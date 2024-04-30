@@ -16,16 +16,28 @@
         <a-space wrap class="search-box">
           <!-- <a-input v-model="listQuery['name']" @pressEnter="loadData" placeholder="名称" class="search-input-item" /> -->
           <div>
-            显示所有
-            <a-switch v-model:checked="listQuery['showAll']" checked-children="是" un-checked-children="否" />
+            {{ $tl('p.showAll') }}
+            <a-switch
+              v-model:checked="listQuery['showAll']"
+              :checked-children="$tl('c.is')"
+              :un-checked-children="$tl('c.no')"
+            />
           </div>
           <div>
-            悬空
-            <a-switch v-model:checked="listQuery['dangling']" checked-children="是" un-checked-children="否" />
+            {{ $tl('p.suspended') }}
+            <a-switch
+              v-model:checked="listQuery['dangling']"
+              :checked-children="$tl('c.is')"
+              :un-checked-children="$tl('c.no')"
+            />
           </div>
-          <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
-          <a-button type="primary" danger :disabled="!tableSelections || !tableSelections.length" @click="batchDelete"
-            >批量删除</a-button
+          <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
+          <a-button
+            type="primary"
+            danger
+            :disabled="!tableSelections || !tableSelections.length"
+            @click="batchDelete"
+            >{{ $tl('p.batchDelete') }}</a-button
           >
 
           |
@@ -33,7 +45,7 @@
           <a-input-search
             v-model:value="pullImageName"
             style="width: 260px"
-            placeholder="要拉取的镜像名称"
+            :placeholder="$tl('p.pullImageName')"
             class="search-input-item"
             @search="pullImage"
           >
@@ -53,7 +65,7 @@
             :before-upload="beforeUpload"
           >
             <LoadingOutlined v-if="percentage" />
-            <a-button v-else type="primary"> <UploadOutlined />导入 </a-button>
+            <a-button v-else type="primary"> <UploadOutlined />{{ $tl('p.importImage') }} </a-button>
           </a-upload>
         </a-space>
       </template>
@@ -83,20 +95,20 @@
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-tooltip title="使用当前镜像创建一个容器">
+            <a-tooltip :title="$tl('p.createContainerWithImage')">
               <a-button size="small" type="link" @click="createContainer(record)"><SelectOutlined /></a-button>
             </a-tooltip>
-            <a-tooltip title="更新镜像">
+            <a-tooltip :title="$tl('p.updateImage')">
               <a-button size="small" type="link" :disabled="!record.repoTags" @click="tryPull(record)"
                 ><CloudDownloadOutlined
               /></a-button>
             </a-tooltip>
-            <a-tooltip title="导出镜像">
+            <a-tooltip :title="$tl('p.exportImage')">
               <a-button size="small" type="link" @click="saveImage(record.id.split(':')[1])"
                 ><DownloadOutlined
               /></a-button>
             </a-tooltip>
-            <a-tooltip title="删除镜像">
+            <a-tooltip :title="$tl('p.deleteImage')">
               <a-button size="small" type="link" @click="doAction(record, 'remove')"><DeleteOutlined /></a-button>
             </a-tooltip>
           </a-space>
@@ -185,29 +197,29 @@ export default {
       temp: {},
       rules: {
         name: [
-          { required: true, message: '容器名称必填', trigger: 'blur' },
+          { required: true, message: this.$tl('p.containerNameRequired'), trigger: 'blur' },
           {
             pattern: /[a-zA-Z0-9][a-zA-Z0-9_.-]$/,
-            message: '容器名称数字字母,且长度大于1',
+            message: this.$tl('p.containerNameAlphanumeric'),
             trigger: 'blur'
           }
         ]
       },
       columns: [
         {
-          title: '序号',
+          title: this.$tl('p.serialNumber'),
           width: '80px',
           ellipsis: true,
           align: 'center',
           customRender: ({ index }) => `${index + 1}`
         },
         {
-          title: '名称',
+          title: this.$tl('p.name'),
           dataIndex: 'repoTags',
           ellipsis: true
         },
         {
-          title: '镜像ID',
+          title: this.$tl('p.imageId'),
           dataIndex: 'id',
           ellipsis: true,
           width: 140,
@@ -215,7 +227,7 @@ export default {
           id: true
         },
         {
-          title: '父级ID',
+          title: this.$tl('p.parentId'),
           dataIndex: 'parentId',
           ellipsis: true,
           width: 140,
@@ -223,13 +235,13 @@ export default {
           id: true
         },
         {
-          title: '占用空间',
+          title: this.$tl('p.spaceOccupied'),
           dataIndex: 'size',
           ellipsis: true,
           width: 120
         },
         {
-          title: '创建时间',
+          title: this.$tl('p.creationTime'),
           dataIndex: 'created',
           sorter: (a, b) => new Number(a.created) - new Number(b.created),
           sortDirections: ['descend', 'ascend'],
@@ -242,7 +254,7 @@ export default {
         },
 
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
           fixed: 'right',
           width: '160px'
@@ -250,7 +262,7 @@ export default {
       ],
       action: {
         remove: {
-          msg: '您确定要删除当前镜像吗？',
+          msg: this.$tl('p.confirmDeleteImage'),
           api: dockerImageRemove
         }
       },
@@ -276,6 +288,9 @@ export default {
     this.loadData()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.docker.images.${key}`, ...args)
+    },
     // 加载数据
     loadData() {
       this.loading = true
@@ -294,11 +309,11 @@ export default {
         return
       }
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemHint'),
         zIndex: 1009,
         content: action.msg,
-        okText: '确认',
-        cancelText: '取消',
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           return action
             .api(this.urlPrefix, {
@@ -320,7 +335,7 @@ export default {
       const repoTags = record?.repoTags[0]
       if (!repoTags) {
         $notification.error({
-          message: '镜像名称不正确 不能更新'
+          message: this.$tl('p.incorrectImageName')
         })
         return
       }
@@ -396,7 +411,7 @@ export default {
     pullImage() {
       if (!this.pullImageName) {
         $notification.warn({
-          message: '请填写要拉取的镜像名称'
+          message: this.$tl('p.fillPullImageName')
         })
         return
       }
@@ -425,11 +440,11 @@ export default {
       let ids = this.tableSelections
 
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemHint'),
         zIndex: 1009,
-        content: '真的要批量删除选择的镜像吗？已经被容器使用的镜像无法删除！',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmBatchDeleteImage'),
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           return dockerImageBatchRemove(this.urlPrefix, {
             id: this.reqDataId,

@@ -31,11 +31,7 @@
       <a-form ref="ruleForm" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-item
           label="命令参数"
-          :help="`${
-            commandParams.length
-              ? '所有参数将拼接成字符串以空格分隔形式执行脚本,需要注意参数顺序和未填写值的参数将自动忽略'
-              : ''
-          }`"
+          :help="`${commandParams.length ? '所有参数将拼接成字符串以空格分隔形式执行脚本,需要注意参数顺序和未填写值的参数将自动忽略' : ''}`"
         >
           <a-space direction="vertical" style="width: 100%">
             <a-row v-for="(item, index) in commandParams" :key="item.key">
@@ -115,9 +111,7 @@ export default {
     socketUrl() {
       return getWebSocketUrl(
         '/socket/node/script_run',
-        `userId=${this.getLongTermToken()}&id=${this.id}&nodeId=${
-          this.nodeId
-        }&type=nodeScript&workspaceId=${this.getWorkspaceId()}`
+        `userId=${this.getLongTermToken()}&id=${this.id}&nodeId=${this.nodeId}&type=nodeScript&workspaceId=${this.getWorkspaceId()}`
       )
     }
   },

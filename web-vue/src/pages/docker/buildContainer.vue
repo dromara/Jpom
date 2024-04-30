@@ -4,7 +4,7 @@
       destroy-on-close
       :open="true"
       width="80vw"
-      title="重建容器"
+      :title="$tl('p.rebuildContainer')"
       :mask-closable="false"
       :footer-style="{ textAlign: 'right' }"
       @close="
@@ -16,28 +16,28 @@
       <a-alert
         v-if="containerData && Object.keys(containerData).length"
         style="margin-bottom: 10px"
-        message="操作提示"
+        :message="$tl('p.operationPrompt')"
         type="warning"
         show-icon
       >
         <template #description>
-          容器重建是指使用已经创建的容器参数重新创建一个相同的容器。
+          {{ $tl('p.containerRebuildDesc') }}
           <div>
-            <b style="color: red">重启创建之前会自动将之前的容器删除掉</b
-            >,如果未挂载容器数据目录请提前备份数据后再使用此功能。
+            <b style="color: red">{{ $tl('p.containerRestartDeleteBefore') }}</b
+            >,{{ $tl('p.containerDataBackupWarning') }}
           </div>
           <div>
-            <b>此功能不能保证新增的容器和之前容器参数完全一致请慎重使用。</b>
+            <b>{{ $tl('p.newContainerParamNotGuaranteed') }}</b>
           </div>
         </template>
       </a-alert>
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
-        <a-form-item label="基础镜像" name="name">
+        <a-form-item :label="$tl('p.baseImage')" name="name">
           <a-row>
             <a-col :span="10">
               <a-input v-model:value="temp.image" disabled placeholder="" />
             </a-col>
-            <a-col :span="4" style="text-align: right">容器名称：</a-col>
+            <a-col :span="4" style="text-align: right">{{ $tl('p.containerName') }}</a-col>
             <a-col :span="10">
               <a-form-item-rest>
                 <a-input v-model:value="temp.name" placeholder="容器名称" />
@@ -46,7 +46,7 @@
           </a-row>
         </a-form-item>
 
-        <a-form-item label="端口">
+        <a-form-item :label="$tl('p.port')">
           <a-form-item-rest>
             <a-space direction="vertical" style="width: 100%">
               <a-row v-for="(item, index) in temp.exposedPorts" :key="index">
@@ -55,20 +55,29 @@
                     <a-input-group>
                       <a-row>
                         <a-col :span="8">
-                          <a-input v-model:value="item.ip" addon-before="IP" placeholder="宿主机ip"> </a-input>
+                          <a-input v-model:value="item.ip" addon-before="IP" :placeholder="$tl('p.hostIp')"> </a-input>
                         </a-col>
                         <a-col :span="6" :offset="1">
-                          <a-input v-model:value="item.publicPort" addon-before="端口" placeholder="端口"> </a-input>
+                          <a-input
+                            v-model:value="item.publicPort"
+                            :addon-before="$tl('p.port')"
+                            :placeholder="$tl('p.port')"
+                          >
+                          </a-input>
                         </a-col>
                         <a-col :span="8" :offset="1">
                           <a-input
                             v-model:value="item.port"
-                            addon-before="容器"
+                            :addon-before="$tl('p.container')"
                             :disabled="item.disabled"
-                            placeholder="容器端口"
+                            :placeholder="$tl('p.containerPort')"
                           >
                             <template #addonAfter>
-                              <a-select v-model:value="item.scheme" :disabled="item.disabled" placeholder="端口协议">
+                              <a-select
+                                v-model:value="item.scheme"
+                                :disabled="item.disabled"
+                                :placeholder="$tl('p.portProtocol')"
+                              >
                                 <a-select-option value="tcp">tcp</a-select-option>
                                 <a-select-option value="udp">udp</a-select-option>
                                 <a-select-option value="sctp">sctp</a-select-option>
@@ -108,19 +117,23 @@
           </a-form-item-rest>
         </a-form-item>
 
-        <a-form-item label="挂载卷">
+        <a-form-item :label="$tl('p.mountedVolume')">
           <a-form-item-rest>
             <a-space direction="vertical" style="width: 100%">
               <a-row v-for="(item, index) in temp.volumes" :key="index">
                 <a-col :span="10">
-                  <a-input v-model:value="item.host" addon-before="宿主" placeholder="宿主机目录" />
+                  <a-input
+                    v-model:value="item.host"
+                    :addon-before="$tl('p.host')"
+                    placeholder="{{$tl('p.host')}}机目录"
+                  />
                 </a-col>
                 <a-col :span="10" :offset="1">
                   <a-input
                     v-model:value="item.container"
-                    addon-before="容器"
+                    :addon-before="$tl('p.container')"
                     :disabled="item.disabled"
-                    placeholder="容器目录"
+                    :placeholder="$tl('p.containerDirectory')"
                   />
                 </a-col>
                 <a-col :span="2" :offset="1">
@@ -147,15 +160,15 @@
             </a-space>
           </a-form-item-rest>
         </a-form-item>
-        <a-form-item label="环境变量">
+        <a-form-item :label="$tl('p.environmentVariables')">
           <a-form-item-rest>
             <a-space direction="vertical" style="width: 100%">
               <a-row v-for="(item, index) in temp.env" :key="index">
                 <a-col :span="10">
-                  <a-input v-model:value="item.key" placeholder="变量名" />
+                  <a-input v-model:value="item.key" :placeholder="$tl('p.variableName')" />
                 </a-col>
                 <a-col :span="10" :offset="1">
-                  <a-input v-model:value="item.value" placeholder="变量值" />
+                  <a-input v-model:value="item.value" :placeholder="$tl('p.variableValue')" />
                 </a-col>
                 <a-col :span="2" :offset="1">
                   <a-space>
@@ -181,12 +194,16 @@
             </a-space>
           </a-form-item-rest>
         </a-form-item>
-        <a-form-item label="命令">
+        <a-form-item :label="$tl('p.command')">
           <a-form-item-rest>
             <a-space direction="vertical" style="width: 100%">
               <a-row v-for="(item, index) in temp.commands" :key="index">
                 <a-col :span="20">
-                  <a-input v-model:value="item.value" addon-before="命令值" placeholder="填写运行命令" />
+                  <a-input
+                    v-model:value="item.value"
+                    :addon-before="$tl('p.commandValue')"
+                    :placeholder="$tl('p.fillRunningCommand')"
+                  />
                 </a-col>
 
                 <a-col :span="2" :offset="1">
@@ -213,28 +230,27 @@
           </a-form-item-rest>
         </a-form-item>
         <a-form-item label="hostname" name="hostname">
-          <a-input v-model:value="temp.hostname" placeholder="主机名 hostname" />
+          <a-input v-model:value="temp.hostname" :placeholder="$tl('p.hostname')" />
         </a-form-item>
-        <a-form-item label="网络">
+        <a-form-item :label="$tl('p.network')">
           <a-auto-complete
             v-model:value="temp.networkMode"
-            placeholder="网络模式：bridge、container:<name|id>、host、container、none"
+            :placeholder="$tl('p.networkMode')"
             :options="[
               {
-                title: '为 docker bridge 上的容器创建一个新的网络堆栈',
+                title: $tl('p.createNetworkStack'),
                 value: 'bridge'
               },
               {
-                title: '这个容器没有网络',
+                title: $tl('p.containerNoNetwork'),
                 value: 'none'
               },
               {
-                title: '重用另一个容器网络堆栈',
+                title: $tl('p.reuseAnotherContainerNetworkStack'),
                 value: 'container:<name|id>'
               },
               {
-                title:
-                  '使用容器内的主机网络堆栈。 注意：主机模式赋予容器对本地系统服务（如 D-bus）的完全访问权限，因此被认为是不安全的。',
+                title: $tl('p.useHostNetworkStack'),
                 value: 'host'
               }
             ]"
@@ -244,25 +260,25 @@
             </template>
           </a-auto-complete>
         </a-form-item>
-        <a-form-item label="重启策略">
+        <a-form-item :label="$tl('p.restartPolicy')">
           <a-auto-complete
             v-model:value="temp.restartPolicy"
-            placeholder="重启策略：no、always、unless-stopped、on-failure"
+            :placeholder="$tl('p.restartPolicyOptions')"
             :options="[
               {
-                title: '不自动重启',
+                title: $tl('p.noAutoRestart'),
                 value: 'no'
               },
               {
-                title: '无论返回什么退出代码，始终重新启动容器。',
+                title: $tl('p.alwaysRestart'),
                 value: 'always'
               },
               {
-                title: '如果容器以非零退出代码退出，则重新启动容器。可以指定次数：on-failure:2',
+                title: $tl('p.restartOnFailure'),
                 value: 'on-failure:1'
               },
               {
-                title: '重新启动容器，除非它已被停止',
+                title: $tl('p.restartUnlessStopped'),
                 value: 'unless-stopped'
               }
             ]"
@@ -272,14 +288,14 @@
             </template>
           </a-auto-complete>
         </a-form-item>
-        <a-form-item label="存储选项">
+        <a-form-item :label="$tl('p.storageOptions')">
           <a-form-item-rest>
             <a-row v-for="(item, index) in temp.storageOpt" :key="index">
               <a-col :span="10">
-                <a-input v-model:value="item.key" placeholder="配置名 （如：size）" />
+                <a-input v-model:value="item.key" :placeholder="$tl('p.configName')" />
               </a-col>
               <a-col :span="10" :offset="1">
-                <a-input v-model:value="item.value" placeholder="配置值 （如：5g）" />
+                <a-input v-model:value="item.value" :placeholder="$tl('p.configValue')" />
               </a-col>
               <a-col :span="2" :offset="1">
                 <a-space>
@@ -305,37 +321,45 @@
           </a-form-item-rest>
         </a-form-item>
         <a-form-item label="runtime">
-          <a-input v-model:value="temp.runtime" placeholder="容器 runtime" />
+          <a-input v-model:value="temp.runtime" :placeholder="$tl('p.containerRuntime')" />
         </a-form-item>
-        <a-form-item label="容器标签">
-          <a-input v-model:value="temp.labels" placeholder="容器标签,如：key1=values1&keyvalue2" />
+        <a-form-item :label="$tl('p.containerLabels')">
+          <a-input v-model:value="temp.labels" :placeholder="$tl('p.containerLabelExample')" />
         </a-form-item>
-        <a-form-item label="自动启动">
+        <a-form-item :label="$tl('p.autoStart')">
           <a-form-item-rest>
             <a-row>
               <a-col :span="4"
-                ><a-switch v-model:checked="temp.autorun" checked-children="启动" un-checked-children="不启动"
+                ><a-switch
+                  v-model:checked="temp.autorun"
+                  :checked-children="$tl('p.start')"
+                  :un-checked-children="$tl('p.noStart')"
               /></a-col>
               <a-col :span="4" style="text-align: right">
                 <a-tooltip>
                   <template #title>
                     <p>--privileged</p>
                     <ul>
-                      privileged=true|false 介绍
-                      <li>true container内的root拥有真正的root权限。</li>
-                      <li>false container内的root只是外部的一个普通用户权限。默认false</li>
-                      <li>
-                        privileged启动的容器 可以看到很多host上的设备 可以执行mount。 可以在docker容器中启动docker容器。
-                      </li>
+                      privileged=true|false
+                      {{
+                        $tl('p.introduction')
+                      }}
+                      <li>true container{{ $tl('p.rootHasTrueRootPermission') }}</li>
+                      <li>false container{{ $tl('p.rootIsJustAnOrdinaryUser') }}</li>
+                      <li>privileged{{ $tl('p.containerCanSeeManyDevices') }}</li>
                     </ul>
                   </template>
 
                   <QuestionCircleOutlined v-if="!temp.id" />
-                  特权：
+                  {{ $tl('p.privilege') }}
                 </a-tooltip>
               </a-col>
               <a-col :span="4">
-                <a-switch v-model:checked="temp.privileged" checked-children="是" un-checked-children="否" />
+                <a-switch
+                  v-model:checked="temp.privileged"
+                  :checked-children="$tl('p.yes')"
+                  :un-checked-children="$tl('p.no')"
+                />
               </a-col>
             </a-row>
           </a-form-item-rest>
@@ -363,9 +387,9 @@
               }
             "
           >
-            取消
+            {{ $tl('p.cancel') }}
           </a-button>
-          <a-button type="primary" :loading="loading" @click="handleBuildOk"> 确认 </a-button>
+          <a-button type="primary" :loading="loading" @click="handleBuildOk"> {{ $tl('p.confirm') }} </a-button>
         </a-space>
         <!-- </div> -->
       </template>
@@ -413,10 +437,10 @@ export default {
       temp: {},
       rules: {
         name: [
-          { required: true, message: '容器名称必填', trigger: 'blur' },
+          { required: true, message: this.$tl('p.containerNameIsRequired'), trigger: 'blur' },
           {
             pattern: /[a-zA-Z0-9][a-zA-Z0-9_.-]$/,
-            message: '容器名称数字字母,且长度大于1',
+            message: this.$tl('p.containerNameAlphanumeric'),
             trigger: 'blur'
           }
         ]
@@ -443,6 +467,9 @@ export default {
     this.createContainer()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.docker.buildContainer.${key}`, ...args)
+    },
     // 构建镜像
     createContainer() {
       // 判断 containerId

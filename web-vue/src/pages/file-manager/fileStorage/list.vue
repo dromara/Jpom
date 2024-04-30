@@ -650,9 +650,7 @@ export default {
                   if (res.data) {
                     //
                     $notification.warning({
-                      message: `当前文件已经存在啦,文件名：${res.data.name} ,是否共享：${
-                        res.data.workspaceId === 'GLOBAL' ? '是' : '否'
-                      }`
+                      message: `当前文件已经存在啦,文件名：${res.data.name} ,是否共享：${res.data.workspaceId === 'GLOBAL' ? '是' : '否'}`
                     })
                     //
                     this.uploading = false

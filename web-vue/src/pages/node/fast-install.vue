@@ -147,9 +147,7 @@ export default {
           this.fastInstallNode = true
           this.fastInstallInfo = res.data
 
-          this.fastInstallInfo.host = `${location.protocol}//${location.host}${res.data.url}?token=${
-            res.data.token
-          }\\&workspaceId=${this.getWorkspaceId()}`
+          this.fastInstallInfo.host = `${location.protocol}//${location.host}${res.data.url}?token=${res.data.token}\\&workspaceId=${this.getWorkspaceId()}`
           this.fastInstallInfo.shUrls = res.data.shUrls.map((item) => {
             item.allText = `${item.url} ${this.fastInstallInfo.key} \\'${this.fastInstallInfo.host}\\'`
             return item

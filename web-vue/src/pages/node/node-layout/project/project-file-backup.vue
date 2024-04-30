@@ -81,9 +81,7 @@
         >
           <template #title>
             <a-popconfirm
-              :title="`${
-                uploadPath ? '将还原【' + uploadPath + '】目录,' : ''
-              } 请选择还原方式,清空还原将会先删除项目目录中的文件再将对应备份文件恢复至当前目录`"
+              :title="`${uploadPath ? '将还原【' + uploadPath + '】目录,' : ''} 请选择还原方式,清空还原将会先删除项目目录中的文件再将对应备份文件恢复至当前目录`"
               ok-text="覆盖还原"
               cancel-text="清空还原"
               :ok-button-props="{
@@ -139,9 +137,7 @@
                 <template v-if="record.isDirectory">
                   <!-- record.filename -->
                   <a-popconfirm
-                    :title="`${
-                      record.filename ? '将还原【' + record.filename + '】目录,' : ''
-                    } 请选择还原方式,清空还原将会先删除项目目录中的文件再将对应备份文件恢复至当前目录`"
+                    :title="`${record.filename ? '将还原【' + record.filename + '】目录,' : ''} 请选择还原方式,清空还原将会先删除项目目录中的文件再将对应备份文件恢复至当前目录`"
                     ok-text="覆盖还原"
                     cancel-text="清空还原"
                     :ok-button-props="{

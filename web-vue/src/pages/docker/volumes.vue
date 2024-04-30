@@ -13,17 +13,21 @@
       <a-space>
         <a-input
           v-model:value="listQuery['name']"
-          placeholder="名称"
+          :placeholder="$tl('c.name')"
           class="search-input-item"
           @press-enter="loadData"
         />
 
         <div>
-          悬空
-          <a-switch v-model:checked="listQuery['dangling']" checked-children="是" un-checked-children="否" />
+          {{ $tl('p.suspended') }}
+          <a-switch
+            v-model:checked="listQuery['dangling']"
+            :checked-children="$tl('p.yes')"
+            :un-checked-children="$tl('p.no')"
+          />
         </div>
 
-        <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+        <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
       </a-space>
     </template>
     <template #bodyCell="{ column, text, record }">
@@ -34,7 +38,7 @@
       </template>
 
       <template v-else-if="column.dataIndex === 'name'">
-        <a-popover v-if="record.labels" title="卷标签">
+        <a-popover v-if="record.labels" :title="$tl('p.volumeLabel')">
           <template #content>
             <p v-for="(value, key) in record.labels" :key="key">{{ key }}<ArrowRightOutlined />{{ value }}</p>
           </template>
@@ -59,7 +63,7 @@
       </template>
       <template v-else-if="column.dataIndex === 'operation'">
         <a-space>
-          <a-tooltip title="删除">
+          <a-tooltip :title="$tl('p.delete')">
             <a-button size="small" type="link" @click="doAction(record, 'remove')"><DeleteOutlined /></a-button>
           </a-tooltip>
         </a-space>
@@ -96,32 +100,32 @@ export default {
       renderSize,
       columns: [
         {
-          title: '序号',
+          title: this.$tl('p.serialNumber'),
           width: 80,
           ellipsis: true,
           align: 'center',
           customRender: ({ index }) => `${index + 1}`
         },
         {
-          title: '名称',
+          title: this.$tl('c.name'),
           dataIndex: 'name',
           ellipsis: true
         },
         {
-          title: '挂载点',
+          title: this.$tl('p.mountPoint'),
           dataIndex: 'mountpoint',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '类型',
+          title: this.$tl('p.type'),
           dataIndex: 'driver',
           ellipsis: true,
           width: 80,
           tooltip: true
         },
         {
-          title: '创建时间',
+          title: this.$tl('p.creationTime'),
           dataIndex: 'CreatedAt',
           ellipsis: true,
           width: 180,
@@ -130,7 +134,7 @@ export default {
           defaultSortOrder: 'descend'
         },
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
           fixed: 'right',
           width: '80px'
@@ -138,7 +142,7 @@ export default {
       ],
       action: {
         remove: {
-          msg: '您确定要删除当前卷吗？',
+          msg: this.$tl('p.areYouSureToDeleteCurrentVolume'),
           api: dockerVolumesRemove
         }
       }
@@ -153,6 +157,9 @@ export default {
     this.loadData()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.docker.volumes.${key}`, ...args)
+    },
     parseTime,
     // 加载数据
     loadData() {
@@ -172,11 +179,11 @@ export default {
         return
       }
       $confirm({
-        title: '系统提示',
+        title: this.$tl('p.systemPrompt'),
         content: action.msg,
         zIndex: 1009,
-        okText: '确认',
-        cancelText: '取消',
+        okText: this.$tl('p.confirm'),
+        cancelText: this.$tl('p.cancel'),
         onOk: () => {
           return action
             .api(this.urlPrefix, {

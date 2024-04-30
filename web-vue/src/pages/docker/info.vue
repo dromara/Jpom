@@ -3,47 +3,47 @@
     <a-timeline>
       <a-timeline-item>
         <span class="layui-elem-quote">
-          基础信息：{{ temp.name }} - {{ temp.osType }} - {{ temp.operatingSystem }} -
+          {{ $tl('p.basicInfo') }}{{ temp.name }} - {{ temp.osType }} - {{ temp.operatingSystem }} -
           <a-tag>{{ temp.architecture }} </a-tag>
           <a-tag>{{ temp.id }}</a-tag>
         </span>
       </a-timeline-item>
       <a-timeline-item>
         <span class="layui-elem-quote">
-          版本：<a-tag>{{ temp.serverVersion }}</a-tag>
+          {{ $tl('p.version') }}<a-tag>{{ temp.serverVersion }}</a-tag>
           <a-tag>{{ temp.kernelVersion }}</a-tag>
         </span>
       </a-timeline-item>
       <a-timeline-item>
         <span class="layui-elem-quote"
-          >资源： <a-tag>cpu:{{ temp.nCPU || temp.NCPU }}</a-tag>
-          <a-tag>内存:{{ renderSize(temp.memTotal) }}</a-tag>
+          >{{ $tl('p.resource') }} <a-tag>cpu:{{ temp.nCPU || temp.NCPU }}</a-tag>
+          <a-tag>{{ $tl('p.memory') }}{{ renderSize(temp.memTotal) }}</a-tag>
 
-          <a-tag>容器数：{{ temp.containers }}</a-tag>
-          <a-tag>镜像数：{{ temp.images }}</a-tag>
+          <a-tag>{{ $tl('p.containerCount') }}{{ temp.containers }}</a-tag>
+          <a-tag>{{ $tl('p.imageCount') }}{{ temp.images }}</a-tag>
         </span>
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote">系统时间：{{ temp.systemTime }} </span>
+        <span class="layui-elem-quote">{{ $tl('p.systemTime') }}{{ temp.systemTime }} </span>
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote">运行目录：{{ temp.dockerRootDir }} </span>
+        <span class="layui-elem-quote">{{ $tl('p.runningDirectory') }}{{ temp.dockerRootDir }} </span>
       </a-timeline-item>
       <template v-if="temp.swarm">
         <a-timeline-item>
           <div class="layui-elem-quote">
-            集群信息：
+            {{ $tl('p.clusterInfo') }}
             <div style="padding-left: 10px">
               <a-space direction="vertical" style="width: 100%">
                 <div>
-                  本地状态：<a-tag v-if="temp.swarm.nodeAddr">{{ temp.swarm.nodeAddr }}</a-tag>
+                  {{ $tl('p.localStatus') }}<a-tag v-if="temp.swarm.nodeAddr">{{ temp.swarm.nodeAddr }}</a-tag>
                   <a-tag>{{ temp.swarm.localNodeState }}</a-tag>
                 </div>
                 <div v-if="temp.swarm.remoteManagers">
-                  管理列表：
+                  {{ $tl('p.managementList') }}
                   <a-tag v-for="(item, index) in temp.swarm.remoteManagers" :key="index">{{ item.addr }}</a-tag>
                 </div>
-                <div>管理节点：{{ temp.swarm.controlAvailable ? '是' : '否' }}</div>
+                <div>{{ $tl('p.managementNode') }}{{ temp.swarm.controlAvailable ? $tl('p.yes') : $tl('p.no') }}</div>
               </a-space>
             </div>
           </div>
@@ -51,7 +51,7 @@
       </template>
       <a-timeline-item v-if="temp.plugins">
         <div class="layui-elem-quote">
-          插件：
+          {{ $tl('p.plugin') }}
 
           <a-list item-layout="horizontal" :data-source="Object.keys(temp.plugins)" size="small">
             <template #renderItem="{ item }">
@@ -65,13 +65,17 @@
       </a-timeline-item>
       <a-timeline-item v-if="temp.registryConfig">
         <div class="layui-elem-quote">
-          仓库：
+          {{ $tl('p.repository') }}
           <a-list item-layout="horizontal" :data-source="Object.keys(temp.registryConfig.indexConfigs)" size="small">
             <template #renderItem="{ item }">
               <a-list-item>
                 {{ item }}
-                <a-tag v-if="temp.registryConfig.indexConfigs[item].official" color="green">官方</a-tag
-                ><a-tag v-if="temp.registryConfig.indexConfigs[item].secure" color="green">安全</a-tag>
+                <a-tag v-if="temp.registryConfig.indexConfigs[item].official" color="green">{{
+                  $tl('p.official')
+                }}</a-tag
+                ><a-tag v-if="temp.registryConfig.indexConfigs[item].secure" color="green">{{
+                  $tl('p.security')
+                }}</a-tag>
                 <a-tag v-for="(item1, index) in temp.registryConfig.indexConfigs[item].mirrors" :key="index">{{
                   item1
                 }}</a-tag>
@@ -119,6 +123,9 @@ export default {
     // console.log(Comparator);
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.docker.info.${key}`, ...args)
+    },
     renderSize,
     // load data
     loadData() {

@@ -1,10 +1,7 @@
 <template>
   <div>
     <template v-if="useSuggestions">
-      <a-result
-        title="当前工作空间还没有 Docker 集群"
-        sub-title="请到【系统管理】-> 【资产管理】-> 【Docker管理】新增Docker并创建集群，或者将已存在的的 Docker 集群授权关联、分配到此工作空间"
-      >
+      <a-result :title="$tl('p.noDockerCluster')" :sub-title="$tl('p.goToAddDocker')">
         <template #extra>
           <router-link to="/system/assets/docker-list">
             <a-button key="console" type="primary">现在就去</a-button></router-link
@@ -35,18 +32,18 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            placeholder="名称"
+            :placeholder="$tl('c.name')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%tag%']"
-            placeholder="标签"
+            :placeholder="$tl('c.tag')"
             class="search-input-item"
             @press-enter="loadData"
           />
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          <a-tooltip :title="$tl('p.goToFirstPage')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -59,14 +56,14 @@
         </template>
         <template v-else-if="column.dataIndex instanceof Array && column.dataIndex.includes('status')">
           <template v-if="record.machineDocker">
-            <a-tag v-if="record.machineDocker.status === 1" color="green">正常</a-tag>
+            <a-tag v-if="record.machineDocker.status === 1" color="green">{{ $tl('p.normal') }}</a-tag>
             <a-tooltip v-else :title="record.machineDocker.failureMsg">
-              <a-tag color="red">无法连接</a-tag>
+              <a-tag color="red">{{ $tl('p.unableToConnect') }}</a-tag>
             </a-tooltip>
           </template>
 
-          <a-tooltip v-else title="集群关联的 docker 信息丢失,不能继续使用管理功能">
-            <a-tag color="red">信息丢失</a-tag>
+          <a-tooltip v-else :title="$tl('p.lostClusterInfo')">
+            <a-tag color="red">{{ $tl('p.lostInfo') }}</a-tag>
           </a-tooltip>
         </template>
 
@@ -78,23 +75,23 @@
                 :disabled="record.machineDocker.status !== 1"
                 type="primary"
                 @click="handleConsole(record, 'server')"
-                >服务</a-button
+                >{{ $tl('c.service') }}</a-button
               >
               <a-button
                 size="small"
                 :disabled="record.machineDocker.status !== 1"
                 type="primary"
                 @click="handleConsole(record, 'node')"
-                >节点</a-button
+                >{{ $tl('c.node') }}</a-button
               >
             </template>
             <template v-else>
-              <a-button size="small" :disabled="true" type="primary">服务</a-button>
-              <a-button size="small" :disabled="true" type="primary">节点</a-button>
+              <a-button size="small" :disabled="true" type="primary">{{ $tl('c.service') }}</a-button>
+              <a-button size="small" :disabled="true" type="primary">{{ $tl('c.node') }}</a-button>
             </template>
 
-            <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-            <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('p.edit') }}</a-button>
+            <a-button size="small" type="primary" danger @click="handleDelete(record)">{{ $tl('p.delete') }}</a-button>
           </a-space>
         </template>
       </template>
@@ -104,17 +101,17 @@
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      title="编辑 Docker 集群"
+      :title="$tl('p.editDockerCluster')"
       :mask-closable="false"
       @ok="handleEditOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item label="集群名称" name="name">
-          <a-input v-model:value="temp.name" placeholder="容器名称" />
+        <a-form-item :label="$tl('p.clusterName')" name="name">
+          <a-input v-model:value="temp.name" :placeholder="$tl('p.containerName')" />
         </a-form-item>
 
-        <a-form-item label="标签" name="tag"
-          ><a-input v-model:value="temp.tag" placeholder="关联容器标签" />
+        <a-form-item :label="$tl('c.tag')" name="tag"
+          ><a-input v-model:value="temp.tag" :placeholder="$tl('p.associatedContainerTag')" />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -170,40 +167,40 @@ export default {
       consoleVisible: false,
       columns: [
         {
-          title: '名称',
+          title: this.$tl('c.name'),
           dataIndex: 'name',
           ellipsis: true,
           tooltip: true
         },
 
         {
-          title: '集群ID',
+          title: this.$tl('p.clusterID'),
           dataIndex: 'swarmId',
           ellipsis: true,
           align: 'center',
           tooltip: true
         },
         {
-          title: '容器标签',
+          title: this.$tl('p.containerTag'),
           dataIndex: 'tag',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '状态',
+          title: this.$tl('p.status'),
           dataIndex: ['machineDocker', 'status'],
           ellipsis: true,
           align: 'center',
           width: '100px'
         },
         {
-          title: '最后修改人',
+          title: this.$tl('p.lastModifier'),
           dataIndex: 'modifyUser',
           width: 120,
           ellipsis: true
         },
         {
-          title: '修改时间',
+          title: this.$tl('p.modificationTime'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -211,7 +208,7 @@ export default {
           width: '170px'
         },
         {
-          title: '集群创建时间',
+          title: this.$tl('p.clusterCreationTime'),
           dataIndex: ['machineDocker', 'swarmCreatedAt'],
           sorter: true,
           ellipsis: true,
@@ -219,7 +216,7 @@ export default {
           width: '170px'
         },
         {
-          title: '集群修改时间',
+          title: this.$tl('p.clusterModificationTime'),
           dataIndex: ['machineDocker', 'swarmUpdatedAt'],
           sorter: true,
           ellipsis: true,
@@ -227,7 +224,7 @@ export default {
           width: '170px'
         },
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
           fixed: 'right',
           align: 'center',
@@ -236,11 +233,11 @@ export default {
       ],
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
-        name: [{ required: true, message: '请填写集群名称', trigger: 'blur' }],
+        name: [{ required: true, message: this.$tl('p.pleaseFillClusterName'), trigger: 'blur' }],
 
         tag: [
-          { required: true, message: '请填写关联容器标签', trigger: 'blur' },
-          { pattern: /^\w{1,10}$/, message: '标签限制为字母数字且长度 1-10' }
+          { required: true, message: this.$tl('p.pleaseFillAssociatedContainerTag'), trigger: 'blur' },
+          { pattern: /^\w{1,10}$/, message: this.$tl('p.tagLimitation') }
         ]
       },
       confirmLoading: false
@@ -279,6 +276,9 @@ export default {
     this.loadData()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.docker.swarm.list.${key}`, ...args)
+    },
     // 加载数据
     loadData(pointerEvent) {
       this.loading = true
@@ -331,11 +331,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('p.systemPrompt'),
         zIndex: 1009,
-        content: '真的要删除该记录么？删除后构建关联的容器标签将无法使用',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmDelete'),
+        okText: this.$tl('p.confirm'),
+        cancelText: this.$tl('p.cancel'),
         onOk: () => {
           return delSwarm({
             id: record.id

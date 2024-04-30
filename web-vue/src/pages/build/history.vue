@@ -123,9 +123,7 @@
 
         <template v-else-if="column.dataIndex === 'resultFileSize'">
           <a-tooltip
-            :title="`${$tl('p.artifactFileSize')}${renderSize(record.resultFileSize)}， ${$tl('p.logFile')} ${renderSize(
-              record.buildLogFileSize
-            )}`"
+            :title="`${$tl('p.artifactFileSize')}${renderSize(record.resultFileSize)}， ${$tl('p.logFile')} ${renderSize(record.buildLogFileSize)}`"
           >
             <span v-if="record.resultFileSize">{{ renderSize(record.resultFileSize) }}</span>
             <span v-else-if="record.buildLogFileSize">{{ renderSize(record.buildLogFileSize) }}</span>
@@ -135,9 +133,7 @@
 
         <template v-else-if="column.dataIndex === 'endTime'">
           <a-tooltip
-            :title="`${$tl('p.startTime')}${parseTime(record.startTime)}，${
-              record.endTime ? $tl('p.endTime') + parseTime(record.endTime) : ''
-            }`"
+            :title="`${$tl('p.startTime')}${parseTime(record.startTime)}，${record.endTime ? $tl('p.endTime') + parseTime(record.endTime) : ''}`"
           >
             <span v-if="record.endTime">{{
               formatDuration((record.endTime || 0) - (record.startTime || 0), '', 2)

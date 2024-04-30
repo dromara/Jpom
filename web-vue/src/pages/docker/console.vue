@@ -17,25 +17,25 @@
       <template #title>
         <a-menu v-model:selectedKeys="menuKeyArray" mode="horizontal" class="docker-menu" @click="menuClick">
           <a-menu-item key="containers">
-            <span class="nav-text">独立容器</span>
+            <span class="nav-text">{{ $tl('p.independentContainer') }}</span>
           </a-menu-item>
           <a-menu-item key="docker-compose">
             <span class="nav-text">docker-compose</span>
           </a-menu-item>
           <a-menu-item key="images">
-            <span class="nav-text">镜像</span>
+            <span class="nav-text">{{ $tl('p.image') }}</span>
           </a-menu-item>
           <a-menu-item key="volumes">
-            <span class="nav-text">卷</span>
+            <span class="nav-text">{{ $tl('p.volume') }}</span>
           </a-menu-item>
           <a-menu-item key="networks">
-            <span class="nav-text">网络</span>
+            <span class="nav-text">{{ $tl('p.network') }}</span>
           </a-menu-item>
           <a-menu-item key="info">
-            <span class="nav-text">信息</span>
+            <span class="nav-text">{{ $tl('p.information') }}</span>
           </a-menu-item>
           <a-menu-item key="prune">
-            <span class="nav-text">裁剪</span>
+            <span class="nav-text">{{ $tl('p.crop') }}</span>
           </a-menu-item>
         </a-menu>
       </template>
@@ -147,6 +147,9 @@ export default {
   },
   mounted() {},
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.docker.console.${key}`, ...args)
+    },
     menuClick(item) {
       this.menuKey = item.key
     },
