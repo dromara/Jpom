@@ -7,23 +7,21 @@
       :label-col="{ span: 4 }"
       :wrapper-col="{ span: 20 }"
     >
-      <a-form-item label="任务名" name="name">
-        <a-input v-model:value="temp.name" placeholder="请输入任务名" :max-length="50" />
+      <a-form-item :label="$tl('p.taskName')" name="name">
+        <a-input v-model:value="temp.name" :placeholder="$tl('p.taskNamePlaceholder')" :max-length="50" />
       </a-form-item>
 
-      <a-form-item label="发布方式" name="taskType">
+      <a-form-item :label="$tl('p.publishMode')" name="taskType">
         <a-radio-group v-model:value="temp.taskType" @change="taskTypeChange">
           <a-radio :value="0"> SSH </a-radio>
-          <a-radio :value="1"> 节点 </a-radio>
+          <a-radio :value="1"> {{ $tl('p.node') }} </a-radio>
         </a-radio-group>
         <template #help>
-          <template v-if="temp.taskType === 0"
-            >发布后的文件名是：文件ID.后缀，并非文件真实名称 （可以使用上传后脚本随意修改）
-          </template>
+          <template v-if="temp.taskType === 0">{{ $tl('p.fileNameAfterPublish') }} </template>
         </template>
       </a-form-item>
 
-      <a-form-item v-if="temp.taskType === 0" name="taskDataIds" label="发布的SSH">
+      <a-form-item v-if="temp.taskType === 0" name="taskDataIds" :label="$tl('p.ssh')">
         <a-row>
           <a-col :span="22">
             <a-select
@@ -40,7 +38,7 @@
                 }
               "
               mode="multiple"
-              placeholder="请选择SSH"
+              :placeholder="$tl('p.sshPlaceholder')"
             >
               <a-select-option v-for="ssh in sshList" :key="ssh.id">
                 <a-tooltip :title="ssh.name"> {{ ssh.name }}</a-tooltip>
@@ -52,7 +50,7 @@
           </a-col>
         </a-row>
       </a-form-item>
-      <a-form-item v-else-if="temp.taskType === 1" name="taskDataIds" label="发布的节点">
+      <a-form-item v-else-if="temp.taskType === 1" name="taskDataIds" :label="$tl('p.publishNode')">
         <a-row>
           <a-col :span="22">
             <a-select
@@ -69,7 +67,7 @@
                 }
               "
               mode="multiple"
-              placeholder="请选择节点"
+              :placeholder="$tl('p.nodePlaceholder')"
             >
               <a-select-option v-for="ssh in nodeList" :key="ssh.id">
                 <a-tooltip :title="ssh.name"> {{ ssh.name }}</a-tooltip>
@@ -82,9 +80,9 @@
         </a-row>
       </a-form-item>
 
-      <a-form-item name="releasePathParent" label="发布目录">
+      <a-form-item name="releasePathParent" :label="$tl('p.publishDir')">
         <template #help>
-          <a-tooltip title="需要配置授权目录（授权才能正常使用发布）,授权目录主要是用于确定可以发布到哪些目录中"
+          <a-tooltip :title="$tl('p.authDirConfig')"
             ><a-button
               size="small"
               type="link"
@@ -94,7 +92,7 @@
                 }
               "
             >
-              <InfoCircleOutlined />配置目录
+              <InfoCircleOutlined />{{ $tl('p.authDir') }}
             </a-button>
           </a-tooltip>
         </template>
@@ -104,7 +102,7 @@
             show-search
             allow-clear
             style="width: 30%"
-            placeholder="请选择发布的一级目录"
+            :placeholder="$tl('p.firstLevelDir')"
           >
             <a-select-option v-for="item in accessList" :key="item">
               <a-tooltip :title="item">{{ item }}</a-tooltip>
@@ -114,32 +112,36 @@
             </template>
           </a-select>
           <a-form-item-rest>
-            <a-input v-model:value="temp.releasePathSecondary" style="width: 70%" placeholder="请填写发布的二级目录" />
+            <a-input
+              v-model:value="temp.releasePathSecondary"
+              style="width: 70%"
+              :placeholder="$tl('p.secondLevelDir')"
+            />
           </a-form-item-rest>
         </a-input-group>
       </a-form-item>
 
       <a-form-item name="releaseBeforeCommand">
         <template #label>
-          执行脚本
+          {{ $tl('p.executeScript') }}
           <a-tooltip>
             <template #title>
               <ul>
-                <li>支持变量引用：${TASK_ID}、${FILE_ID}、${FILE_NAME}、${FILE_EXT_NAME}</li>
-                <li>可以引用工作空间的环境变量 变量占位符 ${xxxx} xxxx 为变量名称</li>
-                <li>建议在上传后的脚本中对文件进行自定义更名，SSH 上传默认为：${FILE_ID}.${FILE_EXT_NAME}</li>
+                <li>{{ $tl('p.scriptVariable') }}</li>
+                <li>{{ $tl('p.workspaceEnvVariable') }}</li>
+                <li>{{ $tl('p.renameFile') }}</li>
               </ul>
             </template>
             <QuestionCircleOutlined />
           </a-tooltip>
         </template>
         <template #help>
-          <div v-if="scriptTabKey === 'before'">文件上传前需要执行的脚本(非阻塞命令)</div>
-          <div v-else-if="scriptTabKey === 'after'">文件上传成功后需要执行的脚本(非阻塞命令)</div>
+          <div v-if="scriptTabKey === 'before'">{{ $tl('p.preUploadScript') }}</div>
+          <div v-else-if="scriptTabKey === 'after'">{{ $tl('p.postUploadScript') }}</div>
         </template>
         <a-form-item-rest>
           <a-tabs v-model:activeKey="scriptTabKey" tab-position="right" type="card">
-            <a-tab-pane key="before" tab="上传前">
+            <a-tab-pane key="before" :tab="$tl('c.content')">
               <code-editor
                 v-model:content="temp.beforeScript"
                 height="40vh"
@@ -149,11 +151,14 @@
                 }"
               >
                 <template #tool_before>
-                  <a-tag><b>上传前</b>执行</a-tag>
+                  <a-tag
+                    ><b>{{ $tl('c.content') }}</b
+                    >{{ $tl('p.execute') }}</a-tag
+                  >
                 </template>
               </code-editor>
             </a-tab-pane>
-            <a-tab-pane key="after" tab="上传后">
+            <a-tab-pane key="after" :tab="$tl('p.afterUpload')">
               <code-editor
                 v-model:content="temp.afterScript"
                 height="40vh"
@@ -162,7 +167,9 @@
                   mode: 'shell'
                 }"
               >
-                <template #tool_before> <a-tag>上传后执行</a-tag></template>
+                <template #tool_before>
+                  <a-tag>{{ $tl('p.afterUploadExecute') }}</a-tag></template
+                >
               </code-editor>
             </a-tab-pane>
           </a-tabs>
@@ -173,7 +180,7 @@
     <a-modal
       v-model:value="configDir"
       destroy-on-close
-      :title="`配置授权目录`"
+      :title="`${$tl('p.authDirSetting')}`"
       :footer="null"
       :mask-closable="false"
       @cancel="
@@ -211,16 +218,16 @@ export default {
     return {
       temp: {},
       releaseFileRules: {
-        name: [{ required: true, message: '请输入文件任务名', trigger: 'blur' }],
-        taskType: [{ required: true, message: '请选择发布方式', trigger: 'blur' }],
+        name: [{ required: true, message: this.$tl('p.taskNameInput'), trigger: 'blur' }],
+        taskType: [{ required: true, message: this.$tl('p.publishModeSelect'), trigger: 'blur' }],
         releasePath: [
           {
             required: true,
-            message: '请选择发布的一级目录和填写二级目录',
+            message: this.$tl('p.publishDirSelect'),
             trigger: 'blur'
           }
         ],
-        taskDataIds: [{ required: true, message: '请选择发布的SSH', trigger: 'blur' }]
+        taskDataIds: [{ required: true, message: this.$tl('p.sshSelect'), trigger: 'blur' }]
       },
       sshList: [],
       accessList: [],
@@ -235,6 +242,9 @@ export default {
     this.loadAccesList()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.fileManager.fileStorage.releaseFile.${key}`, ...args)
+    },
     taskTypeChange() {
       const value = this.temp.taskType
       this.temp = { ...this.temp, taskDataIds: undefined }
