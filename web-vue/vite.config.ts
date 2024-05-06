@@ -26,7 +26,7 @@ import postcss from 'postcss'
 export default defineConfig(({ mode }: ConfigEnv) => {
   // 加载环境配置
   const env: Record<string, string> = loadEnv(mode, __dirname, 'JPOM')
-  const { JPOM_PROXY_HOST: HOST, JPOM_BASE_URL, JPOM_PORT }: Record<string, string> = env
+  const { JPOM_PROXY_HOST: HOST = '', JPOM_BASE_URL = '', JPOM_PORT = '' }: Record<string, string> = env
   console.log(env, `当前为${mode}环境`)
 
   return {
