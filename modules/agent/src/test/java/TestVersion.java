@@ -8,6 +8,7 @@
  * See the Mulan PSL v2 for more details.
  */
 import cn.hutool.core.util.StrUtil;
+import org.junit.Test;
 
 /**
  * @author bwcx_jzy
@@ -16,5 +17,10 @@ import cn.hutool.core.util.StrUtil;
 public class TestVersion {
     public static void main(String[] args) {
         System.out.println(StrUtil.compareVersion("2.4.3", "2.4.2"));
+    }
+
+    @Test
+    public void test() {
+        System.out.println(StrUtil.compareVersion("2.11.5", "2.11.5.1"));
     }
 }
