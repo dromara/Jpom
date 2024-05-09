@@ -14,20 +14,35 @@
     >
       <template #title>
         <a-space wrap class="search-box">
-          <a-select v-model:value="listQuery.nodeId" allow-clear placeholder="请选择节点" class="search-input-item">
+          <a-select
+            v-model:value="listQuery.nodeId"
+            allow-clear
+            :placeholder="$tl('p.pleaseSelectNode')"
+            class="search-input-item"
+          >
             <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
           </a-select>
-          <a-select v-model:value="listQuery.status" allow-clear placeholder="报警状态" class="search-input-item">
-            <a-select-option :value="1">正常</a-select-option>
-            <a-select-option :value="0">异常</a-select-option>
+          <a-select
+            v-model:value="listQuery.status"
+            allow-clear
+            :placeholder="$tl('c.alarmStatus')"
+            class="search-input-item"
+          >
+            <a-select-option :value="1">{{ $tl('c.normal') }}</a-select-option>
+            <a-select-option :value="0">{{ $tl('c.abnormal') }}</a-select-option>
           </a-select>
-          <a-select v-model:value="listQuery.notifyStatus" allow-clear placeholder="通知状态" class="search-input-item">
-            <a-select-option :value="1">成功</a-select-option>
-            <a-select-option :value="0">失败</a-select-option>
+          <a-select
+            v-model:value="listQuery.notifyStatus"
+            allow-clear
+            :placeholder="$tl('c.notificationStatus')"
+            class="search-input-item"
+          >
+            <a-select-option :value="1">{{ $tl('c.success') }}</a-select-option>
+            <a-select-option :value="0">{{ $tl('c.failure') }}</a-select-option>
           </a-select>
           <a-range-picker :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
+          <a-tooltip :title="$tl('p.quickReturnToFirstPage')">
+            <a-button :loading="loading" type="primary" @click="loadData">{{ $tl('p.search') }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -43,21 +58,21 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'status'">
-          <span>{{ text ? '正常' : '异常' }}</span>
+          <span>{{ text ? $tl('c.normal') : $tl('c.abnormal') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'notifyStyle'">
-          {{ notifyStyle[text] || '未知' }}
+          {{ notifyStyle[text] || $tl('p.unknown') }}
         </template>
         <template v-else-if="column.dataIndex === 'notifyStatus'">
-          <span>{{ text ? '成功' : '失败' }}</span>
+          <span>{{ text ? $tl('c.success') : $tl('c.failure') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
-          <a-button size="small" type="primary" @click="handleDetail(record)">详情</a-button>
+          <a-button size="small" type="primary" @click="handleDetail(record)">{{ $tl('p.details') }}</a-button>
         </template>
       </template>
     </a-table>
     <!-- 详情区 -->
-    <a-modal v-model:open="detailVisible" destroy-on-close width="600px" title="详情信息" :footer="null">
+    <a-modal v-model:open="detailVisible" destroy-on-close width="600px" :title="$tl('p.detailInfo')" :footer="null">
       <a-list item-layout="horizontal" :data-source="detailData">
         <template #renderItem="{ item }">
           <a-list-item>
@@ -91,40 +106,40 @@ export default {
       detailData: [],
       columns: [
         {
-          title: '报警标题',
+          title: this.$tl('p.alarmTitle'),
           dataIndex: 'title',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '节点名称',
+          title: this.$tl('p.nodeName'),
           dataIndex: 'nodeId',
           width: 100,
           ellipsis: true
         },
         {
-          title: '项目 ID',
+          title: this.$tl('p.projectId'),
           dataIndex: 'projectId',
           width: 100,
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '报警状态',
+          title: this.$tl('c.alarmStatus'),
           dataIndex: 'status',
           width: 100,
           align: 'center',
           ellipsis: true
         },
         {
-          title: '报警方式',
+          title: this.$tl('p.alarmMethod'),
           dataIndex: 'notifyStyle',
           width: 100,
           align: 'center',
           ellipsis: true
         },
         {
-          title: '报警时间',
+          title: this.$tl('p.alarmTime'),
           dataIndex: 'createTime',
           customRender: ({ text }) => {
             return parseTime(text)
@@ -132,13 +147,13 @@ export default {
           width: '170px'
         },
         {
-          title: '通知状态',
+          title: this.$tl('c.notificationStatus'),
           dataIndex: 'notifyStatus',
           width: 100,
           ellipsis: true
         },
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
           align: 'center',
           fixed: 'right',
@@ -159,6 +174,9 @@ export default {
     })
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages..monitor.log.${key}`, ...args)
+    },
     // 加载 node
     loadNodeList(fn) {
       getNodeListAll().then((res) => {
@@ -202,15 +220,15 @@ export default {
       this.detailData = []
       this.detailVisible = true
       this.temp = Object.assign({}, record)
-      this.detailData.push({ title: '标题', description: this.temp.title })
-      this.detailData.push({ title: '内容', description: this.temp.content })
+      this.detailData.push({ title: this.$tl('p.title'), description: this.temp.title })
+      this.detailData.push({ title: this.$tl('p.content'), description: this.temp.content })
       this.detailData.push({
-        title: '通知对象',
+        title: this.$tl('p.notificationTarget'),
         description: this.temp.notifyObject
       })
       if (!this.temp.notifyStatus) {
         this.detailData.push({
-          title: '通知异常',
+          title: this.$tl('p.notificationAbnormal'),
           description: this.temp.notifyError
         })
       }
