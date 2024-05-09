@@ -5,7 +5,7 @@
       <a-button v-if="mode === 'normal'" type="dashed" class="workspace jpom-workspace btn-group-item">
         <div class="workspace-name">
           <a-tooltip
-            :title="`工作空间名称：${selectWorkspace.name} 【分组名：${selectWorkspace.group || '未配置'}】`"
+            :title="`${$tl('p.workspaceName')}${selectWorkspace.name} ${$tl('p.groupName')}${selectWorkspace.group || '${$tl('c.unConfigured')}'}${$tl('c.bracketRight')}`"
             placement="bottom"
           >
             <SwitcherOutlined />
@@ -29,7 +29,7 @@
       </a-button>
       <a-button v-if="mode === 'management'" type="dashed">
         <div class="workspace-name">
-          <a-tooltip :title="`集群名称：${selectCluster && selectCluster.name}`" placement="bottom">
+          <a-tooltip :title="`${$tl('p.clusterName')}${selectCluster && selectCluster.name}`" placement="bottom">
             <ClusterOutlined />
             {{ selectCluster && selectCluster.name }}
           </a-tooltip>
@@ -48,7 +48,7 @@
             <template v-if="mode === 'normal'">
               <a-sub-menu>
                 <template #title>
-                  <a-button type="link"><RetweetOutlined />切换工作空间</a-button>
+                  <a-button type="link"><RetweetOutlined />{{ $tl('p.switchWorkspace') }}</a-button>
                 </template>
                 <template v-if="myWorkspaceList.length == 1">
                   <template v-for="(item, index) in myWorkspaceList[0].children">
@@ -59,16 +59,17 @@
                       @click="handleWorkspaceChange(item)"
                     >
                       <a-button type="link" :disabled="item.id === selectWorkspace.id">
-                        {{ item.name || '未配置' }}
+                        {{ item.name || $tl('c.unConfigured') }}
                         <template v-if="myClusterList.length > 1 && item.clusterInfoId">
-                          【{{
+                          {{ $tl('c.bracketLeft')
+                          }}{{
                             myClusterList.find((item2) => {
                               return item2.id === item.clusterInfoId
                             }) &&
                             myClusterList.find((item2) => {
                               return item2.id === item.clusterInfoId
                             }).name
-                          }}】
+                          }}{{ $tl('c.bracketRight') }}
                         </template>
                       </a-button>
                     </a-menu-item>
@@ -80,7 +81,7 @@
                     <a-sub-menu>
                       <template #title>
                         <a-button type="link">
-                          {{ item1.value || '未配置' }}
+                          {{ item1.value || $tl('c.unConfigured') }}
                         </a-button>
                       </template>
                       <template v-for="(item, index) in item1.children">
@@ -93,14 +94,15 @@
                           <a-button type="link" :disabled="item.id === selectWorkspace.id">
                             {{ item.name }}
                             <template v-if="myClusterList.length > 1 && item.clusterInfoId">
-                              【{{
+                              {{ $tl('c.bracketLeft')
+                              }}{{
                                 myClusterList.find((item2) => {
                                   return item2.id === item.clusterInfoId
                                 }) &&
                                 myClusterList.find((item2) => {
                                   return item2.id === item.clusterInfoId
                                 }).name
-                              }}】
+                              }}{{ $tl('c.bracketRight') }}
                             </template>
                           </a-button>
                         </a-menu-item>
@@ -117,7 +119,7 @@
             <template v-if="mode === 'management'">
               <a-sub-menu>
                 <template #title>
-                  <a-button type="link"><RetweetOutlined />切换集群</a-button>
+                  <a-button type="link"><RetweetOutlined />{{ $tl('p.switchCluster') }}</a-button>
                 </template>
                 <template v-for="(item, index) in myClusterList">
                   <a-menu-item
@@ -135,31 +137,31 @@
               </a-sub-menu>
             </template>
             <a-menu-item @click="handleUpdatePwd">
-              <a-button type="link"> <lock-outlined />安全管理 </a-button>
+              <a-button type="link"> <lock-outlined />{{ $tl('c.securityManagement') }} </a-button>
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item @click="handleUpdateUser">
-              <a-button type="link"><profile-outlined /> 用户资料 </a-button>
+              <a-button type="link"><profile-outlined /> {{ $tl('p.userProfile') }} </a-button>
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item @click="handleUserlog">
-              <a-button type="link"><bars-outlined /> 操作日志 </a-button>
+              <a-button type="link"><bars-outlined /> {{ $tl('c.operationLog') }} </a-button>
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item @click="customize">
-              <a-button type="link"><skin-outlined /> 个性配置 </a-button>
+              <a-button type="link"><skin-outlined /> {{ $tl('p.personalConfiguration') }} </a-button>
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item @click="logOut">
-              <a-button type="link"> <logout-outlined />退出登录 </a-button>
+              <a-button type="link"> <logout-outlined />{{ $tl('p.logout') }} </a-button>
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item @click="logOutSwap">
-              <a-button type="link"> <SwapOutlined />切换账号 </a-button>
+              <a-button type="link"> <SwapOutlined />{{ $tl('p.switchAccount') }} </a-button>
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item @click="logOutAll">
-              <a-button type="link"><RestOutlined /> 彻底退出 </a-button>
+              <a-button type="link"><RestOutlined /> {{ $tl('p.completeLogout') }} </a-button>
             </a-menu-item>
           </a-menu>
         </template>
@@ -171,12 +173,12 @@
       v-model:open="updateNameVisible"
       destroy-on-close
       :width="'60vw'"
-      title="安全管理"
+      :title="$tl('c.securityManagement')"
       :footer="null"
       :mask-closable="false"
     >
       <a-tabs v-model:active-key="temp.tabActiveKey" @change="tabChange">
-        <a-tab-pane :key="1" tab="修改密码">
+        <a-tab-pane :key="1" :tab="$tl('p.changePassword')">
           <a-spin tip="Loading..." :spinning="confirmLoading">
             <a-form
               ref="pwdForm"
@@ -186,34 +188,36 @@
               :wrapper-col="{ span: 14 }"
               @finish="handleUpdatePwdOk"
             >
-              <a-form-item label="原密码" name="oldPwd">
-                <a-input-password v-model:value="temp.oldPwd" placeholder="请输入原密码" />
+              <a-form-item :label="$tl('p.originalPassword')" name="oldPwd">
+                <a-input-password v-model:value="temp.oldPwd" :placeholder="$tl('c.oldPassword')" />
               </a-form-item>
-              <a-form-item label="新密码" name="newPwd">
-                <a-input-password v-model:value="temp.newPwd" placeholder="请输入新密码" />
+              <a-form-item :label="$tl('p.newPassword')" name="newPwd">
+                <a-input-password v-model:value="temp.newPwd" :placeholder="$tl('c.newPassword')" />
               </a-form-item>
-              <a-form-item label="确认密码" name="confirmPwd">
-                <a-input-password v-model:value="temp.confirmPwd" placeholder="请输入确认密码" />
+              <a-form-item :label="$tl('p.confirmPassword')" name="confirmPwd">
+                <a-input-password v-model:value="temp.confirmPwd" :placeholder="$tl('c.confirmPassword')" />
               </a-form-item>
               <a-form-item>
                 <a-row type="flex" justify="center">
                   <a-col :span="2">
-                    <a-button type="primary" html-type="submit" :loading="confirmLoading">确认重置</a-button>
+                    <a-button type="primary" html-type="submit" :loading="confirmLoading">{{
+                      $tl('p.confirmReset')
+                    }}</a-button>
                   </a-col>
                 </a-row>
               </a-form-item>
             </a-form>
           </a-spin>
         </a-tab-pane>
-        <a-tab-pane :key="2" tab="两步验证">
+        <a-tab-pane :key="2" :tab="$tl('p.twoStepVerification')">
           <a-row>
             <a-col :span="24">
               <a-alert v-if="temp.needVerify" type="warning">
-                <template #message> 提示 </template>
+                <template #message> {{ $tl('p.prompt') }} </template>
                 <template #description>
                   <ul style="color: red">
-                    <li>绑定成功后将不再显示,强烈建议保存此二维码或者下面的 MFA key</li>
-                    <li>请使用应用扫码绑定令牌,然后输入验证码确认绑定才生效</li>
+                    <li>{{ $tl('p.mfaKey') }}</li>
+                    <li>{{ $tl('p.pleaseScanQRCodeAndBindToken') }}</li>
                   </ul>
                 </template>
               </a-alert>
@@ -227,16 +231,16 @@
                 :wrapper-col="{ span: 14 }"
                 @finish="handleBindMfa"
               >
-                <a-form-item label="当前状态" name="status">
+                <a-form-item :label="$tl('p.currentStatus')" name="status">
                   <a-switch
                     v-model:checked="temp.status"
-                    checked-children="开启中"
+                    :checked-children="$tl('p.opening')"
                     disabled
-                    un-checked-children="关闭中"
+                    :un-checked-children="$tl('p.closing')"
                   />
                 </a-form-item>
                 <template v-if="temp.needVerify">
-                  <a-form-item label="二维码">
+                  <a-form-item :label="$tl('p.qrCode')">
                     <a-row>
                       <a-col :span="14">
                         <a-qrcode :value="temp.url" :status="temp.url ? 'active' : 'loading'" />
@@ -256,24 +260,24 @@
                   </a-form-item>
                 </template>
                 <!-- 不能使用  template 包裹 否则验证不能正常启用 -->
-                <a-form-item v-if="temp.needVerify" label="验证码" name="twoCode">
-                  <a-input ref="twoCode" v-model:value="temp.twoCode" placeholder="两步验证码" />
+                <a-form-item v-if="temp.needVerify" :label="$tl('c.verificationCode')" name="twoCode">
+                  <a-input ref="twoCode" v-model:value="temp.twoCode" :placeholder="$tl('c.twoStepVerificationCode')" />
                 </a-form-item>
                 <a-form-item v-if="temp.needVerify">
                   <a-row type="flex" justify="center">
                     <a-col :span="2">
-                      <a-button type="primary" html-type="submit">确认绑定</a-button>
+                      <a-button type="primary" html-type="submit">{{ $tl('p.confirmBind') }}</a-button>
                     </a-col>
                   </a-row>
                 </a-form-item>
                 <!-- 不能使用  template 包裹 否则验证不能正常启用 -->
-                <a-form-item v-if="!temp.needVerify && temp.status" label="验证码" name="twoCode">
-                  <a-input ref="twoCode" v-model:value="temp.twoCode" placeholder="两步验证码" />
+                <a-form-item v-if="!temp.needVerify && temp.status" :label="$tl('c.verificationCode')" name="twoCode">
+                  <a-input ref="twoCode" v-model:value="temp.twoCode" :placeholder="$tl('c.twoStepVerificationCode')" />
                 </a-form-item>
                 <a-form-item v-if="!temp.needVerify && temp.status">
                   <a-row type="flex" justify="center">
                     <a-col :span="2">
-                      <a-button type="primary" html-type="submit">确认关闭</a-button>
+                      <a-button type="primary" html-type="submit">{{ $tl('p.confirmClose') }}</a-button>
                     </a-col>
                   </a-row>
                 </a-form-item>
@@ -281,14 +285,14 @@
                 <a-form-item v-if="!temp.needVerify && !temp.status">
                   <a-row type="flex" justify="center">
                     <a-col :span="2">
-                      <a-button type="primary" @click="openMfaFn">开启 MFA</a-button>
+                      <a-button type="primary" @click="openMfaFn">{{ $tl('p.enableMFA') }}</a-button>
                     </a-col>
                   </a-row>
                 </a-form-item>
               </a-form>
             </a-col>
             <a-col :span="12">
-              <h3 id="两步验证应用">两步验证应用</h3>
+              <h3 :id="$tl('c.twoStepVerificationApp')">{{ $tl('c.twoStepVerificationApp') }}</h3>
               <p v-for="(html, index) in MFA_APP_TIP_ARRAY" :key="index" v-html="html" />
             </a-col>
           </a-row>
@@ -300,12 +304,12 @@
       v-model:open="updateUserVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      title="修改用户资料"
+      :title="$tl('p.editUserProfile')"
       :mask-closable="false"
       @ok="handleUpdateUserOk"
     >
       <a-form ref="userForm" :rules="rules" :model="temp" :label-col="{ span: 8 }" :wrapper-col="{ span: 15 }">
-        <a-form-item label="临时token" name="token">
+        <a-form-item :label="$tl('p.temporaryToken')" name="token">
           <a-input v-model:value="temp.token" disabled placeholder="Token">
             <template #suffix>
               <a-typography-paragraph style="margin-bottom: 0" :copyable="{ tooltip: true, text: temp.token }">
@@ -313,7 +317,7 @@
             </template>
           </a-input>
         </a-form-item>
-        <a-form-item label="长期token" name="md5Token">
+        <a-form-item :label="$tl('p.permanentToken')" name="md5Token">
           <a-input v-model:value="temp.md5Token" disabled placeholder="Token">
             <template #suffix>
               <a-typography-paragraph style="margin-bottom: 0" :copyable="{ tooltip: true, text: temp.md5Token }">
@@ -321,35 +325,47 @@
             </template>
           </a-input>
         </a-form-item>
-        <a-form-item label="昵称" name="name">
-          <a-input v-model:value="temp.name" placeholder="昵称" />
+        <a-form-item :label="$tl('c.nickname')" name="name">
+          <a-input v-model:value="temp.name" :placeholder="$tl('c.nickname')" />
         </a-form-item>
-        <a-form-item label="邮箱地址" name="email">
-          <a-input v-model:value="temp.email" placeholder="邮箱地址" />
+        <a-form-item :label="$tl('c.emailAddress')" name="email">
+          <a-input v-model:value="temp.email" :placeholder="$tl('c.emailAddress')" />
         </a-form-item>
-        <a-form-item v-show="showCode" label="邮箱验证码" name="code">
+        <a-form-item v-show="showCode" :label="$tl('c.emailVerificationCode')" name="code">
           <a-row :gutter="8">
             <a-col :span="15">
-              <a-input v-model:value="temp.code" placeholder="邮箱验证码" />
+              <a-input v-model:value="temp.code" :placeholder="$tl('c.emailVerificationCode')" />
             </a-col>
             <a-col :span="4">
-              <a-button type="primary" :disabled="!temp.email" @click="sendEmailCode">发送验证码</a-button>
+              <a-button type="primary" :disabled="!temp.email" @click="sendEmailCode">{{
+                $tl('p.sendVerificationCode')
+              }}</a-button>
             </a-col>
           </a-row>
         </a-form-item>
-        <a-form-item label="钉钉通知地址" name="dingDing">
-          <a-input v-model:value="temp.dingDing" placeholder="钉钉通知地址" />
+        <a-form-item :label="$tl('c.dingNotificationAddress')" name="dingDing">
+          <a-input v-model:value="temp.dingDing" :placeholder="$tl('c.dingNotificationAddress')" />
         </a-form-item>
-        <a-form-item label="企业微信通知地址" name="workWx">
-          <a-input v-model:value="temp.workWx" placeholder="企业微信通知地址" />
+        <a-form-item :label="$tl('c.enterpriseWeChatNotificationAddress')" name="workWx">
+          <a-input v-model:value="temp.workWx" :placeholder="$tl('c.enterpriseWeChatNotificationAddress')" />
         </a-form-item>
       </a-form>
     </a-modal>
     <!-- 个性配置区 -->
-    <a-modal v-model:open="customizeVisible" destroy-on-close title="个性配置区" :footer="null" :mask-closable="false">
+    <a-modal
+      v-model:open="customizeVisible"
+      destroy-on-close
+      :title="$tl('p.personalConfigArea')"
+      :footer="null"
+      :mask-closable="false"
+    >
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
         <a-alert banner>
-          <template #message> 下列配置信息仅在当前浏览器生效,清空浏览器缓存配置将恢复默认 </template>
+          <template #message>
+            {{ $tl('p.theseConfigsOnlyEffectiveInCurrentBrowser') }},{{
+              $tl('p.clearingBrowserCacheWillRestoreDefaults')
+            }}
+          </template>
         </a-alert>
         <!-- <a-form-item label="页面导航">
           <a-space>
@@ -367,15 +383,15 @@
             </div>
           </a-space>
         </a-form-item> -->
-        <a-form-item label="菜单配置">
+        <a-form-item :label="$tl('p.menuConfig')">
           <a-space>
             <a-switch
-              checked-children="是"
+              :checked-children="$tl('p.yes')"
               :checked="menuMultipleFlag"
-              un-checked-children="否"
+              :un-checked-children="$tl('p.no')"
               @click="toggleMenuMultiple"
             />
-            同时展开多个
+            {{ $tl('p.expandMultipleAtOnce') }}
           </a-space>
         </a-form-item>
         <!-- <a-form-item label="页面配置">
@@ -400,52 +416,52 @@
             />
           </a-space>
         </a-form-item> -->
-        <a-form-item label="全屏日志">
+        <a-form-item :label="$tl('p.fullScreenLog')">
           <a-space>
             <a-switch
-              checked-children="全屏"
+              :checked-children="$tl('p.fullScreen')"
               :checked="fullscreenViewLog"
-              un-checked-children="非全屏"
+              un-checked-children="非{{$tl('p.fullScreen')}}"
               @click="toggleFullscreenViewLog"
             />
-            全屏查看日志
+            {{ $tl('p.viewLogInFullScreen') }}
           </a-space>
         </a-form-item>
-        <a-form-item label="内容主题">
+        <a-form-item :label="$tl('p.contentTheme')">
           <a-space>
             <a-radio-group v-model:value="themeView" button-style="solid">
-              <a-radio-button value="light">浅色</a-radio-button>
-              <a-radio-button value="dark">深色</a-radio-button>
-              <a-radio-button value="auto">跟随系统</a-radio-button>
+              <a-radio-button value="light">{{ $tl('c.lightTheme') }}</a-radio-button>
+              <a-radio-button value="dark">{{ $tl('c.darkTheme') }}</a-radio-button>
+              <a-radio-button value="auto">{{ $tl('p.followSystem') }}</a-radio-button>
             </a-radio-group>
-            内容区域主题切换
+            {{ $tl('p.contentAreaThemeSwitch') }}
           </a-space>
         </a-form-item>
-        <a-form-item label="菜单主题">
+        <a-form-item :label="$tl('p.menuTheme')">
           <a-space>
             <a-radio-group v-model:value="menuThemeView" button-style="solid">
-              <a-radio-button value="light">浅色</a-radio-button>
-              <a-radio-button value="dark">深色</a-radio-button>
+              <a-radio-button value="light">{{ $tl('c.lightTheme') }}</a-radio-button>
+              <a-radio-button value="dark">{{ $tl('c.darkTheme') }}</a-radio-button>
             </a-radio-group>
-            左边菜单栏主题切换
+            {{ $tl('p.leftMenuThemeSwitch') }}
           </a-space>
         </a-form-item>
 
-        <a-form-item label="紧凑模式">
+        <a-form-item :label="$tl('p.compactMode')">
           <a-space>
             <a-switch
-              checked-children="紧凑"
+              :checked-children="$tl('p.compact')"
               :checked="compactView"
-              un-checked-children="宽松"
+              :un-checked-children="$tl('p.loose')"
               @click="toggleCompactView"
             />
-            字体间距调整(仅在深色模式生效)
+            {{ $tl('p.fontSpacingAdjustment') }}({{ $tl('p.onlyEffectiveInDarkMode') }})
           </a-space>
         </a-form-item>
-        <a-form-item v-if="!isProduction" label="语言">
+        <a-form-item v-if="!isProduction" :label="$tl('p.language')">
           <a-space>
             <a-radio-group v-model:value="locale" button-style="solid">
-              <a-radio-button value="zh-cn">中文</a-radio-button>
+              <a-radio-button value="zh-cn">{{ $tl('p.chinese') }}</a-radio-button>
               <a-radio-button value="en-us">English</a-radio-button>
             </a-radio-group>
           </a-space>
@@ -456,7 +472,7 @@
     <a-modal
       v-model:open="bindMfaTip"
       destroy-on-close
-      title="安全提醒"
+      :title="$tl('c.securityReminder')"
       :footer="null"
       :mask-closable="false"
       :closable="false"
@@ -464,13 +480,15 @@
     >
       <a-space direction="vertical">
         <a-alert
-          message="安全提醒"
-          description="为了您的账号安全系统要求必须开启两步验证来确保账号的安全性"
+          :message="$tl('c.securityReminder')"
+          :description="
+            $tl('p.forYourAccountSecurityTheSystemRequiresTwoStepVerificationToBeEnabledToEnsureAccountSafety')
+          "
           type="error"
           :closable="false"
         />
         <a-row align="middle" type="flex" justify="center">
-          <a-button type="danger" @click="toBindMfa"> 立即开启 </a-button>
+          <a-button type="danger" @click="toBindMfa"> {{ $tl('p.enableImmediately') }} </a-button>
         </a-row>
       </a-space>
     </a-modal>
@@ -479,7 +497,7 @@
       v-model:open="viewLogVisible"
       destroy-on-close
       :width="'90vw'"
-      title="操作日志"
+      :title="$tl('c.operationLog')"
       :footer="null"
       :mask-closable="false"
     >
@@ -537,31 +555,31 @@ export default {
       // 表单校验规则
       rules: {
         name: [
-          { required: true, message: '请输入昵称', trigger: 'blur' },
-          { max: 10, message: '昵称长度为2-10', trigger: 'blur' },
-          { min: 2, message: '昵称长度为2-10', trigger: 'blur' }
+          { required: true, message: this.$tl('p.nickname'), trigger: 'blur' },
+          { max: 10, message: this.$tl('c.nicknameLength'), trigger: 'blur' },
+          { min: 2, message: this.$tl('c.nicknameLength'), trigger: 'blur' }
         ],
         oldPwd: [
-          { required: true, message: '请输入原密码', trigger: 'blur' },
-          { max: 20, message: '密码长度为6-20', trigger: 'blur' },
-          { min: 6, message: '密码长度为6-20', trigger: 'blur' }
+          { required: true, message: this.$tl('c.oldPassword'), trigger: 'blur' },
+          { max: 20, message: this.$tl('c.passwordLength'), trigger: 'blur' },
+          { min: 6, message: this.$tl('c.passwordLength'), trigger: 'blur' }
         ],
         newPwd: [
-          { required: true, message: '请输入新密码', trigger: 'blur' },
-          { max: 20, message: '密码长度为6-20', trigger: 'blur' },
-          { min: 6, message: '密码长度为6-20', trigger: 'blur' }
+          { required: true, message: this.$tl('c.newPassword'), trigger: 'blur' },
+          { max: 20, message: this.$tl('c.passwordLength'), trigger: 'blur' },
+          { min: 6, message: this.$tl('c.passwordLength'), trigger: 'blur' }
         ],
         confirmPwd: [
-          { required: true, message: '请输入确认密码', trigger: 'blur' },
-          { max: 20, message: '密码长度为6-20', trigger: 'blur' },
-          { min: 6, message: '密码长度为6-20', trigger: 'blur' }
+          { required: true, message: this.$tl('c.confirmPassword'), trigger: 'blur' },
+          { max: 20, message: this.$tl('c.passwordLength'), trigger: 'blur' },
+          { min: 6, message: this.$tl('c.passwordLength'), trigger: 'blur' }
         ],
         email: [
           // { required: true, message: "请输入邮箱", trigger: "blur" }
         ],
         twoCode: [
-          { required: true, message: '请输入两步验证码', trigger: ['change', 'blur'] },
-          { pattern: /^\d{6}$/, message: '验证码 6 为纯数字', trigger: ['change', 'blur'] }
+          { required: true, message: this.$tl('p.twoStepVerificationCode'), trigger: ['change', 'blur'] },
+          { pattern: /^\d{6}$/, message: this.$tl('p.verificationCode6'), trigger: ['change', 'blur'] }
         ]
       },
       MFA_APP_TIP_ARRAY,
@@ -642,6 +660,9 @@ export default {
     this.init()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.layout.userHeader.${key}`, ...args)
+    },
     customize() {
       this.customizeVisible = true
     },
@@ -699,11 +720,11 @@ export default {
         .then((flag) => {
           if (flag) {
             $notification.success({
-              message: '关闭页面操作引导、导航'
+              message: this.$tl('p.closeOperationGuide')
             })
           } else {
             $notification.success({
-              message: '开启页面操作引导、导航'
+              message: this.$tl('p.openOperationGuide')
             })
           }
         })
@@ -715,11 +736,11 @@ export default {
         .then((flag) => {
           if (flag) {
             $notification.success({
-              message: '可以同时展开多个菜单'
+              message: this.$tl('p.multipleMenusExpand')
             })
           } else {
             $notification.success({
-              message: '同时只能展开一个菜单'
+              message: this.$tl('p.singleMenuExpand')
             })
           }
         })
@@ -731,11 +752,11 @@ export default {
         .then((flag) => {
           if (flag) {
             $notification.success({
-              message: '页面内容自动撑开出现屏幕滚动条'
+              message: this.$tl('p.autoExpandContent')
             })
           } else {
             $notification.success({
-              message: '页面全屏，高度 100%。局部区域可以滚动'
+              message: this.$tl('p.fullScreen_1')
             })
           }
         })
@@ -747,11 +768,11 @@ export default {
         .then((flag) => {
           if (flag) {
             $notification.success({
-              message: '页面内容会出现滚动条'
+              message: this.$tl('p.scrollableContent')
             })
           } else {
             $notification.success({
-              message: '隐藏滚动条。纵向滚动方式提醒：滚轮，横行滚动方式：Shift+滚轮'
+              message: this.$tl('p.hiddenScrollbar')
             })
           }
         })
@@ -763,11 +784,11 @@ export default {
         .then((fullscreenViewLog) => {
           if (fullscreenViewLog) {
             $notification.success({
-              message: '日志弹窗会全屏打开'
+              message: this.$tl('p.logDialogFullScreen')
             })
           } else {
             $notification.success({
-              message: '日志弹窗会非全屏打开'
+              message: this.$tl('p.logDialogNonFullScreen')
             })
           }
         })
@@ -778,11 +799,11 @@ export default {
         .then((compact) => {
           if (compact) {
             $notification.success({
-              message: '页面启用紧凑模式'
+              message: this.$tl('p.compactMode_1')
             })
           } else {
             $notification.success({
-              message: '页面启用宽松模式'
+              message: this.$tl('p.looseMode')
             })
           }
         })
@@ -792,24 +813,24 @@ export default {
         .restGuide()
         .then(() => {
           $notification.success({
-            message: '重置页面操作引导、导航成功'
+            message: this.$tl('p.resetOperationGuideSuccess')
           })
         })
     },
     // 彻底退出登录
     logOutAll() {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemPrompt'),
         zIndex: 1009,
-        content: '真的要彻底退出系统么？彻底退出将退出登录和清空浏览器缓存',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.quitConfirmation'),
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           return useUserStore()
             .logOut()
             .then(() => {
               $notification.success({
-                message: '退出登录成功'
+                message: this.$tl('c.logoutSuccess')
               })
               localStorage.clear()
               this.$router.replace({
@@ -823,17 +844,17 @@ export default {
     // 切换账号登录
     logOutSwap() {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemPrompt'),
         zIndex: 1009,
-        content: '真的要退出并切换账号登录么？',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.switchAccountConfirmation'),
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           return useUserStore()
             .logOut()
             .then(() => {
               $notification.success({
-                message: '退出登录成功'
+                message: this.$tl('c.logoutSuccess')
               })
               useAppStore().changeWorkspace('')
               this.$router.replace({
@@ -847,17 +868,17 @@ export default {
     // 退出登录
     logOut() {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemPrompt'),
         zIndex: 1009,
-        content: '真的要退出系统么？',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.quitSystemConfirmation'),
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           return useUserStore()
             .logOut()
             .then(() => {
               $notification.success({
-                message: '退出登录成功'
+                message: this.$tl('c.logoutSuccess')
               })
               const query = Object.assign({}, this.$route.query)
               this.$router.replace({
@@ -878,7 +899,7 @@ export default {
       // 判断两次新密码是否一致
       if (this.temp.newPwd !== this.temp.confirmPwd) {
         $notification.error({
-          message: '两次密码不一致...'
+          message: this.$tl('p.passwordsNotMatch')
         })
         return
       }
@@ -925,7 +946,7 @@ export default {
     sendEmailCode() {
       if (!this.temp.email) {
         $notification.error({
-          message: '请输入邮箱地址'
+          message: this.$tl('p.emailAddress')
         })
         return
       }
@@ -995,7 +1016,7 @@ export default {
         location.href = url
       } else {
         $notification.error({
-          message: '还未配置集群地址,不能切换集群'
+          message: this.$tl('p.clusterNotConfigured')
         })
       }
     },
@@ -1034,7 +1055,7 @@ export default {
 
           $notification.info({
             // placement: "",
-            message: '需要输入验证码,确认绑定后才生效奥'
+            message: this.$tl('p.verificationCodeRequired')
           })
         }
       })
@@ -1055,11 +1076,11 @@ export default {
         })
       } else {
         $confirm({
-          title: '系统提示',
+          title: this.$tl('c.systemPrompt'),
           zIndex: 1009,
-          content: '确定要关闭两步验证吗？关闭后账号安全性将受到影响,关闭后已经存在的 mfa key 将失效',
-          okText: '确认',
-          cancelText: '取消',
+          content: this.$tl('p.disableTwoStepVerificationConfirmation'),
+          okText: this.$tl('c.confirm'),
+          cancelText: this.$tl('c.cancel'),
           onOk: () => {
             return closeMfa({
               code: this.temp.twoCode
