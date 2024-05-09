@@ -1,28 +1,28 @@
 export default {
   c: {
-    k1: 'alarmStatus',
-    k2: 'normal',
-    k3: 'abnormal',
-    k4: 'notificationStatus',
-    k5: 'success',
-    k6: 'failure'
+    alarmStatus: '报警状态',
+    normal: '正常',
+    abnormal: '异常',
+    notificationStatus: '通知状态',
+    success: '成功',
+    failure: '失败'
   },
   p: {
-    k1: 'pleaseSelectNode',
-    k2: 'holdCtrOrAltOptionToGoBackToFirstPage',
-    k3: 'search',
-    k4: 'unknown',
-    k5: 'details',
-    k6: 'detailedInformation',
-    k7: 'alarmTitle',
-    k8: 'nodeName',
-    k9: 'projectId',
-    k10: 'alarmMethod',
-    k11: 'alarmTime',
-    k12: 'operation',
-    k13: 'title',
-    k14: 'content',
-    k15: 'notificationTarget',
-    k16: 'notificationAbnormal'
+    pleaseSelectNode: '请选择节点',
+    quickReturnToFirstPage: '按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页',
+    search: '搜索',
+    unknown: '未知',
+    details: '详情',
+    detailInfo: '详情信息',
+    alarmTitle: '报警标题',
+    nodeName: '节点名称',
+    projectId: '项目 ID',
+    alarmMethod: '报警方式',
+    alarmTime: '报警时间',
+    operation: '操作',
+    title: '标题',
+    content: '内容',
+    notificationTarget: '通知对象',
+    notificationAbnormal: '通知异常'
   }
 }
