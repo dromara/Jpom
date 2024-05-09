@@ -18,7 +18,7 @@ export default {
     nameLabel: '名称：',
     readWrite: '读写',
     read: '读',
-    path: '路径：{{ item.source }}(宿主机) => {{ item.destination }}(容器)',
+    path: '路径：{source}(宿主机) => {destination}(容器)',
     networkPort: '网络端口',
     bridgeMode: '桥接模式：',
     gateway: '网关',

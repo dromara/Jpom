@@ -13,12 +13,12 @@
         <template v-if="mode === 'normal'">
           <SettingOutlined :style="{ fontSize: '18px' }" />
 
-          <span>系统管理</span>
+          <span>{{ $tl('p.managementSystem') }}</span>
         </template>
         <template v-if="mode === 'management'">
           <DesktopOutlined :style="{ fontSize: '18px' }" />
 
-          <span>功能管理</span>
+          <span>{{ $tl('p.functionManagement') }}</span>
         </template>
       </a-menu-item>
     </a-menu>
@@ -114,6 +114,9 @@ export default {
   },
   beforeUnmount() {},
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.layout.sideMenu.${key}`, ...args)
+    },
     mangerMenuClick() {
       this.mangerMenuOpenkeys = []
       this.$nextTick(() => {
@@ -137,7 +140,7 @@ export default {
       // 如果路由不存在
       if (!subMenu.path) {
         $notification.error({
-          message: '路由无效，无法跳转'
+          message: this.$tl('p.invalidRouting')
         })
         return false
       }

@@ -13,7 +13,7 @@
                   })
                 "
               >
-                <a-button type="link" :disabled="tabList.length <= 1">关闭其他</a-button>
+                <a-button type="link" :disabled="tabList.length <= 1">{{ $tl('p.closeOthers') }}</a-button>
               </a-menu-item>
               <a-menu-item
                 @click="
@@ -23,7 +23,7 @@
                   })
                 "
               >
-                <a-button type="link" :disabled="tabList.length <= 1 || index === 0">关闭左侧</a-button>
+                <a-button type="link" :disabled="tabList.length <= 1 || index === 0">{{ $tl('p.closeLeft') }}</a-button>
               </a-menu-item>
               <a-menu-item
                 @click="
@@ -34,7 +34,7 @@
                 "
               >
                 <a-button type="link" :disabled="tabList.length <= 1 || index === tabList.length - 1"
-                  >关闭右侧
+                  >{{ $tl('p.closeRight') }}
                 </a-button>
               </a-menu-item>
             </a-menu>
@@ -46,9 +46,10 @@
   </a-tabs>
 </template>
 <script lang="ts" setup>
+import { useI18nPage } from '@/i18n/hooks/useI18nPage'
 import userHeader from './user-header.vue'
 import { useAllMenuStore } from '@/stores/menu2'
-
+const { $tl } = useI18nPage('pages.layout.contentTab')
 const router = useRouter()
 const route = useRoute()
 
@@ -87,7 +88,7 @@ const onEdit = (key: string, action: 'remove') => {
   if (action === 'remove') {
     if (tabList.value.length === 1) {
       $notification.warn({
-        message: '不能关闭了'
+        message: $tl('p.cannotClose')
       })
       return
     }
@@ -100,7 +101,7 @@ const onEdit = (key: string, action: 'remove') => {
 // 关闭 tabs
 const closeTabs = (data: any) => {
   $notification.success({
-    message: '操作成功'
+    message: $tl('p.operationSuccess')
   })
   menuStore.clearTabs(props.mode, data).then(() => {
     activeTab()

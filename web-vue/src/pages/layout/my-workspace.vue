@@ -2,7 +2,7 @@
   <div>
     <a-row type="flex" justify="center">
       <a-col :span="18">
-        <a-card title="我的工作空间" :bordered="true">
+        <a-card :title="$tl('p.workspaceName')" :bordered="true">
           <Container drag-handle-selector=".move" orientation="vertical" @drop="onDrop">
             <Draggable v-for="(element, index) in myWorkspaceList" :key="index">
               <a-row class="item-row">
@@ -10,13 +10,13 @@
                   <template v-if="element.edit">
                     <a-input-search
                       v-model:value="element.name"
-                      placeholder="请输入工作空间备注,留空使用默认的名称"
-                      enter-button="确定"
+                      :placeholder="$tl('p.workspaceNote')"
+                      :enter-button="$tl('p.confirm')"
                       @search="editOk(element)"
                     />
                   </template>
                   <template v-else>
-                    <a-tooltip :title="`原始名：${element.originalName}`">
+                    <a-tooltip :title="`${$tl('p.originalName')}${element.originalName}`">
                       {{ element.name || element.originalName }}
                     </a-tooltip>
                   </template>
@@ -27,7 +27,7 @@
                     <a-button :disabled="element.edit" type="primary" size="small" @click="edit(element)">
                       <template #icon><EditOutlined /></template>
                     </a-button>
-                    <a-tooltip placement="left" :title="`长按可以拖动排序`" class="move">
+                    <a-tooltip placement="left" :title="`${$tl('p.sortDrag')}`" class="move">
                       <MenuOutlined />
                     </a-tooltip>
                   </a-space>
@@ -37,8 +37,8 @@
           </Container>
           <a-col style="margin-top: 10px">
             <a-space>
-              <a-button type="primary" @click="save"> 保存 </a-button>
-              <a-button type="primary" @click="resetDefaultName"> 恢复默认名称 </a-button>
+              <a-button type="primary" @click="save"> {{ $tl('p.save') }} </a-button>
+              <a-button type="primary" @click="resetDefaultName"> {{ $tl('p.resetName') }} </a-button>
             </a-space>
           </a-col>
         </a-card>
@@ -65,6 +65,9 @@ export default {
     this.init()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.layout.myWorkspace.${key}`, ...args)
+    },
     onDrop(dropResult) {
       this.myWorkspaceList = dropApplyDrag(this.myWorkspaceList, dropResult).map((item, index) => {
         return { ...item, sort: index }

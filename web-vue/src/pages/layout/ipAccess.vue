@@ -4,9 +4,9 @@
       <a-card hoverable class="card">
         <a-card-meta>
           <template #description>
-            <a-result status="error" title="您没有权限访问">
+            <a-result status="error" :title="$tl('p.k1')">
               <template #extra>
-                <a-button> 禁止访问 </a-button>
+                <a-button> {{ $tl('p.k2') }} </a-button>
               </template>
             </a-result>
           </template>
@@ -23,6 +23,11 @@ export default {
   },
   data() {
     return {}
+  },
+  methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.layout.ipAccess.${key}`, ...args)
+    }
   }
 }
 </script>

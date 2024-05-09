@@ -1,24 +1,26 @@
 <template>
   <div>
     <a-page-header :back-icon="false">
-      <template #title> 欢迎【{{ getUserInfo.name }}】您使用本系统</template>
-      <template #subTitle>可以管理{{ (myWorkspaceList && myWorkspaceList.length) || 0 }}个工作空间 </template>
+      <template #title> {{ $tl('p.welcome') }}{{ getUserInfo.name }}{{ $tl('p.systemUsage') }}</template>
+      <template #subTitle>
+        {{ $tl('p.manageWorkspaces', { count: (myWorkspaceList && myWorkspaceList.length) || 0 }) }}
+      </template>
       <template #tags>
         <a-tag color="blue">
-          <template v-if="getUserInfo.demoUser">演示账号</template>
-          <template v-else-if="getUserInfo.superSystemUser">超级管理员</template>
-          <template v-else-if="getUserInfo.systemUser">管理员</template>
-          <template v-else>普通用户</template>
+          <template v-if="getUserInfo.demoUser">{{ $tl('p.demoAccount') }}</template>
+          <template v-else-if="getUserInfo.superSystemUser">{{ $tl('p.superuser') }}</template>
+          <template v-else-if="getUserInfo.systemUser">{{ $tl('p.admin') }}</template>
+          <template v-else>{{ $tl('p.normalUser') }}</template>
         </a-tag>
       </template>
       <template #extra>
-        <a-tooltip title="刷新数据">
+        <a-tooltip :title="$tl('p.refreshData')">
           <a-button @click="init">
             <template #icon><ReloadOutlined /></template>
           </a-button>
         </a-tooltip>
         <!-- // 擅自修改或者删除版权信息有法律风险，请尊重开源协议，不要擅自修改版本信息，否则可能承担法律责任。 -->
-        <a-tooltip v-if="getUserInfo && (getUserInfo.systemUser || getUserInfo.demoUser)" title="关于系统">
+        <a-tooltip v-if="getUserInfo && (getUserInfo.systemUser || getUserInfo.demoUser)" :title="$tl('p.systemInfo')">
           <a-button @click="showAbout">
             <template #icon><ExclamationCircleOutlined /></template>
           </a-button>
@@ -31,8 +33,8 @@
       <a-col :span="6">
         <a-card size="small">
           <template #title>
-            数据统计
-            <a-tooltip title="当前工作空间关联数据统计"><QuestionCircleOutlined /></a-tooltip>
+            {{ $tl('p.dataStatistics') }}
+            <a-tooltip :title="$tl('p.relatedDataStatistics')"><QuestionCircleOutlined /></a-tooltip>
           </template>
           <a-list :data-source="statNames">
             <template #renderItem="{ item }">
@@ -44,8 +46,8 @@
       <a-col :span="6">
         <a-card size="small">
           <template #title>
-            构建日志
-            <a-tooltip title="当前工作空间您触发的构建记录"><QuestionCircleOutlined /></a-tooltip>
+            {{ $tl('p.buildLog') }}
+            <a-tooltip :title="$tl('p.triggeredBuilds')"><QuestionCircleOutlined /></a-tooltip>
           </template>
           <a-timeline v-if="buildLog && buildLog.length">
             <a-timeline-item v-for="item in buildLog" :key="item.id" :color="statusColor[item.status]">
@@ -65,9 +67,9 @@
                     <span>{{ item.buildName || '-' }}</span>
                   </a-col>
                   <a-col>
-                    <a-tooltip :title="item.statusMsg || statusMap[item.status] || '未知'">
+                    <a-tooltip :title="item.statusMsg || statusMap[item.status] || $tl('c.unknown')">
                       <a-tag :color="statusColor[item.status]" @click="handleBuildLog(item)">
-                        {{ statusMap[item.status] || '未知' }}
+                        {{ statusMap[item.status] || $tl('c.unknown') }}
                       </a-tag>
                     </a-tooltip>
                   </a-col>
@@ -75,12 +77,12 @@
               </a-space>
             </a-timeline-item>
           </a-timeline>
-          <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" description="您还未构建" />
+          <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="$tl('p.notYetBuilt')" />
         </a-card>
       </a-col>
       <a-col :span="6">
         <a-card size="small">
-          <template #title> 登录日志 </template>
+          <template #title> {{ $tl('p.loginLog') }} </template>
           <template #extra>
             <a href="#" @click="handleUserlog(2)">more</a>
           </template>
@@ -89,20 +91,20 @@
               <a-space direction="vertical" :size="1">
                 <div>{{ parseTime(item.createTimeMillis) }}</div>
                 <a-space>
-                  <a-tag> {{ operateCodeMap[item.operateCode] || '未知' }}</a-tag>
+                  <a-tag> {{ operateCodeMap[item.operateCode] || $tl('c.unknown') }}</a-tag>
                   <span> IP:{{ item.ip }}</span>
                 </a-space>
               </a-space>
             </a-timeline-item>
           </a-timeline>
-          <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" description="您还未登录过" />
+          <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="$tl('p.notYetLoggedIn')" />
         </a-card>
       </a-col>
       <a-col :span="6">
         <a-card size="small">
           <template #title>
-            操作日志
-            <a-tooltip title="系统中您所有操作日志"><QuestionCircleOutlined /></a-tooltip>
+            {{ $tl('c.operationLog') }}
+            <a-tooltip :title="$tl('p.allOperationLog')"><QuestionCircleOutlined /></a-tooltip>
           </template>
           <template #extra>
             <a href="#" @click="handleUserlog(1)">more</a>
@@ -122,7 +124,7 @@
               </a-space>
             </a-timeline-item>
           </a-timeline>
-          <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" description="您还未执行操作" />
+          <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="$tl('p.notYetPerformedOperations')" />
         </a-card>
       </a-col>
     </a-row>
@@ -132,7 +134,7 @@
       destroy-on-close
       :open="viewLogVisible > 0"
       :width="'90vw'"
-      title="操作日志"
+      :title="$tl('c.operationLog')"
       :footer="null"
       :mask-closable="false"
       @cancel="viewLogVisible = 0"
@@ -147,7 +149,7 @@
       destroy-on-close
       :open="aboutVisible > 0"
       :width="'90vw'"
-      title="关于开源软件"
+      :title="$tl('p.openSourceInfo')"
       :footer="null"
       :mask-closable="false"
       @cancel="aboutVisible = 0"
@@ -193,16 +195,16 @@ export default {
       viewLogVisible: 0,
       // "逻辑节点", "节点项目", "节点脚本", "项目分发", "SSH终端", "SSH命令", "本地脚本", "Docker节点", "动态文件", "静态文件"
       statNames: [
-        { name: '逻辑节点', field: 'nodeCount' },
-        { name: '节点项目', field: 'projectCount' },
-        { name: '节点脚本', field: 'nodeScriptCount' },
-        { name: '项目分发', field: 'outGivingCount' },
-        { name: 'SSH终端', field: 'sshCount' },
-        { name: 'SSH脚本', field: 'sshCommandCount' },
-        { name: '本地脚本', field: 'scriptCount' },
-        { name: 'Docker节点', field: 'dockerCount' },
-        { name: 'Docker集群', field: 'dockerSwarmCount' },
-        { name: '动态文件', field: 'fileCount' }
+        { name: this.$tl('p.logicNode'), field: 'nodeCount' },
+        { name: this.$tl('p.nodeProject'), field: 'projectCount' },
+        { name: this.$tl('p.nodeScript'), field: 'nodeScriptCount' },
+        { name: this.$tl('p.projectDistribution'), field: 'outGivingCount' },
+        { name: `SSH${this.$tl('p.terminal')}`, field: 'sshCount' },
+        { name: `SSH${this.$tl('p.script')}`, field: 'sshCommandCount' },
+        { name: this.$tl('p.localScript'), field: 'scriptCount' },
+        { name: `Docker${this.$tl('p.node')}`, field: 'dockerCount' },
+        { name: `Docker${this.$tl('p.cluster')}`, field: 'dockerSwarmCount' },
+        { name: this.$tl('p.dynamicFile'), field: 'fileCount' }
         // { name: "静态文件", field: "staticFileCount" },
       ],
       statData: {},
@@ -218,6 +220,9 @@ export default {
     this.init()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.layout.overview.${key}`, ...args)
+    },
     parseTime,
     init() {
       // 工作空间

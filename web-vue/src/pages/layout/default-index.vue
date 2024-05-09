@@ -3,7 +3,7 @@
     <a-layout-sider v-model:collapsed="collapsed" :theme="menuTheme" :trigger="null" collapsible>
       <a-layout-sider v-model:collapsed="collapsed" class="sider" :theme="menuTheme" :trigger="null" collapsible>
         <div class="sider-content">
-          <a-tooltip placement="right" title="点击可以折叠左侧菜单栏">
+          <a-tooltip placement="right" :title="$tl('projectMaintenance.clickToCollapseLeftMenu')">
             <div
               class="logo"
               :style="`color:${menuTheme === 'light' && theme === 'light' ? '#000' : '#fff'}`"
@@ -80,7 +80,10 @@ import { checkSystem, loadingLogo } from '@/api/install'
 import defaultLogo from '@/assets/images/jpom.svg'
 import { useAllMenuStore } from '@/stores/menu2'
 import { UserNotificationType, systemNotification } from '@/api/user/user-notification'
+import { useI18nPage } from '@/i18n/hooks/useI18nPage'
 // import { SpaceSize } from 'ant-design-vue/es/space'
+
+const { $tl } = useI18nPage('pages.layout.defaultIndex')
 defineProps({
   mode: {
     type: String,
@@ -138,7 +141,7 @@ watch(
 )
 
 const collapsed = ref(false)
-const subTitle = ref('项目运维')
+const subTitle = ref($tl('projectMaintenance.projectOperation'))
 const logoUrl = ref('')
 
 const _appStore = appStore()
