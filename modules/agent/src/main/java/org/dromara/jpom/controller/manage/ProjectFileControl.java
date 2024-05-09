@@ -267,6 +267,7 @@ public class ProjectFileControl extends BaseAgentController {
         if (StrUtil.isEmpty(after)) {
             return null;
         }
+        log.debug("开始准备项目重启：{} {}", pim.getId(), after);
         //
         AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(after, AfterOpt.No.getCode()));
         if ("restart".equalsIgnoreCase(after) || afterOpt == AfterOpt.Restart) {
