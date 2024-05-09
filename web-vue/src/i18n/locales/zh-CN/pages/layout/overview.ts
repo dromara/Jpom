@@ -6,7 +6,7 @@ export default {
   p: {
     welcome: '欢迎【',
     systemUsage: '】您使用本系统',
-    manageWorkspaces: '可以管理{{ (myWorkspaceList && myWorkspaceList.length) || 0 }}个工作空间',
+    manageWorkspaces: '可以管理{count}个工作空间',
     demoAccount: '演示账号',
     superuser: '超级管理员',
     admin: '管理员',

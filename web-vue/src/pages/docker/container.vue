@@ -403,7 +403,7 @@
                             {{ $tl('c.nameLabel') }}{{ item.name }}
                             <a-tag>{{ item.rw ? $tl('c.readWrite') : $tl('c.read') }}</a-tag>
                           </p>
-                          <p>{{ $tl('c.path') }}</p>
+                          <p>{{ $tl('c.path', { source: item.source, destination: item.destination }) }}</p>
                           <a-divider></a-divider>
                         </div>
                       </template>

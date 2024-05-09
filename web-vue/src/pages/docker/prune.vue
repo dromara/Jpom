@@ -21,7 +21,7 @@
         <a-switch
           v-model:checked="pruneForm.dangling"
           :checked-children="$tl('p.floating')"
-          un-checked-children="非{{$tl('p.floating')}}"
+          :un-checked-children="$tl('p.nonFloating')"
         />
       </a-form-item>
       <a-form-item

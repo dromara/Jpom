@@ -5,7 +5,7 @@
       <a-button v-if="mode === 'normal'" type="dashed" class="workspace jpom-workspace btn-group-item">
         <div class="workspace-name">
           <a-tooltip
-            :title="`${$tl('p.workspaceName')}${selectWorkspace.name} ${$tl('p.groupName')}${selectWorkspace.group || '${$tl('c.unConfigured')}'}${$tl('c.bracketRight')}`"
+            :title="`${$tl('p.workspaceName')}${selectWorkspace.name} ${$tl('p.groupName')}${selectWorkspace.group || $tl('c.unConfigured')}${$tl('c.bracketRight')}`"
             placement="bottom"
           >
             <SwitcherOutlined />
@@ -421,7 +421,7 @@
             <a-switch
               :checked-children="$tl('p.fullScreen')"
               :checked="fullscreenViewLog"
-              un-checked-children="非{{$tl('p.fullScreen')}}"
+              :un-checked-children="$tl('p.notFullScreen')"
               @click="toggleFullscreenViewLog"
             />
             {{ $tl('p.viewLogInFullScreen') }}

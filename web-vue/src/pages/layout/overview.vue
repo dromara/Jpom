@@ -2,7 +2,9 @@
   <div>
     <a-page-header :back-icon="false">
       <template #title> {{ $tl('p.welcome') }}{{ getUserInfo.name }}{{ $tl('p.systemUsage') }}</template>
-      <template #subTitle>{{ $tl('p.manageWorkspaces') }} </template>
+      <template #subTitle>
+        {{ $tl('p.manageWorkspaces', { count: (myWorkspaceList && myWorkspaceList.length) || 0 }) }}
+      </template>
       <template #tags>
         <a-tag color="blue">
           <template v-if="getUserInfo.demoUser">{{ $tl('p.demoAccount') }}</template>
