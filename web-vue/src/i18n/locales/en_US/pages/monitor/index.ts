@@ -1,6 +1,6 @@
-import list from './list.ts'
-import log from './log.ts'
-import operateLog from './operate-log.ts'
+import list from './list'
+import log from './log'
+import operateLog from './operate-log'
 
 export default {
   list,

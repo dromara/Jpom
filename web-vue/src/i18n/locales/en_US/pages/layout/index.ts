@@ -1,14 +1,15 @@
-import about from './about.ts'
-import contentTab from './content-tab.ts'
-import defaultBg from './default-bg.ts'
-import defaultIndex from './default-index.ts'
-import ipAccess from './ipAccess.ts'
-import loading from './loading.ts'
-import management from './management.ts'
-import myWorkspace from './my-workspace.ts'
-import overview from './overview.ts'
-import sideMenu from './side-menu.ts'
-import userLog from './user-log.ts'
+import about from './about'
+import contentTab from './content-tab'
+import defaultBg from './default-bg'
+import defaultIndex from './default-index'
+import ipAccess from './ipAccess'
+import loading from './loading'
+import management from './management'
+import myWorkspace from './my-workspace'
+import overview from './overview'
+import sideMenu from './side-menu'
+import userHeader from './user-header'
+import userLog from './user-log'
 
 export default {
   about,
@@ -21,5 +22,6 @@ export default {
   myWorkspace,
   overview,
   sideMenu,
+  userHeader,
   userLog
 }
