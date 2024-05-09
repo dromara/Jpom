@@ -13,12 +13,16 @@ import build from './pages/build'
 import certificate from './pages/certificate'
 import dispatch from './pages/dispatch'
 import docker from './pages/docker'
+import fileManager from './pages/file-manager'
+import monitor from './pages/monitor'
 export default {
   pages: {
     404: page404,
     build,
     certificate,
     dispatch,
-    docker
+    docker,
+    fileManager,
+    monitor
   }
 }

@@ -24,28 +24,28 @@
           <a-space>
             <a-input
               v-model:value="listQuery['%name%']"
-              placeholder="文件名称"
+              :placeholder="$tl('p.fileName')"
               class="search-input-item"
               @press-enter="loadData"
             />
 
             <a-input
               v-model:value="listQuery['extName']"
-              placeholder="后缀,精准搜索"
+              :placeholder="$tl('p.suffixSearch')"
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['id']"
-              placeholder="文件id,精准搜索"
+              :placeholder="$tl('p.fileIdSearch')"
               class="search-input-item"
               @press-enter="loadData"
             />
-            <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-              <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+            <a-tooltip :title="$tl('p.quickBackToFirstPage')">
+              <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
             </a-tooltip>
             <!-- <a-button type="primary" @click="handleUpload">上传文件</a-button> -->
-            <a-button type="primary" @click="reScanner">扫描</a-button>
+            <a-button type="primary" @click="reScanner">{{ $tl('p.scan') }}</a-button>
 
             <a-button
               type="primary"
@@ -53,7 +53,7 @@
               :disabled="!tableSelections || tableSelections.length <= 0"
               @click="handleBatchDelete"
             >
-              批量删除
+              {{ $tl('p.batchDelete') }}
             </a-button>
             <a-button
               size="small"
@@ -64,7 +64,7 @@
                 }
               "
             >
-              <InfoCircleOutlined /> 配置目录
+              <InfoCircleOutlined /> {{ $tl('p.configDirectory') }}
             </a-button>
           </a-space>
         </template>
@@ -81,11 +81,11 @@
             </a-tooltip>
           </template>
           <template v-else-if="column.dataIndex === 'name'">
-            <a-popover title="文件信息">
+            <a-popover :title="$tl('p.fileInfo')">
               <template #content>
-                <p>文件ID：{{ record.id }}</p>
-                <p>文件名：{{ text }}</p>
-                <p>文件描述：{{ record.description }}</p>
+                <p>{{ $tl('p.fileId') }}{{ record.id }}</p>
+                <p>{{ $tl('p.fileNameLabel') }}{{ text }}</p>
+                <p>{{ $tl('p.fileDescriptionLabel') }}{{ record.description }}</p>
               </template>
               <!-- {{ text }} -->
               <a-button type="link" style="padding: 0" size="small" @click="handleEdit(record)">{{ text }}</a-button>
@@ -98,19 +98,19 @@
             </a-tooltip>
           </template>
           <template v-else-if="column.dataIndex === 'source'">
-            <a-tooltip placement="topLeft" :title="`${sourceMap[text] || '未知'}`">
-              <span>{{ sourceMap[text] || '未知' }}</span>
+            <a-tooltip placement="topLeft" :title="`${sourceMap[text] || $tl('c.content1')}`">
+              <span>{{ sourceMap[text] || $tl('c.content1') }}</span>
             </a-tooltip>
           </template>
 
           <template v-else-if="column.dataIndex === 'status'">
-            <a-tag v-if="text === 1" color="green">存在</a-tag>
-            <a-tag v-else color="red">丢失</a-tag>
+            <a-tag v-if="text === 1" color="green">{{ $tl('p.exist') }}</a-tag>
+            <a-tag v-else color="red">{{ $tl('p.missing') }}</a-tag>
           </template>
 
           <template v-else-if="column.dataIndex === 'type'">
-            <a-tag v-if="text === 1">文件</a-tag>
-            <a-tag v-else>文件夹</a-tag>
+            <a-tag v-if="text === 1">{{ $tl('p.file') }}</a-tag>
+            <a-tag v-else>{{ $tl('p.folder') }}</a-tag>
           </template>
 
           <template v-else-if="column.dataIndex === 'operation'">
@@ -122,16 +122,18 @@
                 type="primary"
                 @click="handleDownloadUrl(record)"
               >
-                下载</a-button
+                {{ $tl('p.download') }}</a-button
               >
               <a-button
                 size="small"
                 :disabled="!(record.status === 1 && record.type === 1)"
                 type="primary"
                 @click="handleReleaseFile(record)"
-                >发布</a-button
+                >{{ $tl('p.publish') }}</a-button
               >
-              <a-button type="primary" danger size="small" @click="handleDelete(record)">删除</a-button>
+              <a-button type="primary" danger size="small" @click="handleDelete(record)">{{
+                $tl('p.deleteFile')
+              }}</a-button>
             </a-space>
           </template>
         </template>
@@ -141,18 +143,18 @@
       <a-modal
         v-model:open="editVisible"
         destroy-on-close
-        :title="`修改文件`"
+        :title="`${$tl('p.modifyFile')}`"
         :confirm-loading="confirmLoading"
         :mask-closable="false"
         @ok="handleEditOk"
       >
         <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-          <a-form-item label="文件名" name="name">
-            <a-input v-model:value="temp.name" placeholder="文件名" :disabled="true" />
+          <a-form-item :label="$tl('c.fileName')" name="name">
+            <a-input v-model:value="temp.name" :placeholder="$tl('c.fileName')" :disabled="true" />
           </a-form-item>
 
-          <a-form-item label="文件描述" name="description">
-            <a-textarea v-model:value="temp.description" placeholder="请输入文件描述" />
+          <a-form-item :label="$tl('p.fileDescription')" name="description">
+            <a-textarea v-model:value="temp.description" :placeholder="$tl('p.pleaseEnterFileDescription')" />
           </a-form-item>
         </a-form>
       </a-modal>
@@ -161,7 +163,7 @@
       <a-modal
         v-model:open="triggerVisible"
         destroy-on-close
-        title="断点/分片下载"
+        :title="$tl('p.chunkedDownload')"
         width="50%"
         :footer="null"
         :mask-closable="false"
@@ -169,13 +171,13 @@
         <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
           <a-tabs default-active-key="1">
             <template #rightExtra>
-              <a-tooltip title="重置下载 token 信息,重置后之前的下载 token 将失效">
-                <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
+              <a-tooltip :title="$tl('p.resetDownloadToken')">
+                <a-button type="primary" size="small" @click="resetTrigger">{{ $tl('p.reset') }}</a-button>
               </a-tooltip>
             </template>
-            <a-tab-pane key="1" tab="断点/分片单文件下载">
+            <a-tab-pane key="1" :tab="$tl('p.chunkedSingleFileDownload')">
               <a-space direction="vertical" style="width: 100%">
-                <a-alert type="info" :message="`下载地址(点击可以复制)`">
+                <a-alert type="info" :message="`${$tl('c.downloadAddress')}(${$tl('c.copyTip')})`">
                   <template #description>
                     <a-typography-paragraph :copyable="{ text: temp.triggerDownloadUrl }">
                       <a-tag>GET</a-tag>
@@ -184,26 +186,26 @@
                   </template>
                 </a-alert>
                 <a :href="temp.triggerDownloadUrl" target="_blank">
-                  <a-button size="small" type="primary"><DownloadOutlined />立即下载</a-button>
+                  <a-button size="small" type="primary"><DownloadOutlined />{{ $tl('c.downloadNow') }}</a-button>
                 </a>
               </a-space>
             </a-tab-pane>
-            <a-tab-pane v-if="temp.triggerAliasDownloadUrl" tab="断点/分片别名下载">
+            <a-tab-pane v-if="temp.triggerAliasDownloadUrl" :tab="$tl('p.chunkedAliasDownload')">
               <a-space direction="vertical" style="width: 100%">
-                <a-alert message="温馨提示" type="warning">
+                <a-alert :message="$tl('p.warmPrompt')" type="warning">
                   <template #description>
                     <ul>
                       <li>
-                        支持自定义排序字段：sort=createTimeMillis:desc
+                        {{ $tl('p.customSortField') }}=createTimeMillis:desc
 
-                        <p>描述根据创建时间升序第一个</p>
+                        <p>{{ $tl('p.descSortAscFirst') }}</p>
                       </li>
-                      <li>支持的字段可以通过接口返回的查看</li>
-                      <li>通用的字段有：createTimeMillis、modifyTimeMillis</li>
+                      <li>{{ $tl('p.supportedFields') }}</li>
+                      <li>{{ $tl('p.commonFields') }}</li>
                     </ul>
                   </template>
                 </a-alert>
-                <a-alert type="info" :message="`下载地址(点击可以复制)`">
+                <a-alert type="info" :message="`${$tl('c.downloadAddress')}(${$tl('c.copyTip')})`">
                   <template #description>
                     <a-typography-paragraph :copyable="{ text: temp.triggerAliasDownloadUrl }">
                       <a-tag>GET</a-tag>
@@ -212,7 +214,7 @@
                   </template>
                 </a-alert>
                 <a :href="temp.triggerAliasDownloadUrl" target="_blank">
-                  <a-button size="small" type="primary"><DownloadOutlined />立即下载</a-button>
+                  <a-button size="small" type="primary"><DownloadOutlined />{{ $tl('c.downloadNow') }}</a-button>
                 </a>
               </a-space>
             </a-tab-pane>
@@ -223,7 +225,7 @@
       <a-modal
         v-model:open="releaseFileVisible"
         destroy-on-close
-        title="发布文件"
+        :title="$tl('p.publishFile')"
         width="50%"
         :mask-closable="false"
         :confirm-loading="confirmLoading"
@@ -237,7 +239,7 @@
     <a-modal
       v-model:open="configDir"
       destroy-on-close
-      :title="`配置授权目录`"
+      :title="`${$tl('p.configAuthDirectory')}`"
       :footer="null"
       width="50vw"
       :mask-closable="false"
@@ -296,27 +298,27 @@ export default {
       list: [],
       columns: [
         {
-          title: '名称',
+          title: this.$tl('p.name'),
           dataIndex: 'name',
           ellipsis: true,
           width: 150
         },
         {
-          title: '描述',
+          title: this.$tl('p.desc'),
           dataIndex: 'description',
           ellipsis: true,
           width: 150,
           tooltip: true
         },
         {
-          title: '路径',
+          title: this.$tl('p.path'),
           dataIndex: 'absolutePath',
           ellipsis: true,
           width: 150,
           tooltip: true
         },
         {
-          title: '大小',
+          title: this.$tl('p.size'),
           dataIndex: 'size',
           sorter: true,
           ellipsis: true,
@@ -324,7 +326,7 @@ export default {
           width: '100px'
         },
         {
-          title: '后缀',
+          title: this.$tl('p.suffix'),
           dataIndex: 'extName',
           ellipsis: true,
 
@@ -332,14 +334,14 @@ export default {
           width: '80px'
         },
         {
-          title: '类型',
+          title: this.$tl('p.type'),
           dataIndex: 'type',
           ellipsis: true,
 
           width: '80px'
         },
         {
-          title: '文件状态',
+          title: this.$tl('p.fileStatus'),
           dataIndex: 'status',
           ellipsis: true,
 
@@ -347,7 +349,7 @@ export default {
         },
 
         {
-          title: '文件修改时间',
+          title: this.$tl('p.fileModifyTime'),
           dataIndex: 'lastModified',
           sorter: true,
           customRender: ({ text }) => parseTime(text),
@@ -355,7 +357,7 @@ export default {
         },
 
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
           align: 'center',
           ellipsis: true,
@@ -365,8 +367,8 @@ export default {
         }
       ],
       rules: {
-        name: [{ required: true, message: '请输入文件名称', trigger: 'blur' }],
-        url: [{ required: true, message: '请输入远程地址', trigger: 'blur' }]
+        name: [{ required: true, message: this.$tl('p.pleaseEnterFileName'), trigger: 'blur' }],
+        url: [{ required: true, message: this.$tl('p.pleaseEnterRemoteAddress'), trigger: 'blur' }]
       },
 
       temp: {},
@@ -402,6 +404,9 @@ export default {
     this.loadData()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.fileManager.staticFileStorage.list.${key}`, ...args)
+    },
     randomStr,
     CHANGE_PAGE,
     renderSize,
@@ -454,11 +459,11 @@ export default {
     // 删除文件
     handleDelete(record) {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemPrompt'),
         zIndex: 1009,
-        content: '真的要删除当前文件么？' + record.name,
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmDeleteFile') + record.name,
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           return delFile({
             id: record.id,
@@ -478,16 +483,16 @@ export default {
     handleBatchDelete() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
         $notification.warning({
-          message: '没有选择任何数据'
+          message: this.$tl('p.noDataSelected')
         })
         return
       }
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemPrompt'),
         zIndex: 1009,
-        content: '真的要删除这些文件么？',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmDeleteFiles'),
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           return delFile({
             ids: this.tableSelections.join(','),
@@ -575,7 +580,7 @@ export default {
     handerConfirm() {
       if (!this.tableSelections.length) {
         $notification.warning({
-          message: '请选择要使用的文件'
+          message: this.$tl('c.pleaseSelectFile')
         })
         return
       }
@@ -584,7 +589,7 @@ export default {
       })
       if (!selectData.length) {
         $notification.warning({
-          message: '请选择要使用的文件'
+          message: this.$tl('c.pleaseSelectFile')
         })
         return
       }

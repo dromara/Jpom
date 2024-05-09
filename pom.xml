@@ -54,6 +54,8 @@
         <jna-version>5.14.0</jna-version>
         <mwiede.jsch-version>0.2.16</mwiede.jsch-version>
         <oshi.version>6.4.12</oshi.version>
+        <tomcat.version>9.0.86</tomcat.version>
+        <yaml.version>2.2</yaml.version>
     </properties>
     <dependencies>
         <dependency>
@@ -104,6 +106,30 @@
                 <groupId>com.github.mwiede</groupId>
                 <artifactId>jsch</artifactId>
                 <version>${mwiede.jsch-version}</version>
+            </dependency>
+
+            <dependency>
+                <artifactId>snakeyaml</artifactId>
+                <groupId>org.yaml</groupId>
+                <version>${yaml.version}</version>
+            </dependency>
+
+            <dependency>
+                <artifactId>tomcat-embed-core</artifactId>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <version>${tomcat.version}</version>
+            </dependency>
+
+            <dependency>
+                <artifactId>tomcat-embed-el</artifactId>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <version>${tomcat.version}</version>
+            </dependency>
+
+            <dependency>
+                <artifactId>tomcat-embed-websocket</artifactId>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <version>${tomcat.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
