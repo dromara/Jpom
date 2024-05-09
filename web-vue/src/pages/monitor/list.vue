@@ -354,7 +354,7 @@ export default {
   },
   methods: {
     $tl(key, ...args) {
-      return this.$t(`pages..monitor.list.${key}`, ...args)
+      return this.$t(`pages.monitor.list.${key}`, ...args)
     },
     // 加载数据
     loadData(pointerEvent) {

@@ -15,6 +15,7 @@ import dispatch from './pages/dispatch'
 import docker from './pages/docker'
 import fileManager from './pages/file-manager'
 import monitor from './pages/monitor'
+import layout from './pages/layout'
 export default {
   pages: {
     404: page404,
@@ -23,6 +24,7 @@ export default {
     dispatch,
     docker,
     fileManager,
-    monitor
+    monitor,
+    layout
   }
 }

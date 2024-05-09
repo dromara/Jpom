@@ -1,7 +1,7 @@
 <template>
   <div>
     <a-tabs v-model:activeKey="tabKey">
-      <a-tab-pane :key="1" tab="操作日志">
+      <a-tab-pane :key="1" :tab="$tl('p.operationLog')">
         <!-- 数据表格 -->
         <a-table
           size="middle"
@@ -36,7 +36,7 @@
                   }
                 "
                 allow-clear
-                placeholder="操作功能"
+                :placeholder="$tl('c.function')"
                 class="search-input-item"
               >
                 <a-select-option v-for="item in classFeature" :key="item.value">{{ item.title }}</a-select-option>
@@ -55,7 +55,7 @@
                   }
                 "
                 allow-clear
-                placeholder="操作方法"
+                :placeholder="$tl('c.method')"
                 class="search-input-item"
               >
                 <a-select-option v-for="item in methodFeature" :key="item.value">{{ item.title }}</a-select-option>
@@ -69,8 +69,10 @@
                   }
                 "
               />
-              <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-                <a-button type="primary" :loading="operateloading" @click="operaterloadData">搜索</a-button>
+              <a-tooltip :title="$tl('c.shortcut')">
+                <a-button type="primary" :loading="operateloading" @click="operaterloadData">{{
+                  $tl('c.search')
+                }}</a-button>
               </a-tooltip>
             </a-space>
           </template>
@@ -95,7 +97,7 @@
             <template v-else-if="column.dataIndex === 'optStatus'">
               <a-tooltip
                 placement="topLeft"
-                :title="`默认状态码为 200 表示执行成功,部分操作状态码可能为 0,状态码为 0 的操作大部分为没有操作结果或者异步执行`"
+                :title="`${$tl('p.defaultStatusCode')},${$tl('p.partialStatusCode')},${$tl('p.statusCode0')}`"
               >
                 <span>{{ text }}</span>
               </a-tooltip>
@@ -108,7 +110,7 @@
           </template>
         </a-table>
       </a-tab-pane>
-      <a-tab-pane :key="2" tab="登录日志">
+      <a-tab-pane :key="2" :tab="$tl('p.loginLog')">
         <a-table
           size="middle"
           :data-source="loginlist"
@@ -130,13 +132,13 @@
             <a-space>
               <a-input
                 v-model:value="loginlistQuery['%username%']"
-                placeholder="用户名"
+                :placeholder="$tl('p.username')"
                 class="search-input-item"
                 @press-enter="loginloadData"
               />
               <a-input
                 v-model:value="loginlistQuery['%ip%']"
-                placeholder="登录IP"
+                :placeholder="$tl('p.loginIp')"
                 class="search-input-item"
                 @press-enter="loginloadData"
               />
@@ -149,21 +151,21 @@
                   }
                 "
               />
-              <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-                <a-button type="primary" :loading="loginloading" @click="loginloadData">搜索</a-button>
+              <a-tooltip :title="$tl('c.shortcut')">
+                <a-button type="primary" :loading="loginloading" @click="loginloadData">{{ $tl('c.search') }}</a-button>
               </a-tooltip>
             </a-space>
           </template>
           <template #bodyCell="{ column, text }">
             <template v-if="column.dataIndex === 'success'">
-              <a-tooltip placement="topLeft" :title="text ? '成功' : '失败'">
-                <a-tag v-if="text" color="green">成功</a-tag>
-                <a-tag v-else color="pink">失败</a-tag>
+              <a-tooltip placement="topLeft" :title="text ? $tl('c.success') : $tl('c.failure')">
+                <a-tag v-if="text" color="green">{{ $tl('c.success') }}</a-tag>
+                <a-tag v-else color="pink">{{ $tl('c.failure') }}</a-tag>
               </a-tooltip>
             </template>
             <template v-else-if="column.dataIndex === 'useMfa'">
-              <a-tooltip placement="topLeft" :title="text ? '使用' : '未使用'">
-                <a-tag>{{ text ? '使用' : '未使用' }}</a-tag>
+              <a-tooltip placement="topLeft" :title="text ? $tl('c.usage') : $tl('c.unused')">
+                <a-tag>{{ text ? $tl('c.usage') : $tl('c.unused') }}</a-tag>
               </a-tooltip>
             </template>
 
@@ -174,8 +176,8 @@
             </template>
 
             <template v-else-if="column.dataIndex === 'operateCode'">
-              <a-tooltip placement="topLeft" :title="operateCode[text] || '未知'">
-                {{ operateCode[text] || '未知' }}
+              <a-tooltip placement="topLeft" :title="operateCode[text] || $tl('c.unknown')">
+                {{ operateCode[text] || $tl('c.unknown') }}
               </a-tooltip>
             </template>
           </template>
@@ -208,26 +210,26 @@ export default {
       classFeatureMap: {},
       operatecolumns: [
         {
-          title: '操作者',
+          title: this.$tl('p.operator'),
           dataIndex: 'username',
           ellipsis: true
         },
         { title: 'IP', dataIndex: 'ip', ellipsis: true, width: '130px' },
         {
-          title: '节点',
+          title: this.$tl('p.node'),
           dataIndex: 'nodeId',
           width: 120,
           ellipsis: true
         },
         {
-          title: '数据名称',
+          title: this.$tl('p.dataName'),
           dataIndex: 'dataName',
           /*width: 240,*/
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '工作空间名',
+          title: this.$tl('p.workspaceName'),
           dataIndex: 'workspaceName',
           /*width: 240,*/
           ellipsis: true,
@@ -235,24 +237,24 @@ export default {
         },
         // { title: "数据 ID", dataIndex: "dataId", /*width: 240,*/ ellipsis: true,},
         {
-          title: '操作功能',
+          title: this.$tl('c.function'),
           dataIndex: 'classFeature',
           /*width: 240,*/
           ellipsis: true
         },
         {
-          title: '操作方法',
+          title: this.$tl('c.method'),
           dataIndex: 'methodFeature',
           /*width: 240,*/
           ellipsis: true
         },
         {
-          title: '状态码',
+          title: this.$tl('p.statusCode'),
           dataIndex: 'optStatus',
           width: 90
         },
         {
-          title: '操作时间',
+          title: this.$tl('p.operationTime'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text, item }) => {
@@ -267,13 +269,13 @@ export default {
       loginlistQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       logincolumns: [
         {
-          title: '用户ID',
+          title: this.$tl('p.userId'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '用户名称',
+          title: this.$tl('p.userName'),
           dataIndex: 'username',
           ellipsis: true,
           tooltip: true
@@ -285,31 +287,31 @@ export default {
           tooltip: true
         },
         {
-          title: '浏览器',
+          title: this.$tl('p.browser'),
           dataIndex: 'userAgent',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '是否成功',
+          title: this.$tl('p.successFlag'),
           dataIndex: 'success',
           ellipsis: true,
           width: '100px'
         },
         {
-          title: '是否使用MFA',
+          title: this.$tl('p.mfaUsage'),
           dataIndex: 'useMfa',
           ellipsis: true,
           width: '130px'
         },
         {
-          title: '结果描述',
+          title: this.$tl('p.resultDescription'),
           dataIndex: 'operateCode',
           /*width: 240,*/ ellipsis: true
         },
 
         {
-          title: '登录时间',
+          title: this.$tl('p.loginTime'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text, item }) => {
@@ -347,6 +349,9 @@ export default {
     })
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.layout.userLog.${key}`, ...args)
+    },
     CHANGE_PAGE,
     // 加载数据
     operaterloadData(pointerEvent) {
