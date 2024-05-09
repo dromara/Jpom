@@ -467,34 +467,44 @@
       :footer="null"
       :mask-closable="false"
     >
-      <a-tabs>
-        <a-tab-pane key="1" tab="docker">
-          <a-list bordered :data-source="workspaceDockerData && workspaceDockerData.dockerList">
-            <template #renderItem="{ item }">
-              <a-list-item style="display: block">
-                <a-row>
-                  <a-col :span="10">Docker 名称：{{ item.name }}</a-col>
-                  <a-col :span="10">所属工作空间： {{ item.workspace && item.workspace.name }}</a-col>
-                  <a-col :span="4"> </a-col>
-                </a-row>
-              </a-list-item>
-            </template>
-          </a-list>
-        </a-tab-pane>
-        <a-tab-pane key="2" tab="集群">
-          <a-list bordered :data-source="workspaceDockerData && workspaceDockerData.swarmList">
-            <template #renderItem="{ item }">
-              <a-list-item style="display: block">
-                <a-row>
-                  <a-col :span="10">集群名称：{{ item.name }}</a-col>
-                  <a-col :span="10">所属工作空间： {{ item.workspace && item.workspace.name }}</a-col>
-                  <a-col :span="4"> </a-col>
-                </a-row>
-              </a-list-item>
-            </template>
-          </a-list>
-        </a-tab-pane>
-      </a-tabs>
+      <a-space direction="vertical" style="width: 100%">
+        <a-alert
+          message="已经分配到工作空间的 Docker 或者集群无非直接删除，需要到分配到的各个工作空间逐一删除后才能删除资产 Docker 或者集群"
+          type="info"
+          show-icon
+          v-if="
+            workspaceDockerData && (workspaceDockerData.dockerList?.length || workspaceDockerData.swarmList?.length)
+          "
+        />
+        <a-tabs>
+          <a-tab-pane key="1" tab="docker">
+            <a-list bordered :data-source="workspaceDockerData && workspaceDockerData.dockerList">
+              <template #renderItem="{ item }">
+                <a-list-item style="display: block">
+                  <a-row>
+                    <a-col :span="10">Docker 名称：{{ item.name }}</a-col>
+                    <a-col :span="10">所属工作空间： {{ item.workspace && item.workspace.name }}</a-col>
+                    <a-col :span="4"> </a-col>
+                  </a-row>
+                </a-list-item>
+              </template>
+            </a-list>
+          </a-tab-pane>
+          <a-tab-pane key="2" tab="集群">
+            <a-list bordered :data-source="workspaceDockerData && workspaceDockerData.swarmList">
+              <template #renderItem="{ item }">
+                <a-list-item style="display: block">
+                  <a-row>
+                    <a-col :span="10">集群名称：{{ item.name }}</a-col>
+                    <a-col :span="10">所属工作空间： {{ item.workspace && item.workspace.name }}</a-col>
+                    <a-col :span="4"> </a-col>
+                  </a-row>
+                </a-list-item>
+              </template>
+            </a-list>
+          </a-tab-pane>
+        </a-tabs>
+      </a-space>
     </a-modal>
     <!-- 选择证书文件 -->
     <a-drawer
