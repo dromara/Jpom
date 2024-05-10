@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="server-script-list"
-      empty-description="没有任何脚本"
+      :empty-description="$tl('p.noScript')"
       :data-source="list"
       size="middle"
       :columns="columns"
@@ -25,53 +25,53 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['id']"
-            placeholder="脚本ID"
+            :placeholder="$tl('p.scriptId')"
             allow-clear
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%name%']"
-            placeholder="名称"
+            :placeholder="$tl('c.name')"
             allow-clear
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%description%']"
-            placeholder="描述"
+            :placeholder="$tl('c.description')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%autoExecCron%']"
-            placeholder="定时执行"
+            :placeholder="$tl('c.scheduleExecution')"
             class="search-input-item"
             @press-enter="loadData"
           />
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
+          <a-tooltip :title="$tl('p.backToFirstPage')">
+            <a-button :loading="loading" type="primary" @click="loadData">{{ $tl('p.search') }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="createScript">新增</a-button>
+          <a-button type="primary" @click="createScript">{{ $tl('p.add') }}</a-button>
           <a-button
             v-if="mode === 'manage'"
             type="primary"
             :disabled="!tableSelections || !tableSelections.length"
             @click="syncToWorkspaceShow"
-            >工作空间同步</a-button
+            >{{ $tl('p.workspaceSync') }}</a-button
           >
         </a-space>
       </template>
       <template #tableHelp>
         <a-tooltip>
           <template #title>
-            <div>脚本模版是存储在服务端中的命令脚本用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
+            <div>{{ $tl('p.scriptTemplateDescription') }}</div>
 
             <div>
               <ul>
-                <li>执行时候默认不加载全部环境变量、需要脚本里面自行加载</li>
-                <li>命令文件将在 ${数据目录}/script/xxxx.sh、bat 执行</li>
-                <li>分发节点是指在编辑完脚本后自动将脚本内容同步节点的脚本,一般用户节点分发功能中的 DSL 模式</li>
+                <li>{{ $tl('p.executionEnvNote') }}</li>
+                <li>{{ $tl('p.commandFilePath') }}</li>
+                <li>{{ $tl('p.distributionNodeDescription') }}</li>
               </ul>
             </div>
           </template>
@@ -95,28 +95,32 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'workspaceId'">
-          <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
-          <a-tag v-else>工作空间</a-tag>
+          <a-tag v-if="text === 'GLOBAL'">{{ $tl('c.global') }}</a-tag>
+          <a-tag v-else>{{ $tl('p.workspace') }}</a-tag>
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <template v-if="mode === 'manage'">
-              <a-button size="small" type="primary" @click="handleExec(record)">执行</a-button>
-              <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-              <a-button size="small" type="primary" @click="handleLog(record)">日志</a-button>
+              <a-button size="small" type="primary" @click="handleExec(record)">{{ $tl('c.execute') }}</a-button>
+              <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('c.edit') }}</a-button>
+              <a-button size="small" type="primary" @click="handleLog(record)">{{ $tl('p.log') }}</a-button>
               <a-dropdown>
                 <a @click="(e) => e.preventDefault()">
-                  更多
+                  {{ $tl('p.more') }}
                   <DownOutlined />
                 </a>
                 <template #overlay>
                   <a-menu>
                     <a-menu-item>
-                      <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
+                      <a-button size="small" type="primary" @click="handleTrigger(record)">{{
+                        $tl('c.trigger')
+                      }}</a-button>
                     </a-menu-item>
 
                     <a-menu-item>
-                      <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
+                      <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
+                        $tl('p.delete')
+                      }}</a-button>
                     </a-menu-item>
                     <a-menu-item>
                       <a-button
@@ -125,7 +129,7 @@
                         danger
                         :disabled="!record.nodeIds"
                         @click="handleUnbind(record)"
-                        >解绑</a-button
+                        >{{ $tl('p.unbind') }}</a-button
                       >
                     </a-menu-item>
                   </a-menu>
@@ -133,7 +137,7 @@
               </a-dropdown>
             </template>
             <template v-else>
-              <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+              <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('c.edit') }}</a-button>
             </template>
           </a-space>
         </template>
@@ -144,7 +148,7 @@
       v-model:open="editScriptVisible"
       destroy-on-close
       :z-index="1009"
-      title="编辑 Script"
+      :title="$tl('p.editScript')"
       :mask-closable="false"
       width="80vw"
       :confirm-loading="confirmLoading"
@@ -154,10 +158,10 @@
         <a-form-item v-if="temp.id" label="ScriptId" name="id">
           <a-input v-model:value="temp.id" disabled read-only />
         </a-form-item>
-        <a-form-item label="Script 名称" name="name">
-          <a-input v-model:value="temp.name" :max-length="50" placeholder="名称" />
+        <a-form-item :label="$tl('p.scriptName')" name="name">
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$tl('c.name')" />
         </a-form-item>
-        <a-form-item label="Script 内容" name="context">
+        <a-form-item :label="$tl('p.scriptContent')" name="context">
           <a-form-item-rest>
             <code-editor v-model:content="temp.context" height="40vh" :options="{ mode: 'shell', tabSize: 2 }">
             </code-editor>
@@ -166,19 +170,19 @@
         <!-- <a-form-item label="默认参数" name="defArgs">
             <a-input v-model="temp.defArgs" placeholder="默认参数" />
           </a-form-item> -->
-        <a-form-item label="默认参数">
+        <a-form-item :label="$tl('p.defaultParam')">
           <a-space direction="vertical" style="width: 100%">
             <a-row v-for="(item, index) in commandParams" :key="item.key">
               <a-col :span="22">
                 <a-space direction="vertical" style="width: 100%">
                   <a-input
                     v-model:value="item.desc"
-                    :addon-before="`参数${index + 1}描述`"
-                    placeholder="参数描述,参数描述没有实际作用,仅是用于提示参数的含义" />
+                    :addon-before="$tl('p.parameterContent', { count: index + 1 })"
+                    :placeholder="$tl('p.content1')" />
                   <a-input
                     v-model:value="item.value"
-                    :addon-before="`参数${index + 1}值`"
-                    placeholder="参数值,新增默认参数后在手动执行脚本时需要填写参数值"
+                    :addon-before="$tl('p.parameterContent', { count: index + 1 })"
+                    :placeholder="$tl('p.content2')"
                 /></a-space>
               </a-col>
               <a-col :span="2">
@@ -192,43 +196,43 @@
             <a-divider style="margin: 5px 0" />
           </a-space>
 
-          <a-button type="primary" @click="() => commandParams.push({})">新增参数</a-button>
+          <a-button type="primary" @click="() => commandParams.push({})">{{ $tl('p.addParam') }}</a-button>
         </a-form-item>
-        <a-form-item label="定时执行" name="autoExecCron">
+        <a-form-item :label="$tl('c.scheduleExecution')" name="autoExecCron">
           <a-auto-complete
             v-model:value="temp.autoExecCron"
-            placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）"
+            :placeholder="$tl('p.cronExpression')"
             :options="CRON_DATA_SOURCE"
           >
             <template #option="item"> {{ item.title }} {{ item.value }} </template>
           </a-auto-complete>
         </a-form-item>
-        <a-form-item label="描述" name="description">
+        <a-form-item :label="$tl('c.description')" name="description">
           <a-textarea
             v-model:value="temp.description"
             :max-length="200"
             :rows="3"
             style="resize: none"
-            placeholder="详细描述"
+            :placeholder="$tl('p.detailedDescription')"
           />
         </a-form-item>
-        <a-form-item label="共享" name="global">
+        <a-form-item :label="$tl('c.share')" name="global">
           <a-radio-group v-model:value="temp.global">
-            <a-radio :value="true"> 全局</a-radio>
-            <a-radio :value="false"> 当前工作空间</a-radio>
+            <a-radio :value="true"> {{ $tl('c.global') }}</a-radio>
+            <a-radio :value="false"> {{ $tl('p.currentWorkspace') }}</a-radio>
           </a-radio-group>
         </a-form-item>
-        <a-form-item v-if="temp.prohibitSync" label="禁用分发节点">
-          <template #help>需要到原始工作空间中去控制节点分发</template>
+        <a-form-item v-if="temp.prohibitSync" :label="$tl('p.disableDistributionNode')">
+          <template #help>{{ $tl('p.controlNodeDistribution') }}</template>
           <a-tag v-for="(item, index) in temp.nodeList" :key="index"
-            >节点名称：{{ item.nodeName }} 工作空间：{{ item.workspaceName }}</a-tag
+            >{{ $tl('p.nodeName') }}{{ item.nodeName }} {{ $tl('p.selectedWorkspace') }}{{ item.workspaceName }}</a-tag
           >
         </a-form-item>
         <a-form-item v-else>
           <template #label>
             <a-tooltip>
-              分发节点
-              <template #title> 分发节点是指在编辑完脚本后自动将脚本内容同步节点的脚本中 </template>
+              {{ $tl('p.distributionNodeLabel') }}
+              <template #title> {{ $tl('p.content3') }} </template>
               <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
@@ -245,7 +249,7 @@
                 )
               }
             "
-            placeholder="请选择分发到的节点"
+            :placeholder="$tl('p.distributeToNode')"
             mode="multiple"
           >
             <a-select-option v-for="item in nodeList" :key="item.id" :value="item.id">
@@ -271,22 +275,25 @@
       v-model:open="syncToWorkspaceVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      title="同步到其他工作空间"
+      :title="$tl('p.syncToOtherWorkspaces')"
       :mask-closable="false"
       @ok="handleSyncToWorkspace"
     >
-      <a-alert message="温馨提示" type="warning" show-icon>
+      <a-alert :message="$tl('c.warmTips')" type="warning" show-icon>
         <template #description>
           <ul>
-            <li>同步机制采用<b>脚本名称</b>确定是同一个脚本</li>
-            <li>当目标工作空间不存在对应的 脚本 时候将自动创建一个新的 脚本</li>
-            <li>当目标工作空间已经存在 脚本 时候将自动同步 脚本内容、默认参数、定时执行、描述</li>
+            <li>
+              {{ $tl('p.syncMechanism') }}<b>{{ $tl('p.scriptName_1') }}</b
+              >{{ $tl('p.isSameScript') }}
+            </li>
+            <li>{{ $tl('p.createScriptIfNotExist') }}</li>
+            <li>{{ $tl('p.syncScriptContentAndInfo') }}</li>
           </ul>
         </template>
       </a-alert>
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
-        <a-form-item label="选择工作空间" name="workspaceId">
+        <a-form-item :label="$tl('p.selectWorkspace')" name="workspaceId">
           <a-select
             v-model:value="temp.workspaceId"
             show-search
@@ -300,7 +307,7 @@
                 )
               }
             "
-            placeholder="请选择工作空间"
+            :placeholder="$tl('c.selectWorkspace')"
           >
             <a-select-option v-for="item in workspaceList" :key="item.id" :disabled="getWorkspaceId() === item.id">{{
               item.name
@@ -313,7 +320,7 @@
     <a-modal
       v-model:open="triggerVisible"
       destroy-on-close
-      title="触发器"
+      :title="$tl('c.trigger')"
       width="50%"
       :footer="null"
       :mask-closable="false"
@@ -321,35 +328,30 @@
       <a-form ref="editTriggerForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
           <template #rightExtra>
-            <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
-              <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
+            <a-tooltip :title="$tl('p.resetTriggerToken')">
+              <a-button type="primary" size="small" @click="resetTrigger">{{ $tl('p.reset') }}</a-button>
             </a-tooltip>
           </template>
-          <a-tab-pane key="1" tab="执行">
+          <a-tab-pane key="1" :tab="$tl('c.execute')">
             <a-space direction="vertical" style="width: 100%">
-              <a-alert message="温馨提示" type="warning">
+              <a-alert :message="$tl('c.warmTips')" type="warning">
                 <template #description>
                   <ul>
-                    <li>单个触发器地址中：第一个随机字符串为脚本ID，第二个随机字符串为 token</li>
-                    <li>
-                      重置为重新生成触发地址,重置成功后之前的触发器地址将失效,触发器绑定到生成触发器到操作人上,如果将对应的账号删除触发器将失效
-                    </li>
-                    <li>批量触发参数 BODY json： [ { "id":"1", "token":"a" } ]</li>
-                    <li>
-                      单个触发器请求支持将参数解析为环境变量传入脚本执行，比如传入参数名为 abc=efg
-                      在脚本中引入则为：${trigger_abc}
-                    </li>
+                    <li>{{ $tl('p.triggerAddressInfo') }}</li>
+                    <li>{{ $tl('p.resetTriggerAddress') }}</li>
+                    <li>{{ $tl('p.batchTriggerParams') }}</li>
+                    <li>{{ $tl('p.triggerParamsAsEnv') }}</li>
                   </ul>
                 </template>
               </a-alert>
-              <a-alert type="info" :message="`单个触发器地址(点击可以复制)`">
+              <a-alert type="info" :message="`${$tl('p.singleTriggerAddress')}(${$tl('c.copyOnClick')})`">
                 <template #description>
                   <a-typography-paragraph :copyable="{ text: temp.triggerUrl }">
                     <a-tag>GET</a-tag> <span>{{ temp.triggerUrl }} </span>
                   </a-typography-paragraph>
                 </template>
               </a-alert>
-              <a-alert type="info" :message="`批量触发器地址(点击可以复制)`">
+              <a-alert type="info" :message="`${$tl('p.batchTriggerAddress')}(${$tl('c.copyOnClick')})`">
                 <template #description>
                   <a-typography-paragraph :copyable="{ text: temp.batchTriggerUrl }">
                     <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
@@ -364,7 +366,7 @@
     <!-- 脚本日志 -->
     <a-drawer
       destroy-on-close
-      title="脚本执行历史"
+      :title="$tl('p.scriptExecutionHistory')"
       width="70vw"
       :open="drawerLogVisible"
       @close="
@@ -397,9 +399,9 @@
               }
             "
           >
-            取消
+           {{$tl('c.cancel')}}
           </a-button>
-          <a-button type="primary" @click="handerConfirm"> 确定 </a-button>
+          <a-button type="primary" @click="handerConfirm"> {{$tl('c.confirm')}} </a-button>
         </a-space>
       </div>
     </div> -->
@@ -471,14 +473,14 @@ export default {
           tooltip: true
         },
         {
-          title: '名称',
+          title: this.$tl('c.name'),
           dataIndex: 'name',
           ellipsis: true,
           sorter: true,
           width: 150
         },
         {
-          title: '共享',
+          title: this.$tl('c.share'),
           dataIndex: 'workspaceId',
           sorter: true,
           ellipsis: true,
@@ -486,14 +488,14 @@ export default {
           width: '90px'
         },
         {
-          title: '描述',
+          title: this.$tl('c.description'),
           dataIndex: 'description',
           ellipsis: true,
           width: 100,
           tooltip: true
         },
         {
-          title: '定时执行',
+          title: this.$tl('c.scheduleExecution'),
           dataIndex: 'autoExecCron',
           ellipsis: true,
           sorter: true,
@@ -501,7 +503,7 @@ export default {
           tooltip: true
         },
         {
-          title: '修改时间',
+          title: this.$tl('p.modifyTime'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           width: '170px',
@@ -509,7 +511,7 @@ export default {
           customRender: ({ text }) => parseTime(text)
         },
         {
-          title: '创建时间',
+          title: this.$tl('p.createTime'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           width: '170px',
@@ -517,21 +519,21 @@ export default {
           customRender: ({ text }) => parseTime(text)
         },
         {
-          title: '创建人',
+          title: this.$tl('p.creator'),
           dataIndex: 'createUser',
           ellipsis: true,
           tooltip: true,
           width: '120px'
         },
         {
-          title: '修改人',
+          title: this.$tl('p.modifier'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           tooltip: true,
           width: '120px'
         },
         {
-          title: '最后执行人',
+          title: this.$tl('p.lastExecutor'),
           dataIndex: 'lastRunUser',
           ellipsis: true,
           width: '120px',
@@ -539,7 +541,7 @@ export default {
         },
         this.mode === 'manage'
           ? {
-              title: '操作',
+              title: this.$tl('c.operation'),
               dataIndex: 'operation',
               align: 'center',
 
@@ -547,7 +549,7 @@ export default {
               width: '240px'
             }
           : {
-              title: '操作',
+              title: this.$tl('c.operation'),
               dataIndex: 'operation',
               align: 'center',
 
@@ -556,8 +558,8 @@ export default {
             }
       ],
       rules: {
-        name: [{ required: true, message: '请输入脚本名称', trigger: 'blur' }],
-        context: [{ required: true, message: '请输入脚本内容', trigger: 'blur' }]
+        name: [{ required: true, message: this.$tl('p.inputScriptName'), trigger: 'blur' }],
+        context: [{ required: true, message: this.$tl('p.inputScriptContent'), trigger: 'blur' }]
       },
       tableSelections: [],
       syncToWorkspaceVisible: false,
@@ -611,6 +613,9 @@ export default {
     this.loadData()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.script.scriptList.${key}`, ...args)
+    },
     // 加载数据
     loadData(pointerEvent) {
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page
@@ -668,7 +673,7 @@ export default {
           for (let i = 0; i < this.commandParams.length; i++) {
             if (!this.commandParams[i].desc) {
               $notification.error({
-                message: '请填写第' + (i + 1) + '个参数的描述'
+                message: this.$tl('p.paramDescriptionPrefix') + (i + 1) + this.$tl('p.paramDescriptionSuffix')
               })
               return false
             }
@@ -701,11 +706,11 @@ export default {
     },
     handleDelete(record) {
       $confirm({
-        title: '系统提示',
-        content: '真的要删除脚本么？',
+        title: this.$tl('p.systemTip'),
+        content: this.$tl('p.confirmDeleteScript'),
         zIndex: 1009,
-        okText: '确认',
-        cancelText: '取消',
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           return deleteScript({
             id: record.id
@@ -723,7 +728,7 @@ export default {
     // 执行 Script
     handleExec(record) {
       this.temp = Object.assign(record)
-      this.drawerTitle = `控制台(${this.temp.name})`
+      this.drawerTitle = `${$tl('p.console')}(${this.temp.name})`
       this.drawerConsoleVisible = true
     },
     // 关闭 console
@@ -738,20 +743,20 @@ export default {
     // 解绑
     handleUnbind(record) {
       const html =
-        "<b style='font-size: 20px;'>真的要解绑脚本关联的节点么？</b>" +
+        "<b style='font-size: 20px;'>this.$tl('p.confirmUnbindNode')</b>" +
         "<ul style='font-size: 20px;color:red;font-weight: bold;'>" +
-        '<li>解绑不会真实请求节点删除脚本信息</b></li>' +
-        '<li>一般用于服务器无法连接且已经确定不再使用</li>' +
-        '<li>如果误操作会产生冗余数据！！！</li>' +
-        ' </ul>'
+        `<li>${this.$tl('p.unbindNodeNote')}</b></li>` +
+        `<li>${this.$tl('p.unbindNodeForUnreachableServer')}</li>` +
+        `<li>${this.$tl('p.redundantDataWarning')}</li>` +
+        '</ul>'
       $confirm({
-        title: '危险操作！！！',
+        title: this.$tl('p.dangerousOperationWarning'),
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
         okButtonProps: { type: 'primary', danger: true, size: 'small' },
         cancelButtonProps: { type: 'primary' },
-        okText: '确认',
-        cancelText: '取消',
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           return unbindScript({
             id: record.id
@@ -786,7 +791,7 @@ export default {
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
         $notification.warn({
-          message: '请选择工作空间'
+          message: this.$tl('c.selectWorkspace')
         })
         return false
       }
@@ -851,7 +856,7 @@ export default {
     handerConfirm() {
       if (!this.tableSelections.length) {
         $notification.warning({
-          message: '请选择要使用的脚本'
+          message: this.$tl('p.selectScript')
         })
         return
       }

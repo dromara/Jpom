@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="repository-list"
-      empty-description="没有任何仓库"
+      :empty-description="$tl('p.noWarehouse')"
       size="middle"
       :columns="columns"
       :data-source="list"
@@ -31,16 +31,21 @@
           <a-input
             v-model:value="listQuery['%name%']"
             class="search-input-item"
-            placeholder="仓库名称"
+            :placeholder="$tl('c.warehouseName')"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%gitUrl%']"
             class="search-input-item"
-            placeholder="仓库地址"
+            :placeholder="$tl('c.warehouseAddress')"
             @press-enter="loadData"
           />
-          <a-select v-model:value="listQuery.repoType" allow-clear placeholder="仓库类型" class="search-input-item">
+          <a-select
+            v-model:value="listQuery.repoType"
+            allow-clear
+            :placeholder="$tl('c.warehouseType')"
+            class="search-input-item"
+          >
             <a-select-option :value="'0'">GIT</a-select-option>
             <a-select-option :value="'1'">SVN</a-select-option>
           </a-select>
@@ -58,29 +63,35 @@
               }
             "
             allow-clear
-            placeholder="分组"
+            :placeholder="$tl('c.group')"
             class="search-input-item"
           >
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
           </a-select>
 
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          <a-tooltip :title="$tl('p.quickBack')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('c.search') }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">新增</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $tl('c.add') }}</a-button>
           <a-tooltip>
-            <template #title> 使用 Access Token 一次导入多个项目 </template>
-            <a-button type="primary" @click="handleAddGitee"><QuestionCircleOutlined />令牌导入</a-button>
+            <template #title> {{ $tl('p.importMultiple') }} </template>
+            <a-button type="primary" @click="handleAddGitee"
+              ><QuestionCircleOutlined />{{ $tl('p.tokenImport') }}</a-button
+            >
           </a-tooltip>
         </a-space>
       </template>
       <template #toolPrefix>
-        <a-button type="primary" size="small" @click="handlerExportData"><DownloadOutlined />导出</a-button>
+        <a-button type="primary" size="small" @click="handlerExportData"
+          ><DownloadOutlined />{{ $tl('p.export') }}</a-button
+        >
         <a-dropdown>
           <template #overlay>
             <a-menu>
               <a-menu-item key="1">
-                <a-button type="primary" size="small" @click="handlerImportTemplate()">下载导入模板</a-button>
+                <a-button type="primary" size="small" @click="handlerImportTemplate()">{{
+                  $tl('p.downloadTemplate')
+                }}</a-button>
               </a-menu-item>
             </a-menu>
           </template>
@@ -93,7 +104,9 @@
             :multiple="false"
             :before-upload="beforeUpload"
           >
-            <a-button type="primary" size="small"><UploadOutlined /> 导入 <DownOutlined /> </a-button>
+            <a-button type="primary" size="small"
+              ><UploadOutlined /> {{ $tl('p.importData') }} <DownOutlined />
+            </a-button>
           </a-upload>
         </a-dropdown>
       </template>
@@ -107,7 +120,7 @@
         <template v-else-if="column.dataIndex === 'repoType'">
           <span v-if="text === 0">GIT</span>
           <span v-else-if="text === 1">SVN</span>
-          <span v-else>未知</span>
+          <span v-else>{{ $tl('p.unknown') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'protocol'">
           <span v-if="text === 0">HTTP(S)</span>
@@ -116,18 +129,20 @@
           <span v-else>{{ record.gitUrl.indexOf('http') > -1 ? 'HTTP(S)' : 'SSH' }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'workspaceId'">
-          <a-tag v-if="text === 'GLOBAL'">全局</a-tag>
-          <a-tag v-else>工作空间</a-tag>
+          <a-tag v-if="text === 'GLOBAL'">{{ $tl('c.global') }}</a-tag>
+          <a-tag v-else>{{ $tl('p.workspace') }}</a-tag>
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
-            <a-button v-if="global" type="primary" size="small" @click="viewBuild(record)">关联</a-button>
-            <a-button type="primary" danger size="small" @click="handleDelete(record)">删除</a-button>
+            <a-button type="primary" size="small" @click="handleEdit(record)">{{ $tl('p.edit') }}</a-button>
+            <a-button v-if="global" type="primary" size="small" @click="viewBuild(record)">{{
+              $tl('p.associate')
+            }}</a-button>
+            <a-button type="primary" danger size="small" @click="handleDelete(record)">{{ $tl('p.delete') }}</a-button>
 
             <a-dropdown>
               <a @click="(e) => e.preventDefault()">
-                更多
+                {{ $tl('p.more') }}
                 <DownOutlined />
               </a>
               <template #overlay>
@@ -138,7 +153,7 @@
                       type="primary"
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
                       @click="sortItemHander(record, index, 'top')"
-                      >置顶</a-button
+                      >{{ $tl('p.top') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
@@ -147,7 +162,7 @@
                       type="primary"
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
                       @click="sortItemHander(record, index, 'up')"
-                      >上移</a-button
+                      >{{ $tl('p.up') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
@@ -157,7 +172,7 @@
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total"
                       @click="sortItemHander(record, index, 'down')"
                     >
-                      下移
+                      {{ $tl('p.down') }}
                     </a-button>
                   </a-menu-item>
                 </a-menu>
@@ -173,35 +188,45 @@
       :z-index="1009"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      title="编辑仓库"
+      :title="$tl('p.editWarehouse')"
       :mask-closable="false"
       @ok="handleEditOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-item label="仓库名称" name="name">
-          <a-input v-model:value="temp.name" :max-length="50" placeholder="仓库名称" />
+        <a-form-item :label="$tl('c.warehouseName')" name="name">
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$tl('c.warehouseName')" />
         </a-form-item>
-        <a-form-item label="分组" name="group">
+        <a-form-item :label="$tl('c.group')" name="group">
           <custom-select
             v-model:value="temp.group"
             :data="groupList"
-            input-placeholder="新增分组"
-            select-placeholder="选择分组名"
+            :input-placeholder="$tl('p.addGroup')"
+            :select-placeholder="$tl('p.selectGroupName')"
           >
           </custom-select>
         </a-form-item>
-        <a-form-item label="仓库地址" name="gitUrl">
+        <a-form-item :label="$tl('c.warehouseAddress')" name="gitUrl">
           <a-input-group compact>
             <a-form-item-rest>
-              <a-select v-model:value="temp.repoType" style="width: 20%" name="repoType" placeholder="仓库类型">
+              <a-select
+                v-model:value="temp.repoType"
+                style="width: 20%"
+                name="repoType"
+                :placeholder="$tl('c.warehouseType')"
+              >
                 <a-select-option :value="0">GIT</a-select-option>
                 <a-select-option :value="1">SVN</a-select-option>
               </a-select>
             </a-form-item-rest>
-            <a-input v-model:value="temp.gitUrl" style="width: 80%" :max-length="250" placeholder="仓库地址" />
+            <a-input
+              v-model:value="temp.gitUrl"
+              style="width: 80%"
+              :max-length="250"
+              :placeholder="$tl('c.warehouseAddress')"
+            />
           </a-input-group>
         </a-form-item>
-        <a-form-item label="协议" name="protocol">
+        <a-form-item :label="$tl('c.protocol')" name="protocol">
           <a-radio-group v-model:value="temp.protocol" name="protocol">
             <a-radio :value="0">HTTP(S)</a-radio>
             <a-radio :value="1">SSH</a-radio>
@@ -212,8 +237,10 @@
           <a-form-item name="userName">
             <template #label>
               <a-tooltip>
-                账号
-                <template #title> 账号支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
+                {{ $tl('c.account') }}
+                <template #title>
+                  {{ $tl('p.accountReference') }}<b>$ref.wEnv.xxxx</b> xxxx {{ $tl('c.variableName') }}</template
+                >
                 <QuestionCircleOutlined v-if="!temp.id" />
               </a-tooltip>
             </template>
@@ -222,7 +249,7 @@
               :input="temp.userName"
               :env-list="envVarList"
               type="text"
-              :placeholder="`登录用户`"
+              :placeholder="`${$tl('p.loginUser')}`"
               @change="
                 (v) => {
                   temp = { ...temp, userName: v }
@@ -234,8 +261,10 @@
           <a-form-item name="password">
             <template #label>
               <a-tooltip>
-                密码
-                <template #title> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
+                {{ $tl('c.password') }}
+                <template #title>
+                  {{ $tl('c.passwordReference') }}<b>$ref.wEnv.xxxx</b> xxxx {{ $tl('c.variableName') }}</template
+                >
                 <QuestionCircleOutlined v-if="!temp.id" />
               </a-tooltip>
             </template>
@@ -243,7 +272,7 @@
             <custom-input
               :input="temp.password"
               :env-list="envVarList"
-              :placeholder="`${!temp.id ? '登录密码' : '此处不填不会修改密码'}`"
+              :placeholder="`${!temp.id ? '${$tl('p.loginPassword')}' : '${$tl('p.passwordNote2')}'}`"
               @change="
                 (v) => {
                   temp = { ...temp, password: v }
@@ -252,22 +281,24 @@
             >
             </custom-input>
             <template #help>
-              <a-tooltip v-if="temp.id" title=" 密码字段和密钥字段在编辑的时候不会返回，如果需要重置或者清空就请点我">
-                <a-button style="margin: 5px" size="small" type="primary" danger @click="restHideField(temp)"
-                  >清除</a-button
-                >
+              <a-tooltip v-if="temp.id" title=" {{$tl('c.passwordNote')}}">
+                <a-button style="margin: 5px" size="small" type="primary" danger @click="restHideField(temp)">{{
+                  $tl('c.clear')
+                }}</a-button>
               </a-tooltip>
             </template>
           </a-form-item>
         </template>
-        <a-form-item v-if="temp.repoType === 1 && temp.protocol === 1" label="账号" name="userName">
-          <a-input v-model:value="temp.userName" placeholder="svn ssh 必填登录用户">
+        <a-form-item v-if="temp.repoType === 1 && temp.protocol === 1" :label="$tl('c.account')" name="userName">
+          <a-input v-model:value="temp.userName" :placeholder="$tl('p.svnUser')">
             <template #prefix>
               <UserOutlined />
             </template>
             <template #suffix>
-              <a-tooltip v-if="temp.id" title=" 密码字段和密钥字段在编辑的时候不会返回，如果需要重置或者清空就请点我">
-                <a-button size="small" type="primary" danger @click="restHideField(temp)">清除</a-button>
+              <a-tooltip v-if="temp.id" title=" {{$tl('c.passwordNote')}}">
+                <a-button size="small" type="primary" danger @click="restHideField(temp)">{{
+                  $tl('c.clear')
+                }}</a-button>
               </a-tooltip>
             </template>
           </a-input>
@@ -277,15 +308,17 @@
           <a-form-item name="password">
             <template #label>
               <a-tooltip>
-                密码
-                <template #title> 密码支持引用工作空间变量：<b>$ref.wEnv.xxxx</b> xxxx 为变量名称</template>
+                {{ $tl('c.password') }}
+                <template #title>
+                  {{ $tl('c.passwordReference') }}<b>$ref.wEnv.xxxx</b> xxxx {{ $tl('c.variableName') }}</template
+                >
                 <QuestionCircleOutlined v-if="!temp.id" />
               </a-tooltip>
             </template>
             <custom-input
               :input="temp.password"
               :env-list="envVarList"
-              :placeholder="`证书密码`"
+              :placeholder="`${$tl('p.certificatePassword')}`"
               @change="
                 (v) => {
                   temp = { ...temp, password: v }
@@ -294,56 +327,58 @@
             >
             </custom-input>
           </a-form-item>
-          <a-form-item label="私钥" name="rsaPrv">
+          <a-form-item :label="$tl('p.privateKey')" name="rsaPrv">
             <a-tooltip placement="topLeft">
               <template #title>
                 <div>
                   <p style="color: #faa">
-                    注意：目前对 SSH key 访问 git 仓库地址不支持使用 ssh-keygen -t rsa -C "邮箱" 方式生成的 SSH key
-                    <br />需要使用 ssh-keygen -m PEM -t rsa -b 4096 -C "邮箱" 方式生成公私钥<br />
+                    {{ $tl('p.sshKeyNote') }} "{{ $tl('c.email') }}" {{ $tl('p.sshKeyGeneration1') }} <br />{{
+                      $tl('p.sshKeyGeneration2')
+                    }}
+                    "{{ $tl('c.email') }}" {{ $tl('p.sshKeyGeneration3') }}<br />
                   </p>
-                  <p>如果在生成私钥的过程中有加密，那么需要把加密密码填充到上面的密码框中</p>
-                  <p>支持两种方式填充：</p>
+                  <p>{{ $tl('p.privateKeyNote') }}</p>
+                  <p>{{ $tl('p.privateKeyOptions') }}</p>
                   <p>
-                    1. 完整的私钥内容 如: <br />-----BEGIN RSA PRIVATE KEY-----
+                    1. {{ $tl('p.privateKeyContent') }}: <br />-----BEGIN RSA PRIVATE KEY-----
                     <br />
                     ..... <br />
                     -----END RSA PRIVATE KEY-----
                   </p>
                   <p>
-                    2. 私钥文件绝对路径（绝对路径前面新增 file: 前缀) 如:
-                    <br />file:/Users/Hotstrip/.ssh/id_rsa
+                    2. {{ $tl('p.privateKeyFilePath') }}: {{ $tl('p.privateKeyPrefix') }})
+                    {{ $tl('p.privateKeyExample') }}: <br />file:/Users/Hotstrip/.ssh/id_rsa
                   </p>
                 </div>
               </template>
               <a-textarea
                 v-model:value="temp.rsaPrv"
                 :auto-size="{ minRows: 3, maxRows: 3 }"
-                placeholder="私钥,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:"
+                :placeholder="$tl('p.privateKeyDefaultPath')"
               ></a-textarea>
             </a-tooltip>
           </a-form-item>
           <!-- 公钥暂时没用到 -->
-          <a-form-item v-if="false" label="公钥" name="rsaPub">
+          <a-form-item v-if="false" :label="$tl('p.publicKey')" name="rsaPub">
             <a-textarea
               v-model:value="temp.rsaPub"
               :auto-size="{ minRows: 3, maxRows: 3 }"
-              placeholder="公钥,不填将使用默认的 $HOME/.ssh 目录中的配置。支持配置文件目录:file:"
+              :placeholder="$tl('p.publicKeyDefaultPath')"
             ></a-textarea>
           </a-form-item>
         </template>
-        <a-form-item v-if="workspaceId !== 'GLOBAL'" label="共享" name="global">
+        <a-form-item v-if="workspaceId !== 'GLOBAL'" :label="$tl('c.share')" name="global">
           <a-radio-group v-model:value="temp.global">
-            <a-radio :value="true"> 全局</a-radio>
-            <a-radio :value="false"> 当前工作空间</a-radio>
+            <a-radio :value="true"> {{ $tl('c.global') }}</a-radio>
+            <a-radio :value="false"> {{ $tl('p.currentWorkspace') }}</a-radio>
           </a-radio-group>
         </a-form-item>
 
-        <a-form-item label="超时时间(s)" name="timeout">
+        <a-form-item :label="$tl('p.timeout')" name="timeout">
           <a-input-number
             v-model:value="temp.timeout"
             :min="0"
-            placeholder="拉取仓库超时时间,单位秒"
+            :placeholder="$tl('p.repoCloneTimeout')"
             style="width: 100%"
           />
         </a-form-item>
@@ -353,7 +388,7 @@
       v-model:open="giteeImportVisible"
       :z-index="1009"
       destroy-on-close
-      title="通过私人令牌导入仓库"
+      :title="$tl('p.importRepoWithToken')"
       width="80%"
       :footer="null"
       :mask-closable="false"
@@ -367,11 +402,13 @@
       >
         <a-form-item
           name="token"
-          label="私人令牌"
-          help="使用私人令牌，可以在你不输入账号密码的情况下对你账号内的仓库进行管理，你可以在创建令牌时指定令牌所拥有的权限。"
+          :label="$tl('p.personalToken')"
+          help="使用{{$tl('p.personalToken')}}，可以在你不输入账号密码的情况下对你账号内的仓库进行管理，你可以在创建令牌时指定令牌所拥有的权限。"
         >
           <a-form-item-rest>
-            <a-tooltip :title="`${giteeImportForm.type} 的令牌${importTypePlaceholder[giteeImportForm.type]}`">
+            <a-tooltip
+              :title="`${giteeImportForm.type} ${$tl('p.tokenSuffix')}${importTypePlaceholder[giteeImportForm.type]}`"
+            >
               <a-input-group compact>
                 <a-select v-model:value="giteeImportForm.type" style="width: 10%" @change="importChange">
                   <a-select-option v-for="item in Object.keys(providerData)" :key="item" :value="item">
@@ -391,16 +428,16 @@
             </a-tooltip>
           </a-form-item-rest>
         </a-form-item>
-        <a-form-item name="address" label="地址">
-          <a-input v-model:value="giteeImportForm.address" placeholder="请填写平台地址" />
+        <a-form-item name="address" :label="$tl('p.address')">
+          <a-input v-model:value="giteeImportForm.address" :placeholder="$tl('p.platformAddress')" />
         </a-form-item>
         <a-form-item
           v-if="providerData[giteeImportForm.type].query"
           name="condition"
-          label="搜索"
-          help="输入仓库名称或者仓库路径进行搜索"
+          :label="$tl('c.search')"
+          help="输入仓库名称或者仓库路径进行{{$tl('c.search')}}"
         >
-          <a-input v-model:value="giteeImportForm.condition" placeholder="输入仓库名称或者仓库路径进行搜索" />
+          <a-input v-model:value="giteeImportForm.condition" :placeholder="$tl('c.searchInput')" />
         </a-form-item>
       </a-form>
       <a-table
@@ -440,7 +477,7 @@
 
           <template v-else-if="column.dataIndex === 'operation'">
             <a-button type="primary" size="small" :disabled="record.exists" @click="handleGiteeRepoAdd(record)">{{
-              record.exists ? '已存在' : '新增'
+              record.exists ? $tl('p.alreadyExists') : $tl('c.add')
             }}</a-button>
           </template>
         </template>
@@ -480,7 +517,7 @@
       v-model:open="viewBuildVisible"
       destroy-on-close
       width="80vw"
-      title="当前工作空间关联构建"
+      :title="$tl('p.relatedBuild')"
       :mask-closable="false"
       :footer="null"
     >
@@ -492,19 +529,7 @@
 
 <script>
 import CustomInput from '@/components/customInput'
-import {
-  providerInfo,
-  authorizeRepos,
-  deleteRepository,
-  editRepository,
-  getRepositoryList,
-  restHideField,
-  sortItem,
-  exportData,
-  importTemplate,
-  importData,
-  listRepositoryGroup
-} from '@/api/repository'
+import { providerInfo, authorizeRepos, deleteRepository, editRepository, getRepositoryList, restHideField, sortItem, exportData, importTemplate, importData, listRepositoryGroup } from '@/api/repository'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 import { getWorkspaceEnvAll } from '@/api/workspace'
 import CustomSelect from '@/components/customSelect'
@@ -557,7 +582,7 @@ export default {
 
       columns: [
         {
-          title: '仓库名称',
+          title: this.$tl('c.warehouseName'),
           dataIndex: 'name',
           width: 200,
           sorter: true,
@@ -565,14 +590,14 @@ export default {
           tooltip: true
         },
         {
-          title: '分组名',
+          title: this.$tl('p.groupName'),
           dataIndex: 'group',
           ellipsis: true,
           width: '100px',
           tooltip: true
         },
         {
-          title: '仓库地址',
+          title: this.$tl('c.warehouseAddress'),
           dataIndex: 'gitUrl',
           width: 300,
           sorter: true,
@@ -580,62 +605,62 @@ export default {
           tooltip: true
         },
         {
-          title: '仓库类型',
+          title: this.$tl('c.warehouseType'),
           dataIndex: 'repoType',
           width: 100,
           sorter: true,
           ellipsis: true
         },
         {
-          title: '协议',
+          title: this.$tl('c.protocol'),
           dataIndex: 'protocol',
           width: 100,
           sorter: true,
           ellipsis: true
         },
         {
-          title: '共享',
+          title: this.$tl('c.share'),
           dataIndex: 'workspaceId',
           ellipsis: true,
 
           width: '90px'
         },
         {
-          title: '创建人',
+          title: this.$tl('p.creator'),
           dataIndex: 'createUser',
           ellipsis: true,
           tooltip: true,
           width: '120px'
         },
         {
-          title: '修改人',
+          title: this.$tl('p.modifier'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           tooltip: true,
           width: '120px'
         },
         {
-          title: '创建时间',
+          title: this.$tl('p.createTime'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
-          title: '修改时间',
+          title: this.$tl('p.updateTime'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
-          title: '排序值',
+          title: this.$tl('p.sortValue'),
           dataIndex: 'sortValue',
           sorter: true,
           width: '80px'
         },
         {
-          title: '操作',
+          title: this.$tl('c.operation'),
           dataIndex: 'operation',
           fixed: 'right',
           align: 'center',
@@ -644,12 +669,12 @@ export default {
       ],
       reposColumns: [
         {
-          title: '仓库名称',
+          title: this.$tl('c.warehouseName'),
           dataIndex: 'name',
           ellipsis: true
         },
         {
-          title: '仓库路径',
+          title: this.$tl('p.repoPath'),
           dataIndex: 'full_name',
           ellipsis: true
         },
@@ -660,19 +685,19 @@ export default {
         },
 
         {
-          title: '描述',
+          title: this.$tl('p.description'),
           dataIndex: 'description',
 
           ellipsis: true
         },
         {
-          title: '私有',
+          title: this.$tl('p.isPrivate'),
           dataIndex: 'private',
           width: 80,
           ellipsis: true
         },
         {
-          title: '操作',
+          title: this.$tl('c.operation'),
           dataIndex: 'operation',
           width: 100,
 
@@ -685,21 +710,21 @@ export default {
         address: 'https://gitee.com'
       }),
       giteeImportFormRules: {
-        token: [{ required: true, message: '请输入私人令牌', trigger: 'blur' }]
+        token: [{ required: true, message: this.$tl('c.privateTokenInput'), trigger: 'blur' }]
         // address: [{ required: true, message: "请填写平台地址", trigger: "blur" }],
       },
       rules: {
-        name: [{ required: true, message: '请填写仓库名称', trigger: 'blur' }],
-        gitUrl: [{ required: true, message: '请填写仓库地址', trigger: 'blur' }]
+        name: [{ required: true, message: this.$tl('p.repoName'), trigger: 'blur' }],
+        gitUrl: [{ required: true, message: this.$tl('p.repoAddress'), trigger: 'blur' }]
       },
       importTypePlaceholder: {
-        gitee: '在 设置-->安全设置-->私人令牌 中获取',
-        github: '在 Settings-->Developer settings-->Personal access tokens 中获取',
-        gitlab_v3: '在 preferences-->Access Tokens 中获取',
-        gitlab: '在 preferences-->Access Tokens 中获取',
-        gitea: '在 设置 --> 应用 --> 生成令牌',
-        gogs: '在 设置 --> 应用 --> 生成令牌',
-        other: '请输入私人令牌'
+        gitee: this.$tl('p.tokenFromGitlab'),
+        github: this.$tl('p.tokenFromGithub'),
+        gitlab_v3: this.$tl('c.tokenAcquire1'),
+        gitlab: this.$tl('c.tokenAcquire1'),
+        gitea: this.$tl('c.tokenAcquire2'),
+        gogs: this.$tl('c.tokenAcquire2'),
+        other: this.$tl('c.privateTokenInput')
       },
       tableSelections: [],
       envVarList: [],
@@ -747,6 +772,9 @@ export default {
     }
   },
   methods: {
+      $tl(key, ...args) {
+        return this.$t(`pages.repository.repositoryList.${key}`, ...args)
+      },
     CHANGE_PAGE,
     // 分组数据
     loadGroupList() {
@@ -907,10 +935,10 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: '系统提示',
-        content: '真的要删除仓库信息么？',
-        okText: '确认',
-        cancelText: '取消',
+        title: this.$tl('c.systemPrompt'),
+        content: this.$tl('p.confirmDeleteRepo'),
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         zIndex: 1009,
         onOk: () => {
           return deleteRepository({
@@ -930,10 +958,10 @@ export default {
     // 清除隐藏字段
     restHideField(record) {
       $confirm({
-        title: '系统提示',
-        content: '真的要清除仓库隐藏字段信息么？（密码，私钥）',
-        okText: '确认',
-        cancelText: '取消',
+        title: this.$tl('c.systemPrompt'),
+        content: this.$tl('p.confirmClearHiddenFields'),
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         zIndex: 1009,
         onOk: () => {
           return restHideField(record.id).then((res) => {
@@ -951,21 +979,21 @@ export default {
     // 排序
     sortItemHander(record, index, method) {
       const msgData = {
-        top: '确定要将此数据置顶吗？',
-        up: '确定要将此数上移吗？',
-        down: '确定要将此数据下移吗？下移操作可能因为列表后续数据没有排序值操作无效！'
+        top: this.$tl('p.confirmPinToTop'),
+        up: this.$tl('p.confirmMoveToUp'),
+        down: this.$tl('p.confirmMoveToDown')
       }
-      let msg = msgData[method] || '确定要操作吗？'
+      let msg = msgData[method] || this.$tl('p.confirmOperation')
       if (!record.sortValue) {
-        msg += ' 当前数据为默认状态,操后上移或者下移可能不会达到预期排序,还需要对相关数据都操作后才能达到预期排序'
+        msg += ' this.$tl('p.isDefault'),this.$tl('p.moveNotice'),this.$tl('p.moveAdvice')'
       }
       // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
       const compareId = this.list[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemPrompt'),
         content: msg,
-        okText: '确认',
-        cancelText: '取消',
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         zIndex: 1009,
         onOk: () => {
           return sortItem({
@@ -989,7 +1017,7 @@ export default {
     handerConfirm() {
       if (!this.tableSelections.length) {
         $notification.warning({
-          message: '请选择要使用的仓库'
+          message: this.$tl('p.selectRepo')
         })
         return
       }

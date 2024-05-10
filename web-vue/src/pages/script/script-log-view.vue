@@ -2,7 +2,7 @@
   <div>
     <log-view
       :ref="`logView`"
-      title-name="脚本日志"
+      :title-name="$tl('p.scriptLog')"
       :visible="visible"
       @close="
         () => {
@@ -47,6 +47,9 @@ export default {
     this.init()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.script.scriptLogView.${key}`, ...args)
+    },
     init() {
       this.loadData()
       this.logTimer = setInterval(() => {

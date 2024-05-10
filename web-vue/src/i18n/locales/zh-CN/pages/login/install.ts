@@ -1,0 +1,40 @@
+export default {
+  c: {
+    twoFactorAuthApp: '两步验证应用'
+  },
+  p: {
+    initSystemAccount: '初始化系统账户',
+    initSystem: '初始化系统',
+    setSuperAdminAccount: '设置一个超级管理员账号',
+    enableTwoFactorAuth: '启用两步验证',
+    secureAccountWithTwoFactor: '开启两步验证使账号更安全',
+    operationInstructions: '操作说明',
+    createAccountForFutureLogin: '您需要创建一个账户用以后续登录管理系统,请牢记超级管理员账号密码',
+    avoidCommonUsernames: '不建议使用常用名称如',
+    avoidNamesLike: '、root、manager',
+    preventAccountLock: '等常用用户名，避免被其他用户有意或者无意操作造成登录失败次数过多从而超级管理员账号被异常锁定',
+    inputAccountName: '请输入账户名',
+    accountName: '账户名称',
+    inputPassword: '请输入密码',
+    passwordRules: '密码必须包含数字，字母，字符，且大于6位',
+    passwordFormat: '密码（6-18位数字、字母、符号组合）',
+    createAccount: '创建账号',
+    secureWithTwoFactor: '为了考虑系统安全我们强烈建议超级管理员开启两步验证来确保账号的安全性',
+    saveQRCode: '绑定成功后将不再显示,强烈建议保存此二维码或者下面的 MFA key',
+    bindWithApp: '请使用应用扫码绑定令牌,然后输入验证码确认绑定才生效',
+    qrCode: '二维码',
+    verificationCode: '验证码',
+    inputTwoFactorCode: '请输入两步验证码',
+    sixDigitCode: '验证码 6 为纯数字',
+    twoFactorCode: '两步验证码',
+    confirmBinding: '确认绑定',
+    ignoreBinding: '忽略',
+    cannotInit: '不能初始化',
+    systemAlreadyInitialized: '当前系统已经初始化过啦,不能重复初始化',
+    goBackToHome: '回到首页',
+    systemPrompt: '系统提示',
+    confirmIgnoreTwoFactor: '确定要忽略绑定两步验证吗？强烈建议超级管理员开启两步验证来保证账号安全性',
+    confirmAction: '确认',
+    cancelAction: '取消'
+  }
+}
