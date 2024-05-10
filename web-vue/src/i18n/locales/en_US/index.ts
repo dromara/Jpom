@@ -18,6 +18,7 @@ import monitor from './pages/monitor'
 import layout from './pages/layout'
 import login from './pages/login'
 import repository from './pages/repository'
+import script from './pages/script'
 export default {
   pages: {
     404: page404,
@@ -29,6 +30,7 @@ export default {
     monitor,
     layout,
     login,
-    repository
+    repository,
+    script
   }
 }
