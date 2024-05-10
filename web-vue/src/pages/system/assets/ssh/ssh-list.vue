@@ -444,24 +444,32 @@
           :footer="null"
           :mask-closable="false"
         >
-          <a-list bordered :data-source="workspaceSshList">
-            <template #renderItem="{ item }">
-              <a-list-item style="display: block">
-                <a-row>
-                  <a-col :span="10">SSH名称：{{ item.name }}</a-col>
-                  <a-col :span="10">所属工作空间： {{ item.workspace && item.workspace.name }}</a-col>
-                  <a-col :span="4">
-                    <a-button v-if="item.workspace" size="small" type="primary" @click="configWorkspaceSsh(item)"
-                      >配置
-                    </a-button>
-                    <a-button v-else size="small" type="primary" danger @click="handleDeleteWorkspaceItem(item)"
-                      >删除
-                    </a-button>
-                  </a-col>
-                </a-row>
-              </a-list-item>
-            </template>
-          </a-list>
+          <a-space direction="vertical" style="width: 100%">
+            <a-alert
+              message="已经分配到工作空间的 SSH 无非直接删除，需要到分配到的各个工作空间逐一删除后才能删除资产 SSH"
+              type="info"
+              show-icon
+              v-if="workspaceSshList && workspaceSshList.length"
+            />
+            <a-list bordered :data-source="workspaceSshList">
+              <template #renderItem="{ item }">
+                <a-list-item style="display: block">
+                  <a-row>
+                    <a-col :span="10">SSH名称：{{ item.name }}</a-col>
+                    <a-col :span="10">所属工作空间： {{ item.workspace && item.workspace.name }}</a-col>
+                    <a-col :span="4">
+                      <a-button v-if="item.workspace" size="small" type="primary" @click="configWorkspaceSsh(item)"
+                        >配置
+                      </a-button>
+                      <a-button v-else size="small" type="primary" danger @click="handleDeleteWorkspaceItem(item)"
+                        >删除
+                      </a-button>
+                    </a-col>
+                  </a-row>
+                </a-list-item>
+              </template>
+            </a-list>
+          </a-space>
         </a-modal>
         <a-modal
           v-model:open="configWorkspaceSshVisible"

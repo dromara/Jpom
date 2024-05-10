@@ -469,20 +469,28 @@
       :footer="null"
       :mask-closable="false"
     >
-      <a-list bordered :data-source="nodeList">
-        <template #renderItem="{ item }">
-          <a-list-item style="display: block">
-            <a-row>
-              <a-col :span="10">节点名称：{{ item.name }}</a-col>
-              <a-col :span="10">所属工作空间： {{ item.workspace && item.workspace.name }}</a-col>
-              <a-col :span="4">
-                <a-button type="link" @click="toNode(item.id, item.name, item.workspace && item.workspace.id)">
-                  <LoginOutlined /> </a-button
-              ></a-col>
-            </a-row>
-          </a-list-item>
-        </template>
-      </a-list>
+      <a-space direction="vertical" style="width: 100%">
+        <a-alert
+          message="已经分配到工作空间的机器无非直接删除，需要到分配到的各个工作空间逐一删除后才能删除资产机器"
+          type="info"
+          show-icon
+          v-if="nodeList && nodeList.length"
+        />
+        <a-list bordered :data-source="nodeList">
+          <template #renderItem="{ item }">
+            <a-list-item style="display: block">
+              <a-row>
+                <a-col :span="10">节点名称：{{ item.name }}</a-col>
+                <a-col :span="10">所属工作空间： {{ item.workspace && item.workspace.name }}</a-col>
+                <a-col :span="4">
+                  <a-button type="link" @click="toNode(item.id, item.name, item.workspace && item.workspace.id)">
+                    <LoginOutlined /> </a-button
+                ></a-col>
+              </a-row>
+            </a-list-item>
+          </template>
+        </a-list>
+      </a-space>
     </a-modal>
     <!-- 分发节点授权 -->
     <a-modal

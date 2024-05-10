@@ -113,6 +113,7 @@ public class ProjectFileBackupService {
             return null;
         }
         String backupId = DateTime.now().toString(DatePattern.PURE_DATETIME_MS_FORMAT);
+        log.debug("开始准备备份项目文件：{} {}", projectInfoModel.getId(), backupId);
         File projectFileBackup = this.pathProjectBackup(infoModel, backupId);
         Assert.state(!FileUtil.exist(projectFileBackup), "备份目录冲突：" + projectFileBackup.getName());
         FileUtil.copyContent(file, projectFileBackup, true);
@@ -180,6 +181,7 @@ public class ProjectFileBackupService {
             // 备份ID 不存在
             return;
         }
+        log.debug("开始检查备份项目文件：{} {}", projectInfoModel.getId(), backupId);
         NodeProjectInfoModel infoModel = projectInfoService.resolveModel(projectInfoModel);
         File projectPath = projectInfoService.resolveLibFile(infoModel);
         DslYmlDto dslYmlDto = infoModel.dslConfig();
