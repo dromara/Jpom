@@ -17,6 +17,7 @@ import fileManager from './pages/file-manager'
 import monitor from './pages/monitor'
 import layout from './pages/layout'
 import login from './pages/login'
+import repository from './pages/repository'
 export default {
   pages: {
     404: page404,
@@ -27,6 +28,7 @@ export default {
     fileManager,
     monitor,
     layout,
-    login
+    login,
+    repository
   }
 }
