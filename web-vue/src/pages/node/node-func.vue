@@ -26,9 +26,9 @@
               margin: '0'
             }"
           >
-            <a-tab-pane v-if="tabs.includes('project')" key="project" tab="项目管理"></a-tab-pane>
-            <a-tab-pane v-if="tabs.includes('scripct')" key="scripct" tab="脚本管理"></a-tab-pane>
-            <a-tab-pane v-if="tabs.includes('scripct-log')" key="scripct-log" tab="脚本日志"></a-tab-pane>
+            <a-tab-pane v-if="tabs.includes('project')" key="project" :tab="$tl('p.projectManagement')"></a-tab-pane>
+            <a-tab-pane v-if="tabs.includes('scripct')" key="scripct" :tab="$tl('p.scriptManagement')"></a-tab-pane>
+            <a-tab-pane v-if="tabs.includes('scripct-log')" key="scripct-log" :tab="$tl('p.scriptLog')"></a-tab-pane>
           </a-tabs>
         </div>
       </a-space>
@@ -80,6 +80,11 @@ export default {
   created() {
     //
     this.current = this.tabs[0]
+  },
+  methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.node.nodeFunc.${key}`, ...args)
+    }
   }
 }
 </script>

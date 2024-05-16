@@ -9,14 +9,16 @@
           :show-tool="true"
         >
           <template #tool_before>
-            <a-alert v-if="temp.file" show-icon :message="`配置文件路径:${temp.file}`" />
+            <a-alert v-if="temp.file" show-icon :message="`${$tl('p.path')}:${temp.file}`" />
           </template>
         </code-editor>
       </a-form-item>
       <a-form-item :wrapper-col="{ span: 14, offset: 2 }">
         <a-space>
-          <a-button type="primary" :disabled="submitAble" @click="onSubmit(false)">保存</a-button>
-          <a-button type="primary" danger :disabled="submitAble" @click="onSubmit(true)">保存并重启</a-button>
+          <a-button type="primary" :disabled="submitAble" @click="onSubmit(false)">{{ $tl('p.save') }}</a-button>
+          <a-button type="primary" danger :disabled="submitAble" @click="onSubmit(true)">{{
+            $tl('p.saveAndRestart')
+          }}</a-button>
         </a-space>
       </a-form-item>
     </a-form>
@@ -53,6 +55,9 @@ export default {
     this.loadData()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.node.nodeLayout.system.configFile.${key}`, ...args)
+    },
     // load data
     loadData() {
       getConfigData({ machineId: this.machineId }).then((res) => {
@@ -87,7 +92,7 @@ export default {
       this.checkCount = 0
       this.globalLoading({
         spinning: true,
-        tip: (msg || '重启中，请稍候...') + ',请耐心等待暂时不用刷新页面,重启成功后会自动刷新'
+        tip: (msg || this.$tl('p.restarting')) + `,${this.$tl('p.waitForRestart')},${this.$tl('p.autoRefresh')}`
       })
       setTimeout(() => {
         //
@@ -98,7 +103,7 @@ export default {
                 clearInterval(this.timer)
                 this.globalLoading(false)
                 $notification.success({
-                  message: '重启成功'
+                  message: this.$tl('p.restartSuccess')
                 })
 
                 setTimeout(() => {
@@ -107,7 +112,7 @@ export default {
               } else {
                 if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
                   $notification.warning({
-                    message: '未重启成功：' + (res.msg || '')
+                    message: this.$tl('p.restartFailed') + (res.msg || '')
                   })
                   this.globalLoading(false)
                   clearInterval(this.timer)
@@ -119,7 +124,7 @@ export default {
               if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
                 this.globalLoading(false)
                 $notification.error({
-                  message: '重启超时,请去服务器查看控制台日志排查问题'
+                  message: this.$tl('p.restartTimeout')
                 })
                 clearInterval(this.timer)
               }

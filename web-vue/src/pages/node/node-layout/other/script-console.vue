@@ -8,12 +8,12 @@
       <log-view1 :ref="`logView`" height="calc(100vh - 140px)">
         <template #before>
           <a-space>
-            <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 0" type="primary" @click="start"
-              >执行</a-button
-            >
-            <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 1" type="primary" @click="stop"
-              >停止</a-button
-            >
+            <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 0" type="primary" @click="start">{{
+              $tl('p.execute')
+            }}</a-button>
+            <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 1" type="primary" @click="stop">{{
+              $tl('p.stop')
+            }}</a-button>
           </a-space>
         </template>
       </log-view1>
@@ -24,22 +24,19 @@
       v-model:open="editArgs"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      title="新增运行参数"
+      :title="$tl('p.addParameter')"
       :mask-closable="false"
       @ok="startExecution"
     >
       <a-form ref="ruleForm" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-item
-          label="命令参数"
-          :help="`${commandParams.length ? '所有参数将拼接成字符串以空格分隔形式执行脚本,需要注意参数顺序和未填写值的参数将自动忽略' : ''}`"
-        >
+        <a-form-item :label="$tl('p.commandArgs')" :help="`${commandParams.length ? $tl('p.runScript') : ''}`">
           <a-space direction="vertical" style="width: 100%">
             <a-row v-for="(item, index) in commandParams" :key="item.key">
               <a-col :span="22">
                 <a-input
                   v-model:value="item.value"
-                  :addon-before="`参数${index + 1}值`"
-                  :placeholder="`参数值 ${item.desc ? ',' + item.desc : ''}`"
+                  :addon-before="`${$tl('p.parameters')}${index + 1}${$tl('p.value')}`"
+                  :placeholder="`${$tl('p.parameters')}${$tl('p.value')} ${item.desc ? ',' + item.desc : ''}`"
                 >
                   <template #suffix>
                     <a-tooltip v-if="item.desc" :title="item.desc">
@@ -57,7 +54,9 @@
                 </a-row>
               </a-col>
             </a-row>
-            <a-button type="primary" size="small" @click="() => commandParams.push({})">新增参数</a-button>
+            <a-button type="primary" size="small" @click="() => commandParams.push({})">{{
+              $tl('p.newParameter')
+            }}</a-button>
           </a-space>
         </a-form-item>
       </a-form>
@@ -131,6 +130,9 @@ export default {
     this.close()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.node.nodeLayout.other.scriptConsole.${key}`, ...args)
+    },
     close() {
       this.socket?.close()
       clearInterval(this.heart)
@@ -153,7 +155,7 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: 'web socket 错误,请检查是否开启 ws 代理'
+          message: `web socket ${this.$tl('p.error')},${this.$tl('p.checkWsProxy')}`
         })
         clearInterval(this.heart)
         this.btnLoading = true
@@ -163,7 +165,7 @@ export default {
         console.error(err)
         clearInterval(this.heart)
         this.btnLoading = true
-        $message.warning('会话已经关闭[node-script-consloe]')
+        $message.warning(this.$tl('p.sessionClosed'))
       }
       this.socket.onmessage = (msg) => {
         if (msg.data.indexOf('JPOM_MSG') > -1 && msg.data.indexOf('op') > -1) {
