@@ -15,7 +15,9 @@
                 <template v-if="sshData.host">({{ sshData.host }})</template>
               </div>
 
-              <a-button size="small" type="primary" :disabled="!sshData.fileDirs" @click="handleFile()">文件</a-button>
+              <a-button size="small" type="primary" :disabled="!sshData.fileDirs" @click="handleFile()">{{
+                $tl('p.fileType')
+              }}</a-button>
             </a-space>
           </template>
           <template v-else>loading</template>
@@ -25,10 +27,10 @@
         </template>
         <terminal1 v-if="sshData" :ssh-id="sshData.id" />
         <template v-else>
-          <a-result status="404" title="不能操作" sub-title="没有对应的SSH">
+          <a-result status="404" :title="$tl('p.operationNotAllowed')" :sub-title="$tl('p.noSSH')">
             <template #extra>
               <router-link :to="{ path: '/ssh', query: {} }">
-                <a-button type="primary">返回首页</a-button>
+                <a-button type="primary">{{ $tl('p.goBackHome') }}</a-button>
               </router-link>
             </template>
           </a-result>
@@ -38,7 +40,7 @@
     <!-- 文件管理 -->
     <a-drawer v-if="sshData" destroy-on-close placement="right" width="90vw" :open="drawerVisible" @close="onClose">
       <template #title>
-        {{ sshData.name }}<template v-if="sshData.host"> ({{ sshData.host }}) </template>文件管理
+        {{ sshData.name }}<template v-if="sshData.host"> ({{ sshData.host }}) </template>{{ $tl('p.fileManagement') }}
       </template>
       <ssh-file v-if="drawerVisible" :ssh-id="sshData.id" />
     </a-drawer>
@@ -73,6 +75,9 @@ export default {
   },
   beforeUnmount() {},
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.ssh.fullTerminal.${key}`, ...args)
+    },
     loadItemData() {
       getItem({
         id: this.sshId
