@@ -1,7 +1,9 @@
 <template>
   <div>
     <log-view1 :ref="`logView`" height="calc(100vh - 140px)">
-      <template #before> <a-button type="primary" size="small" @click="goFile">文件管理</a-button></template>
+      <template #before>
+        <a-button type="primary" size="small" @click="goFile">{{ $tl('p.fileManagement') }}</a-button></template
+      >
     </log-view1>
   </div>
 </template>
@@ -70,6 +72,9 @@ export default {
     this.close()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.node.nodeLayout.project.projectFileRead.${key}`, ...args)
+    },
     close() {
       this.socket?.close()
 
@@ -92,7 +97,7 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: 'web socket 错误,请检查是否开启 ws 代理'
+          message: `web socket ${this.$tl('p.error')},${this.$tl('p.checkWsProxy')}`
         })
         clearInterval(this.heart)
       }
@@ -100,7 +105,7 @@ export default {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
         clearInterval(this.heart)
-        $message.warning('会话已经关闭[tail-file]')
+        $message.warning(this.$tl('p.sessionClosed'))
       }
       this.socket.onmessage = (msg) => {
         this.$refs.logView?.appendLine(msg.data)

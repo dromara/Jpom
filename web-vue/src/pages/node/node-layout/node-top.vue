@@ -5,8 +5,11 @@
         <a-range-picker
           v-model:value="timeRange"
           :presets="[
-            { label: '今天', value: [dayjs().startOf('day'), dayjs()] },
-            { label: '昨天', value: [dayjs().add(-1, 'days').startOf('day'), dayjs().add(-1, 'days').endOf('day')] }
+            { label: $tl('p.today'), value: [dayjs().startOf('day'), dayjs()] },
+            {
+              label: $tl('p.yesterday'),
+              value: [dayjs().add(-1, 'days').startOf('day'), dayjs().add(-1, 'days').endOf('day')]
+            }
           ]"
           :disabled-date="
             (current) => {
@@ -18,25 +21,15 @@
           format="YYYY-MM-DD HH:mm:ss"
           value-format="YYYY-MM-DD HH:mm:ss"
         />
-        <a-button type="primary" @click="handleFilter">搜索</a-button>
+        <a-button type="primary" @click="handleFilter">{{ $tl('p.search') }}</a-button>
         <a-tooltip>
           <template #title>
             <div>
               <ul>
-                <li>
-                  如果在 Linux 中实际运行内存可能和您直接使用 free -h 命令查询到 free 和 total
-                  字段计算出数值相差过大那么此时就是您当前服务器中的交换内存引起的
-                </li>
-                <li>系统 采用 oshi 库来监控系统，在 oshi 中使用 /proc/meminfo 来获取内存使用情况。</li>
-                <li>
-                  文件中如果存在：MemAvailable、MemTotal 这两个字段，那么 oshi 直接使用，所以本系统
-                  中内存占用计算方式：内存占用=(total-available)/total
-                </li>
-                <li>
-                  文件中如果不存在：MemAvailable，那么 MemAvailable =
-                  MemFree+Active(file)+Inactive(file)+SReclaimable，所以本系统
-                  中内存占用计算方式：内存占用=(total-(MemFree+Active(file)+Inactive(file)+SReclaimable))/total
-                </li>
+                <li>{{ $tl('p.linuxMemoryInfo') }}</li>
+                <li>{{ $tl('p.oshiLibrary') }}</li>
+                <li>{{ $tl('p.memUsageCalcWithAvailable') }}</li>
+                <li>{{ $tl('p.memUsageCalcWithoutAvailable') }}</li>
               </ul>
             </div>
           </template>
@@ -48,7 +41,7 @@
     <a-empty
       v-else-if="nodeMonitorLoadStatus == -1"
       :image="Empty.PRESENTED_IMAGE_SIMPLE"
-      description="未查询到任何数据"
+      :description="$tl('p.noDataFound')"
     >
     </a-empty>
     <a-skeleton v-else />
@@ -99,6 +92,9 @@ export default {
     window.removeEventListener('resize', this.resize)
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.node.nodeLayout.nodeTop.${key}`, ...args)
+    },
     dayjs,
     // 刷新
     handleFilter() {

@@ -1,21 +1,21 @@
 <template>
   <div>
     <!-- 编辑区 -->
-    <a-spin tip="加载项目数据中..." :spinning="loading">
+    <a-spin :tip="$tl('p.loadingData')" :spinning="loading">
       <a-form ref="editProjectForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item label="项目 ID" name="id">
+        <a-form-item :label="$tl('p.projectId')" name="id">
           <a-input
             v-if="temp.type === 'edit'"
             v-model:value="temp.id"
             :max-length="50"
             :disabled="temp.type === 'edit'"
-            placeholder="创建之后不能修改"
+            :placeholder="$tl('c.createOnce')"
           />
           <template v-else>
             <a-input-search
               v-model:value="temp.id"
               :max-length="50"
-              placeholder="创建之后不能修改"
+              :placeholder="$tl('c.createOnce')"
               @search="
                 () => {
                   temp = { ...temp, id: randomStr(6) }
@@ -23,26 +23,26 @@
               "
             >
               <template #enterButton>
-                <a-button type="primary"> 随机生成 </a-button>
+                <a-button type="primary"> {{ $tl('p.randomGenerate') }} </a-button>
               </template>
             </a-input-search>
           </template>
         </a-form-item>
 
-        <a-form-item label="项目名称" name="name">
+        <a-form-item :label="$tl('c.projectName')" name="name">
           <a-row>
             <a-col :span="10">
-              <a-input v-model:value="temp.name" :max-length="50" placeholder="项目名称" />
+              <a-input v-model:value="temp.name" :max-length="50" :placeholder="$tl('c.projectName')" />
             </a-col>
-            <a-col :span="4" style="text-align: right">分组名称：</a-col>
+            <a-col :span="4" style="text-align: right">{{ $tl('p.groupName') }}</a-col>
             <a-col :span="10">
               <a-form-item-rest>
                 <custom-select
                   v-model:value="temp.group"
                   :max-length="50"
                   :data="groupList"
-                  input-placeholder="新增分组"
-                  select-placeholder="选择分组"
+                  :input-placeholder="$tl('p.addNewGroup')"
+                  :select-placeholder="$tl('p.selectGroup')"
                 >
                 </custom-select>
               </a-form-item-rest>
@@ -52,23 +52,25 @@
         <a-form-item name="runMode">
           <template #label>
             <a-tooltip>
-              运行方式
+              {{ $tl('p.runMode') }}
               <template #title>
                 <ul>
-                  <li><b>Dsl</b> 配合脚本模版实现自定义项目管理</li>
-                  <li><b>ClassPath</b> java -classpath xxx 运行项目</li>
-                  <li><b>Jar</b> java -jar xxx 运行项目</li>
-                  <li><b>JarWar</b> java -jar Springboot war 运行项目</li>
-                  <li><b>JavaExtDirsCp</b> java -Djava.ext.dirs=lib -cp conf:run.jar $MAIN_CLASS 运行项目</li>
-                  <li><b>File</b> 项目为静态文件夹,没有项目状态以及控制等功能</li>
+                  <li><b>Dsl</b> {{ $tl('p.customizeProject') }}</li>
+                  <li><b>ClassPath</b> java -classpath xxx {{ $tl('c.runProject') }}</li>
+                  <li><b>Jar</b> java -jar xxx {{ $tl('c.runProject') }}</li>
+                  <li><b>JarWar</b> java -jar Springboot war {{ $tl('c.runProject') }}</li>
+                  <li>
+                    <b>JavaExtDirsCp</b> java -Djava.ext.dirs=lib -cp conf:run.jar $MAIN_CLASS {{ $tl('c.runProject') }}
+                  </li>
+                  <li><b>File</b> {{ $tl('p.staticFolder') }},{{ $tl('p.noStatusControl') }}</li>
                 </ul>
               </template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
           </template>
-          <a-select v-model:value="temp.runMode" placeholder="请选择运行方式" @change="changeRunMode">
+          <a-select v-model:value="temp.runMode" :placeholder="$tl('p.selectRunMode')" @change="changeRunMode">
             <a-select-option v-for="item in runModeArray" :key="item.name">
-              <template v-if="item.desc.indexOf('不推荐') > -1">
+              <template v-if="item.desc.indexOf($tl('p.notRecommended')) > -1">
                 <s>
                   <b>[{{ item.name }}]</b> {{ item.desc }}
                 </s>
@@ -80,8 +82,8 @@
           </a-select>
         </a-form-item>
         <template v-if="temp.runMode === 'Link'">
-          <a-form-item label="软链的项目" name="linkId">
-            <a-select v-model:value="temp.linkId" placeholder="请选择软链的项目" @change="changeLinkId">
+          <a-form-item :label="$tl('p.softLinkProject')" name="linkId">
+            <a-select v-model:value="temp.linkId" :placeholder="$tl('p.selectSoftLinkProject')" @change="changeLinkId">
               <a-select-option
                 v-for="item in projectList"
                 :key="item.projectId"
@@ -96,13 +98,15 @@
           <a-form-item name="whitelistDirectory">
             <template #label>
               <a-tooltip>
-                项目路径
+                {{ $tl('p.projectPath') }}
                 <template #title>
                   <ul>
-                    <li>授权路径是指项目文件存放到服务中的文件夹</li>
-                    <li>可以到节点管理中的【插件端配置】=>【授权配置】修改</li>
-                    <li>项目文件夹是项目实际存放的目录名称</li>
-                    <li>项目文件会存放到 <br />&nbsp;&nbsp;<b>项目授权路径+项目文件夹</b></li>
+                    <li>{{ $tl('p.authPathDesc') }}</li>
+                    <li>{{ $tl('p.modifyAuthConfig') }}</li>
+                    <li>{{ $tl('p.folderName') }}</li>
+                    <li>
+                      {{ $tl('p.storagePath') }} <br />&nbsp;&nbsp;<b>{{ $tl('p.fullPath') }}</b>
+                    </li>
                   </ul>
                 </template>
                 <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
@@ -110,7 +114,7 @@
             </template>
             <template #help>
               <div>
-                需要提前为机器配置授权目录
+                {{ $tl('p.preConfigAuthDir') }}
                 <a-button
                   type="link"
                   size="small"
@@ -120,18 +124,22 @@
                     }
                   "
                 >
-                  <InfoCircleOutlined /> 快速配置
+                  <InfoCircleOutlined /> {{ $tl('p.quickConfig') }}
                 </a-button>
               </div>
             </template>
             <a-input-group compact>
-              <a-select v-model:value="temp.whitelistDirectory" style="width: 50%" placeholder="请选择项目授权路径">
+              <a-select
+                v-model:value="temp.whitelistDirectory"
+                style="width: 50%"
+                :placeholder="$tl('c.selectAuthPath')"
+              >
                 <a-select-option v-for="access in accessList" :key="access">
                   <a-tooltip :title="access">{{ access }}</a-tooltip>
                 </a-select-option>
               </a-select>
               <a-form-item-rest>
-                <a-input v-model:value="temp.lib" style="width: 50%" placeholder="项目存储的文件夹" />
+                <a-input v-model:value="temp.lib" style="width: 50%" :placeholder="$tl('p.storageFolder')" />
               </a-form-item-rest>
             </a-input-group>
             <template #extra>
@@ -139,32 +147,29 @@
             </template>
           </a-form-item>
 
-          <a-form-item v-show="filePath !== ''" label="项目完整目录">
+          <a-form-item v-show="filePath !== ''" :label="$tl('p.completePath')">
             <a-alert :message="filePath" type="success" />
           </a-form-item>
         </template>
         <a-form-item v-show="temp.runMode === 'Dsl'" name="dslContent">
           <template #label>
             <a-tooltip>
-              DSL 内容
+              DSL {{ $tl('p.content') }}
               <template #title>
-                <p>
-                  以 yaml/yml 格式配置,scriptId
-                  为项目路径下的脚本文件的相对路径或者脚本模版ID，可以到脚本模版编辑弹窗中查看 scriptId
-                </p>
-                <p>脚本里面支持的变量有：${PROJECT_ID}、${PROJECT_NAME}、${PROJECT_PATH}</p>
+                <p>{{ $tl('p.configFormat') }}</p>
+                <p>{{ $tl('p.supportedVars') }}</p>
                 <p>
                   <b>status</b>
-                  流程执行完脚本后，输出的内容最后一行必须为：running:$pid
-                  <b>$pid 为当前项目实际的进程ID</b>。如果输出最后一行不是预期格式项目状态将是未运行
+                  {{ $tl('p.outputFormat') }}:$pid <b>$pid {{ $tl('p.processId') }}</b
+                  >{{ $tl('p.statusCheck') }}
                 </p>
-                <p>配置详情请参考配置示例</p>
+                <p>{{ $tl('p.configReference') }}</p>
               </template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
           </template>
           <template #help>
-            scriptId可以使用节点脚本：
+            scriptId{{ $tl('p.useNodeScript') }}
             <a-button
               type="link"
               size="small"
@@ -174,7 +179,7 @@
                 }
               "
             >
-              查看节点脚本
+              {{ $tl('c.viewNodeScript') }}
             </a-button>
           </template>
           <a-form-item-rest>
@@ -184,14 +189,14 @@
               height="40vh"
               :show-tool="true"
               :options="{ mode: 'yaml', tabSize: 2 }"
-              placeholder="请填写项目 DSL 配置内容,可以点击上方切换 tab 查看配置示例"
+              :placeholder="$tl('p.fillDSL')"
             >
               <template #tool_before>
                 <a-segmented
                   v-model:value="dslEditTabKey"
                   :options="[
-                    { label: 'DSL 配置', value: 'content' },
-                    { label: '配置示例', value: 'demo' }
+                    { label: `DSL ${$tl('c.configuration')}`, value: 'content' },
+                    { label: $tl('c.configExample'), value: 'demo' }
                   ]"
                 />
               </template>
@@ -207,8 +212,8 @@
                 <a-segmented
                   v-model:value="dslEditTabKey"
                   :options="[
-                    { label: 'DSL 配置', value: 'content' },
-                    { label: '配置示例', value: 'demo' }
+                    { label: `DSL ${$tl('c.configuration')}`, value: 'content' },
+                    { label: $tl('c.configExample'), value: 'demo' }
                   ]"
                 />
               </template>
@@ -218,19 +223,19 @@
         <a-form-item v-show="noFileModes.includes(temp.runMode) && temp.runMode !== 'Link'">
           <template #label>
             <a-tooltip>
-              日志目录
+              {{ $tl('p.logDir') }}
               <template #title>
                 <ul>
-                  <li>日志目录是指控制台日志存储目录</li>
-                  <li>默认是在插件端数据目录/${projectId}/${projectId}.log</li>
-                  <li>可选择的列表和项目授权目录是一致的，即相同配置</li>
+                  <li>{{ $tl('p.logDirDesc') }}</li>
+                  <li>{{ $tl('c.defaultLogPath') }}</li>
+                  <li>{{ $tl('p.selectableList') }}</li>
                 </ul>
               </template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
           </template>
-          <a-select v-model:value="temp.logPath" placeholder="请选择项目授权路径">
-            <a-select-option key="" value="">默认是在插件端数据目录/${projectId}/${projectId}.log</a-select-option>
+          <a-select v-model:value="temp.logPath" :placeholder="$tl('c.selectAuthPath')">
+            <a-select-option key="" value="">{{ $tl('c.defaultLogPath') }}</a-select-option>
             <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
           </a-select>
         </a-form-item>
@@ -243,7 +248,7 @@
           label="Main Class"
           name="mainClass"
         >
-          <a-input v-model:value="temp.mainClass" placeholder="程序运行的 main 类(jar 模式运行可以不填)" />
+          <a-input v-model:value="temp.mainClass" :placeholder="$tl('p.mainClass')" />
         </a-form-item>
         <a-form-item
           v-show="
@@ -253,64 +258,81 @@
           label="JavaExtDirsCp"
           name="javaExtDirsCp"
         >
-          <a-input v-model:value="temp.javaExtDirsCp" placeholder="-Dext.dirs=xxx: -cp xx  填写【xxx:xx】" />
+          <a-input
+            v-model:value="temp.javaExtDirsCp"
+            placeholder="-Dext.dirs=xxx: -cp xx  {{$tl('p.fillInXxx')}}:xx】"
+          />
         </a-form-item>
         <a-form-item
           v-show="javaModes.includes(temp.runMode) || javaModes.includes(linkProjectData.runMode)"
-          label="JVM 参数"
+          :label="$tl('p.jvmParameters')"
           name="jvm"
         >
           <a-textarea
             v-model:value="temp.jvm"
             :auto-size="{ minRows: 3, maxRows: 3 }"
-            placeholder="jvm参数,非必填.如：-Xms512m -Xmx512m"
+            placeholder="jvm{{$tl('p.parameters')}},{{$tl('p.optional')}}.如：-Xms512m -Xmx512m"
           />
         </a-form-item>
         <a-form-item
           v-show="javaModes.includes(temp.runMode) || javaModes.includes(linkProjectData.runMode)"
-          label="args 参数"
+          :label="$tl('p.argsParameters')"
           name="args"
         >
           <a-textarea
             v-model:value="temp.args"
             :auto-size="{ minRows: 3, maxRows: 3 }"
-            placeholder="Main 函数 args 参数，非必填. 如：--server.port=8080"
+            placeholder="Main {{$tl('p.functionArgs')}}. {{$tl('p.argsExample')}}.port=8080"
           />
         </a-form-item>
         <a-form-item
           v-if="temp.runMode === 'Dsl' || linkProjectData.runMode === 'Dsl'"
           name="dslEnv"
-          label="DSL环境变量"
+          :label="$tl('p.dslEnvVariables')"
         >
-          <a-input v-model:value="temp.dslEnv" placeholder="DSL环境变量,如：key1=values1&keyvalue2" />
+          <a-input
+            v-model:value="temp.dslEnv"
+            placeholder="DSL{{$tl('p.environmentVariables')}},{{$tl('p.envExample')}}=values1&keyvalue2"
+          />
         </a-form-item>
 
         <a-form-item v-show="noFileModes.includes(temp.runMode)" name="autoStart">
           <template #label>
             <a-tooltip>
-              自启动
-              <template #title>插件端启动的时候检查项目状态，如果项目状态是未运行则尝试执行启动项目</template>
+              {{ $tl('p.autoStart') }}
+              <template #title>{{ $tl('p.checkProjectStatusOnStartup') }}</template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
           </template>
           <template #help>
-            <div>非服务器开机自启,如需开机自启建议配置<b>插件端开机自启</b>并开启此开关</div>
+            <div>
+              {{ $tl('p.notAutoStartOnBoot') }}<b>{{ $tl('p.pluginAutoStartOnBoot') }}</b
+              >{{ $tl('p.enableAutoStartSwitch') }}
+            </div>
           </template>
           <div>
-            <a-switch v-model:checked="temp.autoStart" checked-children="开" un-checked-children="关" />
-            插件端启动时自动检查项目如未启动将尝试启动
+            <a-switch
+              v-model:checked="temp.autoStart"
+              :checked-children="$tl('p.switchOn')"
+              :un-checked-children="$tl('p.switchOff')"
+            />
+            {{ $tl('p.checkAndStartOnPluginStartup') }}
           </div>
         </a-form-item>
 
         <a-form-item name="disableScanDir">
           <template #label>
-            <a-tooltip> 禁止扫描 </a-tooltip>
+            <a-tooltip> {{ $tl('p.disableScanning') }} </a-tooltip>
           </template>
           <template #help>
-            <div>如果项目目录较大或者涉及到深目录，建议关闭扫描避免获取项目目录扫描过长影响性能</div>
+            <div>{{ $tl('p.disableScanningForLargeProjects') }}</div>
           </template>
           <div>
-            <a-switch v-model:checked="temp.disableScanDir" checked-children="不扫描" un-checked-children="扫描" />
+            <a-switch
+              v-model:checked="temp.disableScanDir"
+              :checked-children="$tl('p.noScanning')"
+              :un-checked-children="$tl('p.enableScanning')"
+            />
           </div>
         </a-form-item>
 
@@ -320,28 +342,25 @@
               WebHooks
               <template #title>
                 <ul>
-                  <li>项目启动,停止,重启,文件变动都将请求对应的地址</li>
-                  <li>传入参数有：projectId、projectName、type、result</li>
-                  <li>type 的值有：stop、beforeStop、start、beforeRestart、fileChange</li>
-                  <li>DSL 类型项目特有的 type：reload、restart</li>
+                  <li>{{ $tl('p.notifyUrl') }}</li>
+                  <li>{{ $tl('p.notifyUrlParams') }}</li>
+                  <li>type {{ $tl('p.notifyUrlValues') }}</li>
+                  <li>DSL {{ $tl('p.projectSpecificTypes') }}</li>
                 </ul>
               </template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
           </template>
-          <a-input
-            v-model:value="temp.token"
-            placeholder="项目启动,停止,重启,文件变动都将请求对应的地址,非必填，GET请求"
-          />
+          <a-input v-model:value="temp.token" :placeholder="$tl('p.optionalNotifyUrl')" />
         </a-form-item>
 
         <a-form-item
           v-if="temp.runCommand"
           v-show="temp.type === 'edit' && javaModes.includes(temp.runMode)"
-          label="运行命令"
+          :label="$tl('p.runCommand')"
           name="runCommand"
         >
-          <a-alert :message="temp.runCommand || '无'" type="success" />
+          <a-alert :message="temp.runCommand || $tl('p.none')" type="success" />
         </a-form-item>
       </a-form>
     </a-spin>
@@ -349,7 +368,7 @@
     <a-modal
       v-model:open="configDir"
       destroy-on-close
-      :title="`配置授权目录`"
+      :title="`${$tl('p.authorizedDirectory')}`"
       :footer="null"
       :mask-closable="false"
       @cancel="
@@ -373,7 +392,7 @@
     <NodeFunc
       v-if="drawerVisible"
       :id="nodeId"
-      name="查看节点脚本"
+      :name="$tl('c.viewNodeScript')"
       :tabs="['scripct']"
       @close="
         () => {
@@ -434,11 +453,11 @@ export default {
       temp: {},
       drawerVisible: false,
       rules: {
-        id: [{ required: true, message: '请输入项目ID', trigger: 'blur' }],
-        name: [{ required: true, message: '请输入项目名称', trigger: 'blur' }],
-        runMode: [{ required: true, message: '请选择项目运行方式', trigger: 'blur' }],
-        whitelistDirectory: [{ required: true, message: '请选择项目授权路径', trigger: 'blur' }],
-        lib: [{ required: true, message: '请输入项目文件夹', trigger: 'blur' }]
+        id: [{ required: true, message: this.$tl('p.projectIdInput'), trigger: 'blur' }],
+        name: [{ required: true, message: this.$tl('p.projectNameInput'), trigger: 'blur' }],
+        runMode: [{ required: true, message: this.$tl('p.projectRunModeSelection'), trigger: 'blur' }],
+        whitelistDirectory: [{ required: true, message: this.$tl('c.selectAuthPath'), trigger: 'blur' }],
+        lib: [{ required: true, message: this.$tl('p.projectFolderInput'), trigger: 'blur' }]
       },
       linkProjectData: {},
       loading: true,
@@ -465,6 +484,9 @@ export default {
     // this.initData();
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.node.nodeLayout.project.projectEdit.${key}`, ...args)
+    },
     randomStr,
     initData() {
       this.loadAccesList()
@@ -552,7 +574,7 @@ export default {
       return new Promise((resolve, reject) => {
         if (this.temp.outGivingProject) {
           $notification.warning({
-            message: '独立的项目分发请到分发管理中去修改'
+            message: this.$tl('p.distributionManagement')
           })
           reject(false)
           return

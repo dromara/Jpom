@@ -1,11 +1,7 @@
 <template>
   <div class="">
     <template v-if="useSuggestions">
-      <a-result
-        title="当前工作空间还没有项目并且也没有任何节点"
-        sub-title="需要您先新增资产机器再分配机器节点（逻辑节点）到当前工作空间"
-      >
-      </a-result>
+      <a-result :title="$tl('p.noProjectOrNode')" :sub-title="$tl('p.addNewAsset')"> </a-result>
     </template>
 
     <CustomTable
@@ -35,7 +31,7 @@
             v-if="!nodeId"
             v-model:value="listQuery.nodeId"
             allow-clear
-            placeholder="请选择节点"
+            :placeholder="$tl('c.selectNode')"
             class="search-input-item"
           >
             <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
@@ -43,7 +39,7 @@
           <a-select
             v-model:value="listQuery.group"
             allow-clear
-            placeholder="请选择分组"
+            :placeholder="$tl('p.selectGroup')"
             class="search-input-item"
             @change="getNodeProjectData"
           >
@@ -51,22 +47,27 @@
           </a-select>
           <a-input
             v-model:value="listQuery['%name%']"
-            placeholder="搜索项目名"
+            :placeholder="$tl('p.searchProjectName')"
             class="search-input-item"
             @press-enter="getNodeProjectData"
           />
           <a-input
             v-model:value="listQuery['%projectId%']"
-            placeholder="搜索项目ID"
+            :placeholder="$tl('p.searchProjectId')"
             class="search-input-item"
             @press-enter="getNodeProjectData"
           />
 
-          <a-select v-model:value="listQuery.runMode" allow-clear placeholder="运行方式" class="search-input-item">
+          <a-select
+            v-model:value="listQuery.runMode"
+            allow-clear
+            :placeholder="$tl('c.runMode')"
+            class="search-input-item"
+          >
             <a-select-option v-for="item in runModeList" :key="item">{{ item }}</a-select-option>
           </a-select>
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button :loading="loading" type="primary" @click="getNodeProjectData">搜索</a-button>
+          <a-tooltip :title="$tl('p.quickToFirstPage')">
+            <a-button :loading="loading" type="primary" @click="getNodeProjectData">{{ $tl('p.search') }}</a-button>
           </a-tooltip>
 
           <!-- <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="silenceLoadData" /> -->
@@ -74,27 +75,29 @@
       </template>
       <template #toolPrefix>
         <a-dropdown v-if="selectedRowKeys && selectedRowKeys.length">
-          <a-button type="primary" size="small"> 批量操作 <DownOutlined /> </a-button>
+          <a-button type="primary" size="small"> {{ $tl('c.batchOperation') }} <DownOutlined /> </a-button>
           <template #overlay>
             <a-menu>
               <a-menu-item>
-                <a-button type="primary" @click="batchStart">批量启动</a-button>
+                <a-button type="primary" @click="batchStart">{{ $tl('c.batchStart') }}</a-button>
               </a-menu-item>
               <a-menu-item>
-                <a-button type="primary" @click="batchRestart">批量重启</a-button>
+                <a-button type="primary" @click="batchRestart">{{ $tl('p.batchRestart') }}</a-button>
               </a-menu-item>
               <a-menu-item>
-                <a-button type="primary" danger @click="batchStop">批量关闭</a-button>
+                <a-button type="primary" danger @click="batchStop">{{ $tl('p.batchClose') }}</a-button>
               </a-menu-item>
             </a-menu>
           </template>
         </a-dropdown>
-        <a-button v-else type="primary" size="small" :disabled="true"> 批量操作 <DownOutlined /> </a-button>
+        <a-button v-else type="primary" size="small" :disabled="true">
+          {{ $tl('c.batchOperation') }} <DownOutlined />
+        </a-button>
 
-        <a-button type="primary" size="small" @click="openAdd"><PlusOutlined />新增</a-button>
+        <a-button type="primary" size="small" @click="openAdd"><PlusOutlined />{{ $tl('p.addNew') }}</a-button>
         <template v-if="!nodeId">
           <a-dropdown v-if="nodeMap && Object.keys(nodeMap).length">
-            <a-button type="primary" size="small" danger> 同步 <DownOutlined /></a-button>
+            <a-button type="primary" size="small" danger> {{ $tl('c.synchronization') }} <DownOutlined /></a-button>
             <template #overlay>
               <a-menu>
                 <a-menu-item v-for="(nodeName, key) in nodeMap" :key="key" @click="reSyncProject(key)">
@@ -105,17 +108,19 @@
           </a-dropdown>
         </template>
         <a-button v-else type="primary" size="small" danger @click="reSyncProject(nodeId)">
-          <SyncOutlined />同步
+          <SyncOutlined />{{ $tl('c.synchronization') }}
         </a-button>
 
         <a-button v-if="nodeId" size="small" type="primary" @click="handlerExportData()"
-          ><DownloadOutlined />导出</a-button
+          ><DownloadOutlined />{{ $tl('p.exportData') }}</a-button
         >
         <a-dropdown v-if="nodeId">
           <template #overlay>
             <a-menu>
               <a-menu-item key="1">
-                <a-button type="primary" size="small" @click="handlerImportTemplate()">下载导入模板</a-button>
+                <a-button type="primary" size="small" @click="handlerImportTemplate()">{{
+                  $tl('p.downloadTemplate')
+                }}</a-button>
               </a-menu-item>
             </a-menu>
           </template>
@@ -128,7 +133,9 @@
             :multiple="false"
             :before-upload="importBeforeUpload"
           >
-            <a-button size="small" type="primary"><UploadOutlined /> 导入 <DownOutlined /> </a-button>
+            <a-button size="small" type="primary"
+              ><UploadOutlined /> {{ $tl('p.importData') }} <DownOutlined />
+            </a-button>
           </a-upload>
         </a-dropdown>
       </template>
@@ -137,8 +144,8 @@
           <template #title>
             <div>
               <ul>
-                <li>状态数据是异步获取有一定时间延迟</li>
-                <li>在单页列表里面 file 类型项目将自动排序到最后</li>
+                <li>{{ $tl('p.statusDataDelay') }}</li>
+                <li>{{ $tl('p.fileListOrder') }}</li>
               </ul>
             </div>
           </template>
@@ -194,7 +201,7 @@
           <template v-else>
             <a-tooltip
               v-if="noFileModes.includes(record.runMode)"
-              :title="`状态操作请到控制台中控制   ${(projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].statusMsg) || ''}`"
+              :title="`${$tl('p.statusControl')}   ${(projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].statusMsg) || ''}`"
             >
               <a-switch
                 :checked="
@@ -203,8 +210,8 @@
                   projectStatusMap[record.nodeId][record.projectId].pid > 0
                 "
                 disabled
-                checked-children="开"
-                un-checked-children="关"
+                :checked-children="$tl('p.statusOn')"
+                :un-checked-children="$tl('p.statusOff')"
               />
             </a-tooltip>
             <span v-else>-</span>
@@ -214,7 +221,7 @@
         <template v-else-if="column.dataIndex === 'port'">
           <a-tooltip
             placement="topLeft"
-            :title="`进程号：${((projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].pids) || [(projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].pid) || '-']).join(',')} / 端口号：${(projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].port) || '-'}`"
+            :title="`${$tl('p.processId')}${((projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].pids) || [(projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].pid) || '-']).join(',')} / ${$tl('p.portNumber')}${(projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].port) || '-'}`"
           >
             <span
               >{{
@@ -239,51 +246,59 @@
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleFile(record)">文件</a-button>
+            <a-button size="small" type="primary" @click="handleFile(record)">{{ $tl('p.fileType') }}</a-button>
             <template v-if="noFileModes.includes(record.runMode)">
-              <a-button size="small" type="primary" @click="handleConsole(record)">控制台</a-button>
+              <a-button size="small" type="primary" @click="handleConsole(record)">{{ $tl('c.console') }}</a-button>
             </template>
             <template v-else>
-              <a-tooltip title="文件类型没有控制台功能">
-                <a-button size="small" type="primary" :disabled="true">控制台</a-button></a-tooltip
+              <a-tooltip :title="$tl('p.noConsoleForFile')">
+                <a-button size="small" type="primary" :disabled="true">{{ $tl('c.console') }}</a-button></a-tooltip
               >
             </template>
 
             <a-dropdown>
               <a @click="(e) => e.preventDefault()">
-                更多
+                {{ $tl('p.moreOptions') }}
                 <DownOutlined />
               </a>
               <template #overlay>
                 <a-menu>
                   <a-menu-item>
                     <template v-if="noFileModes.includes(record.runMode)">
-                      <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
+                      <a-button size="small" type="primary" @click="handleTrigger(record)">{{
+                        $tl('c.trigger')
+                      }}</a-button>
                     </template>
                     <template v-else>
-                      <a-tooltip title="文件类型没有触发器功能">
-                        <a-button size="small" type="primary" :disabled="true">触发器</a-button></a-tooltip
+                      <a-tooltip :title="$tl('p.noTriggerForFile')">
+                        <a-button size="small" type="primary" :disabled="true">{{
+                          $tl('c.trigger')
+                        }}</a-button></a-tooltip
                       >
                     </template>
                   </a-menu-item>
                   <a-menu-item v-if="noFileModes.includes(record.runMode)">
-                    <a-button size="small" type="primary" @click="handleLogBack(record)">项目日志 </a-button>
+                    <a-button size="small" type="primary" @click="handleLogBack(record)"
+                      >{{ $tl('p.projectLog') }}
+                    </a-button>
                   </a-menu-item>
                   <a-menu-item>
-                    <a-button size="small" type="primary" @click="copyItem(record)">复制</a-button>
+                    <a-button size="small" type="primary" @click="copyItem(record)">{{ $tl('p.copyAction') }}</a-button>
                   </a-menu-item>
                   <a-menu-item>
-                    <a-button size="small" type="primary" danger @click="handleDelete(record, '')">逻辑删除</a-button>
+                    <a-button size="small" type="primary" danger @click="handleDelete(record, '')">{{
+                      $tl('p.logicalDelete')
+                    }}</a-button>
                   </a-menu-item>
                   <a-menu-item>
-                    <a-button size="small" type="primary" danger @click="handleDelete(record, 'thorough')"
-                      >彻底删除</a-button
-                    >
+                    <a-button size="small" type="primary" danger @click="handleDelete(record, 'thorough')">{{
+                      $tl('p.permanentDelete')
+                    }}</a-button>
                   </a-menu-item>
                   <a-menu-item>
-                    <a-button size="small" type="primary" danger @click="migrateWorkspace(record)"
-                      >迁移工作空间</a-button
-                    >
+                    <a-button size="small" type="primary" danger @click="migrateWorkspace(record)">{{
+                      $tl('p.migrateWorkspace')
+                    }}</a-button>
                   </a-menu-item>
                   <a-menu-item>
                     <a-button
@@ -291,7 +306,7 @@
                       type="primary"
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
                       @click="sortItemHander(record, index, 'top')"
-                      >置顶</a-button
+                      >{{ $tl('p.topPriority') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
@@ -385,7 +400,9 @@
               </template>
             </a-list-item-meta>
             <div>
-              <a-tooltip :title="`${item.cause || '未开始'}`">{{ item.cause || '未开始' }} </a-tooltip>
+              <a-tooltip :title="`${item.cause || $tl('c.notStarted')}`"
+                >{{ item.cause || $tl('c.notStarted') }}
+              </a-tooltip>
             </div>
           </a-list-item>
         </template>
@@ -395,7 +412,7 @@
     <a-modal
       v-model:open="triggerVisible"
       destroy-on-close
-      title="触发器"
+      :title="$tl('c.trigger')"
       width="50%"
       :footer="null"
       :mask-closable="false"
@@ -403,20 +420,18 @@
       <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
           <template #rightExtra>
-            <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
-              <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
+            <a-tooltip :title="$tl('p.resetTriggerToken')">
+              <a-button type="primary" size="small" @click="resetTrigger">{{ $tl('p.resetAction') }}</a-button>
             </a-tooltip>
           </template>
-          <a-tab-pane key="1" tab="执行">
+          <a-tab-pane key="1" :tab="$tl('p.executeAction')">
             <a-space direction="vertical" style="width: 100%">
-              <a-alert message="温馨提示" type="warning">
+              <a-alert :message="$tl('c.warmTip')" type="warning">
                 <template #description>
                   <ul>
-                    <li>单个触发器地址中：第一个随机字符串为项目ID(服务端)，第二个随机字符串为 token</li>
-                    <li>
-                      重置为重新生成触发地址,重置成功后之前的触发器地址将失效,触发器绑定到生成触发器到操作人上,如果将对应的账号删除触发器将失效
-                    </li>
-                    <li>批量触发参数 BODY json： [ { "id":"1", "token":"a","action":"status" } ]</li>
+                    <li>{{ $tl('p.triggerAddressInfo') }}</li>
+                    <li>{{ $tl('p.resetTriggerAddress') }}</li>
+                    <li>{{ $tl('p.batchTriggerParams') }}</li>
                   </ul>
                 </template>
               </a-alert>
@@ -425,7 +440,7 @@
                 v-for="item in triggerUses"
                 :key="item.value"
                 type="info"
-                :message="`${item.desc}触发器地址(点击可以复制)`"
+                :message="`${item.desc}${$tl('p.triggerAddress')}(${$tl('c.copyTip')})`"
               >
                 <template #description>
                   <a-typography-paragraph
@@ -437,7 +452,7 @@
                 </template>
               </a-alert>
 
-              <a-alert type="info" :message="`批量触发器地址(点击可以复制)`">
+              <a-alert type="info" :message="`${$tl('p.batchTriggerAddress')}(${$tl('c.copyTip')})`">
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchTriggerUrl }">
                     <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
@@ -454,7 +469,7 @@
       v-model:open="editProjectVisible"
       destroy-on-close
       width="60vw"
-      title="编辑项目"
+      :title="$tl('p.editProject')"
       :confirm-loading="confirmLoading"
       :mask-closable="false"
       @ok="
@@ -467,8 +482,8 @@
       "
     >
       <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item label="选择节点" help="编辑过程中可以切换节点但是要注意数据是否匹配">
-          <a-select v-model:value="temp.nodeId" allow-clear placeholder="请选择节点">
+        <a-form-item :label="$tl('p.selectNode')" :help="$tl('p.switchNodeDuringEdit')">
+          <a-select v-model:value="temp.nodeId" allow-clear :placeholder="$tl('c.selectNode')">
             <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
           </a-select>
         </a-form-item>
@@ -495,44 +510,42 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="50vw"
-      title="迁移到其他工作空间"
+      :title="$tl('p.migrateToOtherWorkspace')"
       :mask-closable="false"
       @ok="migrateWorkspaceOk"
     >
       <a-space direction="vertical" style="width: 100%">
-        <a-alert message="温馨提示" type="warning" show-icon>
+        <a-alert :message="$tl('c.warmTip')" type="warning" show-icon>
           <template #description>
-            项目可能支持关联如下数据：
+            {{ $tl('p.projectSupportAssociatedData') }}
             <ul>
               <li>
-                在线构建（构建关联仓库、构建历史）
+                {{ $tl('p.onlineBuild') }}
 
                 <ol>
-                  <li>如果关联的构建关联的仓库被多个构建绑定（使用）不能迁移</li>
-                  <li>仓库自动迁移后可能会重复存在请手动解决</li>
+                  <li>{{ $tl('p.cannotMigrateIfBuildRepoIsBoundByMultipleBuilds') }}</li>
+                  <li>{{ $tl('p.resolveDuplicateReposAfterAutoMigration') }}</li>
                 </ol>
               </li>
-              <li>节点分发【暂不支持迁移】</li>
-              <li>项目监控 【暂不支持迁移】</li>
-              <li>日志阅读 【暂不支持迁移】</li>
+              <li>{{ $tl('p.nodeDistributionNotSupported') }}</li>
+              <li>{{ $tl('p.projectMonitoringNotSupported') }}</li>
+              <li>{{ $tl('p.logReadingNotSupported') }}</li>
             </ul>
           </template>
         </a-alert>
-        <a-alert message="风险提醒" type="error" show-icon>
+        <a-alert :message="$tl('p.riskReminder')" type="error" show-icon>
           <template #description>
             <ul>
-              <li>如果垮机器（资产机器）迁移之前机器中的项目数据仅是逻辑删除（项目文件和日志均会保留）</li>
-              <li>迁移操作不具有事务性质，如果流程被中断或者限制条件不满足可能产生冗余数据！！！！</li>
-              <li>
-                迁移前您检查迁出机器和迁入机器的连接状态和网络状态避免未知错误或者中断造成流程失败产生冗余数据！！！！
-              </li>
+              <li>{{ $tl('p.logicalDeletionBeforeMigration') }}</li>
+              <li>{{ $tl('p.migrationIsNotTransactional') }}</li>
+              <li>{{ $tl('p.checkConnectionAndNetworkStatusBeforeMigration') }}</li>
             </ul>
           </template>
         </a-alert>
       </a-space>
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
-        <a-form-item label="选择工作空间" name="workspaceId">
+        <a-form-item :label="$tl('p.selectWorkspace')" name="workspaceId">
           <a-select
             v-model:value="temp.workspaceId"
             show-search
@@ -546,13 +559,13 @@
                 )
               }
             "
-            placeholder="请选择工作空间"
+            :placeholder="$tl('c.selectWorkspace')"
             @change="loadMigrateWorkspaceNodeList"
           >
             <a-select-option v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="选择逻辑节点" name="nodeId">
+        <a-form-item :label="$tl('p.selectLogicalNode')" name="nodeId">
           <a-select
             v-model:value="temp.nodeId"
             show-search
@@ -566,7 +579,7 @@
                 )
               }
             "
-            placeholder="请选择逻辑节点"
+            :placeholder="$tl('c.selectLogicNode')"
           >
             <a-select-option v-for="item in migrateWorkspaceNodeList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
@@ -577,7 +590,7 @@
     <a-modal
       v-model:open="lobbackVisible"
       destroy-on-close
-      title="日志备份列表"
+      :title="$tl('p.logBackupList')"
       width="850px"
       :footer="null"
       :mask-closable="false"
@@ -655,20 +668,20 @@ export default {
 
       columns: [
         {
-          title: '项目ID',
+          title: this.$tl('p.projectId'),
           dataIndex: 'projectId',
           width: 100,
           ellipsis: true
         },
 
         {
-          title: '项目名称',
+          title: this.$tl('p.projectName'),
           dataIndex: 'name',
           // width: 200,
           ellipsis: true
         },
         {
-          title: '项目分组',
+          title: this.$tl('p.projectGroup'),
           dataIndex: 'group',
           sorter: true,
           width: '100px',
@@ -676,40 +689,40 @@ export default {
           tooltip: true
         },
         {
-          title: '节点名称',
+          title: this.$tl('p.nodeName'),
           dataIndex: 'nodeId',
           width: 90,
           ellipsis: true
         },
         {
-          title: '运行状态',
+          title: this.$tl('p.runningStatus'),
           dataIndex: 'status',
           align: 'center',
           width: 100,
           ellipsis: true
         },
         {
-          title: '项目路径',
+          title: this.$tl('p.projectPath'),
           dataIndex: 'path',
           ellipsis: true,
           width: 120
         },
         {
-          title: '日志路径',
+          title: this.$tl('p.logPath'),
           dataIndex: 'logPath',
           ellipsis: true,
           width: 120
         },
 
         {
-          title: '端口/PID',
+          title: this.$tl('p.portOrPid'),
           dataIndex: 'port',
           width: 100,
           ellipsis: true
         },
 
         {
-          title: '运行方式',
+          title: this.$tl('c.runMode'),
           dataIndex: 'runMode',
           width: 90,
           ellipsis: true
@@ -722,7 +735,7 @@ export default {
           tooltip: true
         },
         {
-          title: '创建时间',
+          title: this.$tl('p.createTime'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -730,7 +743,7 @@ export default {
           width: '170px'
         },
         {
-          title: '修改时间',
+          title: this.$tl('p.updateTime'),
           dataIndex: 'modifyTimeMillis',
           ellipsis: true,
           sorter: true,
@@ -738,20 +751,20 @@ export default {
           width: '170px'
         },
         {
-          title: '修改人',
+          title: this.$tl('p.modifier'),
           dataIndex: 'modifyUser',
           width: '130px',
           ellipsis: true,
           sorter: true
         },
         {
-          title: '排序值',
+          title: this.$tl('p.sortValue'),
           dataIndex: 'sortValue',
           sorter: true,
           width: '80px'
         },
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
           align: 'center',
           fixed: 'right',
@@ -761,10 +774,10 @@ export default {
       ],
       triggerVisible: false,
       triggerUses: [
-        { desc: '查看状态', value: 'status' },
-        { desc: '启动项目', value: 'start' },
-        { desc: '停止项目', value: 'stop' },
-        { desc: '重启项目', value: 'restart' }
+        { desc: this.$tl('p.viewStatus'), value: 'status' },
+        { desc: this.$tl('p.startProject'), value: 'start' },
+        { desc: this.$tl('p.stopProject'), value: 'stop' },
+        { desc: this.$tl('p.restartProject'), value: 'restart' }
       ],
       editProjectVisible: false,
       // countdownTime: Date.now(),
@@ -833,6 +846,9 @@ export default {
     this.loadGroupList()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.node.search.${key}`, ...args)
+    },
     getNodeProjectData(pointerEvent, loading) {
       this.loading = true
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page
@@ -922,7 +938,7 @@ export default {
                   data2[item.projectId] = {
                     port: 0,
                     pid: 0,
-                    error: '网络异常'
+                    error: this.$tl('p.networkException')
                   }
                 })
                 this.projectStatusMap = {
@@ -938,7 +954,7 @@ export default {
     // 文件管理
     handleFile(record) {
       this.temp = Object.assign({}, record)
-      this.drawerTitle = `文件管理(${this.temp.name})`
+      this.drawerTitle = `${this.$tl('p.fileManagement')}(${this.temp.name})`
       this.drawerFileVisible = true
     },
     // 关闭文件管理对话框
@@ -949,7 +965,7 @@ export default {
     // 控制台
     handleConsole(record) {
       this.temp = Object.assign({}, record)
-      this.drawerTitle = `控制台(${this.temp.name})`
+      this.drawerTitle = `${this.$tl('c.console')}(${this.temp.name})`
       this.drawerConsoleVisible = true
     },
     // 关闭控制台
@@ -975,7 +991,7 @@ export default {
       this.onFileClose()
       this.drawerReadFileVisible = true
       this.temp.readFilePath = (path + '/' + filename).replace(new RegExp('//', 'gm'), '/')
-      this.drawerTitle = `跟踪文件(${filename})`
+      this.drawerTitle = `${this.$tl('p.trackFile')}(${filename})`
     },
     onReadFileClose() {
       this.drawerReadFileVisible = false
@@ -1021,17 +1037,17 @@ export default {
     batchStart() {
       if (this.selectedRowKeys.length <= 0) {
         $notification.warning({
-          message: '请选中要启动的项目'
+          message: this.$tl('p.pleaseSelectProjectToStart')
         })
         return
       }
       this.temp = {
-        title: '批量启动',
+        title: this.$tl('c.batchStart'),
         data: this.selectedRowKeysToId()
       }
 
       this.batchVisible = true
-      this.batchOptInfo(0, '启动', 'start')
+      this.batchOptInfo(0, this.$tl('p.start'), 'start')
     },
     // 批量操作
     batchOptInfo(index, msg, opt) {
@@ -1039,7 +1055,7 @@ export default {
         return
       }
       const value = this.temp.data[index]
-      value.cause = msg + '中'
+      value.cause = msg + this.$tl('p.statusMedium')
       this.updateBatchData(index, value)
       if (value.runMode !== 'File') {
         const params = {
@@ -1055,12 +1071,12 @@ export default {
             this.batchOptInfo(index + 1, msg, opt)
           })
           .catch(() => {
-            value.cause = msg + '失败'
+            value.cause = msg + this.$tl('p.failed')
             this.updateBatchData(index, value)
             this.batchOptInfo(index + 1, msg, opt)
           })
       } else {
-        value.cause = '跳过'
+        value.cause = this.$tl('p.skip')
         this.updateBatchData(index, value)
         this.batchOptInfo(index + 1, msg, opt)
       }
@@ -1070,31 +1086,31 @@ export default {
     batchRestart() {
       if (this.selectedRowKeys.length <= 0) {
         $notification.warning({
-          message: '请选中要重启的项目'
+          message: this.$tl('p.pleaseSelectProjectToRestart')
         })
         return
       }
       this.temp = {
-        title: '批量重新启动',
+        title: this.$tl('p.batchRestart_1'),
         data: this.selectedRowKeysToId()
       }
       this.batchVisible = true
-      this.batchOptInfo(0, '重启', 'restart')
+      this.batchOptInfo(0, this.$tl('p.restartAction'), 'restart')
     },
 
     //批量关闭
     batchStop() {
       if (this.selectedRowKeys.length <= 0) {
         $notification.warning({
-          message: '请选中要关闭的项目'
+          message: this.$tl('p.pleaseSelectProjectToStop')
         })
       }
       this.temp = {
-        title: '批量关闭启动',
+        title: this.$tl('p.batchStopStart'),
         data: this.selectedRowKeysToId()
       }
       this.batchVisible = true
-      this.batchOptInfo(0, '停止', 'stop')
+      this.batchOptInfo(0, this.$tl('p.stopAction'), 'stop')
     },
 
     // 获取复选框属性 判断是否可以勾选
@@ -1113,11 +1129,11 @@ export default {
     },
     reSyncProject(nodeId) {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemTip'),
         zIndex: 1009,
-        content: '确定要重新同步当前节点项目缓存信息吗？',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmResyncCache'),
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           return syncProject(nodeId).then((res) => {
             if (res.code == 200) {
@@ -1133,22 +1149,22 @@ export default {
     // 排序
     sortItemHander(record, index, method) {
       const msgData = {
-        top: '确定要将此数据置顶吗？',
-        up: '确定要将此数上移吗？',
-        down: '确定要将此数据下移吗？下移操作可能因为列表后续数据没有排序值操作无效！'
+        top: this.$tl('p.pinToTop'),
+        up: this.$tl('p.moveUp'),
+        down: this.$tl('p.moveDown')
       }
-      let msg = msgData[method] || '确定要操作吗？'
+      let msg = msgData[method] || this.$tl('p.operate')
       if (!record.sortValue) {
-        msg += ' 当前数据为默认状态,操后上移或者下移可能不会达到预期排序,还需要对相关数据都操作后才能达到预期排序'
+        msg += `${this.$tl('p.defaultStatus')},${this.$tl('p.unexpectedOrder')},${this.$tl('p.expectedOrder')}`
       }
       // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
       const compareId = this.projList[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemTip'),
         zIndex: 1009,
         content: msg,
-        okText: '确认',
-        cancelText: '取消',
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           return sortItemProject({
             id: record.id,
@@ -1230,7 +1246,7 @@ export default {
       delete temp.outGivingProject
       this.temp = {
         ...temp,
-        name: temp.name + '副本',
+        name: temp.name + this.$tl('p.copy'),
         id: temp.projectId + '_copy',
         lib: temp.lib + '_copy'
       }
@@ -1247,13 +1263,11 @@ export default {
     // 删除
     handleDelete(record, thorough) {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemTip'),
         zIndex: 1009,
-        content: thorough
-          ? '真的要彻底删除项目么？彻底项目会自动删除项目相关文件奥(包含项目日志，日志备份，项目文件)'
-          : '真的要删除项目么？删除项目不会删除项目相关文件奥,建议先清理项目相关文件再删除项目',
-        okText: '确认',
-        cancelText: '取消',
+        content: thorough ? this.$tl('p.deleteForever') : this.$tl('p.deleteProject'),
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           return deleteProject({
             nodeId: record.nodeId,
@@ -1305,13 +1319,13 @@ export default {
     migrateWorkspaceOk() {
       if (!this.temp.workspaceId) {
         $notification.warn({
-          message: '请选择工作空间'
+          message: this.$tl('c.selectWorkspace')
         })
         return false
       }
       if (!this.temp.nodeId) {
         $notification.warn({
-          message: '请选择逻辑节点'
+          message: this.$tl('c.selectLogicNode')
         })
         return false
       }
