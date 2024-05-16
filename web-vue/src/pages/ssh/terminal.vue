@@ -40,6 +40,10 @@ export default {
   },
   mounted() {},
   beforeUnmount() {},
-  methods: {}
+  methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.ssh.terminal.${key}`, ...args)
+    }
+  }
 }
 </script>

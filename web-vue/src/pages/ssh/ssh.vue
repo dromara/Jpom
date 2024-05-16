@@ -1,13 +1,10 @@
 <template>
   <div>
     <template v-if="useSuggestions">
-      <a-result
-        title="当前工作空间还没有SSH"
-        sub-title="请到【系统管理】-> 【资产管理】-> 【SSH管理】新增SSH，或者将已新增的SSH授权关联、分配到此工作空间"
-      >
+      <a-result :title="$tl('p.noSshInWorkspace')" :sub-title="$tl('p.addSshInSystemManagement')">
         <template #extra>
           <router-link to="/system/assets/ssh-list">
-            <a-button key="console" type="primary">现在就去</a-button></router-link
+            <a-button key="console" type="primary">{{ $tl('p.goToNow') }}</a-button></router-link
           >
         </template>
       </a-result>
@@ -19,7 +16,7 @@
       default-auto-refresh
       :auto-refresh-time="5"
       table-name="ssh-list"
-      empty-description="没有SSH"
+      :empty-description="$tl('p.noSshAvailable')"
       :active-page="activePage"
       :data-source="list"
       :columns="columns"
@@ -39,7 +36,7 @@
           <a-input
             v-model:value="listQuery['%name%']"
             class="search-input-item"
-            placeholder="ssh名称"
+            :placeholder="$tl('p.sshGroupName')"
             @press-enter="loadData"
           />
           <a-select
@@ -56,19 +53,22 @@
               }
             "
             allow-clear
-            placeholder="分组"
+            :placeholder="$tl('p.group')"
             class="search-input-item"
           >
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
           </a-select>
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          <a-tooltip :title="$tl('p.quickReturnFirstPage')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
           </a-tooltip>
 
-          <a-button type="primary" :disabled="!tableSelections || !tableSelections.length" @click="syncToWorkspaceShow"
-            >工作空间同步</a-button
+          <a-button
+            type="primary"
+            :disabled="!tableSelections || !tableSelections.length"
+            @click="syncToWorkspaceShow"
+            >{{ $tl('p.workspaceSync') }}</a-button
           >
-          <a-button type="primary" @click="toSshTabs">管理面板</a-button>
+          <a-button type="primary" @click="toSshTabs">{{ $tl('p.managementPanel') }}</a-button>
         </a-space>
       </template>
       <template #tableHelp>
@@ -76,9 +76,9 @@
           <template #title>
             <div>
               <ul>
-                <li>关联节点数据是异步获取有一定时间延迟</li>
-                <li>关联节点会自动识别服务器中是否存在 java 环境,如果没有 Java 环境不能快速安装节点</li>
-                <li>关联节点如果服务器存在 java 环境,但是插件端未运行则会显示快速安装按钮</li>
+                <li>{{ $tl('p.associationNodeDataAsync') }}</li>
+                <li>{{ $tl('p.javaEnvironmentDetection') }}</li>
+                <li>{{ $tl('p.javaEnvironmentPluginRunning') }}</li>
               </ul>
             </div>
           </template>
@@ -107,27 +107,27 @@
               {{
                 (statusMap[record.machineSsh && record.machineSsh.status] &&
                   statusMap[record.machineSsh && record.machineSsh.status].desc) ||
-                '未知'
+                $tl('c.unknown')
               }}
             </a-tag>
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex instanceof Array && column.dataIndex.includes('osName')">
-          <a-popover title="系统信息">
+          <a-popover :title="$tl('p.systemInfo')">
             <template #content>
-              <p>系统名：{{ record.machineSsh && record.machineSsh.osName }}</p>
-              <p>系统版本：{{ record.machineSsh && record.machineSsh.osVersion }}</p>
-              <p>CPU型号：{{ record.machineSsh && record.machineSsh.osCpuIdentifierName }}</p>
-              <p>主机名：{{ record.machineSsh && record.machineSsh.hostName }}</p>
-              <p>开机时间：{{ formatDuration(record.machineSsh && record.machineSsh.osSystemUptime) }}</p>
+              <p>{{ $tl('p.systemName') }}{{ record.machineSsh && record.machineSsh.osName }}</p>
+              <p>{{ $tl('p.systemVersion') }}{{ record.machineSsh && record.machineSsh.osVersion }}</p>
+              <p>CPU{{ $tl('p.model') }}{{ record.machineSsh && record.machineSsh.osCpuIdentifierName }}</p>
+              <p>{{ $tl('p.hostName') }}{{ record.machineSsh && record.machineSsh.hostName }}</p>
+              <p>{{ $tl('p.bootTime') }}{{ formatDuration(record.machineSsh && record.machineSsh.osSystemUptime) }}</p>
             </template>
-            {{ text || '未知' }}
+            {{ text || $tl('c.unknown') }}
           </a-popover>
         </template>
         <template v-else-if="column.dataIndex instanceof Array && column.dataIndex.includes('osOccupyMemory')">
           <a-tooltip
             placement="topLeft"
-            :title="`内存使用率：${formatPercent(record.machineSsh && record.machineSsh.osOccupyMemory)},总内存：${renderSize(record.machineSsh && record.machineSsh.osMoneyTotal)}`"
+            :title="`${$tl('p.memoryUsage')}${formatPercent(record.machineSsh && record.machineSsh.osOccupyMemory)},${$tl('p.totalMemory')}${renderSize(record.machineSsh && record.machineSsh.osMoneyTotal)}`"
           >
             <span
               >{{ formatPercent(record.machineSsh && record.machineSsh.osOccupyMemory) }}/{{
@@ -140,7 +140,7 @@
         <template v-else-if="column.dataIndex instanceof Array && column.dataIndex.includes('osOccupyCpu')">
           <a-tooltip
             placement="topLeft"
-            :title="`CPU使用率：${formatPercent2Number(record.machineSsh && record.machineSsh.osOccupyCpu)}%,CPU数：${record.machineSsh && record.machineSsh.osCpuCores}`"
+            :title="`CPU${$tl('p.usageRate')}${formatPercent2Number(record.machineSsh && record.machineSsh.osOccupyCpu)}%,CPU${$tl('p.count')}${record.machineSsh && record.machineSsh.osCpuCores}`"
           >
             <span
               >{{ (formatPercent2Number(record.machineSsh && record.machineSsh.osOccupyCpu) || '-') + '%' }} /
@@ -150,11 +150,17 @@
         </template>
 
         <template v-else-if="column.dataIndex instanceof Array && column.dataIndex.includes('osMaxOccupyDisk')">
-          <a-popover title="硬盘信息">
+          <a-popover :title="$tl('p.hardDiskInfo')">
             <template #content>
-              <p>硬盘总量：{{ renderSize(record.machineSsh && record.machineSsh.osFileStoreTotal) }}</p>
-              <p>硬盘最大的使用率：{{ formatPercent(record.machineSsh && record.machineSsh.osMaxOccupyDisk) }}</p>
-              <p>使用率最大的分区：{{ record.machineSsh && record.machineSsh.osMaxOccupyDiskName }}</p>
+              <p>
+                {{ $tl('p.totalHardDiskSpace')
+                }}{{ renderSize(record.machineSsh && record.machineSsh.osFileStoreTotal) }}
+              </p>
+              <p>
+                {{ $tl('p.maxHardDiskUsage')
+                }}{{ formatPercent(record.machineSsh && record.machineSsh.osMaxOccupyDisk) }}
+              </p>
+              <p>{{ $tl('p.maxUsagePartition') }}{{ record.machineSsh && record.machineSsh.osMaxOccupyDiskName }}</p>
             </template>
             <span
               >{{ formatPercent(record.machineSsh && record.machineSsh.osMaxOccupyDisk) }}
@@ -166,7 +172,7 @@
 
         <template v-else-if="column.dataIndex === 'nodeId'">
           <template v-if="record.linkNode">
-            <a-tooltip placement="topLeft" :title="`节点名称：${record.linkNode.name}`">
+            <a-tooltip placement="topLeft" :title="`${$tl('p.nodeName')}${record.linkNode.name}`">
               <a-button
                 size="small"
                 style="width: 90px; padding: 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis"
@@ -183,13 +189,13 @@
           <a-space>
             <a-dropdown>
               <a-button size="small" type="primary" @click="handleTerminal(record, false)"
-                >终端<DownOutlined
+                >{{ $tl('p.terminal') }}<DownOutlined
               /></a-button>
               <template #overlay>
                 <a-menu>
                   <a-menu-item key="1">
                     <a-button size="small" type="primary" @click="handleTerminal(record, true)"
-                      ><FullscreenOutlined />全屏终端</a-button
+                      ><FullscreenOutlined />{{ $tl('p.fullScreenTerminal') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item key="2">
@@ -200,39 +206,42 @@
                         query: { id: record.id, wid: getWorkspaceId() }
                       }"
                     >
-                      <a-button size="small" type="primary"> <FullscreenOutlined />新标签终端</a-button>
+                      <a-button size="small" type="primary">
+                        <FullscreenOutlined />{{ $tl('p.newTabTerminal') }}</a-button
+                      >
                     </router-link>
                   </a-menu-item>
                 </a-menu>
               </template>
             </a-dropdown>
             <template v-if="record.fileDirs">
-              <a-button size="small" type="primary" @click="handleFile(record)">文件</a-button>
+              <a-button size="small" type="primary" @click="handleFile(record)">{{ $tl('c.fileType') }}</a-button>
             </template>
             <template v-else>
-              <a-tooltip
-                placement="topLeft"
-                title="如果按钮不可用,请去资产管理 ssh 列表的关联中新增当前工作空间允许管理的授权文件夹"
-              >
-                <a-button size="small" type="primary" :disabled="true">文件</a-button>
+              <a-tooltip placement="topLeft" :title="$tl('p.authorizeFolder')">
+                <a-button size="small" type="primary" :disabled="true">{{ $tl('c.fileType') }}</a-button>
               </a-tooltip>
             </template>
 
             <a-dropdown>
               <a @click="(e) => e.preventDefault()">
-                更多
+                {{ $tl('p.more') }}
                 <DownOutlined />
               </a>
               <template #overlay>
                 <a-menu>
                   <a-menu-item>
-                    <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+                    <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('p.edit') }}</a-button>
                   </a-menu-item>
                   <a-menu-item>
-                    <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
+                    <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
+                      $tl('p.delete')
+                    }}</a-button>
                   </a-menu-item>
                   <a-menu-item>
-                    <a-button size="small" type="primary" @click="handleViewLog(record)">终端日志</a-button>
+                    <a-button size="small" type="primary" @click="handleViewLog(record)">{{
+                      $tl('p.terminalLog')
+                    }}</a-button>
                   </a-menu-item>
                 </a-menu>
               </template>
@@ -246,7 +255,7 @@
       v-model:open="editSshVisible"
       destroy-on-close
       width="600px"
-      title="编辑 SSH"
+      :title="$tl('p.editSsh')"
       :mask-closable="false"
       :confirm-loading="confirmLoading"
       @ok="handleEditSshOk"
@@ -256,25 +265,22 @@
           <a-alert type="info" show-icon style="width: 100%; margin-bottom: 10px">
             <template #message>
               <ul>
-                <li>此编辑仅能编辑当前 SSH 在此工作空间的名称信息</li>
-                <li>如果要配置 SSH 请到【系统管理】-> 【资产管理】-> 【SSH 管理】中去配置。</li>
-                <li>
-                  当前 SSH 的授权目录（文件目录、文件后缀、禁止命令）需要请到 【系统管理】-> 【资产管理】-> 【SSH
-                  管理】-> 操作栏中->关联按钮->对应工作空间->操作栏中->配置按钮
-                </li>
+                <li>{{ $tl('p.editSshInfo') }}</li>
+                <li>{{ $tl('p.configureSsh') }}</li>
+                <li>{{ $tl('p.sshAuthConfig') }}</li>
               </ul>
             </template>
           </a-alert>
         </template>
-        <a-form-item label="SSH 名称" name="name">
-          <a-input v-model:value="temp.name" :max-length="50" placeholder="SSH 名称" />
+        <a-form-item :label="$tl('c.sshName')" name="name">
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$tl('c.sshName')" />
         </a-form-item>
-        <a-form-item label="分组名称" name="group">
+        <a-form-item :label="$tl('p.groupName')" name="group">
           <custom-select
             v-model:value="temp.group"
             :data="groupList"
-            input-placeholder="新增分组"
-            select-placeholder="选择分组名"
+            :input-placeholder="$tl('p.groupAddition')"
+            :select-placeholder="$tl('p.groupSelection')"
           >
           </custom-select>
         </a-form-item>
@@ -285,7 +291,7 @@
     <a-drawer
       destroy-on-close
       :open="drawerVisible"
-      :title="`${temp.name} 文件管理`"
+      :title="`${temp.name} ${$tl('p.fileManagement')}`"
       placement="right"
       width="90vw"
       @close="
@@ -324,7 +330,7 @@
     <a-modal
       v-model:open="viewOperationLog"
       destroy-on-close
-      title="操作日志"
+      :title="$tl('p.operationLog')"
       width="80vw"
       :footer="null"
       :mask-closable="false"
@@ -335,23 +341,23 @@
     <a-modal
       v-model:open="syncToWorkspaceVisible"
       destroy-on-close
-      title="同步到其他工作空间"
+      :title="$tl('p.syncToOtherWorkspaces')"
       :confirm-loading="confirmLoading"
       :mask-closable="false"
       @ok="handleSyncToWorkspace"
     >
-      <a-alert message="温馨提示" type="warning" show-icon>
+      <a-alert :message="$tl('p.warmTip')" type="warning" show-icon>
         <template #description>
           <ul>
-            <li>同步机制采用 IP+PORT+连接方式 确定是同一个服务器</li>
-            <li>当目标工作空间不存在对应的 SSH 时候将自动创建一个新的 SSH</li>
-            <li>当目标工作空间已经存在 SSH 时候将自动同步 SSH 账号、密码、私钥等信息</li>
+            <li>{{ $tl('p.syncMechanism') }}</li>
+            <li>{{ $tl('p.createNewSsh') }}</li>
+            <li>{{ $tl('p.syncSshInfo') }}</li>
           </ul>
         </template>
       </a-alert>
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
-        <a-form-item label="选择工作空间" name="workspaceId">
+        <a-form-item :label="$tl('p.workspaceSelection')" name="workspaceId">
           <a-select
             v-model:value="temp.workspaceId"
             show-search
@@ -365,7 +371,7 @@
                 )
               }
             "
-            placeholder="请选择工作空间"
+            :placeholder="$tl('c.selectWorkspace')"
           >
             <a-select-option v-for="item in workspaceList" :key="item.id" :disabled="getWorkspaceId() === item.id">{{
               item.name
@@ -429,7 +435,7 @@ export default {
 
       columns: [
         {
-          title: '名称',
+          title: this.$tl('p.name'),
           dataIndex: 'name',
           sorter: true,
           width: 100,
@@ -445,14 +451,14 @@ export default {
         },
         // { title: "Port", dataIndex: "machineSsh.port", sorter: true, width: 80, ellipsis: true, },
         {
-          title: '用户名',
+          title: this.$tl('p.username'),
           dataIndex: ['machineSsh', 'user'],
           width: '100px',
           ellipsis: true
         },
 
         {
-          title: '系统名',
+          title: this.$tl('p.systemName_1'),
           dataIndex: ['machineSsh', 'osName'],
           width: 80,
           ellipsis: true
@@ -465,20 +471,20 @@ export default {
           ellipsis: true
         },
         {
-          title: '内存',
+          title: this.$tl('p.memory'),
           dataIndex: ['machineSsh', 'osOccupyMemory'],
           width: 80,
           ellipsis: true
         },
         {
-          title: '硬盘',
+          title: this.$tl('p.hardDisk'),
           dataIndex: ['machineSsh', 'osMaxOccupyDisk'],
           width: 80,
           ellipsis: true
         },
         // { title: "编码格式", dataIndex: "charset", sorter: true, width: 120, ellipsis: true,  },
         {
-          title: '连接状态',
+          title: this.$tl('p.connectionStatus'),
           dataIndex: ['machineSsh', 'status'],
           ellipsis: true,
           align: 'center',
@@ -486,14 +492,14 @@ export default {
         },
         // { title: "编码格式", dataIndex: "machineSsh.charset", sorter: true, width: 120, ellipsis: true, },
         {
-          title: '关联节点',
+          title: this.$tl('p.associatedNodes'),
           dataIndex: 'nodeId',
 
           width: '100px',
           ellipsis: true
         },
         {
-          title: '创建时间',
+          title: this.$tl('p.creationTime'),
           dataIndex: 'createTimeMillis',
           ellipsis: true,
           sorter: true,
@@ -501,7 +507,7 @@ export default {
           width: '170px'
         },
         {
-          title: '修改时间',
+          title: this.$tl('p.modificationTime'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -509,7 +515,7 @@ export default {
           width: '170px'
         },
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
 
           width: '200px',
@@ -521,7 +527,7 @@ export default {
 
       // 表单校验规则
       rules: {
-        name: [{ required: true, message: '请输入 SSH 名称', trigger: 'blur' }]
+        name: [{ required: true, message: this.$tl('p.sshNameInput'), trigger: 'blur' }]
       },
 
       groupList: [],
@@ -570,6 +576,9 @@ export default {
     this.loadGroupList()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.ssh.ssh.${key}`, ...args)
+    },
     formatPercent2Number,
     renderSize,
     formatPercent,
@@ -648,11 +657,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('p.systemPrompt'),
         zIndex: 1009,
-        content: '真的要删除 SSH 么？当前 ssh 关联的脚本在删除后均将失效',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmDeletion'),
+        okText: this.$tl('p.confirm'),
+        cancelText: this.$tl('p.cancel'),
         onOk: () => {
           return deleteSsh(record.id).then((res) => {
             if (res.code === 200) {
@@ -723,7 +732,7 @@ export default {
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
         $notification.warn({
-          message: '请选择工作空间'
+          message: this.$tl('c.selectWorkspace')
         })
         return false
       }

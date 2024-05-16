@@ -15,13 +15,13 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%commandName%']"
-            placeholder="搜索命令名称"
+            :placeholder="$tl('p.searchCommandName')"
             class="search-input-item"
             @press-enter="getCommandLogData"
           />
           <a-input
             v-model:value="listQuery['%sshName%']"
-            placeholder="搜索ssh名称"
+            :placeholder="$tl('p.searchSshName')"
             class="search-input-item"
             @press-enter="getCommandLogData"
           />
@@ -39,7 +39,7 @@
               }
             "
             allow-clear
-            placeholder="状态"
+            :placeholder="$tl('p.status')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
@@ -58,13 +58,13 @@
               }
             "
             allow-clear
-            placeholder="触发类型"
+            :placeholder="$tl('p.triggerType')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
           </a-select>
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button type="primary" :loading="loading" @click="getCommandLogData">搜索</a-button>
+          <a-tooltip :title="$tl('p.shortcutToFirstPage')">
+            <a-button type="primary" :loading="loading" @click="getCommandLogData">{{ $tl('p.search') }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -80,23 +80,25 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'status'">
-          <span>{{ statusMap[text] || '未知' }}</span>
+          <span>{{ statusMap[text] || $tl('p.unknown') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'triggerExecType'">
-          <span>{{ triggerExecTypeMap[text] || '未知' }}</span>
+          <span>{{ triggerExecTypeMap[text] || $tl('p.unknown') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'exitCode'">
-          <a-tag v-if="text == 0" color="green">成功</a-tag>
+          <a-tag v-if="text == 0" color="green">{{ $tl('p.success') }}</a-tag>
           <a-tag v-else color="orange">{{ text || '-' }}</a-tag>
         </template>
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button type="primary" size="small" :disabled="!record.hasLog" @click="handleView(record)">查看</a-button>
+            <a-button type="primary" size="small" :disabled="!record.hasLog" @click="handleView(record)">{{
+              $tl('p.view')
+            }}</a-button>
             <a-button type="primary" size="small" :disabled="!record.hasLog" @click="handleDownload(record)"
-              ><DownloadOutlined />日志</a-button
+              ><DownloadOutlined />{{ $tl('p.log') }}</a-button
             >
-            <a-button type="primary" danger size="small" @click="handleDelete(record)">删除</a-button>
+            <a-button type="primary" danger size="small" @click="handleDelete(record)">{{ $tl('p.delete') }}</a-button>
           </a-space>
         </template>
       </template>
@@ -108,7 +110,7 @@
       :width="style.width"
       :body-style="style.bodyStyle"
       :style="style.style"
-      title="执行日志"
+      :title="$tl('p.executionLog')"
       :footer="null"
       :mask-closable="false"
     >
@@ -138,35 +140,35 @@ export default {
       logVisible: false,
       columns: [
         {
-          title: 'ssh 名称',
+          title: `ssh ${this.$tl('p.name')}`,
           dataIndex: 'sshName',
           ellipsis: true
         },
         {
-          title: '命令名称',
+          title: this.$tl('p.commandName'),
           dataIndex: 'commandName',
           ellipsis: true
         },
         {
-          title: '状态',
+          title: this.$tl('p.status'),
           dataIndex: 'status',
           width: 100,
           ellipsis: true
         },
         {
-          title: '退出码',
+          title: this.$tl('p.exitCode'),
           dataIndex: 'exitCode',
           width: 100,
           ellipsis: true
         },
         {
-          title: '触发类型',
+          title: this.$tl('p.triggerType'),
           dataIndex: 'triggerExecType',
           width: 100,
           ellipsis: true
         },
         {
-          title: '执行时间',
+          title: this.$tl('p.executionTime'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -176,7 +178,7 @@ export default {
           width: '170px'
         },
         {
-          title: '结束时间',
+          title: this.$tl('p.endTime'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -186,13 +188,13 @@ export default {
           width: '170px'
         },
         {
-          title: '执行人',
+          title: this.$tl('p.executor'),
           dataIndex: 'modifyUser',
           width: 120,
           ellipsis: true
         },
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
           align: 'center',
           fixed: 'right',
@@ -215,6 +217,9 @@ export default {
     this.getCommandLogData()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.ssh.commandLog.${key}`, ...args)
+    },
     handleView(row) {
       this.temp = row
       this.logVisible = true
@@ -240,11 +245,11 @@ export default {
     //  删除命令
     handleDelete(row) {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('p.systemPrompt'),
         zIndex: 1009,
-        content: '真的要删除该执行记录吗？',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmDeletion'),
+        okText: this.$tl('p.confirm'),
+        cancelText: this.$tl('p.cancel'),
         onOk: () => {
           return deleteCommandLog(row.id).then((res) => {
             if (res.code === 200) {
