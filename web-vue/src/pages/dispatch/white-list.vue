@@ -36,7 +36,7 @@
             v-model:value="temp.allowRemoteDownloadHost"
             :rows="5"
             style="resize: none"
-            placeholder="{{$tl('p.inputRemoteDownloadSecureHosts')}}://www.test.com 等"
+            :placeholder="`${$tl('p.inputRemoteDownloadSecureHosts')}://www.test.com 等`"
           />
         </a-form-item>
         <a-form-item :wrapper-col="{ span: 14, offset: 6 }">

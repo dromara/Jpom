@@ -7,11 +7,11 @@
         <a-layout-sider theme="light" class="sider" width="25%">
           <div class="dir-container">
             <a-space>
-              <a-button size="small" type="primary" @click="loadData">刷新目录</a-button>
+              <a-button size="small" type="primary" @click="loadData">{{ $tl('p.refreshDir') }}</a-button>
               <a-button v-show="noFileModes.includes(runMode)" size="small" type="primary" @click="goConsole">
-                控制台
+                {{ $tl('p.console') }}
               </a-button>
-              <a-button size="small" type="primary" @click="backupList"> 备份列表 </a-button>
+              <a-button size="small" type="primary" @click="backupList"> {{ $tl('c.backupList') }} </a-button>
             </a-space>
           </div>
           <a-directory-tree
@@ -42,54 +42,52 @@
               <a-space>
                 <a-dropdown :disabled="!Object.keys(tempNode).length">
                   <a-button size="small" type="primary" @click="(e) => e.preventDefault()"
-                    ><UploadOutlined />上传</a-button
+                    ><UploadOutlined />{{ $tl('p.upload') }}</a-button
                   >
                   <template #overlay>
                     <a-menu>
                       <a-menu-item @click="handleUpload">
-                        <a-space><FileOutlined />上传文件</a-space>
+                        <a-space><FileOutlined />{{ $tl('p.uploadFile') }}</a-space>
                       </a-menu-item>
                       <a-menu-item @click="handleZipUpload">
-                        <a-space><FileZipOutlined />上传压缩包并自动解压</a-space>
+                        <a-space><FileZipOutlined />{{ $tl('p.uploadAndUnzip') }}</a-space>
                       </a-menu-item>
                     </a-menu>
                   </template>
                 </a-dropdown>
                 <a-dropdown :disabled="!Object.keys(tempNode).length">
                   <a-button size="small" type="primary" @click="(e) => e.preventDefault()"
-                    ><PlusOutlined />新建</a-button
+                    ><PlusOutlined />{{ $tl('p.create') }}</a-button
                   >
                   <template #overlay>
                     <a-menu>
                       <a-menu-item @click="handleAddFile(1)">
                         <a-space>
                           <FolderAddOutlined />
-                          <a-space>新建目录</a-space>
+                          <a-space>{{ $tl('p.newDir') }}</a-space>
                         </a-space>
                       </a-menu-item>
                       <a-menu-item @click="handleAddFile(2)">
                         <a-space>
                           <FileAddOutlined />
-                          <a-space>新建空白文件</a-space>
+                          <a-space>{{ $tl('p.newBlankFile') }}</a-space>
                         </a-space>
                       </a-menu-item>
                     </a-menu>
                   </template>
                 </a-dropdown>
-                <a-tooltip
-                  title="通过 URL 下载远程文件到项目文件夹,需要到对应的工作空间下授权目录配置中配置允许的 HOST 授权"
-                >
+                <a-tooltip :title="$tl('p.downloadRemoteFile')">
                   <a-button size="small" type="primary" @click="openRemoteUpload"><CloudDownloadOutlined /></a-button>
                 </a-tooltip>
-                <a-tooltip title="刷新文件表格">
+                <a-tooltip :title="$tl('p.refreshTable')">
                   <a-button size="small" type="primary" @click="loadFileList"><ReloadOutlined /></a-button>
                 </a-tooltip>
-                <a-tooltip title="清空当前目录文件">
+                <a-tooltip :title="$tl('p.clearDir')">
                   <a-button size="small" type="primary" danger @click="clearFile"><DeleteOutlined /></a-button>
                 </a-tooltip>
 
-                <a-tag v-if="uploadPath" color="#2db7f5">当前目录: {{ uploadPath || '' }}</a-tag>
-                <div>文件名栏支持右键菜单</div>
+                <a-tag v-if="uploadPath" color="#2db7f5">{{ $tl('p.currentDir') }}{{ uploadPath || '' }}</a-tag>
+                <div>{{ $tl('p.fileNameRightClick') }}</div>
               </a-space>
             </template>
 
@@ -102,12 +100,12 @@
                       <a-menu>
                         <a-menu-item key="1">
                           <a-button :disabled="!record.textFileEdit" type="link" @click="goReadFile(record)">
-                            <BarsOutlined /> 跟踪文件
+                            <BarsOutlined /> {{ $tl('p.trackFile') }}
                           </a-button>
                         </a-menu-item>
                         <a-menu-item key="2">
                           <a-button type="link" @click="handleRenameFile(record)">
-                            <HighlightOutlined />重命名
+                            <HighlightOutlined />{{ $tl('c.rename') }}
                           </a-button>
                         </a-menu-item>
                       </a-menu>
@@ -116,7 +114,7 @@
                 </a-tooltip>
               </template>
               <template v-else-if="column.dataIndex === 'isDirectory'">
-                <span>{{ text ? '目录' : '文件' }}</span>
+                <span>{{ text ? $tl('p.dir') : $tl('p.file') }}</span>
               </template>
               <template v-else-if="column.dataIndex === 'fileSizeLong'">
                 <a-tooltip placement="topLeft" :title="`${text ? renderSize(text) : record.fileSize}`">
@@ -131,27 +129,31 @@
               <template v-else-if="column.dataIndex === 'operation'">
                 <a-space>
                   <template v-if="record.isDirectory">
-                    <a-tooltip title="目录不能编辑">
-                      <a-button size="small" type="primary" :disabled="true">编辑</a-button>
+                    <a-tooltip :title="$tl('p.dirNotEditable')">
+                      <a-button size="small" type="primary" :disabled="true">{{ $tl('c.edit') }}</a-button>
                     </a-tooltip>
-                    <a-tooltip title="不能下载目录">
-                      <a-button size="small" type="primary" :disabled="true">下载</a-button>
+                    <a-tooltip :title="$tl('p.cantDownloadDir')">
+                      <a-button size="small" type="primary" :disabled="true">{{ $tl('c.download') }}</a-button>
                     </a-tooltip>
                   </template>
                   <template v-else>
-                    <a-tooltip title="需要到 节点管理中的【插件端配置】的授权配置中配置允许编辑的文件后缀">
+                    <a-tooltip :title="$tl('p.editFileSuffixConfig')">
                       <a-button
                         size="small"
                         type="primary"
                         :loading="editLoading"
                         :disabled="!record.textFileEdit"
                         @click="handleEditFile(record)"
-                        >编辑</a-button
+                        >{{ $tl('c.edit') }}</a-button
                       >
                     </a-tooltip>
-                    <a-button size="small" type="primary" @click="handleDownload(record)">下载</a-button>
+                    <a-button size="small" type="primary" @click="handleDownload(record)">{{
+                      $tl('c.download')
+                    }}</a-button>
                   </template>
-                  <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
+                  <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
+                    $tl('p.delete')
+                  }}</a-button>
                 </a-space>
               </template>
             </template>
@@ -163,7 +165,7 @@
             :closable="!uploading"
             :keyboard="false"
             width="35vw"
-            title="上传项目文件"
+            :title="$tl('p.uploadProjectFile')"
             :footer="null"
             :mask-closable="false"
           >
@@ -193,7 +195,7 @@
                   <span v-else>-</span>
                 </template>
 
-                <a-button v-else><UploadOutlined />选择文件</a-button>
+                <a-button v-else><UploadOutlined />{{ $tl('p.selectFile') }}</a-button>
               </a-upload>
 
               <a-row v-if="percentage">
@@ -204,17 +206,20 @@
                         ({{ renderSize(percentageInfo.total) }})
                       </template>
                       <template v-if="percentageInfo.duration">
-                        当前文件用时:{{ formatDuration(percentageInfo.duration) }}
+                        {{ $tl('c.currentFileDuration') }}:{{ formatDuration(percentageInfo.duration) }}
                       </template>
                       <template v-if="uploadFileList.length">
-                        完成 {{ successSize }} 个 / 共{{ uploadFileList.length }}个
+                        {{ $tl('c.complete') }} {{ successSize }} {{ $tl('c.countFormat') }}{{ uploadFileList.length
+                        }}{{ $tl('c.count') }}
                       </template>
                     </template>
                   </a-progress>
                 </a-col>
               </a-row>
 
-              <a-button type="primary" :disabled="fileUploadDisabled" @click="startUpload">开始上传</a-button>
+              <a-button type="primary" :disabled="fileUploadDisabled" @click="startUpload">{{
+                $tl('c.startUpload')
+              }}</a-button>
             </a-space>
           </a-modal>
           <!-- 上传压缩文件 -->
@@ -224,7 +229,7 @@
             :closable="!uploading"
             :keyboard="false"
             width="35vw"
-            title="上传压缩文件"
+            :title="$tl('p.uploadZipFile')"
             :footer="null"
             :mask-closable="false"
           >
@@ -247,7 +252,7 @@
                 "
               >
                 <LoadingOutlined v-if="percentage" />
-                <a-button v-else><UploadOutlined />选择压缩文件</a-button>
+                <a-button v-else><UploadOutlined />{{ $tl('p.selectZipFile') }}</a-button>
               </a-upload>
               <a-row v-if="percentage">
                 <a-col span="24">
@@ -257,10 +262,11 @@
                         ({{ renderSize(percentageInfo.total) }})
                       </template>
                       <template v-if="percentageInfo.duration">
-                        当前文件用时:{{ formatDuration(percentageInfo.duration) }}
+                        {{ $tl('c.currentFileDuration') }}:{{ formatDuration(percentageInfo.duration) }}
                       </template>
                       <template v-if="uploadFileList.length">
-                        完成 {{ successSize }} 个 / 共{{ uploadFileList.length }}个
+                        {{ $tl('c.complete') }} {{ successSize }} {{ $tl('c.countFormat') }}{{ uploadFileList.length
+                        }}{{ $tl('c.count') }}
                       </template>
                     </template>
                   </a-progress>
@@ -269,8 +275,8 @@
 
               <a-switch
                 v-model:checked="uploadData.checkBox"
-                checked-children="清空覆盖"
-                un-checked-children="不清空"
+                :checked-children="$tl('p.overwrite')"
+                :un-checked-children="$tl('p.keep')"
                 style="margin-bottom: 10px"
               />
 
@@ -278,10 +284,12 @@
                 v-model:value="uploadData.stripComponents"
                 style="width: 100%"
                 :min="0"
-                placeholder="解压时候自动剔除压缩包里面多余的文件夹名"
+                :placeholder="$tl('c.excludeExtraFolder')"
               />
 
-              <a-button type="primary" :disabled="fileUploadDisabled" @click="startZipUpload">开始上传</a-button>
+              <a-button type="primary" :disabled="fileUploadDisabled" @click="startZipUpload">{{
+                $tl('c.startUpload')
+              }}</a-button>
             </a-space>
           </a-modal>
 
@@ -289,7 +297,7 @@
             v-model:open="editFileVisible"
             destroy-on-close
             width="80vw"
-            :title="`编辑文件 ${filename}`"
+            :title="`${$tl('p.editFileContent')} ${filename}`"
             :mask-closable="true"
             @cancel="handleCloseModal"
           >
@@ -309,8 +317,8 @@
             </code-editor>
 
             <template #footer>
-              <a-button @click="handleCloseModal"> 关闭 </a-button>
-              <a-button type="primary" @click="updateFileData"> 保存 </a-button>
+              <a-button @click="handleCloseModal"> {{ $tl('p.close') }} </a-button>
+              <a-button type="primary" @click="updateFileData"> {{ $tl('p.save') }} </a-button>
               <a-button
                 type="primary"
                 @click="
@@ -320,7 +328,7 @@
                   }
                 "
               >
-                保存并关闭
+                {{ $tl('p.saveAndClose') }}
               </a-button>
             </template>
           </a-modal>
@@ -329,7 +337,7 @@
             v-model:open="uploadRemoteFileVisible"
             destroy-on-close
             :confirm-loading="confirmLoading"
-            title="远程下载文件"
+            :title="$tl('p.remoteDownload')"
             :mask-closable="false"
             @ok="handleRemoteUpload"
             @cancel="closeRemoteUpload"
@@ -341,18 +349,22 @@
               :wrapper-col="{ span: 18 }"
               :rules="rules"
             >
-              <a-form-item label="远程下载URL" name="url">
-                <a-input v-model:value="remoteDownloadData.url" placeholder="远程下载地址" />
+              <a-form-item :label="$tl('p.remoteDownloadUrl')" name="url">
+                <a-input v-model:value="remoteDownloadData.url" :placeholder="$tl('p.remoteDownloadAddress')" />
               </a-form-item>
-              <a-form-item label="是否为压缩包">
-                <a-switch v-model:checked="remoteDownloadData.unzip" checked-children="是" un-checked-children="否" />
+              <a-form-item :label="$tl('p.isZipFile')">
+                <a-switch
+                  v-model:checked="remoteDownloadData.unzip"
+                  :checked-children="$tl('p.yes')"
+                  :un-checked-children="$tl('p.no')"
+                />
               </a-form-item>
-              <a-form-item v-if="remoteDownloadData.unzip" label="剔除文件夹">
+              <a-form-item v-if="remoteDownloadData.unzip" :label="$tl('p.excludeFolder')">
                 <a-input-number
                   v-model:value="remoteDownloadData.stripComponents"
                   style="width: 100%"
                   :min="0"
-                  placeholder="解压时候自动剔除压缩包里面多余的文件夹名"
+                  :placeholder="$tl('c.excludeExtraFolder')"
                 />
               </a-form-item>
             </a-form>
@@ -362,19 +374,19 @@
             v-model:open="addFileFolderVisible"
             destroy-on-close
             width="300px"
-            :title="addFileOrFolderType === 1 ? '新增目录' : '新建文件'"
+            :title="addFileOrFolderType === 1 ? $tl('p.addNewDir') : $tl('p.createNewFile')"
             :footer="null"
             :mask-closable="true"
           >
             <a-space direction="vertical" style="width: 100%">
-              <span v-if="uploadPath">当前目录:{{ uploadPath }}</span>
+              <span v-if="uploadPath">{{ $tl('p.currentDirPath') }}{{ uploadPath }}</span>
               <!-- <a-tag v-if="">目录创建成功后需要手动刷新右边树才能显示出来哟</a-tag> -->
 
-              <a-input v-model:value="fileFolderName" placeholder="输入文件或者文件夹名" />
+              <a-input v-model:value="fileFolderName" :placeholder="$tl('p.inputName')" />
               <a-row type="flex" justify="center">
-                <a-button type="primary" :disabled="fileFolderName.length === 0" @click="startAddFileFolder"
-                  >确认</a-button
-                >
+                <a-button type="primary" :disabled="fileFolderName.length === 0" @click="startAddFileFolder">{{
+                  $tl('c.confirm')
+                }}</a-button>
               </a-row>
             </a-space>
           </a-modal>
@@ -383,17 +395,17 @@
             v-model:open="renameFileFolderVisible"
             destroy-on-close
             width="300px"
-            :title="`重命名`"
+            :title="`${$tl('c.rename')}`"
             :footer="null"
             :mask-closable="true"
           >
             <a-space direction="vertical" style="width: 100%">
-              <a-input v-model:value="fileFolderName" placeholder="输入新名称" />
+              <a-input v-model:value="fileFolderName" :placeholder="$tl('p.inputNewName')" />
 
               <a-row type="flex" justify="center">
-                <a-button type="primary" :disabled="fileFolderName.length === 0" @click="renameFileFolder"
-                  >确认</a-button
-                >
+                <a-button type="primary" :disabled="fileFolderName.length === 0" @click="renameFileFolder">{{
+                  $tl('c.confirm')
+                }}</a-button>
               </a-row>
             </a-space>
           </a-modal>
@@ -406,7 +418,7 @@
       destroy-on-close
       width="80vw"
       height="80vh"
-      title="备份列表"
+      :title="$tl('c.backupList')"
       :footer="null"
       :mask-closable="true"
       @cancel="
@@ -507,18 +519,18 @@ export default {
       },
       columns: [
         {
-          title: '文件名称',
+          title: this.$tl('p.fileName'),
           dataIndex: 'filename',
           ellipsis: true
         },
         {
-          title: '文件类型',
+          title: this.$tl('p.fileType'),
           dataIndex: 'isDirectory',
           width: '100px',
           ellipsis: true
         },
         {
-          title: '文件大小',
+          title: this.$tl('p.fileSize'),
           dataIndex: 'fileSizeLong',
           width: 120,
           ellipsis: true,
@@ -526,7 +538,7 @@ export default {
           sorter: (a, b) => a.fileSizeLong - b.fileSizeLong
         },
         {
-          title: '修改时间',
+          title: this.$tl('p.modifyTime'),
           dataIndex: 'modifyTimeLong',
           width: '180px',
           ellipsis: true,
@@ -534,7 +546,7 @@ export default {
           sorter: (a, b) => a.modifyTimeLong - b.modifyTimeLong
         },
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
           width: '180px',
           align: 'center',
@@ -542,7 +554,7 @@ export default {
         }
       ],
       rules: {
-        url: [{ required: true, message: '远程下载Url不为空', trigger: 'change' }]
+        url: [{ required: true, message: this.$tl('p.remoteUrlNotEmpty'), trigger: 'change' }]
       },
       addFileFolderVisible: false,
       // 目录1 文件2 标识
@@ -575,6 +587,9 @@ export default {
     this.loadData()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.node.nodeLayout.project.projectFile.${key}`, ...args)
+    },
     renderSize,
     uploadPieces,
     formatDuration,
@@ -583,7 +598,7 @@ export default {
     loadData() {
       const key = 'root-' + new Date().getTime()
       this.tempNode = {
-        filename: '目录：' + (this.absPath || ''),
+        filename: this.$tl('p.dirLabel') + (this.absPath || ''),
         level: 1,
         isDirectory: true,
         key: key,
@@ -660,7 +675,7 @@ export default {
     handleUpload() {
       if (Object.keys(this.tempNode).length === 0) {
         $notification.error({
-          message: '请选择一个节点'
+          message: this.$tl('c.selectNode')
         })
         return
       }
@@ -798,7 +813,7 @@ export default {
     handleZipUpload() {
       if (Object.keys(this.tempNode).length === 0) {
         $notification.error({
-          message: '请选择一个节点'
+          message: this.$tl('c.selectNode')
         })
         return
       }
@@ -1006,7 +1021,7 @@ export default {
     loadFileList() {
       if (Object.keys(this.tempNode).length === 0) {
         $notification.warn({
-          message: '请选择一个节点'
+          message: this.$tl('c.selectNode')
         })
         return false
       }
@@ -1038,14 +1053,14 @@ export default {
     // 清空文件
     clearFile() {
       const msg = this.uploadPath
-        ? '真的要清空 【' + this.uploadPath + '】目录和文件么？'
-        : '真的要清空项目目录和文件么？'
+        ? this.$tl('p.question50') + this.uploadPath + this.$tl('p.question51')
+        : this.$tl('p.question52')
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemPrompt'),
         content: msg,
-        okText: '确认',
+        okText: this.$tl('c.confirm'),
         zIndex: 1009,
-        cancelText: '取消',
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           return deleteProjectFile({
             nodeId: this.nodeId,
@@ -1066,7 +1081,7 @@ export default {
     // 下载
     handleDownload(record) {
       $notification.info({
-        message: '正在下载，请稍等...'
+        message: this.$tl('p.downloading')
       })
       // 请求参数
       const params = {
@@ -1080,14 +1095,14 @@ export default {
     // 删除
     handleDelete(record) {
       const msg = record.isDirectory
-        ? '真的要删除【' + record.filename + '】文件夹么？'
-        : '真的要删除【' + record.filename + '】文件么？'
+        ? this.$tl('c.deletePrompt') + record.filename + this.$tl('p.question53')
+        : this.$tl('c.deletePrompt') + record.filename + this.$tl('p.question54')
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemPrompt'),
         content: msg,
-        okText: '确认',
+        okText: this.$tl('c.confirm'),
         zIndex: 1009,
-        cancelText: '取消',
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           return deleteProjectFile({
             nodeId: this.nodeId,

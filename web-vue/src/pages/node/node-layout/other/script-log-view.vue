@@ -2,7 +2,7 @@
   <div>
     <log-view1
       :ref="`logView`"
-      title-name="执行日志"
+      :title-name="$tl('p.executionLog')"
       :visible="visible"
       @close="
         () => {
@@ -47,6 +47,9 @@ export default {
     this.init()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.node.nodeLayout.other.scriptLogView.${key}`, ...args)
+    },
     init() {
       this.loadData()
       this.logTimer = setInterval(() => {

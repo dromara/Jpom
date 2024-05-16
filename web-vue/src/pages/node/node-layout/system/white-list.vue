@@ -1,27 +1,27 @@
 <template>
   <div>
-    <a-alert style="margin-bottom: 20px" message="路径需要配置绝对路径,不支持软链" type="info" />
+    <a-alert style="margin-bottom: 20px" :message="$tl('p.pathRequirement')" type="info" />
 
     <a-form ref="editForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
-      <a-form-item label="项目路径" name="project">
+      <a-form-item :label="$tl('p.projectPath')" name="project">
         <a-textarea
           v-model:value="temp.project"
           :rows="5"
           style="resize: none"
-          placeholder="请输入项目存放路径授权，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径"
+          :placeholder="$tl('p.pathAuthorization')"
         />
       </a-form-item>
 
-      <a-form-item label="文件后缀" name="allowEditSuffix">
+      <a-form-item :label="$tl('p.fileExtension')" name="allowEditSuffix">
         <a-textarea
           v-model:value="temp.allowEditSuffix"
           :rows="5"
           style="resize: none"
-          placeholder="请输入允许编辑文件的后缀及文件编码，不设置编码则默认取系统编码，示例：设置编码：txt@utf-8， 不设置编码：txt"
+          :placeholder="$tl('p.editableFileExtensionAndEncoding')"
         />
       </a-form-item>
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-        <a-button type="primary" :disabled="submitAble" @click="onSubmit">提交</a-button>
+        <a-button type="primary" :disabled="submitAble" @click="onSubmit">{{ $tl('p.submit') }}</a-button>
       </a-form-item>
     </a-form>
   </div>
@@ -52,6 +52,9 @@ export default {
     this.loadData()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.node.nodeLayout.system.whiteList.${key}`, ...args)
+    },
     // load data
     loadData() {
       getWhiteList({

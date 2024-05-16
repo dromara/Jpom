@@ -3,7 +3,7 @@
     <a-modal
       destroy-on-close
       :open="true"
-      title="编辑 Script"
+      :title="$tl('p.editScript')"
       :confirm-loading="confirmLoading"
       :mask-closable="false"
       width="80vw"
@@ -14,21 +14,36 @@
         }
       "
     >
-      <a-alert v-if="!nodeList || !nodeList.length" message="提醒" type="warning" show-icon style="margin-bottom: 10px">
-        <template #description>当前工作空间还没有逻辑节点不能创建节点脚本奥</template>
+      <a-alert
+        v-if="!nodeList || !nodeList.length"
+        :message="$tl('p.reminder')"
+        type="warning"
+        show-icon
+        style="margin-bottom: 10px"
+      >
+        <template #description>{{ $tl('p.noLogicNodeError') }}</template>
       </a-alert>
       <a-form ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 19 }">
-        <a-alert v-if="temp.scriptType === 'server-sync'" message="服务端同步的脚本不能在此修改" banner />
-        <a-form-item label="选择节点">
-          <a-select v-model:value="temp.nodeId" :disabled="!!temp.nodeId" allow-clear placeholder="请选择节点">
+        <a-alert
+          v-if="temp.scriptType === 'server-sync'"
+          :message="$tl('c.serverScriptModificationForbidden')"
+          banner
+        />
+        <a-form-item :label="$tl('p.selectNode')">
+          <a-select
+            v-model:value="temp.nodeId"
+            :disabled="!!temp.nodeId"
+            allow-clear
+            :placeholder="$tl('p.pleaseSelectNode')"
+          >
             <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
           </a-select>
         </a-form-item>
         <template v-if="temp.nodeId">
-          <a-form-item label="Script 名称" name="name">
-            <a-input v-model:value="temp.name" placeholder="名称" />
+          <a-form-item :label="$tl('p.scriptName')" name="name">
+            <a-input v-model:value="temp.name" :placeholder="$tl('p.name')" />
           </a-form-item>
-          <a-form-item label="Script 内容" name="context">
+          <a-form-item :label="$tl('p.scriptContent')" name="context">
             <a-form-item-rest>
               <code-editor v-model:content="temp.context" height="40vh" :options="{ mode: 'shell' }"></code-editor>
             </a-form-item-rest>
@@ -36,20 +51,20 @@
           <!-- <a-form-item label="默认参数" name="defArgs">
             <a-input v-model="temp.defArgs" placeholder="默认参数" />
           </a-form-item> -->
-          <a-form-item label="默认参数">
+          <a-form-item :label="$tl('p.defaultParams')">
             <a-space style="width: 100%" direction="vertical">
               <a-row v-for="(item, index) in commandParams" :key="item.key">
                 <a-col :span="22">
                   <a-space style="width: 100%" direction="vertical">
                     <a-input
                       v-model:value="item.desc"
-                      :addon-before="`参数${index + 1}描述`"
-                      placeholder="参数描述,参数描述没有实际作用,仅是用于提示参数的含义"
+                      :addon-before="$tl('p.paramDescriptionTemplate')"
+                      :placeholder="`${$tl('p.paramDescription')},${$tl('p.paramDescriptionNote')},仅是用于提示参数的含义`"
                     />
                     <a-input
                       v-model:value="item.value"
-                      :addon-before="`参数${index + 1}值`"
-                      placeholder="参数值,新增默认参数后在手动执行脚本时需要填写参数值"
+                      :addon-before="$tl('p.paramValueTemplate')"
+                      :placeholder="`${$tl('p.paramValue')}${$tl('p.newParamValueNote')}`"
                     />
                   </a-space>
                 </a-col>
@@ -61,26 +76,31 @@
                   </a-row>
                 </a-col>
               </a-row>
-              <a-button type="primary" @click="() => commandParams.push({})">新增参数</a-button>
+              <a-button type="primary" @click="() => commandParams.push({})">{{ $tl('p.addNewParam') }}</a-button>
             </a-space>
           </a-form-item>
-          <a-form-item label="共享" name="global">
+          <a-form-item :label="$tl('p.sharing')" name="global">
             <a-radio-group v-model:value="temp.global">
-              <a-radio :value="true"> 全局</a-radio>
-              <a-radio :value="false"> 当前工作空间</a-radio>
+              <a-radio :value="true"> {{ $tl('p.globalScope') }}</a-radio>
+              <a-radio :value="false"> {{ $tl('p.currentWorkspace') }}</a-radio>
             </a-radio-group>
           </a-form-item>
-          <a-form-item label="定时执行" name="autoExecCron">
+          <a-form-item :label="$tl('p.scheduledExecution')" name="autoExecCron">
             <a-auto-complete
               v-model:value="temp.autoExecCron"
-              placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）"
+              :placeholder="$tl('p.cronExpressionNote')"
               :options="CRON_DATA_SOURCE"
             >
               <template #option="item"> {{ item.title }} {{ item.value }} </template>
             </a-auto-complete>
           </a-form-item>
-          <a-form-item label="描述" name="description">
-            <a-textarea v-model:value="temp.description" :rows="3" style="resize: none" placeholder="详细描述" />
+          <a-form-item :label="$tl('p.description')" name="description">
+            <a-textarea
+              v-model:value="temp.description"
+              :rows="3"
+              style="resize: none"
+              :placeholder="$tl('p.detailedDescription')"
+            />
           </a-form-item>
         </template>
       </a-form>
@@ -115,8 +135,8 @@ export default {
       commandParams: [],
       nodeList: [],
       rules: {
-        name: [{ required: true, message: '请输入脚本名称', trigger: 'blur' }],
-        context: [{ required: true, message: '请输入脚本内容', trigger: 'blur' }]
+        name: [{ required: true, message: this.$tl('p.pleaseInputScriptName'), trigger: 'blur' }],
+        context: [{ required: true, message: this.$tl('p.pleaseInputScriptContent'), trigger: 'blur' }]
       },
       confirmLoading: false
     }
@@ -134,6 +154,9 @@ export default {
     })
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.node.scriptEdit.${key}`, ...args)
+    },
     // 修改
     handleEdit() {
       this.$refs['editScriptForm']?.resetFields()
@@ -160,13 +183,13 @@ export default {
     handleEditScriptOk() {
       if (this.temp.scriptType === 'server-sync') {
         $notification.warning({
-          message: '服务端同步的脚本不能在此修改'
+          message: this.$tl('c.serverScriptModificationForbidden')
         })
         return
       }
       if (!this.temp.nodeId) {
         $notification.warning({
-          message: '没有选择节点不能保存脚本'
+          message: this.$tl('p.noNodeSelectedError')
         })
         return
       }
@@ -176,7 +199,7 @@ export default {
           for (let i = 0; i < this.commandParams.length; i++) {
             if (!this.commandParams[i].desc) {
               $notification.error({
-                message: '请填写第' + (i + 1) + '个参数的描述'
+                message: this.$tl('p.fillParamDescriptionPrefix') + (i + 1) + this.$tl('p.paramDescriptionSuffix')
               })
               return false
             }

@@ -11,9 +11,13 @@
       <log-view2 :ref="`logView`" height="calc(100vh - 160px - 30px)">
         <template #before>
           <a-space>
-            <a-button type="primary" size="small" @click="loadData">刷新</a-button>
-            <a-button type="primary" danger size="small" :disabled="!temp.path" @click="deleteLog">删除</a-button>
-            <a-button type="primary" size="small" :disabled="!temp.path" @click="downloadLog">下载</a-button>
+            <a-button type="primary" size="small" @click="loadData">{{ $tl('p.refresh') }}</a-button>
+            <a-button type="primary" danger size="small" :disabled="!temp.path" @click="deleteLog">{{
+              $tl('p.delete')
+            }}</a-button>
+            <a-button type="primary" size="small" :disabled="!temp.path" @click="downloadLog">{{
+              $tl('p.download')
+            }}</a-button>
           </a-space>
         </template>
       </log-view2>
@@ -84,6 +88,9 @@ export default {
     this.close()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.node.nodeLayout.system.log.${key}`, ...args)
+    },
     close() {
       this.socket?.close()
     },
@@ -146,13 +153,13 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: 'web socket 错误,请检查是否开启 ws 代理'
+          message: `web socket ${this.$tl('p.error')},${this.$tl('p.checkWsProxy')}`
         })
       }
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
-        $message.warning('会话已经关闭[node-system-log] ' + node.dataRef.path)
+        $message.warning(this.$tl('p.sessionClosed') + node.dataRef.path)
         // clearInterval(this.heart);
       }
     },
@@ -175,11 +182,11 @@ export default {
     // 删除文件
     deleteLog() {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('p.systemTip'),
         zIndex: 1009,
-        content: '真的要删除日志文件么？',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmDeleteLog'),
+        okText: this.$tl('p.confirm'),
+        cancelText: this.$tl('p.cancel'),
         onOk: () => {
           return deleteLog({
             machineId: this.machineId,

@@ -1,57 +1,57 @@
 <template>
   <div class="">
     <a-tabs default-active-key="1" tab-position="left">
-      <a-tab-pane key="1" tab="缓存信息">
-        <a-alert
-          message="请勿手动删除数据目录下面文件,如果需要删除需要提前备份或者已经确定对应文件弃用后才能删除"
-          style="margin-top: 10px; margin-bottom: 40px"
-          banner
-        />
+      <a-tab-pane key="1" :tab="$tl('p.cacheInfo')">
+        <a-alert :message="$tl('p.dataDirectoryWarning')" style="margin-top: 10px; margin-bottom: 40px" banner />
         <a-timeline>
           <a-timeline-item v-if="temp.dateTime">
             <span class="layui-elem-quote">
-              插件端时间：{{ temp.dateTime }}
+              {{ $tl('p.pluginTime') }}{{ temp.dateTime }}
               <a-tag>{{ temp.timeZoneId }}</a-tag>
             </span>
           </a-timeline-item>
           <a-timeline-item>
-            <span class="layui-elem-quote">数据目录占用空间：{{ renderSize(temp.dataSize) }}</span>
+            <span class="layui-elem-quote">{{ $tl('p.dataDirectorySpace') }}{{ renderSize(temp.dataSize) }}</span>
           </a-timeline-item>
           <a-timeline-item v-if="temp.fileSize">
             <a-space>
-              <span class="layui-elem-quote">临时文件占用空间：{{ renderSize(temp.fileSize) }}</span>
-              <a-button size="small" type="primary" class="btn" @click="clear('fileSize')">清空</a-button>
+              <span class="layui-elem-quote">{{ $tl('p.tempFileSpace') }}{{ renderSize(temp.fileSize) }}</span>
+              <a-button size="small" type="primary" class="btn" @click="clear('fileSize')">{{
+                $tl('c.clear')
+              }}</a-button>
             </a-space>
           </a-timeline-item>
           <a-timeline-item v-if="temp.oldJarsSize">
             <a-space>
-              <span class="layui-elem-quote">旧版程序包占有空间：{{ renderSize(temp.oldJarsSize) }}</span>
-              <a-button size="small" type="primary" class="btn" @click="clear('oldJarsSize')">清空</a-button>
+              <span class="layui-elem-quote">{{ $tl('p.oldPackageSpace') }}{{ renderSize(temp.oldJarsSize) }}</span>
+              <a-button size="small" type="primary" class="btn" @click="clear('oldJarsSize')">{{
+                $tl('c.clear')
+              }}</a-button>
             </a-space>
           </a-timeline-item>
 
           <a-timeline-item>
             <a-space>
-              <span class="layui-elem-quote">进程端口缓存：{{ temp.pidPort }}</span>
-              <a-button v-if="temp.pidPort" size="small" type="primary" class="btn" @click="clear('pidPort')"
-                >清空</a-button
-              >
+              <span class="layui-elem-quote">{{ $tl('p.processPortCache') }}{{ temp.pidPort }}</span>
+              <a-button v-if="temp.pidPort" size="small" type="primary" class="btn" @click="clear('pidPort')">{{
+                $tl('c.clear')
+              }}</a-button>
             </a-space>
           </a-timeline-item>
           <a-timeline-item>
-            <span class="layui-elem-quote">脚本日志数：{{ temp.scriptExecLogSize }}</span>
+            <span class="layui-elem-quote">{{ $tl('p.scriptLogCount') }}{{ temp.scriptExecLogSize }}</span>
           </a-timeline-item>
           <a-timeline-item>
-            <span class="layui-elem-quote">在读取的日志文件数：{{ temp.readFileOnLineCount }}</span>
+            <span class="layui-elem-quote">{{ $tl('p.readingLogFileCount') }}{{ temp.readFileOnLineCount }}</span>
           </a-timeline-item>
           <a-timeline-item>
-            <span class="layui-elem-quote">插件数：{{ temp.pluginSize || 0 }}</span>
+            <span class="layui-elem-quote">{{ $tl('p.pluginCount') }}{{ temp.pluginSize || 0 }}</span>
           </a-timeline-item>
           <a-timeline-item>
             <div class="layui-elem-quote">
-              环境变量：
+              {{ $tl('p.environmentVariable') }}
               <a-tag v-for="(item, index) in temp.envVarKeys" :key="index">
-                <a-tooltip :title="`环境变量的key:${item}`">
+                <a-tooltip :title="`${$tl('p.environmentVariableKey')}:${item}`">
                   {{ item }}
                 </a-tooltip>
               </a-tag>
@@ -59,19 +59,19 @@
           </a-timeline-item>
         </a-timeline>
       </a-tab-pane>
-      <a-tab-pane key="2" tab="定时任务"> <task-stat :task-list="taskList" @refresh="loadData" /></a-tab-pane>
-      <a-tab-pane key="3" tab="孤独数据">
+      <a-tab-pane key="2" :tab="$tl('p.scheduledTask')">
+        <task-stat :task-list="taskList" @refresh="loadData"
+      /></a-tab-pane>
+      <a-tab-pane key="3" :tab="$tl('p.lonelyData')">
         <a-space direction="vertical" style="width: 100%">
-          <a-alert message="何为孤独数据" type="warning" show-icon>
+          <a-alert :message="$tl('p.lonelyDataDesc')" type="warning" show-icon>
             <template #description>
               <ul>
-                <li>
-                  孤独数据是指机器节点里面存在数据，但是无法和当前系统绑定上关系（关系绑定=节点ID+工作空间ID对应才行），一般情况下不会出现这样的数据
-                </li>
-                <li>通常情况为项目迁移工作空间、迁移物理机器等一些操作可能产生孤独数据</li>
-                <li>如果孤独数据被工作空间下的其他功能关联，修正后关联的数据将失效对应功能无法查询到关联数据</li>
-                <li>低版本项目数据未存储节点ID，对应项目数据也将出来在孤独数据中（此类数据不影响使用）</li>
-                <li>一个物理节点被多个服务端绑定也会产生孤独数据奥</li>
+                <li>{{ $tl('p.lonelyDataDetail') }}</li>
+                <li>{{ $tl('p.lonelyDataCause') }}</li>
+                <li>{{ $tl('p.lonelyDataEffect') }}</li>
+                <li>{{ $tl('p.oldVersionData') }}</li>
+                <li>{{ $tl('p.multipleBinding') }}</li>
               </ul>
             </template>
           </a-alert>
@@ -79,36 +79,36 @@
             <template #renderItem="{ item }">
               <a-list-item>
                 <a-space>
-                  <span>项目名称：{{ item.name }}</span>
-                  <span>项目ID：{{ item.id }}</span>
-                  <span>工作空间ID：{{ item.workspaceId }}</span>
-                  <span>节点ID：{{ item.nodeId }}</span>
-                  <a-button type="primary" size="small" danger @click="openCorrectLonely(item, 'project')"
-                    >修正</a-button
-                  >
+                  <span>{{ $tl('p.projectName') }}{{ item.name }}</span>
+                  <span>{{ $tl('p.projectId') }}{{ item.id }}</span>
+                  <span>{{ $tl('c.workspaceId') }}{{ item.workspaceId }}</span>
+                  <span>{{ $tl('c.nodeId') }}{{ item.nodeId }}</span>
+                  <a-button type="primary" size="small" danger @click="openCorrectLonely(item, 'project')">{{
+                    $tl('c.correction')
+                  }}</a-button>
                 </a-space>
               </a-list-item>
             </template>
             <template #header>
-              <div>项目孤独数据</div>
+              <div>{{ $tl('p.projectLonelyData') }}</div>
             </template>
           </a-list>
           <a-list size="small" bordered :data-source="machineLonelyData.scripts">
             <template #renderItem="{ item }">
               <a-list-item
                 ><a-space>
-                  <span>脚本名称：{{ item.name }}</span>
-                  <span>脚本ID：{{ item.id }}</span>
-                  <span>工作空间ID：{{ item.workspaceId }}</span>
-                  <span>节点ID：{{ item.nodeId }}</span>
-                  <a-button type="primary" size="small" danger @click="openCorrectLonely(item, 'script')"
-                    >修正</a-button
-                  >
+                  <span>{{ $tl('p.scriptName') }}{{ item.name }}</span>
+                  <span>{{ $tl('p.scriptId') }}{{ item.id }}</span>
+                  <span>{{ $tl('c.workspaceId') }}{{ item.workspaceId }}</span>
+                  <span>{{ $tl('c.nodeId') }}{{ item.nodeId }}</span>
+                  <a-button type="primary" size="small" danger @click="openCorrectLonely(item, 'script')">{{
+                    $tl('c.correction')
+                  }}</a-button>
                 </a-space>
               </a-list-item>
             </template>
             <template #header>
-              <div>脚本孤独数据</div>
+              <div>{{ $tl('p.scriptLonelyData') }}</div>
             </template>
           </a-list></a-space
         >
@@ -119,21 +119,21 @@
       v-model:open="correctLonelyOpen"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      title="修正孤独数据"
+      :title="$tl('p.correctLonelyData')"
       :mask-closable="false"
       @ok="handleCorrectLonely"
     >
       <a-space direction="vertical" style="width: 100%">
-        <a-alert message="温馨提示" type="warning">
+        <a-alert :message="$tl('p.warning')" type="warning">
           <template #description>
             <ul>
-              <li>修改后如果有原始关联数据将失效，需要重新配置关联</li>
-              <li>如果节点选项是禁用，则表示对应数据有推荐关联节点（低版本项目数据可能出现此情况）</li>
+              <li>{{ $tl('p.correctionEffect') }}</li>
+              <li>{{ $tl('p.disabledNodeTip') }}</li>
             </ul>
           </template>
         </a-alert>
         <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
-          <a-form-item label="选择节点" name="nodeId">
+          <a-form-item :label="$tl('p.selectNode')" name="nodeId">
             <a-select
               v-model:value="temp.toNodeId"
               show-search
@@ -148,7 +148,7 @@
                 }
               "
               :disabled="temp.toNodeId && temp.recommend"
-              placeholder="请选择节点"
+              :placeholder="$tl('c.selectNode')"
             >
               <a-select-option v-for="item in nodeList" :key="item.id">
                 【{{ item.workspace && item.workspace.name }}】{{ item.name }}
@@ -192,6 +192,9 @@ export default {
     this.listMachineLonelyData()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.node.nodeLayout.system.cache.${key}`, ...args)
+    },
     // parseTime,
     renderSize,
     // load data
@@ -264,7 +267,7 @@ export default {
     handleCorrectLonely() {
       if (!this.temp.toNodeId) {
         $notification.warn({
-          message: '请选择节点'
+          message: this.$tl('c.selectNode')
         })
         return false
       }
