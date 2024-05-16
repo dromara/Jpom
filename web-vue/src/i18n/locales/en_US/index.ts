@@ -19,6 +19,7 @@ import layout from './pages/layout'
 import login from './pages/login'
 import repository from './pages/repository'
 import script from './pages/script'
+import node from './pages/node'
 export default {
   pages: {
     404: page404,
@@ -31,6 +32,7 @@ export default {
     layout,
     login,
     repository,
-    script
+    script,
+    node
   }
 }

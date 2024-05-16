@@ -4,9 +4,9 @@
     <log-view2 :ref="`logView`" height="calc(100vh - 140px)">
       <template #before>
         <a-space>
-          <a-button size="small" :disabled="project.status" :loading="optButtonLoading" type="primary" @click="start"
-            >启动</a-button
-          >
+          <a-button size="small" :disabled="project.status" :loading="optButtonLoading" type="primary" @click="start">{{
+            $tl('p.start')
+          }}</a-button>
           <a-button
             size="small"
             :disabled="!project.status"
@@ -14,7 +14,7 @@
             type="primary"
             danger
             @click="restart"
-            >重启</a-button
+            >{{ $tl('p.restart') }}</a-button
           >
           <a-button
             size="small"
@@ -23,31 +23,35 @@
             type="primary"
             danger
             @click="stop"
-            >停止</a-button
+            >{{ $tl('p.stop') }}</a-button
           >
           <template v-if="project.runMode === 'Dsl'">
             <template v-if="canReload">
-              <a-popover title="上次重载结果">
+              <a-popover :title="$tl('p.lastReloadResult')">
                 <template #content>
                   <template v-if="project.lastReloadResult">
                     <p>
-                      <a-tag v-if="project.lastReloadResult.success" color="green">成功</a-tag>
-                      <a-tag v-else color="green">成功</a-tag>
+                      <a-tag v-if="project.lastReloadResult.success" color="green">{{ $tl('c.status') }}</a-tag>
+                      <a-tag v-else color="green">{{ $tl('c.status') }}</a-tag>
                     </p>
                     <p v-for="(item, index) in project.lastReloadResult.msgs" :key="index">
                       {{ item }}
                     </p>
                   </template>
-                  <template v-else>还未执行reload</template>
+                  <template v-else>{{ $tl('p.notExecutedReload') }}</template>
                 </template>
-                <a-button size="small" :loading="optButtonLoading" type="primary" @click="reload">重载</a-button>
+                <a-button size="small" :loading="optButtonLoading" type="primary" @click="reload">{{
+                  $tl('c.reload')
+                }}</a-button>
               </a-popover>
             </template>
             <template v-else>
-              <a-button size="small" :disabled="true" :loading="optButtonLoading" type="primary">重载</a-button>
+              <a-button size="small" :disabled="true" :loading="optButtonLoading" type="primary">{{
+                $tl('c.reload')
+              }}</a-button>
             </template>
           </template>
-          <a-button size="small" type="primary" @click="goFile">文件管理</a-button>
+          <a-button size="small" type="primary" @click="goFile">{{ $tl('p.fileManagement') }}</a-button>
           <a-dropdown v-if="project.dslProcessInfo">
             <template #overlay>
               <a-menu>
@@ -56,7 +60,7 @@
                     <a-tag>
                       {{ item.process }}
                     </a-tag>
-                    <template v-if="item.type === 'file'">项目文件 {{ item.scriptId }} </template>
+                    <template v-if="item.type === 'file'">{{ $tl('p.projectFile') }}{{ item.scriptId }} </template>
                     <template v-else-if="item.type === 'script'">
                       <a-button
                         type="link"
@@ -68,7 +72,7 @@
                           }
                         "
                       >
-                        <EditOutlined /> 节点脚本
+                        <EditOutlined /> {{ $tl('p.nodeScript') }}
                       </a-button>
                     </template>
                   </template>
@@ -85,7 +89,7 @@
                 </a-menu-item>
               </a-menu>
             </template>
-            <a-button size="small" type="primary"> 关联脚本 <DownOutlined /> </a-button>
+            <a-button size="small" type="primary"> {{ $tl('p.associatedScript') }} <DownOutlined /> </a-button>
           </a-dropdown>
           <a-button
             size="small"
@@ -97,7 +101,7 @@
             "
           >
             <!-- <a-tag> -->
-            日志大小: {{ project.logSize || '-' }}
+            {{ $tl('p.logSize') }}: {{ project.logSize || '-' }}
             <!-- 更多 -->
             <FullscreenOutlined />
             <!-- </a-tag> -->
@@ -111,7 +115,7 @@
     <a-modal
       v-model:open="lobbackVisible"
       destroy-on-close
-      title="日志备份列表"
+      :title="$tl('p.logBackupList')"
       width="850px"
       :footer="null"
       :mask-closable="false"
@@ -197,6 +201,9 @@ export default {
     this.close()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.node.nodeLayout.project.projectConsole.${key}`, ...args)
+    },
     close() {
       this.socket?.close()
 
@@ -235,14 +242,14 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: 'web socket 错误,请检查是否开启 ws 代理'
+          message: `web socket ${this.$tl('p.error')},${this.$tl('p.checkWsProxy')}`
         })
         clearInterval(this.heart)
       }
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
-        $message.warning('会话已经关闭[project-console]')
+        $message.warning(this.$tl('p.sessionClosed'))
         clearInterval(this.heart)
       }
       this.socket.onmessage = (msg) => {
@@ -283,8 +290,8 @@ export default {
                   this.$refs.logView.appendLine(element)
                 })
               }
-              res.data.ports && this.$refs.logView.appendLine('端口：' + res.data.ports)
-              res.data.pids && this.$refs.logView.appendLine('进程号：' + res.data.pids.join(','))
+              res.data.ports && this.$refs.logView.appendLine(this.$tl('p.port') + res.data.ports)
+              res.data.pids && this.$refs.logView.appendLine(this.$tl('p.processId') + res.data.pids.join(','))
             }
             this.$refs.logView.appendLine(res.op + ' ' + res.msg)
             return
@@ -339,11 +346,11 @@ export default {
     // 重启
     restart() {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemMessage'),
         zIndex: 1009,
-        content: '真的要重启项目么？',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmRestart'),
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           this.sendMsg('restart')
         }
@@ -352,11 +359,11 @@ export default {
     // 停止
     stop() {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemMessage'),
         zIndex: 1009,
-        content: '真的要停止项目么？',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmStop'),
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           this.sendMsg('stop')
         }

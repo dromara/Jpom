@@ -272,7 +272,7 @@
             <custom-input
               :input="temp.password"
               :env-list="envVarList"
-              :placeholder="`${!temp.id ? '${$tl('p.loginPassword')}' : '${$tl('p.passwordNote2')}'}`"
+              :placeholder="`${!temp.id ? $tl('p.loginPassword') : $tl('p.passwordNote2')}`"
               @change="
                 (v) => {
                   temp = { ...temp, password: v }
@@ -529,7 +529,19 @@
 
 <script>
 import CustomInput from '@/components/customInput'
-import { providerInfo, authorizeRepos, deleteRepository, editRepository, getRepositoryList, restHideField, sortItem, exportData, importTemplate, importData, listRepositoryGroup } from '@/api/repository'
+import {
+  providerInfo,
+  authorizeRepos,
+  deleteRepository,
+  editRepository,
+  getRepositoryList,
+  restHideField,
+  sortItem,
+  exportData,
+  importTemplate,
+  importData,
+  listRepositoryGroup
+} from '@/api/repository'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 import { getWorkspaceEnvAll } from '@/api/workspace'
 import CustomSelect from '@/components/customSelect'
@@ -772,9 +784,9 @@ export default {
     }
   },
   methods: {
-      $tl(key, ...args) {
-        return this.$t(`pages.repository.repositoryList.${key}`, ...args)
-      },
+    $tl(key, ...args) {
+      return this.$t(`pages.repository.repositoryList.${key}`, ...args)
+    },
     CHANGE_PAGE,
     // 分组数据
     loadGroupList() {
@@ -985,7 +997,7 @@ export default {
       }
       let msg = msgData[method] || this.$tl('p.confirmOperation')
       if (!record.sortValue) {
-        msg += ' this.$tl('p.isDefault'),this.$tl('p.moveNotice'),this.$tl('p.moveAdvice')'
+        msg += ` ${this.$tl('p.isDefault')},${this.$tl('p.moveNotice')},${this.$tl('p.moveAdvice')}`
       }
       // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
       const compareId = this.list[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id
