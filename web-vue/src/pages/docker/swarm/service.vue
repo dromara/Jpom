@@ -211,7 +211,7 @@
                             <a-input
                               v-model:value="item.targetPort"
                               :addon-before="$tl('c.container')"
-                              placeholder="{{$tl('c.container')}}端口"
+                              :placeholder="`${$tl('c.container')}端口`"
                             >
                               <template #addonAfter>
                                 <a-select v-model:value="item.protocol" :placeholder="$tl('p.portProtocol')">
@@ -268,14 +268,14 @@
                             <a-input
                               v-model:value="item.source"
                               :addon-before="$tl('p.hostMachine')"
-                              placeholder="{{$tl('p.hostMachine')}}机目录"
+                              :placeholder="`${$tl('p.hostMachine')}机目录`"
                             />
                           </a-col>
                           <a-col :span="8" :offset="1">
                             <a-input
                               v-model:value="item.target"
                               :addon-before="$tl('c.container')"
-                              placeholder="{{$tl('c.container')}}目录"
+                              :placeholder="`${$tl('c.container')}目录`"
                             />
                           </a-col>
                         </a-row>
@@ -437,7 +437,7 @@
                     v-model:value="temp.update.maxFailureRatio"
                     style="width: 80%"
                     :min="0"
-                    placeholder="{{$tl('c.failureRate')}}{{$tl('c.failureRateDetail')}}"
+                    :placeholder="`${$tl('c.failureRate')}${$tl('c.failureRateDetail')}`"
                   />
                 </a-form-item>
                 <a-form-item :label="$tl('c.failureStrategy')" name="failureAction">
@@ -487,7 +487,7 @@
                     v-model:value="temp.rollback.maxFailureRatio"
                     style="width: 80%"
                     :min="0"
-                    placeholder="{{$tl('c.failureRate')}}{{$tl('c.failureRateDetail')}}"
+                    :placeholder="`${$tl('c.failureRate')}${$tl('c.failureRateDetail')}`"
                   />
                 </a-form-item>
                 <a-form-item :label="$tl('c.failureStrategy')" name="failureAction">
