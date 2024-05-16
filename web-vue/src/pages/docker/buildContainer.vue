@@ -125,7 +125,7 @@
                   <a-input
                     v-model:value="item.host"
                     :addon-before="$tl('p.host')"
-                    placeholder="{{$tl('p.host')}}机目录"
+                    :placeholder="`${$tl('p.host')}机目录`"
                   />
                 </a-col>
                 <a-col :span="10" :offset="1">
