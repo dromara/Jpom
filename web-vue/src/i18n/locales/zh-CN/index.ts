@@ -22,6 +22,7 @@ import script from './pages/script'
 import node from './pages/node'
 import ssh from './pages/ssh'
 import tools from './pages/tools'
+import user from './pages/user'
 export default {
   pages: {
     404: page404,
@@ -37,6 +38,7 @@ export default {
     script,
     node,
     ssh,
-    tools
+    tools,
+    user
   }
 }
