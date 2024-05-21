@@ -3,39 +3,39 @@
     <a-collapse v-model:activeKey="activeKey">
       <a-collapse-panel key="1">
         <template #header>
-          服务端机器网络
+          {{ $tl('p.serverNetwork') }}
           <a-tooltip>
             <template #title>
               <ul>
-                <li>A类 10.0.0.0-10.255.255.255</li>
-                <li>B类 172.16.0.0-172.31.255.255</li>
-                <li>C类 192.168.0.0-192.168.255.255</li>
+                <li>A{{ $tl('p.class10') }}.0.0.0-10.255.255.255</li>
+                <li>B{{ $tl('p.class172') }}.16.0.0-172.31.255.255</li>
+                <li>C{{ $tl('p.class192') }}.168.0.0-192.168.255.255</li>
               </ul>
             </template>
             <QuestionCircleOutlined />
           </a-tooltip>
         </template>
         <a-space direction="vertical" style="width: 100%">
-          <template v-for="item in ipListArray">
+          <template v-for="(item, index) in ipListArray" :key="index">
             <a-list size="small" bordered :data-source="item.ips">
               <template #renderItem="{ item }">
                 <a-list-item
                   >{{ item.ip }}
-                  <a-tag v-for="label in item.labels">{{ label }}</a-tag>
+                  <a-tag v-for="(item, idx) in item.labels" :key="idx">{{ label }}</a-tag>
                 </a-list-item>
               </template>
               <template #header>
                 <div>
                   {{ item.name }} <a-tag>{{ item.displayName }}</a-tag>
-                  <a-tag v-if="item.virtual">虚拟</a-tag>
-                  <a-tag v-if="item.loopback">环回</a-tag>
+                  <a-tag v-if="item.virtual">{{ $tl('p.virtual') }}</a-tag>
+                  <a-tag v-if="item.loopback">{{ $tl('p.loopback') }}</a-tag>
                 </div>
               </template>
             </a-list>
           </template>
         </a-space>
       </a-collapse-panel>
-      <a-collapse-panel key="ping" header="网络 Reachable 测试">
+      <a-collapse-panel key="ping" :header="$tl('p.networkReachableTest')">
         <a-form
           ref="form"
           :model="pingData"
@@ -44,48 +44,48 @@
           :wrapper-col="{ span: 18 }"
           @finish="onPingSubmit"
         >
-          <a-form-item label="提示" name="">
-            <a-alert message="不等同于 PING 测试，此处测试成功表示网络一定通畅，此处测试失败网络不一定不通畅" banner />
+          <a-form-item :label="$tl('p.hint')" name="">
+            <a-alert :message="$tl('p.note')" banner />
           </a-form-item>
           <a-form-item label="HOST" name="host">
             <a-input
               v-model:value="pingData.host"
-              placeholder="请输入要检查的 host"
+              :placeholder="$tl('c.host')"
               @change="
                 () => {
                   pingReulst = {}
                 }
               "
             />
-            <template #help>支持IP 地址、域名、主机名 </template>
+            <template #help>{{ $tl('c.hostType') }} </template>
           </a-form-item>
-          <a-form-item label="超时时间(S)" name="timeout">
+          <a-form-item :label="$tl('c.timeoutSeconds')" name="timeout">
             <a-input-number
               v-model:value="pingData.timeout"
               :min="1"
-              placeholder="请输入超时时间"
+              :placeholder="$tl('c.inputTimeout')"
               style="width: 100%"
             />
           </a-form-item>
 
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-            <a-button type="primary" html-type="submit" :loading="pingLoading"> 测试 </a-button>
+            <a-button type="primary" html-type="submit" :loading="pingLoading"> {{ $tl('c.test') }} </a-button>
           </a-form-item>
           <template v-if="Object.keys(pingReulst).length">
-            <a-form-item label="结果" name="result">
-              <a-tag v-if="pingReulst.ping" color="green">成功</a-tag>
-              <a-tag v-else color="red">失败</a-tag>
+            <a-form-item :label="$tl('c.result')" name="result">
+              <a-tag v-if="pingReulst.ping" color="green">{{ $tl('c.success') }}</a-tag>
+              <a-tag v-else color="red">{{ $tl('c.failure') }}</a-tag>
             </a-form-item>
-            <a-form-item label="类型" name="labels">
-              <a-tag v-for="item in pingReulst.labels">{{ item }}</a-tag>
+            <a-form-item :label="$tl('c.type')" name="labels">
+              <a-tag v-for="(item, index) in pingReulst.labels" :key="index">{{ item }}</a-tag>
             </a-form-item>
-            <a-form-item v-if="pingReulst.originalIP" label="原始IP" name="originalIP">
+            <a-form-item v-if="pingReulst.originalIP" :label="$tl('c.originalIp')" name="originalIP">
               {{ pingReulst.originalIP }}
             </a-form-item>
           </template>
         </a-form>
       </a-collapse-panel>
-      <a-collapse-panel key="telnet" header="网络端口测试">
+      <a-collapse-panel key="telnet" :header="$tl('p.networkPortTest')">
         <a-form
           ref="form"
           :model="telnetData"
@@ -97,16 +97,16 @@
           <a-form-item label="HOST" name="host">
             <a-input
               v-model:value="telnetData.host"
-              placeholder="请输入要检查的 host"
+              :placeholder="$tl('c.host')"
               @change="
                 () => {
                   telnetReulst = {}
                 }
               "
             />
-            <template #help>支持IP 地址、域名、主机名 </template>
+            <template #help>{{ $tl('c.hostType') }} </template>
           </a-form-item>
-          <a-form-item label="端口" name="port">
+          <a-form-item :label="$tl('p.port')" name="port">
             <a-auto-complete
               v-model:value="telnetData.port"
               :options="UniversalPort"
@@ -120,34 +120,34 @@
                 v-model:value="telnetData.port"
                 :min="0"
                 :max="65535"
-                placeholder="需要测试的端口"
+                :placeholder="$tl('p.testPort')"
                 :controls="false"
               />
               <template #option="item"> {{ item.title }} {{ item.value }} </template>
               <template #clearIcon>1</template>
             </a-auto-complete>
           </a-form-item>
-          <a-form-item label="超时时间(S)" name="timeout">
+          <a-form-item :label="$tl('c.timeoutSeconds')" name="timeout">
             <a-input-number
               v-model:value="telnetData.timeout"
               :min="1"
-              placeholder="请输入超时时间"
+              :placeholder="$tl('c.inputTimeout')"
               style="width: 100%"
             />
           </a-form-item>
 
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-            <a-button type="primary" html-type="submit" :loading="telnetLoading"> 测试 </a-button>
+            <a-button type="primary" html-type="submit" :loading="telnetLoading"> {{ $tl('c.test') }} </a-button>
           </a-form-item>
           <template v-if="Object.keys(telnetReulst).length">
-            <a-form-item label="结果" name="result">
-              <a-tag v-if="telnetReulst.open" color="green">成功</a-tag>
-              <a-tag v-else color="red">失败</a-tag>
+            <a-form-item :label="$tl('c.result')" name="result">
+              <a-tag v-if="telnetReulst.open" color="green">{{ $tl('c.success') }}</a-tag>
+              <a-tag v-else color="red">{{ $tl('c.failure') }}</a-tag>
             </a-form-item>
-            <a-form-item label="类型" name="labels">
-              <a-tag v-for="item in telnetReulst.labels">{{ item }}</a-tag>
+            <a-form-item :label="$tl('c.type')" name="labels">
+              <a-tag v-for="(item, index) in telnetReulst.labels" :key="index">{{ item }}</a-tag>
             </a-form-item>
-            <a-form-item v-if="telnetReulst.originalIP" label="原始IP" name="originalIP">
+            <a-form-item v-if="telnetReulst.originalIP" :label="$tl('c.originalIp')" name="originalIP">
               {{ telnetReulst.originalIP }}
             </a-form-item>
           </template>
@@ -158,20 +158,23 @@
 </template>
 <script setup>
 import { ipList, netPing, netTelnet } from '@/api/tools'
+
+import { useI18nPage } from '@/i18n/hooks/useI18nPage'
+const { $tl } = useI18nPage('pages.tools.network')
 const ipListArray = ref([])
 const activeKey = ref(['ping', 'telnet'])
 
 const UniversalPort = ref([
   {
-    title: '插件端端口',
+    title: $tl('p.pluginPort'),
     value: '2123'
   },
   {
-    title: '服务端端口',
+    title: $tl('p.serverPort'),
     value: '2122'
   },
   {
-    title: 'SSH终端',
+    title: `SSH${$tl('p.terminal')}`,
     value: '22'
   },
   {
@@ -196,7 +199,7 @@ const pingRules = ref({
   host: [
     {
       required: true,
-      message: '请输入要检查的 host',
+      message: $tl('c.host'),
       trigger: 'blur'
     }
   ]
@@ -230,14 +233,14 @@ const telnetRules = ref({
   host: [
     {
       required: true,
-      message: '请输入要检查的 host',
+      message: $tl('c.host'),
       trigger: 'blur'
     }
   ],
   port: [
     {
       required: true,
-      message: '请输入要检查的端口',
+      message: $tl('p.inputPort'),
       trigger: 'blur'
     }
   ]
