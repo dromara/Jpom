@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="systemUserList"
-      empty-description="没有任何用户"
+      :empty-description="$tl('p.noUser')"
       :loading="loading"
       :data-source="list"
       :columns="columns"
@@ -24,29 +24,29 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery.id"
-            placeholder="用户名ID"
+            :placeholder="$tl('p.userId')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%name%']"
-            placeholder="用户名"
+            :placeholder="$tl('p.username')"
             class="search-input-item"
             @press-enter="loadData"
           />
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          <a-tooltip :title="$tl('p.firstPageTip')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">新增</a-button>
-          <a-button type="primary" @click="systemNotificationOpen = true">发布系统公告</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $tl('p.add') }}</a-button>
+          <a-button type="primary" @click="systemNotificationOpen = true">{{ $tl('p.publishNotice') }}</a-button>
         </a-space>
       </template>
       <template #tableBodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('p.edit') }}</a-button>
             <a-dropdown>
-              <a @click="(e) => e.preventDefault()"> 更多 <DownOutlined /> </a>
+              <a @click="(e) => e.preventDefault()"> {{ $tl('p.more') }} <DownOutlined /> </a>
               <template #overlay>
                 <a-menu>
                   <a-menu-item>
@@ -56,7 +56,7 @@
                       size="small"
                       :disabled="record.parent === 'sys'"
                       @click="handleDelete(record)"
-                      >删除</a-button
+                      >{{ $tl('p.delete') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
@@ -66,7 +66,7 @@
                       size="small"
                       :disabled="record.pwdErrorCount === 0"
                       @click="handleUnlock(record)"
-                      >解锁</a-button
+                      >{{ $tl('p.unlock') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
@@ -76,7 +76,7 @@
                       size="small"
                       :disabled="record.parent === 'sys'"
                       @click="restUserPwdHander(record)"
-                      >重置密码</a-button
+                      >{{ $tl('p.resetPassword') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
@@ -86,7 +86,7 @@
                       size="small"
                       :disabled="record.twoFactorAuthKey ? false : true"
                       @click="handleCloseMfa(record)"
-                      >关闭MFA</a-button
+                      >{{ $tl('p.closeMfa') }}</a-button
                     >
                   </a-menu-item>
                 </a-menu>
@@ -97,8 +97,8 @@
         <template v-else-if="column.dataIndex === 'systemUser'">
           <a-switch
             size="small"
-            checked-children="是"
-            un-checked-children="否"
+            :checked-children="$tl('c.isEnable')"
+            :un-checked-children="$tl('c.isDisable')"
             disabled
             :checked="record.systemUser == 1"
           />
@@ -106,8 +106,8 @@
         <template v-else-if="column.dataIndex === 'status'">
           <a-switch
             size="small"
-            checked-children="启用"
-            un-checked-children="禁用"
+            :checked-children="$tl('c.enable')"
+            :un-checked-children="$tl('c.disable')"
             disabled
             :checked="record.status != 0"
           />
@@ -116,8 +116,8 @@
         <template v-else-if="column.dataIndex === 'twoFactorAuthKey'">
           <a-switch
             size="small"
-            checked-children="开"
-            un-checked-children="关"
+            :checked-children="$tl('p.on')"
+            :un-checked-children="$tl('p.off')"
             disabled
             :checked="record.twoFactorAuthKey ? true : false"
           />
@@ -142,49 +142,49 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="60vw"
-      title="编辑用户"
+      :title="$tl('p.editUser')"
       :mask-closable="false"
       @ok="handleEditUserOk"
     >
       <a-alert
         v-if="!permissionGroup || !permissionGroup.length"
-        message="提醒"
+        :message="$tl('p.remind')"
         type="warning"
         show-icon
         style="margin-bottom: 10px"
       >
-        <template #description>还没有配置权限组不能创建用户奥</template>
+        <template #description>{{ $tl('p.noPermissionGroup') }}</template>
       </a-alert>
       <a-form ref="editUserForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item label="登录名称" name="id">
+        <a-form-item :label="$tl('p.loginName')" name="id">
           <a-input
             v-model:value="temp.id"
             :max-length="50"
-            placeholder="登录名称,账号,创建之后不能修改"
+            :placeholder="$tl('p.loginNameTip')"
             :disabled="createOption == false"
             @change="checkTipUserName"
           />
         </a-form-item>
 
-        <a-form-item label="昵称" name="name">
-          <a-input v-model:value="temp.name" :max-length="50" placeholder="昵称" />
+        <a-form-item :label="$tl('c.nickname')" name="name">
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$tl('c.nickname')" />
         </a-form-item>
         <a-form-item name="systemUser">
           <template #label>
             <a-tooltip>
-              管理员
-              <template #title> 管理员拥有：管理服务端的部分权限 </template>
+              {{ $tl('c.admin') }}
+              <template #title> {{ $tl('c.adminDescription') }} </template>
               <QuestionCircleOutlined v-if="createOption" />
             </a-tooltip>
           </template>
           <a-row>
             <a-col :span="4">
-              <a-tooltip title="管理员拥有：管理服务端的部分权限">
+              <a-tooltip :title="$tl('c.adminDescription')">
                 <a-switch
                   :checked="temp.systemUser == 1"
                   :disabled="temp.parent === 'sys'"
-                  checked-children="是"
-                  un-checked-children="否"
+                  :checked-children="$tl('c.isEnable')"
+                  :un-checked-children="$tl('c.isDisable')"
                   default-checked
                   @change="
                     (checked) => {
@@ -196,9 +196,9 @@
             </a-col>
             <a-col :span="4" style="text-align: right">
               <a-tooltip>
-                <template #title> 禁用后该用户不能登录平台 </template>
+                <template #title> {{ $tl('p.disableUserTip') }} </template>
                 <QuestionCircleOutlined v-if="createOption" />
-                状态：
+                {{ $tl('p.statusLabel') }}
               </a-tooltip>
             </a-col>
             <a-col :span="4">
@@ -206,8 +206,8 @@
                 <a-switch
                   :checked="temp.status != 0"
                   :disabled="temp.parent === 'sys'"
-                  checked-children="启用"
-                  un-checked-children="禁用"
+                  :checked-children="$tl('c.enable')"
+                  :un-checked-children="$tl('c.disable')"
                   default-checked
                   @change="
                     (checked) => {
@@ -219,7 +219,7 @@
             </a-col>
           </a-row>
         </a-form-item>
-        <a-form-item label="权限组" name="permissionGroup">
+        <a-form-item :label="$tl('p.permissionGroup')" name="permissionGroup">
           <a-select
             v-model:value="temp.permissionGroup"
             show-search
@@ -233,7 +233,7 @@
                 )
               }
             "
-            placeholder="请选择用户的权限组"
+            :placeholder="$tl('p.selectPermissionGroup')"
             mode="multiple"
           >
             <a-select-option v-for="item in permissionGroup" :key="item.id">
@@ -243,19 +243,25 @@
         </a-form-item>
       </a-form>
     </a-modal>
-    <a-modal v-model:open="showUserPwd" destroy-on-close title="用户密码提示" :mask-closable="false" :footer="null">
+    <a-modal
+      v-model:open="showUserPwd"
+      destroy-on-close
+      :title="$tl('p.passwordTip')"
+      :mask-closable="false"
+      :footer="null"
+    >
       <a-result status="success" :title="temp.title">
         <template #subTitle>
           <div>
-            账号新密码为：
+            {{ $tl('p.newPassword') }}
             <a-typography-paragraph :copyable="{ tooltip: false, text: temp.randomPwd }">
               <b style="color: red; font-size: 20px">
                 {{ temp.randomPwd }}
               </b>
             </a-typography-paragraph>
-            请将此密码复制告知该用户
+            {{ $tl('p.informUser') }}
           </div>
-          <div style="color: red">密码只会出现一次，关闭窗口后无法再次查看密码</div>
+          <div style="color: red">{{ $tl('p.passwordViewTip') }}</div>
         </template>
       </a-result>
     </a-modal>
@@ -263,7 +269,7 @@
     <a-modal
       v-model:open="systemNotificationOpen"
       destroy-on-close
-      title="配置系统公告"
+      :title="$tl('p.configNotice')"
       :mask-closable="false"
       width="50vw"
       :footer="null"
@@ -299,23 +305,23 @@ export default {
           ellipsis: true,
           width: 100
         },
-        { title: '昵称', dataIndex: 'name', ellipsis: true, width: 100 },
+        { title: this.$tl('c.nickname'), dataIndex: 'name', ellipsis: true, width: 100 },
         {
-          title: '管理员',
+          title: this.$tl('c.admin'),
           dataIndex: 'systemUser',
           align: 'center',
           ellipsis: true,
           width: 90
         },
         {
-          title: '状态',
+          title: this.$tl('p.status'),
           dataIndex: 'status',
           align: 'center',
           ellipsis: true,
           width: 90
         },
         {
-          title: '两步验证',
+          title: this.$tl('p.twoStepVerification'),
           dataIndex: 'twoFactorAuthKey',
           align: 'center',
           ellipsis: true,
@@ -323,27 +329,27 @@ export default {
         },
 
         {
-          title: '邮箱',
+          title: this.$tl('p.email'),
           dataIndex: 'email',
           ellipsis: true,
           width: 100
         },
         {
-          title: '来源',
+          title: this.$tl('p.source'),
           dataIndex: 'source',
           ellipsis: true,
           width: 90
         },
         {
-          title: '登录失败',
+          title: this.$tl('p.loginFail'),
           dataIndex: 'pwdErrorCount',
           ellipsis: true,
           width: 90
         },
-        { title: '创建人', dataIndex: 'parent', ellipsis: true, width: 150 },
+        { title: this.$tl('p.creator'), dataIndex: 'parent', ellipsis: true, width: 150 },
 
         {
-          title: '修改时间',
+          title: this.$tl('p.modifyTime'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -353,7 +359,7 @@ export default {
           width: '170px'
         },
         {
-          title: '创建时间',
+          title: this.$tl('p.createTime'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text, record }) => {
@@ -362,7 +368,7 @@ export default {
           width: '170px'
         },
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           align: 'center',
           dataIndex: 'operation',
           fixed: 'right',
@@ -371,9 +377,9 @@ export default {
       ],
       // 表单校验规则
       rules: {
-        id: [{ required: true, message: '请填写用户账号', trigger: 'blur' }],
-        name: [{ required: true, message: '请填写用户昵称', trigger: 'blur' }],
-        permissionGroup: [{ required: true, message: '请选择用户权限组', trigger: 'blur' }]
+        id: [{ required: true, message: this.$tl('p.fillAccount'), trigger: 'blur' }],
+        name: [{ required: true, message: this.$tl('p.fillNickname'), trigger: 'blur' }],
+        permissionGroup: [{ required: true, message: this.$tl('p.selectPermission'), trigger: 'blur' }]
       },
       showUserPwd: false,
       confirmLoading: false,
@@ -393,6 +399,9 @@ export default {
     this.loadData()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.user.index.${key}`, ...args)
+    },
     // 加载数据
     loadData(pointerEvent) {
       this.loading = true
@@ -425,7 +434,7 @@ export default {
         }
         if (!this.permissionGroup || this.permissionGroup.length <= 0)
           $notification.warn({
-            message: '还没有配置权限组,不能创建用户'
+            message: this.$tl('p.noPermissionCreateUser')
           })
       })
     },
@@ -457,7 +466,7 @@ export default {
             if (res.code === 200) {
               if (paramsTemp.type === 'add') {
                 this.temp = {
-                  title: '账号新增成功',
+                  title: this.$tl('p.accountAdded'),
                   randomPwd: res.data.randomPwd
                 }
 
@@ -480,11 +489,11 @@ export default {
     // 删除用户
     handleDelete(record) {
       $confirm({
-        title: '系统提示',
-        content: '真的要删除用户么？',
+        title: this.$tl('c.systemTip'),
+        content: this.$tl('p.confirmDeleteUser'),
         zIndex: 1009,
-        okText: '确认',
-        cancelText: '取消',
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           return deleteUser(record.id).then((res) => {
             if (res.code === 200) {
@@ -500,11 +509,11 @@ export default {
     // 解锁
     handleUnlock(record) {
       $confirm({
-        title: '系统提示',
-        content: '真的要解锁用户么？',
+        title: this.$tl('c.systemTip'),
+        content: this.$tl('p.confirmUnlockUser'),
         zIndex: 1009,
-        okText: '确认',
-        cancelText: '取消',
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           return unlockUser(record.id).then((res) => {
             if (res.code === 200) {
@@ -520,11 +529,11 @@ export default {
     //
     handleCloseMfa(record) {
       $confirm({
-        title: '系统提示',
-        content: '真的关闭当前用户的两步验证么？',
+        title: this.$tl('c.systemTip'),
+        content: this.$tl('p.confirmCloseMfa'),
         zIndex: 1009,
-        okText: '确认',
-        cancelText: '取消',
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           return closeUserMfa(record.id).then((res) => {
             if (res.code === 200) {
@@ -546,12 +555,11 @@ export default {
     checkTipUserName() {
       if (this.temp?.id === 'demo') {
         $confirm({
-          title: '系统提示',
+          title: this.$tl('c.systemTip'),
           zIndex: 1009,
-          content:
-            'demo 账号是系统特定演示使用的账号,系统默认将对 demo 账号限制很多权限。非演示场景不建议使用 demo 账号',
-          okText: '确认',
-          cancelText: '取消',
+          content: `demo ${this.$tl('p.demoAccountTip')},${this.$tl('p.demoAccountLimit')}`,
+          okText: this.$tl('c.confirm'),
+          cancelText: this.$tl('c.cancel'),
 
           onCancel: () => {
             this.temp.id = ''
@@ -562,16 +570,16 @@ export default {
     //
     restUserPwdHander(record) {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemTip'),
         zIndex: 1009,
-        content: '确定要重置用户密码吗？',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmResetPassword'),
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           return restUserPwd(record.id).then((res) => {
             if (res.code === 200) {
               this.temp = {
-                title: '用户密码重置成功',
+                title: this.$tl('p.passwordResetSuccess'),
                 randomPwd: res.data.randomPwd
               }
               this.showUserPwd = true
