@@ -21,6 +21,7 @@ import repository from './pages/repository'
 import script from './pages/script'
 import node from './pages/node'
 import ssh from './pages/ssh'
+import tools from './pages/tools'
 export default {
   pages: {
     404: page404,
@@ -35,6 +36,7 @@ export default {
     repository,
     script,
     node,
-    ssh
+    ssh,
+    tools
   }
 }
