@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="systemUserOperationLog"
-      empty-description="没有任何操作日志"
+      :empty-description="$tl('p.noOperationLog')"
       :data-source="list"
       :columns="columns"
       :pagination="pagination"
@@ -35,7 +35,7 @@
               }
             "
             allow-clear
-            placeholder="请选择操作者"
+            :placeholder="$tl('p.selectOperator')"
             class="search-input-item"
           >
             <a-select-option v-for="item in userList" :key="item.id">{{ item.name }}</a-select-option>
@@ -54,7 +54,7 @@
               }
             "
             allow-clear
-            placeholder="请选择节点"
+            :placeholder="$tl('p.selectNode')"
             class="search-input-item"
           >
             <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
@@ -73,7 +73,7 @@
               }
             "
             allow-clear
-            placeholder="操作功能"
+            :placeholder="$tl('p.operationFunction')"
             class="search-input-item"
           >
             <a-select-option v-for="item in classFeature" :key="item.value">{{ item.title }}</a-select-option>
@@ -92,14 +92,14 @@
               }
             "
             allow-clear
-            placeholder="操作方法"
+            :placeholder="$tl('p.operationMethod')"
             class="search-input-item"
           >
             <a-select-option v-for="item in methodFeature" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
           <a-range-picker :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          <a-tooltip :title="$tl('p.quickBackToFirstPage')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -134,19 +134,19 @@
         <template v-else-if="column.dataIndex === 'optStatus'">
           <a-tooltip
             placement="topLeft"
-            :title="`默认状态码为 200 表示执行成功,部分操作状态码可能为 0,状态码为 0 的操作大部分为没有操作结果或者异步执行`"
+            :title="`${$tl('p.defaultStatusCode')},${$tl('p.partialOperationStatus')},${$tl('p.statusWithNoResult')}`"
           >
             <span>{{ text }}</span>
           </a-tooltip>
         </template>
 
         <template v-else-if="column.dataIndex === 'operation'">
-          <a-button size="small" type="primary" @click="handleDetail(record)">详情</a-button>
+          <a-button size="small" type="primary" @click="handleDetail(record)">{{ $tl('p.details') }}</a-button>
         </template>
       </template>
     </CustomTable>
     <!-- 详情区 -->
-    <a-modal v-model:open="detailVisible" destroy-on-close width="600px" title="详情信息" :footer="null">
+    <a-modal v-model:open="detailVisible" destroy-on-close width="600px" :title="$tl('p.detailInfo')" :footer="null">
       <a-list item-layout="horizontal" :data-source="detailData">
         <template #renderItem="{ item }">
           <a-list-item>
@@ -192,31 +192,31 @@ export default {
       detailData: [],
       columns: [
         {
-          title: '用户ID',
+          title: this.$tl('p.userId'),
           dataIndex: 'userId',
           ellipsis: true
         },
         {
-          title: '用户昵称',
+          title: this.$tl('p.userNickname'),
           dataIndex: 'username',
           ellipsis: true
         },
         { title: 'IP', dataIndex: 'ip' /*width: 130*/ },
         {
-          title: '节点',
+          title: this.$tl('p.node'),
           dataIndex: 'nodeId',
           width: 120,
           ellipsis: true
         },
         {
-          title: '数据名称',
+          title: this.$tl('p.dataName'),
           dataIndex: 'dataName',
           /*width: 240,*/
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '工作空间名',
+          title: this.$tl('p.workspaceName'),
           dataIndex: 'workspaceName',
           /*width: 240,*/
           ellipsis: true,
@@ -224,24 +224,24 @@ export default {
         },
         // { title: "数据 ID", dataIndex: "dataId", /*width: 240,*/ ellipsis: true, },
         {
-          title: '操作功能',
+          title: this.$tl('p.operationFunction'),
           dataIndex: 'classFeature',
           /*width: 240,*/
           ellipsis: true
         },
         {
-          title: '操作方法',
+          title: this.$tl('p.operationMethod'),
           dataIndex: 'methodFeature',
           /*width: 240,*/
           ellipsis: true
         },
         {
-          title: '状态码',
+          title: this.$tl('p.statusCode'),
           dataIndex: 'optStatus',
           width: 90
         },
         {
-          title: '操作时间',
+          title: this.$tl('p.operationTime'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text, record }) => {
@@ -250,7 +250,7 @@ export default {
           width: '170px'
         },
         {
-          title: '操作',
+          title: this.$tl('p.action'),
           align: 'center',
           dataIndex: 'operation',
           fixed: 'right',
@@ -284,6 +284,9 @@ export default {
     })
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.user.operationLog.${key}`, ...args)
+    },
     // 加载 node
     loadNodeList() {
       getNodeListAll().then((res) => {
@@ -340,18 +343,18 @@ export default {
       } catch (e) {
         console.error(e)
       }
-      this.detailData.push({ title: '数据Id', description: this.temp.dataId })
+      this.detailData.push({ title: this.$tl('p.dataId'), description: this.temp.dataId })
       this.detailData.push({
-        title: '浏览器标识',
+        title: this.$tl('p.browserIdentifier'),
         description: this.temp.userAgent
       })
       this.detailData.push({
-        title: '请求参数',
+        title: this.$tl('p.requestParams'),
         json: true,
         value: this.temp.reqData
       })
       this.detailData.push({
-        title: '响应结果',
+        title: this.$tl('p.responseResult'),
         json: true,
         value: this.temp.resultMsg
       })

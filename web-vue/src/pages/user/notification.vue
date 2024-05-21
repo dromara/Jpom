@@ -1,37 +1,48 @@
 <template>
   <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
-    <a-form-item label="状态" name="enabled">
-      <a-switch v-model:checked="temp.enabled" checked-children="开启" un-checked-children="关闭" />
+    <a-form-item :label="$tl('p.statusValue')" name="enabled">
+      <a-switch
+        v-model:checked="temp.enabled"
+        :checked-children="$tl('p.isOpen')"
+        :un-checked-children="$tl('p.status')"
+      />
     </a-form-item>
-    <a-form-item label="标题" name="title">
-      <a-input v-model:value="temp.title" type="text" placeholder="请输入公告标题" />
-      <template #help> 支持 html 格式</template>
+    <a-form-item :label="$tl('p.title')" name="title">
+      <a-input v-model:value="temp.title" type="text" :placeholder="$tl('p.titleInput')" />
+      <template #help> {{ $tl('p.htmlSupport') }}</template>
     </a-form-item>
-    <a-form-item label="内容" name="content">
-      <a-textarea v-model:value="temp.content" type="text" placeholder="请输入公告内容" />
-      <template #help> 支持 html 格式</template>
+    <a-form-item :label="$tl('p.content')" name="content">
+      <a-textarea v-model:value="temp.content" type="text" :placeholder="$tl('p.contentInput')" />
+      <template #help> {{ $tl('p.htmlSupport') }}</template>
     </a-form-item>
-    <a-form-item label="关闭" name="closable">
-      <a-switch v-model:checked="temp.closable" checked-children="可以关闭" un-checked-children="不能关闭" />
+    <a-form-item :label="$tl('p.status')" name="closable">
+      <a-switch
+        v-model:checked="temp.closable"
+        :checked-children="$tl('p.canClose')"
+        :un-checked-children="$tl('p.cannotClose')"
+      />
     </a-form-item>
-    <a-form-item label="级别" name="enabled">
+    <a-form-item :label="$tl('p.level')" name="enabled">
       <a-radio-group v-model:value="temp.level" name="radioGroup">
-        <a-radio value="info">提醒</a-radio>
-        <a-radio value="warning">警告</a-radio>
-        <a-radio value="error">错误</a-radio>
+        <a-radio value="info">{{ $tl('p.reminder') }}</a-radio>
+        <a-radio value="warning">{{ $tl('p.warning') }}</a-radio>
+        <a-radio value="error">{{ $tl('p.error') }}</a-radio>
       </a-radio-group>
     </a-form-item>
     <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-      <a-button type="primary" class="btn" @click="onSubmit()">保存</a-button>
+      <a-button type="primary" class="btn" @click="onSubmit()">{{ $tl('p.save') }}</a-button>
     </a-form-item>
   </a-form>
 </template>
 <script setup lang="ts">
 import { UserNotificationType, getUserNotification, saveUserNotification } from '@/api/user/user-notification'
+
+import { useI18nPage } from '@/i18n/hooks/useI18nPage'
+const { $tl } = useI18nPage('pages.user.notification')
 const defaultValue = {
   level: 'info',
   closable: true,
-  title: '系统公告',
+  title: $tl('p.systemNotice'),
   enabled: false
 } as UserNotificationType
 
