@@ -158,11 +158,7 @@
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
-            <a-input-number
-              v-model:value="temp.cpuPeriod"
-              style="width: 100%"
-              placeholder=" {{$tl('p.cpuPeriodUsec')}}"
-            />
+            <a-input-number v-model:value="temp.cpuPeriod" style="width: 100%" :placeholder="$tl('p.cpuPeriodUsec')" />
           </a-form-item>
           <a-form-item name="cpuQuota">
             <template #label>

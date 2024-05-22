@@ -6,7 +6,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="ssh-command-list"
-      empty-description="没有任何SSH脚本命令"
+      :empty-description="$tl('p.noSshScriptCommand')"
       :data-source="commandList"
       :columns="columns"
       size="middle"
@@ -24,28 +24,28 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            placeholder="搜索命令"
+            :placeholder="$tl('p.searchCommand')"
             class="search-input-item"
             @press-enter="getCommandData"
           />
           <a-input
             v-model:value="listQuery['%desc%']"
-            placeholder="描述"
+            :placeholder="$tl('p.description')"
             class="search-input-item"
             @press-enter="getCommandData"
           />
           <a-input
             v-model:value="listQuery['%autoExecCron%']"
-            placeholder="定时执行"
+            :placeholder="$tl('c.schedulingExecution')"
             class="search-input-item"
             @press-enter="getCommandData"
           />
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button type="primary" :loading="loading" @click="getCommandData">搜索</a-button>
+          <a-tooltip :title="$tl('p.quickBackToFirstPage')">
+            <a-button type="primary" :loading="loading" @click="getCommandData">{{ $tl('p.search') }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="createCommand">新增</a-button>
+          <a-button type="primary" @click="createCommand">{{ $tl('p.addNew') }}</a-button>
           <a-dropdown>
-            <a @click="(e) => e.preventDefault()"> 更多 <DownOutlined /> </a>
+            <a @click="(e) => e.preventDefault()"> {{ $tl('p.more') }} <DownOutlined /> </a>
             <template #overlay>
               <a-menu>
                 <a-menu-item>
@@ -53,7 +53,7 @@
                     type="primary"
                     :disabled="!tableSelections || !tableSelections.length"
                     @click="syncToWorkspaceShow"
-                    >工作空间同步</a-button
+                    >{{ $tl('p.workspaceSync') }}</a-button
                   >
                 </a-menu-item>
               </a-menu>
@@ -64,20 +64,17 @@
       <template #tableHelp>
         <a-tooltip>
           <template #title>
-            <div>命令模版是用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等</div>
+            <div>{{ $tl('p.commandTemplateDescription') }}</div>
 
             <div>
               <ul>
-                <li>命令内容支持工作空间环境变量</li>
+                <li>{{ $tl('p.supportWorkspaceEnv') }}</li>
+                <li>{{ $tl('p.execCommandReplace') }}</li>
                 <li>
-                  执行命令将自动替换为 sh
-                  命令文件、并自动加载环境变量：/etc/profile、/etc/bashrc、~/.bashrc、~/.bash_profile
+                  {{ $tl('p.execCommandInclude') }}<b>#disabled-template-auto-evn</b>
+                  {{ $tl('p.cancelAutoLoadEnv') }}({{ $tl('p.noteNoSpace') }})
                 </li>
-                <li>
-                  执行命令包含：<b>#disabled-template-auto-evn</b>
-                  将取消自动加载环境变量(注意是整行不能包含空格)
-                </li>
-                <li>命令文件将上传至 ${user.home}/.jpom/xxxx.sh 执行完成将自动删除</li>
+                <li>{{ $tl('p.commandFilePath') }}</li>
               </ul>
             </div>
           </template>
@@ -98,10 +95,10 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleExecute(record)">执行</a-button>
-            <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-            <a-button size="small" type="primary" @click="handleTrigger(record)">触发器</a-button>
-            <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
+            <a-button size="small" type="primary" @click="handleExecute(record)">{{ $tl('c.execution') }}</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('p.edit') }}</a-button>
+            <a-button size="small" type="primary" @click="handleTrigger(record)">{{ $tl('c.trigger') }}</a-button>
+            <a-button size="small" type="primary" danger @click="handleDelete(record)">{{ $tl('p.delete') }}</a-button>
           </a-space>
         </template>
       </template>
@@ -111,26 +108,23 @@
       v-model:open="editCommandVisible"
       destroy-on-close
       width="80vw"
-      title="编辑 命令"
+      :title="$tl('p.editCommand')"
       :mask-closable="false"
       :confirm-loading="confirmLoading"
       @ok="handleEditCommandOk"
     >
       <a-form ref="editCommandForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
-        <a-form-item label="命令名称" name="name">
-          <a-input v-model:value="temp.name" :max-length="100" placeholder="命令名称" />
+        <a-form-item :label="$tl('c.commandName')" name="name">
+          <a-input v-model:value="temp.name" :max-length="100" :placeholder="$tl('c.commandName')" />
         </a-form-item>
 
-        <a-form-item
-          name="command"
-          help="脚本存放路径：${user.home}/.jpom/xxxx.sh，执行脚本路径：${user.home}，执行脚本方式：bash ${user.home}/.jpom/xxxx.sh par1 par2"
-        >
+        <a-form-item name="command" :help="$tl('p.scriptPathAndExecMethod')">
           <template #label>
             <a-tooltip>
-              命令内容
+              {{ $tl('p.commandContent') }}
               <template #title>
                 <ul>
-                  <li>可以引用工作空间的环境变量 变量占位符 ${xxxx} xxxx 为变量名称</li>
+                  <li>{{ $tl('p.canReferenceWorkspaceEnv') }}</li>
                 </ul>
               </template>
               <QuestionCircleOutlined v-show="!temp.id" />
@@ -145,7 +139,7 @@
             ></code-editor>
           </a-form-item-rest>
         </a-form-item>
-        <a-form-item label="SSH节点">
+        <a-form-item :label="$tl('c.sshNode')">
           <a-select
             v-model:value="chooseSsh"
             show-search
@@ -159,7 +153,7 @@
                 )
               }
             "
-            placeholder="请选择SSH节点"
+            :placeholder="$tl('p.selectSshNode')"
             mode="multiple"
           >
             <a-select-option v-for="item in sshList" :key="item.id" :value="item.id">
@@ -168,7 +162,7 @@
           </a-select>
         </a-form-item>
 
-        <a-form-item label="默认参数">
+        <a-form-item :label="$tl('p.defaultParam')">
           <a-form-item-rest>
             <a-space direction="vertical" style="width: 100%">
               <a-row v-for="(item, index) in commandParams" :key="item.key">
@@ -176,13 +170,13 @@
                   <a-space direction="vertical" style="width: 100%">
                     <a-input
                       v-model:value="item.desc"
-                      :addon-before="`参数${index + 1}描述`"
-                      placeholder="参数描述,参数描述没有实际作用,仅是用于提示参数的含义"
+                      :addon-before="$tl('p.paramDescription')"
+                      placeholder="参数描述,{{$tl('p.paramDescriptionNoEffect')}},仅是用于提示参数的含义"
                     />
                     <a-input
                       v-model:value="item.value"
-                      :addon-before="`参数${index + 1}值`"
-                      placeholder="参数值,新增默认参数后在手动执行脚本时需要填写参数值"
+                      :addon-before="$tl('p.paramValue')"
+                      :placeholder="`${$tl('c.paramValue')}${$tl('p.addNewDefaultParamNote')}`"
                     />
                   </a-space>
                 </a-col>
@@ -195,26 +189,26 @@
                   </a-row>
                 </a-col>
               </a-row>
-              <a-button type="primary" @click="() => commandParams.push({})">新增参数</a-button>
+              <a-button type="primary" @click="() => commandParams.push({})">{{ $tl('c.newParam') }}</a-button>
             </a-space>
           </a-form-item-rest>
         </a-form-item>
-        <a-form-item label="自动执行" name="autoExecCron">
+        <a-form-item :label="$tl('p.autoExec')" name="autoExecCron">
           <a-auto-complete
             v-model:value="temp.autoExecCron"
-            placeholder="如果需要定时自动执行则填写,cron 表达式.默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）"
+            :placeholder="$tl('p.cronExpression')"
             :options="CRON_DATA_SOURCE"
           >
             <template #option="item"> {{ item.title }} {{ item.value }} </template>
           </a-auto-complete>
         </a-form-item>
-        <a-form-item label="命令描述" name="desc">
+        <a-form-item :label="$tl('c.commandDescription')" name="desc">
           <a-textarea
             v-model:value="temp.desc"
             :max-length="255"
             :rows="3"
             style="resize: none"
-            placeholder="命令详细描述"
+            :placeholder="$tl('p.commandDetail')"
           />
         </a-form-item>
       </a-form>
@@ -224,17 +218,17 @@
       v-model:open="executeCommandVisible"
       destroy-on-close
       width="600px"
-      title="执行 命令"
+      :title="$tl('p.executeCommand')"
       :mask-closable="false"
       :confirm-loading="confirmLoading"
       @ok="handleExecuteCommandOk"
     >
       <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item label="命令名称" name="name">
-          <a-input v-model:value="temp.name" :disabled="true" placeholder="命令名称" />
+        <a-form-item :label="$tl('c.commandName')" name="name">
+          <a-input v-model:value="temp.name" :disabled="true" :placeholder="$tl('c.commandName')" />
         </a-form-item>
 
-        <a-form-item label="SSH节点" required>
+        <a-form-item :label="$tl('c.sshNode')" required>
           <a-select
             v-model:value="chooseSsh"
             show-search
@@ -249,7 +243,7 @@
               }
             "
             mode="multiple"
-            placeholder="请选择 SSH节点"
+            :placeholder="$tl('p.selectSshNode_1')"
           >
             <a-select-option v-for="item in sshList" :key="item.id" :value="item.id">
               {{ item.name }}
@@ -257,17 +251,14 @@
           </a-select>
         </a-form-item>
 
-        <a-form-item
-          label="命令参数"
-          :help="`${commandParams.length ? '所有参数将拼接成字符串以空格分隔形式执行脚本,需要注意参数顺序和未填写值的参数将自动忽略' : ''}`"
-        >
+        <a-form-item :label="$tl('p.commandParam')" :help="`${commandParams.length ? $tl('p.paramInstruction') : ''}`">
           <a-space direction="vertical" style="width: 100%">
             <a-row v-for="(item, index) in commandParams" :key="item.key">
               <a-col :span="22">
                 <a-input
                   v-model:value="item.value"
-                  :addon-before="`参数${index + 1}值`"
-                  :placeholder="`参数值 ${item.desc ? ',' + item.desc : ''}`"
+                  :addon-before="`${$tl('p.paramName')}${index + 1}${$tl('p.paramValue_1')}`"
+                  :placeholder="`${$tl('p.paramName')}${$tl('p.paramValue_1')} ${item.desc ? ',' + item.desc : ''}`"
                 >
                   <template #suffix>
                     <a-tooltip v-if="item.desc" :title="item.desc">
@@ -285,7 +276,7 @@
                 </a-row>
               </a-col>
             </a-row>
-            <a-button type="primary" @click="() => commandParams.push({})">新增参数</a-button>
+            <a-button type="primary" @click="() => commandParams.push({})">{{ $tl('c.newParam') }}</a-button>
           </a-space>
         </a-form-item>
       </a-form>
@@ -295,7 +286,7 @@
       v-model:open="logVisible"
       destroy-on-close
       :width="'80vw'"
-      title="执行日志"
+      :title="$tl('p.executeLog')"
       :footer="null"
       :mask-closable="false"
     >
@@ -306,22 +297,25 @@
       v-model:open="syncToWorkspaceVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      title="同步到其他工作空间"
+      :title="$tl('p.syncToOtherWorkspaces')"
       :mask-closable="false"
       @ok="handleSyncToWorkspace"
     >
-      <a-alert message="温馨提示" type="warning" show-icon>
+      <a-alert :message="$tl('c.tips')" type="warning" show-icon>
         <template #description>
           <ul>
-            <li>同步机制采用<b>脚本名称</b>确定是同一个脚本</li>
-            <li>当目标工作空间不存在对应的 脚本 时候将自动创建一个新的 脚本</li>
-            <li>当目标工作空间已经存在 脚本 时候将自动同步 脚本内容、默认参数、自动执行、描述</li>
+            <li>
+              {{ $tl('p.syncMechanism') }}<b>{{ $tl('p.scriptName') }}</b
+              >{{ $tl('p.confirmSameScript') }}
+            </li>
+            <li>{{ $tl('p.createNewScriptIfNotExist') }}</li>
+            <li>{{ $tl('p.syncScriptInfoIfExists') }}</li>
           </ul>
         </template>
       </a-alert>
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
-        <a-form-item label="选择工作空间" name="workspaceId">
+        <a-form-item :label="$tl('p.selectWorkspace')" name="workspaceId">
           <a-select
             v-model:value="temp.workspaceId"
             show-search
@@ -335,7 +329,7 @@
                 )
               }
             "
-            placeholder="请选择工作空间"
+            :placeholder="$tl('c.selectWorkspace')"
           >
             <a-select-option v-for="item in workspaceList" :key="item.id" :disabled="getWorkspaceId() === item.id">{{
               item.name
@@ -349,7 +343,7 @@
     <a-modal
       v-model:open="triggerVisible"
       destroy-on-close
-      title="触发器"
+      :title="$tl('c.trigger')"
       width="50%"
       :footer="null"
       :mask-closable="false"
@@ -357,35 +351,30 @@
       <a-form ref="editTriggerForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
           <template #rightExtra>
-            <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
-              <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
+            <a-tooltip :title="$tl('p.resetTriggerToken')">
+              <a-button type="primary" size="small" @click="resetTrigger">{{ $tl('p.reset') }}</a-button>
             </a-tooltip>
           </template>
-          <a-tab-pane key="1" tab="执行">
+          <a-tab-pane key="1" :tab="$tl('c.execution')">
             <a-space direction="vertical" style="width: 100%">
-              <a-alert message="温馨提示" type="warning">
+              <a-alert :message="$tl('c.tips')" type="warning">
                 <template #description>
                   <ul>
-                    <li>单个触发器地址中：第一个随机字符串为命令脚本ID，第二个随机字符串为 token</li>
-                    <li>
-                      重置为重新生成触发地址,重置成功后之前的触发器地址将失效,触发器绑定到生成触发器到操作人上,如果将对应的账号删除触发器将失效
-                    </li>
-                    <li>批量触发参数 BODY json： [ { "id":"1", "token":"a" } ]</li>
-                    <li>
-                      单个触发器请求支持将参数解析为环境变量传入脚本执行，比如传入参数名为 abc=efg
-                      在脚本中引入则为：${trigger_abc}
-                    </li>
+                    <li>{{ $tl('p.triggerUrlInfo') }}</li>
+                    <li>{{ $tl('p.regenerateTriggerUrl') }}</li>
+                    <li>{{ $tl('p.batchTriggerParams') }}</li>
+                    <li>{{ $tl('p.parseParamsAsEnv') }}</li>
                   </ul>
                 </template>
               </a-alert>
-              <a-alert type="info" :message="`单个触发器地址(点击可以复制)`">
+              <a-alert type="info" :message="`${$tl('p.singleTriggerUrl')}(${$tl('c.copy')})`">
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.triggerUrl }">
                     <a-tag>GET</a-tag> <span>{{ temp.triggerUrl }} </span>
                   </a-typography-paragraph>
                 </template>
               </a-alert>
-              <a-alert type="info" :message="`批量触发器地址(点击可以复制)`">
+              <a-alert type="info" :message="`${$tl('p.batchTriggerUrls')}(${$tl('c.copy')})`">
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchTriggerUrl }">
                     <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
@@ -431,25 +420,25 @@ export default {
       },
       columns: [
         {
-          title: '命令名称',
+          title: this.$tl('c.commandName'),
           dataIndex: 'name',
           ellipsis: true,
           width: 200
         },
         {
-          title: '命令描述',
+          title: this.$tl('c.commandDescription'),
           dataIndex: 'desc',
           ellipsis: true,
           width: 250
         },
         {
-          title: '定时执行',
+          title: this.$tl('c.schedulingExecution'),
           dataIndex: 'autoExecCron',
           ellipsis: true,
           width: 120
         },
         {
-          title: '创建时间',
+          title: this.$tl('p.createTime'),
           dataIndex: 'createTimeMillis',
           ellipsis: true,
           sorter: true,
@@ -459,7 +448,7 @@ export default {
           width: '170px'
         },
         {
-          title: '修改时间',
+          title: this.$tl('p.updateTime'),
           dataIndex: 'modifyTimeMillis',
           width: '170px',
           ellipsis: true,
@@ -469,13 +458,13 @@ export default {
           }
         },
         {
-          title: '最后操作人',
+          title: this.$tl('p.lastOperator'),
           dataIndex: 'modifyUser',
           width: 120,
           ellipsis: true
         },
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
           align: 'center',
 
@@ -512,6 +501,9 @@ export default {
     //this.getAllSSHList();
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.ssh.command.${key}`, ...args)
+    },
     // 编辑命令信息
     handleEditCommandOk() {
       this.$refs['editCommandForm'].validate().then(() => {
@@ -519,7 +511,7 @@ export default {
           for (let i = 0; i < this.commandParams.length; i++) {
             if (!this.commandParams[i].desc) {
               $notification.error({
-                message: '请填写第' + (i + 1) + '个参数的描述'
+                message: this.$tl('p.fillParamDesc') + (i + 1) + this.$tl('p.paramDesc')
               })
               return false
             }
@@ -602,11 +594,11 @@ export default {
     //  删除命令
     handleDelete(row) {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('p.systemPrompt'),
         zIndex: 1009,
-        content: '真的要删除“' + row.name + '”命令？',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmDeleteCommand') + row.name + this.$tl('p.deleteCommand'),
+        okText: this.$tl('p.confirm'),
+        cancelText: this.$tl('p.cancel'),
         onOk: () => {
           return deleteCommand(row.id).then((res) => {
             if (res.code === 200) {
@@ -629,7 +621,7 @@ export default {
     handleExecuteCommandOk() {
       if (!this.chooseSsh || this.chooseSsh.length <= 0) {
         $notification.error({
-          message: '请选择执行节点'
+          message: this.$tl('p.selectExecuteNode')
         })
         return false
       }
@@ -676,7 +668,7 @@ export default {
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
         $notification.warn({
-          message: '请选择工作空间'
+          message: this.$tl('c.selectWorkspace')
         })
         return false
       }

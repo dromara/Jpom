@@ -18,19 +18,19 @@
           <a-input
             v-model:value="viewOperationLogListQuery['modifyUser']"
             class="search-input-item"
-            placeholder="操作人"
+            :placeholder="$tl('p.operator')"
             @press-enter="handleListLog"
           />
           <a-input
             v-model:value="viewOperationLogListQuery['%sshName%']"
             class="search-input-item"
-            placeholder="ssh 名"
+            :placeholder="$tl('p.sshName')"
             @press-enter="handleListLog"
           />
           <a-input
             v-model:value="viewOperationLogListQuery['%machineSshName%']"
             class="search-input-item"
-            placeholder="机器 ssh 名"
+            :placeholder="$tl('p.machineSshName')"
             @press-enter="handleListLog"
           />
           <a-input
@@ -42,7 +42,7 @@
           <a-input
             v-model:value="viewOperationLogListQuery['%commands%']"
             class="search-input-item"
-            placeholder="执行命令"
+            :placeholder="$tl('p.executeCommand')"
             @press-enter="handleListLog"
           />
           <a-range-picker
@@ -50,7 +50,7 @@
             format="YYYY-MM-DD HH:mm:ss"
             @change="onchangeListLogTime"
           />
-          <a-button type="primary" @click="handleListLog">搜索</a-button>
+          <a-button type="primary" @click="handleListLog">{{ $tl('p.search') }}</a-button>
         </a-space>
       </template>
       <template #bodyCell="{ column, text, record }">
@@ -77,7 +77,7 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'refuse'">
-          <span>{{ text ? '成功' : '拒绝' }}</span>
+          <span>{{ text ? $tl('p.success') : $tl('p.denied') }}</span>
         </template>
       </template>
     </a-table>
@@ -115,27 +115,27 @@ export default {
       ),
       viewOperationLogColumns: [
         {
-          title: '操作者',
+          title: this.$tl('p.operatorName'),
           dataIndex: 'modifyUser',
           width: 100
         },
         { title: 'IP', dataIndex: 'ip', width: '130px' },
         {
-          title: 'ssh名',
+          title: `ssh${this.$tl('p.name')}`,
           dataIndex: 'sshName',
           width: '200px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '机器SSH名',
+          title: this.$tl('p.machineSshName2'),
           dataIndex: 'machineSshName',
           width: '200px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '执行命令',
+          title: this.$tl('p.executeCommand'),
           dataIndex: 'commands',
           width: 200,
           ellipsis: true
@@ -148,7 +148,7 @@ export default {
         },
 
         {
-          title: '操作时间',
+          title: this.$tl('p.operationTime'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text }) => {
@@ -157,7 +157,7 @@ export default {
           width: '180px'
         },
         {
-          title: '是否成功',
+          title: this.$tl('p.isSuccess'),
           dataIndex: 'refuse',
           width: '100px',
           ellipsis: true,
@@ -175,6 +175,9 @@ export default {
     this.handleListLog()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.system.assets.ssh.operationLog.${key}`, ...args)
+    },
     handleListLog() {
       this.viewOperationLoading = true
       let api

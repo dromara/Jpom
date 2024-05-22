@@ -6,7 +6,7 @@
       default-auto-refresh
       :auto-refresh-time="5"
       table-name="assets-docker-list"
-      empty-description="没有资产DOCKER"
+      :empty-description="$tl('p.noAssetDocker')"
       :active-page="activePage"
       size="middle"
       :data-source="list"
@@ -25,7 +25,7 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            placeholder="名称"
+            :placeholder="$tl('c.name')"
             class="search-input-item"
             @press-enter="loadData"
           />
@@ -37,7 +37,7 @@
           />
           <a-input
             v-model:value="listQuery['%swarmId%']"
-            placeholder="集群ID"
+            :placeholder="$tl('p.clusterId')"
             class="search-input-item"
             @press-enter="loadData"
           />
@@ -55,20 +55,22 @@
               }
             "
             allow-clear
-            placeholder="分组"
+            :placeholder="$tl('c.group')"
             class="search-input-item"
           >
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
           </a-select>
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          <a-tooltip :title="$tl('p.quickBackFirstPage')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">新增</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $tl('p.add') }}</a-button>
           <a-button :disabled="!tableSelections.length" type="primary" @click="syncToWorkspaceShow()">
-            批量分配</a-button
+            {{ $tl('p.batchAssign') }}</a-button
           >
-          <a-tooltip title="自动检测服务端所在服务器中是否存在 docker，如果存在将自动新增到列表中">
-            <a-button type="dashed" @click="handleTryLocalDocker"> <QuestionCircleOutlined />自动探测 </a-button>
+          <a-tooltip :title="$tl('p.autoDetectDocker')">
+            <a-button type="dashed" @click="handleTryLocalDocker">
+              <QuestionCircleOutlined />{{ $tl('p.autoProbe') }}
+            </a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -86,19 +88,19 @@
 
         <template v-else-if="column.dataIndex === 'swarmId'">
           <template v-if="text">
-            <a-tooltip v-if="record.swarmControlAvailable" title="管理节点">
+            <a-tooltip v-if="record.swarmControlAvailable" :title="$tl('c.manageNode')">
               <ClusterOutlined />
             </a-tooltip>
-            <a-tooltip v-else title="工作节点">
+            <a-tooltip v-else :title="$tl('c.workNode')">
               <BlockOutlined />
             </a-tooltip>
-            <a-popover title="集群信息">
+            <a-popover :title="$tl('p.clusterInfo')">
               <template #content>
-                <p>集群ID：{{ record.swarmId }}</p>
-                <p>当前节点ID：{{ record.swarmNodeId }}</p>
-                <p>当前节点地址：{{ record.swarmNodeAddr }}</p>
-                <p>集群创建时间：{{ parseTime(record.swarmCreatedAt) }}</p>
-                <p>集群修改时间：{{ parseTime(record.swarmUpdatedAt) }}</p>
+                <p>{{ $tl('p.clusterIdLabel') }}{{ record.swarmId }}</p>
+                <p>{{ $tl('p.currentNodeId') }}{{ record.swarmNodeId }}</p>
+                <p>{{ $tl('p.currentNodeAddress') }}{{ record.swarmNodeAddr }}</p>
+                <p>{{ $tl('p.clusterCreateTime') }}{{ parseTime(record.swarmCreatedAt) }}</p>
+                <p>{{ $tl('p.clusterUpdateTime') }}{{ parseTime(record.swarmUpdatedAt) }}</p>
               </template>
               {{ text }}
             </a-popover>
@@ -108,7 +110,7 @@
         <template v-else-if="column.dataIndex === 'tlsVerify'">
           <a-tooltip
             placement="topLeft"
-            :title="record.tlsVerify ? '开启 TLS 认证,证书信息：' + record.certInfo : '关闭 TLS 认证'"
+            :title="record.tlsVerify ? $tl('p.tlsEnableCertInfo') + record.certInfo : $tl('p.tlsDisable')"
           >
             <template v-if="record.tlsVerify">
               <template v-if="record.certExist">
@@ -116,19 +118,19 @@
                   v-model:checked="record.tlsVerify"
                   size="small"
                   :disabled="true"
-                  checked-children="开"
-                  un-checked-children="关"
+                  :checked-children="$tl('c.statusOn')"
+                  :un-checked-children="$tl('c.statusOff')"
                 />
               </template>
-              <a-tag v-else color="red"> 证书丢失 </a-tag>
+              <a-tag v-else color="red"> {{ $tl('p.certLost') }} </a-tag>
             </template>
             <template v-else>
               <a-switch
                 v-model:checked="record.tlsVerify"
                 size="small"
                 :disabled="true"
-                checked-children="开"
-                un-checked-children="关"
+                :checked-children="$tl('c.statusOn')"
+                :un-checked-children="$tl('c.statusOff')"
               />
             </template>
           </a-tooltip>
@@ -136,25 +138,31 @@
 
         <template v-else-if="column.dataIndex === 'status'">
           <a-tooltip :title="record.failureMsg">
-            <a-tag :color="statusMap[record.status].color">{{ statusMap[record.status].desc || '未知' }}</a-tag>
+            <a-tag :color="statusMap[record.status].color">{{
+              statusMap[record.status].desc || $tl('p.unknown')
+            }}</a-tag>
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" :disabled="record.status !== 1" @click="handleConsole(record)"
-              >控制台</a-button
-            >
+            <a-button size="small" type="primary" :disabled="record.status !== 1" @click="handleConsole(record)">{{
+              $tl('p.console')
+            }}</a-button>
             <template v-if="!record.swarmId && record.status === 1">
-              <a-popover title="集群操作">
+              <a-popover :title="$tl('p.clusterOperation')">
                 <template #content>
                   <p>
-                    <a-button size="small" type="primary" @click="initSwarm(record)">创建集群</a-button>
+                    <a-button size="small" type="primary" @click="initSwarm(record)">{{
+                      $tl('p.createCluster')
+                    }}</a-button>
                   </p>
                   <p>
-                    <a-button size="small" type="primary" @click="joinSwarm(record)">加入集群</a-button>
+                    <a-button size="small" type="primary" @click="joinSwarm(record)">{{
+                      $tl('p.joinCluster')
+                    }}</a-button>
                   </p>
                 </template>
-                <a-button size="small" type="primary"><EditOutlined />集群</a-button>
+                <a-button size="small" type="primary"><EditOutlined />{{ $tl('c.cluster') }}</a-button>
               </a-popover>
             </template>
             <template v-else>
@@ -163,20 +171,24 @@
                 :disabled="parseInt(record.status) !== 1"
                 type="primary"
                 @click="handleSwarmConsole(record)"
-                ><SelectOutlined />集群</a-button
+                ><SelectOutlined />{{ $tl('c.cluster') }}</a-button
               >
             </template>
-            <a-button size="small" type="primary" @click="syncToWorkspaceShow(record)">分配</a-button>
-            <a-button size="small" type="primary" @click="viewWorkspaceDataHander(record)">关联</a-button>
+            <a-button size="small" type="primary" @click="syncToWorkspaceShow(record)">{{ $tl('p.assign') }}</a-button>
+            <a-button size="small" type="primary" @click="viewWorkspaceDataHander(record)">{{
+              $tl('p.associate')
+            }}</a-button>
             <a-dropdown>
-              <a @click="(e) => e.preventDefault()"> 更多 <DownOutlined /> </a>
+              <a @click="(e) => e.preventDefault()"> {{ $tl('p.more') }} <DownOutlined /> </a>
               <template #overlay>
                 <a-menu>
                   <a-menu-item>
-                    <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+                    <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('p.edit') }}</a-button>
                   </a-menu-item>
                   <a-menu-item>
-                    <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
+                    <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
+                      $tl('p.delete')
+                    }}</a-button>
                   </a-menu-item>
                   <a-menu-item>
                     <a-button
@@ -185,7 +197,7 @@
                       type="primary"
                       danger
                       @click="handleLeaveForce(record)"
-                      >退出集群</a-button
+                      >{{ $tl('p.exitCluster') }}</a-button
                     >
                   </a-menu-item>
                 </a-menu>
@@ -200,7 +212,7 @@
       v-model:open="editVisible"
       destroy-on-close
       width="50%"
-      title="编辑  Docker"
+      :title="$tl('p.editDocker')"
       :confirm-loading="confirmLoading"
       :mask-closable="false"
       @ok="handleEditOk"
@@ -211,91 +223,108 @@
             <template #message>
               <template v-if="temp.enableSsh">
                 <ul>
-                  <li>SSH 方式连接 docker 是通过终端实现，每次操作 docker 相关 api 需要登录一次终端</li>
-                  <li>docker 版本需要大于 18.09 才能使用 SSH 方式连接</li>
-                  <li>如果使用 SSH 方式但是 SSH 无法选择，是表示系统没有监测到 docker 服务</li>
+                  <li>SSH {{ $tl('p.sshConnectInfo') }}</li>
+                  <li>docker {{ $tl('p.versionRequirement') }}.09 {{ $tl('p.sshConnectAvailable') }}</li>
+                  <li>{{ $tl('p.sshNoDockerDetected') }}</li>
                   <li>
-                    如果您 SSH 机器中存在 docker 但是系统没有监测到，您需要到【配置管理】->【系统配置目录】中修改
-                    <b>ssh/monitor-script.sh</b> 文件来兼容您的机器
+                    {{ $tl('p.sshDockerNotDetected') }}>{{ $tl('p.modifyConfigFile') }} <b>ssh/monitor-script.sh</b>
+                    {{ $tl('p.compatibleMachine') }}
                   </li>
                 </ul>
               </template>
               <template v-else>
                 <ul>
                   <li>
-                    系统使用 docker http 接口实现和 docker 通讯和管理，但是默认<b style="color: red"
-                      >没有开启任何认证</b
-                    >
+                    {{ $tl('p.useDockerHttpInterface') }}<b style="color: red">{{ $tl('p.noAuthentication') }}</b>
                   </li>
                   <li>
-                    这样使得
-                    <b style="color: red">docker 极不安全</b>
+                    {{ $tl('p.makesItUnsafe') }}
+                    <b style="color: red">docker {{ $tl('p.extremelyUnsafe') }}</b>
                   </li>
-                  <li>如果端口暴露到公网很<b style="color: red"> 容易出现挖矿情况 </b></li>
                   <li>
-                    所以这里 我们<b style="color: red">强烈建议您使用 TLS 证书</b>（证书生成方式可以参考文档）来连接
-                    docker 提升安全性
+                    {{ $tl('p.exposedToInternet') }}<b style="color: red"> {{ $tl('p.easyToMine') }} </b>
                   </li>
-                  <li>如果端口<b style="color: red">保证在内网中使用可以忽略 TLS 证书</b></li>
-                  <li>注意：<b style="color: red">证书的允许的 IP 需要和 docker host 一致</b></li>
+                  <li>
+                    {{ $tl('p.stronglyRecommendTLS') }}<b style="color: red">{{ $tl('p.useTLSCertificate') }}</b
+                    >（{{ $tl('p.certificateGeneration') }}
+                  </li>
+                  <li>
+                    {{ $tl('p.ifPortIsInternal') }}<b style="color: red">{{ $tl('p.ignoreTLSCertificate') }}</b>
+                  </li>
+                  <li>
+                    {{ $tl('p.note') }}<b style="color: red">{{ $tl('p.ipMustMatchDockerHost') }}</b>
+                  </li>
                 </ul>
               </template>
             </template>
           </a-alert>
           <div></div>
         </a-space>
-        <a-form-item label="容器名称" name="name">
-          <a-input v-model:value="temp.name" placeholder="容器名称" />
+        <a-form-item :label="$tl('c.containerName')" name="name">
+          <a-input v-model:value="temp.name" :placeholder="$tl('c.containerName')" />
         </a-form-item>
-        <a-form-item label="分组" name="groupName">
+        <a-form-item :label="$tl('c.group')" name="groupName">
           <custom-select
             v-model:value="temp.groupName"
             :data="groupList"
-            input-placeholder="新增分组"
-            select-placeholder="选择分组名"
+            :input-placeholder="$tl('p.addNewGroup')"
+            :select-placeholder="$tl('p.selectGroupName')"
           >
           </custom-select>
         </a-form-item>
-        <a-form-item label="开启SSH访问" name="enableSsh">
-          <a-switch v-model:checked="temp.enableSsh" checked-children="开" un-checked-children="关" />
+        <a-form-item :label="$tl('p.enableSSHAccess')" name="enableSsh">
+          <a-switch
+            v-model:checked="temp.enableSsh"
+            :checked-children="$tl('c.statusOn')"
+            :un-checked-children="$tl('c.statusOff')"
+          />
         </a-form-item>
-        <a-form-item v-if="temp.enableSsh" label="SSH连接信息" name="enableSsh">
-          <a-select v-model:value="temp.machineSshId" allow-clear placeholder="SSH连接信息" class="search-input-item">
+        <a-form-item v-if="temp.enableSsh" :label="$tl('c.sshConnectionInfo')" name="enableSsh">
+          <a-select
+            v-model:value="temp.machineSshId"
+            allow-clear
+            :placeholder="$tl('c.sshConnectionInfo')"
+            class="search-input-item"
+          >
             <a-select-option v-for="item in sshList" :key="item.id" :disabled="!item.dockerInfo" :value="item.id">
               <a-tooltip :title="`${item.name}(${item.host})`">
                 <template #title>
                   {{ item.name }}({{ item.host }})[{{
                     (item.dockerInfo && JSON.parse(item.dockerInfo) && JSON.parse(item.dockerInfo).version) ||
-                    '未获取到 Docker 或者禁用监控'
+                    $tl('c.dockerMonitoringDisabled')
                   }}]
                 </template>
                 {{ item.name }}({{ item.host }}) [{{
                   (item.dockerInfo && JSON.parse(item.dockerInfo) && JSON.parse(item.dockerInfo).version) ||
-                  '未获取到 Docker 或者禁用监控'
+                  $tl('c.dockerMonitoringDisabled')
                 }}]</a-tooltip
               >
             </a-select-option>
           </a-select>
-          <template #help>需要 SSH 监控中能获取到 docker 信息</template>
+          <template #help>{{ $tl('p.sshMonitoringForDocker') }}</template>
         </a-form-item>
         <template v-if="!temp.enableSsh">
           <a-form-item label="host" name="host">
-            <a-input v-model:value="temp.host" placeholder="容器地址 tcp://127.0.0.1:2375" />
+            <a-input v-model:value="temp.host" :placeholder="`${$tl('p.containerAddressTCP')}://127.0.0.1:2375`" />
           </a-form-item>
 
-          <a-form-item label="TLS 认证" name="tlsVerify">
-            <a-switch v-model:checked="temp.tlsVerify" checked-children="开" un-checked-children="关" />
+          <a-form-item :label="$tl('p.tlsAuthentication')" name="tlsVerify">
+            <a-switch
+              v-model:checked="temp.tlsVerify"
+              :checked-children="$tl('c.statusOn')"
+              :un-checked-children="$tl('c.statusOff')"
+            />
           </a-form-item>
           <a-form-item
             v-if="temp.tlsVerify"
-            label="证书信息"
+            :label="$tl('p.certificateInfo')"
             name="certInfo"
-            help="可以通过证书管理中提前上传或者点击后面选择证书去选择/导入证书"
+            :help="$tl('p.uploadOrSelectCertificate')"
           >
             <a-input-search
               v-model:value="temp.certInfo"
-              placeholder="请输入证书信息或者选择证书信息,证书信息填写规则：序列号:证书类型"
-              enter-button="选择证书"
+              :placeholder="$tl('p.enterOrSelectCertificateInfo')"
+              :enter-button="$tl('p.selectCertificate')"
               @search="
                 () => {
                   certificateVisible = true
@@ -306,21 +335,25 @@
         </template>
 
         <a-collapse>
-          <a-collapse-panel key="1" header="其他配置">
-            <a-form-item label="超时时间" name="heartbeatTimeout">
-              <a-input-number v-model:value="temp.heartbeatTimeout" style="width: 100%" placeholder="超时时间 单位秒" />
+          <a-collapse-panel key="1" :header="$tl('p.otherConfiguration')">
+            <a-form-item :label="$tl('p.timeout')" name="heartbeatTimeout">
+              <a-input-number
+                v-model:value="temp.heartbeatTimeout"
+                style="width: 100%"
+                :placeholder="$tl('p.timeoutInSeconds')"
+              />
             </a-form-item>
-            <a-form-item label="仓库地址" name="registryUrl">
-              <a-input v-model:value="temp.registryUrl" placeholder="仓库地址" />
+            <a-form-item :label="$tl('c.repoAddress')" name="registryUrl">
+              <a-input v-model:value="temp.registryUrl" :placeholder="$tl('c.repoAddress')" />
             </a-form-item>
-            <a-form-item label="仓库账号" name="registryUsername">
-              <a-input v-model:value="temp.registryUsername" placeholder="仓库账号" />
+            <a-form-item :label="$tl('c.repoAccount')" name="registryUsername">
+              <a-input v-model:value="temp.registryUsername" :placeholder="$tl('c.repoAccount')" />
             </a-form-item>
-            <a-form-item label="仓库密码" name="registryPassword">
-              <a-input-password v-model:value="temp.registryPassword" placeholder="仓库密码" />
+            <a-form-item :label="$tl('c.repoPassword')" name="registryPassword">
+              <a-input-password v-model:value="temp.registryPassword" :placeholder="$tl('c.repoPassword')" />
             </a-form-item>
-            <a-form-item label="账号邮箱" name="registryEmail">
-              <a-input v-model:value="temp.registryEmail" placeholder="账号邮箱" />
+            <a-form-item :label="$tl('c.accountEmail')" name="registryEmail">
+              <a-input v-model:value="temp.registryEmail" :placeholder="$tl('c.accountEmail')" />
             </a-form-item>
           </a-collapse-panel>
         </a-collapse>
@@ -330,17 +363,14 @@
     <a-modal
       v-model:open="initSwarmVisible"
       destroy-on-close
-      title="创建 Docker 集群"
+      :title="$tl('p.createDockerCluster')"
       :confirm-loading="confirmLoading"
       :mask-closable="false"
       @ok="handleSwarm"
     >
       <a-form ref="initForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-alert message="温馨提示" type="warning">
-          <template #description>
-            创建集群会将尝试获取 docker
-            中集群信息，如果存在集群信息将自动同步集群信息到系统，反之不存在集群信息将自动创建 swarm 集群
-          </template>
+        <a-alert :message="$tl('p.reminder')" type="warning">
+          <template #description> {{ $tl('p.createClusterBehavior') }} </template>
         </a-alert>
       </a-form>
     </a-modal>
@@ -348,13 +378,13 @@
     <a-modal
       v-model:open="joinSwarmVisible"
       destroy-on-close
-      title="加入 Docker 集群"
+      :title="$tl('p.joinDockerCluster')"
       :confirm-loading="confirmLoading"
       :mask-closable="false"
       @ok="handleSwarmJoin"
     >
       <a-form ref="joinForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item label="选择集群" name="managerId">
+        <a-form-item :label="$tl('p.selectCluster')" name="managerId">
           <a-select
             v-model:value="temp.managerId"
             show-search
@@ -369,7 +399,7 @@
               }
             "
             allow-clear
-            placeholder="加入到哪个集群"
+            :placeholder="$tl('p.joinToCluster')"
             @change="
               (v) => {
                 tempList = swarmList.filter((item) => {
@@ -387,14 +417,14 @@
           </a-select>
         </a-form-item>
 
-        <a-form-item v-if="temp.remoteAddr" label="集群IP" name="remoteAddr"
-          ><a-input v-model:value="temp.remoteAddr" placeholder="关联容器标签" />
+        <a-form-item v-if="temp.remoteAddr" :label="$tl('p.clusterIP')" name="remoteAddr"
+          ><a-input v-model:value="temp.remoteAddr" :placeholder="$tl('p.containerLabel')" />
         </a-form-item>
 
-        <a-form-item label="角色" name="role">
+        <a-form-item :label="$tl('p.role')" name="role">
           <a-radio-group v-model:value="temp.role" name="role">
-            <a-radio value="worker"> 工作节点</a-radio>
-            <a-radio value="manager"> 管理节点 </a-radio>
+            <a-radio value="worker"> {{ $tl('c.workNode') }}</a-radio>
+            <a-radio value="manager"> {{ $tl('c.manageNode') }} </a-radio>
           </a-radio-group>
         </a-form-item>
       </a-form>
@@ -425,19 +455,19 @@
       v-model:open="syncToWorkspaceVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      title="分配到其他工作空间"
+      :title="$tl('p.assignToOtherWorkspace')"
       :mask-closable="false"
       @ok="handleSyncToWorkspace"
     >
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
-        <a-form-item label="分配类型" name="type">
+        <a-form-item :label="$tl('p.assignmentType')" name="type">
           <a-radio-group v-model:value="temp.type">
             <a-radio value="docker"> docker </a-radio>
-            <a-radio value="swarm" :disabled="temp.swarmId === true ? false : true"> 集群 </a-radio>
+            <a-radio value="swarm" :disabled="temp.swarmId === true ? false : true"> {{ $tl('c.cluster') }} </a-radio>
           </a-radio-group>
         </a-form-item>
-        <a-form-item label="选择工作空间" name="workspaceId">
+        <a-form-item :label="$tl('p.selectWorkspace')" name="workspaceId">
           <a-select
             v-model:value="temp.workspaceId"
             show-search
@@ -451,7 +481,7 @@
                 )
               }
             "
-            placeholder="请选择工作空间"
+            :placeholder="$tl('c.selectWorkspace')"
           >
             <a-select-option v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
@@ -463,18 +493,18 @@
       v-model:open="viewWorkspaceDocker"
       destroy-on-close
       width="50%"
-      title="关联工作空间 docker"
+      :title="$tl('p.associatedWorkspaceDocker')"
       :footer="null"
       :mask-closable="false"
     >
       <a-space direction="vertical" style="width: 100%">
         <a-alert
-          message="已经分配到工作空间的 Docker 或者集群无非直接删除，需要到分配到的各个工作空间逐一删除后才能删除资产 Docker 或者集群"
-          type="info"
-          show-icon
           v-if="
             workspaceDockerData && (workspaceDockerData.dockerList?.length || workspaceDockerData.swarmList?.length)
           "
+          :message="$tl('p.cannotDeleteDirectly')"
+          type="info"
+          show-icon
         />
         <a-tabs>
           <a-tab-pane key="1" tab="docker">
@@ -482,21 +512,21 @@
               <template #renderItem="{ item }">
                 <a-list-item style="display: block">
                   <a-row>
-                    <a-col :span="10">Docker 名称：{{ item.name }}</a-col>
-                    <a-col :span="10">所属工作空间： {{ item.workspace && item.workspace.name }}</a-col>
+                    <a-col :span="10">Docker {{ $tl('p.name') }}{{ item.name }}</a-col>
+                    <a-col :span="10">{{ $tl('c.belongWorkspace') }}{{ item.workspace && item.workspace.name }}</a-col>
                     <a-col :span="4"> </a-col>
                   </a-row>
                 </a-list-item>
               </template>
             </a-list>
           </a-tab-pane>
-          <a-tab-pane key="2" tab="集群">
+          <a-tab-pane key="2" :tab="$tl('c.cluster')">
             <a-list bordered :data-source="workspaceDockerData && workspaceDockerData.swarmList">
               <template #renderItem="{ item }">
                 <a-list-item style="display: block">
                   <a-row>
-                    <a-col :span="10">集群名称：{{ item.name }}</a-col>
-                    <a-col :span="10">所属工作空间： {{ item.workspace && item.workspace.name }}</a-col>
+                    <a-col :span="10">{{ $tl('p.clusterName') }}{{ item.name }}</a-col>
+                    <a-col :span="10">{{ $tl('c.belongWorkspace') }}{{ item.workspace && item.workspace.name }}</a-col>
                     <a-col :span="4"> </a-col>
                   </a-row>
                 </a-list-item>
@@ -510,7 +540,7 @@
     <a-drawer
       v-if="certificateVisible"
       destroy-on-close
-      :title="`选择证书文件`"
+      :title="`${$tl('p.selectCertificateFile')}`"
       placement="right"
       :open="certificateVisible"
       width="85vw"
@@ -547,7 +577,7 @@
               }
             "
           >
-            取消
+            {{ $tl('c.cancel') }}
           </a-button>
           <a-button
             type="primary"
@@ -557,7 +587,7 @@
               }
             "
           >
-            确认
+            {{ $tl('c.confirm') }}
           </a-button>
         </a-space>
       </template>
@@ -615,7 +645,7 @@ export default {
       sshList: [],
       columns: [
         {
-          title: '名称',
+          title: this.$tl('c.name'),
           dataIndex: 'name',
           ellipsis: true,
 
@@ -630,7 +660,7 @@ export default {
           width: 150
         },
         {
-          title: 'docker版本',
+          title: `docker${this.$tl('p.version')}`,
           dataIndex: 'dockerVersion',
           ellipsis: true,
           width: '100px',
@@ -638,7 +668,7 @@ export default {
         },
 
         {
-          title: '状态',
+          title: this.$tl('p.status'),
           dataIndex: 'status',
           ellipsis: true,
           align: 'center',
@@ -652,26 +682,26 @@ export default {
           ellipsis: true
         },
         {
-          title: '分组名',
+          title: this.$tl('p.groupName'),
           dataIndex: 'groupName',
           ellipsis: true,
           width: '100px',
           tooltip: true
         },
         {
-          title: '集群',
+          title: this.$tl('c.cluster'),
           dataIndex: 'swarmId',
           ellipsis: true
         },
         // { title: "apiVersion", dataIndex: "apiVersion", width: 100, ellipsis: true, },
         {
-          title: '最后修改人',
+          title: this.$tl('p.lastModifier'),
           dataIndex: 'modifyUser',
           width: 120,
           ellipsis: true
         },
         {
-          title: '创建时间',
+          title: this.$tl('p.createTime'),
           dataIndex: 'createTimeMillis',
           ellipsis: true,
           sorter: true,
@@ -679,7 +709,7 @@ export default {
           width: '170px'
         },
         {
-          title: '修改时间',
+          title: this.$tl('p.updateTime'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -687,7 +717,7 @@ export default {
           width: '170px'
         },
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
 
           fixed: 'right',
@@ -697,23 +727,23 @@ export default {
       ],
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
-        name: [{ required: true, message: '请填写容器名称', trigger: 'blur' }],
+        name: [{ required: true, message: this.$tl('p.containerName'), trigger: 'blur' }],
         // host: [{ required: true, message: "请填写容器地址", trigger: "blur" }],
 
         managerId: [
           {
             required: true,
-            message: '请选择要加入到哪个集群',
+            message: this.$tl('p.clusterToJoin'),
             trigger: 'blur'
           }
         ],
-        role: [{ required: true, message: '请选择节点角色', trigger: 'blur' }],
+        role: [{ required: true, message: this.$tl('p.nodeRole'), trigger: 'blur' }],
         remoteAddr: [
-          { required: true, message: '请填写集群IP', trigger: 'blur' },
+          { required: true, message: this.$tl('p.clusterIp'), trigger: 'blur' },
           {
             pattern:
               /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/,
-            message: '填写正确的IP地址'
+            message: this.$tl('p.correctIp')
           }
         ]
       },
@@ -751,6 +781,9 @@ export default {
     this.loadGroupList()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.system.assets.docker.list.${key}`, ...args)
+    },
     //
     parseTime,
     // 获取所有的分组
@@ -858,12 +891,12 @@ export default {
         const temp = Object.assign({}, this.temp)
         if (temp.enableSsh) {
           if (!temp.machineSshId) {
-            $message.warning('请选择SSH连接信息')
+            $message.warning(this.$tl('p.sshConnectionInfo'))
             return false
           }
         } else {
           if (!temp.host) {
-            $message.warning('请输入host')
+            $message.warning(this.$tl('p.hostInput'))
             return false
           }
         }
@@ -888,11 +921,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemTip'),
         zIndex: 1009,
-        content: '真的要删除该 Docker 么？删除只会检查本地系统的数据关联,不会删除 docker 容器中数据',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmDockerDeletion'),
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           return deleteDcoker({
             id: record.id
@@ -909,20 +942,22 @@ export default {
     },
     // 强制解绑
     handleLeaveForce(record) {
-      const html =
-        "<h1 style='color:red;'>真的要强制退出集群吗？</h1> " +
-        "<h3 style='color:red;'>如果当前集群还存在可能出现数据不一致问题奥</h3> " +
-        "<ul style='color:red;'>" +
-        '<li>请提前备份数据再操作奥</li>' +
-        "<li style='font-weight: bold;'>请不要优先退出管理节点</li>" +
-        '<li>操作不能撤回奥</li>' +
-        ' </ul>'
+      const html = `
+      <h1 style='color:red;'>${this.$tl('p.confirmForceExitCluster')}</h1>
+      <h3 style='color:red;'>${this.$tl('p.dataInconsistencyWarning')}</h3>
+      <ul style='color:red;'>
+        <li>${this.$tl('p.backupDataWarning')}</li>
+        <li>${this.$tl('p.backupDataWarning')}</li>
+        <li style='font-weight: bold;'>${this.$tl('p.avoidExitingManagerNode')}</li>
+        <li>${this.$tl('p.operationIrreversible')}</li>
+      </ul>
+      `
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemTip'),
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
-        okText: '确认',
-        cancelText: '取消',
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           return dcokerSwarmLeaveForce({
             id: record.id
@@ -1040,13 +1075,13 @@ export default {
     handleSyncToWorkspace() {
       if (!this.temp.type) {
         $notification.warn({
-          message: '请选择分配类型'
+          message: this.$tl('p.allocationType')
         })
         return false
       }
       if (!this.temp.workspaceId) {
         $notification.warn({
-          message: '请选择工作空间'
+          message: this.$tl('c.selectWorkspace')
         })
         return false
       }

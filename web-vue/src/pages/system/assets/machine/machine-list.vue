@@ -10,7 +10,7 @@
       default-auto-refresh
       :auto-refresh-time="30"
       table-name="buildList"
-      empty-description="没有资产机器"
+      :empty-description="$tl('p.noAssetMachine')"
       :active-page="activePage"
       :columns="columns"
       :data-source="list"
@@ -39,19 +39,19 @@
           <a-input
             v-model:value="listQuery['%name%']"
             class="search-input-item"
-            placeholder="机器名称"
+            :placeholder="$tl('c.machineName')"
             @press-enter="getMachineList"
           />
           <a-input
             v-model:value="listQuery['%jpomUrl%']"
             class="search-input-item"
-            placeholder="节点地址"
+            :placeholder="$tl('c.nodeAddress')"
             @press-enter="getMachineList"
           />
           <a-input
             v-model:value="listQuery['%jpomVersion%']"
             class="search-input-item"
-            placeholder="插件版本"
+            :placeholder="$tl('p.pluginVersion')"
             @press-enter="getMachineList"
           />
           <a-select
@@ -68,7 +68,7 @@
               }
             "
             allow-clear
-            placeholder="分组"
+            :placeholder="$tl('p.group')"
             class="search-input-item"
           >
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
@@ -76,31 +76,31 @@
           <a-select
             v-model:value="listQuery['order_field']"
             allow-clear
-            placeholder="请选择排序字段"
+            :placeholder="$tl('p.selectSortField')"
             class="search-input-item"
           >
-            <a-select-option value="networkDelay">网络延迟</a-select-option>
+            <a-select-option value="networkDelay">{{ $tl('p.networkDelay') }}</a-select-option>
             <a-select-option value="osOccupyCpu">cpu</a-select-option>
-            <a-select-option value="osOccupyDisk">硬盘</a-select-option>
-            <a-select-option value="osOccupyMemory">内存</a-select-option>
-            <a-select-option value="modifyTimeMillis">更新时间</a-select-option>
-            <a-select-option value="createTimeMillis">创建时间</a-select-option>
+            <a-select-option value="osOccupyDisk">{{ $tl('p.disk') }}</a-select-option>
+            <a-select-option value="osOccupyMemory">{{ $tl('p.memory') }}</a-select-option>
+            <a-select-option value="modifyTimeMillis">{{ $tl('p.updateTime') }}</a-select-option>
+            <a-select-option value="createTimeMillis">{{ $tl('c.createTime') }}</a-select-option>
           </a-select>
-          <a-button :loading="loading" type="primary" @click="getMachineList">搜索</a-button>
-          <a-button type="primary" @click="addMachine">新增</a-button>
+          <a-button :loading="loading" type="primary" @click="getMachineList">{{ $tl('p.search') }}</a-button>
+          <a-button type="primary" @click="addMachine">{{ $tl('p.add') }}</a-button>
 
           <a-dropdown v-if="tableSelections && tableSelections.length">
             <template #overlay>
               <a-menu>
-                <a-menu-item key="1" @click="syncToWorkspaceShow()"> 分配节点 </a-menu-item>
-                <a-menu-item key="2" @click="syncNodeWhiteConfig"> 同步授权 </a-menu-item>
-                <a-menu-item key="3" @click="syncNodeConfig"> 同步系统配置 </a-menu-item>
+                <a-menu-item key="1" @click="syncToWorkspaceShow()"> {{ $tl('p.assignNode') }} </a-menu-item>
+                <a-menu-item key="2" @click="syncNodeWhiteConfig"> {{ $tl('p.syncAuth') }} </a-menu-item>
+                <a-menu-item key="3" @click="syncNodeConfig"> {{ $tl('p.syncSystemConfig') }} </a-menu-item>
               </a-menu>
             </template>
-            <a-button type="primary"> 批量操作 <DownOutlined /> </a-button>
+            <a-button type="primary"> {{ $tl('c.batchOperation') }} <DownOutlined /> </a-button>
           </a-dropdown>
-          <a-tooltip v-else title="表格视图才能使用同步配置功能">
-            <a-button :disabled="true" type="primary"> 批量操作<DownOutlined /></a-button>
+          <a-tooltip v-else :title="$tl('p.useTableViewForSync')">
+            <a-button :disabled="true" type="primary"> {{ $tl('c.batchOperation') }}<DownOutlined /></a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -108,12 +108,9 @@
         <a-tooltip>
           <template #title>
             <ul>
-              <li>节点账号密码为插件端的账号密码,并非用户账号(管理员)密码</li>
-              <li>
-                节点账号密码默认由系统生成：可以通过插件端数据目录下 agent_authorize.json
-                文件查看（如果自定义配置了账号密码将没有此文件）
-              </li>
-              <li>节点地址为插件端的 IP:PORT 插件端端口默认为：2123</li>
+              <li>{{ $tl('p.nodeAccountInfo') }}</li>
+              <li>{{ $tl('p.defaultAccountInfo') }}</li>
+              <li>{{ $tl('p.nodeAddressInfo') }}</li>
             </ul>
           </template>
           <QuestionCircleOutlined />
@@ -134,7 +131,7 @@
         </template>
         <template v-else-if="column.dataIndex === 'status'">
           <a-tooltip
-            :title="`当前状态：${statusMap[record.status]} ${record.statusMsg ? '状态消息：' + record.statusMsg : '还没有状态消息'} `"
+            :title="`${$tl('c.currentStatus')}${statusMap[record.status]} ${record.statusMsg ? $tl('c.statusMessage') + record.statusMsg : $tl('c.noStatusMessage')} `"
           >
             <a-tag :color="record.status === 1 ? 'green' : 'pink'" style="margin-right: 0">
               {{ statusMap[record.status] }}
@@ -159,9 +156,11 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button>
-            <a-button type="primary" size="small" @click="syncToWorkspaceShow(record)">分配</a-button>
-            <a-button type="primary" danger size="small" @click="deleteMachineInfo(record)">删除</a-button>
+            <a-button type="primary" size="small" @click="handleEdit(record)">{{ $tl('c.edit') }}</a-button>
+            <a-button type="primary" size="small" @click="syncToWorkspaceShow(record)">{{ $tl('c.assign') }}</a-button>
+            <a-button type="primary" danger size="small" @click="deleteMachineInfo(record)">{{
+              $tl('c.delete')
+            }}</a-button>
           </a-space>
         </template>
       </template>
@@ -173,8 +172,8 @@
               <a-col :span="17" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
                 <a-tooltip>
                   <template #title>
-                    <div>节点名称：{{ item.name }}</div>
-                    <div>节点地址：{{ item.jpomUrl }}</div>
+                    <div>{{ $tl('c.nodeName') }}{{ item.name }}</div>
+                    <div>{{ $tl('c.nodeAddress') }}：{{ item.jpomUrl }}</div>
                   </template>
                   <span style="cursor: pointer" @click="showMachineInfo(item)">
                     {{ item.name }}
@@ -183,7 +182,7 @@
               </a-col>
               <a-col :span="7" style="text-align: right" class="text-overflow-hidden">
                 <a-tooltip
-                  :title="`当前状态：${statusMap[item.status]} ${item.statusMsg ? '状态消息：' + item.statusMsg : '还没有状态消息'} `"
+                  :title="`${$tl('c.currentStatus')}${statusMap[item.status]} ${item.statusMsg ? $tl('c.statusMessage') + item.statusMsg : $tl('c.noStatusMessage')} `"
                 >
                   <a-tag :color="item.status === 1 ? 'green' : 'pink'" style="margin-right: 0">
                     {{ statusMap[item.status] }}</a-tag
@@ -195,7 +194,7 @@
 
           <a-tooltip :title="item.osName">
             <a-row class="item-info">
-              <a-col :span="6" class="title text-overflow-hidden">系统名称:</a-col>
+              <a-col :span="6" class="title text-overflow-hidden">{{ $tl('p.systemName') }}</a-col>
               <a-col :span="18" class="content text-overflow-hidden">
                 <a-button
                   :disabled="!item.osName"
@@ -211,7 +210,7 @@
           </a-tooltip>
           <a-tooltip :title="item.osVersion">
             <a-row class="item-info">
-              <a-col :span="6" class="title text-overflow-hidden">系统版本:</a-col>
+              <a-col :span="6" class="title text-overflow-hidden">{{ $tl('p.systemVersion') }}</a-col>
               <a-col :span="18" class="content text-overflow-hidden">
                 {{ item.osVersion || '-' }}
               </a-col>
@@ -219,7 +218,7 @@
           </a-tooltip>
           <a-tooltip :title="item.osLoadAverage">
             <a-row class="item-info">
-              <a-col :span="6" class="title text-overflow-hidden">系统负载:</a-col>
+              <a-col :span="6" class="title text-overflow-hidden">{{ $tl('p.systemLoad') }}</a-col>
               <a-col :span="18" class="content text-overflow-hidden">
                 {{ item.osLoadAverage || '-' }}
               </a-col>
@@ -227,7 +226,7 @@
           </a-tooltip>
           <a-tooltip :title="item.jpomVersion">
             <a-row class="item-info">
-              <a-col :span="6" class="title text-overflow-hidden">插件版本:</a-col>
+              <a-col :span="6" class="title text-overflow-hidden">{{ $tl('p.pluginVersionField') }}</a-col>
               <a-col :span="18" class="content text-overflow-hidden">
                 <a-button
                   :disabled="!item.jpomVersion"
@@ -243,11 +242,11 @@
           </a-tooltip>
           <a-row type="flex" align="middle" justify="center" style="margin-top: 10px">
             <a-button-group>
-              <a-button type="primary" size="small" @click="handleEdit(item)"> 编辑 </a-button>
-              <a-button type="primary" size="small" @click="showMachineInfo(item)">详情</a-button>
-              <a-button type="primary" size="small" @click="syncToWorkspaceShow(item)">分配</a-button>
-              <a-button type="primary" size="small" @click="viewMachineNode(item)">节点</a-button>
-              <a-button size="small" @click="deleteMachineInfo(item)">删除</a-button>
+              <a-button type="primary" size="small" @click="handleEdit(item)"> {{ $tl('c.edit') }} </a-button>
+              <a-button type="primary" size="small" @click="showMachineInfo(item)">{{ $tl('p.details') }}</a-button>
+              <a-button type="primary" size="small" @click="syncToWorkspaceShow(item)">{{ $tl('c.assign') }}</a-button>
+              <a-button type="primary" size="small" @click="viewMachineNode(item)">{{ $tl('p.node') }}</a-button>
+              <a-button size="small" @click="deleteMachineInfo(item)">{{ $tl('c.delete') }}</a-button>
             </a-button-group>
           </a-row>
         </a-card>
@@ -288,20 +287,20 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="50%"
-      title="编辑机器"
+      :title="$tl('p.editMachine')"
       :mask-closable="false"
       @ok="handleEditOk"
     >
       <a-form ref="editNodeForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 19 }">
-        <a-form-item label="机器名称" name="name">
-          <a-input v-model:value="temp.name" :max-length="50" placeholder="机器名称" />
+        <a-form-item :label="$tl('c.machineName')" name="name">
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$tl('c.machineName')" />
         </a-form-item>
-        <a-form-item label="机器分组" name="groupName">
+        <a-form-item :label="$tl('p.machineGroup')" name="groupName">
           <custom-select
             v-model:value="temp.groupName"
             :data="groupList"
-            input-placeholder="新增分组"
-            select-placeholder="选择分组名"
+            :input-placeholder="$tl('p.addGroup')"
+            :select-placeholder="$tl('p.selectGroupName')"
           >
           </custom-select>
         </a-form-item>
@@ -309,21 +308,21 @@
         <a-form-item name="jpomUrl">
           <template #label>
             <a-tooltip>
-              节点地址
+              {{ $tl('c.nodeAddress') }}
               <template #title
-                >节点地址为插件端的 IP:PORT 插件端端口默认为：2123
+                >{{ $tl('p.nodeAddressInfo2') }}3
                 <ul>
-                  <li>节点地址建议使用内网地址</li>
-                  <li>如果插件端正常运行但是连接失败请检查端口是否开放,防火墙规则,云服务器的安全组入站规则</li>
+                  <li>{{ $tl('p.useInternalAddress') }}</li>
+                  <li>{{ $tl('p.connectionTroubleshoot') }}</li>
                 </ul>
               </template>
               <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
-          <template #help>节点地址格式为：IP:PORT (示例：192.168.1.100:2123)</template>
-          <a-input v-model:value="temp.jpomUrl" placeholder="节点地址 (192.168.1.100:2123)">
+          <template #help>{{ $tl('p.nodeAddressFormat') }}</template>
+          <a-input v-model:value="temp.jpomUrl" :placeholder="$tl('p.nodeAddressExample')">
             <template #addonBefore>
-              <a-select v-model:value="temp.jpomProtocol" placeholder="协议类型" style="width: 160px">
+              <a-select v-model:value="temp.jpomProtocol" :placeholder="$tl('p.protocolType')" style="width: 160px">
                 <a-select-option value="Http"> Http:// </a-select-option>
                 <a-select-option value="Https"> Https:// </a-select-option>
               </a-select>
@@ -331,51 +330,48 @@
           </a-input>
         </a-form-item>
 
-        <a-form-item label="节点账号" name="loginName">
-          <a-input v-model:value="temp.jpomUsername" placeholder="节点账号,请查看节点启动输出的信息" />
-          <template #help>默认账号为：jpomAgent</template>
+        <a-form-item :label="$tl('p.nodeAccount')" name="loginName">
+          <a-input v-model:value="temp.jpomUsername" :placeholder="$tl('p.nodeAccountInfo_1')" />
+          <template #help>{{ $tl('p.defaultAccount') }}</template>
         </a-form-item>
         <a-form-item :name="`${temp.id ? 'loginPwd-update' : 'loginPwd'}`">
           <template #label>
             <a-tooltip>
-              节点密码
-              <template #title>
-                节点账号密码默认由系统生成：可以通过插件端数据目录下 agent_authorize.json
-                文件查看（如果自定义配置了账号密码将没有此文件）
-              </template>
+              {{ $tl('p.nodePassword') }}
+              <template #title> {{ $tl('p.accountPasswordInfo') }}_authorize.json {{ $tl('p.fileView') }} </template>
               <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
-          <a-input-password v-model:value="temp.jpomPassword" placeholder="节点密码,请查看节点启动输出的信息" />
+          <a-input-password v-model:value="temp.jpomPassword" :placeholder="$tl('p.nodePasswordInfo')" />
         </a-form-item>
 
         <a-collapse>
-          <a-collapse-panel key="1" header="其他配置">
-            <a-form-item label="模板节点" name="templateNode" help="">
+          <a-collapse-panel key="1" :header="$tl('p.otherConfig')">
+            <a-form-item :label="$tl('c.templateNode')" name="templateNode" help="">
               <a-switch
                 v-model:checked="temp.templateNode"
-                checked-children="是"
-                un-checked-children="否"
+                :checked-children="$tl('c.isTemplateNode')"
+                :un-checked-children="$tl('c.isNotTemplateNode')"
                 default-checked
               />
-              以此机器节点配置为模板,用于快捷同步其他机器节点的配置
+              {{ $tl('p.useAsTemplate') }},{{ $tl('p.syncConfig') }}
             </a-form-item>
 
-            <a-form-item label="超时时间(s)" name="timeOut">
+            <a-form-item :label="$tl('p.timeout')" name="timeOut">
               <a-input-number
                 v-model:value="temp.jpomTimeout"
                 :min="0"
-                placeholder="秒 (值太小可能会取不到节点状态)"
+                :placeholder="$tl('p.timeoutUnit')"
                 style="width: 100%"
               />
             </a-form-item>
 
-            <a-form-item label="代理" name="jpomHttpProxy">
-              <a-input v-model:value="temp.jpomHttpProxy" placeholder="代理地址 (127.0.0.1:8888)">
+            <a-form-item :label="$tl('p.proxy')" name="jpomHttpProxy">
+              <a-input v-model:value="temp.jpomHttpProxy" :placeholder="$tl('p.proxyAddress')">
                 <template #addonBefore>
                   <a-select
                     v-model:value="temp.jpomHttpProxyType"
-                    placeholder="选择代理类型"
+                    :placeholder="$tl('p.proxyType')"
                     default-value="HTTP"
                     style="width: 100px"
                   >
@@ -387,14 +383,14 @@
               </a-input>
             </a-form-item>
 
-            <a-form-item label="编码方式" name="transportEncryption">
+            <a-form-item :label="$tl('p.encoding')" name="transportEncryption">
               <a-select
                 v-model:value="temp.transportEncryption"
                 show-search
                 default-value="0"
-                placeholder="请选择编码方式"
+                :placeholder="$tl('p.selectEncoding')"
               >
-                <a-select-option :value="0">不编码</a-select-option>
+                <a-select-option :value="0">{{ $tl('p.noEncoding') }}</a-select-option>
                 <a-select-option :value="1">BASE64</a-select-option>
                 <a-select-option :value="2">AES</a-select-option>
               </a-select>
@@ -433,12 +429,12 @@
       v-model:open="syncToWorkspaceVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      title="分配到其他工作空间"
+      :title="$tl('p.assignWorkspace')"
       :mask-closable="false"
       @ok="handleSyncToWorkspace"
     >
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
-        <a-form-item label="选择工作空间" name="workspaceId">
+        <a-form-item :label="$tl('p.selectWorkspace')" name="workspaceId">
           <a-select
             v-model:value="temp.workspaceId"
             show-search
@@ -452,7 +448,7 @@
                 )
               }
             "
-            placeholder="请选择工作空间"
+            :placeholder="$tl('c.selectWorkspace')"
           >
             <a-select-option v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
@@ -465,23 +461,18 @@
       v-model:open="viewLinkNode"
       destroy-on-close
       width="50%"
-      title="关联节点"
+      :title="$tl('p.associatedNode')"
       :footer="null"
       :mask-closable="false"
     >
       <a-space direction="vertical" style="width: 100%">
-        <a-alert
-          message="已经分配到工作空间的机器无非直接删除，需要到分配到的各个工作空间逐一删除后才能删除资产机器"
-          type="info"
-          show-icon
-          v-if="nodeList && nodeList.length"
-        />
+        <a-alert v-if="nodeList && nodeList.length" :message="$tl('p.deleteNodeInfo')" type="info" show-icon />
         <a-list bordered :data-source="nodeList">
           <template #renderItem="{ item }">
             <a-list-item style="display: block">
               <a-row>
-                <a-col :span="10">节点名称：{{ item.name }}</a-col>
-                <a-col :span="10">所属工作空间： {{ item.workspace && item.workspace.name }}</a-col>
+                <a-col :span="10">{{ $tl('c.nodeName') }}{{ item.name }}</a-col>
+                <a-col :span="10">{{ $tl('p.belongToWorkspace') }}{{ item.workspace && item.workspace.name }}</a-col>
                 <a-col :span="4">
                   <a-button type="link" @click="toNode(item.id, item.name, item.workspace && item.workspace.id)">
                     <LoginOutlined /> </a-button
@@ -498,17 +489,17 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="50%"
-      title="同步节点授权"
+      :title="$tl('p.syncAuth_1')"
       :mask-closable="false"
       @ok="onSubmitWhitelist"
     >
       <a-alert
-        :message="`一键分发同步多个节点的授权配置,不用挨个配置。配置后会覆盖之前的配置,一般用于节点环境一致的情况`"
+        :message="`${$tl('p.syncAuthConfig')},${$tl('c.configWithoutOverwrite')},${$tl('c.useForConsistentEnv')}`"
         style="margin-top: 10px; margin-bottom: 20px"
         banner
       />
       <a-form ref="editWhiteForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
-        <a-form-item label="模板节点">
+        <a-form-item :label="$tl('c.templateNode')">
           <a-select
             v-model:value="temp.templateNodeId"
             show-search
@@ -522,7 +513,7 @@
                 )
               }
             "
-            placeholder="请选择模板节点"
+            :placeholder="$tl('p.selectTemplateNode')"
             @change="(id) => loadWhitelistData(id)"
           >
             <a-select-option v-for="item in templateNodeList" :key="item.id" :value="item.id">
@@ -530,21 +521,21 @@
             </a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="项目路径" name="project">
+        <a-form-item :label="$tl('p.projectPath')" name="project">
           <a-textarea
             v-model:value="temp.project"
             :rows="5"
             style="resize: none"
-            placeholder="请输入项目存放路径授权，回车支持输入多个路径，系统会自动过滤 ../ 路径、不允许输入根路径"
+            :placeholder="$tl('p.projectPathAuth')"
           />
         </a-form-item>
 
-        <a-form-item label="文件后缀" name="allowEditSuffix">
+        <a-form-item :label="$tl('p.fileExtension')" name="allowEditSuffix">
           <a-textarea
             v-model:value="temp.allowEditSuffix"
             :rows="5"
             style="resize: none"
-            placeholder="请输入允许编辑文件的后缀及文件编码，不设置编码则默认取系统编码，示例：设置编码：txt@utf-8， 不设置编码：txt"
+            :placeholder="$tl('p.allowedFileExtension')"
           />
         </a-form-item>
       </a-form>
@@ -555,22 +546,24 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="50%"
-      title="同步节点配置"
+      :title="$tl('p.syncNodeConfig')"
       :mask-closable="false"
     >
       <template #footer>
         <a-space>
-          <a-button type="primary" :disabled="!temp.content" @click="onNodeSubmit(false)">保存</a-button>
-          <a-button type="primary" :disabled="!temp.content" @click="onNodeSubmit(true)">保存并重启</a-button>
+          <a-button type="primary" :disabled="!temp.content" @click="onNodeSubmit(false)">{{ $tl('p.save') }}</a-button>
+          <a-button type="primary" :disabled="!temp.content" @click="onNodeSubmit(true)">{{
+            $tl('p.saveAndRestart')
+          }}</a-button>
         </a-space>
       </template>
       <a-alert
-        :message="`一键分发同步多个节点的系统配置,不用挨个配置。配置后会覆盖之前的配置,一般用于节点环境一致的情况`"
+        :message="`${$tl('p.syncSystemConfig_1')},${$tl('c.configWithoutOverwrite')},${$tl('c.useForConsistentEnv')}`"
         style="margin-top: 10px; margin-bottom: 20px"
         banner
       />
       <a-form ref="editNodeConfigForm" :model="temp">
-        <a-form-item label="模版节点">
+        <a-form-item :label="$tl('p.templateNode')">
           <a-select
             v-model:value="temp.templateNodeId"
             show-search
@@ -584,7 +577,7 @@
                 )
               }
             "
-            placeholder="请选择模版节点"
+            :placeholder="$tl('p.selectTemplate')"
             @change="(id) => loadNodeConfig(id)"
           >
             <a-select-option v-for="item in templateNodeList" :key="item.id" :value="item.id">
@@ -658,7 +651,7 @@ export default {
       syncToWorkspaceVisible: false,
       temp: {},
       rules: {
-        name: [{ required: true, message: '请输入机器的名称', trigger: 'blur' }]
+        name: [{ required: true, message: this.$tl('p.machineName'), trigger: 'blur' }]
       },
       drawerVisible: false,
       drawerUpgradeVisible: false,
@@ -668,27 +661,27 @@ export default {
       layoutType: null,
       columns: [
         {
-          title: '名称',
+          title: this.$tl('p.name'),
           dataIndex: 'name',
           width: 150,
           ellipsis: true
         },
         {
-          title: '系统名',
+          title: this.$tl('p.systemName_1'),
           dataIndex: 'osName',
           width: 150,
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '主机名',
+          title: this.$tl('p.hostName'),
           dataIndex: 'hostName',
           width: 150,
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '节点地址',
+          title: this.$tl('c.nodeAddress'),
           dataIndex: 'jpomUrl',
           width: 150,
           sorter: true,
@@ -696,21 +689,21 @@ export default {
           tooltip: true
         },
         {
-          title: '分组名',
+          title: this.$tl('p.groupName'),
           dataIndex: 'groupName',
           ellipsis: true,
           width: '100px',
           tooltip: true
         },
         {
-          title: '状态',
+          title: this.$tl('p.status'),
           dataIndex: 'status',
           align: 'center',
           width: '100px',
           ellipsis: true
         },
         {
-          title: '开机时间',
+          title: this.$tl('p.bootTime'),
           sorter: true,
           dataIndex: 'osSystemUptime',
           width: 150,
@@ -718,7 +711,7 @@ export default {
           duration2: true
         },
         {
-          title: 'CPU占用',
+          title: `CPU${this.$tl('p.usage')}`,
           sorter: true,
           align: 'center',
           dataIndex: 'osOccupyCpu',
@@ -727,7 +720,7 @@ export default {
           percent2Number: true
         },
         {
-          title: '实际内存占用',
+          title: this.$tl('p.actualMemoryUsage'),
           sorter: true,
           align: 'center',
           dataIndex: 'osOccupyMemory',
@@ -736,7 +729,7 @@ export default {
           percent2Number: true
         },
         {
-          title: '硬盘占用',
+          title: this.$tl('p.diskUsage'),
           sorter: true,
           align: 'center',
           dataIndex: 'osOccupyDisk',
@@ -745,24 +738,24 @@ export default {
           percent2Number: true
         },
         {
-          title: '插件版本号',
+          title: this.$tl('p.pluginVersion_1'),
           dataIndex: 'jpomVersion',
           width: '100px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '模板节点',
+          title: this.$tl('c.templateNode'),
           dataIndex: 'templateNode',
           width: '90px',
           align: 'center',
           ellipsis: true,
           customRender: ({ text }) => {
-            return text ? '是' : '否'
+            return text ? this.$tl('c.isTemplateNode') : this.$tl('c.isNotTemplateNode')
           }
         },
         {
-          title: '创建时间',
+          title: this.$tl('c.createTime'),
           dataIndex: 'createTimeMillis',
           ellipsis: true,
           sorter: true,
@@ -770,14 +763,14 @@ export default {
           width: '170px'
         },
         {
-          title: '修改时间',
+          title: this.$tl('p.modifyTime'),
           dataIndex: 'modifyTimeMillis',
           customRender: ({ text }) => parseTime(text),
           sorter: true,
           width: '170px'
         },
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
           width: '120px',
           fixed: 'right',
@@ -813,6 +806,9 @@ export default {
     this.getMachineList()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.system.assets.machine.machineList.${key}`, ...args)
+    },
     parseTime,
     formatDuration,
     formatPercent2Number,
@@ -887,11 +883,11 @@ export default {
     // 删除机器
     deleteMachineInfo(item) {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemPrompt'),
         zIndex: 1009,
-        content: '真的要删除机器么？删除会检查数据关联性',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmDeleteMachine'),
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () =>
           machineDelete({
             id: item.id
@@ -926,7 +922,7 @@ export default {
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
         $notification.warn({
-          message: '请选择工作空间'
+          message: this.$tl('c.selectWorkspace')
         })
         return false
       }
@@ -985,7 +981,7 @@ export default {
     syncNodeWhiteConfig() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
         $notification.warn({
-          message: '请选择要同步授权的机器节点'
+          message: this.$tl('p.syncAuthNode')
         })
         return
       }
@@ -1002,7 +998,7 @@ export default {
             this.loadWhitelistData(this.temp.templateNodeId)
           } else {
             $notification.warn({
-              message: '还没有配置模板节点'
+              message: this.$tl('c.noConfigTemplateNode')
             })
           }
         }
@@ -1043,7 +1039,7 @@ export default {
     syncNodeConfig() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
         $notification.warn({
-          message: '请选择要同步系统配置的机器节点'
+          message: this.$tl('p.syncConfigNode')
         })
         return
       }
@@ -1060,7 +1056,7 @@ export default {
             this.loadNodeConfig(this.temp.templateNodeId)
           } else {
             $notification.warn({
-              message: '还没有配置模板节点'
+              message: this.$tl('c.noConfigTemplateNode')
             })
           }
         }
@@ -1078,13 +1074,11 @@ export default {
     // submit
     onNodeSubmit(restart) {
       $confirm({
-        title: '系统提示',
-        content: restart
-          ? '真的要保存当前配置吗？如果配置有误,可能无法启动服务需要手动还原奥！！！ 保存成功后请及时关注重启状态！！'
-          : '真的要保存当前配置吗？如果配置有误,可能无法启动服务需要手动还原奥！！！',
-        okText: '确认',
+        title: this.$tl('c.systemPrompt'),
+        content: restart ? this.$tl('p.confirmSaveConfig') : this.$tl('p.confirmSaveConfigWarning'),
+        okText: this.$tl('c.confirm'),
         zIndex: 1009,
-        cancelText: '取消',
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           this.confirmLoading = true
           return saveNodeConfig({

@@ -196,7 +196,7 @@ export default {
     buildCommandL2: 'Execute line by line',
     buildCommandL3: 'If you want to switch paths and execute commands, you need to',
     buildCommandHelp:
-      'Build and execute commands (non blocking commands), such as: mvn clean package, npm run build. Supported variables: ${BUILL_ID}, ${BUILL_AME}, ${BUILL_OURCE-FILE}, ${BUILD0HUMBER-ID},. env in the warehouse directory, workspace variables',
+      'Build and execute commands (non blocking commands), such as: mvn clean package, npm run build. Supported variables: ${BUILD_ID}、${BUILD_NAME}、${BUILD_SOURCE_FILE}、${BUILD_NUMBER_ID},. env in the warehouse directory, workspace variables',
     dsl1: 'Configure in yaml/yml format',
     dsl2: 'Configuration requires declaring the use of specific dockers to perform build related operations (it is recommended to use dockers from the server where the server is located)',
     dsl3: 'Container construction will generate relevant mounting directories in Docker, and generally does not require manual operation',

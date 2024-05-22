@@ -31,7 +31,7 @@
       >
         <template #rightExtra>
           <a-button type="primary" :disabled="!activeKey" @click="changeFileVisible(activeKey, true)">
-            文件管理
+            {{ $tl('c.fileManagement') }}
           </a-button>
         </template>
         <a-tab-pane
@@ -45,16 +45,16 @@
             <div v-if="pane.open" :style="{ height: `calc(100vh - 70px) ` }">
               <terminal1 :ssh-id="pane.id" />
             </div>
-            <a-result v-else status="warning" title="未开启当前终端">
+            <a-result v-else status="warning" :title="$tl('p.terminalNotEnabled')">
               <template #extra>
-                <a-button type="primary" @click="open(pane.id)"> 打开终端 </a-button>
+                <a-button type="primary" @click="open(pane.id)"> {{ $tl('p.openTerminal') }} </a-button>
               </template>
             </a-result>
             <!-- 文件管理 -->
             <a-drawer
               v-if="pane.openFile"
               :get-container="`#paneDom${pane.id}`"
-              :title="`${pane.name}文件管理`"
+              :title="`${pane.name}${$tl('c.fileManagement')}`"
               placement="right"
               width="90vw"
               :open="pane.fileVisible"
@@ -65,7 +65,7 @@
           </div>
         </a-tab-pane>
       </a-tabs>
-      <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" description="未选择ssh"></a-empty>
+      <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="$tl('p.sshNotSelected')"></a-empty>
     </a-layout-content>
   </a-layout>
 </template>
@@ -98,6 +98,9 @@ export default {
     this.listData()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.ssh.sshTabs.${key}`, ...args)
+    },
     findItemById(list, id) {
       // 每次进来使用find遍历一次
       let res = list.find((item) => item.id == id)
