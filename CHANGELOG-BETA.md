@@ -5,6 +5,7 @@
 ### 🐣 新增功能
 
 1. 【all】升级 tomcat、yaml 版本（感谢@佳驰）
+2. 【all】升级 bcprov-jdk18on 版本
 
 ------
 
