@@ -31,7 +31,7 @@
             </template>
           </div>
           <div v-if="groupList.filter((item) => !groupMap[item]).length">
-            未绑定集群的分组：
+            {{ $tl('p.unboundGroup') }}
             <template v-for="(item, index) in groupList">
               <a-tag v-if="!groupMap[item]" :key="index">{{ item }}</a-tag>
             </template>
@@ -39,37 +39,35 @@
           <a-space>
             <a-input
               v-model:value="listQuery['%name%']"
-              placeholder="集群名称"
+              :placeholder="$tl('p.clusterName')"
               allow-clear
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['%url%']"
-              placeholder="集群地址"
+              :placeholder="$tl('c.clusterAddress')"
               allow-clear
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['%localHostName%']"
-              placeholder="主机名"
+              :placeholder="$tl('p.hostname')"
               allow-clear
               class="search-input-item"
               @press-enter="loadData"
             />
-            <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-              <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+            <a-tooltip :title="$tl('p.quickReturnFirstPage')">
+              <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
             </a-tooltip>
 
             <a-tooltip>
               <template #title>
                 <ul>
-                  <li>
-                    集群不能手动创建，创建需要多个服务端使用通一个数据库，并且配置不同的集群 id 来自动创建集群信息
-                  </li>
-                  <li>新集群需要手动配置集群管理资产分组、集群访问地址</li>
-                  <li>新机器还需要绑定工作空间，因为我们建议将不同集群资源分配到不同的工作空间来管理</li>
+                  <li>{{ $tl('p.clusterCreationInfo') }}</li>
+                  <li>{{ $tl('p.newClusterConfig') }}</li>
+                  <li>{{ $tl('p.workspaceBinding') }}</li>
                 </ul>
               </template>
               <QuestionCircleOutlined />
@@ -85,7 +83,7 @@
         </template>
         <template v-else-if="column.dataIndex === 'url'">
           <a-tooltip
-            :title="`集群名称：${record.name || ''}/地址：${record.url || ''}/状态消息：${record.statusMsg || ''}`"
+            :title="`${$tl('p.inputClusterName')}${record.name || ''}/${$tl('p.address')}${record.url || ''}/${$tl('p.statusMessage')}${record.statusMsg || ''}`"
           >
             <a-button v-if="record.url" type="link" size="small" @click="openUrl(record.url)">
               {{ text }}
@@ -96,8 +94,8 @@
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-            <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('p.edit') }}</a-button>
+            <a-button size="small" type="primary" danger @click="handleDelete(record)">{{ $tl('p.delete') }}</a-button>
           </a-space>
         </template>
       </template>
@@ -108,18 +106,18 @@
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      title="编辑集群"
+      :title="$tl('p.editCluster')"
       :mask-closable="false"
       @ok="handleEditOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
-        <a-form-item label="名称" name="name">
-          <a-input v-model:value="temp.name" :max-length="50" placeholder="工作空间名称" />
+        <a-form-item :label="$tl('c.name')" name="name">
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$tl('p.workspaceName')" />
         </a-form-item>
-        <a-form-item label="关联分组" name="linkGroups">
+        <a-form-item :label="$tl('c.associatedGroup')" name="linkGroups">
           <template #help>
-            关联分组主要用于资产监控来实现不同服务端执行不同分组下面的资产监控
-            <div style="color: red">注意：同一个分组不建议被多个集群绑定</div>
+            {{ $tl('p.associatedGroupDescription') }}
+            <div style="color: red">{{ $tl('p.bindingNotice') }}</div>
           </template>
           <a-select
             v-model:value="temp.linkGroups"
@@ -136,14 +134,14 @@
               }
             "
             allow-clear
-            placeholder="关联分组"
+            :placeholder="$tl('c.associatedGroup')"
           >
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="集群地址" name="url">
-          <template #help> 集群地址主要用于切换工作空间自动跳转到对应的集群 </template>
-          <a-input v-model:value="temp.url" placeholder="集群访问地址" />
+        <a-form-item :label="$tl('c.clusterAddress')" name="url">
+          <template #help> {{ $tl('p.clusterAddressForWorkspace') }} </template>
+          <a-input v-model:value="temp.url" :placeholder="$tl('p.clusterAccessAddress')" />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -161,43 +159,43 @@ export default {
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       columns: [
         {
-          title: '安装ID',
+          title: this.$tl('p.installationID'),
           dataIndex: 'id',
           ellipsis: true,
           width: '100px'
         },
         {
-          title: '集群ID',
+          title: this.$tl('p.clusterID'),
           dataIndex: 'clusterId',
           ellipsis: true,
           width: '100px'
         },
         {
-          title: '名称',
+          title: this.$tl('c.name'),
           dataIndex: 'name',
           ellipsis: true,
           width: 200
         },
         {
-          title: '集群地址',
+          title: this.$tl('c.clusterAddress'),
           dataIndex: 'url',
           ellipsis: true,
           width: 200
         },
         {
-          title: '集群主机名',
+          title: this.$tl('p.clusterHostname'),
           dataIndex: 'localHostName',
           ellipsis: true,
           width: '100px'
         },
         {
-          title: '版本号',
+          title: this.$tl('p.version'),
           dataIndex: 'jpomVersion',
           ellipsis: true,
           width: '100px'
         },
         {
-          title: '最后心跳时间',
+          title: this.$tl('p.lastHeartbeatTime'),
           dataIndex: 'lastHeartbeat',
           sorter: true,
           ellipsis: true,
@@ -205,7 +203,7 @@ export default {
           width: '170px'
         },
         {
-          title: '修改人',
+          title: this.$tl('p.modifier'),
           dataIndex: 'modifyUser',
           ellipsis: true,
 
@@ -213,7 +211,7 @@ export default {
         },
 
         {
-          title: '创建时间',
+          title: this.$tl('p.creationTime'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -221,14 +219,14 @@ export default {
           width: '170px'
         },
         {
-          title: '修改时间',
+          title: this.$tl('p.modificationTime'),
           dataIndex: 'modifyTimeMillis',
           customRender: ({ text }) => parseTime(text),
           sorter: true,
           width: '170px'
         },
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
           fixed: 'right',
           align: 'center',
@@ -238,8 +236,8 @@ export default {
       ],
       // 表单校验规则
       rules: {
-        name: [{ required: true, message: '请输入集群名称', trigger: 'blur' }],
-        linkGroups: [{ required: true, message: '请输入选择关联分组', trigger: 'blur' }]
+        name: [{ required: true, message: this.$tl('p.inputClusterNamePrompt'), trigger: 'blur' }],
+        linkGroups: [{ required: true, message: this.$tl('p.inputAssociatedGroupPrompt'), trigger: 'blur' }]
         // url: [{ required: true, message: "请输入集群访问地址", trigger: "blur" }],
       },
       editVisible: false,
@@ -259,6 +257,9 @@ export default {
     this.loadGroupList()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.system.clusterList.${key}`, ...args)
+    },
     parseTime,
     CHANGE_PAGE,
     // 加载数据
@@ -276,11 +277,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('p.systemPrompt'),
         zIndex: 1009,
-        content: '真的要删除该集群信息么？1',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.deleteClusterConfirmation'),
+        okText: this.$tl('p.confirm'),
+        cancelText: this.$tl('p.cancel'),
         onOk: () => {
           return deleteCluster(record.id).then((res) => {
             if (res.code === 200) {
@@ -316,7 +317,7 @@ export default {
         const linkGroups = newData.linkGroups
         if (!linkGroups) {
           $notification.error({
-            message: '请选择集群关联分组'
+            message: this.$tl('p.selectAssociatedGroup')
           })
           return false
         }

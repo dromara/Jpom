@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="systemUserLoginLog"
-      empty-description="没有任何登录日志"
+      :empty-description="$tl('p.noLoginLogs')"
       :loading="loading"
       :data-source="list"
       :columns="columns"
@@ -24,19 +24,19 @@
         <a-space>
           <a-input
             v-model:value="listQuery['%modifyUser%']"
-            placeholder="用户名"
+            :placeholder="$tl('p.username')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%username%']"
-            placeholder="用户昵称"
+            :placeholder="$tl('p.nickname')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%ip%']"
-            placeholder="登录IP"
+            :placeholder="$tl('p.loginIp')"
             class="search-input-item"
             @press-enter="loadData"
           />
@@ -47,8 +47,8 @@
             format="YYYY-MM-DD HH:mm:ss"
             @change="onChangeTime"
           />
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          <a-tooltip :title="$tl('p.goToFirstPage')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -58,16 +58,16 @@
         </template>
 
         <template v-if="column.dataIndex === 'success'">
-          <a-tag v-if="text" color="green">成功</a-tag>
-          <a-tag v-else color="pink">失败</a-tag>
+          <a-tag v-if="text" color="green">{{ $tl('p.success') }}</a-tag>
+          <a-tag v-else color="pink">{{ $tl('p.failure') }}</a-tag>
         </template>
 
         <template v-if="column.dataIndex === 'useMfa'">
-          <a-tag>{{ text ? '使用' : '未使用' }}</a-tag>
+          <a-tag>{{ text ? $tl('p.used') : $tl('p.unused') }}</a-tag>
         </template>
 
         <template v-if="column.dataIndex === 'operateCode'">
-          {{ operateCodeMap[text] || '未知' }}
+          {{ operateCodeMap[text] || $tl('p.unknown') }}
         </template>
       </template>
     </CustomTable>
@@ -78,6 +78,9 @@ import { userLoginLgin, operateCodeMap } from '@/api/user/user-login-log'
 import { IPageQuery } from '@/interface/common'
 import { CustomColumnType } from '@/components/customTable/types'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
+
+import { useI18nPage } from '@/i18n/hooks/useI18nPage'
+const { $tl } = useI18nPage('pages.user.userLoginLog')
 
 const loading = ref(false)
 const list = ref([])
@@ -91,36 +94,36 @@ const activePage = computed(() => {
 })
 
 const columns = ref<CustomColumnType[]>([
-  { title: '用户ID', dataIndex: 'modifyUser', width: 100 },
-  { title: '用户昵称', dataIndex: 'username', width: 120 },
+  { title: $tl('p.userId'), dataIndex: 'modifyUser', width: 100 },
+  { title: $tl('p.nickname'), dataIndex: 'username', width: 120 },
   { title: 'IP', dataIndex: 'ip', width: 120 },
 
   {
-    title: '是否成功',
+    title: $tl('p.isSuccess'),
     dataIndex: 'success',
     width: 90,
     align: 'center'
   },
   {
-    title: '是否使用MFA',
+    title: $tl('p.isMfaUsed'),
     dataIndex: 'useMfa',
     align: 'center',
     width: 110
   },
   {
-    title: '结果描述',
+    title: $tl('p.resultDescription'),
     dataIndex: 'operateCode',
     ellipsis: true,
     width: 180
   },
   {
-    title: '登录时间',
+    title: $tl('p.loginTime'),
     dataIndex: 'createTimeMillis',
     sorter: true,
     customRender: ({ text, record }) => parseTime(text || record.optTime),
     width: '170px'
   },
-  { title: '浏览器', dataIndex: 'userAgent', ellipsis: true, width: 100 }
+  { title: $tl('p.browser'), dataIndex: 'userAgent', ellipsis: true, width: 100 }
 ])
 
 const pagination = computed(() => {

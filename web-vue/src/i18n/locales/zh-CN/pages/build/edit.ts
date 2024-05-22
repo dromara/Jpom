@@ -181,7 +181,7 @@ export default {
     buildCommandL2: '逐行执行',
     buildCommandL3: '，如果想要切换路径后执行命令则需要',
     buildCommandHelp:
-      '构建执行的命令(非阻塞命令)，如：mvn clean package、npm run build。支持变量：${ BUILD_ID }、${ BUILD_NAME }、${ BUILD_SOURCE_FILE }、${ BUILD_NUMBER_ID }、仓库目录下 .env、工作空间变量',
+      '构建执行的命令(非阻塞命令)，如：mvn clean package、npm run build。支持变量：${BUILD_ID}、${BUILD_NAME}、${BUILD_SOURCE_FILE}、${BUILD_NUMBER_ID}、仓库目录下 .env、工作空间变量',
     dsl1: '以 yaml/yml 格式配置',
     dsl2: '配置需要声明使用具体的 docker 来执行构建相关操作(建议使用服务端所在服务器中的 docker)',
     dsl3: '容器构建会在 docker 中生成相关挂载目录,一般情况不需要人为操作',

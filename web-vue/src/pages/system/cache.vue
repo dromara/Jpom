@@ -1,75 +1,75 @@
 <template>
   <div>
     <a-tabs default-active-key="1">
-      <a-tab-pane key="1" tab="缓存信息">
+      <a-tab-pane key="1" :tab="$tl('p.cacheInfo')">
         <a-descriptions bordered title="" layout="vertical" size="middle">
           <a-descriptions-item :span="3">
             <template #label>
               <a-row>
-                <a-col :span="12"> 提示 </a-col>
+                <a-col :span="12"> {{ $tl('p.tip') }} </a-col>
                 <a-col :span="12" style="text-align: right">
-                  <a-button size="small" type="link" @click="refreshCache">手动刷新统计<ReloadOutlined /></a-button>
+                  <a-button size="small" type="link" @click="refreshCache"
+                    >{{ $tl('p.manualRefreshStats') }}<ReloadOutlined
+                  /></a-button>
                 </a-col>
               </a-row>
             </template>
             <div style="color: red; font-weight: bold; font-size: 16px">
-              <p>请勿手动删除数据目录下面文件 !!!!</p>
-              <p>如果需要删除需要提前备份或者已经确定对应文件弃用后才能删除 !!!!</p>
+              <p>{{ $tl('p.dataDirWarning') }}</p>
+              <p>{{ $tl('p.deleteBackupWarning') }}</p>
             </div>
-            <a-tag color="orange">集群ID:{{ temp.clusterId }}</a-tag>
-            <a-tag color="blue">安装ID:{{ temp.installId }}</a-tag>
+            <a-tag color="orange">{{ $tl('p.clusterId') }}{{ temp.clusterId }}</a-tag>
+            <a-tag color="blue">{{ $tl('p.installId') }}{{ temp.installId }}</a-tag>
           </a-descriptions-item>
-          <a-descriptions-item label="数据目录占用空间" :span="1">
-            {{ renderSize(temp.dataSize) }} (每天0/12点刷新一次)
+          <a-descriptions-item :label="$tl('p.dataDirSpace')" :span="1">
+            {{ renderSize(temp.dataSize) }} ({{ $tl('c.refreshTime') }})
             <a-tooltip>
               <template #title>
                 <ul>
-                  <li>数据目录是指程序在运行过程中产生的文件以及数据存储目录</li>
-                  <li>数据目录大小包含：临时文件、在线构建文件、数据库文件等</li>
+                  <li>{{ $tl('p.dataDirDescription') }}</li>
+                  <li>{{ $tl('p.dataDirContents') }}</li>
                 </ul>
               </template>
               <QuestionCircleOutlined />
             </a-tooltip>
           </a-descriptions-item>
-          <a-descriptions-item label="临时文件占用空间" :span="1">
+          <a-descriptions-item :label="$tl('p.tempSpace')" :span="1">
             <a-space>
-              <span>{{ renderSize(temp.cacheFileSize) }} (10分钟刷新一次)</span>
+              <span>{{ renderSize(temp.cacheFileSize) }} (10{{ $tl('p.refreshInterval') }})</span>
               <a-button
                 v-if="temp.cacheFileSize !== '0'"
                 size="small"
                 type="primary"
                 class="btn"
                 @click="clear('serviceCacheFileSize')"
-                >清空</a-button
+                >{{ $tl('c.clear') }}</a-button
               >
             </a-space>
           </a-descriptions-item>
-          <a-descriptions-item label="在线构建文件占用空间">
-            {{ renderSize(temp.cacheBuildFileSize) }} (每天0/12点刷新一次)
+          <a-descriptions-item :label="$tl('p.buildSpace')">
+            {{ renderSize(temp.cacheBuildFileSize) }} ({{ $tl('c.refreshTime') }})
             <a-tooltip>
               <template #title>
                 <ul>
-                  <li>
-                    在线构建文件主要保存，仓库文件，构建历史产物等。不支持主动清除，如果文件占用过大可以配置保留规则和对单个构建配置是否保存仓库、产物文件等
-                  </li>
+                  <li>{{ $tl('p.buildDirDescription') }}</li>
                 </ul>
               </template>
               <QuestionCircleOutlined />
             </a-tooltip>
           </a-descriptions-item>
 
-          <a-descriptions-item label="数据目录" :span="1">
+          <a-descriptions-item :label="$tl('p.dataDirPath')" :span="1">
             {{ temp.dataPath }}
           </a-descriptions-item>
-          <a-descriptions-item label="临时文件目录" :span="1"> {{ temp.tempPath }} </a-descriptions-item>
-          <a-descriptions-item label="在线构建目录">
+          <a-descriptions-item :label="$tl('p.tempDirPath')" :span="1"> {{ temp.tempPath }} </a-descriptions-item>
+          <a-descriptions-item :label="$tl('p.buildDirPath')">
             {{ temp.buildPath }}
           </a-descriptions-item>
 
-          <a-descriptions-item label="服务端时间" :span="1">
+          <a-descriptions-item :label="$tl('p.serverTime')" :span="1">
             {{ temp.dateTime }} <a-tag>{{ temp.timeZoneId }}</a-tag>
           </a-descriptions-item>
-          <a-descriptions-item label="旧版程序包占有空间">
+          <a-descriptions-item :label="$tl('p.oldPackageSpace')">
             <a-space>
               <span>{{ renderSize(temp.oldJarsSize) }}</span>
               <a-button
@@ -78,19 +78,19 @@
                 type="primary"
                 class="btn"
                 @click="clear('serviceOldJarsSize')"
-                >清空</a-button
+                >{{ $tl('c.clear') }}</a-button
               >
             </a-space>
           </a-descriptions-item>
-          <a-descriptions-item label="禁止 IP">
+          <a-descriptions-item :label="$tl('c.blockIP')">
             <a-space>
-              <a-popover title="禁止 IP">
+              <a-popover :title="$tl('c.blockIP')">
                 <template #content
                   ><a-list size="small" bordered :data-source="temp.errorIp">
                     <template #renderItem="{ item }">
                       <a-list-item>
-                        {{ item.key }} <a-tag>{{ item.obj }}次</a-tag>
-                        <a-tag>过期时间：{{ formatDuration(item.ttl, '') }}</a-tag>
+                        {{ item.key }} <a-tag>{{ item.obj }}{{ $tl('p.times') }}</a-tag>
+                        <a-tag>{{ $tl('p.expiryTime') }}{{ formatDuration(item.ttl, '') }}</a-tag>
                       </a-list-item>
                     </template>
                   </a-list>
@@ -104,17 +104,17 @@
                 type="primary"
                 class="btn"
                 @click="clear('serviceIpSize')"
-                >清空</a-button
+                >{{ $tl('c.clear') }}</a-button
               >
             </a-space>
           </a-descriptions-item>
-          <a-descriptions-item label="在读取的日志文件数">
+          <a-descriptions-item :label="$tl('p.logFilesCount')">
             {{ temp.readFileOnLineCount }}
           </a-descriptions-item>
-          <a-descriptions-item label="插件数"> {{ temp.pluginSize || 0 }} </a-descriptions-item>
-          <a-descriptions-item label="分片操作数"> {{ temp.shardingSize }} </a-descriptions-item>
-          <a-descriptions-item label="正在构建数">
-            <a-popover title="正在构建">
+          <a-descriptions-item :label="$tl('p.pluginsCount')"> {{ temp.pluginSize || 0 }} </a-descriptions-item>
+          <a-descriptions-item :label="$tl('p.shardingOperationsCount')"> {{ temp.shardingSize }} </a-descriptions-item>
+          <a-descriptions-item :label="$tl('p.buildingCount')">
+            <a-popover :title="$tl('p.isBuilding')">
               <template #content>
                 <p v-for="item in temp.buildKeys || []" :key="item">{{ item }}</p>
               </template>
@@ -124,8 +124,8 @@
               </a-space>
             </a-popover>
           </a-descriptions-item>
-          <a-descriptions-item label="线程同步器">
-            <a-popover title="正在运行的线程同步器">
+          <a-descriptions-item :label="$tl('p.threadSynchronizer')">
+            <a-popover :title="$tl('p.runningSynchronizer')">
               <template #content>
                 <p v-for="item in temp.syncFinisKeys || []" :key="item">{{ item }}</p>
               </template>
@@ -135,8 +135,8 @@
               </a-space>
             </a-popover>
           </a-descriptions-item>
-          <a-descriptions-item label="错误的工作空间数据">
-            <a-popover title="错误的工作空间数据">
+          <a-descriptions-item :label="$tl('c.errorWorkspaceData')">
+            <a-popover :title="$tl('c.errorWorkspaceData')">
               <template #content>
                 <a-collapse>
                   <a-collapse-panel v-for="(item, key) in temp.errorWorkspace" :key="key" :header="key">
@@ -165,10 +165,10 @@
           <a-timeline-item> </a-timeline-item>
         </a-timeline> -->
       </a-tab-pane>
-      <a-tab-pane key="2" tab="运行中的定时任务" force-render>
+      <a-tab-pane key="2" :tab="$tl('p.runningTasks')" force-render>
         <task-stat :task-list="taskList" @refresh="loadData" />
       </a-tab-pane>
-      <a-tab-pane key="3" tab="触发器管理">
+      <a-tab-pane key="3" :tab="$tl('p.triggerManagement')">
         <TriggerToken />
       </a-tab-pane>
     </a-tabs>
@@ -195,6 +195,9 @@ export default {
     // console.log(Comparator);
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.system.cache.${key}`, ...args)
+    },
     renderSize,
     formatDuration,
     // load data
@@ -236,11 +239,11 @@ export default {
       // If you don't want click extra trigger collapse, you can prevent this:
       event.stopPropagation()
       $confirm({
-        title: '系统提示',
+        title: this.$tl('p.systemTip'),
         zIndex: 1009,
-        content: '真的要删除' + tableName + '表中的错误数据吗？',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmDelete') + tableName + this.$tl('p.confirmErrorMsg'),
+        okText: this.$tl('p.confirm'),
+        cancelText: this.$tl('p.cancel'),
         onOk: () => {
           return clearErrorWorkspace({ tableName }).then((res) => {
             if (res.code === 200) {

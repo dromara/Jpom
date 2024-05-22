@@ -752,7 +752,7 @@
           >
             <a-input
               v-model:value="temp.javaExtDirsCp"
-              placeholder="-Dext.dirs=xxx: -cp xx  {{$tl('p.jvmArgs')}}:xx】"
+              :placeholder="`-Dext.dirs=xxx: -cp xx  ${$tl('p.jvmArgs')}:xx】`"
             />
           </a-form-item>
           <a-form-item :label="$tl('c.distributionOperationAfter')" name="afterOpt">

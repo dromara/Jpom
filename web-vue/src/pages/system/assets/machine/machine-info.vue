@@ -3,10 +3,15 @@
     <a-tabs tab-position="left" @change="changeTabs">
       <template #leftExtra>
         <a-space>
-          <a-statistic-countdown format=" s 秒后刷新" title="" :value="countdownTime" @finish="pullNodeData" />
+          <a-statistic-countdown format="s" title="" :value="countdownTime" @finish="pullNodeData">
+            <template #suffix>
+              <div style="font-size: 12px">{{ $tl('p.refreshAfterSeconds') }}</div>
+            </template>
+          </a-statistic-countdown>
+          <!-- <a-statistic-countdown title="" :value="countdownTime" @finish="pullNodeData" /> -->
         </a-space>
       </template>
-      <a-tab-pane key="info" tab="基础信息">
+      <a-tab-pane key="info" :tab="$tl('c.baseInfo')">
         <a-card size="small">
           <template #title>
             {{ machineInfo && machineInfo.name }}
@@ -17,13 +22,13 @@
               :color="machineInfo && machineInfo.status === 1 ? 'green' : 'pink'"
               style="margin-right: 0"
             >
-              {{ statusMap[machineInfo && machineInfo.status] || '未知' }}
+              {{ statusMap[machineInfo && machineInfo.status] || $tl('p.unknown') }}
             </a-tag>
           </template>
           <a-space direction="vertical" style="display: block">
             <a-alert
               v-if="machineInfo && machineInfo.status !== 1"
-              message="状态描述"
+              :message="$tl('p.statusDescription')"
               :description="(machineInfo && machineInfo.statusMsg) || ''"
               type="warning"
               show-icon
@@ -31,25 +36,25 @@
             <a-descriptions :column="4" :bordered="true">
               <template #title> </template>
 
-              <a-descriptions-item label="系统名" :span="2">{{
+              <a-descriptions-item :label="$tl('p.systemName')" :span="2">{{
                 machineInfo && machineInfo.osName
               }}</a-descriptions-item>
-              <a-descriptions-item label="系统版本" :span="2">{{
+              <a-descriptions-item :label="$tl('p.systemVersion')" :span="2">{{
                 machineInfo && machineInfo.osVersion
               }}</a-descriptions-item>
-              <a-descriptions-item label="硬件信息" :span="2">
+              <a-descriptions-item :label="$tl('p.hardwareInfo')" :span="2">
                 {{ machineInfo && machineInfo.osHardwareVersion }}
               </a-descriptions-item>
-              <a-descriptions-item label="CPU型号" :span="2">
+              <a-descriptions-item :label="$tl('p.cpuModel')" :span="2">
                 {{ machineInfo && machineInfo.osCpuIdentifierName }}
               </a-descriptions-item>
-              <a-descriptions-item label="主机名" :span="2">
+              <a-descriptions-item :label="$tl('p.hostName')" :span="2">
                 {{ machineInfo && machineInfo.hostName }}
               </a-descriptions-item>
               <a-descriptions-item label="IPV4" :span="2">
                 <template v-if="machineInfo && machineInfo.ipv4List && machineInfo.ipv4List.length">
                   {{ machineInfo && machineInfo.ipv4List[0] }}
-                  <a-popover title="所有的IPV4列表">
+                  <a-popover :title="$tl('p.ipv4List')">
                     <template #content>
                       <p v-for="item in machineInfo && machineInfo.ipv4List" :key="item">
                         {{ item }}
@@ -63,50 +68,58 @@
                   </a-popover>
                 </template>
               </a-descriptions-item>
-              <a-descriptions-item label="CPU数">{{ machineInfo && machineInfo.osCpuCores }} </a-descriptions-item>
-              <a-descriptions-item label="内存"
+              <a-descriptions-item :label="$tl('p.cpuCount')"
+                >{{ machineInfo && machineInfo.osCpuCores }}
+              </a-descriptions-item>
+              <a-descriptions-item :label="$tl('p.memory')"
                 >{{ renderSize(machineInfo && machineInfo.osMoneyTotal) }}
               </a-descriptions-item>
-              <a-descriptions-item label="虚拟内存"
+              <a-descriptions-item :label="$tl('c.virtualMemory')"
                 >{{ renderSize(machineInfo && machineInfo.osVirtualMax) }}
               </a-descriptions-item>
-              <a-descriptions-item label="交换内存"
+              <a-descriptions-item :label="$tl('p.swapMemory')"
                 >{{ renderSize(machineInfo && machineInfo.osSwapTotal) }}
               </a-descriptions-item>
-              <a-descriptions-item label="硬盘"
+              <a-descriptions-item :label="$tl('p.hardDisk')"
                 >{{ renderSize(machineInfo && machineInfo.osFileStoreTotal) }}
               </a-descriptions-item>
 
-              <a-descriptions-item label="负载">{{ machineInfo && machineInfo.osLoadAverage }} </a-descriptions-item>
-              <a-descriptions-item label="系统运行时间"
+              <a-descriptions-item :label="$tl('p.load')"
+                >{{ machineInfo && machineInfo.osLoadAverage }}
+              </a-descriptions-item>
+              <a-descriptions-item :label="$tl('p.systemUptime')"
                 >{{ formatDuration(((machineInfo && machineInfo.osSystemUptime) || 0) * 1000, '', 3) }}
               </a-descriptions-item>
-              <a-descriptions-item label="插件版本">{{ machineInfo && machineInfo.jpomVersion }} </a-descriptions-item>
-              <a-descriptions-item label="插件运行时间"
+              <a-descriptions-item :label="$tl('p.pluginVersion')"
+                >{{ machineInfo && machineInfo.jpomVersion }}
+              </a-descriptions-item>
+              <a-descriptions-item :label="$tl('p.pluginRunningTime')"
                 >{{ formatDuration(machineInfo && machineInfo.jpomUptime, '', 3) }}
               </a-descriptions-item>
-              <a-descriptions-item label="插件构建时间"
+              <a-descriptions-item :label="$tl('p.pluginBuildTime')"
                 >{{ machineInfo && machineInfo.jpomBuildTime }}
               </a-descriptions-item>
-              <a-descriptions-item label="JDK版本">{{ machineInfo && machineInfo.javaVersion }} </a-descriptions-item>
-              <a-descriptions-item label="JVM总内存"
+              <a-descriptions-item :label="$tl('p.jdkVersion')"
+                >{{ machineInfo && machineInfo.javaVersion }}
+              </a-descriptions-item>
+              <a-descriptions-item :label="$tl('p.jvmTotalMemory')"
                 >{{ renderSize(machineInfo && machineInfo.jvmTotalMemory) }}
               </a-descriptions-item>
-              <a-descriptions-item label="JVM剩余内存"
+              <a-descriptions-item :label="$tl('p.jvmFreeMemory')"
                 >{{ renderSize(machineInfo && machineInfo.jvmFreeMemory) }}
               </a-descriptions-item>
 
-              <a-descriptions-item label="项目数"
+              <a-descriptions-item :label="$tl('p.projectCount')"
                 >{{ machineInfo && machineInfo.jpomProjectCount }}
               </a-descriptions-item>
-              <a-descriptions-item label="脚本数"
+              <a-descriptions-item :label="$tl('p.scriptCount')"
                 >{{ machineInfo && machineInfo.jpomScriptCount }}
               </a-descriptions-item>
-              <a-descriptions-item label="网络延迟"
+              <a-descriptions-item :label="$tl('p.networkLatency')"
                 >{{ formatDuration(machineInfo && machineInfo.networkDelay) }}
               </a-descriptions-item>
 
-              <a-descriptions-item label="硬盘占用" :span="4">
+              <a-descriptions-item :label="$tl('p.hardDiskUsage')" :span="4">
                 <a-progress
                   :stroke-color="{
                     '0%': '#87d068',
@@ -115,7 +128,7 @@
                   :percent="formatPercent2Number((machineInfo && machineInfo.osOccupyDisk) || 0)"
                 />
               </a-descriptions-item>
-              <a-descriptions-item label="实际内存占用" :span="4">
+              <a-descriptions-item :label="$tl('p.actualMemoryUsage')" :span="4">
                 <a-progress
                   :stroke-color="{
                     '0%': '#87d068',
@@ -124,7 +137,7 @@
                   :percent="formatPercent2Number((machineInfo && machineInfo.osOccupyMemory) || 0)"
                 />
               </a-descriptions-item>
-              <a-descriptions-item label="CPU占用" :span="4">
+              <a-descriptions-item :label="$tl('p.cpuUsage')" :span="4">
                 <a-progress
                   :stroke-color="{
                     '0%': '#87d068',
@@ -137,12 +150,12 @@
           </a-space>
         </a-card>
       </a-tab-pane>
-      <a-tab-pane key="stat" tab="统计趋势">
+      <a-tab-pane key="stat" :tab="$tl('p.statisticsTrend')">
         <a-space v-if="nodeMonitorLoadStatus === 1" direction="vertical" style="width: 100%">
-          <a-card size="small" title="基础信息">
+          <a-card size="small" :title="$tl('c.baseInfo')">
             <template #extra>
               <a-button v-if="historyChart" size="small" type="primary" @click="handleHistory('')">
-                <AreaChartOutlined />历史监控图表
+                <AreaChartOutlined />{{ $tl('c.historyChart') }}
               </a-button>
             </template>
             <!-- top 图表 -->
@@ -154,10 +167,10 @@
                 <template #split>
                   <a-divider type="vertical" />
                 </template>
-                网络流量信息
+                {{ $tl('p.networkTrafficInfo') }}
                 <template v-if="monitorConfig?.network?.statExcludeNames">
                   <span>
-                    排除：
+                    {{ $tl('p.exclude') }}
                     <a-tag v-for="item in monitorConfig?.network?.statExcludeNames?.split(',')">
                       {{ item }}
                     </a-tag>
@@ -165,18 +178,18 @@
                 </template>
                 <template v-if="monitorConfig?.network?.statContainsOnlyNames">
                   <span>
-                    仅统计：
+                    {{ $tl('p.onlyStatistics') }}
                     <a-tag v-for="item in monitorConfig?.network?.statContainsOnlyNames?.split(',')">
                       {{ item }}
                     </a-tag>
                   </span>
                 </template>
                 <a-popover>
-                  <template #title>统计说明 </template>
+                  <template #title>{{ $tl('p.statisticsDescription') }} </template>
                   <template #content>
-                    <b>默认统计机器中除本地接口（环回或无硬件地址）网卡流量总和</b>
+                    <b>{{ $tl('p.defaultStatistics') }}</b>
                     <div>
-                      统计的网卡：
+                      {{ $tl('p.statisticsNetworkCards') }}
                       <a-tag v-for="item in JSON.parse(machineInfo?.extendInfo || '{}')?.monitorIfsNames?.split(',')">
                         {{ item }}
                       </a-tag>
@@ -189,16 +202,16 @@
             <template #extra>
               <a-button v-if="netHistoryChart" size="small" type="primary" @click="handleHistory('network-stat')">
                 <AreaChartOutlined />
-                历史监控图表
+                {{ $tl('c.historyChart') }}
               </a-button>
             </template>
             <!-- 网络流量图表 -->
             <div id="net-chart" class="chart">loading...</div>
           </a-card>
-          <a-card size="small" title="机器延迟">
+          <a-card size="small" :title="$tl('p.machineLatency')">
             <template #extra>
               <a-button v-if="networkDelayChart" size="small" type="primary" @click="handleHistory('networkDelay')">
-                <AreaChartOutlined />历史监控图表
+                <AreaChartOutlined />{{ $tl('c.historyChart') }}
               </a-button>
             </template>
             <!-- 机器延迟 图表 -->
@@ -208,12 +221,12 @@
         <a-empty
           v-else-if="nodeMonitorLoadStatus === -1"
           :image="Empty.PRESENTED_IMAGE_SIMPLE"
-          description="当前机器还未监控到任何数据"
+          :description="$tl('p.noDataYet')"
         >
         </a-empty>
         <a-skeleton v-else />
       </a-tab-pane>
-      <a-tab-pane key="process" tab="系统进程">
+      <a-tab-pane key="process" :tab="$tl('p.systemProcesses')">
         <a-card size="small">
           <template #title>
             <a-row>
@@ -225,17 +238,17 @@
                     sel-style="width: 200px !important"
                     :data="processNames"
                     :popup-container-parent="false"
-                    input-placeholder="自定义进程类型"
-                    select-placeholder="选择进程名"
+                    :input-placeholder="$tl('p.customProcessType')"
+                    :select-placeholder="$tl('p.selectedProcessName')"
                     @change="loadNodeProcess"
                     @add-option="addNodeProcess"
                   >
                     <template #suffixIcon> <DownOutlined /></template>
                   </custom-select>
-                  <a-tooltip title="查看的进程数量">
+                  <a-tooltip :title="$tl('p.viewProcessCount')">
                     <a-input-number v-model:value="processSearch.processCount" :min="1" @change="loadNodeProcess" />
                   </a-tooltip>
-                  <a-tooltip title="重置自定义的进程名信息">
+                  <a-tooltip :title="$tl('p.resetCustomProcessName')">
                     <RestOutlined @click="restProcessNames" />
                   </a-tooltip>
                 </a-space>
@@ -289,7 +302,7 @@
           </a-table>
         </a-card>
       </a-tab-pane>
-      <a-tab-pane key="disk" tab="文件系统">
+      <a-tab-pane key="disk" :tab="$tl('p.fileSystem')">
         <a-table
           size="middle"
           :loading="diskLoading"
@@ -325,23 +338,31 @@
           </template>
         </a-table>
       </a-tab-pane>
-      <a-tab-pane key="hw-disk" tab="硬件硬盘">
+      <a-tab-pane key="hw-disk" :tab="$tl('p.hardwareDisks')">
         <a-collapse>
           <a-collapse-panel v-for="item in hwDiskList" :key="item.uuid">
             <template #header>
               <a-page-header :title="item.name" :back-icon="false">
                 <template #subTitle> {{ item.model }} </template>
                 <a-descriptions size="small" :column="4">
-                  <a-descriptions-item label="序号">{{ item.serial }}</a-descriptions-item>
-                  <a-descriptions-item label="大小">{{ renderSize(item.size) }}</a-descriptions-item>
-                  <a-descriptions-item label="运行时间">{{ formatDuration(item.transferTime) }}</a-descriptions-item>
-                  <a-descriptions-item label="队列数"> {{ item.currentQueueLength }} </a-descriptions-item>
+                  <a-descriptions-item :label="$tl('p.serialNumber')">{{ item.serial }}</a-descriptions-item>
+                  <a-descriptions-item :label="$tl('c.size')">{{ renderSize(item.size) }}</a-descriptions-item>
+                  <a-descriptions-item :label="$tl('c.runningTime')">{{
+                    formatDuration(item.transferTime)
+                  }}</a-descriptions-item>
+                  <a-descriptions-item :label="$tl('p.queueCount')">
+                    {{ item.currentQueueLength }}
+                  </a-descriptions-item>
                 </a-descriptions>
                 <a-descriptions size="small" :column="4">
-                  <a-descriptions-item label="写入大小"> {{ renderSize(item.writeBytes) }} </a-descriptions-item>
-                  <a-descriptions-item label="写入次数">{{ item.writes }}</a-descriptions-item>
-                  <a-descriptions-item label="读取大小"> {{ renderSize(item.readBytes) }} </a-descriptions-item>
-                  <a-descriptions-item label="读取次数">{{ item.reads }}</a-descriptions-item>
+                  <a-descriptions-item :label="$tl('p.writeSize')">
+                    {{ renderSize(item.writeBytes) }}
+                  </a-descriptions-item>
+                  <a-descriptions-item :label="$tl('p.writeCount')">{{ item.writes }}</a-descriptions-item>
+                  <a-descriptions-item :label="$tl('p.readSize')">
+                    {{ renderSize(item.readBytes) }}
+                  </a-descriptions-item>
+                  <a-descriptions-item :label="$tl('p.readCount')">{{ item.reads }}</a-descriptions-item>
                 </a-descriptions>
               </a-page-header>
             </template>
@@ -368,7 +389,7 @@
           </a-collapse-panel>
         </a-collapse>
       </a-tab-pane>
-      <a-tab-pane key="networkInterfaces" tab="网卡信息">
+      <a-tab-pane key="networkInterfaces" :tab="$tl('p.networkCardInfo')">
         <a-collapse v-if="networkInterfaces && networkInterfaces.length">
           <a-collapse-panel v-for="(item, index) in networkInterfaces" :key="index">
             <template #header>
@@ -434,8 +455,10 @@
               <a-descriptions-item label="MTU">
                 {{ item.mtu }}
               </a-descriptions-item>
-              <a-descriptions-item label="速度">{{ renderBpsSize(item.speed) }} </a-descriptions-item>
-              <a-descriptions-item label="虚拟MAC">{{ item.knownVmMacAddr ? '是' : '否' }} </a-descriptions-item>
+              <a-descriptions-item :label="$tl('p.speed')">{{ renderBpsSize(item.speed) }} </a-descriptions-item>
+              <a-descriptions-item :label="$tl('p.virtualMac')"
+                >{{ item.knownVmMacAddr ? $tl('p.yes') : $tl('p.no') }}
+              </a-descriptions-item>
 
               <a-descriptions-item label="IPV4" :span="4">
                 <a-tag v-for="ipItem in item.ipv4addr || []" :key="ipItem">{{ ipItem }}</a-tag>
@@ -443,18 +466,20 @@
               <a-descriptions-item label="IPV6" :span="4">
                 <a-tag v-for="ipItem in item.ipv6addr || []" :key="ipItem">{{ ipItem }}</a-tag>
               </a-descriptions-item>
-              <a-descriptions-item label="接收包">{{ item.packetsRecv }} </a-descriptions-item>
-              <a-descriptions-item label="接收大小">{{ renderSize(item.bytesRecv) }} </a-descriptions-item>
-              <a-descriptions-item label="接收错误">{{ item.inErrors }} </a-descriptions-item>
-              <a-descriptions-item label="丢弃包">{{ item.tnDrops }} </a-descriptions-item>
-              <a-descriptions-item label="发送包">{{ item.packetsSent }} </a-descriptions-item>
-              <a-descriptions-item label="发送大小">{{ renderSize(item.bytesSent) }} </a-descriptions-item>
-              <a-descriptions-item label="发送错误">{{ item.outErrors }} </a-descriptions-item>
-              <a-descriptions-item label="冲突数">{{ item.collisions }} </a-descriptions-item>
+              <a-descriptions-item :label="$tl('p.receivedPackets')">{{ item.packetsRecv }} </a-descriptions-item>
+              <a-descriptions-item :label="$tl('p.receivedSize')"
+                >{{ renderSize(item.bytesRecv) }}
+              </a-descriptions-item>
+              <a-descriptions-item :label="$tl('p.receiveErrors')">{{ item.inErrors }} </a-descriptions-item>
+              <a-descriptions-item :label="$tl('p.droppedPackets')">{{ item.tnDrops }} </a-descriptions-item>
+              <a-descriptions-item :label="$tl('p.sentPackets')">{{ item.packetsSent }} </a-descriptions-item>
+              <a-descriptions-item :label="$tl('p.sentSize')">{{ renderSize(item.bytesSent) }} </a-descriptions-item>
+              <a-descriptions-item :label="$tl('p.sendErrors')">{{ item.outErrors }} </a-descriptions-item>
+              <a-descriptions-item :label="$tl('p.collisions')">{{ item.collisions }} </a-descriptions-item>
             </a-descriptions>
           </a-collapse-panel>
         </a-collapse>
-        <a-empty v-else description="没有任何网络接口信息" />
+        <a-empty v-else :description="$tl('p.noNetworkInterfaceInfo')" />
       </a-tab-pane>
     </a-tabs>
 
@@ -463,7 +488,7 @@
       v-model:open="monitorVisible.visible"
       destroy-on-close
       width="75%"
-      title="历史监控图表"
+      :title="$tl('c.historyChart')"
       :footer="null"
       :mask-closable="false"
     >
@@ -548,21 +573,21 @@ export default {
           tooltip: true
         },
         {
-          title: '名称',
+          title: this.$tl('c.name'),
           dataIndex: 'name',
           width: '80px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '端口',
+          title: this.$tl('p.port'),
           dataIndex: 'port',
           width: '100px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '所有者',
+          title: this.$tl('p.owner'),
           dataIndex: 'user',
           width: '100px',
           ellipsis: true,
@@ -570,14 +595,14 @@ export default {
         },
 
         {
-          title: '状态',
+          title: this.$tl('p.status'),
           dataIndex: 'state',
           width: '80px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '虚拟内存',
+          title: this.$tl('c.virtualMemory'),
           dataIndex: 'virtualSize',
           width: '100px',
           ellipsis: true,
@@ -591,56 +616,56 @@ export default {
           percentTooltip: true
         },
         {
-          title: '驻留集',
+          title: this.$tl('p.rss'),
           dataIndex: 'residentSetSize',
           width: '100px',
           ellipsis: true,
           sizeTooltip: true
         },
         {
-          title: '优先级',
+          title: this.$tl('p.priority'),
           dataIndex: 'priority',
           width: '80px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '启动时间',
+          title: this.$tl('p.startTime'),
           dataIndex: 'startTime',
           width: '180px',
           ellipsis: true,
           timeTooltip: true
         },
         {
-          title: '运行时间',
+          title: this.$tl('c.runningTime'),
           dataIndex: 'upTime',
           width: '100px',
           ellipsis: true,
           durationTooltip: true
         },
         {
-          title: '用户时间',
+          title: this.$tl('p.userTime'),
           dataIndex: 'userTime',
           width: '100px',
           ellipsis: true,
           durationTooltip: true
         },
         {
-          title: '路径',
+          title: this.$tl('p.path'),
           dataIndex: 'path',
           width: '180px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '启动命令',
+          title: this.$tl('p.startCommand'),
           dataIndex: 'commandLine',
           width: '180px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
 
           align: 'center',
@@ -656,61 +681,61 @@ export default {
           tooltip: true
         },
         {
-          title: '名称',
+          title: this.$tl('c.name'),
           dataIndex: 'name',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '卷',
+          title: this.$tl('p.volume'),
           dataIndex: 'mount',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '文件系统类型',
+          title: this.$tl('p.fileType'),
           dataIndex: 'type',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '描述',
+          title: this.$tl('p.description'),
           dataIndex: 'description',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '剩余空间(未分配)',
+          title: this.$tl('p.freeSpaceUnallocated'),
           dataIndex: 'freeSpace',
           ellipsis: true,
           sizeTooltip: true
         },
         {
-          title: '剩余空间',
+          title: this.$tl('p.freeSpace'),
           dataIndex: 'usableSpace',
           ellipsis: true,
           sizeTooltip: true
         },
         {
-          title: '总空间',
+          title: this.$tl('p.totalSpace'),
           dataIndex: 'totalSpace',
           ellipsis: true,
           sizeTooltip: true
         },
         {
-          title: '剩余 inode 数',
+          title: this.$tl('p.freeInodes'),
           dataIndex: 'freeInodes',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '总 inode 数',
+          title: this.$tl('p.totalInodes'),
           dataIndex: 'totalInodes',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '选项',
+          title: this.$tl('p.options'),
           dataIndex: 'options',
           ellipsis: true,
           tooltip: true
@@ -719,43 +744,43 @@ export default {
 
       hwDiskPartitionColumns: [
         {
-          title: '分区ID',
+          title: this.$tl('p.partitionId'),
           dataIndex: 'identification',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '挂载分区',
+          title: this.$tl('p.mountedPartition'),
           dataIndex: 'mountPoint',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '名称',
+          title: this.$tl('c.name'),
           dataIndex: 'name',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '类型',
+          title: this.$tl('p.type'),
           dataIndex: 'type',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '大小',
+          title: this.$tl('c.size'),
           dataIndex: 'size',
           ellipsis: true,
           sizeTooltip: true
         },
         {
-          title: '主要ID',
+          title: this.$tl('p.majorId'),
           dataIndex: 'major',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '次要ID',
+          title: this.$tl('p.minorId'),
           dataIndex: 'minor',
           ellipsis: true,
           tooltip: true
@@ -804,6 +829,9 @@ export default {
     window.removeEventListener('resize', this.resize)
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.system.assets.machine.machineInfo.${key}`, ...args)
+    },
     formatPercent,
     parseTime,
     formatDuration,
@@ -932,11 +960,11 @@ export default {
     // kill pid
     kill(record) {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('p.systemPrompt'),
         zIndex: 1009,
-        content: '真的要 Kill 这个进程么？',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmKillProcess'),
+        okText: this.$tl('p.confirm'),
+        cancelText: this.$tl('p.cancel'),
         onOk: () => {
           return killPid({
             ...this.idInfo,

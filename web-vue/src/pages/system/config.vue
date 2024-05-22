@@ -4,7 +4,7 @@
       <template #tab>
         <span>
           <SettingOutlined />
-          服务端系统配置
+          {{ $tl('p.serverSystemConfig') }}
         </span>
       </template>
 
@@ -18,14 +18,14 @@
             height="calc(100vh - 200px)"
           >
             <template #tool_before>
-              <a-alert v-if="temp.file" show-icon :message="`配置文件路径:${temp.file}`" />
+              <a-alert v-if="temp.file" show-icon :message="`${$tl('p.configFilePath')}:${temp.file}`" />
             </template>
           </code-editor>
         </a-form-item>
         <a-form-item :wrapper-col="{ span: 14, offset: 2 }">
           <a-space>
-            <a-button type="primary" class="btn" @click="onSubmit(false)">保存</a-button>
-            <a-button type="primary" danger class="btn" @click="onSubmit(true)">保存并重启</a-button>
+            <a-button type="primary" class="btn" @click="onSubmit(false)">{{ $tl('c.save') }}</a-button>
+            <a-button type="primary" danger class="btn" @click="onSubmit(true)">{{ $tl('p.saveAndRestart') }}</a-button>
           </a-space>
         </a-form-item>
       </a-form>
@@ -34,20 +34,12 @@
       <template #tab>
         <span>
           <LockOutlined />
-          服务端IP授权配置
+          {{ $tl('p.serverIpAuthConfig') }}
         </span>
       </template>
-      <a-alert :message="`当前访问IP：${ipTemp.ip}`" type="success" />
-      <a-alert
-        message="请仔细确认后配置，ip配置后立即生效。配置时需要保证当前ip能访问！127.0.0.1 该IP不受访问限制.支持配置IP段 192.168.1.1/192.168.1.254,192.168.1.0/24"
-        style="margin-top: 10px"
-        banner
-      />
-      <a-alert
-        message="如果配置错误需要重启服务端并新增命令行参数 --rest:ip_config 将恢复默认配置"
-        style="margin-top: 10px"
-        banner
-      />
+      <a-alert :message="`${$tl('p.currentAccessIp')}${ipTemp.ip}`" type="success" />
+      <a-alert :message="$tl('p.ipConfigWarning')" style="margin-top: 10px" banner />
+      <a-alert :message="$tl('p.resetConfigWarning')" style="margin-top: 10px" banner />
       <a-form
         ref="editIpConfigForm"
         style="margin-top: 10px"
@@ -59,9 +51,9 @@
           <template #label>
             <a-space align="center">
               <a-tooltip>
-                <template #title>禁止访问的 IP 地址 </template>
+                <template #title>{{ $tl('p.forbiddenIp') }} </template>
                 <StopFilled />
-                IP禁止
+                IP{{ $tl('p.forbidden') }}
               </a-tooltip>
             </a-space>
           </template>
@@ -69,16 +61,16 @@
             v-model:value="ipTemp.prohibited"
             :rows="8"
             class="ip-list-config"
-            placeholder="请输入IP禁止,多个使用换行,支持配置IP段 192.168.1.1/192.168.1.254,192.168.1.0/24"
+            :placeholder="$tl('p.inputForbiddenIp')"
           />
         </a-form-item>
         <a-form-item name="allowed">
           <template #label>
             <a-space align="center">
               <a-tooltip>
-                <template #title> 只允许访问的 IP 地址 </template>
+                <template #title> {{ $tl('p.allowedIp') }} </template>
                 <CheckCircleFilled />
-                IP授权
+                IP{{ $tl('p.authorize') }}
               </a-tooltip>
             </a-space>
           </template>
@@ -86,12 +78,12 @@
             v-model:value="ipTemp.allowed"
             :rows="8"
             class="ip-list-config"
-            placeholder="请输入IP授权,多个使用换行,0.0.0.0 是开放所有IP,支持配置IP段 192.168.1.1/192.168.1.254,192.168.1.0/24"
+            :placeholder="$tl('p.inputAuthorizedIp')"
           />
         </a-form-item>
 
         <a-form-item :wrapper-col="{ offset: 10 }" class="ip-config-button">
-          <a-button type="primary" class="btn" @click="onSubmitIp()">保存</a-button>
+          <a-button type="primary" class="btn" @click="onSubmitIp()">{{ $tl('c.save') }}</a-button>
         </a-form-item>
       </a-form>
     </a-tab-pane>
@@ -101,29 +93,25 @@
       <template #tab>
         <span>
           <ApiOutlined />
-          全局代理
+          {{ $tl('p.globalProxy') }}
         </span>
       </template>
-      <a-alert
-        :message="`全局代理配置后将对服务端的网络生效，代理实现方式：ProxySelector`"
-        style="margin-top: 10px; margin-bottom: 20px"
-        banner
-      />
+      <a-alert :message="`${$tl('p.globalProxyDesc')}`" style="margin-top: 10px; margin-bottom: 20px" banner />
       <a-row justify="center" type="flex">
         <a-form ref="editProxyForm" :model="proxyConfigData">
           <a-row v-for="(item, index) in proxyConfigData.globalProxy" :key="index">
             <a-space>
-              <a-form-item label="通配符" name="pattern">
+              <a-form-item :label="$tl('p.wildcard')" name="pattern">
                 <a-input
                   v-model:value="item.pattern"
                   style="width: 30vw"
                   :max-length="200"
-                  placeholder="地址通配符,* 表示所有地址都将使用代理"
+                  :placeholder="$tl('p.addressWildcard')"
                 >
                 </a-input>
               </a-form-item>
-              <a-form-item label="代理">
-                <a-input v-model:value="item.proxyAddress" style="width: 30vw" placeholder="代理地址 (127.0.0.1:8888)">
+              <a-form-item :label="$tl('p.proxy')">
+                <a-input v-model:value="item.proxyAddress" style="width: 30vw" :placeholder="$tl('p.proxyAddress')">
                   <template #addonBefore>
                     <a-select v-model:value="item.proxyType" style="width: 100px">
                       <a-select-option value="HTTP">HTTP</a-select-option>
@@ -145,7 +133,7 @@
                     }
                   "
                 >
-                  删除
+                  {{ $tl('p.delete') }}
                 </a-button>
               </a-form-item>
             </a-space>
@@ -168,9 +156,9 @@
                     }
                   }
                 "
-                >新增</a-button
+                >{{ $tl('p.add') }}</a-button
               >
-              <a-button type="primary" @click="saveProxyConfigHannder">保存</a-button>
+              <a-button type="primary" @click="saveProxyConfigHannder">{{ $tl('c.save') }}</a-button>
             </a-space>
           </a-form-item>
         </a-form>
@@ -222,6 +210,9 @@ export default {
     this.tabChange('1')
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.system.config.${key}`, ...args)
+    },
     // load data
     loadConfitData() {
       getConfigData().then((res) => {
@@ -245,11 +236,11 @@ export default {
     // submit
     onSubmit(restart) {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemPrompt'),
         zIndex: 1009,
-        content: '真的要保存当前配置吗？如果配置有误,可能无法启动服务需要手动还原奥！！！',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmSaveConfig'),
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           this.temp.restart = restart
           return editConfig(this.temp).then((res) => {
@@ -271,7 +262,9 @@ export default {
 
       this.globalLoading({
         spinning: true,
-        tip: (msg || '重启中，请稍候...') + ',请耐心等待暂时不用刷新页面,重启成功后会自动刷新'
+        tip:
+          (msg || this.$tl('p.restarting')) +
+          `,${this.$tl('p.waitWithoutRefresh')},${this.$tl('p.autoRefreshAfterRestart')}`
       })
       setTimeout(() => {
         //
@@ -284,7 +277,7 @@ export default {
                   spinning: false
                 })
                 $notification.success({
-                  message: '重启成功'
+                  message: this.$tl('p.restartSuccess')
                 })
 
                 setTimeout(() => {
@@ -293,7 +286,7 @@ export default {
               } else {
                 if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
                   $notification.warning({
-                    message: '未重启成功：' + (res.msg || '')
+                    message: this.$tl('p.restartFailed') + (res.msg || '')
                   })
                   this.globalLoading({
                     spinning: false
@@ -309,7 +302,7 @@ export default {
                   spinning: false
                 })
                 $notification.error({
-                  message: '重启超时,请去服务器查看控制台日志排查问题'
+                  message: this.$tl('p.restartTimeout')
                 })
                 clearInterval(this.timer)
               }
@@ -321,12 +314,11 @@ export default {
     // submit ip config
     onSubmitIp() {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemPrompt'),
         zIndex: 1009,
-        content:
-          '真的要保存当前配置吗？IP 授权请慎重配置奥( 授权是指只允许访问的 IP ),配置后立马生效 如果配置错误将出现无法访问的情况,需要手动恢复奥！！！',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmSaveConfigWithAuth'),
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           return editIpConfig(this.ipTemp).then((res) => {
             if (res.code === 200) {

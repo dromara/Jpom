@@ -1,32 +1,32 @@
 <template>
   <div>
     <a-page-header :back-icon="false">
-      <template #title> 欢迎【{{ getUserInfo.name }}】您来到系统管理中心</template>
-      <template #subTitle>当前区域为系统管理、资产管理中心 </template>
+      <template #title> {{ $tl('p.k1') }}{{ getUserInfo.name }}{{ $tl('p.k2') }}</template>
+      <template #subTitle>{{ $tl('p.k3') }} </template>
       <template #tags>
         <a-tag color="blue">
-          <template v-if="getUserInfo.demoUser">演示账号</template>
-          <template v-else-if="getUserInfo.superSystemUser">超级管理员</template>
-          <template v-else-if="getUserInfo.systemUser">管理员</template>
-          <template v-else>普通用户</template>
+          <template v-if="getUserInfo.demoUser">{{ $tl('p.k4') }}</template>
+          <template v-else-if="getUserInfo.superSystemUser">{{ $tl('p.k5') }}</template>
+          <template v-else-if="getUserInfo.systemUser">{{ $tl('p.k6') }}</template>
+          <template v-else>{{ $tl('p.k7') }}</template>
         </a-tag>
       </template>
       <template #extra>
-        <a-tooltip title="刷新数据">
+        <a-tooltip :title="$tl('p.k8')">
           <a-button :loading="loading" @click="init">
             <template #icon><ReloadOutlined /></template>
           </a-button>
         </a-tooltip>
         <!-- // 擅自修改或者删除版权信息有法律风险，请尊重开源协议，不要擅自修改版本信息，否则可能承担法律责任。 -->
-        <a-tooltip title="关于系统">
+        <a-tooltip :title="$tl('p.k9')">
           <a-button @click="toAbout">
             <template #icon><ExclamationCircleOutlined /></template>
           </a-button>
         </a-tooltip>
       </template>
       <a-space>
-        <span> 工作空间总数： <a-badge color="blue" :count="statData['workspaceCount'] || '0'" show-zero /> </span>
-        <span>集群数：<a-badge color="cyan" :count="statData['clusterCount'] || '0'" show-zero /></span>
+        <span> {{ $tl('p.k10') }} <a-badge color="blue" :count="statData['workspaceCount'] || '0'" show-zero /> </span>
+        <span>{{ $tl('p.k11') }}<a-badge color="cyan" :count="statData['clusterCount'] || '0'" show-zero /></span>
       </a-space>
     </a-page-header>
     <a-divider dashed />
@@ -34,12 +34,13 @@
     <a-row :gutter="[16, 16]">
       <a-col :span="6">
         <a-card size="small">
-          <template #title> 机器节点 </template>
+          <template #title> {{ $tl('p.k12') }} </template>
 
           <a-list :data-source="['all', ...Object.keys(nodeStatusMap)]">
             <template #renderItem="{ item }">
               <a-list-item v-if="item === 'all'">
-                总数：<a-badge
+                {{ $tl('p.totalCount')
+                }}<a-badge
                   :color="item.color"
                   :count="
                     (statData.nodeStat &&
@@ -73,12 +74,13 @@
       </a-col>
       <a-col :span="6">
         <a-card size="small">
-          <template #title> 机器SSH </template>
+          <template #title> {{ $tl('p.k13') }} </template>
 
           <a-list :data-source="['all', ...Object.keys(sshStatusMap)]">
             <template #renderItem="{ item }">
               <a-list-item v-if="item === 'all'">
-                总数：<a-badge
+                {{ $tl('p.totalCount')
+                }}<a-badge
                   :color="item.color"
                   :count="
                     (statData.sshStat &&
@@ -112,12 +114,13 @@
       </a-col>
       <a-col :span="6">
         <a-card size="small">
-          <template #title> 机器DOCKER </template>
+          <template #title> {{ $tl('p.k14') }} </template>
 
           <a-list :data-source="['all', ...Object.keys(dockerStatusMap)]">
             <template #renderItem="{ item }">
               <a-list-item v-if="item === 'all'">
-                总数：<a-badge
+                {{ $tl('p.totalCount')
+                }}<a-badge
                   :color="item.color"
                   :count="
                     (statData.dockerStat &&
@@ -151,14 +154,14 @@
       </a-col>
       <a-col :span="6">
         <a-card size="small">
-          <template #title> 用户数据 </template>
+          <template #title> {{ $tl('p.k15') }} </template>
 
           <a-list
             :data-source="[
-              { name: '用户总数', field: 'userCount', color: 'red' },
-              { name: '管理员数', field: 'systemUserCount', color: 'pink' },
-              { name: '开启MFA数', field: 'openTwoFactorAuth', color: 'green' },
-              { name: '禁用数量', field: 'disableUserCount', color: 'yellow' }
+              { name: $tl('p.k16'), field: 'userCount', color: 'red' },
+              { name: $tl('p.k17'), field: 'systemUserCount', color: 'pink' },
+              { name: $tl('p.k18'), field: 'openTwoFactorAuth', color: 'green' },
+              { name: $tl('p.k19'), field: 'disableUserCount', color: 'yellow' }
             ]"
           >
             <template #renderItem="{ item }">
@@ -202,6 +205,9 @@ export default {
     this.init()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.system.overview.${key}`, ...args)
+    },
     init() {
       // 数据
       this.loading = true

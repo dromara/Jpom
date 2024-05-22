@@ -1,14 +1,14 @@
 <template>
   <div>
     <a-tabs type="card" default-active-key="1">
-      <a-tab-pane key="1" tab="服务端"> <upgrade></upgrade></a-tab-pane>
-      <a-tab-pane key="2" tab="所有节点(插件端)">
+      <a-tab-pane key="1" :tab="$tl('p.server')"> <upgrade></upgrade></a-tab-pane>
+      <a-tab-pane key="2" :tab="$tl('p.allNodes')">
         <CustomTable
           is-show-tools
           default-auto-refresh
           :auto-refresh-time="30"
           table-name="upgrade-node-list"
-          empty-description="没有节点"
+          :empty-description="$tl('p.noNodes')"
           :active-page="activePage"
           :columns="columns"
           :data-source="list"
@@ -31,19 +31,19 @@
               <a-input
                 v-model:value="listQuery['%name%']"
                 class="search-input-item"
-                placeholder="节点名称"
+                :placeholder="$tl('p.nodeName')"
                 @press-enter="getNodeList"
               />
               <a-input
                 v-model:value="listQuery['%jpomUrl%']"
                 class="search-input-item"
-                placeholder="节点地址"
+                :placeholder="$tl('c.nodeAddress')"
                 @press-enter="getNodeList"
               />
               <a-input
                 v-model:value="listQuery['%jpomVersion%']"
                 class="search-input-item"
-                placeholder="插件版本"
+                :placeholder="$tl('p.pluginVersion')"
                 @press-enter="getNodeList"
               />
               <a-select
@@ -60,18 +60,18 @@
                   }
                 "
                 allow-clear
-                placeholder="分组"
+                :placeholder="$tl('p.group')"
                 class="search-input-item"
               >
                 <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
               </a-select>
-              <a-button :loading="loading" type="primary" @click="getNodeList">搜索</a-button>
+              <a-button :loading="loading" type="primary" @click="getNodeList">{{ $tl('p.search') }}</a-button>
 
-              <a-select v-model:value="temp.protocol" placeholder="升级协议" class="search-input-item">
+              <a-select v-model:value="temp.protocol" :placeholder="$tl('p.upgradeProtocol')" class="search-input-item">
                 <a-select-option value="WebSocket">WebSocket</a-select-option>
                 <a-select-option value="Http">Http</a-select-option>
               </a-select>
-              <a-button type="primary" @click="batchUpdate">批量更新</a-button>
+              <a-button type="primary" @click="batchUpdate">{{ $tl('p.batchUpdate') }}</a-button>
               |
               <a-upload
                 name="file"
@@ -83,17 +83,17 @@
                 :before-upload="beforeUpload"
               >
                 <LoadingOutlined v-if="percentage" />
-                <a-button v-else type="primary"> <UploadOutlined />上传包 </a-button>
+                <a-button v-else type="primary"> <UploadOutlined />{{ $tl('p.uploadPackage') }} </a-button>
               </a-upload>
 
               <!-- 打包时间：{{ agentTimeStamp | version }}</div> -->
             </a-space>
           </template>
           <template #toolPrefix>
-            <a-tooltip :title="`打包时间：${agentTimeStamp || '未知'}`">
-              Agent版本：{{ version_filter(agentVersion) }}
+            <a-tooltip :title="`${$tl('p.packingTime')}${agentTimeStamp || $tl('c.unknown')}`">
+              Agent{{ $tl('p.version') }}{{ version_filter(agentVersion) }}
               <a-tag v-if="temp.upgrade" color="pink" @click="downloadRemoteEvent">
-                新版本：{{ temp.newVersion }} <DownloadOutlined />
+                {{ $tl('p.newVersion') }}{{ temp.newVersion }} <DownloadOutlined />
               </a-tag>
               <!-- </div> -->
             </a-tooltip></template
@@ -114,7 +114,7 @@
             </template>
             <template v-else-if="column.dataIndex === 'status'">
               <a-tag :color="text === 1 ? 'green' : 'pink'" style="margin-right: 0">
-                {{ statusMap[text] || '未知' }}
+                {{ statusMap[text] || $tl('c.unknown') }}
               </a-tag>
             </template>
             <template v-else-if="column.dataIndex === 'updateStatus'">
@@ -126,13 +126,13 @@
               </div>
               <div v-if="text && text.type === 'uploading'">
                 <div class="text">
-                  {{ text.percent === 100 ? '上传成功' : '正在上传文件' }}
+                  {{ text.percent === 100 ? $tl('p.uploadSuccess') : $tl('p.uploadingFile') }}
                 </div>
                 <a-progress :percent="text.percent" />
               </div>
             </template>
             <template v-else-if="column.dataIndex === 'operation'">
-              <a-button type="primary" size="small" @click="updateNodeHandler(record)">更新</a-button>
+              <a-button type="primary" size="small" @click="updateNodeHandler(record)">{{ $tl('p.update') }}</a-button>
             </template>
           </template>
         </CustomTable>
@@ -168,13 +168,13 @@ export default {
       groupList: [],
       columns: [
         {
-          title: '机器名称',
+          title: this.$tl('p.machineName'),
           dataIndex: 'name',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '节点地址',
+          title: this.$tl('c.nodeAddress'),
           dataIndex: 'jpomUrl',
           sorter: true,
           width: '150px',
@@ -182,51 +182,51 @@ export default {
           tooltip: true
         },
         {
-          title: '分组名',
+          title: this.$tl('p.groupName'),
           dataIndex: 'groupName',
           ellipsis: true,
           width: '100px',
           tooltip: true
         },
         {
-          title: '机器状态(缓存)',
+          title: this.$tl('p.machineStatus'),
           dataIndex: 'status',
           width: '130px',
           ellipsis: true
         },
         {
-          title: '缓存版本号',
+          title: this.$tl('p.cacheVersion'),
           dataIndex: 'jpomVersion',
           width: '100px',
           ellipsis: true
         },
         {
-          title: '实时版本号',
+          title: this.$tl('p.realTimeVersion'),
           dataIndex: 'version',
           width: '100px',
           ellipsis: true
         },
         {
-          title: '打包时间',
+          title: this.$tl('p.packingDateTime'),
           dataIndex: 'timeStamp',
           width: '170px',
           ellipsis: true
         },
         {
-          title: '运行时间',
+          title: this.$tl('p.runningTime'),
           dataIndex: 'upTime',
           width: '110px',
           ellipsis: true
         },
 
         {
-          title: '更新状态',
+          title: this.$tl('p.updateStatus'),
           dataIndex: 'updateStatus',
           ellipsis: true
         },
         // {title: '自动更新', dataIndex: 'autoUpdate', ellipsis: true,},
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
           width: '80px',
 
@@ -274,8 +274,11 @@ export default {
     this.close()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.system.upgrade.${key}`, ...args)
+    },
     status_filter(value) {
-      return (value && value) || '未知'
+      return (value && value) || this.$tl('c.unknown')
     },
     version_filter(value) {
       return value || '---'
@@ -340,14 +343,14 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: 'web socket 错误,请检查是否开启 ws 代理'
+          message: `web socket ${this.$tl('p.error')},${this.$tl('p.checkWsProxy')}`
         })
       }
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
         clearInterval(this.heart)
-        $message.warning('会话已经关闭[upgrade]')
+        $message.warning(this.$tl('p.sessionClosed'))
       }
     },
     checkAgentFileVersion() {
@@ -390,7 +393,7 @@ export default {
     batchUpdate() {
       if (this.tableSelections.length === 0) {
         $notification.warning({
-          message: '请选择要升级的节点'
+          message: this.$tl('p.selectNodesToUpgrade')
         })
         return
       }
@@ -495,28 +498,33 @@ export default {
     updateNode() {
       if (!this.agentVersion) {
         $notification.error({
-          message: '请先上传或者下载新版本'
+          message: this.$tl('p.uploadOrDownloadNewVersion')
         })
         return
       }
       const len = this.tableSelections.length
-      const html =
-        "确认要将选中的  <b style='color:red;font-size: 20px;'>" +
-        len +
-        "</b> 个节点升级到 <b style='color:red;font-size: 20px;'>" +
-        (this.agentVersion || '--') +
-        "</b> 吗？<ul style='color:red;'>" +
-        '<li>升级前请阅读更新日志里面的说明和注意事项并且<b>请注意备份数据防止数据丢失！！</b></li>' +
-        '<li>如果升级失败需要手动恢复奥</li>' +
-        '<li>一般情况下不建议降级操作</li>' +
-        ' </ul>'
-
+      const html = `
+        ${this.$tl('p.confirmUpgradeNodes')}
+        <b style='color:red;font-size: 20px;'>
+          ${len}
+        </b>
+        ${this.$tl('p.upgradeNodesTo')}
+        <b style='color:red;font-size: 20px;'>
+          (${this.agentVersion} || '--')
+        </b>
+        ${this.$tl('p.upgradeConfirmation')}
+        <ul style='color:red;'>
+          <li>${this.$tl('p.readUpdateLog')}<b>${this.$tl('c.backupData')}</b></li>
+          <li>${this.$tl('c.manualRecovery')}</li>
+          <li>${this.$tl('p.discourageDowngrade')}</li>
+        </ul>
+      `
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemPrompt'),
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
-        okText: '确认',
-        cancelText: '取消',
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           this.sendMsg('updateNode', {
             ids: this.tableSelections,
@@ -527,18 +535,19 @@ export default {
       })
     },
     beforeUpload(file) {
-      const html =
-        "确认要上传最新的插件包吗？<ul style='color:red;'>" +
-        '<li>上传前请阅读更新日志里面的说明和注意事项并且更新前<b>请注意备份数据防止数据丢失！！</b></li>' +
-        '<li>上传前请检查包是否完整,否则可能出现更新后无法正常启动的情况！！</li>' +
-        ' </ul>'
-
+      const html = `
+        ${this.$tl('p.confirmUploadLatestPackage')}
+        <ul style='color:red;'>
+          <li>${this.$tl('p.readUploadLog')}<b>${this.$tl('c.backupData')}</b></li>
+          <li>${this.$tl('p.checkPackageIntegrity')}</li>
+        </ul>
+      `
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemPrompt'),
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
-        okText: '确认',
-        cancelText: '取消',
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           this.percentage = 0
           uploadPieces({
@@ -597,19 +606,21 @@ export default {
     },
     // 下载远程最新文件
     downloadRemoteEvent() {
-      const html =
-        "确认要下载最新版本吗？<ul style='color:red;'>" +
-        '<li>下载速度根据网速来确定,如果网络不佳下载会较慢</li>' +
-        '<li>下载前请阅读更新日志里面的说明和注意事项并且更新前<b>请注意备份数据防止数据丢失！！</b></li>' +
-        '<li>下载完成后需要手动选择更新到节点才能完成节点更新奥</li>' +
-        '<li>如果升级失败需要手动恢复奥</li>' +
-        ' </ul>'
+      const html = `
+        ${this.$tl('p.confirmDownloadLatestVersion')}
+        <ul style='color:red;'>
+          <li>${this.$tl('p.downloadSpeed')}</li>
+          <li>${this.$tl('p.readDownloadLog')}<b>${this.$tl('c.backupData')}</b></li>
+          <li>${this.$tl('p.manualUpdateAfterDownload')}</li>
+          <li>${this.$tl('c.manualRecovery')}</li>
+        </ul>
+      `
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemPrompt'),
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
-        okText: '确认',
-        cancelText: '取消',
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           return downloadRemote().then((res) => {
             if (res.code === 200) {

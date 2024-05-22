@@ -51,6 +51,9 @@ export default {
     this.loadData()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.ssh.commandViewLog.${key}`, ...args)
+    },
     // 加载日志内容
     loadData() {
       this.activeKey = this.temp.id || ''
