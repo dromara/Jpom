@@ -25,13 +25,13 @@
               margin: '0'
             }"
           >
-            <a-tab-pane key="info" tab="基本信息"></a-tab-pane>
-            <a-tab-pane key="cache" tab="缓存监控"></a-tab-pane>
-            <a-tab-pane key="config" tab="系统配置"></a-tab-pane>
-            <a-tab-pane key="freeScript" tab="自由脚本"></a-tab-pane>
-            <a-tab-pane key="path-config" tab="授权配置"></a-tab-pane>
-            <a-tab-pane key="upgrade" tab="在线升级"></a-tab-pane>
-            <a-tab-pane key="log" tab="系统日志"></a-tab-pane>
+            <a-tab-pane key="info" :tab="$tl('p.basicInfo')"></a-tab-pane>
+            <a-tab-pane key="cache" :tab="$tl('p.cacheMonitoring')"></a-tab-pane>
+            <a-tab-pane key="config" :tab="$tl('p.systemConfig')"></a-tab-pane>
+            <a-tab-pane key="freeScript" :tab="$tl('p.freeScript')"></a-tab-pane>
+            <a-tab-pane key="path-config" :tab="$tl('p.authorizationConfig')"></a-tab-pane>
+            <a-tab-pane key="upgrade" :tab="$tl('p.onlineUpgrade')"></a-tab-pane>
+            <a-tab-pane key="log" :tab="$tl('p.systemLogs')"></a-tab-pane>
           </a-tabs>
         </div>
       </a-space>
@@ -93,8 +93,12 @@ export default {
   computed: {
     ...mapState(useAppStore, ['getCollapsed'])
   },
-
-  mounted() {}
+  mounted() {},
+  methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.system.assets.machine.machineFunc.${key}`, ...args)
+    }
+  }
 }
 </script>
 

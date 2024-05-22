@@ -1,8 +1,8 @@
 <template>
   <div>
     <a-tabs default-active-key="1">
-      <a-tab-pane key="1" tab="工作空间管理"><workspaceList></workspaceList> </a-tab-pane>
-      <a-tab-pane key="2" tab="集群管理">
+      <a-tab-pane key="1" :tab="$tl('p.workspaceManagement')"><workspaceList></workspaceList> </a-tab-pane>
+      <a-tab-pane key="2" :tab="$tl('p.clusterManagement')">
         <clusterList></clusterList>
       </a-tab-pane>
     </a-tabs>
@@ -22,6 +22,10 @@ export default {
   },
   computed: {},
   created() {},
-  methods: {}
+  methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.system.workspace.${key}`, ...args)
+    }
+  }
 }
 </script>

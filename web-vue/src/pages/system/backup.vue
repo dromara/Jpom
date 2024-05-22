@@ -17,31 +17,31 @@
         <a-space>
           <a-input
             v-model:value="listQuery['%name%']"
-            placeholder="请输入备份名称"
+            :placeholder="$tl('p.backupName')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%version%']"
-            placeholder="请输入版本"
+            :placeholder="$tl('p.version')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-select
             v-model:value="listQuery.backupType"
             allow-clear
-            placeholder="请选择备份类型"
+            :placeholder="$tl('p.selectBackupType')"
             class="search-input-item"
           >
             <a-select-option v-for="backupTypeItem in backupTypeList" :key="backupTypeItem.key">
               {{ backupTypeItem.value }}
             </a-select-option>
           </a-select>
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
+          <a-tooltip :title="$tl('p.quickBackToFirstPage')">
+            <a-button :loading="loading" type="primary" @click="loadData">{{ $tl('p.search') }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">创建备份</a-button>
-          <a-button type="primary" @click="handleSqlUpload">导入备份</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $tl('p.createBackup') }}</a-button>
+          <a-button type="primary" @click="handleSqlUpload">{{ $tl('p.importBackup') }}</a-button>
         </a-space>
       </template>
       <template #bodyCell="{ column, text, record }">
@@ -61,14 +61,14 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'status'">
-          <a-tooltip v-if="record.fileExist" :title="`${backupStatusMap[text]} 点击复制文件路径`">
+          <a-tooltip v-if="record.fileExist" :title="`${backupStatusMap[text]} ${$tl('p.copyFilePath')}`">
             <div>
               <a-typography-paragraph :copyable="{ tooltip: false, text: record.filePath }" style="margin-bottom: 0">
                 {{ backupStatusMap[text] }}
               </a-typography-paragraph>
             </div>
           </a-tooltip>
-          <a-tooltip v-else :title="`备份文件不存在:${record.filePath}`">
+          <a-tooltip v-else :title="`${$tl('p.backupNotExist')}:${record.filePath}`">
             <WarningOutlined />
           </a-tooltip>
         </template>
@@ -86,7 +86,7 @@
               type="primary"
               :disabled="!record.fileExist || record.status !== 1"
               @click="handleDownload(record)"
-              >下载</a-button
+              >{{ $tl('p.download') }}</a-button
             >
             <a-button
               size="small"
@@ -94,9 +94,9 @@
               danger
               :disabled="!record.fileExist || record.status !== 1"
               @click="handleRestore(record)"
-              >还原</a-button
+              >{{ $tl('p.restore') }}</a-button
             >
-            <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
+            <a-button size="small" type="primary" danger @click="handleDelete(record)">{{ $tl('p.delete') }}</a-button>
           </a-space>
         </template>
       </template>
@@ -106,13 +106,13 @@
       v-model:open="createBackupVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      title="创建备份信息"
+      :title="$tl('p.createBackupInfo')"
       width="600px"
       :mask-closable="false"
       @ok="handleCreateBackupOk"
     >
       <a-form ref="editBackupForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-item label="备份类型" name="backupType">
+        <a-form-item :label="$tl('c.backupType')" name="backupType">
           <a-radio-group v-model:value="temp.backupType" name="backupType">
             <a-radio v-for="item in backupTypeList" v-show="!item.disabled" :key="item.key" :value="item.key">{{
               item.value
@@ -120,7 +120,12 @@
           </a-radio-group>
         </a-form-item>
         <!-- 部分备份 -->
-        <a-form-item v-if="temp.backupType === 1" label="勾选数据表" name="tableNameList" class="feature jpom-role">
+        <a-form-item
+          v-if="temp.backupType === 1"
+          :label="$tl('p.selectDataTable')"
+          name="tableNameList"
+          class="feature jpom-role"
+        >
           <a-transfer
             :data-source="tableNameList"
             show-search
@@ -138,12 +143,12 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="300px"
-      title="上传 SQL 文件"
+      :title="$tl('p.uploadSqlFile')"
       :mask-closable="true"
       @ok="startSqlUpload"
     >
       <a-upload :file-list="uploadFileList" :before-upload="beforeSqlUpload" accept=".sql" @remove="handleSqlRemove">
-        <a-button><UploadOutlined />选择 SQL 文件</a-button>
+        <a-button><UploadOutlined />{{ $tl('p.chooseSqlFile') }}</a-button>
       </a-upload>
       <!-- <br />
         <a-radio-group v-model="backupType" name="backupType">
@@ -192,37 +197,37 @@ export default {
 
       columns: [
         {
-          title: '备份名称',
+          title: this.$tl('p.backupNameLabel'),
           dataIndex: 'name',
           ellipsis: true
         },
         {
-          title: '打包时间',
+          title: this.$tl('p.packageTime'),
           width: 170,
           dataIndex: 'baleTimeStamp',
           // ellipsis: true,
           sorter: true
         },
         {
-          title: '版本',
+          title: this.$tl('p.versionLabel'),
           dataIndex: 'version',
           width: 100
           // ellipsis: true,
         },
         {
-          title: '备份类型',
+          title: this.$tl('c.backupType'),
           dataIndex: 'backupType',
           width: 100,
           ellipsis: true
         },
         {
-          title: '文件大小',
+          title: this.$tl('p.fileSize'),
           dataIndex: 'fileSize',
           width: 100
           // ellipsis: true,
         },
         {
-          title: '状态',
+          title: this.$tl('p.status'),
           dataIndex: 'status',
           width: 120
         },
@@ -234,14 +239,14 @@ export default {
 
         // },
         {
-          title: '修改人',
+          title: this.$tl('p.modifier'),
           dataIndex: 'modifyUser',
           ellipsis: true,
 
           width: 120
         },
         {
-          title: '备份时间',
+          title: this.$tl('p.backupTime'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text }) => {
@@ -250,7 +255,7 @@ export default {
           width: '170px'
         },
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
           width: '180px',
 
@@ -277,6 +282,9 @@ export default {
     this.timer && clearTimeout(this.timer)
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.system.backup.${key}`, ...args)
+    },
     // 格式化文件大小
     renderSizeFormat(value) {
       return renderSize(value)
@@ -357,11 +365,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemPrompt'),
         zIndex: 1009,
-        content: '真的要删除备份信息么？',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmDeleteBackup'),
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         onOk: () => {
           return deleteBackup(record.id).then((res) => {
             if (res.code === 200) {
@@ -376,18 +384,20 @@ export default {
     },
     // 还原备份
     handleRestore(record) {
-      const html =
-        "真的要还原备份信息么？<ul style='color:red;'>" +
-        '<li>建议还原和当前版本一致的文件或者临近版本的文件</li>' +
-        '<li>如果版本相差大需要重新初始化数据来保证和当前程序里面字段一致</li>' +
-        '<li>重置初始化在启动时候传入参数 <b> --rest:load_init_db </b> </li>' +
-        ' </ul>还原过程中不能操作哦...'
+      const html = `
+        ${this.$tl('p.confirmRestoreBackup')}
+        <ul style='color:red;'>
+        <li>${this.$tl('p.adviceRestore')}</li>
+        <li>${this.$tl('p.resetInitData')}</li>
+        <li>${this.$tl('p.resetInitParam')} <b> --rest:load_init_db </b> </li>
+      </ul>${this.$tl('p.operatingDuringRestore')}`
+
       $confirm({
-        title: '系统提示',
+        title: this.$tl('c.systemPrompt'),
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
-        okText: '确认',
-        cancelText: '取消',
+        okText: this.$tl('c.confirm'),
+        cancelText: this.$tl('c.cancel'),
         width: 600,
         onOk: () => {
           return restoreBackup(record.id).then((res) => {
@@ -420,7 +430,7 @@ export default {
     startSqlUpload() {
       if (this.uploadFileList.length != 1) {
         $notification.warning({
-          message: '请选择一个文件'
+          message: this.$tl('p.chooseFile')
         })
         return
       }

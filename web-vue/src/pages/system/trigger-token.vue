@@ -18,19 +18,19 @@
           <a-input
             v-model:value="viewOperationLogListQuery['userId']"
             class="search-input-item"
-            placeholder="创建人,全匹配"
+            :placeholder="$tl('p.creatorExactMatch')"
             @press-enter="handleListLog"
           />
           <a-input
             v-model:value="viewOperationLogListQuery['triggerToken']"
             class="search-input-item"
-            placeholder="token,全匹配"
+            :placeholder="$tl('p.tokenExactMatch')"
             @press-enter="handleListLog"
           />
           <a-select
             v-model:value="viewOperationLogListQuery.type"
             allow-clear
-            placeholder="类型"
+            :placeholder="$tl('p.type')"
             class="search-input-item"
           >
             <a-select-option v-for="item in allTypeList" :key="item.name">{{ item.desc }}</a-select-option>
@@ -40,7 +40,7 @@
             format="YYYY-MM-DD HH:mm:ss"
             @change="onchangeListLogTime"
           />
-          <a-button type="primary" @click="handleListLog">搜索</a-button>
+          <a-button type="primary" @click="handleListLog">{{ $tl('p.search') }}</a-button>
         </a-space>
       </template>
       <template #bodyCell="{ column, text, record }">
@@ -63,7 +63,7 @@
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
+            <a-button size="small" type="primary" danger @click="handleDelete(record)">{{ $tl('p.delete') }}</a-button>
           </a-space>
         </template>
       </template>
@@ -88,7 +88,7 @@ export default {
       ),
       viewOperationLogColumns: [
         {
-          title: '创建人',
+          title: this.$tl('p.creator'),
           dataIndex: 'userId',
           width: 100
         },
@@ -99,24 +99,24 @@ export default {
         },
 
         {
-          title: '关联数据名',
+          title: this.$tl('p.relatedDataName'),
           dataIndex: 'dataName'
           // width: 100
         },
         {
-          title: '调用次数',
+          title: this.$tl('p.callTimes'),
           dataIndex: 'triggerCount',
           width: 100,
           sorter: true
         },
         {
-          title: '关联数据',
+          title: this.$tl('p.relatedData'),
           dataIndex: 'dataId',
           width: 100
         },
 
         {
-          title: '创建时间',
+          title: this.$tl('p.createTime'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text }) => {
@@ -125,7 +125,7 @@ export default {
           width: '180px'
         },
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
           width: '80px',
 
@@ -150,6 +150,9 @@ export default {
     this.handleListLog()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.system.triggerToken.${key}`, ...args)
+    },
     handleListLog() {
       this.viewOperationLoading = true
 
@@ -177,11 +180,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('p.systemPrompt'),
         zIndex: 1009,
-        content: '真的要删除对应的触发器吗？',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmDeletion'),
+        okText: this.$tl('p.confirm'),
+        cancelText: this.$tl('p.cancel'),
         onOk: () => {
           return triggerTokenDelete({
             id: record.id

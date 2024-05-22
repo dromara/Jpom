@@ -281,7 +281,7 @@
             >
             </custom-input>
             <template #help>
-              <a-tooltip v-if="temp.id" title=" {{$tl('c.passwordNote')}}">
+              <a-tooltip v-if="temp.id" :title="$tl('c.passwordNote')">
                 <a-button style="margin: 5px" size="small" type="primary" danger @click="restHideField(temp)">{{
                   $tl('c.clear')
                 }}</a-button>
@@ -295,7 +295,7 @@
               <UserOutlined />
             </template>
             <template #suffix>
-              <a-tooltip v-if="temp.id" title=" {{$tl('c.passwordNote')}}">
+              <a-tooltip v-if="temp.id" :title="$tl('c.passwordNote')">
                 <a-button size="small" type="primary" danger @click="restHideField(temp)">{{
                   $tl('c.clear')
                 }}</a-button>
