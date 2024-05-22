@@ -260,7 +260,7 @@
         >
           <a-input
             v-model:value="temp.javaExtDirsCp"
-            placeholder="-Dext.dirs=xxx: -cp xx  {{$tl('p.fillInXxx')}}:xx】"
+            :placeholder="`-Dext.dirs=xxx: -cp xx  ${$tl('p.fillInXxx')}:xx】`"
           />
         </a-form-item>
         <a-form-item
@@ -282,7 +282,7 @@
           <a-textarea
             v-model:value="temp.args"
             :auto-size="{ minRows: 3, maxRows: 3 }"
-            placeholder="Main {{$tl('p.functionArgs')}}. {{$tl('p.argsExample')}}.port=8080"
+            :placeholder="`Main ${$tl('p.functionArgs')}. ${$tl('p.argsExample')}.port=8080`"
           />
         </a-form-item>
         <a-form-item

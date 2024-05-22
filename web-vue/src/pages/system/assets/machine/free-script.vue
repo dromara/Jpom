@@ -12,15 +12,15 @@
             >
               <template #tool_before>
                 <a-tooltip>
-                  <template #title>自由脚本是指直接在机器节点中执行任意脚本</template>
-                  帮助
+                  <template #title>{{ $tl('p.freeScriptDescription') }}</template>
+                  {{ $tl('p.help') }}
                   <QuestionCircleOutlined />
                 </a-tooltip>
               </template>
             </code-editor>
           </a-form-item>
-          <a-form-item label="执行路径" name="path">
-            <a-input v-model:value="temp.path" placeholder="执行脚本的路径" />
+          <a-form-item :label="$tl('p.executionPath')" name="path">
+            <a-input v-model:value="temp.path" :placeholder="$tl('p.scriptPath')" />
           </a-form-item>
           <!-- <a-form-item :wrapper-col="{ span: 14, offset: 2 }">
             <a-space>
@@ -39,12 +39,12 @@
                 :loading="loading"
                 :disabled="!temp.content"
                 @click="onSubmit(false)"
-                >执行</a-button
+                >{{ $tl('p.execute') }}</a-button
               >
               <a-switch
                 v-model:checked="temp.appendTemplate"
-                checked-children="追加脚本模板"
-                un-checked-children="不追加脚本模板"
+                :checked-children="$tl('p.appendScriptTemplate')"
+                un-checked-children="不{{$tl('p.appendScriptTemplate')}}"
               />
             </a-space>
           </template>
@@ -57,6 +57,9 @@
 import codeEditor from '@/components/codeEditor'
 import LogView2 from '@/components/logView/index2'
 import { getWebSocketUrl } from '@/api/config'
+
+import { useI18nPage } from '@/i18n/hooks/useI18nPage'
+const { $tl } = useI18nPage('pages.system.assets.machine.freeScript')
 
 const props = defineProps({
   machineId: {
@@ -97,14 +100,14 @@ const conentScript = () => {
   socket_.onerror = (err) => {
     console.error(err)
     $notification.error({
-      message: 'web socket 错误,请检查是否开启 ws 代理'
+      message: `web socket ${($tl('p.error'), $tl('p.checkWsProxy'))}`
     })
   }
   socket_.onclose = (err) => {
     //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
     console.error(err)
     loading.value = false
-    $message.warning('会话已经关闭[free-script] ')
+    $message.warning($tl('p.sessionClosed'))
     // clearInterval(this.heart);
   }
   socket.value = socket_

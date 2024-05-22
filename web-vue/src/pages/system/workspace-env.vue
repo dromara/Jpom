@@ -17,32 +17,32 @@
         <a-space>
           <a-input
             v-model:value="envVarListQuery['%name%']"
-            placeholder="名称"
+            :placeholder="$tl('c.name')"
             allow-clear
             class="search-input-item"
             @press-enter="loadDataEnvVar"
           />
           <a-input
             v-model:value="envVarListQuery['%value%']"
-            placeholder="值"
+            :placeholder="$tl('c.value')"
             allow-clear
             class="search-input-item"
             @press-enter="loadDataEnvVar"
           />
           <a-input
             v-model:value="envVarListQuery['%description%']"
-            placeholder="描述"
+            :placeholder="$tl('c.description')"
             allow-clear
             class="search-input-item"
             @press-enter="loadDataEnvVar"
           />
-          <a-button type="primary" @click="loadDataEnvVar">搜索</a-button>
-          <a-button type="primary" @click="addEnvVar">新增</a-button>
+          <a-button type="primary" @click="loadDataEnvVar">{{ $tl('p.search') }}</a-button>
+          <a-button type="primary" @click="addEnvVar">{{ $tl('p.add') }}</a-button>
           <a-tooltip>
             <template #title>
-              <div>环境变量是指配置在系统中的一些固定参数值，用于脚本执行时候快速引用。</div>
-              <div>环境变量还可以用于仓库账号密码、ssh密码引用</div>
-              <div>注意：环境变量存在作用域：当前工作空间或者全局，不能跨工作空间引用</div>
+              <div>{{ $tl('p.envDescription') }}</div>
+              <div>{{ $tl('p.envUsage') }}</div>
+              <div>{{ $tl('p.scopeNote') }}</div>
             </template>
             <QuestionCircleOutlined />
           </a-tooltip>
@@ -50,7 +50,7 @@
       </template>
       <template #bodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'value'">
-          <a-tooltip placement="topLeft" :title="record.privacy === 1 ? '隐私字段' : text">
+          <a-tooltip placement="topLeft" :title="record.privacy === 1 ? $tl('p.privacyField') : text">
             <EyeInvisibleOutlined v-if="record.privacy === 1" />
             <span v-else>{{ text }}</span>
           </a-tooltip>
@@ -62,16 +62,18 @@
         </template>
 
         <template v-else-if="column.dataIndex === 'workspaceId'">
-          <span>{{ text === 'GLOBAL' ? '全局' : '当前工作空间' }}</span>
+          <span>{{ text === 'GLOBAL' ? $tl('p.globalScope') : $tl('p.currentWorkspace') }}</span>
         </template>
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEnvEdit(record)">编辑</a-button>
-            <a-button size="small" type="primary" :disabled="record.privacy === 1" @click="handleTrigger(record)"
-              >触发器</a-button
-            >
-            <a-button size="small" type="primary" danger @click="handleEnvDelete(record)">删除</a-button>
+            <a-button size="small" type="primary" @click="handleEnvEdit(record)">{{ $tl('p.edit') }}</a-button>
+            <a-button size="small" type="primary" :disabled="record.privacy === 1" @click="handleTrigger(record)">{{
+              $tl('c.trigger')
+            }}</a-button>
+            <a-button size="small" type="primary" danger @click="handleEnvDelete(record)">{{
+              $tl('p.delete')
+            }}</a-button>
           </a-space>
         </template>
       </template>
@@ -81,37 +83,34 @@
     <a-modal
       v-model:open="editEnvVisible"
       :confirm-loading="confirmLoading"
-      title="编辑环境变量"
+      :title="$tl('p.editEnv')"
       width="50vw"
       :mask-closable="false"
       @ok="handleEnvEditOk"
     >
       <a-form ref="editEnvForm" :rules="rulesEnv" :model="envTemp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item label="名称" name="name">
-          <a-input v-model:value="envTemp.name" :max-length="50" placeholder="变量名称" />
+        <a-form-item :label="$tl('c.name')" name="name">
+          <a-input v-model:value="envTemp.name" :max-length="50" :placeholder="$tl('p.varName')" />
         </a-form-item>
-        <a-form-item label="值" :prop="`${envTemp.privacy === 1 ? '' : 'value'}`">
-          <a-textarea v-model:value="envTemp.value" :rows="5" placeholder="变量值" />
+        <a-form-item :label="$tl('c.value')" :prop="`${envTemp.privacy === 1 ? '' : 'value'}`">
+          <a-textarea v-model:value="envTemp.value" :rows="5" :placeholder="$tl('p.varValue')" />
         </a-form-item>
-        <a-form-item label="描述" name="description">
-          <a-textarea v-model:value="envTemp.description" :max-length="200" :rows="5" placeholder="变量描述" />
+        <a-form-item :label="$tl('c.description')" name="description">
+          <a-textarea v-model:value="envTemp.description" :max-length="200" :rows="5" :placeholder="$tl('p.varDesc')" />
         </a-form-item>
         <a-form-item name="privacy">
           <template #label>
             <a-tooltip>
-              隐私变量
-              <template #title>
-                隐私变量是指一些密码字段或者关键密钥等重要信息，隐私字段只能修改不能查看（编辑弹窗中无法看到对应值）。
-                隐私字段一旦创建后将不能切换为非隐私字段
-              </template>
+              {{ $tl('p.privacyVar') }}
+              <template #title> {{ $tl('p.privacyVarDesc') }} </template>
               <QuestionCircleOutlined v-show="!envTemp.id" />
             </a-tooltip>
           </template>
           <a-switch
             :checked="envTemp.privacy === 1"
             :disabled="envTemp.id !== undefined"
-            checked-children="隐私"
-            un-checked-children="非隐私"
+            :checked-children="$tl('p.privacy')"
+            :un-checked-children="$tl('p.nonPrivacy')"
             @change="
               (checked) => {
                 envTemp = { ...envTemp, privacy: checked ? 1 : 0 }
@@ -122,8 +121,8 @@
         <a-form-item>
           <template #label>
             <a-tooltip>
-              分发节点
-              <template #title> 分发节点是指将变量同步到对应节点，在节点脚本中也可以使用当前变量</template>
+              {{ $tl('p.distributeNode') }}
+              <template #title> {{ $tl('p.distributeNodeDesc') }}</template>
               <QuestionCircleOutlined v-show="!envTemp.id" />
             </a-tooltip>
           </template>
@@ -140,7 +139,7 @@
                 )
               }
             "
-            placeholder="请选择分发到的节点"
+            :placeholder="$tl('p.selectNode')"
             mode="multiple"
           >
             <a-select-option v-for="item in nodeList" :key="item.id" :value="item.id">
@@ -154,7 +153,7 @@
     <a-modal
       v-model:open="triggerVisible"
       destroy-on-close
-      title="触发器"
+      :title="$tl('c.trigger')"
       width="50%"
       :footer="null"
       :mask-closable="false"
@@ -162,26 +161,28 @@
       <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
           <template #rightExtra>
-            <a-tooltip title="重置触发器 token 信息,重置后之前的触发器 token 将失效">
-              <a-button type="primary" size="small" @click="resetTrigger">重置</a-button>
+            <a-tooltip :title="$tl('p.resetToken')">
+              <a-button type="primary" size="small" @click="resetTrigger">{{ $tl('p.reset') }}</a-button>
             </a-tooltip>
           </template>
-          <a-tab-pane key="1" tab="获取">
+          <a-tab-pane key="1" :tab="$tl('p.get')">
             <a-space direction="vertical" style="width: 100%">
-              <a-alert message="温馨提示" type="warning">
+              <a-alert :message="$tl('p.tips')" type="warning">
                 <template #description>
                   <ul>
-                    <li>接口响应 ContentType 均为：text/plain</li>
-                    <li>操作成功接口 HTTP 状态码为 200</li>
-                    <li>修改接口 HTTP 状态码为 200 并且响应内容为：success 才能确定操作成功反之均可能失败</li>
-                    <li>PUT 方式请求接口参数传入到请求体 ContentType 请使用：text/plain</li>
+                    <li>{{ $tl('p.contentType') }}</li>
+                    <li>{{ $tl('p.successCode') }}</li>
+                    <li>{{ $tl('p.modifySuccess') }}</li>
+                    <li>PUT {{ $tl('p.requestBodyType') }}</li>
                   </ul>
                 </template>
               </a-alert>
 
               <a-alert type="info">
                 <template #message>
-                  <a-typography-paragraph :copyable="{ text: temp.triggerUrl }">获取变量值地址 </a-typography-paragraph>
+                  <a-typography-paragraph :copyable="{ text: temp.triggerUrl }"
+                    >{{ $tl('p.getAddress') }}
+                  </a-typography-paragraph>
                 </template>
                 <template #description>
                   <a-tag>GET</a-tag> <span>{{ temp.triggerUrl }} </span>
@@ -191,7 +192,7 @@
               <a-alert type="info">
                 <template #message>
                   <a-typography-paragraph :copyable="{ text: temp.triggerUrlPost }">
-                    修改变量值地址
+                    {{ $tl('c.modifyAddress') }}
                   </a-typography-paragraph>
                 </template>
                 <template #description>
@@ -201,7 +202,7 @@
               <a-alert type="info">
                 <template #message>
                   <a-typography-paragraph :copyable="{ text: temp.triggerUrl }">
-                    修改变量值地址
+                    {{ $tl('c.modifyAddress') }}
                   </a-typography-paragraph>
                 </template>
                 <template #description>
@@ -243,39 +244,39 @@ export default {
       temp: {},
       envVarColumns: [
         {
-          title: '名称',
+          title: this.$tl('c.name'),
           dataIndex: 'name',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '值',
+          title: this.$tl('c.value'),
           dataIndex: 'value',
           ellipsis: true
         },
 
         {
-          title: '描述',
+          title: this.$tl('c.description'),
           dataIndex: 'description',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: '修改人',
+          title: this.$tl('p.modifier'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           tooltip: true,
           width: 120
         },
         {
-          title: '作用域',
+          title: this.$tl('p.scope'),
           dataIndex: 'workspaceId',
           ellipsis: true,
 
           width: '120px'
         },
         {
-          title: '修改时间',
+          title: this.$tl('p.modifyTime'),
           dataIndex: 'modifyTimeMillis',
           customRender: ({ text }) => {
             return parseTime(text)
@@ -284,7 +285,7 @@ export default {
           width: '180px'
         },
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
           align: 'center',
 
@@ -293,9 +294,9 @@ export default {
       ],
       // 表单校验规则
       rulesEnv: {
-        name: [{ required: true, message: '请输入变量名称', trigger: 'blur' }],
-        description: [{ required: true, message: '请输入变量描述', trigger: 'blur' }],
-        value: [{ required: true, message: '请输入变量值', trigger: 'blur' }]
+        name: [{ required: true, message: this.$tl('p.inputName'), trigger: 'blur' }],
+        description: [{ required: true, message: this.$tl('p.inputDesc'), trigger: 'blur' }],
+        value: [{ required: true, message: this.$tl('p.inputValue'), trigger: 'blur' }]
       },
       triggerVisible: false,
       confirmLoading: false
@@ -310,6 +311,9 @@ export default {
     this.loadDataEnvVar()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.system.workspaceEnv.${key}`, ...args)
+    },
     loadDataEnvVar(pointerEvent) {
       this.envVarLoading = true
 
@@ -366,11 +370,11 @@ export default {
     //
     handleEnvDelete(record) {
       $confirm({
-        title: '系统提示',
+        title: this.$tl('p.systemTips'),
         zIndex: 1009,
-        content: '真的删除当前变量吗？',
-        okText: '确认',
-        cancelText: '取消',
+        content: this.$tl('p.confirmDelete'),
+        okText: this.$tl('p.confirm'),
+        cancelText: this.$tl('p.cancel'),
         onOk: () => {
           return deleteWorkspaceEnv({
             id: record.id,

@@ -6,7 +6,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="system-task-stat"
-      empty-description="没有任何运行中的任务"
+      :empty-description="$tl('p.noRunningTasks')"
       size="middle"
       row-key="taskId"
       :columns="taskColumns"
@@ -55,7 +55,7 @@ export default {
 
       taskColumns: [
         {
-          title: '任务ID',
+          title: this.$tl('p.taskId'),
           dataIndex: 'taskId',
 
           // sorter: (a, b) => (a && b ? a.localeCompare(b, "zh-CN") : 0),
@@ -64,19 +64,19 @@ export default {
           ellipsis: true,
           filters: [
             {
-              text: '构建',
+              text: this.$tl('p.build'),
               value: 'build'
             },
             {
-              text: '节点脚本',
+              text: this.$tl('p.nodeScript'),
               value: 'script'
             },
             {
-              text: '服务端脚本',
+              text: this.$tl('p.serverScript'),
               value: 'server_script'
             },
             {
-              text: 'ssh 脚本',
+              text: `ssh ${this.$tl('p.script')}`,
               value: 'ssh_command'
             }
           ],
@@ -95,28 +95,28 @@ export default {
         //   // sortDirections: ["descend", "ascend"],
         // },
         {
-          title: '执行次数',
+          title: this.$tl('p.executionCount'),
           dataIndex: 'executeCount',
           sortDirections: ['descend', 'ascend'],
           width: 140,
           sorter: (a, b) => a.executeCount || 0 - b.executeCount || 0
         },
         {
-          title: '成功次数',
+          title: this.$tl('p.successCount'),
           dataIndex: 'succeedCount',
           sortDirections: ['descend', 'ascend'],
           width: 140,
           sorter: (a, b) => a.succeedCount || 0 - b.succeedCount || 0
         },
         {
-          title: '失败次数',
+          title: this.$tl('p.failureCount'),
           dataIndex: 'failedCount',
           sortDirections: ['descend', 'ascend'],
           width: 140,
           sorter: (a, b) => a.failedCount || 0 - b.failedCount || 0
         },
         {
-          title: '最后执行时间',
+          title: this.$tl('p.lastExecutionTime'),
           dataIndex: 'lastExecuteTime',
           sortDirections: ['descend', 'ascend'],
           defaultSortOrder: 'descend',
@@ -133,6 +133,9 @@ export default {
   },
   mounted() {},
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.system.taskStat.${key}`, ...args)
+    },
     parseTime,
     refresh() {
       this.$emit('refresh', {})

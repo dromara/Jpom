@@ -1,0 +1,58 @@
+export default {
+  c: {
+    nodeAddress: 'Node Address',
+    unknown: 'Unknown',
+    backupData: 'Please backup your data to prevent data loss!!',
+    manualRecovery: 'If the upgrade fails, manual recovery is required',
+    systemPrompt: 'System Prompt',
+    confirm: 'Confirm',
+    cancel: 'Cancel'
+  },
+  p: {
+    server: 'Server',
+    allNodes: 'All Nodes (Plugin Side)',
+    noNodes: 'No Nodes',
+    nodeName: 'Node Name',
+    pluginVersion: 'Plugin Version',
+    group: 'Group',
+    search: 'Search',
+    upgradeProtocol: 'Upgrade Protocol',
+    batchUpdate: 'Batch Update',
+    uploadPackage: 'Upload Package',
+    packingTime: 'Packing Time:',
+    version: 'Version:',
+    newVersion: 'New Version:',
+    uploadSuccess: 'Upload Successful',
+    uploadingFile: 'Uploading File',
+    update: 'Update',
+    machineName: 'Machine Name',
+    groupName: 'Group Name',
+    machineStatus: 'Machine Status (Cached)',
+    cacheVersion: 'Cache Version',
+    realTimeVersion: 'Real-time Version',
+    packingDateTime: 'Packing DateTime',
+    runningTime: 'Running Time',
+    updateStatus: 'Update Status',
+    operation: 'Operation',
+    error: 'Error',
+    checkWsProxy: 'Please check if ws proxy is enabled',
+    sessionClosed: 'Session has been closed [upgrade]',
+    selectNodesToUpgrade: 'Please select the nodes to upgrade',
+    uploadOrDownloadNewVersion: 'Please upload or download the new version first',
+    confirmUpgradeNodes: 'Are you sure you want to upgrade the selected',
+    upgradeNodesTo: ' nodes to',
+    upgradeConfirmation: '?',
+    readUpdateLog: 'Before upgrading, please read the instructions and notes in the update log and',
+    discourageDowngrade: 'Generally, downgrading is not recommended',
+    confirmUploadLatestPackage: 'Confirm to upload the latest plugin package?',
+    readUploadLog: 'Please read the instructions and notes in the update log before uploading and before updating',
+    checkPackageIntegrity:
+      'Please check if the package is complete before uploading, otherwise the node may fail to start normally after updating!!',
+    confirmDownloadLatestVersion: 'Confirm to download the latest version?',
+    downloadSpeed:
+      'The download speed depends on the network speed. If the network is poor, the download will be slower',
+    readDownloadLog: 'Please read the instructions and notes in the update log before downloading and before updating',
+    manualUpdateAfterDownload:
+      'After downloading, you need to manually select to update the node to complete the node update'
+  }
+}

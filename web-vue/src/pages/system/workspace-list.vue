@@ -17,14 +17,14 @@
         <a-space>
           <a-input
             v-model:value="listQuery['id']"
-            placeholder="空间ID(全匹配)"
+            :placeholder="$tl('p.spaceId')"
             allow-clear
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%name%']"
-            placeholder="工作空间名称"
+            :placeholder="$tl('c.workspaceName')"
             allow-clear
             class="search-input-item"
             @press-enter="loadData"
@@ -43,7 +43,7 @@
               }
             "
             allow-clear
-            placeholder="分组"
+            :placeholder="$tl('c.group')"
             class="search-input-item"
           >
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
@@ -62,20 +62,20 @@
               }
             "
             allow-clear
-            placeholder="集群"
+            :placeholder="$tl('c.cluster')"
             class="search-input-item"
           >
             <a-select-option v-for="item in clusterList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button type="primary" :loading="loading" @click="loadData">搜索</a-button>
+          <a-tooltip :title="$tl('p.quickBackToFirstPage')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">新增</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $tl('p.add') }}</a-button>
           <a-tooltip>
             <template #title>
               <ul>
-                <li>工作空间用于隔离数据,工作空间下面可以有不同数据,不同权限,不同菜单等来实现权限控制</li>
-                <li>工作空间环境变量用于构建命令相关</li>
+                <li>{{ $tl('p.workspaceDescription') }}</li>
+                <li>{{ $tl('p.workspaceEnv') }}</li>
               </ul>
             </template>
             <QuestionCircleOutlined />
@@ -119,15 +119,17 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-            <a-button size="small" type="primary" @click="configMeun(record)">菜单</a-button>
-            <a-button size="small" type="primary" @click="configWhiteDir(record)">授权配置</a-button>
-            <a-button size="small" type="primary" @click="viewEnvVar(record)">变量</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('p.edit') }}</a-button>
+            <a-button size="small" type="primary" @click="configMeun(record)">{{ $tl('p.menu') }}</a-button>
+            <a-button size="small" type="primary" @click="configWhiteDir(record)">{{ $tl('p.authConfig') }}</a-button>
+            <a-button size="small" type="primary" @click="viewEnvVar(record)">{{ $tl('p.variable') }}</a-button>
 
-            <a-tooltip v-if="record.id === 'DEFAULT'" title="不能删除默认工作空间">
-              <a-button size="small" type="primary" danger :disabled="true">删除</a-button>
+            <a-tooltip v-if="record.id === 'DEFAULT'" :title="$tl('p.cannotDeleteDefaultWorkspace')">
+              <a-button size="small" type="primary" danger :disabled="true">{{ $tl('c.deleteAction') }}</a-button>
             </a-tooltip>
-            <a-button v-else size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
+            <a-button v-else size="small" type="primary" danger @click="handleDelete(record)">{{
+              $tl('c.deleteAction')
+            }}</a-button>
           </a-space>
         </template>
       </template>
@@ -137,16 +139,16 @@
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      title="编辑工作空间"
+      :title="$tl('p.editWorkspace')"
       :mask-closable="false"
       @ok="handleEditOk"
     >
-      <a-alert message="温馨提醒" type="info" show-icon>
+      <a-alert :message="$tl('p.warmReminder')" type="info" show-icon>
         <template #description>
           <ul>
-            <li>创建工作空间后还需要在对应工作空间中分别管理对应数据</li>
-            <li>如果要将工作空间分配给其他用户还需要到权限组管理</li>
-            <li>工作空间的菜单、环境变量、节点分发授权需要逐一配置</li>
+            <li>{{ $tl('p.manageData') }}</li>
+            <li>{{ $tl('p.assignToUser') }}</li>
+            <li>{{ $tl('p.configSeparately') }}</li>
           </ul>
         </template>
       </a-alert>
@@ -158,10 +160,10 @@
         :wrapper-col="{ span: 14 }"
         style="padding-top: 15px"
       >
-        <a-form-item label="名称" name="name">
-          <a-input v-model:value="temp.name" :max-length="50" placeholder="工作空间名称" />
+        <a-form-item :label="$tl('c.name')" name="name">
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$tl('c.workspaceName')" />
         </a-form-item>
-        <a-form-item label="绑定集群" name="clusterInfoId">
+        <a-form-item :label="$tl('c.bindCluster')" name="clusterInfoId">
           <a-select
             v-model:value="temp.clusterInfoId"
             show-search
@@ -176,23 +178,28 @@
               }
             "
             allow-clear
-            placeholder="绑定集群"
+            :placeholder="$tl('c.bindCluster')"
           >
             <a-select-option v-for="item in clusterList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="分组" name="group">
+        <a-form-item :label="$tl('c.group')" name="group">
           <custom-select
             v-model:value="temp.group"
             :data="groupList"
-            input-placeholder="新增分组"
-            select-placeholder="选择分组名"
+            :input-placeholder="$tl('p.addGroup')"
+            :select-placeholder="$tl('p.selectGroupName')"
           >
           </custom-select>
         </a-form-item>
 
-        <a-form-item label="描述" name="description">
-          <a-textarea v-model:value="temp.description" :max-length="200" :rows="5" placeholder="工作空间描述" />
+        <a-form-item :label="$tl('c.description')" name="description">
+          <a-textarea
+            v-model:value="temp.description"
+            :max-length="200"
+            :rows="5"
+            :placeholder="$tl('p.workspaceDesc')"
+          />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -200,7 +207,7 @@
     <a-modal
       v-model:open="envVarListVisible"
       destroy-on-close
-      :title="`${temp.name} 工作空间环境变量`"
+      :title="`${temp.name} ${$tl('p.workspaceEnvVars')}`"
       width="80vw"
       :footer="null"
       :mask-closable="false"
@@ -212,19 +219,19 @@
       v-model:open="configMenuVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="`${temp.name} 工作空间菜单`"
+      :title="`${temp.name} ${$tl('p.workspaceMenus')}`"
       :mask-closable="false"
       @ok="onSubmitMenus"
     >
       <a-form ref="editWhiteForm" :model="menusConfigData">
         <a-row type="flex" justify="center">
           <a-alert
-            :message="`菜单配置只对非超级管理员生效`"
+            :message="`${$tl('p.menuConfigForNonAdmin')}`"
             style="margin-top: 10px; margin-bottom: 20px; width: 100%"
             banner
           />
           <a-col :span="20">
-            <a-card title="服务端菜单" :bordered="true">
+            <a-card :title="$tl('p.serverMenus')" :bordered="true">
               <a-tree
                 v-if="menusConfigData.serverMenus"
                 v-model:checkedKeys="menusConfigData.serverMenuKeys"
@@ -246,7 +253,7 @@
     <a-modal
       v-model:open="configDir"
       destroy-on-close
-      :title="`配置授权目录`"
+      :title="`${$tl('p.configAuthDir')}`"
       :footer="null"
       width="60vw"
       :mask-closable="false"
@@ -271,7 +278,7 @@
       v-model:open="preDeleteVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="`删除工作空间确认`"
+      :title="`${$tl('p.confirmDeleteWorkspace')}`"
       :mask-closable="false"
       @ok="handleDeleteOk"
       @cancel="
@@ -280,8 +287,8 @@
         }
       "
     >
-      <a-alert message="操作提示" type="error" show-icon>
-        <template #description> 真的当前工作空间么,删除前需要将关联数据都删除后才能删除当前工作空间？</template>
+      <a-alert :message="$tl('p.operationTip')" type="error" show-icon>
+        <template #description> {{ $tl('p.confirmCurrentWorkspace') }},{{ $tl('p.deleteAssociatedData') }}</template>
       </a-alert>
 
       <a-tree :tree-data="treeData" default-expand-all :field-names="preDeleteReplaceFields" :show-line="true">
@@ -292,11 +299,13 @@
           {{ dataRef.name }}
 
           <template v-if="dataRef.count > 0">
-            <a-tag color="pink"> 存在 {{ dataRef.count }} 条数据 </a-tag>
+            <a-tag color="pink"> {{ $tl('p.dataExists') }} {{ dataRef.count }} {{ $tl('p.dataCount') }} </a-tag>
 
-            <a-tag v-if="dataRef.workspaceBind === 2" color="cyan">自动删除</a-tag>
-            <a-tag v-else-if="dataRef.workspaceBind === 3" color="blue">父级不存在自动删除</a-tag>
-            <a-tag v-else color="purple">手动删除</a-tag>
+            <a-tag v-if="dataRef.workspaceBind === 2" color="cyan">{{ $tl('p.autoDelete') }}</a-tag>
+            <a-tag v-else-if="dataRef.workspaceBind === 3" color="blue">{{
+              $tl('p.autoDeleteIfParentNotExist')
+            }}</a-tag>
+            <a-tag v-else color="purple">{{ $tl('p.manualDelete') }}</a-tag>
           </template>
         </template>
       </a-tree>
@@ -348,39 +357,39 @@ export default {
       temp: {},
       columns: [
         {
-          title: '名称',
+          title: this.$tl('c.name'),
           dataIndex: 'name',
           ellipsis: true,
           width: 200
         },
         {
-          title: '描述',
+          title: this.$tl('c.description'),
           dataIndex: 'description',
           ellipsis: true,
           width: 200
         },
         {
-          title: '分组名',
+          title: this.$tl('p.groupName'),
           dataIndex: 'group',
           ellipsis: true,
           width: '100px',
           tooltip: true
         },
         {
-          title: '集群',
+          title: this.$tl('c.cluster'),
           dataIndex: 'clusterInfoId',
           ellipsis: true,
           width: '100px'
         },
         {
-          title: '修改人',
+          title: this.$tl('p.modifier'),
           dataIndex: 'modifyUser',
           ellipsis: true,
 
           width: 120
         },
         {
-          title: '创建时间',
+          title: this.$tl('p.createTime'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -388,14 +397,14 @@ export default {
           width: '170px'
         },
         {
-          title: '修改时间',
+          title: this.$tl('p.modifyTime'),
           dataIndex: 'modifyTimeMillis',
           customRender: ({ text }) => parseTime(text),
           sorter: true,
           width: '170px'
         },
         {
-          title: '操作',
+          title: this.$tl('p.operation'),
           dataIndex: 'operation',
           fixed: 'right',
           align: 'center',
@@ -406,9 +415,9 @@ export default {
 
       // 表单校验规则
       rules: {
-        name: [{ required: true, message: '请输入工作空间名称', trigger: 'blur' }],
-        description: [{ required: true, message: '请输入工作空间描述', trigger: 'blur' }],
-        clusterInfoId: [{ required: true, message: '请输入选择绑定的集群', trigger: 'blur' }]
+        name: [{ required: true, message: this.$tl('p.inputWorkspaceName'), trigger: 'blur' }],
+        description: [{ required: true, message: this.$tl('p.inputWorkspaceDesc'), trigger: 'blur' }],
+        clusterInfoId: [{ required: true, message: this.$tl('p.inputBindCluster'), trigger: 'blur' }]
       },
       configMenuVisible: false,
       replaceFields: { children: 'childs', title: 'title', key: 'id' },
@@ -437,6 +446,9 @@ export default {
     this.loadClusterList()
   },
   methods: {
+    $tl(key, ...args) {
+      return this.$t(`pages.system.workspaceList.${key}`, ...args)
+    },
     // 获取所有集群
     loadClusterList() {
       return new Promise((resolve) => {
