@@ -56,6 +56,10 @@
         <oshi.version>6.4.12</oshi.version>
         <tomcat.version>9.0.86</tomcat.version>
         <yaml.version>2.2</yaml.version>
+        <!-- logback 不能升级
+        https://github.com/spring-projects/spring-boot/issues/34708
+        https://github.com/spring-projects/spring-boot/issues/12649
+        -->
     </properties>
     <dependencies>
         <dependency>
