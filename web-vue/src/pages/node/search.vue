@@ -1262,10 +1262,15 @@ export default {
     },
     // 删除
     handleDelete(record, thorough) {
+      const msg = thorough ? this.$tl('p.deleteForever') : this.$tl('p.deleteProject')
+      const html = thorough
+        ? "<b style='font-size: 24px;color:red;font-weight: bold;'>" + msg + '</b>'
+        : "<b style='font-size: 20px;font-weight: bold;'>" + msg + '</b>'
       $confirm({
         title: this.$tl('c.systemTip'),
         zIndex: 1009,
-        content: thorough ? this.$tl('p.deleteForever') : this.$tl('p.deleteProject'),
+        content: h('p', { innerHTML: html }, null),
+        okButtonProps: { type: 'primary', danger: !!thorough, size: thorough ? 'small' : 'middle' },
         okText: this.$tl('c.confirm'),
         cancelText: this.$tl('c.cancel'),
         onOk: () => {
