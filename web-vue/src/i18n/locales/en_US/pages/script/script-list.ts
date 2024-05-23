@@ -26,7 +26,7 @@ export default {
       'Script templates are command scripts stored on the server for online management of script commands, such as initializing software environments and managing applications.',
     executionEnvNote:
       'By default, all environment variables are not loaded during execution. They need to be loaded within the script itself.',
-    commandFilePath: 'Command files will be executed at ${Data Directory}/script/xxxx.sh, bat',
+    commandFilePath: "Command files will be executed at {'${Data Directory}'}/script/xxxx.sh, bat",
     distributionNodeDescription:
       'Distribution nodes refer to nodes that automatically synchronize script content after editing the script, typically used in DSL mode for node distribution functions.',
     workspace: 'Workspace',
@@ -72,7 +72,7 @@ export default {
       'Reset to regenerate the trigger address. After a successful reset, the previous trigger address will be invalidated. The trigger is bound to the operator who generated the trigger. If the corresponding account is deleted, the trigger will be invalidated',
     batchTriggerParams: 'Batch trigger parameters BODY json: [ { "id":"1", "token":"a" } ]',
     triggerParamsAsEnv:
-      'Individual trigger requests support parsing parameters as environment variables for script execution. For example, the passed parameter name abc=efg can be introduced in the script as: ${trigger_abc}',
+      "Individual trigger requests support parsing parameters as environment variables for script execution. For example, the passed parameter name abc=efg can be introduced in the script as: {'${trigger_abc}'}",
     singleTriggerAddress: 'Single Trigger Address',
     batchTriggerAddress: 'Batch Trigger Address',
     scriptExecutionHistory: 'Script Execution History',

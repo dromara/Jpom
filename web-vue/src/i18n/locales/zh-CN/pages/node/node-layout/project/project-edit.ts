@@ -7,7 +7,7 @@ export default {
     viewNodeScript: '查看节点脚本',
     configuration: '配置',
     configExample: '配置示例',
-    defaultLogPath: '默认是在插件端数据目录/${projectId}/${projectId}.log'
+    defaultLogPath: "默认是在插件端数据目录/{'${projectId}'}/{'${projectId}'}.log"
   },
   p: {
     loadingData: '加载项目数据中...',
@@ -37,7 +37,7 @@ export default {
     content: '内容',
     configFormat:
       '以 yaml/yml 格式配置,scriptId 为项目路径下的脚本文件的相对路径或者脚本模版ID，可以到脚本模版编辑弹窗中查看 scriptId',
-    supportedVars: '脚本里面支持的变量有：${PROJECT_ID}、${PROJECT_NAME}、${PROJECT_PATH}',
+    supportedVars: "脚本里面支持的变量有：{'${PROJECT_ID}'}、{'${PROJECT_NAME}'}、{'${PROJECT_PATH}'}",
     outputFormat: '流程执行完脚本后，输出的内容最后一行必须为：running',
     processId: '为当前项目实际的进程ID',
     statusCheck: '。如果输出最后一行不是预期格式项目状态将是未运行',

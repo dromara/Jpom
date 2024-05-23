@@ -91,7 +91,7 @@ export default {
       '需要在仓库里面 dockerfile,如果多文件夹查看可以指定二级目录如果 springboot-test-jar:springboot-test-jar/Dockerfile',
     imageTag: '镜像 tag',
     containerTag:
-      '容器标签,如：xxxx:latest 多个使用逗号隔开, 配置附加环境变量文件支持加载仓库目录下 .env 文件环境变量 如： xxxx:${VERSION}',
+      "容器标签,如：xxxx:latest 多个使用逗号隔开, 配置附加环境变量文件支持加载仓库目录下 .env 文件环境变量 如： xxxx:{'${VERSION}'}",
     buildParams: '构建参数',
     buildParamsInput: '构建参数,如：key1=values1&keyvalue2 使用 URL 编码',
     imageTagInput: '镜像标签,如：key1=values1&keyvalue2 使用 URL 编码',
@@ -181,7 +181,7 @@ export default {
     buildCommandL2: '逐行执行',
     buildCommandL3: '，如果想要切换路径后执行命令则需要',
     buildCommandHelp:
-      '构建执行的命令(非阻塞命令)，如：mvn clean package、npm run build。支持变量：${BUILD_ID}、${BUILD_NAME}、${BUILD_SOURCE_FILE}、${BUILD_NUMBER_ID}、仓库目录下 .env、工作空间变量',
+      "构建执行的命令(非阻塞命令)，如：mvn clean package、npm run build。支持变量：{'${BUILD_ID}'}、{'${BUILD_NAME}'}、{'${BUILD_SOURCE_FILE}'}、{'${BUILD_NUMBER_ID}'}、仓库目录下 .env、工作空间变量",
     dsl1: '以 yaml/yml 格式配置',
     dsl2: '配置需要声明使用具体的 docker 来执行构建相关操作(建议使用服务端所在服务器中的 docker)',
     dsl3: '容器构建会在 docker 中生成相关挂载目录,一般情况不需要人为操作',
@@ -190,9 +190,9 @@ export default {
     dsl6: 'java sdk 镜像使用：https://mirrors.tuna.tsinghua.edu.cn/ 支持版本有：8, 9, 10, 11, 12, 13, 14, 15, 16, 17',
     dsl7: 'maven sdk 镜像使用：https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/',
     dsl8: 'node sdk 镜像使用：https://registry.npmmirror.com/-/binary/node',
-    dsl9: '(存在兼容问题,实际使用中需要提前测试) python3 sdk 镜像使用：https://repo.huaweicloud.com/python/${PYTHON3_VERSION}/Python-${PYTHON3_VERSION}.tar.xz',
+    dsl9: "(存在兼容问题,实际使用中需要提前测试) python3 sdk 镜像使用：https://repo.huaweicloud.com/python/{'${PYTHON3_VERSION}'}/Python-{'${PYTHON3_VERSION}'}.tar.xz",
     dsl10:
-      '(存在兼容问题,实际使用中需要提前测试) go sdk 镜像使用：https://studygolang.com/dl/golang/go${GO_VERSION}.linux-${ARCH}.tar.gz',
+      "(存在兼容问题,实际使用中需要提前测试) go sdk 镜像使用：https://studygolang.com/dl/golang/go{'${GO_VERSION}'}.linux-{'${ARCH}'}.tar.gz",
     artifact1: '可以理解为项目打包的目录。 如 Jpom 项目执行（构建命令）',
     artifact2: '构建命令，构建产物相对路径为：',
     publish1: '发布操作是指,执行完构建命令后将构建产物目录中的文件用不同的方式发布(上传)到对应的地方',
@@ -201,19 +201,19 @@ export default {
     publish4: 'SSH 是指,通过 SSH 命令的方式对产物进行发布或者执行多条命令来实现发布(需要到 SSH 中提前去新增)',
     publish5: '本地命令是指,在服务端本地执行多条命令来实现发布',
     publish6:
-      ' SSH、本地命令发布都执行变量替换,系统预留变量有：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}',
-    publish7: '可以引用工作空间的环境变量 变量占位符 ${xxxx} xxxx 为变量名称',
+      " SSH、本地命令发布都执行变量替换,系统预留变量有：{'${BUILD_ID}'}、{'${BUILD_NAME}'}、{'${BUILD_RESULT_FILE}'}、{'${BUILD_NUMBER_ID}'}",
+    publish7: "可以引用工作空间的环境变量 变量占位符 {'${xxxx}'} xxxx 为变量名称",
     releasePath2P: '发布目录,构建产物上传到对应目录',
     prePublish1: '发布前执行的命令(非阻塞命令),一般是关闭项目命令',
-    prePublish2: '支持变量替换：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}',
-    prePublish3: '可以引用工作空间的环境变量 变量占位符 ${xxxx} xxxx 为变量名称',
+    prePublish2: "支持变量替换：{'${BUILD_ID}'}、{'${BUILD_NAME}'}、{'${BUILD_RESULT_FILE}'}、{'${BUILD_NUMBER_ID}'}",
+    prePublish3: "可以引用工作空间的环境变量 变量占位符 {'${xxxx}'} xxxx 为变量名称",
     prePublishHelp:
-      '发布前执行的命令(非阻塞命令),一般是关闭项目命令,支持变量替换：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}',
+      "发布前执行的命令(非阻塞命令),一般是关闭项目命令,支持变量替换：{'${BUILD_ID}'}、{'${BUILD_NAME}'}、{'${BUILD_RESULT_FILE}'}、{'${BUILD_NUMBER_ID}'}",
     postPublish1: '发布后执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java',
-    postPublish2: '支持变量替换：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}',
-    postPublish3: '可以引用工作空间的环境变量 变量占位符 ${xxxx} xxxx 为变量名称',
+    postPublish2: "支持变量替换：{'${BUILD_ID}'}、{'${BUILD_NAME}'}、{'${BUILD_RESULT_FILE}'}、{'${BUILD_NUMBER_ID}'}",
+    postPublish3: "可以引用工作空间的环境变量 变量占位符 {'${xxxx}'} xxxx 为变量名称",
     postPublishHelp:
-      '发布后执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java, 支持变量替换：${ BUILD_ID }、${ BUILD_NAME }、${ BUILD_RESULT_FILE }、${ BUILD_NUMBER_ID } ',
+      "发布后执行的命令(非阻塞命令),一般是启动项目命令 如：ps -aux | grep java, 支持变量替换：{'${ BUILD_ID }'}、{'${ BUILD_NAME }'}、{'${ BUILD_RESULT_FILE }'}、{'${ BUILD_NUMBER_ID }'} ",
     clearPublishTip: '清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件先删除后再保存新文件',
     diffTip1: '差异发布是指对应构建产物和项目文件夹里面的文件是否存在差异,如果存在增量差异那么上传或者覆盖文件。',
     diffTip2:
