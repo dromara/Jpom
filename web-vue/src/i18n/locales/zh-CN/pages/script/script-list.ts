@@ -25,7 +25,7 @@ export default {
     scriptTemplateDescription:
       '脚本模版是存储在服务端中的命令脚本用于在线管理一些脚本命令，如初始化软件环境、管理应用程序等',
     executionEnvNote: '执行时候默认不加载全部环境变量、需要脚本里面自行加载',
-    commandFilePath: '命令文件将在 ${数据目录}/script/xxxx.sh、bat 执行',
+    commandFilePath: "命令文件将在 {'${数据目录}'}/script/xxxx.sh、bat 执行",
     distributionNodeDescription:
       '分发节点是指在编辑完脚本后自动将脚本内容同步节点的脚本,一般用户节点分发功能中的 DSL 模式',
     workspace: '工作空间',
@@ -64,7 +64,7 @@ export default {
       '重置为重新生成触发地址,重置成功后之前的触发器地址将失效,触发器绑定到生成触发器到操作人上,如果将对应的账号删除触发器将失效',
     batchTriggerParams: '批量触发参数 BODY json： [ { "id":"1", "token":"a" } ]',
     triggerParamsAsEnv:
-      '单个触发器请求支持将参数解析为环境变量传入脚本执行，比如传入参数名为 abc=efg 在脚本中引入则为：${trigger_abc}',
+      "单个触发器请求支持将参数解析为环境变量传入脚本执行，比如传入参数名为 abc=efg 在脚本中引入则为：{'${trigger_abc}'}",
     singleTriggerAddress: '单个触发器地址',
     batchTriggerAddress: '批量触发器地址',
     scriptExecutionHistory: '脚本执行历史',

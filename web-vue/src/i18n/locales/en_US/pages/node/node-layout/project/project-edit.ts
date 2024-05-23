@@ -7,7 +7,7 @@ export default {
     viewNodeScript: 'View node script',
     configuration: 'Configuration',
     configExample: 'Configuration example',
-    defaultLogPath: 'The default is the plugin-side data directory/${projectId}/${projectId}.log'
+    defaultLogPath: "The default is the plugin-side data directory/{'${projectId}'}/{'${projectId}'}.log"
   },
   p: {
     loadingData: 'Loading project data...',
@@ -37,7 +37,8 @@ export default {
     content: 'Content',
     configFormat:
       'Configure in yaml/yml format, scriptId is the relative path of the script file under the project path or the script template ID, which can be viewed in the script template editing popup',
-    supportedVars: 'The variables supported in the script are: ${PROJECT_ID}, ${PROJECT_NAME}, ${PROJECT_PATH}',
+    supportedVars:
+      "The variables supported in the script are: {'${PROJECT_ID}'}, {'${PROJECT_NAME}'}, {'${PROJECT_PATH}'}",
     outputFormat: 'After the process executes the script, the last line of the output content must be: running',
     processId: 'Actual process ID for the current project',
     statusCheck:

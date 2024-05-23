@@ -170,12 +170,12 @@
                   <a-space direction="vertical" style="width: 100%">
                     <a-input
                       v-model:value="item.desc"
-                      :addon-before="$tl('p.paramDescription')"
+                      :addon-before="$tl('p.paramDescription', { index: index + 1 })"
                       placeholder="参数描述,{{$tl('p.paramDescriptionNoEffect')}},仅是用于提示参数的含义"
                     />
                     <a-input
                       v-model:value="item.value"
-                      :addon-before="$tl('p.paramValue')"
+                      :addon-before="$tl('p.paramValue', { index: index + 1 })"
                       :placeholder="`${$tl('c.paramValue')}${$tl('p.addNewDefaultParamNote')}`"
                     />
                   </a-space>

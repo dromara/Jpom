@@ -44,7 +44,7 @@ export default {
     selectProjectAuthorizationPath: '请选择项目授权路径',
     configuration: '配置',
     configurationExample: '配置示例',
-    defaultLogDirectory: '默认是在插件端数据目录/${projectId}/${projectId}.log',
+    defaultLogDirectory: "默认是在插件端数据目录/{'${projectId}'}/{'${projectId}'}.log",
     selectProject: '请选择项目',
     systemPrompt: '系统提示',
     confirm: '确认',
@@ -104,7 +104,7 @@ export default {
     content: '内容',
     yamlConfig:
       '以 yaml/yml 格式配置,scriptId 为项目路径下的脚本文件的相对路径或者服务端脚本模版ID，可以到服务端脚本模版编辑弹窗中查看 scriptId',
-    variablesInScript: '脚本里面支持的变量有：${PROJECT_ID}、${PROJECT_NAME}、${PROJECT_PATH}',
+    variablesInScript: "脚本里面支持的变量有：{'${PROJECT_ID}'}、{'${PROJECT_NAME}'}、{'${PROJECT_PATH}'}",
     scriptOutput: '流程执行完脚本后，输出的内容最后一行必须为：running',
     processID: '为当前项目实际的进程ID',
     incorrectOutputFormat: '。如果输出最后一行不是预期格式项目状态将是未运行',

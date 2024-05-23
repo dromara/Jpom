@@ -48,7 +48,7 @@ export default {
     selectProjectAuthorizationPath: 'Select Project Authorization Path',
     configuration: 'Configuration',
     configurationExample: 'Configuration Example',
-    defaultLogDirectory: 'Default is in the plugin data directory /${projectId}/${projectId}.log',
+    defaultLogDirectory: "Default is in the plugin data directory /{'${projectId}'}/{'${projectId}'}.log",
     selectProject: 'Select Project',
     systemPrompt: 'System Prompt',
     confirm: 'Confirm',
@@ -109,7 +109,8 @@ export default {
     content: 'Content',
     yamlConfig:
       'Configure in yaml/yml format, scriptId is the relative path of the script file under the project path or the server-side script template ID, which can be viewed in the server-side script template editing dialog box',
-    variablesInScript: 'Variables supported in the script include: ${PROJECT_ID}, ${PROJECT_NAME}, ${PROJECT_PATH}',
+    variablesInScript:
+      "Variables supported in the script include: {'${PROJECT_ID}'}, {'${PROJECT_NAME}'}, {'${PROJECT_PATH}'}",
     scriptOutput: 'After the process is executed, the script must output: running',
     processID: 'The actual process ID of the current project',
     incorrectOutputFormat:
