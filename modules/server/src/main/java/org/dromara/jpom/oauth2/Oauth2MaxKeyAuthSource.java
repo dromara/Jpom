@@ -27,19 +27,19 @@ public class Oauth2MaxKeyAuthSource implements AuthSource {
 
     @Override
     public String authorize() {
-        Assert.notNull(oauthConfig, "为配置 oauth2");
+        Assert.notNull(oauthConfig, "未配置 oauth2");
         return oauthConfig.getAuthorizationUri();
     }
 
     @Override
     public String accessToken() {
-        Assert.notNull(oauthConfig, "为配置 oauth2");
+        Assert.notNull(oauthConfig, "未配置 oauth2");
         return oauthConfig.getAccessTokenUri();
     }
 
     @Override
     public String userInfo() {
-        Assert.notNull(oauthConfig, "为配置 oauth2");
+        Assert.notNull(oauthConfig, "未配置 oauth2");
         return oauthConfig.getUserInfoUri();
     }
 
