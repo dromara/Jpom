@@ -21,7 +21,7 @@ export default {
       'Node script templates are command scripts stored in nodes for online management of script commands, such as initializing software environments, managing applications, etc.',
     loadEnv:
       'By default, all environment variables are not loaded during execution, and they need to be loaded within the script',
-    commandFilePath: 'The command file will be executed at ${Plugin data directory}/script/xxxx.sh, bat',
+    commandFilePath: "The command file will be executed at {'${Plugin data directory}'}/script/xxxx.sh, bat",
     addScriptTemplate: 'To add a script template, go to node management to add',
     global: 'Global',
     workspace: 'Workspace',
@@ -40,7 +40,7 @@ export default {
       'Reset to regenerate the trigger address. After successful reset, the previous trigger address will be invalid. The trigger is bound to the operator who generated the trigger. If the corresponding account is deleted, the trigger will be invalid',
     batchTriggerParams: 'Batch trigger parameters BODY json: [ { "id":"1", "token":"a" } ]',
     triggerParamEnv:
-      'Single trigger requests support parsing parameters into environment variables for script execution. For example, if the parameter name is abc=efg, it can be referenced in the script as: ${trigger_abc}',
+      "Single trigger requests support parsing parameters into environment variables for script execution. For example, if the parameter name is abc=efg, it can be referenced in the script as: {'${trigger_abc}'}",
     singleTriggerAddress: 'Single trigger address',
     batchTriggerAddress: 'Batch trigger address',
     nodeName: 'Node name',

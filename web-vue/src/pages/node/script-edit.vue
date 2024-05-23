@@ -58,12 +58,12 @@
                   <a-space style="width: 100%" direction="vertical">
                     <a-input
                       v-model:value="item.desc"
-                      :addon-before="$tl('p.paramDescriptionTemplate')"
-                      :placeholder="`${$tl('p.paramDescription')},${$tl('p.paramDescriptionNote')},仅是用于提示参数的含义`"
+                      :addon-before="$tl('p.paramDescriptionTemplate', { index: index + 1 })"
+                      :placeholder="`${$tl('p.paramDescription')},${$tl('p.paramDescriptionNote')},${$tl('p.paramDescriptionHint')}`"
                     />
                     <a-input
                       v-model:value="item.value"
-                      :addon-before="$tl('p.paramValueTemplate')"
+                      :addon-before="$tl('p.paramValueTemplate', { index: index + 1 })"
                       :placeholder="`${$tl('p.paramValue')}${$tl('p.newParamValueNote')}`"
                     />
                   </a-space>
