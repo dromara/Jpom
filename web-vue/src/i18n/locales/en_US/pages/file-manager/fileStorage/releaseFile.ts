@@ -20,11 +20,12 @@ export default {
     firstLevelDir: 'Please select the first-level directory for publishing',
     secondLevelDir: 'Please enter the second-level directory for publishing',
     executeScript: 'Execution script',
-    scriptVariable: 'Supports variable references: ${TASK_ID}, ${FILE_ID}, ${FILE_NAME}, ${FILE_EXT_NAME}',
+    scriptVariable:
+      "Supports variable references: {'${TASK_ID}'}, {'${FILE_ID}'}, {'${FILE_NAME}'}, {'${FILE_EXT_NAME}'}",
     workspaceEnvVariable:
-      'You can reference workspace environment variables. Variable placeholder: ${xxxx}, where xxxx is the variable name',
+      "You can reference workspace environment variables. Variable placeholder: {'${xxxx}'}, where xxxx is the variable name",
     renameFile:
-      'It is recommended to rename the file in the post-upload script. The default for SSH upload is: ${FILE_ID}.${FILE_EXT_NAME}',
+      "It is recommended to rename the file in the post-upload script. The default for SSH upload is: {'${FILE_ID}'}.{'${FILE_EXT_NAME}'}",
     preUploadScript: 'Script to be executed before file upload (non-blocking command)',
     postUploadScript: 'Script to be executed after successful file upload (non-blocking command)',
     execute: 'Execute',

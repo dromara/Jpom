@@ -30,21 +30,21 @@ export default {
     cancelAutoLoadEnv: 'Will cancel the automatic loading of environment variables',
     noteNoSpace: 'Note that the entire line cannot contain spaces',
     commandFilePath:
-      'The command file will be uploaded to ${user.home}/.jpom/xxxx.sh and will be automatically deleted after execution',
+      "The command file will be uploaded to {'${user.home}'}/.jpom/xxxx.sh and will be automatically deleted after execution",
     edit: 'Edit',
     delete: 'Delete',
     editCommand: 'Edit Command',
     scriptPathAndExecMethod:
-      'Script storage path: ${user.home}/.jpom/xxxx.sh, script execution path: ${user.home}, script execution method: bash ${user.home}/.jpom/xxxx.sh par1 par2',
+      "Script storage path: {'${user.home}'}/.jpom/xxxx.sh, script execution path: {'${user.home}'}, script execution method: bash {'${user.home}'}/.jpom/xxxx.sh par1 par2",
     commandContent: 'Command Content',
     canReferenceWorkspaceEnv:
-      'Can reference workspace environment variables Variable placeholder ${xxxx} xxxx is the variable name',
+      "Can reference workspace environment variables Variable placeholder {'${xxxx}'} xxxx is the variable name",
     selectSshNode: 'Please select the SSH node',
     defaultParam: 'Default parameter',
-    paramDescription: 'Parameter ${index + 1} description',
+    paramDescription: "Parameter {'${index + 1}'} description",
     paramDescriptionNoEffect: 'Parameter description has no practical effect',
     paramDescriptionHint: ',,Only used to indicate the meaning of the parameter',
-    paramValue: 'Parameter ${index + 1} value',
+    paramValue: "Parameter {'${index + 1}'} value",
     addNewDefaultParamNote:
       ',After adding a new default parameter, you need to fill in the parameter value when manually executing the script',
     autoExec: 'Automatic execution',
@@ -77,7 +77,7 @@ export default {
       'Reset to regenerate the trigger URL. After successful reset, the previous trigger URL will be invalidated. The trigger is bound to the operator who generated it. If the corresponding account is deleted, the trigger will be invalidated',
     batchTriggerParams: 'Batch trigger parameters BODY json: [ { "id":"1", "token":"a" } ]',
     parseParamsAsEnv:
-      'Single trigger requests support parsing parameters as environment variables and passing them into script execution. For example, the passed parameter name abc=efg can be introduced in the script as: ${trigger_abc}',
+      "Single trigger requests support parsing parameters as environment variables and passing them into script execution. For example, the passed parameter name abc=efg can be introduced in the script as: {'${trigger_abc}'}",
     singleTriggerUrl: 'Single trigger URL',
     batchTriggerUrls: 'Batch trigger URLs',
     createTime: 'Creation time',

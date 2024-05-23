@@ -12,11 +12,11 @@ export default {
     name: 'Name',
     scriptContent: 'Script Content',
     defaultParams: 'Default Parameters',
-    paramDescriptionTemplate: 'Parameter ${index + 1} Description`',
+    paramDescriptionTemplate: "Parameter {'${index + 1}'} Description`",
     paramDescription: 'Parameter Description',
     paramDescriptionNote: 'Parameter descriptions do not have any practical effect',
     paramDescriptionHint: ',,They are only used to indicate the meaning of the parameters',
-    paramValueTemplate: 'Parameter ${index + 1} Value`',
+    paramValueTemplate: "Parameter {'${index + 1}'} Value`",
     paramValue: 'Parameter Value',
     newParamValueNote:
       ',After adding new default parameters, you need to fill in the parameter values when manually executing the script',

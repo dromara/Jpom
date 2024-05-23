@@ -93,7 +93,7 @@ export default {
       'A Dockerfile is required in the repository, if multiple folders are viewed, you can specify the second-level directory, such as springboot-test-jar:springboot-test-jar/Dockerfile',
     imageTag: 'Image tag',
     containerTag:
-      'Container tag, such as xxxx:latest, multiple tags are separated by commas, additional environment variable files are supported to load .env files in the repository directory, such as xxxx:${VERSION}',
+      "Container tag, such as xxxx:latest, multiple tags are separated by commas, additional environment variable files are supported to load .env files in the repository directory, such as xxxx:{'${VERSION}'}",
     buildParams: 'Build parameters',
     buildParamsInput: 'Build parameters, such as key1=value1&keyvalue2, use URL encoding',
     imageTagInput: 'Image tag, such as key1=value1&keyvalue2, use URL encoding',
@@ -196,7 +196,7 @@ export default {
     buildCommandL2: 'Execute line by line',
     buildCommandL3: 'If you want to switch paths and execute commands, you need to',
     buildCommandHelp:
-      'Build and execute commands (non blocking commands), such as: mvn clean package, npm run build. Supported variables: ${BUILD_ID}、${BUILD_NAME}、${BUILD_SOURCE_FILE}、${BUILD_NUMBER_ID},. env in the warehouse directory, workspace variables',
+      "Build and execute commands (non blocking commands), such as: mvn clean package, npm run build. Supported variables: {'${BUILD_ID}'}、{'${BUILD_NAME}'}、{'${BUILD_SOURCE_FILE}'}、{'${BUILD_NUMBER_ID}'},. env in the warehouse directory, workspace variables",
     dsl1: 'Configure in yaml/yml format',
     dsl2: 'Configuration requires declaring the use of specific dockers to perform build related operations (it is recommended to use dockers from the server where the server is located)',
     dsl3: 'Container construction will generate relevant mounting directories in Docker, and generally does not require manual operation',
@@ -205,9 +205,9 @@ export default {
     dsl6: 'Java SDK image usage: https://mirrors.tuna.tsinghua.edu.cn/ Supported versions include: 8, 9, 10, 11, 12, 13, 14, 15, 16, 17',
     dsl7: 'Maven SDK image usage: https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/',
     dsl8: 'node sdk 镜像使用：https://registry.npmmirror.com/-/binary/node',
-    dsl9: '(There are compatibility issues that need to be tested in advance during actual use) Python 3 SDK image usage: https://repo.huaweicloud.com/python/ ${PYTHON3_VERSION}/Python - ${PYTHON3_VERSION}. tar. xz',
+    dsl9: "(There are compatibility issues that need to be tested in advance during actual use) Python 3 SDK image usage: https://repo.huaweicloud.com/python/ {'${PYTHON3_VERSION}'}/Python - {'${PYTHON3_VERSION}'}. tar. xz",
     dsl10:
-      '(There are compatibility issues that need to be tested in advance during actual use) GO SDK image usage: https://studygolang.com/dl/golang/go ${GO_VERSION}. Linux - ${ARCH}. tar. gz',
+      "(There are compatibility issues that need to be tested in advance during actual use) GO SDK image usage: https://studygolang.com/dl/golang/go {'${GO_VERSION}'}. Linux - {'${ARCH}'}. tar. gz",
     artifact1: 'It can be understood as a directory for project packaging. Execution of Jpom project (build command)',
     artifact2: 'Build command, the relative path to build the product is:',
     publish1:
@@ -219,23 +219,23 @@ export default {
       'SSH refers to publishing products through SSH commands or executing multiple commands to achieve publishing (requiring early addition in SSH)',
     publish5: 'Local commands refer to executing multiple commands locally on the server to achieve publishing',
     publish6:
-      'SSH and local command publishing both execute variable replacement. The system reserves variables including: ${BUILL_ID}',
+      "SSH and local command publishing both execute variable replacement. The system reserves variables including: {'${BUILL_ID}'}",
     publish7:
-      'The environment variable placeholder ${xxxx} xxxx in the workspace can be referenced as the variable name',
+      "The environment variable placeholder {'${xxxx}'} xxxx in the workspace can be referenced as the variable name",
     releasePath2P: 'Publish directory, build products and upload them to the corresponding directory',
     prePublish1: 'The command executed before release (non blocking command), usually the command to close the project',
-    prePublish2: '支持变量替换：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}',
+    prePublish2: "支持变量替换：{'${BUILD_ID}'}、{'${BUILD_NAME}'}、{'${BUILD_RESULT_FILE}'}、{'${BUILD_NUMBER_ID}'}",
     prePublish3:
-      'The environment variable placeholder ${xxxx} xxxx in the workspace can be referenced as the variable name',
+      "The environment variable placeholder {'${xxxx}'} xxxx in the workspace can be referenced as the variable name",
     prePublishHelp:
-      'The command executed before publication (non blocking command) is usually the close project command, which supports variable replacement: ${BUILL_ID}, ${BUILD0AME}, ${BUILD0RESULT-FILE}, ${BUILD0HUMBER-ID}',
+      "The command executed before publication (non blocking command) is usually the close project command, which supports variable replacement: {'${BUILL_ID}'}, {'${BUILD0AME}'}, {'${BUILD0RESULT-FILE}'}, {'${BUILD0HUMBER-ID}'}",
     postPublish1:
       'The command executed after publication (non blocking command) is usually the command to start the project, such as ps - aux | grep Java',
-    postPublish2: '支持变量替换：${BUILD_ID}、${BUILD_NAME}、${BUILD_RESULT_FILE}、${BUILD_NUMBER_ID}',
+    postPublish2: "支持变量替换：{'${BUILD_ID}'}、{'${BUILD_NAME}'}、{'${BUILD_RESULT_FILE}'}、{'${BUILD_NUMBER_ID}'}",
     postPublish3:
-      'The environment variable placeholder ${xxxx} xxxx in the workspace can be referenced as the variable name',
+      "The environment variable placeholder {'${xxxx}'} xxxx in the workspace can be referenced as the variable name",
     postPublishHelp:
-      'The command executed after publication (non blocking command) is usually a startup project command such as ps - aux | grep Java, supporting variable replacement: ${BUILL_ID}',
+      "The command executed after publication (non blocking command) is usually a startup project command such as ps - aux | grep Java, supporting variable replacement: {'${BUILL_ID}'}",
     clearPublishTip:
       'Clear publishing refers to deleting all files in the project folder directory before uploading new files, and then saving the new files',
     diffTip1:
