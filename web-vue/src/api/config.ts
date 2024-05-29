@@ -48,7 +48,8 @@ const instance: AxiosInstance = axios.create({
   responseType: 'json'
 })
 
-let refreshTokenIng = false
+// 续签状态
+let isRefreshing = false
 
 const obj2base64 = (obj: any) => {
   if (obj instanceof Object && obj.constructor === Object) {
@@ -179,18 +180,8 @@ async function request<T = any>(arg: string | AxiosRequestConfig, config?: Axios
 
   // 需要续签
   if (data.code === 801) {
-    if (refreshTokenIng) {
-      return Promise.reject(data)
-    }
-    $notification.info({
-      key: 'login-timeout',
-      message: '登录信息过期',
-      description: '尝试自动续签...'
-    })
-    refreshTokenIng = true
-    await redoRequest(response.config)
-    refreshTokenIng = false
-    return Promise.reject(data)
+    const data2 = await handleRefreshTokenAndRetryQueue(response.config)
+    return data2 as any
   }
 
   // 账号禁用
@@ -226,36 +217,98 @@ async function request<T = any>(arg: string | AxiosRequestConfig, config?: Axios
 
 export default request
 
-// 刷新 jwt token 并且重试上次请求
-async function redoRequest() {
-  const result = await refreshToken()
-  if (result.code === 200) {
-    // 调用 store action 存储当前登录的用户名和 token
-    const userStore = useUserStore()
-
-    await userStore.login(result.data)
-    // 刷新页面
-    $notification.success({
-      message: '提示',
-      description: '自动续签成功,页面将在 2 秒后自动刷新'
+// 异步续签并处理队列
+async function handleRefreshTokenAndRetryQueue(config: InternalAxiosRequestConfig) {
+  if (!isRefreshing) {
+    isRefreshing = true
+    return new Promise(async (resolve, reject) => {
+      try {
+        $notification.info({
+          key: 'login-timeout',
+          message: '登录信息过期',
+          description: '尝试自动续签...'
+        })
+        // 执行续签操作
+        const result = await refreshToken()
+        if (result.code === 200) {
+          // 更新用户登录状态或token
+          const userStore = useUserStore()
+          await userStore.login(result.data)
+          $notification.success({
+            key: 'login-timeout',
+            message: '登录信息过期',
+            description: '尝试自动续签成功'
+          })
+          // 更新token到config中，以便于后续请求使用新token
+          config.headers[TOKEN_HEADER_KEY] = userStore.getToken()
+          const result2 = await request(config)
+          resolve(result2)
+          isRefreshing = false
+        } else {
+          toLoginOnly('登录信息过期', '尝试自动续签失败' + result.msg + ',2 秒后将自动跳转到登录页面')
+          return
+        }
+      } catch (error) {
+        //reject('Failed to refresh token:' + error)
+        toLoginOnly('登录信息过期', '尝试自动续签失败' + error + ',2 秒后将自动跳转到登录页面')
+      } finally {
+      }
     })
-    setTimeout(() => {
-      location.reload()
-    }, 2000)
-    //return await request(config)
+  } else {
+    return new Promise(async (resolve) => {
+      const interval = setInterval(async () => {
+        if (!isRefreshing) {
+          clearInterval(interval)
+          const userStore = useUserStore()
+          config.headers[TOKEN_HEADER_KEY] = userStore.getToken()
+          const result2 = await request(config)
+          resolve(result2)
+        } else {
+        }
+      }, 100) // 检查间隔设置为100毫秒
+    })
   }
-  return Promise.reject()
 }
 
 function toLogin(res: IResponse<any>, response: AxiosResponse<IResponse<any>>) {
+  return toLogin2('提示信息 ' + (pro ? '' : response.config.url), res.msg)
+}
+
+function toLogin2(message: any, description: any) {
   $notification.warn({
-    message: '提示信息 ' + (pro ? '' : response.config.url),
-    description: res.msg,
+    message: message,
+    description: description,
     key: 'to-login'
   })
   const userStore = useUserStore()
 
   userStore.logOut().then(() => {
+    const index = location.hash.indexOf('?')
+    let params = {}
+    if (index > -1) {
+      params = Qs.parse(location.hash.substring(index + 1))
+    }
+    const pageUrl = router.resolve({
+      path: '/login',
+      query: params
+    })
+
+    setTimeout(() => {
+      ;(location.href as any) = pageUrl.href
+    }, 2000)
+  })
+  return false
+}
+
+function toLoginOnly(message: any, description: any) {
+  $notification.warn({
+    message: message,
+    description: description,
+    key: 'to-login'
+  })
+  const userStore = useUserStore()
+
+  userStore.logOutOnly().then(() => {
     const index = location.hash.indexOf('?')
     let params = {}
     if (index > -1) {

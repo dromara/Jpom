@@ -59,18 +59,26 @@ export const useUserStore = defineStore('user', {
     },
     // 退出登录 移除对应的 store
     async logOut() {
-      localStorage.removeItem(TOKEN_KEY)
-      localStorage.removeItem(LONG_TERM_TOKEN)
-      const menuStore = useAllMenuStore()
-      // 调用其他 action
-      menuStore.clearTabs('normal', { key: 'all' })
-      menuStore.clearTabs('management', { key: 'all' })
-      menuStore.clearMenus('normal')
-      menuStore.clearMenus('management')
-      // 重置，避免信息没有刷新
-      this.reloadUserInfo = false
+      await this.logOutOnly()
       //
       return loginOut({})
+    },
+    // 退出登录 移除对应的 store
+    async logOutOnly() {
+      return new Promise<void>((resolve) => {
+        localStorage.removeItem(TOKEN_KEY)
+        localStorage.removeItem(LONG_TERM_TOKEN)
+        const menuStore = useAllMenuStore()
+        // 调用其他 action
+        menuStore.clearTabs('normal', { key: 'all' })
+        menuStore.clearTabs('management', { key: 'all' })
+        menuStore.clearMenus('normal')
+        menuStore.clearMenus('management')
+        // 重置，避免信息没有刷新
+        this.reloadUserInfo = false
+        //
+        resolve()
+      })
     }
   },
   getters: {
