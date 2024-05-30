@@ -403,7 +403,7 @@
         <a-form-item
           name="token"
           :label="$tl('p.personalToken')"
-          help="使用{{$tl('p.personalToken')}}，可以在你不输入账号密码的情况下对你账号内的仓库进行管理，你可以在创建令牌时指定令牌所拥有的权限。"
+          :help="`使用${$tl('p.personalToken')}，可以在你不输入账号密码的情况下对你账号内的仓库进行管理，你可以在创建令牌时指定令牌所拥有的权限。`"
         >
           <a-form-item-rest>
             <a-tooltip
@@ -435,7 +435,7 @@
           v-if="providerData[giteeImportForm.type].query"
           name="condition"
           :label="$tl('c.search')"
-          help="输入仓库名称或者仓库路径进行{{$tl('c.search')}}"
+          :help="`输入仓库名称或者仓库路径进行${$tl('c.search')}`"
         >
           <a-input v-model:value="giteeImportForm.condition" :placeholder="$tl('c.searchInput')" />
         </a-form-item>

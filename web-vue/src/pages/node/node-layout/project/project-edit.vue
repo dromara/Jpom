@@ -271,7 +271,7 @@
           <a-textarea
             v-model:value="temp.jvm"
             :auto-size="{ minRows: 3, maxRows: 3 }"
-            placeholder="jvm{{$tl('p.parameters')}},{{$tl('p.optional')}}.如：-Xms512m -Xmx512m"
+            :placeholder="`jvm${$tl('p.parameters')},${$tl('p.optional')}.如：-Xms512m -Xmx512m`"
           />
         </a-form-item>
         <a-form-item
