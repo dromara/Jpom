@@ -94,6 +94,18 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
      *
      * @param keyValue ID
      * @param request  请求
+     * @return data
+     */
+    public List<T> getByKey(Collection<String> keyValue, HttpServletRequest request) {
+        String workspace = this.getCheckUserWorkspace(request);
+        return super.getByKey(keyValue, true, entity -> entity.set("workspaceId", workspace));
+    }
+
+    /**
+     * 根据主键ID + 请信息查询
+     *
+     * @param keyValue ID
+     * @param request  请求
      * @param fill     是否填充数据
      * @return data
      */

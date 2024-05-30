@@ -171,7 +171,7 @@
                     <a-input
                       v-model:value="item.desc"
                       :addon-before="$tl('p.paramDescription', { index: index + 1 })"
-                      placeholder="参数描述,{{$tl('p.paramDescriptionNoEffect')}},仅是用于提示参数的含义"
+                      :placeholder="`参数描述,${$tl('p.paramDescriptionNoEffect')},仅是用于提示参数的含义`"
                     />
                     <a-input
                       v-model:value="item.value"
