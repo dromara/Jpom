@@ -510,7 +510,7 @@ export default {
         </b>
         ${this.$tl('p.upgradeNodesTo')}
         <b style='color:red;font-size: 20px;'>
-          (${this.agentVersion} || '--')
+          ${this.agentVersion || '--'}
         </b>
         ${this.$tl('p.upgradeConfirmation')}
         <ul style='color:red;'>
