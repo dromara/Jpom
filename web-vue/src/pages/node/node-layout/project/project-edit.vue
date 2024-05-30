@@ -290,10 +290,11 @@
           name="dslEnv"
           :label="$tl('p.dslEnvVariables')"
         >
-          <a-input
+          <!-- <a-input
             v-model:value="temp.dslEnv"
             placeholder="DSL{{$tl('p.environmentVariables')}},{{$tl('p.envExample')}}=values1&keyvalue2"
-          />
+          /> -->
+          <parameter-widget v-model:value="temp.dslEnv"></parameter-widget>
         </a-form-item>
 
         <a-form-item v-show="noFileModes.includes(temp.runMode)" name="autoStart">

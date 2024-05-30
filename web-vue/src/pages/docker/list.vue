@@ -106,7 +106,7 @@
       :mask-closable="false"
       @ok="handleEditOk"
     >
-      <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
+      <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
         <a-form-item :label="$tl('c.containerName')" name="name">
           <a-input v-model:value="temp.name" :placeholder="$tl('c.containerName')" />
         </a-form-item>
