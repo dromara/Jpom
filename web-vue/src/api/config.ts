@@ -156,7 +156,6 @@ instance.interceptors.response.use(
  * @param config AxiosRequestConfig
  * @returns IResponse<T>
  */
-
 async function request<T = any>(url: string, config?: AxiosRequestConfig): Promise<IResponse<T>>
 // eslint-disable-next-line no-redeclare
 async function request<T = any>(config: AxiosRequestConfig): Promise<IResponse<T>>

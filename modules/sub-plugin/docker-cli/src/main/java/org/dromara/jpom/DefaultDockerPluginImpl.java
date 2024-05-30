@@ -249,6 +249,8 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
         Map<String, String> storageOpt = (Map<String, String>) parameter.get("storageOpt");
         String labels = (String) parameter.get("labels");
         String runtime = (String) parameter.get("runtime");
+        List<String> extraHosts = (List<String>) parameter.get("extraHosts");
+
         //
         CreateContainerCmd containerCmd = dockerClient.createContainerCmd(imageId);
         containerCmd.withName(name);
@@ -267,6 +269,11 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
         Opt.ofBlankAble(hostname).ifPresent(containerCmd::withHostName);
         HostConfig hostConfig = HostConfig.newHostConfig();
         Opt.ofBlankAble(runtime).ifPresent(hostConfig::withRuntime);
+        //
+        Opt.ofBlankAble(extraHosts).ifPresent(list -> {
+            String[] array = list.stream().filter(StrUtil::isNotEmpty).toArray(String[]::new);
+            hostConfig.withExtraHosts(array);
+        });
         List<ExposedPort> exposedPortList = new ArrayList<>();
         if (StrUtil.isNotEmpty(exposedPorts)) {
             List<PortBinding> portBindings = StrUtil.splitTrim(exposedPorts, StrUtil.COMMA)

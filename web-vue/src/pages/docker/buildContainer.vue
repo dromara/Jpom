@@ -288,36 +288,69 @@
             </template>
           </a-auto-complete>
         </a-form-item>
+        <a-form-item label="自定义 host">
+          <a-form-item-rest>
+            <a-space direction="vertical" style="width: 100%">
+              <a-row v-for="(item, index) in temp.extraHosts" :key="index">
+                <a-col :span="20">
+                  <a-input v-model:value="temp.extraHosts[index]" placeholder="自定义host, xxx:192.168.0.x" />
+                </a-col>
+
+                <a-col :span="2" :offset="1">
+                  <a-space>
+                    <MinusCircleOutlined
+                      v-if="temp.extraHosts && temp.extraHosts.length > 1"
+                      @click="
+                        () => {
+                          temp.extraHosts.splice(index, 1)
+                        }
+                      "
+                    />
+                    <PlusSquareOutlined
+                      @click="
+                        () => {
+                          temp.extraHosts.push('')
+                        }
+                      "
+                    />
+                  </a-space>
+                </a-col>
+              </a-row>
+            </a-space>
+          </a-form-item-rest>
+        </a-form-item>
         <a-form-item :label="$tl('p.storageOptions')">
           <a-form-item-rest>
-            <a-row v-for="(item, index) in temp.storageOpt" :key="index">
-              <a-col :span="10">
-                <a-input v-model:value="item.key" :placeholder="$tl('p.configName')" />
-              </a-col>
-              <a-col :span="10" :offset="1">
-                <a-input v-model:value="item.value" :placeholder="$tl('p.configValue')" />
-              </a-col>
-              <a-col :span="2" :offset="1">
-                <a-space>
-                  <MinusCircleOutlined
-                    v-if="temp.storageOpt && temp.storageOpt.length > 1"
-                    @click="
-                      () => {
-                        temp.storageOpt.splice(index, 1)
-                      }
-                    "
-                  />
+            <a-space direction="vertical" style="width: 100%">
+              <a-row v-for="(item, index) in temp.storageOpt" :key="index">
+                <a-col :span="10">
+                  <a-input v-model:value="item.key" :placeholder="$tl('p.configName')" />
+                </a-col>
+                <a-col :span="10" :offset="1">
+                  <a-input v-model:value="item.value" :placeholder="$tl('p.configValue')" />
+                </a-col>
+                <a-col :span="2" :offset="1">
+                  <a-space>
+                    <MinusCircleOutlined
+                      v-if="temp.storageOpt && temp.storageOpt.length > 1"
+                      @click="
+                        () => {
+                          temp.storageOpt.splice(index, 1)
+                        }
+                      "
+                    />
 
-                  <PlusSquareOutlined
-                    @click="
-                      () => {
-                        temp.storageOpt.push({})
-                      }
-                    "
-                  />
-                </a-space>
-              </a-col>
-            </a-row>
+                    <PlusSquareOutlined
+                      @click="
+                        () => {
+                          temp.storageOpt.push({})
+                        }
+                      "
+                    />
+                  </a-space>
+                </a-col>
+              </a-row>
+            </a-space>
           </a-form-item-rest>
         </a-form-item>
         <a-form-item label="runtime">
@@ -569,6 +602,7 @@ export default {
           networkMode: res.data?.hostConfig?.networkMode,
           runtime: res.data?.hostConfig?.runtime,
           privileged: res.data.hostConfig?.privileged || false,
+          extraHosts: res.data?.hostConfig?.extraHosts || [''],
           ...this.temp
         }
         this.$refs['editForm']?.resetFields()
@@ -595,7 +629,8 @@ export default {
           imageId: this.imageId,
           env: [{}],
           storageOpt: [{}],
-          commands: [{}]
+          commands: [{}],
+          extraHosts: ['']
         }
         this.$refs['editForm']?.resetFields()
       })
@@ -616,7 +651,8 @@ export default {
           labels: this.temp.labels,
           runtime: this.temp.runtime,
           hostname: this.temp.hostname,
-          storageOpt: {}
+          storageOpt: {},
+          extraHosts: this.temp.extraHosts
         }
         temp.volumes = (this.temp.volumes || [])
           .filter((item) => {
