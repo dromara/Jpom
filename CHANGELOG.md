@@ -1,5 +1,28 @@
 # 🚀 版本日志
 
+## 2.11.6-release (2024-05-30)
+
+### 🐣 新增功能
+
+1. 【all】新增 自由脚本方便调试机器节点
+2. 【agent】新增 项目支持配置禁止扫描目录避免大目录页面超时（感谢@我）
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】修复 资产管理 SSH 配置禁用命令无法回显（感谢@zhangw）
+2. 【server】修复 资产管理 SSH 未配置授权目录时 NPE （感谢[@Anley](https://gitee.com/MrAnley) [Gitee issues I9J17G](https://gitee.com/dromara/Jpom/issues/I9J17G) ）
+3. 【agent】优化 监控机器网络流程支持配置排除网卡或者仅统计对应的网卡
+4. 【server】修复 退出登录时页面会提示需要登录相关信息
+5. 【server】优化 页面检测新版本判断是否加入 beta
+6. 【agent】优化 添加数据记录修改人（感谢[@陈旭](https://gitee.com/chenxu8989) [Gitee issues I9JSY7](https://gitee.com/dromara/Jpom/issues/I9JSY7) ）
+7. 【server】优化 插件端注册到服务端，网络测试支持 ping + telnet （感谢@泊凉青川）
+8. 【server】优化 自动续签采用无感模式（感谢@湘江夜色）
+9. 【server】优化 容器构建执行配置自定义 host 参数（感谢@冰淇淋还是冰激凌）
+10. 【all】升级 tomcat、yaml 版本（感谢@佳驰）
+11. 【all】升级 bcprov-jdk18on 版本
+
+------
+
 ## 2.11.5-release (2024-04-23)
 
 ### 🐣 新增功能
