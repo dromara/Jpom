@@ -38,10 +38,10 @@ export default {
     canReferenceWorkspaceEnv: "可以引用工作空间的环境变量 变量占位符 {'${xxxx}'} xxxx 为变量名称",
     selectSshNode: '请选择SSH节点',
     defaultParam: '默认参数',
-    paramDescription: '参数{index}描述`',
+    paramDescription: '参数{index}描述',
     paramDescriptionNoEffect: '参数描述没有实际作用',
     paramDescriptionHint: ',,仅是用于提示参数的含义',
-    paramValue: '参数{index}值`',
+    paramValue: '参数{index}值',
     addNewDefaultParamNote: ',新增默认参数后在手动执行脚本时需要填写参数值',
     autoExec: '自动执行',
     cronExpression:
