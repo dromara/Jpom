@@ -357,7 +357,8 @@
           <a-input v-model:value="temp.runtime" :placeholder="$tl('p.containerRuntime')" />
         </a-form-item>
         <a-form-item :label="$tl('p.containerLabels')">
-          <a-input v-model:value="temp.labels" :placeholder="$tl('p.containerLabelExample')" />
+          <parameter-widget v-model:value="temp.labels"></parameter-widget>
+          <!-- <a-input v-model:value="temp.labels" :placeholder="$tl('p.containerLabelExample')" /> -->
         </a-form-item>
         <a-form-item :label="$tl('p.autoStart')">
           <a-form-item-rest>
@@ -567,6 +568,10 @@ export default {
       }).then((res) => {
         this.buildVisible = true
         const storageOpt = res.data.hostConfig?.storageOpt || { '': '' }
+        const extraHosts = res.data?.hostConfig?.extraHosts || ['']
+        if (!extraHosts.length) {
+          extraHosts.push('')
+        }
 
         this.temp = {
           name: res.data?.name,
@@ -602,7 +607,7 @@ export default {
           networkMode: res.data?.hostConfig?.networkMode,
           runtime: res.data?.hostConfig?.runtime,
           privileged: res.data.hostConfig?.privileged || false,
-          extraHosts: res.data?.hostConfig?.extraHosts || [''],
+          extraHosts: extraHosts,
           ...this.temp
         }
         this.$refs['editForm']?.resetFields()

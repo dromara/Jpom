@@ -694,7 +694,7 @@
                   <a-segmented
                     v-model:value="dslEditTabKey"
                     :options="[
-                      { label: `DSL {{$tl('c.configuration')}}`, value: 'content' },
+                      { label: `DSL ${$tl('c.configuration')}`, value: 'content' },
                       { label: $tl('c.configurationExample'), value: 'demo' }
                     ]"
                   />
@@ -910,10 +910,11 @@
                 </div>
               </a-form-item>
               <a-form-item v-if="temp.runMode === 'Dsl'" name="dslEnv" :label="$tl('p.dslEnvironmentVariables')">
-                <a-input
+                <!-- <a-input
                   v-model:checked="temp[`${nodeId}_dslEnv`]"
                   placeholder="DSL{{$tl('p.environmentVariables')}},{{$tl('p.exampleVariable')}}=values1&keyvalue2"
-                />
+                /> -->
+                <parameter-widget v-model:value="temp[`${nodeId}_dslEnv`]"></parameter-widget>
               </a-form-item>
               <a-form-item v-show="noFileModes.includes(temp.runMode)" name="token">
                 <template #label>
