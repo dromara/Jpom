@@ -151,10 +151,22 @@
                 }"
               >
                 <template #tool_before>
-                  <a-tag
-                    ><b>{{ $tl('c.content') }}</b
-                    >{{ $tl('p.execute') }}</a-tag
-                  >
+                  <a-space>
+                    <a-tag>
+                      <b>{{ $tl('c.content') }}</b>
+                      {{ $tl('p.execute') }}
+                    </a-tag>
+                    <a-button
+                      type="link"
+                      @click="
+                        () => {
+                          chooseScriptVisible = 1
+                        }
+                      "
+                    >
+                      脚本模板
+                    </a-button>
+                  </a-space>
                 </template>
               </code-editor>
             </a-tab-pane>
@@ -168,15 +180,27 @@
                 }"
               >
                 <template #tool_before>
-                  <a-tag>{{ $tl('p.afterUploadExecute') }}</a-tag></template
-                >
+                  <a-space>
+                    <a-tag>{{ $tl('p.afterUploadExecute') }}</a-tag>
+                    <a-button
+                      type="link"
+                      @click="
+                        () => {
+                          chooseScriptVisible = 2
+                        }
+                      "
+                    >
+                      脚本模板
+                    </a-button>
+                  </a-space>
+                </template>
               </code-editor>
             </a-tab-pane>
           </a-tabs>
         </a-form-item-rest>
       </a-form-item>
     </a-form>
-
+    <!-- 配置授权目录 -->
     <a-modal
       v-model:value="configDir"
       destroy-on-close
@@ -199,6 +223,76 @@
         "
       ></whiteList>
     </a-modal>
+
+    <!-- 选择脚本 -->
+    <a-drawer
+      destroy-on-close
+      title="选择脚本"
+      placement="right"
+      :open="chooseScriptVisible != 0"
+      width="70vw"
+      :z-index="1009"
+      :footer-style="{ textAlign: 'right' }"
+      @close="
+        () => {
+          chooseScriptVisible = 0
+        }
+      "
+    >
+      <scriptPage
+        v-if="chooseScriptVisible"
+        ref="scriptPage"
+        choose="radio"
+        :choose-val="
+          chooseScriptVisible === 1
+            ? temp.beforeScript?.indexOf('$ref.script.') !== -1
+              ? temp.beforeScript?.replace('$ref.script.')
+              : ''
+            : temp.afterScript?.indexOf('$ref.script.') !== -1
+              ? temp.afterScript?.replace('$ref.script.')
+              : ''
+        "
+        mode="choose"
+        @confirm="
+          (id) => {
+            if (chooseScriptVisible === 1) {
+              temp = { ...temp, beforeScript: '$ref.script.' + id }
+            } else if (chooseScriptVisible === 2) {
+              temp = { ...temp, afterScript: '$ref.script.' + id }
+            }
+            chooseScriptVisible = 0
+          }
+        "
+        @cancel="
+          () => {
+            chooseScriptVisible = 0
+          }
+        "
+      ></scriptPage>
+      <template #footer>
+        <a-space>
+          <a-button
+            @click="
+              () => {
+                chooseScriptVisible = false
+              }
+            "
+          >
+            取消
+          </a-button>
+          <a-button
+            type="primary"
+            @click="
+              () => {
+                $refs['scriptPage'].handerConfirm()
+              }
+            "
+          >
+            确认
+          </a-button>
+        </a-space>
+      </template>
+    </a-drawer>
   </div>
 </template>
 
@@ -208,10 +302,12 @@ import { getDispatchWhiteList } from '@/api/dispatch'
 import { getNodeListAll } from '@/api/node'
 import codeEditor from '@/components/codeEditor'
 import whiteList from '@/pages/dispatch/white-list.vue'
+import scriptPage from '@/pages/script/script-list.vue'
 export default {
   components: {
     codeEditor,
-    whiteList
+    whiteList,
+    scriptPage
   },
   emits: ['commit'],
   data() {
@@ -233,7 +329,8 @@ export default {
       accessList: [],
       nodeList: [],
       configDir: false,
-      scriptTabKey: 'before'
+      scriptTabKey: 'before',
+      chooseScriptVisible: 0
     }
   },
   created() {
