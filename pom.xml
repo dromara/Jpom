@@ -56,6 +56,8 @@
         <oshi.version>6.4.12</oshi.version>
         <tomcat.version>9.0.86</tomcat.version>
         <yaml.version>2.2</yaml.version>
+        <!--  h2 不能直接升级 The write format 2 is smaller than the supported format 3-->
+        <h2.version>2.1.214</h2.version>
         <!-- logback 不能升级
         https://github.com/spring-projects/spring-boot/issues/34708
         https://github.com/spring-projects/spring-boot/issues/12649
@@ -134,6 +136,11 @@
                 <artifactId>tomcat-embed-websocket</artifactId>
                 <groupId>org.apache.tomcat.embed</groupId>
                 <version>${tomcat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
