@@ -93,6 +93,8 @@ instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const { headers } = config
   headers[TOKEN_HEADER_KEY] = userStore.getToken()
   headers[CACHE_WORKSPACE_ID] = appStore.getWorkspaceId()
+  const useGuideStore = guideStore()
+  headers['Accept-Language'] = useGuideStore.getLocale()
 
   if (routerBase) {
     // 防止 url 出现 //

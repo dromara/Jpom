@@ -1,0 +1,176 @@
+[
+  {
+    "title": "Overview",
+    "icon_v3": "laptop",
+    "id": "overview"
+  },
+  {
+    "title": "Node & Project",
+    "icon_v3": "apartment",
+    "id": "outgiving",
+    "childs": [
+      {
+        "title": "Logical node",
+        "id": "nodeList"
+      },
+      {
+        "title": "List of projects",
+        "id": "projectSearch"
+      },
+      {
+        "id": "outgivingList",
+        "title": "Distribution List"
+      },
+      {
+        "id": "outgivingLog",
+        "title": "Distribution log"
+      },
+      {
+        "id": "outgivingWhitelistDirectory",
+        "title": "Authorization configuration",
+        "role": "system"
+      },
+      {
+        "id": "logRead",
+        "title": "Log Search"
+      }
+    ]
+  },
+  {
+    "title": "Online Construction",
+    "icon_v3": "build",
+    "id": "build",
+    "childs": [
+      {
+        "id": "repository",
+        "title": "Warehouse information"
+      },
+      {
+        "id": "buildList",
+        "title": "Build List"
+      },
+      {
+        "id": "buildHistory",
+        "title": "Building History"
+      }
+    ]
+  },
+  {
+    "title": "SSH Management",
+    "icon_v3": "code",
+    "id": "sshManager",
+    "childs": [
+      {
+        "title": "SSH List",
+        "id": "sshList"
+      },
+      {
+        "title": "Command Management",
+        "id": "commandList"
+      },
+      {
+        "title": "Command execution record",
+        "id": "commandLogList"
+      }
+    ]
+  },
+  {
+    "title": "Script Management",
+    "icon_v3": "file-text",
+    "id": "scriptManager",
+    "childs": [
+      {
+        "title": "List of node scripts",
+        "id": "scriptAllList"
+      },
+      {
+        "title": "List of scripts",
+        "id": "serverScriptList"
+      },
+      {
+        "title": "Script execution record",
+        "id": "serverScriptLogList"
+      },
+      {
+        "title": "environement variable",
+        "id": "configWorkspaceEnv"
+      }
+    ]
+  },
+  {
+    "title": "Docker Management",
+    "icon_v3": "cloud-server",
+    "id": "dockerManager",
+    "childs": [
+      {
+        "title": "List of Docker",
+        "id": "dockerList"
+      },
+      {
+        "title": "Cluster List",
+        "id": "dockerSwarm"
+      }
+    ]
+  },
+  {
+    "title": "Monitoring and management",
+    "icon_v3": "monitor",
+    "id": "monitor",
+    "childs": [
+      {
+        "id": "monitorList",
+        "title": "Watch list"
+      },
+      {
+        "id": "monitorLog",
+        "title": "Monitor log"
+      },
+      {
+        "id": "userOptLog",
+        "title": "Operation monitoring"
+      }
+    ]
+  },
+  {
+    "title": "Document Management",
+    "icon_v3": "file",
+    "id": "file-manager",
+    "childs": [
+      {
+        "id": "fileStorage",
+        "title": "List of files"
+      },
+      {
+        "id": "staticFileStorage",
+        "title": "Static file"
+      },
+      {
+        "id": "fileReleaseTask",
+        "title": "Publish task"
+      }
+    ]
+  },
+  {
+    "title": "Other Management",
+    "icon_v3": "tool",
+    "id": "tools",
+    "childs": [
+      {
+        "id": "certificate",
+        "title": "Certificate Management"
+      },
+      {
+        "id": "myWorkspaceList",
+        "title": "My working space"
+      },
+      {
+        "id": "netTools",
+        "title": "network tools"
+      },
+      {
+        "id": "cronTools",
+        "title": "Cron expression"
+      }
+    ]
+  }
+]
