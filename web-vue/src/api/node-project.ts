@@ -500,6 +500,19 @@ export function renameFileFolder(params) {
 }
 
 /**
+ * 复制文件
+ * @param params
+ * @returns {id, levelName, filename,newname} params x
+ */
+export function copyFileFolder(params) {
+  return axios({
+    url: '/node/manage/file/copy',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
  * 构建分组
  */
 export function getProjectGroupAll() {
