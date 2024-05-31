@@ -17,6 +17,8 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.extra.compress.CompressUtil;
+import cn.hutool.extra.compress.archiver.Archiver;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.HttpUtil;
 import cn.keepbx.jpom.IJsonMessage;
@@ -389,7 +391,7 @@ public class ProjectFileControl extends BaseAgentController {
         File targetFile;
         // 生成不冲突的新文件名
         do {
-            newName = StrUtil.format("{}({}){}", baseName, counter, extension, extension);
+            newName = StrUtil.format("{}({}){}", baseName, counter, extension);
             targetFile = FileUtil.file(libFile, filePath, newName);
             counter++;
         } while (FileUtil.exist(targetFile));
@@ -399,6 +401,51 @@ public class ProjectFileControl extends BaseAgentController {
             FileUtil.copy(file, targetFile, false);
         }
         return JsonMessage.success("复制成功");
+    }
+
+    /**
+     * compress
+     *
+     * @param filePath 相对项目文件的文件夹
+     * @param filename 文件名
+     * @return json
+     */
+    @PostMapping(value = "compress", produces = MediaType.APPLICATION_JSON_VALUE)
+    public IJsonMessage<String> compress(String filePath, String filename, String type) {
+        NodeProjectInfoModel pim = getProjectInfoModel();
+        filePath = StrUtil.emptyToDefault(filePath, File.separator);
+        File libFile = projectInfoService.resolveLibFile(pim);
+        File file = FileUtil.file(libFile, filePath, filename);
+        Assert.state(FileUtil.isDirectory(file), "请选择文件夹进行压缩");
+        String ext;
+        if (StrUtil.equals(type, "zip")) {
+            ext = ".zip";
+        } else if (StrUtil.equals(type, "tar")) {
+            ext = ".tar";
+        } else if (StrUtil.equals(type, "tar.gz")) {
+            ext = ".tar.gz";
+        } else {
+            return JsonMessage.fail("不支持的压缩类型," + type);
+        }
+        int counter = 0;
+        String baseName = FileUtil.mainName(file);
+        String newName;
+        File targetFile;
+        // 生成不冲突的新文件名
+        do {
+            if (counter == 0) {
+                newName = StrUtil.format("{}{}", baseName, ext);
+            } else {
+                newName = StrUtil.format("{}({}){}", baseName, counter, ext);
+            }
+            targetFile = FileUtil.file(libFile, filePath, newName);
+            counter++;
+        } while (FileUtil.exist(targetFile));
+        //
+        try (Archiver archiver = CompressUtil.createArchiver(Charset.defaultCharset(), FileUtil.extName(targetFile), targetFile)) {
+            archiver.add(file);
+        }
+        return JsonMessage.success("压缩成功");
     }
 
     /**
