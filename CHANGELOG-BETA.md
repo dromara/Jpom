@@ -6,6 +6,7 @@
 
 1. 【server】优化 部分参数、环境变量配置交互优化取消文本输入框采用标签模式（感谢@湘江夜色）
 2. 【server】修复 部分页面中文描述未正常显示
+3. 【server】优化 文件发布支持选择脚本模板（感谢[@linCodeTest](https://gitee.com/linWorld) [Gitee issues I9P0EU](https://gitee.com/dromara/Jpom/issues/I9P0EU) ）
 
 ------
 
