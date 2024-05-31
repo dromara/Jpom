@@ -27,6 +27,7 @@ import org.dromara.jpom.common.BaseAgentController;
 import org.dromara.jpom.common.commander.CommandOpResult;
 import org.dromara.jpom.common.commander.ProjectCommander;
 import org.dromara.jpom.common.validator.ValidatorItem;
+import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.controller.manage.vo.DiffFileVo;
 import org.dromara.jpom.model.AfterOpt;
 import org.dromara.jpom.model.BaseEnum;
@@ -35,7 +36,6 @@ import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.service.ProjectFileBackupService;
 import org.dromara.jpom.service.WhitelistDirectoryService;
 import org.dromara.jpom.socket.ConsoleCommandOp;
-import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.CompressionFileUtil;
 import org.dromara.jpom.util.FileUtils;
@@ -362,6 +362,43 @@ public class ProjectFileControl extends BaseAgentController {
         File file = FileUtil.file(libFile, filePath, filename);
         String ymlString = FileUtil.readString(file, charset);
         return JsonMessage.success("", ymlString);
+    }
+
+    /**
+     * copy
+     *
+     * @param filePath 相对项目文件的文件夹
+     * @param filename 文件名
+     * @return json
+     */
+    @PostMapping(value = "copy", produces = MediaType.APPLICATION_JSON_VALUE)
+    public IJsonMessage<String> copy(String filePath, String filename) {
+        NodeProjectInfoModel pim = getProjectInfoModel();
+        filePath = StrUtil.emptyToDefault(filePath, File.separator);
+        File libFile = projectInfoService.resolveLibFile(pim);
+        File file = FileUtil.file(libFile, filePath, filename);
+        int counter = 1;
+        String baseName = FileUtil.mainName(file);
+        String extension = FileUtil.extName(file);
+        if (StrUtil.isNotEmpty(extension)) {
+            extension = StrUtil.DOT + extension;
+        } else {
+            extension = StrUtil.EMPTY;
+        }
+        String newName;
+        File targetFile;
+        // 生成不冲突的新文件名
+        do {
+            newName = StrUtil.format("{}({}){}", baseName, counter, extension, extension);
+            targetFile = FileUtil.file(libFile, filePath, newName);
+            counter++;
+        } while (FileUtil.exist(targetFile));
+        if (FileUtil.isDirectory(file)) {
+            FileUtil.copyContent(file, targetFile, false);
+        } else {
+            FileUtil.copy(file, targetFile, false);
+        }
+        return JsonMessage.success("复制成功");
     }
 
     /**

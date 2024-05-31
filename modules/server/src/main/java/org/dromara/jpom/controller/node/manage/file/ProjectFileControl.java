@@ -164,4 +164,15 @@ public class ProjectFileControl extends BaseServerController {
         return NodeForward.request(getNode(), request, NodeUrl.MANAGE_FILE_RENAME_FILE_FOLDER);
     }
 
+    /**
+     * 复制文件
+     *
+     * @return json
+     */
+    @PostMapping(value = "copy", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.EDIT)
+    public IJsonMessage<Object> copy(HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.MANAGE_FILE_COPY);
+    }
+
 }

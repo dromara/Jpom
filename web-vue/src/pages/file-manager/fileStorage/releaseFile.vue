@@ -202,7 +202,7 @@
     </a-form>
     <!-- 配置授权目录 -->
     <a-modal
-      v-model:value="configDir"
+      v-model:open="configDir"
       destroy-on-close
       :title="`${$tl('p.authDirSetting')}`"
       :footer="null"
