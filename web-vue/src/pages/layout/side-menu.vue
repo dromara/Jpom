@@ -34,10 +34,10 @@
         <template v-if="menu.childs && menu.childs.length">
           <a-sub-menu :key="menu.id">
             <template #title>
-              <span>
+              <a-tooltip :title="menu.title">
                 <icon :type="menu.icon_v3" :style="{ fontSize: '18px' }" />
                 <span>{{ menu.title }}</span>
-              </span>
+              </a-tooltip>
             </template>
             <a-menu-item
               v-for="subMenu in menu.childs"
@@ -45,14 +45,16 @@
               :p="(subMenu.parent = menu)"
               @click="handleClick(subMenu)"
             >
-              <span>{{ subMenu.title }}</span>
+              <a-tooltip :title="subMenu.title">{{ subMenu.title }}</a-tooltip>
             </a-menu-item>
           </a-sub-menu>
         </template>
         <template v-else>
           <a-menu-item :key="menu.id" @click="handleClick(menu)">
-            <icon :type="menu.icon_v3" :style="{ fontSize: '18px' }" />
-            <span>{{ menu.title }}</span>
+            <a-tooltip :title="menu.title">
+              <icon :type="menu.icon_v3" :style="{ fontSize: '18px' }" />
+              <span>{{ menu.title }}</span>
+            </a-tooltip>
           </a-menu-item>
         </template>
       </template>
