@@ -175,4 +175,15 @@ public class ProjectFileControl extends BaseServerController {
         return NodeForward.request(getNode(), request, NodeUrl.MANAGE_FILE_COPY);
     }
 
+    /**
+     * 压缩文件
+     *
+     * @return json
+     */
+    @PostMapping(value = "compress", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.EDIT)
+    public IJsonMessage<Object> compress(HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.MANAGE_FILE_COMPRESS);
+    }
+
 }
