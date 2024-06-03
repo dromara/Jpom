@@ -7,7 +7,7 @@
 	<strong>🚀Simple and lightweight low-invasive online build, automated deployment, daily operations, and project monitoring software.</strong>
 </p>
 <p align="center">
-   <strong>It is also a native ops software</strong>
+   【<strong>It is also a native ops software</strong> / <a href="./README.md">中文</a>】
 </p>
 
 <p align="center">
