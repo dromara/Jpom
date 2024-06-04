@@ -92,7 +92,7 @@ export default {
       'Please enter the project storage path authorization. Press Enter to support entering multiple paths. The system will automatically filter ../ paths and does not allow entering the root path.',
     fileExtension: 'File Extension',
     allowedFileExtension:
-      'Please enter the allowed file extensions and file encoding for editing. If no encoding is set, the system encoding will be used by default. Example: Set encoding: txt@utf-8, No encoding set: txt',
+      "Please enter the allowed file extensions and file encoding for editing. If no encoding is set, the system encoding will be used by default. Example: Set encoding: txt{'@'}utf-8, No encoding set: txt",
     syncNodeConfig: 'Sync Node Configuration',
     save: 'Save',
     saveAndRestart: 'Save and Restart',
