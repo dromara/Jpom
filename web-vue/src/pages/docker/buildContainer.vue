@@ -516,21 +516,21 @@ export default {
       }
     },
     getPortsFromPorts(ports) {
-      const _ports = ports.map((item) => {
+      const _ports = ports?.map((item) => {
         item.disabled = item.privatePort !== null
         item.port = item.privatePort
         return item
       })
-      return _ports.length > 0 ? _ports : null
+      return _ports?.length > 0 ? _ports : null
     },
     getPortsFromExposedPorts(exposedPorts) {
-      const _ports = exposedPorts.map((item) => {
+      const _ports = exposedPorts?.map((item) => {
         item.disabled = item.port !== null
         item.ip = '0.0.0.0'
         item.scheme = item.scheme || 'tcp'
         return item
       })
-      return _ports.length > 0 ? _ports : null
+      return _ports?.length > 0 ? _ports : null
     },
     getVolumesFromMounts(mounts) {
       const _mounts = mounts.map((item) => {
@@ -668,7 +668,7 @@ export default {
           })
           .join(',')
         // 处理端口
-        temp.exposedPorts = (this.temp.exposedPorts || [])
+        temp.exposedPorts = (this.temp?.exposedPorts || [])
           .filter((item) => {
             return item.publicPort && item.ip
           })
