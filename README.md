@@ -7,7 +7,7 @@
 	<strong>🚀简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件</strong>
 </p>
 <p align="center">
-   <strong>更是一款原生 ops 软件</strong>
+   【<strong>更是一款原生 ops 软件</strong> / <a href="./README-en.md">English</a>】
 </p>
 
 <p align="center">
@@ -66,7 +66,7 @@
 - 界面形式实时查看项目运行状态、控制台日志、管理项目文件
 	1. 在线修改项目文本文件
 - Docker 容器管理、Docker Swarm 集群管理（**Docker UI**）
-- **在线 SSH 终端**，让您在没有 Xshell、FinalShell 等软件也能轻松管理服务器
+- **在线 SSH 终端**，让您在没有 PuTTY、Xshell、FinalShell 等软件也能轻松管理服务器
 	1. 登录 Jpom 系统后不需要知道服务器密码
 	2. 能指定 SSH 禁止执行的命令，避免执行高风险命令，并且能自动执行命令日志
 	3. 设置文件目录，在线查看管理对应项目文件及配置文件
@@ -241,15 +241,15 @@ docker run -d -p 2122:2122 \
 1. 下载安装包 [https://jpom.top/pages/all-downloads/](https://jpom.top/pages/all-downloads/)
 2. 解压文件
 3. 安装插件端
-	1. agent-x.x.x-release 目录为插件端的全部安装文件
+	1. `agent-x.x.x-release` 目录为插件端的全部安装文件
 	2. 上传到对应服务器（整个目录）
 	3. 启动插件端，Windows 环境用 bat 脚本，Linux 环境用 sh 脚本。（如果出现乱码或者无法正常执行，请检查编码格式、换行符是否匹配。）
 	4. 插件端默认运行端口：`2123`
 4. 安装服务端
-	1. server-x.x.x-release 目录为服务端的全部安装文件
+	1. `server-x.x.x-release` 目录为服务端的全部安装文件
 	2. 上传到对应服务器（整个目录）
 	3. 启动服务端，Windows 环境用 bat 脚本，Linux 环境用 sh 脚本。（如果出现乱码或者无法正常执行，请检查编码格式、换行符是否匹配。）
-	4. 服务端默认运行端口：`2122`，访问管理页面：`http://127.0.0.1:2122/`（非本机访问把 127.0.0.1 换成您的服务器 IP 地址）
+	4. 服务端默认运行端口：`2122`，访问管理页面：`http://127.0.0.1:2122/`（非本机访问把 `127.0.0.1` 换成您的服务器 IP 地址）
 
 ### 方式四：⌨️ 编译安装
 
@@ -258,15 +258,15 @@ docker run -d -p 2122:2122 \
 3. 执行 `npm run build` 进行 vue 项目打包
 4. 切换到项目根目录执行：`mvn clean package`
 5. 安装插件端
-	1. 查看插件端安装包 modules/agent/target/agent-x.x.x-release
+	1. 查看插件端安装包 `modules/agent/target/agent-x.x.x-release`
 	2. 打包上传服务器运行（整个目录）
 	3. 启动插件端，Windows 环境用 bat 脚本，Linux 环境用 sh 脚本。（如果出现乱码或者无法正常执行，请检查编码格式、换行符是否匹配。）
 	4. 默认运行端口：`2123`
 6. 安装服务端
-	1. 查看插件端安装包 modules/server/target/server-x.x.x-release
+	1. 查看插件端安装包 `modules/server/target/server-x.x.x-release`
 	2. 打包上传服务器运行（整个目录）
 	3. 启动服务端，Windows 环境用 bat 脚本，Linux 环境用 sh 脚本。（如果出现乱码或者无法正常执行，请检查编码格式、换行符是否匹配。）
-	4. 服务端默认运行端口：`2122`，访问管理页面：`http://127.0.0.1:2122/`（非本机访问把 127.0.0.1 换成您的服务器 IP 地址）
+	4. 服务端默认运行端口：`2122`，访问管理页面：`http://127.0.0.1:2122/`（非本机访问把 `127.0.0.1` 换成您的服务器 IP 地址）
 
 > 也可以使用 `script/release.bat` 或 `script/release.sh` 快速打包。
 
@@ -302,7 +302,7 @@ docker-compose -f docker-compose.yml up
 4. 构建 vue 页面，切换到 `web-vue` 目录（前提需要本地开发环境有 node、npm 环境）
 5. 安装项目 vue 依赖，控制台执行 `npm install`
 6. 启动开发模式，控制台执行 `npm run dev`
-7. 根据控制台输出的地址访问前端页面：`http://127.0.0.1:3000/`（非本机访问把 127.0.0.1 换成您的服务器 IP 地址）
+7. 根据控制台输出的地址访问前端页面：`http://127.0.0.1:3000/`（非本机访问把 `127.0.0.1` 换成您的服务器 IP 地址）
 
 ## 管理 Jpom 命令
 
@@ -310,18 +310,18 @@ docker-compose -f docker-compose.yml up
 
 ```bash
 # 服务端管理脚本 （命令行）
-./bin/Server.bat start 启动Jpom服务端
-./bin/Server.bat stop 停止Jpom服务端
-./bin/Server.bat restart 重启Jpom服务端
-./bin/Server.bat status 查看Jpom服务端运行状态
+./bin/Server.bat start   # 启动Jpom服务端
+./bin/Server.bat stop    # 停止Jpom服务端
+./bin/Server.bat restart # 重启Jpom服务端
+./bin/Server.bat status  # 查看Jpom服务端运行状态
 # 服务端管理脚本 （控制面板），按照面板提示输入操作
 ./bin/Server.bat
 
 # 插件端管理脚本
-./bin/Agent.bat start 启动Jpom插件端
-./bin/Agent.bat stop 停止Jpom插件端
-./bin/Agent.bat restart 重启Jpom插件端
-./bin/Agent.bat status 查看Jpom插件端运行状态
+./bin/Agent.bat start   # 启动Jpom插件端
+./bin/Agent.bat stop    # 停止Jpom插件端
+./bin/Agent.bat restart # 重启Jpom插件端
+./bin/Agent.bat status  # 查看Jpom插件端运行状态
 # 插件端管理脚本（控制面板），按照面板提示输入操作
 ./bin/Agent.bat
 
@@ -334,18 +334,18 @@ docker-compose -f docker-compose.yml up
 
 ```bash
 # 服务端
-./bin/Server.sh start     启动Jpom服务端
-./bin/Server.sh stop      停止Jpom服务端
-./bin/Server.sh restart   重启Jpom服务端
-./bin/Server.sh status    查看Jpom服务端运行状态
-./bin/Service.sh install    创建Jpom服务端的应用服务（jpom-server）
+./bin/Server.sh start     # 启动Jpom服务端
+./bin/Server.sh stop      # 停止Jpom服务端
+./bin/Server.sh restart   # 重启Jpom服务端
+./bin/Server.sh status    # 查看Jpom服务端运行状态
+./bin/Service.sh install  # 创建Jpom服务端的应用服务（jpom-server）
 
 # 插件端
-./bin/Agent.sh start     启动Jpom插件端
-./bin/Agent.sh stop      停止Jpom插件端
-./bin/Agent.sh restart   重启Jpom插件端
-./bin/Agent.sh status    查看Jpom插件端运行状态
-./bin/Service.sh install     创建Jpom插件端的应用服务（jpom-agent）
+./bin/Agent.sh start     # 启动Jpom插件端
+./bin/Agent.sh stop      # 停止Jpom插件端
+./bin/Agent.sh restart   # 重启Jpom插件端
+./bin/Agent.sh status    # 查看Jpom插件端运行状态
+./bin/Service.sh install # 创建Jpom插件端的应用服务（jpom-agent）
 ```
 
 ## Linux 服务方式管理
@@ -404,14 +404,14 @@ docker-compose -f docker-compose.yml up
 4. [node vue 案例代码(antdv)](https://gitee.com/keepbx/Jpom-demo-case/tree/master/antdv)
 5. [python 案例代码](https://gitee.com/keepbx/Jpom-demo-case/tree/master/python)
 
-> nodejs 编译指定目录：
+> Node.js 编译指定目录：
 
 ```bash
 yarn --cwd xxxx/ install
 yarn --cwd xxxx/ build
 ```
 
-> maven 编译指定目录：
+> Maven 编译指定目录：
 
 ```bash
 mvn -f xxxx/pom.xml clean package

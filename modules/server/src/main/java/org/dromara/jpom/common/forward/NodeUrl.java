@@ -114,6 +114,8 @@ public enum NodeUrl {
     Manage_File_Remote_Download("/manage/file/remote_download", true),
     MANAGE_FILE_NEW_FILE_FOLDER("/manage/file/new_file_folder.json"),
     MANAGE_FILE_RENAME_FILE_FOLDER("/manage/file/rename.json"),
+    MANAGE_FILE_COPY("/manage/file/copy"),
+    MANAGE_FILE_COMPRESS("/manage/file/compress"),
 
     Manage_File_Download("/manage/file/download", true),
 

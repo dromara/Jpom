@@ -1,16 +1,41 @@
 # 🚀 版本日志
 
-## 2.11.5.2
+## 2.11.6.2-beta
 
 ### 🐣 新增功能
 
-1. 【all】升级 tomcat、yaml 版本（感谢@佳驰）
-2. 【all】升级 bcprov-jdk18on 版本
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】修复 没有端口的容器重建页面异常（感谢@冰淇淋还是冰激凌）
+
+------
+
+## 2.11.6.1-beta (2024-06-04)
+
+### 🐣 新增功能
+
+1. 【agent】新增 项目文件支持快捷复制到当前文件夹
+2. 【agent】新增 项目文件夹支持快捷压缩（感谢[@yiziyu](https://gitee.com/yiziyu) [Gitee issues I9737L](https://gitee.com/dromara/Jpom/issues/I9737L) ）
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】优化 部分参数、环境变量配置交互优化取消文本输入框采用标签模式（感谢@湘江夜色）
+2. 【server】修复 部分页面中文描述未正常显示
+3. 【server】优化 文件发布支持选择脚本模板（感谢[@linCodeTest](https://gitee.com/linWorld) [Gitee issues I9P0EU](https://gitee.com/dromara/Jpom/issues/I9P0EU) ）
+4. 【server】优化 升级 postgresql 版本（感谢@ʟᴊx💎💎）
+5. 【server】修复 机器相关授权配置文件后缀输入框未正常显示（@感谢@ccx2480）
+
+------
+
+## 2.11.5.2-beta (2024-05-30)
 
 ### 🐞 解决BUG、优化功能
 
 1. 【server】优化 自动续签采用无感模式（感谢@湘江夜色）
 2. 【server】优化 容器构建执行配置自定义 host 参数（感谢@冰淇淋还是冰激凌）
+3. 【all】升级 tomcat、yaml 版本（感谢@佳驰）
+4. 【all】升级 bcprov-jdk18on 版本
 
 ------
 

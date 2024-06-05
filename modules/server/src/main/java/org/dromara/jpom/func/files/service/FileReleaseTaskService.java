@@ -29,6 +29,7 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.Session;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
+import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
@@ -40,11 +41,13 @@ import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.data.SshModel;
+import org.dromara.jpom.model.script.ScriptModel;
 import org.dromara.jpom.plugins.JschUtils;
 import org.dromara.jpom.service.IStatusRecover;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.service.node.ssh.SshService;
+import org.dromara.jpom.service.script.ScriptServer;
 import org.dromara.jpom.service.system.WorkspaceEnvVarService;
 import org.dromara.jpom.system.ServerConfig;
 import org.dromara.jpom.configuration.BuildExtConfig;
@@ -81,6 +84,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
     private final ServerConfig serverConfig;
     private final FileStorageService fileStorageService;
     private final StaticFileStorageService staticFileStorageService;
+    private final ScriptServer scriptServer;
 
     private final Map<String, String> cancelTag = new SafeConcurrentHashMap<>();
 
@@ -91,7 +95,8 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                                   BuildExtConfig buildExtConfig,
                                   ServerConfig serverConfig,
                                   FileStorageService fileStorageService,
-                                  StaticFileStorageService staticFileStorageService) {
+                                  StaticFileStorageService staticFileStorageService,
+                                  ScriptServer scriptServer) {
         this.sshService = sshService;
         this.jpomApplication = jpomApplication;
         this.workspaceEnvVarService = workspaceEnvVarService;
@@ -100,6 +105,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         this.serverConfig = serverConfig;
         this.fileStorageService = fileStorageService;
         this.staticFileStorageService = staticFileStorageService;
+        this.scriptServer = scriptServer;
     }
 
     /**
@@ -342,9 +348,17 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                     }
 
                     String releasePath = model.getReleasePath();
-                    if (StrUtil.isNotEmpty(model.getBeforeScript())) {
+                    String beforeScript = model.getBeforeScript();
+                    if (StrUtil.isNotEmpty(beforeScript)) {
                         logRecorder.system("开始执行上传前命令");
-                        this.runNodeScript(model.getBeforeScript(), item, logRecorder, modelId, environmentMapBuilder, releasePath);
+                        if (StrUtil.startWith(beforeScript, ServerConst.REF_SCRIPT)) {
+                            String scriptId = StrUtil.removePrefix(beforeScript, ServerConst.REF_SCRIPT);
+                            ScriptModel keyAndGlobal = scriptServer.getByKey(scriptId);
+                            Assert.notNull(keyAndGlobal, "请选择正确的脚本");
+                            beforeScript = keyAndGlobal.getContext();
+                            logRecorder.system("引入脚本内容：{}[{}]", keyAndGlobal.getName(), scriptId);
+                        }
+                        this.runNodeScript(beforeScript, item, logRecorder, modelId, environmentMapBuilder, releasePath);
                     }
                     logRecorder.system("{} start file upload", item.getName());
                     // 上传文件
@@ -374,9 +388,17 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                     }
                     logRecorder.system("{} file upload done", item.getName());
 
-                    if (StrUtil.isNotEmpty(model.getAfterScript())) {
+                    String afterScript = model.getAfterScript();
+                    if (StrUtil.isNotEmpty(afterScript)) {
                         logRecorder.system("开始执行上传后命令");
-                        this.runNodeScript(model.getAfterScript(), item, logRecorder, modelId, environmentMapBuilder, releasePath);
+                        if (StrUtil.startWith(afterScript, ServerConst.REF_SCRIPT)) {
+                            String scriptId = StrUtil.removePrefix(afterScript, ServerConst.REF_SCRIPT);
+                            ScriptModel keyAndGlobal = scriptServer.getByKey(scriptId);
+                            Assert.notNull(keyAndGlobal, "请选择正确的脚本");
+                            afterScript = keyAndGlobal.getContext();
+                            logRecorder.system("引入脚本内容：{}[{}]", keyAndGlobal.getName(), scriptId);
+                        }
+                        this.runNodeScript(afterScript, item, logRecorder, modelId, environmentMapBuilder, releasePath);
                     }
                     this.updateStatus(taskId, modelId, 2, "发布成功");
                 } catch (Exception e) {
@@ -471,9 +493,17 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                     session = sshService.getSessionByModel(machineSshModel);
                     Map<String, String> environment = environmentMapBuilder.environment();
                     environmentMapBuilder.eachStr(logRecorder::system);
-                    if (StrUtil.isNotEmpty(model.getBeforeScript())) {
+                    String beforeScript = model.getBeforeScript();
+                    if (StrUtil.isNotEmpty(beforeScript)) {
                         logRecorder.system("开始执行上传前命令");
-                        JschUtils.execCallbackLine(session, charset, timeout, model.getBeforeScript(), StrUtil.EMPTY, environment, logRecorder::info);
+                        if (StrUtil.startWith(beforeScript, ServerConst.REF_SCRIPT)) {
+                            String scriptId = StrUtil.removePrefix(beforeScript, ServerConst.REF_SCRIPT);
+                            ScriptModel keyAndGlobal = scriptServer.getByKey(scriptId);
+                            Assert.notNull(keyAndGlobal, "请选择正确的脚本");
+                            beforeScript = keyAndGlobal.getContext();
+                            logRecorder.system("引入脚本内容：{}[{}]", keyAndGlobal.getName(), scriptId);
+                        }
+                        JschUtils.execCallbackLine(session, charset, timeout, beforeScript, StrUtil.EMPTY, environment, logRecorder::info);
                     }
                     logRecorder.system("{} start ftp upload", item.getName());
 
@@ -485,9 +515,17 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                     sftp.syncUpload(storageSaveFile, releasePath);
                     logRecorder.system("{} ftp upload done", item.getName());
 
-                    if (StrUtil.isNotEmpty(model.getAfterScript())) {
+                    String afterScript = model.getAfterScript();
+                    if (StrUtil.isNotEmpty(afterScript)) {
                         logRecorder.system("开始执行上传后命令");
-                        JschUtils.execCallbackLine(session, charset, timeout, model.getAfterScript(), StrUtil.EMPTY, environment, logRecorder::info);
+                        if (StrUtil.startWith(afterScript, ServerConst.REF_SCRIPT)) {
+                            String scriptId = StrUtil.removePrefix(afterScript, ServerConst.REF_SCRIPT);
+                            ScriptModel keyAndGlobal = scriptServer.getByKey(scriptId);
+                            Assert.notNull(keyAndGlobal, "请选择正确的脚本");
+                            afterScript = keyAndGlobal.getContext();
+                            logRecorder.system("引入脚本内容：{}[{}]", keyAndGlobal.getName(), scriptId);
+                        }
+                        JschUtils.execCallbackLine(session, charset, timeout, afterScript, StrUtil.EMPTY, environment, logRecorder::info);
                     }
                     this.updateStatus(taskId, modelId, 2, "发布成功");
                 } catch (Exception e) {

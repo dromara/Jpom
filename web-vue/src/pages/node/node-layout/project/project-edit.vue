@@ -271,7 +271,7 @@
           <a-textarea
             v-model:value="temp.jvm"
             :auto-size="{ minRows: 3, maxRows: 3 }"
-            placeholder="jvm{{$tl('p.parameters')}},{{$tl('p.optional')}}.如：-Xms512m -Xmx512m"
+            :placeholder="`jvm${$tl('p.parameters')},${$tl('p.optional')}.如：-Xms512m -Xmx512m`"
           />
         </a-form-item>
         <a-form-item
@@ -290,10 +290,11 @@
           name="dslEnv"
           :label="$tl('p.dslEnvVariables')"
         >
-          <a-input
+          <!-- <a-input
             v-model:value="temp.dslEnv"
             placeholder="DSL{{$tl('p.environmentVariables')}},{{$tl('p.envExample')}}=values1&keyvalue2"
-          />
+          /> -->
+          <parameter-widget v-model:value="temp.dslEnv"></parameter-widget>
         </a-form-item>
 
         <a-form-item v-show="noFileModes.includes(temp.runMode)" name="autoStart">
