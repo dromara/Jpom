@@ -379,7 +379,7 @@
                       <a-input
                         v-model:value="item.name"
                         :addon-before="$tl('c.name')"
-                        placeholder="变量{{$tl('c.name')}}"
+                        :placeholder="$tl('c.variableName')"
                       />
                     </a-col>
                     <a-col :span="10" :offset="1">

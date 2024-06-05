@@ -10,7 +10,7 @@ export default {
     encoding: 'Encoding format',
     fileSuffix: 'File suffix',
     fileSuffixAndEncoding:
-      'Please enter the suffix and encoding of the file allowed to edit. If no encoding is set, the system encoding will be taken by default. Multiple entries can be separated by line breaks. Example: setting encoding: txt@utf-8, not setting encoding: txt',
+      "Please enter the suffix and encoding of the file allowed to edit. If no encoding is set, the system encoding will be taken by default. Multiple entries can be separated by line breaks. Example: setting encoding: txt{'@'}utf-8, not setting encoding: txt",
     workspaceName: 'Workspace name',
     selectWorkspace: 'Please select a workspace',
     systemPrompt: 'System prompt',

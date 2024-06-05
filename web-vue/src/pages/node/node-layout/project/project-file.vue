@@ -108,6 +108,29 @@
                             <HighlightOutlined />{{ $tl('c.rename') }}
                           </a-button>
                         </a-menu-item>
+                        <a-menu-item key="3">
+                          <a-button type="link" @click="hannderCopy(record)"><CopyOutlined />复制 </a-button>
+                        </a-menu-item>
+                        <a-sub-menu key="4" :disabled="!record.isDirectory">
+                          <template #title>
+                            <a-button type="link"><CompressOutlined />压缩 </a-button>
+                          </template>
+                          <a-menu-item>
+                            <a-button type="link" @click="hannderCompress(record, 'zip')">
+                              <FileZipOutlined />zip
+                            </a-button>
+                          </a-menu-item>
+                          <a-menu-item>
+                            <a-button type="link" @click="hannderCompress(record, 'tar')">
+                              <FileZipOutlined />tar
+                            </a-button>
+                          </a-menu-item>
+                          <a-menu-item>
+                            <a-button type="link" @click="hannderCompress(record, 'tar.gz')">
+                              <FileZipOutlined />tar.gz
+                            </a-button>
+                          </a-menu-item>
+                        </a-sub-menu>
                       </a-menu>
                     </template>
                   </a-dropdown>
@@ -444,7 +467,9 @@ import {
   renameFileFolder,
   updateFile,
   uploadProjectFile,
-  shardingMerge
+  shardingMerge,
+  copyFileFolder,
+  compressFileFolder
 } from '@/api/node-project'
 import { ZIP_ACCEPT, renderSize, formatDuration, concurrentExecution, parseTime } from '@/utils/const'
 import codeEditor from '@/components/codeEditor'
@@ -1178,6 +1203,41 @@ export default {
     // 查看备份列表
     backupList() {
       this.backupListVisible = true
+    },
+    // 复制文件
+    hannderCopy(record) {
+      const params = {
+        nodeId: this.nodeId,
+        id: this.projectId,
+        filePath: this.uploadPath,
+        filename: record.filename
+      }
+      copyFileFolder(params).then((res) => {
+        if (res.code === 200) {
+          $notification.success({
+            message: res.msg
+          })
+          this.loadFileList()
+        }
+      })
+    },
+    // 压缩文件
+    hannderCompress(record, type) {
+      const params = {
+        nodeId: this.nodeId,
+        id: this.projectId,
+        filePath: this.uploadPath,
+        filename: record.filename,
+        type: type
+      }
+      compressFileFolder(params).then((res) => {
+        if (res.code === 200) {
+          $notification.success({
+            message: res.msg
+          })
+          this.loadFileList()
+        }
+      })
     }
   }
 }

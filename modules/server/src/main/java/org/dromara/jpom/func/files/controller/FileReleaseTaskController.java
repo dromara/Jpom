@@ -16,6 +16,7 @@ import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.controller.outgiving.OutGivingWhitelistService;
@@ -24,10 +25,12 @@ import org.dromara.jpom.func.files.service.FileReleaseTaskService;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.AgentWhitelist;
 import org.dromara.jpom.model.data.ServerWhitelist;
+import org.dromara.jpom.model.script.ScriptModel;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.service.node.NodeService;
+import org.dromara.jpom.service.script.ScriptServer;
 import org.dromara.jpom.util.FileUtils;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -52,12 +55,15 @@ public class FileReleaseTaskController extends BaseServerController {
 
     private final FileReleaseTaskService fileReleaseTaskService;
     private final OutGivingWhitelistService outGivingWhitelistService;
+    private final ScriptServer scriptServer;
 
     public FileReleaseTaskController(FileReleaseTaskService fileReleaseTaskService,
                                      OutGivingWhitelistService outGivingWhitelistService,
-                                     NodeService nodeService) {
+                                     NodeService nodeService,
+                                     ScriptServer scriptServer) {
         this.fileReleaseTaskService = fileReleaseTaskService;
         this.outGivingWhitelistService = outGivingWhitelistService;
+        this.scriptServer = scriptServer;
         this.nodeService = nodeService;
     }
 
@@ -79,6 +85,17 @@ public class FileReleaseTaskController extends BaseServerController {
         List<String> whitelistServerOutGiving = configDeNewInstance.getOutGiving();
         Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, releasePathParent), "请选择正确的项目路径,或者还没有配置授权");
         Assert.hasText(releasePathSecondary, "请填写发布文件的二级目录");
+
+        if (StrUtil.startWith(beforeScript, ServerConst.REF_SCRIPT)) {
+            String scriptId = StrUtil.removePrefix(beforeScript, ServerConst.REF_SCRIPT);
+            ScriptModel keyAndGlobal = scriptServer.getByKeyAndGlobal(scriptId, request, "请选择正确的发布前脚本");
+            Assert.notNull(keyAndGlobal, "请选择正确的发布前脚本");
+        }
+        if (StrUtil.startWith(afterScript, ServerConst.REF_SCRIPT)) {
+            String scriptId = StrUtil.removePrefix(afterScript, ServerConst.REF_SCRIPT);
+            ScriptModel keyAndGlobal = scriptServer.getByKeyAndGlobal(scriptId, request, "请选择正确的发布后脚本");
+            Assert.notNull(keyAndGlobal, "请选择正确的发布后脚本");
+        }
 
         String releasePath = FileUtil.normalize(releasePathParent + StrUtil.SLASH + releasePathSecondary);
 

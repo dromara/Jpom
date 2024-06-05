@@ -9,6 +9,8 @@
  */
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.PatternPool;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.net.url.UrlQuery;
@@ -32,6 +34,12 @@ import java.util.stream.Stream;
  * Created by bwcx_jzy on 2019/3/1.
  */
 public class TestString {
+
+    @Test
+    public void testDate(){
+        DateTime dateTime = DateUtil.parse("1940-06-01 00:00:00");
+        System.out.println(dateTime);
+    }
 
     @Test
     public void testCtrlC() {

@@ -1,0 +1,130 @@
+[
+  {
+    "title": "Asset Overview",
+    "icon_v3": "laptop",
+    "id": "system-overview"
+  },
+  {
+    "title": "Asset Management",
+    "icon_v3": "hdd",
+    "id": "assets-manager",
+    "childs": [
+      {
+        "id": "machine_node_info",
+        "title": "Machine Management",
+        "role": "system"
+      },
+      {
+        "id": "machine_ssh_info",
+        "title": "SSH Management",
+        "role": "system"
+      },
+      {
+        "id": "machine_docker_info",
+        "title": "Docker Management",
+        "role": "system"
+      },
+      {
+        "id": "global_repository",
+        "title": "Shared warehouse",
+        "role": "system"
+      }
+    ]
+  },
+  {
+    "title": "Configuration Management",
+    "icon_v3": "save",
+    "id": "config",
+    "childs": [
+      {
+        "id": "authConfig",
+        "title": "Certification Management",
+        "role": "system"
+      },
+      {
+        "id": "surveorConfigEmail",
+        "title": "Mailbox configuration",
+        "role": "system"
+      },
+      {
+        "id": "systemExtConfig",
+        "title": "System configuration directory",
+        "role": "system"
+      }
+    ]
+  },
+  {
+    "title": "User Management",
+    "icon_v3": "user",
+    "id": "user",
+    "childs": [
+      {
+        "id": "userList",
+        "title": "User List",
+        "role": "system"
+      },
+      {
+        "id": "permission_group",
+        "title": "permission group",
+        "role": "system"
+      },
+      {
+        "id": "user_log",
+        "title": "operation log",
+        "role": "system"
+      },
+      {
+        "id": "user_login_log",
+        "title": "Login log",
+        "role": "system"
+      }
+    ]
+  },
+  {
+    "title": "Server Level Configuration",
+    "icon_v3": "setting",
+    "id": "setting",
+    "childs": [
+      {
+        "id": "workspace",
+        "title": "Workspaces & Clusters",
+        "role": "system"
+      },
+      {
+        "id": "globalEnv",
+        "title": "Global Variable",
+        "role": "system"
+      },
+      {
+        "id": "cacheManage",
+        "title": "Cache Management",
+        "role": "system"
+      },
+      {
+        "id": "logManage",
+        "title": "System log",
+        "role": "system"
+      },
+      {
+        "id": "update",
+        "title": "Online upgrade",
+        "role": "sys"
+      },
+      {
+        "id": "sysConfig",
+        "title": "System Configuration",
+        "role": "system"
+      },
+      {
+        "id": "backup",
+        "title": "Database Backup",
+        "role": "system",
+        "storageMode": "H2"
+      },
+      {
+        "id": "about",
+        "title": "About the System"
+      }
+    ]
+  }
+]

@@ -161,7 +161,7 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       :title="$tl('p.deployCert')"
-      width="50%"
+      width="60%"
       :mask-closable="false"
       @ok="releaseFileOk()"
     >

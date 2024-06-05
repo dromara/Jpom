@@ -50,10 +50,10 @@ public class WebConfigurer implements WebMvcConfigurer, WebServerFactoryCustomiz
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-//        registry.addResourceHandler("/css/**").addResourceLocations("classpath:/dist/css/");
-//        registry.addResourceHandler("/js/**").addResourceLocations("classpath:/dist/js/");
-//        registry.addResourceHandler("/img/**").addResourceLocations("classpath:/dist/img/");
-//        registry.addResourceHandler("/fonts/**").addResourceLocations("classpath:/dist/fonts/");
+        //        registry.addResourceHandler("/css/**").addResourceLocations("classpath:/dist/css/");
+        //        registry.addResourceHandler("/js/**").addResourceLocations("classpath:/dist/js/");
+        //        registry.addResourceHandler("/img/**").addResourceLocations("classpath:/dist/img/");
+        //        registry.addResourceHandler("/fonts/**").addResourceLocations("classpath:/dist/fonts/");
     }
 
     @Override

@@ -129,7 +129,7 @@
 
         <template #bodyCell="{ column, text, record }">
           <template v-if="column.dataIndex === 'name'">
-            <a-tooltip placement="topLeft" :title="` ${$tl('p.name')}${text} 长{{$tl('p.name')}}${record.longname}`">
+            <a-tooltip placement="topLeft" :title="` ${$tl('p.name')}${text} 长${$tl('p.name')}${record.longname}`">
               <a-dropdown :trigger="['contextmenu']">
                 <div>{{ text }}</div>
                 <template #overlay>

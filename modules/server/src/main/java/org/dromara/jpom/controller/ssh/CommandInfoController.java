@@ -9,6 +9,7 @@
  */
 package org.dromara.jpom.controller.ssh;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.IJsonMessage;
@@ -23,6 +24,7 @@ import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.CommandExecLogModel;
 import org.dromara.jpom.model.data.CommandModel;
+import org.dromara.jpom.model.data.SshModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
@@ -31,6 +33,7 @@ import org.dromara.jpom.permission.SystemPermission;
 import org.dromara.jpom.script.CommandParam;
 import org.dromara.jpom.service.node.ssh.CommandExecLogService;
 import org.dromara.jpom.service.node.ssh.SshCommandService;
+import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.service.user.TriggerTokenLogServer;
 import org.dromara.jpom.util.CommandUtil;
 import org.springframework.http.MediaType;
@@ -41,6 +44,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -57,13 +61,16 @@ public class CommandInfoController extends BaseServerController {
     private final SshCommandService sshCommandService;
     private final CommandExecLogService commandExecLogService;
     private final TriggerTokenLogServer triggerTokenLogServer;
+    private final SshService sshService;
 
     public CommandInfoController(SshCommandService sshCommandService,
                                  CommandExecLogService commandExecLogService,
-                                 TriggerTokenLogServer triggerTokenLogServer) {
+                                 TriggerTokenLogServer triggerTokenLogServer,
+                                 SshService sshService) {
         this.sshCommandService = sshCommandService;
         this.commandExecLogService = commandExecLogService;
         this.triggerTokenLogServer = triggerTokenLogServer;
+        this.sshService = sshService;
     }
 
     /**
@@ -110,7 +117,13 @@ public class CommandInfoController extends BaseServerController {
         commandModel.setName(name);
         commandModel.setCommand(command);
         commandModel.setDesc(desc);
-        commandModel.setSshIds(data.getString("sshIds"));
+        String sshIds = data.getString("sshIds");
+        List<String> sshIdList = StrUtil.split(sshIds, StrUtil.COMMA, true, true);
+        if (CollUtil.isNotEmpty(sshIdList)) {
+            List<SshModel> commandModels = sshService.getByKey(sshIdList, request);
+            Assert.state(CollUtil.size(sshIdList) == CollUtil.size(commandModels), "关联 SSH 节点包含不存在的节点");
+        }
+        commandModel.setSshIds(sshIds);
         commandModel.setAutoExecCron(autoExecCron);
         //
         commandModel.setDefParams(CommandParam.checkStr(defParams));

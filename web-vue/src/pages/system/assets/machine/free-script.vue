@@ -44,7 +44,7 @@
               <a-switch
                 v-model:checked="temp.appendTemplate"
                 :checked-children="$tl('p.appendScriptTemplate')"
-                un-checked-children="不{{$tl('p.appendScriptTemplate')}}"
+                :un-checked-children="$tl('p.doNotAppendScriptTemplate')"
               />
             </a-space>
           </template>

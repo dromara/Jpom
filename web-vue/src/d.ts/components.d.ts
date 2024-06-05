@@ -142,6 +142,7 @@ declare module 'vue' {
     MessageOutlined: typeof import('@ant-design/icons-vue')['MessageOutlined']
     MinusCircleOutlined: typeof import('@ant-design/icons-vue')['MinusCircleOutlined']
     MoreOutlined: typeof import('@ant-design/icons-vue')['MoreOutlined']
+    ParameterWidget: typeof import('./../components/parameterWidget/index.vue')['default']
     PlayCircleOutlined: typeof import('@ant-design/icons-vue')['PlayCircleOutlined']
     PlusOutlined: typeof import('@ant-design/icons-vue')['PlusOutlined']
     PlusSquareOutlined: typeof import('@ant-design/icons-vue')['PlusSquareOutlined']

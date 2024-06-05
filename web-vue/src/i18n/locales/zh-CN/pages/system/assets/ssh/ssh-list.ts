@@ -10,7 +10,7 @@ export default {
     encoding: '编码格式',
     fileSuffix: '文件后缀',
     fileSuffixAndEncoding:
-      '请输入允许编辑文件的后缀及文件编码，不设置编码则默认取系统编码，多个使用换行。示例：设置编码：txt@utf-8， 不设置编码：txt',
+      "请输入允许编辑文件的后缀及文件编码，不设置编码则默认取系统编码，多个使用换行。示例：设置编码：txt{'@'}utf-8， 不设置编码：txt",
     workspaceName: '工作空间名称',
     selectWorkspace: '请选择工作空间',
     systemPrompt: '系统提示',
