@@ -6,24 +6,28 @@
         <br />
         <template v-if="action === 'login'">
           <a-form :model="loginForm" :label-col="{ span: 0 }" :wrapper-col="{ span: 24 }" @finish="handleLogin">
-            <a-form-item name="loginName" :rules="[{ required: true, message: $tl('p.usernamePrompt') }]">
-              <a-input v-model:value="loginForm.loginName" autocomplete="true" :placeholder="$tl('p.username')" />
+            <a-form-item name="loginName" :rules="[{ required: true, message: $t('pages.login.index.ebf15c4e') }]">
+              <a-input
+                v-model:value="loginForm.loginName"
+                autocomplete="true"
+                :placeholder="$t('pages.login.index.c28c6dc1')"
+              />
             </a-form-item>
-            <a-form-item name="userPwd" :rules="[{ required: true, message: $tl('p.passwordPrompt') }]">
+            <a-form-item name="userPwd" :rules="[{ required: true, message: $t('pages.login.index.8937efed') }]">
               <a-input-password
                 v-model:value="loginForm.userPwd"
                 autocomplete="true"
-                :placeholder="$tl('p.password')"
+                :placeholder="$t('pages.login.index.f102d63')"
               />
             </a-form-item>
             <a-form-item
               v-if="!disabledCaptcha"
               name="code"
-              :rules="[{ required: true, message: $tl('p.codePrompt') }]"
+              :rules="[{ required: true, message: $t('pages.login.index.6bd117e2') }]"
             >
               <a-row>
                 <a-col :span="14">
-                  <a-input v-model:value="loginForm.code" :placeholder="$tl('c.code')" />
+                  <a-input v-model:value="loginForm.code" :placeholder="$t('pages.login.index.1702a2b6')" />
                 </a-col>
                 <a-col :offset="2" :span="8">
                   <div class="rand-code">
@@ -35,11 +39,11 @@
             </a-form-item>
             <a-form-item :wrapper-col="{ span: 24 }">
               <a-button type="primary" html-type="submit" class="btn-login" :loading="loading">
-                {{ $tl('p.loginBtn') }}
+                {{ $t('pages.login.index.6d273eca') }}
               </a-button>
             </a-form-item>
             <template v-if="enabledOauth2Provides.length">
-              <a-divider>{{ $tl('p.thirdPartyLogin') }}</a-divider>
+              <a-divider>{{ $t('pages.login.index.8dc088d5') }}</a-divider>
               <a-form-item :wrapper-col="{ span: 24 }">
                 <a-space :size="20" wrap>
                   <template v-for="(item, index) in oauth2AllProvides">
@@ -88,18 +92,20 @@
             @finish="handleMfa"
           >
             <a-form-item
-              :label="$tl('c.code')"
+              :label="$t('pages.login.index.1702a2b6')"
               name="mfaCode"
-              :help="$tl('p.mfaRequired')"
+              :help="$t('pages.login.index.34ee1039')"
               :rules="[
-                { required: true, message: $tl('p.mfaCodePrompt') },
-                { pattern: /^\d{6}$/, message: $tl('p.mfaCodeInfo') }
+                { required: true, message: $t('pages.login.index.6763395b') },
+                { pattern: /^\d{6}$/, message: $t('pages.login.index.1a850509') }
               ]"
             >
-              <a-input v-model:value="mfaData.mfaCode" :placeholder="$tl('p.mfaCode')" />
+              <a-input v-model:value="mfaData.mfaCode" :placeholder="$t('pages.login.index.9cab783a')" />
             </a-form-item>
 
-            <a-button type="primary" html-type="submit" class="btn-login"> {{ $tl('p.confirmBtn') }} </a-button>
+            <a-button type="primary" html-type="submit" class="btn-login">
+              {{ $t('pages.login.index.e89ab2fa') }}
+            </a-button>
           </a-form>
         </template>
       </a-card>
@@ -122,42 +128,42 @@ import qyWeixinImg from '@/assets/images/qyweixin.svg'
 import { useGuideStore } from '@/stores/guide'
 import { Button } from 'ant-design-vue'
 
-import { useI18nPage } from '@/i18n/hooks/useI18nPage'
-const { $tl } = useI18nPage('pages.login.login')
+import { useI18n } from 'vue-i18n'
+const { t: $t } = useI18n()
 
 const oauth2AllProvides = ref([
   {
-    name: $tl('p.dingtalkLogin'),
+    name: $t('pages.login.index.af984888'),
     key: 'dingtalk',
     img: dingtalkImg
   },
   {
-    name: $tl('p.feishuLogin'),
+    name: $t('pages.login.index.576d8dda'),
     key: 'feishu',
     img: feishuImg
   },
   {
-    name: $tl('p.wechatWorkLogin'),
+    name: $t('pages.login.index.578df5ac'),
     key: 'wechat_enterprise',
     img: qyWeixinImg
   },
   {
-    name: `gitee ${$tl('c.login')}`,
+    name: `gitee ${$t('pages.login.index.76bed14d')}`,
     key: 'gitee',
     img: giteeImg
   },
   {
-    name: `maxkey ${$tl('p.platformLogin')}`,
+    name: `maxkey ${$t('pages.login.index.6ae041b2')}`,
     key: 'maxkey',
     img: maxkeyImg
   },
   {
-    name: `github ${$tl('c.login')}`,
+    name: `github ${$t('pages.login.index.76bed14d')}`,
     key: 'github',
     img: githubImg
   },
   {
-    name: $tl('p.gitlabLogin'),
+    name: $t('pages.login.index.ff8043c5'),
     key: 'mygitlab',
     img: gitlabImg
   }
@@ -177,7 +183,7 @@ const theme = computed(() => {
 const router = useRouter()
 const route = useRoute()
 
-const loginTitle = ref($tl('p.jpomLogin'))
+const loginTitle = ref($t('pages.login.index.c5537957'))
 const loginForm = reactive<IFormState>({
   loginName: '',
   userPwd: '',
@@ -231,7 +237,7 @@ const getLoginConfig = () => {
       const demo = res.data.demo
       const p = h('p', { innerHTML: demo.msg }, [])
       $notification.info({
-        message: $tl('p.tip'),
+        message: $t('pages.login.index.c8dfae81'),
         description: h('div', {}, [p]),
         key: login_tip_key,
         duration: null
@@ -299,7 +305,7 @@ const checkOauth2 = () => {
 const toOauth2Url = (provide: string) => {
   oauth2Url({ provide: provide }).then((res) => {
     if (res.code === 200 && res.data) {
-      $message.loading({ content: $tl('p.redirectPrompt'), key: 'oauth2', duration: 0 })
+      $message.loading({ content: $t('pages.login.index.38f1354b'), key: 'oauth2', duration: 0 })
       location.href = res.data.toUrl
     }
   })
@@ -380,11 +386,15 @@ const checkHasLoginInfo = () => {
   if (useUserStore.userInfo && useUserStore.getToken()) {
     const p = h(
       'p',
-      { innerHTML: `${$tl('p.currentAccount')}<b>${useUserStore.userInfo.name || ''}</b> ${$tl('p.autoRedirect')}` },
+      {
+        innerHTML: `${$t('pages.login.index.cba1f5b5')}<b>${useUserStore.userInfo.name || ''}</b> ${$t(
+          'pages.login.index.6dee1b92'
+        )}`
+      },
       []
     )
     $notification.open({
-      message: $tl('p.accountDetected'),
+      message: $t('pages.login.index.87221de'),
       description: h('div', {}, [p]),
       btn: () =>
         h(
@@ -397,7 +407,7 @@ const checkHasLoginInfo = () => {
               router.push({ path: '/' })
             }
           },
-          { default: () => $tl('p.redirect') }
+          { default: () => $t('pages.login.index.f9def59d') }
         ),
       key: tip_has_login_key,
       duration: null

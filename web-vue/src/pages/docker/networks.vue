@@ -13,7 +13,7 @@
       <a-space>
         <a-input
           v-model:value="listQuery['name']"
-          :placeholder="$tl('c.name')"
+          :placeholder="$t('pages.docker.networks.3e34ec28')"
           class="search-input-item"
           @press-enter="loadData"
         />
@@ -24,7 +24,9 @@
           @press-enter="loadData"
         />
 
-        <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
+        <a-button type="primary" :loading="loading" @click="loadData">{{
+          $t('pages.docker.networks.53c2763c')
+        }}</a-button>
       </a-space>
     </template>
     <template #bodyCell="{ column, text, record }">
@@ -41,7 +43,11 @@
             text.config &&
             text.config
               .map((item) => {
-                return ($tl('p.gateway') + item.gateway || '') + '#' + ($tl('p.subnetMask') + item.subnet || '')
+                return (
+                  ($t('pages.docker.networks.73c4a51e') + item.gateway || '') +
+                  '#' +
+                  ($t('pages.docker.networks.cf0aa0c1') + item.subnet || '')
+                )
               })
               .join(',')
           }`"
@@ -71,7 +77,7 @@
       </template>
       <template v-else-if="column.dataIndex === 'operation'">
         <a-space>
-          <a-tooltip :title="$tl('p.delete')">
+          <a-tooltip :title="$t('pages.docker.networks.dd20d11c')">
             <a-button size="small" type="link" @click="doAction(record, 'remove')"><DeleteOutlined /></a-button>
           </a-tooltip>
         </a-space>
@@ -108,14 +114,14 @@ export default {
       renderSize,
       columns: [
         {
-          title: this.$tl('p.serialNumber'),
+          title: this.$t('pages.docker.networks.72cebb96'),
           width: 80,
           ellipsis: true,
           align: 'center',
           customRender: ({ index }) => `${index + 1}`
         },
         {
-          title: this.$tl('c.name'),
+          title: this.$t('pages.docker.networks.3e34ec28'),
           dataIndex: 'name',
           ellipsis: true,
           tooltip: true
@@ -127,7 +133,7 @@ export default {
           tooltip: true
         },
         {
-          title: this.$tl('p.range'),
+          title: this.$t('pages.docker.networks.1907c647'),
           dataIndex: 'scope',
           ellipsis: true
         },
@@ -137,13 +143,13 @@ export default {
           ellipsis: true
         },
         {
-          title: this.$tl('p.type'),
+          title: this.$t('pages.docker.networks.698bb532'),
           dataIndex: 'driver',
           ellipsis: true,
           width: 80
         },
         {
-          title: this.$tl('p.creationTime'),
+          title: this.$t('pages.docker.networks.f06e8846'),
           dataIndex: 'Created',
           ellipsis: true,
           width: 180,
@@ -155,7 +161,7 @@ export default {
       ],
       action: {
         remove: {
-          msg: this.$tl('p.areYouSureToDeleteCurrentVolume'),
+          msg: this.$t('pages.docker.networks.9e6ac7fa'),
           api: dockerVolumesRemove
         }
       }
@@ -192,11 +198,11 @@ export default {
         return
       }
       $confirm({
-        title: this.$tl('p.systemPrompt'),
+        title: this.$t('pages.docker.networks.b22d55a0'),
         zIndex: 1009,
         content: action.msg,
-        okText: this.$tl('p.confirm'),
-        cancelText: this.$tl('p.cancel'),
+        okText: this.$t('pages.docker.networks.e8e9db25'),
+        cancelText: this.$t('pages.docker.networks.b12468e9'),
         onOk: () => {
           return action
             .api(this.urlPrefix, {

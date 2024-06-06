@@ -23,20 +23,20 @@
         <template v-if="id">
           <a-menu v-model:selectedKeys="menuKey" mode="horizontal" class="menu" @click="menuClick">
             <a-menu-item key="info">
-              <span><InfoOutlined /> {{ $tl('p.buildInfo') }}</span>
+              <span><InfoOutlined /> {{ $t('pages.build.item.1541b045') }}</span>
             </a-menu-item>
             <a-menu-item key="edit">
-              <span> <EditOutlined /> {{ $tl('p.editBuild') }}</span>
+              <span> <EditOutlined /> {{ $t('pages.build.item.b2bad6f5') }}</span>
             </a-menu-item>
             <a-menu-item key="trigger">
-              <span><ApiOutlined /> {{ $tl('p.trigger') }}</span>
+              <span><ApiOutlined /> {{ $t('pages.build.item.7d51773c') }}</span>
             </a-menu-item>
           </a-menu>
         </template>
         <template v-else>
           <a-menu v-model:selectedKeys="menuKey" mode="horizontal" class="menu" @click="menuClick">
             <a-menu-item key="edit">
-              <span> <EditOutlined /> {{ $tl('p.addBuild') }}</span>
+              <span> <EditOutlined /> {{ $t('pages.build.item.156e1b82') }}</span>
             </a-menu-item>
           </a-menu>
         </template>
@@ -74,10 +74,10 @@
               }
             "
           >
-            {{ $tl('p.cancel') }}
+            {{ $t('pages.build.item.b12468e9') }}
           </a-button>
-          <a-tooltip v-if="id" :title="$tl('p.refreshWarning')">
-            <a-button @click="$refs.editBuild.refresh()"> {{ $tl('p.refresh') }}</a-button>
+          <a-tooltip v-if="id" :title="$t('pages.build.item.c0e613d6')">
+            <a-button @click="$refs.editBuild.refresh()"> {{ $t('pages.build.item.7bbd89a') }}</a-button>
           </a-tooltip>
           <a-divider type="vertical" />
           <a-button
@@ -88,7 +88,7 @@
                 stepsCurrent = stepsCurrent - 1
               }
             "
-            >{{ $tl('p.previousStep') }}</a-button
+            >{{ $t('pages.build.item.d1379d85') }}</a-button
           >
           <a-button
             type="primary"
@@ -98,13 +98,15 @@
                 stepsCurrent = stepsCurrent + 1
               }
             "
-            >{{ $tl('p.nextStep') }}</a-button
+            >{{ $t('pages.build.item.6af322a9') }}</a-button
           >
           <a-divider type="vertical" />
 
-          <a-button type="primary" @click="$refs.editBuild.handleEditBuildOk(false)"> {{ $tl('p.save') }} </a-button>
+          <a-button type="primary" @click="$refs.editBuild.handleEditBuildOk(false)">
+            {{ $t('pages.build.item.b033d8c5') }}
+          </a-button>
           <a-button type="primary" @click="$refs.editBuild.handleEditBuildOk(true)">
-            {{ $tl('p.saveAndBuild') }}
+            {{ $t('pages.build.item.4af9344a') }}
           </a-button>
         </a-space>
       </template>

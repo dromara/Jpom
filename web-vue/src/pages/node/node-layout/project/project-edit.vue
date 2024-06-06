@@ -1,21 +1,21 @@
 <template>
   <div>
     <!-- 编辑区 -->
-    <a-spin :tip="$tl('p.loadingData')" :spinning="loading">
+    <a-spin :tip="$t('pages.node.node-layout.project.project-edit.a5c1d44')" :spinning="loading">
       <a-form ref="editProjectForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$tl('p.projectId')" name="id">
+        <a-form-item :label="$t('pages.node.node-layout.project.project-edit.4eaba425')" name="id">
           <a-input
             v-if="temp.type === 'edit'"
             v-model:value="temp.id"
             :max-length="50"
             :disabled="temp.type === 'edit'"
-            :placeholder="$tl('c.createOnce')"
+            :placeholder="$t('pages.node.node-layout.project.project-edit.92ebd5f0')"
           />
           <template v-else>
             <a-input-search
               v-model:value="temp.id"
               :max-length="50"
-              :placeholder="$tl('c.createOnce')"
+              :placeholder="$t('pages.node.node-layout.project.project-edit.92ebd5f0')"
               @search="
                 () => {
                   temp = { ...temp, id: randomStr(6) }
@@ -23,26 +23,32 @@
               "
             >
               <template #enterButton>
-                <a-button type="primary"> {{ $tl('p.randomGenerate') }} </a-button>
+                <a-button type="primary"> {{ $t('pages.node.node-layout.project.project-edit.45f317b2') }} </a-button>
               </template>
             </a-input-search>
           </template>
         </a-form-item>
 
-        <a-form-item :label="$tl('c.projectName')" name="name">
+        <a-form-item :label="$t('pages.node.node-layout.project.project-edit.7cb5b39')" name="name">
           <a-row>
             <a-col :span="10">
-              <a-input v-model:value="temp.name" :max-length="50" :placeholder="$tl('c.projectName')" />
+              <a-input
+                v-model:value="temp.name"
+                :max-length="50"
+                :placeholder="$t('pages.node.node-layout.project.project-edit.7cb5b39')"
+              />
             </a-col>
-            <a-col :span="4" style="text-align: right">{{ $tl('p.groupName') }}</a-col>
+            <a-col :span="4" style="text-align: right">{{
+              $t('pages.node.node-layout.project.project-edit.12d0e469')
+            }}</a-col>
             <a-col :span="10">
               <a-form-item-rest>
                 <custom-select
                   v-model:value="temp.group"
                   :max-length="50"
                   :data="groupList"
-                  :input-placeholder="$tl('p.addNewGroup')"
-                  :select-placeholder="$tl('p.selectGroup')"
+                  :input-placeholder="$t('pages.node.node-layout.project.project-edit.95c41d82')"
+                  :select-placeholder="$t('pages.node.node-layout.project.project-edit.761c903a')"
                 >
                 </custom-select>
               </a-form-item-rest>
@@ -52,25 +58,39 @@
         <a-form-item name="runMode">
           <template #label>
             <a-tooltip>
-              {{ $tl('p.runMode') }}
+              {{ $t('pages.node.node-layout.project.project-edit.eaf004ca') }}
               <template #title>
                 <ul>
-                  <li><b>Dsl</b> {{ $tl('p.customizeProject') }}</li>
-                  <li><b>ClassPath</b> java -classpath xxx {{ $tl('c.runProject') }}</li>
-                  <li><b>Jar</b> java -jar xxx {{ $tl('c.runProject') }}</li>
-                  <li><b>JarWar</b> java -jar Springboot war {{ $tl('c.runProject') }}</li>
+                  <li><b>Dsl</b> {{ $t('pages.node.node-layout.project.project-edit.64759ad3') }}</li>
                   <li>
-                    <b>JavaExtDirsCp</b> java -Djava.ext.dirs=lib -cp conf:run.jar $MAIN_CLASS {{ $tl('c.runProject') }}
+                    <b>ClassPath</b> java -classpath xxx {{ $t('pages.node.node-layout.project.project-edit.788bfc') }}
                   </li>
-                  <li><b>File</b> {{ $tl('p.staticFolder') }},{{ $tl('p.noStatusControl') }}</li>
+                  <li><b>Jar</b> java -jar xxx {{ $t('pages.node.node-layout.project.project-edit.788bfc') }}</li>
+                  <li>
+                    <b>JarWar</b> java -jar Springboot war
+                    {{ $t('pages.node.node-layout.project.project-edit.788bfc') }}
+                  </li>
+                  <li>
+                    <b>JavaExtDirsCp</b> java -Djava.ext.dirs=lib -cp conf:run.jar $MAIN_CLASS
+                    {{ $t('pages.node.node-layout.project.project-edit.788bfc') }}
+                  </li>
+                  <li>
+                    <b>File</b> {{ $t('pages.node.node-layout.project.project-edit.d33f4295') }},{{
+                      $t('pages.node.node-layout.project.project-edit.35f7833f')
+                    }}
+                  </li>
                 </ul>
               </template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
           </template>
-          <a-select v-model:value="temp.runMode" :placeholder="$tl('p.selectRunMode')" @change="changeRunMode">
+          <a-select
+            v-model:value="temp.runMode"
+            :placeholder="$t('pages.node.node-layout.project.project-edit.9f508cc8')"
+            @change="changeRunMode"
+          >
             <a-select-option v-for="item in runModeArray" :key="item.name">
-              <template v-if="item.desc.indexOf($tl('p.notRecommended')) > -1">
+              <template v-if="item.desc.indexOf($t('pages.node.node-layout.project.project-edit.ad7005ba')) > -1">
                 <s>
                   <b>[{{ item.name }}]</b> {{ item.desc }}
                 </s>
@@ -82,8 +102,12 @@
           </a-select>
         </a-form-item>
         <template v-if="temp.runMode === 'Link'">
-          <a-form-item :label="$tl('p.softLinkProject')" name="linkId">
-            <a-select v-model:value="temp.linkId" :placeholder="$tl('p.selectSoftLinkProject')" @change="changeLinkId">
+          <a-form-item :label="$t('pages.node.node-layout.project.project-edit.4b36f25f')" name="linkId">
+            <a-select
+              v-model:value="temp.linkId"
+              :placeholder="$t('pages.node.node-layout.project.project-edit.9ac42fe6')"
+              @change="changeLinkId"
+            >
               <a-select-option
                 v-for="item in projectList"
                 :key="item.projectId"
@@ -98,14 +122,16 @@
           <a-form-item name="whitelistDirectory">
             <template #label>
               <a-tooltip>
-                {{ $tl('p.projectPath') }}
+                {{ $t('pages.node.node-layout.project.project-edit.5b716424') }}
                 <template #title>
                   <ul>
-                    <li>{{ $tl('p.authPathDesc') }}</li>
-                    <li>{{ $tl('p.modifyAuthConfig') }}</li>
-                    <li>{{ $tl('p.folderName') }}</li>
+                    <li>{{ $t('pages.node.node-layout.project.project-edit.9d024ef5') }}</li>
+                    <li>{{ $t('pages.node.node-layout.project.project-edit.80b551d6') }}</li>
+                    <li>{{ $t('pages.node.node-layout.project.project-edit.28952768') }}</li>
                     <li>
-                      {{ $tl('p.storagePath') }} <br />&nbsp;&nbsp;<b>{{ $tl('p.fullPath') }}</b>
+                      {{ $t('pages.node.node-layout.project.project-edit.528d80cb') }} <br />&nbsp;&nbsp;<b>{{
+                        $t('pages.node.node-layout.project.project-edit.5ef24c2f')
+                      }}</b>
                     </li>
                   </ul>
                 </template>
@@ -114,7 +140,7 @@
             </template>
             <template #help>
               <div>
-                {{ $tl('p.preConfigAuthDir') }}
+                {{ $t('pages.node.node-layout.project.project-edit.20f66fff') }}
                 <a-button
                   type="link"
                   size="small"
@@ -124,7 +150,7 @@
                     }
                   "
                 >
-                  <InfoCircleOutlined /> {{ $tl('p.quickConfig') }}
+                  <InfoCircleOutlined /> {{ $t('pages.node.node-layout.project.project-edit.2ebdf25e') }}
                 </a-button>
               </div>
             </template>
@@ -132,14 +158,18 @@
               <a-select
                 v-model:value="temp.whitelistDirectory"
                 style="width: 50%"
-                :placeholder="$tl('c.selectAuthPath')"
+                :placeholder="$t('pages.node.node-layout.project.project-edit.6fa628c8')"
               >
                 <a-select-option v-for="access in accessList" :key="access">
                   <a-tooltip :title="access">{{ access }}</a-tooltip>
                 </a-select-option>
               </a-select>
               <a-form-item-rest>
-                <a-input v-model:value="temp.lib" style="width: 50%" :placeholder="$tl('p.storageFolder')" />
+                <a-input
+                  v-model:value="temp.lib"
+                  style="width: 50%"
+                  :placeholder="$t('pages.node.node-layout.project.project-edit.d4e69bd6')"
+                />
               </a-form-item-rest>
             </a-input-group>
             <template #extra>
@@ -147,29 +177,30 @@
             </template>
           </a-form-item>
 
-          <a-form-item v-show="filePath !== ''" :label="$tl('p.completePath')">
+          <a-form-item v-show="filePath !== ''" :label="$t('pages.node.node-layout.project.project-edit.2f9f87a5')">
             <a-alert :message="filePath" type="success" />
           </a-form-item>
         </template>
         <a-form-item v-show="temp.runMode === 'Dsl'" name="dslContent">
           <template #label>
             <a-tooltip>
-              DSL {{ $tl('p.content') }}
+              DSL {{ $t('pages.node.node-layout.project.project-edit.99ff48c8') }}
               <template #title>
-                <p>{{ $tl('p.configFormat') }}</p>
-                <p>{{ $tl('p.supportedVars') }}</p>
+                <p>{{ $t('pages.node.node-layout.project.project-edit.e79a829d') }}</p>
+                <p>{{ $t('pages.node.node-layout.project.project-edit.56b96c89') }}</p>
                 <p>
                   <b>status</b>
-                  {{ $tl('p.outputFormat') }}:$pid <b>$pid {{ $tl('p.processId') }}</b
-                  >{{ $tl('p.statusCheck') }}
+                  {{ $t('pages.node.node-layout.project.project-edit.3cbddbbe') }}:$pid
+                  <b>$pid {{ $t('pages.node.node-layout.project.project-edit.3cf2b4f7') }}</b
+                  >{{ $t('pages.node.node-layout.project.project-edit.b76bdd94') }}
                 </p>
-                <p>{{ $tl('p.configReference') }}</p>
+                <p>{{ $t('pages.node.node-layout.project.project-edit.f26fd1f1') }}</p>
               </template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
           </template>
           <template #help>
-            scriptId{{ $tl('p.useNodeScript') }}
+            scriptId{{ $t('pages.node.node-layout.project.project-edit.2695c530') }}
             <a-button
               type="link"
               size="small"
@@ -179,7 +210,7 @@
                 }
               "
             >
-              {{ $tl('c.viewNodeScript') }}
+              {{ $t('pages.node.node-layout.project.project-edit.41ceb72c') }}
             </a-button>
           </template>
           <a-form-item-rest>
@@ -189,14 +220,14 @@
               height="40vh"
               :show-tool="true"
               :options="{ mode: 'yaml', tabSize: 2 }"
-              :placeholder="$tl('p.fillDSL')"
+              :placeholder="$t('pages.node.node-layout.project.project-edit.89967495')"
             >
               <template #tool_before>
                 <a-segmented
                   v-model:value="dslEditTabKey"
                   :options="[
-                    { label: `DSL ${$tl('c.configuration')}`, value: 'content' },
-                    { label: $tl('c.configExample'), value: 'demo' }
+                    { label: `DSL ${$t('pages.node.node-layout.project.project-edit.28f9e270')}`, value: 'content' },
+                    { label: $t('pages.node.node-layout.project.project-edit.a3186ee5'), value: 'demo' }
                   ]"
                 />
               </template>
@@ -212,8 +243,8 @@
                 <a-segmented
                   v-model:value="dslEditTabKey"
                   :options="[
-                    { label: `DSL ${$tl('c.configuration')}`, value: 'content' },
-                    { label: $tl('c.configExample'), value: 'demo' }
+                    { label: `DSL ${$t('pages.node.node-layout.project.project-edit.28f9e270')}`, value: 'content' },
+                    { label: $t('pages.node.node-layout.project.project-edit.a3186ee5'), value: 'demo' }
                   ]"
                 />
               </template>
@@ -223,19 +254,24 @@
         <a-form-item v-show="noFileModes.includes(temp.runMode) && temp.runMode !== 'Link'">
           <template #label>
             <a-tooltip>
-              {{ $tl('p.logDir') }}
+              {{ $t('pages.node.node-layout.project.project-edit.e9f209dd') }}
               <template #title>
                 <ul>
-                  <li>{{ $tl('p.logDirDesc') }}</li>
-                  <li>{{ $tl('c.defaultLogPath') }}</li>
-                  <li>{{ $tl('p.selectableList') }}</li>
+                  <li>{{ $t('pages.node.node-layout.project.project-edit.8f348042') }}</li>
+                  <li>{{ $t('pages.node.node-layout.project.project-edit.1008ec50') }}</li>
+                  <li>{{ $t('pages.node.node-layout.project.project-edit.a3cf55e2') }}</li>
                 </ul>
               </template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
           </template>
-          <a-select v-model:value="temp.logPath" :placeholder="$tl('c.selectAuthPath')">
-            <a-select-option key="" value="">{{ $tl('c.defaultLogPath') }}</a-select-option>
+          <a-select
+            v-model:value="temp.logPath"
+            :placeholder="$t('pages.node.node-layout.project.project-edit.6fa628c8')"
+          >
+            <a-select-option key="" value="">{{
+              $t('pages.node.node-layout.project.project-edit.1008ec50')
+            }}</a-select-option>
             <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
           </a-select>
         </a-form-item>
@@ -248,7 +284,10 @@
           label="Main Class"
           name="mainClass"
         >
-          <a-input v-model:value="temp.mainClass" :placeholder="$tl('p.mainClass')" />
+          <a-input
+            v-model:value="temp.mainClass"
+            :placeholder="$t('pages.node.node-layout.project.project-edit.b324b030')"
+          />
         </a-form-item>
         <a-form-item
           v-show="
@@ -260,39 +299,43 @@
         >
           <a-input
             v-model:value="temp.javaExtDirsCp"
-            :placeholder="`-Dext.dirs=xxx: -cp xx  ${$tl('p.fillInXxx')}:xx】`"
+            :placeholder="`-Dext.dirs=xxx: -cp xx  ${$t('pages.node.node-layout.project.project-edit.4241b582')}:xx】`"
           />
         </a-form-item>
         <a-form-item
           v-show="javaModes.includes(temp.runMode) || javaModes.includes(linkProjectData.runMode)"
-          :label="$tl('p.jvmParameters')"
+          :label="$t('pages.node.node-layout.project.project-edit.19af9418')"
           name="jvm"
         >
           <a-textarea
             v-model:value="temp.jvm"
             :auto-size="{ minRows: 3, maxRows: 3 }"
-            :placeholder="`jvm${$tl('p.parameters')},${$tl('p.optional')}.如：-Xms512m -Xmx512m`"
+            :placeholder="`jvm${$t('pages.node.node-layout.project.project-edit.6e6cc3c2')},${$t(
+              'pages.node.node-layout.project.project-edit.a72cfae2'
+            )}.如：-Xms512m -Xmx512m`"
           />
         </a-form-item>
         <a-form-item
           v-show="javaModes.includes(temp.runMode) || javaModes.includes(linkProjectData.runMode)"
-          :label="$tl('p.argsParameters')"
+          :label="$t('pages.node.node-layout.project.project-edit.c5feb1a')"
           name="args"
         >
           <a-textarea
             v-model:value="temp.args"
             :auto-size="{ minRows: 3, maxRows: 3 }"
-            :placeholder="`Main ${$tl('p.functionArgs')}. ${$tl('p.argsExample')}.port=8080`"
+            :placeholder="`Main ${$t('pages.node.node-layout.project.project-edit.ee6f8f43')}. ${$t(
+              'pages.node.node-layout.project.project-edit.18629de'
+            )}.port=8080`"
           />
         </a-form-item>
         <a-form-item
           v-if="temp.runMode === 'Dsl' || linkProjectData.runMode === 'Dsl'"
           name="dslEnv"
-          :label="$tl('p.dslEnvVariables')"
+          :label="$t('pages.node.node-layout.project.project-edit.ede504be')"
         >
           <!-- <a-input
             v-model:value="temp.dslEnv"
-            placeholder="DSL{{$tl('p.environmentVariables')}},{{$tl('p.envExample')}}=values1&keyvalue2"
+            placeholder="DSL{{$t('pages.node.node-layout.project.project-edit.c81b2c2e')}},{{$t('pages.node.node-layout.project.project-edit.7e189322')}}=values1&keyvalue2"
           /> -->
           <parameter-widget v-model:value="temp.dslEnv"></parameter-widget>
         </a-form-item>
@@ -300,39 +343,40 @@
         <a-form-item v-show="noFileModes.includes(temp.runMode)" name="autoStart">
           <template #label>
             <a-tooltip>
-              {{ $tl('p.autoStart') }}
-              <template #title>{{ $tl('p.checkProjectStatusOnStartup') }}</template>
+              {{ $t('pages.node.node-layout.project.project-edit.12861e4e') }}
+              <template #title>{{ $t('pages.node.node-layout.project.project-edit.be7082a2') }}</template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
           </template>
           <template #help>
             <div>
-              {{ $tl('p.notAutoStartOnBoot') }}<b>{{ $tl('p.pluginAutoStartOnBoot') }}</b
-              >{{ $tl('p.enableAutoStartSwitch') }}
+              {{ $t('pages.node.node-layout.project.project-edit.b35cbffb')
+              }}<b>{{ $t('pages.node.node-layout.project.project-edit.297af6c7') }}</b
+              >{{ $t('pages.node.node-layout.project.project-edit.53c6c542') }}
             </div>
           </template>
           <div>
             <a-switch
               v-model:checked="temp.autoStart"
-              :checked-children="$tl('p.switchOn')"
-              :un-checked-children="$tl('p.switchOff')"
+              :checked-children="$t('pages.node.node-layout.project.project-edit.c5f50974')"
+              :un-checked-children="$t('pages.node.node-layout.project.project-edit.e9a7e1c4')"
             />
-            {{ $tl('p.checkAndStartOnPluginStartup') }}
+            {{ $t('pages.node.node-layout.project.project-edit.f32199a3') }}
           </div>
         </a-form-item>
 
         <a-form-item name="disableScanDir">
           <template #label>
-            <a-tooltip> {{ $tl('p.disableScanning') }} </a-tooltip>
+            <a-tooltip> {{ $t('pages.node.node-layout.project.project-edit.217ba8f3') }} </a-tooltip>
           </template>
           <template #help>
-            <div>{{ $tl('p.disableScanningForLargeProjects') }}</div>
+            <div>{{ $t('pages.node.node-layout.project.project-edit.3342e1c4') }}</div>
           </template>
           <div>
             <a-switch
               v-model:checked="temp.disableScanDir"
-              :checked-children="$tl('p.noScanning')"
-              :un-checked-children="$tl('p.enableScanning')"
+              :checked-children="$t('pages.node.node-layout.project.project-edit.f78bec3f')"
+              :un-checked-children="$t('pages.node.node-layout.project.project-edit.fc6ab345')"
             />
           </div>
         </a-form-item>
@@ -343,25 +387,31 @@
               WebHooks
               <template #title>
                 <ul>
-                  <li>{{ $tl('p.notifyUrl') }}</li>
-                  <li>{{ $tl('p.notifyUrlParams') }}</li>
-                  <li>type {{ $tl('p.notifyUrlValues') }}</li>
-                  <li>DSL {{ $tl('p.projectSpecificTypes') }}</li>
+                  <li>{{ $t('pages.node.node-layout.project.project-edit.5db82550') }}</li>
+                  <li>{{ $t('pages.node.node-layout.project.project-edit.316f78d0') }}</li>
+                  <li>type {{ $t('pages.node.node-layout.project.project-edit.84063ac5') }}</li>
+                  <li>DSL {{ $t('pages.node.node-layout.project.project-edit.d4d5dc62') }}</li>
                 </ul>
               </template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
           </template>
-          <a-input v-model:value="temp.token" :placeholder="$tl('p.optionalNotifyUrl')" />
+          <a-input
+            v-model:value="temp.token"
+            :placeholder="$t('pages.node.node-layout.project.project-edit.8b1eb070')"
+          />
         </a-form-item>
 
         <a-form-item
           v-if="temp.runCommand"
           v-show="temp.type === 'edit' && javaModes.includes(temp.runMode)"
-          :label="$tl('p.runCommand')"
+          :label="$t('pages.node.node-layout.project.project-edit.da878eca')"
           name="runCommand"
         >
-          <a-alert :message="temp.runCommand || $tl('p.none')" type="success" />
+          <a-alert
+            :message="temp.runCommand || $t('pages.node.node-layout.project.project-edit.9ac5e2d4')"
+            type="success"
+          />
         </a-form-item>
       </a-form>
     </a-spin>
@@ -369,7 +419,7 @@
     <a-modal
       v-model:open="configDir"
       destroy-on-close
-      :title="`${$tl('p.authorizedDirectory')}`"
+      :title="`${$t('pages.node.node-layout.project.project-edit.277cb48f')}`"
       :footer="null"
       :mask-closable="false"
       @cancel="
@@ -393,7 +443,7 @@
     <NodeFunc
       v-if="drawerVisible"
       :id="nodeId"
-      :name="$tl('c.viewNodeScript')"
+      :name="$t('pages.node.node-layout.project.project-edit.41ceb72c')"
       :tabs="['scripct']"
       @close="
         () => {
@@ -454,11 +504,21 @@ export default {
       temp: {},
       drawerVisible: false,
       rules: {
-        id: [{ required: true, message: this.$tl('p.projectIdInput'), trigger: 'blur' }],
-        name: [{ required: true, message: this.$tl('p.projectNameInput'), trigger: 'blur' }],
-        runMode: [{ required: true, message: this.$tl('p.projectRunModeSelection'), trigger: 'blur' }],
-        whitelistDirectory: [{ required: true, message: this.$tl('c.selectAuthPath'), trigger: 'blur' }],
-        lib: [{ required: true, message: this.$tl('p.projectFolderInput'), trigger: 'blur' }]
+        id: [
+          { required: true, message: this.$t('pages.node.node-layout.project.project-edit.6916e3ff'), trigger: 'blur' }
+        ],
+        name: [
+          { required: true, message: this.$t('pages.node.node-layout.project.project-edit.bf4a219b'), trigger: 'blur' }
+        ],
+        runMode: [
+          { required: true, message: this.$t('pages.node.node-layout.project.project-edit.4551702c'), trigger: 'blur' }
+        ],
+        whitelistDirectory: [
+          { required: true, message: this.$t('pages.node.node-layout.project.project-edit.6fa628c8'), trigger: 'blur' }
+        ],
+        lib: [
+          { required: true, message: this.$t('pages.node.node-layout.project.project-edit.b5d7203a'), trigger: 'blur' }
+        ]
       },
       linkProjectData: {},
       loading: true,
@@ -575,7 +635,7 @@ export default {
       return new Promise((resolve, reject) => {
         if (this.temp.outGivingProject) {
           $notification.warning({
-            message: this.$tl('p.distributionManagement')
+            message: this.$t('pages.node.node-layout.project.project-edit.d074a68')
           })
           reject(false)
           return

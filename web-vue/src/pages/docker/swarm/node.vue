@@ -20,7 +20,7 @@
           />
           <a-input
             v-model:value="listQuery['nodeName']"
-            :placeholder="$tl('p.name')"
+            :placeholder="$t('pages.docker.swarm.node.bb769c1d')"
             class="search-input-item"
             @press-enter="loadData"
           />
@@ -38,22 +38,24 @@
               }
             "
             allow-clear
-            :placeholder="$tl('c.role')"
+            :placeholder="$t('pages.docker.swarm.node.377e1844')"
             class="search-input-item"
           >
-            <a-select-option key="worker">{{ $tl('c.workNode') }}</a-select-option>
-            <a-select-option key="manager">{{ $tl('c.managementNode') }}</a-select-option>
+            <a-select-option key="worker">{{ $t('pages.docker.swarm.node.e4035840') }}</a-select-option>
+            <a-select-option key="manager">{{ $t('pages.docker.swarm.node.acf5e304') }}</a-select-option>
           </a-select>
 
-          <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
+          <a-button type="primary" :loading="loading" @click="loadData">{{
+            $t('pages.docker.swarm.node.53c2763c')
+          }}</a-button>
           <a-statistic-countdown
             format="s"
-            :title="$tl('p.refreshCountdown')"
+            :title="$t('pages.docker.swarm.node.ae8f1e')"
             :value="countdownTime"
             @finish="loadData"
           >
             <template #suffix>
-              <div style="font-size: 12px">{{ $tl('p.sSeconds') }}</div>
+              <div style="font-size: 12px">{{ $t('pages.docker.swarm.node.28cda8') }}</div>
             </template>
           </a-statistic-countdown>
         </a-space>
@@ -68,11 +70,11 @@
         <template v-else-if="column.dataIndex === 'hostname'">
           <a-popover
             placement="topLeft"
-            :title="`${$tl('p.hostName')}${record.description && record.description.hostname}`"
+            :title="`${$t('pages.docker.swarm.node.7fb10499')}${record.description && record.description.hostname}`"
           >
             <template #content>
               <p>
-                {{ $tl('p.nodeId') }}: <a-tag>{{ record.id }}</a-tag>
+                {{ $t('pages.docker.swarm.node.ee50ba1c') }}: <a-tag>{{ record.id }}</a-tag>
               </p>
               <template v-if="record.description && record.description.resources">
                 <p>
@@ -86,7 +88,8 @@
               </template>
               <template v-if="record.description && record.description.engine">
                 <p>
-                  {{ $tl('p.version') }}: <a-tag>{{ record.description.engine.engineVersion }}</a-tag>
+                  {{ $t('pages.docker.swarm.node.d826aba2') }}:
+                  <a-tag>{{ record.description.engine.engineVersion }}</a-tag>
                 </p>
               </template>
             </template>
@@ -98,7 +101,9 @@
         <template v-else-if="column.dataIndex === 'state'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$tl('p.nodeStatus')}${record.status && record.status.state} ${$tl('p.nodeAvailability')}${record.spec ? record.spec.availability || '' : ''}`"
+            :title="`${$t('pages.docker.swarm.node.87c09576')}${record.status && record.status.state} ${$t(
+              'pages.docker.swarm.node.147fba6c'
+            )}${record.spec ? record.spec.availability || '' : ''}`"
           >
             <a-tag
               :color="
@@ -118,7 +123,11 @@
         <template v-else-if="column.dataIndex === 'role'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$tl('p.roleLabel')}${record.spec && record.spec.role} ${record.managerStatus && record.managerStatus.reachability === 'REACHABLE' ? $tl('p.managementStatus') + record.managerStatus.reachability : ''}`"
+            :title="`${$t('pages.docker.swarm.node.ec4b9b1')}${record.spec && record.spec.role} ${
+              record.managerStatus && record.managerStatus.reachability === 'REACHABLE'
+                ? $t('pages.docker.swarm.node.c1956a20') + record.managerStatus.reachability
+                : ''
+            }`"
           >
             <a-tag
               :color="`${record.managerStatus && record.managerStatus.reachability === 'REACHABLE' ? 'green' : ''}`"
@@ -147,7 +156,9 @@
         <template v-else-if="column.dataIndex === 'updatedAt'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$tl('p.modifyTime')}${text} ${$tl('p.createTime')}${record.createdAt}`"
+            :title="`${$t('pages.docker.swarm.node.a2b40316')}${text} ${$t('pages.docker.swarm.node.f5b90169')}${
+              record.createdAt
+            }`"
           >
             <span>
               {{ text }}
@@ -158,14 +169,22 @@
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <template v-if="record.managerStatus && record.managerStatus.leader">
-              <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('c.modify') }}</a-button>
-              <a-tooltip :title="$tl('p.primaryNodeCannotBeRemoved')">
-                <a-button size="small" type="primary" danger :disabled="true">{{ $tl('c.remove') }}</a-button>
+              <a-button size="small" type="primary" @click="handleEdit(record)">{{
+                $t('pages.docker.swarm.node.e2f053aa')
+              }}</a-button>
+              <a-tooltip :title="$t('pages.docker.swarm.node.55ade145')">
+                <a-button size="small" type="primary" danger :disabled="true">{{
+                  $t('pages.docker.swarm.node.7d868663')
+                }}</a-button>
               </a-tooltip>
             </template>
             <template v-else>
-              <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('c.modify') }}</a-button>
-              <a-button size="small" type="primary" danger @click="handleLeava(record)">{{ $tl('c.remove') }}</a-button>
+              <a-button size="small" type="primary" @click="handleEdit(record)">{{
+                $t('pages.docker.swarm.node.e2f053aa')
+              }}</a-button>
+              <a-button size="small" type="primary" danger @click="handleLeava(record)">{{
+                $t('pages.docker.swarm.node.7d868663')
+              }}</a-button>
             </template>
           </a-space>
         </template>
@@ -176,22 +195,22 @@
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$tl('p.editNode')"
+      :title="$t('pages.docker.swarm.node.9fa2f20c')"
       :mask-closable="false"
       @ok="handleEditOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$tl('c.role')" name="role">
+        <a-form-item :label="$t('pages.docker.swarm.node.377e1844')" name="role">
           <a-radio-group v-model:value="temp.role" name="role" :disabled="temp.leader">
-            <a-radio value="WORKER"> {{ $tl('c.workNode') }}</a-radio>
-            <a-radio value="MANAGER"> {{ $tl('c.managementNode') }} </a-radio>
+            <a-radio value="WORKER"> {{ $t('pages.docker.swarm.node.e4035840') }}</a-radio>
+            <a-radio value="MANAGER"> {{ $t('pages.docker.swarm.node.acf5e304') }} </a-radio>
           </a-radio-group>
         </a-form-item>
-        <a-form-item :label="$tl('c.status')" name="availability">
+        <a-form-item :label="$t('pages.docker.swarm.node.6e06fe4f')" name="availability">
           <a-radio-group v-model:value="temp.availability" name="availability">
-            <a-radio value="ACTIVE"> {{ $tl('p.active') }}</a-radio>
-            <a-radio value="PAUSE"> {{ $tl('p.paused') }} </a-radio>
-            <a-radio value="DRAIN"> {{ $tl('p.drained') }} </a-radio>
+            <a-radio value="ACTIVE"> {{ $t('pages.docker.swarm.node.ac2c5199') }}</a-radio>
+            <a-radio value="PAUSE"> {{ $t('pages.docker.swarm.node.a183e300') }} </a-radio>
+            <a-radio value="DRAIN"> {{ $t('pages.docker.swarm.node.312559de') }} </a-radio>
           </a-radio-group>
         </a-form-item>
       </a-form>
@@ -228,13 +247,13 @@ export default {
       editVisible: false,
       initSwarmVisible: false,
       rules: {
-        role: [{ required: true, message: this.$tl('p.pleaseSelectNodeRole'), trigger: 'blur' }],
-        availability: [{ required: true, message: this.$tl('p.pleaseSelectNodeStatus'), trigger: 'blur' }]
+        role: [{ required: true, message: this.$t('pages.docker.swarm.node.b559696f'), trigger: 'blur' }],
+        availability: [{ required: true, message: this.$t('pages.docker.swarm.node.3f74c0ab'), trigger: 'blur' }]
       },
 
       columns: [
         {
-          title: this.$tl('p.serialNumber'),
+          title: this.$t('pages.docker.swarm.node.72cebb96'),
           width: 80,
           ellipsis: true,
           align: 'center',
@@ -242,31 +261,31 @@ export default {
         },
         // { title: "节点Id", dataIndex: "id", ellipsis: true, },
         {
-          title: this.$tl('p.host'),
+          title: this.$t('pages.docker.swarm.node.2a72f1e6'),
           dataIndex: 'hostname',
           ellipsis: true
         },
         {
-          title: this.$tl('p.nodeAddress'),
+          title: this.$t('pages.docker.swarm.node.a0d52737'),
           width: 150,
           dataIndex: 'address',
           ellipsis: true
         },
         {
-          title: this.$tl('c.status'),
+          title: this.$t('pages.docker.swarm.node.6e06fe4f'),
           width: 140,
           dataIndex: 'state',
           ellipsis: true
         },
         {
-          title: this.$tl('c.role'),
+          title: this.$t('pages.docker.swarm.node.377e1844'),
           width: 110,
           dataIndex: 'role',
           ellipsis: true
         },
 
         {
-          title: this.$tl('p.systemType'),
+          title: this.$t('pages.docker.swarm.node.c4c0c00a'),
           width: 140,
           align: 'center',
           dataIndex: 'os',
@@ -280,7 +299,7 @@ export default {
         //   width: 170,
         // },
         {
-          title: this.$tl('p.modificationTime'),
+          title: this.$t('pages.docker.swarm.node.61164914'),
           dataIndex: 'updatedAt',
 
           ellipsis: true,
@@ -288,7 +307,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.docker.swarm.node.3bb962bf'),
           dataIndex: 'operation',
           fixed: 'right',
           align: 'center',
@@ -356,11 +375,11 @@ export default {
     //
     handleLeava(record) {
       $confirm({
-        title: this.$tl('p.systemPrompt'),
+        title: this.$t('pages.docker.swarm.node.b22d55a0'),
         zIndex: 1009,
-        content: this.$tl('p.areYouSureToRemoveThisNodeFromTheCluster'),
-        okText: this.$tl('p.confirm'),
-        cancelText: this.$tl('p.cancel'),
+        content: this.$t('pages.docker.swarm.node.b35e191c'),
+        okText: this.$t('pages.docker.swarm.node.e8e9db25'),
+        cancelText: this.$t('pages.docker.swarm.node.b12468e9'),
         onOk: () => {
           return dockerSwarmNodeLeave({
             nodeId: record.id,
