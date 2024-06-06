@@ -89,6 +89,7 @@ export default {
     content1: '参数描述,参数描述没有实际作用,仅是用于提示参数的含义',
     content2: '参数值,新增默认参数后在手动执行脚本时需要填写参数值',
     content3: '分发节点是指在编辑完脚本后自动将脚本内容同步节点的脚本中',
-    parameterContent: '参数{count}描述'
+    parameterContent: '参数{count}描述',
+    parameterValue: '参数{count}值'
   }
 }

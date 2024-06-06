@@ -98,6 +98,7 @@ export default {
     content2: 'Parameter values need to be filled in when manually executing scripts after adding default parameters',
     content3:
       'The distribution node refers to the script that automatically synchronizes the script content with the node after editing the script',
-    parameterContent: 'Parameter {count} description'
+    parameterContent: 'Parameter {count} description',
+    parameterValue: 'Parameter {count} value'
   }
 }
