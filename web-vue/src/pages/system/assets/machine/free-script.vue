@@ -12,15 +12,15 @@
             >
               <template #tool_before>
                 <a-tooltip>
-                  <template #title>{{ $tl('p.freeScriptDescription') }}</template>
-                  {{ $tl('p.help') }}
+                  <template #title>{{ $t('pages.system.assets.machine.free-script.69ed9ab7') }}</template>
+                  {{ $t('pages.system.assets.machine.free-script.edd2beb7') }}
                   <QuestionCircleOutlined />
                 </a-tooltip>
               </template>
             </code-editor>
           </a-form-item>
-          <a-form-item :label="$tl('p.executionPath')" name="path">
-            <a-input v-model:value="temp.path" :placeholder="$tl('p.scriptPath')" />
+          <a-form-item :label="$t('pages.system.assets.machine.free-script.243b7015')" name="path">
+            <a-input v-model:value="temp.path" :placeholder="$t('pages.system.assets.machine.free-script.8eec4f88')" />
           </a-form-item>
           <!-- <a-form-item :wrapper-col="{ span: 14, offset: 2 }">
             <a-space>
@@ -39,12 +39,12 @@
                 :loading="loading"
                 :disabled="!temp.content"
                 @click="onSubmit(false)"
-                >{{ $tl('p.execute') }}</a-button
+                >{{ $t('pages.system.assets.machine.free-script.985968bf') }}</a-button
               >
               <a-switch
                 v-model:checked="temp.appendTemplate"
-                :checked-children="$tl('p.appendScriptTemplate')"
-                :un-checked-children="$tl('p.doNotAppendScriptTemplate')"
+                :checked-children="$t('pages.system.assets.machine.free-script.f18e273b')"
+                :un-checked-children="$t('pages.system.assets.machine.free-script.d47b3f96')"
               />
             </a-space>
           </template>
@@ -58,9 +58,8 @@ import codeEditor from '@/components/codeEditor'
 import LogView2 from '@/components/logView/index2'
 import { getWebSocketUrl } from '@/api/config'
 
-import { useI18nPage } from '@/i18n/hooks/useI18nPage'
-const { $tl } = useI18nPage('pages.system.assets.machine.freeScript')
-
+import { useI18n } from 'vue-i18n'
+const { t: $t } = useI18n()
 const props = defineProps({
   machineId: {
     type: String,
@@ -100,14 +99,16 @@ const conentScript = () => {
   socket_.onerror = (err) => {
     console.error(err)
     $notification.error({
-      message: `web socket ${($tl('p.error'), $tl('p.checkWsProxy'))}`
+      message: `web socket ${
+        ($t('pages.system.assets.machine.free-script.d75d207f'), $t('pages.system.assets.machine.free-script.763330b'))
+      }`
     })
   }
   socket_.onclose = (err) => {
     //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
     console.error(err)
     loading.value = false
-    $message.warning($tl('p.sessionClosed'))
+    $message.warning($t('pages.system.assets.machine.free-script.8a2aae09'))
     // clearInterval(this.heart);
   }
   socket.value = socket_

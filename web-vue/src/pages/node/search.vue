@@ -1,7 +1,7 @@
 <template>
   <div class="">
     <template v-if="useSuggestions">
-      <a-result :title="$tl('p.noProjectOrNode')" :sub-title="$tl('p.addNewAsset')"> </a-result>
+      <a-result :title="$t('pages.node.search.2520ef6')" :sub-title="$t('pages.node.search.faab031b')"> </a-result>
     </template>
 
     <CustomTable
@@ -31,7 +31,7 @@
             v-if="!nodeId"
             v-model:value="listQuery.nodeId"
             allow-clear
-            :placeholder="$tl('c.selectNode')"
+            :placeholder="$t('pages.node.search.2388531c')"
             class="search-input-item"
           >
             <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
@@ -39,7 +39,7 @@
           <a-select
             v-model:value="listQuery.group"
             allow-clear
-            :placeholder="$tl('p.selectGroup')"
+            :placeholder="$t('pages.node.search.761c903a')"
             class="search-input-item"
             @change="getNodeProjectData"
           >
@@ -47,13 +47,13 @@
           </a-select>
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$tl('p.searchProjectName')"
+            :placeholder="$t('pages.node.search.33226e19')"
             class="search-input-item"
             @press-enter="getNodeProjectData"
           />
           <a-input
             v-model:value="listQuery['%projectId%']"
-            :placeholder="$tl('p.searchProjectId')"
+            :placeholder="$t('pages.node.search.9dc0bd7e')"
             class="search-input-item"
             @press-enter="getNodeProjectData"
           />
@@ -61,13 +61,15 @@
           <a-select
             v-model:value="listQuery.runMode"
             allow-clear
-            :placeholder="$tl('c.runMode')"
+            :placeholder="$t('pages.node.search.7fbd7a7e')"
             class="search-input-item"
           >
             <a-select-option v-for="item in runModeList" :key="item">{{ item }}</a-select-option>
           </a-select>
-          <a-tooltip :title="$tl('p.quickToFirstPage')">
-            <a-button :loading="loading" type="primary" @click="getNodeProjectData">{{ $tl('p.search') }}</a-button>
+          <a-tooltip :title="$t('pages.node.search.a89bd71f')">
+            <a-button :loading="loading" type="primary" @click="getNodeProjectData">{{
+              $t('pages.node.search.53c2763c')
+            }}</a-button>
           </a-tooltip>
 
           <!-- <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="silenceLoadData" /> -->
@@ -75,29 +77,33 @@
       </template>
       <template #toolPrefix>
         <a-dropdown v-if="selectedRowKeys && selectedRowKeys.length">
-          <a-button type="primary" size="small"> {{ $tl('c.batchOperation') }} <DownOutlined /> </a-button>
+          <a-button type="primary" size="small"> {{ $t('pages.node.search.766122c2') }} <DownOutlined /> </a-button>
           <template #overlay>
             <a-menu>
               <a-menu-item>
-                <a-button type="primary" @click="batchStart">{{ $tl('c.batchStart') }}</a-button>
+                <a-button type="primary" @click="batchStart">{{ $t('pages.node.search.8080545f') }}</a-button>
               </a-menu-item>
               <a-menu-item>
-                <a-button type="primary" @click="batchRestart">{{ $tl('p.batchRestart') }}</a-button>
+                <a-button type="primary" @click="batchRestart">{{ $t('pages.node.search.b15d1c0') }}</a-button>
               </a-menu-item>
               <a-menu-item>
-                <a-button type="primary" danger @click="batchStop">{{ $tl('p.batchClose') }}</a-button>
+                <a-button type="primary" danger @click="batchStop">{{ $t('pages.node.search.777ebf18') }}</a-button>
               </a-menu-item>
             </a-menu>
           </template>
         </a-dropdown>
         <a-button v-else type="primary" size="small" :disabled="true">
-          {{ $tl('c.batchOperation') }} <DownOutlined />
+          {{ $t('pages.node.search.766122c2') }} <DownOutlined />
         </a-button>
 
-        <a-button type="primary" size="small" @click="openAdd"><PlusOutlined />{{ $tl('p.addNew') }}</a-button>
+        <a-button type="primary" size="small" @click="openAdd"
+          ><PlusOutlined />{{ $t('pages.node.search.e141baa9') }}</a-button
+        >
         <template v-if="!nodeId">
           <a-dropdown v-if="nodeMap && Object.keys(nodeMap).length">
-            <a-button type="primary" size="small" danger> {{ $tl('c.synchronization') }} <DownOutlined /></a-button>
+            <a-button type="primary" size="small" danger>
+              {{ $t('pages.node.search.830dbf3c') }} <DownOutlined
+            /></a-button>
             <template #overlay>
               <a-menu>
                 <a-menu-item v-for="(nodeName, key) in nodeMap" :key="key" @click="reSyncProject(key)">
@@ -108,18 +114,18 @@
           </a-dropdown>
         </template>
         <a-button v-else type="primary" size="small" danger @click="reSyncProject(nodeId)">
-          <SyncOutlined />{{ $tl('c.synchronization') }}
+          <SyncOutlined />{{ $t('pages.node.search.830dbf3c') }}
         </a-button>
 
         <a-button v-if="nodeId" size="small" type="primary" @click="handlerExportData()"
-          ><DownloadOutlined />{{ $tl('p.exportData') }}</a-button
+          ><DownloadOutlined />{{ $t('pages.node.search.405389ab') }}</a-button
         >
         <a-dropdown v-if="nodeId">
           <template #overlay>
             <a-menu>
               <a-menu-item key="1">
                 <a-button type="primary" size="small" @click="handlerImportTemplate()">{{
-                  $tl('p.downloadTemplate')
+                  $t('pages.node.search.9b6f4751')
                 }}</a-button>
               </a-menu-item>
             </a-menu>
@@ -134,7 +140,7 @@
             :before-upload="importBeforeUpload"
           >
             <a-button size="small" type="primary"
-              ><UploadOutlined /> {{ $tl('p.importData') }} <DownOutlined />
+              ><UploadOutlined /> {{ $t('pages.node.search.bc386e1b') }} <DownOutlined />
             </a-button>
           </a-upload>
         </a-dropdown>
@@ -144,8 +150,8 @@
           <template #title>
             <div>
               <ul>
-                <li>{{ $tl('p.statusDataDelay') }}</li>
-                <li>{{ $tl('p.fileListOrder') }}</li>
+                <li>{{ $t('pages.node.search.e9efc582') }}</li>
+                <li>{{ $t('pages.node.search.e966e9a1') }}</li>
               </ul>
             </div>
           </template>
@@ -201,7 +207,12 @@
           <template v-else>
             <a-tooltip
               v-if="noFileModes.includes(record.runMode)"
-              :title="`${$tl('p.statusControl')}   ${(projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].statusMsg) || ''}`"
+              :title="`${$t('pages.node.search.be1be888')}   ${
+                (projectStatusMap[record.nodeId] &&
+                  projectStatusMap[record.nodeId][record.projectId] &&
+                  projectStatusMap[record.nodeId][record.projectId].statusMsg) ||
+                ''
+              }`"
             >
               <a-switch
                 :checked="
@@ -210,8 +221,8 @@
                   projectStatusMap[record.nodeId][record.projectId].pid > 0
                 "
                 disabled
-                :checked-children="$tl('p.statusOn')"
-                :un-checked-children="$tl('p.statusOff')"
+                :checked-children="$t('pages.node.search.7d4fd556')"
+                :un-checked-children="$t('pages.node.search.3c7f1afc')"
               />
             </a-tooltip>
             <span v-else>-</span>
@@ -221,7 +232,21 @@
         <template v-else-if="column.dataIndex === 'port'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$tl('p.processId')}${((projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].pids) || [(projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].pid) || '-']).join(',')} / ${$tl('p.portNumber')}${(projectStatusMap[record.nodeId] && projectStatusMap[record.nodeId][record.projectId] && projectStatusMap[record.nodeId][record.projectId].port) || '-'}`"
+            :title="`${$t('pages.node.search.3cf2b4f7')}${(
+              (projectStatusMap[record.nodeId] &&
+                projectStatusMap[record.nodeId][record.projectId] &&
+                projectStatusMap[record.nodeId][record.projectId].pids) || [
+                (projectStatusMap[record.nodeId] &&
+                  projectStatusMap[record.nodeId][record.projectId] &&
+                  projectStatusMap[record.nodeId][record.projectId].pid) ||
+                  '-'
+              ]
+            ).join(',')} / ${$t('pages.node.search.284af1b3')}${
+              (projectStatusMap[record.nodeId] &&
+                projectStatusMap[record.nodeId][record.projectId] &&
+                projectStatusMap[record.nodeId][record.projectId].port) ||
+              '-'
+            }`"
           >
             <span
               >{{
@@ -246,19 +271,25 @@
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleFile(record)">{{ $tl('p.fileType') }}</a-button>
+            <a-button size="small" type="primary" @click="handleFile(record)">{{
+              $t('pages.node.search.741604c2')
+            }}</a-button>
             <template v-if="noFileModes.includes(record.runMode)">
-              <a-button size="small" type="primary" @click="handleConsole(record)">{{ $tl('c.console') }}</a-button>
+              <a-button size="small" type="primary" @click="handleConsole(record)">{{
+                $t('pages.node.search.c474c963')
+              }}</a-button>
             </template>
             <template v-else>
-              <a-tooltip :title="$tl('p.noConsoleForFile')">
-                <a-button size="small" type="primary" :disabled="true">{{ $tl('c.console') }}</a-button></a-tooltip
+              <a-tooltip :title="$t('pages.node.search.2e4bb15d')">
+                <a-button size="small" type="primary" :disabled="true">{{
+                  $t('pages.node.search.c474c963')
+                }}</a-button></a-tooltip
               >
             </template>
 
             <a-dropdown>
               <a @click="(e) => e.preventDefault()">
-                {{ $tl('p.moreOptions') }}
+                {{ $t('pages.node.search.3b96efcb') }}
                 <DownOutlined />
               </a>
               <template #overlay>
@@ -266,38 +297,40 @@
                   <a-menu-item>
                     <template v-if="noFileModes.includes(record.runMode)">
                       <a-button size="small" type="primary" @click="handleTrigger(record)">{{
-                        $tl('c.trigger')
+                        $t('pages.node.search.e81c0988')
                       }}</a-button>
                     </template>
                     <template v-else>
-                      <a-tooltip :title="$tl('p.noTriggerForFile')">
+                      <a-tooltip :title="$t('pages.node.search.7da2710e')">
                         <a-button size="small" type="primary" :disabled="true">{{
-                          $tl('c.trigger')
+                          $t('pages.node.search.e81c0988')
                         }}</a-button></a-tooltip
                       >
                     </template>
                   </a-menu-item>
                   <a-menu-item v-if="noFileModes.includes(record.runMode)">
                     <a-button size="small" type="primary" @click="handleLogBack(record)"
-                      >{{ $tl('p.projectLog') }}
+                      >{{ $t('pages.node.search.afa17fb5') }}
                     </a-button>
                   </a-menu-item>
                   <a-menu-item>
-                    <a-button size="small" type="primary" @click="copyItem(record)">{{ $tl('p.copyAction') }}</a-button>
+                    <a-button size="small" type="primary" @click="copyItem(record)">{{
+                      $t('pages.node.search.167d3e23')
+                    }}</a-button>
                   </a-menu-item>
                   <a-menu-item>
                     <a-button size="small" type="primary" danger @click="handleDelete(record, '')">{{
-                      $tl('p.logicalDelete')
+                      $t('pages.node.search.f4272b09')
                     }}</a-button>
                   </a-menu-item>
                   <a-menu-item>
                     <a-button size="small" type="primary" danger @click="handleDelete(record, 'thorough')">{{
-                      $tl('p.permanentDelete')
+                      $t('pages.node.search.e12b0aaa')
                     }}</a-button>
                   </a-menu-item>
                   <a-menu-item>
                     <a-button size="small" type="primary" danger @click="migrateWorkspace(record)">{{
-                      $tl('p.migrateWorkspace')
+                      $t('pages.node.search.d5a5b82b')
                     }}</a-button>
                   </a-menu-item>
                   <a-menu-item>
@@ -306,7 +339,7 @@
                       type="primary"
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
                       @click="sortItemHander(record, index, 'top')"
-                      >{{ $tl('p.topPriority') }}</a-button
+                      >{{ $t('pages.node.search.24c6eea1') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
@@ -400,8 +433,8 @@
               </template>
             </a-list-item-meta>
             <div>
-              <a-tooltip :title="`${item.cause || $tl('c.notStarted')}`"
-                >{{ item.cause || $tl('c.notStarted') }}
+              <a-tooltip :title="`${item.cause || $t('pages.node.search.725a49a2')}`"
+                >{{ item.cause || $t('pages.node.search.725a49a2') }}
               </a-tooltip>
             </div>
           </a-list-item>
@@ -412,7 +445,7 @@
     <a-modal
       v-model:open="triggerVisible"
       destroy-on-close
-      :title="$tl('c.trigger')"
+      :title="$t('pages.node.search.e81c0988')"
       width="50%"
       :footer="null"
       :mask-closable="false"
@@ -420,18 +453,20 @@
       <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
           <template #rightExtra>
-            <a-tooltip :title="$tl('p.resetTriggerToken')">
-              <a-button type="primary" size="small" @click="resetTrigger">{{ $tl('p.resetAction') }}</a-button>
+            <a-tooltip :title="$t('pages.node.search.e172ddd8')">
+              <a-button type="primary" size="small" @click="resetTrigger">{{
+                $t('pages.node.search.6da09b16')
+              }}</a-button>
             </a-tooltip>
           </template>
-          <a-tab-pane key="1" :tab="$tl('p.executeAction')">
+          <a-tab-pane key="1" :tab="$t('pages.node.search.47bbbde8')">
             <a-space direction="vertical" style="width: 100%">
-              <a-alert :message="$tl('c.warmTip')" type="warning">
+              <a-alert :message="$t('pages.node.search.40ad503e')" type="warning">
                 <template #description>
                   <ul>
-                    <li>{{ $tl('p.triggerAddressInfo') }}</li>
-                    <li>{{ $tl('p.resetTriggerAddress') }}</li>
-                    <li>{{ $tl('p.batchTriggerParams') }}</li>
+                    <li>{{ $t('pages.node.search.8f9bc485') }}</li>
+                    <li>{{ $t('pages.node.search.21ae4cfc') }}</li>
+                    <li>{{ $t('pages.node.search.789c025c') }}</li>
                   </ul>
                 </template>
               </a-alert>
@@ -440,7 +475,7 @@
                 v-for="item in triggerUses"
                 :key="item.value"
                 type="info"
-                :message="`${item.desc}${$tl('p.triggerAddress')}(${$tl('c.copyTip')})`"
+                :message="`${item.desc}${$t('pages.node.search.27313a78')}(${$t('pages.node.search.4c8d1a3b')})`"
               >
                 <template #description>
                   <a-typography-paragraph
@@ -452,7 +487,10 @@
                 </template>
               </a-alert>
 
-              <a-alert type="info" :message="`${$tl('p.batchTriggerAddress')}(${$tl('c.copyTip')})`">
+              <a-alert
+                type="info"
+                :message="`${$t('pages.node.search.4bd083f4')}(${$t('pages.node.search.4c8d1a3b')})`"
+              >
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchTriggerUrl }">
                     <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
@@ -469,7 +507,7 @@
       v-model:open="editProjectVisible"
       destroy-on-close
       width="60vw"
-      :title="$tl('p.editProject')"
+      :title="$t('pages.node.search.18b73209')"
       :confirm-loading="confirmLoading"
       :mask-closable="false"
       @ok="
@@ -482,8 +520,8 @@
       "
     >
       <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$tl('p.selectNode')" :help="$tl('p.switchNodeDuringEdit')">
-          <a-select v-model:value="temp.nodeId" allow-clear :placeholder="$tl('c.selectNode')">
+        <a-form-item :label="$t('pages.node.search.580e6c10')" :help="$t('pages.node.search.ad3ec391')">
+          <a-select v-model:value="temp.nodeId" allow-clear :placeholder="$t('pages.node.search.2388531c')">
             <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
           </a-select>
         </a-form-item>
@@ -510,42 +548,42 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="50vw"
-      :title="$tl('p.migrateToOtherWorkspace')"
+      :title="$t('pages.node.search.d3aa1785')"
       :mask-closable="false"
       @ok="migrateWorkspaceOk"
     >
       <a-space direction="vertical" style="width: 100%">
-        <a-alert :message="$tl('c.warmTip')" type="warning" show-icon>
+        <a-alert :message="$t('pages.node.search.40ad503e')" type="warning" show-icon>
           <template #description>
-            {{ $tl('p.projectSupportAssociatedData') }}
+            {{ $t('pages.node.search.57868338') }}
             <ul>
               <li>
-                {{ $tl('p.onlineBuild') }}
+                {{ $t('pages.node.search.4822e6e') }}
 
                 <ol>
-                  <li>{{ $tl('p.cannotMigrateIfBuildRepoIsBoundByMultipleBuilds') }}</li>
-                  <li>{{ $tl('p.resolveDuplicateReposAfterAutoMigration') }}</li>
+                  <li>{{ $t('pages.node.search.67023ad') }}</li>
+                  <li>{{ $t('pages.node.search.7d50dc4f') }}</li>
                 </ol>
               </li>
-              <li>{{ $tl('p.nodeDistributionNotSupported') }}</li>
-              <li>{{ $tl('p.projectMonitoringNotSupported') }}</li>
-              <li>{{ $tl('p.logReadingNotSupported') }}</li>
+              <li>{{ $t('pages.node.search.9718d189') }}</li>
+              <li>{{ $t('pages.node.search.a15327bb') }}</li>
+              <li>{{ $t('pages.node.search.eb0f266a') }}</li>
             </ul>
           </template>
         </a-alert>
-        <a-alert :message="$tl('p.riskReminder')" type="error" show-icon>
+        <a-alert :message="$t('pages.node.search.8e8fe98c')" type="error" show-icon>
           <template #description>
             <ul>
-              <li>{{ $tl('p.logicalDeletionBeforeMigration') }}</li>
-              <li>{{ $tl('p.migrationIsNotTransactional') }}</li>
-              <li>{{ $tl('p.checkConnectionAndNetworkStatusBeforeMigration') }}</li>
+              <li>{{ $t('pages.node.search.9e237bfe') }}</li>
+              <li>{{ $t('pages.node.search.6fb792df') }}</li>
+              <li>{{ $t('pages.node.search.5e3f37cb') }}</li>
             </ul>
           </template>
         </a-alert>
       </a-space>
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
-        <a-form-item :label="$tl('p.selectWorkspace')" name="workspaceId">
+        <a-form-item :label="$t('pages.node.search.7ef9d8fb')" name="workspaceId">
           <a-select
             v-model:value="temp.workspaceId"
             show-search
@@ -559,13 +597,13 @@
                 )
               }
             "
-            :placeholder="$tl('c.selectWorkspace')"
+            :placeholder="$t('pages.node.search.3a321a02')"
             @change="loadMigrateWorkspaceNodeList"
           >
             <a-select-option v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item :label="$tl('p.selectLogicalNode')" name="nodeId">
+        <a-form-item :label="$t('pages.node.search.237e0d5a')" name="nodeId">
           <a-select
             v-model:value="temp.nodeId"
             show-search
@@ -579,7 +617,7 @@
                 )
               }
             "
-            :placeholder="$tl('c.selectLogicNode')"
+            :placeholder="$t('pages.node.search.59427711')"
           >
             <a-select-option v-for="item in migrateWorkspaceNodeList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
@@ -590,7 +628,7 @@
     <a-modal
       v-model:open="lobbackVisible"
       destroy-on-close
-      :title="$tl('p.logBackupList')"
+      :title="$t('pages.node.search.111eece')"
       width="850px"
       :footer="null"
       :mask-closable="false"
@@ -668,20 +706,20 @@ export default {
 
       columns: [
         {
-          title: this.$tl('p.projectId'),
+          title: this.$t('pages.node.search.4eaba425'),
           dataIndex: 'projectId',
           width: 100,
           ellipsis: true
         },
 
         {
-          title: this.$tl('p.projectName'),
+          title: this.$t('pages.node.search.e06912d'),
           dataIndex: 'name',
           // width: 200,
           ellipsis: true
         },
         {
-          title: this.$tl('p.projectGroup'),
+          title: this.$t('pages.node.search.c12c986a'),
           dataIndex: 'group',
           sorter: true,
           width: '100px',
@@ -689,40 +727,40 @@ export default {
           tooltip: true
         },
         {
-          title: this.$tl('p.nodeName'),
+          title: this.$t('pages.node.search.fa8d810f'),
           dataIndex: 'nodeId',
           width: 90,
           ellipsis: true
         },
         {
-          title: this.$tl('p.runningStatus'),
+          title: this.$t('pages.node.search.ca637451'),
           dataIndex: 'status',
           align: 'center',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$tl('p.projectPath'),
+          title: this.$t('pages.node.search.5b716424'),
           dataIndex: 'path',
           ellipsis: true,
           width: 120
         },
         {
-          title: this.$tl('p.logPath'),
+          title: this.$t('pages.node.search.eed26c71'),
           dataIndex: 'logPath',
           ellipsis: true,
           width: 120
         },
 
         {
-          title: this.$tl('p.portOrPid'),
+          title: this.$t('pages.node.search.5fd4d3fb'),
           dataIndex: 'port',
           width: 100,
           ellipsis: true
         },
 
         {
-          title: this.$tl('c.runMode'),
+          title: this.$t('pages.node.search.7fbd7a7e'),
           dataIndex: 'runMode',
           width: 90,
           ellipsis: true
@@ -735,7 +773,7 @@ export default {
           tooltip: true
         },
         {
-          title: this.$tl('p.createTime'),
+          title: this.$t('pages.node.search.f5b90169'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -743,7 +781,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$tl('p.updateTime'),
+          title: this.$t('pages.node.search.3d55d8de'),
           dataIndex: 'modifyTimeMillis',
           ellipsis: true,
           sorter: true,
@@ -751,20 +789,20 @@ export default {
           width: '170px'
         },
         {
-          title: this.$tl('p.modifier'),
+          title: this.$t('pages.node.search.916db24b'),
           dataIndex: 'modifyUser',
           width: '130px',
           ellipsis: true,
           sorter: true
         },
         {
-          title: this.$tl('p.sortValue'),
+          title: this.$t('pages.node.search.f5049383'),
           dataIndex: 'sortValue',
           sorter: true,
           width: '80px'
         },
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.node.search.3bb962bf'),
           dataIndex: 'operation',
           align: 'center',
           fixed: 'right',
@@ -774,10 +812,10 @@ export default {
       ],
       triggerVisible: false,
       triggerUses: [
-        { desc: this.$tl('p.viewStatus'), value: 'status' },
-        { desc: this.$tl('p.startProject'), value: 'start' },
-        { desc: this.$tl('p.stopProject'), value: 'stop' },
-        { desc: this.$tl('p.restartProject'), value: 'restart' }
+        { desc: this.$t('pages.node.search.fc48a099'), value: 'status' },
+        { desc: this.$t('pages.node.search.da6bd2c9'), value: 'start' },
+        { desc: this.$t('pages.node.search.8e0aca19'), value: 'stop' },
+        { desc: this.$t('pages.node.search.e6919f0c'), value: 'restart' }
       ],
       editProjectVisible: false,
       // countdownTime: Date.now(),
@@ -938,7 +976,7 @@ export default {
                   data2[item.projectId] = {
                     port: 0,
                     pid: 0,
-                    error: this.$tl('p.networkException')
+                    error: this.$t('pages.node.search.5374a803')
                   }
                 })
                 this.projectStatusMap = {
@@ -954,7 +992,7 @@ export default {
     // 文件管理
     handleFile(record) {
       this.temp = Object.assign({}, record)
-      this.drawerTitle = `${this.$tl('p.fileManagement')}(${this.temp.name})`
+      this.drawerTitle = `${this.$t('pages.node.search.502f94')}(${this.temp.name})`
       this.drawerFileVisible = true
     },
     // 关闭文件管理对话框
@@ -965,7 +1003,7 @@ export default {
     // 控制台
     handleConsole(record) {
       this.temp = Object.assign({}, record)
-      this.drawerTitle = `${this.$tl('c.console')}(${this.temp.name})`
+      this.drawerTitle = `${this.$t('pages.node.search.c474c963')}(${this.temp.name})`
       this.drawerConsoleVisible = true
     },
     // 关闭控制台
@@ -991,7 +1029,7 @@ export default {
       this.onFileClose()
       this.drawerReadFileVisible = true
       this.temp.readFilePath = (path + '/' + filename).replace(new RegExp('//', 'gm'), '/')
-      this.drawerTitle = `${this.$tl('p.trackFile')}(${filename})`
+      this.drawerTitle = `${this.$t('pages.node.search.c7a1ee83')}(${filename})`
     },
     onReadFileClose() {
       this.drawerReadFileVisible = false
@@ -1037,17 +1075,17 @@ export default {
     batchStart() {
       if (this.selectedRowKeys.length <= 0) {
         $notification.warning({
-          message: this.$tl('p.pleaseSelectProjectToStart')
+          message: this.$t('pages.node.search.b9d35477')
         })
         return
       }
       this.temp = {
-        title: this.$tl('c.batchStart'),
+        title: this.$t('pages.node.search.8080545f'),
         data: this.selectedRowKeysToId()
       }
 
       this.batchVisible = true
-      this.batchOptInfo(0, this.$tl('p.start'), 'start')
+      this.batchOptInfo(0, this.$t('pages.node.search.15f9c981'), 'start')
     },
     // 批量操作
     batchOptInfo(index, msg, opt) {
@@ -1055,7 +1093,7 @@ export default {
         return
       }
       const value = this.temp.data[index]
-      value.cause = msg + this.$tl('p.statusMedium')
+      value.cause = msg + this.$t('pages.node.search.b524b645')
       this.updateBatchData(index, value)
       if (value.runMode !== 'File') {
         const params = {
@@ -1071,12 +1109,12 @@ export default {
             this.batchOptInfo(index + 1, msg, opt)
           })
           .catch(() => {
-            value.cause = msg + this.$tl('p.failed')
+            value.cause = msg + this.$t('pages.node.search.79b90eec')
             this.updateBatchData(index, value)
             this.batchOptInfo(index + 1, msg, opt)
           })
       } else {
-        value.cause = this.$tl('p.skip')
+        value.cause = this.$t('pages.node.search.1d23b766')
         this.updateBatchData(index, value)
         this.batchOptInfo(index + 1, msg, opt)
       }
@@ -1086,31 +1124,31 @@ export default {
     batchRestart() {
       if (this.selectedRowKeys.length <= 0) {
         $notification.warning({
-          message: this.$tl('p.pleaseSelectProjectToRestart')
+          message: this.$t('pages.node.search.4c9b5f8e')
         })
         return
       }
       this.temp = {
-        title: this.$tl('p.batchRestart_1'),
+        title: this.$t('pages.node.search.170a6d47'),
         data: this.selectedRowKeysToId()
       }
       this.batchVisible = true
-      this.batchOptInfo(0, this.$tl('p.restartAction'), 'restart')
+      this.batchOptInfo(0, this.$t('pages.node.search.69a3e8e1'), 'restart')
     },
 
     //批量关闭
     batchStop() {
       if (this.selectedRowKeys.length <= 0) {
         $notification.warning({
-          message: this.$tl('p.pleaseSelectProjectToStop')
+          message: this.$t('pages.node.search.ca674286')
         })
       }
       this.temp = {
-        title: this.$tl('p.batchStopStart'),
+        title: this.$t('pages.node.search.4974c64c'),
         data: this.selectedRowKeysToId()
       }
       this.batchVisible = true
-      this.batchOptInfo(0, this.$tl('p.stopAction'), 'stop')
+      this.batchOptInfo(0, this.$t('pages.node.search.2f450533'), 'stop')
     },
 
     // 获取复选框属性 判断是否可以勾选
@@ -1129,11 +1167,11 @@ export default {
     },
     reSyncProject(nodeId) {
       $confirm({
-        title: this.$tl('c.systemTip'),
+        title: this.$t('pages.node.search.d3367221'),
         zIndex: 1009,
-        content: this.$tl('p.confirmResyncCache'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.node.search.837dc86b'),
+        okText: this.$t('pages.node.search.7da4a591'),
+        cancelText: this.$t('pages.node.search.43105e21'),
         onOk: () => {
           return syncProject(nodeId).then((res) => {
             if (res.code == 200) {
@@ -1149,22 +1187,24 @@ export default {
     // 排序
     sortItemHander(record, index, method) {
       const msgData = {
-        top: this.$tl('p.pinToTop'),
-        up: this.$tl('p.moveUp'),
-        down: this.$tl('p.moveDown')
+        top: this.$t('pages.node.search.a8734c35'),
+        up: this.$t('pages.node.search.6e79de86'),
+        down: this.$t('pages.node.search.78c0cb41')
       }
-      let msg = msgData[method] || this.$tl('p.operate')
+      let msg = msgData[method] || this.$t('pages.node.search.23f08eca')
       if (!record.sortValue) {
-        msg += `${this.$tl('p.defaultStatus')},${this.$tl('p.unexpectedOrder')},${this.$tl('p.expectedOrder')}`
+        msg += `${this.$t('pages.node.search.c7b66a29')},${this.$t('pages.node.search.e5d84892')},${this.$t(
+          'pages.node.search.dad3b017'
+        )}`
       }
       // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
       const compareId = this.projList[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id
       $confirm({
-        title: this.$tl('c.systemTip'),
+        title: this.$t('pages.node.search.d3367221'),
         zIndex: 1009,
         content: msg,
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        okText: this.$t('pages.node.search.7da4a591'),
+        cancelText: this.$t('pages.node.search.43105e21'),
         onOk: () => {
           return sortItemProject({
             id: record.id,
@@ -1246,7 +1286,7 @@ export default {
       delete temp.outGivingProject
       this.temp = {
         ...temp,
-        name: temp.name + this.$tl('p.copy'),
+        name: temp.name + this.$t('pages.node.search.a8ef5999'),
         id: temp.projectId + '_copy',
         lib: temp.lib + '_copy'
       }
@@ -1262,17 +1302,17 @@ export default {
     },
     // 删除
     handleDelete(record, thorough) {
-      const msg = thorough ? this.$tl('p.deleteForever') : this.$tl('p.deleteProject')
+      const msg = thorough ? this.$t('pages.node.search.56e17a4c') : this.$t('pages.node.search.8ced9e02')
       const html = thorough
         ? "<b style='font-size: 24px;color:red;font-weight: bold;'>" + msg + '</b>'
         : "<b style='font-size: 20px;font-weight: bold;'>" + msg + '</b>'
       $confirm({
-        title: this.$tl('c.systemTip'),
+        title: this.$t('pages.node.search.d3367221'),
         zIndex: 1009,
         content: h('p', { innerHTML: html }, null),
         okButtonProps: { type: 'primary', danger: !!thorough, size: thorough ? 'small' : 'middle' },
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        okText: this.$t('pages.node.search.7da4a591'),
+        cancelText: this.$t('pages.node.search.43105e21'),
         onOk: () => {
           return deleteProject({
             nodeId: record.nodeId,
@@ -1324,13 +1364,13 @@ export default {
     migrateWorkspaceOk() {
       if (!this.temp.workspaceId) {
         $notification.warn({
-          message: this.$tl('c.selectWorkspace')
+          message: this.$t('pages.node.search.3a321a02')
         })
         return false
       }
       if (!this.temp.nodeId) {
         $notification.warn({
-          message: this.$tl('c.selectLogicNode')
+          message: this.$t('pages.node.search.59427711')
         })
         return false
       }

@@ -17,14 +17,14 @@
         <a-space>
           <a-input
             v-model:value="listQuery['id']"
-            :placeholder="$tl('p.spaceId')"
+            :placeholder="$t('pages.system.workspace-list.844d3ebe')"
             allow-clear
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$tl('c.workspaceName')"
+            :placeholder="$t('pages.system.workspace-list.d83f3e09')"
             allow-clear
             class="search-input-item"
             @press-enter="loadData"
@@ -43,7 +43,7 @@
               }
             "
             allow-clear
-            :placeholder="$tl('c.group')"
+            :placeholder="$t('pages.system.workspace-list.b1765e98')"
             class="search-input-item"
           >
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
@@ -62,20 +62,22 @@
               }
             "
             allow-clear
-            :placeholder="$tl('c.cluster')"
+            :placeholder="$t('pages.system.workspace-list.17b26f41')"
             class="search-input-item"
           >
             <a-select-option v-for="item in clusterList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
-          <a-tooltip :title="$tl('p.quickBackToFirstPage')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
+          <a-tooltip :title="$t('pages.system.workspace-list.cb5a8131')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{
+              $t('pages.system.workspace-list.53c2763c')
+            }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">{{ $tl('p.add') }}</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $t('pages.system.workspace-list.7d46652a') }}</a-button>
           <a-tooltip>
             <template #title>
               <ul>
-                <li>{{ $tl('p.workspaceDescription') }}</li>
-                <li>{{ $tl('p.workspaceEnv') }}</li>
+                <li>{{ $t('pages.system.workspace-list.69594ec6') }}</li>
+                <li>{{ $t('pages.system.workspace-list.2604809e') }}</li>
               </ul>
             </template>
             <QuestionCircleOutlined />
@@ -119,16 +121,26 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('p.edit') }}</a-button>
-            <a-button size="small" type="primary" @click="configMeun(record)">{{ $tl('p.menu') }}</a-button>
-            <a-button size="small" type="primary" @click="configWhiteDir(record)">{{ $tl('p.authConfig') }}</a-button>
-            <a-button size="small" type="primary" @click="viewEnvVar(record)">{{ $tl('p.variable') }}</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{
+              $t('pages.system.workspace-list.64603c01')
+            }}</a-button>
+            <a-button size="small" type="primary" @click="configMeun(record)">{{
+              $t('pages.system.workspace-list.9850d888')
+            }}</a-button>
+            <a-button size="small" type="primary" @click="configWhiteDir(record)">{{
+              $t('pages.system.workspace-list.fdc31c9f')
+            }}</a-button>
+            <a-button size="small" type="primary" @click="viewEnvVar(record)">{{
+              $t('pages.system.workspace-list.f69fec3b')
+            }}</a-button>
 
-            <a-tooltip v-if="record.id === 'DEFAULT'" :title="$tl('p.cannotDeleteDefaultWorkspace')">
-              <a-button size="small" type="primary" danger :disabled="true">{{ $tl('c.deleteAction') }}</a-button>
+            <a-tooltip v-if="record.id === 'DEFAULT'" :title="$t('pages.system.workspace-list.517e0aa2')">
+              <a-button size="small" type="primary" danger :disabled="true">{{
+                $t('pages.system.workspace-list.bf510d47')
+              }}</a-button>
             </a-tooltip>
             <a-button v-else size="small" type="primary" danger @click="handleDelete(record)">{{
-              $tl('c.deleteAction')
+              $t('pages.system.workspace-list.bf510d47')
             }}</a-button>
           </a-space>
         </template>
@@ -139,16 +151,16 @@
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$tl('p.editWorkspace')"
+      :title="$t('pages.system.workspace-list.d2afd162')"
       :mask-closable="false"
       @ok="handleEditOk"
     >
-      <a-alert :message="$tl('p.warmReminder')" type="info" show-icon>
+      <a-alert :message="$t('pages.system.workspace-list.30376d6d')" type="info" show-icon>
         <template #description>
           <ul>
-            <li>{{ $tl('p.manageData') }}</li>
-            <li>{{ $tl('p.assignToUser') }}</li>
-            <li>{{ $tl('p.configSeparately') }}</li>
+            <li>{{ $t('pages.system.workspace-list.6472482b') }}</li>
+            <li>{{ $t('pages.system.workspace-list.cafa023a') }}</li>
+            <li>{{ $t('pages.system.workspace-list.8fa12a0f') }}</li>
           </ul>
         </template>
       </a-alert>
@@ -160,10 +172,14 @@
         :wrapper-col="{ span: 14 }"
         style="padding-top: 15px"
       >
-        <a-form-item :label="$tl('c.name')" name="name">
-          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$tl('c.workspaceName')" />
+        <a-form-item :label="$t('pages.system.workspace-list.3e34ec28')" name="name">
+          <a-input
+            v-model:value="temp.name"
+            :max-length="50"
+            :placeholder="$t('pages.system.workspace-list.d83f3e09')"
+          />
         </a-form-item>
-        <a-form-item :label="$tl('c.bindCluster')" name="clusterInfoId">
+        <a-form-item :label="$t('pages.system.workspace-list.1f1383b6')" name="clusterInfoId">
           <a-select
             v-model:value="temp.clusterInfoId"
             show-search
@@ -178,27 +194,27 @@
               }
             "
             allow-clear
-            :placeholder="$tl('c.bindCluster')"
+            :placeholder="$t('pages.system.workspace-list.1f1383b6')"
           >
             <a-select-option v-for="item in clusterList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item :label="$tl('c.group')" name="group">
+        <a-form-item :label="$t('pages.system.workspace-list.b1765e98')" name="group">
           <custom-select
             v-model:value="temp.group"
             :data="groupList"
-            :input-placeholder="$tl('p.addGroup')"
-            :select-placeholder="$tl('p.selectGroupName')"
+            :input-placeholder="$t('pages.system.workspace-list.c50ead9c')"
+            :select-placeholder="$t('pages.system.workspace-list.c385f859')"
           >
           </custom-select>
         </a-form-item>
 
-        <a-form-item :label="$tl('c.description')" name="description">
+        <a-form-item :label="$t('pages.system.workspace-list.4b2e093e')" name="description">
           <a-textarea
             v-model:value="temp.description"
             :max-length="200"
             :rows="5"
-            :placeholder="$tl('p.workspaceDesc')"
+            :placeholder="$t('pages.system.workspace-list.d8b6196d')"
           />
         </a-form-item>
       </a-form>
@@ -207,7 +223,7 @@
     <a-modal
       v-model:open="envVarListVisible"
       destroy-on-close
-      :title="`${temp.name} ${$tl('p.workspaceEnvVars')}`"
+      :title="`${temp.name} ${$t('pages.system.workspace-list.58f9d869')}`"
       width="80vw"
       :footer="null"
       :mask-closable="false"
@@ -219,19 +235,19 @@
       v-model:open="configMenuVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="`${temp.name} ${$tl('p.workspaceMenus')}`"
+      :title="`${temp.name} ${$t('pages.system.workspace-list.2da38372')}`"
       :mask-closable="false"
       @ok="onSubmitMenus"
     >
       <a-form ref="editWhiteForm" :model="menusConfigData">
         <a-row type="flex" justify="center">
           <a-alert
-            :message="`${$tl('p.menuConfigForNonAdmin')}`"
+            :message="`${$t('pages.system.workspace-list.a1f2ceff')}`"
             style="margin-top: 10px; margin-bottom: 20px; width: 100%"
             banner
           />
           <a-col :span="20">
-            <a-card :title="$tl('p.serverMenus')" :bordered="true">
+            <a-card :title="$t('pages.system.workspace-list.4a16a53c')" :bordered="true">
               <a-tree
                 v-if="menusConfigData.serverMenus"
                 v-model:checkedKeys="menusConfigData.serverMenuKeys"
@@ -253,7 +269,7 @@
     <a-modal
       v-model:open="configDir"
       destroy-on-close
-      :title="`${$tl('p.configAuthDir')}`"
+      :title="`${$t('pages.system.workspace-list.fcce7810')}`"
       :footer="null"
       width="60vw"
       :mask-closable="false"
@@ -278,7 +294,7 @@
       v-model:open="preDeleteVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="`${$tl('p.confirmDeleteWorkspace')}`"
+      :title="`${$t('pages.system.workspace-list.1c5ce361')}`"
       :mask-closable="false"
       @ok="handleDeleteOk"
       @cancel="
@@ -287,8 +303,10 @@
         }
       "
     >
-      <a-alert :message="$tl('p.operationTip')" type="error" show-icon>
-        <template #description> {{ $tl('p.confirmCurrentWorkspace') }},{{ $tl('p.deleteAssociatedData') }}</template>
+      <a-alert :message="$t('pages.system.workspace-list.5bba45b7')" type="error" show-icon>
+        <template #description>
+          {{ $t('pages.system.workspace-list.8d0c613e') }},{{ $t('pages.system.workspace-list.a87846a2') }}</template
+        >
       </a-alert>
 
       <a-tree :tree-data="treeData" default-expand-all :field-names="preDeleteReplaceFields" :show-line="true">
@@ -299,13 +317,18 @@
           {{ dataRef.name }}
 
           <template v-if="dataRef.count > 0">
-            <a-tag color="pink"> {{ $tl('p.dataExists') }} {{ dataRef.count }} {{ $tl('p.dataCount') }} </a-tag>
+            <a-tag color="pink">
+              {{ $t('pages.system.workspace-list.194bc8b9') }} {{ dataRef.count }}
+              {{ $t('pages.system.workspace-list.804a144d') }}
+            </a-tag>
 
-            <a-tag v-if="dataRef.workspaceBind === 2" color="cyan">{{ $tl('p.autoDelete') }}</a-tag>
-            <a-tag v-else-if="dataRef.workspaceBind === 3" color="blue">{{
-              $tl('p.autoDeleteIfParentNotExist')
+            <a-tag v-if="dataRef.workspaceBind === 2" color="cyan">{{
+              $t('pages.system.workspace-list.d6fc71ea')
             }}</a-tag>
-            <a-tag v-else color="purple">{{ $tl('p.manualDelete') }}</a-tag>
+            <a-tag v-else-if="dataRef.workspaceBind === 3" color="blue">{{
+              $t('pages.system.workspace-list.9f7d21f6')
+            }}</a-tag>
+            <a-tag v-else color="purple">{{ $t('pages.system.workspace-list.fcda4526') }}</a-tag>
           </template>
         </template>
       </a-tree>
@@ -357,39 +380,39 @@ export default {
       temp: {},
       columns: [
         {
-          title: this.$tl('c.name'),
+          title: this.$t('pages.system.workspace-list.3e34ec28'),
           dataIndex: 'name',
           ellipsis: true,
           width: 200
         },
         {
-          title: this.$tl('c.description'),
+          title: this.$t('pages.system.workspace-list.4b2e093e'),
           dataIndex: 'description',
           ellipsis: true,
           width: 200
         },
         {
-          title: this.$tl('p.groupName'),
+          title: this.$t('pages.system.workspace-list.12d0e469'),
           dataIndex: 'group',
           ellipsis: true,
           width: '100px',
           tooltip: true
         },
         {
-          title: this.$tl('c.cluster'),
+          title: this.$t('pages.system.workspace-list.17b26f41'),
           dataIndex: 'clusterInfoId',
           ellipsis: true,
           width: '100px'
         },
         {
-          title: this.$tl('p.modifier'),
+          title: this.$t('pages.system.workspace-list.916db24b'),
           dataIndex: 'modifyUser',
           ellipsis: true,
 
           width: 120
         },
         {
-          title: this.$tl('p.createTime'),
+          title: this.$t('pages.system.workspace-list.f5b90169'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -397,14 +420,14 @@ export default {
           width: '170px'
         },
         {
-          title: this.$tl('p.modifyTime'),
+          title: this.$t('pages.system.workspace-list.a2b40316'),
           dataIndex: 'modifyTimeMillis',
           customRender: ({ text }) => parseTime(text),
           sorter: true,
           width: '170px'
         },
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.system.workspace-list.3bb962bf'),
           dataIndex: 'operation',
           fixed: 'right',
           align: 'center',
@@ -415,9 +438,9 @@ export default {
 
       // 表单校验规则
       rules: {
-        name: [{ required: true, message: this.$tl('p.inputWorkspaceName'), trigger: 'blur' }],
-        description: [{ required: true, message: this.$tl('p.inputWorkspaceDesc'), trigger: 'blur' }],
-        clusterInfoId: [{ required: true, message: this.$tl('p.inputBindCluster'), trigger: 'blur' }]
+        name: [{ required: true, message: this.$t('pages.system.workspace-list.afb740ab'), trigger: 'blur' }],
+        description: [{ required: true, message: this.$t('pages.system.workspace-list.fa2192f9'), trigger: 'blur' }],
+        clusterInfoId: [{ required: true, message: this.$t('pages.system.workspace-list.34b97d6a'), trigger: 'blur' }]
       },
       configMenuVisible: false,
       replaceFields: { children: 'childs', title: 'title', key: 'id' },

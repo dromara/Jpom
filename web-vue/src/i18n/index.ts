@@ -9,8 +9,8 @@
 ///
 
 import { createI18n } from 'vue-i18n'
-import zhCN from './locales/zh-CN'
-import enUS from './locales/en_US'
+// @ts-ignore 兼容i8n_tools插件
+import { zhCN, enUS } from './locales'
 
 import antdZhCN from 'ant-design-vue/es/locale/zh_CN'
 import antdEnUS from 'ant-design-vue/es/locale/en_US'

@@ -21,40 +21,41 @@
         <ul>
           <li>
             <div>
-              <b style="color: red">{{ $tl('p.openSourceIsNotFree') }}</b
-              >，{{ $tl('p.contactUsForAuthorization') }} <b>logo{{ $tl('p.nameCopyright') }}</b
-              >，{{ $tl('p.legalRisks') }}
-              <div>{{ $tl('p.pursueLegalAction') }}</div>
+              <b style="color: red">{{ $t('pages.layout.about.bcb3c132') }}</b
+              >，{{ $t('pages.layout.about.eb71aee8') }} <b>logo{{ $t('pages.layout.about.6065956f') }}</b
+              >，{{ $t('pages.layout.about.c3cc824c') }}
+              <div>{{ $t('pages.layout.about.7ab34d72') }}</div>
             </div>
           </li>
           <li>
             <div>
-              <b style="color: red">{{ $tl('p.modifyCopyrightRisks') }}</b
-              >，{{ $tl('p.respectOpenSourceAgreement') }}
+              <b style="color: red">{{ $t('pages.layout.about.a09aa05') }}</b
+              >，{{ $t('pages.layout.about.d88b276') }}
             </div>
           </li>
         </ul>
       </template>
     </a-alert>
     <a-tabs>
-      <a-tab-pane key="0" :tab="$tl('p.supportOpenSource')">
-        <h2>Jpom {{ $tl('p.supportUs') }}</h2>
+      <a-tab-pane key="0" :tab="$t('pages.layout.about.2f2bcf9')">
+        <h2>Jpom {{ $t('pages.layout.about.8989ace2') }}</h2>
 
         <ul>
           <li>
-            Star {{ $tl('p.recommendToFriends') }} <a href="https://gitee.com/dromara/Jpom" target="_blank">Gitee</a> /
+            Star {{ $t('pages.layout.about.72cb28ed') }}
+            <a href="https://gitee.com/dromara/Jpom" target="_blank">Gitee</a> /
             <a href="https://github.com/dromara/Jpom" target="_blank">Github</a>
           </li>
-          <li>{{ $tl('p.donationSponsorship') }}</li>
-          <li>{{ $tl('p.prioritySupport') }}</li>
+          <li>{{ $t('pages.layout.about.37d4a17e') }}</li>
+          <li>{{ $t('pages.layout.about.322ed3e') }}</li>
           <li>
-            {{ $tl('p.enterpriseVersion')
+            {{ $t('pages.layout.about.35cdb498')
             }}<a href="https://jpom.top/pages/enterprise-service/" target="_blank">企业服务</a>
           </li>
         </ul>
         <div></div>
         <a-card style="text-align: center">
-          <template #title> {{ $tl('p.oneTimeDonation') }} </template>
+          <template #title> {{ $t('pages.layout.about.537239f8') }} </template>
           <template #extra>
             <a href="https://jpom.top/pages/praise/" target="_blank">更多说明</a>
           </template>
@@ -76,7 +77,10 @@
                   <!-- <setting-outlined key="setting" />
                   <edit-outlined key="edit" />
                   <ellipsis-outlined key="ellipsis" /> -->
-                  <a-card-meta :title="$tl('p.wechatAppreciation')" :description="$tl('p.scanToSupport')">
+                  <a-card-meta
+                    :title="$t('pages.layout.about.14728ef9')"
+                    :description="$t('pages.layout.about.255688b0')"
+                  >
                   </a-card-meta>
                 </template>
               </a-card>
@@ -95,7 +99,11 @@
                   <!-- <img alt="alipay" :src="alipayQrcorde" style="width: 90%; margin: 5%" /> -->
                 </template>
                 <template #actions>
-                  <a-card-meta :title="$tl('p.alipayTransfer')" :description="$tl('p.scanToTransfer')"> </a-card-meta>
+                  <a-card-meta
+                    :title="$t('pages.layout.about.266cd308')"
+                    :description="$t('pages.layout.about.2d4c1548')"
+                  >
+                  </a-card-meta>
 
                   <!-- <setting-outlined key="setting" />
                 <edit-outlined key="edit" />
@@ -107,19 +115,19 @@
           </a-row>
         </a-card>
       </a-tab-pane>
-      <a-tab-pane key="3" :tab="$tl('p.contactUs')">
+      <a-tab-pane key="3" :tab="$t('pages.layout.about.33d7e86e')">
         <div>
-          <h2 style="display: inline">{{ $tl('p.notePurpose') }}</h2>
-          {{ $tl('p.noteExample') }}<a-tag>{{ $tl('p.paidCommunity') }}</a-tag
-          ><a-tag>{{ $tl('p.enterpriseServices') }}</a-tag
-          ><a-tag>{{ $tl('p.advertising') }}</a-tag
-          ><a-tag>{{ $tl('p.cooperationInquiry') }}</a-tag>
-          <a-tag>{{ $tl('p.freeCommunity') }}</a-tag>
+          <h2 style="display: inline">{{ $t('pages.layout.about.b9dcb92c') }}</h2>
+          {{ $t('pages.layout.about.6fb79158') }}<a-tag>{{ $t('pages.layout.about.527e7279') }}</a-tag
+          ><a-tag>{{ $t('pages.layout.about.8f01b872') }}</a-tag
+          ><a-tag>{{ $t('pages.layout.about.7f261d74') }}</a-tag
+          ><a-tag>{{ $t('pages.layout.about.3748fe06') }}</a-tag>
+          <a-tag>{{ $t('pages.layout.about.d8c2cd8b') }}</a-tag>
         </div>
 
         <ul>
           <li>
-            {{ $tl('p.email')
+            {{ $t('pages.layout.about.6d12e07a')
             }}<a-typography-paragraph
               style="display: inline"
               :copyable="{ tooltip: false, text: 'bwcx_jzy@dromara.org' }"
@@ -128,14 +136,14 @@
             </a-typography-paragraph>
           </li>
           <li>
-            {{ $tl('p.wechat')
+            {{ $t('pages.layout.about.55dce4ca')
             }}<a-typography-paragraph style="display: inline" :copyable="{ tooltip: false, text: 'jpom66' }">
               <a href="https://jpom.top/pages/praise/join/" target="_blank"> jpom66</a>
             </a-typography-paragraph>
           </li>
         </ul>
 
-        <a-card :title="$tl('p.wechatQRCode')">
+        <a-card :title="$t('pages.layout.about.a9721057')">
           <div style="text-align: center">
             <a-image width="400px" :src="weixQrcodeJpom66" :preview="true"> </a-image>
           </div>
@@ -148,11 +156,11 @@
           /> -->
         </a-card>
       </a-tab-pane>
-      <a-tab-pane key="1" :tab="$tl('p.openSourceLicense')">
+      <a-tab-pane key="1" :tab="$t('pages.layout.about.d1403674')">
         <pre style="white-space: pre-wrap">{{ licenseText }}</pre>
       </a-tab-pane>
-      <a-tab-pane key="2" :tab="$tl('p.softwareAcknowledgment')">
-        <h1>Jpom {{ $tl('p.usedOpenSourceSoftware') }}</h1>
+      <a-tab-pane key="2" :tab="$t('pages.layout.about.9497520b')">
+        <h1>Jpom {{ $t('pages.layout.about.f5dd8a86') }}</h1>
         <a-list size="small" bordered :data-source="thankDependency">
           <template #renderItem="{ item }">
             <a-list-item>
@@ -174,10 +182,10 @@
             </a-list-item>
           </template>
           <template #header>
-            <div>{{ $tl('p.alphabeticalOrder') }}</div>
+            <div>{{ $t('pages.layout.about.f2e1f6d3') }}</div>
           </template>
           <template #footer>
-            <div>{{ $tl('p.moreRelatedDependencies') }}</div>
+            <div>{{ $t('pages.layout.about.77ac5b13') }}</div>
           </template>
         </a-list></a-tab-pane
       >
@@ -192,13 +200,12 @@ import weixinQrcorde from '@/assets/images/qrcode/weixin-small.png'
 import alipayPraiseQrcorde from '@/assets/images/qrcode/alipay-praise.jpg'
 import weixinPraiseQrcorde from '@/assets/images/qrcode/weixin-praise.jpg'
 import weixQrcodeJpom66 from '@/assets/images/qrcode/weix-qrcode-jpom66.jpg'
-import { useI18nPage } from '@/i18n/hooks/useI18nPage'
+import { useI18n } from 'vue-i18n'
+const { t: $t } = useI18n()
 // import jpomLogo from '@/assets/images/jpom.svg'
 const licenseText = ref('')
 
 const thankDependency = ref([])
-
-const { $tl } = useI18nPage('pages.layout.about')
 
 // const qrCodeSize = ref(200)
 
