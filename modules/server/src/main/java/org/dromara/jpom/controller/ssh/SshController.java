@@ -102,9 +102,9 @@ public class SshController extends BaseServerController {
                 String group = sshModel.getGroup();
                 String groupId = SecureUtil.sha1(StrUtil.emptyToDefault(group, StrUtil.EMPTY));
                 String groupId2 = StrUtil.format("g_{}", groupId);
-                groupNode.computeIfAbsent(groupId, s -> new TreeNode<>(groupId2, StrUtil.SLASH, group, 0));
+                groupNode.computeIfAbsent(groupId, s -> new TreeNode<>(groupId2, StrUtil.SLASH, group, sshModel.getName()));
                 //
-                TreeNode<String> treeNode = new TreeNode<>(sshModel.getId(), groupId2, sshModel.getName(), 0);
+                TreeNode<String> treeNode = new TreeNode<>(sshModel.getId(), groupId2, sshModel.getName(), sshModel.getName());
                 Map<String, Object> extra = new HashMap<>();
                 extra.put("fileDirs", sshModel.getFileDirs());
                 extra.put("isLeaf", true);
