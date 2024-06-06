@@ -12,7 +12,9 @@
           x: 'max-content'
         }"
       >
-        <template v-if="backupListData.path" #title> {{ $tl('p.backupDirectory') }}{{ backupListData.path }} </template>
+        <template v-if="backupListData.path" #title>
+          {{ $t('pages.node.node-layout.project.project-file-backup.d0c9ff5d') }}{{ backupListData.path }}
+        </template>
 
         <template #bodyCell="{ column, text, record }">
           <template v-if="column.dataIndex === 'filename'">
@@ -32,9 +34,11 @@
           </template>
           <template v-else-if="column.dataIndex === 'operation'">
             <a-space>
-              <a-button size="small" type="primary" @click="handleBackupFile(record)">{{ $tl('p.details') }}</a-button>
+              <a-button size="small" type="primary" @click="handleBackupFile(record)">{{
+                $t('pages.node.node-layout.project.project-file-backup.151c73eb')
+              }}</a-button>
               <a-button size="small" type="primary" danger @click="handlBackupeDelete(record)">{{
-                $tl('c.delete')
+                $t('pages.node.node-layout.project.project-file-backup.2f14e7d4')
               }}</a-button>
             </a-space>
           </template>
@@ -55,9 +59,11 @@
                   viewList = true
                 }
               "
-              >{{ $tl('p.returnToList') }}
+              >{{ $t('pages.node.node-layout.project.project-file-backup.a21788bc') }}
             </a-button>
-            <a-button size="small" type="primary" @click="loadData">{{ $tl('p.refreshDirectory') }}</a-button>
+            <a-button size="small" type="primary" @click="loadData">{{
+              $t('pages.node.node-layout.project.project-file-backup.71bd4892')
+            }}</a-button>
           </a-space>
         </div>
 
@@ -83,9 +89,17 @@
         >
           <template #title>
             <a-popconfirm
-              :title="`${uploadPath ? $tl('c.restorePrefix') + uploadPath + $tl('c.directorySuffix') : ''} ${$tl('c.restoreMethod')},${$tl('c.clearRestoreDescription')}`"
-              :ok-text="$tl('c.overwriteRestore')"
-              :cancel-text="$tl('c.clearRestore')"
+              :title="`${
+                uploadPath
+                  ? $t('pages.node.node-layout.project.project-file-backup.e1aa5b23') +
+                    uploadPath +
+                    $t('pages.node.node-layout.project.project-file-backup.7fa8492f')
+                  : ''
+              } ${$t('pages.node.node-layout.project.project-file-backup.2c42e7cd')},${$t(
+                'pages.node.node-layout.project.project-file-backup.69fd8524'
+              )}`"
+              :ok-text="$t('pages.node.node-layout.project.project-file-backup.7f268593')"
+              :cancel-text="$t('pages.node.node-layout.project.project-file-backup.2a382b54')"
               :ok-button-props="{
                 loading: recoverLoading
               }"
@@ -96,11 +110,15 @@
                 <QuestionCircleOutlined style="color: red" />
               </template>
               <!-- @click="recoverPath(uploadPath)" -->
-              <a-button size="small" type="primary">{{ $tl('c.restore') }}</a-button>
+              <a-button size="small" type="primary">{{
+                $t('pages.node.node-layout.project.project-file-backup.75a0292a')
+              }}</a-button>
             </a-popconfirm>
 
             <a-space>
-              <a-tag v-if="uploadPath" color="#2db7f5">{{ $tl('p.currentDirectory') }}{{ uploadPath || '' }}</a-tag>
+              <a-tag v-if="uploadPath" color="#2db7f5"
+                >{{ $t('pages.node.node-layout.project.project-file-backup.5a7e230f') }}{{ uploadPath || '' }}</a-tag
+              >
             </a-space>
           </template>
 
@@ -113,7 +131,11 @@
             </template>
             <template v-else-if="column.dataIndex === 'isDirectory'">
               <a-tooltip placement="topLeft" :title="text">
-                <span>{{ text ? $tl('p.directory') : $tl('p.file') }}</span>
+                <span>{{
+                  text
+                    ? $t('pages.node.node-layout.project.project-file-backup.64408008')
+                    : $t('pages.node.node-layout.project.project-file-backup.69cad40b')
+                }}</span>
               </a-tooltip>
             </template>
             <template v-else-if="column.dataIndex === 'fileSizeLong'">
@@ -129,21 +151,31 @@
             <template v-else-if="column.dataIndex === 'operation'">
               <a-space>
                 <template v-if="record.isDirectory">
-                  <a-tooltip :title="$tl('p.cannotDownloadDirectory')">
-                    <a-button size="small" type="primary" :disabled="true">{{ $tl('c.download') }}</a-button>
+                  <a-tooltip :title="$t('pages.node.node-layout.project.project-file-backup.88600d3e')">
+                    <a-button size="small" type="primary" :disabled="true">{{
+                      $t('pages.node.node-layout.project.project-file-backup.8e51d32d')
+                    }}</a-button>
                   </a-tooltip>
                 </template>
                 <template v-else>
                   <a-button size="small" type="primary" @click="handleDownload(record)">{{
-                    $tl('c.download')
+                    $t('pages.node.node-layout.project.project-file-backup.8e51d32d')
                   }}</a-button>
                 </template>
                 <template v-if="record.isDirectory">
                   <!-- record.filename -->
                   <a-popconfirm
-                    :title="`${record.filename ? $tl('c.restorePrefix') + record.filename + $tl('c.directorySuffix') : ''} ${$tl('c.restoreMethod')},${$tl('c.clearRestoreDescription')}`"
-                    :ok-text="$tl('c.overwriteRestore')"
-                    :cancel-text="$tl('c.clearRestore')"
+                    :title="`${
+                      record.filename
+                        ? $t('pages.node.node-layout.project.project-file-backup.e1aa5b23') +
+                          record.filename +
+                          $t('pages.node.node-layout.project.project-file-backup.7fa8492f')
+                        : ''
+                    } ${$t('pages.node.node-layout.project.project-file-backup.2c42e7cd')},${$t(
+                      'pages.node.node-layout.project.project-file-backup.69fd8524'
+                    )}`"
+                    :ok-text="$t('pages.node.node-layout.project.project-file-backup.7f268593')"
+                    :cancel-text="$t('pages.node.node-layout.project.project-file-backup.2a382b54')"
                     :ok-button-props="{
                       loading: recoverLoading
                     }"
@@ -153,17 +185,19 @@
                     <template #icon>
                       <QuestionCircleOutlined style="color: red" />
                     </template>
-                    <a-button size="small" type="primary">{{ $tl('c.restore') }}</a-button>
+                    <a-button size="small" type="primary">{{
+                      $t('pages.node.node-layout.project.project-file-backup.75a0292a')
+                    }}</a-button>
                   </a-popconfirm>
                 </template>
                 <template v-else>
                   <a-button size="small" type="primary" :loading="recoverLoading" @click="recover(record)">{{
-                    $tl('c.restore')
+                    $t('pages.node.node-layout.project.project-file-backup.75a0292a')
                   }}</a-button>
                 </template>
 
                 <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-                  $tl('c.delete')
+                  $t('pages.node.node-layout.project.project-file-backup.2f14e7d4')
                 }}</a-button>
               </a-space>
             </template>
@@ -219,25 +253,25 @@ export default {
 
       columns: [
         {
-          title: this.$tl('c.fileName'),
+          title: this.$t('pages.node.node-layout.project.project-file-backup.6a721706'),
           dataIndex: 'filename',
           ellipsis: true
         },
 
         {
-          title: this.$tl('c.fileSize'),
+          title: this.$t('pages.node.node-layout.project.project-file-backup.c3914d6a'),
           dataIndex: 'fileSizeLong',
           width: 120,
           ellipsis: true
         },
         {
-          title: this.$tl('c.modifiedTime'),
+          title: this.$t('pages.node.node-layout.project.project-file-backup.e7410f94'),
           dataIndex: 'modifyTimeLong',
           width: 180,
           ellipsis: true
         },
         {
-          title: this.$tl('c.operation'),
+          title: this.$t('pages.node.node-layout.project.project-file-backup.cadc075'),
           dataIndex: 'operation',
           width: 180,
           align: 'center',
@@ -246,30 +280,30 @@ export default {
       ],
       fileColumns: [
         {
-          title: this.$tl('c.fileName'),
+          title: this.$t('pages.node.node-layout.project.project-file-backup.6a721706'),
           dataIndex: 'filename',
           ellipsis: true
         },
         {
-          title: this.$tl('p.fileType'),
+          title: this.$t('pages.node.node-layout.project.project-file-backup.741604c2'),
           dataIndex: 'isDirectory',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$tl('c.fileSize'),
+          title: this.$t('pages.node.node-layout.project.project-file-backup.c3914d6a'),
           dataIndex: 'fileSizeLong',
           width: 120,
           ellipsis: true
         },
         {
-          title: this.$tl('c.modifiedTime'),
+          title: this.$t('pages.node.node-layout.project.project-file-backup.e7410f94'),
           dataIndex: 'modifyTimeLong',
           width: 180,
           ellipsis: true
         },
         {
-          title: this.$tl('c.operation'),
+          title: this.$t('pages.node.node-layout.project.project-file-backup.cadc075'),
           dataIndex: 'operation',
           width: 180,
           align: 'center',
@@ -326,7 +360,7 @@ export default {
       const key = 'root-' + new Date().getTime()
       this.treeList = [
         {
-          filename: this.$tl('p.directoryLabel') + (this.temp.filename || ''),
+          filename: this.$t('pages.node.node-layout.project.project-file-backup.6344a175') + (this.temp.filename || ''),
           level: 1,
           isDirectory: true,
           key: key,
@@ -397,7 +431,7 @@ export default {
     loadFileList() {
       if (Object.keys(this.tempNode).length === 0) {
         $notification.warn({
-          message: this.$tl('p.selectNode')
+          message: this.$t('pages.node.node-layout.project.project-file-backup.580e6c10')
         })
         return false
       }
@@ -430,7 +464,7 @@ export default {
     // 下载
     handleDownload(record) {
       $notification.info({
-        message: this.$tl('p.downloading')
+        message: this.$t('pages.node.node-layout.project.project-file-backup.1fce73f8')
       })
       // 请求参数
       const params = {
@@ -446,14 +480,18 @@ export default {
     // 删除
     handleDelete(record) {
       const msg = record.isDirectory
-        ? this.$tl('c.confirmDeletePrefix') + record.filename + this.$tl('p.confirmFolderRestore')
-        : this.$tl('c.confirmDeletePrefix') + record.filename + this.$tl('p.confirmFileRestore')
+        ? this.$t('pages.node.node-layout.project.project-file-backup.b658d8ec') +
+          record.filename +
+          this.$t('pages.node.node-layout.project.project-file-backup.1cad79c0')
+        : this.$t('pages.node.node-layout.project.project-file-backup.b658d8ec') +
+          record.filename +
+          this.$t('pages.node.node-layout.project.project-file-backup.194806c7')
       $confirm({
-        title: this.$tl('c.systemPrompt'),
+        title: this.$t('pages.node.node-layout.project.project-file-backup.a8fe4c17'),
         zIndex: 1009,
         content: msg,
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        okText: this.$t('pages.node.node-layout.project.project-file-backup.7da4a591'),
+        cancelText: this.$t('pages.node.node-layout.project.project-file-backup.43105e21'),
         onOk: () => {
           return backupDeleteProjectFile({
             nodeId: this.nodeId,
@@ -475,13 +513,16 @@ export default {
     },
     // 删除备份
     handlBackupeDelete(record) {
-      const msg = this.$tl('c.confirmDeletePrefix') + record.filename + this.$tl('p.confirmBackupFolderRestore')
+      const msg =
+        this.$t('pages.node.node-layout.project.project-file-backup.b658d8ec') +
+        record.filename +
+        this.$t('pages.node.node-layout.project.project-file-backup.fe7b030a')
       $confirm({
-        title: this.$tl('c.systemPrompt'),
+        title: this.$t('pages.node.node-layout.project.project-file-backup.a8fe4c17'),
         zIndex: 1009,
         content: msg,
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        okText: this.$t('pages.node.node-layout.project.project-file-backup.7da4a591'),
+        cancelText: this.$t('pages.node.node-layout.project.project-file-backup.43105e21'),
         onOk: () => {
           return backupDeleteProjectFile({
             nodeId: this.nodeId,
@@ -511,11 +552,14 @@ export default {
         this.recoverPath(record.filename)
       } else {
         $confirm({
-          title: this.$tl('c.systemPrompt'),
+          title: this.$t('pages.node.node-layout.project.project-file-backup.a8fe4c17'),
           zIndex: 1009,
-          content: this.$tl('p.confirmRestorePrefix') + record.filename + this.$tl('p.confirmFileRestoreToProject'),
-          okText: this.$tl('c.confirm'),
-          cancelText: this.$tl('c.cancel'),
+          content:
+            this.$t('pages.node.node-layout.project.project-file-backup.24fdeed2') +
+            record.filename +
+            this.$t('pages.node.node-layout.project.project-file-backup.f4ea8f84'),
+          okText: this.$t('pages.node.node-layout.project.project-file-backup.7da4a591'),
+          cancelText: this.$t('pages.node.node-layout.project.project-file-backup.43105e21'),
           onOk() {
             // // 请求参数
             this.recoverNet('', record.filename)

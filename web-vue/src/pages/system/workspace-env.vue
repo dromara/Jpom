@@ -17,32 +17,32 @@
         <a-space>
           <a-input
             v-model:value="envVarListQuery['%name%']"
-            :placeholder="$tl('c.name')"
+            :placeholder="$t('pages.system.workspace-env.3e34ec28')"
             allow-clear
             class="search-input-item"
             @press-enter="loadDataEnvVar"
           />
           <a-input
             v-model:value="envVarListQuery['%value%']"
-            :placeholder="$tl('c.value')"
+            :placeholder="$t('pages.system.workspace-env.c1c14269')"
             allow-clear
             class="search-input-item"
             @press-enter="loadDataEnvVar"
           />
           <a-input
             v-model:value="envVarListQuery['%description%']"
-            :placeholder="$tl('c.description')"
+            :placeholder="$t('pages.system.workspace-env.4b2e093e')"
             allow-clear
             class="search-input-item"
             @press-enter="loadDataEnvVar"
           />
-          <a-button type="primary" @click="loadDataEnvVar">{{ $tl('p.search') }}</a-button>
-          <a-button type="primary" @click="addEnvVar">{{ $tl('p.add') }}</a-button>
+          <a-button type="primary" @click="loadDataEnvVar">{{ $t('pages.system.workspace-env.53c2763c') }}</a-button>
+          <a-button type="primary" @click="addEnvVar">{{ $t('pages.system.workspace-env.7d46652a') }}</a-button>
           <a-tooltip>
             <template #title>
-              <div>{{ $tl('p.envDescription') }}</div>
-              <div>{{ $tl('p.envUsage') }}</div>
-              <div>{{ $tl('p.scopeNote') }}</div>
+              <div>{{ $t('pages.system.workspace-env.e188b304') }}</div>
+              <div>{{ $t('pages.system.workspace-env.1601450d') }}</div>
+              <div>{{ $t('pages.system.workspace-env.3abecbf2') }}</div>
             </template>
             <QuestionCircleOutlined />
           </a-tooltip>
@@ -50,7 +50,10 @@
       </template>
       <template #bodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'value'">
-          <a-tooltip placement="topLeft" :title="record.privacy === 1 ? $tl('p.privacyField') : text">
+          <a-tooltip
+            placement="topLeft"
+            :title="record.privacy === 1 ? $t('pages.system.workspace-env.882745f1') : text"
+          >
             <EyeInvisibleOutlined v-if="record.privacy === 1" />
             <span v-else>{{ text }}</span>
           </a-tooltip>
@@ -62,17 +65,21 @@
         </template>
 
         <template v-else-if="column.dataIndex === 'workspaceId'">
-          <span>{{ text === 'GLOBAL' ? $tl('p.globalScope') : $tl('p.currentWorkspace') }}</span>
+          <span>{{
+            text === 'GLOBAL' ? $t('pages.system.workspace-env.b21bb9ac') : $t('pages.system.workspace-env.919267cc')
+          }}</span>
         </template>
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEnvEdit(record)">{{ $tl('p.edit') }}</a-button>
+            <a-button size="small" type="primary" @click="handleEnvEdit(record)">{{
+              $t('pages.system.workspace-env.64603c01')
+            }}</a-button>
             <a-button size="small" type="primary" :disabled="record.privacy === 1" @click="handleTrigger(record)">{{
-              $tl('c.trigger')
+              $t('pages.system.workspace-env.e81c0988')
             }}</a-button>
             <a-button size="small" type="primary" danger @click="handleEnvDelete(record)">{{
-              $tl('p.delete')
+              $t('pages.system.workspace-env.dd20d11c')
             }}</a-button>
           </a-space>
         </template>
@@ -83,34 +90,50 @@
     <a-modal
       v-model:open="editEnvVisible"
       :confirm-loading="confirmLoading"
-      :title="$tl('p.editEnv')"
+      :title="$t('pages.system.workspace-env.f48b76ed')"
       width="50vw"
       :mask-closable="false"
       @ok="handleEnvEditOk"
     >
       <a-form ref="editEnvForm" :rules="rulesEnv" :model="envTemp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$tl('c.name')" name="name">
-          <a-input v-model:value="envTemp.name" :max-length="50" :placeholder="$tl('p.varName')" />
+        <a-form-item :label="$t('pages.system.workspace-env.3e34ec28')" name="name">
+          <a-input
+            v-model:value="envTemp.name"
+            :max-length="50"
+            :placeholder="$t('pages.system.workspace-env.ea01237a')"
+          />
         </a-form-item>
-        <a-form-item :label="$tl('c.value')" :prop="`${envTemp.privacy === 1 ? '' : 'value'}`">
-          <a-textarea v-model:value="envTemp.value" :rows="5" :placeholder="$tl('p.varValue')" />
+        <a-form-item
+          :label="$t('pages.system.workspace-env.c1c14269')"
+          :prop="`${envTemp.privacy === 1 ? '' : 'value'}`"
+        >
+          <a-textarea
+            v-model:value="envTemp.value"
+            :rows="5"
+            :placeholder="$t('pages.system.workspace-env.4470477e')"
+          />
         </a-form-item>
-        <a-form-item :label="$tl('c.description')" name="description">
-          <a-textarea v-model:value="envTemp.description" :max-length="200" :rows="5" :placeholder="$tl('p.varDesc')" />
+        <a-form-item :label="$t('pages.system.workspace-env.4b2e093e')" name="description">
+          <a-textarea
+            v-model:value="envTemp.description"
+            :max-length="200"
+            :rows="5"
+            :placeholder="$t('pages.system.workspace-env.bf97f128')"
+          />
         </a-form-item>
         <a-form-item name="privacy">
           <template #label>
             <a-tooltip>
-              {{ $tl('p.privacyVar') }}
-              <template #title> {{ $tl('p.privacyVarDesc') }} </template>
+              {{ $t('pages.system.workspace-env.42a4f580') }}
+              <template #title> {{ $t('pages.system.workspace-env.a7685d3b') }} </template>
               <QuestionCircleOutlined v-show="!envTemp.id" />
             </a-tooltip>
           </template>
           <a-switch
             :checked="envTemp.privacy === 1"
             :disabled="envTemp.id !== undefined"
-            :checked-children="$tl('p.privacy')"
-            :un-checked-children="$tl('p.nonPrivacy')"
+            :checked-children="$t('pages.system.workspace-env.a4be6169')"
+            :un-checked-children="$t('pages.system.workspace-env.93b5d49f')"
             @change="
               (checked) => {
                 envTemp = { ...envTemp, privacy: checked ? 1 : 0 }
@@ -121,8 +144,8 @@
         <a-form-item>
           <template #label>
             <a-tooltip>
-              {{ $tl('p.distributeNode') }}
-              <template #title> {{ $tl('p.distributeNodeDesc') }}</template>
+              {{ $t('pages.system.workspace-env.bcd969cb') }}
+              <template #title> {{ $t('pages.system.workspace-env.dfe01b33') }}</template>
               <QuestionCircleOutlined v-show="!envTemp.id" />
             </a-tooltip>
           </template>
@@ -139,7 +162,7 @@
                 )
               }
             "
-            :placeholder="$tl('p.selectNode')"
+            :placeholder="$t('pages.system.workspace-env.580e6c10')"
             mode="multiple"
           >
             <a-select-option v-for="item in nodeList" :key="item.id" :value="item.id">
@@ -153,7 +176,7 @@
     <a-modal
       v-model:open="triggerVisible"
       destroy-on-close
-      :title="$tl('c.trigger')"
+      :title="$t('pages.system.workspace-env.e81c0988')"
       width="50%"
       :footer="null"
       :mask-closable="false"
@@ -161,19 +184,21 @@
       <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
           <template #rightExtra>
-            <a-tooltip :title="$tl('p.resetToken')">
-              <a-button type="primary" size="small" @click="resetTrigger">{{ $tl('p.reset') }}</a-button>
+            <a-tooltip :title="$t('pages.system.workspace-env.5c0bb1c0')">
+              <a-button type="primary" size="small" @click="resetTrigger">{{
+                $t('pages.system.workspace-env.da1d2343')
+              }}</a-button>
             </a-tooltip>
           </template>
-          <a-tab-pane key="1" :tab="$tl('p.get')">
+          <a-tab-pane key="1" :tab="$t('pages.system.workspace-env.7d6738bd')">
             <a-space direction="vertical" style="width: 100%">
-              <a-alert :message="$tl('p.tips')" type="warning">
+              <a-alert :message="$t('pages.system.workspace-env.8179a313')" type="warning">
                 <template #description>
                   <ul>
-                    <li>{{ $tl('p.contentType') }}</li>
-                    <li>{{ $tl('p.successCode') }}</li>
-                    <li>{{ $tl('p.modifySuccess') }}</li>
-                    <li>PUT {{ $tl('p.requestBodyType') }}</li>
+                    <li>{{ $t('pages.system.workspace-env.fb6b3414') }}</li>
+                    <li>{{ $t('pages.system.workspace-env.1483947f') }}</li>
+                    <li>{{ $t('pages.system.workspace-env.a8213c8f') }}</li>
+                    <li>PUT {{ $t('pages.system.workspace-env.a32ecd9') }}</li>
                   </ul>
                 </template>
               </a-alert>
@@ -181,7 +206,7 @@
               <a-alert type="info">
                 <template #message>
                   <a-typography-paragraph :copyable="{ text: temp.triggerUrl }"
-                    >{{ $tl('p.getAddress') }}
+                    >{{ $t('pages.system.workspace-env.d93f2ea1') }}
                   </a-typography-paragraph>
                 </template>
                 <template #description>
@@ -192,7 +217,7 @@
               <a-alert type="info">
                 <template #message>
                   <a-typography-paragraph :copyable="{ text: temp.triggerUrlPost }">
-                    {{ $tl('c.modifyAddress') }}
+                    {{ $t('pages.system.workspace-env.9f70798a') }}
                   </a-typography-paragraph>
                 </template>
                 <template #description>
@@ -202,7 +227,7 @@
               <a-alert type="info">
                 <template #message>
                   <a-typography-paragraph :copyable="{ text: temp.triggerUrl }">
-                    {{ $tl('c.modifyAddress') }}
+                    {{ $t('pages.system.workspace-env.9f70798a') }}
                   </a-typography-paragraph>
                 </template>
                 <template #description>
@@ -244,39 +269,39 @@ export default {
       temp: {},
       envVarColumns: [
         {
-          title: this.$tl('c.name'),
+          title: this.$t('pages.system.workspace-env.3e34ec28'),
           dataIndex: 'name',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$tl('c.value'),
+          title: this.$t('pages.system.workspace-env.c1c14269'),
           dataIndex: 'value',
           ellipsis: true
         },
 
         {
-          title: this.$tl('c.description'),
+          title: this.$t('pages.system.workspace-env.4b2e093e'),
           dataIndex: 'description',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$tl('p.modifier'),
+          title: this.$t('pages.system.workspace-env.916db24b'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           tooltip: true,
           width: 120
         },
         {
-          title: this.$tl('p.scope'),
+          title: this.$t('pages.system.workspace-env.8a2fc9dd'),
           dataIndex: 'workspaceId',
           ellipsis: true,
 
           width: '120px'
         },
         {
-          title: this.$tl('p.modifyTime'),
+          title: this.$t('pages.system.workspace-env.a2b40316'),
           dataIndex: 'modifyTimeMillis',
           customRender: ({ text }) => {
             return parseTime(text)
@@ -285,7 +310,7 @@ export default {
           width: '180px'
         },
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.system.workspace-env.3bb962bf'),
           dataIndex: 'operation',
           align: 'center',
 
@@ -294,9 +319,9 @@ export default {
       ],
       // 表单校验规则
       rulesEnv: {
-        name: [{ required: true, message: this.$tl('p.inputName'), trigger: 'blur' }],
-        description: [{ required: true, message: this.$tl('p.inputDesc'), trigger: 'blur' }],
-        value: [{ required: true, message: this.$tl('p.inputValue'), trigger: 'blur' }]
+        name: [{ required: true, message: this.$t('pages.system.workspace-env.95105178'), trigger: 'blur' }],
+        description: [{ required: true, message: this.$t('pages.system.workspace-env.c086832a'), trigger: 'blur' }],
+        value: [{ required: true, message: this.$t('pages.system.workspace-env.aa013720'), trigger: 'blur' }]
       },
       triggerVisible: false,
       confirmLoading: false
@@ -370,11 +395,11 @@ export default {
     //
     handleEnvDelete(record) {
       $confirm({
-        title: this.$tl('p.systemTips'),
+        title: this.$t('pages.system.workspace-env.2c32d62b'),
         zIndex: 1009,
-        content: this.$tl('p.confirmDelete'),
-        okText: this.$tl('p.confirm'),
-        cancelText: this.$tl('p.cancel'),
+        content: this.$t('pages.system.workspace-env.987c2cd6'),
+        okText: this.$t('pages.system.workspace-env.e8e9db25'),
+        cancelText: this.$t('pages.system.workspace-env.b12468e9'),
         onOk: () => {
           return deleteWorkspaceEnv({
             id: record.id,

@@ -24,28 +24,32 @@
           <a-space>
             <a-input
               v-model:value="listQuery['%name%']"
-              :placeholder="$tl('p.fileName')"
+              :placeholder="$t('pages.file-manager.staticFileStorage.list.a6eb2ded')"
               class="search-input-item"
               @press-enter="loadData"
             />
 
             <a-input
               v-model:value="listQuery['extName']"
-              :placeholder="$tl('p.suffixSearch')"
+              :placeholder="$t('pages.file-manager.staticFileStorage.list.4fd0f685')"
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['id']"
-              :placeholder="$tl('p.fileIdSearch')"
+              :placeholder="$t('pages.file-manager.staticFileStorage.list.8200285')"
               class="search-input-item"
               @press-enter="loadData"
             />
-            <a-tooltip :title="$tl('p.quickBackToFirstPage')">
-              <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
+            <a-tooltip :title="$t('pages.file-manager.staticFileStorage.list.cb5a8131')">
+              <a-button type="primary" :loading="loading" @click="loadData">{{
+                $t('pages.file-manager.staticFileStorage.list.53c2763c')
+              }}</a-button>
             </a-tooltip>
             <!-- <a-button type="primary" @click="handleUpload">上传文件</a-button> -->
-            <a-button type="primary" @click="reScanner">{{ $tl('p.scan') }}</a-button>
+            <a-button type="primary" @click="reScanner">{{
+              $t('pages.file-manager.staticFileStorage.list.21e651b5')
+            }}</a-button>
 
             <a-button
               type="primary"
@@ -53,7 +57,7 @@
               :disabled="!tableSelections || tableSelections.length <= 0"
               @click="handleBatchDelete"
             >
-              {{ $tl('p.batchDelete') }}
+              {{ $t('pages.file-manager.staticFileStorage.list.b5139d46') }}
             </a-button>
             <a-button
               size="small"
@@ -64,7 +68,7 @@
                 }
               "
             >
-              <InfoCircleOutlined /> {{ $tl('p.configDirectory') }}
+              <InfoCircleOutlined /> {{ $t('pages.file-manager.staticFileStorage.list.1ab4dc38') }}
             </a-button>
           </a-space>
         </template>
@@ -81,11 +85,11 @@
             </a-tooltip>
           </template>
           <template v-else-if="column.dataIndex === 'name'">
-            <a-popover :title="$tl('p.fileInfo')">
+            <a-popover :title="$t('pages.file-manager.staticFileStorage.list.334162bc')">
               <template #content>
-                <p>{{ $tl('p.fileId') }}{{ record.id }}</p>
-                <p>{{ $tl('p.fileNameLabel') }}{{ text }}</p>
-                <p>{{ $tl('p.fileDescriptionLabel') }}{{ record.description }}</p>
+                <p>{{ $t('pages.file-manager.staticFileStorage.list.48f7e53e') }}{{ record.id }}</p>
+                <p>{{ $t('pages.file-manager.staticFileStorage.list.10902f4f') }}{{ text }}</p>
+                <p>{{ $t('pages.file-manager.staticFileStorage.list.fa56a3f7') }}{{ record.description }}</p>
               </template>
               <!-- {{ text }} -->
               <a-button type="link" style="padding: 0" size="small" @click="handleEdit(record)">{{ text }}</a-button>
@@ -98,19 +102,24 @@
             </a-tooltip>
           </template>
           <template v-else-if="column.dataIndex === 'source'">
-            <a-tooltip placement="topLeft" :title="`${sourceMap[text] || $tl('c.content1')}`">
-              <span>{{ sourceMap[text] || $tl('c.content1') }}</span>
+            <a-tooltip
+              placement="topLeft"
+              :title="`${sourceMap[text] || $t('pages.file-manager.staticFileStorage.list.da636096')}`"
+            >
+              <span>{{ sourceMap[text] || $t('pages.file-manager.staticFileStorage.list.da636096') }}</span>
             </a-tooltip>
           </template>
 
           <template v-else-if="column.dataIndex === 'status'">
-            <a-tag v-if="text === 1" color="green">{{ $tl('p.exist') }}</a-tag>
-            <a-tag v-else color="red">{{ $tl('p.missing') }}</a-tag>
+            <a-tag v-if="text === 1" color="green">{{
+              $t('pages.file-manager.staticFileStorage.list.a78774e2')
+            }}</a-tag>
+            <a-tag v-else color="red">{{ $t('pages.file-manager.staticFileStorage.list.979a03b8') }}</a-tag>
           </template>
 
           <template v-else-if="column.dataIndex === 'type'">
-            <a-tag v-if="text === 1">{{ $tl('p.file') }}</a-tag>
-            <a-tag v-else>{{ $tl('p.folder') }}</a-tag>
+            <a-tag v-if="text === 1">{{ $t('pages.file-manager.staticFileStorage.list.69cad40b') }}</a-tag>
+            <a-tag v-else>{{ $t('pages.file-manager.staticFileStorage.list.b90a456') }}</a-tag>
           </template>
 
           <template v-else-if="column.dataIndex === 'operation'">
@@ -122,17 +131,17 @@
                 type="primary"
                 @click="handleDownloadUrl(record)"
               >
-                {{ $tl('p.download') }}</a-button
+                {{ $t('pages.file-manager.staticFileStorage.list.42c8e9c6') }}</a-button
               >
               <a-button
                 size="small"
                 :disabled="!(record.status === 1 && record.type === 1)"
                 type="primary"
                 @click="handleReleaseFile(record)"
-                >{{ $tl('p.publish') }}</a-button
+                >{{ $t('pages.file-manager.staticFileStorage.list.dfaeb420') }}</a-button
               >
               <a-button type="primary" danger size="small" @click="handleDelete(record)">{{
-                $tl('p.deleteFile')
+                $t('pages.file-manager.staticFileStorage.list.d7cfa4c5')
               }}</a-button>
             </a-space>
           </template>
@@ -143,18 +152,25 @@
       <a-modal
         v-model:open="editVisible"
         destroy-on-close
-        :title="`${$tl('p.modifyFile')}`"
+        :title="`${$t('pages.file-manager.staticFileStorage.list.41bfad43')}`"
         :confirm-loading="confirmLoading"
         :mask-closable="false"
         @ok="handleEditOk"
       >
         <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-          <a-form-item :label="$tl('c.fileName')" name="name">
-            <a-input v-model:value="temp.name" :placeholder="$tl('c.fileName')" :disabled="true" />
+          <a-form-item :label="$t('pages.file-manager.staticFileStorage.list.6a721706')" name="name">
+            <a-input
+              v-model:value="temp.name"
+              :placeholder="$t('pages.file-manager.staticFileStorage.list.6a721706')"
+              :disabled="true"
+            />
           </a-form-item>
 
-          <a-form-item :label="$tl('p.fileDescription')" name="description">
-            <a-textarea v-model:value="temp.description" :placeholder="$tl('p.pleaseEnterFileDescription')" />
+          <a-form-item :label="$t('pages.file-manager.staticFileStorage.list.7cee55c0')" name="description">
+            <a-textarea
+              v-model:value="temp.description"
+              :placeholder="$t('pages.file-manager.staticFileStorage.list.3d17ed2c')"
+            />
           </a-form-item>
         </a-form>
       </a-modal>
@@ -163,7 +179,7 @@
       <a-modal
         v-model:open="triggerVisible"
         destroy-on-close
-        :title="$tl('p.chunkedDownload')"
+        :title="$t('pages.file-manager.staticFileStorage.list.b1634db3')"
         width="50%"
         :footer="null"
         :mask-closable="false"
@@ -171,13 +187,20 @@
         <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
           <a-tabs default-active-key="1">
             <template #rightExtra>
-              <a-tooltip :title="$tl('p.resetDownloadToken')">
-                <a-button type="primary" size="small" @click="resetTrigger">{{ $tl('p.reset') }}</a-button>
+              <a-tooltip :title="$t('pages.file-manager.staticFileStorage.list.27e4eccc')">
+                <a-button type="primary" size="small" @click="resetTrigger">{{
+                  $t('pages.file-manager.staticFileStorage.list.da1d2343')
+                }}</a-button>
               </a-tooltip>
             </template>
-            <a-tab-pane key="1" :tab="$tl('p.chunkedSingleFileDownload')">
+            <a-tab-pane key="1" :tab="$t('pages.file-manager.staticFileStorage.list.f0649f07')">
               <a-space direction="vertical" style="width: 100%">
-                <a-alert type="info" :message="`${$tl('c.downloadAddress')}(${$tl('c.copyTip')})`">
+                <a-alert
+                  type="info"
+                  :message="`${$t('pages.file-manager.staticFileStorage.list.f0c647b3')}(${$t(
+                    'pages.file-manager.staticFileStorage.list.4c8d1a3b'
+                  )})`"
+                >
                   <template #description>
                     <a-typography-paragraph :copyable="{ text: temp.triggerDownloadUrl }">
                       <a-tag>GET</a-tag>
@@ -186,26 +209,36 @@
                   </template>
                 </a-alert>
                 <a :href="temp.triggerDownloadUrl" target="_blank">
-                  <a-button size="small" type="primary"><DownloadOutlined />{{ $tl('c.downloadNow') }}</a-button>
+                  <a-button size="small" type="primary"
+                    ><DownloadOutlined />{{ $t('pages.file-manager.staticFileStorage.list.2fadc8ac') }}</a-button
+                  >
                 </a>
               </a-space>
             </a-tab-pane>
-            <a-tab-pane v-if="temp.triggerAliasDownloadUrl" :tab="$tl('p.chunkedAliasDownload')">
+            <a-tab-pane
+              v-if="temp.triggerAliasDownloadUrl"
+              :tab="$t('pages.file-manager.staticFileStorage.list.81630ff')"
+            >
               <a-space direction="vertical" style="width: 100%">
-                <a-alert :message="$tl('p.warmPrompt')" type="warning">
+                <a-alert :message="$t('pages.file-manager.staticFileStorage.list.46d9b29')" type="warning">
                   <template #description>
                     <ul>
                       <li>
-                        {{ $tl('p.customSortField') }}=createTimeMillis:desc
+                        {{ $t('pages.file-manager.staticFileStorage.list.9568db65') }}=createTimeMillis:desc
 
-                        <p>{{ $tl('p.descSortAscFirst') }}</p>
+                        <p>{{ $t('pages.file-manager.staticFileStorage.list.8c75e50e') }}</p>
                       </li>
-                      <li>{{ $tl('p.supportedFields') }}</li>
-                      <li>{{ $tl('p.commonFields') }}</li>
+                      <li>{{ $t('pages.file-manager.staticFileStorage.list.ce130623') }}</li>
+                      <li>{{ $t('pages.file-manager.staticFileStorage.list.7d507a40') }}</li>
                     </ul>
                   </template>
                 </a-alert>
-                <a-alert type="info" :message="`${$tl('c.downloadAddress')}(${$tl('c.copyTip')})`">
+                <a-alert
+                  type="info"
+                  :message="`${$t('pages.file-manager.staticFileStorage.list.f0c647b3')}(${$t(
+                    'pages.file-manager.staticFileStorage.list.4c8d1a3b'
+                  )})`"
+                >
                   <template #description>
                     <a-typography-paragraph :copyable="{ text: temp.triggerAliasDownloadUrl }">
                       <a-tag>GET</a-tag>
@@ -214,7 +247,9 @@
                   </template>
                 </a-alert>
                 <a :href="temp.triggerAliasDownloadUrl" target="_blank">
-                  <a-button size="small" type="primary"><DownloadOutlined />{{ $tl('c.downloadNow') }}</a-button>
+                  <a-button size="small" type="primary"
+                    ><DownloadOutlined />{{ $t('pages.file-manager.staticFileStorage.list.2fadc8ac') }}</a-button
+                  >
                 </a>
               </a-space>
             </a-tab-pane>
@@ -225,7 +260,7 @@
       <a-modal
         v-model:open="releaseFileVisible"
         destroy-on-close
-        :title="$tl('p.publishFile')"
+        :title="$t('pages.file-manager.staticFileStorage.list.68203efe')"
         width="50%"
         :mask-closable="false"
         :confirm-loading="confirmLoading"
@@ -239,7 +274,7 @@
     <a-modal
       v-model:open="configDir"
       destroy-on-close
-      :title="`${$tl('p.configAuthDirectory')}`"
+      :title="`${$t('pages.file-manager.staticFileStorage.list.4457e1f9')}`"
       :footer="null"
       width="50vw"
       :mask-closable="false"
@@ -298,27 +333,27 @@ export default {
       list: [],
       columns: [
         {
-          title: this.$tl('p.name'),
+          title: this.$t('pages.file-manager.staticFileStorage.list.bb769c1d'),
           dataIndex: 'name',
           ellipsis: true,
           width: 150
         },
         {
-          title: this.$tl('p.desc'),
+          title: this.$t('pages.file-manager.staticFileStorage.list.eee04e4f'),
           dataIndex: 'description',
           ellipsis: true,
           width: 150,
           tooltip: true
         },
         {
-          title: this.$tl('p.path'),
+          title: this.$t('pages.file-manager.staticFileStorage.list.ee016914'),
           dataIndex: 'absolutePath',
           ellipsis: true,
           width: 150,
           tooltip: true
         },
         {
-          title: this.$tl('p.size'),
+          title: this.$t('pages.file-manager.staticFileStorage.list.1295c671'),
           dataIndex: 'size',
           sorter: true,
           ellipsis: true,
@@ -326,7 +361,7 @@ export default {
           width: '100px'
         },
         {
-          title: this.$tl('p.suffix'),
+          title: this.$t('pages.file-manager.staticFileStorage.list.52822a45'),
           dataIndex: 'extName',
           ellipsis: true,
 
@@ -334,14 +369,14 @@ export default {
           width: '80px'
         },
         {
-          title: this.$tl('p.type'),
+          title: this.$t('pages.file-manager.staticFileStorage.list.698bb532'),
           dataIndex: 'type',
           ellipsis: true,
 
           width: '80px'
         },
         {
-          title: this.$tl('p.fileStatus'),
+          title: this.$t('pages.file-manager.staticFileStorage.list.34e8b7bd'),
           dataIndex: 'status',
           ellipsis: true,
 
@@ -349,7 +384,7 @@ export default {
         },
 
         {
-          title: this.$tl('p.fileModifyTime'),
+          title: this.$t('pages.file-manager.staticFileStorage.list.c15532f1'),
           dataIndex: 'lastModified',
           sorter: true,
           customRender: ({ text }) => parseTime(text),
@@ -357,7 +392,7 @@ export default {
         },
 
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.file-manager.staticFileStorage.list.3bb962bf'),
           dataIndex: 'operation',
           align: 'center',
           ellipsis: true,
@@ -367,8 +402,12 @@ export default {
         }
       ],
       rules: {
-        name: [{ required: true, message: this.$tl('p.pleaseEnterFileName'), trigger: 'blur' }],
-        url: [{ required: true, message: this.$tl('p.pleaseEnterRemoteAddress'), trigger: 'blur' }]
+        name: [
+          { required: true, message: this.$t('pages.file-manager.staticFileStorage.list.20c02197'), trigger: 'blur' }
+        ],
+        url: [
+          { required: true, message: this.$t('pages.file-manager.staticFileStorage.list.cc2bc679'), trigger: 'blur' }
+        ]
       },
 
       temp: {},
@@ -459,11 +498,11 @@ export default {
     // 删除文件
     handleDelete(record) {
       $confirm({
-        title: this.$tl('c.systemPrompt'),
+        title: this.$t('pages.file-manager.staticFileStorage.list.a8fe4c17'),
         zIndex: 1009,
-        content: this.$tl('p.confirmDeleteFile') + record.name,
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.file-manager.staticFileStorage.list.639bed63') + record.name,
+        okText: this.$t('pages.file-manager.staticFileStorage.list.7da4a591'),
+        cancelText: this.$t('pages.file-manager.staticFileStorage.list.43105e21'),
         onOk: () => {
           return delFile({
             id: record.id,
@@ -483,16 +522,16 @@ export default {
     handleBatchDelete() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
         $notification.warning({
-          message: this.$tl('p.noDataSelected')
+          message: this.$t('pages.file-manager.staticFileStorage.list.2ad67cae')
         })
         return
       }
       $confirm({
-        title: this.$tl('c.systemPrompt'),
+        title: this.$t('pages.file-manager.staticFileStorage.list.a8fe4c17'),
         zIndex: 1009,
-        content: this.$tl('p.confirmDeleteFiles'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.file-manager.staticFileStorage.list.cfd66404'),
+        okText: this.$t('pages.file-manager.staticFileStorage.list.7da4a591'),
+        cancelText: this.$t('pages.file-manager.staticFileStorage.list.43105e21'),
         onOk: () => {
           return delFile({
             ids: this.tableSelections.join(','),
@@ -580,7 +619,7 @@ export default {
     handerConfirm() {
       if (!this.tableSelections.length) {
         $notification.warning({
-          message: this.$tl('c.pleaseSelectFile')
+          message: this.$t('pages.file-manager.staticFileStorage.list.e1f69633')
         })
         return
       }
@@ -589,7 +628,7 @@ export default {
       })
       if (!selectData.length) {
         $notification.warning({
-          message: this.$tl('c.pleaseSelectFile')
+          message: this.$t('pages.file-manager.staticFileStorage.list.e1f69633')
         })
         return
       }
