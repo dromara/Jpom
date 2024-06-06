@@ -4,11 +4,11 @@
       <a-card hoverable class="card">
         <a-card-meta>
           <template #description>
-            <a-result status="404" title="404" :sub-title="$t('pages.404.subTitle')">
+            <a-result status="404" title="404" :sub-title="$tl('p.subTitle')">
               <a-space>
                 <a-button type="primary" @click="goHome">
                   <HomeOutlined />
-                  <span>{{ $t('pages.404.goHome') }}</span>
+                  <span>{{ $tl('p.goHome') }}</span>
                 </a-button>
                 <!-- <a-button type="primary" @click="goBack">
                   <left-outlined />
@@ -24,6 +24,8 @@
 </template>
 <script lang="ts" setup>
 import defaultBg from '@/pages/layout/default-bg.vue'
+import { useI18nPage } from '@/i18n/hooks/useI18nPage'
+const { $tl } = useI18nPage('pages.login.login')
 const router = useRouter()
 // const goBack = () => {
 //   router.back()
