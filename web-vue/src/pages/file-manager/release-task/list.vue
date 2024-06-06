@@ -21,7 +21,7 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$tl('c.taskName')"
+            :placeholder="$t('pages.file-manager.release-task.list.2ab36118')"
             class="search-input-item"
             @press-enter="loadData"
           />
@@ -39,7 +39,7 @@
               }
             "
             allow-clear
-            :placeholder="$tl('c.status')"
+            :placeholder="$t('pages.file-manager.release-task.list.6e06fe4f')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
@@ -58,13 +58,15 @@
               }
             "
             allow-clear
-            :placeholder="$tl('p.publishType')"
+            :placeholder="$t('pages.file-manager.release-task.list.68615fc7')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in taskTypeMap" :key="key">{{ val }}</a-select-option>
           </a-select>
-          <a-tooltip :title="$tl('p.fastReturnFirstPage')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
+          <a-tooltip :title="$t('pages.file-manager.release-task.list.249b5548')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{
+              $t('pages.file-manager.release-task.list.53c2763c')
+            }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -84,34 +86,44 @@
         </template>
 
         <template v-else-if="column.dataIndex === 'status'">
-          <a-tag v-if="text === 2" color="green">{{ statusMap[text] || $tl('c.unknown') }}</a-tag>
-          <a-tag v-else-if="text === 0 || text === 1" color="orange">{{ statusMap[text] || $tl('c.unknown') }}</a-tag>
+          <a-tag v-if="text === 2" color="green">{{
+            statusMap[text] || $t('pages.file-manager.release-task.list.5f51a112')
+          }}</a-tag>
+          <a-tag v-else-if="text === 0 || text === 1" color="orange">{{
+            statusMap[text] || $t('pages.file-manager.release-task.list.5f51a112')
+          }}</a-tag>
           <a-tag v-else-if="text === 4" color="blue">
-            {{ statusMap[text] || $tl('c.unknown') }}
+            {{ statusMap[text] || $t('pages.file-manager.release-task.list.5f51a112') }}
           </a-tag>
-          <a-tag v-else-if="text === 3" color="red">{{ statusMap[text] || $tl('c.unknown') }}</a-tag>
-          <a-tag v-else>{{ statusMap[text] || $tl('c.unknown') }}</a-tag>
+          <a-tag v-else-if="text === 3" color="red">{{
+            statusMap[text] || $t('pages.file-manager.release-task.list.5f51a112')
+          }}</a-tag>
+          <a-tag v-else>{{ statusMap[text] || $t('pages.file-manager.release-task.list.5f51a112') }}</a-tag>
         </template>
         <template v-else-if="column.dataIndex === 'taskType'">
-          <span>{{ taskTypeMap[text] || $tl('c.unknown') }}</span>
+          <span>{{ taskTypeMap[text] || $t('pages.file-manager.release-task.list.5f51a112') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'fileType'">
-          <span v-if="text == 2">{{ $tl('p.staticFile') }}</span>
-          <span v-else>{{ $tl('p.fileCenter') }}</span>
+          <span v-if="text == 2">{{ $t('pages.file-manager.release-task.list.c3a20e28') }}</span>
+          <span v-else>{{ $t('pages.file-manager.release-task.list.f183985') }}</span>
         </template>
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button type="primary" size="small" @click="handleView(record)">{{ $tl('p.view') }}</a-button>
+            <a-button type="primary" size="small" @click="handleView(record)">{{
+              $t('pages.file-manager.release-task.list.1ba84995')
+            }}</a-button>
 
-            <a-button type="primary" size="small" @click="handleRetask(record)">{{ $tl('p.rebuild') }}</a-button>
+            <a-button type="primary" size="small" @click="handleRetask(record)">{{
+              $t('pages.file-manager.release-task.list.a21afd32')
+            }}</a-button>
             <a-button
               type="primary"
               danger
               size="small"
               :disabled="!(record.status === 0 || record.status === 1)"
               @click="handleCancelTask(record)"
-              >{{ $tl('c.cancel') }}</a-button
+              >{{ $t('pages.file-manager.release-task.list.43105e21') }}</a-button
             >
             <a-button
               type="primary"
@@ -119,7 +131,7 @@
               size="small"
               :disabled="record.status === 0 || record.status === 1"
               @click="handleDelete(record)"
-              >{{ $tl('p.delete') }}</a-button
+              >{{ $t('pages.file-manager.release-task.list.dd20d11c') }}</a-button
             >
           </a-space>
         </template>
@@ -127,7 +139,7 @@
     </a-table>
     <!-- 任务详情 -->
     <a-drawer
-      :title="$tl('p.taskDetail')"
+      :title="$t('pages.file-manager.release-task.list.cc90625')"
       placement="right"
       :width="'80vw'"
       :open="detailsVisible"
@@ -144,7 +156,7 @@
       v-model:open="releaseFileVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$tl('p.publishFile')"
+      :title="$t('pages.file-manager.release-task.list.68203efe')"
       width="60%"
       :mask-closable="false"
       @ok="handleReCrateTask"
@@ -156,18 +168,26 @@
         :label-col="{ span: 4 }"
         :wrapper-col="{ span: 20 }"
       >
-        <a-form-item :label="$tl('c.taskName')" name="name">
-          <a-input v-model:value="temp.name" :placeholder="$tl('p.pleaseInputTaskName')" :max-length="50" />
+        <a-form-item :label="$t('pages.file-manager.release-task.list.2ab36118')" name="name">
+          <a-input
+            v-model:value="temp.name"
+            :placeholder="$t('pages.file-manager.release-task.list.1ed66592')"
+            :max-length="50"
+          />
         </a-form-item>
 
-        <a-form-item :label="$tl('p.publishWay')" name="taskType">
+        <a-form-item :label="$t('pages.file-manager.release-task.list.4a07d135')" name="taskType">
           <a-radio-group v-model:value="temp.taskType" :disabled="true">
             <a-radio :value="0"> SSH </a-radio>
-            <a-radio :value="1"> {{ $tl('p.node') }} </a-radio>
+            <a-radio :value="1"> {{ $t('pages.file-manager.release-task.list.602a0a5e') }} </a-radio>
           </a-radio-group>
         </a-form-item>
 
-        <a-form-item v-if="temp.taskType === 0" name="taskDataIds" :label="$tl('p.publishSsh')">
+        <a-form-item
+          v-if="temp.taskType === 0"
+          name="taskDataIds"
+          :label="$t('pages.file-manager.release-task.list.5f4a29c8')"
+        >
           <a-row>
             <a-col :span="22">
               <a-select
@@ -184,7 +204,7 @@
                   }
                 "
                 mode="multiple"
-                :placeholder="$tl('p.pleaseSelectSsh')"
+                :placeholder="$t('pages.file-manager.release-task.list.1e02c6a8')"
               >
                 <a-select-option v-for="ssh in sshList" :key="ssh.id">
                   <a-tooltip :title="ssh.name"> {{ ssh.name }}</a-tooltip>
@@ -196,7 +216,11 @@
             </a-col>
           </a-row>
         </a-form-item>
-        <a-form-item v-else-if="temp.taskType === 1" name="taskDataIds" :label="$tl('p.publishNode')">
+        <a-form-item
+          v-else-if="temp.taskType === 1"
+          name="taskDataIds"
+          :label="$t('pages.file-manager.release-task.list.61c0e0ab')"
+        >
           <a-row>
             <a-col :span="22">
               <a-select
@@ -213,7 +237,7 @@
                   }
                 "
                 mode="multiple"
-                :placeholder="$tl('p.pleaseSelectNode')"
+                :placeholder="$t('pages.file-manager.release-task.list.2c33c91c')"
               >
                 <a-select-option v-for="ssh in nodeList" :key="ssh.id">
                   <a-tooltip :title="ssh.name"> {{ ssh.name }}</a-tooltip>
@@ -226,18 +250,22 @@
           </a-row>
         </a-form-item>
 
-        <a-form-item name="releasePathParent" :label="$tl('c.publishDir')">
-          <a-input v-model:value="temp.releasePath" :placeholder="$tl('p.pleaseInputPublishDir')" :disabled="true" />
+        <a-form-item name="releasePathParent" :label="$t('pages.file-manager.release-task.list.70eaa090')">
+          <a-input
+            v-model:value="temp.releasePath"
+            :placeholder="$t('pages.file-manager.release-task.list.b6eb202d')"
+            :disabled="true"
+          />
         </a-form-item>
 
-        <a-form-item name="releasePathParent" :label="$tl('p.fileIdInput')">
-          <a-input v-model:value="temp.fileId" :placeholder="$tl('p.pleaseInputPublishFileId')" />
+        <a-form-item name="releasePathParent" :label="$t('pages.file-manager.release-task.list.6e720a66')">
+          <a-input v-model:value="temp.fileId" :placeholder="$t('pages.file-manager.release-task.list.b5feca24')" />
         </a-form-item>
 
-        <a-form-item :label="$tl('p.executeScript')" name="releaseBeforeCommand">
+        <a-form-item :label="$t('pages.file-manager.release-task.list.1cf6b640')" name="releaseBeforeCommand">
           <a-form-item-rest>
             <a-tabs tab-position="right">
-              <a-tab-pane key="before" :tab="$tl('p.beforeUpload')">
+              <a-tab-pane key="before" :tab="$t('pages.file-manager.release-task.list.5eadc84d')">
                 <code-editor
                   v-model:content="temp.beforeScript"
                   height="40vh"
@@ -246,9 +274,9 @@
                   }"
                 ></code-editor>
 
-                <div style="margin-top: 10px">{{ $tl('p.beforeUploadScript') }}</div>
+                <div style="margin-top: 10px">{{ $t('pages.file-manager.release-task.list.a8adfac6') }}</div>
               </a-tab-pane>
-              <a-tab-pane key="after" :tab="$tl('p.afterUpload')">
+              <a-tab-pane key="after" :tab="$t('pages.file-manager.release-task.list.e643b0a1')">
                 <code-editor
                   v-model:content="temp.afterScript"
                   height="40vh"
@@ -257,7 +285,7 @@
                   }"
                 ></code-editor>
 
-                <div style="margin-top: 10px">{{ $tl('p.afterUploadScript') }}</div>
+                <div style="margin-top: 10px">{{ $t('pages.file-manager.release-task.list.fd641392') }}</div>
               </a-tab-pane>
             </a-tabs>
           </a-form-item-rest>
@@ -268,27 +296,35 @@
     <a-modal
       v-model:open="viewFileVisible"
       destroy-on-close
-      :title="`${$tl('p.viewFile')}`"
+      :title="`${$t('pages.file-manager.release-task.list.35c3c1fa')}`"
       :footer="null"
       :mask-closable="false"
     >
       <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-item :label="$tl('p.fileName')" name="name">
+        <a-form-item :label="$t('pages.file-manager.release-task.list.a6eb2ded')" name="name">
           {{ temp.name }}
         </a-form-item>
-        <a-form-item :label="$tl('c.fileId')" name="name">
+        <a-form-item :label="$t('pages.file-manager.release-task.list.bac3d3f6')" name="name">
           {{ temp.id }}
         </a-form-item>
-        <a-form-item :label="$tl('p.fileSize')" name="size">
+        <a-form-item :label="$t('pages.file-manager.release-task.list.f087781')" name="size">
           {{ renderSize(temp.size) }}
         </a-form-item>
-        <a-form-item v-if="temp.validUntil" :label="$tl('p.expireTime')" name="validUntil">
+        <a-form-item
+          v-if="temp.validUntil"
+          :label="$t('pages.file-manager.release-task.list.bc646985')"
+          name="validUntil"
+        >
           {{ parseTime(temp.validUntil) }}
         </a-form-item>
-        <a-form-item v-if="temp.workspaceId" :label="$tl('p.fileShare')" name="global">
-          {{ temp.workspaceId === 'GLOBAL' ? $tl('p.global') : $tl('p.workspace') }}
+        <a-form-item v-if="temp.workspaceId" :label="$t('pages.file-manager.release-task.list.d8266ef9')" name="global">
+          {{
+            temp.workspaceId === 'GLOBAL'
+              ? $t('pages.file-manager.release-task.list.f372618')
+              : $t('pages.file-manager.release-task.list.afacc4cb')
+          }}
         </a-form-item>
-        <a-form-item :label="$tl('p.fileDescription')" name="description">
+        <a-form-item :label="$t('pages.file-manager.release-task.list.7cee55c0')" name="description">
           {{ temp.description }}
         </a-form-item>
       </a-form>
@@ -330,59 +366,59 @@ export default {
       confirmLoading: false,
       columns: [
         {
-          title: this.$tl('p.taskName'),
+          title: this.$t('pages.file-manager.release-task.list.e62a5bf3'),
           dataIndex: 'name',
           ellipsis: true,
           width: 150,
           tooltip: true
         },
         {
-          title: this.$tl('p.distributeType'),
+          title: this.$t('pages.file-manager.release-task.list.b578d6a7'),
           dataIndex: 'taskType',
           width: '100px',
           ellipsis: true
         },
         {
-          title: this.$tl('p.fileSource'),
+          title: this.$t('pages.file-manager.release-task.list.1062add2'),
           dataIndex: 'fileType',
           width: '100px',
           ellipsis: true
         },
         {
-          title: this.$tl('c.status'),
+          title: this.$t('pages.file-manager.release-task.list.6e06fe4f'),
           dataIndex: 'status',
           width: '100px',
           ellipsis: true
         },
 
         {
-          title: this.$tl('p.statusDescription'),
+          title: this.$t('pages.file-manager.release-task.list.a622e852'),
           dataIndex: 'statusMsg',
           ellipsis: true,
           width: 200,
           tooltip: true
         },
         {
-          title: this.$tl('c.fileId'),
+          title: this.$t('pages.file-manager.release-task.list.bac3d3f6'),
           dataIndex: 'fileId',
           ellipsis: true,
           width: 150
         },
         {
-          title: this.$tl('c.publishDir'),
+          title: this.$t('pages.file-manager.release-task.list.70eaa090'),
           dataIndex: 'releasePath',
           width: '100px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$tl('p.executor'),
+          title: this.$t('pages.file-manager.release-task.list.cda0e062'),
           dataIndex: 'modifyUser',
           width: '120px',
           ellipsis: true
         },
         {
-          title: this.$tl('p.taskTime'),
+          title: this.$t('pages.file-manager.release-task.list.d79dbdb0'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -390,7 +426,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$tl('p.taskUpdateTime'),
+          title: this.$t('pages.file-manager.release-task.list.af919b1e'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -399,7 +435,7 @@ export default {
         },
 
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.file-manager.release-task.list.3bb962bf'),
           dataIndex: 'operation',
           align: 'center',
 
@@ -411,9 +447,11 @@ export default {
       nodeList: [],
       releaseFileVisible: false,
       releaseFileRules: {
-        name: [{ required: true, message: this.$tl('p.pleaseInputFileTaskName'), trigger: 'blur' }],
+        name: [{ required: true, message: this.$t('pages.file-manager.release-task.list.a539cd9e'), trigger: 'blur' }],
 
-        taskDataIds: [{ required: true, message: this.$tl('p.pleaseSelectPublishSsh'), trigger: 'blur' }]
+        taskDataIds: [
+          { required: true, message: this.$t('pages.file-manager.release-task.list.e7fe7c15'), trigger: 'blur' }
+        ]
       },
       viewFileVisible: false
     }
@@ -454,11 +492,11 @@ export default {
     //  删除命令
     handleDelete(row) {
       $confirm({
-        title: this.$tl('c.systemPrompt'),
+        title: this.$t('pages.file-manager.release-task.list.a8fe4c17'),
         zIndex: 1009,
-        content: this.$tl('p.reallyDeleteRecord'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.file-manager.release-task.list.21b52dcb'),
+        okText: this.$t('pages.file-manager.release-task.list.7da4a591'),
+        cancelText: this.$t('pages.file-manager.release-task.list.43105e21'),
         onOk: () => {
           return deleteReleaseTask({
             id: row.id
@@ -547,11 +585,11 @@ export default {
     // 取消
     handleCancelTask(record) {
       $confirm({
-        title: this.$tl('c.systemPrompt'),
+        title: this.$t('pages.file-manager.release-task.list.a8fe4c17'),
         zIndex: 1009,
-        content: this.$tl('p.reallyCancelTask'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.file-manager.release-task.list.537ede69'),
+        okText: this.$t('pages.file-manager.release-task.list.7da4a591'),
+        cancelText: this.$t('pages.file-manager.release-task.list.43105e21'),
         oonOk: () => {
           return cancelReleaseTask({ id: record.id }).then((res) => {
             if (res.code === 200) {
@@ -577,7 +615,7 @@ export default {
               this.viewFileVisible = true
             } else {
               $notification.warning({
-                message: this.$tl('c.fileNotExist')
+                message: this.$t('pages.file-manager.release-task.list.a2f846c1')
               })
             }
           }
@@ -592,7 +630,7 @@ export default {
               this.viewFileVisible = true
             } else {
               $notification.warning({
-                message: this.$tl('c.fileNotExist')
+                message: this.$t('pages.file-manager.release-task.list.a2f846c1')
               })
             }
           }

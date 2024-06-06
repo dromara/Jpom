@@ -1,26 +1,32 @@
 <template>
   <div>
     <a-page-header :back-icon="false">
-      <template #title> {{ $tl('p.welcome') }}{{ getUserInfo.name }}{{ $tl('p.systemUsage') }}</template>
+      <template #title>
+        {{ $t('pages.layout.overview.50f119d2') }}{{ getUserInfo.name
+        }}{{ $t('pages.layout.overview.72c43195') }}</template
+      >
       <template #subTitle>
-        {{ $tl('p.manageWorkspaces', { count: (myWorkspaceList && myWorkspaceList.length) || 0 }) }}
+        {{ $t('pages.layout.overview.306f3e5e', { count: (myWorkspaceList && myWorkspaceList.length) || 0 }) }}
       </template>
       <template #tags>
         <a-tag color="blue">
-          <template v-if="getUserInfo.demoUser">{{ $tl('p.demoAccount') }}</template>
-          <template v-else-if="getUserInfo.superSystemUser">{{ $tl('p.superuser') }}</template>
-          <template v-else-if="getUserInfo.systemUser">{{ $tl('p.admin') }}</template>
-          <template v-else>{{ $tl('p.normalUser') }}</template>
+          <template v-if="getUserInfo.demoUser">{{ $t('pages.layout.overview.18437ccc') }}</template>
+          <template v-else-if="getUserInfo.superSystemUser">{{ $t('pages.layout.overview.723b44a0') }}</template>
+          <template v-else-if="getUserInfo.systemUser">{{ $t('pages.layout.overview.28e9178') }}</template>
+          <template v-else>{{ $t('pages.layout.overview.501ac2ec') }}</template>
         </a-tag>
       </template>
       <template #extra>
-        <a-tooltip :title="$tl('p.refreshData')">
+        <a-tooltip :title="$t('pages.layout.overview.c5f3dbc5')">
           <a-button @click="init">
             <template #icon><ReloadOutlined /></template>
           </a-button>
         </a-tooltip>
         <!-- // 擅自修改或者删除版权信息有法律风险，请尊重开源协议，不要擅自修改版本信息，否则可能承担法律责任。 -->
-        <a-tooltip v-if="getUserInfo && (getUserInfo.systemUser || getUserInfo.demoUser)" :title="$tl('p.systemInfo')">
+        <a-tooltip
+          v-if="getUserInfo && (getUserInfo.systemUser || getUserInfo.demoUser)"
+          :title="$t('pages.layout.overview.8397a674')"
+        >
           <a-button @click="showAbout">
             <template #icon><ExclamationCircleOutlined /></template>
           </a-button>
@@ -33,8 +39,8 @@
       <a-col :span="6">
         <a-card size="small">
           <template #title>
-            {{ $tl('p.dataStatistics') }}
-            <a-tooltip :title="$tl('p.relatedDataStatistics')"><QuestionCircleOutlined /></a-tooltip>
+            {{ $t('pages.layout.overview.e86dceb9') }}
+            <a-tooltip :title="$t('pages.layout.overview.930f07d8')"><QuestionCircleOutlined /></a-tooltip>
           </template>
           <a-list :data-source="statNames">
             <template #renderItem="{ item }">
@@ -46,8 +52,8 @@
       <a-col :span="6">
         <a-card size="small">
           <template #title>
-            {{ $tl('p.buildLog') }}
-            <a-tooltip :title="$tl('p.triggeredBuilds')"><QuestionCircleOutlined /></a-tooltip>
+            {{ $t('pages.layout.overview.fc20bf28') }}
+            <a-tooltip :title="$t('pages.layout.overview.3318ecb')"><QuestionCircleOutlined /></a-tooltip>
           </template>
           <a-timeline v-if="buildLog && buildLog.length">
             <a-timeline-item v-for="item in buildLog" :key="item.id" :color="statusColor[item.status]">
@@ -67,9 +73,11 @@
                     <span>{{ item.buildName || '-' }}</span>
                   </a-col>
                   <a-col>
-                    <a-tooltip :title="item.statusMsg || statusMap[item.status] || $tl('c.unknown')">
+                    <a-tooltip
+                      :title="item.statusMsg || statusMap[item.status] || $t('pages.layout.overview.5f51a112')"
+                    >
                       <a-tag :color="statusColor[item.status]" @click="handleBuildLog(item)">
-                        {{ statusMap[item.status] || $tl('c.unknown') }}
+                        {{ statusMap[item.status] || $t('pages.layout.overview.5f51a112') }}
                       </a-tag>
                     </a-tooltip>
                   </a-col>
@@ -77,12 +85,12 @@
               </a-space>
             </a-timeline-item>
           </a-timeline>
-          <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="$tl('p.notYetBuilt')" />
+          <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="$t('pages.layout.overview.6f21bc24')" />
         </a-card>
       </a-col>
       <a-col :span="6">
         <a-card size="small">
-          <template #title> {{ $tl('p.loginLog') }} </template>
+          <template #title> {{ $t('pages.layout.overview.b75360fe') }} </template>
           <template #extra>
             <a href="#" @click="handleUserlog(2)">more</a>
           </template>
@@ -91,20 +99,20 @@
               <a-space direction="vertical" :size="1">
                 <div>{{ parseTime(item.createTimeMillis) }}</div>
                 <a-space>
-                  <a-tag> {{ operateCodeMap[item.operateCode] || $tl('c.unknown') }}</a-tag>
+                  <a-tag> {{ operateCodeMap[item.operateCode] || $t('pages.layout.overview.5f51a112') }}</a-tag>
                   <span> IP:{{ item.ip }}</span>
                 </a-space>
               </a-space>
             </a-timeline-item>
           </a-timeline>
-          <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="$tl('p.notYetLoggedIn')" />
+          <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="$t('pages.layout.overview.7328ac6d')" />
         </a-card>
       </a-col>
       <a-col :span="6">
         <a-card size="small">
           <template #title>
-            {{ $tl('c.operationLog') }}
-            <a-tooltip :title="$tl('p.allOperationLog')"><QuestionCircleOutlined /></a-tooltip>
+            {{ $t('pages.layout.overview.86d58c89') }}
+            <a-tooltip :title="$t('pages.layout.overview.a53992b3')"><QuestionCircleOutlined /></a-tooltip>
           </template>
           <template #extra>
             <a href="#" @click="handleUserlog(1)">more</a>
@@ -124,7 +132,7 @@
               </a-space>
             </a-timeline-item>
           </a-timeline>
-          <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="$tl('p.notYetPerformedOperations')" />
+          <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="$t('pages.layout.overview.6b286e33')" />
         </a-card>
       </a-col>
     </a-row>
@@ -134,7 +142,7 @@
       destroy-on-close
       :open="viewLogVisible > 0"
       :width="'90vw'"
-      :title="$tl('c.operationLog')"
+      :title="$t('pages.layout.overview.86d58c89')"
       :footer="null"
       :mask-closable="false"
       @cancel="viewLogVisible = 0"
@@ -149,7 +157,7 @@
       destroy-on-close
       :open="aboutVisible > 0"
       :width="'90vw'"
-      :title="$tl('p.openSourceInfo')"
+      :title="$t('pages.layout.overview.5f76d6ae')"
       :footer="null"
       :mask-closable="false"
       @cancel="aboutVisible = 0"
@@ -195,16 +203,16 @@ export default {
       viewLogVisible: 0,
       // "逻辑节点", "节点项目", "节点脚本", "项目分发", "SSH终端", "SSH命令", "本地脚本", "Docker节点", "动态文件", "静态文件"
       statNames: [
-        { name: this.$tl('p.logicNode'), field: 'nodeCount' },
-        { name: this.$tl('p.nodeProject'), field: 'projectCount' },
-        { name: this.$tl('p.nodeScript'), field: 'nodeScriptCount' },
-        { name: this.$tl('p.projectDistribution'), field: 'outGivingCount' },
-        { name: `SSH${this.$tl('p.terminal')}`, field: 'sshCount' },
-        { name: `SSH${this.$tl('p.script')}`, field: 'sshCommandCount' },
-        { name: this.$tl('p.localScript'), field: 'scriptCount' },
-        { name: `Docker${this.$tl('p.node')}`, field: 'dockerCount' },
-        { name: `Docker${this.$tl('p.cluster')}`, field: 'dockerSwarmCount' },
-        { name: this.$tl('p.dynamicFile'), field: 'fileCount' }
+        { name: this.$t('pages.layout.overview.ccdca9d8'), field: 'nodeCount' },
+        { name: this.$t('pages.layout.overview.82289858'), field: 'projectCount' },
+        { name: this.$t('pages.layout.overview.e0417750'), field: 'nodeScriptCount' },
+        { name: this.$t('pages.layout.overview.9acec431'), field: 'outGivingCount' },
+        { name: `SSH${this.$t('pages.layout.overview.b5a97ef7')}`, field: 'sshCount' },
+        { name: `SSH${this.$t('pages.layout.overview.fbb32aa1')}`, field: 'sshCommandCount' },
+        { name: this.$t('pages.layout.overview.a1f47198'), field: 'scriptCount' },
+        { name: `Docker${this.$t('pages.layout.overview.602a0a5e')}`, field: 'dockerCount' },
+        { name: `Docker${this.$t('pages.layout.overview.82ff11f5')}`, field: 'dockerSwarmCount' },
+        { name: this.$t('pages.layout.overview.30d0bb03'), field: 'fileCount' }
         // { name: "静态文件", field: "staticFileCount" },
       ],
       statData: {},

@@ -4,7 +4,7 @@
       <template #tab>
         <span>
           <SettingOutlined />
-          {{ $tl('p.serverSystemConfig') }}
+          {{ $t('pages.system.config.16c8a2eb') }}
         </span>
       </template>
 
@@ -18,14 +18,18 @@
             height="calc(100vh - 200px)"
           >
             <template #tool_before>
-              <a-alert v-if="temp.file" show-icon :message="`${$tl('p.configFilePath')}:${temp.file}`" />
+              <a-alert v-if="temp.file" show-icon :message="`${$t('pages.system.config.b6bc55e9')}:${temp.file}`" />
             </template>
           </code-editor>
         </a-form-item>
         <a-form-item :wrapper-col="{ span: 14, offset: 2 }">
           <a-space>
-            <a-button type="primary" class="btn" @click="onSubmit(false)">{{ $tl('c.save') }}</a-button>
-            <a-button type="primary" danger class="btn" @click="onSubmit(true)">{{ $tl('p.saveAndRestart') }}</a-button>
+            <a-button type="primary" class="btn" @click="onSubmit(false)">{{
+              $t('pages.system.config.3571a8f0')
+            }}</a-button>
+            <a-button type="primary" danger class="btn" @click="onSubmit(true)">{{
+              $t('pages.system.config.fda40980')
+            }}</a-button>
           </a-space>
         </a-form-item>
       </a-form>
@@ -34,12 +38,12 @@
       <template #tab>
         <span>
           <LockOutlined />
-          {{ $tl('p.serverIpAuthConfig') }}
+          {{ $t('pages.system.config.12fec1a7') }}
         </span>
       </template>
-      <a-alert :message="`${$tl('p.currentAccessIp')}${ipTemp.ip}`" type="success" />
-      <a-alert :message="$tl('p.ipConfigWarning')" style="margin-top: 10px" banner />
-      <a-alert :message="$tl('p.resetConfigWarning')" style="margin-top: 10px" banner />
+      <a-alert :message="`${$t('pages.system.config.280a47a7')}${ipTemp.ip}`" type="success" />
+      <a-alert :message="$t('pages.system.config.f86e70bd')" style="margin-top: 10px" banner />
+      <a-alert :message="$t('pages.system.config.f16607cf')" style="margin-top: 10px" banner />
       <a-form
         ref="editIpConfigForm"
         style="margin-top: 10px"
@@ -51,9 +55,9 @@
           <template #label>
             <a-space align="center">
               <a-tooltip>
-                <template #title>{{ $tl('p.forbiddenIp') }} </template>
+                <template #title>{{ $t('pages.system.config.4e608c6f') }} </template>
                 <StopFilled />
-                IP{{ $tl('p.forbidden') }}
+                IP{{ $t('pages.system.config.170303f') }}
               </a-tooltip>
             </a-space>
           </template>
@@ -61,16 +65,16 @@
             v-model:value="ipTemp.prohibited"
             :rows="8"
             class="ip-list-config"
-            :placeholder="$tl('p.inputForbiddenIp')"
+            :placeholder="$t('pages.system.config.6c07b8a7')"
           />
         </a-form-item>
         <a-form-item name="allowed">
           <template #label>
             <a-space align="center">
               <a-tooltip>
-                <template #title> {{ $tl('p.allowedIp') }} </template>
+                <template #title> {{ $t('pages.system.config.c4b3b613') }} </template>
                 <CheckCircleFilled />
-                IP{{ $tl('p.authorize') }}
+                IP{{ $t('pages.system.config.e243dfef') }}
               </a-tooltip>
             </a-space>
           </template>
@@ -78,12 +82,12 @@
             v-model:value="ipTemp.allowed"
             :rows="8"
             class="ip-list-config"
-            :placeholder="$tl('p.inputAuthorizedIp')"
+            :placeholder="$t('pages.system.config.1f774cad')"
           />
         </a-form-item>
 
         <a-form-item :wrapper-col="{ offset: 10 }" class="ip-config-button">
-          <a-button type="primary" class="btn" @click="onSubmitIp()">{{ $tl('c.save') }}</a-button>
+          <a-button type="primary" class="btn" @click="onSubmitIp()">{{ $t('pages.system.config.3571a8f0') }}</a-button>
         </a-form-item>
       </a-form>
     </a-tab-pane>
@@ -93,25 +97,33 @@
       <template #tab>
         <span>
           <ApiOutlined />
-          {{ $tl('p.globalProxy') }}
+          {{ $t('pages.system.config.c1c625c1') }}
         </span>
       </template>
-      <a-alert :message="`${$tl('p.globalProxyDesc')}`" style="margin-top: 10px; margin-bottom: 20px" banner />
+      <a-alert
+        :message="`${$t('pages.system.config.2a338cec')}`"
+        style="margin-top: 10px; margin-bottom: 20px"
+        banner
+      />
       <a-row justify="center" type="flex">
         <a-form ref="editProxyForm" :model="proxyConfigData">
           <a-row v-for="(item, index) in proxyConfigData.globalProxy" :key="index">
             <a-space>
-              <a-form-item :label="$tl('p.wildcard')" name="pattern">
+              <a-form-item :label="$t('pages.system.config.c39f7c03')" name="pattern">
                 <a-input
                   v-model:value="item.pattern"
                   style="width: 30vw"
                   :max-length="200"
-                  :placeholder="$tl('p.addressWildcard')"
+                  :placeholder="$t('pages.system.config.62a3d2f9')"
                 >
                 </a-input>
               </a-form-item>
-              <a-form-item :label="$tl('p.proxy')">
-                <a-input v-model:value="item.proxyAddress" style="width: 30vw" :placeholder="$tl('p.proxyAddress')">
+              <a-form-item :label="$t('pages.system.config.f9f255b0')">
+                <a-input
+                  v-model:value="item.proxyAddress"
+                  style="width: 30vw"
+                  :placeholder="$t('pages.system.config.775fdae9')"
+                >
                   <template #addonBefore>
                     <a-select v-model:value="item.proxyType" style="width: 100px">
                       <a-select-option value="HTTP">HTTP</a-select-option>
@@ -133,7 +145,7 @@
                     }
                   "
                 >
-                  {{ $tl('p.delete') }}
+                  {{ $t('pages.system.config.dd20d11c') }}
                 </a-button>
               </a-form-item>
             </a-space>
@@ -156,9 +168,11 @@
                     }
                   }
                 "
-                >{{ $tl('p.add') }}</a-button
+                >{{ $t('pages.system.config.7d46652a') }}</a-button
               >
-              <a-button type="primary" @click="saveProxyConfigHannder">{{ $tl('c.save') }}</a-button>
+              <a-button type="primary" @click="saveProxyConfigHannder">{{
+                $t('pages.system.config.3571a8f0')
+              }}</a-button>
             </a-space>
           </a-form-item>
         </a-form>
@@ -236,11 +250,11 @@ export default {
     // submit
     onSubmit(restart) {
       $confirm({
-        title: this.$tl('c.systemPrompt'),
+        title: this.$t('pages.system.config.a8fe4c17'),
         zIndex: 1009,
-        content: this.$tl('p.confirmSaveConfig'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.system.config.b812712c'),
+        okText: this.$t('pages.system.config.7da4a591'),
+        cancelText: this.$t('pages.system.config.43105e21'),
         onOk: () => {
           this.temp.restart = restart
           return editConfig(this.temp).then((res) => {
@@ -263,8 +277,8 @@ export default {
       this.globalLoading({
         spinning: true,
         tip:
-          (msg || this.$tl('p.restarting')) +
-          `,${this.$tl('p.waitWithoutRefresh')},${this.$tl('p.autoRefreshAfterRestart')}`
+          (msg || this.$t('pages.system.config.9e8c0aa9')) +
+          `,${this.$t('pages.system.config.4098e2c9')},${this.$t('pages.system.config.c4521fd3')}`
       })
       setTimeout(() => {
         //
@@ -277,7 +291,7 @@ export default {
                   spinning: false
                 })
                 $notification.success({
-                  message: this.$tl('p.restartSuccess')
+                  message: this.$t('pages.system.config.a6229050')
                 })
 
                 setTimeout(() => {
@@ -286,7 +300,7 @@ export default {
               } else {
                 if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
                   $notification.warning({
-                    message: this.$tl('p.restartFailed') + (res.msg || '')
+                    message: this.$t('pages.system.config.b0e4c704') + (res.msg || '')
                   })
                   this.globalLoading({
                     spinning: false
@@ -302,7 +316,7 @@ export default {
                   spinning: false
                 })
                 $notification.error({
-                  message: this.$tl('p.restartTimeout')
+                  message: this.$t('pages.system.config.48633a70')
                 })
                 clearInterval(this.timer)
               }
@@ -314,11 +328,11 @@ export default {
     // submit ip config
     onSubmitIp() {
       $confirm({
-        title: this.$tl('c.systemPrompt'),
+        title: this.$t('pages.system.config.a8fe4c17'),
         zIndex: 1009,
-        content: this.$tl('p.confirmSaveConfigWithAuth'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.system.config.eed9d363'),
+        okText: this.$t('pages.system.config.7da4a591'),
+        cancelText: this.$t('pages.system.config.43105e21'),
         onOk: () => {
           return editIpConfig(this.ipTemp).then((res) => {
             if (res.code === 200) {

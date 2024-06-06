@@ -9,10 +9,10 @@
         <template #before>
           <a-space>
             <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 0" type="primary" @click="start">{{
-              $tl('p.execute')
+              $t('pages.node.node-layout.other.script-console.985968bf')
             }}</a-button>
             <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 1" type="primary" @click="stop">{{
-              $tl('p.stop')
+              $t('pages.node.node-layout.other.script-console.5c03f4ad')
             }}</a-button>
           </a-space>
         </template>
@@ -24,19 +24,26 @@
       v-model:open="editArgs"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$tl('p.addParameter')"
+      :title="$t('pages.node.node-layout.other.script-console.b7d5eb0d')"
       :mask-closable="false"
       @ok="startExecution"
     >
       <a-form ref="ruleForm" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-item :label="$tl('p.commandArgs')" :help="`${commandParams.length ? $tl('p.runScript') : ''}`">
+        <a-form-item
+          :label="$t('pages.node.node-layout.other.script-console.af78e8cb')"
+          :help="`${commandParams.length ? $t('pages.node.node-layout.other.script-console.8fb2b0cc') : ''}`"
+        >
           <a-space direction="vertical" style="width: 100%">
             <a-row v-for="(item, index) in commandParams" :key="item.key">
               <a-col :span="22">
                 <a-input
                   v-model:value="item.value"
-                  :addon-before="`${$tl('p.parameters')}${index + 1}${$tl('p.value')}`"
-                  :placeholder="`${$tl('p.parameters')}${$tl('p.value')} ${item.desc ? ',' + item.desc : ''}`"
+                  :addon-before="`${$t('pages.node.node-layout.other.script-console.6e6cc3c2')}${index + 1}${$t(
+                    'pages.node.node-layout.other.script-console.97f7c43a'
+                  )}`"
+                  :placeholder="`${$t('pages.node.node-layout.other.script-console.6e6cc3c2')}${$t(
+                    'pages.node.node-layout.other.script-console.97f7c43a'
+                  )} ${item.desc ? ',' + item.desc : ''}`"
                 >
                   <template #suffix>
                     <a-tooltip v-if="item.desc" :title="item.desc">
@@ -55,7 +62,7 @@
               </a-col>
             </a-row>
             <a-button type="primary" size="small" @click="() => commandParams.push({})">{{
-              $tl('p.newParameter')
+              $t('pages.node.node-layout.other.script-console.c8569157')
             }}</a-button>
           </a-space>
         </a-form-item>
@@ -110,7 +117,9 @@ export default {
     socketUrl() {
       return getWebSocketUrl(
         '/socket/node/script_run',
-        `userId=${this.getLongTermToken()}&id=${this.id}&nodeId=${this.nodeId}&type=nodeScript&workspaceId=${this.getWorkspaceId()}`
+        `userId=${this.getLongTermToken()}&id=${this.id}&nodeId=${
+          this.nodeId
+        }&type=nodeScript&workspaceId=${this.getWorkspaceId()}`
       )
     }
   },
@@ -155,7 +164,9 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: `web socket ${this.$tl('p.error')},${this.$tl('p.checkWsProxy')}`
+          message: `web socket ${this.$t('pages.node.node-layout.other.script-console.d75d207f')},${this.$t(
+            'pages.node.node-layout.other.script-console.763330b'
+          )}`
         })
         clearInterval(this.heart)
         this.btnLoading = true
@@ -165,7 +176,7 @@ export default {
         console.error(err)
         clearInterval(this.heart)
         this.btnLoading = true
-        $message.warning(this.$tl('p.sessionClosed'))
+        $message.warning(this.$t('pages.node.node-layout.other.script-console.8a2aae09'))
       }
       this.socket.onmessage = (msg) => {
         if (msg.data.indexOf('JPOM_MSG') > -1 && msg.data.indexOf('op') > -1) {

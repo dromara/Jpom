@@ -16,15 +16,17 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$tl('c.logName')"
+            :placeholder="$t('pages.dispatch.logRead.2ee8e7cc')"
             class="search-input-item"
             @press-enter="loadData"
           />
 
-          <a-tooltip :title="$tl('p.clickButtonToGoBackToFirstPage')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
+          <a-tooltip :title="$t('pages.dispatch.logRead.3371c7a0')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{
+              $t('pages.dispatch.logRead.53c2763c')
+            }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">{{ $tl('c.action') }}</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $t('pages.dispatch.logRead.52ca17c1') }}</a-button>
         </a-space>
       </template>
       <template #bodyCell="{ column, text, record }">
@@ -36,9 +38,15 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button type="primary" size="small" @click="handleEdit(record)">{{ $tl('p.edit') }}</a-button>
-            <a-button type="primary" size="small" @click="handleLogRead(record)">{{ $tl('p.view') }}</a-button>
-            <a-button type="primary" danger size="small" @click="handleDelete(record)">{{ $tl('p.delete') }}</a-button>
+            <a-button type="primary" size="small" @click="handleEdit(record)">{{
+              $t('pages.dispatch.logRead.64603c01')
+            }}</a-button>
+            <a-button type="primary" size="small" @click="handleLogRead(record)">{{
+              $t('pages.dispatch.logRead.1ba84995')
+            }}</a-button>
+            <a-button type="primary" danger size="small" @click="handleDelete(record)">{{
+              $t('pages.dispatch.logRead.dd20d11c')
+            }}</a-button>
           </a-space>
         </template>
       </template>
@@ -49,23 +57,23 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="60%"
-      :title="$tl('p.editLogSearch')"
+      :title="$t('pages.dispatch.logRead.4621082b')"
       :mask-closable="false"
       @ok="handleEditOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$tl('c.logName')" name="name">
-          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$tl('p.logItemName')" />
+        <a-form-item :label="$t('pages.dispatch.logRead.2ee8e7cc')" name="name">
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('pages.dispatch.logRead.ce9b8b40')" />
         </a-form-item>
-        <a-form-item :label="$tl('p.bindNode')" required>
+        <a-form-item :label="$t('pages.dispatch.logRead.89553def')" required>
           <a-space direction="vertical" style="width: 100%">
             <a-row v-for="(item, index) in temp.projectList" :key="index">
               <a-col :span="11">
-                <span>{{ $tl('p.node') }} </span>
+                <span>{{ $t('pages.dispatch.logRead.602a0a5e') }} </span>
                 <a-select
                   v-model:value="item.nodeId"
                   style="width: 80%"
-                  :placeholder="$tl('p.pleaseSelectNode')"
+                  :placeholder="$t('pages.dispatch.logRead.2c33c91c')"
                   @change="
                     () => {
                       temp = {
@@ -94,12 +102,12 @@
                 </a-select>
               </a-col>
               <a-col :span="11">
-                <span>{{ $tl('p.project') }} </span>
+                <span>{{ $t('pages.dispatch.logRead.4889a88f') }} </span>
                 <a-select
                   v-model:value="item.projectId"
                   :disabled="!item.nodeId"
                   style="width: 80%"
-                  :placeholder="`${$tl('p.pleaseSelectProject')}`"
+                  :placeholder="`${$t('pages.dispatch.logRead.bf2bdd20')}`"
                 >
                   <!-- <a-select-option value=""> 请先选择节点</a-select-option> -->
                   <template v-if="nodeProjectList[item.nodeId]">
@@ -126,7 +134,9 @@
               </a-col>
             </a-row>
 
-            <a-button type="primary" @click="() => temp.projectList.push({})">{{ $tl('c.action') }}</a-button>
+            <a-button type="primary" @click="() => temp.projectList.push({})">{{
+              $t('pages.dispatch.logRead.52ca17c1')
+            }}</a-button>
           </a-space>
         </a-form-item>
       </a-form>
@@ -145,7 +155,7 @@
       "
     >
       <template #title>
-        {{ $tl('p.searchAndView') }}
+        {{ $t('pages.dispatch.logRead.a602ffb5') }}
         {{ temp.cacheData && temp.cacheData.logFile ? ':' + temp.cacheData.logFile : '' }}
       </template>
       <logReadView
@@ -187,14 +197,14 @@ export default {
       editVisible: false,
       columns: [
         {
-          title: this.$tl('p.name'),
+          title: this.$t('pages.dispatch.logRead.bb769c1d'),
           dataIndex: 'name',
           ellipsis: true,
           tooltip: true
         },
 
         {
-          title: this.$tl('p.modifier'),
+          title: this.$t('pages.dispatch.logRead.916db24b'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           align: 'center',
@@ -202,7 +212,7 @@ export default {
           width: 120
         },
         {
-          title: this.$tl('p.modificationTime'),
+          title: this.$t('pages.dispatch.logRead.61164914'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           customRender: ({ text }) => {
@@ -214,7 +224,7 @@ export default {
           width: 180
         },
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.dispatch.logRead.3bb962bf'),
           dataIndex: 'operation',
           ellipsis: true,
 
@@ -223,7 +233,7 @@ export default {
         }
       ],
       rules: {
-        name: [{ required: true, message: this.$tl('p.pleaseFillInLogItemName'), trigger: 'blur' }]
+        name: [{ required: true, message: this.$t('pages.dispatch.logRead.b3c4e04b'), trigger: 'blur' }]
       },
       confirmLoading: false
     }
@@ -317,7 +327,7 @@ export default {
         })
         if (!temp.projectList || !temp.projectList.length) {
           $notification.warn({
-            message: this.$tl('p.atLeastSelectOneNodeAndProject')
+            message: this.$t('pages.dispatch.logRead.6d8491c8')
           })
           return false
         }
@@ -343,11 +353,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$tl('p.systemPrompt'),
+        title: this.$t('pages.dispatch.logRead.b22d55a0'),
         zIndex: 1009,
-        content: this.$tl('p.reallyDeleteLogSearch'),
-        okText: this.$tl('p.confirm'),
-        cancelText: this.$tl('p.cancel'),
+        content: this.$t('pages.dispatch.logRead.347d0d00'),
+        okText: this.$t('pages.dispatch.logRead.e8e9db25'),
+        cancelText: this.$t('pages.dispatch.logRead.b12468e9'),
         onOk: () => {
           return deleteLogRead(record.id).then((res) => {
             if (res.code === 200) {
