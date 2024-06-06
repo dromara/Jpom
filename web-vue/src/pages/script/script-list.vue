@@ -181,7 +181,7 @@
                     :placeholder="$tl('p.content1')" />
                   <a-input
                     v-model:value="item.value"
-                    :addon-before="$tl('p.parameterContent', { count: index + 1 })"
+                    :addon-before="$tl('p.parameterValue', { count: index + 1 })"
                     :placeholder="$tl('p.content2')"
                 /></a-space>
               </a-col>
@@ -728,7 +728,7 @@ export default {
     // 执行 Script
     handleExec(record) {
       this.temp = Object.assign(record)
-      this.drawerTitle = `${$tl('p.console')}(${this.temp.name})`
+      this.drawerTitle = `${this.$tl('p.console')}(${this.temp.name})`
       this.drawerConsoleVisible = true
     },
     // 关闭 console

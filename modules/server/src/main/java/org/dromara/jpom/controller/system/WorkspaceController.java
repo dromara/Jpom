@@ -24,6 +24,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.common.UrlRedirectUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.db.TableName;
@@ -272,13 +273,14 @@ public class WorkspaceController extends BaseServerController {
      */
     @RequestMapping(value = "get_menus_config", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<JSONObject> getMenusConfig(String workspaceId) {
+    public IJsonMessage<JSONObject> getMenusConfig(String workspaceId, HttpServletRequest request) {
         WorkspaceModel workspaceModel = workspaceService.getByKey(workspaceId);
         Assert.notNull(workspaceModel, "不存在对应的工作空间");
         JSONObject config = systemParametersServer.getConfigDefNewInstance(StrUtil.format("menus_config_{}", workspaceId), JSONObject.class);
         //"classpath:/menus/index.json"
         //"classpath:/menus/node-index.json"
-        config.put("serverMenus", this.readMenusJson("classpath:/menus/index.json"));
+        String language = UrlRedirectUtil.parseLanguage(request);
+        config.put("serverMenus", this.readMenusJson("classpath:/menus/" + language + "/index.json"));
         return JsonMessage.success("", config);
     }
 
