@@ -466,7 +466,7 @@
           />
         </a-form-item>
         <a-form-item
-          v-if="providerData[giteeImportForm.type].query"
+          v-if="providerData[giteeImportForm.type]?.query"
           name="condition"
           :label="$t('pages.repository.repository-list.a1f640f4')"
           :help="`输入仓库名称或者仓库路径进行${$t('pages.repository.repository-list.a1f640f4')}`"
