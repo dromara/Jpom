@@ -96,9 +96,6 @@ export default {
     this.init()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.docker.swarm.pullLog.${key}`, ...args)
-    },
     init() {
       this.logTimer && clearTimeout(this.logTimer)
       this.$refs.logView.clearLogCache()

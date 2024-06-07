@@ -221,9 +221,6 @@ export default {
     this.getCommandLogData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.ssh.commandLog.${key}`, ...args)
-    },
     handleView(row) {
       this.temp = row
       this.logVisible = true

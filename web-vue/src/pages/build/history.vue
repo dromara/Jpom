@@ -406,9 +406,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.build.history.${key}`, ...args)
-    },
     parseTime,
     renderSize,
     formatDuration,

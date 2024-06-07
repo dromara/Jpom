@@ -154,9 +154,6 @@ export default {
     })
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.scriptEdit.${key}`, ...args)
-    },
     // 修改
     handleEdit() {
       this.$refs['editScriptForm']?.resetFields()

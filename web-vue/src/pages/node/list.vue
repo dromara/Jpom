@@ -884,9 +884,6 @@ export default {
   },
 
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.list.${key}`, ...args)
-    },
     formatDuration,
     renderSize,
     // PAGE_DEFAULT_SHOW_TOTAL,

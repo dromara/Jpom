@@ -288,9 +288,6 @@ export default {
     this.editContainer()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.docker.editContainer.${key}`, ...args)
-    },
     renderSize,
     // 编辑容器
     editContainer() {

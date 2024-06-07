@@ -214,9 +214,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.system.mail.${key}`, ...args)
-    },
     // load data
     loadData() {
       getMailConfigData().then((res) => {

@@ -1250,8 +1250,8 @@
           chooseScriptVisible === 1
             ? tempExtraData.noticeScriptId
             : temp.script && temp.script.indexOf('$ref.script.') != -1
-            ? temp.script.replace('$ref.script.')
-            : ''
+              ? temp.script.replace('$ref.script.')
+              : ''
         "
         mode="choose"
         @confirm="
@@ -1651,9 +1651,6 @@ export default {
     this.loadGroupList()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.build.edit.${key}`, ...args)
-    },
     randomStr,
     refresh() {
       this.loading = true

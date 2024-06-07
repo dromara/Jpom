@@ -90,9 +90,6 @@ export default {
     this.close()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.nodeLayout.system.log.${key}`, ...args)
-    },
     close() {
       this.socket?.close()
     },

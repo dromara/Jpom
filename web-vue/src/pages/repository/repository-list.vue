@@ -823,9 +823,6 @@ export default {
     }
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.repository.repositoryList.${key}`, ...args)
-    },
     CHANGE_PAGE,
     // 分组数据
     loadGroupList() {

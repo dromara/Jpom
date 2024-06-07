@@ -902,9 +902,6 @@ export default {
     this.getMachineList()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.system.assets.machine.machineList.${key}`, ...args)
-    },
     parseTime,
     formatDuration,
     formatPercent2Number,

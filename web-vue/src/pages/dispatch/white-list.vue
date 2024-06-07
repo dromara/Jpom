@@ -69,9 +69,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.dispatch.whiteList.${key}`, ...args)
-    },
     // load data
     loadData() {
       this.loading = true

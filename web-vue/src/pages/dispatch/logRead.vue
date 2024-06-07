@@ -249,9 +249,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.dispatch.logRead.${key}`, ...args)
-    },
     // 加载数据
     loadData(pointerEvent) {
       this.loading = true

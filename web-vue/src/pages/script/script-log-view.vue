@@ -47,9 +47,6 @@ export default {
     this.init()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.script.scriptLogView.${key}`, ...args)
-    },
     init() {
       this.loadData()
       this.logTimer = setInterval(() => {

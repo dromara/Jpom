@@ -921,9 +921,6 @@ export default {
     this.autoUpdate()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.docker.container.${key}`, ...args)
-    },
     autoUpdate() {
       this.loadData()
     },

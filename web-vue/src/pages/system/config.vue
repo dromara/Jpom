@@ -224,9 +224,6 @@ export default {
     this.tabChange('1')
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.system.config.${key}`, ...args)
-    },
     // load data
     loadConfitData() {
       getConfigData().then((res) => {

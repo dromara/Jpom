@@ -82,9 +82,6 @@ export default {
     this.pullLog()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.build.log.${key}`, ...args)
-    },
     nextPull() {
       if (this.logTimer) {
         clearTimeout(this.logTimer)

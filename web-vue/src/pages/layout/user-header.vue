@@ -684,9 +684,6 @@ export default {
     this.init()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.layout.userHeader.${key}`, ...args)
-    },
     customize() {
       this.customizeVisible = true
     },

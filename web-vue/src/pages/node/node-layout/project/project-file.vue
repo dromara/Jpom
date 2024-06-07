@@ -668,9 +668,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.nodeLayout.project.projectFile.${key}`, ...args)
-    },
     renderSize,
     uploadPieces,
     formatDuration,

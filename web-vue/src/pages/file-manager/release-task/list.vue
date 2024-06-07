@@ -465,9 +465,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.fileManager.releaseTask.list.${key}`, ...args)
-    },
     CHANGE_PAGE,
     renderSize,
     parseTime,

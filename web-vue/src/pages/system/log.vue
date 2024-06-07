@@ -75,9 +75,6 @@ export default {
     this.socket?.close()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.system.log.${key}`, ...args)
-    },
     // 加载数据
     loadData() {
       this.list = []

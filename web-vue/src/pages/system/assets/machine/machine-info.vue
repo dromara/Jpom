@@ -859,9 +859,6 @@ export default {
     window.removeEventListener('resize', this.resize)
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.system.assets.machine.machineInfo.${key}`, ...args)
-    },
     formatPercent,
     parseTime,
     formatDuration,

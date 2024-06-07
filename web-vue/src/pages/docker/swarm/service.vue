@@ -726,9 +726,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.docker.swarm.service.${key}`, ...args)
-    },
     // 加载数据
     loadData() {
       if (!this.visible) {

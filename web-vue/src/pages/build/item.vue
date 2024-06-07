@@ -157,9 +157,6 @@ export default {
     }
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.build.item.${key}`, ...args)
-    },
     menuClick(item) {
       this.menuKey = item.key
     },

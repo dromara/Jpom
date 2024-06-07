@@ -147,9 +147,6 @@ export default {
   },
   mounted() {},
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.docker.console.${key}`, ...args)
-    },
     menuClick(item) {
       this.menuKey = item.key
     },
