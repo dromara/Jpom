@@ -48,9 +48,18 @@ public class ImportRepoUtil {
 
     private static final String IMPORT_REPO_PROVIDER_DIR = "/import-repo-provider/";
 
-    @SneakyThrows
     public Map<String, Map<String, Object>> getProviderList() {
-        Resource[] configResources = ExtConfigBean.getConfigResources("import-repo-provider/*.yml");
+        Resource[] configResources = ExtConfigBean.getDefaultConfigResources("import-repo-provider/*.yml");
+        Map<String, Map<String, Object>> map = resourceToMap(configResources);
+        Resource[] diyConfigResources = ExtConfigBean.getConfigResources("import-repo-provider/*.yml");
+        map.putAll(resourceToMap(diyConfigResources));
+        return map;
+    }
+
+    private Map<String, Map<String, Object>> resourceToMap(Resource[] configResources) {
+        if (configResources == null) {
+            return new HashMap<>(1);
+        }
         return Arrays.stream(configResources)
             .map(resource -> {
                 String filename = resource.getFilename();
