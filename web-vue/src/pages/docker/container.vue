@@ -16,50 +16,52 @@
           <a-space>
             <a-input
               v-model:value="listQuery['name']"
-              :placeholder="$tl('c.name')"
+              :placeholder="$t('pages.docker.container.3e34ec28')"
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['containerId']"
-              :placeholder="$tl('c.containerId')"
+              :placeholder="$t('pages.docker.container.cfda881')"
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['imageId']"
-              :placeholder="$tl('c.imageId')"
+              :placeholder="$t('pages.docker.container.e2840598')"
               class="search-input-item"
               @keyup.enter="loadData"
             />
             <div>
-              {{ $tl('c.view') }}
+              {{ $t('pages.docker.container.9eea39a0') }}
               <a-switch
                 v-model:checked="listQuery['showAll']"
-                :checked-children="$tl('c.all')"
-                :un-checked-children="$tl('c.running')"
+                :checked-children="$t('pages.docker.container.9c048a42')"
+                :un-checked-children="$t('pages.docker.container.dd568fba')"
               />
             </div>
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('c.search') }}</a-button>
+            <a-button type="primary" :loading="loading" @click="loadData">{{
+              $t('pages.docker.container.a1f640f4')
+            }}</a-button>
             <a-statistic-countdown
               format="s"
-              :title="$tl('c.refreshCountdown') + ' '"
+              :title="$t('pages.docker.container.c48b0e64') + ' '"
               :value="countdownTime"
               @finish="autoUpdate"
             >
               <template #suffix>
-                <div style="font-size: 12px">{{ $tl('c.seconds') }}</div>
+                <div style="font-size: 12px">{{ $t('pages.docker.container.dda10f33') }}</div>
               </template>
             </a-statistic-countdown>
           </a-space>
         </template>
         <template #bodyCell="{ column, text, record }">
           <template v-if="column.dataIndex === 'names'">
-            <a-popover :title="`${$tl('c.containerName')}${(text || []).join(',')}`">
+            <a-popover :title="`${$t('pages.docker.container.cddbe6bd')}${(text || []).join(',')}`">
               <template #content>
-                <p>{{ $tl('c.containerIdLabel') }}{{ record.id }}</p>
-                <p>{{ $tl('c.image') }}{{ record.image }}</p>
-                <p>{{ $tl('c.imageIdLabel') }}{{ record.imageId }}</p>
+                <p>{{ $t('pages.docker.container.da9678ab') }}{{ record.id }}</p>
+                <p>{{ $t('pages.docker.container.198b1e02') }}{{ record.image }}</p>
+                <p>{{ $t('pages.docker.container.93bac13d') }}{{ record.imageId }}</p>
               </template>
 
               <span>{{ (text || []).join(',') }}</span>
@@ -67,7 +69,7 @@
           </template>
 
           <template v-else-if="column.dataIndex === 'labels'">
-            <a-popover :title="`${$tl('c.containerNameTag')}`">
+            <a-popover :title="`${$t('pages.docker.container.ef67c3db')}`">
               <template #content>
                 <template v-if="record.labels">
                   <p v-for="(value, key) in record.labels" :key="key">
@@ -85,15 +87,17 @@
             </a-popover>
           </template>
           <template v-else-if="column.dataIndex === 'mounts'">
-            <a-popover :title="`${$tl('c.mount')}`">
+            <a-popover :title="`${$t('pages.docker.container.e65fe05e')}`">
               <template #content>
                 <template v-if="record.mounts">
                   <div v-for="(item, index) in record.mounts" :key="index">
                     <p>
-                      {{ $tl('c.nameLabel') }}{{ item.name }}
-                      <a-tag>{{ item.rw ? $tl('c.readWrite') : $tl('c.read') }}</a-tag>
+                      {{ $t('pages.docker.container.c0d9b398') }}{{ item.name }}
+                      <a-tag>{{
+                        item.rw ? $t('pages.docker.container.71579f61') : $t('pages.docker.container.f840d349')
+                      }}</a-tag>
                     </p>
-                    <p>{{ $tl('c.path') }}</p>
+                    <p>{{ $t('pages.docker.container.6b431921') }}</p>
                     <a-divider></a-divider>
                   </div>
                 </template>
@@ -121,7 +125,7 @@
           <template v-else-if="column.dataIndex === 'ports'">
             <a-popover placement="topLeft">
               <template #title>
-                {{ $tl('c.networkPort') }}
+                {{ $t('pages.docker.container.64ea7bda') }}
                 <ul>
                   <li v-for="(item, index) in text || []" :key="index">
                     {{ item.type + ' ' + (item.ip || '') + ':' + (item.publicPort || '') + ':' + item.privatePort }}
@@ -132,7 +136,7 @@
                 <template v-if="record.networkSettings">
                   <template v-if="record.networkSettings.networks">
                     <template v-if="record.networkSettings.networks.bridge">
-                      {{ $tl('c.bridgeMode') }}
+                      {{ $t('pages.docker.container.1976c068') }}
                       <p v-if="record.networkSettings.networks.bridge.ipAddress">
                         IP:
                         <a-tag>{{ record.networkSettings.networks.bridge.ipAddress }}</a-tag>
@@ -142,7 +146,7 @@
                         <a-tag>{{ record.networkSettings.networks.bridge.macAddress }}</a-tag>
                       </p>
                       <p v-if="record.networkSettings.networks.bridge.gateway">
-                        {{ $tl('c.gateway') }}:
+                        {{ $t('pages.docker.container.e689dbaa') }}:
                         <a-tag>{{ record.networkSettings.networks.bridge.gateway }}</a-tag>
                       </p>
                       <p v-if="record.networkSettings.networks.bridge.networkID">
@@ -164,7 +168,7 @@
                         <a-tag>{{ record.networkSettings.networks.ingress.macAddress }}</a-tag>
                       </p>
                       <p v-if="record.networkSettings.networks.ingress.gateway">
-                        {{ $tl('c.gateway') }}:
+                        {{ $t('pages.docker.container.e689dbaa') }}:
                         <a-tag>{{ record.networkSettings.networks.ingress.gateway }}</a-tag>
                       </p>
                       <p v-if="record.networkSettings.networks.ingress.networkID">
@@ -191,7 +195,7 @@
           </template>
 
           <template v-else-if="column.dataIndex === 'state'">
-            <a-tooltip :title="(record.status || '') + $tl('c.viewLogs')" @click="viewLog(record)">
+            <a-tooltip :title="(record.status || '') + $t('pages.docker.container.854a0b5d')" @click="viewLog(record)">
               <a-switch :checked="text === 'running'" :disabled="true">
                 <template #checkedChildren>
                   <CheckCircleOutlined />
@@ -205,7 +209,7 @@
           <template v-else-if="column.dataIndex === 'operation'">
             <a-space>
               <template v-if="record.state === 'running'">
-                <a-tooltip :title="$tl('c.enterTerminal')">
+                <a-tooltip :title="$t('pages.docker.container.e49f7a16')">
                   <a-button
                     size="small"
                     type="link"
@@ -214,23 +218,23 @@
                     ><CodeOutlined
                   /></a-button>
                 </a-tooltip>
-                <a-tooltip :title="$tl('c.stop')">
+                <a-tooltip :title="$t('pages.docker.container.d9418498')">
                   <a-button size="small" type="link" @click="doAction(record, 'stop')"><StopOutlined /></a-button>
                 </a-tooltip>
-                <a-tooltip :title="$tl('c.restart')">
+                <a-tooltip :title="$t('pages.docker.container.158e24d2')">
                   <a-button size="small" type="link" @click="doAction(record, 'restart')"><ReloadOutlined /></a-button>
                 </a-tooltip>
               </template>
               <template v-else>
-                <a-tooltip :title="$tl('c.start')">
+                <a-tooltip :title="$t('pages.docker.container.43cf4fd2')">
                   <a-button size="small" type="link" @click="doAction(record, 'start')">
                     <PlayCircleOutlined />
                   </a-button>
                 </a-tooltip>
-                <a-tooltip :title="$tl('c.stop')">
+                <a-tooltip :title="$t('pages.docker.container.d9418498')">
                   <a-button size="small" type="link" :disabled="true"><StopOutlined /></a-button>
                 </a-tooltip>
-                <a-tooltip :title="$tl('c.restart')">
+                <a-tooltip :title="$t('pages.docker.container.158e24d2')">
                   <a-button size="small" type="link" :disabled="true"><ReloadOutlined /></a-button>
                 </a-tooltip>
               </template>
@@ -242,35 +246,35 @@
                 <template #overlay>
                   <a-menu>
                     <a-menu-item>
-                      <a-tooltip :title="$tl('c.modifyAndRun')">
+                      <a-tooltip :title="$t('pages.docker.container.9bce7fda')">
                         <a-button size="small" type="link" @click="rebuild(record)"
-                          ><RedoOutlined />{{ $tl('c.rebuild') }}</a-button
+                          ><RedoOutlined />{{ $t('pages.docker.container.37578386') }}</a-button
                         >
                       </a-tooltip>
                     </a-menu-item>
                     <a-menu-item>
-                      <a-tooltip :title="$tl('c.editBasicParams')">
+                      <a-tooltip :title="$t('pages.docker.container.a1ba9678')">
                         <a-button
                           size="small"
                           type="link"
                           :disabled="record.state !== 'running'"
                           @click="editContainer(record)"
                         >
-                          <EditOutlined />{{ $tl('c.edit') }}
+                          <EditOutlined />{{ $t('pages.docker.container.e1224c34') }}
                         </a-button>
                       </a-tooltip>
                     </a-menu-item>
                     <a-menu-item>
-                      <a-tooltip :title="$tl('c.viewLogs')">
+                      <a-tooltip :title="$t('pages.docker.container.854a0b5d')">
                         <a-button size="small" type="link" @click="viewLog(record)"
-                          ><MessageOutlined />{{ $tl('c.logs') }}</a-button
+                          ><MessageOutlined />{{ $t('pages.docker.container.90985472') }}</a-button
                         >
                       </a-tooltip>
                     </a-menu-item>
                     <a-menu-item>
-                      <a-tooltip :title="$tl('c.forceDelete')">
+                      <a-tooltip :title="$t('pages.docker.container.30c29')">
                         <a-button size="small" type="link" @click="doAction(record, 'remove')">
-                          <DeleteOutlined />{{ $tl('c.delete') }}
+                          <DeleteOutlined />{{ $t('pages.docker.container.2f14e7d4') }}
                         </a-button>
                       </a-tooltip>
                     </a-menu-item>
@@ -288,39 +292,41 @@
           <a-space>
             <a-input
               v-model:value="listQuery['name']"
-              :placeholder="$tl('c.name')"
+              :placeholder="$t('pages.docker.container.3e34ec28')"
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['containerId']"
-              :placeholder="$tl('c.containerId')"
+              :placeholder="$t('pages.docker.container.cfda881')"
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['imageId']"
-              :placeholder="$tl('c.imageId')"
+              :placeholder="$t('pages.docker.container.e2840598')"
               class="search-input-item"
               @keyup.enter="loadData"
             />
             <div>
-              {{ $tl('c.view') }}
+              {{ $t('pages.docker.container.9eea39a0') }}
               <a-switch
                 v-model:checked="listQuery['showAll']"
-                :checked-children="$tl('c.all')"
-                :un-checked-children="$tl('c.running')"
+                :checked-children="$t('pages.docker.container.9c048a42')"
+                :un-checked-children="$t('pages.docker.container.dd568fba')"
               />
             </div>
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('c.search') }}</a-button>
+            <a-button type="primary" :loading="loading" @click="loadData">{{
+              $t('pages.docker.container.a1f640f4')
+            }}</a-button>
             <a-statistic-countdown
               format="s"
-              :title="$tl('c.refreshCountdown') + ' '"
+              :title="$t('pages.docker.container.c48b0e64') + ' '"
               :value="countdownTime"
               @finish="autoUpdate"
             >
               <template #suffix>
-                <div style="font-size: 12px">{{ $tl('c.seconds') }}</div>
+                <div style="font-size: 12px">{{ $t('pages.docker.container.dda10f33') }}</div>
               </template>
             </a-statistic-countdown>
           </a-space>
@@ -365,11 +371,11 @@
             >
               <template #bodyCell="{ column, text, record }">
                 <template v-if="column.dataIndex === 'names'">
-                  <a-popover :title="`${$tl('c.containerName')}${(text || []).join(',')}`">
+                  <a-popover :title="`${$t('pages.docker.container.cddbe6bd')}${(text || []).join(',')}`">
                     <template #content>
-                      <p>{{ $tl('c.containerIdLabel') }}{{ record.id }}</p>
-                      <p>{{ $tl('c.image') }}{{ record.image }}</p>
-                      <p>{{ $tl('c.imageIdLabel') }}{{ record.imageId }}</p>
+                      <p>{{ $t('pages.docker.container.da9678ab') }}{{ record.id }}</p>
+                      <p>{{ $t('pages.docker.container.198b1e02') }}{{ record.image }}</p>
+                      <p>{{ $t('pages.docker.container.93bac13d') }}{{ record.imageId }}</p>
                     </template>
 
                     <span>{{ (text || []).join(',') }}</span>
@@ -377,7 +383,7 @@
                 </template>
 
                 <template v-else-if="column.dataIndex === 'labels'">
-                  <a-popover :title="`${$tl('c.containerNameTag')}`">
+                  <a-popover :title="`${$t('pages.docker.container.ef67c3db')}`">
                     <template #content>
                       <template v-if="record.labels">
                         <p v-for="(value, key) in record.labels" :key="key">
@@ -395,15 +401,24 @@
                   </a-popover>
                 </template>
                 <template v-else-if="column.dataIndex === 'mounts'">
-                  <a-popover :title="`${$tl('c.mount')}`">
+                  <a-popover :title="`${$t('pages.docker.container.e65fe05e')}`">
                     <template #content>
                       <template v-if="record.mounts">
                         <div v-for="(item, idx) in record.mounts" :key="idx">
                           <p>
-                            {{ $tl('c.nameLabel') }}{{ item.name }}
-                            <a-tag>{{ item.rw ? $tl('c.readWrite') : $tl('c.read') }}</a-tag>
+                            {{ $t('pages.docker.container.c0d9b398') }}{{ item.name }}
+                            <a-tag>{{
+                              item.rw ? $t('pages.docker.container.71579f61') : $t('pages.docker.container.f840d349')
+                            }}</a-tag>
                           </p>
-                          <p>{{ $tl('c.path', { source: item.source, destination: item.destination }) }}</p>
+                          <p>
+                            {{
+                              $t('pages.docker.container.6b431921', {
+                                source: item.source,
+                                destination: item.destination
+                              })
+                            }}
+                          </p>
                           <a-divider></a-divider>
                         </div>
                       </template>
@@ -431,7 +446,7 @@
                 <template v-else-if="column.dataIndex === 'ports'">
                   <a-popover placement="topLeft">
                     <template #title>
-                      {{ $tl('c.networkPort') }}
+                      {{ $t('pages.docker.container.64ea7bda') }}
                       <ul>
                         <li v-for="(item, idx) in text || []" :key="idx">
                           {{
@@ -444,7 +459,7 @@
                       <template v-if="record.networkSettings">
                         <template v-if="record.networkSettings.networks">
                           <template v-if="record.networkSettings.networks.bridge">
-                            {{ $tl('c.bridgeMode') }}
+                            {{ $t('pages.docker.container.1976c068') }}
                             <p v-if="record.networkSettings.networks.bridge.ipAddress">
                               IP:
                               <a-tag>{{ record.networkSettings.networks.bridge.ipAddress }}</a-tag>
@@ -454,7 +469,7 @@
                               <a-tag>{{ record.networkSettings.networks.bridge.macAddress }}</a-tag>
                             </p>
                             <p v-if="record.networkSettings.networks.bridge.gateway">
-                              {{ $tl('c.gateway') }}:
+                              {{ $t('pages.docker.container.e689dbaa') }}:
                               <a-tag>{{ record.networkSettings.networks.bridge.gateway }}</a-tag>
                             </p>
                             <p v-if="record.networkSettings.networks.bridge.networkID">
@@ -476,7 +491,7 @@
                               <a-tag>{{ record.networkSettings.networks.ingress.macAddress }}</a-tag>
                             </p>
                             <p v-if="record.networkSettings.networks.ingress.gateway">
-                              {{ $tl('c.gateway') }}:
+                              {{ $t('pages.docker.container.e689dbaa') }}:
                               <a-tag>{{ record.networkSettings.networks.ingress.gateway }}</a-tag>
                             </p>
                             <p v-if="record.networkSettings.networks.ingress.networkID">
@@ -502,7 +517,10 @@
                 </template>
 
                 <template v-else-if="column.dataIndex === 'state'">
-                  <a-tooltip :title="(record.status || '') + $tl('c.viewLogs')" @click="viewLog(record)">
+                  <a-tooltip
+                    :title="(record.status || '') + $t('pages.docker.container.854a0b5d')"
+                    @click="viewLog(record)"
+                  >
                     <a-switch :checked="record.state === 'running'" :disabled="true">
                       <template #checkedChildren>
                         <CheckCircleOutlined />
@@ -516,28 +534,28 @@
                 <template v-else-if="column.dataIndex === 'operation'">
                   <a-space>
                     <template v-if="record.state === 'running'">
-                      <a-tooltip :title="$tl('c.enterTerminal')">
+                      <a-tooltip :title="$t('pages.docker.container.e49f7a16')">
                         <a-button size="small" type="link" @click="handleTerminal(record)"><CodeOutlined /></a-button>
                       </a-tooltip>
-                      <a-tooltip :title="$tl('c.stop')">
+                      <a-tooltip :title="$t('pages.docker.container.d9418498')">
                         <a-button size="small" type="link" @click="doAction(record, 'stop')"><StopOutlined /></a-button>
                       </a-tooltip>
-                      <a-tooltip :title="$tl('c.restart')">
+                      <a-tooltip :title="$t('pages.docker.container.158e24d2')">
                         <a-button size="small" type="link" @click="doAction(record, 'restart')">
                           <ReloadOutlined />
                         </a-button>
                       </a-tooltip>
                     </template>
                     <template v-else>
-                      <a-tooltip :title="$tl('c.start')">
+                      <a-tooltip :title="$t('pages.docker.container.43cf4fd2')">
                         <a-button size="small" type="link" @click="doAction(record, 'start')">
                           <PlayCircleOutlined />
                         </a-button>
                       </a-tooltip>
-                      <a-tooltip :title="$tl('c.stop')">
+                      <a-tooltip :title="$t('pages.docker.container.d9418498')">
                         <a-button size="small" type="link" :disabled="true"><StopOutlined /></a-button>
                       </a-tooltip>
-                      <a-tooltip :title="$tl('c.restart')">
+                      <a-tooltip :title="$t('pages.docker.container.158e24d2')">
                         <a-button size="small" type="link" :disabled="true"><ReloadOutlined /></a-button>
                       </a-tooltip>
                     </template>
@@ -549,35 +567,35 @@
                       <template #overlay>
                         <a-menu>
                           <a-menu-item>
-                            <a-tooltip :title="$tl('c.modifyAndRun')">
+                            <a-tooltip :title="$t('pages.docker.container.9bce7fda')">
                               <a-button size="small" type="link" @click="rebuild(record)"
-                                ><RedoOutlined />{{ $tl('c.rebuild') }}</a-button
+                                ><RedoOutlined />{{ $t('pages.docker.container.37578386') }}</a-button
                               >
                             </a-tooltip>
                           </a-menu-item>
                           <a-menu-item>
-                            <a-tooltip :title="$tl('c.editBasicParams')">
+                            <a-tooltip :title="$t('pages.docker.container.a1ba9678')">
                               <a-button
                                 size="small"
                                 type="link"
                                 :disabled="record.state !== 'running'"
                                 @click="editContainer(record)"
                               >
-                                <EditOutlined />{{ $tl('c.edit') }}
+                                <EditOutlined />{{ $t('pages.docker.container.e1224c34') }}
                               </a-button>
                             </a-tooltip>
                           </a-menu-item>
                           <a-menu-item>
-                            <a-tooltip :title="$tl('c.viewLogs')">
+                            <a-tooltip :title="$t('pages.docker.container.854a0b5d')">
                               <a-button size="small" type="link" @click="viewLog(record)">
-                                <MessageOutlined />{{ $tl('c.logs') }}
+                                <MessageOutlined />{{ $t('pages.docker.container.90985472') }}
                               </a-button>
                             </a-tooltip>
                           </a-menu-item>
                           <a-menu-item>
-                            <a-tooltip :title="$tl('c.forceDelete')">
+                            <a-tooltip :title="$t('pages.docker.container.30c29')">
                               <a-button size="small" type="link" @click="doAction(record, 'remove')">
-                                <DeleteOutlined />{{ $tl('c.delete') }}
+                                <DeleteOutlined />{{ $t('pages.docker.container.2f14e7d4') }}
                               </a-button>
                             </a-tooltip>
                           </a-menu-item>
@@ -591,7 +609,7 @@
           </a-collapse-panel>
         </a-collapse>
         <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE">
-          <template #description>{{ $tl('p.noData') }}</template>
+          <template #description>{{ $t('pages.docker.container.53e901cf') }}</template>
         </a-empty>
       </a-card>
 
@@ -654,7 +672,7 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="60vw"
-      :title="$tl('p.configureContainer')"
+      :title="$t('pages.docker.container.6cfb3f78')"
       :mask-closable="false"
       @ok="
         () => {
@@ -763,34 +781,34 @@ export default {
       confirmLoading: false,
       columns: [
         {
-          title: this.$tl('p.serialNumber'),
+          title: this.$t('pages.docker.container.72cebb96'),
           width: '60px',
           // ellipsis: true,
           align: 'center',
           customRender: ({ index }) => `${index + 1}`
         },
         {
-          title: this.$tl('c.name'),
+          title: this.$t('pages.docker.container.3e34ec28'),
           dataIndex: 'names',
           ellipsis: true
           // width: 150
         },
         {
-          title: this.$tl('p.containerId'),
+          title: this.$t('pages.docker.container.5306295'),
           dataIndex: 'id',
           ellipsis: true,
           width: '10px',
           showid: true
         },
         {
-          title: this.$tl('p.imageId'),
+          title: this.$t('pages.docker.container.77c97b2c'),
           dataIndex: 'imageId',
           ellipsis: true,
           width: '130px',
           showid: true
         },
         {
-          title: this.$tl('p.status'),
+          title: this.$t('pages.docker.container.9c32c887'),
           dataIndex: 'state',
           // ellipsis: true,
           align: 'center',
@@ -798,33 +816,33 @@ export default {
         },
 
         {
-          title: this.$tl('p.port'),
+          title: this.$t('pages.docker.container.a6c4bfd7'),
           dataIndex: 'ports',
           ellipsis: true,
           width: '100px'
         },
 
         {
-          title: this.$tl('p.tag'),
+          title: this.$t('pages.docker.container.83d5a14e'),
           dataIndex: 'labels',
           ellipsis: true,
           width: '50px'
         },
         {
-          title: this.$tl('c.mount'),
+          title: this.$t('pages.docker.container.e65fe05e'),
           dataIndex: 'mounts',
           ellipsis: true,
           width: '50px'
         },
         {
-          title: this.$tl('p.command'),
+          title: this.$t('pages.docker.container.e9f092b5'),
           dataIndex: 'command',
           ellipsis: true,
           width: 150,
           tooltip: true
         },
         {
-          title: this.$tl('p.createTime'),
+          title: this.$t('pages.docker.container.f5b90169'),
           dataIndex: 'created',
           ellipsis: true,
           sorter: (a, b) => Number(a.created) - new Number(b.created),
@@ -834,7 +852,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.docker.container.3bb962bf'),
           dataIndex: 'operation',
           fixed: 'right',
 
@@ -870,19 +888,19 @@ export default {
       // ],
       action: {
         remove: {
-          msg: this.$tl('p.confirmDelete'),
+          msg: this.$t('pages.docker.container.987c2cd6'),
           api: dockerContainerRemove
         },
         stop: {
-          msg: this.$tl('p.confirmStop'),
+          msg: this.$t('pages.docker.container.2e391eba'),
           api: dockerContainerStop
         },
         restart: {
-          msg: this.$tl('p.confirmRestart'),
+          msg: this.$t('pages.docker.container.fb372d35'),
           api: dockerContainerRestart
         },
         start: {
-          msg: this.$tl('p.confirmStart'),
+          msg: this.$t('pages.docker.container.965876ac'),
           api: dockerContainerStart
         }
       },
@@ -958,11 +976,11 @@ export default {
         return
       }
       $confirm({
-        title: this.$tl('p.systemPrompt'),
+        title: this.$t('pages.docker.container.b22d55a0'),
         zIndex: 1009,
         content: action.msg,
-        okText: this.$tl('p.confirm'),
-        cancelText: this.$tl('p.cancel'),
+        okText: this.$t('pages.docker.container.e8e9db25'),
+        cancelText: this.$t('pages.docker.container.b12468e9'),
         onOk: () => {
           return action
             .api(this.urlPrefix, {

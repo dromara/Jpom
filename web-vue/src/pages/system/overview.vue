@@ -1,32 +1,41 @@
 <template>
   <div>
     <a-page-header :back-icon="false">
-      <template #title> {{ $tl('p.k1') }}{{ getUserInfo.name }}{{ $tl('p.k2') }}</template>
-      <template #subTitle>{{ $tl('p.k3') }} </template>
+      <template #title>
+        {{ $t('pages.system.overview.af7fa63c') }}{{ getUserInfo.name
+        }}{{ $t('pages.system.overview.3676f786') }}</template
+      >
+      <template #subTitle>{{ $t('pages.system.overview.4171c710') }} </template>
       <template #tags>
         <a-tag color="blue">
-          <template v-if="getUserInfo.demoUser">{{ $tl('p.k4') }}</template>
-          <template v-else-if="getUserInfo.superSystemUser">{{ $tl('p.k5') }}</template>
-          <template v-else-if="getUserInfo.systemUser">{{ $tl('p.k6') }}</template>
-          <template v-else>{{ $tl('p.k7') }}</template>
+          <template v-if="getUserInfo.demoUser">{{ $t('pages.system.overview.df1552b3') }}</template>
+          <template v-else-if="getUserInfo.superSystemUser">{{ $t('pages.system.overview.a8126225') }}</template>
+          <template v-else-if="getUserInfo.systemUser">{{ $t('pages.system.overview.311b339f') }}</template>
+          <template v-else>{{ $t('pages.system.overview.461c0309') }}</template>
         </a-tag>
       </template>
       <template #extra>
-        <a-tooltip :title="$tl('p.k8')">
+        <a-tooltip :title="$t('pages.system.overview.d6a31e98')">
           <a-button :loading="loading" @click="init">
             <template #icon><ReloadOutlined /></template>
           </a-button>
         </a-tooltip>
         <!-- // 擅自修改或者删除版权信息有法律风险，请尊重开源协议，不要擅自修改版本信息，否则可能承担法律责任。 -->
-        <a-tooltip :title="$tl('p.k9')">
+        <a-tooltip :title="$t('pages.system.overview.a1a42e0e')">
           <a-button @click="toAbout">
             <template #icon><ExclamationCircleOutlined /></template>
           </a-button>
         </a-tooltip>
       </template>
       <a-space>
-        <span> {{ $tl('p.k10') }} <a-badge color="blue" :count="statData['workspaceCount'] || '0'" show-zero /> </span>
-        <span>{{ $tl('p.k11') }}<a-badge color="cyan" :count="statData['clusterCount'] || '0'" show-zero /></span>
+        <span>
+          {{ $t('pages.system.overview.db1bdc00') }}
+          <a-badge color="blue" :count="statData['workspaceCount'] || '0'" show-zero />
+        </span>
+        <span
+          >{{ $t('pages.system.overview.ac1cec96')
+          }}<a-badge color="cyan" :count="statData['clusterCount'] || '0'" show-zero
+        /></span>
       </a-space>
     </a-page-header>
     <a-divider dashed />
@@ -34,12 +43,12 @@
     <a-row :gutter="[16, 16]">
       <a-col :span="6">
         <a-card size="small">
-          <template #title> {{ $tl('p.k12') }} </template>
+          <template #title> {{ $t('pages.system.overview.3515bd2c') }} </template>
 
           <a-list :data-source="['all', ...Object.keys(nodeStatusMap)]">
             <template #renderItem="{ item }">
               <a-list-item v-if="item === 'all'">
-                {{ $tl('p.totalCount')
+                {{ $t('pages.system.overview.fda03bc')
                 }}<a-badge
                   :color="item.color"
                   :count="
@@ -74,12 +83,12 @@
       </a-col>
       <a-col :span="6">
         <a-card size="small">
-          <template #title> {{ $tl('p.k13') }} </template>
+          <template #title> {{ $t('pages.system.overview.42128dba') }} </template>
 
           <a-list :data-source="['all', ...Object.keys(sshStatusMap)]">
             <template #renderItem="{ item }">
               <a-list-item v-if="item === 'all'">
-                {{ $tl('p.totalCount')
+                {{ $t('pages.system.overview.fda03bc')
                 }}<a-badge
                   :color="item.color"
                   :count="
@@ -114,12 +123,12 @@
       </a-col>
       <a-col :span="6">
         <a-card size="small">
-          <template #title> {{ $tl('p.k14') }} </template>
+          <template #title> {{ $t('pages.system.overview.dc761819') }} </template>
 
           <a-list :data-source="['all', ...Object.keys(dockerStatusMap)]">
             <template #renderItem="{ item }">
               <a-list-item v-if="item === 'all'">
-                {{ $tl('p.totalCount')
+                {{ $t('pages.system.overview.fda03bc')
                 }}<a-badge
                   :color="item.color"
                   :count="
@@ -154,14 +163,14 @@
       </a-col>
       <a-col :span="6">
         <a-card size="small">
-          <template #title> {{ $tl('p.k15') }} </template>
+          <template #title> {{ $t('pages.system.overview.ab71288f') }} </template>
 
           <a-list
             :data-source="[
-              { name: $tl('p.k16'), field: 'userCount', color: 'red' },
-              { name: $tl('p.k17'), field: 'systemUserCount', color: 'pink' },
-              { name: $tl('p.k18'), field: 'openTwoFactorAuth', color: 'green' },
-              { name: $tl('p.k19'), field: 'disableUserCount', color: 'yellow' }
+              { name: $t('pages.system.overview.32787935'), field: 'userCount', color: 'red' },
+              { name: $t('pages.system.overview.457f49a3'), field: 'systemUserCount', color: 'pink' },
+              { name: $t('pages.system.overview.d5c05432'), field: 'openTwoFactorAuth', color: 'green' },
+              { name: $t('pages.system.overview.a2c764a4'), field: 'disableUserCount', color: 'yellow' }
             ]"
           >
             <template #renderItem="{ item }">

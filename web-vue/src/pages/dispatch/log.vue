@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="dispatch-log-list"
-      :empty-description="$tl('p.noLogs')"
+      :empty-description="$t('pages.dispatch.log.e9534f0')"
       size="middle"
       :data-source="list"
       :columns="columns"
@@ -24,7 +24,7 @@
           <a-select
             v-model:value="listQuery.nodeId"
             allow-clear
-            :placeholder="$tl('p.selectNode')"
+            :placeholder="$t('pages.dispatch.log.580e6c10')"
             class="search-input-item"
           >
             <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
@@ -32,7 +32,7 @@
           <a-select
             v-model:value="listQuery.outGivingId"
             allow-clear
-            :placeholder="$tl('p.distributeProject')"
+            :placeholder="$t('pages.dispatch.log.d935498a')"
             class="search-input-item"
           >
             <a-select-option v-for="dispatch in dispatchList" :key="dispatch.id">{{ dispatch.name }}</a-select-option>
@@ -40,7 +40,7 @@
           <a-select
             v-model:value="listQuery.status"
             allow-clear
-            :placeholder="$tl('p.selectStatus')"
+            :placeholder="$t('pages.dispatch.log.56195645')"
             class="search-input-item"
           >
             <a-select-option v-for="(item, key) in dispatchStatusMap" :key="key" :value="key">{{
@@ -48,8 +48,10 @@
             }}</a-select-option>
           </a-select>
           <a-range-picker :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
-          <a-tooltip :title="$tl('p.goToFirstPage')">
-            <a-button :loading="loading" type="primary" @click="loadData">{{ $tl('p.search') }}</a-button>
+          <a-tooltip :title="$t('pages.dispatch.log.1bfed54a')">
+            <a-button :loading="loading" type="primary" @click="loadData">{{
+              $t('pages.dispatch.log.53c2763c')
+            }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -84,7 +86,7 @@
         <template v-else-if="column.dataIndex === 'mode'">
           <a-tooltip
             placement="topLeft"
-            :title="`${dispatchMode[text] || ''}  ${$tl('p.relatedData')}${record.modeData || ''}`"
+            :title="`${dispatchMode[text] || ''}  ${$t('pages.dispatch.log.733ffc6e')}${record.modeData || ''}`"
           >
             <span>{{ dispatchMode[text] || '' }}</span>
           </a-tooltip>
@@ -119,22 +121,32 @@
         </template>
         <template v-else-if="column.dataIndex === 'status'">
           <!-- {{ dispatchStatusMap[text] || "未知" }} -->
-          <a-tag v-if="text === 2" color="green">{{ dispatchStatusMap[text] || $tl('c.unknown') }}</a-tag>
+          <a-tag v-if="text === 2" color="green">{{
+            dispatchStatusMap[text] || $t('pages.dispatch.log.5f51a112')
+          }}</a-tag>
           <a-tag v-else-if="text === 1 || text === 0 || text === 5" color="orange">{{
-            dispatchStatusMap[text] || $tl('c.unknown')
+            dispatchStatusMap[text] || $t('pages.dispatch.log.5f51a112')
           }}</a-tag>
           <a-tag v-else-if="text === 3 || text === 4 || text === 6" color="red">{{
-            dispatchStatusMap[text] || $tl('c.unknown')
+            dispatchStatusMap[text] || $t('pages.dispatch.log.5f51a112')
           }}</a-tag>
-          <a-tag v-else>{{ dispatchStatusMap[text] || $tl('c.unknown') }}</a-tag>
+          <a-tag v-else>{{ dispatchStatusMap[text] || $t('pages.dispatch.log.5f51a112') }}</a-tag>
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
-          <a-button type="primary" size="small" @click="handleDetail(record)">{{ $tl('p.details') }}</a-button>
+          <a-button type="primary" size="small" @click="handleDetail(record)">{{
+            $t('pages.dispatch.log.151c73eb')
+          }}</a-button>
         </template>
       </template>
     </CustomTable>
     <!-- 详情区 -->
-    <a-modal v-model:open="detailVisible" destroy-on-close width="600px" :title="$tl('p.info')" :footer="null">
+    <a-modal
+      v-model:open="detailVisible"
+      destroy-on-close
+      width="600px"
+      :title="$t('pages.dispatch.log.2edcd34c')"
+      :footer="null"
+    >
       <a-list item-layout="horizontal" :data-source="detailData">
         <template #renderItem="{ item }">
           <a-list-item>
@@ -174,49 +186,49 @@ export default {
       detailData: [],
       columns: [
         {
-          title: this.$tl('p.projectId'),
+          title: this.$t('pages.dispatch.log.4eaba425'),
           dataIndex: 'outGivingId',
           width: 100,
           ellipsis: true
         },
 
         {
-          title: this.$tl('p.nodeName'),
+          title: this.$t('pages.dispatch.log.fa8d810f'),
           dataIndex: 'nodeName',
           ellipsis: true,
           width: 150
         },
         {
-          title: this.$tl('p.distributeId'),
+          title: this.$t('pages.dispatch.log.87c0ef77'),
           dataIndex: 'projectId',
           ellipsis: true,
           width: 100
         },
         {
-          title: this.$tl('p.method'),
+          title: this.$t('pages.dispatch.log.b96b97fb'),
           dataIndex: 'mode',
           ellipsis: true,
           width: '100px'
         },
         {
-          title: this.$tl('c.result'),
+          title: this.$t('pages.dispatch.log.66c5a40'),
           dataIndex: 'outGivingResultMsg',
           ellipsis: true,
           width: 200
         },
 
         {
-          title: this.$tl('p.duration'),
+          title: this.$t('pages.dispatch.log.bc8deb76'),
           dataIndex: 'outGivingResultTime',
           width: '120px'
         },
         {
-          title: this.$tl('p.fileSize'),
+          title: this.$t('pages.dispatch.log.f087781'),
           dataIndex: 'outGivingResultSize',
           width: '100px'
         },
         {
-          title: this.$tl('p.startTime'),
+          title: this.$t('pages.dispatch.log.ac9ef5f5'),
           dataIndex: 'startTime',
           customRender: ({ text }) => {
             return parseTime(text)
@@ -225,7 +237,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$tl('p.endTime'),
+          title: this.$t('pages.dispatch.log.9376939d'),
           dataIndex: 'endTime',
           sorter: true,
           customRender: ({ text }) => {
@@ -234,26 +246,32 @@ export default {
           width: '170px'
         },
         {
-          title: this.$tl('p.statusMessage'),
+          title: this.$t('pages.dispatch.log.e57df4bc'),
           dataIndex: 'outGivingResultMsgData',
           ellipsis: true,
           width: 100
         },
         {
-          title: this.$tl('p.operator'),
+          title: this.$t('pages.dispatch.log.ed74cc37'),
           dataIndex: 'modifyUser',
           ellipsis: true,
 
           width: 120
         },
         {
-          title: this.$tl('p.status'),
+          title: this.$t('pages.dispatch.log.9c32c887'),
           dataIndex: 'status',
           width: 100,
           ellipsis: true,
           fixed: 'right'
         },
-        { title: this.$tl('p.action'), dataIndex: 'operation', align: 'center', width: '100px', fixed: 'right' }
+        {
+          title: this.$t('pages.dispatch.log.a0fe2109'),
+          dataIndex: 'operation',
+          align: 'center',
+          width: '100px',
+          fixed: 'right'
+        }
       ]
     }
   },
@@ -317,7 +335,7 @@ export default {
       this.detailVisible = true
       this.temp = Object.assign({}, record)
 
-      this.detailData.push({ title: this.$tl('c.result'), description: this.temp.result })
+      this.detailData.push({ title: this.$t('pages.dispatch.log.66c5a40'), description: this.temp.result })
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {

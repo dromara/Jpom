@@ -7,11 +7,15 @@
         <a-layout-sider theme="light" class="sider" width="25%">
           <div class="dir-container">
             <a-space>
-              <a-button size="small" type="primary" @click="loadData">{{ $tl('p.refreshDir') }}</a-button>
+              <a-button size="small" type="primary" @click="loadData">{{
+                $t('pages.node.node-layout.project.project-file.673024c2')
+              }}</a-button>
               <a-button v-show="noFileModes.includes(runMode)" size="small" type="primary" @click="goConsole">
-                {{ $tl('p.console') }}
+                {{ $t('pages.node.node-layout.project.project-file.5139b7d7') }}
               </a-button>
-              <a-button size="small" type="primary" @click="backupList"> {{ $tl('c.backupList') }} </a-button>
+              <a-button size="small" type="primary" @click="backupList">
+                {{ $t('pages.node.node-layout.project.project-file.deafd62c') }}
+              </a-button>
             </a-space>
           </div>
           <a-directory-tree
@@ -42,52 +46,58 @@
               <a-space>
                 <a-dropdown :disabled="!Object.keys(tempNode).length">
                   <a-button size="small" type="primary" @click="(e) => e.preventDefault()"
-                    ><UploadOutlined />{{ $tl('p.upload') }}</a-button
+                    ><UploadOutlined />{{ $t('pages.node.node-layout.project.project-file.f08f4b84') }}</a-button
                   >
                   <template #overlay>
                     <a-menu>
                       <a-menu-item @click="handleUpload">
-                        <a-space><FileOutlined />{{ $tl('p.uploadFile') }}</a-space>
+                        <a-space
+                          ><FileOutlined />{{ $t('pages.node.node-layout.project.project-file.33ffacfb') }}</a-space
+                        >
                       </a-menu-item>
                       <a-menu-item @click="handleZipUpload">
-                        <a-space><FileZipOutlined />{{ $tl('p.uploadAndUnzip') }}</a-space>
+                        <a-space
+                          ><FileZipOutlined />{{ $t('pages.node.node-layout.project.project-file.6800b7c2') }}</a-space
+                        >
                       </a-menu-item>
                     </a-menu>
                   </template>
                 </a-dropdown>
                 <a-dropdown :disabled="!Object.keys(tempNode).length">
                   <a-button size="small" type="primary" @click="(e) => e.preventDefault()"
-                    ><PlusOutlined />{{ $tl('p.create') }}</a-button
+                    ><PlusOutlined />{{ $t('pages.node.node-layout.project.project-file.68e44d60') }}</a-button
                   >
                   <template #overlay>
                     <a-menu>
                       <a-menu-item @click="handleAddFile(1)">
                         <a-space>
                           <FolderAddOutlined />
-                          <a-space>{{ $tl('p.newDir') }}</a-space>
+                          <a-space>{{ $t('pages.node.node-layout.project.project-file.be93e7e8') }}</a-space>
                         </a-space>
                       </a-menu-item>
                       <a-menu-item @click="handleAddFile(2)">
                         <a-space>
                           <FileAddOutlined />
-                          <a-space>{{ $tl('p.newBlankFile') }}</a-space>
+                          <a-space>{{ $t('pages.node.node-layout.project.project-file.d2d212a') }}</a-space>
                         </a-space>
                       </a-menu-item>
                     </a-menu>
                   </template>
                 </a-dropdown>
-                <a-tooltip :title="$tl('p.downloadRemoteFile')">
+                <a-tooltip :title="$t('pages.node.node-layout.project.project-file.2be4f3d2')">
                   <a-button size="small" type="primary" @click="openRemoteUpload"><CloudDownloadOutlined /></a-button>
                 </a-tooltip>
-                <a-tooltip :title="$tl('p.refreshTable')">
+                <a-tooltip :title="$t('pages.node.node-layout.project.project-file.c9f489b3')">
                   <a-button size="small" type="primary" @click="loadFileList"><ReloadOutlined /></a-button>
                 </a-tooltip>
-                <a-tooltip :title="$tl('p.clearDir')">
+                <a-tooltip :title="$t('pages.node.node-layout.project.project-file.d7878f7')">
                   <a-button size="small" type="primary" danger @click="clearFile"><DeleteOutlined /></a-button>
                 </a-tooltip>
 
-                <a-tag v-if="uploadPath" color="#2db7f5">{{ $tl('p.currentDir') }}{{ uploadPath || '' }}</a-tag>
-                <div>{{ $tl('p.fileNameRightClick') }}</div>
+                <a-tag v-if="uploadPath" color="#2db7f5"
+                  >{{ $t('pages.node.node-layout.project.project-file.79d208a0') }}{{ uploadPath || '' }}</a-tag
+                >
+                <div>{{ $t('pages.node.node-layout.project.project-file.aa19cb64') }}</div>
               </a-space>
             </template>
 
@@ -100,12 +110,12 @@
                       <a-menu>
                         <a-menu-item key="1">
                           <a-button :disabled="!record.textFileEdit" type="link" @click="goReadFile(record)">
-                            <BarsOutlined /> {{ $tl('p.trackFile') }}
+                            <BarsOutlined /> {{ $t('pages.node.node-layout.project.project-file.c7a1ee83') }}
                           </a-button>
                         </a-menu-item>
                         <a-menu-item key="2">
                           <a-button type="link" @click="handleRenameFile(record)">
-                            <HighlightOutlined />{{ $tl('c.rename') }}
+                            <HighlightOutlined />{{ $t('pages.node.node-layout.project.project-file.cc9bcf1d') }}
                           </a-button>
                         </a-menu-item>
                         <a-menu-item key="3">
@@ -137,7 +147,11 @@
                 </a-tooltip>
               </template>
               <template v-else-if="column.dataIndex === 'isDirectory'">
-                <span>{{ text ? $tl('p.dir') : $tl('p.file') }}</span>
+                <span>{{
+                  text
+                    ? $t('pages.node.node-layout.project.project-file.3af76cdd')
+                    : $t('pages.node.node-layout.project.project-file.69cad40b')
+                }}</span>
               </template>
               <template v-else-if="column.dataIndex === 'fileSizeLong'">
                 <a-tooltip placement="topLeft" :title="`${text ? renderSize(text) : record.fileSize}`">
@@ -152,30 +166,34 @@
               <template v-else-if="column.dataIndex === 'operation'">
                 <a-space>
                   <template v-if="record.isDirectory">
-                    <a-tooltip :title="$tl('p.dirNotEditable')">
-                      <a-button size="small" type="primary" :disabled="true">{{ $tl('c.edit') }}</a-button>
+                    <a-tooltip :title="$t('pages.node.node-layout.project.project-file.8ae46c33')">
+                      <a-button size="small" type="primary" :disabled="true">{{
+                        $t('pages.node.node-layout.project.project-file.e1224c34')
+                      }}</a-button>
                     </a-tooltip>
-                    <a-tooltip :title="$tl('p.cantDownloadDir')">
-                      <a-button size="small" type="primary" :disabled="true">{{ $tl('c.download') }}</a-button>
+                    <a-tooltip :title="$t('pages.node.node-layout.project.project-file.c4f5f6e8')">
+                      <a-button size="small" type="primary" :disabled="true">{{
+                        $t('pages.node.node-layout.project.project-file.8e51d32d')
+                      }}</a-button>
                     </a-tooltip>
                   </template>
                   <template v-else>
-                    <a-tooltip :title="$tl('p.editFileSuffixConfig')">
+                    <a-tooltip :title="$t('pages.node.node-layout.project.project-file.309603aa')">
                       <a-button
                         size="small"
                         type="primary"
                         :loading="editLoading"
                         :disabled="!record.textFileEdit"
                         @click="handleEditFile(record)"
-                        >{{ $tl('c.edit') }}</a-button
+                        >{{ $t('pages.node.node-layout.project.project-file.e1224c34') }}</a-button
                       >
                     </a-tooltip>
                     <a-button size="small" type="primary" @click="handleDownload(record)">{{
-                      $tl('c.download')
+                      $t('pages.node.node-layout.project.project-file.8e51d32d')
                     }}</a-button>
                   </template>
                   <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-                    $tl('p.delete')
+                    $t('pages.node.node-layout.project.project-file.dd20d11c')
                   }}</a-button>
                 </a-space>
               </template>
@@ -188,7 +206,7 @@
             :closable="!uploading"
             :keyboard="false"
             width="35vw"
-            :title="$tl('p.uploadProjectFile')"
+            :title="$t('pages.node.node-layout.project.project-file.92c4b47e')"
             :footer="null"
             :mask-closable="false"
           >
@@ -218,7 +236,9 @@
                   <span v-else>-</span>
                 </template>
 
-                <a-button v-else><UploadOutlined />{{ $tl('p.selectFile') }}</a-button>
+                <a-button v-else
+                  ><UploadOutlined />{{ $t('pages.node.node-layout.project.project-file.51eeb245') }}</a-button
+                >
               </a-upload>
 
               <a-row v-if="percentage">
@@ -229,11 +249,14 @@
                         ({{ renderSize(percentageInfo.total) }})
                       </template>
                       <template v-if="percentageInfo.duration">
-                        {{ $tl('c.currentFileDuration') }}:{{ formatDuration(percentageInfo.duration) }}
+                        {{ $t('pages.node.node-layout.project.project-file.2860854d') }}:{{
+                          formatDuration(percentageInfo.duration)
+                        }}
                       </template>
                       <template v-if="uploadFileList.length">
-                        {{ $tl('c.complete') }} {{ successSize }} {{ $tl('c.countFormat') }}{{ uploadFileList.length
-                        }}{{ $tl('c.count') }}
+                        {{ $t('pages.node.node-layout.project.project-file.b42c817e') }} {{ successSize }}
+                        {{ $t('pages.node.node-layout.project.project-file.ab314151') }}{{ uploadFileList.length
+                        }}{{ $t('pages.node.node-layout.project.project-file.596f5e3f') }}
                       </template>
                     </template>
                   </a-progress>
@@ -241,7 +264,7 @@
               </a-row>
 
               <a-button type="primary" :disabled="fileUploadDisabled" @click="startUpload">{{
-                $tl('c.startUpload')
+                $t('pages.node.node-layout.project.project-file.c9b65c5c')
               }}</a-button>
             </a-space>
           </a-modal>
@@ -252,7 +275,7 @@
             :closable="!uploading"
             :keyboard="false"
             width="35vw"
-            :title="$tl('p.uploadZipFile')"
+            :title="$t('pages.node.node-layout.project.project-file.6d1f9442')"
             :footer="null"
             :mask-closable="false"
           >
@@ -275,7 +298,9 @@
                 "
               >
                 <LoadingOutlined v-if="percentage" />
-                <a-button v-else><UploadOutlined />{{ $tl('p.selectZipFile') }}</a-button>
+                <a-button v-else
+                  ><UploadOutlined />{{ $t('pages.node.node-layout.project.project-file.1c2e5817') }}</a-button
+                >
               </a-upload>
               <a-row v-if="percentage">
                 <a-col span="24">
@@ -285,11 +310,14 @@
                         ({{ renderSize(percentageInfo.total) }})
                       </template>
                       <template v-if="percentageInfo.duration">
-                        {{ $tl('c.currentFileDuration') }}:{{ formatDuration(percentageInfo.duration) }}
+                        {{ $t('pages.node.node-layout.project.project-file.2860854d') }}:{{
+                          formatDuration(percentageInfo.duration)
+                        }}
                       </template>
                       <template v-if="uploadFileList.length">
-                        {{ $tl('c.complete') }} {{ successSize }} {{ $tl('c.countFormat') }}{{ uploadFileList.length
-                        }}{{ $tl('c.count') }}
+                        {{ $t('pages.node.node-layout.project.project-file.b42c817e') }} {{ successSize }}
+                        {{ $t('pages.node.node-layout.project.project-file.ab314151') }}{{ uploadFileList.length
+                        }}{{ $t('pages.node.node-layout.project.project-file.596f5e3f') }}
                       </template>
                     </template>
                   </a-progress>
@@ -298,8 +326,8 @@
 
               <a-switch
                 v-model:checked="uploadData.checkBox"
-                :checked-children="$tl('p.overwrite')"
-                :un-checked-children="$tl('p.keep')"
+                :checked-children="$t('pages.node.node-layout.project.project-file.9f944d4')"
+                :un-checked-children="$t('pages.node.node-layout.project.project-file.2ea5aa10')"
                 style="margin-bottom: 10px"
               />
 
@@ -307,11 +335,11 @@
                 v-model:value="uploadData.stripComponents"
                 style="width: 100%"
                 :min="0"
-                :placeholder="$tl('c.excludeExtraFolder')"
+                :placeholder="$t('pages.node.node-layout.project.project-file.cd9753f4')"
               />
 
               <a-button type="primary" :disabled="fileUploadDisabled" @click="startZipUpload">{{
-                $tl('c.startUpload')
+                $t('pages.node.node-layout.project.project-file.c9b65c5c')
               }}</a-button>
             </a-space>
           </a-modal>
@@ -320,7 +348,7 @@
             v-model:open="editFileVisible"
             destroy-on-close
             width="80vw"
-            :title="`${$tl('p.editFileContent')} ${filename}`"
+            :title="`${$t('pages.node.node-layout.project.project-file.4d43d54d')} ${filename}`"
             :mask-closable="true"
             @cancel="handleCloseModal"
           >
@@ -340,8 +368,12 @@
             </code-editor>
 
             <template #footer>
-              <a-button @click="handleCloseModal"> {{ $tl('p.close') }} </a-button>
-              <a-button type="primary" @click="updateFileData"> {{ $tl('p.save') }} </a-button>
+              <a-button @click="handleCloseModal">
+                {{ $t('pages.node.node-layout.project.project-file.99811dca') }}
+              </a-button>
+              <a-button type="primary" @click="updateFileData">
+                {{ $t('pages.node.node-layout.project.project-file.b033d8c5') }}
+              </a-button>
               <a-button
                 type="primary"
                 @click="
@@ -351,7 +383,7 @@
                   }
                 "
               >
-                {{ $tl('p.saveAndClose') }}
+                {{ $t('pages.node.node-layout.project.project-file.e4584755') }}
               </a-button>
             </template>
           </a-modal>
@@ -360,7 +392,7 @@
             v-model:open="uploadRemoteFileVisible"
             destroy-on-close
             :confirm-loading="confirmLoading"
-            :title="$tl('p.remoteDownload')"
+            :title="$t('pages.node.node-layout.project.project-file.367f115c')"
             :mask-closable="false"
             @ok="handleRemoteUpload"
             @cancel="closeRemoteUpload"
@@ -372,22 +404,28 @@
               :wrapper-col="{ span: 18 }"
               :rules="rules"
             >
-              <a-form-item :label="$tl('p.remoteDownloadUrl')" name="url">
-                <a-input v-model:value="remoteDownloadData.url" :placeholder="$tl('p.remoteDownloadAddress')" />
-              </a-form-item>
-              <a-form-item :label="$tl('p.isZipFile')">
-                <a-switch
-                  v-model:checked="remoteDownloadData.unzip"
-                  :checked-children="$tl('p.yes')"
-                  :un-checked-children="$tl('p.no')"
+              <a-form-item :label="$t('pages.node.node-layout.project.project-file.3afe9b11')" name="url">
+                <a-input
+                  v-model:value="remoteDownloadData.url"
+                  :placeholder="$t('pages.node.node-layout.project.project-file.40ced483')"
                 />
               </a-form-item>
-              <a-form-item v-if="remoteDownloadData.unzip" :label="$tl('p.excludeFolder')">
+              <a-form-item :label="$t('pages.node.node-layout.project.project-file.4a4b3f66')">
+                <a-switch
+                  v-model:checked="remoteDownloadData.unzip"
+                  :checked-children="$t('pages.node.node-layout.project.project-file.f5bb2364')"
+                  :un-checked-children="$t('pages.node.node-layout.project.project-file.5edb2e8a')"
+                />
+              </a-form-item>
+              <a-form-item
+                v-if="remoteDownloadData.unzip"
+                :label="$t('pages.node.node-layout.project.project-file.89d09852')"
+              >
                 <a-input-number
                   v-model:value="remoteDownloadData.stripComponents"
                   style="width: 100%"
                   :min="0"
-                  :placeholder="$tl('c.excludeExtraFolder')"
+                  :placeholder="$t('pages.node.node-layout.project.project-file.cd9753f4')"
                 />
               </a-form-item>
             </a-form>
@@ -397,18 +435,27 @@
             v-model:open="addFileFolderVisible"
             destroy-on-close
             width="300px"
-            :title="addFileOrFolderType === 1 ? $tl('p.addNewDir') : $tl('p.createNewFile')"
+            :title="
+              addFileOrFolderType === 1
+                ? $t('pages.node.node-layout.project.project-file.4bbe6dca')
+                : $t('pages.node.node-layout.project.project-file.8cccdefa')
+            "
             :footer="null"
             :mask-closable="true"
           >
             <a-space direction="vertical" style="width: 100%">
-              <span v-if="uploadPath">{{ $tl('p.currentDirPath') }}{{ uploadPath }}</span>
+              <span v-if="uploadPath"
+                >{{ $t('pages.node.node-layout.project.project-file.72c90289') }}{{ uploadPath }}</span
+              >
               <!-- <a-tag v-if="">目录创建成功后需要手动刷新右边树才能显示出来哟</a-tag> -->
 
-              <a-input v-model:value="fileFolderName" :placeholder="$tl('p.inputName')" />
+              <a-input
+                v-model:value="fileFolderName"
+                :placeholder="$t('pages.node.node-layout.project.project-file.95105178')"
+              />
               <a-row type="flex" justify="center">
                 <a-button type="primary" :disabled="fileFolderName.length === 0" @click="startAddFileFolder">{{
-                  $tl('c.confirm')
+                  $t('pages.node.node-layout.project.project-file.7da4a591')
                 }}</a-button>
               </a-row>
             </a-space>
@@ -418,16 +465,19 @@
             v-model:open="renameFileFolderVisible"
             destroy-on-close
             width="300px"
-            :title="`${$tl('c.rename')}`"
+            :title="`${$t('pages.node.node-layout.project.project-file.cc9bcf1d')}`"
             :footer="null"
             :mask-closable="true"
           >
             <a-space direction="vertical" style="width: 100%">
-              <a-input v-model:value="fileFolderName" :placeholder="$tl('p.inputNewName')" />
+              <a-input
+                v-model:value="fileFolderName"
+                :placeholder="$t('pages.node.node-layout.project.project-file.79d8583e')"
+              />
 
               <a-row type="flex" justify="center">
                 <a-button type="primary" :disabled="fileFolderName.length === 0" @click="renameFileFolder">{{
-                  $tl('c.confirm')
+                  $t('pages.node.node-layout.project.project-file.7da4a591')
                 }}</a-button>
               </a-row>
             </a-space>
@@ -441,7 +491,7 @@
       destroy-on-close
       width="80vw"
       height="80vh"
-      :title="$tl('c.backupList')"
+      :title="$t('pages.node.node-layout.project.project-file.deafd62c')"
       :footer="null"
       :mask-closable="true"
       @cancel="
@@ -544,18 +594,18 @@ export default {
       },
       columns: [
         {
-          title: this.$tl('p.fileName'),
+          title: this.$t('pages.node.node-layout.project.project-file.a6eb2ded'),
           dataIndex: 'filename',
           ellipsis: true
         },
         {
-          title: this.$tl('p.fileType'),
+          title: this.$t('pages.node.node-layout.project.project-file.741604c2'),
           dataIndex: 'isDirectory',
           width: '100px',
           ellipsis: true
         },
         {
-          title: this.$tl('p.fileSize'),
+          title: this.$t('pages.node.node-layout.project.project-file.f087781'),
           dataIndex: 'fileSizeLong',
           width: 120,
           ellipsis: true,
@@ -563,7 +613,7 @@ export default {
           sorter: (a, b) => a.fileSizeLong - b.fileSizeLong
         },
         {
-          title: this.$tl('p.modifyTime'),
+          title: this.$t('pages.node.node-layout.project.project-file.a2b40316'),
           dataIndex: 'modifyTimeLong',
           width: '180px',
           ellipsis: true,
@@ -571,7 +621,7 @@ export default {
           sorter: (a, b) => a.modifyTimeLong - b.modifyTimeLong
         },
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.node.node-layout.project.project-file.3bb962bf'),
           dataIndex: 'operation',
           width: '180px',
           align: 'center',
@@ -579,7 +629,13 @@ export default {
         }
       ],
       rules: {
-        url: [{ required: true, message: this.$tl('p.remoteUrlNotEmpty'), trigger: 'change' }]
+        url: [
+          {
+            required: true,
+            message: this.$t('pages.node.node-layout.project.project-file.4484dd55'),
+            trigger: 'change'
+          }
+        ]
       },
       addFileFolderVisible: false,
       // 目录1 文件2 标识
@@ -623,7 +679,7 @@ export default {
     loadData() {
       const key = 'root-' + new Date().getTime()
       this.tempNode = {
-        filename: this.$tl('p.dirLabel') + (this.absPath || ''),
+        filename: this.$t('pages.node.node-layout.project.project-file.5ad13793') + (this.absPath || ''),
         level: 1,
         isDirectory: true,
         key: key,
@@ -700,7 +756,7 @@ export default {
     handleUpload() {
       if (Object.keys(this.tempNode).length === 0) {
         $notification.error({
-          message: this.$tl('c.selectNode')
+          message: this.$t('pages.node.node-layout.project.project-file.2388531c')
         })
         return
       }
@@ -838,7 +894,7 @@ export default {
     handleZipUpload() {
       if (Object.keys(this.tempNode).length === 0) {
         $notification.error({
-          message: this.$tl('c.selectNode')
+          message: this.$t('pages.node.node-layout.project.project-file.2388531c')
         })
         return
       }
@@ -1046,7 +1102,7 @@ export default {
     loadFileList() {
       if (Object.keys(this.tempNode).length === 0) {
         $notification.warn({
-          message: this.$tl('c.selectNode')
+          message: this.$t('pages.node.node-layout.project.project-file.2388531c')
         })
         return false
       }
@@ -1078,14 +1134,16 @@ export default {
     // 清空文件
     clearFile() {
       const msg = this.uploadPath
-        ? this.$tl('p.question50') + this.uploadPath + this.$tl('p.question51')
-        : this.$tl('p.question52')
+        ? this.$t('pages.node.node-layout.project.project-file.cc344691') +
+          this.uploadPath +
+          this.$t('pages.node.node-layout.project.project-file.bb337607')
+        : this.$t('pages.node.node-layout.project.project-file.223a27bd')
       $confirm({
-        title: this.$tl('c.systemPrompt'),
+        title: this.$t('pages.node.node-layout.project.project-file.a8fe4c17'),
         content: msg,
-        okText: this.$tl('c.confirm'),
+        okText: this.$t('pages.node.node-layout.project.project-file.7da4a591'),
         zIndex: 1009,
-        cancelText: this.$tl('c.cancel'),
+        cancelText: this.$t('pages.node.node-layout.project.project-file.43105e21'),
         onOk: () => {
           return deleteProjectFile({
             nodeId: this.nodeId,
@@ -1106,7 +1164,7 @@ export default {
     // 下载
     handleDownload(record) {
       $notification.info({
-        message: this.$tl('p.downloading')
+        message: this.$t('pages.node.node-layout.project.project-file.1fce73f8')
       })
       // 请求参数
       const params = {
@@ -1120,14 +1178,18 @@ export default {
     // 删除
     handleDelete(record) {
       const msg = record.isDirectory
-        ? this.$tl('c.deletePrompt') + record.filename + this.$tl('p.question53')
-        : this.$tl('c.deletePrompt') + record.filename + this.$tl('p.question54')
+        ? this.$t('pages.node.node-layout.project.project-file.9a72eded') +
+          record.filename +
+          this.$t('pages.node.node-layout.project.project-file.553d172b')
+        : this.$t('pages.node.node-layout.project.project-file.9a72eded') +
+          record.filename +
+          this.$t('pages.node.node-layout.project.project-file.cb598288')
       $confirm({
-        title: this.$tl('c.systemPrompt'),
+        title: this.$t('pages.node.node-layout.project.project-file.a8fe4c17'),
         content: msg,
-        okText: this.$tl('c.confirm'),
+        okText: this.$t('pages.node.node-layout.project.project-file.7da4a591'),
         zIndex: 1009,
-        cancelText: this.$tl('c.cancel'),
+        cancelText: this.$t('pages.node.node-layout.project.project-file.43105e21'),
         onOk: () => {
           return deleteProjectFile({
             nodeId: this.nodeId,

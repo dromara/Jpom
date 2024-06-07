@@ -13,12 +13,12 @@
         <template v-if="mode === 'normal'">
           <SettingOutlined :style="{ fontSize: '18px' }" />
 
-          <span>{{ $tl('p.managementSystem') }}</span>
+          <span>{{ $t('pages.layout.side-menu.73d81eb7') }}</span>
         </template>
         <template v-if="mode === 'management'">
           <DesktopOutlined :style="{ fontSize: '18px' }" />
 
-          <span>{{ $tl('p.functionManagement') }}</span>
+          <span>{{ $t('pages.layout.side-menu.c49bfeed') }}</span>
         </template>
       </a-menu-item>
     </a-menu>
@@ -142,7 +142,7 @@ export default {
       // 如果路由不存在
       if (!subMenu.path) {
         $notification.error({
-          message: this.$tl('p.invalidRouting')
+          message: this.$t('pages.layout.side-menu.424b3794')
         })
         return false
       }

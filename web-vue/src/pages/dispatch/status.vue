@@ -2,7 +2,7 @@
   <div>
     <a-drawer
       destroy-on-close
-      :title="`${$tl('p.view')} ${name} ${$tl('c.status')}`"
+      :title="`${$t('pages.dispatch.status.1ba84995')} ${name} ${$t('pages.dispatch.status.6e06fe4f')}`"
       placement="right"
       width="85vw"
       :open="true"
@@ -13,7 +13,7 @@
       "
     >
       <a-tabs v-model:activeKey="tabKey" tab-position="left">
-        <a-tab-pane key="1" :tab="$tl('c.status')">
+        <a-tab-pane key="1" :tab="$t('pages.dispatch.status.6e06fe4f')">
           <!-- 嵌套表格 -->
           <a-table
             :loading="childLoading"
@@ -30,28 +30,30 @@
             <template #title>
               <a-space>
                 <div>
-                  {{ $tl('p.currentStatus') }}
-                  <a-tag v-if="data.status === 2" color="green">{{ statusMap[data.status] || $tl('c.unknown') }}</a-tag>
+                  {{ $t('pages.dispatch.status.8a8e4923') }}
+                  <a-tag v-if="data.status === 2" color="green">{{
+                    statusMap[data.status] || $t('pages.dispatch.status.5f51a112')
+                  }}</a-tag>
                   <a-tag v-else-if="data.status === 1 || data.status === 0" color="orange">{{
-                    statusMap[data.status] || $tl('c.unknown')
+                    statusMap[data.status] || $t('pages.dispatch.status.5f51a112')
                   }}</a-tag>
                   <a-tag v-else-if="data.status === 3 || data.status === 4" color="red">{{
-                    statusMap[data.status] || $tl('c.unknown')
+                    statusMap[data.status] || $t('pages.dispatch.status.5f51a112')
                   }}</a-tag>
-                  <a-tag v-else>{{ statusMap[data.status] || $tl('c.unknown') }}</a-tag>
+                  <a-tag v-else>{{ statusMap[data.status] || $t('pages.dispatch.status.5f51a112') }}</a-tag>
                 </div>
-                <div>{{ $tl('p.statusDescription') }}{{ data.statusMsg || '-' }}</div>
+                <div>{{ $t('pages.dispatch.status.a622e852') }}{{ data.statusMsg || '-' }}</div>
                 <a-button type="primary" size="small" :loading="childLoading" @click="loadData">{{
-                  $tl('p.refresh')
+                  $t('pages.dispatch.status.7bbd89a')
                 }}</a-button>
                 <a-statistic-countdown
                   format="s"
-                  :title="$tl('p.refreshCountdown')"
+                  :title="$t('pages.dispatch.status.ae8f1e')"
                   :value="countdownTime"
                   @finish="silenceLoadData"
                 >
                   <template #suffix>
-                    <div style="font-size: 12px">{{ $tl('p.seconds') }}</div>
+                    <div style="font-size: 12px">{{ $t('pages.dispatch.status.48ec7187') }}</div>
                   </template>
                 </a-statistic-countdown>
               </a-space>
@@ -68,7 +70,7 @@
               <template v-else-if="column.dataIndex === 'projectName'">
                 <a-tooltip placement="topLeft" :title="text">
                   <template v-if="record.disabled">
-                    <a-tooltip :title="$tl('p.currentProjectDisabled')">
+                    <a-tooltip :title="$t('pages.dispatch.status.c668c2a4')">
                       <EyeInvisibleOutlined />
                     </a-tooltip>
                   </template>
@@ -76,14 +78,16 @@
                 </a-tooltip>
               </template>
               <template v-else-if="column.dataIndex === 'outGivingStatus'">
-                <a-tag v-if="text === 2" color="green">{{ dispatchStatusMap[text] || $tl('c.unknown') }}</a-tag>
+                <a-tag v-if="text === 2" color="green">{{
+                  dispatchStatusMap[text] || $t('pages.dispatch.status.5f51a112')
+                }}</a-tag>
                 <a-tag v-else-if="text === 1 || text === 0 || text === 5" color="orange">{{
-                  dispatchStatusMap[text] || $tl('c.unknown')
+                  dispatchStatusMap[text] || $t('pages.dispatch.status.5f51a112')
                 }}</a-tag>
                 <a-tag v-else-if="text === 3 || text === 4 || text === 6" color="red">{{
-                  dispatchStatusMap[text] || $tl('c.unknown')
+                  dispatchStatusMap[text] || $t('pages.dispatch.status.5f51a112')
                 }}</a-tag>
-                <a-tag v-else>{{ dispatchStatusMap[text] || $tl('c.unknown') }}</a-tag>
+                <a-tag v-else>{{ dispatchStatusMap[text] || $t('pages.dispatch.status.5f51a112') }}</a-tag>
               </template>
               <template v-else-if="column.dataIndex === 'outGivingResultMsg'">
                 <a-tooltip placement="topLeft" :title="readJsonStrField(record.outGivingResult, 'msg')">
@@ -122,15 +126,17 @@
                   :checked="text"
                   :disabled="true"
                   size="small"
-                  :checked-children="$tl('p.running')"
-                  :un-checked-children="$tl('p.notRunning')"
+                  :checked-children="$t('pages.dispatch.status.481bf10e')"
+                  :un-checked-children="$t('pages.dispatch.status.926b691b')"
                 />
               </template>
 
               <template v-else-if="column.dataIndex === 'projectPid'">
                 <a-tooltip
                   placement="topLeft"
-                  :title="`${$tl('p.processId')}${record.projectPid || '-'} / ${$tl('p.portNumber')}${record.projectPort || '-'}`"
+                  :title="`${$t('pages.dispatch.status.3cf2b4f7')}${record.projectPid || '-'} / ${$t(
+                    'pages.dispatch.status.284af1b3'
+                  )}${record.projectPort || '-'}`"
                 >
                   <span>{{ record.projectPid || '-' }}/{{ record.projectPort || '-' }}</span>
                 </a-tooltip>
@@ -139,21 +145,21 @@
               <template v-else-if="column.dataIndex === 'child-operation'">
                 <a-space>
                   <a-button size="small" :disabled="!record.projectName" type="primary" @click="handleFile(record)">{{
-                    $tl('p.file')
+                    $t('pages.dispatch.status.69cad40b')
                   }}</a-button>
                   <a-button
                     size="small"
                     :disabled="!record.projectName"
                     type="primary"
                     @click="handleConsole(record)"
-                    >{{ $tl('c.console') }}</a-button
+                    >{{ $t('pages.dispatch.status.c474c963') }}</a-button
                   >
                 </a-space>
               </template>
             </template>
           </a-table>
         </a-tab-pane>
-        <a-tab-pane key="2" :tab="$tl('p.configuration')">
+        <a-tab-pane key="2" :tab="$t('pages.dispatch.status.7de61746')">
           <!-- 配置分发 -->
           <div style="width: 50vw">
             <!-- list -->
@@ -161,14 +167,14 @@
               <Draggable v-for="(element, index) in list" :key="index">
                 <a-row class="item-row">
                   <a-col :span="18">
-                    <span> {{ $tl('p.nodeName') }} {{ element.nodeName }} </span>
-                    <span> {{ $tl('p.projectName') }} {{ element.cacheProjectName }} </span>
+                    <span> {{ $t('pages.dispatch.status.fa8d810f') }} {{ element.nodeName }} </span>
+                    <span> {{ $t('pages.dispatch.status.e06912d') }} {{ element.cacheProjectName }} </span>
                   </a-col>
                   <a-col :span="6">
                     <a-space>
                       <a-switch
-                        :checked-children="$tl('p.enable')"
-                        :un-checked-children="$tl('p.disable')"
+                        :checked-children="$t('pages.dispatch.status.149265a9')"
+                        :un-checked-children="$t('pages.dispatch.status.287f3530')"
                         :checked="element.disabled ? false : true"
                         @change="
                           (checked) => {
@@ -189,9 +195,9 @@
                         :disabled="!list || list.length <= 1"
                         @click="handleRemoveProject(element)"
                       >
-                        {{ $tl('p.unbind') }}
+                        {{ $t('pages.dispatch.status.4c957529') }}
                       </a-button>
-                      <a-tooltip placement="left" :title="`${$tl('p.longPressToDragAndSort')}`" class="move">
+                      <a-tooltip placement="left" :title="`${$t('pages.dispatch.status.686a2f77')}`" class="move">
                         <MenuOutlined />
                       </a-tooltip>
                     </a-space>
@@ -201,7 +207,9 @@
             </Container>
             <a-col style="margin-top: 10px">
               <a-space>
-                <a-button type="primary" size="small" @click="viewDispatchManagerOk">{{ $tl('p.save') }}</a-button>
+                <a-button type="primary" size="small" @click="viewDispatchManagerOk">{{
+                  $t('pages.dispatch.status.b033d8c5')
+                }}</a-button>
               </a-space>
             </a-col>
           </div>
@@ -325,65 +333,65 @@ export default {
 
       childColumns: [
         {
-          title: this.$tl('p.nodeNameLabel'),
+          title: this.$t('pages.dispatch.status.1f6db887'),
           dataIndex: 'nodeId',
           width: 120,
           ellipsis: true
         },
         {
-          title: this.$tl('p.projectNameLabel'),
+          title: this.$t('pages.dispatch.status.69c543a4'),
           dataIndex: 'projectName',
           width: 120,
           ellipsis: true
         },
         {
-          title: this.$tl('p.projectStatusLabel'),
+          title: this.$t('pages.dispatch.status.42c1c984'),
           dataIndex: 'projectStatus',
           width: 120,
           ellipsis: true
         },
         {
-          title: this.$tl('p.processPortLabel'),
+          title: this.$t('pages.dispatch.status.8aee2036'),
           dataIndex: 'projectPid',
           width: '120px',
           ellipsis: true
         },
         {
-          title: this.$tl('p.distributionStatusLabel'),
+          title: this.$t('pages.dispatch.status.f495ed7'),
           dataIndex: 'outGivingStatus',
           width: '120px'
         },
         {
-          title: this.$tl('p.distributionResultLabel'),
+          title: this.$t('pages.dispatch.status.a774e80d'),
           dataIndex: 'outGivingResultMsg',
           ellipsis: true,
           width: 120
         },
         {
-          title: this.$tl('p.distributionStatusMessageLabel'),
+          title: this.$t('pages.dispatch.status.70af3e3e'),
           dataIndex: 'outGivingResultMsgData',
           ellipsis: true,
           width: 120
         },
         {
-          title: this.$tl('p.distributionDurationLabel'),
+          title: this.$t('pages.dispatch.status.f5b107cb'),
           dataIndex: 'outGivingResultTime',
           width: '120px'
         },
         {
-          title: this.$tl('p.fileSizeLabel'),
+          title: this.$t('pages.dispatch.status.3c83339c'),
           dataIndex: 'outGivingResultSize',
           width: '100px'
         },
         {
-          title: this.$tl('p.lastDistributionTimeLabel'),
+          title: this.$t('pages.dispatch.status.9d4fa95c'),
           dataIndex: 'lastTime',
           width: '170px',
           ellipsis: true,
           customRender: ({ text }) => parseTime(text)
         },
         {
-          title: this.$tl('p.operationLabel'),
+          title: this.$t('pages.dispatch.status.3ae3f506'),
           dataIndex: 'child-operation',
           fixed: 'right',
 
@@ -552,7 +560,7 @@ export default {
                       ...element,
                       projectStatus: false,
                       projectPid: '-',
-                      errorMsg: this.$tl('p.networkError')
+                      errorMsg: this.$t('pages.dispatch.status.b3fd6bb1')
                     }
                   }
                   return element
@@ -567,7 +575,7 @@ export default {
     // 文件管理
     handleFile(record) {
       this.temp = Object.assign({}, record)
-      this.drawerTitle = `${this.$tl('p.fileManagement')}(${this.temp.projectId})`
+      this.drawerTitle = `${this.$t('pages.dispatch.status.502f94')}(${this.temp.projectId})`
       this.drawerFileVisible = true
     },
     // 关闭文件管理对话框
@@ -577,7 +585,7 @@ export default {
     // 控制台
     handleConsole(record) {
       this.temp = Object.assign({}, record)
-      this.drawerTitle = `${this.$tl('c.console')}(${this.temp.projectId})`
+      this.drawerTitle = `${this.$t('pages.dispatch.status.c474c963')}(${this.temp.projectId})`
       this.drawerConsoleVisible = true
     },
     // 关闭控制台
@@ -602,7 +610,7 @@ export default {
       this.onFileClose()
       this.drawerReadFileVisible = true
       this.temp.readFilePath = (path + '/' + filename).replace(new RegExp('//', 'gm'), '/')
-      this.drawerTitle = `${this.$tl('p.trackFile')}(${filename})`
+      this.drawerTitle = `${this.$t('pages.dispatch.status.c7a1ee83')}(${filename})`
     },
     onReadFileClose() {
       this.drawerReadFileVisible = false
@@ -623,22 +631,22 @@ export default {
     handleRemoveProject(item) {
       const html = `
       <b style='font-size: 20px;'>
-        ${this.$tl('p.reallyReleaseCurrentProject')}
+        ${this.$t('pages.dispatch.status.218bed57')}
       </b>
       <ul style='font-size: 20px;color:red;font-weight: bold;'>
-        <li>this.$tl('p.willNotActuallyRequestNodeToDeleteProjectInfo')</b></li>
-        <li>this.$tl('p.generallyUsedWhenServerCannotBeConnectedAndIsNoLongerNeeded')</li>
-        <li>this.$tl('p.willProduceRedundantDataIfMisoperated')</li>
+        <li>this.$t('pages.dispatch.status.3673e6eb')</b></li>
+        <li>this.$t('pages.dispatch.status.1c0a903b')</li>
+        <li>this.$t('pages.dispatch.status.779ded29')</li>
       </ul>
       `
       $confirm({
-        title: this.$tl('p.dangerousOperation'),
+        title: this.$t('pages.dispatch.status.cd503941'),
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
         okButtonProps: { type: 'primary', size: 'small', danger: true },
         cancelButtonProps: { type: 'primary' },
-        okText: this.$tl('p.confirm'),
-        cancelText: this.$tl('p.cancel'),
+        okText: this.$t('pages.dispatch.status.e8e9db25'),
+        cancelText: this.$t('pages.dispatch.status.b12468e9'),
         onOk: () => {
           return removeProject({
             nodeId: item.nodeId,

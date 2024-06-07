@@ -2,7 +2,7 @@
   <div>
     <a-row type="flex" justify="center">
       <a-col :span="18">
-        <a-card :title="$tl('p.workspaceName')" :bordered="true">
+        <a-card :title="$t('pages.layout.my-workspace.8d20cb3f')" :bordered="true">
           <Container drag-handle-selector=".move" orientation="vertical" @drop="onDrop">
             <Draggable v-for="(element, index) in myWorkspaceList" :key="index">
               <a-row class="item-row">
@@ -10,13 +10,13 @@
                   <template v-if="element.edit">
                     <a-input-search
                       v-model:value="element.name"
-                      :placeholder="$tl('p.workspaceNote')"
-                      :enter-button="$tl('p.confirm')"
+                      :placeholder="$t('pages.layout.my-workspace.1cbe4f2d')"
+                      :enter-button="$t('pages.layout.my-workspace.e8e9db25')"
                       @search="editOk(element)"
                     />
                   </template>
                   <template v-else>
-                    <a-tooltip :title="`${$tl('p.originalName')}${element.originalName}`">
+                    <a-tooltip :title="`${$t('pages.layout.my-workspace.cf2692e4')}${element.originalName}`">
                       {{ element.name || element.originalName }}
                     </a-tooltip>
                   </template>
@@ -27,7 +27,7 @@
                     <a-button :disabled="element.edit" type="primary" size="small" @click="edit(element)">
                       <template #icon><EditOutlined /></template>
                     </a-button>
-                    <a-tooltip placement="left" :title="`${$tl('p.sortDrag')}`" class="move">
+                    <a-tooltip placement="left" :title="`${$t('pages.layout.my-workspace.a65a292c')}`" class="move">
                       <MenuOutlined />
                     </a-tooltip>
                   </a-space>
@@ -37,8 +37,10 @@
           </Container>
           <a-col style="margin-top: 10px">
             <a-space>
-              <a-button type="primary" @click="save"> {{ $tl('p.save') }} </a-button>
-              <a-button type="primary" @click="resetDefaultName"> {{ $tl('p.resetName') }} </a-button>
+              <a-button type="primary" @click="save"> {{ $t('pages.layout.my-workspace.b033d8c5') }} </a-button>
+              <a-button type="primary" @click="resetDefaultName">
+                {{ $t('pages.layout.my-workspace.d4d18984') }}
+              </a-button>
             </a-space>
           </a-col>
         </a-card>

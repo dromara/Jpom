@@ -17,21 +17,27 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$tl('c.name')"
+            :placeholder="$t('pages.user.permission-group.3e34ec28')"
             class="search-input-item"
             @press-enter="loadData"
           />
-          <a-tooltip :title="$tl('p.quickBack')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
+          <a-tooltip :title="$t('pages.user.permission-group.554d1b95')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{
+              $t('pages.user.permission-group.53c2763c')
+            }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">{{ $tl('c.new') }}</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $t('pages.user.permission-group.ccffbfda') }}</a-button>
         </a-space>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('c.edit') }}</a-button>
-            <a-button type="primary" danger size="small" @click="handleDelete(record)">{{ $tl('p.delete') }}</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{
+              $t('pages.user.permission-group.e1224c34')
+            }}</a-button>
+            <a-button type="primary" danger size="small" @click="handleDelete(record)">{{
+              $t('pages.user.permission-group.dd20d11c')
+            }}</a-button>
           </a-space>
         </template>
       </template>
@@ -42,19 +48,27 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="60vw"
-      :title="$tl('c.edit')"
+      :title="$t('pages.user.permission-group.e1224c34')"
       :mask-closable="false"
       @ok="handleEditUserOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$tl('c.name')" name="name">
-          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$tl('c.name')" />
+        <a-form-item :label="$t('pages.user.permission-group.3e34ec28')" name="name">
+          <a-input
+            v-model:value="temp.name"
+            :max-length="50"
+            :placeholder="$t('pages.user.permission-group.3e34ec28')"
+          />
         </a-form-item>
         <a-form-item name="workspace">
           <template #label>
             <a-tooltip>
-              {{ $tl('p.workspace') }}
-              <template #title> {{ $tl('p.configWorkspacePermission') }},{{ $tl('p.userRestriction') }}</template>
+              {{ $t('pages.user.permission-group.afacc4cb') }}
+              <template #title>
+                {{ $t('pages.user.permission-group.bd82e6b0') }},{{
+                  $t('pages.user.permission-group.751c9372')
+                }}</template
+              >
               <QuestionCircleOutlined v-if="!temp.id" />
             </a-tooltip>
           </template>
@@ -63,8 +77,8 @@
         <a-form-item name="prohibitExecute">
           <template #label>
             <a-tooltip>
-              {{ $tl('p.disablePeriod') }}
-              <template #title> {{ $tl('p.disableControl') }}</template>
+              {{ $t('pages.user.permission-group.aaad8c31') }}
+              <template #title> {{ $t('pages.user.permission-group.c0b6d654') }}</template>
               <QuestionCircleOutlined v-if="!temp.id" />
             </a-tooltip>
           </template>
@@ -97,11 +111,18 @@
                     :show-time="{ format: 'HH:mm:ss' }"
                     format="YYYY-MM-DD HH:mm:ss"
                     value-format="YYYY-MM-DD HH:mm:ss"
-                    :placeholder="[$tl('c.startTime'), $tl('c.endTime')]"
+                    :placeholder="[
+                      $t('pages.user.permission-group.9b8a573f'),
+                      $t('pages.user.permission-group.63bed29')
+                    ]"
                   />
 
                   <div>
-                    <a-input v-model:value="item.reason" :placeholder="$tl('p.disableReason')" allow-clear />
+                    <a-input
+                      v-model:value="item.reason"
+                      :placeholder="$t('pages.user.permission-group.54ad1af3')"
+                      allow-clear
+                    />
                   </div>
                 </a-space>
 
@@ -124,15 +145,17 @@
                   temp.prohibitExecuteArray.push({})
                 }
               "
-              >{{ $tl('c.new') }}
+              >{{ $t('pages.user.permission-group.ccffbfda') }}
             </a-button>
           </a-form-item-rest>
         </a-form-item>
         <a-form-item name="allowExecute">
           <template #label>
             <a-tooltip>
-              {{ $tl('p.allowPeriod') }}
-              <template #title> {{ $tl('p.priorityDisable') }},{{ $tl('p.allowOperation') }} </template>
+              {{ $t('pages.user.permission-group.f7840bbf') }}
+              <template #title>
+                {{ $t('pages.user.permission-group.cc634bca') }},{{ $t('pages.user.permission-group.54683eab') }}
+              </template>
               <QuestionCircleOutlined v-if="!temp.id" />
             </a-tooltip>
           </template>
@@ -143,7 +166,7 @@
                   <div>
                     <a-select
                       v-model:value="item.week"
-                      :placeholder="$tl('p.selectableWeekdays')"
+                      :placeholder="$t('pages.user.permission-group.2f160681')"
                       mode="multiple"
                       style="width: 100%"
                     >
@@ -167,12 +190,12 @@
                     <a-space>
                       <a-time-picker
                         v-model:value="item.startTime"
-                        :placeholder="$tl('c.startTime')"
+                        :placeholder="$t('pages.user.permission-group.9b8a573f')"
                         value-format="HH:mm:ss"
                       />
                       <a-time-picker
                         v-model:value="item.endTime"
-                        :placeholder="$tl('c.endTime')"
+                        :placeholder="$t('pages.user.permission-group.63bed29')"
                         value-format="HH:mm:ss"
                       />
                     </a-space>
@@ -197,17 +220,17 @@
                   temp.allowExecuteArray.push({})
                 }
               "
-              >{{ $tl('c.new') }}
+              >{{ $t('pages.user.permission-group.ccffbfda') }}
             </a-button>
           </a-form-item-rest>
         </a-form-item>
 
-        <a-form-item :label="$tl('c.description')" name="description">
+        <a-form-item :label="$t('pages.user.permission-group.4b2e093e')" name="description">
           <a-textarea
             v-model:value="temp.description"
             :max-length="200"
             :rows="5"
-            :placeholder="$tl('c.description')"
+            :placeholder="$t('pages.user.permission-group.4b2e093e')"
           />
         </a-form-item>
       </a-form>
@@ -237,29 +260,29 @@ export default {
       methodFeature: [],
       temp: {},
       weeks: [
-        { value: 1, name: this.$tl('p.monday') },
-        { value: 2, name: this.$tl('p.tuesday') },
-        { value: 3, name: this.$tl('p.wednesday') },
-        { value: 4, name: this.$tl('p.thursday') },
-        { value: 5, name: this.$tl('p.friday') },
-        { value: 6, name: this.$tl('p.saturday') },
-        { value: 7, name: this.$tl('p.sunday') }
+        { value: 1, name: this.$t('pages.user.permission-group.38e08092') },
+        { value: 2, name: this.$t('pages.user.permission-group.8b27c898') },
+        { value: 3, name: this.$t('pages.user.permission-group.b746d1ae') },
+        { value: 4, name: this.$t('pages.user.permission-group.7425f91a') },
+        { value: 5, name: this.$t('pages.user.permission-group.57801bdb') },
+        { value: 6, name: this.$t('pages.user.permission-group.2ab8dd00') },
+        { value: 7, name: this.$t('pages.user.permission-group.2b6c6c5a') }
       ],
       editVisible: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       columns: [
         { title: 'id', dataIndex: 'id', ellipsis: true },
-        { title: this.$tl('c.name'), dataIndex: 'name', ellipsis: true },
-        { title: this.$tl('c.description'), dataIndex: 'description', ellipsis: true },
+        { title: this.$t('pages.user.permission-group.3e34ec28'), dataIndex: 'name', ellipsis: true },
+        { title: this.$t('pages.user.permission-group.4b2e093e'), dataIndex: 'description', ellipsis: true },
 
         {
-          title: this.$tl('p.modifier'),
+          title: this.$t('pages.user.permission-group.916db24b'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           width: 150
         },
         {
-          title: this.$tl('p.modifyTime'),
+          title: this.$t('pages.user.permission-group.a2b40316'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -269,7 +292,7 @@ export default {
           width: 170
         },
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.user.permission-group.3bb962bf'),
           align: 'center',
           dataIndex: 'operation',
 
@@ -278,7 +301,7 @@ export default {
       ],
       // 表单校验规则
       rules: {
-        name: [{ required: true, message: this.$tl('p.permissionGroupName'), trigger: 'blur' }]
+        name: [{ required: true, message: this.$t('pages.user.permission-group.d9245f83'), trigger: 'blur' }]
       },
       confirmLoading: false
     }
@@ -320,13 +343,13 @@ export default {
               const children = this.methodFeature.map((item) => {
                 return {
                   key: element.id + '-' + item.value,
-                  title: item.title + this.$tl('p.permission'),
+                  title: item.title + this.$t('pages.user.permission-group.88b61996'),
                   parentId: element.id
                 }
               })
               children.push({
                 key: element.id + '-sshCommandNotLimited',
-                title: `SSH ${this.$tl('p.terminalUnlimited')}`,
+                title: `SSH ${this.$t('pages.user.permission-group.8d1812cd')}`,
                 parentId: element.id
               })
               this.workspaceList.push({
@@ -415,7 +438,7 @@ export default {
         delete temp.allowExecuteArray
         if (!emitKeys || emitKeys.length <= 0) {
           $notification.error({
-            message: this.$tl('p.selectWorkspace')
+            message: this.$t('pages.user.permission-group.7ef9d8fb')
           })
           return false
         }
@@ -444,11 +467,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$tl('c.systemTip'),
+        title: this.$t('pages.user.permission-group.d3367221'),
         zIndex: 1009,
-        content: this.$tl('p.confirmDelete'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.user.permission-group.987c2cd6'),
+        okText: this.$t('pages.user.permission-group.7da4a591'),
+        cancelText: this.$t('pages.user.permission-group.43105e21'),
         onOk: () => {
           return deletePermissionGroup(record.id).then((res) => {
             if (res.code === 200) {
@@ -470,11 +493,13 @@ export default {
     checkTipUserName() {
       if (this.temp?.id === 'demo') {
         $confirm({
-          title: this.$tl('c.systemTip'),
+          title: this.$t('pages.user.permission-group.d3367221'),
           zIndex: 1009,
-          content: `demo ${this.$tl('p.demoAccountTip')},${this.$tl('p.demoAccountRestriction')}`,
-          okText: this.$tl('c.confirm'),
-          cancelText: this.$tl('c.cancel'),
+          content: `demo ${this.$t('pages.user.permission-group.8424b740')},${this.$t(
+            'pages.user.permission-group.f382dae4'
+          )}`,
+          okText: this.$t('pages.user.permission-group.7da4a591'),
+          cancelText: this.$t('pages.user.permission-group.43105e21'),
 
           onCancel: () => {
             this.temp.id = ''
