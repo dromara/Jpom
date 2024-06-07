@@ -500,6 +500,14 @@ Jpom 作为开源项目，离不开社区的支持，欢迎任何人修改和提
 
 > 目前用到的主要是 dev 和 docs 分支，接受 PR 修改，其他的分支为归档分支，贡献者可以不用管。
 
+### 贡献者
+
+<a href="https://github.com/dromara/Jpom/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=dromara/Jpom" alt="contributors"/>
+</a>
+
+Made with [contrib.rocks](https://contrib.rocks).
+
 ## 🌍 知识星球
 
 <p align="center">
