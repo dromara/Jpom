@@ -340,6 +340,11 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 
 <br/>
 
+<a href="https://github.com/dromara/Jpom/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=dromara/Jpom" alt="contributors"/>
+</a>
+
+Made with [contrib.rocks](https://contrib.rocks).
 
 ## 🤝 dromara 组织项目
 
