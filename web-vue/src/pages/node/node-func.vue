@@ -93,11 +93,7 @@ export default {
     //
     this.current = this.tabs[0]
   },
-  methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.nodeFunc.${key}`, ...args)
-    }
-  }
+  methods: {}
 }
 </script>
 <style scoped>

@@ -94,11 +94,7 @@ export default {
     ...mapState(useAppStore, ['getCollapsed'])
   },
   mounted() {},
-  methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.system.assets.machine.machineFunc.${key}`, ...args)
-    }
-  }
+  methods: {}
 }
 </script>
 
