@@ -210,9 +210,6 @@ export default {
     this.listMachineLonelyData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.nodeLayout.system.cache.${key}`, ...args)
-    },
     // parseTime,
     renderSize,
     // load data

@@ -265,8 +265,8 @@
               ? temp.beforeScript?.replace('$ref.script.')
               : ''
             : temp.afterScript?.indexOf('$ref.script.') !== -1
-            ? temp.afterScript?.replace('$ref.script.')
-            : ''
+              ? temp.afterScript?.replace('$ref.script.')
+              : ''
         "
         mode="choose"
         @confirm="
@@ -361,9 +361,6 @@ export default {
     this.loadAccesList()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.fileManager.fileStorage.releaseFile.${key}`, ...args)
-    },
     taskTypeChange() {
       const value = this.temp.taskType
       this.temp = { ...this.temp, taskDataIds: undefined }

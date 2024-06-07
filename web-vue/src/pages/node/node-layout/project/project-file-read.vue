@@ -76,9 +76,6 @@ export default {
     this.close()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.nodeLayout.project.projectFileRead.${key}`, ...args)
-    },
     close() {
       this.socket?.close()
 

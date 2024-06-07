@@ -359,9 +359,6 @@ export default {
     })
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.layout.userLog.${key}`, ...args)
-    },
     CHANGE_PAGE,
     // 加载数据
     operaterloadData(pointerEvent) {

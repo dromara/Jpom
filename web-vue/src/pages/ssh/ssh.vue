@@ -589,9 +589,6 @@ export default {
     this.loadGroupList()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.ssh.ssh.${key}`, ...args)
-    },
     formatPercent2Number,
     renderSize,
     formatPercent,

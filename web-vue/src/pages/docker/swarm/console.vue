@@ -82,9 +82,6 @@ export default {
     this.menuKeyArray = [this.initMenu]
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.docker.swarm.console.${key}`, ...args)
-    },
     menuClick(item) {
       this.menuKey = item.key
     },

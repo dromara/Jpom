@@ -528,9 +528,6 @@ export default {
     //this.getAllSSHList();
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.ssh.command.${key}`, ...args)
-    },
     // 编辑命令信息
     handleEditCommandOk() {
       this.$refs['editCommandForm'].validate().then(() => {

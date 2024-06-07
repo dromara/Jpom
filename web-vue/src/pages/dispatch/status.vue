@@ -412,9 +412,6 @@ export default {
     this.loadNodeList()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.dispatch.status.${key}`, ...args)
-    },
     readJsonStrField,
     renderSize,
     formatDuration,

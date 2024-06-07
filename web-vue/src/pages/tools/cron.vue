@@ -203,9 +203,6 @@ export default {
     }
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.tools.cron.${key}`, ...args)
-    },
     parseTime,
     onSubmit() {
       this.resultList = []

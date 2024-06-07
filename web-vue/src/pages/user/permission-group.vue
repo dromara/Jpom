@@ -317,9 +317,6 @@ export default {
     this.loadOptTypeData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.user.permissionGroup.${key}`, ...args)
-    },
     dayjs,
     // 加载数据
     loadData(pointerEvent) {

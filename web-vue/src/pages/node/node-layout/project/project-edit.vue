@@ -545,9 +545,6 @@ export default {
     // this.initData();
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.nodeLayout.project.projectEdit.${key}`, ...args)
-    },
     randomStr,
     initData() {
       this.loadAccesList()

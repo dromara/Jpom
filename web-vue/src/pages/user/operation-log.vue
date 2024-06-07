@@ -296,9 +296,6 @@ export default {
     })
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.user.operationLog.${key}`, ...args)
-    },
     // 加载 node
     loadNodeList() {
       getNodeListAll().then((res) => {

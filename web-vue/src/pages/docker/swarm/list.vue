@@ -288,9 +288,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.docker.swarm.list.${key}`, ...args)
-    },
     // 加载数据
     loadData(pointerEvent) {
       this.loading = true

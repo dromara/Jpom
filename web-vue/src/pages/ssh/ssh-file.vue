@@ -158,16 +158,16 @@
                 record.link
                   ? $t('pages.ssh.ssh-file.56bb0bdf')
                   : text
-                  ? $t('pages.ssh.ssh-file.535422c2')
-                  : $t('pages.ssh.ssh-file.ec88a43e')
+                    ? $t('pages.ssh.ssh-file.535422c2')
+                    : $t('pages.ssh.ssh-file.ec88a43e')
               }`"
             >
               <span>{{
                 record.link
                   ? $t('pages.ssh.ssh-file.56bb0bdf')
                   : text
-                  ? $t('pages.ssh.ssh-file.535422c2')
-                  : $t('pages.ssh.ssh-file.ec88a43e')
+                    ? $t('pages.ssh.ssh-file.535422c2')
+                    : $t('pages.ssh.ssh-file.ec88a43e')
               }}</span>
             </a-tooltip>
           </template>
@@ -542,9 +542,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.ssh.sshFile.${key}`, ...args)
-    },
     changeSort(key, asc) {
       this.sortMethod = { key: key, asc: asc }
       localStorage.setItem('ssh-list-sort', JSON.stringify(this.sortMethod))

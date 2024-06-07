@@ -286,9 +286,6 @@ export default {
     this.timer && clearTimeout(this.timer)
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.system.backup.${key}`, ...args)
-    },
     // 格式化文件大小
     renderSizeFormat(value) {
       return renderSize(value)
