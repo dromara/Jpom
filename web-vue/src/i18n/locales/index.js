@@ -1,2 +1,3 @@
-export { zhCN } from './zh_cn.json'
-export { enUS } from './en_us.json'
+import zhCN from './zh_cn.json'
+import enUS from './en_us.json'
+export { zhCN, enUS }
