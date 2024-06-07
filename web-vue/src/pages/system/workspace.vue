@@ -22,10 +22,6 @@ export default {
   },
   computed: {},
   created() {},
-  methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.system.workspace.${key}`, ...args)
-    }
-  }
+  methods: {}
 }
 </script>

@@ -19,10 +19,6 @@ export default {
   },
   computed: { ...mapState(useAppStore, ['getWorkspaceId']) },
   created() {},
-  methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.script.env.${key}`, ...args)
-    }
-  }
+  methods: {}
 }
 </script>
