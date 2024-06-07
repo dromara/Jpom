@@ -376,29 +376,31 @@ public class RepositoryController extends BaseServerController {
     @GetMapping(value = "/build/repository/authorize_repos")
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<PageResultDto<JSONObject>> authorizeRepos(HttpServletRequest request,
-                                                                 @ValidatorItem String token,
-                                                                 String address,
-                                                                 @ValidatorItem String type,
-                                                                 String condition) {
+                                                                  @ValidatorItem String token,
+                                                                  String address,
+                                                                  @ValidatorItem String type,
+                                                                  String condition) {
         // 获取分页信息
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
         Page page = repositoryService.parsePage(paramMap);
         Assert.hasText(token, "请填写个人令牌");
         // 搜索条件
         // 远程仓库
-        PageResultDto<JSONObject> pageResultDto;
-        ImportRepoUtil.getProviderConfig(type);
+        //ImportRepoUtil.getProviderConfig(type);
 
         String userName = ImportRepoUtil.getCurrentUserName(type, token, address);
         cn.hutool.json.JSONObject repoList = ImportRepoUtil.getRepoList(type, condition, page, token, userName, address);
-        pageResultDto = new PageResultDto<>(page.getPageNumber(), page.getPageSize(), repoList.getLong("total").intValue());
-        List<JSONObject> objects = repoList.getJSONArray("data").stream().map(o -> {
-            cn.hutool.json.JSONObject obj = (cn.hutool.json.JSONObject) o;
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.putAll(obj);
-            jsonObject.put("exists", RepositoryController.this.checkRepositoryUrl(obj.getStr("url"), request));
-            return jsonObject;
-        }).collect(Collectors.toList());
+        PageResultDto<JSONObject> pageResultDto = new PageResultDto<>(page.getPageNumber(), page.getPageSize(), repoList.getLong("total").intValue());
+        List<JSONObject> objects = repoList.getJSONArray("data")
+            .stream()
+            .map(o -> {
+                cn.hutool.json.JSONObject obj = (cn.hutool.json.JSONObject) o;
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.putAll(obj);
+                jsonObject.put("exists", RepositoryController.this.checkRepositoryUrl(obj.getStr("url"), request));
+                return jsonObject;
+            })
+            .collect(Collectors.toList());
         pageResultDto.setResult(objects);
         return JsonMessage.success(HttpStatus.OK.name(), pageResultDto);
     }
@@ -525,8 +527,8 @@ public class RepositoryController extends BaseServerController {
     @GetMapping(value = "/build/repository/sort-item", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<String> sortItem(@ValidatorItem String id,
-                                        @ValidatorItem String method,
-                                        String compareId, HttpServletRequest request) {
+                                         @ValidatorItem String method,
+                                         String compareId, HttpServletRequest request) {
         if (StrUtil.equalsIgnoreCase(method, "top")) {
             repositoryService.sortToTop(id, request);
         } else if (StrUtil.equalsIgnoreCase(method, "up")) {
