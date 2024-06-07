@@ -52,23 +52,23 @@ public class ImportRepoUtil {
     public Map<String, Map<String, Object>> getProviderList() {
         Resource[] configResources = ExtConfigBean.getConfigResources("import-repo-provider/*.yml");
         return Arrays.stream(configResources)
-                .map(resource -> {
-                    String filename = resource.getFilename();
-                    String mainName = FileUtil.mainName(filename);
+            .map(resource -> {
+                String filename = resource.getFilename();
+                String mainName = FileUtil.mainName(filename);
 
-                    try (InputStream inputStream = resource.getInputStream()) {
-                        ImportRepoProviderConfig providerConfig = YamlUtil.load(inputStream, ImportRepoProviderConfig.class);
-                        Map<String, Object> map = new HashMap<>();
-                        map.put("name", mainName);
-                        map.put("baseUrl", providerConfig.getBaseUrl());
-                        // 是否支持查询
-                        map.put("query", providerConfig.getRepoListParam().values().stream().anyMatch(s -> s.contains("${query}")));
-                        return map;
-                    } catch (Exception e) {
-                        throw Lombok.sneakyThrow(e);
-                    }
-                })
-                .collect(Collectors.toMap(map -> (String) map.get("name"), map -> map));
+                try (InputStream inputStream = resource.getInputStream()) {
+                    ImportRepoProviderConfig providerConfig = YamlUtil.load(inputStream, ImportRepoProviderConfig.class);
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("name", mainName);
+                    map.put("baseUrl", providerConfig.getBaseUrl());
+                    // 是否支持查询
+                    map.put("query", providerConfig.getRepoListParam().values().stream().anyMatch(s -> s.contains("${query}")));
+                    return map;
+                } catch (Exception e) {
+                    throw Lombok.sneakyThrow(e);
+                }
+            })
+            .collect(Collectors.toMap(map -> (String) map.get("name"), map -> map));
     }
 
     @SneakyThrows
@@ -186,12 +186,12 @@ public class ImportRepoUtil {
         HttpRequest request = HttpUtil.createRequest(Method.valueOf(provider.getCurrentUserMethod()), baseUrl + provider.getCurrentUserUrl());
         setCommonParams(platform, request, token);
         String body;
-        log.debug(String.format("url: %s headers: %s form: %s", request.getUrl(), request.headers(), request.form()));
+        log.debug("url: {} headers: {} form: {}", request.getUrl(), request.headers(), request.form());
         try (HttpResponse execute = request.execute()) {
             body = execute.body();
             int status = execute.getStatus();
             Map<String, List<String>> headers = execute.headers();
-            log.debug(String.format("status: %s body: %s headers: %s", status, body, headers));
+            log.debug("status: {} body: {} headers: {}", status, body, headers);
             Assert.state(execute.isOk(), String.format("请求失败: status: %s body: %s headers: %s", status, body, headers));
         }
         return JSONUtil.parse(body).getByPath(provider.getUserNamePath(), String.class);
