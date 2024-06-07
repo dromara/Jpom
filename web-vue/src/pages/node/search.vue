@@ -884,9 +884,6 @@ export default {
     this.loadGroupList()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.search.${key}`, ...args)
-    },
     getNodeProjectData(pointerEvent, loading) {
       this.loading = true
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page

@@ -214,9 +214,6 @@ export default {
     this.init()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.system.overview.${key}`, ...args)
-    },
     init() {
       // 数据
       this.loading = true

@@ -534,9 +534,6 @@ export default {
     // console.log(this.temp);
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.dispatch.start.${key}`, ...args)
-    },
     renderSize,
     formatDuration,
     // 处理文件移除

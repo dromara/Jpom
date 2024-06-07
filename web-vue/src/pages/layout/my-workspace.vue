@@ -67,9 +67,6 @@ export default {
     this.init()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.layout.myWorkspace.${key}`, ...args)
-    },
     onDrop(dropResult) {
       this.myWorkspaceList = dropApplyDrag(this.myWorkspaceList, dropResult).map((item, index) => {
         return { ...item, sort: index }

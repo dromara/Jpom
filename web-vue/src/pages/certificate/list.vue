@@ -360,9 +360,7 @@ export default {
   },
   methods: {
     CHANGE_PAGE,
-    $tl(key, ...args) {
-      return this.$t(`pages.certificate.list.${key}`, ...args)
-    },
+
     // 加载数据
     loadData(pointerEvent) {
       this.loading = true

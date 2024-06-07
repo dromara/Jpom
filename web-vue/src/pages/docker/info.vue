@@ -129,9 +129,6 @@ export default {
     // console.log(Comparator);
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.docker.info.${key}`, ...args)
-    },
     renderSize,
     // load data
     loadData() {

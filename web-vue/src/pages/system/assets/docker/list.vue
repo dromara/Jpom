@@ -826,9 +826,6 @@ export default {
     this.loadGroupList()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.system.assets.docker.list.${key}`, ...args)
-    },
     //
     parseTime,
     // 获取所有的分组

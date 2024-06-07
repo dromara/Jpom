@@ -152,9 +152,6 @@ export default {
     this.handleListLog()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.system.triggerToken.${key}`, ...args)
-    },
     handleListLog() {
       this.viewOperationLoading = true
 

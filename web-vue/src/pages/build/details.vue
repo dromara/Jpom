@@ -254,9 +254,6 @@ export default {
     }
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.build.details.${key}`, ...args)
-    },
     parseTime,
     formatDuration,
     PAGE_DEFAULT_SHOW_TOTAL,

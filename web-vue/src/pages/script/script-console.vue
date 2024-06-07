@@ -130,9 +130,6 @@ export default {
     this.close()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.script.scriptConsole.${key}`, ...args)
-    },
     close() {
       this.socket?.close()
 

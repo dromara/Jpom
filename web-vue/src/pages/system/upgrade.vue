@@ -284,9 +284,6 @@ export default {
     this.close()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.system.upgrade.${key}`, ...args)
-    },
     status_filter(value) {
       return (value && value) || this.$t('pages.system.upgrade.5f51a112')
     },

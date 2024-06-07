@@ -92,9 +92,6 @@ export default {
     window.removeEventListener('resize', this.resize)
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.nodeLayout.nodeTop.${key}`, ...args)
-    },
     dayjs,
     // 刷新
     handleFilter() {

@@ -228,9 +228,6 @@ export default {
     this.init()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.layout.overview.${key}`, ...args)
-    },
     parseTime,
     init() {
       // 工作空间

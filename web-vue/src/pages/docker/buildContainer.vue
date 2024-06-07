@@ -508,9 +508,6 @@ export default {
     this.createContainer()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.docker.buildContainer.${key}`, ...args)
-    },
     // 构建镜像
     createContainer() {
       // 判断 containerId

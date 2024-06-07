@@ -147,9 +147,6 @@ export default {
     this.fastInstall()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.fastInstall.${key}`, ...args)
-    },
     // 关闭弹窗,关闭定时轮询
     cancelFastInstall() {
       if (this.pullFastInstallResultTime) {

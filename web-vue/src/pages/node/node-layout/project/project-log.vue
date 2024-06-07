@@ -122,9 +122,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.nodeLayout.project.projectLog.${key}`, ...args)
-    },
     renderSize,
     parseTime,
     // 加载日志文件大小

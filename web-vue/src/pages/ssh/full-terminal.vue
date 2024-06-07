@@ -80,9 +80,6 @@ export default {
   },
   beforeUnmount() {},
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.ssh.fullTerminal.${key}`, ...args)
-    },
     loadItemData() {
       getItem({
         id: this.sshId

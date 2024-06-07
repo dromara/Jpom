@@ -133,9 +133,6 @@ export default {
   },
   mounted() {},
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.system.taskStat.${key}`, ...args)
-    },
     parseTime,
     refresh() {
       this.$emit('refresh', {})

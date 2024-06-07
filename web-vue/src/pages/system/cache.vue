@@ -201,9 +201,6 @@ export default {
     // console.log(Comparator);
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.system.cache.${key}`, ...args)
-    },
     renderSize,
     formatDuration,
     // load data

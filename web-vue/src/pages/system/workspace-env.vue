@@ -336,9 +336,6 @@ export default {
     this.loadDataEnvVar()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.system.workspaceEnv.${key}`, ...args)
-    },
     loadDataEnvVar(pointerEvent) {
       this.envVarLoading = true
 

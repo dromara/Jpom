@@ -45,10 +45,6 @@ export default {
   },
   mounted() {},
   beforeUnmount() {},
-  methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.docker.terminal.${key}`, ...args)
-    }
-  }
+  methods: {}
 }
 </script>

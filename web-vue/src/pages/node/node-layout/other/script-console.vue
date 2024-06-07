@@ -139,9 +139,6 @@ export default {
     this.close()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.nodeLayout.other.scriptConsole.${key}`, ...args)
-    },
     close() {
       this.socket?.close()
       clearInterval(this.heart)

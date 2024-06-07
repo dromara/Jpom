@@ -650,9 +650,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.fileManager.fileStorage.list.${key}`, ...args)
-    },
     randomStr,
     CHANGE_PAGE,
     renderSize,
