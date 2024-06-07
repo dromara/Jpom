@@ -11,7 +11,7 @@
 baseUrl: https://try.gogs.io
 authType: 1
 authKey: Authorization
-authValue: 'Bearer ${token}'
+authValue: 'token ${token}'
 currentUserMethod: GET
 currentUserUrl: /api/v1/user
 userNamePath: login

@@ -193,26 +193,37 @@ public class ExtConfigBean {
     public static Resource[] getConfigResources(String matchStr) {
         PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
         File configResourceDir = getConfigResourceDir();
-        return Opt.ofBlankAble(configResourceDir).map(file -> {
-            try {
-                String format = StrUtil.format("{}{}/{}", ResourceUtils.FILE_URL_PREFIX, file.getAbsolutePath(), matchStr);
-                Resource[] resources = pathMatchingResourcePatternResolver.getResources(format);
-                if (ArrayUtil.isEmpty(resources)) {
-                    log.warn("配置文件不存在 {}", format);
-                    return null;
+        return Opt.ofBlankAble(configResourceDir)
+            .map(file -> {
+                try {
+                    String format = StrUtil.format("{}{}/{}", ResourceUtils.FILE_URL_PREFIX, file.getAbsolutePath(), matchStr);
+                    Resource[] resources = pathMatchingResourcePatternResolver.getResources(format);
+                    if (ArrayUtil.isEmpty(resources)) {
+                        log.warn("配置文件不存在 {}", format);
+                        return null;
+                    }
+                    return resources;
+                } catch (IOException e) {
+                    throw Lombok.sneakyThrow(e);
                 }
-                return resources;
-            } catch (IOException e) {
-                throw Lombok.sneakyThrow(e);
-            }
-        }).orElseGet(() -> {
-            try {
-                String format = StrUtil.format("{}/config_default/{}", ResourceUtils.CLASSPATH_URL_PREFIX, matchStr);
-                return pathMatchingResourcePatternResolver.getResources(format);
-            } catch (IOException e) {
-                throw Lombok.sneakyThrow(e);
-            }
-        });
+            })
+            .orElse(null);
+    }
+
+    /**
+     * 模糊匹配获取配置文件资源
+     *
+     * @param matchStr 匹配关键词
+     * @return 资源
+     */
+    public static Resource[] getDefaultConfigResources(String matchStr) {
+        PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
+        try {
+            String format = StrUtil.format("{}/config_default/{}", ResourceUtils.CLASSPATH_URL_PREFIX, matchStr);
+            return pathMatchingResourcePatternResolver.getResources(format);
+        } catch (IOException e) {
+            throw Lombok.sneakyThrow(e);
+        }
     }
 
 
