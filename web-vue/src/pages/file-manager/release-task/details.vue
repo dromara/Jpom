@@ -131,9 +131,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.fileManager.releaseTask.details.${key}`, ...args)
-    },
     // 加载日志内容
     loadData() {
       this.activeKey = this.temp.id || ''

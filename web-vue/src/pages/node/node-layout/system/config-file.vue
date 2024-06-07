@@ -61,9 +61,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.nodeLayout.system.configFile.${key}`, ...args)
-    },
     // load data
     loadData() {
       getConfigData({ machineId: this.machineId }).then((res) => {

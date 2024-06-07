@@ -1238,9 +1238,6 @@ export default {
     this.loadGroupList()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.dispatch.list.${key}`, ...args)
-    },
     randomStr,
     CHANGE_PAGE,
 

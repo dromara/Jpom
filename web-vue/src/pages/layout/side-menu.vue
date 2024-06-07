@@ -116,9 +116,6 @@ export default {
   },
   beforeUnmount() {},
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.layout.sideMenu.${key}`, ...args)
-    },
     mangerMenuClick() {
       this.mangerMenuOpenkeys = []
       this.$nextTick(() => {

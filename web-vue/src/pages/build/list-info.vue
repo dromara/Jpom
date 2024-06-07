@@ -942,9 +942,7 @@ export default {
   },
   methods: {
     CHANGE_PAGE,
-    $tl(key, ...args) {
-      return this.$t(`pages.build.listInfo.${key}`, ...args)
-    },
+
     // PAGE_DEFAULT_SHOW_TOTAL,
     // getCachePageLimit,
     // 分组数据

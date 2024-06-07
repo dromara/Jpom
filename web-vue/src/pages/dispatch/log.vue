@@ -287,9 +287,6 @@ export default {
     this.handleFilter()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.dispatch.log.${key}`, ...args)
-    },
     readJsonStrField,
     // 搜索
     handleFilter() {

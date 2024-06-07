@@ -24,10 +24,6 @@ export default {
   data() {
     return {}
   },
-  methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.layout.ipAccess.${key}`, ...args)
-    }
-  }
+  methods: {}
 }
 </script>

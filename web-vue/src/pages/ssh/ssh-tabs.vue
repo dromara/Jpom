@@ -98,9 +98,6 @@ export default {
     this.listData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.ssh.sshTabs.${key}`, ...args)
-    },
     findItemById(list, id) {
       // 每次进来使用find遍历一次
       let res = list.find((item) => item.id == id)

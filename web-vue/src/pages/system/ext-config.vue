@@ -83,9 +83,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.system.extConfig.${key}`, ...args)
-    },
     // 加载数据
     loadData() {
       this.loading = true

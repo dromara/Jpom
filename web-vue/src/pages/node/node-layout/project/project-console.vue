@@ -213,9 +213,6 @@ export default {
     this.close()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.nodeLayout.project.projectConsole.${key}`, ...args)
-    },
     close() {
       this.socket?.close()
 

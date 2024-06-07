@@ -866,9 +866,6 @@ export default {
     this.getWorkEnvList()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.system.assets.ssh.sshList.${key}`, ...args)
-    },
     formatDuration,
     renderSize,
     formatPercent,

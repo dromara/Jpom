@@ -302,9 +302,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.docker.swarm.task.${key}`, ...args)
-    },
     parseTime,
     // 加载数据
     loadData() {

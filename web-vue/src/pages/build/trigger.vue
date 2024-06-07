@@ -164,9 +164,6 @@ export default {
     }
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.build.trigger.${key}`, ...args)
-    },
     // 触发器
     handleTrigger() {
       this.temp = {}

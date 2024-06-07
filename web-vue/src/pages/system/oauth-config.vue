@@ -645,9 +645,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.system.oauthConfig.${key}`, ...args)
-    },
     // load data
     loadData() {
       this.provides.forEach((item) => {

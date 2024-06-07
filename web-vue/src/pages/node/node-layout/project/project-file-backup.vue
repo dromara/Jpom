@@ -329,9 +329,6 @@ export default {
     this.loadBackupList()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.nodeLayout.project.projectFileBackup.${key}`, ...args)
-    },
     renderSize,
     parseTime,
     onTreeData(treeNode) {

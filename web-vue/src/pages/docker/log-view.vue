@@ -111,9 +111,6 @@ export default {
     this.close()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.docker.logView.${key}`, ...args)
-    },
     close() {
       clearInterval(this.heart)
       this.socket?.close()

@@ -265,9 +265,6 @@ export default {
     this.loadGroupList()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.system.clusterList.${key}`, ...args)
-    },
     parseTime,
     CHANGE_PAGE,
     // 加载数据

@@ -469,9 +469,6 @@ export default {
     this.loadClusterList()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.system.workspaceList.${key}`, ...args)
-    },
     // 获取所有集群
     loadClusterList() {
       return new Promise((resolve) => {
