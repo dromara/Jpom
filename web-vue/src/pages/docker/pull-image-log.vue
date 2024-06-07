@@ -2,7 +2,7 @@
   <div>
     <log-view
       :ref="`logView`"
-      :title-name="$tl('p.pullLog')"
+      :title-name="$t('pages.docker.pull-image-log.28d0ce86')"
       :visible="visible"
       @close="
         () => {

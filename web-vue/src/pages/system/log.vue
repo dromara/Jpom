@@ -12,12 +12,12 @@
         <log-view2 :ref="`logView`" height="calc(100vh - 140px)">
           <template #before>
             <a-space>
-              <a-button type="primary" size="small" @click="loadData">{{ $tl('p.refresh') }}</a-button>
+              <a-button type="primary" size="small" @click="loadData">{{ $t('pages.system.log.7bbd89a') }}</a-button>
               <a-button type="primary" danger size="small" :disabled="!temp.path" @click="deleteLog">{{
-                $tl('p.delete')
+                $t('pages.system.log.dd20d11c')
               }}</a-button>
               <a-button type="primary" size="small" :disabled="!temp.path" @click="downloadLog">{{
-                $tl('p.download')
+                $t('pages.system.log.42c8e9c6')
               }}</a-button>
               |
             </a-space>
@@ -137,13 +137,13 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: `web socket ${this.$tl('p.error')},${this.$tl('p.checkWsProxy')}`
+          message: `web socket ${this.$t('pages.system.log.d75d207f')},${this.$t('pages.system.log.763330b')}`
         })
       }
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
-        $message.warning(this.$tl('p.sessionClosed') + node.dataRef.path)
+        $message.warning(this.$t('pages.system.log.8a2aae09') + node.dataRef.path)
         // clearInterval(this.heart);
       }
     },
@@ -166,11 +166,11 @@ export default {
     // 删除文件
     deleteLog() {
       $confirm({
-        title: this.$tl('p.systemPrompt'),
+        title: this.$t('pages.system.log.b22d55a0'),
         zIndex: 1009,
-        content: this.$tl('p.confirmDeleteLog'),
-        okText: this.$tl('p.confirm'),
-        cancelText: this.$tl('p.cancel'),
+        content: this.$t('pages.system.log.5ef43186'),
+        okText: this.$t('pages.system.log.e8e9db25'),
+        cancelText: this.$t('pages.system.log.b12468e9'),
         onOk: () => {
           return deleteLog({
             nodeId: null,

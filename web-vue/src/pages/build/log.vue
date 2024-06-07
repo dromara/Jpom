@@ -1,7 +1,7 @@
 <template>
   <log-view
     :ref="`logView`"
-    :title-name="$tl('p.buildLog')"
+    :title-name="$t('pages.build.log.fc20bf28')"
     :visible="visible"
     @close="
       () => {
@@ -12,22 +12,24 @@
     <template #before>
       <a-space>
         <span v-if="status">
-          {{ $tl('c.currentStatus') }}
+          {{ $t('pages.build.log.df91bc15') }}
           <a-tooltip
-            :title="`${$tl('c.currentStatus')} ${statusMap[status]} ${statusMsg ? $tl('p.statusMsg') + statusMsg : ''}`"
+            :title="`${$t('pages.build.log.df91bc15')} ${statusMap[status]} ${
+              statusMsg ? $t('pages.build.log.7f491810') + statusMsg : ''
+            }`"
           >
             <a-tag :color="statusColor[status]" style="margin-right: 0">
-              {{ statusMap[status] || $tl('p.unknownStatus') }}
+              {{ statusMap[status] || $t('pages.build.log.3ebb81e0') }}
             </a-tag>
           </a-tooltip>
         </span>
         <span>
-          {{ $tl('p.buildId') }}
+          {{ $t('pages.build.log.7cf809d7') }}
           <a-tag>{{ temp && temp.buildId }}</a-tag>
         </span>
         <a-button type="primary" :disabled="!logId" size="small" @click="handleDownload"
           ><DownloadOutlined />
-          {{ $tl('p.download') }}
+          {{ $t('pages.build.log.42c8e9c6') }}
         </a-button>
         |
       </a-space>

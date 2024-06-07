@@ -17,7 +17,7 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%scriptName%']"
-            :placeholder="$tl('c.name')"
+            :placeholder="$t('pages.script.script-log.3e34ec28')"
             allow-clear
             class="search-input-item"
             @press-enter="loadData"
@@ -36,7 +36,7 @@
               }
             "
             allow-clear
-            :placeholder="$tl('c.triggerType')"
+            :placeholder="$t('pages.script.script-log.43766a5b')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
@@ -55,7 +55,7 @@
               }
             "
             allow-clear
-            :placeholder="$tl('c.status')"
+            :placeholder="$t('pages.script.script-log.6e06fe4f')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
@@ -64,7 +64,7 @@
             allow-clear
             input-read-only
             :show-time="{ format: 'HH:mm:ss' }"
-            :placeholder="[$tl('p.startTime'), $tl('p.endTime')]"
+            :placeholder="[$t('pages.script.script-log.ac9ef5f5'), $t('pages.script.script-log.9376939d')]"
             format="YYYY-MM-DD HH:mm:ss"
             value-format="YYYY-MM-DD HH:mm:ss"
             @change="
@@ -77,8 +77,10 @@
               }
             "
           />
-          <a-tooltip :title="$tl('p.hotkeyTip')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
+          <a-tooltip :title="$t('pages.script.script-log.983f7ae3')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{
+              $t('pages.script.script-log.53c2763c')
+            }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -94,11 +96,11 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'triggerExecType'">
-          <span>{{ triggerExecTypeMap[text] || $tl('p.unknown') }}</span>
+          <span>{{ triggerExecTypeMap[text] || $t('pages.script.script-log.ca1cdfa6') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'workspaceId'">
-          <a-tag v-if="text === 'GLOBAL'">{{ $tl('p.global') }}</a-tag>
-          <a-tag v-else>{{ $tl('p.workspace') }}</a-tag>
+          <a-tag v-if="text === 'GLOBAL'">{{ $t('pages.script.script-log.f372618') }}</a-tag>
+          <a-tag v-else>{{ $t('pages.script.script-log.afacc4cb') }}</a-tag>
         </template>
         <template v-else-if="column.dataIndex === 'createTimeMillis'">
           <a-tooltip :title="`${parseTime(record.createTimeMillis)}`">
@@ -106,7 +108,7 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'exitCode'">
-          <a-tag v-if="text == 0" color="green">{{ $tl('p.success') }}</a-tag>
+          <a-tag v-if="text == 0" color="green">{{ $t('pages.script.script-log.83aa7d3') }}</a-tag>
           <a-tag v-else color="orange">{{ text || '-' }}</a-tag>
         </template>
         <template v-else-if="column.dataIndex === 'status'">
@@ -114,9 +116,13 @@
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button type="primary" size="small" @click="viewLog(record)">{{ $tl('p.viewLog') }}</a-button>
+            <a-button type="primary" size="small" @click="viewLog(record)">{{
+              $t('pages.script.script-log.b51c8bb3')
+            }}</a-button>
 
-            <a-button type="primary" danger size="small" @click="handleDelete(record)">{{ $tl('p.delete') }}</a-button>
+            <a-button type="primary" danger size="small" @click="handleDelete(record)">{{
+              $t('pages.script.script-log.dd20d11c')
+            }}</a-button>
           </a-space>
         </template>
       </template>
@@ -163,51 +169,51 @@ export default {
       logVisible: 0,
       columns: [
         {
-          title: this.$tl('c.name'),
+          title: this.$t('pages.script.script-log.3e34ec28'),
           dataIndex: 'scriptName',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$tl('p.executionTime'),
+          title: this.$t('pages.script.script-log.40fb635f'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           ellipsis: true,
           width: '160px'
         },
         {
-          title: this.$tl('c.triggerType'),
+          title: this.$t('pages.script.script-log.43766a5b'),
           dataIndex: 'triggerExecType',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$tl('c.status'),
+          title: this.$t('pages.script.script-log.6e06fe4f'),
           dataIndex: 'status',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$tl('p.executionDomain'),
+          title: this.$t('pages.script.script-log.3debe02b'),
           dataIndex: 'workspaceId',
           ellipsis: true,
 
           width: '90px'
         },
         {
-          title: this.$tl('p.exitCode'),
+          title: this.$t('pages.script.script-log.cdb6dc6b'),
           dataIndex: 'exitCode',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$tl('p.executor'),
+          title: this.$t('pages.script.script-log.cda0e062'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           width: '100px'
         },
         {
-          title: this.$tl('p.action'),
+          title: this.$t('pages.script.script-log.a0fe2109'),
           dataIndex: 'operation',
           align: 'center',
           fixed: 'right',
@@ -249,11 +255,11 @@ export default {
     },
     handleDelete(record) {
       $confirm({
-        title: this.$tl('p.systemTip'),
-        content: this.$tl('p.deleteConfirm'),
+        title: this.$t('pages.script.script-log.e422d0eb'),
+        content: this.$t('pages.script.script-log.2c8deda8'),
         zIndex: 1009,
-        okText: this.$tl('p.confirm'),
-        cancelText: this.$tl('p.cancel'),
+        okText: this.$t('pages.script.script-log.e8e9db25'),
+        cancelText: this.$t('pages.script.script-log.b12468e9'),
         onOk: () => {
           return scriptDel({
             id: record.scriptId,

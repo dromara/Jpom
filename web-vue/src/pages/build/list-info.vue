@@ -19,7 +19,7 @@
       default-auto-refresh
       :auto-refresh-time="5"
       table-name="buildList"
-      :empty-description="$tl('p.noBuild')"
+      :empty-description="$t('pages.build.list-info.623e07ea')"
       :active-page="activePage"
       :layout="layout"
       size="middle"
@@ -58,7 +58,7 @@
             v-model:value="listQuery['%name%']"
             allow-clear
             class="search-input-item"
-            :placeholder="$tl('p.buildName')"
+            :placeholder="$t('pages.build.list-info.80ebff14')"
             @press-enter="loadData"
           />
           <a-select
@@ -75,7 +75,7 @@
                 )
               }
             "
-            :placeholder="$tl('c.status')"
+            :placeholder="$t('pages.build.list-info.6e06fe4f')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
@@ -94,7 +94,7 @@
               }
             "
             allow-clear
-            :placeholder="$tl('c.publishMethod')"
+            :placeholder="$t('pages.build.list-info.c5607db9')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in releaseMethodMap" :key="key">{{ val }}</a-select-option>
@@ -113,7 +113,7 @@
               }
             "
             allow-clear
-            :placeholder="$tl('c.group')"
+            :placeholder="$t('pages.build.list-info.b1765e98')"
             class="search-input-item"
           >
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
@@ -122,27 +122,33 @@
             v-model:value="listQuery['%resultDirFile%']"
             allow-clear
             class="search-input-item"
-            :placeholder="$tl('c.artifactCatalog')"
+            :placeholder="$t('pages.build.list-info.63121c12')"
             @press-enter="loadData"
           />
-          <a-tooltip :title="$tl('p.backToFirstPage')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
+          <a-tooltip :title="$t('pages.build.list-info.6ebd5885')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{
+              $t('pages.build.list-info.53c2763c')
+            }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">{{ $tl('p.new') }}</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $t('pages.build.list-info.ebbf5288') }}</a-button>
           <template v-if="tableSelections && tableSelections.length">
             <a-dropdown>
               <template #overlay>
                 <a-menu>
-                  <a-menu-item key="1" @click="batchBuild"> {{ $tl('p.batchBuild') }} </a-menu-item>
-                  <a-menu-item key="2" @click="batchCancel"> {{ $tl('p.batchCancel') }} </a-menu-item>
-                  <a-menu-item key="3" @click="handleBatchDelete"> {{ $tl('p.batchDelete') }} </a-menu-item>
+                  <a-menu-item key="1" @click="batchBuild"> {{ $t('pages.build.list-info.d9dfcc07') }} </a-menu-item>
+                  <a-menu-item key="2" @click="batchCancel"> {{ $t('pages.build.list-info.d91724b3') }} </a-menu-item>
+                  <a-menu-item key="3" @click="handleBatchDelete">
+                    {{ $t('pages.build.list-info.b5139d46') }}
+                  </a-menu-item>
                 </a-menu>
               </template>
-              <a-button type="primary"> {{ $tl('c.batchOperation') }}<DownOutlined /> </a-button>
+              <a-button type="primary"> {{ $t('pages.build.list-info.766122c2') }}<DownOutlined /> </a-button>
             </a-dropdown>
           </template>
-          <a-tooltip v-else :title="$tl('p.batchOperationNote')">
-            <a-button :disabled="true" type="primary"> {{ $tl('c.batchOperation') }} <DownOutlined /> </a-button>
+          <a-tooltip v-else :title="$t('pages.build.list-info.2ed8929')">
+            <a-button :disabled="true" type="primary">
+              {{ $t('pages.build.list-info.766122c2') }} <DownOutlined />
+            </a-button>
           </a-tooltip>
 
           <!-- <a-button v-if="!layout" type="primary" @click="changeLayout">
@@ -174,10 +180,12 @@
               </a-col>
               <a-col :span="7" style="text-align: right" class="text-overflow-hidden">
                 <a-tooltip
-                  :title="`${$tl('p.currentStatus')}${statusMap[item.status]} ${item.statusMsg ? $tl('p.statusMessage') + item.statusMsg : ''}`"
+                  :title="`${$t('pages.build.list-info.8a8e4923')}${statusMap[item.status]} ${
+                    item.statusMsg ? $t('pages.build.list-info.e57df4bc') + item.statusMsg : ''
+                  }`"
                 >
                   <a-tag :color="statusColor[item.status]" style="margin-right: 0">
-                    {{ statusMap[item.status] || $tl('p.unknownStatus') }}</a-tag
+                    {{ statusMap[item.status] || $t('pages.build.list-info.3ebb81e0') }}</a-tag
                   >
                 </a-tooltip>
               </a-col>
@@ -187,17 +195,17 @@
           <a-tooltip>
             <template #title>
               <div v-if="item.branchTagName">
-                <div>{{ $tl('c.tagName') }}{{ item.branchTagName }}</div>
-                <div>{{ $tl('c.lastCommitId') }}{{ item.repositoryLastCommitId }}</div>
+                <div>{{ $t('pages.build.list-info.40d35415') }}{{ item.branchTagName }}</div>
+                <div>{{ $t('pages.build.list-info.153a2f31') }}{{ item.repositoryLastCommitId }}</div>
               </div>
               <div v-else>
-                <div>{{ $tl('c.branchName') }}{{ item.branchName }}</div>
-                <div>{{ $tl('c.lastCommitId') }}{{ item.repositoryLastCommitId }}</div>
+                <div>{{ $t('pages.build.list-info.c40b3b99') }}{{ item.branchName }}</div>
+                <div>{{ $t('pages.build.list-info.153a2f31') }}{{ item.repositoryLastCommitId }}</div>
               </div>
             </template>
 
             <a-row class="item-info">
-              <a-col :span="6" class="title text-overflow-hidden">{{ $tl('p.groupTag') }}</a-col>
+              <a-col :span="6" class="title text-overflow-hidden">{{ $t('pages.build.list-info.990386a2') }}</a-col>
               <a-col :span="18" class="content text-overflow-hidden">
                 {{ item.branchName }} {{ item.branchTagName }}</a-col
               >
@@ -205,7 +213,7 @@
           </a-tooltip>
           <a-tooltip :title="item.resultDirFile">
             <a-row class="item-info">
-              <a-col :span="6" class="title text-overflow-hidden">{{ $tl('p.product') }}</a-col>
+              <a-col :span="6" class="title text-overflow-hidden">{{ $t('pages.build.list-info.b4707ccc') }}</a-col>
               <a-col :span="18" class="content text-overflow-hidden">
                 {{ item.resultDirFile }}
               </a-col>
@@ -213,7 +221,7 @@
           </a-tooltip>
 
           <a-row class="item-info">
-            <a-col :span="6" class="title text-overflow-hidden">{{ $tl('p.buildId') }}:</a-col>
+            <a-col :span="6" class="title text-overflow-hidden">{{ $t('pages.build.list-info.7cf809d7') }}:</a-col>
             <a-col :span="18" class="content text-overflow-hidden">
               <a-tag v-if="item.buildId <= 0">-</a-tag>
               <a-tag v-else color="#108ee9" @click="handleBuildLog(item)">#{{ item.buildId }}</a-tag>
@@ -221,20 +229,20 @@
           </a-row>
 
           <a-row class="item-info">
-            <a-col :span="6" class="title text-overflow-hidden">{{ $tl('p.buildMethod') }}</a-col>
+            <a-col :span="6" class="title text-overflow-hidden">{{ $t('pages.build.list-info.bc1227cd') }}</a-col>
             <a-col :span="18" class="content text-overflow-hidden">
               <template v-if="item.buildMode === 1">
                 <CloudOutlined />
-                {{ $tl('c.containerBuild') }}
+                {{ $t('pages.build.list-info.e1806047') }}
               </template>
               <template v-else>
                 <CodeOutlined />
-                {{ $tl('c.localBuild') }}
+                {{ $t('pages.build.list-info.e227327') }}
               </template>
             </a-col>
           </a-row>
           <a-row class="item-info">
-            <a-col :span="6" class="title text-overflow-hidden">{{ $tl('p.publishMethod') }}</a-col>
+            <a-col :span="6" class="title text-overflow-hidden">{{ $t('pages.build.list-info.907f888f') }}</a-col>
             <a-col :span="18" class="content text-overflow-hidden">
               {{ releaseMethodMap[item.releaseMethod] }}
             </a-col>
@@ -248,11 +256,11 @@
                 type="primary"
                 danger
                 @click="handleStopBuild(item)"
-                >{{ $tl('c.stop') }}
+                >{{ $t('pages.build.list-info.d9418498') }}
               </a-button>
               <a-dropdown v-else>
                 <a-button size="small" type="primary" @click="handleConfirmStartBuild(item)">
-                  {{ $tl('c.build') }}
+                  {{ $t('pages.build.list-info.6116e886') }}
                   <DownOutlined />
                 </a-button>
                 <template #overlay>
@@ -262,7 +270,7 @@
                         size="small"
                         type="primary"
                         @click="reqStartBuild({ id: item.id, buildEnvParameter: item.buildEnvParameter }, true)"
-                        >{{ $tl('c.directBuild') }}
+                        >{{ $t('pages.build.list-info.56424415') }}
                       </a-button>
                     </a-menu-item>
                     <a-menu-item key="2">
@@ -271,38 +279,40 @@
                         type="primary"
                         @click="reqStartBuild({ id: item.id, buildEnvParameter: item.buildEnvParameter }, false)"
                       >
-                        {{ $tl('c.backgroundBuild') }}
+                        {{ $t('pages.build.list-info.d128c3f3') }}
                       </a-button>
                     </a-menu-item>
                   </a-menu>
                 </template>
               </a-dropdown>
               <a-dropdown>
-                <a-button size="small" type="primary" @click="handleEdit(item)">{{ $tl('c.edit') }}</a-button>
+                <a-button size="small" type="primary" @click="handleEdit(item)">{{
+                  $t('pages.build.list-info.e1224c34')
+                }}</a-button>
                 <template #overlay>
                   <a-menu>
                     <a-menu-item @click="handleEdit(item, 0)">
-                      <a href="javascript:;">{{ $tl('c.buildMethod') }}</a>
+                      <a href="javascript:;">{{ $t('pages.build.list-info.b5dfedd9') }}</a>
                     </a-menu-item>
                     <a-menu-item @click="handleEdit(item, 1)">
-                      <a href="javascript:;">{{ $tl('c.basicInfo') }}</a>
+                      <a href="javascript:;">{{ $t('pages.build.list-info.fbe7a37d') }}</a>
                     </a-menu-item>
                     <a-menu-item @click="handleEdit(item, 2)">
-                      <a href="javascript:;">{{ $tl('c.buildProcess') }}</a>
+                      <a href="javascript:;">{{ $t('pages.build.list-info.344b9569') }}</a>
                     </a-menu-item>
                     <a-menu-item @click="handleEdit(item, 3)">
-                      <a href="javascript:;">{{ $tl('c.publishOperation') }}</a>
+                      <a href="javascript:;">{{ $t('pages.build.list-info.7be4f983') }}</a>
                     </a-menu-item>
                     <a-menu-item @click="handleEdit(item, 4)">
-                      <a href="javascript:;">{{ $tl('c.otherConfig') }}</a>
+                      <a href="javascript:;">{{ $t('pages.build.list-info.17607860') }}</a>
                     </a-menu-item>
                   </a-menu>
                 </template>
               </a-dropdown>
-              <a-button size="small" @click="handleDelete(item)">{{ $tl('c.delete') }}</a-button>
-              <a-tooltip placement="leftBottom" :title="$tl('c.clearCode')">
+              <a-button size="small" @click="handleDelete(item)">{{ $t('pages.build.list-info.2f14e7d4') }}</a-button>
+              <a-tooltip placement="leftBottom" :title="$t('pages.build.list-info.7ed8368b')">
                 <a-button size="small" :disabled="!item.sourceDirExist" @click="handleClear(item)"
-                  >{{ $tl('p.clearCode') }}
+                  >{{ $t('pages.build.list-info.49cc9441') }}
                 </a-button>
               </a-tooltip>
             </a-button-group>
@@ -313,7 +323,7 @@
         <template v-if="column.dataIndex === 'name'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$tl('p.name')}${text} ${$tl('p.viewDetails')}`"
+            :title="`${$t('pages.build.list-info.bb769c1d')}${text} ${$t('pages.build.list-info.ef7334e0')}`"
             @click="handleDetails(record)"
           >
             <a-button type="link" style="padding: 0" size="small"> <FullscreenOutlined />{{ text }}</a-button>
@@ -323,12 +333,12 @@
           <a-tooltip placement="topLeft">
             <template #title>
               <div v-if="record.branchTagName">
-                <div>{{ $tl('c.tagName') }}{{ record.branchTagName }}</div>
-                <div>{{ $tl('c.lastCommitId') }}{{ record.repositoryLastCommitId }}</div>
+                <div>{{ $t('pages.build.list-info.40d35415') }}{{ record.branchTagName }}</div>
+                <div>{{ $t('pages.build.list-info.153a2f31') }}{{ record.repositoryLastCommitId }}</div>
               </div>
               <div v-else>
-                <div>{{ $tl('c.branchName') }}{{ text }}</div>
-                <div>{{ $tl('c.lastCommitId') }}{{ record.repositoryLastCommitId }}</div>
+                <div>{{ $t('pages.build.list-info.c40b3b99') }}{{ text }}</div>
+                <div>{{ $t('pages.build.list-info.153a2f31') }}{{ record.repositoryLastCommitId }}</div>
               </div>
             </template>
             <span v-if="record.branchTagName"><TagOutlined />{{ record.branchTagName }}</span>
@@ -337,7 +347,10 @@
         </template>
 
         <template v-else-if="column.dataIndex === 'buildMode'">
-          <a-tooltip placement="topLeft" :title="text === 1 ? $tl('c.containerBuild') : $tl('c.localBuild')">
+          <a-tooltip
+            placement="topLeft"
+            :title="text === 1 ? $t('pages.build.list-info.e1806047') : $t('pages.build.list-info.e227327')"
+          >
             <CloudOutlined v-if="text === 1" />
             <CodeOutlined v-else />
           </a-tooltip>
@@ -346,25 +359,25 @@
           <a-tooltip>
             <template #title>
               <ul>
-                <li>{{ $tl('p.publishMethod') }}{{ releaseMethodMap[text] }}</li>
-                <li>{{ $tl('p.artifactCatalog') }}{{ record.resultDirFile }}</li>
-                <li v-if="record.buildMode !== 1">{{ $tl('p.buildCommand') }}{{ record.script }}</li>
+                <li>{{ $t('pages.build.list-info.907f888f') }}{{ releaseMethodMap[text] }}</li>
+                <li>{{ $t('pages.build.list-info.27d9deeb') }}{{ record.resultDirFile }}</li>
+                <li v-if="record.buildMode !== 1">{{ $t('pages.build.list-info.264f7e9c') }}{{ record.script }}</li>
               </ul>
             </template>
             <span>{{ releaseMethodMap[text] }}</span>
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'status'">
-          <a-tooltip :title="record.statusMsg || statusMap[text] || $tl('c.unknown')">
+          <a-tooltip :title="record.statusMsg || statusMap[text] || $t('pages.build.list-info.5f51a112')">
             <a-tag
               :color="statusColor[record.status]"
-              :title="record.statusMsg || statusMap[text] || $tl('c.unknown')"
-              >{{ statusMap[text] || $tl('c.unknown') }}</a-tag
+              :title="record.statusMsg || statusMap[text] || $t('pages.build.list-info.5f51a112')"
+              >{{ statusMap[text] || $t('pages.build.list-info.5f51a112') }}</a-tag
             >
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'buildId'">
-          <a-tooltip placement="topLeft" :title="text + ` ( ${$tl('p.viewLog')} ) `">
+          <a-tooltip placement="topLeft" :title="text + ` ( ${$t('pages.build.list-info.b51c8bb3')} ) `">
             <span v-if="record.buildId <= 0"></span>
             <a-tag v-else color="#108ee9" @click="handleBuildLog(record)">#{{ text }}</a-tag>
           </a-tooltip>
@@ -382,11 +395,11 @@
               type="primary"
               danger
               @click="handleStopBuild(record)"
-              >{{ $tl('c.stop') }}
+              >{{ $t('pages.build.list-info.d9418498') }}
             </a-button>
             <a-dropdown v-else>
               <a-button size="small" type="primary" @click="handleConfirmStartBuild(record)"
-                >{{ $tl('c.build') }}<DownOutlined
+                >{{ $t('pages.build.list-info.6116e886') }}<DownOutlined
               /></a-button>
               <template #overlay>
                 <a-menu>
@@ -395,7 +408,7 @@
                       size="small"
                       type="primary"
                       @click="reqStartBuild({ id: record.id, buildEnvParameter: record.buildEnvParameter }, true)"
-                      >{{ $tl('c.directBuild') }}</a-button
+                      >{{ $t('pages.build.list-info.56424415') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item key="2">
@@ -403,43 +416,47 @@
                       size="small"
                       type="primary"
                       @click="reqStartBuild({ id: record.id, buildEnvParameter: record.buildEnvParameter }, false)"
-                      >{{ $tl('c.backgroundBuild') }}</a-button
+                      >{{ $t('pages.build.list-info.d128c3f3') }}</a-button
                     >
                   </a-menu-item>
                 </a-menu>
               </template>
             </a-dropdown>
             <a-dropdown>
-              <a-button size="small" type="primary" @click="handleEdit(record, 1)">{{ $tl('c.edit') }}</a-button>
+              <a-button size="small" type="primary" @click="handleEdit(record, 1)">{{
+                $t('pages.build.list-info.e1224c34')
+              }}</a-button>
               <template #overlay>
                 <a-menu>
                   <a-menu-item @click="handleEdit(record, 0)">
-                    <a href="javascript:;">{{ $tl('c.buildMethod') }}</a>
+                    <a href="javascript:;">{{ $t('pages.build.list-info.b5dfedd9') }}</a>
                   </a-menu-item>
                   <a-menu-item @click="handleEdit(record, 1)">
-                    <a href="javascript:;">{{ $tl('c.basicInfo') }}</a>
+                    <a href="javascript:;">{{ $t('pages.build.list-info.fbe7a37d') }}</a>
                   </a-menu-item>
                   <a-menu-item @click="handleEdit(record, 2)">
-                    <a href="javascript:;">{{ $tl('c.buildProcess') }}</a>
+                    <a href="javascript:;">{{ $t('pages.build.list-info.344b9569') }}</a>
                   </a-menu-item>
                   <a-menu-item @click="handleEdit(record, 3)">
-                    <a href="javascript:;">{{ $tl('c.publishOperation') }}</a>
+                    <a href="javascript:;">{{ $t('pages.build.list-info.7be4f983') }}</a>
                   </a-menu-item>
                   <a-menu-item @click="handleEdit(record, 4)">
-                    <a href="javascript:;">{{ $tl('c.otherConfig') }}</a>
+                    <a href="javascript:;">{{ $t('pages.build.list-info.17607860') }}</a>
                   </a-menu-item>
                 </a-menu>
               </template>
             </a-dropdown>
             <a-dropdown>
               <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-                {{ $tl('p.more') }}
+                {{ $t('pages.build.list-info.6e071067') }}
                 <DownOutlined />
               </a>
               <template #overlay>
                 <a-menu>
                   <a-menu-item>
-                    <a-button size="small" type="primary" @click="copyItem(record)">{{ $tl('p.copy') }}</a-button>
+                    <a-button size="small" type="primary" @click="copyItem(record)">{{
+                      $t('pages.build.list-info.a8ef5999')
+                    }}</a-button>
                   </a-menu-item>
                   <a-menu-item>
                     <a-button
@@ -447,24 +464,24 @@
                       :disabled="!record.resultHasFile"
                       type="primary"
                       @click="handleDownloadFile(record)"
-                      >{{ $tl('p.downloadArtifact') }}</a-button
+                      >{{ $t('pages.build.list-info.44ea38fe') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
                     <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-                      $tl('c.delete')
+                      $t('pages.build.list-info.2f14e7d4')
                     }}</a-button>
                   </a-menu-item>
 
                   <a-menu-item>
-                    <a-tooltip placement="leftBottom" :title="$tl('c.clearCode')">
+                    <a-tooltip placement="leftBottom" :title="$t('pages.build.list-info.7ed8368b')">
                       <a-button
                         size="small"
                         type="primary"
                         danger
                         :disabled="!record.sourceDirExist"
                         @click="handleClear(record)"
-                        >{{ $tl('p.clearCode') }}
+                        >{{ $t('pages.build.list-info.49cc9441') }}
                       </a-button>
                     </a-tooltip>
                   </a-menu-item>
@@ -475,7 +492,7 @@
                       type="primary"
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
                       @click="sortItemHander(record, index, 'top')"
-                      >{{ $tl('p.pin') }}</a-button
+                      >{{ $t('pages.build.list-info.35d93b3e') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
@@ -484,7 +501,7 @@
                       type="primary"
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
                       @click="sortItemHander(record, index, 'up')"
-                      >{{ $tl('p.moveUp') }}</a-button
+                      >{{ $t('pages.build.list-info.6e79de86') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
@@ -494,7 +511,7 @@
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total"
                       @click="sortItemHander(record, index, 'down')"
                     >
-                      {{ $tl('p.moveDown') }}
+                      {{ $t('pages.build.list-info.78c0cb41') }}
                     </a-button>
                   </a-menu-item>
                 </a-menu>
@@ -575,31 +592,31 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="40vw"
-      :title="$tl('p.buildConfirmDialog')"
+      :title="$t('pages.build.list-info.f56a79a2')"
       :mask-closable="false"
       @ok="handleStartBuild"
     >
       <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-item :label="$tl('p.name')" name="name">
+        <a-form-item :label="$t('pages.build.list-info.bb769c1d')" name="name">
           <a-input v-model:value="temp.name" read-only disabled />
         </a-form-item>
-        <a-form-item :label="$tl('p.branch')" name="branchName">
+        <a-form-item :label="$t('pages.build.list-info.5cb4b684')" name="branchName">
           <custom-select
             v-model:value="temp.branchName"
             :data="branchList"
             :disabled="temp.branchTagName ? true : false"
             :can-reload="true"
-            :input-placeholder="$tl('p.customBranchWildcard')"
-            :select-placeholder="$tl('p.selectBranch')"
+            :input-placeholder="$t('pages.build.list-info.8f70dedd')"
+            :select-placeholder="$t('pages.build.list-info.969f2846')"
             @on-refresh-select="loadBranchListById(temp.repositoryId)"
           >
             <template #inputTips>
               <div>
-                {{ $tl('c.xxx') }}(AntPathMatcher)
+                {{ $t('pages.build.list-info.bb871195') }}(AntPathMatcher)
                 <ul>
-                  <li>? {{ $tl('c.x') }}</li>
-                  <li>* {{ $tl('c.y') }}</li>
-                  <li>** {{ $tl('c.z') }}</li>
+                  <li>? {{ $t('pages.build.list-info.e0095c49') }}</li>
+                  <li>* {{ $t('pages.build.list-info.970e6cdf') }}</li>
+                  <li>** {{ $t('pages.build.list-info.e073d65') }}</li>
                 </ul>
               </div>
             </template>
@@ -607,45 +624,45 @@
         </a-form-item>
         <a-form-item
           v-if="(branchTagList && branchTagList.length) || (temp.branchTagName && temp.branchTagName.length)"
-          :label="$tl('p.tag')"
+          :label="$t('pages.build.list-info.83d5a14e')"
           name="branchTagName"
         >
           <custom-select
             v-model:value="temp.branchTagName"
             :data="branchTagList"
             :can-reload="true"
-            :input-placeholder="$tl('p.customTagWildcard')"
-            :select-placeholder="$tl('p.selectTag')"
+            :input-placeholder="$t('pages.build.list-info.b328c96c')"
+            :select-placeholder="$t('pages.build.list-info.7f712bec')"
             @on-refresh-select="loadBranchListById(temp.repositoryId)"
           >
             <template #inputTips>
               <div>
-                {{ $tl('c.xxx') }}(AntPathMatcher)
+                {{ $t('pages.build.list-info.bb871195') }}(AntPathMatcher)
                 <ul>
-                  <li>? {{ $tl('c.x') }}</li>
-                  <li>* {{ $tl('c.y') }}</li>
-                  <li>** {{ $tl('c.z') }}</li>
+                  <li>? {{ $t('pages.build.list-info.e0095c49') }}</li>
+                  <li>* {{ $t('pages.build.list-info.970e6cdf') }}</li>
+                  <li>** {{ $t('pages.build.list-info.e073d65') }}</li>
                 </ul>
               </div>
             </template>
           </custom-select>
         </a-form-item>
-        <a-form-item name="resultDirFile" :label="$tl('c.artifactCatalog')">
-          <a-input v-model:value="temp.resultDirFile" :placeholder="$tl('p.notUpdate')" />
+        <a-form-item name="resultDirFile" :label="$t('pages.build.list-info.63121c12')">
+          <a-input v-model:value="temp.resultDirFile" :placeholder="$t('pages.build.list-info.6f375d88')" />
         </a-form-item>
-        <a-form-item name="checkRepositoryDiff" :label="$tl('p.diffBuild')" help="">
+        <a-form-item name="checkRepositoryDiff" :label="$t('pages.build.list-info.8692041e')" help="">
           <a-space>
             <a-switch
               v-model:checked="temp.checkRepositoryDiff"
-              :checked-children="$tl('p.yes')"
-              :un-checked-children="$tl('p.no')"
+              :checked-children="$t('pages.build.list-info.f5bb2364')"
+              :un-checked-children="$t('pages.build.list-info.5edb2e8a')"
             />
             <span>
               <a-tooltip>
-                <template #title> {{ $tl('p.diffBuildDescription') }} </template>
+                <template #title> {{ $t('pages.build.list-info.6f2466a3') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
-              {{ $tl('p.onlyThisTime') }}
+              {{ $t('pages.build.list-info.abad81a4') }}
             </span>
           </a-space>
         </a-form-item>
@@ -653,35 +670,43 @@
         <a-form-item
           v-if="temp.releaseMethod === 1 || temp.releaseMethod === 2"
           name="projectSecondaryDirectory"
-          :label="$tl('p.subDirectory')"
+          :label="$t('pages.build.list-info.597f26e8')"
         >
-          <a-input v-model:value="temp.projectSecondaryDirectory" :placeholder="$tl('p.notFillRoot')" />
+          <a-input v-model:value="temp.projectSecondaryDirectory" :placeholder="$t('pages.build.list-info.8e2b5cb2')" />
         </a-form-item>
-        <a-form-item :label="$tl('p.envVariable')" name="buildEnvParameter" :help="$tl('p.saveToCurrentBuild')">
+        <a-form-item
+          :label="$t('pages.build.list-info.798dbcb4')"
+          name="buildEnvParameter"
+          :help="$t('pages.build.list-info.c23ac61d')"
+        >
           <a-textarea
             v-model:value="temp.buildEnvParameter"
-            :placeholder="$tl('p.buildEnvVariable')"
+            :placeholder="$t('pages.build.list-info.6cc91892')"
             :auto-size="{ minRows: 3, maxRows: 5 }"
           />
         </a-form-item>
-        <a-form-item :label="$tl('p.buildNote')" name="buildRemark" :help="$tl('p.onlyThisBuild')">
+        <a-form-item
+          :label="$t('pages.build.list-info.11757b06')"
+          name="buildRemark"
+          :help="$t('pages.build.list-info.6a69192c')"
+        >
           <a-textarea
             v-model:value="temp.buildRemark"
             :max-length="240"
-            :placeholder="$tl('p.inputNote')"
+            :placeholder="$t('pages.build.list-info.48ed56a')"
             :auto-size="{ minRows: 2, maxRows: 5 }"
           />
         </a-form-item>
         <a-form-item
           v-if="dispatchProjectList && dispatchProjectList.length"
           name="selectProject"
-          :label="$tl('p.filterProject')"
-          :help="$tl('p.filterEffect')"
+          :label="$t('pages.build.list-info.ec12e21e')"
+          :help="$t('pages.build.list-info.1bdcc00f')"
         >
           <a-select
             v-model:value="temp.dispatchSelectProjectArray"
             mode="multiple"
-            :placeholder="$tl('p.selectProject')"
+            :placeholder="$t('pages.build.list-info.3d29208d')"
           >
             <a-select-option
               v-for="item in dispatchProjectList"
@@ -776,28 +801,28 @@ export default {
       buildConfirmVisible: false,
       columns: [
         {
-          title: this.$tl('p.name'),
+          title: this.$t('pages.build.list-info.bb769c1d'),
           dataIndex: 'name',
           sorter: true,
           width: 200,
           ellipsis: true
         },
         {
-          title: this.$tl('c.group'),
+          title: this.$t('pages.build.list-info.b1765e98'),
           dataIndex: 'group',
           width: 100,
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$tl('p.branchTag'),
+          title: this.$t('pages.build.list-info.a36b3cc8'),
           dataIndex: 'branchName',
           ellipsis: true,
           width: 100
         },
 
         {
-          title: this.$tl('p.method'),
+          title: this.$t('pages.build.list-info.b96b97fb'),
           dataIndex: 'buildMode',
           align: 'center',
           width: '80px',
@@ -805,14 +830,14 @@ export default {
           ellipsis: true
         },
         {
-          title: this.$tl('c.status'),
+          title: this.$t('pages.build.list-info.6e06fe4f'),
           dataIndex: 'status',
           align: 'center',
           width: '100px',
           ellipsis: true
         },
         {
-          title: this.$tl('p.buildId'),
+          title: this.$t('pages.build.list-info.7cf809d7'),
           dataIndex: 'buildId',
           width: '90px',
           ellipsis: true,
@@ -820,27 +845,27 @@ export default {
         },
 
         {
-          title: this.$tl('c.publishMethod'),
+          title: this.$t('pages.build.list-info.c5607db9'),
           dataIndex: 'releaseMethod',
           width: '100px',
           ellipsis: true
         },
         {
-          title: this.$tl('p.artifact'),
+          title: this.$t('pages.build.list-info.72370b9a'),
           dataIndex: 'resultDirFile',
           width: 100,
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$tl('p.timingBuild'),
+          title: this.$t('pages.build.list-info.313ac3d0'),
           dataIndex: 'autoBuildCron',
           width: 100,
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$tl('p.modifier'),
+          title: this.$t('pages.build.list-info.916db24b'),
           dataIndex: 'modifyUser',
           width: '130px',
           ellipsis: true,
@@ -848,7 +873,7 @@ export default {
         },
 
         {
-          title: this.$tl('p.createTime'),
+          title: this.$t('pages.build.list-info.f5b90169'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -856,20 +881,20 @@ export default {
           width: '160px'
         },
         {
-          title: this.$tl('p.modifyTime'),
+          title: this.$t('pages.build.list-info.a2b40316'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           customRender: ({ text }) => parseTime(text),
           width: '160px'
         },
         {
-          title: this.$tl('p.sortValue'),
+          title: this.$t('pages.build.list-info.f5049383'),
           dataIndex: 'sortValue',
           sorter: true,
           width: '80px'
         },
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.build.list-info.3bb962bf'),
           dataIndex: 'operation',
           width: '200px',
 
@@ -980,7 +1005,7 @@ export default {
       const temp = Object.assign({}, record)
       delete temp.id
       delete temp.triggerToken
-      temp.name = temp.name + this.$tl('p.duplicate')
+      temp.name = temp.name + this.$t('pages.build.list-info.307f45c9')
       this.temp = temp
       this.editBuildVisible = 2
       this.editSteps = 1
@@ -1013,11 +1038,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$tl('c.alert'),
+        title: this.$t('pages.build.list-info.cb4b5c9c'),
         zIndex: 1009,
-        content: this.$tl('p.deleteConfirm'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.build.list-info.2c8deda8'),
+        okText: this.$t('pages.build.list-info.7da4a591'),
+        cancelText: this.$t('pages.build.list-info.43105e21'),
         onOk: () => {
           // 删除
           return deleteBuild(record.id).then((res) => {
@@ -1035,16 +1060,16 @@ export default {
     handleBatchDelete() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
         $notification.warning({
-          message: this.$tl('c.noData')
+          message: this.$t('pages.build.list-info.a1dd3707')
         })
         return
       }
       $confirm({
-        title: this.$tl('c.alert'),
+        title: this.$t('pages.build.list-info.cb4b5c9c'),
         zIndex: 1009,
-        content: this.$tl('p.batchDeleteConfirm'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.build.list-info.cba18cfc'),
+        okText: this.$t('pages.build.list-info.7da4a591'),
+        cancelText: this.$t('pages.build.list-info.43105e21'),
         onOk: () => {
           // 删除
           return deleteatchBuild({ ids: this.tableSelections.join(',') }).then((res) => {
@@ -1061,11 +1086,11 @@ export default {
     // 清除构建
     handleClear(record) {
       $confirm({
-        title: this.$tl('c.alert'),
+        title: this.$t('pages.build.list-info.cb4b5c9c'),
         zIndex: 1009,
-        content: this.$tl('p.clearConfirm'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.build.list-info.38efbe58'),
+        okText: this.$t('pages.build.list-info.7da4a591'),
+        cancelText: this.$t('pages.build.list-info.43105e21'),
         onOk: () => {
           return clearBuid(record.id).then((res) => {
             if (res.code === 200) {
@@ -1160,12 +1185,12 @@ export default {
     // 停止构建
     handleStopBuild(record) {
       $confirm({
-        title: this.$tl('c.alert'),
+        title: this.$t('pages.build.list-info.cb4b5c9c'),
         zIndex: 1009,
         // TODO 后续抽优化
-        content: this.$tl('p.cancelConfirm') + record.name + this.$tl('p.cancelConfirmEnd'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.build.list-info.a37e5410') + record.name + this.$t('pages.build.list-info.4dfd12e9'),
+        okText: this.$t('pages.build.list-info.7da4a591'),
+        cancelText: this.$t('pages.build.list-info.43105e21'),
         onOk: () => {
           this.temp = Object.assign({}, record)
           return stopBuild(this.temp.id).then((res) => {
@@ -1195,22 +1220,22 @@ export default {
     // 排序
     sortItemHander(record, index, method) {
       const msgData = {
-        top: this.$tl('p.pinConfirm'),
-        up: this.$tl('p.moveUpConfirm'),
-        down: this.$tl('p.moveDownConfirm')
+        top: this.$t('pages.build.list-info.959fa602'),
+        up: this.$t('pages.build.list-info.aca73ac1'),
+        down: this.$t('pages.build.list-info.9ea36aca')
       }
-      let msg = msgData[method] || this.$tl('p.confirmOperation')
+      let msg = msgData[method] || this.$t('pages.build.list-info.644ef343')
       if (!record.sortValue) {
-        msg += this.$tl('p.currentDataIsDefault')
+        msg += this.$t('pages.build.list-info.fd3f32c7')
       }
       // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
       const compareId = this.list[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id
       $confirm({
-        title: this.$tl('c.alert'),
+        title: this.$t('pages.build.list-info.cb4b5c9c'),
         zIndex: 1009,
         content: msg,
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        okText: this.$t('pages.build.list-info.7da4a591'),
+        cancelText: this.$t('pages.build.list-info.43105e21'),
         onOk: () => {
           return sortItem({
             id: record.id,
@@ -1236,16 +1261,16 @@ export default {
     batchBuild() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
         $notification.warning({
-          message: this.$tl('c.noData')
+          message: this.$t('pages.build.list-info.a1dd3707')
         })
         return
       }
       $confirm({
-        title: this.$tl('c.alert'),
+        title: this.$t('pages.build.list-info.cb4b5c9c'),
         zIndex: 1009,
-        content: this.$tl('p.batchBuildConfirm'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.build.list-info.b31a6402'),
+        okText: this.$t('pages.build.list-info.7da4a591'),
+        cancelText: this.$t('pages.build.list-info.43105e21'),
         onOk: () => {
           this.tableSelections.forEach((item) => {
             startBuild({
@@ -1265,16 +1290,16 @@ export default {
     batchCancel() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
         $notification.warning({
-          message: this.$tl('c.noData')
+          message: this.$t('pages.build.list-info.a1dd3707')
         })
         return
       }
       $confirm({
-        title: this.$tl('c.alert'),
+        title: this.$t('pages.build.list-info.cb4b5c9c'),
         zIndex: 1009,
-        content: this.$tl('p.batchCancelConfirm'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.build.list-info.44523544'),
+        okText: this.$t('pages.build.list-info.7da4a591'),
+        cancelText: this.$t('pages.build.list-info.43105e21'),
         onOk: () => {
           this.tableSelections.forEach((item) => {
             stopBuild(item).then((res) => {
@@ -1308,7 +1333,7 @@ export default {
     handerConfirm() {
       if (!this.tableSelections.length) {
         $notification.warning({
-          message: this.$tl('c.selectBuild')
+          message: this.$t('pages.build.list-info.afb1ec30')
         })
         return
       }
@@ -1317,7 +1342,7 @@ export default {
       })
       if (!selectData.length) {
         $notification.warning({
-          message: this.$tl('c.selectBuild')
+          message: this.$t('pages.build.list-info.afb1ec30')
         })
         return
       }

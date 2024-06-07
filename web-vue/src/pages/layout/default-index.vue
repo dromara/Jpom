@@ -3,7 +3,7 @@
     <a-layout-sider v-model:collapsed="collapsed" :theme="menuTheme" :trigger="null" collapsible>
       <a-layout-sider v-model:collapsed="collapsed" class="sider" :theme="menuTheme" :trigger="null" collapsible>
         <div class="sider-content">
-          <a-tooltip placement="right" :title="$tl('projectMaintenance.clickToCollapseLeftMenu')">
+          <a-tooltip placement="right" :title="$t('pages.layout.default-index.f29dfeb9')">
             <div
               class="logo"
               :style="`color:${menuTheme === 'light' && theme === 'light' ? '#000' : '#fff'}`"
@@ -80,10 +80,9 @@ import { checkSystem, loadingLogo } from '@/api/install'
 import defaultLogo from '@/assets/images/jpom.svg'
 import { useAllMenuStore } from '@/stores/menu2'
 import { UserNotificationType, systemNotification } from '@/api/user/user-notification'
-import { useI18nPage } from '@/i18n/hooks/useI18nPage'
 // import { SpaceSize } from 'ant-design-vue/es/space'
-
-const { $tl } = useI18nPage('pages.layout.defaultIndex')
+import { useI18n } from 'vue-i18n'
+const { t: $t } = useI18n()
 defineProps({
   mode: {
     type: String,
@@ -141,7 +140,7 @@ watch(
 )
 
 const collapsed = ref(false)
-const subTitle = ref($tl('projectMaintenance.projectOperation'))
+const subTitle = ref($t('pages.layout.default-index.cf628a26'))
 const logoUrl = ref('')
 
 const _appStore = appStore()

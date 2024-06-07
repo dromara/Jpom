@@ -1,29 +1,37 @@
 <template>
   <div>
     <a-form :model="temp" :label-col="{ span: 2 }" :wrapper-col="{ span: 20 }">
-      <a-form-item :label="$tl('p.taskName')" name="name">
-        <a-input :placeholder="$tl('c.taskName')" :disabled="true" :value="temp.taskData && temp.taskData.name" />
+      <a-form-item :label="$t('pages.file-manager.release-task.details.e62a5bf3')" name="name">
+        <a-input
+          :placeholder="$t('pages.file-manager.release-task.details.2ab36118')"
+          :disabled="true"
+          :value="temp.taskData && temp.taskData.name"
+        />
       </a-form-item>
 
-      <a-form-item :label="$tl('p.publishMethod')" name="taskType">
+      <a-form-item :label="$t('pages.file-manager.release-task.details.907f888f')" name="taskType">
         <a-radio-group :value="temp.taskData && temp.taskData.taskType" :disabled="true">
           <a-radio :value="0"> SSH </a-radio>
-          <a-radio :value="1"> {{ $tl('p.node') }} </a-radio>
+          <a-radio :value="1"> {{ $t('pages.file-manager.release-task.details.602a0a5e') }} </a-radio>
         </a-radio-group>
       </a-form-item>
 
-      <a-form-item name="releasePath" :label="$tl('p.publishDir')">
+      <a-form-item name="releasePath" :label="$t('pages.file-manager.release-task.details.b6c9f9c')">
         <a-input
-          :placeholder="$tl('c.taskName')"
+          :placeholder="$t('pages.file-manager.release-task.details.2ab36118')"
           :disabled="true"
           :value="temp.taskData && temp.taskData.releasePath"
         />
       </a-form-item>
-      <a-form-item name="releasePath" :label="$tl('p.status')" :help="temp.taskData && temp.taskData.statusMsg">
-        {{ statusMap[temp.taskData && temp.taskData.status] || $tl('p.unknown') }}
+      <a-form-item
+        name="releasePath"
+        :label="$t('pages.file-manager.release-task.details.9c32c887')"
+        :help="temp.taskData && temp.taskData.statusMsg"
+      >
+        {{ statusMap[temp.taskData && temp.taskData.status] || $t('pages.file-manager.release-task.details.ca1cdfa6') }}
       </a-form-item>
 
-      <a-form-item :label="$tl('p.executionLog')">
+      <a-form-item :label="$t('pages.file-manager.release-task.details.8fb8f5f9')">
         <a-tabs :active-key="activeKey" @change="tabCallback">
           <a-tab-pane v-for="item in temp.taskList" :key="item.id">
             <template #tab>
@@ -54,9 +62,9 @@
           </a-tab-pane>
         </a-tabs>
       </a-form-item>
-      <a-form-item :label="$tl('p.executionScript')" name="releaseBeforeCommand">
+      <a-form-item :label="$t('pages.file-manager.release-task.details.86c3791a')" name="releaseBeforeCommand">
         <a-tabs tab-position="right">
-          <a-tab-pane key="before" :tab="$tl('p.beforeUpload')">
+          <a-tab-pane key="before" :tab="$t('pages.file-manager.release-task.details.5eadc84d')">
             <code-editor
               height="40vh"
               :content="temp.taskData && temp.taskData.beforeScript"
@@ -66,7 +74,7 @@
               }"
             ></code-editor>
           </a-tab-pane>
-          <a-tab-pane key="after" :tab="$tl('p.afterUpload')">
+          <a-tab-pane key="after" :tab="$t('pages.file-manager.release-task.details.e643b0a1')">
             <code-editor
               height="40vh"
               :content="temp.taskData && temp.taskData.afterScript"

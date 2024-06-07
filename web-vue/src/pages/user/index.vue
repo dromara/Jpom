@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="systemUserList"
-      :empty-description="$tl('p.noUser')"
+      :empty-description="$t('pages.user.index.738924e5')"
       :loading="loading"
       :data-source="list"
       :columns="columns"
@@ -24,29 +24,35 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery.id"
-            :placeholder="$tl('p.userId')"
+            :placeholder="$t('pages.user.index.8384e057')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$tl('p.username')"
+            :placeholder="$t('pages.user.index.c28c6dc1')"
             class="search-input-item"
             @press-enter="loadData"
           />
-          <a-tooltip :title="$tl('p.firstPageTip')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
+          <a-tooltip :title="$t('pages.user.index.c52a67d7')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{
+              $t('pages.user.index.53c2763c')
+            }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">{{ $tl('p.add') }}</a-button>
-          <a-button type="primary" @click="systemNotificationOpen = true">{{ $tl('p.publishNotice') }}</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $t('pages.user.index.7d46652a') }}</a-button>
+          <a-button type="primary" @click="systemNotificationOpen = true">{{
+            $t('pages.user.index.862bf72d')
+          }}</a-button>
         </a-space>
       </template>
       <template #tableBodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('p.edit') }}</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{
+              $t('pages.user.index.64603c01')
+            }}</a-button>
             <a-dropdown>
-              <a @click="(e) => e.preventDefault()"> {{ $tl('p.more') }} <DownOutlined /> </a>
+              <a @click="(e) => e.preventDefault()"> {{ $t('pages.user.index.6e071067') }} <DownOutlined /> </a>
               <template #overlay>
                 <a-menu>
                   <a-menu-item>
@@ -56,7 +62,7 @@
                       size="small"
                       :disabled="record.parent === 'sys'"
                       @click="handleDelete(record)"
-                      >{{ $tl('p.delete') }}</a-button
+                      >{{ $t('pages.user.index.dd20d11c') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
@@ -66,7 +72,7 @@
                       size="small"
                       :disabled="record.pwdErrorCount === 0"
                       @click="handleUnlock(record)"
-                      >{{ $tl('p.unlock') }}</a-button
+                      >{{ $t('pages.user.index.8dd61d74') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
@@ -76,7 +82,7 @@
                       size="small"
                       :disabled="record.parent === 'sys'"
                       @click="restUserPwdHander(record)"
-                      >{{ $tl('p.resetPassword') }}</a-button
+                      >{{ $t('pages.user.index.e9feb431') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
@@ -86,7 +92,7 @@
                       size="small"
                       :disabled="record.twoFactorAuthKey ? false : true"
                       @click="handleCloseMfa(record)"
-                      >{{ $tl('p.closeMfa') }}</a-button
+                      >{{ $t('pages.user.index.77fa96cb') }}</a-button
                     >
                   </a-menu-item>
                 </a-menu>
@@ -97,8 +103,8 @@
         <template v-else-if="column.dataIndex === 'systemUser'">
           <a-switch
             size="small"
-            :checked-children="$tl('c.isEnable')"
-            :un-checked-children="$tl('c.isDisable')"
+            :checked-children="$t('pages.user.index.c48393b5')"
+            :un-checked-children="$t('pages.user.index.3cae7889')"
             disabled
             :checked="record.systemUser == 1"
           />
@@ -106,8 +112,8 @@
         <template v-else-if="column.dataIndex === 'status'">
           <a-switch
             size="small"
-            :checked-children="$tl('c.enable')"
-            :un-checked-children="$tl('c.disable')"
+            :checked-children="$t('pages.user.index.e6a65361')"
+            :un-checked-children="$t('pages.user.index.bd324b84')"
             disabled
             :checked="record.status != 0"
           />
@@ -116,8 +122,8 @@
         <template v-else-if="column.dataIndex === 'twoFactorAuthKey'">
           <a-switch
             size="small"
-            :checked-children="$tl('p.on')"
-            :un-checked-children="$tl('p.off')"
+            :checked-children="$t('pages.user.index.30c72f5d')"
+            :un-checked-children="$t('pages.user.index.abe04b8e')"
             disabled
             :checked="record.twoFactorAuthKey ? true : false"
           />
@@ -142,49 +148,49 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="60vw"
-      :title="$tl('p.editUser')"
+      :title="$t('pages.user.index.974ecc00')"
       :mask-closable="false"
       @ok="handleEditUserOk"
     >
       <a-alert
         v-if="!permissionGroup || !permissionGroup.length"
-        :message="$tl('p.remind')"
+        :message="$t('pages.user.index.7e2364d6')"
         type="warning"
         show-icon
         style="margin-bottom: 10px"
       >
-        <template #description>{{ $tl('p.noPermissionGroup') }}</template>
+        <template #description>{{ $t('pages.user.index.9c3b3ac6') }}</template>
       </a-alert>
       <a-form ref="editUserForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$tl('p.loginName')" name="id">
+        <a-form-item :label="$t('pages.user.index.ef10fb2a')" name="id">
           <a-input
             v-model:value="temp.id"
             :max-length="50"
-            :placeholder="$tl('p.loginNameTip')"
+            :placeholder="$t('pages.user.index.afeb1567')"
             :disabled="createOption == false"
             @change="checkTipUserName"
           />
         </a-form-item>
 
-        <a-form-item :label="$tl('c.nickname')" name="name">
-          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$tl('c.nickname')" />
+        <a-form-item :label="$t('pages.user.index.57c3af39')" name="name">
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('pages.user.index.57c3af39')" />
         </a-form-item>
         <a-form-item name="systemUser">
           <template #label>
             <a-tooltip>
-              {{ $tl('c.admin') }}
-              <template #title> {{ $tl('c.adminDescription') }} </template>
+              {{ $t('pages.user.index.54b8172b') }}
+              <template #title> {{ $t('pages.user.index.a967c24a') }} </template>
               <QuestionCircleOutlined v-if="createOption" />
             </a-tooltip>
           </template>
           <a-row>
             <a-col :span="4">
-              <a-tooltip :title="$tl('c.adminDescription')">
+              <a-tooltip :title="$t('pages.user.index.a967c24a')">
                 <a-switch
                   :checked="temp.systemUser == 1"
                   :disabled="temp.parent === 'sys'"
-                  :checked-children="$tl('c.isEnable')"
-                  :un-checked-children="$tl('c.isDisable')"
+                  :checked-children="$t('pages.user.index.c48393b5')"
+                  :un-checked-children="$t('pages.user.index.3cae7889')"
                   default-checked
                   @change="
                     (checked) => {
@@ -196,9 +202,9 @@
             </a-col>
             <a-col :span="4" style="text-align: right">
               <a-tooltip>
-                <template #title> {{ $tl('p.disableUserTip') }} </template>
+                <template #title> {{ $t('pages.user.index.9c8c1216') }} </template>
                 <QuestionCircleOutlined v-if="createOption" />
-                {{ $tl('p.statusLabel') }}
+                {{ $t('pages.user.index.8542216f') }}
               </a-tooltip>
             </a-col>
             <a-col :span="4">
@@ -206,8 +212,8 @@
                 <a-switch
                   :checked="temp.status != 0"
                   :disabled="temp.parent === 'sys'"
-                  :checked-children="$tl('c.enable')"
-                  :un-checked-children="$tl('c.disable')"
+                  :checked-children="$t('pages.user.index.e6a65361')"
+                  :un-checked-children="$t('pages.user.index.bd324b84')"
                   default-checked
                   @change="
                     (checked) => {
@@ -219,7 +225,7 @@
             </a-col>
           </a-row>
         </a-form-item>
-        <a-form-item :label="$tl('p.permissionGroup')" name="permissionGroup">
+        <a-form-item :label="$t('pages.user.index.eddf3185')" name="permissionGroup">
           <a-select
             v-model:value="temp.permissionGroup"
             show-search
@@ -233,7 +239,7 @@
                 )
               }
             "
-            :placeholder="$tl('p.selectPermissionGroup')"
+            :placeholder="$t('pages.user.index.3c2dec3c')"
             mode="multiple"
           >
             <a-select-option v-for="item in permissionGroup" :key="item.id">
@@ -246,22 +252,22 @@
     <a-modal
       v-model:open="showUserPwd"
       destroy-on-close
-      :title="$tl('p.passwordTip')"
+      :title="$t('pages.user.index.7c2c151')"
       :mask-closable="false"
       :footer="null"
     >
       <a-result status="success" :title="temp.title">
         <template #subTitle>
           <div>
-            {{ $tl('p.newPassword') }}
+            {{ $t('pages.user.index.4cb8151c') }}
             <a-typography-paragraph :copyable="{ tooltip: false, text: temp.randomPwd }">
               <b style="color: red; font-size: 20px">
                 {{ temp.randomPwd }}
               </b>
             </a-typography-paragraph>
-            {{ $tl('p.informUser') }}
+            {{ $t('pages.user.index.72f1baab') }}
           </div>
-          <div style="color: red">{{ $tl('p.passwordViewTip') }}</div>
+          <div style="color: red">{{ $t('pages.user.index.e3c8dd83') }}</div>
         </template>
       </a-result>
     </a-modal>
@@ -269,7 +275,7 @@
     <a-modal
       v-model:open="systemNotificationOpen"
       destroy-on-close
-      :title="$tl('p.configNotice')"
+      :title="$t('pages.user.index.712db580')"
       :mask-closable="false"
       width="50vw"
       :footer="null"
@@ -305,23 +311,23 @@ export default {
           ellipsis: true,
           width: 100
         },
-        { title: this.$tl('c.nickname'), dataIndex: 'name', ellipsis: true, width: 100 },
+        { title: this.$t('pages.user.index.57c3af39'), dataIndex: 'name', ellipsis: true, width: 100 },
         {
-          title: this.$tl('c.admin'),
+          title: this.$t('pages.user.index.54b8172b'),
           dataIndex: 'systemUser',
           align: 'center',
           ellipsis: true,
           width: 90
         },
         {
-          title: this.$tl('p.status'),
+          title: this.$t('pages.user.index.9c32c887'),
           dataIndex: 'status',
           align: 'center',
           ellipsis: true,
           width: 90
         },
         {
-          title: this.$tl('p.twoStepVerification'),
+          title: this.$t('pages.user.index.80647404'),
           dataIndex: 'twoFactorAuthKey',
           align: 'center',
           ellipsis: true,
@@ -329,27 +335,27 @@ export default {
         },
 
         {
-          title: this.$tl('p.email'),
+          title: this.$t('pages.user.index.6d12e07a'),
           dataIndex: 'email',
           ellipsis: true,
           width: 100
         },
         {
-          title: this.$tl('p.source'),
+          title: this.$t('pages.user.index.b8b8d2e8'),
           dataIndex: 'source',
           ellipsis: true,
           width: 90
         },
         {
-          title: this.$tl('p.loginFail'),
+          title: this.$t('pages.user.index.3714ae65'),
           dataIndex: 'pwdErrorCount',
           ellipsis: true,
           width: 90
         },
-        { title: this.$tl('p.creator'), dataIndex: 'parent', ellipsis: true, width: 150 },
+        { title: this.$t('pages.user.index.db3c9202'), dataIndex: 'parent', ellipsis: true, width: 150 },
 
         {
-          title: this.$tl('p.modifyTime'),
+          title: this.$t('pages.user.index.a2b40316'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -359,7 +365,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$tl('p.createTime'),
+          title: this.$t('pages.user.index.f5b90169'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text, record }) => {
@@ -368,7 +374,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.user.index.3bb962bf'),
           align: 'center',
           dataIndex: 'operation',
           fixed: 'right',
@@ -377,9 +383,9 @@ export default {
       ],
       // 表单校验规则
       rules: {
-        id: [{ required: true, message: this.$tl('p.fillAccount'), trigger: 'blur' }],
-        name: [{ required: true, message: this.$tl('p.fillNickname'), trigger: 'blur' }],
-        permissionGroup: [{ required: true, message: this.$tl('p.selectPermission'), trigger: 'blur' }]
+        id: [{ required: true, message: this.$t('pages.user.index.c3e73623'), trigger: 'blur' }],
+        name: [{ required: true, message: this.$t('pages.user.index.d2ea3987'), trigger: 'blur' }],
+        permissionGroup: [{ required: true, message: this.$t('pages.user.index.aebe7c26'), trigger: 'blur' }]
       },
       showUserPwd: false,
       confirmLoading: false,
@@ -434,7 +440,7 @@ export default {
         }
         if (!this.permissionGroup || this.permissionGroup.length <= 0)
           $notification.warn({
-            message: this.$tl('p.noPermissionCreateUser')
+            message: this.$t('pages.user.index.73725eb')
           })
       })
     },
@@ -466,7 +472,7 @@ export default {
             if (res.code === 200) {
               if (paramsTemp.type === 'add') {
                 this.temp = {
-                  title: this.$tl('p.accountAdded'),
+                  title: this.$t('pages.user.index.d25103f6'),
                   randomPwd: res.data.randomPwd
                 }
 
@@ -489,11 +495,11 @@ export default {
     // 删除用户
     handleDelete(record) {
       $confirm({
-        title: this.$tl('c.systemTip'),
-        content: this.$tl('p.confirmDeleteUser'),
+        title: this.$t('pages.user.index.d3367221'),
+        content: this.$t('pages.user.index.62970d3a'),
         zIndex: 1009,
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        okText: this.$t('pages.user.index.7da4a591'),
+        cancelText: this.$t('pages.user.index.43105e21'),
         onOk: () => {
           return deleteUser(record.id).then((res) => {
             if (res.code === 200) {
@@ -509,11 +515,11 @@ export default {
     // 解锁
     handleUnlock(record) {
       $confirm({
-        title: this.$tl('c.systemTip'),
-        content: this.$tl('p.confirmUnlockUser'),
+        title: this.$t('pages.user.index.d3367221'),
+        content: this.$t('pages.user.index.2d3daa3d'),
         zIndex: 1009,
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        okText: this.$t('pages.user.index.7da4a591'),
+        cancelText: this.$t('pages.user.index.43105e21'),
         onOk: () => {
           return unlockUser(record.id).then((res) => {
             if (res.code === 200) {
@@ -529,11 +535,11 @@ export default {
     //
     handleCloseMfa(record) {
       $confirm({
-        title: this.$tl('c.systemTip'),
-        content: this.$tl('p.confirmCloseMfa'),
+        title: this.$t('pages.user.index.d3367221'),
+        content: this.$t('pages.user.index.85e362f2'),
         zIndex: 1009,
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        okText: this.$t('pages.user.index.7da4a591'),
+        cancelText: this.$t('pages.user.index.43105e21'),
         onOk: () => {
           return closeUserMfa(record.id).then((res) => {
             if (res.code === 200) {
@@ -555,11 +561,11 @@ export default {
     checkTipUserName() {
       if (this.temp?.id === 'demo') {
         $confirm({
-          title: this.$tl('c.systemTip'),
+          title: this.$t('pages.user.index.d3367221'),
           zIndex: 1009,
-          content: `demo ${this.$tl('p.demoAccountTip')},${this.$tl('p.demoAccountLimit')}`,
-          okText: this.$tl('c.confirm'),
-          cancelText: this.$tl('c.cancel'),
+          content: `demo ${this.$t('pages.user.index.8424b740')},${this.$t('pages.user.index.439c765a')}`,
+          okText: this.$t('pages.user.index.7da4a591'),
+          cancelText: this.$t('pages.user.index.43105e21'),
 
           onCancel: () => {
             this.temp.id = ''
@@ -570,16 +576,16 @@ export default {
     //
     restUserPwdHander(record) {
       $confirm({
-        title: this.$tl('c.systemTip'),
+        title: this.$t('pages.user.index.d3367221'),
         zIndex: 1009,
-        content: this.$tl('p.confirmResetPassword'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.user.index.79b6f4f6'),
+        okText: this.$t('pages.user.index.7da4a591'),
+        cancelText: this.$t('pages.user.index.43105e21'),
         onOk: () => {
           return restUserPwd(record.id).then((res) => {
             if (res.code === 200) {
               this.temp = {
-                title: this.$tl('p.passwordResetSuccess'),
+                title: this.$t('pages.user.index.7e8456dd'),
                 randomPwd: res.data.randomPwd
               }
               this.showUserPwd = true

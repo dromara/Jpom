@@ -2,7 +2,7 @@
   <div>
     <log-view
       :ref="`logView`"
-      :title-name="$tl('p.scriptLog')"
+      :title-name="$t('pages.script.script-log-view.52cb3797')"
       :visible="visible"
       @close="
         () => {

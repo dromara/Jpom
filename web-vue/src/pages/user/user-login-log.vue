@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="systemUserLoginLog"
-      :empty-description="$tl('p.noLoginLogs')"
+      :empty-description="$t('pages.user.user-login-log.61b2c18c')"
       :loading="loading"
       :data-source="list"
       :columns="columns"
@@ -24,19 +24,19 @@
         <a-space>
           <a-input
             v-model:value="listQuery['%modifyUser%']"
-            :placeholder="$tl('p.username')"
+            :placeholder="$t('pages.user.user-login-log.c28c6dc1')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%username%']"
-            :placeholder="$tl('p.nickname')"
+            :placeholder="$t('pages.user.user-login-log.9b5a95d2')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%ip%']"
-            :placeholder="$tl('p.loginIp')"
+            :placeholder="$t('pages.user.user-login-log.11294c8f')"
             class="search-input-item"
             @press-enter="loadData"
           />
@@ -47,8 +47,10 @@
             format="YYYY-MM-DD HH:mm:ss"
             @change="onChangeTime"
           />
-          <a-tooltip :title="$tl('p.goToFirstPage')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
+          <a-tooltip :title="$t('pages.user.user-login-log.1bfed54a')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{
+              $t('pages.user.user-login-log.53c2763c')
+            }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -58,16 +60,18 @@
         </template>
 
         <template v-if="column.dataIndex === 'success'">
-          <a-tag v-if="text" color="green">{{ $tl('p.success') }}</a-tag>
-          <a-tag v-else color="pink">{{ $tl('p.failure') }}</a-tag>
+          <a-tag v-if="text" color="green">{{ $t('pages.user.user-login-log.83aa7d3') }}</a-tag>
+          <a-tag v-else color="pink">{{ $t('pages.user.user-login-log.46a17ba0') }}</a-tag>
         </template>
 
         <template v-if="column.dataIndex === 'useMfa'">
-          <a-tag>{{ text ? $tl('p.used') : $tl('p.unused') }}</a-tag>
+          <a-tag>{{
+            text ? $t('pages.user.user-login-log.9c128103') : $t('pages.user.user-login-log.731ee562')
+          }}</a-tag>
         </template>
 
         <template v-if="column.dataIndex === 'operateCode'">
-          {{ operateCodeMap[text] || $tl('p.unknown') }}
+          {{ operateCodeMap[text] || $t('pages.user.user-login-log.ca1cdfa6') }}
         </template>
       </template>
     </CustomTable>
@@ -79,8 +83,8 @@ import { IPageQuery } from '@/interface/common'
 import { CustomColumnType } from '@/components/customTable/types'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 
-import { useI18nPage } from '@/i18n/hooks/useI18nPage'
-const { $tl } = useI18nPage('pages.user.userLoginLog')
+import { useI18n } from 'vue-i18n'
+const { t: $t } = useI18n()
 
 const loading = ref(false)
 const list = ref([])
@@ -94,36 +98,36 @@ const activePage = computed(() => {
 })
 
 const columns = ref<CustomColumnType[]>([
-  { title: $tl('p.userId'), dataIndex: 'modifyUser', width: 100 },
-  { title: $tl('p.nickname'), dataIndex: 'username', width: 120 },
+  { title: $t('pages.user.user-login-log.8384e057'), dataIndex: 'modifyUser', width: 100 },
+  { title: $t('pages.user.user-login-log.9b5a95d2'), dataIndex: 'username', width: 120 },
   { title: 'IP', dataIndex: 'ip', width: 120 },
 
   {
-    title: $tl('p.isSuccess'),
+    title: $t('pages.user.user-login-log.2bff48a0'),
     dataIndex: 'success',
     width: 90,
     align: 'center'
   },
   {
-    title: $tl('p.isMfaUsed'),
+    title: $t('pages.user.user-login-log.b13cc4c9'),
     dataIndex: 'useMfa',
     align: 'center',
     width: 110
   },
   {
-    title: $tl('p.resultDescription'),
+    title: $t('pages.user.user-login-log.5f2a060b'),
     dataIndex: 'operateCode',
     ellipsis: true,
     width: 180
   },
   {
-    title: $tl('p.loginTime'),
+    title: $t('pages.user.user-login-log.dea71d69'),
     dataIndex: 'createTimeMillis',
     sorter: true,
     customRender: ({ text, record }) => parseTime(text || record.optTime),
     width: '170px'
   },
-  { title: $tl('p.browser'), dataIndex: 'userAgent', ellipsis: true, width: 100 }
+  { title: $t('pages.user.user-login-log.bd29775b'), dataIndex: 'userAgent', ellipsis: true, width: 100 }
 ])
 
 const pagination = computed(() => {
