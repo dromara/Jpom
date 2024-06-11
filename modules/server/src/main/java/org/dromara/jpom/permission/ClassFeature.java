@@ -10,6 +10,7 @@
 package org.dromara.jpom.permission;
 
 import lombok.Getter;
+import org.dromara.jpom.func.assets.server.ScriptLibraryServer;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.func.assets.server.MachineNodeServer;
 import org.dromara.jpom.func.assets.server.MachineSshServer;
@@ -95,6 +96,7 @@ public enum ClassFeature {
     SYSTEM_ASSETS_MACHINE("机器资产管理", MachineNodeServer.class),
     SYSTEM_ASSETS_MACHINE_SSH("SSH资产管理", MachineSshServer.class),
     SYSTEM_ASSETS_MACHINE_DOCKER("DOCKER资产管理", MachineDockerServer.class),
+    SYSTEM_ASSETS_GLOBAL_SCRIPT("脚本库", ScriptLibraryServer.class),
     SYSTEM_CONFIG("服务端系统配置"),
     SYSTEM_EXT_CONFIG("系统配置目录"),
     SYSTEM_CONFIG_IP("系统配置IP授权"),
