@@ -188,6 +188,11 @@ const management = [
     component: () => import('../pages/repository/global-repository.vue')
   },
   {
+    path: '/system/assets/script-library',
+    name: 'system-script-library',
+    component: () => import('../pages/system/assets/script-library.vue')
+  },
+  {
     path: '/user/permission-group',
     name: 'permission-group',
     component: () => import('../pages/user/permission-group.vue')
