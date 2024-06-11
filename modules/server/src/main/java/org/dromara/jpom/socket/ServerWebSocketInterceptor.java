@@ -280,13 +280,13 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
             return "您没有资产管理权限";
         }
         if (handlerType == HandlerType.nodeUpdate) {
-            return "您没有对应功能【" + ClassFeature.NODE_UPGRADE.getName() + "】管理权限";
+            return StrUtil.format("您没有对应功能【{}】管理权限", ClassFeature.NODE_UPGRADE.getName());
         }
         Class<?> handlerClass = handlerType.getHandlerClass();
         SystemPermission systemPermission = handlerClass.getAnnotation(SystemPermission.class);
         if (systemPermission != null) {
             if (!userInfo.isSuperSystemUser()) {
-                return "您没有对应功能【" + ClassFeature.NODE_UPGRADE.getName() + "】管理权限";
+                return StrUtil.format("您没有对应功能【{}】管理权限", ClassFeature.NODE_UPGRADE.getName());
             }
         }
         Feature feature = handlerClass.getAnnotation(Feature.class);
@@ -296,7 +296,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
         if (permissionResult.isSuccess()) {
             return StrUtil.EMPTY;
         }
-        return permissionResult.errorMsg("对应功能【" + cls.getName() + "-" + method.getName() + "】");
+        return permissionResult.errorMsg(StrUtil.format("对应功能【{}-{}】", cls.getName(), method.getName()));
     }
 
     private BaseWorkspaceModel checkData(HandlerType handlerType, UserModel userModel, HttpServletRequest httpServletRequest) {

@@ -330,7 +330,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
 //            return "消息解析失败" + e.getMessage();
 //        }
         log.error("同步节点" + dataName + "失败:" + nodeModelName, e);
-        return "同步节点" + dataName + "失败" + e.getMessage();
+        return StrUtil.format("同步节点 {} 失败 {}", dataName, e.getMessage());
     }
 
     /**

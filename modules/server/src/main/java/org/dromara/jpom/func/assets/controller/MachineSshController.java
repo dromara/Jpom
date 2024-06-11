@@ -221,7 +221,7 @@ public class MachineSshController extends BaseGroupNameController {
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<String> delete(@ValidatorItem String id) {
         long count = sshService.countByMachine(id);
-        Assert.state(count <= 0, "当前机器SSH还关联" + count + "个ssh不能删除");
+        Assert.state(count <= 0, StrUtil.format("当前机器SSH还关联{}个ssh不能删除", count));
         machineSshServer.delByKey(id);
         return JsonMessage.success("操作成功");
     }
@@ -357,7 +357,8 @@ public class MachineSshController extends BaseGroupNameController {
     @GetMapping(value = "export-data", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DOWNLOAD)
     public void exportData(HttpServletResponse response, HttpServletRequest request) throws IOException {
-        String fileName = "导出的 ssh 数据 " + DateTime.now().toString(DatePattern.NORM_DATE_FORMAT) + ".csv";
+        String prefix = "导出的 ssh 数据 ";
+        String fileName = prefix + DateTime.now().toString(DatePattern.NORM_DATE_FORMAT) + ".csv";
         this.setApplicationHeader(response, fileName);
         //
         CsvWriter writer = CsvUtil.getWriter(response.getWriter());

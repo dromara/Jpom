@@ -121,7 +121,7 @@ public abstract class BaseJpomController {
         // 准备合并
         File[] files = sliceItemPath.listFiles();
         int length = ArrayUtil.length(files);
-        Assert.state(files != null && length == totalSlice, "文件上传失败,存在分片丢失的情况, " + length + " != " + totalSlice);
+        Assert.state(files != null && length == totalSlice, StrUtil.format("文件上传失败,存在分片丢失的情况, {} != {}", length, totalSlice));
         // 文件真实名称
         String name = files[0].getName();
         name = StrUtil.subBefore(name, StrUtil.DOT, true);

@@ -142,7 +142,7 @@ public class ScriptController extends BaseServerController {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("id", scriptModel.getId());
             JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.Script_Del, jsonObject);
-            Assert.state(request.getCode() == 200, "处理 " + byKey.getName() + " 节点删除脚本失败" + request.getMsg());
+            Assert.state(request.getCode() == 200, StrUtil.format("处理 {} 节点删除脚本失败{}", byKey.getName(), request.getMsg()));
             nodeScriptServer.syncNode(byKey);
         }
     }
@@ -169,7 +169,7 @@ public class ScriptController extends BaseServerController {
             jsonObject.put("global", scriptModel.global());
             jsonObject.put("nodeId", byKey.getId());
             JsonMessage<String> jsonMessage = NodeForward.request(byKey, NodeUrl.Script_Save, jsonObject);
-            Assert.state(jsonMessage.success(), "处理 " + byKey.getName() + " 节点同步脚本失败" + jsonMessage.getMsg());
+            Assert.state(jsonMessage.success(), StrUtil.format("处理 {} 节点同步脚本失败 {}", byKey.getName(), jsonMessage.getMsg()));
             nodeScriptServer.syncNode(byKey);
         }
     }

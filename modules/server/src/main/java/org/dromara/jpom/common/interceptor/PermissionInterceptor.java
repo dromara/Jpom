@@ -111,7 +111,7 @@ public class PermissionInterceptor implements HandlerMethodInterceptor {
             String workspaceId = BaseWorkspaceService.getWorkspaceId(request);
             UserBindWorkspaceModel.PermissionResult permissionResult = userBindWorkspaceService.checkPermission(userModel, workspaceId + StrUtil.DASHED + method.name());
             if (!permissionResult.isSuccess()) {
-                this.errorMsg(response, permissionResult.errorMsg("对应功能【" + classFeature.getName() + StrUtil.DASHED + method.getName() + "】"));
+                this.errorMsg(response, permissionResult.errorMsg(StrUtil.format("对应功能【{}-{}】", classFeature.getName(), method.getName())));
                 return false;
             }
         }

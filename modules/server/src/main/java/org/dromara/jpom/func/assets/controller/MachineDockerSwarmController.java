@@ -91,9 +91,9 @@ public class MachineDockerSwarmController extends BaseServerController {
     @PostMapping(value = "join", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<Object> join(@ValidatorItem String managerId,
-                                    @ValidatorItem String id,
-                                    @ValidatorItem String remoteAddr,
-                                    @ValidatorItem String role) throws Exception {
+                                     @ValidatorItem String id,
+                                     @ValidatorItem String remoteAddr,
+                                     @ValidatorItem String role) throws Exception {
         MachineDockerModel managerSwarmDocker = machineDockerServer.getByKey(managerId, false);
         Assert.notNull(managerSwarmDocker, "对应的 docker 不存在");
         MachineDockerModel joinSwarmDocker = machineDockerServer.getByKey(id, false);
@@ -131,7 +131,7 @@ public class MachineDockerSwarmController extends BaseServerController {
             JSONObject joinTokens = managerSwarmInfo.getJSONObject("joinTokens");
             Assert.notNull(joinTokens, "集群信息不完整,不能加入改集群:-1");
             roleToken = joinTokens.getString(role);
-            Assert.hasText(roleToken, "不能已 " + role + " 角色加入集群");
+            Assert.hasText(roleToken, StrUtil.format("不能以 {} 角色加入集群", role));
         }
         Map<String, Object> parameter = machineDockerServer.toParameter(joinSwarmDocker);
         parameter.put("token", roleToken);
@@ -172,7 +172,7 @@ public class MachineDockerSwarmController extends BaseServerController {
         DockerSwarmInfoMode dockerSwarmInfoMode = new DockerSwarmInfoMode();
         dockerSwarmInfoMode.setSwarmId(dockerInfoModel.getSwarmId());
         long count = dockerSwarmInfoService.count(dockerSwarmInfoMode);
-        Assert.state(count <= 0, "当前 docker 集群还关联 " + count + " 个工作空间集群,不能退出集群");
+        Assert.state(count <= 0, StrUtil.format("当前 docker 集群还关联 {} 个工作空间集群,不能退出集群", count));
         //
         IPlugin plugin = PluginFactory.getPlugin(DockerSwarmInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = machineDockerServer.toParameter(dockerInfoModel);
@@ -211,8 +211,8 @@ public class MachineDockerSwarmController extends BaseServerController {
         List<MachineDockerModel> machineDockerModels = machineDockerServer.listByBean(machineDockerModel, false);
         Assert.notEmpty(machineDockerModels, "当前集群未找到管理节点");
         Optional<MachineDockerModel> dockerModelOptional = machineDockerModels.stream()
-                .filter(machineDockerModel1 -> machineDockerModel1.getStatus() != null && machineDockerModel1.getStatus() == 1)
-                .findFirst();
+            .filter(machineDockerModel1 -> machineDockerModel1.getStatus() != null && machineDockerModel1.getStatus() == 1)
+            .findFirst();
         Assert.state(dockerModelOptional.isPresent(), "当前集群未找到在线的管理节点");
         //
         IPlugin plugin = PluginFactory.getPlugin(DockerSwarmInfoService.DOCKER_PLUGIN_NAME);

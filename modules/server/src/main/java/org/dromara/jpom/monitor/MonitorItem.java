@@ -338,7 +338,9 @@ public class MonitorItem implements Task {
         monitorNotifyLog.setNotifyObject("报警联系人异常");
         monitorNotifyLog.setNotifyStyle(MonitorModel.NotifyType.mail.getCode());
         monitorNotifyLog.setNotifyStatus(false);
-        monitorNotifyLog.setNotifyError("报警联系人异常:" + (item == null ? "联系人不存在" : ""));
+        String userNotFound = "联系人不存在";
+        String notifyError = "报警联系人异常:" + (item == null ? userNotFound : "");
+        monitorNotifyLog.setNotifyError(notifyError);
         dbMonitorNotifyLogService.insert(monitorNotifyLog);
     }
 
