@@ -182,7 +182,7 @@ public class ParameterInterceptor implements HandlerMethodInterceptor {
         }
         if (method == null) {
             // 没有配置对应方法
-            log.error(handlerMethod.getBeanType() + "未配置验证方法：" + validatorConfig.customizeMethod());
+            log.error("{}未配置验证方法：{}", handlerMethod.getBeanType(), validatorConfig.customizeMethod());
             interceptor.error(request, response, name, value, validatorItem);
             return false;
         }
@@ -442,7 +442,8 @@ public class ParameterInterceptor implements HandlerMethodInterceptor {
     public static class DefaultInterceptor implements Interceptor {
         @Override
         public void error(HttpServletRequest request, HttpServletResponse response, String parameterName, String value, ValidatorItem validatorItem) {
-            JsonMessage<String> jsonMessage = new JsonMessage<>(validatorItem.code(), validatorItem.msg());
+            String msg = validatorItem.msg();
+            JsonMessage<String> jsonMessage = new JsonMessage<>(validatorItem.code(), msg);
             log.warn("{} {} {} {} {}", request.getRequestURI(), parameterName, value, validatorItem.value(), jsonMessage);
             ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_VALUE);
         }
