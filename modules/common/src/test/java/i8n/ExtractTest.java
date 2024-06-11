@@ -182,6 +182,7 @@ public class ExtractTest {
                     continue;
                 }
                 //
+                boolean find = false;
                 {
                     Matcher matcher = chinesePattern.matcher(line);
                     while (matcher.find()) {
@@ -191,7 +192,11 @@ public class ExtractTest {
                             System.err.println(line);
                             throw new IllegalArgumentException("重复的 key:" + chineseText);
                         }
+                        find = true;
                     }
+                }
+                if (find && StrUtil.contains(line, "@ValidatorItem(")) {
+                    System.out.println("需要单独处理的：" + line);
                 }
             }
         }
