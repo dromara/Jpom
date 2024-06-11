@@ -138,10 +138,10 @@ public class UserListController extends BaseServerController {
         boolean email = Validator.isEmail(id);
         if (email) {
             int length = id.length();
-            Assert.state(length <= Const.ID_MAX_LEN && length >= UserModel.USER_NAME_MIN_LEN, "登录名如果为邮箱格式,长度必须" + UserModel.USER_NAME_MIN_LEN + "-" + Const.ID_MAX_LEN);
+            Assert.state(length <= Const.ID_MAX_LEN && length >= UserModel.USER_NAME_MIN_LEN, StrUtil.format("登录名如果为邮箱格式,长度必须 {}-{}", UserModel.USER_NAME_MIN_LEN, Const.ID_MAX_LEN));
         } else {
             String checkId = StrUtil.replace(id, "-", "_");
-            Validator.validateGeneral(checkId, UserModel.USER_NAME_MIN_LEN, Const.ID_MAX_LEN, "登录名格式不正确（英文字母 、数字和下划线）,并且长度必须" + UserModel.USER_NAME_MIN_LEN + "-" + Const.ID_MAX_LEN);
+            Validator.validateGeneral(checkId, UserModel.USER_NAME_MIN_LEN, Const.ID_MAX_LEN, StrUtil.format("登录名格式不正确（英文字母 、数字和下划线）,并且长度必须 {}-{}", UserModel.USER_NAME_MIN_LEN, Const.ID_MAX_LEN));
         }
 
         Assert.state(!StrUtil.equalsAnyIgnoreCase(id, UserModel.SYSTEM_OCCUPY_NAME, UserModel.SYSTEM_ADMIN), "当前登录名已经被系统占用");

@@ -67,7 +67,7 @@ public class ManageEditProjectController extends BaseAgentController {
         // 兼容 _
         String checkId = StrUtil.replace(id, StrUtil.DASHED, StrUtil.UNDERLINE);
         Validator.validateGeneral(checkId, 2, Const.ID_MAX_LEN, "项目id 长度范围2-20（英文字母 、数字和下划线）");
-        Assert.state(!Const.SYSTEM_ID.equals(id), "项目id " + Const.SYSTEM_ID + " 关键词被系统占用");
+        Assert.state(!Const.SYSTEM_ID.equals(id), StrUtil.format("项目id {} 关键词被系统占用", Const.SYSTEM_ID));
         // 运行模式
         RunMode runMode = projectInfo.getRunMode();
         Assert.notNull(runMode, "请选择运行模式");
@@ -286,7 +286,7 @@ public class ManageEditProjectController extends BaseAgentController {
             }
             File fileLib = projectInfoService.resolveLibFile(item);
             if (!nodeProjectInfoModel.getId().equals(id) && FileUtil.equals(fileLib, checkFile)) {
-                throw new IllegalArgumentException("当前项目路径已经被【" + item.getName() + "】占用,请检查");
+                throw new IllegalArgumentException(StrUtil.format("当前项目路径已经被【{}】占用,请检查", item.getName()));
             }
         }
 
@@ -310,7 +310,7 @@ public class ManageEditProjectController extends BaseAgentController {
             }
         }
         if (nodeProjectInfoModel1 != null) {
-            throw new IllegalArgumentException("项目路径和【" + nodeProjectInfoModel1.getName() + "】项目冲突:" + nodeProjectInfoModel1.allLib());
+            throw new IllegalArgumentException(StrUtil.format("项目路径和【{}】项目冲突:{}", nodeProjectInfoModel1.getName(), nodeProjectInfoModel1.allLib()));
         }
     }
 
@@ -335,7 +335,7 @@ public class ManageEditProjectController extends BaseAgentController {
             if (nodeProjectInfoModel.getRunMode() != RunMode.Link) {
                 continue;
             }
-            Assert.state(!StrUtil.equals(projectInfoModel.getLinkId(), id), "项目被" + projectInfoModel.getName() + "软链中");
+            Assert.state(!StrUtil.equals(projectInfoModel.getLinkId(), id), StrUtil.format("项目被{}软链中", projectInfoModel.getName()));
         }
         this.thorough(thorough, nodeProjectInfoModel);
         //

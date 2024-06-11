@@ -128,7 +128,8 @@ public class RepositoryController extends BaseServerController {
     @Feature(method = MethodFeature.DOWNLOAD)
     @SystemPermission
     public void exportRepositoryList(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String fileName = "导出的 仓库信息 数据 " + DateTime.now().toString(DatePattern.NORM_DATE_FORMAT) + ".csv";
+        String prex  = "导出的 仓库信息 数据 ";
+        String fileName = prex + DateTime.now().toString(DatePattern.NORM_DATE_FORMAT) + ".csv";
         this.setApplicationHeader(response, fileName);
         CsvWriter writer = CsvUtil.getWriter(response.getWriter());
         int pageInt = 0;

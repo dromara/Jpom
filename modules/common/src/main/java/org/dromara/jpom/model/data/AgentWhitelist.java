@@ -81,7 +81,7 @@ public class AgentWhitelist extends BaseModel {
                 Assert.state(!StrUtil.startWith(ExtConfigBean.getPath(), val), errorMsg);
                 //
                 if (maxLen > 0) {
-                    Assert.state(StrUtil.length(val) <= maxLen, "配置路径超过" + maxLen + "长度限制:" + val);
+                    Assert.state(StrUtil.length(val) <= maxLen, StrUtil.format("配置路径超过{}长度限制:{}", maxLen, val));
                 }
                 return val;
             })

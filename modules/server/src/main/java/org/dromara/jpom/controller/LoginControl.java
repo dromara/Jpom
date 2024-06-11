@@ -205,7 +205,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
                     updateModel = userModel.errorLock(userConfig.getAlwaysLoginError());
                     this.ipError();
                     userLoginLogServer.fail(userModel, 2, false, request);
-                    return new JsonMessage<>(400, "该账户登录失败次数过多，已被锁定" + msg + ",请不要再次尝试");
+                    return new JsonMessage<>(400, StrUtil.format("该账户登录失败次数过多，已被锁定{},请不要再次尝试", msg));
                 }
                 // 验证
                 if (userService.simpleLogin(loginName, userPwd) != null) {

@@ -224,7 +224,7 @@ public class CertificateInfoController extends BaseServerController {
         } else {
             throw new IllegalArgumentException("不支持的文件格式");
         }
-        Assert.notNull(pfxFile, "没有找到 " + suffix + " 文件");
+        Assert.notNull(pfxFile, StrUtil.format("没有找到 {} 文件", suffix));
         try {
             char[] passwordChars = StrUtil.emptyToDefault(newPassword, StrUtil.EMPTY).toCharArray();
             KeyStore keyStore = StrUtil.equals(suffix, "jks") ? KeyUtil.readJKSKeyStore(pfxFile, passwordChars) : KeyUtil.readPKCS12KeyStore(pfxFile, passwordChars);

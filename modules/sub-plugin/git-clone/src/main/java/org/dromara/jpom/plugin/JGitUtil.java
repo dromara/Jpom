@@ -558,7 +558,7 @@ public class JGitUtil {
     public static String[] getLastCommitMsg(File file, boolean tag, String refName) throws IOException, GitAPIException {
         try (Git git = Git.open(file)) {
             ObjectId anyObjectId = tag ? getTagAnyObjectId(git, refName) : getBranchAnyObjectId(git, refName);
-            Objects.requireNonNull(anyObjectId, "没有" + refName + "分支/标签");
+            Objects.requireNonNull(anyObjectId, StrUtil.format("没有 {} 分支/标签", refName));
             //System.out.println(anyObjectId.getName());
             String lastCommitMsg = getLastCommitMsg(file, refName, anyObjectId);
             return new String[]{anyObjectId.getName(), lastCommitMsg};

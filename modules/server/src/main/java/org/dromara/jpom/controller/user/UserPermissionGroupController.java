@@ -200,7 +200,7 @@ public class UserPermissionGroupController extends BaseServerController {
             BaseOauth2Config baseOauth2Config = systemParametersServer.getConfigDefNewInstance(dbKey, value.get(1));
             String permissionGroup = baseOauth2Config.getPermissionGroup();
             List<String> permissionGroupList = StrUtil.split(permissionGroup, StrUtil.AT, true, true);
-            Assert.state(!CollUtil.contains(permissionGroupList, groupBean.getId()), "当前权限组被 oauth2[" + baseOauth2Config.provide() + "] 绑定，不能删除");
+            Assert.state(!CollUtil.contains(permissionGroupList, groupBean.getId()), StrUtil.format("当前权限组被 oauth2[{}] 绑定，不能删除", baseOauth2Config.provide()));
         }
         //
         userPermissionGroupServer.delByKey(id);

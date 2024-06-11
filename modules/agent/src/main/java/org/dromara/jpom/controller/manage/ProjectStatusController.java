@@ -126,6 +126,8 @@ public class ProjectStatusController extends BaseAgentController {
         Assert.notNull(consoleCommandOp, "请选择操作类型");
         Assert.state(consoleCommandOp.isCanOpt(), "不支持当前操作：" + opt);
         CommandOpResult result = projectCommander.execCommand(consoleCommandOp, item);
-        return new JsonMessage<>(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr(), result);
+        String success = "操作成功";
+        String errorMsg = "操作失败:" + result.msgStr();
+        return new JsonMessage<>(result.isSuccess() ? 200 : 201, result.isSuccess() ? success : errorMsg, result);
     }
 }

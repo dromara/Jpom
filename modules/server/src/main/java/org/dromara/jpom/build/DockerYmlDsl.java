@@ -156,7 +156,7 @@ public class DockerYmlDsl extends BaseJsonModel {
                     File pluginInstallResource = null;
                     try {
                         pluginInstallResource = plugin.getResourceToFile("uses/" + uses + "/install.sh", tmpDir);
-                        Assert.notNull(pluginInstallResource, "当前还不支持" + uses + "插件");
+                        Assert.notNull(pluginInstallResource, StrUtil.format("当前还不支持 {} 插件", uses));
                     } finally {
                         FileUtil.del(pluginInstallResource);
                     }

@@ -284,7 +284,7 @@ public class ProjectManageControl extends BaseServerController {
                                     return !StrUtil.equals(buildInfoModel2.getReleaseMethodDataId(), dataId);
                                 })
                                 .count();
-                            Assert.state(count <= 0, "当前【项目】关联的【在线构建】关联的【仓库(" + repositoryModel.getName() + ")】被其他 " + count + "个不同发布方式的【在线构建】绑定暂不支持迁移");
+                            Assert.state(count <= 0, StrUtil.format("当前【项目】关联的【在线构建】关联的【仓库({})】被其他 {} 个不同发布方式的【在线构建】绑定暂不支持迁移", repositoryModel.getName(), count));
                         }
                     }
                     return new Tuple(buildInfoModel, repositoryModel);
@@ -461,7 +461,8 @@ public class ProjectManageControl extends BaseServerController {
     @Feature(method = MethodFeature.DOWNLOAD)
     public void exportData(HttpServletResponse response, HttpServletRequest request) throws IOException {
         String workspace = projectInfoCacheService.getCheckUserWorkspace(request);
-        String fileName = "导出的项目数据 " + DateTime.now().toString(DatePattern.NORM_DATE_FORMAT) + ".csv";
+        String prefix = "导出的项目数据 ";
+        String fileName = prefix + DateTime.now().toString(DatePattern.NORM_DATE_FORMAT) + ".csv";
         this.setApplicationHeader(response, fileName);
         //
         CsvWriteConfig csvWriteConfig = CsvWriteConfig.defaultConfig();

@@ -12,6 +12,7 @@ package org.dromara.jpom.oauth2.platform;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.net.url.UrlBuilder;
+import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import me.zhyd.oauth.config.AuthDefaultSource;
@@ -44,7 +45,7 @@ public class MyGitlabOauth2Config extends BaseOauth2Config implements AuthSource
 
     @Override
     public AuthRequest authRequest() {
-        Assert.state(this.enabled(), "没有开启此 " + this.provide() + " oauth2");
+        Assert.state(this.enabled(), StrUtil.format("没有开启此 {} oauth2", this.provide()));
         return new MyAuthGitlabRequest(this.authConfig(), this);
     }
 

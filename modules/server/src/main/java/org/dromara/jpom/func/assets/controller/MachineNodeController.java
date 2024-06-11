@@ -88,7 +88,7 @@ public class MachineNodeController extends BaseGroupNameController {
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<String> delete(@ValidatorItem String id) {
         long count = nodeService.countByMachine(id);
-        Assert.state(count <= 0, "当前机器还关联" + count + "个节点不能删除");
+        Assert.state(count <= 0, StrUtil.format("当前机器还关联{}个节点不能删除", count));
         machineNodeServer.delByKey(id);
         return JsonMessage.success("操作成功");
     }
@@ -165,7 +165,7 @@ public class MachineNodeController extends BaseGroupNameController {
             MachineNodeModel machineNodeModel = machineNodeServer.getByKey(s);
             Assert.notNull(machineNodeModel, "没有对应的机器");
             JsonMessage<String> jsonMessage = NodeForward.request(machineNodeModel, request, NodeUrl.WhitelistDirectory_Submit);
-            Assert.state(jsonMessage.success(), "分发 " + machineNodeModel.getName() + " 节点授权失败" + jsonMessage.getMsg());
+            Assert.state(jsonMessage.success(), StrUtil.format("分发 {} 节点授权失败 {}", machineNodeModel.getName(), jsonMessage.getMsg()));
         }
         return JsonMessage.success("保存成功");
     }
@@ -185,7 +185,7 @@ public class MachineNodeController extends BaseGroupNameController {
             reqData.put("content", content);
             reqData.put("restart", restart);
             JsonMessage<String> jsonMessage = NodeForward.request(machineNodeModel, NodeUrl.SystemSaveConfig, reqData);
-            Assert.state(jsonMessage.success(), "分发 " + machineNodeModel.getName() + " 节点配置失败" + jsonMessage.getMsg());
+            Assert.state(jsonMessage.success(), StrUtil.format("分发 {} 节点配置失败 {}", machineNodeModel.getName(), jsonMessage.getMsg()));
         }
         return JsonMessage.success("修改成功");
     }

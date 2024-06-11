@@ -100,7 +100,9 @@ public class SystemUpdateController extends BaseServerController implements ILoa
     public IJsonMessage<String> changeBetaRelease(String beta) {
         boolean betaBool = this.changeBetaRelease2(beta);
         RemoteVersion.loadRemoteInfo();
-        return JsonMessage.success(betaBool ? "成功加入 beta 计划" : "关闭 beta 计划成功");
+        String isBeta = "成功加入 beta 计划";
+        String closeBeta = "关闭 beta 计划成功";
+        return JsonMessage.success(betaBool ? isBeta : closeBeta);
     }
 
     private boolean changeBetaRelease2(String beta) {

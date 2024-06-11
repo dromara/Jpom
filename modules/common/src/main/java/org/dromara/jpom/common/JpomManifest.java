@@ -381,7 +381,7 @@ public class JpomManifest {
             ZipEntry entry = jarFile1.getEntry(StrUtil.format("BOOT-INF/classes/{}.class",
                 StrUtil.replace(applicationClass, ".", StrUtil.SLASH)));
             if (entry == null) {
-                return new JsonMessage<>(405, "此包不是Jpom【" + type.name() + "】包");
+                return new JsonMessage<>(405, StrUtil.format("此包不是Jpom【{}】包", type.name()));
             }
             String version = jarVersion.get(0);
             String timeStamp = jarVersion.get(1);
@@ -489,7 +489,7 @@ public class JpomManifest {
                     String typeName = type.name().toLowerCase();
                     return StrUtil.startWith(name, "lib/" + typeName) && StrUtil.endWith(name, ".jar");
                 }).findFirst();
-                Assert.state(first.isPresent(), "上传的压缩包不是 Jpom [" + type + "] 包");
+                Assert.state(first.isPresent(), StrUtil.format("上传的压缩包不是 Jpom [{}] 包", type));
                 //
                 ZipEntry zipEntry = first.get();
                 try (InputStream stream = ZipUtil.getStream(zipFile, zipEntry)) {

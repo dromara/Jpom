@@ -9,6 +9,7 @@
  */
 package org.dromara.jpom.oauth2.platform;
 
+import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import me.zhyd.oauth.request.AuthGithubRequest;
@@ -33,7 +34,7 @@ public class GithubOauth2Config extends BaseOauth2Config {
 
     @Override
     public AuthRequest authRequest() {
-        Assert.state(this.enabled(), "没有开启此 " + this.provide() + " oauth2");
+        Assert.state(this.enabled(),  StrUtil.format("没有开启此 {} oauth2", this.provide()));
         return new AuthGithubRequest(this.authConfig());
     }
 }

@@ -13,6 +13,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -145,7 +146,9 @@ public class BuildExecuteService {
             //
             Opt.ofBlankAble(checkRepositoryDiff).map(Convert::toBool).ifPresent(taskBuilder::checkRepositoryDiff);
             this.runTask(taskBuilder.build(), buildExtraModule);
-            String msg = (delay == null || delay <= 0) ? "开始构建中" : "延迟" + delay + "秒后开始构建";
+            String startMsg = "开始构建中";
+            String delayMsg = StrUtil.format("延迟 {} 秒后开始构建", delay);
+            String msg = (delay == null || delay <= 0) ? startMsg : delayMsg;
             return JsonMessage.success(msg, buildInfoModel.getBuildId());
         }
     }

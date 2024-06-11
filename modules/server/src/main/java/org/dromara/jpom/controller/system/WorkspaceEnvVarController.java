@@ -172,7 +172,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("name", name);
             JsonMessage<String> jsonMessage = NodeForward.request(byKey, NodeUrl.Workspace_EnvVar_Delete, jsonObject);
-            Assert.state(jsonMessage.success(), "处理 " + byKey.getName() + " 节点删除脚本失败" + jsonMessage.getMsg());
+            Assert.state(jsonMessage.success(), StrUtil.format("处理 {} 节点删除脚本失败 {}", byKey.getName(), jsonMessage.getMsg()));
         }
     }
 
@@ -199,7 +199,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
                 jsonObject.put("value", byKeyExits.getValue());
             }
             JsonMessage<String> jsonMessage = NodeForward.request(byKey, NodeUrl.Workspace_EnvVar_Update, jsonObject);
-            Assert.state(jsonMessage.getCode() == 200, "处理 " + byKey.getName() + " 节点同步脚本失败" + jsonMessage.getMsg());
+            Assert.state(jsonMessage.getCode() == 200, StrUtil.format("处理 {} 节点同步脚本失败 {}", byKey.getName(), jsonMessage.getMsg()));
         }
     }
 

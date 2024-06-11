@@ -16,7 +16,6 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.lang.Opt;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
@@ -335,7 +334,7 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
         MachineDockerModel machineDockerModel = this.getByKey(machineDockerId, false);
         Assert.notNull(machineDockerModel, "没有找到对应的 docker 信息");
         Integer status = machineDockerModel.getStatus();
-        Assert.state(status != null && status == 1, "当前 " + machineDockerModel.getName() + " docker 不在线");
+        Assert.state(status != null && status == 1, StrUtil.format("当前 {} docker 不在线", machineDockerModel.getName()));
         return this.toParameter(machineDockerModel);
     }
 
@@ -372,7 +371,7 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
         MachineDockerModel first = this.getMachineDocker(workspaceSwarmId);
         Assert.notNull(first, "没有找到集群管理节点");
         Integer status = first.getStatus();
-        Assert.state(status != null && status == 1, "当前 " + first.getName() + " docker 集群没有管理节点在线");
+        Assert.state(status != null && status == 1, StrUtil.format("当前 {} docker 集群没有管理节点在线", first.getName()));
         return toParameter(first);
     }
 
