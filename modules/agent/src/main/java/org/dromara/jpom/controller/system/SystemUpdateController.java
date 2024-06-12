@@ -90,7 +90,7 @@ public class SystemUpdateController extends BaseAgentController {
         JpomManifest.releaseJar(path, version);
         //
         JpomApplication.restart();
-        return JsonMessage.success(Const.UPGRADE_MSG);
+        return JsonMessage.success(Const.UPGRADE_MSG.get());
     }
 
     @PostMapping(value = "change_log", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -128,6 +128,6 @@ public class SystemUpdateController extends BaseAgentController {
     @PostMapping(value = "remote_upgrade.json", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<Object> upgrade() throws IOException {
         RemoteVersion.upgrade(configBean.getTempPath().getAbsolutePath());
-        return JsonMessage.success(Const.UPGRADE_MSG);
+        return JsonMessage.success(Const.UPGRADE_MSG.get());
     }
 }

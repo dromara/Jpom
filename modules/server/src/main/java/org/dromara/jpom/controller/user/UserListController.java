@@ -144,7 +144,7 @@ public class UserListController extends BaseServerController {
             Validator.validateGeneral(checkId, UserModel.USER_NAME_MIN_LEN, Const.ID_MAX_LEN, StrUtil.format("登录名格式不正确（英文字母 、数字和下划线）,并且长度必须 {}-{}", UserModel.USER_NAME_MIN_LEN, Const.ID_MAX_LEN));
         }
 
-        Assert.state(!StrUtil.equalsAnyIgnoreCase(id, UserModel.SYSTEM_OCCUPY_NAME, UserModel.SYSTEM_ADMIN), "当前登录名已经被系统占用");
+        Assert.state(!StrUtil.equalsAnyIgnoreCase(id, UserModel.SYSTEM_OCCUPY_NAME.get(), UserModel.SYSTEM_ADMIN), "当前登录名已经被系统占用");
 
         UserModel userModel = new UserModel();
         UserModel optUser = getUser();

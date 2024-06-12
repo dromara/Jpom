@@ -133,7 +133,7 @@ public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
      * @return 结果
      */
     public String restart(Session session) {
-        String result = Const.UPGRADE_MSG;
+        String result = Const.UPGRADE_MSG.get();
         try {
             UploadFileModel uploadFile = UPLOAD_FILE_INFO.get(session.getId());
             String filePath = uploadFile.getFilePath();

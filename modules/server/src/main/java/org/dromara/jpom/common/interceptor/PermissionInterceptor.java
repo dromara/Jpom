@@ -33,6 +33,7 @@ import org.springframework.web.method.HandlerMethod;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.function.Supplier;
 
 /**
  * 权限拦截器
@@ -47,7 +48,7 @@ public class PermissionInterceptor implements HandlerMethodInterceptor {
     private NodeService nodeService;
     @Resource
     private UserBindWorkspaceService userBindWorkspaceService;
-    public static final String DEMO_TIP = "演示账号不能使用该功能";
+    public static final Supplier<String> DEMO_TIP = () -> "演示账号不能使用该功能";
     /**
      * demo 账号不能使用的功能
      */
@@ -97,7 +98,7 @@ public class PermissionInterceptor implements HandlerMethodInterceptor {
         }
         MethodFeature method = feature.method();
         if (ArrayUtil.contains(DEMO, method) && userModel.isDemoUser()) {
-            this.errorMsg(response, DEMO_TIP);
+            this.errorMsg(response, DEMO_TIP.get());
             return false;
         }
         ClassFeature classFeature = feature.cls();

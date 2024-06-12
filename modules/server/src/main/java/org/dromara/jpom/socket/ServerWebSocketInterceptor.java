@@ -278,7 +278,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
             return StrUtil.EMPTY;
         }
         if (userInfo.isDemoUser()) {
-            return PermissionInterceptor.DEMO_TIP;
+            return PermissionInterceptor.DEMO_TIP.get();
         }
         boolean isAssetsManager = Convert.toBool(attributes.get("isAssetsManager"), false);
         if (isAssetsManager && !userInfo.isSystemUser()) {

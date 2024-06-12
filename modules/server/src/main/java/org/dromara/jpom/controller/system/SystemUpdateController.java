@@ -187,7 +187,7 @@ public class SystemUpdateController extends BaseServerController implements ILoa
         backupInfoService.autoBackup();
         //
         JpomApplication.restart();
-        return JsonMessage.success(Const.UPGRADE_MSG);
+        return JsonMessage.success(Const.UPGRADE_MSG.get());
     }
 
     /**
@@ -224,7 +224,7 @@ public class SystemUpdateController extends BaseServerController implements ILoa
             } catch (IOException e) {
                 throw Lombok.sneakyThrow(e);
             }
-            return JsonMessage.success(Const.UPGRADE_MSG);
+            return JsonMessage.success(Const.UPGRADE_MSG.get());
         });
     }
 

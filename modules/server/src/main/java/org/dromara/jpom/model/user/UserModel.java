@@ -19,6 +19,7 @@ import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.BaseUserModifyDbModel;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 /**
  * 用户实体
@@ -47,7 +48,7 @@ public class UserModel extends BaseUserModifyDbModel {
     /**
      * 系统占用名
      */
-    public static final String SYSTEM_OCCUPY_NAME = "系统管理员";
+    public static final Supplier<String> SYSTEM_OCCUPY_NAME = () -> "系统管理员";
     /**
      * 用户名限制
      */

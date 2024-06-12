@@ -189,7 +189,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
             }
             if (userModel.getStatus() != null && userModel.getStatus() == 0) {
                 userLoginLogServer.fail(userModel, 4, false, request);
-                return new JsonMessage<>(ServerConst.ACCOUNT_LOCKED, ServerConst.ACCOUNT_LOCKED_TIP);
+                return new JsonMessage<>(ServerConst.ACCOUNT_LOCKED, ServerConst.ACCOUNT_LOCKED_TIP.get());
             }
             if (!webConfig.isDisabledCaptcha()) {
                 // 获取验证码
@@ -307,7 +307,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
             }
             if (userModel.getStatus() != null && userModel.getStatus() == 0) {
                 userLoginLogServer.fail(userModel, 4, false, request);
-                return new JsonMessage<>(ServerConst.ACCOUNT_LOCKED, ServerConst.ACCOUNT_LOCKED_TIP);
+                return new JsonMessage<>(ServerConst.ACCOUNT_LOCKED, ServerConst.ACCOUNT_LOCKED_TIP.get());
             }
             //
             UserModel updateModel = UserModel.unLock(userModel.getId());

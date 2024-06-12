@@ -88,7 +88,7 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
     @Override
     protected void fillInsert(MachineDockerModel machineDockerModel) {
         super.fillInsert(machineDockerModel);
-        machineDockerModel.setGroupName(StrUtil.emptyToDefault(machineDockerModel.getGroupName(), Const.DEFAULT_GROUP_NAME));
+        machineDockerModel.setGroupName(StrUtil.emptyToDefault(machineDockerModel.getGroupName(), Const.DEFAULT_GROUP_NAME.get()));
         machineDockerModel.setStatus(ObjectUtil.defaultIfNull(machineDockerModel.getStatus(), 0));
     }
 

@@ -9,6 +9,8 @@
  */
 package org.dromara.jpom.common;
 
+import java.util.function.Supplier;
+
 /**
  * @author bwcx_jzy
  * @since 2022/8/30
@@ -58,8 +60,8 @@ public class ServerConst extends Const {
      * 账号被锁定
      */
     public static final int ACCOUNT_LOCKED = 802;
-    public static final String LOGIN_TIP = "登录信息已失效,重新登录";
-    public static final String ACCOUNT_LOCKED_TIP = "账号已经被禁用,不能使用";
+    public static final Supplier<String> LOGIN_TIP = () -> "登录信息已失效,重新登录";
+    public static final Supplier<String> ACCOUNT_LOCKED_TIP = () -> "账号已经被禁用,不能使用";
 
     public static final String CHECK_SYSTEM = "check-system";
 
