@@ -380,8 +380,8 @@ public class ExtractI18nTest {
             // jpom 特有注解
             return false;
         }
-        if (StrUtil.startWithAny(trimLin, "@", "*", "//", "public static final")) {
-            // 日志、注解、注释、枚举、产量
+        if (StrUtil.startWithAny(trimLin, "@", "*", "//", "public static final String")) {
+            // 注解、注释、枚举、产量
             return true;
         }
         if (StrUtil.endWithAny(trimLin, "),")) {
