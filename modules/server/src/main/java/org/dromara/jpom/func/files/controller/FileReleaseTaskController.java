@@ -223,7 +223,7 @@ public class FileReleaseTaskController extends BaseServerController {
     @GetMapping(value = "log-list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<JSONObject> log(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
-                                        @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line,
+                                        @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "行号错误") int line,
                                         HttpServletRequest request) {
         FileReleaseTaskLogModel item = fileReleaseTaskService.getByKey(id, request);
         Assert.notNull(item, "没有对应数据");

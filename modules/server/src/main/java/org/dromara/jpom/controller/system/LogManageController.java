@@ -74,7 +74,7 @@ public class LogManageController extends BaseServerController {
     @RequestMapping(value = "log_del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<String> logData(String machineId,
-                                        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path,
+                                        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "参数错误path错误") String path,
                                         HttpServletRequest request) {
         JsonMessage<String> jsonMessage = this.tryRequestMachine(machineId, request, NodeUrl.DelSystemLog);
         return Optional.ofNullable(jsonMessage).orElseGet(() -> {
@@ -96,7 +96,7 @@ public class LogManageController extends BaseServerController {
     @RequestMapping(value = "log_download", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DOWNLOAD)
     public void logDownload(String machineId,
-                            @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path,
+                            @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "参数错误path错误") String path,
                             HttpServletResponse response,
                             HttpServletRequest request) {
         if (StrUtil.isNotEmpty(machineId)) {

@@ -69,7 +69,7 @@ public class ExtractTest {
             }
             if (key == null) {
                 do {
-                    key = StrUtil.format("key.{}", RandomUtil.randomStringUpper(4));
+                    key = StrUtil.format("key.{}", RandomUtil.randomStringUpper(6));
                 } while (zhProperties.containsKey(key));
                 System.out.println("生成新的 key:" + key);
                 zhProperties.put(key, s);
@@ -80,7 +80,11 @@ public class ExtractTest {
         int beforeSize = oldKeys.size();
         oldKeys.removeIf(next -> {
             //
-            return !linkUsed.contains(next) && !useKeys.contains(next);
+            boolean b = !linkUsed.contains(next) && !useKeys.contains(next);
+            if (b) {
+                System.out.println("删除 key：" + next);
+            }
+            return b;
         });
         int afterSize = oldKeys.size();
         if (beforeSize != afterSize) {
@@ -154,6 +158,7 @@ public class ExtractTest {
     Pattern[] messageKeyPatterns = new Pattern[]{
         Pattern.compile("MessageUtil\\.get\\(\"(.*?)\"\\)"),
         Pattern.compile("TransportMessageUtil\\.get\\(\"(.*?)\"\\)"),
+        Pattern.compile("@ValidatorItem\\(.*?msg\\s*=\\s*\"([^\"]*)\""),
     };
 
 
@@ -280,7 +285,7 @@ public class ExtractTest {
         Matcher matcher = pattern.matcher(text);
         boolean b = matcher.find();
         if (!b) {
-            System.out.println("不包含汉字需要忽略：" + text + "    ======" + line);
+            //System.out.println("不包含汉字需要忽略：" + text + "    ======" + line);
             return true;
         }
         return false;
@@ -297,7 +302,7 @@ public class ExtractTest {
         }
         if (StrUtil.endWithAny(trimLin, "),")) {
             // 枚举
-//            System.out.println(trimLin);
+            //  System.out.println(trimLin);
             return true;
         }
         return false;
