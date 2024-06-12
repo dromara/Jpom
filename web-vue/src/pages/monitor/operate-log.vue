@@ -92,9 +92,12 @@
             show-search
             :filter-option="filterOption"
             :target-keys="monitorUserKeys"
-            :render="(item) => item.title"
             @change="handleMonitorUserChange"
-          />
+          >
+            <template #render="item">
+              <a-tooltip :title="item.title">{{ item.title }} </a-tooltip>
+            </template>
+          </a-transfer>
         </a-form-item>
         <a-form-item :label="$t('pages.monitor.operate-log.59c90082')" name="monitorOpt">
           <a-transfer
@@ -103,9 +106,12 @@
             show-search
             :filter-option="filterOption"
             :target-keys="classFeatureKeys"
-            :render="(item) => item.title"
             @change="handleClassFeatureChange"
-          />
+          >
+            <template #render="item">
+              <a-tooltip :title="item.title">{{ item.title }} </a-tooltip>
+            </template>
+          </a-transfer>
         </a-form-item>
         <a-form-item :label="$t('pages.monitor.operate-log.42cc6f66')" name="monitorOpt">
           <a-transfer
@@ -114,9 +120,12 @@
             show-search
             :filter-option="filterOption"
             :target-keys="methodFeatureKeys"
-            :render="(item) => item.title"
             @change="handleMethodFeatureChange"
-          />
+          >
+            <template #render="item">
+              <a-tooltip :title="item.title">{{ item.title }} </a-tooltip>
+            </template>
+          </a-transfer>
         </a-form-item>
         <a-form-item name="notifyUser" class="jpom-monitor-notify">
           <template #label>
@@ -132,9 +141,12 @@
             show-search
             :filter-option="filterOption"
             :target-keys="notifyUserKeys"
-            :render="(item) => item.title"
             @change="handleNotifyUserChange"
-          />
+          >
+            <template #render="item">
+              <a-tooltip :title="item.title">{{ item.title }} </a-tooltip>
+            </template>
+          </a-transfer>
         </a-form-item>
       </a-form>
     </a-modal>
