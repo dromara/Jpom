@@ -131,8 +131,9 @@ public class NodeScriptExecuteLogServer extends BaseNodeService<NodeScriptExecut
             BaseServerController.resetInfo(UserModel.EMPTY);
             //
             models.forEach(NodeScriptExecuteLogServer.super::upsert);
+            String template = "{} 物理节点拉取到 {} 个执行记录,更新 {} 个执行记录";
             String format = StrUtil.format(
-                "{} 物理节点拉取到 {} 个执行记录,更新 {} 个执行记录",
+                template,
                 nodeModelName, CollUtil.size(jsonArray),
                 CollUtil.size(models));
             log.debug(format);
