@@ -165,8 +165,10 @@ public class HttpTransportServer implements TransportServer {
         urlBuilder.setWithEndTag(false);
         String uriTemplate = urlBuilder.build();
         uriTemplate = StrUtil.removePrefixIgnoreCase(uriTemplate, nodeInfo.scheme());
-        String ws = "https".equalsIgnoreCase(nodeInfo.scheme()) ? "wss" : "ws";
-        uriTemplate = StrUtil.format("{}{}", ws, uriTemplate);
+        String wss = "wss";
+        String ws = "ws";
+        String protocol = "https".equalsIgnoreCase(nodeInfo.scheme()) ? wss : ws;
+        uriTemplate = StrUtil.format("{}{}", protocol, uriTemplate);
         //
         if (log.isDebugEnabled()) {
             log.debug("{}[{}] -> {}", nodeInfo.name(), uriTemplate, urlItem.workspaceId());
