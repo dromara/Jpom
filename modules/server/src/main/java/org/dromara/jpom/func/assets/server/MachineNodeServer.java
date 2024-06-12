@@ -94,7 +94,7 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
     @Override
     protected void fillInsert(MachineNodeModel machineNodeModel) {
         super.fillInsert(machineNodeModel);
-        machineNodeModel.setGroupName(StrUtil.emptyToDefault(machineNodeModel.getGroupName(), Const.DEFAULT_GROUP_NAME));
+        machineNodeModel.setGroupName(StrUtil.emptyToDefault(machineNodeModel.getGroupName(), Const.DEFAULT_GROUP_NAME.get()));
         //
         machineNodeModel.setTransportMode(0);
     }

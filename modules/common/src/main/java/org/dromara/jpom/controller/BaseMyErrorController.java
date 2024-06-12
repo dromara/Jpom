@@ -22,6 +22,7 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * @author bwcx_jzy
@@ -31,7 +32,7 @@ import java.util.Map;
 @Slf4j
 public abstract class BaseMyErrorController extends AbstractErrorController {
 
-    public static final String FILE_MAX_SIZE_MSG = "上传文件太大了,请重新选择一个较小的文件上传吧";
+    public static final Supplier<String> FILE_MAX_SIZE_MSG = () -> "上传文件太大了,请重新选择一个较小的文件上传吧";
 
     public BaseMyErrorController(ErrorAttributes errorAttributes) {
         super(errorAttributes);
@@ -52,7 +53,7 @@ public abstract class BaseMyErrorController extends AbstractErrorController {
         String msg = "啊哦，好像哪里出错了，请稍候再试试吧~";
         if (attribute instanceof MaxUploadSizeExceededException) {
             // 上传文件大小异常
-            msg = FILE_MAX_SIZE_MSG;
+            msg = FILE_MAX_SIZE_MSG.get();
             log.error("发生文件上传异常：{}  {}", statusCode, requestUri);
         } else if (status == HttpStatus.NOT_FOUND) {
             msg = "没有找到对应的资源";

@@ -20,7 +20,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.map.CaseInsensitiveMap;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.cron.task.Task;
 import cn.hutool.db.Entity;
@@ -92,7 +91,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
     @Override
     protected void fillInsert(MachineSshModel machineSshModel) {
         super.fillInsert(machineSshModel);
-        machineSshModel.setGroupName(StrUtil.emptyToDefault(machineSshModel.getGroupName(), Const.DEFAULT_GROUP_NAME));
+        machineSshModel.setGroupName(StrUtil.emptyToDefault(machineSshModel.getGroupName(), Const.DEFAULT_GROUP_NAME.get()));
         machineSshModel.setStatus(ObjectUtil.defaultIfNull(machineSshModel.getStatus(), 0));
     }
 

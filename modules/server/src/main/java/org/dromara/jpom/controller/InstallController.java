@@ -86,7 +86,7 @@ public class InstallController extends BaseServerController {
         Assert.state(!systemOccupyUserName, "当前登录名已经被系统占用啦");
         // 创建用户
         UserModel userModel = new UserModel();
-        userModel.setName(UserModel.SYSTEM_OCCUPY_NAME);
+        userModel.setName(UserModel.SYSTEM_OCCUPY_NAME.get());
         userModel.setId(userName);
         userModel.setSalt(userService.generateSalt());
         userModel.setPassword(SecureUtil.sha1(userPwd + userModel.getSalt()));

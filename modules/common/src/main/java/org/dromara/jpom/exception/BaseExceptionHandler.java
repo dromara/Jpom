@@ -116,7 +116,7 @@ public abstract class BaseExceptionHandler {
     @ResponseBody
     public IJsonMessage<String> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
         log.error("上传文件大小超出限制", e);
-        return new JsonMessage<>(HttpStatus.NOT_ACCEPTABLE.value(), BaseMyErrorController.FILE_MAX_SIZE_MSG, e.getMessage());
+        return new JsonMessage<>(HttpStatus.NOT_ACCEPTABLE.value(), BaseMyErrorController.FILE_MAX_SIZE_MSG.get(), e.getMessage());
     }
 
     @ExceptionHandler({ConstructorException.class})

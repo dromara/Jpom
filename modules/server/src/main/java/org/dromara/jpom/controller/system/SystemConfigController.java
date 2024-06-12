@@ -166,7 +166,7 @@ public class SystemConfigController extends BaseServerController {
         if (restartBool) {
             // 重启
             JpomApplication.restart();
-            return JsonMessage.success(Const.UPGRADE_MSG);
+            return JsonMessage.success(Const.UPGRADE_MSG.get());
         }
         return JsonMessage.success("修改成功");
     }
