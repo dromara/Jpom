@@ -172,7 +172,7 @@ public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implemen
             Assert.state(code == JsonMessage.DEFAULT_SUCCESS_CODE, () -> {
                 String msg = jsonObject.getString(JsonMessage.MSG);
                 msg = StrUtil.emptyToDefault(msg, jsonObject.toString());
-                return "集群状态码异常：" + code + " " + msg;
+                return StrUtil.format("集群状态码异常：{} {}", code, msg);
             });
             //
             JSONObject data = jsonObject.getJSONObject("data");

@@ -646,7 +646,8 @@ public class ReleaseManage {
             logRecorder.system("开始回滚：{}", DateTime.now());
             //
             String errorMsg = this.start(null, item);
-            logRecorder.system("执行回滚结束：{}", StrUtil.emptyToDefault(errorMsg, "ok"));
+            String emptied = StrUtil.emptyToDefault(errorMsg, "ok");
+            logRecorder.system("执行回滚结束：{}", emptied);
             if (errorMsg == null) {
                 this.updateStatus(BuildStatus.PubSuccess, "发布成功");
             } else {

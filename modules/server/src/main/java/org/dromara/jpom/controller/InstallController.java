@@ -75,7 +75,7 @@ public class InstallController extends BaseServerController {
     public IJsonMessage<JSONObject> installSubmit(
         @ValidatorConfig(value = {
             @ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "登录名不能为空"),
-            @ValidatorItem(value = ValidatorRule.NOT_BLANK, range = UserModel.USER_NAME_MIN_LEN + ":" + Const.ID_MAX_LEN, msg = "登录名长度范围" + UserModel.USER_NAME_MIN_LEN + "-" + Const.ID_MAX_LEN),
+            @ValidatorItem(value = ValidatorRule.NOT_BLANK, range = UserModel.USER_NAME_MIN_LEN + ":" + Const.ID_MAX_LEN, msg = "登录名长度范围 3-50"),
             @ValidatorItem(value = ValidatorRule.WORD, msg = "登录名不能包含汉字并且不能包含特殊字符")
         }) String userName,
         @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空") String userPwd) {

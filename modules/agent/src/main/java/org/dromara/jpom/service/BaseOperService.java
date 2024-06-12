@@ -175,7 +175,7 @@ public abstract class BaseOperService<T extends BaseModel> {
         if (allData != null) {
             // 判断是否存在数据
             if (allData.containsKey(key)) {
-                throw new JpomRuntimeException("数据Id已经存在啦：" + filename + " :" + key);
+                throw new JpomRuntimeException(StrUtil.format("数据Id已经存在啦：{} : {}", filename, key));
             }
         } else {
             allData = new JSONObject();

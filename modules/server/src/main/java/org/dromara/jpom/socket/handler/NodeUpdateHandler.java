@@ -128,7 +128,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                     log.error("创建插件端连接失败 {}", closeStatusMsg, e);
                     IProxyWebSocket webSocket = clientMap.remove(model.getId());
                     IoUtil.close(webSocket);
-                    this.onError(session, "连接插件端失败：" + closeStatusMsg + " " + e.getMessage(), model.getId());
+                    this.onError(session, StrUtil.format("连接插件端失败：{} {} {}", closeStatusMsg, e.getMessage(), model.getId()));
                 }
             });
         }
