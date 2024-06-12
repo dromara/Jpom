@@ -289,8 +289,9 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
                 delCount = super.delByKey(needDelete, null);
             }
             int size = CollUtil.size(projectInfoModels);
+            String template = "{} 物理节点拉取到 {} 个{},当前工作空间逻辑节点已经缓存 {} 个{},更新 {} 个{},删除 {} 个缓存";
             String format = StrUtil.format(
-                "{} 物理节点拉取到 {} 个{},当前工作空间逻辑节点已经缓存 {} 个{},更新 {} 个{},删除 {} 个缓存",
+                template,
                 nodeModelName, CollUtil.size(jsonArray), dataName,
                 CollUtil.size(cacheAll), dataName,
                 size, dataName,
