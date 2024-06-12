@@ -104,15 +104,15 @@ public class ExtractI18nTest {
         // 生成 key
         generateKey(file);
         // 替换中文
-        walkFile(file, file1 -> {
-            try {
-                for (Pattern chinesePattern : chinesePatterns) {
-                    replaceQuotedChineseInFile(file1, chinesePattern);
-                }
-            } catch (Exception e) {
-                throw Lombok.sneakyThrow(e);
-            }
-        });
+//        walkFile(file, file1 -> {
+//            try {
+//                for (Pattern chinesePattern : chinesePatterns) {
+//                    replaceQuotedChineseInFile(file1, chinesePattern);
+//                }
+//            } catch (Exception e) {
+//                throw Lombok.sneakyThrow(e);
+//            }
+//        });
     }
 
     /**
