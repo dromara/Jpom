@@ -55,7 +55,7 @@ public class MessageUtil {
         if (StrUtil.isEmpty(key)) {
             return StrUtil.EMPTY;
         }
-        String language = "zh_CN";
+        String language = "zh-CN";
         ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (servletRequestAttributes != null) {
             HttpServletRequest request = servletRequestAttributes.getRequest();
@@ -63,10 +63,10 @@ public class MessageUtil {
         }
         Locale locale;
         switch (language) {
-            case "zh_CN":
+            case "zh-CN":
                 locale = Locale.CHINA;
                 break;
-            case "en_US":
+            case "en-US":
                 locale = Locale.US;
                 break;
             default:
