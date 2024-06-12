@@ -116,12 +116,14 @@ public class DslScriptServer {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("status", false);
         if (scriptProcess == null) {
-            jsonObject.put("msg", "流程不存在");
+            String value = "流程不存在";
+            jsonObject.put("msg", value);
             return new Tuple(jsonObject, null);
         }
         String scriptId = scriptProcess.getScriptId();
         if (StrUtil.isEmpty(scriptId)) {
-            jsonObject.put("msg", "请填写脚本模板id");
+            String value = "请填写脚本模板id";
+            jsonObject.put("msg", value);
             return new Tuple(jsonObject, null);
         }
         //
@@ -142,7 +144,8 @@ public class DslScriptServer {
             jsonObject.put("scriptId", scriptId);
             return new Tuple(jsonObject, scriptFile);
         }
-        jsonObject.put("msg", "脚本模版不存在:" + scriptId);
+        String value = "脚本模版不存在:" + scriptId;
+        jsonObject.put("msg", value);
         return new Tuple(jsonObject, null);
     }
 

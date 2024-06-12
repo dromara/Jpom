@@ -134,7 +134,8 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
             installId = IdUtil.fastSimpleUUID();
             jsonObject.put("installId", installId);
             jsonObject.put("installTime", DateTime.now().toString());
-            jsonObject.put("desc", "请勿删除此文件,删除后关联 id 将失效");
+            String value = "请勿删除此文件,删除后关联 id 将失效";
+            jsonObject.put("desc", value);
             JsonFileUtil.saveJson(file.getAbsolutePath(), jsonObject);
             log.info("安装成功,本机安装 ID 为：{}", installId);
         }

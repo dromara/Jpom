@@ -177,7 +177,8 @@ public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implemen
             //
             JSONObject data = jsonObject.getJSONObject("data");
             Assert.notNull(data, "集群响应信息不正确,请确认集群地址是正确的服务端地址");
-            Assert.state(data.containsKey("routerBase") && data.containsKey("extendPlugins"), "填写的集群地址不正确");
+            boolean expression = data.containsKey("routerBase") && data.containsKey("extendPlugins");
+            Assert.state(expression, "填写的集群地址不正确");
         } catch (Exception e) {
             log.error("检查集群信息异常", e);
             throw new IllegalArgumentException("填写的集群地址检查异常,请确认集群地址是正确的服务端地址," + e.getMessage());

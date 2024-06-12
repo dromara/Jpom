@@ -88,7 +88,8 @@ public class CertificateInfoService extends BaseGlobalOrWorkspaceService<Certifi
                     certificateInfoModel.setWorkspaceId(ServerConst.WORKSPACE_GLOBAL);
                     certificateInfoModel.setCreateUser(UserModel.SYSTEM_ADMIN);
                     certificateInfoModel.setModifyUser(UserModel.SYSTEM_ADMIN);
-                    certificateInfoModel.setDescription("docker[" + dockerModel.getName() + "] 资产导入");
+                    String description = StrUtil.format("docker[{}] 资产导入", dockerModel.getName());
+                    certificateInfoModel.setDescription(description);
                     this.insert(certificateInfoModel);
                 }
                 // 更新

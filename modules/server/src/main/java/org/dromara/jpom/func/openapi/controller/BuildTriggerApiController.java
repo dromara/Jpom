@@ -348,17 +348,20 @@ public class BuildTriggerApiController extends BaseJpomController implements IAs
         JSONObject jsonObject = new JSONObject();
         BuildInfoModel item = buildInfoService.getByKey(id);
         if (item == null) {
-            jsonObject.put("msg", "没有对应数据");
+            String value = "没有对应数据";
+            jsonObject.put("msg", value);
             return jsonObject;
         }
         UserModel userModel = triggerTokenLogServer.getUserByToken(token, buildInfoService.typeName());
         if (userModel == null) {
-            jsonObject.put("msg", "对应的用户不存在,触发器已失效");
+            String value = "对应的用户不存在,触发器已失效";
+            jsonObject.put("msg", value);
             return jsonObject;
         }
         //
         if (!StrUtil.equals(token, item.getTriggerToken())) {
-            jsonObject.put("msg", "触发token错误,或者已经失效");
+            String value = "触发token错误,或者已经失效";
+            jsonObject.put("msg", value);
             return jsonObject;
         }
         // 更新字段
