@@ -143,13 +143,13 @@ public class MachineSshController extends BaseGroupNameController {
      */
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public IJsonMessage<String> save(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "ssh名称不能为空") String name,
-                                     @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "host不能为空") String host,
-                                     @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "user不能为空") String user,
+    public IJsonMessage<String> save(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "参数错误ssh名称不能为空") String name,
+                                     @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "参数错误host不能为空") String host,
+                                     @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "参数错误user不能为空") String user,
                                      String password,
                                      MachineSshModel.ConnectType connectType,
                                      String privateKey,
-                                     @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "port错误") int port,
+                                     @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "参数错误port错误") int port,
                                      String charset,
                                      String id,
                                      Integer timeout,

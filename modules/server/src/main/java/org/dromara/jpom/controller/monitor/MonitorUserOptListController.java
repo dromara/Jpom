@@ -197,7 +197,7 @@ public class MonitorUserOptListController extends BaseServerController {
      */
     @RequestMapping(value = "changeStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public IJsonMessage<Object> changeStatus(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id不能为空") String id,
+    public IJsonMessage<Object> changeStatus(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "参数错误id不能为空") String id,
                                              String status) {
         MonitorUserOptModel monitorModel = monitorUserOptService.getByKey(id);
         Assert.notNull(monitorModel, "不存在监控项啦");

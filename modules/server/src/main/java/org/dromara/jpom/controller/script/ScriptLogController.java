@@ -107,7 +107,7 @@ public class ScriptLogController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<JSONObject> getNowLog(@ValidatorItem() String id,
                                               @ValidatorItem() String executeId,
-                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line,
+                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "行号错误") int line,
                                               HttpServletRequest request) {
         ScriptModel item = scriptServer.getByKey(id, request);
         Assert.notNull(item, "没有对应数据");

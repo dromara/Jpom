@@ -145,7 +145,7 @@ public class ScriptController extends BaseAgentController {
     @RequestMapping(value = "log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<JSONObject> getNowLog(@ValidatorItem() String id,
                                               @ValidatorItem() String executeId,
-                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "line") int line) {
+                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "行号不正确") int line) {
         NodeScriptModel item = nodeScriptServer.getItem(id);
         Assert.notNull(item, "没有对应数据");
         File logFile = item.logFile(executeId);

@@ -52,7 +52,7 @@ public class LogManageController extends BaseAgentController {
 
     @RequestMapping(value = "log_del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public IJsonMessage<String> logData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path) {
+    public IJsonMessage<String> logData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "参数错误path错误") String path) {
         File file = FileUtil.file(LogbackConfig.getPath(), path);
         // 判断修改时间
         long modified = file.lastModified();
@@ -68,7 +68,7 @@ public class LogManageController extends BaseAgentController {
 
     @RequestMapping(value = "log_download", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public void logDownload(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path, HttpServletResponse response) {
+    public void logDownload(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "参数错误path错误") String path, HttpServletResponse response) {
         File file = FileUtil.file(LogbackConfig.getPath(), path);
         if (file.isFile()) {
             ServletUtil.write(response, file);

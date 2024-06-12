@@ -149,7 +149,7 @@ public class SshController extends BaseServerController {
      */
     @PostMapping(value = "save.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public IJsonMessage<String> save(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "ssh名称不能为空") String name,
+    public IJsonMessage<String> save(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "参数错误ssh名称不能为空") String name,
                                      String id,
                                      String group,
                                      HttpServletRequest request) {
