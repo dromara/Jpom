@@ -139,9 +139,10 @@ public class ExtractTest {
 
     // 匹配中文字符的正则表达式
     Pattern[] chinesePatterns = new Pattern[]{
-        Pattern.compile("\"[\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-]*\""),
-        Pattern.compile("\" [\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）\\[\\]+\" \\-]*\""),
-        Pattern.compile("\"[a-zA-Z][\\w\\u4e00-\\u9fa5]*[\\u4e00-\\u9fa5]\""),
+        Pattern.compile("\"[\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
+        Pattern.compile("\"[\\s+][\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
+        Pattern.compile("\"[a-zA-Z.·\\d][\\u4e00-\\u9fa5]*[\\u4e00-\\u9fa5.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
+        Pattern.compile("\"[\\d.]\\s[\\u4e00-\\u9fa5]*[\\u4e00-\\u9fa5.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
         Pattern.compile("\"[\\u4e00-\\u9fa5]+[a-zA-Z]\""),
     };
     Pattern[] messageKeyPatterns = new Pattern[]{
@@ -178,7 +179,7 @@ public class ExtractTest {
                             matcher.appendReplacement(modifiedLine, String.format("\"%s\"", key));
                         } else {
                             String path = FileUtil.getAbsolutePath(file);
-                            if (StrUtil.containsAny(path, "/agent-transport-common/", "\\agent-transport-common\\")) {
+                            if (StrUtil.containsAny(path, "/agent-transport/", "\\agent-transport\\")) {
                                 matcher.appendReplacement(modifiedLine, String.format("TransportMessageUtil.get(\"%s\")", key));
                             } else {
                                 matcher.appendReplacement(modifiedLine, String.format("MessageUtil.get(\"%s\")", key));

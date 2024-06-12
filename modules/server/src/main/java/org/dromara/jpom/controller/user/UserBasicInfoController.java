@@ -11,10 +11,8 @@ package org.dromara.jpom.controller.user;
 
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.collection.CollStreamUtil;
-import cn.hutool.core.comparator.CompareUtil;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
@@ -36,7 +34,6 @@ import org.dromara.jpom.func.user.model.UserLoginLogModel;
 import org.dromara.jpom.func.user.server.UserLoginLogServer;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.MailAccountModel;
-import org.dromara.jpom.model.data.WorkspaceModel;
 import org.dromara.jpom.model.log.BuildHistoryLog;
 import org.dromara.jpom.model.log.UserOperateLogV1;
 import org.dromara.jpom.model.user.UserModel;
@@ -170,7 +167,8 @@ public class UserBasicInfoController extends BaseServerController {
         Assert.notNull(config, "管理员还没有配置系统邮箱,请联系管理配置发件信息");
         int randomInt = RandomUtil.randomInt(1000, 9999);
         try {
-            EmailUtil.send(email, "Jpom 验证码", "验证码是：" + randomInt);
+            String title = "Jpom 验证码";
+            EmailUtil.send(email, title, StrUtil.format("验证码是：{}", randomInt));
         } catch (Exception e) {
             log.error("发送失败", e);
             return new JsonMessage<>(500, "发送邮件失败：" + e.getMessage());

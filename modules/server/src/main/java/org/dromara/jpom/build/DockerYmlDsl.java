@@ -296,7 +296,10 @@ public class DockerYmlDsl extends BaseJsonModel {
     private void python3PluginCheck(Map<String, Object> step) {
         Assert.notNull(step.get("version"), "python3 插件 version 不能为空");
         String version = String.valueOf(step.get("version"));
-        Assert.state(StrUtil.startWith(version, "3."), "请填入正确的 python3 版本号");
+        Assert.state(StrUtil.startWith(version, "3."), () -> {
+            //
+            return "请填入正确的 python3 版本号";
+        });
         String link = String.format("https://repo.huaweicloud.com/python/%s/Python-%s.tar.xz", version, version);
         HttpResponse httpResponse = HttpUtil.createRequest(Method.HEAD, link).execute();
         Assert.isTrue(httpResponse.isOk() ||
