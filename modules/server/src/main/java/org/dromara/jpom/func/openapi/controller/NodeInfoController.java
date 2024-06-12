@@ -71,12 +71,12 @@ public class NodeInfoController extends BaseServerController {
      */
     @RequestMapping(value = ServerOpenApi.RECEIVE_PUSH, method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public IJsonMessage<JSONObject> receivePush(@ValidatorItem(msg = "token empty") String token,
-                                                @ValidatorItem(msg = "ips empty") String ips,
-                                                @ValidatorItem(msg = "loginName empty") String loginName,
-                                                @ValidatorItem(msg = "loginPwd empty") String loginPwd,
-                                                @ValidatorItem(msg = "workspaceId empty") String workspaceId,
-                                                @ValidatorItem(value = ValidatorRule.NUMBERS, msg = "port error") int port,
+    public IJsonMessage<JSONObject> receivePush(@ValidatorItem(msg = "凭证不能为空") String token,
+                                                @ValidatorItem(msg = "通信 IP 不能为空") String ips,
+                                                @ValidatorItem(msg = "登录名不能为空") String loginName,
+                                                @ValidatorItem(msg = "密码不能为空") String loginPwd,
+                                                @ValidatorItem(msg = "工作空间ID不能为空") String workspaceId,
+                                                @ValidatorItem(value = ValidatorRule.NUMBERS, msg = "端口错误") int port,
                                                 String ping) {
         Assert.state(StrUtil.equals(token, JpomManifest.getInstance().randomIdSign()), "token error");
         boolean exists = workspaceService.exists(new WorkspaceModel(workspaceId));
