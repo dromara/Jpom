@@ -17,6 +17,7 @@ import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.i18n.MessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.PageResultDto;
@@ -76,7 +77,8 @@ public class MonitorUserOptListController extends BaseServerController {
             .filter(classFeature -> classFeature != ClassFeature.NULL)
             .map(classFeature -> {
                 JSONObject jsonObject1 = new JSONObject();
-                jsonObject1.put("title", classFeature.getName());
+                String value = MessageUtil.get(classFeature.getName().get());
+                jsonObject1.put("title", value);
                 jsonObject1.put("value", classFeature.name());
                 return jsonObject1;
             })
@@ -87,7 +89,8 @@ public class MonitorUserOptListController extends BaseServerController {
             .filter(methodFeature -> methodFeature != MethodFeature.NULL && methodFeature != MethodFeature.LIST)
             .map(classFeature -> {
                 JSONObject jsonObject1 = new JSONObject();
-                jsonObject1.put("title", classFeature.getName());
+                String value = MessageUtil.get(classFeature.getName().get());
+                jsonObject1.put("title", value);
                 jsonObject1.put("value", classFeature.name());
                 return jsonObject1;
             })

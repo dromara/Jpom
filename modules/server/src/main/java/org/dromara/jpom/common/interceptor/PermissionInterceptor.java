@@ -15,6 +15,7 @@ import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.i18n.MessageUtil;
 import org.dromara.jpom.exception.AgentException;
 import org.dromara.jpom.model.BaseNodeModel;
 import org.dromara.jpom.model.data.NodeModel;
@@ -111,7 +112,7 @@ public class PermissionInterceptor implements HandlerMethodInterceptor {
             String workspaceId = BaseWorkspaceService.getWorkspaceId(request);
             UserBindWorkspaceModel.PermissionResult permissionResult = userBindWorkspaceService.checkPermission(userModel, workspaceId + StrUtil.DASHED + method.name());
             if (!permissionResult.isSuccess()) {
-                this.errorMsg(response, permissionResult.errorMsg(StrUtil.format("对应功能【{}-{}】", classFeature.getName(), method.getName())));
+                this.errorMsg(response, permissionResult.errorMsg(StrUtil.format("对应功能【{}-{}】", MessageUtil.get(classFeature.getName().get()), MessageUtil.get(method.getName().get()))));
                 return false;
             }
         }

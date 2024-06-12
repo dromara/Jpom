@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.i18n.MessageUtil;
 import org.dromara.jpom.common.interceptor.PermissionInterceptor;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.assets.server.MachineNodeServer;
@@ -47,6 +48,7 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * socket 拦截器、鉴权
@@ -283,14 +285,15 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
             // 判断资产权限
             return "您没有资产管理权限";
         }
+        Supplier<String> nodeUpgradeName = ClassFeature.NODE_UPGRADE.getName();
         if (handlerType == HandlerType.nodeUpdate) {
-            return StrUtil.format("您没有对应功能【{}】管理权限", ClassFeature.NODE_UPGRADE.getName());
+            return StrUtil.format("您没有对应功能【{}】管理权限", MessageUtil.get(nodeUpgradeName.get()));
         }
         Class<?> handlerClass = handlerType.getHandlerClass();
         SystemPermission systemPermission = handlerClass.getAnnotation(SystemPermission.class);
         if (systemPermission != null) {
             if (!userInfo.isSuperSystemUser()) {
-                return StrUtil.format("您没有对应功能【{}】管理权限", ClassFeature.NODE_UPGRADE.getName());
+                return StrUtil.format("您没有对应功能【{}】管理权限", MessageUtil.get(nodeUpgradeName.get()));
             }
         }
         Feature feature = handlerClass.getAnnotation(Feature.class);
@@ -300,7 +303,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
         if (permissionResult.isSuccess()) {
             return StrUtil.EMPTY;
         }
-        return permissionResult.errorMsg(StrUtil.format("对应功能【{}-{}】", cls.getName(), method.getName()));
+        return permissionResult.errorMsg(StrUtil.format("对应功能【{}-{}】", MessageUtil.get(cls.getName().get()), MessageUtil.get(method.getName().get())));
     }
 
     private BaseWorkspaceModel checkData(HandlerType handlerType, UserModel userModel, HttpServletRequest httpServletRequest) {

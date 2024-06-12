@@ -29,6 +29,9 @@ public class MessageUtil {
      * @return msg
      */
     public static String get(String key) {
+        if (StrUtil.isEmpty(key)) {
+            return StrUtil.EMPTY;
+        }
         String language = "zh_CN";
         ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (servletRequestAttributes != null) {
