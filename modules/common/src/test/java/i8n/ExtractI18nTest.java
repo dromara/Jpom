@@ -76,6 +76,10 @@ public class ExtractI18nTest {
         Pattern.compile("@ValidatorItem\\(.*?msg\\s*=\\s*\"([^\"]*)\".*?\\)"),
     };
 
+    private final String[] JpomAnnotation = {
+        "@ValidatorItem", "@TableName"
+    };
+
 
     @Test
     @SneakyThrows
@@ -92,22 +96,22 @@ public class ExtractI18nTest {
                     verifyDuplicates(file1, chinesePattern);
                     extractFile(file1, chinesePattern);
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw Lombok.sneakyThrow(e);
             }
         });
         // 生成 key
         generateKey(file);
         // 替换中文
-        walkFile(file, file1 -> {
-            try {
-                for (Pattern chinesePattern : chinesePatterns) {
-                    replaceQuotedChineseInFile(file1, chinesePattern);
-                }
-            } catch (IOException e) {
-                throw Lombok.sneakyThrow(e);
-            }
-        });
+//        walkFile(file, file1 -> {
+//            try {
+//                for (Pattern chinesePattern : chinesePatterns) {
+//                    replaceQuotedChineseInFile(file1, chinesePattern);
+//                }
+//            } catch (Exception e) {
+//                throw Lombok.sneakyThrow(e);
+//            }
+//        });
     }
 
     /**
@@ -206,7 +210,7 @@ public class ExtractI18nTest {
      * @param pattern 当前匹配的正则
      * @throws IOException io 异常
      */
-    private void replaceQuotedChineseInFile(File file, Pattern pattern) throws IOException {
+    private void replaceQuotedChineseInFile(File file, Pattern pattern) throws Exception {
         String subPath = FileUtil.subPath(rootFile.getAbsolutePath(), file);
         // 先存储于临时文件
         File tempFile = FileUtil.file(rootFile, "i18n-temp", subPath);
@@ -231,7 +235,7 @@ public class ExtractI18nTest {
                         if (key == null) {
                             throw new IllegalArgumentException("找不到 key:" + unWrap);
                         }
-                        if (StrUtil.contains(line, "@ValidatorItem(")) {
+                        if (StrUtil.containsAny(line, JpomAnnotation)) {
                             //System.out.println("需要单独处理的：" + line);
                             matcher.appendReplacement(modifiedLine, String.format("\"%s\"", key));
                         } else {
@@ -268,7 +272,7 @@ public class ExtractI18nTest {
      * @param pattern 匹配的正则
      * @throws IOException io 异常
      */
-    private void verifyDuplicates(File file, Pattern pattern) throws IOException {
+    private void verifyDuplicates(File file, Pattern pattern) throws Exception {
         try (BufferedReader reader = Files.newBufferedReader(file.toPath())) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -292,7 +296,7 @@ public class ExtractI18nTest {
                     find = true;
                 }
 
-                if (find && StrUtil.contains(line, "@ValidatorItem(")) {
+                if (find && StrUtil.containsAny(line, JpomAnnotation)) {
                     //System.out.println("需要单独处理的：" + line);
                 }
             }
@@ -306,7 +310,7 @@ public class ExtractI18nTest {
      * @param pattern 匹配的正则
      * @throws IOException io 异常
      */
-    private void extractFile(File file, Pattern pattern) throws IOException {
+    private void extractFile(File file, Pattern pattern) throws Exception {
         try (BufferedReader reader = Files.newBufferedReader(file.toPath())) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -370,9 +374,9 @@ public class ExtractI18nTest {
      * @param line 代码行
      * @return 是否需要忽略
      */
-    private boolean canIgnore(String line) {
+    private boolean canIgnore(String line) throws ClassNotFoundException {
         String trimLin = line.trim();
-        if (StrUtil.startWithAny(trimLin, "@ValidatorItem")) {
+        if (StrUtil.startWithAny(trimLin, JpomAnnotation)) {
             // jpom 特有注解
             return false;
         }
@@ -381,6 +385,11 @@ public class ExtractI18nTest {
             return true;
         }
         if (StrUtil.endWithAny(trimLin, "),")) {
+            // 枚举通用代码格式
+            if (StrUtil.containsAny(trimLin, "() -> ")) {
+                // 枚举实现了 Supplier
+                return false;
+            }
             // 假定枚举通用代码格式
             //  System.out.println(trimLin);
             return true;

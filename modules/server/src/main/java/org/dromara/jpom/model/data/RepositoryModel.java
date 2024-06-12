@@ -29,7 +29,8 @@ import java.util.Map;
  * @author Hotstrip
  * 仓库地址实体类
  */
-@TableName(value = "REPOSITORY", nameKey = "仓库信息")
+@TableName(value = "REPOSITORY",
+    nameKey = "仓库信息")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class RepositoryModel extends BaseGroupModel {
