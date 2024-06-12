@@ -183,7 +183,8 @@ public abstract class BaseDockerImagesController extends BaseDockerController {
                                           MultipartFile file) throws Exception {
         String originalFilename = file.getOriginalFilename();
         String extName = FileUtil.extName(originalFilename);
-        Assert.state(StrUtil.equalsIgnoreCase(extName, "tar"), "只支持tar文件");
+        boolean expression = StrUtil.equalsIgnoreCase(extName, "tar");
+        Assert.state(expression, "只支持tar文件");
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("stream", file.getInputStream());
@@ -219,8 +220,10 @@ public abstract class BaseDockerImagesController extends BaseDockerController {
     public IJsonMessage<Object> createContainer(@RequestBody JSONObject jsonObject) throws Exception {
         String id = jsonObject.getString("id");
         Assert.hasText(id, "id 不能为空");
-        Assert.hasText(jsonObject.getString("imageId"), "镜像不能为空");
-        Assert.hasText(jsonObject.getString("name"), "容器名称不能为空");
+        String imageId = jsonObject.getString("imageId");
+        Assert.hasText(imageId, "镜像不能为空");
+        String name = jsonObject.getString("name");
+        Assert.hasText(name, "容器名称不能为空");
 
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);

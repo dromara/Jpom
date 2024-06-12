@@ -35,6 +35,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -131,10 +132,12 @@ public class DockerYmlDsl extends BaseJsonModel {
                 containsRun = true;
             }
             if (step.containsKey("env")) {
-                Assert.isInstanceOf(Map.class, step.get("env"), "env 必须是 map 类型");
+                Object env1 = step.get("env");
+                Assert.isInstanceOf(Map.class, env1, "env 必须是 map 类型");
             }
             if (step.containsKey("uses")) {
-                Assert.isInstanceOf(String.class, step.get("uses"), "uses 只支持 String 类型");
+                Object uses1 = step.get("uses");
+                Assert.isInstanceOf(String.class, uses1, "uses 只支持 String 类型");
                 String uses = (String) step.get("uses");
                 if ("node".equals(uses)) {
                     nodePluginCheck(step);
@@ -174,7 +177,8 @@ public class DockerYmlDsl extends BaseJsonModel {
     }
 
     private void cachePluginCheck(Map<String, Object> step) {
-        Assert.notNull(step.get("path"), "cache 插件 path 不能为空");
+        Object path = step.get("path");
+        Assert.notNull(path, "cache 插件 path 不能为空");
     }
 
     /**
@@ -183,8 +187,9 @@ public class DockerYmlDsl extends BaseJsonModel {
      * @param step 参数
      */
     private void mavenPluginCheck(Map<String, Object> step, DockerInfoService dockerInfoService, MachineDockerServer machineDockerServer, String workspaceId) {
-        Assert.notNull(step.get("version"), "maven 插件 version 不能为空");
-        String version = String.valueOf(step.get("version"));
+        Object version1 = step.get("version");
+        Assert.notNull(version1, "maven 插件 version 不能为空");
+        String version = String.valueOf(version1);
         String link = String.format("https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/%s/binaries/apache-maven-%s-bin.tar.gz", version, version);
         HttpRequest request = HttpUtil.createRequest(Method.HEAD, link);
         try (HttpResponse httpResponse = request.execute()) {
@@ -238,8 +243,9 @@ public class DockerYmlDsl extends BaseJsonModel {
      * @param step 参数
      */
     private void javaPluginCheck(Map<String, Object> step) {
-        Assert.notNull(step.get("version"), "java 插件 version 不能为空");
-        Integer version = Integer.valueOf(String.valueOf(step.get("version")));
+        Object version1 = step.get("version");
+        Assert.notNull(version1, "java 插件 version 不能为空");
+        Integer version = Integer.valueOf(String.valueOf(version1));
         List<Integer> supportedVersions = ListUtil.of(8, 11, 17, 18);
         Assert.isTrue(supportedVersions.contains(version), String.format("目前java 插件支持的版本: %s", supportedVersions));
     }
@@ -251,13 +257,16 @@ public class DockerYmlDsl extends BaseJsonModel {
      * @param step 参数
      */
     private void gradlePluginCheck(Map<String, Object> step) {
-        Assert.notNull(step.get("version"), "gradle 插件 version 不能为空");
-        String version = String.valueOf(step.get("version"));
+        Object version1 = step.get("version");
+        Assert.notNull(version1, "gradle 插件 version 不能为空");
+        String version = String.valueOf(version1);
         String link = String.format("https://downloads.gradle-dn.com/distributions/gradle-%s-bin.zip", version);
-        HttpResponse httpResponse = HttpUtil.createRequest(Method.HEAD, link).execute();
-        Assert.isTrue(httpResponse.isOk() ||
-            httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP ||
-            httpResponse.getStatus() == HttpStatus.HTTP_SEE_OTHER, "请填入正确的 gradle 版本号");
+        HttpUtil.createRequest(Method.HEAD, link).thenFunction(httpResponse -> {
+            Assert.isTrue(httpResponse.isOk() ||
+                httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP ||
+                httpResponse.getStatus() == HttpStatus.HTTP_SEE_OTHER, "请填入正确的 gradle 版本号");
+            return null;
+        });
     }
 
     /**
@@ -266,8 +275,9 @@ public class DockerYmlDsl extends BaseJsonModel {
      * @param step 参数
      */
     private void nodePluginCheck(Map<String, Object> step) {
-        Assert.notNull(step.get("version"), "node 插件 version 不能为空");
-        String version = String.valueOf(step.get("version"));
+        Object version1 = step.get("version");
+        Assert.notNull(version1, "node 插件 version 不能为空");
+        String version = String.valueOf(version1);
         String link = String.format("https://registry.npmmirror.com/-/binary/node/v%s/node-v%s-linux-x64.tar.gz", version, version);
         HttpResponse httpResponse = HttpUtil.createRequest(Method.HEAD, link).execute();
         Assert.isTrue(httpResponse.isOk() || httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP, "请填入正确的 node 版本号");
@@ -279,13 +289,19 @@ public class DockerYmlDsl extends BaseJsonModel {
      * @param step 参数
      */
     private void goPluginCheck(Map<String, Object> step) {
-        Assert.notNull(step.get("version"), "go 插件 version 不能为空");
-        String version = String.valueOf(step.get("version"));
+        Object version1 = step.get("version");
+        Assert.notNull(version1, "go 插件 version 不能为空");
+        String version = String.valueOf(version1);
         String link = String.format("https://studygolang.com/dl/golang/go%s.linux-amd64.tar.gz", version);
-        HttpResponse httpResponse = HttpUtil.createRequest(Method.HEAD, link).execute();
-        Assert.isTrue(httpResponse.isOk() ||
-            httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP ||
-            httpResponse.getStatus() == HttpStatus.HTTP_SEE_OTHER, "请填入正确的 go 版本号");
+        HttpUtil.createRequest(Method.HEAD, link).thenFunction(new Function<HttpResponse, Object>() {
+            @Override
+            public Object apply(HttpResponse httpResponse) {
+                Assert.isTrue(httpResponse.isOk() ||
+                    httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP ||
+                    httpResponse.getStatus() == HttpStatus.HTTP_SEE_OTHER, "请填入正确的 go 版本号");
+                return null;
+            }
+        });
     }
 
     /**
@@ -294,16 +310,23 @@ public class DockerYmlDsl extends BaseJsonModel {
      * @param step 参数
      */
     private void python3PluginCheck(Map<String, Object> step) {
-        Assert.notNull(step.get("version"), "python3 插件 version 不能为空");
-        String version = String.valueOf(step.get("version"));
+        Object version1 = step.get("version");
+        Assert.notNull(version1, "python3 插件 version 不能为空");
+        String version = String.valueOf(version1);
         Assert.state(StrUtil.startWith(version, "3."), () -> {
             //
             return "请填入正确的 python3 版本号";
         });
         String link = String.format("https://repo.huaweicloud.com/python/%s/Python-%s.tar.xz", version, version);
-        HttpResponse httpResponse = HttpUtil.createRequest(Method.HEAD, link).execute();
-        Assert.isTrue(httpResponse.isOk() ||
-            httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP, "请填入正确的 python3 版本号");
+        HttpUtil.createRequest(Method.HEAD, link).thenFunction(new Function<HttpResponse, Object>() {
+            @Override
+            public Object apply(HttpResponse httpResponse) {
+                Assert.isTrue(httpResponse.isOk() ||
+                    httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP, "请填入正确的 python3 版本号");
+                return null;
+            }
+        });
+
     }
 
     /**
