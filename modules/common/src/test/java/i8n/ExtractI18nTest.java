@@ -23,6 +23,8 @@ import java.util.regex.Pattern;
 
 /**
  * 提交代码中的中文并生成随机 key 转存到 properties
+ * <p>
+ * \"[\u4e00-\u9fa5]+\"
  *
  * @author bwcx_jzy
  * @since 2024/6/11
@@ -62,6 +64,7 @@ public class ExtractI18nTest {
         Pattern.compile("\"[a-zA-Z.·\\d][\\u4e00-\\u9fa5]*[\\u4e00-\\u9fa5.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
         Pattern.compile("\"[\\d.]\\s[\\u4e00-\\u9fa5]*[\\u4e00-\\u9fa5.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
         Pattern.compile("\"[\\u4e00-\\u9fa5]+[a-zA-Z]\""),
+        // 字母开头
         Pattern.compile("\"[a-zA-Z].*[\\u4e00-\\u9fa5]\""),
     };
     /**
@@ -96,15 +99,15 @@ public class ExtractI18nTest {
         // 生成 key
         generateKey(file);
         // 替换中文
-//        walkFile(file, file1 -> {
-//            try {
-//                for (Pattern chinesePattern : chinesePatterns) {
-//                    replaceQuotedChineseInFile(file1, chinesePattern);
-//                }
-//            } catch (IOException e) {
-//                throw Lombok.sneakyThrow(e);
-//            }
-//        });
+        walkFile(file, file1 -> {
+            try {
+                for (Pattern chinesePattern : chinesePatterns) {
+                    replaceQuotedChineseInFile(file1, chinesePattern);
+                }
+            } catch (IOException e) {
+                throw Lombok.sneakyThrow(e);
+            }
+        });
     }
 
     /**
