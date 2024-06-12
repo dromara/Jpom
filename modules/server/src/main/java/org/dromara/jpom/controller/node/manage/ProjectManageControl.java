@@ -416,7 +416,7 @@ public class ProjectManageControl extends BaseServerController {
         // 刷新缓存
         projectInfoCacheService.syncExecuteNode(nowNode);
         projectInfoCacheService.syncExecuteNode(toNodeModel);
-        return new JsonMessage<>(200, "项目迁移成功：" + result.getMsg() + " | " + buildMsg);
+        return new JsonMessage<>(200, StrUtil.format("项目迁移成功：{} | {}", result.getMsg(), buildMsg));
     }
 
     /**

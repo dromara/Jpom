@@ -126,22 +126,23 @@ public class ExtractTest {
         // 生成 key
         generateKey(file);
         // 替换中文
-        walkFile(file, file1 -> {
-            try {
-                for (Pattern chinesePattern : chinesePatterns) {
-                    replaceQuotedChineseInFile(file1, chinesePattern);
-                }
-            } catch (IOException e) {
-                throw Lombok.sneakyThrow(e);
-            }
-        });
+//        walkFile(file, file1 -> {
+//            try {
+//                for (Pattern chinesePattern : chinesePatterns) {
+//                    replaceQuotedChineseInFile(file1, chinesePattern);
+//                }
+//            } catch (IOException e) {
+//                throw Lombok.sneakyThrow(e);
+//            }
+//        });
     }
 
     // 匹配中文字符的正则表达式
     Pattern[] chinesePatterns = new Pattern[]{
-        Pattern.compile("\"[\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）\\[\\]+\" \\-]*\""),
+        Pattern.compile("\"[\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-]*\""),
         Pattern.compile("\" [\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）\\[\\]+\" \\-]*\""),
-        Pattern.compile("\"[a-zA-Z][\\w\\u4e00-\\u9fa5]*[\\u4e00-\\u9fa5]\"")
+        Pattern.compile("\"[a-zA-Z][\\w\\u4e00-\\u9fa5]*[\\u4e00-\\u9fa5]\""),
+        Pattern.compile("\"[\\u4e00-\\u9fa5]+[a-zA-Z]\""),
     };
     Pattern[] messageKeyPatterns = new Pattern[]{
         Pattern.compile("MessageUtil\\.get\\(\"(.*?)\"\\)"),
@@ -260,11 +261,16 @@ public class ExtractTest {
 
     private boolean canIgnore(String line) {
         String trimLin = line.trim();
+        if (StrUtil.startWithAny(trimLin, "@ValidatorItem")) {
+            return false;
+        }
         if (StrUtil.startWithAny(trimLin, "log.", "@", "*", "//", "public static final")) {
+
             return true;
         }
         if (StrUtil.endWithAny(trimLin, "),")) {
             // 枚举
+//            System.out.println(trimLin);
             return true;
         }
         return false;
