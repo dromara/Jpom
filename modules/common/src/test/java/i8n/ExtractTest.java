@@ -158,7 +158,7 @@ public class ExtractTest {
     Pattern[] messageKeyPatterns = new Pattern[]{
         Pattern.compile("MessageUtil\\.get\\(\"(.*?)\"\\)"),
         Pattern.compile("TransportMessageUtil\\.get\\(\"(.*?)\"\\)"),
-        Pattern.compile("@ValidatorItem\\(.*?msg\\s*=\\s*\"([^\"]*)\""),
+        Pattern.compile("@ValidatorItem\\(.*?msg\\s*=\\s*\"([^\"]*)\".*?\\)"),
     };
 
 
