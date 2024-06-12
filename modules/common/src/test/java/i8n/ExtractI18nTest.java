@@ -326,7 +326,11 @@ public class ExtractI18nTest {
                 for (Pattern messageKeyPattern : messageKeyPatterns) {
                     Matcher matcher = messageKeyPattern.matcher(line);
                     while (matcher.find()) {
-                        useKeys.add(matcher.group(1));
+                        String key = matcher.group(1);
+                        if (!needIgnoreCase(key, line)) {
+                            continue;
+                        }
+                        useKeys.add(key);
                         found = true;
                     }
                 }

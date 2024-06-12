@@ -10,6 +10,7 @@
 package org.dromara.jpom.model.data;
 
 import cn.hutool.core.util.ReflectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.setting.yaml.YamlUtil;
 import cn.keepbx.jpom.model.BaseJsonModel;
 import lombok.Data;
@@ -217,7 +218,7 @@ public class DslYmlDto extends BaseJsonModel {
      */
     public DslYmlDto.BaseProcess getDslProcess(String opt) {
         DslYmlDto.BaseProcess baseProcess = this.tryDslProcess(opt);
-        Assert.notNull(baseProcess, "DSL 未配置运行管理或者未配置 " + opt + " 流程");
+        Assert.notNull(baseProcess, StrUtil.format("DSL 未配置运行管理或者未配置 {} 流程", opt));
         return baseProcess;
     }
 }

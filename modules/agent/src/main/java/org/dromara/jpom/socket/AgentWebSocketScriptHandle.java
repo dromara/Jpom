@@ -118,7 +118,8 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
         nodeScriptModel.setLastRunUser(name);
         nodeScriptServer.updateItem(nodeScriptModel);
         json.put("code", 200);
-        json.put("msg", "执行成功");
+        String value = "执行成功";
+        json.put("msg", value);
         log.debug(json.toString());
         SocketSessionUtil.send(session, json.toString());
     }
