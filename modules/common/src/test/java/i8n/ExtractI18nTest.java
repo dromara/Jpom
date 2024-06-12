@@ -65,7 +65,7 @@ public class ExtractI18nTest {
         Pattern.compile("\"[\\d.]\\s[\\u4e00-\\u9fa5]*[\\u4e00-\\u9fa5.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
         Pattern.compile("\"[\\u4e00-\\u9fa5]+[a-zA-Z]\""),
         // 字母开头
-        Pattern.compile("\"[a-zA-Z].*[\\u4e00-\\u9fa5]\""),
+        Pattern.compile("\"[a-zA-Z{} ].*[\\u4e00-\\u9fa5]\""),
     };
     /**
      * 代码中关联（引用） key 的正则
@@ -376,7 +376,7 @@ public class ExtractI18nTest {
             // jpom 特有注解
             return false;
         }
-        if (StrUtil.startWithAny(trimLin, "log.", "@", "*", "//", "public static final")) {
+        if (StrUtil.startWithAny(trimLin, "@", "*", "//", "public static final")) {
             // 日志、注解、注释、枚举、产量
             return true;
         }
