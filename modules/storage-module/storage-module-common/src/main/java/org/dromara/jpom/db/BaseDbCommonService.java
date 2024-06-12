@@ -24,6 +24,7 @@ import cn.hutool.db.sql.Condition;
 import cn.hutool.extra.spring.SpringUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.MessageUtil;
 import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.system.JpomRuntimeException;
@@ -76,7 +77,7 @@ public abstract class BaseDbCommonService<T> {
     public String getDataDesc() {
         TableName annotation = tClass.getAnnotation(TableName.class);
         Assert.notNull(annotation, "请配置 table Name");
-        return annotation.name();
+        return MessageUtil.get(annotation.nameKey());
     }
 
     protected DataSource getDataSource() {

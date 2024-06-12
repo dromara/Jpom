@@ -21,7 +21,7 @@ import org.dromara.jpom.model.BaseWorkspaceModel;
  * @since 2019/4/19
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "USEROPERATELOGV1", name = "用户操作日志", workspaceBind = 2)
+@TableName(value = "USEROPERATELOGV1", nameKey = "用户操作日志", workspaceBind = 2)
 @Data
 public class UserOperateLogV1 extends BaseWorkspaceModel {
     /**

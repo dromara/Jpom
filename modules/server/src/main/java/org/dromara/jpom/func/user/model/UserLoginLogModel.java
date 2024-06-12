@@ -20,7 +20,7 @@ import org.dromara.jpom.model.BaseUserModifyDbModel;
  * @since 2023/3/9
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "USER_LOGIN_LOG", name = "用户登录日志")
+@TableName(value = "USER_LOGIN_LOG", nameKey = "用户登录日志")
 @Data
 @NoArgsConstructor
 public class UserLoginLogModel extends BaseUserModifyDbModel {

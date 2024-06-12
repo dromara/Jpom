@@ -28,7 +28,7 @@ import java.util.List;
  * @author Arno
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "MONITOR_INFO", name = "监控信息")
+@TableName(value = "MONITOR_INFO", nameKey = "监控信息")
 @Data
 public class MonitorModel extends BaseWorkspaceModel {
 

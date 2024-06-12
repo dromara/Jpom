@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @since 2019/4/21
  */
-@TableName(value = "OUT_GIVING", name = "节点分发")
+@TableName(value = "OUT_GIVING", nameKey = "节点分发")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class OutGivingModel extends BaseGroupModel {

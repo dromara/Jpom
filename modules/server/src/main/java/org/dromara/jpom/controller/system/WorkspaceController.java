@@ -25,6 +25,7 @@ import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.UrlRedirectUtil;
+import org.dromara.jpom.common.i18n.MessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.db.TableName;
@@ -187,7 +188,7 @@ public class WorkspaceController extends BaseServerController {
             String sql = "select  count(1) as cnt from " + tableName.value() + " where workspaceId=?";
             Number number = workspaceService.queryNumber(sql, id);
 
-            TreeNode<String> treeNode = new TreeNode<>(tableName.value(), parent, tableName.name(), 0);
+            TreeNode<String> treeNode = new TreeNode<>(tableName.value(), parent, MessageUtil.get(tableName.nameKey()), 0);
             //
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("workspaceBind", tableName.workspaceBind());
@@ -231,14 +232,14 @@ public class WorkspaceController extends BaseServerController {
                 //
                 String sql = "select  count(1) as cnt from " + tableName1.value() + " where workspaceId=?";
                 int cnt = ObjectUtil.defaultIfNull(workspaceService.queryNumber(sql, id), Number::intValue, 0);
-                Assert.state(cnt <= 0, StrUtil.format("当前工作空间下还存在关联：{} 和 {} 数据", tableName.name(), tableName1.name()));
+                Assert.state(cnt <= 0, StrUtil.format("当前工作空间下还存在关联：{} 和 {} 数据", MessageUtil.get(tableName.nameKey()), MessageUtil.get(tableName1.nameKey())));
                 // 等待自动删除
                 autoDeleteClass.add(aClass);
             } else {
                 // 其他严格检查的情况
                 String sql = "select  count(1) as cnt from " + tableName.value() + " where workspaceId=?";
                 int cnt = ObjectUtil.defaultIfNull(workspaceService.queryNumber(sql, id), Number::intValue, 0);
-                Assert.state(cnt <= 0, "当前工作空间下还存在关联数据：" + tableName.name());
+                Assert.state(cnt <= 0, "当前工作空间下还存在关联数据：" + MessageUtil.get(tableName.nameKey()));
             }
         }
         // 判断用户绑定关系

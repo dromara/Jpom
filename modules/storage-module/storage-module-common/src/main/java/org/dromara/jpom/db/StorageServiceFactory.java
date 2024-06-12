@@ -23,6 +23,7 @@ import cn.hutool.db.sql.Wrapper;
 import cn.hutool.setting.Setting;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.MessageUtil;
 import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.system.JpomRuntimeException;
@@ -134,7 +135,8 @@ public class StorageServiceFactory {
             .map(Field::getName)
             .collect(Collectors.toSet());
 
-        log.info("开始迁移 {} {}", tableName.name(), tableName.value());
+        String tableDesc = MessageUtil.get(tableName.nameKey());
+        log.info("开始迁移 {} {}", tableDesc, tableName.value());
         int total = 0;
         while (true) {
             Entity where = Entity.create(tableName.value());
@@ -193,7 +195,7 @@ public class StorageServiceFactory {
             deleteWhere.set("id", newResult.stream().map(entity -> entity.getStr("id")).collect(Collectors.toList()));
             db.del(deleteWhere);
         }
-        log.info("{} 迁移成功 {} 条数据", tableName.name(), total);
+        log.info("{} 迁移成功 {} 条数据", tableDesc, total);
         return total;
     }
 
