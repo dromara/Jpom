@@ -67,10 +67,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class BackupInfoController extends BaseServerController {
 
-    /**
-     * 存储数据库表名称和别名的变量
-     */
-    private static Map<String, String> TABLE_NAME_MAP = new HashMap<>();
 
     private final BackupInfoService backupInfoService;
 
@@ -262,16 +258,16 @@ public class BackupInfoController extends BaseServerController {
         // 从数据库加载表名称列表
         List<String> tableNameList = backupInfoService.h2TableNameList();
         // 扫描程序，拿到表名称和别名
-        if (TABLE_NAME_MAP.isEmpty()) {
-            Set<Class<?>> classes = ClassUtil.scanPackageByAnnotation("org.dromara.jpom", TableName.class);
-            TABLE_NAME_MAP = CollStreamUtil.toMap(classes, aClass -> {
-                TableName tableName = aClass.getAnnotation(TableName.class);
-                return tableName.value();
-            }, aClass -> {
-                TableName tableName = aClass.getAnnotation(TableName.class);
-                return MessageUtil.get(tableName.nameKey());
-            });
-        }
+
+        Set<Class<?>> classes = ClassUtil.scanPackageByAnnotation("org.dromara.jpom", TableName.class);
+        Map<String, String> TABLE_NAME_MAP = CollStreamUtil.toMap(classes, aClass -> {
+            TableName tableName = aClass.getAnnotation(TableName.class);
+            return tableName.value();
+        }, aClass -> {
+            TableName tableName = aClass.getAnnotation(TableName.class);
+            return MessageUtil.get(tableName.nameKey());
+        });
+
         List<JSONObject> list = tableNameList.stream().map(s -> {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("tableName", s);

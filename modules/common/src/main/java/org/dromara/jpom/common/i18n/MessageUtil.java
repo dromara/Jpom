@@ -1,12 +1,14 @@
 package org.dromara.jpom.common.i18n;
 
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import cn.hutool.http.Header;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -23,6 +25,27 @@ import java.util.Locale;
 public class MessageUtil {
 
     /**
+     * 获取语言
+     *
+     * @param request 请求
+     * @return 合法的语言
+     */
+    public static String parseLanguage(HttpServletRequest request) {
+        String language = ServletUtil.getHeader(request, Header.ACCEPT_LANGUAGE.getValue(), CharsetUtil.CHARSET_UTF_8);
+        language = StrUtil.emptyToDefault(language, "zh-cn");
+        language = language.toLowerCase();
+        switch (language) {
+            case "en-us":
+            case "en_us":
+                return "en-US";
+            case "zh_cn":
+            case "zh-cn":
+            default:
+                return "zh-CN";
+        }
+    }
+
+    /**
      * 根据key信息获取对应语言的内容
      *
      * @param key 消息key值
@@ -36,8 +59,7 @@ public class MessageUtil {
         ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (servletRequestAttributes != null) {
             HttpServletRequest request = servletRequestAttributes.getRequest();
-            language = request.getHeader(HttpHeaders.ACCEPT_LANGUAGE);
-            language = StrUtil.emptyToDefault(language, "zh_CN");
+            language = parseLanguage(request);
         }
         Locale locale;
         switch (language) {

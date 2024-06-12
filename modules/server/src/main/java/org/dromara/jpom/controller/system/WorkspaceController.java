@@ -24,7 +24,6 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.common.UrlRedirectUtil;
 import org.dromara.jpom.common.i18n.MessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
@@ -280,7 +279,7 @@ public class WorkspaceController extends BaseServerController {
         JSONObject config = systemParametersServer.getConfigDefNewInstance(StrUtil.format("menus_config_{}", workspaceId), JSONObject.class);
         //"classpath:/menus/index.json"
         //"classpath:/menus/node-index.json"
-        String language = UrlRedirectUtil.parseLanguage(request);
+        String language = MessageUtil.parseLanguage(request);
         config.put("serverMenus", this.readMenusJson("classpath:/menus/" + language + "/index.json"));
         return JsonMessage.success("", config);
     }
