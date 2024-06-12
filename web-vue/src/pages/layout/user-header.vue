@@ -654,6 +654,11 @@ export default {
     locale: {
       set: function (value) {
         useGuideStore().changeLocale(value)
+        //清空本地 tabs
+        const menuStore = useAllMenuStore()
+        // 调用其他 action
+        menuStore.clearTabs('normal', { key: 'all' })
+        menuStore.clearTabs('management', { key: 'all' })
       },
       get: function () {
         return useGuideStore().getLocale()
