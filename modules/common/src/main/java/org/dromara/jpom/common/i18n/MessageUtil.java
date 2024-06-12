@@ -71,7 +71,7 @@ public class MessageUtil {
                 break;
             default:
                 locale = Locale.CHINA;
-                log.warn("未知的语言方式：{}", language);
+                log.warn("Unknown language:{}", language);
                 break;
         }
         return get(key, locale);
