@@ -203,7 +203,8 @@ public class UserBasicInfoController extends BaseServerController {
             .collect(Collectors.toList());
         UserModel user = getUser();
         Map<String, UserWorkspaceModel> map = CollStreamUtil.toMap(collect, UserWorkspaceModel::getId, workspaceModel -> workspaceModel);
-        systemParametersServer.upsert("user-my-workspace-" + user.getId(), map, "用户自定义工作空间");
+        String name = "user-my-workspace-" + user.getId();
+        systemParametersServer.upsert(name, map, "用户自定义工作空间");
         return JsonMessage.success("保存成功");
     }
 

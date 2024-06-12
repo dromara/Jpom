@@ -137,17 +137,20 @@ public class ServerScriptTriggerApiController extends BaseJpomController {
                 String token = jsonObject.getString("token");
                 ScriptModel item = scriptServer.getByKey(id);
                 if (item == null) {
-                    jsonObject.put("msg", "没有对应数据");
+                    String value = "没有对应数据";
+                    jsonObject.put("msg", value);
                     return;
                 }
                 UserModel userModel = triggerTokenLogServer.getUserByToken(token, scriptServer.typeName());
                 if (userModel == null) {
-                    jsonObject.put("msg", "对应的用户不存在,触发器已失效");
+                    String value = "对应的用户不存在,触发器已失效";
+                    jsonObject.put("msg", value);
                     return;
                 }
                 //
                 if (!StrUtil.equals(token, item.getTriggerToken())) {
-                    jsonObject.put("msg", "触发token错误,或者已经失效");
+                    String value = "触发token错误,或者已经失效";
+                    jsonObject.put("msg", value);
                     return;
                 }
                 BaseServerController.resetInfo(userModel);

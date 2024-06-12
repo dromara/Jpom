@@ -177,7 +177,8 @@ public class RepositoryController extends BaseServerController {
         Assert.notNull(file, "没有上传文件");
         String originalFilename = file.getOriginalFilename();
         String extName = FileUtil.extName(originalFilename);
-        Assert.state(StrUtil.endWithIgnoreCase(extName, "csv"), "不允许的文件格式");
+        boolean csv = StrUtil.endWithIgnoreCase(extName, "csv");
+        Assert.state(csv, "不允许的文件格式");
         BomReader bomReader = IoUtil.getBomReader(file.getInputStream());
         CsvReadConfig csvReadConfig = CsvReadConfig.defaultConfig();
         csvReadConfig.setHeaderLineNo(0);

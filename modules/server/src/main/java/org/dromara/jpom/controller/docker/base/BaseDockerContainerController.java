@@ -217,8 +217,10 @@ public abstract class BaseDockerContainerController extends BaseDockerController
         String id = jsonObject.getString("id");
         String containerId = jsonObject.getString("containerId");
         Assert.hasText(id, "id 不能为空");
-        Assert.hasText(jsonObject.getString("imageId"), "镜像不能为空");
-        Assert.hasText(jsonObject.getString("name"), "容器名称不能为空");
+        String imageId = jsonObject.getString("imageId");
+        Assert.hasText(imageId, "镜像不能为空");
+        String name = jsonObject.getString("name");
+        Assert.hasText(name, "容器名称不能为空");
 
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);

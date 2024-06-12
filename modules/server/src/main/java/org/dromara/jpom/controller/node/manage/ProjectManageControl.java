@@ -534,7 +534,8 @@ public class ProjectManageControl extends BaseServerController {
         NodeModel node = getNode();
         String originalFilename = file.getOriginalFilename();
         String extName = FileUtil.extName(originalFilename);
-        Assert.state(StrUtil.endWithIgnoreCase(extName, "csv"), "不允许的文件格式");
+        boolean csv = StrUtil.endWithIgnoreCase(extName, "csv");
+        Assert.state(csv, "不允许的文件格式");
         assert originalFilename != null;
         File csvFile = FileUtil.file(serverConfig.getUserTempPath(), originalFilename);
         int updateCount = 0, ignoreCount = 0;

@@ -408,7 +408,8 @@ public class MachineSshController extends BaseGroupNameController {
         Assert.notNull(file, "没有上传文件");
         String originalFilename = file.getOriginalFilename();
         String extName = FileUtil.extName(originalFilename);
-        Assert.state(StrUtil.endWithIgnoreCase(extName, "csv"), "不允许的文件格式");
+        boolean csv = StrUtil.endWithIgnoreCase(extName, "csv");
+        Assert.state(csv, "不允许的文件格式");
         assert originalFilename != null;
         File csvFile = FileUtil.file(serverConfig.getUserTempPath(), originalFilename);
         int addCount = 0, updateCount = 0;

@@ -842,8 +842,9 @@ public class BuildExecuteManage implements Runnable {
             buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Interrupt, diyInterruptException.getMessage());
         } catch (java.util.concurrent.CancellationException interruptException) {
             // 异常中断
-            this.asyncWebHooks("stop", "process", processName, "statusMsg", "系统中断异常");
-            buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Interrupt, "系统中断异常");
+            String string = "系统中断异常";
+            this.asyncWebHooks("stop", "process", processName, "statusMsg", string);
+            buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Interrupt, string);
         } catch (Exception e) {
             buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Error, e.getMessage());
             logRecorder.error("构建失败:" + processName, e);
