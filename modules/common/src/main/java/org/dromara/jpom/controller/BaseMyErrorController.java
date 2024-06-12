@@ -53,12 +53,12 @@ public abstract class BaseMyErrorController extends AbstractErrorController {
         if (attribute instanceof MaxUploadSizeExceededException) {
             // 上传文件大小异常
             msg = FILE_MAX_SIZE_MSG;
-            log.error("发生异常：" + statusCode + "  " + requestUri);
+            log.error("发生文件上传异常：{}  {}", statusCode, requestUri);
         } else if (status == HttpStatus.NOT_FOUND) {
             msg = "没有找到对应的资源";
             body.put(JsonMessage.DATA, requestUri);
         } else {
-            log.error("发生异常：" + statusCode + "  " + requestUri);
+            log.error("发生异常：{}  {}", statusCode, requestUri);
         }
         body.put(JsonMessage.MSG, msg);
 
