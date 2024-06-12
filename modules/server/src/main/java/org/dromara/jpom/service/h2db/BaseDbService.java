@@ -138,7 +138,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         Assert.state(this.canGroup, "当前数据表不支持分组");
         String group = DialectUtil.wrapField("group");
         String sql = String.format("update %s set %s =? where %s is null or %s = ''", getTableName(), group, group, group);
-        super.execute(sql, Const.DEFAULT_GROUP_NAME);
+        super.execute(sql, Const.DEFAULT_GROUP_NAME.get());
     }
 
     public int insert(T t) {
