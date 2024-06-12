@@ -24,7 +24,8 @@ import org.dromara.jpom.model.data.SshModel;
  * @since 2021/08/04
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "SSHTERMINALEXECUTELOG", nameKey = "ssh 终端执行日志", parents = SshModel.class)
+@TableName(value = "SSHTERMINALEXECUTELOG",
+    nameKey = "ssh 终端执行日志", parents = SshModel.class)
 @Data
 @NoArgsConstructor
 public class SshTerminalExecuteLog extends BaseWorkspaceModel {

@@ -22,7 +22,8 @@ import org.dromara.jpom.model.BaseDbModel;
  * @author bwcx_jzy
  * @since 2021/12/4
  */
-@TableName(value = "USER_BIND_WORKSPACE", nameKey = "用户(权限组)工作空间关系表")
+@TableName(value = "USER_BIND_WORKSPACE",
+    nameKey = "用户(权限组)工作空间关系表")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class UserBindWorkspaceModel extends BaseDbModel {

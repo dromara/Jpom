@@ -29,7 +29,8 @@ import java.io.File;
  * @since 2023/3/3
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "MACHINE_DOCKER_INFO", nameKey = "机器DOCKER信息")
+@TableName(value = "MACHINE_DOCKER_INFO",
+    nameKey = "机器DOCKER信息")
 @Data
 @NoArgsConstructor
 public class MachineDockerModel extends BaseGroupNameModel {

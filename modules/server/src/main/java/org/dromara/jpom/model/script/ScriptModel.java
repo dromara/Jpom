@@ -31,7 +31,8 @@ import java.io.InputStream;
  * @author bwcx_jzy
  * @since 2022/1/19
  */
-@TableName(value = "SERVER_SCRIPT_INFO", nameKey = "脚本模版")
+@TableName(value = "SERVER_SCRIPT_INFO",
+    nameKey = "脚本模版")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ScriptModel extends BaseWorkspaceModel {

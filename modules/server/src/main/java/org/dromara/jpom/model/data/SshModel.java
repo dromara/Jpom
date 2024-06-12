@@ -32,7 +32,8 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @since 2019/8/9
  */
-@TableName(value = "SSH_INFO", nameKey = "SSH 信息")
+@TableName(value = "SSH_INFO",
+    nameKey = "SSH 信息")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor

@@ -27,7 +27,8 @@ import java.util.concurrent.TimeUnit;
  * @since 2019/1/16
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "USER_INFO", nameKey = "用户账号")
+@TableName(value = "USER_INFO",
+    nameKey = "用户账号")
 @Data
 @NoArgsConstructor
 public class UserModel extends BaseUserModifyDbModel {
