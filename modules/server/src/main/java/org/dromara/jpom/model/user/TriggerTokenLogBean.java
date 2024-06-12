@@ -22,7 +22,7 @@ import org.dromara.jpom.service.ITriggerToken;
  * @author bwcx_jzy
  * @since 2022/7/22
  */
-@TableName(value = "TRIGGER_TOKEN_LOG", name = "触发器 token")
+@TableName(value = "TRIGGER_TOKEN_LOG", nameKey = "触发器 token")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class TriggerTokenLogBean extends BaseDbModel {

@@ -23,7 +23,7 @@ import org.dromara.jpom.model.data.WorkspaceModel;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@TableName(value = "DOCKER_INFO", name = "docker 信息")
+@TableName(value = "DOCKER_INFO", nameKey = "docker 信息")
 public class DockerInfoModel extends BaseWorkspaceModel {
     /**
      * 名称

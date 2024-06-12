@@ -20,7 +20,7 @@ import org.dromara.jpom.model.BaseNodeModel;
  * @since 2021/12/12
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "SCRIPT_EXECUTE_LOG", name = "节点脚本模版执行记录", parents = NodeScriptCacheModel.class)
+@TableName(value = "SCRIPT_EXECUTE_LOG", nameKey = "节点脚本模版执行记录", parents = NodeScriptCacheModel.class)
 @Data
 public class NodeScriptExecuteLogCacheModel extends BaseNodeModel {
 

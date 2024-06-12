@@ -22,7 +22,7 @@ import org.dromara.jpom.model.BaseUserModifyDbModel;
  * @since 23/12/28 028
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "STATIC_FILE_STORAGE", name = "静态文件管理")
+@TableName(value = "STATIC_FILE_STORAGE", nameKey = "静态文件管理")
 @Data
 @NoArgsConstructor
 public class StaticFileStorageModel extends BaseUserModifyDbModel implements IFileStorage {

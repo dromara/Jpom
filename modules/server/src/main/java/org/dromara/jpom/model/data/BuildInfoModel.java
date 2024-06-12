@@ -27,7 +27,7 @@ import org.dromara.jpom.util.StringUtil;
  * @author Hotstrip
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "BUILD_INFO", name = "构建信息")
+@TableName(value = "BUILD_INFO", nameKey = "构建信息")
 @Data
 @Builder
 public class BuildInfoModel extends BaseGroupModel {
