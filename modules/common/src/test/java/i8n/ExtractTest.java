@@ -49,7 +49,8 @@ public class ExtractTest {
     }
 
     private void generateKey(File file) throws IOException {
-        File zhPropertiesFile = FileUtil.file(file, "application/src/main/resources/i18n/messages_zh_CN.properties");
+        //   /Users/user/IdeaProjects/Jpom/jpom-parent/modules/.DS_Store
+        File zhPropertiesFile = FileUtil.file(file, "common/src/main/resources/i18n/messages_zh_CN.properties");
         Properties zhProperties = new Properties();
         Charset charset = CharsetUtil.CHARSET_UTF_8;
         try (BufferedReader inputStream = FileUtil.getReader(zhPropertiesFile, charset)) {
@@ -133,7 +134,7 @@ public class ExtractTest {
     }
 
     // 匹配中文字符的正则表达式
-    Pattern chinesePattern = Pattern.compile("\"[\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】\\[\\]+\" \\-]*\"");
+    Pattern chinesePattern = Pattern.compile("\"[\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）\\[\\]+\" \\-]*\"");
     Pattern messageKeyPattern = Pattern.compile("MessageUtil\\.get\\(\"(.*?)\"\\)");
 
 
@@ -158,7 +159,12 @@ public class ExtractTest {
                         if (key == null) {
                             throw new IllegalArgumentException("找不到 key:" + unWrap);
                         }
-                        matcher.appendReplacement(modifiedLine, String.format("MessageUtil.get(\"%s\")", key));
+                        if (StrUtil.contains(line, "@ValidatorItem(")) {
+                            System.out.println("需要单独处理的：" + line);
+                            matcher.appendReplacement(modifiedLine, String.format("\"%s\"", key));
+                        } else {
+                            matcher.appendReplacement(modifiedLine, String.format("MessageUtil.get(\"%s\")", key));
+                        }
                     }
                     matcher.appendTail(modifiedLine);
                     writer.write(modifiedLine.toString());
@@ -236,7 +242,7 @@ public class ExtractTest {
 
     private boolean canIgnore(String line) {
         String trimLin = line.trim();
-        if (StrUtil.startWithAny(trimLin, "log.", "@", "*", "//")) {
+        if (StrUtil.startWithAny(trimLin, "log.", "@", "*", "//", "public static final")) {
             return true;
         }
         if (StrUtil.endWithAny(trimLin, "),")) {
