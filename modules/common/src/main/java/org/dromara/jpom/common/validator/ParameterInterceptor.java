@@ -443,6 +443,9 @@ public class ParameterInterceptor implements HandlerMethodInterceptor {
         @Override
         public void error(HttpServletRequest request, HttpServletResponse response, String parameterName, String value, ValidatorItem validatorItem) {
             String msg = validatorItem.msg();
+            if (StrUtil.isEmpty(msg)) {
+                msg = "参数验证失败";
+            }
             JsonMessage<String> jsonMessage = new JsonMessage<>(validatorItem.code(), msg);
             log.warn("{} {} {} {} {}", request.getRequestURI(), parameterName, value, validatorItem.value(), jsonMessage);
             ServletUtil.write(response, jsonMessage.toString(), MediaType.APPLICATION_JSON_VALUE);
