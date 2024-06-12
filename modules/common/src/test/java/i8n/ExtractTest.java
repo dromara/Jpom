@@ -115,8 +115,10 @@ public class ExtractTest {
         // 提取中文
         walkFile(file, file1 -> {
             try {
-                verifyDuplicates(file1);
-                extractFile(file1);
+                for (Pattern chinesePattern : chinesePatterns) {
+                    verifyDuplicates(file1, chinesePattern);
+                    extractFile(file1, chinesePattern);
+                }
             } catch (IOException e) {
                 throw Lombok.sneakyThrow(e);
             }
@@ -126,7 +128,9 @@ public class ExtractTest {
         // 替换中文
         walkFile(file, file1 -> {
             try {
-                replaceQuotedChineseInFile(file1);
+                for (Pattern chinesePattern : chinesePatterns) {
+                    replaceQuotedChineseInFile(file1, chinesePattern);
+                }
             } catch (IOException e) {
                 throw Lombok.sneakyThrow(e);
             }
@@ -134,11 +138,18 @@ public class ExtractTest {
     }
 
     // 匹配中文字符的正则表达式
-    Pattern chinesePattern = Pattern.compile("\"[\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）\\[\\]+\" \\-]*\"");
-    Pattern messageKeyPattern = Pattern.compile("MessageUtil\\.get\\(\"(.*?)\"\\)");
+    Pattern[] chinesePatterns = new Pattern[]{
+        Pattern.compile("\"[\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）\\[\\]+\" \\-]*\""),
+        Pattern.compile("\" [\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）\\[\\]+\" \\-]*\""),
+        Pattern.compile("\"[a-zA-Z][\\w\\u4e00-\\u9fa5]*[\\u4e00-\\u9fa5]\"")
+    };
+    Pattern[] messageKeyPatterns = new Pattern[]{
+        Pattern.compile("MessageUtil\\.get\\(\"(.*?)\"\\)"),
+        Pattern.compile("TransportMessageUtil\\.get\\(\"(.*?)\"\\)"),
+    };
 
 
-    private void replaceQuotedChineseInFile(File file) throws IOException {
+    private void replaceQuotedChineseInFile(File file, Pattern pattern) throws IOException {
         String subPath = FileUtil.subPath(rootFile.getAbsolutePath(), file);
         File tempFile = FileUtil.file(rootFile, "i18n-temp", subPath);
         FileUtil.mkParentDirs(tempFile);
@@ -150,8 +161,10 @@ public class ExtractTest {
                 if (canIgnore(line)) {
                     writer.write(line);
                 } else {
-                    Matcher matcher = chinesePattern.matcher(line);
+
                     StringBuffer modifiedLine = new StringBuffer();
+
+                    Matcher matcher = pattern.matcher(line);
                     while (matcher.find()) {
                         String chineseText = matcher.group();
                         String unWrap = StrUtil.unWrap(chineseText, '\"');
@@ -163,10 +176,16 @@ public class ExtractTest {
                             System.out.println("需要单独处理的：" + line);
                             matcher.appendReplacement(modifiedLine, String.format("\"%s\"", key));
                         } else {
-                            matcher.appendReplacement(modifiedLine, String.format("MessageUtil.get(\"%s\")", key));
+                            String path = FileUtil.getAbsolutePath(file);
+                            if (StrUtil.containsAny(path, "/agent-transport-common/", "\\agent-transport-common\\")) {
+                                matcher.appendReplacement(modifiedLine, String.format("TransportMessageUtil.get(\"%s\")", key));
+                            } else {
+                                matcher.appendReplacement(modifiedLine, String.format("MessageUtil.get(\"%s\")", key));
+                            }
                         }
                     }
                     matcher.appendTail(modifiedLine);
+
                     writer.write(modifiedLine.toString());
                     modified = true;
                 }
@@ -180,7 +199,7 @@ public class ExtractTest {
         }
     }
 
-    private void verifyDuplicates(File file) throws IOException {
+    private void verifyDuplicates(File file, Pattern pattern) throws IOException {
         try (BufferedReader reader = Files.newBufferedReader(file.toPath())) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -189,18 +208,18 @@ public class ExtractTest {
                 }
                 //
                 boolean find = false;
-                {
-                    Matcher matcher = chinesePattern.matcher(line);
-                    while (matcher.find()) {
-                        String chineseText = matcher.group();
-                        int count = StrUtil.count(chineseText, '\"');
-                        if (count > 2) {
-                            System.err.println(line);
-                            throw new IllegalArgumentException("重复的 key:" + chineseText);
-                        }
-                        find = true;
+
+                Matcher matcher = pattern.matcher(line);
+                while (matcher.find()) {
+                    String chineseText = matcher.group();
+                    int count = StrUtil.count(chineseText, '\"');
+                    if (count > 2) {
+                        System.err.println(line);
+                        throw new IllegalArgumentException("重复的 key:" + chineseText);
                     }
+                    find = true;
                 }
+
                 if (find && StrUtil.contains(line, "@ValidatorItem(")) {
                     System.out.println("需要单独处理的：" + line);
                 }
@@ -208,7 +227,7 @@ public class ExtractTest {
         }
     }
 
-    private void extractFile(File file) throws IOException {
+    private void extractFile(File file, Pattern pattern) throws IOException {
         try (BufferedReader reader = Files.newBufferedReader(file.toPath())) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -216,9 +235,8 @@ public class ExtractTest {
                     continue;
                 }
                 //
-
                 {
-                    Matcher matcher = chinesePattern.matcher(line);
+                    Matcher matcher = pattern.matcher(line);
                     while (matcher.find()) {
                         String chineseText = matcher.group();
                         wordsSet.add(StrUtil.unWrap(chineseText, '\"'));
@@ -226,7 +244,7 @@ public class ExtractTest {
                     }
                 }
                 boolean found = false;
-                {
+                for (Pattern messageKeyPattern : messageKeyPatterns) {
                     Matcher matcher = messageKeyPattern.matcher(line);
                     while (matcher.find()) {
                         useKeys.add(matcher.group(1));
