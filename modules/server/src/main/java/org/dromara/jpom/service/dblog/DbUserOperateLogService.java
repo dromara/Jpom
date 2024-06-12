@@ -18,6 +18,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.MessageUtil;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.MonitorModel;
 import org.dromara.jpom.model.data.MonitorUserOptModel;
@@ -179,7 +180,7 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
         Map<String, Object> dataMap = this.buildDataMsg(classFeature, cacheInfo, userOperateLogV1);
         WorkspaceModel workspaceModel = workspaceService.getByKey(userOperateLogV1.getWorkspaceId());
 
-        String optTypeMsg = StrUtil.format(" 【{}】->【{}】", classFeature.getName(), methodFeature.getName());
+        String optTypeMsg = StrUtil.format(" 【{}】->【{}】", MessageUtil.get(classFeature.getName().get()), MessageUtil.get(methodFeature.getName().get()));
         List<MonitorUserOptModel> monitorUserOptModels = monitorUserOptService.listByType(userOperateLogV1.getWorkspaceId(),
             classFeature,
             methodFeature,
