@@ -157,7 +157,8 @@ public class NodeProjectInfoController extends BaseServerController {
             updateItem = item;
         }
         Map<String, String> map = this.getBuildToken(updateItem, request);
-        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
+        String string = "重置成功";
+        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : string, map);
     }
 
     private Map<String, String> getBuildToken(ProjectInfoCacheModel item, HttpServletRequest request) {
