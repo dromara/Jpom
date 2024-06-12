@@ -126,20 +126,26 @@ public class ExtractTest {
         // 生成 key
         generateKey(file);
         // 替换中文
-//        walkFile(file, file1 -> {
-//            try {
-//                for (Pattern chinesePattern : chinesePatterns) {
-//                    replaceQuotedChineseInFile(file1, chinesePattern);
-//                }
-//            } catch (IOException e) {
-//                throw Lombok.sneakyThrow(e);
-//            }
-//        });
+        walkFile(file, file1 -> {
+            try {
+                for (Pattern chinesePattern : chinesePatterns) {
+                    replaceQuotedChineseInFile(file1, chinesePattern);
+                }
+            } catch (IOException e) {
+                throw Lombok.sneakyThrow(e);
+            }
+        });
     }
 
     // 匹配中文字符的正则表达式
     Pattern[] chinesePatterns = new Pattern[]{
+        // 中文开头
         Pattern.compile("\"[\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
+        // 序号开头
+        Pattern.compile("\"\\d+\\..*[\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
+        // 符合开头
+        Pattern.compile("\"[,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。][\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
+        // 空格开头
         Pattern.compile("\"[\\s+][\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
         Pattern.compile("\"[a-zA-Z.·\\d][\\u4e00-\\u9fa5]*[\\u4e00-\\u9fa5.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
         Pattern.compile("\"[\\d.]\\s[\\u4e00-\\u9fa5]*[\\u4e00-\\u9fa5.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
@@ -169,13 +175,16 @@ public class ExtractTest {
                     Matcher matcher = pattern.matcher(line);
                     while (matcher.find()) {
                         String chineseText = matcher.group();
+                        if (needIgnoreCase(chineseText, line)) {
+                            continue;
+                        }
                         String unWrap = StrUtil.unWrap(chineseText, '\"');
                         String key = chineseMap.get(unWrap);
                         if (key == null) {
                             throw new IllegalArgumentException("找不到 key:" + unWrap);
                         }
                         if (StrUtil.contains(line, "@ValidatorItem(")) {
-                            System.out.println("需要单独处理的：" + line);
+                            //System.out.println("需要单独处理的：" + line);
                             matcher.appendReplacement(modifiedLine, String.format("\"%s\"", key));
                         } else {
                             String path = FileUtil.getAbsolutePath(file);
@@ -214,6 +223,9 @@ public class ExtractTest {
                 Matcher matcher = pattern.matcher(line);
                 while (matcher.find()) {
                     String chineseText = matcher.group();
+                    if (needIgnoreCase(chineseText, line)) {
+                        continue;
+                    }
                     int count = StrUtil.count(chineseText, '\"');
                     if (count > 2) {
                         System.err.println(line);
@@ -223,7 +235,7 @@ public class ExtractTest {
                 }
 
                 if (find && StrUtil.contains(line, "@ValidatorItem(")) {
-                    System.out.println("需要单独处理的：" + line);
+                    //System.out.println("需要单独处理的：" + line);
                 }
             }
         }
@@ -241,6 +253,9 @@ public class ExtractTest {
                     Matcher matcher = pattern.matcher(line);
                     while (matcher.find()) {
                         String chineseText = matcher.group();
+                        if (needIgnoreCase(chineseText, line)) {
+                            continue;
+                        }
                         wordsSet.add(StrUtil.unWrap(chineseText, '\"'));
                         System.out.println("匹配到的内容：" + chineseText + "  -> " + line.trim());
                     }
@@ -258,6 +273,17 @@ public class ExtractTest {
                 }
             }
         }
+    }
+
+    private boolean needIgnoreCase(String text, String line) {
+        Pattern pattern = Pattern.compile("[\\u4e00-\\u9fa5]");
+        Matcher matcher = pattern.matcher(text);
+        boolean b = matcher.find();
+        if (!b) {
+            System.out.println("不包含汉字需要忽略：" + text + "    ======" + line);
+            return true;
+        }
+        return false;
     }
 
     private boolean canIgnore(String line) {
