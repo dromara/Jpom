@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ServerConst;
-import org.dromara.jpom.common.i18n.MessageUtil;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.interceptor.PermissionInterceptor;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.assets.server.MachineNodeServer;
@@ -287,13 +287,13 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
         }
         Supplier<String> nodeUpgradeName = ClassFeature.NODE_UPGRADE.getName();
         if (handlerType == HandlerType.nodeUpdate) {
-            return StrUtil.format("您没有对应功能【{}】管理权限", MessageUtil.get(nodeUpgradeName.get()));
+            return StrUtil.format("您没有对应功能【{}】管理权限", I18nMessageUtil.get(nodeUpgradeName.get()));
         }
         Class<?> handlerClass = handlerType.getHandlerClass();
         SystemPermission systemPermission = handlerClass.getAnnotation(SystemPermission.class);
         if (systemPermission != null) {
             if (!userInfo.isSuperSystemUser()) {
-                return StrUtil.format("您没有对应功能【{}】管理权限", MessageUtil.get(nodeUpgradeName.get()));
+                return StrUtil.format("您没有对应功能【{}】管理权限", I18nMessageUtil.get(nodeUpgradeName.get()));
             }
         }
         Feature feature = handlerClass.getAnnotation(Feature.class);
@@ -303,7 +303,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
         if (permissionResult.isSuccess()) {
             return StrUtil.EMPTY;
         }
-        return permissionResult.errorMsg(StrUtil.format("对应功能【{}-{}】", MessageUtil.get(cls.getName().get()), MessageUtil.get(method.getName().get())));
+        return permissionResult.errorMsg(StrUtil.format("对应功能【{}-{}】", I18nMessageUtil.get(cls.getName().get()), I18nMessageUtil.get(method.getName().get())));
     }
 
     private BaseWorkspaceModel checkData(HandlerType handlerType, UserModel userModel, HttpServletRequest httpServletRequest) {

@@ -24,7 +24,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
-import org.dromara.jpom.common.i18n.MessageUtil;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.db.DbExtConfig;
@@ -265,7 +265,7 @@ public class BackupInfoController extends BaseServerController {
             return tableName.value();
         }, aClass -> {
             TableName tableName = aClass.getAnnotation(TableName.class);
-            return MessageUtil.get(tableName.nameKey());
+            return I18nMessageUtil.get(tableName.nameKey());
         });
 
         List<JSONObject> list = tableNameList.stream().map(s -> {

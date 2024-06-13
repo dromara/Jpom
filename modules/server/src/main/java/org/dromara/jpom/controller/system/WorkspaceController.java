@@ -24,7 +24,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
-import org.dromara.jpom.common.i18n.MessageUtil;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.db.TableName;
@@ -187,7 +187,7 @@ public class WorkspaceController extends BaseServerController {
             String sql = "select  count(1) as cnt from " + tableName.value() + " where workspaceId=?";
             Number number = workspaceService.queryNumber(sql, id);
 
-            TreeNode<String> treeNode = new TreeNode<>(tableName.value(), parent, MessageUtil.get(tableName.nameKey()), 0);
+            TreeNode<String> treeNode = new TreeNode<>(tableName.value(), parent, I18nMessageUtil.get(tableName.nameKey()), 0);
             //
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("workspaceBind", tableName.workspaceBind());
@@ -231,14 +231,14 @@ public class WorkspaceController extends BaseServerController {
                 //
                 String sql = "select  count(1) as cnt from " + tableName1.value() + " where workspaceId=?";
                 int cnt = ObjectUtil.defaultIfNull(workspaceService.queryNumber(sql, id), Number::intValue, 0);
-                Assert.state(cnt <= 0, StrUtil.format("当前工作空间下还存在关联：{} 和 {} 数据", MessageUtil.get(tableName.nameKey()), MessageUtil.get(tableName1.nameKey())));
+                Assert.state(cnt <= 0, StrUtil.format("当前工作空间下还存在关联：{} 和 {} 数据", I18nMessageUtil.get(tableName.nameKey()), I18nMessageUtil.get(tableName1.nameKey())));
                 // 等待自动删除
                 autoDeleteClass.add(aClass);
             } else {
                 // 其他严格检查的情况
                 String sql = "select  count(1) as cnt from " + tableName.value() + " where workspaceId=?";
                 int cnt = ObjectUtil.defaultIfNull(workspaceService.queryNumber(sql, id), Number::intValue, 0);
-                Assert.state(cnt <= 0, "当前工作空间下还存在关联数据：" + MessageUtil.get(tableName.nameKey()));
+                Assert.state(cnt <= 0, "当前工作空间下还存在关联数据：" + I18nMessageUtil.get(tableName.nameKey()));
             }
         }
         // 判断用户绑定关系
@@ -279,7 +279,7 @@ public class WorkspaceController extends BaseServerController {
         JSONObject config = systemParametersServer.getConfigDefNewInstance(StrUtil.format("menus_config_{}", workspaceId), JSONObject.class);
         //"classpath:/menus/index.json"
         //"classpath:/menus/node-index.json"
-        String language = MessageUtil.parseLanguage(request);
+        String language = I18nMessageUtil.parseLanguage(request);
         config.put("serverMenus", this.readMenusJson("classpath:/menus/" + language + "/index.json"));
         return JsonMessage.success("", config);
     }

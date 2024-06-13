@@ -23,7 +23,7 @@ import cn.hutool.db.sql.Wrapper;
 import cn.hutool.setting.Setting;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.common.i18n.MessageUtil;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.system.JpomRuntimeException;
@@ -135,7 +135,7 @@ public class StorageServiceFactory {
             .map(Field::getName)
             .collect(Collectors.toSet());
 
-        String tableDesc = MessageUtil.get(tableName.nameKey());
+        String tableDesc = I18nMessageUtil.get(tableName.nameKey());
         log.info("开始迁移 {} {}", tableDesc, tableName.value());
         int total = 0;
         while (true) {
