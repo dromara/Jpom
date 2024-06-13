@@ -5,27 +5,62 @@ import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.net.url.UrlBuilder;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.*;
 import cn.hutool.system.SystemUtil;
-import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author bwcx_jzy1
  * @since 2024/6/12
  */
-public class BaidubceRpcTexttransTest {
+public class BaiduBceRpcTexttransTest {
 
     @Test
-    public void doTranslate() {
+    public void testTranslate() {
+        ArrayList<String> strings = CollUtil.newArrayList("请输入正确的验证码", "请传入 body 参数", "开始准备项目重启：{} {}");
+        JSONObject jsonObject = this.doTranslate(strings);
+        System.out.println(jsonObject);
+    }
+
+    private boolean checkHasI18nKey(JSONObject jsonObject) {
+        Set<String> keyed = jsonObject.keySet();
+        for (String s : keyed) {
+            if (StrUtil.startWith(s, "i18n.")) {
+                // 提前失败 或者翻译失败
+                //System.err.println("翻译失败或者提取失败," + s + "=" + jsonObject.get(s));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public JSONObject doTranslate(Collection<String> words) {
+        while (true) {
+            JSONObject jsonObject = this.doTranslate2(words);
+            if (checkHasI18nKey(jsonObject)) {
+                System.err.println("翻译失败或者提取失败,自动重试," + jsonObject);
+            } else {
+                return jsonObject;
+            }
+        }
+    }
+
+
+    private JSONObject doTranslate2(Collection<String> words) {
         String token = this.getToken();
         UrlBuilder urlBuilder = UrlBuilder.of("https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions");
         urlBuilder.addQuery("access_token", token);
@@ -40,14 +75,17 @@ public class BaidubceRpcTexttransTest {
         //
         InputStream inputStream = ResourceUtil.getStream("baidubce_translate.txt");
         String string = IoUtil.readUtf8(inputStream);
-        HashMap<Object, Object> map = new HashMap<>();
-        JSONArray jsonArray = new JSONArray();
-        jsonArray.add("测试变量");
-        jsonArray.add("连接关闭 {} {}");
-        jsonArray.add("清除临时文件失败,请手动清理：");
-        map.put("REQUEST_STR", jsonArray.toString());
-        string = StrUtil.format(string, map);
-        System.out.println(string);
+        //
+        JSONObject from = new JSONObject();
+        for (String value : words) {
+            String key;
+            do {
+                key = StrUtil.format("i18n.{}", RandomUtil.randomStringUpper(6));
+            } while (from.containsKey(key));
+            from.put(key, value);
+        }
+        string = StrUtil.format(string, MapUtil.of("REQUEST_STR", from.toString()));
+        //System.out.println(string);
         message.put("content", string);
         jsonObject.put("messages", CollUtil.newArrayList(message));
         //
@@ -55,9 +93,26 @@ public class BaidubceRpcTexttransTest {
         String result = httpRequest.thenFunction(httpResponse -> {
             String body = httpResponse.body();
             JSONObject jsonObject1 = JSONObject.parseObject(body);
+            if (jsonObject1.getIntValue("error_code") != 0) {
+                Assert.fail(jsonObject1.getString("error_msg"));
+            }
             return jsonObject1.getString("result");
         });
-        System.out.println(result);
+        String patternString = "(?s)```json\\s*([^`]*?)\\s*```";
+        Pattern pattern = Pattern.compile(patternString);
+        Matcher matcher = pattern.matcher(result);
+        //
+        JSONObject jsonObject1 = null;
+        while (matcher.find()) {
+            //System.out.println(result);
+            String jsonContent = matcher.group(1);
+            jsonObject1 = JSONObject.parseObject(jsonContent);
+            if (!this.checkHasI18nKey(jsonObject1)) {
+                return jsonObject1;
+            }
+        }
+        Assert.assertNotNull("翻译失败或者提取失败", jsonObject1);
+        return jsonObject1;
     }
 
     private String getToken() {
@@ -77,9 +132,9 @@ public class BaidubceRpcTexttransTest {
     }
 
     /**
-     * https://cloud.baidu.com/doc/WENXINWORKSHOP/s/7lpch74jm
+     * <a href="https://cloud.baidu.com/doc/WENXINWORKSHOP/s/7lpch74jm">https://cloud.baidu.com/doc/WENXINWORKSHOP/s/7lpch74jm</a>
      *
-     * @return
+     * @return token
      */
     private JSONObject doTokenByApi(File file) {
         String bceCi = SystemUtil.get("JPOM_TRANSLATE_BAIDUBCE_CI", StrUtil.EMPTY);
