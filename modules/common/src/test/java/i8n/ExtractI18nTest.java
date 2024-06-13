@@ -12,6 +12,8 @@ import cn.hutool.crypto.SecureUtil;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
+import i8n.api.BaiduBceRpcTexttransTest;
+import i8n.api.VolcTranslateApiTest;
 import lombok.Lombok;
 import org.junit.Assert;
 import org.junit.Before;
@@ -33,7 +35,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * <h1>Jpom 后端 i18n 使用流程</h1>
+ * <h1>Jpom 后端 i18n 工具自动化流程</h1>
  * <p>
  * <ol>
  *     <li>提取代码中的所有关联的中文</li>
@@ -47,7 +49,11 @@ import java.util.stream.Collectors;
  *     <li>对应扫描结果中的 i18n key 但是 zh_CN.properties 中不存在的 key，进行提示</li>
  *     <li>----------------------------</li>
  *     <li>将 zh_CN.properties 使用火山翻译（字节跳动）转换为 en_US.properties</li>
+ *     <li>----------------------------</li>
+ *     <li>使用 idea 优化 import 实现自动导包</li>
  * </ol>
+ * <p>
+ *   ======================================
  * <p>
  *  扫描代码中的中文关键词：\"[\u4e00-\u9fa5]+\"
  *
@@ -174,7 +180,7 @@ public class ExtractI18nTest {
                     break;
                 }
             }
-            saveWords(allResult);
+            saveWords(allResult, true);
         }
     }
 
@@ -246,7 +252,7 @@ public class ExtractI18nTest {
             isChange = true;
         }
         if (isChange) {
-            saveWords(cacheWords);
+            saveWords(cacheWords, false);
             try (BufferedWriter writer = FileUtil.getWriter(zhPropertiesFile, charset, false)) {
                 zhProperties.store(writer, "i18n zh");
             }
@@ -366,12 +372,28 @@ public class ExtractI18nTest {
         return null;
     }
 
-    private void saveWords(JSONObject jsonObject) {
-        // 根据 key 排序
-        TreeMap<String, Object> sort = MapUtil.sort(jsonObject);
-        // 提前保存
+    /**
+     * 增量更新缓存的 words
+     *
+     * @param jsonObject 需要更新的信息
+     * @param append     是否增量更新
+     */
+    private void saveWords(JSONObject jsonObject, boolean append) {
         File wordsFile = FileUtil.file(rootFile, "common/src/main/resources/i18n/words.json");
-        FileUtil.writeString(JSONArray.toJSONString(sort, JSONWriter.Feature.PrettyFormat), wordsFile, StandardCharsets.UTF_8);
+        if (append) {
+            JSONObject cacheWords = this.loadCacheWords();
+            JSONObject updateAfter = cacheWords.clone();
+            updateAfter.putAll(jsonObject);
+            if (!ObjectUtil.equals(MapUtil.sort(updateAfter), MapUtil.sort(cacheWords))) {
+                // 变动才保存
+                // 根据 key 排序
+                TreeMap<String, Object> sort = MapUtil.sort(updateAfter);
+                FileUtil.writeString(JSONArray.toJSONString(sort, JSONWriter.Feature.PrettyFormat), wordsFile, StandardCharsets.UTF_8);
+            }
+        } else {
+            TreeMap<String, Object> sort = MapUtil.sort(jsonObject);
+            FileUtil.writeString(JSONArray.toJSONString(sort, JSONWriter.Feature.PrettyFormat), wordsFile, StandardCharsets.UTF_8);
+        }
     }
 
     private JSONObject loadCacheWords() {
