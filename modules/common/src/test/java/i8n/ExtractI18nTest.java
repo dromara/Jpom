@@ -9,6 +9,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONWriter;
 import lombok.Lombok;
 import org.junit.Assert;
 import org.junit.Before;
@@ -140,25 +141,24 @@ public class ExtractI18nTest {
             int start = PageUtil.getStart(i, pageSize);
             int end = PageUtil.getEnd(i, pageSize);
             Collection<String> sub = CollUtil.sub(wordsSetSort, start, end);
-            sub = filterExists(sub, cacheWords, allResult);
-            if (CollUtil.isNotEmpty(sub)) {
+            Collection<String> subAfter = filterExists(sub, cacheWords, allResult);
+            if (CollUtil.isNotEmpty(subAfter)) {
                 while (true) out:{
                     BaiduBceRpcTexttransTest bceRpcTexttrans = new BaiduBceRpcTexttransTest();
-                    System.out.println("等待翻译：" + sub);
-                    JSONObject jsonObject = bceRpcTexttrans.doTranslate(sub);
+                    System.out.println("等待翻译：" + subAfter);
+                    JSONObject jsonObject = bceRpcTexttrans.doTranslate(subAfter);
                     System.out.println("翻译结果：" + jsonObject);
                     // 转换为可用 key
                     for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
                         String key = entry.getKey();
                         String value = (String) entry.getValue();
-                        String originalValue = findOriginal(sub, value);
+                        String originalValue = findOriginal(subAfter, value);
                         if (originalValue == null) {
                             System.err.println("翻译后的中文和翻译前的中文不一致（需要重试）：" + value);
                             break out;
                         }
                         String buildKey = this.buildKey(key, originalValue, allResult);
                         allResult.put(buildKey, originalValue);
-
                     }
                     break;
                 }
@@ -167,7 +167,7 @@ public class ExtractI18nTest {
             TreeMap<String, Object> sort = MapUtil.sort(allResult);
             // 提前保存
             File wordsFile = FileUtil.file(rootFile, "common/src/main/resources/i18n/words.json");
-            FileUtil.writeString(JSONArray.toJSONString(sort), wordsFile, StandardCharsets.UTF_8);
+            FileUtil.writeString(JSONArray.toJSONString(sort, JSONWriter.Feature.PrettyFormat), wordsFile, StandardCharsets.UTF_8);
         }
     }
 
@@ -253,14 +253,15 @@ public class ExtractI18nTest {
     /**
      * 找到原始的中文字符串（大模型处理后面前后空格可能不存在）
      *
-     * @param list  list
-     * @param value value
+     * @param list  list（翻译前）
+     * @param value value（翻译后）
      * @return 原始的中文字符串 ，null 不存在
      */
     private String findOriginal(Collection<String> list, String value) {
         for (String s : list) {
             if (StrUtil.equals(s, value) || StrUtil.equals(StrUtil.trim(s), value)) {
-                return value;
+                // 需要返回原始值，不能返回翻译后的值
+                return s;
             }
         }
         return null;
