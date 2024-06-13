@@ -90,7 +90,7 @@ public class ExtractI18nTest {
      * 提前代码中的中文并使用大模型进行语意化翻译 key
      */
     @Test
-    public void extract() throws Exception {
+    public void extractJavaZh() throws Exception {
         // 中文字符串
         Set<String> wordsSet = new LinkedHashSet<>();
         // 将已经存在的合并使用, 中文资源文件存储路径
@@ -159,6 +159,11 @@ public class ExtractI18nTest {
     }
 
     /**
+     * 根据提取出的中文生成 i18n 中文配置文件、并替换代码中的关键词
+     * <p>
+     * 1. 自动对比未关联
+     * 2. 自动删除未使用
+     *
      * @throws Exception 异常
      */
     @Test
