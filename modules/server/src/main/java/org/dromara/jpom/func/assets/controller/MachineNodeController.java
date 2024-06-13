@@ -88,7 +88,7 @@ public class MachineNodeController extends BaseGroupNameController {
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<String> delete(@ValidatorItem String id) {
         long count = nodeService.countByMachine(id);
-        Assert.state(count <= 0, StrUtil.format("当前机器还关联{}个节点不能删除", count));
+        Assert.state(count <= 0, StrUtil.format("当前机器还关联{}个节点，不能直接删除（需要提前删除解绑或者删除关联数据后才能删除）", count));
         machineNodeServer.delByKey(id);
         return JsonMessage.success("操作成功");
     }

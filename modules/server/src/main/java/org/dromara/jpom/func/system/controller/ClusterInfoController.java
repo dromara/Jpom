@@ -166,7 +166,7 @@ public class ClusterInfoController {
         WorkspaceModel workspaceModel = new WorkspaceModel();
         workspaceModel.setClusterInfoId(infoModel.getId());
         long count = workspaceService.count(workspaceModel);
-        Assert.state(count == 0, "当前集群还被工作空间绑定不能删除");
+        Assert.state(count == 0, "当前集群还被工作空间绑定，不能直接删除（需要提前删除解绑或者删除关联数据后才能删除）");
         //
         clusterInfoService.delByKey(id);
         return JsonMessage.success("删除成功");

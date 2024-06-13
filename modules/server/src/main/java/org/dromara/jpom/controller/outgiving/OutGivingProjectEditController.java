@@ -119,7 +119,7 @@ public class OutGivingProjectEditController extends BaseServerController {
 
         // 判断构建
         boolean releaseMethod = buildService.checkReleaseMethod(id, request, BuildReleaseMethod.Outgiving);
-        Assert.state(!releaseMethod, "当前分发存在构建项，不能删除");
+        Assert.state(!releaseMethod, "当前分发存在构建项，不能直接删除（需要提前删除解绑或者删除关联数据后才能删除）");
         //
         Assert.state(outGivingModel.outGivingProject(), "该项目不是节点分发项目,不能在此次删除");
 
@@ -411,7 +411,7 @@ public class OutGivingProjectEditController extends BaseServerController {
      * @param outGivingNodeProjects 新的节点项目
      */
     private void deleteProject(OutGivingModel outGivingModel, List<OutGivingNodeProject> outGivingNodeProjects) {
-        Assert.state(CollUtil.size(outGivingNodeProjects) >= 1, "至少选择一个节点及以上");
+        Assert.state(CollUtil.size(outGivingNodeProjects) >= 1, "至少选择一个节点");
         // 删除
         List<OutGivingNodeProject> deleteNodeProject = outGivingModel.getDelete(outGivingNodeProjects);
         if (deleteNodeProject != null) {

@@ -126,7 +126,7 @@ public class NodeEditController extends BaseServerController {
             projectInfoCacheModel.setNodeId(id);
             projectInfoCacheModel.setWorkspaceId(projectInfoCacheService.getCheckUserWorkspace(request));
             boolean exists = projectInfoCacheService.exists(projectInfoCacheModel);
-            Assert.state(!exists, "该节点下还存在项目，不能删除");
+            Assert.state(!exists, "该节点下还存在项目，不能直接删除（需要提前删除解绑或者删除关联数据后才能删除）");
         }
         //
         {
@@ -134,7 +134,7 @@ public class NodeEditController extends BaseServerController {
             nodeScriptCacheModel.setNodeId(id);
             nodeScriptCacheModel.setWorkspaceId(nodeScriptServer.getCheckUserWorkspace(request));
             boolean exists = nodeScriptServer.exists(nodeScriptCacheModel);
-            Assert.state(!exists, "该节点下还存在脚本模版，不能删除");
+            Assert.state(!exists, "该节点下还存在脚本模版，不能直接删除（需要提前删除解绑或者删除关联数据后才能删除）");
         }
         //
         this.delNodeData(id, request);
