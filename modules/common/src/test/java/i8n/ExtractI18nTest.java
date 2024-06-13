@@ -11,7 +11,6 @@ package i8n;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -100,12 +99,12 @@ public class ExtractI18nTest {
     /**
      * 代码中关联（引用） key 的正则
      */
-    public static final Tuple[] messageKeyPatterns = new Tuple[]{
+    public static final Pattern[] messageKeyPatterns = new Pattern[]{
         // 优先匹配（避免后续替换异常）
-        new Tuple(Pattern.compile("TransportI18nMessageUtil\\.get\\(\"(.*?)\"\\)"), true),
-        new Tuple(Pattern.compile("I18nMessageUtil\\.get\\(\"(.*?)\"\\)"), true),
-        new Tuple(Pattern.compile("@ValidatorItem\\(.*?msg\\s*=\\s*\"([^\"]*)\".*?\\)"), false),
-        new Tuple(Pattern.compile("nameKey\\s*=\\s*\"([^\"]*)\".*?\\)"), false),
+        Pattern.compile("TransportI18nMessageUtil\\.get\\(\"(.*?)\"\\)"),
+        Pattern.compile("I18nMessageUtil\\.get\\(\"(.*?)\"\\)"),
+        Pattern.compile("@ValidatorItem\\(.*?msg\\s*=\\s*\"([^\"]*)\".*?\\)"),
+        Pattern.compile("nameKey\\s*=\\s*\"([^\"]*)\".*?\\)"),
     };
 
     public final static String[] JpomAnnotation = {
@@ -496,8 +495,7 @@ public class ExtractI18nTest {
                     writer.write(line);
                 } else {
                     // 匹配已经使用到的 key
-                    for (Tuple tuple : messageKeyPatterns) {
-                        Pattern messageKeyPattern = tuple.get(0);
+                    for (Pattern messageKeyPattern : messageKeyPatterns) {
                         Matcher matcher = messageKeyPattern.matcher(line);
                         while (matcher.find()) {
                             String key = matcher.group(1);
@@ -566,8 +564,6 @@ public class ExtractI18nTest {
                     continue;
                 }
                 //
-                boolean find = false;
-
                 Matcher matcher = pattern.matcher(line);
                 while (matcher.find()) {
                     String chineseText = matcher.group();
@@ -579,11 +575,6 @@ public class ExtractI18nTest {
                         System.err.println(line);
                         throw new IllegalArgumentException("重复的 key:" + chineseText);
                     }
-                    find = true;
-                }
-
-                if (find && StrUtil.containsAny(line, JpomAnnotation)) {
-                    //System.out.println("需要单独处理的：" + line);
                 }
             }
         }
