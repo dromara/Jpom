@@ -1,4 +1,4 @@
-package i8n;
+package i8n.api;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.SystemClock;
