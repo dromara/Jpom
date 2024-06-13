@@ -235,7 +235,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
             }
         } catch (Exception e) {
             log.error("升级失败", e);
-            this.onError(session, "升级失败 " + e.getMessage());
+            this.onError(session, "升级失败:" + e.getMessage());
         }
     }
 

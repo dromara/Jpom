@@ -263,7 +263,7 @@ public class WorkspaceController extends BaseServerController {
         systemParametersServer.delByKey(StrUtil.format("node_config_{}", id));
         // 删除信息
         workspaceService.delByKey(id);
-        return new JsonMessage<>(200, "删除成功 " + autoDelete);
+        return new JsonMessage<>(200, "删除成功:" + autoDelete);
     }
 
     /**
