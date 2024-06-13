@@ -589,7 +589,7 @@ public abstract class BaseSshFileController extends BaseServerController {
                     List<String> result = new ArrayList<>();
                     JschUtils.execCallbackLine(session, charset, timeout, command.toString(), StrUtil.EMPTY, result::add);
 
-                    return JsonMessage.success("操作成功 " + CollUtil.join(result, StrUtil.LF));
+                    return JsonMessage.success("操作成功:" + CollUtil.join(result, StrUtil.LF));
                 } catch (IOException e) {
                     throw Lombok.sneakyThrow(e);
                 }
@@ -633,6 +633,6 @@ public abstract class BaseSshFileController extends BaseServerController {
             log.error("ssh修改文件权限异常...: {} {}", remotePath, permissionValue, e);
             return new JsonMessage<>(400, "操作失败 " + e.getMessage());
         }
-        return JsonMessage.success("操作成功 ");
+        return JsonMessage.success("操作成功");
     }
 }

@@ -123,7 +123,7 @@ public class BaiduBceRpcTexttransTest {
             JSONObject cacheData = JSONObject.parseObject(FileUtil.readUtf8String(tokenCache));
             int expiresIn = cacheData.getIntValue("expires_in");
             if (SystemClock.now() / 1000L < expiresIn) {
-                System.out.println("token 缓存有效，直接使用");
+                //System.out.println("token 缓存有效，直接使用");
                 return cacheData.getString("access_token");
             }
         }
@@ -144,8 +144,8 @@ public class BaiduBceRpcTexttransTest {
 
         HttpRequest httpRequest = HttpUtil.createPost("https://aip.baidubce.com/oauth/2.0/token");
         httpRequest.form("grant_type", "client_credentials")
-            .form("client_id", "WdRlwS6iSEDJrUtHrzt2ZUot")
-            .form("client_secret", "NO0pJQ8ynMYHklYstQtrLF2YzXV6jM4S");
+            .form("client_id", bceCi)
+            .form("client_secret", bceCs);
         httpRequest.header(Header.CONTENT_TYPE, ContentType.JSON.getValue());
         httpRequest.header(Header.ACCEPT, ContentType.JSON.getValue());
         JSONObject json = httpRequest.thenFunction(httpResponse -> {

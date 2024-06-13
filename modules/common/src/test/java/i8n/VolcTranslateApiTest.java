@@ -1,16 +1,21 @@
 package i8n;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.net.URLEncodeUtil;
 import cn.hutool.core.util.HexUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.http.Method;
+import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.*;
 
@@ -20,7 +25,7 @@ import java.util.*;
  * @author bwcx_jzy
  * @since 2024/6/11
  */
-public class VolcTranslateApi {
+public class VolcTranslateApiTest {
 
     private final String region;
     private final String service;
@@ -31,7 +36,7 @@ public class VolcTranslateApi {
     private final String sk;
 
 
-    private VolcTranslateApi(String region, String service, String schema, String host, String path, String ak, String sk) {
+    private VolcTranslateApiTest(String region, String service, String schema, String host, String path, String ak, String sk) {
         this.region = region;
         this.service = service;
         this.host = host;
@@ -41,14 +46,27 @@ public class VolcTranslateApi {
         this.sk = sk;
     }
 
-    public VolcTranslateApi(String ak, String sk) {
+    public VolcTranslateApiTest() {
+        String volcSk = SystemUtil.get("JPOM_TRANSLATE_VOLC_SK", StrUtil.EMPTY);
+        String volcAk = SystemUtil.get("JPOM_TRANSLATE_VOLC_AK", StrUtil.EMPTY);
+        Assert.assertNotEquals("请配置火山翻译 SecretAccessKey[JPOM_TRANSLATE_VOLC_SK]", volcSk, StrUtil.EMPTY);
+        Assert.assertNotEquals("请配置火山翻译 AccessKeyID[JPOM_TRANSLATE_VOLC_AK]", volcAk, StrUtil.EMPTY);
+
         this.region = "cn-north-1";
         this.service = "translate";
         this.host = "translate.volcengineapi.com";
         this.schema = "https";
         this.path = "/";
-        this.ak = ak;
-        this.sk = sk;
+        this.ak = volcAk;
+        this.sk = volcSk;
+    }
+
+
+    @Test
+    public void test2() throws Exception {
+        VolcTranslateApiTest translateApi = new VolcTranslateApiTest();
+        JSONArray translateText = translateApi.translate("zh", "en", CollUtil.newArrayList("你好", "世界"));
+        System.out.println(translateText);
     }
 
     public JSONArray translate(String source, String target, List<String> textList) throws Exception {

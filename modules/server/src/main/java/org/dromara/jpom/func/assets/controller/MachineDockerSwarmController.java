@@ -104,7 +104,7 @@ public class MachineDockerSwarmController extends BaseServerController {
         {
             // 获取集群信息
             managerSwarmInfo = (JSONObject) plugin.execute("inSpectSwarm", machineDockerServer.toParameter(managerSwarmDocker));
-            Assert.notNull(managerSwarmInfo, "集群信息不完整,不能加入改集群");
+            Assert.notNull(managerSwarmInfo, "集群信息不完整,不能加入该集群");
         }
         {
             // 检查节点存在的信息
@@ -129,7 +129,7 @@ public class MachineDockerSwarmController extends BaseServerController {
         String roleToken;
         {// 准备加入集群
             JSONObject joinTokens = managerSwarmInfo.getJSONObject("joinTokens");
-            Assert.notNull(joinTokens, "集群信息不完整,不能加入改集群:-1");
+            Assert.notNull(joinTokens, "集群信息不完整,不能加入该集群:-1");
             roleToken = joinTokens.getString(role);
             Assert.hasText(roleToken, StrUtil.format("不能以 {} 角色加入集群", role));
         }
