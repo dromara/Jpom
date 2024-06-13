@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.PageUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
@@ -172,8 +173,17 @@ public class ExtractI18nTest {
         TreeMap<String, Object> sort = MapUtil.sort(cacheWords);
         Properties zhProperties = new Properties();
         zhProperties.putAll(sort);
-        try (BufferedWriter writer = FileUtil.getWriter(zhPropertiesFile, charset, false)) {
-            zhProperties.store(writer, "i18n zh");
+        {
+            Properties zhExitsProperties = new Properties();
+            try (BufferedReader inputStream = FileUtil.getReader(zhPropertiesFile, charset)) {
+                zhExitsProperties.load(inputStream);
+            }
+            if (!ObjectUtil.equals(zhExitsProperties, zhProperties)) {
+                // 不一致才重新存储
+                try (BufferedWriter writer = FileUtil.getWriter(zhPropertiesFile, charset, false)) {
+                    zhProperties.store(writer, "i18n zh");
+                }
+            }
         }
         // 将配置按照中文转 map
         /*
@@ -202,22 +212,28 @@ public class ExtractI18nTest {
                 throw Lombok.sneakyThrow(e);
             }
         });
-        for (Object useKey : useKeys) {
-            if (zhProperties.containsKey(useKey)) {
-                continue;
-            }
-            System.err.println("代码中存在未关联的key（请手动修正）:" + useKey);
-        }
+        // 删除临时文件
+        FileUtil.del(tempDir);
         //
-        for (Map.Entry<Object, Object> entry : zhProperties.entrySet()) {
-            String key = (String) entry.getKey();
+        boolean isChange = false;
+        for (Object keyObj : CollUtil.newArrayList(zhProperties.keySet())) {
+            String key = StrUtil.toStringOrNull(keyObj);
             if (useKeys.contains(key)) {
                 continue;
             }
             System.err.println("配置中存在未关联的key（将自动删除 zhProperties、words.json）:" + key);
+            zhProperties.remove(key);
+            cacheWords.remove(key);
+            isChange = true;
         }
-        // 删除临时文件
-        FileUtil.del(tempDir);
+        if (isChange) {
+            saveWords(cacheWords);
+            try (BufferedWriter writer = FileUtil.getWriter(zhPropertiesFile, charset, false)) {
+                zhProperties.store(writer, "i18n zh");
+            }
+        }
+        List<Object> notUseKeys = useKeys.stream().filter(o -> !zhProperties.containsKey(o)).collect(Collectors.toList());
+        Assert.assertTrue("存在未使用的 key:" + CollUtil.join(notUseKeys, StrUtil.COMMA), CollUtil.isEmpty(notUseKeys));
     }
 
     /**
@@ -276,8 +292,10 @@ public class ExtractI18nTest {
                 }
             }
         }
-        try (BufferedWriter writer = FileUtil.getWriter(enPropertiesFile, charset, false)) {
-            enProperties.store(writer, "i18n en");
+        if (!ObjectUtil.equals(enEexitsProperties, enProperties)) {
+            try (BufferedWriter writer = FileUtil.getWriter(enPropertiesFile, charset, false)) {
+                enProperties.store(writer, "i18n en");
+            }
         }
     }
 
