@@ -243,7 +243,7 @@ public class MachineDockerController extends BaseGroupNameController {
             DockerInfoModel dockerInfoModel = new DockerInfoModel();
             dockerInfoModel.setMachineDockerId(id);
             long count = dockerInfoService.count(dockerInfoModel);
-            Assert.state(count <= 0, StrUtil.format("当前 docker 还关联{}个 工作空间 docker 不能直接删除（需要提前删除解绑或者删除关联数据后才能删除）", count));
+            Assert.state(count <= 0, StrUtil.format("当前 docker 还关联{}个 工作空间 docker 不能直接删除（需要提前解绑或者删除关联数据后才能删除）", count));
         }
         MachineDockerModel infoModel = machineDockerServer.getByKey(id);
         Optional.ofNullable(infoModel).ifPresent(machineDockerModel -> {
@@ -252,7 +252,7 @@ public class MachineDockerController extends BaseGroupNameController {
                 DockerSwarmInfoMode dockerInfoModel = new DockerSwarmInfoMode();
                 dockerInfoModel.setSwarmId(machineDockerModel.getSwarmId());
                 long count = dockerSwarmInfoService.count(dockerInfoModel);
-                Assert.state(count <= 0, StrUtil.format("当前 docker 还关联{}个 工作空间 docker 集群，不能直接删除（需要提前删除解绑或者删除关联数据后才能删除）", count));
+                Assert.state(count <= 0, StrUtil.format("当前 docker 还关联{}个 工作空间 docker 集群，不能直接删除（需要提前解绑或者删除关联数据后才能删除）", count));
             }
         });
         machineDockerServer.delByKey(id);

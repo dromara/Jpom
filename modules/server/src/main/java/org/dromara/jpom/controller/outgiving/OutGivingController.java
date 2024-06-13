@@ -222,7 +222,7 @@ public class OutGivingController extends BaseServerController {
     public IJsonMessage<Object> releaseDel(String id, HttpServletRequest request) {
         // 判断构建
         boolean releaseMethod = buildService.checkReleaseMethod(id, request, BuildReleaseMethod.Outgiving);
-        Assert.state(!releaseMethod, "当前分发存在构建项，不能直接删除（需要提前删除解绑或者删除关联数据后才能删除）");
+        Assert.state(!releaseMethod, "当前分发存在构建项，不能直接删除（需要提前解绑或者删除关联数据后才能删除）");
 
         OutGivingModel outGivingServerItem = outGivingServer.getByKey(id, request);
 
