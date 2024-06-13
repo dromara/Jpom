@@ -25,13 +25,13 @@ import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.build.BuildExtraModule;
 import org.dromara.jpom.build.BuildUtil;
+import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.model.BaseDbModel;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.enums.BuildStatus;
 import org.dromara.jpom.model.log.BuildHistoryLog;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
-import org.dromara.jpom.configuration.BuildExtConfig;
 import org.springframework.stereotype.Service;
 
 import java.io.File;

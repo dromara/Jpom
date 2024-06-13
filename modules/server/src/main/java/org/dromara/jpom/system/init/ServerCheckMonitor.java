@@ -9,7 +9,6 @@
  */
 package org.dromara.jpom.system.init;
 
-import cn.hutool.core.thread.ThreadUtil;
 import cn.keepbx.jpom.event.ISystemTask;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
