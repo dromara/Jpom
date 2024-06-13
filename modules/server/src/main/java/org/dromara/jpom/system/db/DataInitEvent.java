@@ -17,7 +17,7 @@ import cn.keepbx.jpom.model.BaseIdModel;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.common.ServerConst;
-import org.dromara.jpom.common.i18n.MessageUtil;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.BaseWorkspaceModel;
 import org.dromara.jpom.model.data.WorkspaceModel;
@@ -107,7 +107,7 @@ public class DataInitEvent implements ILoadEvent, ICacheTask {
                 if (workspaceIds.contains(workspaceId)) {
                     continue;
                 }
-                String format = StrUtil.format("表 {}[{}] 存在 {} 条错误工作空间数据 -> {}", MessageUtil.get(tableName.nameKey()), tableName.value(), allCount, workspaceId);
+                String format = StrUtil.format("表 {}[{}] 存在 {} 条错误工作空间数据 -> {}", I18nMessageUtil.get(tableName.nameKey()), tableName.value(), allCount, workspaceId);
                 log.error(format);
                 List<String> stringList = errorWorkspaceTable.computeIfAbsent(tableName.value(), s -> new ArrayList<>());
                 stringList.add(format);

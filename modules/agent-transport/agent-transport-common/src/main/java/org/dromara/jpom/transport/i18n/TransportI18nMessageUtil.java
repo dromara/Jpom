@@ -7,7 +7,7 @@ import cn.hutool.core.util.ServiceLoaderUtil;
  * @author bwcx_jzy1
  * @since 2024/6/11
  */
-public class TransportMessageUtil {
+public class TransportI18nMessageUtil {
 
     /**
      * 获得单例的 TransportServer
@@ -15,7 +15,7 @@ public class TransportMessageUtil {
      * @return 单例的 TransportServer
      */
     public static String get(String key) {
-        return Singleton.get(IMessageUtil.class.getName(), TransportMessageUtil::doCreate).get(key);
+        return Singleton.get(II18nMessageUtil.class.getName(), TransportI18nMessageUtil::doCreate).get(key);
     }
 
 
@@ -25,8 +25,8 @@ public class TransportMessageUtil {
      *
      * @return {@code EngineFactory}
      */
-    private static IMessageUtil doCreate() {
-        final IMessageUtil engine = ServiceLoaderUtil.loadFirstAvailable(IMessageUtil.class);
+    private static II18nMessageUtil doCreate() {
+        final II18nMessageUtil engine = ServiceLoaderUtil.loadFirstAvailable(II18nMessageUtil.class);
         if (null != engine) {
             return engine;
         }

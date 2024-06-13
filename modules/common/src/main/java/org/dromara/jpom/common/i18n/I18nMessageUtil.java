@@ -22,7 +22,7 @@ import java.util.Locale;
  **/
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
-public class MessageUtil {
+public class I18nMessageUtil {
 
     /**
      * 获取语言

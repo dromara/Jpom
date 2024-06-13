@@ -68,8 +68,8 @@ public class ExtractI18nTest {
      * 代码中关联（引用） key 的正则
      */
     private final Pattern[] messageKeyPatterns = new Pattern[]{
-        Pattern.compile("MessageUtil\\.get\\(\"(.*?)\"\\)"),
-        Pattern.compile("TransportMessageUtil\\.get\\(\"(.*?)\"\\)"),
+        Pattern.compile("I18nMessageUtil\\.get\\(\"(.*?)\"\\)"),
+        Pattern.compile("TransportI18nMessageUtil\\.get\\(\"(.*?)\"\\)"),
         Pattern.compile("@ValidatorItem\\(.*?msg\\s*=\\s*\"([^\"]*)\".*?\\)"),
         Pattern.compile("nameKey\\s*=\\s*\"([^\"]*)\".*?\\)"),
     };
@@ -529,9 +529,9 @@ public class ExtractI18nTest {
                         } else {
                             String path = FileUtil.getAbsolutePath(file);
                             if (StrUtil.containsAny(path, "/agent-transport/", "\\agent-transport\\")) {
-                                matcher.appendReplacement(modifiedLine, String.format("TransportMessageUtil.get(\"%s\")", key));
+                                matcher.appendReplacement(modifiedLine, String.format("TransportI18nMessageUtil.get(\"%s\")", key));
                             } else {
-                                matcher.appendReplacement(modifiedLine, String.format("MessageUtil.get(\"%s\")", key));
+                                matcher.appendReplacement(modifiedLine, String.format("I18nMessageUtil.get(\"%s\")", key));
                             }
                         }
                         useKeys.add(key);
