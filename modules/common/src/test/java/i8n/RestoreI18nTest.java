@@ -104,20 +104,23 @@ public class RestoreI18nTest {
                             matcher.appendReplacement(modifiedLine, String.format("\"%s\"", chineseText));
                         }
                         matcher.appendTail(modifiedLine);
-                        writer.write(modifiedLine.toString());
                     } else {
                         if (matcher.find()) {
                             String key = matcher.group(1);
-                            if (!ExtractI18nTest.needIgnoreCase(key, line)) {
-                                continue;
+                            if (ExtractI18nTest.needIgnoreCase(key, line)) {
+                                String chineseText = (String) zhProperties.get(key);
+                                if (chineseText == null) {
+                                    throw new IllegalArgumentException("找不到对应的中文:" + key);
+                                }
+                                modifiedLine.append(StrUtil.replace(line, String.format("\"%s\"", key), String.format("\"%s\"", chineseText)));
+                            } else {
+                                modifiedLine.append(line);
                             }
-                            String chineseText = (String) zhProperties.get(key);
-                            if (chineseText == null) {
-                                throw new IllegalArgumentException("找不到对应的中文:" + key);
-                            }
-                            modifiedLine.append(StrUtil.replace(line, String.format("\"%s\"", key), String.format("\"%s\"", chineseText)));
+                        } else {
+                            modifiedLine.append(line);
                         }
                     }
+                    writer.write(modifiedLine.toString());
                     modified = true;
                 }
                 writer.newLine();

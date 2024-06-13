@@ -595,7 +595,7 @@ public class ExtractI18nTest {
      *
      * @param text 匹配到的结果
      * @param line 整行
-     * @return 是否需要忽略
+     * @return 是否需要忽略 (不是 中文 true)
      */
     public static boolean needIgnoreCase(String text, String line) {
         Pattern pattern = Pattern.compile("[\\u4e00-\\u9fa5]");
