@@ -2,6 +2,7 @@ package i8n;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.PageUtil;
 import cn.hutool.core.util.StrUtil;
@@ -104,6 +105,8 @@ public class ExtractI18nTest {
         FileUtil.del(FileUtil.file(rootFile, "i18n-temp"));
         // 中文字符串
         Set<String> wordsSet = new LinkedHashSet<>();
+        // 将已经存在的合并使用
+        zhProperties.values().forEach(o -> wordsSet.add(o.toString()));
         // 提取中文
         walkFile(rootFile, file1 -> {
             try {
@@ -123,8 +126,11 @@ public class ExtractI18nTest {
             long value = entry.getValue();
             Assert.assertEquals("[" + entry.getKey() + "]出现去重空格后重复", 1L, value);
         }
-        // 语意化中文存储为 key
+        // 语意化中文存储为 key（提前排序）
         Collection<String> wordsSetSort = CollUtil.sort(wordsSet, String::compareTo);
+        //
+        JSONObject cacheWords = this.loadCacheWords();
+
         int pageSize = 50;
         int total = CollUtil.size(wordsSet);
         int page = PageUtil.totalPage(total, pageSize);
@@ -133,33 +139,102 @@ public class ExtractI18nTest {
         for (int i = PageUtil.getFirstPageNo(); i <= page; i++) {
             int start = PageUtil.getStart(i, pageSize);
             int end = PageUtil.getEnd(i, pageSize);
+            Collection<String> sub = CollUtil.sub(wordsSetSort, start, end);
+            sub = filterExists(sub, cacheWords, allResult);
+            if (CollUtil.isNotEmpty(sub)) {
+                while (true) out:{
+                    BaiduBceRpcTexttransTest bceRpcTexttrans = new BaiduBceRpcTexttransTest();
+                    System.out.println("等待翻译：" + sub);
+                    JSONObject jsonObject = bceRpcTexttrans.doTranslate(sub);
+                    System.out.println("翻译结果：" + jsonObject);
+                    // 转换为可用 key
+                    for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
+                        String key = entry.getKey();
+                        String value = (String) entry.getValue();
+                        String originalValue = findOriginal(sub, value);
+                        if (originalValue == null) {
+                            System.err.println("翻译后的中文和翻译前的中文不一致（需要重试）：" + value);
+                            break out;
+                        }
+                        String buildKey = this.buildKey(key, originalValue, allResult);
+                        allResult.put(buildKey, originalValue);
 
-            List<String> sub = CollUtil.sub(wordsSetSort, start, end);
-            while (true) out:{
-                BaiduBceRpcTexttransTest bceRpcTexttrans = new BaiduBceRpcTexttransTest();
-                JSONObject jsonObject = bceRpcTexttrans.doTranslate(sub);
-                System.out.println("翻译结果：" + jsonObject);
-                // 转换为可用 key
-                for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
-                    String key = entry.getKey();
-                    String value = (String) entry.getValue();
-                    String originalValue = findOriginal(sub, value);
-                    if (originalValue == null) {
-                        System.err.println("翻译后的中文和翻译前的中文不一致（需要重试）：" + value);
-                        break out;
                     }
-                    String buildKey = this.buildKey(key, originalValue, allResult);
-                    allResult.put(buildKey, originalValue);
-
+                    break;
                 }
-                // 提前保存
-                File wordsFile = FileUtil.file(rootFile, "common/src/main/resources/i18n/words.json");
-                FileUtil.writeString(JSONArray.toJSONString(allResult), wordsFile, StandardCharsets.UTF_8);
-                break;
             }
+            // 根据 key 排序
+            TreeMap<String, Object> sort = MapUtil.sort(allResult);
+            // 提前保存
+            File wordsFile = FileUtil.file(rootFile, "common/src/main/resources/i18n/words.json");
+            FileUtil.writeString(JSONArray.toJSONString(sort), wordsFile, StandardCharsets.UTF_8);
         }
     }
 
+    /**
+     * 过滤已经存在的语意 key 的中文
+     *
+     * @param wordsSet   中文数组
+     * @param cacheWords 已经存在的语意 key
+     * @param allResult  新的结果
+     * @return 过滤后的中文
+     */
+    private Collection<String> filterExists(Collection<String> wordsSet, JSONObject cacheWords, JSONObject allResult) {
+        return wordsSet.stream()
+            .filter(s -> {
+                String existKey = checkExists(cacheWords, s);
+                if (existKey != null) {
+                    //System.out.println("key 已经存在：" + existKey);
+                    allResult.put(existKey, s);
+                    return false;
+                }
+                return true;
+            })
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * 判断对应的中文是否存在语意 key
+     *
+     * @param jsonObject 已经存在的语意 key
+     * @param value      中文
+     * @return 语意 key
+     */
+    private String checkExists(JSONObject jsonObject, String value) {
+        for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
+            String entryValue = (String) entry.getValue();
+            if (StrUtil.equals(entryValue, value)) {
+                // 值相同
+                String key = entry.getKey();
+                List<String> split = StrUtil.split(key, StrUtil.DOT);
+                String last = CollUtil.getLast(split);
+                String md5 = SecureUtil.md5(value);
+                if (StrUtil.startWith(md5, last)) {
+                    // 可以的后缀也等于值的 md5 前缀
+                    return key;
+                }
+                System.out.println("翻译前后的值相等但是 md5 不一致：" + md5 + "," + last);
+            }
+        }
+        return null;
+    }
+
+    private JSONObject loadCacheWords() {
+        File wordsFile = FileUtil.file(rootFile, "common/src/main/resources/i18n/words.json");
+        if (wordsFile.exists()) {
+            return JSONObject.parseObject(FileUtil.readUtf8String(wordsFile));
+        }
+        return new JSONObject();
+    }
+
+    /**
+     * 生成 key
+     *
+     * @param key        翻译后的key
+     * @param value      原始中文
+     * @param jsonObject 所以的key
+     * @return i18n.{}.{}
+     */
     private String buildKey(String key, String value, JSONObject jsonObject) {
         int md5IdLen = 4;
         while (true) {
@@ -182,7 +257,7 @@ public class ExtractI18nTest {
      * @param value value
      * @return 原始的中文字符串 ，null 不存在
      */
-    private String findOriginal(List<String> list, String value) {
+    private String findOriginal(Collection<String> list, String value) {
         for (String s : list) {
             if (StrUtil.equals(s, value) || StrUtil.equals(StrUtil.trim(s), value)) {
                 return value;

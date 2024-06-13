@@ -4,11 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.PageUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson2.JSONArray;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.BufferedReader;
@@ -29,26 +25,13 @@ import java.util.Set;
 public class TranslateEnTest {
 
 
-    String SecretAccessKey;
-    String AccessKeyID;
-
-    @Before
-    public void before() {
-        String volcSk = SystemUtil.get("JPOM_TRANSLATE_VOLC_SK", StrUtil.EMPTY);
-        String volcAk = SystemUtil.get("JPOM_TRANSLATE_VOLC_AK", StrUtil.EMPTY);
-        Assert.assertNotEquals("请配置火山翻译 SecretAccessKey[JPOM_TRANSLATE_VOLC_SK]", volcSk, StrUtil.EMPTY);
-        Assert.assertNotEquals("请配置火山翻译 AccessKeyID[JPOM_TRANSLATE_VOLC_AK]", volcAk, StrUtil.EMPTY);
-        SecretAccessKey = volcSk;
-        AccessKeyID = volcAk;
-    }
-
     @Test
     public void test() throws Exception {
         File file = new File("");
         String rootPath = file.getAbsolutePath();
         File rootFile = new File(rootPath).getParentFile();
 
-        VolcTranslateApi translateApi = new VolcTranslateApi(AccessKeyID, SecretAccessKey);
+        VolcTranslateApiTest translateApi = new VolcTranslateApiTest();
 
 
         File zhPropertiesFile = FileUtil.file(rootFile, "common/src/main/resources/i18n/messages_zh_CN.properties");
@@ -89,12 +72,5 @@ public class TranslateEnTest {
         try (BufferedWriter writer = FileUtil.getWriter(enPropertiesFile, charset, false)) {
             enProperties.store(writer, "i18n en");
         }
-    }
-
-    @Test
-    public void test2() throws Exception {
-        VolcTranslateApi translateApi = new VolcTranslateApi(AccessKeyID, SecretAccessKey);
-        JSONArray translateText = translateApi.translate("zh", "en", CollUtil.newArrayList("你好", "世界"));
-        System.out.println(translateText);
     }
 }
