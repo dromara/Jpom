@@ -201,7 +201,6 @@
     </a-layout>
   </div>
 </template>
-
 <script>
 import { getNodeListAll, getProjectListAll } from '@/api/node'
 import { getFileList } from '@/api/node-project'
@@ -539,7 +538,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .sider {
   border: 1px solid #e2e2e2;

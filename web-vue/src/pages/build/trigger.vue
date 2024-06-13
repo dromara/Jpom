@@ -141,7 +141,6 @@
     </template>
   </div>
 </template>
-
 <script>
 import { getTriggerUrl } from '@/api/build-info'
 export default {

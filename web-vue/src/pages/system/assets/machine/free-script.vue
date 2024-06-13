@@ -53,7 +53,7 @@
     </a-row>
   </div>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import codeEditor from '@/components/codeEditor'
 import LogView2 from '@/components/logView/index2'
 import { getWebSocketUrl } from '@/api/config'

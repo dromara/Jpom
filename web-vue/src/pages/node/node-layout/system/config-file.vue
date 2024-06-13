@@ -30,7 +30,6 @@
     </a-form>
   </div>
 </template>
-
 <script>
 import { getConfigData, editConfig, systemInfo } from '@/api/system'
 import codeEditor from '@/components/codeEditor'
@@ -143,5 +142,3 @@ export default {
   }
 }
 </script>
-
-<style scoped></style>

@@ -47,7 +47,6 @@
     <a-skeleton v-else />
   </div>
 </template>
-
 <script>
 import { nodeMonitorData } from '@/api/node'
 import { drawChart, generateNodeTopChart, generateNodeNetworkTimeChart, generateNodeNetChart } from '@/api/node-stat'
@@ -143,7 +142,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .historyChart {
   height: 50vh;

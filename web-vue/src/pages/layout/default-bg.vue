@@ -45,7 +45,7 @@
     </div>
   </div>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 const guideStore1 = guideStore()
 const theme = computed(() => {
   return guideStore1.getThemeView()

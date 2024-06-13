@@ -12,7 +12,6 @@
     />
   </div>
 </template>
-
 <script>
 import { scriptLog } from '@/api/node-other'
 import LogView1 from '@/components/logView'

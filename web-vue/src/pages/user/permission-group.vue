@@ -237,7 +237,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import { workspaceList } from '@/api/user/user'
 import { getList, editPermissionGroup, deletePermissionGroup } from '@/api/user/user-permission'
@@ -268,6 +267,7 @@ export default {
         { value: 6, name: this.$t('pages.user.permission-group.2ab8dd00') },
         { value: 7, name: this.$t('pages.user.permission-group.2b6c6c5a') }
       ],
+
       editVisible: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       columns: [
@@ -299,6 +299,7 @@ export default {
           width: 120
         }
       ],
+
       // 表单校验规则
       rules: {
         name: [{ required: true, message: this.$t('pages.user.permission-group.d9245f83'), trigger: 'blur' }]
@@ -507,7 +508,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .item-info {
   /* display: inline-block; */

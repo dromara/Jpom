@@ -72,7 +72,7 @@
     </a-layout>
   </a-layout>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import SideMenu from './side-menu.vue'
 // import UserHeader from "./user-header";
 import ContentTab from './content-tab.vue'
@@ -123,8 +123,7 @@ watch(
       // 登录登录会触发 tab 变化，这里不改变路由缓存。避免重新加载路由触发请求接口
       // 已经由 v-if="menuTabKeyList.length" 实现
       // return
-    }
-    // 获取已被删除的key
+    } // 获取已被删除的key
     oldKeys
       ?.filter((key) => {
         return !newKeys.includes(key)
@@ -219,7 +218,7 @@ const changeCollapsed = () => {
   _appStore.collapsed(collapsed.value)
 }
 </script>
-<style scoped lang="less">
+<style lang="less" scoped>
 #app-layout {
   min-height: 100vh;
 }
@@ -308,7 +307,6 @@ const changeCollapsed = () => {
   overflow-y: scroll;
 } */
 </style>
-
 <style>
 /* .layout-content { */
 /* margin: 0; */

@@ -184,7 +184,6 @@
     </a-row>
   </div>
 </template>
-
 <script>
 import { statSystemOverview } from '@/api/user/user'
 
@@ -235,7 +234,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 :deep(.ant-divider-horizontal) {
   margin: 5px 0;

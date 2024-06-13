@@ -36,7 +36,6 @@
     </div>
   </a-drawer>
 </template>
-
 <script>
 import SwarmNode from './node'
 import SwarmService from './service'
@@ -91,7 +90,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .docker-menu {
   border-bottom: 0;

@@ -334,7 +334,10 @@
                 <a-col :span="7" style="text-align: right">
                   <a-tooltip>
                     <template #title>
-                      <div>当前状态：{{ statusMap[item.machineNodeData && item.machineNodeData.status] }}</div>
+                      <div>
+                        {{ $t('pages.node.list.10775be3')
+                        }}{{ statusMap[item.machineNodeData && item.machineNodeData.status] }}
+                      </div>
                       <div>
                         {{ $t('pages.node.list.a622e852')
                         }}{{ (item.machineNodeData && item.machineNodeData.statusMsg) || '' }}
@@ -660,7 +663,6 @@
     </customModal>
   </div>
 </template>
-
 <script>
 import { mapState } from 'pinia'
 import { Empty } from 'ant-design-vue'
@@ -1193,5 +1195,3 @@ export default {
   }
 }
 </script>
-
-<style scoped></style>

@@ -12,7 +12,6 @@
     />
   </div>
 </template>
-
 <script>
 import LogView from '@/components/logView'
 import { dockerImagePullImageLog } from '@/api/docker-api'

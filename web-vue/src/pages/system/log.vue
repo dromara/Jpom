@@ -27,7 +27,6 @@
     </a-layout>
   </div>
 </template>
-
 <script>
 import { getLogList, downloadFile, deleteLog } from '@/api/system'
 import { mapState } from 'pinia'
@@ -187,7 +186,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .log-layout {
   padding: 0;

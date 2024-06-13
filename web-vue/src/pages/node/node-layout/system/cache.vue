@@ -178,7 +178,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import { getNodeCache, clearCache } from '@/api/system'
 import TaskStat from '@/pages/system/taskStat'

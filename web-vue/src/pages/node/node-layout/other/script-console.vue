@@ -70,7 +70,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import { mapState } from 'pinia'
 import { useUserStore } from '@/stores/user'
@@ -235,7 +234,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .script-console-layout {
   padding: 0;

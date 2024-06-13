@@ -720,7 +720,6 @@
     />
   </div>
 </template>
-
 <script>
 import { parseTime } from '@/utils/const'
 import {
@@ -859,6 +858,7 @@ export default {
           width: '160px'
         }
       ],
+
       // parentColumns: [
       //   {
       //     title: '序号',
@@ -1017,7 +1017,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 :deep(.ant-statistic div) {
   display: inline-block;

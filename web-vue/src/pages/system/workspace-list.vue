@@ -335,7 +335,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import {
   deleteWorkspace,

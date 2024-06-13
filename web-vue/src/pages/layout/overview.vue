@@ -168,7 +168,6 @@
     <build-log v-if="buildLogVisible > 0" :temp="temp" :visible="buildLogVisible != 0" @close="buildLogVisible = 0" />
   </div>
 </template>
-
 <script>
 import { myWorkspace, statWorkspace, recentLogData } from '@/api/user/user'
 import BuildLog from '@/pages/build/log'
@@ -280,7 +279,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 :deep(.ant-divider-horizontal) {
   margin: 5px 0;

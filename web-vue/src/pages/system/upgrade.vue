@@ -150,7 +150,6 @@
     </a-tabs>
   </div>
 </template>
-
 <script>
 import upgrade from '@/components/upgrade'
 import { checkVersion, downloadRemote, uploadAgentFile, uploadAgentFileMerge } from '@/api/node'
@@ -244,6 +243,7 @@ export default {
           fixed: 'right'
         }
       ],
+
       nodeVersion: {},
       nodeStatus: {},
       tableSelections: [],

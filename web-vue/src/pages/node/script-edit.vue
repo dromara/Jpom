@@ -107,7 +107,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import codeEditor from '@/components/codeEditor'
 import { editScript, itemScript } from '@/api/node-other'

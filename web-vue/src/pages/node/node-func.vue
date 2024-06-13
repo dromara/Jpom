@@ -52,7 +52,6 @@
     </div>
   </a-drawer>
 </template>
-
 <script>
 import { mapState } from 'pinia'
 import ScriptList from '@/pages/node/script-list'

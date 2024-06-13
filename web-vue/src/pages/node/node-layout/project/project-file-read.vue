@@ -9,7 +9,6 @@
     </log-view1>
   </div>
 </template>
-
 <script>
 // import { getProjectData, getProjectLogSize, downloadProjectLogFile, getLogBackList, downloadProjectLogBackFile, deleteProjectLogBackFile } from "@/api/node-project";
 import { getWebSocketUrl } from '@/api/config'
@@ -138,7 +137,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .filter {
   margin: 0 0 10px;
