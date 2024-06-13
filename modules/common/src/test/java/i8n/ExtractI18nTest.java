@@ -2,6 +2,7 @@ package i8n;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -14,7 +15,9 @@ import com.alibaba.fastjson2.JSONWriter;
 import lombok.Lombok;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -30,13 +33,28 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * 提交代码中的中文并生成随机 key 转存到 properties
+ * <h1>Jpom 后端 i18n 使用流程</h1>
  * <p>
- * \"[\u4e00-\u9fa5]+\"
+ * <ol>
+ *     <li>提取代码中的所有关联的中文</li>
+ *     <li>将提取到的中文使用千帆大模型（百度）进行语意化翻译</li>
+ *     <li>将翻译结果进行拼接成 key = i18n.xxxx.md5('原始中文')[4+]</li>
+ *     <li>将结果缓存至 words.json (如果缓存中存在不会进行重复翻译)</li>
+ *     <li>----------------------------</li>
+ *     <li>将 words.json 转换为 zh_CN.properties</li>
+ *     <li>扫描代码中所有关联中文并根据 zh_CN.properties 进行替换</li>
+ *     <li>对比扫描结果中使用到的 i18n key，删除 zh_CN.properties 、words.json 中未关联的 key</li>
+ *     <li>对应扫描结果中的 i18n key 但是 zh_CN.properties 中不存在的 key，进行提示</li>
+ *     <li>----------------------------</li>
+ *     <li>将 zh_CN.properties 使用火山翻译（字节跳动）转换为 en_US.properties</li>
+ * </ol>
+ * <p>
+ *  扫描代码中的中文关键词：\"[\u4e00-\u9fa5]+\"
  *
  * @author bwcx_jzy
  * @since 2024/6/11
  */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ExtractI18nTest {
 
     /**
@@ -67,14 +85,15 @@ public class ExtractI18nTest {
     /**
      * 代码中关联（引用） key 的正则
      */
-    private final Pattern[] messageKeyPatterns = new Pattern[]{
-        Pattern.compile("I18nMessageUtil\\.get\\(\"(.*?)\"\\)"),
-        Pattern.compile("TransportI18nMessageUtil\\.get\\(\"(.*?)\"\\)"),
-        Pattern.compile("@ValidatorItem\\(.*?msg\\s*=\\s*\"([^\"]*)\".*?\\)"),
-        Pattern.compile("nameKey\\s*=\\s*\"([^\"]*)\".*?\\)"),
+    public static final Tuple[] messageKeyPatterns = new Tuple[]{
+        // 优先匹配（避免后续替换异常）
+        new Tuple(Pattern.compile("TransportI18nMessageUtil\\.get\\(\"(.*?)\"\\)"), true),
+        new Tuple(Pattern.compile("I18nMessageUtil\\.get\\(\"(.*?)\"\\)"), true),
+        new Tuple(Pattern.compile("@ValidatorItem\\(.*?msg\\s*=\\s*\"([^\"]*)\".*?\\)"), false),
+        new Tuple(Pattern.compile("nameKey\\s*=\\s*\"([^\"]*)\".*?\\)"), false),
     };
 
-    private final String[] JpomAnnotation = {
+    public final static String[] JpomAnnotation = {
         "@ValidatorItem", "nameKey = \""
     };
 
@@ -88,10 +107,10 @@ public class ExtractI18nTest {
     }
 
     /**
-     * 提前代码中的中文并使用大模型进行语意化翻译 key
+     * 提取代码中的中文并使用大模型进行语意化翻译 key
      */
     @Test
-    public void extractJavaZh() throws Exception {
+    public void extractJavaZh_First1() throws Exception {
         // 中文字符串
         Set<String> wordsSet = new LinkedHashSet<>();
         // 将已经存在的合并使用, 中文资源文件存储路径
@@ -119,7 +138,7 @@ public class ExtractI18nTest {
             long value = entry.getValue();
             Assert.assertEquals("[" + entry.getKey() + "]出现去重空格后重复", 1L, value);
         }
-        // 语意化中文存储为 key（提前排序）
+        // 语意化中文存储为 key（排序）
         Collection<String> wordsSetSort = CollUtil.sort(wordsSet, String::compareTo);
         //
         JSONObject cacheWords = this.loadCacheWords();
@@ -168,7 +187,7 @@ public class ExtractI18nTest {
      * @throws Exception 异常
      */
     @Test
-    public void generateZhPropertiesAndReplace() throws Exception {
+    public void generateZhPropertiesAndReplace_Second2() throws Exception {
         JSONObject cacheWords = this.loadCacheWords();
         TreeMap<String, Object> sort = MapUtil.sort(cacheWords);
         Properties zhProperties = new Properties();
@@ -242,7 +261,7 @@ public class ExtractI18nTest {
      * @throws IOException io 异常
      */
     @Test
-    public void syncZhToEnProperties() throws Exception {
+    public void syncZhToEnProperties_Third3() throws Exception {
         // 加载中文配置
         Properties zhProperties = new Properties();
         try (BufferedReader inputStream = FileUtil.getReader(zhPropertiesFile, charset)) {
@@ -409,7 +428,7 @@ public class ExtractI18nTest {
      * @param file     目录
      * @param consumer java 文件
      */
-    private void walkFile(File file, Consumer<File> consumer) {
+    public static void walkFile(File file, Consumer<File> consumer) {
         FileUtil.walkFiles(file, file1 -> {
             if (FileUtil.isDirectory(file1)) {
                 return;
@@ -424,60 +443,6 @@ public class ExtractI18nTest {
         });
     }
 
-    /**
-     * 生成中文对应的 key
-     *
-     * @param file 项目根路径
-     * @throws IOException io 异常
-     */
-    private void generateKey(File file) throws IOException {
-        //   /Users/user/IdeaProjects/Jpom/jpom-parent/modules/.DS_Store
-//        Collection<Object> oldKeys = zhProperties.keySet();
-//        Collection<Object> linkUsed = new LinkedHashSet<>();
-//        wordsSet = CollUtil.sort(wordsSet, String::compareTo);
-//        wordsSet.forEach(s -> {
-//            // 根据中文反查 key
-//            String key = null;
-//            for (Map.Entry<Object, Object> entry : zhProperties.entrySet()) {
-//                if (StrUtil.equals(StrUtil.toStringOrNull(entry.getValue()), s)) {
-//                    key = (String) entry.getKey();
-//                    break;
-//                }
-//            }
-//            if (key == null) {
-//                do {
-//                    key = StrUtil.format("i18n.{}", RandomUtil.randomStringUpper(6));
-//                } while (zhProperties.containsKey(key));
-//                System.out.println("生成新的 key:" + key);
-//                zhProperties.put(key, s);
-//            }
-//            linkUsed.add(key);
-//        });
-//        // 删除不存在的
-//        int beforeSize = oldKeys.size();
-//        oldKeys.removeIf(next -> {
-//            //
-//            boolean b = !linkUsed.contains(next) && !useKeys.contains(next);
-//            if (b) {
-//                System.out.println("删除 key：" + next);
-//            }
-//            return b;
-//        });
-//        int afterSize = oldKeys.size();
-//        if (beforeSize != afterSize) {
-//            System.out.println(beforeSize + "  " + afterSize);
-//        }
-//
-//
-//        try (BufferedWriter writer = FileUtil.getWriter(zhPropertiesFile, charset, false)) {
-//            zhProperties.store(writer, "i18n zh");
-//        }
-//        System.out.println(zhProperties.size());
-//
-//        for (Map.Entry<Object, Object> entry : zhProperties.entrySet()) {
-//            chineseMap.put(StrUtil.toStringOrNull(entry.getValue()), StrUtil.toStringOrNull(entry.getKey()));
-//        }
-    }
 
     /**
      * 替换代码中的中文为方法调用
@@ -500,7 +465,8 @@ public class ExtractI18nTest {
                     writer.write(line);
                 } else {
                     // 匹配已经使用到的 key
-                    for (Pattern messageKeyPattern : messageKeyPatterns) {
+                    for (Tuple tuple : messageKeyPatterns) {
+                        Pattern messageKeyPattern = tuple.get(0);
                         Matcher matcher = messageKeyPattern.matcher(line);
                         while (matcher.find()) {
                             String key = matcher.group(1);
@@ -631,7 +597,7 @@ public class ExtractI18nTest {
      * @param line 整行
      * @return 是否需要忽略
      */
-    private boolean needIgnoreCase(String text, String line) {
+    public static boolean needIgnoreCase(String text, String line) {
         Pattern pattern = Pattern.compile("[\\u4e00-\\u9fa5]");
         Matcher matcher = pattern.matcher(text);
         boolean b = matcher.find();
@@ -648,7 +614,7 @@ public class ExtractI18nTest {
      * @param line 代码行
      * @return 是否需要忽略
      */
-    private boolean canIgnore(String line) throws ClassNotFoundException {
+    public static boolean canIgnore(String line) throws ClassNotFoundException {
         String trimLin = line.trim();
         if (StrUtil.startWithAny(trimLin, JpomAnnotation)) {
             // jpom 特有注解
