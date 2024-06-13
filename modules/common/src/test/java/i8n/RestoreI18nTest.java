@@ -10,7 +10,6 @@
 package i8n;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.Lombok;
@@ -59,8 +58,8 @@ public class RestoreI18nTest {
         // 提取中文
         ExtractI18nTest.walkFile(rootFile, file1 -> {
             try {
-                for (Tuple tuple : ExtractI18nTest.messageKeyPatterns) {
-                    restoreChineseInFile(file1, tempDir, tuple, zhProperties);
+                for (Pattern pattern : ExtractI18nTest.messageKeyPatterns) {
+                    restoreChineseInFile(file1, tempDir, pattern, zhProperties);
                 }
             } catch (Exception e) {
                 throw Lombok.sneakyThrow(e);
@@ -68,7 +67,7 @@ public class RestoreI18nTest {
         });
     }
 
-    private void restoreChineseInFile(File file, File tempDir, Tuple tuple, Properties zhProperties) throws Exception {
+    private void restoreChineseInFile(File file, File tempDir, Pattern pattern, Properties zhProperties) throws Exception {
         String subPath = FileUtil.subPath(rootFile.getAbsolutePath(), file);
         // 先存储于临时文件
         File tempFile = FileUtil.file(tempDir, subPath);
@@ -81,24 +80,26 @@ public class RestoreI18nTest {
                 if (ExtractI18nTest.canIgnore(line)) {
                     writer.write(line);
                 } else {
-//                    // 匹配已经使用到的 key
-//                    for (Pattern messageKeyPattern : ExtractI18nTest.messageKeyPatterns) {
-//                        Matcher matcher = messageKeyPattern.matcher(line);
-//                        while (matcher.find()) {
-//                            String key = matcher.group(1);
-//                            if (!ExtractI18nTest.needIgnoreCase(key, line)) {
-//                                continue;
-//                            }
-//                            useKeys.add(key);
-//                        }
-//                    }
-                    // 替换为 i18n key 或者方法
-
-                    Pattern pattern = tuple.get(0);
-                    boolean full = tuple.get(1);
-                    Matcher matcher = pattern.matcher(line);
+                    // 将 i18n key 替换为中文
                     StringBuffer modifiedLine = new StringBuffer();
-                    if (full) {
+                    Matcher matcher = pattern.matcher(line);
+                    if (StrUtil.containsAny(line, ExtractI18nTest.JpomAnnotation)) {
+                        if (matcher.find()) {
+                            String key = matcher.group(1);
+                            if (ExtractI18nTest.needIgnoreCase(key, line)) {
+                                String chineseText = (String) zhProperties.get(key);
+                                if (chineseText == null) {
+                                    throw new IllegalArgumentException("找不到对应的中文:" + key);
+                                }
+                                // 完整替换
+                                modifiedLine.append(StrUtil.replace(line, String.format("\"%s\"", key), String.format("\"%s\"", chineseText)));
+                            } else {
+                                modifiedLine.append(line);
+                            }
+                        } else {
+                            modifiedLine.append(line);
+                        }
+                    } else {
                         while (matcher.find()) {
                             String key = matcher.group(1);
                             if (!ExtractI18nTest.needIgnoreCase(key, line)) {
@@ -108,26 +109,10 @@ public class RestoreI18nTest {
                             if (chineseText == null) {
                                 throw new IllegalArgumentException("找不到对应的中文:" + key);
                             }
-                            //System.out.println("需要单独处理的：" + line);
-                            // 完整替换
+                            // 正则关键词替换
                             matcher.appendReplacement(modifiedLine, String.format("\"%s\"", chineseText));
                         }
                         matcher.appendTail(modifiedLine);
-                    } else {
-                        if (matcher.find()) {
-                            String key = matcher.group(1);
-                            if (ExtractI18nTest.needIgnoreCase(key, line)) {
-                                String chineseText = (String) zhProperties.get(key);
-                                if (chineseText == null) {
-                                    throw new IllegalArgumentException("找不到对应的中文:" + key);
-                                }
-                                modifiedLine.append(StrUtil.replace(line, String.format("\"%s\"", key), String.format("\"%s\"", chineseText)));
-                            } else {
-                                modifiedLine.append(line);
-                            }
-                        } else {
-                            modifiedLine.append(line);
-                        }
                     }
                     writer.write(modifiedLine.toString());
                     modified = true;
