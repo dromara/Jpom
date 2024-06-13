@@ -234,8 +234,8 @@
         @ok="handleEditOk"
       >
         <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-          <a-form-item label="文件名" name="name">
-            <a-input v-model:value="temp.name" placeholder="文件名" />
+          <a-form-item :label="$t('pages.file-manager.fileStorage.list.94c193de')" name="name">
+            <a-input v-model:value="temp.name" :placeholder="$t('pages.file-manager.fileStorage.list.94c193de')" />
           </a-form-item>
           <a-form-item :label="$t('pages.file-manager.fileStorage.list.86a4093a')" name="keepDay">
             <a-input-number
@@ -458,7 +458,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import {
   CHANGE_PAGE,
@@ -610,6 +609,7 @@ export default {
           width: '170px'
         }
       ],
+
       rules: {
         name: [{ required: true, message: this.$t('pages.file-manager.fileStorage.list.20c02197'), trigger: 'blur' }],
         url: [{ required: true, message: this.$t('pages.file-manager.fileStorage.list.cc2bc679'), trigger: 'blur' }]
@@ -983,7 +983,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 :deep(.ant-progress-text) {
   width: auto;

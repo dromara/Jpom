@@ -428,7 +428,6 @@
     </div> -->
   </div>
 </template>
-
 <script>
 import {
   deleteScript,
@@ -578,6 +577,7 @@ export default {
               width: '100px'
             }
       ],
+
       rules: {
         name: [{ required: true, message: this.$t('pages.script.script-list.beb9cb37'), trigger: 'blur' }],
         context: [{ required: true, message: this.$t('pages.script.script-list.52049f49'), trigger: 'blur' }]

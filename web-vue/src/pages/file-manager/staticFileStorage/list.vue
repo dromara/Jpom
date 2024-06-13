@@ -296,7 +296,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import {
   CHANGE_PAGE,
@@ -401,10 +400,12 @@ export default {
           width: '170px'
         }
       ],
+
       rules: {
         name: [
           { required: true, message: this.$t('pages.file-manager.staticFileStorage.list.20c02197'), trigger: 'blur' }
         ],
+
         url: [
           { required: true, message: this.$t('pages.file-manager.staticFileStorage.list.cc2bc679'), trigger: 'blur' }
         ]
@@ -645,7 +646,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 :deep(.ant-progress-text) {
   width: auto;

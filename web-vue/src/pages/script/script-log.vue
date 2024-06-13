@@ -141,7 +141,6 @@
     />
   </div>
 </template>
-
 <script>
 import { getScriptLogList, scriptDel, triggerExecTypeMap } from '@/api/server-script'
 import ScriptLogView from '@/pages/script/script-log-view'

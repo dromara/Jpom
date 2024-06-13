@@ -69,7 +69,6 @@
     </a-layout-content>
   </a-layout>
 </template>
-
 <script>
 import { getSshListTree } from '@/api/ssh'
 import terminal1 from './terminal'

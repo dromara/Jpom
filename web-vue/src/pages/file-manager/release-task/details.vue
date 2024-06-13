@@ -89,7 +89,6 @@
     </a-form>
   </div>
 </template>
-
 <script>
 import { taskDetails, statusMap, taskLogInfoList } from '@/api/file-manager/release-task-log'
 import LogView1 from '@/components/logView/index2'

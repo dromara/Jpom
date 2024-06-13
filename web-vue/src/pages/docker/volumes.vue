@@ -73,7 +73,6 @@
     </template>
   </a-table>
 </template>
-
 <script>
 import { renderSize, parseTime } from '@/utils/const'
 import { dockerVolumesList, dockerVolumesRemove } from '@/api/docker-api'
@@ -142,6 +141,7 @@ export default {
           width: '80px'
         }
       ],
+
       action: {
         remove: {
           msg: this.$t('pages.docker.volumes.9e6ac7fa'),

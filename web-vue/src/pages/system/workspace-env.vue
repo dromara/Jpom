@@ -241,7 +241,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import { deleteWorkspaceEnv, editWorkspaceEnv, getWorkspaceEnvList, getTriggerUrlWorkspaceEnv } from '@/api/workspace'
 import { getNodeListAll } from '@/api/node'
@@ -317,6 +316,7 @@ export default {
           width: '200px'
         }
       ],
+
       // 表单校验规则
       rulesEnv: {
         name: [{ required: true, message: this.$t('pages.system.workspace-env.95105178'), trigger: 'blur' }],

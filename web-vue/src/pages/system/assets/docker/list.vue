@@ -639,7 +639,6 @@
     </a-drawer>
   </div>
 </template>
-
 <script>
 import {
   dockerList,
@@ -770,6 +769,7 @@ export default {
           width: '320px'
         }
       ],
+
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
         name: [{ required: true, message: this.$t('pages.system.assets.docker.list.98c4138b'), trigger: 'blur' }],
@@ -782,6 +782,7 @@ export default {
             trigger: 'blur'
           }
         ],
+
         role: [{ required: true, message: this.$t('pages.system.assets.docker.list.f3c77563'), trigger: 'blur' }],
         remoteAddr: [
           { required: true, message: this.$t('pages.system.assets.docker.list.331c207a'), trigger: 'blur' },

@@ -207,7 +207,6 @@
     </a-layout>
   </div>
 </template>
-
 <script>
 import {
   backupDeleteProjectFile,
@@ -278,6 +277,7 @@ export default {
           fixed: 'right'
         }
       ],
+
       fileColumns: [
         {
           title: this.$t('pages.node.node-layout.project.project-file-backup.6a721706'),
@@ -310,6 +310,7 @@ export default {
           fixed: 'right'
         }
       ],
+
       recoverLoading: false
     }
   },
@@ -364,6 +365,7 @@ export default {
           isLeaf: false
         }
       ]
+
       // 设置默认展开第一个
       setTimeout(() => {
         const node = this.treeList[0]
@@ -591,7 +593,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .file-layout {
   padding: 0;

@@ -395,7 +395,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import { deleteSsh, editSsh, getSshList, syncToWorkspace, getSshGroupAll } from '@/api/ssh'
 import { statusMap } from '@/api/system/assets-ssh'

@@ -3,7 +3,6 @@
     <workspaceEnv ref="workspaceEnv" :workspace-id="getWorkspaceId()" :global="true" />
   </div>
 </template>
-
 <script>
 import workspaceEnv from '@/pages/system/workspace-env.vue'
 import { mapState } from 'pinia'

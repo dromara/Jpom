@@ -1,7 +1,6 @@
 <template>
   <terminal :url="socketUrl" />
 </template>
-
 <script>
 import { mapState } from 'pinia'
 import { getWebSocketUrl } from '@/api/config'

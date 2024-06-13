@@ -531,7 +531,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import { nodeMonitorData, getProcessList, killPid } from '@/api/node'
 import {
@@ -703,6 +702,7 @@ export default {
           fixed: 'right'
         }
       ],
+
       diskColumns: [
         {
           title: 'uuid',
@@ -822,6 +822,7 @@ export default {
           tooltip: true
         }
       ],
+
       refreshInterval: 5,
       historyChart: null,
       netHistoryChart: null,
@@ -1072,7 +1073,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .chart {
   height: 35vh;

@@ -4,7 +4,7 @@
       <a-result :title="$t('pages.docker.swarm.list.67b40edb')" :sub-title="$t('pages.docker.swarm.list.b037a0fc')">
         <template #extra>
           <router-link to="/system/assets/docker-list">
-            <a-button key="console" type="primary">现在就去</a-button></router-link
+            <a-button key="console" type="primary">{{ $t('pages.docker.swarm.list.356927eb') }}</a-button></router-link
           >
         </template>
       </a-result>
@@ -15,7 +15,7 @@
       default-auto-refresh
       :auto-refresh-time="5"
       table-name="docker-swarm-list"
-      empty-description="没有docker集群"
+      :empty-description="$t('pages.docker.swarm.list.e33acb4f')"
       :active-page="activePage"
       size="middle"
       :data-source="list"
@@ -156,7 +156,6 @@
     <!-- </a-drawer> -->
   </div>
 </template>
-
 <script>
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 import { dockerSwarmList, editDockerSwarm, delSwarm } from '@/api/docker-swarm'
@@ -243,6 +242,7 @@ export default {
           width: '220px'
         }
       ],
+
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
         name: [{ required: true, message: this.$t('pages.docker.swarm.list.b9de83e8'), trigger: 'blur' }],

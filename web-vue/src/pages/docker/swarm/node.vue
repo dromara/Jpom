@@ -217,7 +217,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import { dockerSwarmNodeList, dockerSwarmNodeUpdate } from '@/api/docker-swarm'
 import { dockerSwarmNodeLeave } from '@/api/system/assets-docker'
@@ -314,6 +313,7 @@ export default {
           width: '120px'
         }
       ],
+
       countdownTime: Date.now(),
       confirmLoading: false
     }
@@ -395,7 +395,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 :deep(.ant-statistic div) {
   display: inline-block;

@@ -310,9 +310,12 @@
           <a-textarea
             v-model:value="temp.jvm"
             :auto-size="{ minRows: 3, maxRows: 3 }"
-            :placeholder="`jvm${$t('pages.node.node-layout.project.project-edit.6e6cc3c2')},${$t(
-              'pages.node.node-layout.project.project-edit.a72cfae2'
-            )}.如：-Xms512m -Xmx512m`"
+            :placeholder="
+              $t('pages.node.node-layout.project.project-edit.17924912', {
+                slot1: $t('pages.node.node-layout.project.project-edit.6e6cc3c2'),
+                slot2: $t('pages.node.node-layout.project.project-edit.a72cfae2')
+              })
+            "
           />
         </a-form-item>
         <a-form-item
@@ -453,7 +456,6 @@
     ></NodeFunc>
   </div>
 </template>
-
 <script>
 import CustomSelect from '@/components/customSelect'
 import NodeFunc from '@/pages/node/node-func'
@@ -507,15 +509,19 @@ export default {
         id: [
           { required: true, message: this.$t('pages.node.node-layout.project.project-edit.6916e3ff'), trigger: 'blur' }
         ],
+
         name: [
           { required: true, message: this.$t('pages.node.node-layout.project.project-edit.bf4a219b'), trigger: 'blur' }
         ],
+
         runMode: [
           { required: true, message: this.$t('pages.node.node-layout.project.project-edit.4551702c'), trigger: 'blur' }
         ],
+
         whitelistDirectory: [
           { required: true, message: this.$t('pages.node.node-layout.project.project-edit.6fa628c8'), trigger: 'blur' }
         ],
+
         lib: [
           { required: true, message: this.$t('pages.node.node-layout.project.project-edit.b5d7203a'), trigger: 'blur' }
         ]

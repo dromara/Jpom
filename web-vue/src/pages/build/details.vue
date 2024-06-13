@@ -199,7 +199,6 @@
     />
   </div>
 </template>
-
 <script>
 import {
   getBuildGet,

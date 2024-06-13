@@ -15,7 +15,7 @@
           <a-input
             v-if="!serviceId"
             v-model:value="listQuery['serviceId']"
-            placeholder="服务id"
+            :placeholder="$t('pages.docker.swarm.task.ee51b4c9')"
             class="search-input-item"
             @press-enter="loadData"
           />
@@ -27,13 +27,13 @@
           />
           <a-input
             v-model:value="listQuery['taskId']"
-            placeholder="任务id"
+            :placeholder="$t('pages.docker.swarm.task.744d5016')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['taskNode']"
-            placeholder="节点id"
+            :placeholder="$t('pages.docker.swarm.task.a3c2349d')"
             class="search-input-item"
             @press-enter="loadData"
           />
@@ -96,7 +96,9 @@
               <p>
                 {{ $t('pages.docker.swarm.task.8a8e4923') }}<a-tag>{{ text }}-{{ TASK_STATE[text] }}</a-tag>
               </p>
-              <p v-if="record.status && record.status.err">错误信息：{{ record.status.err }}</p>
+              <p v-if="record.status && record.status.err">
+                {{ $t('pages.docker.swarm.task.9c95b60f') }}{{ record.status.err }}
+              </p>
               <p v-if="record.status && record.status.state">
                 {{ $t('pages.docker.swarm.task.29134ef5') }}<a-tag>{{ record.status.state }}</a-tag>
               </p>
@@ -166,7 +168,6 @@
     />
   </div>
 </template>
-
 <script>
 import { dockerSwarmServicesTaskList, TASK_STATE } from '@/api/docker-swarm'
 import { parseTime } from '@/utils/const'
@@ -275,7 +276,7 @@ export default {
         //   width: 170,
         // },
         {
-          title: '修改时间',
+          title: this.$t('pages.docker.swarm.task.d3b29478'),
           dataIndex: 'updatedAt',
           ellipsis: true,
 
@@ -292,6 +293,7 @@ export default {
           width: '80px'
         }
       ],
+
       countdownTime: Date.now()
     }
   },
@@ -329,7 +331,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 :deep(.ant-statistic div) {
   display: inline-block;

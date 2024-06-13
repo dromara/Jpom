@@ -180,7 +180,6 @@
     </a-tab-pane>
   </a-tabs>
 </template>
-
 <script>
 import {
   editConfig,
@@ -376,5 +375,3 @@ export default {
   }
 }
 </script>
-
-<style scoped></style>

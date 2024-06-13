@@ -155,7 +155,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 import { getClusterList, deleteCluster, listLinkGroups, editCluster } from '@/api/system/cluster'
@@ -242,6 +241,7 @@ export default {
           width: '120px'
         }
       ],
+
       // 表单校验规则
       rules: {
         name: [{ required: true, message: this.$t('pages.system.cluster-list.2e3ee77e'), trigger: 'blur' }],
