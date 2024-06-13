@@ -37,17 +37,7 @@ import java.util.stream.Collectors;
  * @since 2024/6/11
  */
 public class ExtractI18nTest {
-    /**
-     * 中文对应的 key map
-     * <p>
-     * key:中文
-     * value:随机key
-     */
-    private final Map<String, String> chineseMap = new HashMap<>();
-    /**
-     * 代码中已经使用到的 key
-     */
-    private final Collection<Object> useKeys = new HashSet<>();
+
     /**
      * 项目根路径
      */
@@ -101,9 +91,6 @@ public class ExtractI18nTest {
      */
     @Test
     public void extract() throws Exception {
-//        // 删除临时文件
-//        File file = FileUtil.file(rootFile, "i18n-temp");
-//        FileUtil.del(file);
         // 中文字符串
         Set<String> wordsSet = new LinkedHashSet<>();
         // 将已经存在的合并使用, 中文资源文件存储路径
@@ -167,12 +154,65 @@ public class ExtractI18nTest {
                     break;
                 }
             }
-            // 根据 key 排序
-            TreeMap<String, Object> sort = MapUtil.sort(allResult);
-            // 提前保存
-            File wordsFile = FileUtil.file(rootFile, "common/src/main/resources/i18n/words.json");
-            FileUtil.writeString(JSONArray.toJSONString(sort, JSONWriter.Feature.PrettyFormat), wordsFile, StandardCharsets.UTF_8);
+            saveWords(allResult);
         }
+    }
+
+    /**
+     * @throws Exception 异常
+     */
+    @Test
+    public void generateZhPropertiesAndReplace() throws Exception {
+        JSONObject cacheWords = this.loadCacheWords();
+        TreeMap<String, Object> sort = MapUtil.sort(cacheWords);
+        Properties zhProperties = new Properties();
+        zhProperties.putAll(sort);
+        try (BufferedWriter writer = FileUtil.getWriter(zhPropertiesFile, charset, false)) {
+            zhProperties.store(writer, "i18n zh");
+        }
+        // 将配置按照中文转 map
+        /*
+          中文对应的 key map
+          <p>
+          key:中文
+          value:随机key
+         */
+        Map<String, String> chineseMap = new HashMap<>();
+        for (Map.Entry<Object, Object> entry : zhProperties.entrySet()) {
+            chineseMap.put(StrUtil.toStringOrNull(entry.getValue()), StrUtil.toStringOrNull(entry.getKey()));
+        }
+        // 代码中已经使用到的 key
+        Collection<Object> useKeys = new HashSet<>();
+        // 临时文件
+        File tempDir = FileUtil.file(rootFile, "i18n-temp");
+        // 删除临时文件
+        FileUtil.del(tempDir);
+        // 替换中文
+        walkFile(rootFile, file1 -> {
+            try {
+                for (Pattern chinesePattern : chinesePatterns) {
+                    replaceQuotedChineseInFile(file1, tempDir, chinesePattern, chineseMap, useKeys);
+                }
+            } catch (Exception e) {
+                throw Lombok.sneakyThrow(e);
+            }
+        });
+        for (Object useKey : useKeys) {
+            if (zhProperties.containsKey(useKey)) {
+                continue;
+            }
+            System.err.println("代码中存在未关联的key（请手动修正）:" + useKey);
+        }
+        //
+        for (Map.Entry<Object, Object> entry : zhProperties.entrySet()) {
+            String key = (String) entry.getKey();
+            if (useKeys.contains(key)) {
+                continue;
+            }
+            System.err.println("配置中存在未关联的key（将自动删除 zhProperties、words.json）:" + key);
+        }
+        // 删除临时文件
+        FileUtil.del(tempDir);
     }
 
     /**
@@ -181,44 +221,56 @@ public class ExtractI18nTest {
      * @throws IOException io 异常
      */
     @Test
-    public void generateProperties() throws Exception {
-        JSONObject cacheWords = this.loadCacheWords();
-        TreeMap<String, Object> sort = MapUtil.sort(cacheWords);
+    public void syncZhToEnProperties() throws Exception {
+        // 加载中文配置
         Properties zhProperties = new Properties();
-        zhProperties.putAll(sort);
-        try (BufferedWriter writer = FileUtil.getWriter(zhPropertiesFile, charset, false)) {
-            zhProperties.store(writer, "i18n zh");
+        try (BufferedReader inputStream = FileUtil.getReader(zhPropertiesFile, charset)) {
+            zhProperties.load(inputStream);
+        }
+        // 加载英文配置
+        File enPropertiesFile = FileUtil.file(rootFile, "common/src/main/resources/i18n/messages_en_US.properties");
+        Properties enEexitsProperties = new Properties();
+        try (BufferedReader inputStream = FileUtil.getReader(enPropertiesFile, charset)) {
+            enEexitsProperties.load(inputStream);
         }
         // 翻译成英文
         VolcTranslateApiTest translateApi = new VolcTranslateApiTest();
-        Set<Object> objects = zhProperties.keySet();
-        int pageSize = 20;
-        int total = CollUtil.size(objects);
+        Set<Object> keySets = zhProperties.keySet();
+        // 接口限制、不能超过 16
+        int pageSize = 16;
+        int total = CollUtil.size(keySets);
         int page = PageUtil.totalPage(total, pageSize);
         //
         Properties enProperties = new Properties();
-        for (int i = 0; i < page; i++) {
+        for (int i = PageUtil.getFirstPageNo(); i <= page; i++) {
             int start = PageUtil.getStart(i, pageSize);
             int end = PageUtil.getEnd(i, pageSize);
 
-            List<Object> sub = CollUtil.sub(objects, start, end);
+            List<Object> keys = CollUtil.sub(keySets, start, end);
             List<String> values = new ArrayList<>();
-            for (Object object : sub) {
+            List<String> useKeys = new ArrayList<>();
+            for (Object object : keys) {
                 String key = (String) object;
                 String value1 = (String) zhProperties.get(key);
+                String existsValue = (String) enEexitsProperties.get(key);
+                if (existsValue != null) {
+                    // 已经存在
+                    enProperties.put(key, existsValue);
+                    continue;
+                }
                 values.add(value1);
+                useKeys.add(key);
             }
-
-            JSONArray translateText = translateApi.translate("zh", "en", values);
-
-            System.out.println(values);
-            System.out.println(translateText);
-            System.out.println("=================");
-            for (int i1 = 0; i1 < sub.size(); i1++) {
-                enProperties.put(sub.get(i1), translateText.getJSONObject(i1).getString("Translation"));
+            if (CollUtil.isNotEmpty(values)) {
+                JSONArray translateText = translateApi.translate("zh", "en", values);
+                System.out.println(values);
+                System.out.println(translateText);
+                System.out.println("=================");
+                for (int i1 = 0; i1 < values.size(); i1++) {
+                    enProperties.put(useKeys.get(i1), translateText.getJSONObject(i1).getString("Translation"));
+                }
             }
         }
-        File enPropertiesFile = FileUtil.file(rootFile, "common/src/main/resources/i18n/messages_en_US.properties");
         try (BufferedWriter writer = FileUtil.getWriter(enPropertiesFile, charset, false)) {
             enProperties.store(writer, "i18n en");
         }
@@ -272,6 +324,14 @@ public class ExtractI18nTest {
         return null;
     }
 
+    private void saveWords(JSONObject jsonObject) {
+        // 根据 key 排序
+        TreeMap<String, Object> sort = MapUtil.sort(jsonObject);
+        // 提前保存
+        File wordsFile = FileUtil.file(rootFile, "common/src/main/resources/i18n/words.json");
+        FileUtil.writeString(JSONArray.toJSONString(sort, JSONWriter.Feature.PrettyFormat), wordsFile, StandardCharsets.UTF_8);
+    }
+
     private JSONObject loadCacheWords() {
         File wordsFile = FileUtil.file(rootFile, "common/src/main/resources/i18n/words.json");
         if (wordsFile.exists()) {
@@ -318,20 +378,6 @@ public class ExtractI18nTest {
             }
         }
         return null;
-    }
-
-    @Test
-    public void replace() {
-        // 替换中文
-        walkFile(rootFile, file1 -> {
-            try {
-                for (Pattern chinesePattern : chinesePatterns) {
-                    replaceQuotedChineseInFile(file1, chinesePattern);
-                }
-            } catch (Exception e) {
-                throw Lombok.sneakyThrow(e);
-            }
-        });
     }
 
     /**
@@ -399,12 +445,6 @@ public class ExtractI18nTest {
 //            System.out.println(beforeSize + "  " + afterSize);
 //        }
 //
-//        for (Object useKey : useKeys) {
-//            if (zhProperties.containsKey(useKey)) {
-//                continue;
-//            }
-//            System.out.println("存在未关联的key:" + useKey);
-//        }
 //
 //        try (BufferedWriter writer = FileUtil.getWriter(zhPropertiesFile, charset, false)) {
 //            zhProperties.store(writer, "i18n zh");
@@ -423,10 +463,10 @@ public class ExtractI18nTest {
      * @param pattern 当前匹配的正则
      * @throws IOException io 异常
      */
-    private void replaceQuotedChineseInFile(File file, Pattern pattern) throws Exception {
+    private void replaceQuotedChineseInFile(File file, File tempDir, Pattern pattern, Map<String, String> chineseMap, Collection<Object> useKeys) throws Exception {
         String subPath = FileUtil.subPath(rootFile.getAbsolutePath(), file);
         // 先存储于临时文件
-        File tempFile = FileUtil.file(rootFile, "i18n-temp", subPath);
+        File tempFile = FileUtil.file(tempDir, subPath);
         FileUtil.mkParentDirs(tempFile);
         boolean modified = false;
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8);
@@ -436,6 +476,18 @@ public class ExtractI18nTest {
                 if (canIgnore(line)) {
                     writer.write(line);
                 } else {
+                    // 匹配已经使用到的 key
+                    for (Pattern messageKeyPattern : messageKeyPatterns) {
+                        Matcher matcher = messageKeyPattern.matcher(line);
+                        while (matcher.find()) {
+                            String key = matcher.group(1);
+                            if (!needIgnoreCase(key, line)) {
+                                continue;
+                            }
+                            useKeys.add(key);
+                        }
+                    }
+                    // 替换为 i18n key 或者方法
                     StringBuffer modifiedLine = new StringBuffer();
                     Matcher matcher = pattern.matcher(line);
                     while (matcher.find()) {
@@ -459,6 +511,7 @@ public class ExtractI18nTest {
                                 matcher.appendReplacement(modifiedLine, String.format("MessageUtil.get(\"%s\")", key));
                             }
                         }
+                        useKeys.add(key);
                     }
                     matcher.appendTail(modifiedLine);
 
@@ -541,21 +594,6 @@ public class ExtractI18nTest {
                         wordsSet.add(StrUtil.unWrap(chineseText, '\"'));
                         System.out.println("匹配到的内容：" + chineseText + "  -> " + line.trim());
                     }
-                }
-                boolean found = false;
-                for (Pattern messageKeyPattern : messageKeyPatterns) {
-                    Matcher matcher = messageKeyPattern.matcher(line);
-                    while (matcher.find()) {
-                        String key = matcher.group(1);
-                        if (!needIgnoreCase(key, line)) {
-                            continue;
-                        }
-                        useKeys.add(key);
-                        found = true;
-                    }
-                }
-                if (found) {
-                    continue;
                 }
             }
         }

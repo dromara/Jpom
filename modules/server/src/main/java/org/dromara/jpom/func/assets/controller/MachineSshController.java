@@ -221,7 +221,7 @@ public class MachineSshController extends BaseGroupNameController {
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<String> delete(@ValidatorItem String id) {
         long count = sshService.countByMachine(id);
-        Assert.state(count <= 0, StrUtil.format("当前机器SSH还关联{}个ssh，不能直接删除（需要提前删除解绑或者删除关联数据后才能删除）", count));
+        Assert.state(count <= 0, StrUtil.format("当前机器SSH还关联{}个ssh，不能直接删除（需要提前解绑或者删除关联数据后才能删除）", count));
         machineSshServer.delByKey(id);
         return JsonMessage.success("操作成功");
     }

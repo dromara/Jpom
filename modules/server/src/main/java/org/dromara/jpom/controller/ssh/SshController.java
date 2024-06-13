@@ -166,10 +166,10 @@ public class SshController extends BaseServerController {
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<Object> del(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id, HttpServletRequest request) {
         boolean checkSsh = buildInfoService.checkReleaseMethodByLike(id, request, BuildReleaseMethod.Ssh);
-        Assert.state(!checkSsh, "当前ssh存在构建项，不能直接删除（需要提前删除解绑或者删除关联数据后才能删除）");
+        Assert.state(!checkSsh, "当前ssh存在构建项，不能直接删除（需要提前解绑或者删除关联数据后才能删除）");
         // 判断是否绑定节点
         List<NodeModel> nodeBySshId = nodeService.getNodeBySshId(id);
-        Assert.state(CollUtil.isEmpty(nodeBySshId), "当前ssh被节点绑定，不能直接删除（需要提前删除解绑或者删除关联数据后才能删除）");
+        Assert.state(CollUtil.isEmpty(nodeBySshId), "当前ssh被节点绑定，不能直接删除（需要提前解绑或者删除关联数据后才能删除）");
 
         sshService.delByKey(id, request);
         //
@@ -182,10 +182,10 @@ public class SshController extends BaseServerController {
     @SystemPermission
     public IJsonMessage<Object> delFore(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id) {
         boolean checkSsh = buildInfoService.checkReleaseMethodByLike(id, BuildReleaseMethod.Ssh);
-        Assert.state(!checkSsh, "当前ssh存在构建项，不能直接删除（需要提前删除解绑或者删除关联数据后才能删除）");
+        Assert.state(!checkSsh, "当前ssh存在构建项，不能直接删除（需要提前解绑或者删除关联数据后才能删除）");
         // 判断是否绑定节点
         List<NodeModel> nodeBySshId = nodeService.getNodeBySshId(id);
-        Assert.state(CollUtil.isEmpty(nodeBySshId), "当前ssh被节点绑定，不能直接删除（需要提前删除解绑或者删除关联数据后才能删除）");
+        Assert.state(CollUtil.isEmpty(nodeBySshId), "当前ssh被节点绑定，不能直接删除（需要提前解绑或者删除关联数据后才能删除）");
 
         sshService.delByKey(id);
         //
