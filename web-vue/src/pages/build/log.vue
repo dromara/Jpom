@@ -36,7 +36,6 @@
     </template>
   </log-view>
 </template>
-
 <script>
 import LogView from '@/components/logView'
 

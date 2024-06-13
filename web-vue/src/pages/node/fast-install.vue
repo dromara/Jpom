@@ -116,7 +116,6 @@
     <div v-else>loading....</div>
   </div>
 </template>
-
 <script>
 import { mapState } from 'pinia'
 

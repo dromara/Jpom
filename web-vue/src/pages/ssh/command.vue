@@ -181,7 +181,11 @@
                     <a-input
                       v-model:value="item.desc"
                       :addon-before="$t('pages.ssh.command.b31dbb3', { index: index + 1 })"
-                      :placeholder="`参数描述,${$t('pages.ssh.command.6d8e653f')},仅是用于提示参数的含义`"
+                      :placeholder="
+                        $t('pages.ssh.command.4676a7bb', {
+                          slot1: $t('pages.ssh.command.6d8e653f')
+                        })
+                      "
                     />
                     <a-input
                       v-model:value="item.value"
@@ -415,7 +419,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import { deleteCommand, editCommand, executeBatch, getCommandList, syncToWorkspace, getTriggerUrl } from '@/api/command'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
@@ -499,6 +502,7 @@ export default {
           width: '240px'
         }
       ],
+
       tableSelections: [],
       syncToWorkspaceVisible: false,
       workspaceList: [],
@@ -752,7 +756,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .config-editor {
   overflow-y: scroll;

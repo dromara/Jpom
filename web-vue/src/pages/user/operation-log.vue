@@ -177,7 +177,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import { getOperationLogList } from '@/api/operation-log'
 import { getMonitorOperateTypeList } from '@/api/monitor'

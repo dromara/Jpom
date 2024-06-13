@@ -14,7 +14,6 @@
     </a-tabs>
   </div>
 </template>
-
 <script>
 import { getCommandLogBarchList, getCommandLogInfo } from '@/api/command'
 import LogView1 from '@/components/logView/index2'
@@ -155,5 +154,3 @@ export default {
   }
 }
 </script>
-
-<style scoped></style>

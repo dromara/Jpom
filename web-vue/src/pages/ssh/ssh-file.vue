@@ -131,9 +131,14 @@
           <template v-if="column.dataIndex === 'name'">
             <a-tooltip
               placement="topLeft"
-              :title="` ${$t('pages.ssh.ssh-file.bb769c1d')}${text} 长${$t('pages.ssh.ssh-file.bb769c1d')}${
-                record.longname
-              }`"
+              :title="
+                $t('pages.ssh.ssh-file.f6609058', {
+                  slot1: $t('pages.ssh.ssh-file.bb769c1d'),
+                  text: text,
+                  slot2: $t('pages.ssh.ssh-file.bb769c1d'),
+                  slot3: record.longname
+                })
+              "
             >
               <a-dropdown :trigger="['contextmenu']">
                 <div>{{ text }}</div>
@@ -158,16 +163,16 @@
                 record.link
                   ? $t('pages.ssh.ssh-file.56bb0bdf')
                   : text
-                    ? $t('pages.ssh.ssh-file.535422c2')
-                    : $t('pages.ssh.ssh-file.ec88a43e')
+                  ? $t('pages.ssh.ssh-file.535422c2')
+                  : $t('pages.ssh.ssh-file.ec88a43e')
               }`"
             >
               <span>{{
                 record.link
                   ? $t('pages.ssh.ssh-file.56bb0bdf')
                   : text
-                    ? $t('pages.ssh.ssh-file.535422c2')
-                    : $t('pages.ssh.ssh-file.ec88a43e')
+                  ? $t('pages.ssh.ssh-file.535422c2')
+                  : $t('pages.ssh.ssh-file.ec88a43e')
               }}</span>
             </a-tooltip>
           </template>
@@ -384,7 +389,6 @@
     </a-layout-content>
   </a-layout>
 </template>
-
 <script>
 import {
   deleteFile,
@@ -440,7 +444,7 @@ export default {
       },
       columns: [
         {
-          title: '文件名称',
+          title: this.$t('pages.ssh.ssh-file.48d3b5c4'),
           dataIndex: 'name',
           width: 200,
           ellipsis: true,
@@ -485,6 +489,7 @@ export default {
           width: '220px'
         }
       ],
+
       editFileVisible: false,
       addFileFolderVisible: false,
       editFilePermissionVisible: false,
@@ -504,6 +509,7 @@ export default {
           key: 'modifyTime'
         }
       ],
+
       sortMethod: {
         key: 'name',
         asc: true
@@ -879,8 +885,7 @@ export default {
     renderFilePermissionsTips() {
       //const permissionsValue = calcFilePermissionValue(this.permissions);
       //this.permissionTips = `cd ${this.temp.nextPath} && chmod ${permissionsValue} ${this.temp.name}`;
-    },
-    // 确认修改文件权限
+    }, // 确认修改文件权限
     updateFilePermissions() {
       // 请求参数
       const params = {
@@ -1010,7 +1015,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .ssh-file-layout {
   padding: 0;

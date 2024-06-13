@@ -9,7 +9,6 @@
   >
   </repository>
 </template>
-
 <script>
 import repository from './repository-list.vue'
 import { mapState } from 'pinia'

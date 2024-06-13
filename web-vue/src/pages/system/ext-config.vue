@@ -52,7 +52,6 @@
     </a-row>
   </div>
 </template>
-
 <script>
 import codeEditor from '@/components/codeEditor'
 import { addItem, listExtConf, getItem, saveItem, getDefaultItem } from '@/api/ext-config'
@@ -155,5 +154,3 @@ export default {
   }
 }
 </script>
-
-<style scoped></style>

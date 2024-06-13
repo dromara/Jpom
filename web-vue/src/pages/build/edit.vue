@@ -1250,8 +1250,8 @@
           chooseScriptVisible === 1
             ? tempExtraData.noticeScriptId
             : temp.script && temp.script.indexOf('$ref.script.') != -1
-              ? temp.script.replace('$ref.script.')
-              : ''
+            ? temp.script.replace('$ref.script.')
+            : ''
         "
         mode="choose"
         @confirm="
@@ -1351,7 +1351,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import codeEditor from '@/components/codeEditor'
 import repository from '@/pages/repository/list.vue'
@@ -1419,19 +1418,19 @@ export default {
           title: this.$t('pages.build.edit.2a9ef0eb'),
           children: [
             {
-              title: '不执行，也不编译测试用例 mvn clean package -Dmaven.test.skip=true',
+              title: this.$t('pages.build.edit.9d427063'),
               value: 'mvn clean package -Dmaven.test.skip=true'
             },
             {
-              title: '打包生产环境包 mvn clean package -Dmaven.test.skip=true -Pprod',
+              title: this.$t('pages.build.edit.5659520'),
               value: 'mvn clean package -Dmaven.test.skip=true -Pprod'
             },
             {
-              title: '打包测试环境包 mvn clean package -Dmaven.test.skip=true -Ptest',
+              title: this.$t('pages.build.edit.f869e0df'),
               value: 'mvn clean package -Dmaven.test.skip=true -Ptest'
             },
             {
-              title: '不执行，但是编译测试用例 mvn clean package -DskipTests',
+              title: this.$t('pages.build.edit.34d8a5b'),
               value: 'mvn clean package -DskipTests'
             },
             {
@@ -1439,36 +1438,36 @@ export default {
               value: 'mvn clean package'
             },
             {
-              title: '指定 pom 文件打包 mvn -f xxx/pom.xml clean package',
+              title: this.$t('pages.build.edit.73512cae'),
               value: 'mvn -f xxx/pom.xml clean package'
             },
             {
-              title: '指定 settings 文件打包 mvn -s xxx/settings.xml clean package',
+              title: this.$t('pages.build.edit.4304fb7e'),
               value: 'mvn -s xxx/settings.xml clean package'
             }
           ]
         },
         {
-          title: 'vue 项目(示例参考，具体还需要根据项目实际情况来决定)',
+          title: this.$t('pages.build.edit.7e95f38d'),
           children: [
             {
-              title: '需要先安装依赖 npm i && npm run build',
+              title: this.$t('pages.build.edit.455f3ab2'),
               value: 'npm i && npm run build'
             },
             {
-              title: '打包正式环境 npm i && npm run build:prod',
+              title: this.$t('pages.build.edit.fda856b3'),
               value: 'npm i && npm run build:prod'
             },
             {
-              title: '打包预发布环境 npm i && npm run build:stage',
+              title: this.$t('pages.build.edit.2b4b3931'),
               value: 'npm i && npm run build:stage'
             },
             {
-              title: '需要先安装依赖 yarn && yarn run build',
+              title: this.$t('pages.build.edit.4d7ec7a'),
               value: 'yarn && yarn run build'
             },
             {
-              title: '指定目录打包 yarn && yarn --cwd xxx build',
+              title: this.$t('pages.build.edit.9b30b8b1'),
               value: 'yarn && yarn --cwd xxx build'
             }
           ]
@@ -1542,15 +1541,16 @@ export default {
           // status: 'wait'
         }
       ],
+
       dslDefault:
-        '# 基础镜像 目前仅支持 ubuntu-latest\n' +
+        this.$t('pages.build.edit.157cc1d7') +
         'runsOn: ubuntu-latest\n' +
-        '# 使用哪个 docker 构建,填写 docker 标签 默认查询可用的第一个,如果 tag 查询出多个也选择第一个结果\n' +
+        this.$t('pages.build.edit.29dc8c24') +
         'fromTag: xxx\n' +
-        '# version 需要在对应镜像源中存在\n' +
-        '# java 镜像源 https://mirrors.tuna.tsinghua.edu.cn/Adoptium/\n' +
-        '# maven 镜像源 https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/\n' +
-        '# node 镜像源 https://registry.npmmirror.com/-/binary/node/\n' +
+        this.$t('pages.build.edit.2c1567a3') +
+        this.$t('pages.build.edit.e97ba49b') +
+        this.$t('pages.build.edit.e989032a') +
+        this.$t('pages.build.edit.abb166fd') +
         'steps:\n' +
         '  - uses: java\n' +
         '    version: 8\n' +
@@ -1562,31 +1562,31 @@ export default {
         '#    version: 1.17.6\n' +
         '#  - uses: python3\n' +
         '#    version: 3.6.6\n' +
-        '# 将容器中的 maven 仓库文件缓存到 docker 卷中\n' +
+        this.$t('pages.build.edit.8d3bf857') +
         '  - uses: cache\n' +
         '    path: /root/.m2\n' +
-        '# 将此目录缓存到全局（多个构建可以共享此缓存目录）\n' +
+        this.$t('pages.build.edit.f4c0f558') +
         '    type: global\n' +
-        '# 将容器中的 node_modules 文件缓存到 docker 卷中\n' +
+        this.$t('pages.build.edit.2aacda2d') +
         '  - uses: cache\n' +
         '    path: ${JPOM_WORKING_DIR}/web-vue/node_modules\n' +
-        '# 使用 copy 文件的方式缓存，反之使用软链的形式。copy 文件方式缓存 node_modules 可以避免 npm WARN reify Removing non-directory\n' +
+        this.$t('pages.build.edit.19594154') +
         '    mode: copy\n' +
         '  - run: npm config set registry https://registry.npmmirror.com\n' +
-        '# 内置变量 ${JPOM_WORKING_DIR} ${JPOM_BUILD_ID}\n' +
+        this.$t('pages.build.edit.f3de78b') +
         '  - run: cd  ${JPOM_WORKING_DIR}/web-vue && npm i && npm run build\n' +
         '  - run: cd ${JPOM_WORKING_DIR} && mvn package -s script/settings.xml\n' +
-        '# 宿主机目录和容器目录挂载 /host:/container:ro\n' +
+        this.$t('pages.build.edit.c8899a6d') +
         '# binds:\n' +
         '#  - /Users/user/.m2/settings.xml:/root/.m2/\n' +
-        '# 宿主机文件上传到容器 /host:/container:true\n' +
+        this.$t('pages.build.edit.a6fcd6f4') +
         '# dirChildrenOnly = true will create /var/data/titi and /var/data/tata dirChildrenOnly = false will create /var/data/root/titi and /var/data/root/tata\n' +
         '# copy:\n' +
         '#  - /Users/user/.m2/settings.xml:/root/.m2/:false\n' +
-        '# 给容器新增环境变量\n' +
+        this.$t('pages.build.edit.af8e732e') +
         'env:\n' +
         '  NODE_OPTIONS: --max-old-space-size=900\n' +
-        '#配置说明：https://docs.docker.com/engine/api/v1.43/#tag/Container/operation/ContainerCreate\n' +
+        this.$t('pages.build.edit.5f8d5d96') +
         '#hostConfig:\n' +
         '#  CpuShares: 1',
       loading: false,

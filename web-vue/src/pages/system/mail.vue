@@ -101,7 +101,6 @@
     />
   </div>
 </template>
-
 <script>
 import { getMailConfigData, editMailConfig } from '@/api/system'
 
@@ -118,6 +117,7 @@ export default {
             trigger: 'blur'
           }
         ],
+
         pass: [{ required: true, message: this.$t('pages.system.mail.dfc93456'), trigger: 'blur' }],
         user: [
           {
@@ -126,6 +126,7 @@ export default {
             trigger: 'blur'
           }
         ],
+
         from: [
           {
             required: true,
@@ -162,6 +163,7 @@ export default {
           ]
         }
       ],
+
       portDataSource: [
         {
           title: this.$t('pages.system.mail.bc591b'),
@@ -266,7 +268,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .btn {
   margin-left: 20px;

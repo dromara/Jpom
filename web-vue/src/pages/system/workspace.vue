@@ -8,7 +8,6 @@
     </a-tabs>
   </div>
 </template>
-
 <script>
 import workspaceList from './workspace-list.vue'
 import clusterList from './cluster-list.vue'

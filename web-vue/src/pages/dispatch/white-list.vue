@@ -36,7 +36,11 @@
             v-model:value="temp.allowRemoteDownloadHost"
             :rows="5"
             style="resize: none"
-            :placeholder="`${$t('pages.dispatch.white-list.a2b2c7e5')}://www.test.com 等`"
+            :placeholder="
+              $t('pages.dispatch.white-list.99c74010', {
+                slot1: $t('pages.dispatch.white-list.a2b2c7e5')
+              })
+            "
           />
         </a-form-item>
         <a-form-item :wrapper-col="{ span: 14, offset: 6 }">
@@ -48,7 +52,6 @@
     </a-space>
   </div>
 </template>
-
 <script>
 import { getDispatchWhiteList, editDispatchWhiteList } from '@/api/dispatch'
 export default {

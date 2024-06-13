@@ -284,7 +284,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import { closeUserMfa, deleteUser, editUser, getUserList, unlockUser, restUserPwd } from '@/api/user/user'
 import { getUserPermissionListAll } from '@/api/user/user-permission'
@@ -381,6 +380,7 @@ export default {
           width: '120px'
         }
       ],
+
       // 表单校验规则
       rules: {
         id: [{ required: true, message: this.$t('pages.user.index.c3e73623'), trigger: 'blur' }],
@@ -594,7 +594,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 /* .filter {
   margin-bottom: 10px;

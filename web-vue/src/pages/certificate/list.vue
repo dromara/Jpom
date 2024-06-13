@@ -178,7 +178,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import {
   certificateImportFile,
@@ -326,6 +325,7 @@ export default {
           width: '180px'
         }
       ],
+
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
         // name: [{ required: true, message: "Please input name", trigger: "blur" }],

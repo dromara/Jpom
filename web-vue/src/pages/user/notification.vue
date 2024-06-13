@@ -34,7 +34,7 @@
     </a-form-item>
   </a-form>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { UserNotificationType, getUserNotification, saveUserNotification } from '@/api/user/user-notification'
 
 import { useI18n } from 'vue-i18n'

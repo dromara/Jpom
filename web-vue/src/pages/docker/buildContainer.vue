@@ -40,7 +40,7 @@
             <a-col :span="4" style="text-align: right">{{ $t('pages.docker.buildContainer.98c4138b') }}</a-col>
             <a-col :span="10">
               <a-form-item-rest>
-                <a-input v-model:value="temp.name" placeholder="容器名称" />
+                <a-input v-model:value="temp.name" :placeholder="$t('pages.docker.buildContainer.4017e91d')" />
               </a-form-item-rest>
             </a-col>
           </a-row>
@@ -130,7 +130,9 @@
                   <a-input
                     v-model:value="item.host"
                     :addon-before="$t('pages.docker.buildContainer.2a72f1e6')"
-                    :placeholder="`${$t('pages.docker.buildContainer.2a72f1e6')}机目录`"
+                    :placeholder="
+                      $t('pages.docker.buildContainer.f791ed7d', { slot1: $t('pages.docker.buildContainer.2a72f1e6') })
+                    "
                   />
                 </a-col>
                 <a-col :span="10" :offset="1">
@@ -293,12 +295,15 @@
             </template>
           </a-auto-complete>
         </a-form-item>
-        <a-form-item label="自定义 host">
+        <a-form-item :label="$t('pages.docker.buildContainer.b8b60236')">
           <a-form-item-rest>
             <a-space direction="vertical" style="width: 100%">
               <a-row v-for="(item, index) in temp.extraHosts" :key="index">
                 <a-col :span="20">
-                  <a-input v-model:value="temp.extraHosts[index]" placeholder="自定义host, xxx:192.168.0.x" />
+                  <a-input
+                    v-model:value="temp.extraHosts[index]"
+                    :placeholder="$t('pages.docker.buildContainer.b1033d65')"
+                  />
                 </a-col>
 
                 <a-col :span="2" :offset="1">
@@ -437,7 +442,6 @@
     </a-drawer>
   </div>
 </template>
-
 <script>
 import {
   dockerImageCreateContainer,

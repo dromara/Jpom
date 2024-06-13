@@ -331,7 +331,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import {
   fileReleaseTaskLog,
@@ -443,6 +442,7 @@ export default {
           width: '230px'
         }
       ],
+
       sshList: [],
       nodeList: [],
       releaseFileVisible: false,

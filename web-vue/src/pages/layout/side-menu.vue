@@ -65,7 +65,6 @@
     </a-menu>
   </div>
 </template>
-
 <script>
 import { mapState } from 'pinia'
 import Icon from '@/components/Icon'

@@ -153,7 +153,7 @@
             <a-input
               v-model:value="temp.cpusetCpus"
               style="width: 100%"
-              placeholder="允许执行的 CPU（例如，0-3、0,1）。"
+              :placeholder="$t('pages.docker.editContainer.80a60c2e')"
             />
           </a-form-item>
           <a-form-item name="cpusetMems">
@@ -161,8 +161,9 @@
               CpusetMems
               <a-tooltip>
                 <template #title>
-                  {{ $t('pages.docker.editContainer.7014f5d1') }} (MEM) (0-3, 0,1)。 仅在 NUMA 系统上有效。
-                </template>
+                  {{ $t('pages.docker.editContainer.7014f5d1')
+                  }}{{ $t('pages.docker.editContainer.937d5c60') }}</template
+                >
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
@@ -248,7 +249,6 @@
     </a-row>
   </div>
 </template>
-
 <script>
 import { dockerContainerStats, dockerInspectContainer, dockerUpdateContainer } from '@/api/docker-api'
 import { renderSize } from '@/utils/const'

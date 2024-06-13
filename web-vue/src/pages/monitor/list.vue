@@ -250,7 +250,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import { deleteMonitor, editMonitor, getMonitorList } from '@/api/monitor'
 import { noFileModes } from '@/api/node-project'
@@ -343,6 +342,7 @@ export default {
           width: '120px'
         }
       ],
+
       rules: {
         name: [
           {

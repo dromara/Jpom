@@ -44,7 +44,6 @@
     </log-view>
   </div>
 </template>
-
 <script>
 import LogView from '@/components/logView'
 import {

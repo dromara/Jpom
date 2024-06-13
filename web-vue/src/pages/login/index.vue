@@ -112,7 +112,7 @@
     </template>
   </defaultBg>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { login, loginConfig, mfaVerify, oauth2Url, oauth2Login, loginRandCode } from '@/api/user/user'
 import { checkSystem } from '@/api/install'
 import sha1 from 'js-sha1'

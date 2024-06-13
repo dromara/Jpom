@@ -228,7 +228,11 @@
                             <a-input
                               v-model:value="item.targetPort"
                               :addon-before="$t('pages.docker.swarm.service.d28e8a03')"
-                              :placeholder="`${$t('pages.docker.swarm.service.d28e8a03')}端口`"
+                              :placeholder="
+                                $t('pages.docker.swarm.service.577b1501', {
+                                  slot1: $t('pages.docker.swarm.service.d28e8a03')
+                                })
+                              "
                             >
                               <template #addonAfter>
                                 <a-select
@@ -288,14 +292,22 @@
                             <a-input
                               v-model:value="item.source"
                               :addon-before="$t('pages.docker.swarm.service.289b437c')"
-                              :placeholder="`${$t('pages.docker.swarm.service.289b437c')}机目录`"
+                              :placeholder="
+                                $t('pages.docker.swarm.service.f791ed7d', {
+                                  slot1: $t('pages.docker.swarm.service.289b437c')
+                                })
+                              "
                             />
                           </a-col>
                           <a-col :span="8" :offset="1">
                             <a-input
                               v-model:value="item.target"
                               :addon-before="$t('pages.docker.swarm.service.d28e8a03')"
-                              :placeholder="`${$t('pages.docker.swarm.service.d28e8a03')}目录`"
+                              :placeholder="
+                                $t('pages.docker.swarm.service.6c2c0b0a', {
+                                  slot1: $t('pages.docker.swarm.service.d28e8a03')
+                                })
+                              "
                             />
                           </a-col>
                         </a-row>
@@ -614,7 +626,6 @@
     />
   </div>
 </template>
-
 <script>
 import { dockerSwarmServicesDel, dockerSwarmServicesEdit, dockerSwarmServicesList } from '@/api/docker-swarm'
 import SwarmTask from './task'
@@ -716,6 +727,7 @@ export default {
           width: '120px'
         }
       ],
+
       countdownTime: Date.now()
     }
   },
@@ -765,11 +777,13 @@ export default {
             protocol: 'TCP'
           }
         ],
+
         volumes: [
           {
             type: 'VOLUME'
           }
         ],
+
         args: [{}],
         commands: [{}],
         envs: [{}],
@@ -811,6 +825,7 @@ export default {
             protocol: 'TCP'
           }
         ],
+
         volumes: [{ type: 'VOLUME' }],
         args: [{}],
         commands: [{}],
@@ -937,7 +952,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 :deep(.ant-statistic div) {
   display: inline-block;

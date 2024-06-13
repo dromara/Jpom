@@ -122,9 +122,7 @@
           <template #label>
             {{ $t('pages.dispatch.start.fa8d15d') }}
             <a-tooltip>
-              <template #title>
-                清空发布是指在上传新文件前,会将项目文件夹目录里面的所有文件先删除后再保存新文件
-              </template>
+              <template #title>{{ $t('pages.dispatch.start.81c6b18') }}</template>
               <QuestionCircleOutlined />
             </a-tooltip>
           </template>
@@ -419,7 +417,6 @@
     </a-drawer>
   </div>
 </template>
-
 <script>
 import { uploadPieces } from '@/utils/upload-pieces'
 import {
@@ -762,7 +759,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 :deep(.ant-progress-text) {
   width: auto;

@@ -272,7 +272,6 @@
     </a-drawer>
   </div>
 </template>
-
 <script>
 import {
   getDispatchProject,
@@ -684,7 +683,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 :deep(.ant-progress-text) {
   width: auto;

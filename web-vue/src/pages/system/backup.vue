@@ -166,7 +166,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import {
   backupStatusMap,
@@ -270,6 +269,7 @@ export default {
           fixed: 'right'
         }
       ],
+
       rules: {},
       confirmLoading: false,
       timer: null

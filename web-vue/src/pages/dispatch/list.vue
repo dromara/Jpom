@@ -881,9 +881,12 @@
                 <a-textarea
                   v-model:value="temp[`${nodeId}_jvm`]"
                   :auto-size="{ minRows: 3, maxRows: 3 }"
-                  :placeholder="`jvm${$t('pages.dispatch.list.68fca368')},${$t(
-                    'pages.dispatch.list.f3096daa'
-                  )}.如：-Xms512m -Xmx512m`"
+                  :placeholder="
+                    $t('pages.dispatch.list.17924912', {
+                      slot1: $t('pages.dispatch.list.68fca368'),
+                      slot2: $t('pages.dispatch.list.f3096daa')
+                    })
+                  "
                 />
               </a-form-item>
               <a-form-item
@@ -1036,7 +1039,6 @@
     </a-drawer>
   </div>
 </template>
-
 <script>
 import Status from './status'
 import codeEditor from '@/components/codeEditor'
@@ -1702,7 +1704,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 :deep(.ant-statistic div) {
   display: inline-block;

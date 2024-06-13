@@ -85,7 +85,6 @@
     </template>
   </a-table>
 </template>
-
 <script>
 import { renderSize, parseTime } from '@/utils/const'
 import { dockerNetworksList, dockerVolumesRemove } from '@/api/docker-api'

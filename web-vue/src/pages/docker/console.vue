@@ -98,7 +98,6 @@
     </a-drawer>
   </div>
 </template>
-
 <script>
 import Container from './container'
 import Images from './images'

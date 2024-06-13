@@ -12,7 +12,6 @@
     />
   </div>
 </template>
-
 <script>
 import { scriptLog } from '@/api/server-script'
 import LogView from '@/components/logView'

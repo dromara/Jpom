@@ -44,9 +44,9 @@
           <a-input v-model:value="pruneForm.labels" :placeholder="$t('pages.docker.prune.d3cece44')" />
         </a-tooltip>
       </a-form-item>
-      <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-        自动执行：docker
-        {{ pruneTypes[pruneForm.pruneType] && pruneTypes[pruneForm.pruneType].command }}
+      <a-form-item :wrapper-col="{ span: 14, offset: 4 }"
+        >{{ $t('pages.docker.prune.e0d922b4')
+        }}{{ pruneTypes[pruneForm.pruneType] && pruneTypes[pruneForm.pruneType].command }}
         prune xxxxx
       </a-form-item>
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
@@ -57,7 +57,6 @@
     </a-form>
   </div>
 </template>
-
 <script>
 import { dockerPrune } from '@/api/docker-api'
 import { renderSize } from '@/utils/const'

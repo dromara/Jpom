@@ -80,6 +80,7 @@ export default {
               value: 'ssh_command'
             }
           ],
+
           onFilter: (value, record) => record.taskId.indexOf(value) === 0
         },
         {

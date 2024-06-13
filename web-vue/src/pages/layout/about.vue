@@ -1,20 +1,14 @@
 <!-- Jpom 为开源软件，请基于开源协议用于商业用途 -->
-
-<!-- 开源不等同于免费，如果您基于 Jpom 二次开发修改了 logo、名称、版权等，请找我们授权，否则会有法律风险。
-  我们有权利追诉破坏开源并因此获利的团队个人的全部违法所得，也欢迎给我们提供侵权线索。 -->
-
-<!-- 二次修改不可删除或者修改版权，否则可能承担法律责任 -->
-
-<!-- 擅自修改或者删除版权信息有法律风险，请尊重开源协议，不要擅自修改版本信息，否则可能承担法律责任。 -->
-
 <template>
   <div>
     <a-alert type="warning" show-icon>
       <template #message>
         <a-space>
           <template #split> <a-divider type="vertical" /> </template>
-          <a href="https://jpom.top/pages/legal-risk/" target="_blank"> 法律风险<LinkOutlined /> </a>
-          <a href="https://jpom.top" target="_blank"> 官方文档<LinkOutlined /> </a>
+          <a href="https://jpom.top/pages/legal-risk/" target="_blank"
+            >{{ $t('pages.layout.about.6175e15d') }}<LinkOutlined />
+          </a>
+          <a href="https://jpom.top" target="_blank">{{ $t('pages.layout.about.b31c18fd') }}<LinkOutlined /> </a>
         </a-space>
       </template>
       <template #description>
@@ -50,14 +44,16 @@
           <li>{{ $t('pages.layout.about.322ed3e') }}</li>
           <li>
             {{ $t('pages.layout.about.35cdb498')
-            }}<a href="https://jpom.top/pages/enterprise-service/" target="_blank">企业服务</a>
+            }}<a href="https://jpom.top/pages/enterprise-service/" target="_blank">{{
+              $t('pages.layout.about.412de998')
+            }}</a>
           </li>
         </ul>
         <div></div>
         <a-card style="text-align: center">
           <template #title> {{ $t('pages.layout.about.537239f8') }} </template>
           <template #extra>
-            <a href="https://jpom.top/pages/praise/" target="_blank">更多说明</a>
+            <a href="https://jpom.top/pages/praise/" target="_blank">{{ $t('pages.layout.about.30cf73d6') }}</a>
           </template>
           <a-row :gutter="[16, 16]">
             <a-col :span="6" />
@@ -192,7 +188,7 @@
     </a-tabs>
   </div>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 // 擅自修改或者删除版权信息有法律风险，请尊重开源协议，不要擅自修改版本信息，否则可能承担法律责任。
 import { getLicense, getThankDependency } from '@/api/about'
 import alipayQrcorde from '@/assets/images/qrcode/alipay-small.png'
