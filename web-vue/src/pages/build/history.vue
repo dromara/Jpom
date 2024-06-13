@@ -245,7 +245,6 @@
     </div> -->
   </div>
 </template>
-
 <script>
 import BuildLog from './log'
 import {

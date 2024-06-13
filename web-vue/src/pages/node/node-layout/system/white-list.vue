@@ -32,7 +32,6 @@
     </a-form>
   </div>
 </template>
-
 <script>
 import { editWhiteList, getWhiteList } from '@/api/node-system'
 

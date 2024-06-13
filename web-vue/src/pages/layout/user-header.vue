@@ -583,21 +583,25 @@ export default {
           { max: 10, message: this.$t('pages.layout.user-header.dad8bc7b'), trigger: 'blur' },
           { min: 2, message: this.$t('pages.layout.user-header.dad8bc7b'), trigger: 'blur' }
         ],
+
         oldPwd: [
           { required: true, message: this.$t('pages.layout.user-header.eda355b6'), trigger: 'blur' },
           { max: 20, message: this.$t('pages.layout.user-header.254a970b'), trigger: 'blur' },
           { min: 6, message: this.$t('pages.layout.user-header.254a970b'), trigger: 'blur' }
         ],
+
         newPwd: [
           { required: true, message: this.$t('pages.layout.user-header.4575df08'), trigger: 'blur' },
           { max: 20, message: this.$t('pages.layout.user-header.254a970b'), trigger: 'blur' },
           { min: 6, message: this.$t('pages.layout.user-header.254a970b'), trigger: 'blur' }
         ],
+
         confirmPwd: [
           { required: true, message: this.$t('pages.layout.user-header.b9c21ba3'), trigger: 'blur' },
           { max: 20, message: this.$t('pages.layout.user-header.254a970b'), trigger: 'blur' },
           { min: 6, message: this.$t('pages.layout.user-header.254a970b'), trigger: 'blur' }
         ],
+
         email: [
           // { required: true, message: "请输入邮箱", trigger: "blur" }
         ],

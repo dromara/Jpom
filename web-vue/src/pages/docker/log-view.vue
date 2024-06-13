@@ -47,7 +47,6 @@
     </log-view2>
   </div>
 </template>
-
 <script>
 import { mapState } from 'pinia'
 import { getWebSocketUrl } from '@/api/config'

@@ -196,7 +196,6 @@
     </a-tabs>
   </div>
 </template>
-
 <script>
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 import { listOperaterLog, listLoginLog } from '@/api/user/user'
@@ -273,6 +272,7 @@ export default {
           width: '170px'
         }
       ],
+
       loginloading: false,
       loginlist: [],
       operateCode: operateCodeMap,
@@ -330,6 +330,7 @@ export default {
           width: '170px'
         }
       ],
+
       tabKey: 1
     }
   },

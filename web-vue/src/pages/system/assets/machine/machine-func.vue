@@ -48,7 +48,6 @@
     </div>
   </a-drawer>
 </template>
-
 <script>
 import { mapState } from 'pinia'
 import machineInfo from './machine-info'
@@ -97,7 +96,6 @@ export default {
   methods: {}
 }
 </script>
-
 <style scoped>
 .layout-content {
   padding: 0;

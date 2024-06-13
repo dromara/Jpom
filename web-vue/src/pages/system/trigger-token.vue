@@ -72,7 +72,6 @@
     </a-table>
   </div>
 </template>
-
 <script>
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 import { triggerTokenList, triggerTokenAllType, triggerTokenDelete } from '@/api/trigger-token'
@@ -135,6 +134,7 @@ export default {
           fixed: 'right'
         }
       ],
+
       allTypeList: []
     }
   },

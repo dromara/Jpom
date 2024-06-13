@@ -432,7 +432,7 @@
         <a-form-item
           name="token"
           :label="$t('pages.repository.repository-list.2add4b88')"
-          help="使用私人令牌，可以在你不输入账号密码的情况下对你账号内的仓库进行管理，你可以在创建令牌时指定令牌所拥有的权限。"
+          :help="$t('pages.repository.repository-list.91916119')"
         >
           <a-form-item-rest>
             <a-tooltip
@@ -469,7 +469,11 @@
           v-if="providerData[giteeImportForm.type]?.query"
           name="condition"
           :label="$t('pages.repository.repository-list.a1f640f4')"
-          :help="`输入仓库名称或者仓库路径进行${$t('pages.repository.repository-list.a1f640f4')}`"
+          :help="
+            $t('pages.repository.repository-list.1bb7d42e', {
+              slot1: $t('pages.repository.repository-list.a1f640f4')
+            })
+          "
         >
           <a-input
             v-model:value="giteeImportForm.condition"
@@ -565,7 +569,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import CustomInput from '@/components/customInput'
 import {
@@ -718,6 +721,7 @@ export default {
           width: this.global ? '240px' : '180px'
         }
       ],
+
       reposColumns: [
         {
           title: this.$t('pages.repository.repository-list.348e98c9'),
@@ -755,6 +759,7 @@ export default {
           align: 'left'
         }
       ],
+
       giteeImportForm: Object.assign({}, PAGE_DEFAULT_LIST_QUERY, {
         limit: 15,
         type: 'gitee',
@@ -1085,7 +1090,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 /* .filter {
   margin-bottom: 10px;

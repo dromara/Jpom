@@ -49,6 +49,8 @@
         "b12468e9": "Cancel"
       },
       "edit": {
+        "5659520": "Packaging Production Environment Package mvn clean package -Dmaven.test.skip=true -Pprod",
+        "19594154": "#Cache using copy files, and vice versa using soft chain format. Caching node.modules by copying files can avoid npm WARN reify Removing non directory",
         "21643071": "Node distribution refers to the deployment of a project across multiple nodes using node distribution to complete project publishing operations across multiple nodes in one step",
         "24573653": "Common build command example",
         "31270908": "Retention days for artifacts synchronized to the file center",
@@ -170,12 +172,6 @@
         "c61621e9": "Use ANT expression to filter specified directories for publishing exclusion",
         "eed6df5e": "View container",
         "e7ebed80": "Build command example",
-        "80ebff14": "Please enter build name",
-        "bc1227cd": "Please select build method",
-        "89ea3e7d": "Please select publish operation",
-        "969f2846": "Please select branch",
-        "622cc99e": "Please enter build command",
-        "c997ffa2": "Please enter artifact directory",
         "fdf774f1": "Please select the repository for build",
         "ccf301b7": "Basic information",
         "2e988cde": "Build process",
@@ -184,7 +180,6 @@
         "8e910076": "Please select node project, there may be no projects in the node, you need to create a project in the node",
         "908d376f": "Build artifacts path, relative to the repository path, such as java project's target/xxx.jar, vue project's dist",
         "23d7171a": "Post-build actions",
-        "4669f3fe": "Upload build artifacts to the corresponding directory",
         "301d915f": "Folder path, a Dockerfile is required in the repository",
         "a95bf9ab": "Container tags, such as: xxxx:latest. Multiple tags are separated by commas.",
         "ead1cb46": "Build parameters, for example: key1=value1&key2=value2",
@@ -221,7 +216,7 @@
         "b9196bd2": "Currently, there are all supported plugins available (look forward to more plugins):",
         "20103a68": "Java SDK image usage: https://mirrors.tuna.tsinghua.edu.cn/ Supported versions include: 8, 9, 10, 11, 12, 13, 14, 15, 16, 17",
         "57170afe": "Maven SDK image usage: https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/",
-        "c7a8176f": "node sdk 镜像使用：https://registry.npmmirror.com/-/binary/node",
+        "c7a8176f": "node sdk image usage: https://registry.npmmirror.com/-/binary/node",
         "b0af27f9": "(There are compatibility issues that need to be tested in advance during actual use) Python 3 SDK image usage: https://repo.huaweicloud.com/python/ {'${PYTHON3_VERSION}'}/Python - {'${PYTHON3_VERSION}'}. tar. xz",
         "f8d3b0b6": "(There are compatibility issues that need to be tested in advance during actual use) GO SDK image usage: https://studygolang.com/dl/golang/go {'${GO_VERSION}'}. Linux - {'${ARCH}'}. tar. gz",
         "9374a2e6": "It can be understood as a directory for project packaging. Execution of Jpom project (build command)",
@@ -234,11 +229,11 @@
         "510ec4fe": "The environment variable placeholder {'${xxxx}'} xxxx in the workspace can be referenced as the variable name",
         "ec3e7305": "Publish directory, build products and upload them to the corresponding directory",
         "4001461f": "The command executed before release (non blocking command), usually the command to close the project",
-        "d90817a5": "支持变量替换：{'${BUILD_ID}'}、{'${BUILD_NAME}'}、{'${BUILD_RESULT_FILE}'}、{'${BUILD_NUMBER_ID}'}",
+        "d90817a5": "Support variable replacement:{'${BUILD_ID}'}、{'${BUILD_NAME}'}、{'${BUILD_RESULT_FILE}'}、{'${BUILD_NUMBER_ID}'}",
         "ae0f2733": "The environment variable placeholder {'${xxxx}'} xxxx in the workspace can be referenced as the variable name",
         "f8795640": "The command executed before publication (non blocking command) is usually the close project command, which supports variable replacement: {'${BUILL_ID}'}, {'${BUILD0AME}'}, {'${BUILD0RESULT-FILE}'}, {'${BUILD0HUMBER-ID}'}",
         "3bf075cd": "The command executed after publication (non blocking command) is usually the command to start the project, such as ps - aux | grep Java",
-        "a2f92477": "支持变量替换：{'${BUILD_ID}'}、{'${BUILD_NAME}'}、{'${BUILD_RESULT_FILE}'}、{'${BUILD_NUMBER_ID}'}",
+        "a2f92477": "Support variable replacement:{'${BUILD_ID}'}、{'${BUILD_NAME}'}、{'${BUILD_RESULT_FILE}'}、{'${BUILD_NUMBER_ID}'}",
         "d5fe14e1": "The environment variable placeholder {'${xxxx}'} xxxx in the workspace can be referenced as the variable name",
         "48a510df": "The command executed after publication (non blocking command) is usually a startup project command such as ps - aux | grep Java, supporting variable replacement: {'${BUILL_ID}'}",
         "54849cc4": "Clear publishing refers to deleting all files in the project folder directory before uploading new files, and then saving the new files",
@@ -252,7 +247,7 @@
         "82be0bf8": "Strictly execute scripts (build command, event script, local publish script, container build command). The return status code must be 0, otherwise the build status will be marked as failed",
         "3b8c1c97": "The construction process requests the corresponding address, starts construction, completes construction, starts publishing, completes publishing, builds exceptions, publishes exceptions",
         "a2854d2d": "The parameters passed in include: buildId, buildName, type, statusMsg, triggerTime",
-        "d5827dbb": "type 的值有：startReady、pull、executeCommand、release、done、stop、success、error",
+        "d5827dbb": "type The values are:startReady、pull、executeCommand、release、done、stop、success、error",
         "4be6e818": "Asynchronous requests cannot guarantee orderliness",
         "d8d80300": "Execute the corresponding script during the construction process, start building, complete building, start publishing, complete publishing, build exceptions, publish exceptions",
         "41d152ba": "The environment variables passed in include: buildId, buildName, type, statusMsg, triggerTime, buildNumberId, buildSourceFile",
@@ -272,8 +267,32 @@
         "e4d6d7d6": "Please choose the construction method",
         "bbc5e270": "Please select a publishing operation",
         "622dac4d": "Please select a branch",
-        "a79da278": "Please fill in the build command",
-        "7a12ba09": "Please fill in the product catalog"
+        "7a12ba09": "Please fill in the product catalog",
+        "9d427063": "Do not execute or compile test case mvn clean package - Dmaven. test. skip=true",
+        "f869e0df": "Package testing environment package mvn clean package -Dmaven.test.skip=true -Ptest",
+        "34d8a5b": "Do not execute, but compile test case mvn clean package - DskipTests",
+        "73512cae": "Specify pom file packaging mvn -f xxx/pom.xml clean package",
+        "4304fb7e": "Specify settings file packaging mvn -s xxx/settings.xml clean package",
+        "7e95f38d": "Vue project (for example reference, specific decisions need to be made based on the actual situation of the project)",
+        "455f3ab2": "Need to install dependency npm i&&npm run build first",
+        "fda856b3": "Packaging formal environment npm i&&npm run build: prod",
+        "2b4b3931": "Packaging pre release environment npm i&&npm run build: stage",
+        "4d7ec7a": "We need to first install the dependent Yarn&&Yarn Run build",
+        "9b30b8b1": "Specify directory to package yarn&&yarn -- cwd xxx build",
+        "157cc1d7": "#The basic image currently only supports Ubuntu latest",
+        "29dc8c24": "#Which Docker to use for construction, fill in the Docker tag to default to the first available query, and if multiple tags are found, choose the first result as well",
+        "2c1567a3": "#Version needs to exist in the corresponding image source",
+        "e97ba49b": "# java Image Source https://mirrors.tuna.tsinghua.edu.cn/Adoptium/",
+        "e989032a": "#Maven Image Source https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/",
+        "abb166fd": "#node Image Source https://registry.npmmirror.com/-/binary/node/",
+        "8d3bf857": "#Cache the Maven repository files in the container to the Docker volume",
+        "f4c0f558": "#Cache this directory globally (multiple builds can share this cache directory)",
+        "2aacda2d": "#Cache the node.modules file in the container to the Docker volume",
+        "f3de78b": "# Built in variables ${JPOM_WORKING_DIR} ${JPOM_BUILD_ID}",
+        "c8899a6d": "#Mount the host directory and container directory/host:/container: ro",
+        "a6fcd6f4": "#Upload host files to container/host:/container: true",
+        "af8e732e": "#Add environment variables to the container",
+        "5f8d5d96": "#Configuration instructions:https://docs.docker.com/engine/api/v1.43/#tag/Container/operation/ContainerCreate"
       },
       "history": {
         "56195645": "Please select status",
@@ -438,9 +457,6 @@
         "aca73ac1": "Are you sure to move this number up?",
         "9ea36aca": "Are you sure to move this data down? The down move operation may be invalid due to the lack of sort value operation for subsequent data in the list!",
         "644ef343": "Are you sure to perform the operation?",
-        "c7b66a29": "Current data is in default status",
-        "4a27e53": "After operation, moving up or down may not achieve the expected sort.",
-        "e38dc416": "You need to operate on all related data to achieve the expected sort.",
         "b31a6402": "Are you sure to batch build? Note: Running multiple builds at the same time will occupy a large amount of resources. Please use batch build with caution. If the number of batch builds exceeds the build task queue waiting number, the build task will be automatically canceled.",
         "b4707ccc": "Product:",
         "49cc9441": "Clear code",
@@ -544,6 +560,7 @@
     "dispatch": {
       "list": {
         "14102976": "It is recommended to use the server-side script distribution to the script:",
+        "17924912": "jvm{slot1},{slot2}.Example: -Xms512m -Xmx512m",
         "24159903": "After the process is executed, the script must output: running",
         "30061739": "The folder where the project is stored, the folder where the jar package is stored",
         "44857232": "If the last line of the output is not the expected format, the project status will be unrun",
@@ -656,12 +673,10 @@
         "549e1e09": "Select Log Directory",
         "b324b030": "The main class for program execution (can be left blank for jar mode)",
         "fe24b714": "Fill in [xxx",
-        "67f7d143": "-Dext.dirs=xxx: -cp xx : xx]",
         "27b4e405": "Select Distribution Node",
         "b482c412": "JVM Parameters",
         "68fca368": "Parameters",
         "f3096daa": "Not Mandatory",
-        "825f4979": "jvm, e.g.: -Xms512m -Xmx512m",
         "550bae25": "Args Parameters",
         "f2214ebb": "Function args parameters, not mandatory",
         "94c10a27": "e.g.: --server",
@@ -825,7 +840,6 @@
         "94149f7b": "Remote Download URL",
         "40ced483": "Remote Download Address",
         "fa8d15d": "Clear Publish",
-        "6edd89fd": "Clearing publish means deleting all files in the project folder directory before uploading new files and saving them.",
         "23788e28": "Unzip",
         "240759e7": "Whether to automatically unzip uploaded compressed files. Supported compression types include tar.",
         "89d09852": "Exclude Folder",
@@ -842,7 +856,8 @@
         "95dc7228": "Please fill in the remote URL",
         "de346cfe": "Please fill in Build and Product",
         "346e59ed": "Please select a file from the File Center",
-        "26b3a389": "Please select a file from the Static File"
+        "26b3a389": "Please select a file from the Static File",
+        "81c6b18": "Clear publishing refers to deleting all files in the project folder directory before uploading new files, and then saving the new files"
       },
       "status": {
         "6e06fe4f": "Status",
@@ -903,13 +918,13 @@
         "b850dd8a": "Remote download secure HOST",
         "cb53f096": "Used for downloading remote files for node distribution and file upload",
         "a2b2c7e5": "Please enter the remote download secure HOST. Pressing Enter supports entering multiple paths. Example: https",
-        "d8031ed8": "Submit"
+        "d8031ed8": "Submit",
+        "99c74010": "{slot1}://www.test.com "
       }
     },
     "docker": {
       "buildContainer": {
         "85763041": "Container Port",
-        "ef46f81b": "Do not start",
         "fc991f8c": "Introduction",
         "8d868a21": "The root inside has true root permissions.",
         "f4be8553": "The root inside is just an ordinary user permission outside. Default is false.",
@@ -935,7 +950,6 @@
         "9e4da8c2": "Port Protocol",
         "c17b4a83": "Mounted Volume",
         "2a72f1e6": "Host",
-        "63a4cd9e": "Host Directory",
         "f74fa9ca": "Container Directory",
         "c81b2c2e": "Environment Variables",
         "dbc446a0": "Variable Name",
@@ -964,7 +978,11 @@
         "f003fd5e": "Container labels, such as: key1=values1&keyvalue2",
         "12861e4e": "Auto Start",
         "15f9c981": "Start",
-        "40e7a0be": "No Start"
+        "40e7a0be": "No Start",
+        "4017e91d": "Container Name",
+        "f791ed7d": "{slot1} machine directory",
+        "b8b60236": "Custom host",
+        "b1033d65": "Custom host, xxx: 192.168.0. x"
       },
       "console": {
         "8d118d98": "Independent container",
@@ -1049,7 +1067,9 @@
         "e69c93e3": "Time",
         "63465f7d": "Memory",
         "deff5643": "Total memory",
-        "d117a15f": "Soft memory"
+        "d117a15f": "Soft memory",
+        "80a60c2e": "CPU allowed for execution (e.g. 0-3, 0,1).",
+        "937d5c60": "(MEM) (0-3, 0,1). Only valid on NUMA systems."
       },
       "images": {
         "47371c73": "Yes",
@@ -1123,7 +1143,6 @@
         "64603c01": "Edit",
         "dd20d11c": "Delete",
         "2e8ce846": "Edit Docker",
-        "6acf14d4": "Tag is used for container build selection (fromTag)",
         "2749e827": "Please enter a tag name with alphanumeric characters with a length of 1-10",
         "7d46652a": "Add",
         "6cc42b32": "Synchronize to other workspaces",
@@ -1143,7 +1162,8 @@
         "b22d55a0": "System prompt",
         "e51646aa": "Are you sure you want to delete this record? After deletion, the associated container tag for the build will no longer be usable",
         "e8e9db25": "Confirm",
-        "b12468e9": "Cancel"
+        "b12468e9": "Cancel",
+        "3727734b": "{slot1} is used for container building and container selection function (from Tag)"
       },
       "log-view": {
         "648b57ff": "Container log",
@@ -1189,7 +1209,6 @@
         "8dd61567": "Specified label",
         "b6d13d99": "Example: key,key1 or key=value,key1=value1",
         "d3cece44": "Trim objects with specified labels, multiple use commas to separate",
-        "cc8ce336": "docker",
         "e8e9db25": "Confirm",
         "4fbd9851": "Image",
         "2ac80e6a": "Trim only unused and unmarked images",
@@ -1200,7 +1219,8 @@
         "b22d55a0": "System prompt",
         "faa2b295": "Are you sure you want to trim the corresponding information? Trimming will automatically clean up the corresponding data.",
         "e5a2dcc3": "Confirm",
-        "b12468e9": "Cancel"
+        "b12468e9": "Cancel",
+        "e0d922b4": "Automatic execution: Docker"
       },
       "pull-image-log": {
         "28d0ce86": "pull logs"
@@ -1244,7 +1264,9 @@
           "b22d55a0": "System Prompt",
           "987c2cd6": "Are you sure you want to delete this record? Deleting it will make the associated container tag unusable",
           "e8e9db25": "Confirm",
-          "b12468e9": "Cancel"
+          "b12468e9": "Cancel",
+          "356927eb": "Go now",
+          "e33acb4f": "No Docker Cluster"
         },
         "node": {
           "61164914": "Modification time",
@@ -1297,7 +1319,6 @@
         },
         "service": {
           "61164914": "Modification Time",
-          "85763041": "Container Port",
           "3e34ec28": "Name",
           "b7e0f2ad": "Service Name",
           "5a97fa84": "Not modifiable after creation",
@@ -1349,8 +1370,6 @@
           "9e4da8c2": "Port Protocol",
           "6f7e66db": "Mounted Volumes",
           "289b437c": "Host Machine",
-          "733c962b": "Host Machine Directory",
-          "f74fa9ca": "Container Directory",
           "6e6cc3c2": "Parameters",
           "a94da34e": "Parameter Value",
           "4dba58d9": "Fill in running parameters",
@@ -1377,7 +1396,10 @@
           "b22d55a0": "System Prompt",
           "bd1a6f5b": "Are you sure you want to delete this service?",
           "e8e9db25": "Confirm",
-          "b12468e9": "Cancel"
+          "b12468e9": "Cancel",
+          "577b1501": "{slot1} port",
+          "f791ed7d": "{slot1} machine directory",
+          "6c2c0b0a": "{slot1} directory"
         },
         "task": {
           "6e06fe4f": "Status",
@@ -1401,7 +1423,12 @@
           "3f74c0ab": "Please select node status",
           "72cebb96": "Serial Number",
           "4fbd9851": "Image",
-          "3bb962bf": "Operation"
+          "3bb962bf": "Operation",
+          "ee51b4c9": "Service ID",
+          "744d5016": "Task ID",
+          "a3c2349d": "Node ID",
+          "9c95b60f": "Error message:",
+          "d3b29478": "Modification time"
         }
       },
       "terminal": {},
@@ -1505,7 +1532,8 @@
           "5edb2e8a": "No",
           "533f191c": "Are you sure you want to delete the current file?",
           "2ad67cae": "No data selected",
-          "8cb13ac8": "Are you sure you want to delete these files?"
+          "8cb13ac8": "Are you sure you want to delete these files?",
+          "94c193de": "file name"
         },
         "releaseFile": {
           "52373158": "You can reference workspace environment variables. Variable placeholder: {'${xxxx}'}, where xxxx is the variable name",
@@ -1536,7 +1564,11 @@
           "378f28a1": "Please enter the file task name",
           "c33e3d16": "Please select the publishing method",
           "8092e55": "Please select the first-level directory for publishing and enter the second-level directory",
-          "6a05f5c8": "Please select the publishing SSH"
+          "6a05f5c8": "Please select the publishing SSH",
+          "d236a971": "Script template",
+          "952117a8": "Select Script",
+          "a0451c97": "cancel",
+          "1cbe2507": "confirm"
         }
       },
       "release-task": {
@@ -1678,7 +1710,7 @@
         "eb71aee8": "If you modify Jpom based on secondary development",
         "6065956f": ", name, copyright, etc.",
         "c3cc824c": "Please contact us for authorization, otherwise there will be legal risks.",
-        "7ab34d72": "We have the right to sue all illegal income from teams or individuals who破坏open source and profit from it, and we also welcome you to provide us with clues of infringement.",
+        "7ab34d72": "We have the right to sue all illegal income from teams or individuals who destruction open source and profit from it, and we also welcome you to provide us with clues of infringement.",
         "a09aa05": "Unauthorized modification or deletion of copyright information has legal risks",
         "d88b276": "Please respect the open source agreement and do not modify the version information without authorization, otherwise you may bear legal responsibility.",
         "2f2bcf9": "Support open source",
@@ -1707,7 +1739,11 @@
         "9497520b": "Software acknowledgment",
         "f5dd8a86": "The following open source software is used in Jpom. We sincerely thank them for making Jpom more perfect with their open source contributions",
         "f2e1f6d3": "The ranking is sorted in alphabetical order a-z",
-        "77ac5b13": "There are more related dependent open source components"
+        "77ac5b13": "There are more related dependent open source components",
+        "6175e15d": "Legal risk",
+        "b31c18fd": "Official documents",
+        "412de998": "Enterprise Services",
+        "30cf73d6": "More explanation"
       },
       "content-tab": {
         "a8318e00": "Close others",
@@ -1976,7 +2012,8 @@
         "b22d55a0": "System prompt",
         "250da8d7": "Are you sure you want to ignore binding two-step verification? It is strongly recommended that super administrators enable two-step verification to ensure account security",
         "e5a2dcc3": "Confirm",
-        "33a5532c": "Cancel"
+        "33a5532c": "Cancel",
+        "10496d2": "More open source instructions"
       }
     },
     "monitor": {
@@ -2224,7 +2261,8 @@
         "8ad93f78": "Are you sure you want to move this data down? The move down operation may be invalid if there is no sort value for subsequent data in the list!",
         "644ef343": "Are you sure you want to proceed with the operation?",
         "4deb73b2": "Moving up or down after the operation may not achieve the expected sorting",
-        "d9c5971d": "You still need to operate on the relevant data to achieve the expected sorting"
+        "d9c5971d": "You still need to operate on the relevant data to achieve the expected sorting",
+        "10775be3": "Current status:"
       },
       "node-func": {
         "37f14108": "Project management",
@@ -2251,7 +2289,6 @@
             "8fb2b0cc": "All parameters will be concatenated into a string separated by spaces to execute the script. Note that the parameter order and unfilled parameters will be automatically ignored",
             "6e6cc3c2": "Parameters",
             "97f7c43a": "Value",
-            "5b6ebe20": "Parameter value",
             "c8569157": "New parameter",
             "d75d207f": "Error",
             "763330b": "Please check if the ws proxy is enabled",
@@ -2311,6 +2348,7 @@
             "2e391eba": "Are you sure you want to stop the project?"
           },
           "project-edit": {
+            "17924912": "jvm{slot1},{slot2}.Example: -Xms512m -Xmx512m",
             "28952768": "The project folder is the actual directory name where the project is stored",
             "89967495": "Please fill in the project DSL configuration content. You can click the tab above to view the configuration example",
             "92ebd5f0": "Cannot be modified after creation",
@@ -2357,11 +2395,9 @@
             "a3cf55e2": "The selectable list is consistent with the project authorization directory, i.e., the same configuration",
             "b324b030": "The main class for running the program (optional for jar mode execution)",
             "4241b582": "Fill in [xxx",
-            "70364a3": "-Dext.dirs=xxx: -cp xx :xx]",
             "19af9418": "JVM parameters",
             "6e6cc3c2": "Parameters",
             "a72cfae2": "Optional",
-            "d991728a": "jvm, e.g., -Xms512m -Xmx512m",
             "c5feb1a": "args parameters",
             "ee6f8f43": "Function args parameters, optional",
             "18629de": "e.g., --server",
@@ -2506,7 +2542,9 @@
             "223a27bd": "Are you sure you want to clear the project directory and files?",
             "1fce73f8": "Downloading, please wait...",
             "553d172b": "】 folder?",
-            "cb598288": "】 file?"
+            "cb598288": "】 file?",
+            "8079a3d1": "Copy",
+            "ed3ffb78": "Compression"
           },
           "project-log": {
             "6424a544": "Console logs are only log information output when starting the project, not project logs. You can turn off the console log backup function:",
@@ -2755,7 +2793,7 @@
         "8e8fe98c": "Risk reminder",
         "9e237bfe": "If the project data in the machine (asset machine) is only logically deleted (both project files and logs will be retained) before migration",
         "6fb792df": "Migration operations are not transactional. If the process is interrupted or the conditions are not met, redundant data may be generated!!!!",
-        "5e3f37cb": "Before migration, please check the connection status and network status of the迁出machine and迁入machine to avoid unknown errors or interruptions that may cause the process to fail and generate redundant data!!!!",
+        "5e3f37cb": "Before migration, please check the connection status and network status of the move out machine and move in machine to avoid unknown errors or interruptions that may cause the process to fail and generate redundant data!!!!",
         "7ef9d8fb": "Select workspace",
         "237e0d5a": "Select logical node",
         "111eece": "Log backup list",
@@ -2798,13 +2836,16 @@
         "dad3b017": "You need to perform operations on the relevant data to achieve the expected sorting",
         "a8ef5999": "Copy",
         "56e17a4c": "Are you sure you want to permanently delete the project? Permanently deleting the project will automatically delete related files (including project logs, log backups, and project files).",
-        "8ced9e02": "Are you sure you want to delete the project? Deleting the project will not delete related files. It is recommended to clean up the project-related files before deleting the project."
+        "8ced9e02": "Are you sure you want to delete the project? Deleting the project will not delete related files. It is recommended to clean up the project-related files before deleting the project.",
+        "8f1c6bb2": "Move Up",
+        "37a00cd7": "Move Down"
       }
     },
     "repository": {
       "global-repository": {},
       "list": {},
       "repository-list": {
+        "91916119": "By using a private token, you can manage the warehouse within your account without entering your account password. You can specify the permissions that the token has when creating it.",
         "348e98c9": "warehouseName",
         "37fe35a9": "warehouseAddress",
         "e673b1e6": "warehouseType",
@@ -2873,7 +2914,6 @@
         "c98219ce": "Repository cloning timeout, in seconds",
         "3f4ed4fb": "Import repository using a personal token",
         "2add4b88": "Personal token",
-        "4db0f40b": "Using a personal token allows you to manage repositories within your account without entering your username and password. You can specify the permissions of the token when creating it.",
         "b4fde939": "'s token",
         "6a7417e0": "Address",
         "9c121b3c": "Please fill in the platform address",
@@ -2901,7 +2941,8 @@
         "a7a197cd": "The current data is in the default state",
         "616438fd": "Moving up or down after the operation may not achieve the expected sorting",
         "4deb73b2": "You need to operate on the relevant data to achieve the expected sorting",
-        "812d3faa": "Please select the repository to use"
+        "812d3faa": "Please select the repository to use",
+        "1bb7d42e": "Enter the warehouse name or warehouse path for {slot1}"
       }
     },
     "script": {
@@ -2914,7 +2955,6 @@
         "1cf6b640": "All parameters will be concatenated into a string separated by spaces to execute the script. Please note the parameter order and any unfilled parameters will be automatically ignored",
         "2e7ae087": "Parameter",
         "97f7c43a": "Value",
-        "5b6ebe20": "Parameter value",
         "f621fcfd": "New parameter",
         "d75d207f": "Error",
         "763330b": "Please check if the ws proxy is enabled",
@@ -2955,8 +2995,6 @@
         "c05890d1": "Edit Script",
         "db9bba81": "Script Name",
         "709314dd": "Script Content",
-        "449e6efc": "Only used to indicate the meaning of the parameter",
-        "2d735d0": "After adding default parameters, you need to fill in the parameter value when manually executing the script",
         "c3495d0": "Add Parameter",
         "50fcce7a": "Fill in if scheduled automatic execution is needed, cron expression. By default, second-level matching is not enabled. You need to modify the configuration file: [system.timerMatchSecond]",
         "419e634e": "Detailed Description",
@@ -3002,7 +3040,9 @@
         "8ff30bc7": "Parameter values need to be filled in when manually executing scripts after adding default parameters",
         "f8f43b51": "The distribution node refers to the script that automatically synchronizes the script content with the node after editing the script",
         "17a3e7b": "Parameter {count} description",
-        "a94da34e": "Parameter {count} value"
+        "a94da34e": "Parameter {count} value",
+        "b2a4dc0e": "Please fill in the number",
+        "94a5dd5e": "Description of parameters"
       },
       "script-log-view": {
         "52cb3797": "Script log"
@@ -3096,7 +3136,6 @@
         "728b3e2f": "Please select the SSH node",
         "b31dbb3": "Parameter {'${index + 1}'} description",
         "6d8e653f": "Parameter description has no practical effect",
-        "4b6049f2": ",,Only used to indicate the meaning of the parameter",
         "5b6ebe20": "Parameter {'${index + 1}'} value",
         "fcb85bf9": ",After adding a new default parameter, you need to fill in the parameter value when manually executing the script",
         "4c297ada": "Automatic execution",
@@ -3135,7 +3174,8 @@
         "2d94a438": "command?",
         "e8e9db25": "Confirm",
         "b12468e9": "Cancel",
-        "7872c5ad": "Please select the execution node"
+        "7872c5ad": "Please select the execution node",
+        "4676a7bb": "Parameter description, {slot1}, is only used to indicate the meaning of the parameter"
       },
       "full-terminal": {
         "741604c2": "File",
@@ -3170,7 +3210,6 @@
         "d75b3b1a": "Show",
         "41cc2930": "Hide",
         "bb769c1d": "Name:",
-        "63f3f674": "Long Name:",
         "81fcf2df": "Need to configure allowed file suffixes in SSH info",
         "64603c01": "Edit",
         "42c8e9c6": "Download",
@@ -3196,7 +3235,9 @@
         "f087781": "File size",
         "3bb962bf": "Operation",
         "52580f9b": "Are you sure you want to delete the current folder?",
-        "f2275641": "Are you sure you want to delete the file?"
+        "f2275641": "Are you sure you want to delete the file?",
+        "f6609058": " {slot1}{text} long {slot2}{slot3}",
+        "48d3b5c4": "File Name"
       },
       "ssh-tabs": {
         "cfbfa5f8": "File management",

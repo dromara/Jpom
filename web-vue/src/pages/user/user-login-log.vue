@@ -162,4 +162,3 @@ onMounted(() => {
   loadData()
 })
 </script>
-<style scoped></style>

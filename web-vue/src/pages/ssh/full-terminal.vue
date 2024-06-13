@@ -51,7 +51,6 @@
     </a-drawer>
   </div>
 </template>
-
 <script>
 import terminal1 from './terminal'
 import { getItem } from '@/api/ssh'

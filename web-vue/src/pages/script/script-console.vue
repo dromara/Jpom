@@ -69,7 +69,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import LogView1 from '@/components/logView/index2'
 import { getWebSocketUrl } from '@/api/config'
@@ -96,8 +95,7 @@ export default {
       editArgs: false,
       temp: {
         // args: "",
-      },
-      // 日志内容
+      }, // 日志内容
       // logContext: "loading ...",
       btnLoading: true,
       commandParams: [],
@@ -227,5 +225,3 @@ export default {
   }
 }
 </script>
-
-<style scoped></style>

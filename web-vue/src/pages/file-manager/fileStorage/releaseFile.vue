@@ -179,9 +179,8 @@
                           chooseScriptVisible = 1
                         }
                       "
+                      >{{ $t('pages.file-manager.fileStorage.releaseFile.d236a971') }}</a-button
                     >
-                      脚本模板
-                    </a-button>
                   </a-space>
                 </template>
               </code-editor>
@@ -205,9 +204,8 @@
                           chooseScriptVisible = 2
                         }
                       "
+                      >{{ $t('pages.file-manager.fileStorage.releaseFile.d236a971') }}</a-button
                     >
-                      脚本模板
-                    </a-button>
                   </a-space>
                 </template>
               </code-editor>
@@ -240,10 +238,9 @@
       ></whiteList>
     </a-modal>
 
-    <!-- 选择脚本 -->
     <a-drawer
       destroy-on-close
-      title="选择脚本"
+      :title="$t('pages.file-manager.fileStorage.releaseFile.952117a8')"
       placement="right"
       :open="chooseScriptVisible != 0"
       width="70vw"
@@ -265,8 +262,8 @@
               ? temp.beforeScript?.replace('$ref.script.')
               : ''
             : temp.afterScript?.indexOf('$ref.script.') !== -1
-              ? temp.afterScript?.replace('$ref.script.')
-              : ''
+            ? temp.afterScript?.replace('$ref.script.')
+            : ''
         "
         mode="choose"
         @confirm="
@@ -293,9 +290,8 @@
                 chooseScriptVisible = false
               }
             "
+            >{{ $t('pages.file-manager.fileStorage.releaseFile.a0451c97') }}</a-button
           >
-            取消
-          </a-button>
           <a-button
             type="primary"
             @click="
@@ -303,15 +299,13 @@
                 $refs['scriptPage'].handerConfirm()
               }
             "
+            >{{ $t('pages.file-manager.fileStorage.releaseFile.1cbe2507') }}</a-button
           >
-            确认
-          </a-button>
         </a-space>
       </template>
     </a-drawer>
   </div>
 </template>
-
 <script>
 import { getSshListAll } from '@/api/ssh'
 import { getDispatchWhiteList } from '@/api/dispatch'
@@ -333,9 +327,11 @@ export default {
         name: [
           { required: true, message: this.$t('pages.file-manager.fileStorage.releaseFile.378f28a1'), trigger: 'blur' }
         ],
+
         taskType: [
           { required: true, message: this.$t('pages.file-manager.fileStorage.releaseFile.c33e3d16'), trigger: 'blur' }
         ],
+
         releasePath: [
           {
             required: true,
@@ -343,6 +339,7 @@ export default {
             trigger: 'blur'
           }
         ],
+
         taskDataIds: [
           { required: true, message: this.$t('pages.file-manager.fileStorage.releaseFile.6a05f5c8'), trigger: 'blur' }
         ]

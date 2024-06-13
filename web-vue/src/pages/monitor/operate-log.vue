@@ -152,7 +152,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import {
   deleteMonitorOperate,
@@ -213,6 +212,7 @@ export default {
           width: '120px'
         }
       ],
+
       rules: {
         name: [
           {

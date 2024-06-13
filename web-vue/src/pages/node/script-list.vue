@@ -262,7 +262,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import { deleteScript, getScriptListAll, getTriggerUrl, unbindScript, syncScript } from '@/api/node-other'
 

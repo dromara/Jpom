@@ -4,7 +4,7 @@
       <a-card v-if="canInstall" :style="`${setpCurrent === 1 ? 'width: 60vw' : 'width: 550px'}`" hoverable>
         <template #title>
           {{ $t('pages.login.install.cd8e34c0') }}
-          <a href="https://jpom.top" target="_blank">更多开源说明</a>
+          <a href="https://jpom.top" target="_blank">{{ $t('pages.login.install.10496d2') }}</a>
         </template>
         <a-steps :current="setpCurrent">
           <a-step
@@ -155,7 +155,7 @@
     </template>
   </defaultBg>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { bindMfa } from '@/api/user/user'
 import { MFA_APP_TIP_ARRAY } from '@/utils/const'
 import sha1 from 'js-sha1'
@@ -265,4 +265,3 @@ onMounted(() => {
   })
 })
 </script>
-<style scoped></style>

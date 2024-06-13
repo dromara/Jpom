@@ -37,8 +37,8 @@
               <p>{{ $t('pages.tools.cron.3f4889d6') }}<br /></p>
 
               <pre>
-    {{$t('pages.tools.cron.5b44a2be')}}<strong>{{$t('pages.tools.cron.512dbcf2')}}</strong> ，{{$t('pages.tools.cron.1c7a0cd4')}}~59，{{$t('pages.tools.cron.1b17e4d')}}
-    {{$t('pages.tools.cron.c3619377')}}<strong>{{$t('pages.tools.cron.5ed7912c')}}</strong> ，{{$t('pages.tools.cron.4c7cba2e')}}~2099，{{$t('pages.tools.cron.f450c90d')}}
+    {{$t('pages.tools.cron.5b44a2be')}}<strong >{{$t('pages.tools.cron.512dbcf2')}}</strong> ，{{$t('pages.tools.cron.1c7a0cd4')}}~59，{{$t('pages.tools.cron.1b17e4d')}}
+    {{$t('pages.tools.cron.c3619377')}}<strong >{{$t('pages.tools.cron.5ed7912c')}}</strong> ，{{$t('pages.tools.cron.4c7cba2e')}}~2099，{{$t('pages.tools.cron.f450c90d')}}
     </pre>
               <p>
                 {{ $t('pages.tools.cron.53484a75') }}<br />
@@ -160,7 +160,6 @@
     </a-row>
   </div>
 </template>
-
 <script>
 import { cronTools } from '@/api/tools'
 import { parseTime } from '@/utils/const'
@@ -183,6 +182,7 @@ export default {
             trigger: 'blur'
           }
         ],
+
         count: [
           {
             required: true,

@@ -119,11 +119,17 @@
                           </a-button>
                         </a-menu-item>
                         <a-menu-item key="3">
-                          <a-button type="link" @click="hannderCopy(record)"><CopyOutlined />复制 </a-button>
+                          <a-button type="link" @click="hannderCopy(record)"
+                            ><CopyOutlined />{{ $t('pages.node.node-layout.project.project-file.8079a3d1') }}</a-button
+                          >
                         </a-menu-item>
                         <a-sub-menu key="4" :disabled="!record.isDirectory">
                           <template #title>
-                            <a-button type="link"><CompressOutlined />压缩 </a-button>
+                            <a-button type="link"
+                              ><CompressOutlined />{{
+                                $t('pages.node.node-layout.project.project-file.ed3ffb78')
+                              }}</a-button
+                            >
                           </template>
                           <a-menu-item>
                             <a-button type="link" @click="hannderCompress(record, 'zip')">
@@ -504,7 +510,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import {
   deleteProjectFile,
@@ -628,6 +633,7 @@ export default {
           fixed: 'right'
         }
       ],
+
       rules: {
         url: [
           {
@@ -1301,7 +1307,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 :deep(.ant-progress-text) {
   width: auto;

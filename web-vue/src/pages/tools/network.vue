@@ -241,6 +241,7 @@ const telnetRules = ref({
       trigger: 'blur'
     }
   ],
+
   port: [
     {
       required: true,

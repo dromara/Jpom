@@ -120,7 +120,11 @@
         <a-form-item
           :label="$t('pages.docker.list.d2114ab5')"
           name="tagInput"
-          :help="`${$t('pages.docker.list.d2114ab5')} 用于容器构建选择容器功能（fromTag）`"
+          :help="
+            $t('pages.docker.list.3727734b', {
+              slot1: $t('pages.docker.list.d2114ab5')
+            })
+          "
         >
           <a-space direction="vertical" style="width: 100%">
             <div>
@@ -216,7 +220,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import { deleteDcoker, dockerList, editDocker, syncToWorkspace } from '@/api/docker-api'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
@@ -309,6 +312,7 @@ export default {
           width: '190px'
         }
       ],
+
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
         name: [{ required: true, message: this.$t('pages.docker.list.ce3b796b'), trigger: 'blur' }],

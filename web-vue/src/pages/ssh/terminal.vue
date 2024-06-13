@@ -1,7 +1,6 @@
 <template>
   <terminal2 :url="socketUrl" />
 </template>
-
 <script>
 import { mapState } from 'pinia'
 import { useUserStore } from '@/stores/user'

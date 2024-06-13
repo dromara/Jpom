@@ -164,7 +164,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import { getNodeListAll } from '@/api/node'
 import { dispatchStatusMap, getDishPatchListAll, getDishPatchLogList, dispatchMode } from '@/api/dispatch'

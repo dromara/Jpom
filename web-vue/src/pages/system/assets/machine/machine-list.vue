@@ -689,7 +689,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import {
   machineListData,
@@ -873,6 +872,7 @@ export default {
           align: 'center'
         }
       ],
+
       tableSelections: [],
       whiteConfigVisible: false,
       nodeConfigVisible: false,
@@ -1200,7 +1200,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .item-info {
   padding: 4px 0;

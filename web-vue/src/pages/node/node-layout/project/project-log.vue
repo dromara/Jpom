@@ -62,7 +62,6 @@
     </a-space>
   </div>
 </template>
-
 <script>
 import {
   getLogBackList,

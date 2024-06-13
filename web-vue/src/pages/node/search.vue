@@ -348,7 +348,7 @@
                       type="primary"
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
                       @click="sortItemHander(record, index, 'up')"
-                      >上移</a-button
+                      >{{ $t('pages.node.search.8f1c6bb2') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
@@ -357,9 +357,8 @@
                       type="primary"
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total"
                       @click="sortItemHander(record, index, 'down')"
+                      >{{ $t('pages.node.search.37a00cd7') }}</a-button
                     >
-                      下移
-                    </a-button>
                   </a-menu-item>
                 </a-menu>
               </template>
@@ -637,7 +636,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import { getNodeListAll, getProjectList, sortItemProject, syncProject } from '@/api/node'
 import {
@@ -810,6 +808,7 @@ export default {
           width: '190px'
         }
       ],
+
       triggerVisible: false,
       triggerUses: [
         { desc: this.$t('pages.node.search.fc48a099'), value: 'status' },
@@ -817,6 +816,7 @@ export default {
         { desc: this.$t('pages.node.search.8e0aca19'), value: 'stop' },
         { desc: this.$t('pages.node.search.e6919f0c'), value: 'restart' }
       ],
+
       editProjectVisible: false,
       // countdownTime: Date.now(),
       // refreshInterval: 5,
@@ -1426,13 +1426,3 @@ export default {
   }
 }
 </script>
-
-<!-- <style scoped>
-:deep(.ant-statistic div) {
-  display: inline-block;
-}
-
-:deep(.ant-statistic-content-value, .ant-statistic-content) {
-  font-size: 16px;
-}
-</style> -->

@@ -171,7 +171,6 @@
     </a-drawer>
   </div>
 </template>
-
 <script>
 import { deleteLogRead, editLogRead, getLogReadList } from '@/api/log-read'
 import { getNodeListAll, getProjectListAll } from '@/api/node'
@@ -232,6 +231,7 @@ export default {
           align: 'center'
         }
       ],
+
       rules: {
         name: [{ required: true, message: this.$t('pages.dispatch.logRead.b3c4e04b'), trigger: 'blur' }]
       },

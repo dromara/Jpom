@@ -145,7 +145,6 @@
     ></ScriptEdit>
   </div>
 </template>
-
 <script>
 import { getProjectData, getProjectLogSize } from '@/api/node-project'
 import { getWebSocketUrl } from '@/api/config'

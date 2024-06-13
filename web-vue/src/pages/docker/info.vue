@@ -93,7 +93,6 @@
     </a-timeline>
   </div>
 </template>
-
 <script>
 import { dockerInfo } from '@/api/docker-api'
 import { renderSize } from '@/utils/const'

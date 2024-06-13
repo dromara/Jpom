@@ -721,7 +721,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import BuildLog from './log'
 import BuildItem from './item'
@@ -1349,7 +1348,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .item-info {
   padding: 4px 0;

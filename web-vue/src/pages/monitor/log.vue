@@ -97,7 +97,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import { getMonitorLogList, notifyStyle } from '@/api/monitor'
 import { getNodeListAll } from '@/api/node'

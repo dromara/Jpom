@@ -620,7 +620,6 @@
     </a-tabs>
   </div>
 </template>
-
 <script>
 import { oauthConfigOauth2, oauthConfigOauth2Save } from '@/api/system'
 import { getUserPermissionListAll } from '@/api/user/user-permission'

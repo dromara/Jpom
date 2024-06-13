@@ -654,7 +654,6 @@
     </a-tabs>
   </div>
 </template>
-
 <script>
 import {
   machineSshListData,
@@ -712,6 +711,7 @@ export default {
         { label: this.$t('pages.system.assets.ssh.ssh-list.c3891788'), value: 'PASS' },
         { label: this.$t('pages.system.assets.ssh.ssh-list.e9b5946'), value: 'PUBKEY' }
       ],
+
       columns: [
         {
           title: this.$t('pages.system.assets.ssh.ssh-list.2bf15b5b'),
@@ -813,6 +813,7 @@ export default {
           fixed: 'right'
         }
       ],
+
       // 表单校验规则
       rules: {
         name: [{ required: true, message: this.$t('pages.system.assets.ssh.ssh-list.95105178'), trigger: 'blur' }],
@@ -825,6 +826,7 @@ export default {
             trigger: 'blur'
           }
         ],
+
         user: [{ required: true, message: this.$t('pages.system.assets.ssh.ssh-list.fee12658'), trigger: 'blur' }],
         password: [{ required: true, message: this.$t('pages.system.assets.ssh.ssh-list.5242e286'), trigger: 'blur' }]
       },

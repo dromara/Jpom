@@ -129,7 +129,6 @@
     />
   </div>
 </template>
-
 <script>
 import { getScriptLogList, scriptDel, triggerExecTypeMap } from '@/api/node-other'
 // import {triggerExecTypeMap} from "@/api/node-script";

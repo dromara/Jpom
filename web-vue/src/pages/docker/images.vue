@@ -152,7 +152,6 @@
     />
   </div>
 </template>
-
 <script>
 import { parseTime, renderSize } from '@/utils/const'
 import {
@@ -262,6 +261,7 @@ export default {
           width: '160px'
         }
       ],
+
       action: {
         remove: {
           msg: this.$t('pages.docker.images.cde2002'),
