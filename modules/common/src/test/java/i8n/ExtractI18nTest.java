@@ -53,7 +53,8 @@ public class ExtractI18nTest {
      */
     private File rootFile;
 
-    private final Properties zhProperties = new Properties();
+    private File zhPropertiesFile;
+    private final Charset charset = CharsetUtil.CHARSET_UTF_8;
     /**
      * 匹配中文字符的正则表达式
      */
@@ -92,21 +93,24 @@ public class ExtractI18nTest {
         String rootPath = file.getAbsolutePath();
         rootFile = new File(rootPath).getParentFile();
         //
-        // 中文资源文件存储路径
-        File zhPropertiesFile = FileUtil.file(rootFile, "common/src/main/resources/i18n/messages_zh_CN.properties");
-        Charset charset = CharsetUtil.CHARSET_UTF_8;
+        zhPropertiesFile = FileUtil.file(rootFile, "common/src/main/resources/i18n/messages_zh_CN.properties");
+    }
+
+    /**
+     * 提前代码中的中文并使用大模型进行语意化翻译 key
+     */
+    @Test
+    public void extract() throws Exception {
+//        // 删除临时文件
+//        File file = FileUtil.file(rootFile, "i18n-temp");
+//        FileUtil.del(file);
+        // 中文字符串
+        Set<String> wordsSet = new LinkedHashSet<>();
+        // 将已经存在的合并使用, 中文资源文件存储路径
+        Properties zhProperties = new Properties();
         try (BufferedReader inputStream = FileUtil.getReader(zhPropertiesFile, charset)) {
             zhProperties.load(inputStream);
         }
-    }
-
-    @Test
-    public void extract() {
-        // 删除临时文件
-        FileUtil.del(FileUtil.file(rootFile, "i18n-temp"));
-        // 中文字符串
-        Set<String> wordsSet = new LinkedHashSet<>();
-        // 将已经存在的合并使用
         zhProperties.values().forEach(o -> wordsSet.add(o.toString()));
         // 提取中文
         walkFile(rootFile, file1 -> {
@@ -168,6 +172,55 @@ public class ExtractI18nTest {
             // 提前保存
             File wordsFile = FileUtil.file(rootFile, "common/src/main/resources/i18n/words.json");
             FileUtil.writeString(JSONArray.toJSONString(sort, JSONWriter.Feature.PrettyFormat), wordsFile, StandardCharsets.UTF_8);
+        }
+    }
+
+    /**
+     * <a href="https://www.volcengine.com/docs/4640/65067">https://www.volcengine.com/docs/4640/65067</a>
+     *
+     * @throws IOException io 异常
+     */
+    @Test
+    public void generateProperties() throws Exception {
+        JSONObject cacheWords = this.loadCacheWords();
+        TreeMap<String, Object> sort = MapUtil.sort(cacheWords);
+        Properties zhProperties = new Properties();
+        zhProperties.putAll(sort);
+        try (BufferedWriter writer = FileUtil.getWriter(zhPropertiesFile, charset, false)) {
+            zhProperties.store(writer, "i18n zh");
+        }
+        // 翻译成英文
+        VolcTranslateApiTest translateApi = new VolcTranslateApiTest();
+        Set<Object> objects = zhProperties.keySet();
+        int pageSize = 20;
+        int total = CollUtil.size(objects);
+        int page = PageUtil.totalPage(total, pageSize);
+        //
+        Properties enProperties = new Properties();
+        for (int i = 0; i < page; i++) {
+            int start = PageUtil.getStart(i, pageSize);
+            int end = PageUtil.getEnd(i, pageSize);
+
+            List<Object> sub = CollUtil.sub(objects, start, end);
+            List<String> values = new ArrayList<>();
+            for (Object object : sub) {
+                String key = (String) object;
+                String value1 = (String) zhProperties.get(key);
+                values.add(value1);
+            }
+
+            JSONArray translateText = translateApi.translate("zh", "en", values);
+
+            System.out.println(values);
+            System.out.println(translateText);
+            System.out.println("=================");
+            for (int i1 = 0; i1 < sub.size(); i1++) {
+                enProperties.put(sub.get(i1), translateText.getJSONObject(i1).getString("Translation"));
+            }
+        }
+        File enPropertiesFile = FileUtil.file(rootFile, "common/src/main/resources/i18n/messages_en_US.properties");
+        try (BufferedWriter writer = FileUtil.getWriter(enPropertiesFile, charset, false)) {
+            enProperties.store(writer, "i18n en");
         }
     }
 
