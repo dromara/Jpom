@@ -28,3 +28,13 @@ STATIC_FILE_STORAGE,lastModified,Long,,,false,false,最后修改时间,
 STATIC_FILE_STORAGE,size,Long,,,false,false,文件大小,
 STATIC_FILE_STORAGE,level,Integer,,,false,false,"层级",
 STATIC_FILE_STORAGE,triggerToken,String,100,,false,false,触发器token,
+
+SCRIPT_LIBRARY,id,String,50,,true,true,id,静态文件管理
+SCRIPT_LIBRARY,createTimeMillis,Long,,,false,false,数据创建时间,
+SCRIPT_LIBRARY,modifyTimeMillis,Long,,,false,false,数据修改时间,
+SCRIPT_LIBRARY,modifyUser,String,50,,false,false,修改人,
+SCRIPT_LIBRARY,tag,String,50,,true,false,标签,
+SCRIPT_LIBRARY,description,String,255,,false,false,描述,
+SCRIPT_LIBRARY,script,text,,,false,false,描述,
+SCRIPT_LIBRARY,machineIds,text,,,false,false,关联的机器节点,
+SCRIPT_LIBRARY,version,String,50,,true,false,版本,

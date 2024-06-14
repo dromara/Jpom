@@ -63,7 +63,8 @@ const i18n = createI18n<I18nLocaleType>({
     const { local } = lang[key]
     pre[key] = local
     return pre
-  }, {})
+  }, {}),
+  warnHtmlMessage: false
 })
 
 export default i18n

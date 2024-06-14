@@ -125,3 +125,11 @@ export function machineMonitorConfig(data) {
     params: data
   })
 }
+
+export function machineSearch(data) {
+  return axios({
+    url: '/system/assets/machine/search',
+    method: 'get',
+    params: data
+  })
+}

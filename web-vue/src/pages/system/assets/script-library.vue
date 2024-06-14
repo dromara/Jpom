@@ -7,14 +7,13 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="script-library"
-      :empty-description="$tl('p.noScript')"
+      empty-description="没有任何的脚本库"
       :data-source="list"
       size="middle"
       :columns="columns"
       :pagination="pagination"
       bordered
       row-key="id"
-      :row-selection="rowSelection"
       :scroll="{
         x: 'max-content'
       }"
@@ -24,54 +23,40 @@
       <template #title>
         <a-space wrap class="search-box">
           <a-input
-            v-model:value="listQuery['id']"
-            :placeholder="$tl('p.scriptId')"
+            v-model:value="listQuery['%tag%']"
+            placeholder="脚本标记"
             allow-clear
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
-            v-model:value="listQuery['%name%']"
-            :placeholder="$tl('c.name')"
+            v-model:value="listQuery['%version%']"
+            placeholder="版本"
             allow-clear
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%description%']"
-            :placeholder="$tl('c.description')"
+            placeholder="描述"
             class="search-input-item"
             @press-enter="loadData"
           />
-          <a-input
-            v-model:value="listQuery['%autoExecCron%']"
-            :placeholder="$tl('c.scheduleExecution')"
-            class="search-input-item"
-            @press-enter="loadData"
-          />
-          <a-tooltip :title="$tl('p.backToFirstPage')">
-            <a-button :loading="loading" type="primary" @click="loadData">{{ $tl('p.search') }}</a-button>
+
+          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
+            <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="createScript">{{ $tl('p.add') }}</a-button>
-          <a-button
-            v-if="mode === 'manage'"
-            type="primary"
-            :disabled="!tableSelections || !tableSelections.length"
-            @click="syncToWorkspaceShow"
-            >{{ $tl('p.workspaceSync') }}</a-button
-          >
+          <a-button type="primary" @click="createScript">创建</a-button>
         </a-space>
       </template>
       <template #tableHelp>
         <a-tooltip>
           <template #title>
-            <div>{{ $tl('p.scriptTemplateDescription') }}</div>
+            <div>脚本库用于存储管理通用的脚本,脚本库中的脚本不能直接执行。</div>
 
             <div>
               <ul>
-                <li>{{ $tl('p.executionEnvNote') }}</li>
-                <li>{{ $tl('p.commandFilePath') }}</li>
-                <li>{{ $tl('p.distributionNodeDescription') }}</li>
+                <li>可以将脚本分发到机器节点中在 DSL 项目中引用，达到多个项目共用相同脚本</li>
               </ul>
             </div>
           </template>
@@ -89,56 +74,11 @@
             <span>{{ text }}</span>
           </a-tooltip>
         </template>
-        <template v-else-if="column.dataIndex === 'name'">
-          <a-tooltip placement="topLeft" :title="text" @click="handleEdit(record)">
-            <a-button type="link" style="padding: 0" size="small">{{ text }}</a-button>
-          </a-tooltip>
-        </template>
-        <template v-else-if="column.dataIndex === 'workspaceId'">
-          <a-tag v-if="text === 'GLOBAL'">{{ $tl('c.global') }}</a-tag>
-          <a-tag v-else>{{ $tl('p.workspace') }}</a-tag>
-        </template>
+
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <template v-if="mode === 'manage'">
-              <a-button size="small" type="primary" @click="handleExec(record)">{{ $tl('c.execute') }}</a-button>
-              <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('c.edit') }}</a-button>
-              <a-button size="small" type="primary" @click="handleLog(record)">{{ $tl('p.log') }}</a-button>
-              <a-dropdown>
-                <a @click="(e) => e.preventDefault()">
-                  {{ $tl('p.more') }}
-                  <DownOutlined />
-                </a>
-                <template #overlay>
-                  <a-menu>
-                    <a-menu-item>
-                      <a-button size="small" type="primary" @click="handleTrigger(record)">{{
-                        $tl('c.trigger')
-                      }}</a-button>
-                    </a-menu-item>
-
-                    <a-menu-item>
-                      <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-                        $tl('p.delete')
-                      }}</a-button>
-                    </a-menu-item>
-                    <a-menu-item>
-                      <a-button
-                        size="small"
-                        type="primary"
-                        danger
-                        :disabled="!record.nodeIds"
-                        @click="handleUnbind(record)"
-                        >{{ $tl('p.unbind') }}</a-button
-                      >
-                    </a-menu-item>
-                  </a-menu>
-                </template>
-              </a-dropdown>
-            </template>
-            <template v-else>
-              <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('c.edit') }}</a-button>
-            </template>
+            <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
+            <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
           </a-space>
         </template>
       </template>
@@ -148,109 +88,56 @@
       v-model:open="editScriptVisible"
       destroy-on-close
       :z-index="1009"
-      :title="$tl('p.editScript')"
+      title="编辑脚本"
       :mask-closable="false"
       width="80vw"
       :confirm-loading="confirmLoading"
       @ok="handleEditScriptOk"
     >
       <a-form ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 19 }">
-        <a-form-item v-if="temp.id" label="ScriptId" name="id">
-          <a-input v-model:value="temp.id" disabled read-only />
+        <a-form-item v-if="temp.id" label="版本" name="id">
+          <a-input v-model:value="temp.version" disabled read-only />
         </a-form-item>
-        <a-form-item :label="$tl('p.scriptName')" name="name">
-          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$tl('c.name')" />
+        <a-form-item label="标记" name="tag">
+          <a-input
+            v-model:value="temp.tag"
+            :max-length="50"
+            placeholder="请输入脚本标记，标记只能是字母或者数字长度需要小于 20 并且全局唯一"
+            :disabled="!!temp.id"
+          />
         </a-form-item>
-        <a-form-item :label="$tl('p.scriptContent')" name="context">
+        <a-form-item label="内容" name="script">
           <a-form-item-rest>
-            <code-editor v-model:content="temp.context" height="40vh" :options="{ mode: 'shell', tabSize: 2 }">
+            <code-editor v-model:content="temp.script" height="40vh" :options="{ mode: 'shell', tabSize: 2 }">
             </code-editor>
           </a-form-item-rest>
         </a-form-item>
-        <!-- <a-form-item label="默认参数" name="defArgs">
-            <a-input v-model="temp.defArgs" placeholder="默认参数" />
-          </a-form-item> -->
-        <a-form-item :label="$tl('p.defaultParam')">
-          <a-space direction="vertical" style="width: 100%">
-            <a-row v-for="(item, index) in commandParams" :key="item.key">
-              <a-col :span="22">
-                <a-space direction="vertical" style="width: 100%">
-                  <a-input
-                    v-model:value="item.desc"
-                    :addon-before="$tl('p.parameterContent', { count: index + 1 })"
-                    :placeholder="$tl('p.content1')" />
-                  <a-input
-                    v-model:value="item.value"
-                    :addon-before="$tl('p.parameterContent', { count: index + 1 })"
-                    :placeholder="$tl('p.content2')"
-                /></a-space>
-              </a-col>
-              <a-col :span="2">
-                <a-row type="flex" justify="center" align="middle">
-                  <a-col>
-                    <MinusCircleOutlined style="color: #ff0000" @click="() => commandParams.splice(index, 1)" />
-                  </a-col>
-                </a-row>
-              </a-col>
-            </a-row>
-            <a-divider style="margin: 5px 0" />
-          </a-space>
 
-          <a-button type="primary" @click="() => commandParams.push({})">{{ $tl('p.addParam') }}</a-button>
-        </a-form-item>
-        <a-form-item :label="$tl('c.scheduleExecution')" name="autoExecCron">
-          <a-auto-complete
-            v-model:value="temp.autoExecCron"
-            :placeholder="$tl('p.cronExpression')"
-            :options="CRON_DATA_SOURCE"
-          >
-            <template #option="item"> {{ item.title }} {{ item.value }} </template>
-          </a-auto-complete>
-        </a-form-item>
-        <a-form-item :label="$tl('c.description')" name="description">
+        <a-form-item label="描述" name="description">
           <a-textarea
             v-model:value="temp.description"
             :max-length="200"
             :rows="3"
             style="resize: none"
-            :placeholder="$tl('p.detailedDescription')"
+            placeholder="请输入脚本描述"
           />
         </a-form-item>
-        <a-form-item :label="$tl('c.share')" name="global">
-          <a-radio-group v-model:value="temp.global">
-            <a-radio :value="true"> {{ $tl('c.global') }}</a-radio>
-            <a-radio :value="false"> {{ $tl('p.currentWorkspace') }}</a-radio>
-          </a-radio-group>
-        </a-form-item>
-        <a-form-item v-if="temp.prohibitSync" :label="$tl('p.disableDistributionNode')">
-          <template #help>{{ $tl('p.controlNodeDistribution') }}</template>
-          <a-tag v-for="(item, index) in temp.nodeList" :key="index"
-            >{{ $tl('p.nodeName') }}{{ item.nodeName }} {{ $tl('p.selectedWorkspace') }}{{ item.workspaceName }}</a-tag
-          >
-        </a-form-item>
-        <a-form-item v-else>
+
+        <a-form-item>
           <template #label>
             <a-tooltip>
-              {{ $tl('p.distributionNodeLabel') }}
-              <template #title> {{ $tl('p.content3') }} </template>
+              分发机器
+              <template #title> 将脚本分发到对应的机器节点中，对应的机器节点可以引用对应的脚本 </template>
               <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
           <a-select
             v-model:value="temp.chooseNode"
             show-search
-            :filter-option="
-              (input, option) => {
-                const children = option.children && option.children()
-                return (
-                  children &&
-                  children[0].children &&
-                  children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                )
-              }
-            "
-            :placeholder="$tl('p.distributeToNode')"
+            :filter-option="false"
+            placeholder="请选择要分发到的机器节点"
             mode="multiple"
+            @search="searchMachineList"
           >
             <a-select-option v-for="item in nodeList" :key="item.id" :value="item.id">
               {{ item.name }}
@@ -265,32 +152,17 @@
 <script>
 import { getScriptLibraryList, editScriptLibrary, delScriptLibrary } from '@/api/system/script-library'
 import codeEditor from '@/components/codeEditor'
-import { getNodeListAll } from '@/api/node'
+import { machineSearch } from '@/api/system/assets-machine'
 
 import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 
-import { getWorkSpaceListAll } from '@/api/workspace'
+// import { getWorkSpaceListAll } from '@/api/workspace'
 
 export default {
   components: {
     codeEditor
   },
-  props: {
-    choose: {
-      type: String,
-      default: 'checkbox'
-      // "radio" ,"checkbox"
-    },
-    mode: {
-      // choose、manage
-      type: String,
-      default: 'manage'
-    },
-    chooseVal: {
-      type: String,
-      default: ''
-    }
-  },
+  props: {},
 
   data() {
     return {
@@ -306,45 +178,29 @@ export default {
       drawerConsoleVisible: false,
       columns: [
         {
-          title: 'id',
-          dataIndex: 'id',
-          ellipsis: true,
-          sorter: true,
-          width: 50,
-          tooltip: true
-        },
-        {
-          title: this.$tl('c.name'),
-          dataIndex: 'name',
+          title: '标记',
+          dataIndex: 'tag',
           ellipsis: true,
           sorter: true,
           width: 150
         },
         {
-          title: this.$tl('c.share'),
-          dataIndex: 'workspaceId',
-          sorter: true,
-          ellipsis: true,
-
-          width: '90px'
-        },
-        {
-          title: this.$tl('c.description'),
-          dataIndex: 'description',
-          ellipsis: true,
-          width: 100,
-          tooltip: true
-        },
-        {
-          title: this.$tl('c.scheduleExecution'),
-          dataIndex: 'autoExecCron',
+          title: '版本',
+          dataIndex: 'version',
           ellipsis: true,
           sorter: true,
           width: '100px',
           tooltip: true
         },
         {
-          title: this.$tl('p.modifyTime'),
+          title: '描述',
+          dataIndex: 'description',
+          ellipsis: true,
+          width: 100,
+          tooltip: true
+        },
+        {
+          title: '修改时间',
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           width: '170px',
@@ -352,7 +208,7 @@ export default {
           customRender: ({ text }) => parseTime(text)
         },
         {
-          title: this.$tl('p.createTime'),
+          title: '创建时间',
           dataIndex: 'createTimeMillis',
           sorter: true,
           width: '170px',
@@ -360,54 +216,34 @@ export default {
           customRender: ({ text }) => parseTime(text)
         },
         {
-          title: this.$tl('p.creator'),
+          title: '创建人',
           dataIndex: 'createUser',
           ellipsis: true,
           tooltip: true,
           width: '120px'
         },
         {
-          title: this.$tl('p.modifier'),
+          title: '修改人',
           dataIndex: 'modifyUser',
           ellipsis: true,
           tooltip: true,
           width: '120px'
         },
+
         {
-          title: this.$tl('p.lastExecutor'),
-          dataIndex: 'lastRunUser',
-          ellipsis: true,
-          width: '120px',
-          tooltip: true
-        },
-        this.mode === 'manage'
-          ? {
-              title: this.$tl('c.operation'),
-              dataIndex: 'operation',
-              align: 'center',
+          title: '操作',
+          dataIndex: 'operation',
+          align: 'center',
 
-              fixed: 'right',
-              width: '240px'
-            }
-          : {
-              title: this.$tl('c.operation'),
-              dataIndex: 'operation',
-              align: 'center',
-
-              fixed: 'right',
-              width: '100px'
-            }
+          fixed: 'right',
+          width: '240px'
+        }
       ],
       rules: {
-        name: [{ required: true, message: this.$tl('p.inputScriptName'), trigger: 'blur' }],
-        context: [{ required: true, message: this.$tl('p.inputScriptContent'), trigger: 'blur' }]
+        // name: [{ required: true, message: this.$tl('p.inputScriptName'), trigger: 'blur' }],
+        // context: [{ required: true, message: this.$tl('p.inputScriptContent'), trigger: 'blur' }]
       },
-      tableSelections: [],
-      syncToWorkspaceVisible: false,
-      workspaceList: [],
-      triggerVisible: false,
-      commandParams: [],
-      drawerLogVisible: false,
+
       confirmLoading: false
     }
   },
@@ -417,32 +253,9 @@ export default {
     },
     activePage() {
       return this.$attrs.routerUrl === this.$route.path
-    },
-    rowSelection() {
-      return {
-        onChange: (selectedRowKeys) => {
-          this.tableSelections = selectedRowKeys
-        },
-        selectedRowKeys: this.tableSelections,
-        type: this.choose
-      }
     }
   },
-  watch: {
-    chooseVal: {
-      deep: true,
-
-      handler(v) {
-        if (v) {
-          this.tableSelections = v.split(',')
-        } else {
-          this.tableSelections = []
-        }
-      },
-
-      immediate: true
-    }
-  },
+  watch: {},
   created() {
     // this.columns.push(
     // );
@@ -453,9 +266,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.script.scriptList.${key}`, ...args)
-    },
     // 加载数据
     loadData(pointerEvent) {
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page
@@ -470,63 +280,50 @@ export default {
     },
     parseTime,
     // 获取所有节点
-    getAllNodeList() {
-      getNodeListAll().then((res) => {
+    searchMachineList(name) {
+      machineSearch({
+        name: name,
+        limit: 10,
+        appendIds: this.temp.machineIds || ''
+      }).then((res) => {
         this.nodeList = res.data || []
       })
     },
     createScript() {
       this.temp = {}
-      this.commandParams = []
+
       this.editScriptVisible = true
-      this.getAllNodeList()
+      this.searchMachineList()
     },
     // 修改
     handleEdit(record) {
-      getScriptItem({
-        id: record.id
-      }).then((res) => {
-        if (res.code === 200) {
-          const data = res.data.data
-          this.temp = Object.assign({}, data)
+      this.temp = Object.assign({}, record)
 
-          this.commandParams = data?.defArgs ? JSON.parse(data.defArgs) : []
+      //this.commandParams = data?.defArgs ? JSON.parse(data.defArgs) : []
 
-          this.temp = {
-            ...this.temp,
-            prohibitSync: res.data.prohibitSync,
-            nodeList: res.data.nodeList,
-            chooseNode: data?.nodeIds ? data.nodeIds.split(',') : [],
-            global: data.workspaceId === 'GLOBAL',
-            workspaceId: ''
-          }
-          this.editScriptVisible = true
-          this.getAllNodeList()
-        }
-      })
+      this.temp = {
+        ...this.temp,
+        chooseNode: record?.machineIds ? record.machineIds.split(',') : []
+      }
+      this.editScriptVisible = true
+      this.searchMachineList()
+      // getScriptItem({
+      //   id: record.id
+      // }).then((res) => {
+      //   if (res.code === 200) {
+      //     const data = res.data.data
+      //   }
+      // })
     },
     // 提交 Script 数据
     handleEditScriptOk() {
       // 检验表单
       this.$refs['editScriptForm'].validate().then(() => {
-        if (this.commandParams && this.commandParams.length > 0) {
-          for (let i = 0; i < this.commandParams.length; i++) {
-            if (!this.commandParams[i].desc) {
-              $notification.error({
-                message: this.$tl('p.paramDescriptionPrefix') + (i + 1) + this.$tl('p.paramDescriptionSuffix')
-              })
-              return false
-            }
-          }
-          this.temp.defArgs = JSON.stringify(this.commandParams)
-        } else {
-          this.temp.defArgs = ''
-        }
         // 提交数据
-        this.temp.nodeIds = this.temp?.chooseNode?.join(',')
+        this.temp.machineIds = this.temp?.chooseNode?.join(',')
         delete this.temp.nodeList
         this.confirmLoading = true
-        editScript(this.temp)
+        editScriptLibrary(this.temp)
           .then((res) => {
             if (res.code === 200) {
               // 成功
@@ -546,13 +343,13 @@ export default {
     },
     handleDelete(record) {
       $confirm({
-        title: this.$tl('p.systemTip'),
-        content: this.$tl('p.confirmDeleteScript'),
+        title: '系统提示',
+        content: '确定要删除此脚本库吗？',
         zIndex: 1009,
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        okText: '确定',
+        cancelText: '取消',
         onOk: () => {
-          return deleteScript({
+          return delScriptLibrary({
             id: record.id
           }).then((res) => {
             if (res.code === 200) {
@@ -565,29 +362,11 @@ export default {
         }
       })
     },
-    // 执行 Script
-    handleExec(record) {
-      this.temp = Object.assign(record)
-      this.drawerTitle = `${$tl('p.console')}(${this.temp.name})`
-      this.drawerConsoleVisible = true
-    },
-    // 关闭 console
-    onConsoleClose() {
-      this.drawerConsoleVisible = false
-    },
+
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
       this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter })
       this.loadData()
-    },
-
-    // 加载工作空间数据
-    loadWorkSpaceListAll() {
-      getWorkSpaceListAll().then((res) => {
-        if (res.code === 200) {
-          this.workspaceList = res.data
-        }
-      })
     }
   }
 }
