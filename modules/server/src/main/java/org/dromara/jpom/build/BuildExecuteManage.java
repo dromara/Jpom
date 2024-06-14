@@ -157,7 +157,7 @@ public class BuildExecuteManage implements Runnable {
         int queueSize = threadPoolExecutor.getQueue().size();
         int limitPoolSize = threadPoolExecutor.getPoolSize();
         int corePoolSize = threadPoolExecutor.getCorePoolSize();
-        String format = StrUtil.format("当前构建中任务数：{},队列中任务数：{} 构建任务等待超时或者超出最大等待数量,当前运行中的任务数：{}/{},取消执行当前构建", BUILD_MANAGE_MAP.size(), queueSize, limitPoolSize, corePoolSize);
+        String format = StrUtil.format(I18nMessageUtil.get("i18n.build_status_message.42a7"), BUILD_MANAGE_MAP.size(), queueSize, limitPoolSize, corePoolSize);
         logRecorder.system(format);
         this.cancelTask(format);
     }
@@ -265,7 +265,8 @@ public class BuildExecuteManage implements Runnable {
                                 String itemS = StrUtil.SLASH + CollUtil.join(CollUtil.sub(list, 0, i + 1), StrUtil.SLASH) + suffix;
                                 if (AntPathUtil.ANT_PATH_MATCHER.match(antSubMatch, itemS)) {
                                     notMathIndex = i + 1;
-                                    break; // 结束本次循环
+                                    // 结束本次循环
+                                    break;
                                 }
                             }
                             if (notMathIndex == ArrayUtil.INDEX_NOT_FOUND) {
@@ -297,7 +298,7 @@ public class BuildExecuteManage implements Runnable {
                 logRecorder.systemError(format);
                 return format;
             }
-            logRecorder.system("{} 二级目录模糊匹配到 {} 个文件, 当前文件保留方式 {}", antSubMatch, subMatchCount, antFileUploadMode);
+            logRecorder.system(I18nMessageUtil.get("i18n.secondary_directory_match.0aec"), antSubMatch, subMatchCount, antFileUploadMode);
             // 更新产物路径为普通路径
             dbBuildHistoryLogService.updateResultDirFile(this.logId, StrUtil.SLASH);
             buildInfoModel.setResultDirFile(StrUtil.SLASH);
@@ -328,7 +329,7 @@ public class BuildExecuteManage implements Runnable {
                 .copy();
         }
         if (CollUtil.isNotEmpty(excludeReleaseAnts)) {
-            logRecorder.system("{} 累积过滤：{} 个文件 ", excludeReleaseAnt, excludeReleaseAntCount[0]);
+            logRecorder.system(I18nMessageUtil.get("i18n.cumulative_filter_files.448d"), excludeReleaseAnt, excludeReleaseAntCount[0]);
         }
         return null;
     }
@@ -832,7 +833,8 @@ public class BuildExecuteManage implements Runnable {
                 }
                 logRecorder.system(I18nMessageUtil.get("i18n.execution_ended_with_duration.a59b"), processItem.name(), DateUtil.formatBetween(SystemClock.now() - processItemStartTime));
             }
-            if (!stop) { // 没有执行 stop
+            if (!stop) {
+                // 没有执行 stop
                 this.asyncWebHooks("success");
             }
         } catch (LogRecorderCloseException logRecorderCloseException) {

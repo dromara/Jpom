@@ -255,7 +255,7 @@ public class JpomApplication implements DisposableBean, InitializingBean {
     public static void shutdownGlobalThreadPool() {
         LINK_EXECUTOR_SERVICE.forEach((s, executorService) -> {
             if (!executorService.isShutdown()) {
-                log.debug("shutdown {} ThreadPool", s);
+                log.debug(I18nMessageUtil.get("i18n.close_thread_pool.4cd9"), s);
                 executorService.shutdownNow();
             }
         });

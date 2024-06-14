@@ -202,7 +202,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
                 entity.set("nodeId", nodeModel.getId());
                 int del = super.del(entity);
                 //
-                log.debug("{} 节点没有拉取到任何 {},但是删除了数据：{}", nodeModelName, dataName, del);
+                log.debug(I18nMessageUtil.get("i18n.node_no_data_pulled.0dae"), nodeModelName, dataName, del);
                 return I18nMessageUtil.get("i18n.node_did_not_pull_anything.8af5") + dataName;
             }
             // 查询现在存在的项目
@@ -320,11 +320,11 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
     protected String checkException(Exception e, String nodeModelName) {
         if (e instanceof AgentException) {
             AgentException agentException = (AgentException) e;
-            log.error("{} 同步失败 {}", nodeModelName, agentException.getMessage());
+            log.error(I18nMessageUtil.get("i18n.synchronization_failed.091a"), nodeModelName, agentException.getMessage());
             return I18nMessageUtil.get("i18n.synchronization_failed.d610") + agentException.getMessage();
         } else if (e instanceof AgentAuthorizeException) {
             AgentAuthorizeException agentAuthorizeException = (AgentAuthorizeException) e;
-            log.error("{} 授权异常 {}", nodeModelName, agentAuthorizeException.getMessage());
+            log.error(I18nMessageUtil.get("i18n.authorization_exception.acc0"), nodeModelName, agentAuthorizeException.getMessage());
             return I18nMessageUtil.get("i18n.auth_exception.27be") + agentAuthorizeException.getMessage();
         }
 //        else if (e instanceof JSONException) {

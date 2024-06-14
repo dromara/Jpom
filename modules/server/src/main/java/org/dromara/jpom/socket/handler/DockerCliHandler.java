@@ -196,7 +196,7 @@ public class DockerCliHandler extends BaseTerminalHandler {
                 log.error(I18nMessageUtil.get("i18n.container_command_execution_exception.a14a"), e);
                 sendBinary(session, I18nMessageUtil.get("i18n.execution_exception_message.ef79") + e.getMessage());
             }
-            log.debug("[{}] docker exec 终端进程结束", dockerInfoModel.getName());
+            log.debug(I18nMessageUtil.get("i18n.docker_exec_terminal_process_ended.c734"), dockerInfoModel.getName());
             // 标记自动结束
             this.containerId = null;
         }

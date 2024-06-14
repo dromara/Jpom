@@ -167,9 +167,10 @@ public class ReleaseManage {
             logRecorder.system(I18nMessageUtil.get("i18n.start_syncing_to_file_management_center.0a03"), keepMsg);
             boolean tarGz = this.buildEnv.getBool(BuildUtil.USE_TAR_GZ, false);
             File dirPackage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, tarGz, (unZip, file) -> file);
+            String string = I18nMessageUtil.get("i18n.build_source.2ef9");
             String successMd5 = fileStorageService.addFile(dirPackage, 1,
                 buildInfoModel.getWorkspaceId(),
-                "构建来源," + buildInfoModel.getName(),
+                string + buildInfoModel.getName(),
                 // 默认的别名码为构建id
                 StrUtil.emptyToDefault(buildInfoModel.getAliasCode(), buildInfoModel.getId()),
                 fileStorageKeepDay);
@@ -281,7 +282,7 @@ public class ReleaseManage {
                 .queryByTag(this.buildExtraModule.getWorkspaceId(), fromTag);
             Map<String, Object> map = machineDockerServer.dockerParameter(dockerInfoModels);
             if (map == null) {
-                String format = StrUtil.format("{} 没有可用的 docker server", fromTag);
+                String format = StrUtil.format(I18nMessageUtil.get("i18n.no_available_docker_server.6aaa"), fromTag);
                 logRecorder.systemError(format);
                 return format;
             }
@@ -541,7 +542,8 @@ public class ReleaseManage {
                     int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
                     if (progressRangeList.add(progressRange)) {
                         //  total, progressSize
-                        logRecorder.system("上传文件进度：{}[{}/{}] {}/{} {} ", file.getName(),
+                        String info = I18nMessageUtil.get("i18n.upload_progress_message_format.b91c");
+                        logRecorder.system(info, file.getName(),
                             (finalI + 1), diffSize,
                             FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
                             NumberUtil.formatPercent(((float) progressSize / total), 0)
@@ -590,7 +592,7 @@ public class ReleaseManage {
                     double progressPercentage = Math.floor(((float) progressSize / total) * 100);
                     int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
                     if (progressRangeList.add(progressRange)) {
-                        logRecorder.system("上传文件进度：{} {}/{} {}", name,
+                        logRecorder.system(I18nMessageUtil.get("i18n.upload_progress_with_colon.dd5b"), name,
                             FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
                             NumberUtil.formatPercent(((float) progressSize / total), 0));
                     }

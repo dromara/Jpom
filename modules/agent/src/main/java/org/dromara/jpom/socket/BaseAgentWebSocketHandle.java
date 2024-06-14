@@ -105,7 +105,7 @@ public abstract class BaseAgentWebSocketHandle {
             SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.server_exception_occurred.9eb4") + ExceptionUtil.stacktraceToString(thr));
         } catch (IOException ignored) {
         }
-        log.error(session.getId() + I18nMessageUtil.get("i18n.socket_exception.d836"), thr);
+        log.error("{}{}", session.getId(), I18nMessageUtil.get("i18n.socket_exception.d836"), thr);
     }
 
     protected String getOptUserName(Session session) {

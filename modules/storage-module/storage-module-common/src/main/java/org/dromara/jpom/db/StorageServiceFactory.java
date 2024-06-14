@@ -93,7 +93,7 @@ public class StorageServiceFactory {
             String user = setting.get("user");
             String pass = setting.get("pass");
             h2StorageService.backupSql(url, user, pass, backupSqlPath, null);
-            log.info("H2 数据库备份成功：{}", backupSqlPath);
+            log.info(I18nMessageUtil.get("i18n.h2_database_backup_success.a099"), backupSqlPath);
             //
             IStorageService nowStorageService = doCreateStorageService(dbExtConfig.getMode());
             DSFactory nowDsFactory = nowStorageService.create(dbExtConfig, null, null, null);

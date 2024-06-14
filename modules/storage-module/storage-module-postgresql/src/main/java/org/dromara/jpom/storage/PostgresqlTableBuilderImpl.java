@@ -109,7 +109,8 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
         for (TableViewAlterData viewAlterData : row) {
             String alterType = viewAlterData.getAlterType();
             String tableName = fieldWrapper.wrap(viewAlterData.getTableName());
-            String columnName = viewAlterData.getName().toLowerCase(); //不使用wrapper，存储过程调用时，column不需要包裹
+            //不使用wrapper，存储过程调用时，column不需要包裹
+            String columnName = viewAlterData.getName().toLowerCase();
             switch (alterType) {
                 case "DROP":
                     stringBuilder.append("CALL drop_column_if_exists('").append(tableName).append("', '").append(columnName).append("')");

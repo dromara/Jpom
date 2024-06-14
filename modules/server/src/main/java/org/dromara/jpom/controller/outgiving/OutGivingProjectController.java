@@ -283,7 +283,7 @@ public class OutGivingProjectController extends BaseServerController {
                                                String selectProject,
                                                HttpServletRequest request) {
         Assert.hasText(url, I18nMessageUtil.get("i18n.fill_download_address.763c"));
-        Assert.state(StrUtil.length(url) <= 200, "url 长度不能超过 200");
+        Assert.state(StrUtil.length(url) <= 200, I18nMessageUtil.get("i18n.url_length_exceeded.ca1c"));
         OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, I18nMessageUtil.get("i18n.distribution_in_progress.c3ae")), request);
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
         Assert.notNull(afterOpt1, I18nMessageUtil.get("i18n.post_distribution_action_required.8cc8"));

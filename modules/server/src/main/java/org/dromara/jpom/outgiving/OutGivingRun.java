@@ -255,7 +255,7 @@ public class OutGivingRun {
                 if (statusList.size() != projectSize) {
                     //
                     status = OutGivingModel.Status.FAIL;
-                    msg = StrUtil.format("完成的个数不足 {}/{}", statusList.size(), projectSize);
+                    msg = StrUtil.format(I18nMessageUtil.get("i18n.completed_count_insufficient.02e9"), statusList.size(), projectSize);
                 } else {
                     int successCount = statusList.stream().mapToInt(value -> value == OutGivingNodeProject.Status.Ok ? 1 : 0).sum();
                     if (successCount == projectSize) {
@@ -263,7 +263,7 @@ public class OutGivingRun {
                         msg = I18nMessageUtil.get("i18n.distribute_success.c689") + successCount;
                     } else {
                         status = OutGivingModel.Status.FAIL;
-                        msg = StrUtil.format("完成并成功的个数不足 {}/{}", successCount, projectSize);
+                        msg = StrUtil.format(I18nMessageUtil.get("i18n.completed_and_successful_count_insufficient.92fa"), successCount, projectSize);
                     }
                 }
                 Optional.ofNullable(logRecorder).ifPresent(logRecorder -> logRecorder.system(msg));

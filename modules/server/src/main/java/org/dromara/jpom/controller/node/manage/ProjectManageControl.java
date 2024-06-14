@@ -417,7 +417,7 @@ public class ProjectManageControl extends BaseServerController {
         // 刷新缓存
         projectInfoCacheService.syncExecuteNode(nowNode);
         projectInfoCacheService.syncExecuteNode(toNodeModel);
-        return new JsonMessage<>(200, StrUtil.format("项目迁移成功：{} | {}", result.getMsg(), buildMsg));
+        return new JsonMessage<>(200, StrUtil.format(I18nMessageUtil.get("i18n.migration_success_message.e546"), result.getMsg(), buildMsg));
     }
 
     /**
@@ -588,7 +588,7 @@ public class ProjectManageControl extends BaseServerController {
             FileUtil.del(csvFile);
         }
         String fileCharsetStr = Optional.ofNullable(fileCharset).map(Charset::name).orElse(StrUtil.EMPTY);
-        return JsonMessage.success("导入成功(编码格式：{}),更新 {} 条数据,因为节点分发/项目副本忽略 {} 条数据", fileCharsetStr, updateCount, ignoreCount);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.import_success_message.2df3"), fileCharsetStr, updateCount, ignoreCount);
     }
 
     private JSONObject loadProjectData(CsvRow csvRow, String workspaceId, NodeModel node) {

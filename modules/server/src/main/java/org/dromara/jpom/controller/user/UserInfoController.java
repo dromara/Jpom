@@ -68,13 +68,13 @@ public class UserInfoController extends BaseServerController {
         Assert.state(!userName.isDemoUser(), I18nMessageUtil.get("i18n.demo_account_password_change_not_supported.91f4"));
 
         UserModel userModel = userService.simpleLogin(userName.getId(), oldPwd);
-        Assert.notNull(userModel, "旧密码不正确！");
+        Assert.notNull(userModel, I18nMessageUtil.get("i18n.old_password_incorrect.9cf6"));
         Assert.state(ObjectUtil.defaultIfNull(userModel.getPwdErrorCount(), 0) <= 0, I18nMessageUtil.get("i18n.account_locked_cannot_change_password.d6ab"));
 
         userService.updatePwd(userName.getId(), newPwd);
         // 如果修改成功，则销毁会话
         session.invalidate();
-        return JsonMessage.success("修改密码成功！");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.password_change_success.8013"));
     }
 
     /**

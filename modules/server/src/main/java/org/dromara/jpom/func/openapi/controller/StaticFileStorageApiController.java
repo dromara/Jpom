@@ -61,7 +61,7 @@ public class StaticFileStorageApiController extends BaseDownloadApiController {
         //
         UserModel userModel = triggerTokenLogServer.getUserByToken(token, staticFileStorageService.typeName());
         //
-        Assert.notNull(userModel, "token错误,或者已经失效:-1");
+        Assert.notNull(userModel, I18nMessageUtil.get("i18n.token_invalid_or_expired.cb96"));
         File file = FileUtil.file(storageModel.getAbsolutePath());
         // 需要考虑文件名中存在非法字符
         String name = this.convertName(storageModel.getName(), storageModel.getExtName(), file.getName());

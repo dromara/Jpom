@@ -128,7 +128,8 @@ public class MachineDockerSwarmController extends BaseServerController {
             }
         }
         String roleToken;
-        {// 准备加入集群
+        {
+            // 准备加入集群
             JSONObject joinTokens = managerSwarmInfo.getJSONObject("joinTokens");
             Assert.notNull(joinTokens, I18nMessageUtil.get("i18n.cluster_info_incomplete_with_code.246b"));
             roleToken = joinTokens.getString(role);
@@ -218,12 +219,14 @@ public class MachineDockerSwarmController extends BaseServerController {
         //
         IPlugin plugin = PluginFactory.getPlugin(DockerSwarmInfoService.DOCKER_PLUGIN_NAME);
         //
-        { //节点强制退出
+        {
+            //节点强制退出
             Map<String, Object> parameter = machineDockerServer.toParameter(first);
             parameter.put("force", true);
             plugin.execute("leaveSwarm", parameter, JSONObject.class);
         }
-        { // 集群删除节点
+        {
+            // 集群删除节点
             Map<String, Object> map = machineDockerServer.toParameter(dockerModelOptional.get());
             map.put("nodeId", nodeId);
             plugin.execute("removeSwarmNode", map);
