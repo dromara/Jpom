@@ -35,7 +35,7 @@ public @interface TableName {
      *
      * @return 描述
      */
-    String name();
+    String nameKey();
 
     /**
      * 数据库默认

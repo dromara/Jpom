@@ -19,6 +19,7 @@ import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.encrypt.EncryptFactory;
 import org.dromara.jpom.encrypt.Encryptor;
+import org.dromara.jpom.transport.i18n.TransportI18nMessageUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -89,16 +90,16 @@ public class HttpTransportServer implements TransportServer {
                         }
                         httpRequest.form(encryptedMap);
                     } else {
-                        throw new IllegalArgumentException("不支持的类型:" + o.getClass());
+                        throw new IllegalArgumentException(TransportI18nMessageUtil.get("i18n.unsupported_type_with_colon.1050") + o.getClass());
                     }
                 } else if (dataContentType == DataContentType.JSON) {
                     httpRequest.body(encryptor.encrypt(JSONObject.toJSONString(o)), ContentType.JSON.getValue());
                 } else {
-                    throw new IllegalArgumentException("不支持的 contentType");
+                    throw new IllegalArgumentException(TransportI18nMessageUtil.get("i18n.content_type_not_supported.81a9"));
                 }
             } catch (Exception e) {
-                log.error("编码异常", e);
-                throw new TransportAgentException("节点传输信息编码异常:" + e.getMessage());
+                log.error(TransportI18nMessageUtil.get("i18n.encoding_error.b685"), e);
+                throw new TransportAgentException(TransportI18nMessageUtil.get("i18n.node_transfer_info_encoding_exception.12c8") + e.getMessage());
             }
         });
     }
@@ -113,8 +114,8 @@ public class HttpTransportServer implements TransportServer {
             String body = response.body();
             log.debug("Completed {}", body);
             if (status != HttpStatus.HTTP_OK) {
-                log.warn("{} 响应异常 状态码错误：{} {}", nodeInfo.name(), status, body);
-                throw new TransportAgentException(nodeInfo.name() + " 节点响应异常,状态码错误：" + status);
+                log.warn(TransportI18nMessageUtil.get("i18n.response_exception_status_code.cbca"), nodeInfo.name(), status, body);
+                throw new TransportAgentException(nodeInfo.name() + TransportI18nMessageUtil.get("i18n.node_response_error.efc6") + status);
             }
             return body;
         });
@@ -165,8 +166,10 @@ public class HttpTransportServer implements TransportServer {
         urlBuilder.setWithEndTag(false);
         String uriTemplate = urlBuilder.build();
         uriTemplate = StrUtil.removePrefixIgnoreCase(uriTemplate, nodeInfo.scheme());
-        String ws = "https".equalsIgnoreCase(nodeInfo.scheme()) ? "wss" : "ws";
-        uriTemplate = StrUtil.format("{}{}", ws, uriTemplate);
+        String wss = "wss";
+        String ws = "ws";
+        String protocol = "https".equalsIgnoreCase(nodeInfo.scheme()) ? wss : ws;
+        uriTemplate = StrUtil.format("{}{}", protocol, uriTemplate);
         //
         if (log.isDebugEnabled()) {
             log.debug("{}[{}] -> {}", nodeInfo.name(), uriTemplate, urlItem.workspaceId());

@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="node-script-list"
-      :empty-description="$tl('p.noNodeScript')"
+      :empty-description="$t('pages.node.script-list.546ac7e5')"
       :data-source="list"
       size="middle"
       :columns="columns"
@@ -26,33 +26,35 @@
             v-if="!nodeId"
             v-model:value="listQuery.nodeId"
             allow-clear
-            :placeholder="$tl('p.selectNode')"
+            :placeholder="$t('pages.node.script-list.580e6c10')"
             class="search-input-item"
           >
             <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
           </a-select>
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$tl('c.name')"
+            :placeholder="$t('pages.node.script-list.3e34ec28')"
             allow-clear
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%autoExecCron%']"
-            :placeholder="$tl('c.scheduling')"
+            :placeholder="$t('pages.node.script-list.eeeaafc5')"
             class="search-input-item"
             @press-enter="loadData"
           />
-          <a-tooltip :title="$tl('p.quickBack')">
-            <a-button :loading="loading" type="primary" @click="loadData">{{ $tl('p.search') }}</a-button>
+          <a-tooltip :title="$t('pages.node.script-list.554d1b95')">
+            <a-button :loading="loading" type="primary" @click="loadData">{{
+              $t('pages.node.script-list.53c2763c')
+            }}</a-button>
           </a-tooltip>
 
-          <a-button type="primary" @click="handleEdit()">{{ $tl('p.add') }}</a-button>
+          <a-button type="primary" @click="handleEdit()">{{ $t('pages.node.script-list.7d46652a') }}</a-button>
 
           <template v-if="!nodeId">
             <a-dropdown v-if="nodeMap && Object.keys(nodeMap).length">
-              <a-button type="primary" danger> {{ $tl('c.syncCache') }}<DownOutlined /></a-button>
+              <a-button type="primary" danger> {{ $t('pages.node.script-list.9a59feaf') }}<DownOutlined /></a-button>
               <template #overlay>
                 <a-menu>
                   <a-menu-item v-for="(nodeName, key) in nodeMap" :key="key" @click="sync(key)">
@@ -63,20 +65,20 @@
             </a-dropdown>
           </template>
           <a-button v-else type="primary" danger @click="sync(nodeId)">
-            <SyncOutlined />{{ $tl('c.syncCache') }}
+            <SyncOutlined />{{ $t('pages.node.script-list.9a59feaf') }}
           </a-button>
         </a-space>
       </template>
       <template #tableHelp>
         <a-tooltip>
           <template #title>
-            <div>{{ $tl('p.nodeScriptTemplateDescription') }}</div>
+            <div>{{ $t('pages.node.script-list.452c8b98') }}</div>
 
             <div>
               <ul>
-                <li>{{ $tl('p.loadEnv') }}</li>
-                <li>{{ $tl('p.commandFilePath') }}</li>
-                <li>{{ $tl('p.addScriptTemplate') }}</li>
+                <li>{{ $t('pages.node.script-list.6bbddfa3') }}</li>
+                <li>{{ $t('pages.node.script-list.e62fd265') }}</li>
+                <li>{{ $t('pages.node.script-list.6c55e5d0') }}</li>
               </ul>
             </div>
           </template>
@@ -97,27 +99,33 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'workspaceId'">
-          <a-tag v-if="text === 'GLOBAL'">{{ $tl('p.global') }}</a-tag>
-          <a-tag v-else>{{ $tl('p.workspace') }}</a-tag>
+          <a-tag v-if="text === 'GLOBAL'">{{ $t('pages.node.script-list.f372618') }}</a-tag>
+          <a-tag v-else>{{ $t('pages.node.script-list.afacc4cb') }}</a-tag>
         </template>
         <template v-else-if="column.dataIndex === 'scriptType'">
-          <a-tooltip v-if="text === 'server-sync'" :title="$tl('p.serverScript')">
+          <a-tooltip v-if="text === 'server-sync'" :title="$t('pages.node.script-list.380d4731')">
             <ClusterOutlined />
           </a-tooltip>
-          <a-tooltip v-else :title="$tl('p.localScript')">
+          <a-tooltip v-else :title="$t('pages.node.script-list.a1f47198')">
             <FileTextOutlined />
           </a-tooltip>
         </template>
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleExec(record)">{{ $tl('c.execute') }}</a-button>
-            <a-button size="small" type="primary" @click="handleLog(record)">{{ $tl('c.log') }}</a-button>
-            <a-button size="small" type="primary" @click="handleTrigger(record)">{{ $tl('c.trigger') }}</a-button>
+            <a-button size="small" type="primary" @click="handleExec(record)">{{
+              $t('pages.node.script-list.d14160b')
+            }}</a-button>
+            <a-button size="small" type="primary" @click="handleLog(record)">{{
+              $t('pages.node.script-list.2823935a')
+            }}</a-button>
+            <a-button size="small" type="primary" @click="handleTrigger(record)">{{
+              $t('pages.node.script-list.e81c0988')
+            }}</a-button>
 
             <a-dropdown>
               <a @click="(e) => e.preventDefault()">
-                {{ $tl('p.more') }}
+                {{ $t('pages.node.script-list.6e071067') }}
                 <DownOutlined />
               </a>
               <template #overlay>
@@ -125,7 +133,11 @@
                   <a-menu-item>
                     <!-- <a-button size="small" :type="`${record.scriptType === 'server-sync' ? '' : 'primary'}`" @click="handleEdit(record)">{{ record.scriptType === "server-sync" ? "查看" : " 编辑" }}</a-button> -->
                     <a-tooltip
-                      :title="`${record.scriptType === 'server-sync' ? $tl('p.serverScriptDelete') : $tl('c.delete')}`"
+                      :title="`${
+                        record.scriptType === 'server-sync'
+                          ? $t('pages.node.script-list.c0594515')
+                          : $t('pages.node.script-list.2f14e7d4')
+                      }`"
                     >
                       <a-button
                         size="small"
@@ -133,13 +145,13 @@
                         type="primary"
                         danger
                         @click="handleDelete(record)"
-                        >{{ $tl('c.delete') }}</a-button
+                        >{{ $t('pages.node.script-list.2f14e7d4') }}</a-button
                       >
                     </a-tooltip>
                   </a-menu-item>
                   <a-menu-item>
                     <a-button size="small" type="primary" danger @click="handleUnbind(record)">{{
-                      $tl('p.unbind')
+                      $t('pages.node.script-list.4c957529')
                     }}</a-button>
                   </a-menu-item>
                 </a-menu>
@@ -195,34 +207,48 @@
       <script-log v-if="drawerLogVisible" :script-id="temp.scriptId" :node-id="temp.nodeId" />
     </a-drawer>
     <!-- 触发器 -->
-    <a-modal v-model:open="triggerVisible" destroy-on-close :title="$tl('c.trigger')" width="50%" :footer="null">
+    <a-modal
+      v-model:open="triggerVisible"
+      destroy-on-close
+      :title="$t('pages.node.script-list.e81c0988')"
+      width="50%"
+      :footer="null"
+    >
       <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
           <template #rightExtra>
-            <a-tooltip :title="$tl('p.resetToken')">
-              <a-button type="primary" size="small" @click="resetTrigger">{{ $tl('p.reset') }}</a-button>
+            <a-tooltip :title="$t('pages.node.script-list.5c0bb1c0')">
+              <a-button type="primary" size="small" @click="resetTrigger">{{
+                $t('pages.node.script-list.da1d2343')
+              }}</a-button>
             </a-tooltip>
           </template>
-          <a-tab-pane key="1" :tab="$tl('c.execute')">
+          <a-tab-pane key="1" :tab="$t('pages.node.script-list.d14160b')">
             <a-space direction="vertical" style="width: 100%">
-              <a-alert :message="$tl('p.tip')" type="warning" show-icon>
+              <a-alert :message="$t('pages.node.script-list.c8dfae81')" type="warning" show-icon>
                 <template #description>
                   <ul>
-                    <li>{{ $tl('p.triggerAddressInfo') }}</li>
-                    <li>{{ $tl('p.resetTriggerAddress') }}</li>
-                    <li>{{ $tl('p.batchTriggerParams') }}</li>
-                    <li>{{ $tl('p.triggerParamEnv') }}</li>
+                    <li>{{ $t('pages.node.script-list.8f9bc485') }}</li>
+                    <li>{{ $t('pages.node.script-list.21ae4cfc') }}</li>
+                    <li>{{ $t('pages.node.script-list.789c025c') }}</li>
+                    <li>{{ $t('pages.node.script-list.3f453ca7') }}</li>
                   </ul>
                 </template>
               </a-alert>
-              <a-alert type="info" :message="`${$tl('p.singleTriggerAddress')}(${$tl('c.copyOnClick')})`">
+              <a-alert
+                type="info"
+                :message="`${$t('pages.node.script-list.2cd9ba62')}(${$t('pages.node.script-list.da836fdd')})`"
+              >
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.triggerUrl }">
                     <a-tag>GET</a-tag> <span>{{ temp.triggerUrl }} </span>
                   </a-typography-paragraph>
                 </template>
               </a-alert>
-              <a-alert type="info" :message="`${$tl('p.batchTriggerAddress')}(${$tl('c.copyOnClick')})`">
+              <a-alert
+                type="info"
+                :message="`${$t('pages.node.script-list.4bd083f4')}(${$t('pages.node.script-list.da836fdd')})`"
+              >
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchTriggerUrl }">
                     <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
@@ -236,7 +262,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import { deleteScript, getScriptListAll, getTriggerUrl, unbindScript, syncScript } from '@/api/node-other'
 
@@ -279,48 +304,48 @@ export default {
           tooltip: true
         },
         {
-          title: this.$tl('c.name'),
+          title: this.$t('pages.node.script-list.3e34ec28'),
           dataIndex: 'name',
           ellipsis: true,
           width: 200
         },
         {
-          title: this.$tl('p.nodeName'),
+          title: this.$t('pages.node.script-list.fa8d810f'),
           dataIndex: 'nodeName',
           ellipsis: true,
           width: 150,
           tooltip: true
         },
         {
-          title: this.$tl('p.workspaceName'),
+          title: this.$t('pages.node.script-list.8d20cb3f'),
           dataIndex: 'workspaceName',
           ellipsis: true,
           width: 150,
           tooltip: true
         },
         {
-          title: this.$tl('p.type'),
+          title: this.$t('pages.node.script-list.698bb532'),
           dataIndex: 'scriptType',
           width: 70,
           align: 'center',
           ellipsis: true
         },
         {
-          title: this.$tl('p.share'),
+          title: this.$t('pages.node.script-list.65860154'),
           dataIndex: 'workspaceId',
           ellipsis: true,
 
           width: '90px'
         },
         {
-          title: this.$tl('c.scheduling'),
+          title: this.$t('pages.node.script-list.eeeaafc5'),
           dataIndex: 'autoExecCron',
           ellipsis: true,
           width: 120,
           tooltip: true
         },
         {
-          title: this.$tl('p.modifyTime'),
+          title: this.$t('pages.node.script-list.a2b40316'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           width: '170px',
@@ -328,7 +353,7 @@ export default {
           customRender: ({ text }) => parseTime(text)
         },
         {
-          title: this.$tl('p.createTime'),
+          title: this.$t('pages.node.script-list.f5b90169'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           width: '170px',
@@ -336,25 +361,25 @@ export default {
           customRender: ({ text }) => parseTime(text)
         },
         {
-          title: this.$tl('p.creator'),
+          title: this.$t('pages.node.script-list.db3c9202'),
           dataIndex: 'createUser',
           ellipsis: true,
           width: '120px'
         },
         {
-          title: this.$tl('p.modifier'),
+          title: this.$t('pages.node.script-list.916db24b'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           width: '120px'
         },
         {
-          title: this.$tl('p.lastOperator'),
+          title: this.$t('pages.node.script-list.358d534a'),
           dataIndex: 'lastRunUser',
           ellipsis: true,
           width: '120px'
         },
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.node.script-list.3bb962bf'),
           dataIndex: 'operation',
           align: 'center',
 
@@ -387,9 +412,6 @@ export default {
     })
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.scriptList.${key}`, ...args)
-    },
     // 加载数据
     loadData(pointerEvent) {
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page
@@ -417,11 +439,11 @@ export default {
 
     handleDelete(record) {
       $confirm({
-        title: this.$tl('p.systemTip'),
+        title: this.$t('pages.node.script-list.e422d0eb'),
         zIndex: 1009,
-        content: this.$tl('p.confirmation'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.node.script-list.41a45994'),
+        okText: this.$t('pages.node.script-list.7da4a591'),
+        cancelText: this.$t('pages.node.script-list.43105e21'),
         onOk: () => {
           return deleteScript({
             nodeId: record.nodeId,
@@ -440,12 +462,12 @@ export default {
     // 执行 Script
     handleExec(record) {
       this.temp = Object.assign({}, record)
-      this.drawerTitle = `${this.$tl('p.console')}(${this.temp.name})`
+      this.drawerTitle = `${this.$t('pages.node.script-list.5139b7d7')}(${this.temp.name})`
       this.drawerConsoleVisible = true
     },
     handleLog(record) {
       this.temp = Object.assign({}, record)
-      this.drawerTitle = `${this.$tl('c.log')}(${this.temp.name})`
+      this.drawerTitle = `${this.$t('pages.node.script-list.2823935a')}(${this.temp.name})`
       this.drawerLogVisible = true
     },
     // // 关闭 console
@@ -494,21 +516,21 @@ export default {
     // 解绑
     handleUnbind(record) {
       const html = `
-      <b style='font-size: 20px;'>${this.$tl('p.unbindConfirmation')}</b>
+      <b style='font-size: 20px;'>${this.$t('pages.node.script-list.45c565a2')}</b>
       <ul style='font-size: 20px;color:red;font-weight: bold;'>
-        <li>${this.$tl('p.unbindNote')}</b></li>
-        <li>${this.$tl('p.unbindUsage')}</li>
-        <li>${this.$tl('p.misoperationWarning')}</li>
+        <li>${this.$t('pages.node.script-list.93d36cc1')}</b></li>
+        <li>${this.$t('pages.node.script-list.260e16bd')}</li>
+        <li>${this.$t('pages.node.script-list.f9775b85')}</li>
       </ul>
       `
       $confirm({
-        title: this.$tl('p.dangerWarning'),
+        title: this.$t('pages.node.script-list.714aeea9'),
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
         okButtonProps: { props: { type: 'danger', size: 'small' } },
         cancelButtonProps: { props: { type: 'primary' } },
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        okText: this.$t('pages.node.script-list.7da4a591'),
+        cancelText: this.$t('pages.node.script-list.43105e21'),
         onOk: () => {
           return unbindScript({
             id: record.id

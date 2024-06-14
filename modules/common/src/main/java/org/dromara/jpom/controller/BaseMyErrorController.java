@@ -11,6 +11,7 @@ package org.dromara.jpom.controller;
 
 import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.springframework.boot.autoconfigure.web.servlet.error.AbstractErrorController;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,7 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * @author bwcx_jzy
@@ -31,7 +33,7 @@ import java.util.Map;
 @Slf4j
 public abstract class BaseMyErrorController extends AbstractErrorController {
 
-    public static final String FILE_MAX_SIZE_MSG = "上传文件太大了,请重新选择一个较小的文件上传吧";
+    public static final Supplier<String> FILE_MAX_SIZE_MSG = () -> I18nMessageUtil.get("i18n.file_too_large.9994");
 
     public BaseMyErrorController(ErrorAttributes errorAttributes) {
         super(errorAttributes);
@@ -49,16 +51,16 @@ public abstract class BaseMyErrorController extends AbstractErrorController {
         Object attribute = request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
         Map<String, Object> body = new HashMap<>(5);
         body.put(JsonMessage.CODE, HttpStatus.INTERNAL_SERVER_ERROR.value());
-        String msg = "啊哦，好像哪里出错了，请稍候再试试吧~";
+        String msg = I18nMessageUtil.get("i18n.general_error_message.728a");
         if (attribute instanceof MaxUploadSizeExceededException) {
             // 上传文件大小异常
-            msg = FILE_MAX_SIZE_MSG;
-            log.error("发生异常：" + statusCode + "  " + requestUri);
+            msg = FILE_MAX_SIZE_MSG.get();
+            log.error(I18nMessageUtil.get("i18n.file_upload_exception.a5f6"), statusCode, requestUri);
         } else if (status == HttpStatus.NOT_FOUND) {
-            msg = "没有找到对应的资源";
+            msg = I18nMessageUtil.get("i18n.no_resource_found.dc22");
             body.put(JsonMessage.DATA, requestUri);
         } else {
-            log.error("发生异常：" + statusCode + "  " + requestUri);
+            log.error(I18nMessageUtil.get("i18n.unexpected_exception_with_details.247d"), statusCode, requestUri);
         }
         body.put(JsonMessage.MSG, msg);
 

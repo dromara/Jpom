@@ -12,6 +12,7 @@ package org.dromara.jpom.build;
 import cn.hutool.core.thread.ExecutorBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.BuildExtConfig;
 import org.springframework.stereotype.Service;
 
@@ -61,7 +62,7 @@ public class BuildExecutorPoolService {
                                 BuildExecuteManage buildExecuteManage = (BuildExecuteManage) r;
                                 buildExecuteManage.rejectedExecution();
                             } else {
-                                log.warn("构建线程池拒绝了未知任务：{}", r.getClass());
+                                log.warn(I18nMessageUtil.get("i18n.build_thread_pool_rejected_task.3bad"), r.getClass());
                             }
                         }
                     });

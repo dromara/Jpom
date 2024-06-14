@@ -15,6 +15,7 @@ import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.script.ScriptExecuteLogModel;
 import org.dromara.jpom.model.script.ScriptModel;
 import org.dromara.jpom.model.user.UserModel;
@@ -51,7 +52,7 @@ public class ServerScriptHandler extends BaseProxyHandler {
         this.logServer = SpringUtil.getBean(ScriptExecuteLogServer.class);
         this.nodeScriptServer = SpringUtil.getBean(ScriptServer.class);
         ScriptModel scriptModel = (ScriptModel) attributes.get("dataItem");
-        this.sendMsg(session, "连接成功：" + scriptModel.getName());
+        this.sendMsg(session, I18nMessageUtil.get("i18n.connection_successful_with_message.5cf2") + scriptModel.getName());
     }
 
     public ServerScriptHandler() {
@@ -78,7 +79,7 @@ public class ServerScriptHandler extends BaseProxyHandler {
                 json.put(Const.SOCKET_MSG_TAG, Const.SOCKET_MSG_TAG);
                 json.put("executeId", executeId);
                 ServerScriptProcessBuilder.addWatcher(scriptModel, executeId, args, session);
-                JsonMessage<String> jsonMessage = new JsonMessage<>(200, "开始执行");
+                JsonMessage<String> jsonMessage = new JsonMessage<>(200, I18nMessageUtil.get("i18n.start_execution.00d7"));
                 JSONObject jsonObject = jsonMessage.toJson();
                 jsonObject.putAll(json);
                 this.sendMsg(session, jsonObject.toString());
@@ -87,7 +88,7 @@ public class ServerScriptHandler extends BaseProxyHandler {
             case stop: {
                 String executeId = json.getString("executeId");
                 if (StrUtil.isEmpty(executeId)) {
-                    SocketSessionUtil.send(session, "没有执行ID");
+                    SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.no_execution_id.68dc"));
                     session.close();
                     return null;
                 }

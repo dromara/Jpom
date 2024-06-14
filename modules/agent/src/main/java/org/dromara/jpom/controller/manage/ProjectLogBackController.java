@@ -17,6 +17,7 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseAgentController;
 import org.dromara.jpom.common.commander.ProjectCommander;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.util.FileUtils;
 import org.springframework.http.MediaType;
@@ -86,35 +87,35 @@ public class ProjectLogBackController extends BaseAgentController {
         try {
             String msg = projectCommander.backLog(pim);
             if (msg.contains("ok")) {
-                return JsonMessage.success("重置成功");
+                return JsonMessage.success(I18nMessageUtil.get("i18n.reset_success.faa3"));
             }
-            return new JsonMessage<>(201, "重置失败：" + msg);
+            return new JsonMessage<>(201, I18nMessageUtil.get("i18n.reset_failed.5281") + msg);
         } catch (Exception e) {
-            log.error("重置日志失败", e);
-            return new JsonMessage<>(500, "重置日志失败");
+            log.error(I18nMessageUtil.get("i18n.reset_log_failure.b3d3"), e);
+            return new JsonMessage<>(500, I18nMessageUtil.get("i18n.reset_log_failure.b3d3"));
         }
     }
 
     @RequestMapping(value = "logBack_delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<String> clear(String name) {
-        Assert.hasText(name, "没有对应到文件");
+        Assert.hasText(name, I18nMessageUtil.get("i18n.no_file_found.7d40"));
         NodeProjectInfoModel pim = getProjectInfoModel();
         File logBack = projectInfoService.resolveLogBack(pim);
         if (logBack.exists() && logBack.isDirectory()) {
             logBack = FileUtil.file(logBack, name);
             if (logBack.exists()) {
                 FileUtil.del(logBack);
-                return JsonMessage.success("删除成功");
+                return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
             }
-            return new JsonMessage<>(500, "没有对应文件");
+            return new JsonMessage<>(500, I18nMessageUtil.get("i18n.no_corresponding_file.97b5"));
         } else {
-            return new JsonMessage<>(500, "没有对应文件夹");
+            return new JsonMessage<>(500, I18nMessageUtil.get("i18n.no_corresponding_folder.621f"));
         }
     }
 
     @RequestMapping(value = "logBack_download", method = RequestMethod.GET)
     public void download(String key, HttpServletResponse response) {
-        Assert.hasText(key, "请选择对应到文件");
+        Assert.hasText(key, I18nMessageUtil.get("i18n.corresponding_file_required.57b3"));
         try {
             NodeProjectInfoModel pim = getProjectInfoModel();
             File logBack = projectInfoService.resolveLogBack(pim);
@@ -122,11 +123,11 @@ public class ProjectLogBackController extends BaseAgentController {
                 logBack = FileUtil.file(logBack, key);
                 ServletUtil.write(response, logBack);
             } else {
-                ServletUtil.write(response, JsonMessage.getString(400, "没有对应文件:" + logBack.getPath()), MediaType.APPLICATION_JSON_VALUE);
+                ServletUtil.write(response, JsonMessage.getString(400, I18nMessageUtil.get("i18n.no_corresponding_file_colon.8970") + logBack.getPath()), MediaType.APPLICATION_JSON_VALUE);
             }
         } catch (Exception e) {
-            log.error("下载文件异常", e);
-            ServletUtil.write(response, JsonMessage.getString(400, "下载失败。请刷新页面后重试", e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
+            log.error(I18nMessageUtil.get("i18n.download_exception.e616"), e);
+            ServletUtil.write(response, JsonMessage.getString(400, I18nMessageUtil.get("i18n.download_failed_retry.c113"), e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
         }
     }
 
@@ -158,7 +159,7 @@ public class ProjectLogBackController extends BaseAgentController {
 
         File file = projectInfoService.resolveAbsoluteLogFile(pim);
         if (!file.exists()) {
-            ServletUtil.write(response, JsonMessage.getString(400, "没有日志文件:" + file.getPath()), MediaType.APPLICATION_JSON_VALUE);
+            ServletUtil.write(response, JsonMessage.getString(400, I18nMessageUtil.get("i18n.log_file_not_found.7f2e") + file.getPath()), MediaType.APPLICATION_JSON_VALUE);
             return;
         }
         ServletUtil.write(response, file);

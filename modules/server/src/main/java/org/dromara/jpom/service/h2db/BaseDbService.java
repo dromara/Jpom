@@ -26,6 +26,7 @@ import cn.hutool.extra.servlet.ServletUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.db.BaseDbCommonService;
 import org.dromara.jpom.db.DbExtConfig;
 import org.dromara.jpom.dialect.DialectUtil;
@@ -113,7 +114,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * @return list
      */
     public List<String> listGroupByName(String sql, String fieldName, Object... params) {
-        Assert.state(this.canGroup || this.canGroupName, "当前数据表不支持分组");
+        Assert.state(this.canGroup || this.canGroupName, I18nMessageUtil.get("i18n.data_table_not_supported_for_grouping.6678"));
         List<Entity> list = super.query(sql, params);
         String unWrapField = DialectUtil.unWrapField(fieldName);
         // 筛选字段
@@ -135,10 +136,10 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * 恢复字段
      */
     public void repairGroupFiled() {
-        Assert.state(this.canGroup, "当前数据表不支持分组");
+        Assert.state(this.canGroup, I18nMessageUtil.get("i18n.data_table_not_supported_for_grouping.6678"));
         String group = DialectUtil.wrapField("group");
         String sql = String.format("update %s set %s =? where %s is null or %s = ''", getTableName(), group, group, group);
-        super.execute(sql, Const.DEFAULT_GROUP_NAME);
+        super.execute(sql, Const.DEFAULT_GROUP_NAME.get());
     }
 
     public int insert(T t) {
@@ -198,7 +199,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
     public int updateById(T info, Consumer<Entity> whereConsumer) {
         // check id
         String id = info.getId();
-        Assert.hasText(id, "不能执行：error");
+        Assert.hasText(id, I18nMessageUtil.get("i18n.cannot_execute_error.4c29"));
         // def modify time
         info.setModifyTimeMillis(ObjectUtil.defaultIfNull(info.getModifyTimeMillis(), SystemClock.now()));
 
@@ -284,7 +285,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      */
     public int delByBean(T info) {
         Entity where = this.dataBeanToEntity(info);
-        Assert.state(!where.isEmpty(), "没有添加任何参数:-2");
+        Assert.state(!where.isEmpty(), I18nMessageUtil.get("i18n.no_parameters_added_with_minus_two.a7cf"));
         return this.del(where);
     }
 
@@ -330,7 +331,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         if (consumer != null) {
             consumer.accept(where);
         }
-        Assert.state(!where.isEmpty(), "没有添加任何参数:-1");
+        Assert.state(!where.isEmpty(), I18nMessageUtil.get("i18n.no_parameters_added_with_minus_one.e47d"));
         return del(where);
     }
 
@@ -656,7 +657,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         return this.listPageDb(where, page, fill);
     }
 
-    protected Order[] defaultOrders() {
+    public Order[] defaultOrders() {
         return DEFAULT_ORDERS;
     }
 
@@ -733,7 +734,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
                 entity.set(timeColumn, "< " + time);
                 int count = super.del(entity);
                 if (count > 0) {
-                    log.debug("{} 清理了 {}条数据", super.getTableName(), count);
+                    log.debug(I18nMessageUtil.get("i18n.cleaned_data.0e9d"), super.getTableName(), count);
                 }
             });
         }
@@ -790,7 +791,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         } catch (java.lang.IllegalStateException illegalStateException) {
             return 0L;
         } catch (Exception e) {
-            log.error("查询数据错误", e);
+            log.error(I18nMessageUtil.get("i18n.query_data_error.45e7"), e);
             return 0L;
         }
         if (pageResult.isEmpty()) {

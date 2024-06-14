@@ -13,6 +13,7 @@ import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
@@ -55,6 +56,6 @@ public abstract class BaseDockerVolumeController extends BaseDockerController {
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("volumeName", volumeName);
         plugin.execute("removeVolume", parameter);
-        return JsonMessage.success("执行成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.execution_succeeded.f56c"));
     }
 }

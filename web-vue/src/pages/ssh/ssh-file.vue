@@ -5,7 +5,7 @@
     <a-layout-sider theme="light" class="sider" width="25%">
       <a-row class="dir-container">
         <a-space>
-          <a-button size="small" type="primary" @click="loadData()">{{ $tl('c.refresh') }}</a-button>
+          <a-button size="small" type="primary" @click="loadData()">{{ $t('pages.ssh.ssh-file.92f6a62e') }}</a-button>
           <a-dropdown>
             <template #overlay>
               <a-menu>
@@ -38,7 +38,7 @@
                 sortMethodList.find((item) => {
                   return item.key === sortMethod.key
                 }).name
-              }}{{ $tl('p.sort') }}
+              }}{{ $t('pages.ssh.ssh-file.b4711039') }}
               <SortAscendingOutlined v-if="sortMethod.asc" />
               <SortDescendingOutlined v-else />
             </a-button>
@@ -72,71 +72,81 @@
           <a-space>
             <a-dropdown :disabled="!tempNode.nextPath">
               <a-button size="small" type="primary" @click="(e) => e.preventDefault()">{{
-                $tl('p.uploadSmallFile')
+                $t('pages.ssh.ssh-file.c1668483')
               }}</a-button>
               <template #overlay>
                 <a-menu>
                   <a-menu-item @click="handleUpload">
-                    <a-space><FileAddOutlined />{{ $tl('c.uploadFile') }}</a-space>
+                    <a-space><FileAddOutlined />{{ $t('pages.ssh.ssh-file.487993f7') }}</a-space>
                   </a-menu-item>
                   <a-menu-item @click="handleUploadZip">
-                    <a-space><FileZipOutlined />{{ $tl('p.uploadZipFile') }}</a-space>
+                    <a-space><FileZipOutlined />{{ $t('pages.ssh.ssh-file.6d1f9442') }}</a-space>
                   </a-menu-item>
                 </a-menu>
               </template>
             </a-dropdown>
             <a-dropdown :disabled="!tempNode.nextPath">
               <a-button size="small" type="primary" @click="(e) => e.preventDefault()">{{
-                $tl('p.createNew')
+                $t('pages.ssh.ssh-file.f9c9dec4')
               }}</a-button>
               <template #overlay>
                 <a-menu>
                   <a-menu-item @click="handleAddFolder">
                     <a-space>
                       <FolderAddOutlined />
-                      <a-space>{{ $tl('p.createNewDirectory') }}</a-space>
+                      <a-space>{{ $t('pages.ssh.ssh-file.592d629a') }}</a-space>
                     </a-space>
                   </a-menu-item>
                   <a-menu-item @click="handleAddFile">
                     <a-space>
                       <FileAddOutlined />
-                      <a-space>{{ $tl('p.createNewBlankFile') }}</a-space>
+                      <a-space>{{ $t('pages.ssh.ssh-file.f0b9072d') }}</a-space>
                     </a-space>
                   </a-menu-item>
                 </a-menu>
               </template>
             </a-dropdown>
             <a-button size="small" :disabled="!tempNode.nextPath" type="primary" @click="loadFileList()">{{
-              $tl('c.refresh')
+              $t('pages.ssh.ssh-file.92f6a62e')
             }}</a-button>
             <a-button size="small" :disabled="!tempNode.nextPath" type="primary" danger @click="handleDeletePath()">{{
-              $tl('c.delete')
+              $t('pages.ssh.ssh-file.2f14e7d4')
             }}</a-button>
             <div>
-              {{ $tl('p.folder') }}
+              {{ $t('pages.ssh.ssh-file.b90a456') }}
               <a-switch
                 v-model:checked="listShowDir"
                 :disabled="!tempNode.nextPath"
-                :checked-children="$tl('p.show')"
-                :un-checked-children="$tl('p.hide')"
+                :checked-children="$t('pages.ssh.ssh-file.d75b3b1a')"
+                :un-checked-children="$t('pages.ssh.ssh-file.41cc2930')"
                 @change="changeListShowDir"
               />
             </div>
-            <span v-if="nowPath">{{ $tl('c.currentDirectory') }}{{ nowPath }}</span>
+            <span v-if="nowPath">{{ $t('pages.ssh.ssh-file.9e5ba275') }}{{ nowPath }}</span>
             <!-- <span v-if="this.nowPath">{{ this.tempNode.parentDir }}</span> -->
           </a-space>
         </template>
 
         <template #bodyCell="{ column, text, record }">
           <template v-if="column.dataIndex === 'name'">
-            <a-tooltip placement="topLeft" :title="` ${$tl('p.name')}${text} 长${$tl('p.name')}${record.longname}`">
+            <a-tooltip
+              placement="topLeft"
+              :title="
+                $t('pages.ssh.ssh-file.f6609058', {
+                  slot1: $t('pages.ssh.ssh-file.bb769c1d'),
+                  text: text,
+                  slot2: $t('pages.ssh.ssh-file.bb769c1d'),
+                  slot3: record.longname
+                })
+              "
+            >
               <a-dropdown :trigger="['contextmenu']">
                 <div>{{ text }}</div>
                 <template #overlay>
                   <a-menu>
                     <a-menu-item key="2">
                       <a-button type="link" @click="handleRenameFile(record)"
-                        ><HighlightOutlined /> {{ $tl('c.rename') }}
+                        ><HighlightOutlined /> {{ $t('pages.ssh.ssh-file.cc9bcf1d') }}
                       </a-button>
                     </a-menu-item>
                   </a-menu>
@@ -149,9 +159,21 @@
           <template v-else-if="column.dataIndex === 'dir'">
             <a-tooltip
               placement="topLeft"
-              :title="`${record.link ? $tl('c.link') : text ? $tl('c.directory') : $tl('c.file')}`"
+              :title="`${
+                record.link
+                  ? $t('pages.ssh.ssh-file.56bb0bdf')
+                  : text
+                  ? $t('pages.ssh.ssh-file.535422c2')
+                  : $t('pages.ssh.ssh-file.ec88a43e')
+              }`"
             >
-              <span>{{ record.link ? $tl('c.link') : text ? $tl('c.directory') : $tl('c.file') }}</span>
+              <span>{{
+                record.link
+                  ? $t('pages.ssh.ssh-file.56bb0bdf')
+                  : text
+                  ? $t('pages.ssh.ssh-file.535422c2')
+                  : $t('pages.ssh.ssh-file.ec88a43e')
+              }}</span>
             </a-tooltip>
           </template>
           <template v-else-if="column.dataIndex === 'size'">
@@ -166,21 +188,21 @@
           </template>
           <template v-else-if="column.dataIndex === 'operation'">
             <a-space>
-              <a-tooltip :title="$tl('p.needToConfigureAllowedFileSuffixesInSshInfo')">
+              <a-tooltip :title="$t('pages.ssh.ssh-file.81fcf2df')">
                 <a-button size="small" type="primary" :disabled="!record.textFileEdit" @click="handleEdit(record)">{{
-                  $tl('p.edit')
+                  $t('pages.ssh.ssh-file.64603c01')
                 }}</a-button>
               </a-tooltip>
-              <a-tooltip :title="$tl('c.modifyFilePermission')">
+              <a-tooltip :title="$t('pages.ssh.ssh-file.b25715a5')">
                 <a-button size="small" type="primary" @click="handleFilePermission(record)">{{
-                  $tl('c.permission')
+                  $t('pages.ssh.ssh-file.f330269a')
                 }}</a-button>
               </a-tooltip>
               <a-button size="small" type="primary" :disabled="record.dir" @click="handleDownload(record)">{{
-                $tl('p.download')
+                $t('pages.ssh.ssh-file.42c8e9c6')
               }}</a-button>
               <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-                $tl('c.delete')
+                $t('pages.ssh.ssh-file.2f14e7d4')
               }}</a-button>
             </a-space>
           </template>
@@ -191,7 +213,7 @@
         v-model:open="uploadFileVisible"
         destroy-on-close
         width="300px"
-        :title="$tl('c.uploadFile')"
+        :title="$t('pages.ssh.ssh-file.487993f7')"
         :confirm-loading="confirmLoading"
         :footer="null"
         :mask-closable="true"
@@ -206,8 +228,8 @@
         >
           <a-button>
             <UploadOutlined />
-            {{ $tl('p.selectFile') }}
-            {{ uploadFileZip ? $tl('p.zipPackage') : '' }}
+            {{ $t('pages.ssh.ssh-file.51eeb245') }}
+            {{ uploadFileZip ? $t('pages.ssh.ssh-file.ba37d103') : '' }}
           </a-button>
         </a-upload>
         <br />
@@ -216,31 +238,29 @@
           :disabled="uploadFileList.length === 0"
           :loading="confirmLoading"
           @click="startUpload"
-          >{{ $tl('p.startUpload') }}</a-button
+          >{{ $t('pages.ssh.ssh-file.c07b9648') }}</a-button
         >
       </a-modal>
       <!--  新增文件 目录    -->
       <a-modal
         v-model:open="addFileFolderVisible"
         width="300px"
-        :title="temp.addFileOrFolderType === 1 ? $tl('p.addNewDirectory') : $tl('p.createNewFile')"
+        :title="temp.addFileOrFolderType === 1 ? $t('pages.ssh.ssh-file.f4dc8e4b') : $t('pages.ssh.ssh-file.8cccdefa')"
         :footer="null"
         :mask-closable="true"
       >
         <a-space direction="vertical" style="width: 100%">
-          <span v-if="nowPath">{{ $tl('c.currentDirectory') }}{{ nowPath }}</span>
+          <span v-if="nowPath">{{ $t('pages.ssh.ssh-file.9e5ba275') }}{{ nowPath }}</span>
           <!-- <a-tag v-if="">目录创建成功后需要手动刷新右边树才能显示出来哟</a-tag> -->
-          <a-tooltip
-            :title="temp.addFileOrFolderType === 1 ? $tl('p.directoryNeedsToBeManuallyRefreshedAfterCreation') : ''"
-          >
-            <a-input v-model:value="temp.fileFolderName" :placeholder="$tl('p.enterFileOrFolderName')" />
+          <a-tooltip :title="temp.addFileOrFolderType === 1 ? $t('pages.ssh.ssh-file.3af90221') : ''">
+            <a-input v-model:value="temp.fileFolderName" :placeholder="$t('pages.ssh.ssh-file.396ae8d8')" />
           </a-tooltip>
           <a-row type="flex" justify="center">
             <a-button
               type="primary"
               :disabled="!temp.fileFolderName || temp.fileFolderName.length === 0"
               @click="startAddFileFolder"
-              >{{ $tl('c.confirm') }}</a-button
+              >{{ $t('pages.ssh.ssh-file.7da4a591') }}</a-button
             >
           </a-row>
         </a-space>
@@ -251,8 +271,8 @@
         destroy-on-close
         :confirm-loading="confirmLoading"
         width="80vw"
-        :title="$tl('p.editFile')"
-        :cancel-text="$tl('p.close')"
+        :title="$t('pages.ssh.ssh-file.96422c59')"
+        :cancel-text="$t('pages.ssh.ssh-file.99811dca')"
         :mask-closable="true"
         @ok="updateFileData"
       >
@@ -275,12 +295,12 @@
         v-model:open="renameFileFolderVisible"
         destroy-on-close
         width="300px"
-        :title="`${$tl('c.rename')}`"
+        :title="`${$t('pages.ssh.ssh-file.cc9bcf1d')}`"
         :footer="null"
         :mask-closable="true"
       >
         <a-space direction="vertical" style="width: 100%">
-          <a-input v-model:value="temp.fileFolderName" :placeholder="$tl('p.enterNewName')" />
+          <a-input v-model:value="temp.fileFolderName" :placeholder="$t('pages.ssh.ssh-file.1f96fe33')" />
 
           <a-row v-if="temp.fileFolderName" type="flex" justify="center">
             <a-button
@@ -288,7 +308,7 @@
               type="primary"
               :disabled="temp.fileFolderName.length === 0 || temp.fileFolderName === temp.oldFileFolderName"
               @click="renameFileFolder"
-              >{{ $tl('c.confirm') }}</a-button
+              >{{ $t('pages.ssh.ssh-file.7da4a591') }}</a-button
             >
           </a-row>
         </a-space>
@@ -299,27 +319,27 @@
         v-model:open="editFilePermissionVisible"
         destroy-on-close
         width="400px"
-        :title="`${$tl('c.modifyFilePermission')}`"
+        :title="`${$t('pages.ssh.ssh-file.b25715a5')}`"
         :footer="null"
         :mask-closable="true"
       >
         <a-row>
           <a-col :span="6"
-            ><span class="title">{{ $tl('c.permission') }}</span></a-col
+            ><span class="title">{{ $t('pages.ssh.ssh-file.f330269a') }}</span></a-col
           >
           <a-col :span="6"
-            ><span class="title">{{ $tl('p.owner') }}</span></a-col
+            ><span class="title">{{ $t('pages.ssh.ssh-file.45e07a72') }}</span></a-col
           >
           <a-col :span="6"
-            ><span class="title">{{ $tl('p.group') }}</span></a-col
+            ><span class="title">{{ $t('pages.ssh.ssh-file.e740d8cb') }}</span></a-col
           >
           <a-col :span="6"
-            ><span class="title">{{ $tl('p.others') }}</span></a-col
+            ><span class="title">{{ $t('pages.ssh.ssh-file.c78b1a6d') }}</span></a-col
           >
         </a-row>
         <a-row>
           <a-col :span="6">
-            <span>{{ $tl('p.read') }}</span>
+            <span>{{ $t('pages.ssh.ssh-file.7d02a37c') }}</span>
           </a-col>
           <a-col :span="6">
             <a-checkbox v-model:checked="permissions.owner.read" />
@@ -333,7 +353,7 @@
         </a-row>
         <a-row>
           <a-col :span="6">
-            <span>{{ $tl('p.write') }}</span>
+            <span>{{ $t('pages.ssh.ssh-file.f7ebe651') }}</span>
           </a-col>
           <a-col :span="6">
             <a-checkbox v-model:checked="permissions.owner.write" />
@@ -347,7 +367,7 @@
         </a-row>
         <a-row>
           <a-col :span="6">
-            <span>{{ $tl('p.execute') }}</span>
+            <span>{{ $t('pages.ssh.ssh-file.985968bf') }}</span>
           </a-col>
           <a-col :span="6">
             <a-checkbox v-model:checked="permissions.owner.execute" />
@@ -360,7 +380,7 @@
           </a-col>
         </a-row>
         <a-row type="flex" style="margin-top: 20px">
-          <a-button type="primary" @click="updateFilePermissions">{{ $tl('p.confirmModification') }}</a-button>
+          <a-button type="primary" @click="updateFilePermissions">{{ $t('pages.ssh.ssh-file.11a03875') }}</a-button>
         </a-row>
         <!-- <a-row>
             <a-alert style="margin-top: 20px" :message="permissionTips" type="success" />
@@ -369,7 +389,6 @@
     </a-layout-content>
   </a-layout>
 </template>
-
 <script>
 import {
   deleteFile,
@@ -425,7 +444,7 @@ export default {
       },
       columns: [
         {
-          title: '文件名称',
+          title: this.$t('pages.ssh.ssh-file.48d3b5c4'),
           dataIndex: 'name',
           width: 200,
           ellipsis: true,
@@ -433,13 +452,13 @@ export default {
           sorter: (a, b) => (a.name || '').localeCompare(b.name || '')
         },
         {
-          title: this.$tl('p.fileType'),
+          title: this.$t('pages.ssh.ssh-file.741604c2'),
           dataIndex: 'dir',
           width: '100px',
           ellipsis: true
         },
         {
-          title: this.$tl('p.fileSize'),
+          title: this.$t('pages.ssh.ssh-file.f087781'),
           dataIndex: 'size',
           width: 120,
           ellipsis: true,
@@ -447,14 +466,14 @@ export default {
           sorter: (a, b) => Number(a.size) - new Number(b.size)
         },
         {
-          title: this.$tl('c.permission'),
+          title: this.$t('pages.ssh.ssh-file.f330269a'),
           dataIndex: 'permissions',
           width: 120,
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$tl('c.modifyTime'),
+          title: this.$t('pages.ssh.ssh-file.d9323c1a'),
           dataIndex: 'modifyTime',
           width: '170px',
           ellipsis: true,
@@ -462,7 +481,7 @@ export default {
           sorter: (a, b) => Number(a.modifyTime) - new Number(b.modifyTime)
         },
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.ssh.ssh-file.3bb962bf'),
           dataIndex: 'operation',
           align: 'center',
           fixed: 'right',
@@ -470,6 +489,7 @@ export default {
           width: '220px'
         }
       ],
+
       editFileVisible: false,
       addFileFolderVisible: false,
       editFilePermissionVisible: false,
@@ -481,14 +501,15 @@ export default {
       // permissionTips: "",
       sortMethodList: [
         {
-          name: this.$tl('p.fileName'),
+          name: this.$t('pages.ssh.ssh-file.a6eb2ded'),
           key: 'name'
         },
         {
-          name: this.$tl('c.modifyTime'),
+          name: this.$t('pages.ssh.ssh-file.d9323c1a'),
           key: 'modifyTime'
         }
       ],
+
       sortMethod: {
         key: 'name',
         asc: true
@@ -527,9 +548,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.ssh.sshFile.${key}`, ...args)
-    },
     changeSort(key, asc) {
       this.sortMethod = { key: key, asc: asc }
       localStorage.setItem('ssh-list-sort', JSON.stringify(this.sortMethod))
@@ -675,7 +693,7 @@ export default {
     loadFileList() {
       if (Object.keys(this.tempNode).length === 0) {
         $notification.warn({
-          message: this.$tl('c.pleaseSelectANode')
+          message: this.$t('pages.ssh.ssh-file.c4732955')
         })
         return false
       }
@@ -715,7 +733,7 @@ export default {
     handleUpload() {
       if (Object.keys(this.tempNode).length === 0) {
         $notification.error({
-          message: this.$tl('c.pleaseSelectANode')
+          message: this.$t('pages.ssh.ssh-file.c4732955')
         })
         return
       }
@@ -867,8 +885,7 @@ export default {
     renderFilePermissionsTips() {
       //const permissionsValue = calcFilePermissionValue(this.permissions);
       //this.permissionTips = `cd ${this.temp.nextPath} && chmod ${permissionsValue} ${this.temp.name}`;
-    },
-    // 确认修改文件权限
+    }, // 确认修改文件权限
     updateFilePermissions() {
       // 请求参数
       const params = {
@@ -904,11 +921,11 @@ export default {
     // 删除文件夹
     handleDeletePath() {
       $confirm({
-        title: this.$tl('c.systemPrompt'),
+        title: this.$t('pages.ssh.ssh-file.a8fe4c17'),
         zIndex: 1009,
-        content: this.$tl('p.areYouSureToDeleteTheCurrentFolder'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.ssh.ssh-file.52580f9b'),
+        okText: this.$t('pages.ssh.ssh-file.7da4a591'),
+        cancelText: this.$t('pages.ssh.ssh-file.43105e21'),
         onOk: async () => {
           return deleteFile(this.baseUrl, {
             id: this.reqDataId,
@@ -940,11 +957,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$tl('c.systemPrompt'),
+        title: this.$t('pages.ssh.ssh-file.a8fe4c17'),
         zIndex: 1009,
-        content: this.$tl('p.areYouSureToDeleteTheFile'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.ssh.ssh-file.f2275641'),
+        okText: this.$t('pages.ssh.ssh-file.7da4a591'),
+        cancelText: this.$t('pages.ssh.ssh-file.43105e21'),
         onOk: () => {
           return deleteFile(this.baseUrl, {
             id: this.reqDataId,
@@ -998,7 +1015,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .ssh-file-layout {
   padding: 0;

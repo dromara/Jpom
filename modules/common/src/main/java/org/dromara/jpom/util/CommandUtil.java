@@ -19,6 +19,7 @@ import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.system.ExtConfigBean;
 
 import java.io.File;
@@ -72,7 +73,7 @@ public class CommandUtil {
             COMMAND.add("cmd");
             COMMAND.add("/c");
         } else {
-            log.error("不支持的系统类型：{}", osInfo.getName());
+            log.error(I18nMessageUtil.get("i18n.unsupported_system_type_with_placeholder.d5cc"), osInfo.getName());
         }
         //
         if (osInfo.isWindows()) {
@@ -177,10 +178,10 @@ public class CommandUtil {
             result = exec(cmd, file, map);
         } catch (Exception e) {
             if (ExceptionUtil.isCausedBy(e, InterruptedException.class)) {
-                log.warn("执行被中断：{}", command);
-                result += "执行被中断";
+                log.warn(I18nMessageUtil.get("i18n.execution_interrupted_message.2597"), command);
+                result += I18nMessageUtil.get("i18n.execution_interrupted.1bb6");
             } else {
-                log.error("执行命令异常", e);
+                log.error(I18nMessageUtil.get("i18n.command_execution_exception.4ccd"), e);
                 result += e.getMessage();
             }
         }
@@ -467,7 +468,7 @@ public class CommandUtil {
                     process.waitFor(500, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException ignored) {
                 }
-                log.info("等待关闭[Process]进程：{}", handle);
+                log.info(I18nMessageUtil.get("i18n.waiting_to_close_process.3634"), handle);
             } else {
                 break;
             }

@@ -13,6 +13,7 @@ import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
@@ -65,6 +66,6 @@ public abstract class BaseDockerSwarmInfoController extends BaseDockerController
         map.put("availability", availability);
         map.put("role", role);
         plugin.execute("updateSwarmNode", map);
-        return new JsonMessage<>(200, "修改成功");
+        return new JsonMessage<>(200, I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 }

@@ -1,7 +1,6 @@
 <template>
   <terminal2 :url="socketUrl" />
 </template>
-
 <script>
 import { mapState } from 'pinia'
 import { useUserStore } from '@/stores/user'
@@ -34,16 +33,14 @@ export default {
     socketUrl() {
       return getWebSocketUrl(
         '/socket/ssh',
-        `userId=${this.getLongTermToken()}&id=${this.sshId}&machineSshId=${this.machineSshId}&nodeId=system&type=ssh&workspaceId=${this.getWorkspaceId()}`
+        `userId=${this.getLongTermToken()}&id=${this.sshId}&machineSshId=${
+          this.machineSshId
+        }&nodeId=system&type=ssh&workspaceId=${this.getWorkspaceId()}`
       )
     }
   },
   mounted() {},
   beforeUnmount() {},
-  methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.ssh.terminal.${key}`, ...args)
-    }
-  }
+  methods: {}
 }
 </script>

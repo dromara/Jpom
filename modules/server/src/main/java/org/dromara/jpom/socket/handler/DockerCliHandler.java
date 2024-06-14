@@ -20,6 +20,7 @@ import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONValidator;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.model.docker.DockerInfoModel;
@@ -73,8 +74,8 @@ public class DockerCliHandler extends BaseTerminalHandler {
             handlerItem.startRead();
         } catch (Exception e) {
             // 输出超时日志 @author jzy
-            log.error("docker 控制台连接超时", e);
-            sendBinary(session, "docker 控制台连接超时");
+            log.error(I18nMessageUtil.get("i18n.docker_console_connection_timeout.b2c7"), e);
+            sendBinary(session, I18nMessageUtil.get("i18n.docker_console_connection_timeout.b2c7"));
             this.destroy(session);
             return;
         }
@@ -87,7 +88,7 @@ public class DockerCliHandler extends BaseTerminalHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         HandlerItem handlerItem = HANDLER_ITEM_CONCURRENT_HASH_MAP.get(session.getId());
         if (handlerItem == null) {
-            sendBinary(session, "已经离线啦");
+            sendBinary(session, I18nMessageUtil.get("i18n.already_offline.d3b5"));
             IoUtil.close(session);
             return;
         }
@@ -110,7 +111,7 @@ public class DockerCliHandler extends BaseTerminalHandler {
             handlerItem.sendCommand(payload);
         } catch (Exception e) {
             sendBinary(session, "Failure:" + e.getMessage());
-            log.error("执行命令异常", e);
+            log.error(I18nMessageUtil.get("i18n.command_execution_exception.4ccd"), e);
         }
     }
 
@@ -158,8 +159,8 @@ public class DockerCliHandler extends BaseTerminalHandler {
             try {
                 plugin.execute("resizeExec", map);
             } catch (Exception e) {
-                log.error("执行容器命令异常", e);
-                sendBinary(session, "执行异常:" + e.getMessage());
+                log.error(I18nMessageUtil.get("i18n.container_command_execution_exception.a14a"), e);
+                sendBinary(session, I18nMessageUtil.get("i18n.execution_exception_message.ef79") + e.getMessage());
             }
         }
 
@@ -192,10 +193,10 @@ public class DockerCliHandler extends BaseTerminalHandler {
             try {
                 plugin.execute("exec", map);
             } catch (Exception e) {
-                log.error("执行容器命令异常", e);
-                sendBinary(session, "执行异常:" + e.getMessage());
+                log.error(I18nMessageUtil.get("i18n.container_command_execution_exception.a14a"), e);
+                sendBinary(session, I18nMessageUtil.get("i18n.execution_exception_message.ef79") + e.getMessage());
             }
-            log.debug("[{}] docker exec 终端进程结束", dockerInfoModel.getName());
+            log.debug(I18nMessageUtil.get("i18n.docker_exec_terminal_process_ended.c734"), dockerInfoModel.getName());
             // 标记自动结束
             this.containerId = null;
         }
@@ -236,9 +237,9 @@ public class DockerCliHandler extends BaseTerminalHandler {
                 //
                 Optional.ofNullable(this.thread).ifPresent(Thread::interrupt);
             } catch (Exception e) {
-                log.error("执行容器命令异常", e);
+                log.error(I18nMessageUtil.get("i18n.container_command_execution_exception.a14a"), e);
             }
-            log.debug("关闭[{}] docker exec 终端：{}", dockerInfoModel.getName(), execId);
+            log.debug(I18nMessageUtil.get("i18n.close_docker_exec_terminal.fec3"), dockerInfoModel.getName(), execId);
             IoUtil.close(this.inputStream);
             IoUtil.close(this.outputStream);
             this.inputStream = null;

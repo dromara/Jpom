@@ -1,7 +1,7 @@
 <template>
   <div>
     <a-tabs v-model:activeKey="tabKey">
-      <a-tab-pane :key="1" :tab="$tl('p.operationLog')">
+      <a-tab-pane :key="1" :tab="$t('pages.layout.user-log.9c06953e')">
         <!-- 数据表格 -->
         <a-table
           size="middle"
@@ -36,7 +36,7 @@
                   }
                 "
                 allow-clear
-                :placeholder="$tl('c.function')"
+                :placeholder="$t('pages.layout.user-log.3ce54760')"
                 class="search-input-item"
               >
                 <a-select-option v-for="item in classFeature" :key="item.value">{{ item.title }}</a-select-option>
@@ -55,7 +55,7 @@
                   }
                 "
                 allow-clear
-                :placeholder="$tl('c.method')"
+                :placeholder="$t('pages.layout.user-log.4b5fa133')"
                 class="search-input-item"
               >
                 <a-select-option v-for="item in methodFeature" :key="item.value">{{ item.title }}</a-select-option>
@@ -69,9 +69,9 @@
                   }
                 "
               />
-              <a-tooltip :title="$tl('c.shortcut')">
+              <a-tooltip :title="$t('pages.layout.user-log.d8b36ec1')">
                 <a-button type="primary" :loading="operateloading" @click="operaterloadData">{{
-                  $tl('c.search')
+                  $t('pages.layout.user-log.a1f640f4')
                 }}</a-button>
               </a-tooltip>
             </a-space>
@@ -97,7 +97,9 @@
             <template v-else-if="column.dataIndex === 'optStatus'">
               <a-tooltip
                 placement="topLeft"
-                :title="`${$tl('p.defaultStatusCode')},${$tl('p.partialStatusCode')},${$tl('p.statusCode0')}`"
+                :title="`${$t('pages.layout.user-log.f8c26fc9')},${$t('pages.layout.user-log.c0820e90')},${$t(
+                  'pages.layout.user-log.819da0e0'
+                )}`"
               >
                 <span>{{ text }}</span>
               </a-tooltip>
@@ -110,7 +112,7 @@
           </template>
         </a-table>
       </a-tab-pane>
-      <a-tab-pane :key="2" :tab="$tl('p.loginLog')">
+      <a-tab-pane :key="2" :tab="$t('pages.layout.user-log.b75360fe')">
         <a-table
           size="middle"
           :data-source="loginlist"
@@ -132,13 +134,13 @@
             <a-space>
               <a-input
                 v-model:value="loginlistQuery['%username%']"
-                :placeholder="$tl('p.username')"
+                :placeholder="$t('pages.layout.user-log.c28c6dc1')"
                 class="search-input-item"
                 @press-enter="loginloadData"
               />
               <a-input
                 v-model:value="loginlistQuery['%ip%']"
-                :placeholder="$tl('p.loginIp')"
+                :placeholder="$t('pages.layout.user-log.11294c8f')"
                 class="search-input-item"
                 @press-enter="loginloadData"
               />
@@ -151,21 +153,29 @@
                   }
                 "
               />
-              <a-tooltip :title="$tl('c.shortcut')">
-                <a-button type="primary" :loading="loginloading" @click="loginloadData">{{ $tl('c.search') }}</a-button>
+              <a-tooltip :title="$t('pages.layout.user-log.d8b36ec1')">
+                <a-button type="primary" :loading="loginloading" @click="loginloadData">{{
+                  $t('pages.layout.user-log.a1f640f4')
+                }}</a-button>
               </a-tooltip>
             </a-space>
           </template>
           <template #bodyCell="{ column, text }">
             <template v-if="column.dataIndex === 'success'">
-              <a-tooltip placement="topLeft" :title="text ? $tl('c.success') : $tl('c.failure')">
-                <a-tag v-if="text" color="green">{{ $tl('c.success') }}</a-tag>
-                <a-tag v-else color="pink">{{ $tl('c.failure') }}</a-tag>
+              <a-tooltip
+                placement="topLeft"
+                :title="text ? $t('pages.layout.user-log.9d77d967') : $t('pages.layout.user-log.d3ec0514')"
+              >
+                <a-tag v-if="text" color="green">{{ $t('pages.layout.user-log.9d77d967') }}</a-tag>
+                <a-tag v-else color="pink">{{ $t('pages.layout.user-log.d3ec0514') }}</a-tag>
               </a-tooltip>
             </template>
             <template v-else-if="column.dataIndex === 'useMfa'">
-              <a-tooltip placement="topLeft" :title="text ? $tl('c.usage') : $tl('c.unused')">
-                <a-tag>{{ text ? $tl('c.usage') : $tl('c.unused') }}</a-tag>
+              <a-tooltip
+                placement="topLeft"
+                :title="text ? $t('pages.layout.user-log.c5d442d') : $t('pages.layout.user-log.812ad3aa')"
+              >
+                <a-tag>{{ text ? $t('pages.layout.user-log.c5d442d') : $t('pages.layout.user-log.812ad3aa') }}</a-tag>
               </a-tooltip>
             </template>
 
@@ -176,8 +186,8 @@
             </template>
 
             <template v-else-if="column.dataIndex === 'operateCode'">
-              <a-tooltip placement="topLeft" :title="operateCode[text] || $tl('c.unknown')">
-                {{ operateCode[text] || $tl('c.unknown') }}
+              <a-tooltip placement="topLeft" :title="operateCode[text] || $t('pages.layout.user-log.5f51a112')">
+                {{ operateCode[text] || $t('pages.layout.user-log.5f51a112') }}
               </a-tooltip>
             </template>
           </template>
@@ -186,7 +196,6 @@
     </a-tabs>
   </div>
 </template>
-
 <script>
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 import { listOperaterLog, listLoginLog } from '@/api/user/user'
@@ -210,26 +219,26 @@ export default {
       classFeatureMap: {},
       operatecolumns: [
         {
-          title: this.$tl('p.operator'),
+          title: this.$t('pages.layout.user-log.ed74cc37'),
           dataIndex: 'username',
           ellipsis: true
         },
         { title: 'IP', dataIndex: 'ip', ellipsis: true, width: '130px' },
         {
-          title: this.$tl('p.node'),
+          title: this.$t('pages.layout.user-log.602a0a5e'),
           dataIndex: 'nodeId',
           width: 120,
           ellipsis: true
         },
         {
-          title: this.$tl('p.dataName'),
+          title: this.$t('pages.layout.user-log.cd2442c1'),
           dataIndex: 'dataName',
           /*width: 240,*/
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$tl('p.workspaceName'),
+          title: this.$t('pages.layout.user-log.8d20cb3f'),
           dataIndex: 'workspaceName',
           /*width: 240,*/
           ellipsis: true,
@@ -237,24 +246,24 @@ export default {
         },
         // { title: "数据 ID", dataIndex: "dataId", /*width: 240,*/ ellipsis: true,},
         {
-          title: this.$tl('c.function'),
+          title: this.$t('pages.layout.user-log.3ce54760'),
           dataIndex: 'classFeature',
           /*width: 240,*/
           ellipsis: true
         },
         {
-          title: this.$tl('c.method'),
+          title: this.$t('pages.layout.user-log.4b5fa133'),
           dataIndex: 'methodFeature',
           /*width: 240,*/
           ellipsis: true
         },
         {
-          title: this.$tl('p.statusCode'),
+          title: this.$t('pages.layout.user-log.2cdc5dc2'),
           dataIndex: 'optStatus',
           width: 90
         },
         {
-          title: this.$tl('p.operationTime'),
+          title: this.$t('pages.layout.user-log.45e88a2c'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text, item }) => {
@@ -263,19 +272,20 @@ export default {
           width: '170px'
         }
       ],
+
       loginloading: false,
       loginlist: [],
       operateCode: operateCodeMap,
       loginlistQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       logincolumns: [
         {
-          title: this.$tl('p.userId'),
+          title: this.$t('pages.layout.user-log.8384e057'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$tl('p.userName'),
+          title: this.$t('pages.layout.user-log.62bec2ff'),
           dataIndex: 'username',
           ellipsis: true,
           tooltip: true
@@ -287,31 +297,31 @@ export default {
           tooltip: true
         },
         {
-          title: this.$tl('p.browser'),
+          title: this.$t('pages.layout.user-log.bd29775b'),
           dataIndex: 'userAgent',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$tl('p.successFlag'),
+          title: this.$t('pages.layout.user-log.b2624f7d'),
           dataIndex: 'success',
           ellipsis: true,
           width: '100px'
         },
         {
-          title: this.$tl('p.mfaUsage'),
+          title: this.$t('pages.layout.user-log.e8d822fc'),
           dataIndex: 'useMfa',
           ellipsis: true,
           width: '130px'
         },
         {
-          title: this.$tl('p.resultDescription'),
+          title: this.$t('pages.layout.user-log.5f2a060b'),
           dataIndex: 'operateCode',
           /*width: 240,*/ ellipsis: true
         },
 
         {
-          title: this.$tl('p.loginTime'),
+          title: this.$t('pages.layout.user-log.dea71d69'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text, item }) => {
@@ -320,6 +330,7 @@ export default {
           width: '170px'
         }
       ],
+
       tabKey: 1
     }
   },
@@ -349,9 +360,6 @@ export default {
     })
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.layout.userLog.${key}`, ...args)
-    },
     CHANGE_PAGE,
     // 加载数据
     operaterloadData(pointerEvent) {

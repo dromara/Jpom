@@ -12,6 +12,7 @@ package org.dromara.jpom.controller.monitor;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.log.MonitorNotifyLog;
 import org.dromara.jpom.permission.ClassFeature;
@@ -51,6 +52,6 @@ public class MonitorLogController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<PageResultDto<MonitorNotifyLog>> listData(HttpServletRequest request) {
         PageResultDto<MonitorNotifyLog> pageResult = dbMonitorNotifyLogService.listPage(request);
-        return JsonMessage.success("获取成功", pageResult);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.get_success.fb55"), pageResult);
     }
 }

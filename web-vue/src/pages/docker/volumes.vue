@@ -13,21 +13,23 @@
       <a-space>
         <a-input
           v-model:value="listQuery['name']"
-          :placeholder="$tl('c.name')"
+          :placeholder="$t('pages.docker.volumes.3e34ec28')"
           class="search-input-item"
           @press-enter="loadData"
         />
 
         <div>
-          {{ $tl('p.suspended') }}
+          {{ $t('pages.docker.volumes.a8ad56bd') }}
           <a-switch
             v-model:checked="listQuery['dangling']"
-            :checked-children="$tl('p.yes')"
-            :un-checked-children="$tl('p.no')"
+            :checked-children="$t('pages.docker.volumes.f5bb2364')"
+            :un-checked-children="$t('pages.docker.volumes.5edb2e8a')"
           />
         </div>
 
-        <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
+        <a-button type="primary" :loading="loading" @click="loadData">{{
+          $t('pages.docker.volumes.53c2763c')
+        }}</a-button>
       </a-space>
     </template>
     <template #bodyCell="{ column, text, record }">
@@ -38,7 +40,7 @@
       </template>
 
       <template v-else-if="column.dataIndex === 'name'">
-        <a-popover v-if="record.labels" :title="$tl('p.volumeLabel')">
+        <a-popover v-if="record.labels" :title="$t('pages.docker.volumes.970023d4')">
           <template #content>
             <p v-for="(value, key) in record.labels" :key="key">{{ key }}<ArrowRightOutlined />{{ value }}</p>
           </template>
@@ -63,7 +65,7 @@
       </template>
       <template v-else-if="column.dataIndex === 'operation'">
         <a-space>
-          <a-tooltip :title="$tl('p.delete')">
+          <a-tooltip :title="$t('pages.docker.volumes.dd20d11c')">
             <a-button size="small" type="link" @click="doAction(record, 'remove')"><DeleteOutlined /></a-button>
           </a-tooltip>
         </a-space>
@@ -71,7 +73,6 @@
     </template>
   </a-table>
 </template>
-
 <script>
 import { renderSize, parseTime } from '@/utils/const'
 import { dockerVolumesList, dockerVolumesRemove } from '@/api/docker-api'
@@ -100,32 +101,32 @@ export default {
       renderSize,
       columns: [
         {
-          title: this.$tl('p.serialNumber'),
+          title: this.$t('pages.docker.volumes.72cebb96'),
           width: 80,
           ellipsis: true,
           align: 'center',
           customRender: ({ index }) => `${index + 1}`
         },
         {
-          title: this.$tl('c.name'),
+          title: this.$t('pages.docker.volumes.3e34ec28'),
           dataIndex: 'name',
           ellipsis: true
         },
         {
-          title: this.$tl('p.mountPoint'),
+          title: this.$t('pages.docker.volumes.337aee59'),
           dataIndex: 'mountpoint',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$tl('p.type'),
+          title: this.$t('pages.docker.volumes.698bb532'),
           dataIndex: 'driver',
           ellipsis: true,
           width: 80,
           tooltip: true
         },
         {
-          title: this.$tl('p.creationTime'),
+          title: this.$t('pages.docker.volumes.f06e8846'),
           dataIndex: 'CreatedAt',
           ellipsis: true,
           width: 180,
@@ -134,15 +135,16 @@ export default {
           defaultSortOrder: 'descend'
         },
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.docker.volumes.3bb962bf'),
           dataIndex: 'operation',
           fixed: 'right',
           width: '80px'
         }
       ],
+
       action: {
         remove: {
-          msg: this.$tl('p.areYouSureToDeleteCurrentVolume'),
+          msg: this.$t('pages.docker.volumes.9e6ac7fa'),
           api: dockerVolumesRemove
         }
       }
@@ -157,9 +159,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.docker.volumes.${key}`, ...args)
-    },
     parseTime,
     // 加载数据
     loadData() {
@@ -179,11 +178,11 @@ export default {
         return
       }
       $confirm({
-        title: this.$tl('p.systemPrompt'),
+        title: this.$t('pages.docker.volumes.b22d55a0'),
         content: action.msg,
         zIndex: 1009,
-        okText: this.$tl('p.confirm'),
-        cancelText: this.$tl('p.cancel'),
+        okText: this.$t('pages.docker.volumes.e8e9db25'),
+        cancelText: this.$t('pages.docker.volumes.b12468e9'),
         onOk: () => {
           return action
             .api(this.urlPrefix, {

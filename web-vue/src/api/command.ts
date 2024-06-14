@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 ///
 /// Copyright (c) 2019 Of Him Code Technology Studio
 /// Jpom is licensed under Mulan PSL v2.
@@ -119,14 +120,14 @@ export function getTriggerUrl(data) {
 }
 
 export const statusMap = {
-  0: '执行中',
-  1: '执行结束',
-  2: '执行错误',
-  3: '会话异常'
+  0: t('api.command.5b123a0d'),
+  1: t('api.command.f979b457'),
+  2: t('api.command.2e68c441'),
+  3: t('api.command.5da3d762')
 }
 
 export const triggerExecTypeMap = {
-  0: '手动',
-  1: '自动',
-  2: '触发器'
+  0: t('api.command.4139f3b5'),
+  1: t('api.command.dc8de4ff'),
+  2: t('api.command.44701ced')
 }

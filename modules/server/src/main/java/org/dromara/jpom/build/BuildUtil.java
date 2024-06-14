@@ -18,6 +18,7 @@ import cn.hutool.extra.compress.CompressUtil;
 import cn.hutool.extra.compress.archiver.Archiver;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.data.RepositoryModel;
 import org.springframework.util.Assert;
@@ -153,11 +154,11 @@ public class BuildUtil {
      * @return 压缩包文件
      */
     private static File isDirPackage(String id, int buildNumberId, File file, boolean tarGz) {
-        Assert.state(file != null && file.exists(), "产物文件不存在");
+        Assert.state(file != null && file.exists(), I18nMessageUtil.get("i18n.product_file_does_not_exist.ee13"));
         if (file.isFile()) {
             return null;
         }
-        Assert.state(!FileUtil.isDirEmpty(file), "文件夹为空,不能打包 #" + buildNumberId);
+        Assert.state(!FileUtil.isDirEmpty(file), I18nMessageUtil.get("i18n.empty_folder_cannot_be_packed.5a75") + buildNumberId);
         String name = FileUtil.getName(file);
         // 如果产物配置 / 时无法获取文件名，采用 result
         name = StrUtil.emptyToDefault(name, "result");
@@ -230,7 +231,7 @@ public class BuildUtil {
             // 写入
             FileUtil.writeUtf8String(repositoryModel.getRsaPrv(), rsaFile);
         }
-        Assert.state(FileUtil.isFile(rsaFile), "仓库密钥文件不存在或者异常,请检查后操作");
+        Assert.state(FileUtil.isFile(rsaFile), I18nMessageUtil.get("i18n.repository_key_file_does_not_exist_or_is_abnormal.1d78"));
         return rsaFile;
     }
 }

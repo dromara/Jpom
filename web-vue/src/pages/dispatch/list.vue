@@ -28,19 +28,19 @@
           <a-input
             v-model:value="listQuery['%id%']"
             class="search-input-item"
-            :placeholder="$tl('p.distributionID')"
+            :placeholder="$t('pages.dispatch.list.c266c17')"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%name%']"
             class="search-input-item"
-            :placeholder="$tl('p.name')"
+            :placeholder="$t('pages.dispatch.list.bb769c1d')"
             @press-enter="loadData"
           />
           <a-select
             v-model:value="listQuery.group"
             allow-clear
-            :placeholder="$tl('p.selectGrouping')"
+            :placeholder="$t('pages.dispatch.list.dc532d0a')"
             class="search-input-item"
             @change="loadData"
           >
@@ -49,25 +49,27 @@
           <a-select
             v-model:value="listQuery.outGivingProject"
             allow-clear
-            :placeholder="$tl('c.distributionType')"
+            :placeholder="$t('pages.dispatch.list.585c23e6')"
             class="search-input-item"
           >
-            <a-select-option :value="1">{{ $tl('c.independent') }}</a-select-option>
-            <a-select-option :value="0">{{ $tl('c.related') }}</a-select-option>
+            <a-select-option :value="1">{{ $t('pages.dispatch.list.f4630780') }}</a-select-option>
+            <a-select-option :value="0">{{ $t('pages.dispatch.list.92207645') }}</a-select-option>
           </a-select>
           <a-select
             v-model:value="listQuery.status"
             allow-clear
-            :placeholder="$tl('p.selectStatus')"
+            :placeholder="$t('pages.dispatch.list.56195645')"
             class="search-input-item"
           >
             <a-select-option v-for="(name, key) in statusMap" :key="key">{{ name }}</a-select-option>
           </a-select>
-          <a-tooltip :title="$tl('p.quickBackToFirstPage')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
+          <a-tooltip :title="$t('pages.dispatch.list.cb5a8131')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{
+              $t('pages.dispatch.list.53c2763c')
+            }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleLink">{{ $tl('p.addRelated') }}</a-button>
-          <a-button type="primary" @click="handleAdd">{{ $tl('p.addDistribution') }}</a-button>
+          <a-button type="primary" @click="handleLink">{{ $t('pages.dispatch.list.d2f8649f') }}</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $t('pages.dispatch.list.fdb4b6ff') }}</a-button>
 
           <!-- <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="silenceLoadData" /> -->
         </a-space>
@@ -75,12 +77,12 @@
       <template #tableHelp>
         <a-tooltip>
           <template #title>
-            <div>{{ $tl('p.nodeDistributionDescription') }}</div>
+            <div>{{ $t('pages.dispatch.list.99b26470') }}</div>
 
             <div>
               <ul>
-                <li>{{ $tl('p.addRelatedProjectDescription') }}</li>
-                <li>{{ $tl('p.createDistributionProjectDescription') }}</li>
+                <li>{{ $t('pages.dispatch.list.2399f601') }}</li>
+                <li>{{ $t('pages.dispatch.list.2b3dba3c') }}</li>
               </ul>
             </div>
           </template>
@@ -118,10 +120,14 @@
 
         <template v-else-if="column.dataIndex === 'status'">
           <a-tooltip placement="topLeft" :title="`${record.statusMsg || ''}`">
-            <a-tag v-if="text === 2" color="green">{{ statusMap[text] || $tl('c.unknown') }}</a-tag>
-            <a-tag v-else-if="text === 1" color="orange">{{ statusMap[text] || $tl('c.unknown') }}</a-tag>
-            <a-tag v-else-if="text === 3 || text === 4" color="red">{{ statusMap[text] || $tl('c.unknown') }}</a-tag>
-            <a-tag v-else>{{ statusMap[text] || $tl('c.unknown') }}</a-tag>
+            <a-tag v-if="text === 2" color="green">{{ statusMap[text] || $t('pages.dispatch.list.5f51a112') }}</a-tag>
+            <a-tag v-else-if="text === 1" color="orange">{{
+              statusMap[text] || $t('pages.dispatch.list.5f51a112')
+            }}</a-tag>
+            <a-tag v-else-if="text === 3 || text === 4" color="red">{{
+              statusMap[text] || $t('pages.dispatch.list.5f51a112')
+            }}</a-tag>
+            <a-tag v-else>{{ statusMap[text] || $t('pages.dispatch.list.5f51a112') }}</a-tag>
           </a-tooltip>
         </template>
 
@@ -129,8 +135,8 @@
           <a-tooltip>
             <a-switch
               size="small"
-              :checked-children="$tl('c.yes')"
-              :un-checked-children="$tl('c.no')"
+              :checked-children="$t('pages.dispatch.list.d2fbce36')"
+              :un-checked-children="$t('pages.dispatch.list.1c77d6fb')"
               disabled
               :checked="text"
           /></a-tooltip>
@@ -159,13 +165,13 @@
         </template>
 
         <template v-else-if="column.dataIndex === 'outGivingProject'">
-          <span v-if="text">{{ $tl('c.independent') }}</span>
-          <span v-else>{{ $tl('c.related') }}</span>
+          <span v-if="text">{{ $t('pages.dispatch.list.f4630780') }}</span>
+          <span v-else>{{ $t('pages.dispatch.list.92207645') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button size="small" type="primary" @click="handleDispatch(record)">
-              {{ $tl('p.distributionFiles') }}
+              {{ $t('pages.dispatch.list.bd2ea0af') }}
             </a-button>
 
             <a-button
@@ -173,15 +179,15 @@
               size="small"
               type="primary"
               @click="handleEditDispatchProject(record)"
-              >{{ $tl('c.edit') }}</a-button
+              >{{ $t('pages.dispatch.list.e1224c34') }}</a-button
             >
             <a-button v-else size="small" type="primary" @click="handleEditDispatch(record)">
-              {{ $tl('c.edit') }}
+              {{ $t('pages.dispatch.list.e1224c34') }}
             </a-button>
 
             <a-dropdown>
               <a @click="(e) => e.preventDefault()">
-                {{ $tl('p.more') }}
+                {{ $t('pages.dispatch.list.6e071067') }}
                 <DownOutlined />
               </a>
               <template #overlay>
@@ -194,22 +200,26 @@
                       :disabled="record.status !== 1"
                       @click="handleCancel(record)"
                     >
-                      {{ $tl('p.cancelDistribution') }}
+                      {{ $t('pages.dispatch.list.9afbd509') }}
                     </a-button>
                   </a-menu-item>
                   <a-menu-item>
                     <a-button type="primary" danger size="small" @click="handleDelete(record, '')">
-                      {{ record.outGivingProject ? $tl('p.delete') : $tl('p.release') }}
+                      {{
+                        record.outGivingProject
+                          ? $t('pages.dispatch.list.dd20d11c')
+                          : $t('pages.dispatch.list.f97d7b7c')
+                      }}
                     </a-button>
                   </a-menu-item>
                   <a-menu-item v-if="record.outGivingProject">
                     <a-button type="primary" danger size="small" @click="handleDelete(record, 'thorough')">
-                      {{ $tl('p.deleteCompletely') }}
+                      {{ $t('pages.dispatch.list.dbe32f01') }}
                     </a-button>
                   </a-menu-item>
                   <a-menu-item>
                     <a-button type="primary" danger size="small" @click="handleUnbind(record)">
-                      {{ $tl('p.unbind') }}
+                      {{ $t('pages.dispatch.list.4c957529') }}
                     </a-button>
                   </a-menu-item>
                 </a-menu>
@@ -225,7 +235,7 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="900px"
-      :title="temp.type === 'edit' ? $tl('p.editRelatedProject') : $tl('p.addRelatedProject')"
+      :title="temp.type === 'edit' ? $t('pages.dispatch.list.b006329f') : $t('pages.dispatch.list.9ef2c865')"
       :mask-closable="false"
       @ok="handleLinkDispatchOk"
       @cancel="clearDispatchList"
@@ -234,8 +244,8 @@
         <a-form-item name="id">
           <template #label>
             <a-tooltip>
-              {{ $tl('c.distributionID') }}
-              <template #title>{{ $tl('c.distributionIDEqualsProjectID') }}</template>
+              {{ $t('pages.dispatch.list.c3c9e67b') }}
+              <template #title>{{ $t('pages.dispatch.list.abda741f') }}</template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
           </template>
@@ -244,13 +254,13 @@
             v-model:value="temp.id"
             :max-length="50"
             :disabled="temp.type === 'edit'"
-            :placeholder="$tl('c.cannotModifyAfterCreation')"
+            :placeholder="$t('pages.dispatch.list.9878fcc3')"
           />
           <template v-else>
             <a-input-search
               v-model:value="temp.id"
               :max-length="50"
-              :placeholder="$tl('c.cannotModifyAfterCreation')"
+              :placeholder="$t('pages.dispatch.list.9878fcc3')"
               @search="
                 () => {
                   temp = { ...temp, id: randomStr(6) }
@@ -259,7 +269,7 @@
             >
               <template #enterButton>
                 <a-button type="primary">
-                  {{ $tl('c.randomlyGenerated') }}
+                  {{ $t('pages.dispatch.list.24a518c3') }}
                 </a-button>
               </template>
             </a-input-search>
@@ -267,20 +277,20 @@
           <!-- <a-input v-model="temp.id" :maxLength="50" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" /> -->
         </a-form-item>
 
-        <a-form-item :label="$tl('c.distributionName')" name="name">
+        <a-form-item :label="$t('pages.dispatch.list.8aa10ac9')" name="name">
           <a-row>
             <a-col :span="10">
-              <a-input v-model:value="temp.name" :max-length="50" :placeholder="$tl('c.distributionName')" />
+              <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('pages.dispatch.list.8aa10ac9')" />
             </a-col>
-            <a-col :span="4" style="text-align: right">{{ $tl('c.groupingName') }}</a-col>
+            <a-col :span="4" style="text-align: right">{{ $t('pages.dispatch.list.7c047057') }}</a-col>
             <a-col :span="10">
               <a-form-item-rest>
                 <custom-select
                   v-model:value="temp.group"
                   :max-length="50"
                   :data="groupList"
-                  :input-placeholder="$tl('c.addNewGrouping')"
-                  :select-placeholder="$tl('c.selectGrouping')"
+                  :input-placeholder="$t('pages.dispatch.list.ded4b4cd')"
+                  :select-placeholder="$t('pages.dispatch.list.13bca766')"
                 >
                 </custom-select>
               </a-form-item-rest>
@@ -288,12 +298,12 @@
           </a-row>
         </a-form-item>
 
-        <a-form-item :label="$tl('c.distributionNode')" required>
+        <a-form-item :label="$t('pages.dispatch.list.51fd9c8a')" required>
           <a-list
             item-layout="horizontal"
             :data-source="dispatchList"
             :locale="{
-              emptyText: $tl('p.noData')
+              emptyText: $t('pages.dispatch.list.53e901cf')
             }"
             :row-key="
               (item) => {
@@ -304,10 +314,10 @@
             <template #renderItem="{ item, index }">
               <a-list-item>
                 <a-space>
-                  <div>{{ $tl('p.node') }}</div>
+                  <div>{{ $t('pages.dispatch.list.602a0a5e') }}</div>
                   <a-select
-                    :placeholder="$tl('p.selectNode')"
-                    :not-found-content="$tl('p.noNodeInfo')"
+                    :placeholder="$t('pages.dispatch.list.580e6c10')"
+                    :not-found-content="$t('pages.dispatch.list.e20812b')"
                     style="width: 140px"
                     :value="item.nodeId ? item.nodeId : undefined"
                     :disabled="
@@ -323,12 +333,12 @@
                       {{ nodeNameMap[nodeItemList.id] }}
                     </a-select-option>
                   </a-select>
-                  <span>{{ $tl('p.project') }} </span>
+                  <span>{{ $t('pages.dispatch.list.4889a88f') }} </span>
                   <a-select
                     style="width: 300px"
                     :placeholder="item.placeholder"
                     :default-value="item.projectId ? item.projectId : undefined"
-                    :not-found-content="$tl('c.noProjectInThisNode')"
+                    :not-found-content="$t('pages.dispatch.list.e6af4e4c')"
                     :disabled="dispatchList[index].disabled"
                     @change="(projectId) => handleProjectChange(projectId, index)"
                   >
@@ -347,9 +357,9 @@
                       "
                     >
                       <a-tooltip
-                        :title="`${project.outGivingProject ? $tl('c.independentDistribution') : ''} ${project.name}`"
+                        :title="`${project.outGivingProject ? $t('pages.dispatch.list.44fbbff') : ''} ${project.name}`"
                       >
-                        {{ project.outGivingProject ? $tl('c.independentDistribution') : '' }}
+                        {{ project.outGivingProject ? $t('pages.dispatch.list.44fbbff') : '' }}
                         {{ project.name }}
                       </a-tooltip>
                     </a-select-option>
@@ -361,22 +371,24 @@
               </a-list-item>
             </template>
           </a-list>
-          <a-button type="primary" size="small" @click="addDispachList">{{ $tl('p.add') }}</a-button>
+          <a-button type="primary" size="small" @click="addDispachList">{{
+            $t('pages.dispatch.list.7d46652a')
+          }}</a-button>
         </a-form-item>
-        <a-form-item :label="$tl('c.distributionOperationAfter')" name="afterOpt">
-          <a-select v-model:value="temp.afterOpt" :placeholder="$tl('c.selectOperationAfterPublish')">
+        <a-form-item :label="$t('pages.dispatch.list.50b92ecb')" name="afterOpt">
+          <a-select v-model:value="temp.afterOpt" :placeholder="$t('pages.dispatch.list.9a15b54b')">
             <a-select-option v-for="item in afterOptList" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
         </a-form-item>
         <a-form-item v-if="temp.afterOpt === 2 || temp.afterOpt === 3" name="intervalTime">
           <template #label>
             <a-tooltip>
-              {{ $tl('c.intervalTime') }}
+              {{ $t('pages.dispatch.list.26d543f6') }}
               <template #title>
-                {{ $tl('c.ensureProjectRestart') }}, {{ $tl('c.waitPreviousProjectStart') }},{{
-                  $tl('c.configureBasedOnProjectStartTime')
+                {{ $t('pages.dispatch.list.2c7f38ee') }}, {{ $t('pages.dispatch.list.e68260b4') }},{{
+                  $t('pages.dispatch.list.5d1f2d8e')
                 }}
-                <li>{{ $tl('c.suggestedIntervalTime') }}</li>
+                <li>{{ $t('pages.dispatch.list.bd011884') }}</li>
               </template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
@@ -384,19 +396,19 @@
           <a-input-number
             v-model:value="temp.intervalTime"
             :min="0"
-            :placeholder="$tl('c.distributionIntervalTimeEffect')"
+            :placeholder="$t('pages.dispatch.list.c7ed6684')"
             style="width: 100%"
           />
         </a-form-item>
-        <a-form-item name="secondaryDirectory" :label="$tl('c.secondaryDirectory')">
-          <a-input v-model:value="temp.secondaryDirectory" :placeholder="$tl('c.publishToRootIfNotFilled')" />
+        <a-form-item name="secondaryDirectory" :label="$t('pages.dispatch.list.2b72d6ca')">
+          <a-input v-model:value="temp.secondaryDirectory" :placeholder="$t('pages.dispatch.list.3a664c1f')" />
         </a-form-item>
         <a-form-item name="clearOld">
           <template #label>
             <a-tooltip>
-              {{ $tl('c.clearPublish') }}
+              {{ $t('pages.dispatch.list.157bc8ea') }}
               <template #title>
-                {{ $tl('c.clearPublishDescription') }}
+                {{ $t('pages.dispatch.list.32718c0') }}
               </template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
@@ -405,24 +417,24 @@
             <a-col :span="4">
               <a-switch
                 v-model:checked="temp.clearOld"
-                :checked-children="$tl('c.yes')"
-                :un-checked-children="$tl('c.no')"
+                :checked-children="$t('pages.dispatch.list.d2fbce36')"
+                :un-checked-children="$t('pages.dispatch.list.1c77d6fb')"
               />
             </a-col>
 
             <a-col :span="4" style="text-align: right">
               <a-tooltip v-if="temp.type !== 'edit'">
-                <template #title> {{ $tl('c.publishStopBefore') }} </template>
+                <template #title> {{ $t('pages.dispatch.list.9f9df513') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
-              {{ $tl('c.publishStopBeforeColon') }}
+              {{ $t('pages.dispatch.list.267c8d13') }}
             </a-col>
             <a-col :span="4">
               <a-form-item-rest>
                 <a-switch
                   v-model:checked="temp.uploadCloseFirst"
-                  :checked-children="$tl('c.yes')"
-                  :un-checked-children="$tl('c.no')"
+                  :checked-children="$t('pages.dispatch.list.d2fbce36')"
+                  :un-checked-children="$t('pages.dispatch.list.1c77d6fb')"
               /></a-form-item-rest>
             </a-col>
           </a-row>
@@ -432,17 +444,17 @@
             <a-tooltip>
               <template #title>
                 <ul>
-                  <li>{{ $tl('c.distributionRequestAddress') }}</li>
-                  <li>{{ $tl('c.parametersForDistribution') }}</li>
-                  <li>status {{ $tl('c.statusValues') }}:{{ $tl('c.distributionStatuses') }}</li>
-                  <li>{{ $tl('c.asynchronousRequest') }}</li>
+                  <li>{{ $t('pages.dispatch.list.1af01061') }}</li>
+                  <li>{{ $t('pages.dispatch.list.d20429d4') }}</li>
+                  <li>status {{ $t('pages.dispatch.list.5323a6a3') }}:{{ $t('pages.dispatch.list.be2dccc9') }}</li>
+                  <li>{{ $t('pages.dispatch.list.663c4985') }}</li>
                 </ul>
               </template>
               WebHooks
               <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
-          <a-input v-model:value="temp.webhook" :placeholder="$tl('c.distributionProcessRequest')" />
+          <a-input v-model:value="temp.webhook" :placeholder="$t('pages.dispatch.list.ad9cad23')" />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -453,11 +465,11 @@
       :confirm-loading="confirmLoading"
       :z-index="900"
       width="60vw"
-      :title="temp.type === 'edit' ? $tl('p.editDistributionProject') : $tl('p.createDistributionProject')"
+      :title="temp.type === 'edit' ? $t('pages.dispatch.list.7d755f9b') : $t('pages.dispatch.list.898758b9')"
       :mask-closable="false"
       @ok="handleEditDispatchOk"
     >
-      <a-spin :tip="$tl('p.loadingData')" :spinning="editDispatchLoading">
+      <a-spin :tip="$t('pages.dispatch.list.a5c1d44')" :spinning="editDispatchLoading">
         <a-form
           ref="editDispatchForm"
           :rules="rules"
@@ -467,18 +479,18 @@
         >
           <a-alert
             v-if="!nodeList || !nodeList.length"
-            :message="$tl('p.remind')"
+            :message="$t('pages.dispatch.list.7e2364d6')"
             type="warning"
             show-icon
             style="margin-bottom: 10px"
           >
-            <template #description>{{ $tl('p.noLogicalNode') }}</template>
+            <template #description>{{ $t('pages.dispatch.list.5386da00') }}</template>
           </a-alert>
           <a-form-item name="id">
             <template #label>
               <a-tooltip>
-                {{ $tl('c.distributionID') }}
-                <template #title>{{ $tl('c.distributionIDEqualsProjectID') }}</template>
+                {{ $t('pages.dispatch.list.c3c9e67b') }}
+                <template #title>{{ $t('pages.dispatch.list.abda741f') }}</template>
                 <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
               </a-tooltip>
             </template>
@@ -487,13 +499,13 @@
               v-model:value="temp.id"
               :max-length="50"
               :disabled="temp.type === 'edit'"
-              :placeholder="$tl('c.immutableAfterCreation')"
+              :placeholder="$t('pages.dispatch.list.786953be')"
             />
             <template v-else>
               <a-input-search
                 v-model:value="temp.id"
                 :max-length="50"
-                :placeholder="$tl('c.immutableAfterCreation')"
+                :placeholder="$t('pages.dispatch.list.786953be')"
                 @search="
                   () => {
                     temp = { ...temp, id: randomStr(6) }
@@ -502,27 +514,27 @@
               >
                 <template #enterButton>
                   <a-button type="primary">
-                    {{ $tl('c.randomlyGenerated') }}
+                    {{ $t('pages.dispatch.list.24a518c3') }}
                   </a-button>
                 </template>
               </a-input-search>
             </template>
             <!-- <a-input v-model="temp.id" :maxLength="50" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改,分发 ID 等同于项目 ID" /> -->
           </a-form-item>
-          <a-form-item :label="$tl('c.distributionName')" name="name">
+          <a-form-item :label="$t('pages.dispatch.list.8aa10ac9')" name="name">
             <a-row>
               <a-col :span="10">
-                <a-input v-model:value="temp.name" :max-length="50" :placeholder="$tl('p.distributionName')" />
+                <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('pages.dispatch.list.4e848bb3')" />
               </a-col>
-              <a-col :span="4" style="text-align: right">{{ $tl('c.groupingName') }}</a-col>
+              <a-col :span="4" style="text-align: right">{{ $t('pages.dispatch.list.7c047057') }}</a-col>
               <a-col :span="10">
                 <a-form-item-rest>
                   <custom-select
                     v-model:value="temp.group"
                     :max-length="50"
                     :data="groupList"
-                    :input-placeholder="$tl('c.addNewGrouping')"
-                    :select-placeholder="$tl('c.selectGrouping')"
+                    :input-placeholder="$t('pages.dispatch.list.ded4b4cd')"
+                    :select-placeholder="$t('pages.dispatch.list.13bca766')"
                   >
                   </custom-select>
                 </a-form-item-rest>
@@ -533,33 +545,35 @@
           <a-form-item name="runMode">
             <template #label>
               <a-tooltip>
-                {{ $tl('p.runningMode') }}
+                {{ $t('pages.dispatch.list.b2108479') }}
                 <template #title>
                   <ul>
-                    <li><b>Dsl</b> {{ $tl('p.scriptTemplate') }}</li>
+                    <li><b>Dsl</b> {{ $t('pages.dispatch.list.c086fc82') }}</li>
                     <li>
                       <b>ClassPath</b> java -classpath xxx
-                      {{ $tl('c.runProject') }}
+                      {{ $t('pages.dispatch.list.788bfc') }}
                     </li>
-                    <li><b>Jar</b> java -jar xxx {{ $tl('c.runProject') }}</li>
+                    <li><b>Jar</b> java -jar xxx {{ $t('pages.dispatch.list.788bfc') }}</li>
                     <li>
                       <b>JarWar</b> java -jar Springboot war
-                      {{ $tl('c.runProject') }}
+                      {{ $t('pages.dispatch.list.788bfc') }}
                     </li>
                     <li>
                       <b>JavaExtDirsCp</b> java -Djava.ext.dirs=lib -cp conf:run.jar $MAIN_CLASS
-                      {{ $tl('c.runProject') }}
+                      {{ $t('pages.dispatch.list.788bfc') }}
                     </li>
-                    <li><b>File</b> {{ $tl('p.staticFolder') }},{{ $tl('p.noProjectStatus') }}</li>
+                    <li>
+                      <b>File</b> {{ $t('pages.dispatch.list.d33f4295') }},{{ $t('pages.dispatch.list.b6295c0e') }}
+                    </li>
                   </ul>
                 </template>
                 <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
               </a-tooltip>
             </template>
 
-            <a-select v-model:value="temp.runMode" :placeholder="$tl('p.selectRunningMode')">
+            <a-select v-model:value="temp.runMode" :placeholder="$t('pages.dispatch.list.79573f90')">
               <a-select-option v-for="item in runModeArray.filter((item) => item.onlyNode !== true)" :key="item.name">
-                <template v-if="item.desc.indexOf($tl('p.notRecommended')) > -1">
+                <template v-if="item.desc.indexOf($t('pages.dispatch.list.ad7005ba')) > -1">
                   <s>
                     <b>[{{ item.name }}]</b> {{ item.desc }}
                   </s>
@@ -574,15 +588,15 @@
           <a-form-item name="whitelistDirectory" class="jpom-project-whitelist">
             <template #label>
               <a-tooltip>
-                {{ $tl('p.projectPath') }}
+                {{ $t('pages.dispatch.list.5b716424') }}
                 <template #title>
                   <ul>
-                    <li>{{ $tl('p.authorizationPath') }}</li>
-                    <li>{{ $tl('p.modifyAuthorizationConfig') }}</li>
-                    <li>{{ $tl('p.projectFolder') }}</li>
+                    <li>{{ $t('pages.dispatch.list.87db3fab') }}</li>
+                    <li>{{ $t('pages.dispatch.list.2a4034e5') }}</li>
+                    <li>{{ $t('pages.dispatch.list.aa675b68') }}</li>
                     <li>
-                      {{ $tl('p.projectFilesStored') }} <br />&nbsp;&nbsp;<b>{{
-                        $tl('p.authorizationPathProjectFolder')
+                      {{ $t('pages.dispatch.list.961e28d') }} <br />&nbsp;&nbsp;<b>{{
+                        $t('pages.dispatch.list.7bdaa7bf')
                       }}</b>
                     </li>
                   </ul>
@@ -594,7 +608,7 @@
               <a-select
                 v-model:value="temp.whitelistDirectory"
                 style="width: 50%"
-                :placeholder="$tl('c.selectProjectAuthorizationPath')"
+                :placeholder="$t('pages.dispatch.list.fea56c3')"
               >
                 <a-select-option v-for="access in accessList" :key="access">
                   <a-tooltip :title="access">
@@ -603,12 +617,12 @@
                 </a-select-option>
               </a-select>
               <a-form-item-rest>
-                <a-input v-model:value="temp.lib" style="width: 50%" :placeholder="$tl('p.jarFolder')"
+                <a-input v-model:value="temp.lib" style="width: 50%" :placeholder="$t('pages.dispatch.list.30061739')"
               /></a-form-item-rest>
             </a-input-group>
             <template #help>
               <div>
-                {{ $tl('p.configureAuthorizationDirectory') }}
+                {{ $t('pages.dispatch.list.a5df5146') }}
 
                 <a-button
                   size="small"
@@ -619,35 +633,35 @@
                     }
                   "
                 >
-                  <InfoCircleOutlined /> {{ $tl('p.configureDirectory') }}
+                  <InfoCircleOutlined /> {{ $t('pages.dispatch.list.ed2197b9') }}
                 </a-button>
               </div>
             </template>
           </a-form-item>
 
-          <a-form-item v-show="filePath !== ''" :label="$tl('p.projectFullDirectory')">
+          <a-form-item v-show="filePath !== ''" :label="$t('pages.dispatch.list.6541b24c')">
             <a-alert :message="filePath" type="success" />
           </a-form-item>
           <a-form-item v-show="temp.runMode === 'Dsl'" name="dslContent">
             <template #label>
               <a-tooltip>
-                DSL {{ $tl('p.content') }}
+                DSL {{ $t('pages.dispatch.list.99ff48c8') }}
                 <template #title>
-                  <p>{{ $tl('p.yamlConfig') }}</p>
-                  <p>{{ $tl('p.variablesInScript') }}</p>
+                  <p>{{ $t('pages.dispatch.list.af2dc0ed') }}</p>
+                  <p>{{ $t('pages.dispatch.list.cac3b49f') }}</p>
                   <p>
                     <b>status</b>
-                    {{ $tl('p.scriptOutput') }}:$pid <b>$pid {{ $tl('p.processID') }}</b
-                    >{{ $tl('p.incorrectOutputFormat') }}
+                    {{ $t('pages.dispatch.list.24159903') }}:$pid <b>$pid {{ $t('pages.dispatch.list.79c943f') }}</b
+                    >{{ $t('pages.dispatch.list.44857232') }}
                   </p>
-                  <p>{{ $tl('p.referToConfigExample') }}</p>
+                  <p>{{ $t('pages.dispatch.list.2d9d9e69') }}</p>
                 </template>
                 <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
               </a-tooltip>
             </template>
             <template #help>
               <div>
-                scriptId{{ $tl('p.recommendedScriptDistribution') }}
+                scriptId{{ $t('pages.dispatch.list.14102976') }}
                 <a-button
                   type="link"
                   size="small"
@@ -657,7 +671,7 @@
                     }
                   "
                 >
-                  {{ $tl('p.viewServerScript') }}
+                  {{ $t('pages.dispatch.list.e4c6938e') }}
                 </a-button>
               </div>
             </template>
@@ -688,14 +702,14 @@
                 height="40vh"
                 :show-tool="true"
                 :options="{ mode: 'yaml', tabSize: 2 }"
-                :placeholder="$tl('p.fillProjectDSLConfig')"
+                :placeholder="$t('pages.dispatch.list.b3b45f16')"
               >
                 <template #tool_before>
                   <a-segmented
                     v-model:value="dslEditTabKey"
                     :options="[
-                      { label: `DSL ${$tl('c.configuration')}`, value: 'content' },
-                      { label: $tl('c.configurationExample'), value: 'demo' }
+                      { label: `DSL ${$t('pages.dispatch.list.28f9e270')}`, value: 'content' },
+                      { label: $t('pages.dispatch.list.36177d5c'), value: 'demo' }
                     ]"
                   />
                 </template>
@@ -711,8 +725,8 @@
                   <a-segmented
                     v-model:value="dslEditTabKey"
                     :options="[
-                      { label: `DSL ${$tl('c.configuration')}`, value: 'content' },
-                      { label: $tl('c.configurationExample'), value: 'demo' }
+                      { label: `DSL ${$t('pages.dispatch.list.28f9e270')}`, value: 'content' },
+                      { label: $t('pages.dispatch.list.36177d5c'), value: 'demo' }
                     ]"
                   />
                 </template>
@@ -722,19 +736,19 @@
           <a-form-item v-show="noFileModes.includes(temp.runMode)">
             <template #label>
               <a-tooltip>
-                {{ $tl('p.logDirectory') }}
+                {{ $t('pages.dispatch.list.8d83036e') }}
                 <template #title>
                   <ul>
-                    <li>{{ $tl('p.logDirectorySelection') }}</li>
-                    <li>{{ $tl('c.defaultLogDirectory') }}</li>
-                    <li>{{ $tl('p.sameConfigAsAuthorizationDirectory') }}</li>
+                    <li>{{ $t('pages.dispatch.list.15aa24c8') }}</li>
+                    <li>{{ $t('pages.dispatch.list.965acf34') }}</li>
+                    <li>{{ $t('pages.dispatch.list.c6fe24a4') }}</li>
                   </ul>
                 </template>
                 <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
               </a-tooltip>
             </template>
-            <a-select v-model:value="temp.logPath" :placeholder="$tl('p.selectLogDirectory')">
-              <a-select-option key="" value="">{{ $tl('c.defaultLogDirectory') }}</a-select-option>
+            <a-select v-model:value="temp.logPath" :placeholder="$t('pages.dispatch.list.549e1e09')">
+              <a-select-option key="" value="">{{ $t('pages.dispatch.list.965acf34') }}</a-select-option>
               <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
             </a-select>
           </a-form-item>
@@ -743,7 +757,7 @@
             label="Main Class"
             name="mainClass"
           >
-            <a-input v-model:value="temp.mainClass" :placeholder="$tl('p.mainClass')" />
+            <a-input v-model:value="temp.mainClass" :placeholder="$t('pages.dispatch.list.b324b030')" />
           </a-form-item>
           <a-form-item
             v-show="javaModes.includes(temp.runMode) && temp.runMode === 'JavaExtDirsCp'"
@@ -752,23 +766,23 @@
           >
             <a-input
               v-model:value="temp.javaExtDirsCp"
-              :placeholder="`-Dext.dirs=xxx: -cp xx  ${$tl('p.jvmArgs')}:xx】`"
+              :placeholder="`-Dext.dirs=xxx: -cp xx  ${$t('pages.dispatch.list.fe24b714')}:xx】`"
             />
           </a-form-item>
-          <a-form-item :label="$tl('c.distributionOperationAfter')" name="afterOpt">
-            <a-select v-model:value="temp.afterOpt" :placeholder="$tl('c.selectOperationAfterPublish')">
+          <a-form-item :label="$t('pages.dispatch.list.50b92ecb')" name="afterOpt">
+            <a-select v-model:value="temp.afterOpt" :placeholder="$t('pages.dispatch.list.9a15b54b')">
               <a-select-option v-for="item in afterOptList" :key="item.value">{{ item.title }}</a-select-option>
             </a-select>
           </a-form-item>
           <a-form-item v-if="temp.afterOpt === 2 || temp.afterOpt === 3" name="intervalTime">
             <template #label>
               <a-tooltip>
-                {{ $tl('c.intervalTime') }}
+                {{ $t('pages.dispatch.list.26d543f6') }}
                 <template #title>
-                  {{ $tl('c.ensureProjectRestart') }},{{ $tl('c.waitPreviousProjectStart') }},{{
-                    $tl('c.configureBasedOnProjectStartTime')
+                  {{ $t('pages.dispatch.list.2c7f38ee') }},{{ $t('pages.dispatch.list.e68260b4') }},{{
+                    $t('pages.dispatch.list.5d1f2d8e')
                   }}
-                  <li>{{ $tl('c.suggestedIntervalTime') }}</li>
+                  <li>{{ $t('pages.dispatch.list.bd011884') }}</li>
                 </template>
                 <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
               </a-tooltip>
@@ -776,19 +790,19 @@
             <a-input-number
               v-model:value="temp.intervalTime"
               :min="0"
-              :placeholder="$tl('c.distributionIntervalTimeEffect')"
+              :placeholder="$t('pages.dispatch.list.c7ed6684')"
               style="width: 100%"
             />
           </a-form-item>
-          <a-form-item name="secondaryDirectory" :label="$tl('c.secondaryDirectory')">
-            <a-input v-model:value="temp.secondaryDirectory" :placeholder="$tl('c.publishToRootIfNotFilled')" />
+          <a-form-item name="secondaryDirectory" :label="$t('pages.dispatch.list.2b72d6ca')">
+            <a-input v-model:value="temp.secondaryDirectory" :placeholder="$t('pages.dispatch.list.3a664c1f')" />
           </a-form-item>
           <a-form-item name="clearOld">
             <template #label>
               <a-tooltip>
-                {{ $tl('c.clearPublish') }}
+                {{ $t('pages.dispatch.list.157bc8ea') }}
                 <template #title>
-                  {{ $tl('c.clearPublishDescription') }}
+                  {{ $t('pages.dispatch.list.32718c0') }}
                 </template>
                 <QuestionCircleOutlined v-if="temp.type !== 'edit'" />
               </a-tooltip>
@@ -797,23 +811,23 @@
               <a-col :span="4">
                 <a-switch
                   v-model:checked="temp.clearOld"
-                  :checked-children="$tl('c.yes')"
-                  :un-checked-children="$tl('c.no')"
+                  :checked-children="$t('pages.dispatch.list.d2fbce36')"
+                  :un-checked-children="$t('pages.dispatch.list.1c77d6fb')"
                 />
               </a-col>
               <a-col :span="4" style="text-align: right">
                 <a-tooltip v-if="temp.type !== 'edit'">
-                  <template #title> {{ $tl('c.publishStopBefore') }} </template>
+                  <template #title> {{ $t('pages.dispatch.list.9f9df513') }} </template>
                   <QuestionCircleOutlined />
                 </a-tooltip>
-                {{ $tl('c.publishStopBeforeColon') }}
+                {{ $t('pages.dispatch.list.267c8d13') }}
               </a-col>
               <a-col :span="4">
                 <a-form-item-rest>
                   <a-switch
                     v-model:checked="temp.uploadCloseFirst"
-                    :checked-children="$tl('c.yes')"
-                    :un-checked-children="$tl('c.no')"
+                    :checked-children="$t('pages.dispatch.list.d2fbce36')"
+                    :un-checked-children="$t('pages.dispatch.list.1c77d6fb')"
                   />
                 </a-form-item-rest>
               </a-col>
@@ -825,19 +839,19 @@
                 WebHooks
                 <template #title>
                   <ul>
-                    <li>{{ $tl('c.distributionRequestAddress') }}</li>
-                    <li>{{ $tl('c.parametersForDistribution') }}</li>
-                    <li>status {{ $tl('c.statusValues') }}:{{ $tl('c.distributionStatuses') }}</li>
-                    <li>{{ $tl('c.asynchronousRequest') }}</li>
+                    <li>{{ $t('pages.dispatch.list.1af01061') }}</li>
+                    <li>{{ $t('pages.dispatch.list.d20429d4') }}</li>
+                    <li>status {{ $t('pages.dispatch.list.5323a6a3') }}:{{ $t('pages.dispatch.list.be2dccc9') }}</li>
+                    <li>{{ $t('pages.dispatch.list.663c4985') }}</li>
                   </ul>
                 </template>
                 <QuestionCircleOutlined v-show="!temp.id" />
               </a-tooltip>
             </template>
-            <a-input v-model:value="temp.webhook" :placeholder="$tl('c.distributionProcessRequest')" />
+            <a-input v-model:value="temp.webhook" :placeholder="$t('pages.dispatch.list.ad9cad23')" />
           </a-form-item>
           <!-- 节点 -->
-          <a-form-item :label="$tl('c.distributionNode')" name="nodeId">
+          <a-form-item :label="$t('pages.dispatch.list.51fd9c8a')" name="nodeId">
             <a-select
               v-model:value="temp.nodeIdList"
               show-search
@@ -852,67 +866,82 @@
                 }
               "
               mode="multiple"
-              :placeholder="$tl('p.selectDistributionNode')"
+              :placeholder="$t('pages.dispatch.list.27b4e405')"
             >
               <a-select-option v-for="node in nodeList" :key="node.id">{{ `${node.name}` }}</a-select-option>
             </a-select>
           </a-form-item>
           <a-collapse>
             <a-collapse-panel v-for="nodeId in temp.nodeIdList" :key="nodeId" :header="nodeNameMap[nodeId] || nodeId">
-              <a-form-item v-show="javaModes.includes(temp.runMode)" :label="$tl('p.jvmParams')" name="jvm">
+              <a-form-item
+                v-show="javaModes.includes(temp.runMode)"
+                :label="$t('pages.dispatch.list.b482c412')"
+                name="jvm"
+              >
                 <a-textarea
                   v-model:value="temp[`${nodeId}_jvm`]"
                   :auto-size="{ minRows: 3, maxRows: 3 }"
-                  :placeholder="`jvm${$tl('p.params')},${$tl('p.nonMandatory')}.如：-Xms512m -Xmx512m`"
+                  :placeholder="
+                    $t('pages.dispatch.list.17924912', {
+                      slot1: $t('pages.dispatch.list.68fca368'),
+                      slot2: $t('pages.dispatch.list.f3096daa')
+                    })
+                  "
                 />
               </a-form-item>
-              <a-form-item v-show="javaModes.includes(temp.runMode)" :label="$tl('p.argsParams')" name="args">
+              <a-form-item
+                v-show="javaModes.includes(temp.runMode)"
+                :label="$t('pages.dispatch.list.550bae25')"
+                name="args"
+              >
                 <a-textarea
                   v-model:value="temp[`${nodeId}_args`]"
                   :auto-size="{ minRows: 3, maxRows: 3 }"
-                  :placeholder="`Main ${$tl('p.functionArgsParams')}. ${$tl('p.argsParamsExample')}.port=8080`"
+                  :placeholder="`Main ${$t('pages.dispatch.list.f2214ebb')}. ${$t(
+                    'pages.dispatch.list.94c10a27'
+                  )}.port=8080`"
                 />
               </a-form-item>
               <a-form-item v-show="noFileModes.includes(temp.runMode)" name="autoStart">
                 <template #label>
                   <a-tooltip>
-                    {{ $tl('p.autoStart') }}
-                    <template #title>{{ $tl('p.checkProjectStatus') }}</template>
+                    {{ $t('pages.dispatch.list.12861e4e') }}
+                    <template #title>{{ $t('pages.dispatch.list.6023ee05') }}</template>
                     <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
                   </a-tooltip>
                 </template>
                 <template #help>
                   <div>
-                    {{ $tl('p.nonServerAutoStart') }}<b>{{ $tl('p.pluginAutoStart') }}</b
-                    >{{ $tl('p.turnOnAutoStart') }}
+                    {{ $t('pages.dispatch.list.2190c483') }}<b>{{ $t('pages.dispatch.list.7172ec4f') }}</b
+                    >{{ $t('pages.dispatch.list.bd19335d') }}
                   </div>
                 </template>
                 <a-switch
                   v-model:checked="temp[`${nodeId}_autoStart`]"
-                  :checked-children="$tl('p.on')"
-                  :un-checked-children="$tl('p.off')"
+                  :checked-children="$t('pages.dispatch.list.30c72f5d')"
+                  :un-checked-children="$t('pages.dispatch.list.abe04b8e')"
                 />
-                {{ $tl('p.pluginAutoCheckProjectOnStart') }}
+                {{ $t('pages.dispatch.list.78de10a4') }}
               </a-form-item>
               <a-form-item name="disableScanDir">
                 <template #label>
-                  <a-tooltip> {{ $tl('p.disableScanDir') }} </a-tooltip>
+                  <a-tooltip> {{ $t('pages.dispatch.list.e1eda90c') }} </a-tooltip>
                 </template>
                 <template #help>
-                  <div>{{ $tl('p.disableScanDirTip') }}</div>
+                  <div>{{ $t('pages.dispatch.list.d8aa9e4c') }}</div>
                 </template>
                 <div>
                   <a-switch
                     v-model:checked="temp[`${nodeId}_disableScanDir`]"
-                    :checked-children="$tl('p.dontScanning')"
-                    :un-checked-children="$tl('p.scanning')"
+                    :checked-children="$t('pages.dispatch.list.c85f6b97')"
+                    :un-checked-children="$t('pages.dispatch.list.968ca34a')"
                   />
                 </div>
               </a-form-item>
-              <a-form-item v-if="temp.runMode === 'Dsl'" name="dslEnv" :label="$tl('p.dslEnvironmentVariables')">
+              <a-form-item v-if="temp.runMode === 'Dsl'" name="dslEnv" :label="$t('pages.dispatch.list.72ddf462')">
                 <!-- <a-input
                   v-model:checked="temp[`${nodeId}_dslEnv`]"
-                  placeholder="DSL{{$tl('p.environmentVariables')}},{{$tl('p.exampleVariable')}}=values1&keyvalue2"
+                  placeholder="DSL{{$t('pages.dispatch.list.c81b2c2e')}},{{$t('pages.dispatch.list.24e5c26a')}}=values1&keyvalue2"
                 /> -->
                 <parameter-widget v-model:value="temp[`${nodeId}_dslEnv`]"></parameter-widget>
               </a-form-item>
@@ -921,16 +950,16 @@
                   <a-tooltip>
                     <template #title>
                       <ul>
-                        <li>{{ $tl('p.projectRequestOnStartStopRestart') }}</li>
-                        <li>{{ $tl('p.parametersForProjectRequest') }}</li>
-                        <li>type {{ $tl('p.valuesForProjectRequest') }}</li>
+                        <li>{{ $t('pages.dispatch.list.3e549c2f') }}</li>
+                        <li>{{ $t('pages.dispatch.list.4bebe9d') }}</li>
+                        <li>type {{ $t('pages.dispatch.list.bbb000cc') }}</li>
                       </ul>
                     </template>
                     WebHooks
                     <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
                   </a-tooltip>
                 </template>
-                <a-input v-model:value="temp[`${nodeId}_token`]" :placeholder="$tl('p.projectRequestOnFileChange')" />
+                <a-input v-model:value="temp[`${nodeId}_token`]" :placeholder="$t('pages.dispatch.list.187760d7')" />
               </a-form-item>
             </a-collapse-panel>
           </a-collapse>
@@ -964,7 +993,7 @@
     <a-modal
       v-model:open="configDir"
       destroy-on-close
-      :title="`${$tl('p.configureAuthorizationDirectory1')}`"
+      :title="`${$t('pages.dispatch.list.1cc6d443')}`"
       :footer="null"
       width="50vw"
       :mask-closable="false"
@@ -987,7 +1016,7 @@
     <!-- 查看服务端脚本 -->
     <a-drawer
       destroy-on-close
-      :title="`${$tl('p.viewScript')}`"
+      :title="`${$t('pages.dispatch.list.9bc942bf')}`"
       placement="right"
       :open="viewScriptVisible"
       width="70vw"
@@ -1010,7 +1039,6 @@
     </a-drawer>
   </div>
 </template>
-
 <script>
 import Status from './status'
 import codeEditor from '@/components/codeEditor'
@@ -1085,19 +1113,19 @@ export default {
       totalProjectNum: 0,
       columns: [
         {
-          title: this.$tl('c.distributionID'),
+          title: this.$t('pages.dispatch.list.c3c9e67b'),
           dataIndex: 'id',
           ellipsis: true,
           width: 110
         },
         {
-          title: this.$tl('c.distributionName'),
+          title: this.$t('pages.dispatch.list.8aa10ac9'),
           dataIndex: 'name',
           ellipsis: true,
           width: 200
         },
         {
-          title: this.$tl('p.projectGrouping'),
+          title: this.$t('pages.dispatch.list.5eefb9a9'),
           dataIndex: 'group',
           sorter: true,
           width: '100px',
@@ -1105,46 +1133,46 @@ export default {
           tooltip: true
         },
         {
-          title: this.$tl('c.distributionType'),
+          title: this.$t('pages.dispatch.list.585c23e6'),
           dataIndex: 'outGivingProject',
           width: '90px',
           ellipsis: true
         },
         {
-          title: this.$tl('p.distributionStatus'),
+          title: this.$t('pages.dispatch.list.2f6529d5'),
           dataIndex: 'afterOpt',
           ellipsis: true,
           width: '150px'
         },
         {
-          title: this.$tl('c.clearPublish'),
+          title: this.$t('pages.dispatch.list.157bc8ea'),
           dataIndex: 'clearOld',
           align: 'center',
           ellipsis: true,
           width: '100px'
         },
         {
-          title: this.$tl('c.intervalTime'),
+          title: this.$t('pages.dispatch.list.26d543f6'),
           dataIndex: 'intervalTime',
           width: 90,
           ellipsis: true
         },
 
         {
-          title: this.$tl('p.status'),
+          title: this.$t('pages.dispatch.list.9c32c887'),
           dataIndex: 'status',
           ellipsis: true,
           width: 110
         },
         {
-          title: this.$tl('c.secondaryDirectory'),
+          title: this.$t('pages.dispatch.list.2b72d6ca'),
           dataIndex: 'secondaryDirectory',
           ellipsis: true,
           width: 110,
           tooltip: true
         },
         {
-          title: this.$tl('p.creationTime'),
+          title: this.$t('pages.dispatch.list.f06e8846'),
           dataIndex: 'createTimeMillis',
           ellipsis: true,
           sorter: true,
@@ -1152,7 +1180,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$tl('p.modificationTime'),
+          title: this.$t('pages.dispatch.list.61164914'),
           dataIndex: 'modifyTimeMillis',
           ellipsis: true,
           sorter: true,
@@ -1160,14 +1188,14 @@ export default {
           width: '170px'
         },
         {
-          title: this.$tl('p.modifiedBy'),
+          title: this.$t('pages.dispatch.list.8406fc21'),
           dataIndex: 'modifyUser',
           width: '130px',
           ellipsis: true,
           sorter: true
         },
         {
-          title: this.$tl('p.operations'),
+          title: this.$t('pages.dispatch.list.40ebd874'),
           dataIndex: 'operation',
 
           fixed: 'right',
@@ -1177,15 +1205,13 @@ export default {
       ],
 
       rules: {
-        id: [{ required: true, message: this.$tl('p.enterProjectID'), trigger: 'blur' }],
-        name: [{ required: true, message: this.$tl('p.enterProjectName'), trigger: 'blur' }],
-        projectId: [{ required: true, message: this.$tl('c.selectProject'), trigger: 'blur' }],
-        runMode: [{ required: true, message: this.$tl('p.selectProjectRunningMode'), trigger: 'blur' }],
-        whitelistDirectory: [
-          { required: true, message: this.$tl('c.selectProjectAuthorizationPath'), trigger: 'blur' }
-        ],
-        lib: [{ required: true, message: this.$tl('p.enterProjectFolder'), trigger: 'blur' }],
-        afterOpt: [{ required: true, message: this.$tl('c.selectOperationAfterPublish'), trigger: 'blur' }]
+        id: [{ required: true, message: this.$t('pages.dispatch.list.6d76ea6b'), trigger: 'blur' }],
+        name: [{ required: true, message: this.$t('pages.dispatch.list.c9d5fa0c'), trigger: 'blur' }],
+        projectId: [{ required: true, message: this.$t('pages.dispatch.list.6836d5bb'), trigger: 'blur' }],
+        runMode: [{ required: true, message: this.$t('pages.dispatch.list.d83981be'), trigger: 'blur' }],
+        whitelistDirectory: [{ required: true, message: this.$t('pages.dispatch.list.fea56c3'), trigger: 'blur' }],
+        lib: [{ required: true, message: this.$t('pages.dispatch.list.fc983188'), trigger: 'blur' }],
+        afterOpt: [{ required: true, message: this.$t('pages.dispatch.list.9a15b54b'), trigger: 'blur' }]
       },
       // countdownTime: Date.now(),
       // refreshInterval: 5,
@@ -1214,9 +1240,6 @@ export default {
     this.loadGroupList()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.dispatch.list.${key}`, ...args)
-    },
     randomStr,
     CHANGE_PAGE,
 
@@ -1355,7 +1378,7 @@ export default {
       this.$refs['linkDispatchForm'].validate().then(() => {
         // 校验分发节点数据
         if (this.dispatchList.length < 1) {
-          $notification.error({ message: this.$tl('p.selectAtLeastOneNodeProject') })
+          $notification.error({ message: this.$t('pages.dispatch.list.9548a044') })
           return false
         }
         this.dispatchList.forEach((item, index) => {
@@ -1480,7 +1503,7 @@ export default {
         // 检查
         if (tempData.nodeIdList.length < 1) {
           $notification.warn({
-            message: this.$tl('p.selectAtLeastOneNode')
+            message: this.$t('pages.dispatch.list.6ad32a91')
           })
           return false
         }
@@ -1519,13 +1542,11 @@ export default {
     handleDelete(record, thorough) {
       if (record.outGivingProject) {
         $confirm({
-          title: this.$tl('c.systemPrompt'),
+          title: this.$t('pages.dispatch.list.a8fe4c17'),
           zIndex: 1009,
-          content: thorough
-            ? this.$tl('p.confirmDeletionOfDistributionInfo')
-            : this.$tl('p.confirmDeletionOfDistributionInfoSimple'),
-          okText: this.$tl('c.confirm'),
-          cancelText: this.$tl('c.cancel'),
+          content: thorough ? this.$t('pages.dispatch.list.638fc0de') : this.$t('pages.dispatch.list.f85d7ea4'),
+          okText: this.$t('pages.dispatch.list.7da4a591'),
+          cancelText: this.$t('pages.dispatch.list.43105e21'),
           onOk: () => {
             return delDisPatchProject({ id: record.id, thorough: thorough }).then((res) => {
               if (res.code === 200) {
@@ -1540,11 +1561,11 @@ export default {
         return
       }
       $confirm({
-        title: this.$tl('c.systemPrompt'),
+        title: this.$t('pages.dispatch.list.a8fe4c17'),
         zIndex: 1009,
-        content: this.$tl('p.confirmReleaseOfDistributionInfo'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.dispatch.list.ab7b03bc'),
+        okText: this.$t('pages.dispatch.list.7da4a591'),
+        cancelText: this.$t('pages.dispatch.list.43105e21'),
         onOk: () => {
           return releaseDelDisPatch(record.id).then((res) => {
             if (res.code === 200) {
@@ -1561,22 +1582,22 @@ export default {
     handleUnbind(record) {
       const html = `
       <b style='font-size: 20px;'>
-        ${this.$tl('p.confirmUnbindingCurrentNodeDistribution')}
+        ${this.$t('pages.dispatch.list.c5bfcffb')}
       </b>
       <ul style='font-size: 20px;color:red;font-weight: bold;'>
-          <li>${this.$tl('p.unbindCheckDataAssociation')}</b></li>
-          <li>${this.$tl('p.unbindForUnreachableServer')}</li>
-          <li>${this.$tl('p.cautionDueToMistakeOperation')}</li>
+          <li>${this.$t('pages.dispatch.list.3764ec84')}</b></li>
+          <li>${this.$t('pages.dispatch.list.cbd05868')}</li>
+          <li>${this.$t('pages.dispatch.list.b65e38f0')}</li>
       </ul>`
 
       $confirm({
-        title: this.$tl('p.dangerousOperation'),
+        title: this.$t('pages.dispatch.list.cd503941'),
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
         okButtonProps: { type: 'primary', size: 'small', danger: true },
         cancelButtonProps: { type: 'primary' },
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        okText: this.$t('pages.dispatch.list.7da4a591'),
+        cancelText: this.$t('pages.dispatch.list.43105e21'),
         onOk: () => {
           return unbindOutgiving(record.id).then((res) => {
             if (res.code === 200) {
@@ -1619,10 +1640,10 @@ export default {
     handleNodeListChange(nodeId, index) {
       const nodeData = this.nodeProjectsList.filter((item) => item.id === nodeId)[0]
       if (nodeData.projects.length === 0) {
-        this.dispatchList[index].placeholder = this.$tl('c.noProjectInThisNode')
+        this.dispatchList[index].placeholder = this.$t('pages.dispatch.list.e6af4e4c')
         this.dispatchList[index].disabled = true
       } else {
-        this.dispatchList[index].placeholder = this.$tl('c.selectProject')
+        this.dispatchList[index].placeholder = this.$t('pages.dispatch.list.6836d5bb')
         this.dispatchList[index].disabled = false
       }
       this.dispatchList[index].nodeId = nodeId
@@ -1635,13 +1656,13 @@ export default {
     addDispachList() {
       if (this.dispatchList.length >= this.totalProjectNum) {
         $notification.error({
-          message: this.$tl('p.noMoreNodeProjects')
+          message: this.$t('pages.dispatch.list.4715a27')
         })
         return false
       }
       this.dispatchList.push({
         index: this.dispatchList.length,
-        placeholder: this.$tl('p.selectNodeFirst'),
+        placeholder: this.$t('pages.dispatch.list.3a5ce43c'),
         disabled: true
       })
     },
@@ -1657,11 +1678,11 @@ export default {
     // 取消
     handleCancel(record) {
       $confirm({
-        title: this.$tl('c.systemPrompt'),
+        title: this.$t('pages.dispatch.list.a8fe4c17'),
         zIndex: 1009,
-        content: this.$tl('p.confirmCancellationOfCurrentDistribution'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.dispatch.list.a5cbc9d2'),
+        okText: this.$t('pages.dispatch.list.7da4a591'),
+        cancelText: this.$t('pages.dispatch.list.43105e21'),
         onOk: () => {
           return cancelOutgiving({ id: record.id }).then((res) => {
             if (res.code === 200) {
@@ -1683,7 +1704,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 :deep(.ant-statistic div) {
   display: inline-block;

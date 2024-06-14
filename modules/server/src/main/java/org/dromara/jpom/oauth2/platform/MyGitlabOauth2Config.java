@@ -12,12 +12,14 @@ package org.dromara.jpom.oauth2.platform;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.net.url.UrlBuilder;
+import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import me.zhyd.oauth.config.AuthDefaultSource;
 import me.zhyd.oauth.config.AuthSource;
 import me.zhyd.oauth.request.AuthDefaultRequest;
 import me.zhyd.oauth.request.AuthRequest;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.oauth2.BaseOauth2Config;
 import org.dromara.jpom.oauth2.MyAuthGitlabRequest;
 import org.springframework.util.Assert;
@@ -44,14 +46,14 @@ public class MyGitlabOauth2Config extends BaseOauth2Config implements AuthSource
 
     @Override
     public AuthRequest authRequest() {
-        Assert.state(this.enabled(), "没有开启此 " + this.provide() + " oauth2");
+        Assert.state(this.enabled(), StrUtil.format(I18nMessageUtil.get("i18n.oauth2_not_enabled.c8b7"), this.provide()));
         return new MyAuthGitlabRequest(this.authConfig(), this);
     }
 
     @Override
     public void check() {
         super.check();
-        Validator.validateMatchRegex(RegexPool.URL_HTTP, this.host, "请配置正确的自建 gitlab 地址");
+        Validator.validateMatchRegex(RegexPool.URL_HTTP, this.host, I18nMessageUtil.get("i18n.configure_correct_self_hosted_gitlab_address.ad50"));
     }
 
     /**

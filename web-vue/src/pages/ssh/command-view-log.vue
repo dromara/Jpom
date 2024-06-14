@@ -14,7 +14,6 @@
     </a-tabs>
   </div>
 </template>
-
 <script>
 import { getCommandLogBarchList, getCommandLogInfo } from '@/api/command'
 import LogView1 from '@/components/logView/index2'
@@ -51,9 +50,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.ssh.commandViewLog.${key}`, ...args)
-    },
     // 加载日志内容
     loadData() {
       this.activeKey = this.temp.id || ''
@@ -158,5 +154,3 @@ export default {
   }
 }
 </script>
-
-<style scoped></style>

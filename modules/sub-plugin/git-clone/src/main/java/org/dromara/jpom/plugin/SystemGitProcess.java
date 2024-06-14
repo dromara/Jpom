@@ -16,6 +16,7 @@ import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.util.CommandUtil;
 import org.eclipse.jgit.lib.Constants;
 import org.springframework.util.Assert;
@@ -92,12 +93,12 @@ public class SystemGitProcess extends AbstractGitProcess {
             // TODO 需要实现本地 git ssh 指定证书拉取
             File rsaFile = (File) parameter.get("rsaFile");
             if (FileUtil.isFile(rsaFile)) {
-                throw new IllegalStateException("暂时不支持本地 git 指定证书拉取代码");
+                throw new IllegalStateException(I18nMessageUtil.get("i18n.local_git_certificate_not_supported.b395"));
             }
             // 默认的方式去执行
             return command;
         } else {
-            throw new IllegalArgumentException("不支持的 protocol" + protocol);
+            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.protocol_not_supported.b906") + protocol);
         }
     }
 
@@ -126,14 +127,14 @@ public class SystemGitProcess extends AbstractGitProcess {
     @Override
     public String[] pull() throws Exception {
         String branchName = (String) parameter.get("branchName");
-        Assert.hasText(branchName, "没有 branch name");
+        Assert.hasText(branchName, I18nMessageUtil.get("i18n.no_branch_name.1879"));
         return pull(branchName);
     }
 
     @Override
     public String[] pullByTag() throws Exception {
         String tagName = (String) parameter.get("tagName");
-        Assert.hasText(tagName, "没有 tag name");
+        Assert.hasText(tagName, I18nMessageUtil.get("i18n.no_tag_name.40ff"));
         return pull(tagName);
     }
 
@@ -159,21 +160,21 @@ public class SystemGitProcess extends AbstractGitProcess {
                 printWriter.flush();
             }, "git", "fetch", "--all");
             if (code != 0 && strictlyEnforce) {
-                return new String[]{null, null, "git fetch失败状态码:" + code};
+                return new String[]{null, null, I18nMessageUtil.get("i18n.git_fetch_failed_status_code.5187") + code};
             }
             code = CommandUtil.exec(saveFile, null, line -> {
                 printWriter.println(line);
                 printWriter.flush();
             }, "git", "reset", "--hard", "origin/" + branchOrTag);
             if (code != 0 && strictlyEnforce) {
-                return new String[]{null, null, "git reset --hard失败状态码:" + code};
+                return new String[]{null, null, I18nMessageUtil.get("i18n.git_reset_hard_failed_status_code.d818") + code};
             }
             code = CommandUtil.exec(saveFile, null, line -> {
                 printWriter.println(line);
                 printWriter.flush();
             }, "git", "submodule", "update", "--init", "--remote", "-f", "--recursive");
             if (code != 0 && strictlyEnforce) {
-                return new String[]{null, null, "git submodule update 失败状态码:" + code};
+                return new String[]{null, null, I18nMessageUtil.get("i18n.git_submodule_update_failed_status_code.2218") + code};
             }
         }
         // 获取提交日志

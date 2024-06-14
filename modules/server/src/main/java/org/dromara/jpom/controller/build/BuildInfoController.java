@@ -30,8 +30,10 @@ import org.dromara.jpom.build.DockerYmlDsl;
 import org.dromara.jpom.build.ResultDirFileAction;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
+import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.model.AfterOpt;
 import org.dromara.jpom.model.BaseEnum;
@@ -51,7 +53,6 @@ import org.dromara.jpom.service.dblog.RepositoryService;
 import org.dromara.jpom.service.docker.DockerInfoService;
 import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.service.script.ScriptServer;
-import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.FileUtils;
 import org.springframework.http.MediaType;
@@ -136,7 +137,7 @@ public class BuildInfoController extends BaseServerController {
     public IJsonMessage<BuildInfoModel> getBuildListAll(String id, HttpServletRequest request) {
         // load list with page
         BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);
-        Assert.notNull(buildInfoModel, "不存在对应的构建");
+        Assert.notNull(buildInfoModel, I18nMessageUtil.get("i18n.build_not_exist.c2ac"));
         // 获取源码目录是否存在
         File source = BuildUtil.getSourceById(buildInfoModel.getId());
         buildInfoModel.setSourceDirExist(FileUtil.exist(source));
@@ -178,24 +179,24 @@ public class BuildInfoController extends BaseServerController {
     @RequestMapping(value = "/build/edit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<String> updateBuild(String id,
-                                            @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建名称不能为空") String name,
-                                            @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库信息不能为空") String repositoryId,
-                                            @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建产物目录不能为空,长度1-200", range = "1:200") String resultDirFile,
-                                            @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "构建命令不能为空") String script,
-                                            @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "发布方法不正确") int releaseMethod,
+                                            @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.build_name_not_empty.4154") String name,
+                                            @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.repository_info_cannot_be_empty.67d2") String repositoryId,
+                                            @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.build_product_dir_not_empty.ba06", range = "1:200") String resultDirFile,
+                                            @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.build_command_not_empty.2e37") String script,
+                                            @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "i18n.incorrect_publish_method.e095") int releaseMethod,
                                             String branchName, String branchTagName, String webhook, String autoBuildCron,
                                             String extraData, String group,
-                                            @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "构建方式不正确") int buildMode,
+                                            @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "i18n.build_method_incorrect.5319") int buildMode,
                                             String aliasCode,
-                                            @ValidatorItem(value = ValidatorRule.NUMBERS, msg = "请填写正确的保留天数") Integer resultKeepDay,
+                                            @ValidatorItem(value = ValidatorRule.NUMBERS, msg = "i18n.correct_retention_days_required.d542") Integer resultKeepDay,
                                             String buildEnvParameter,
                                             HttpServletRequest request) {
         // 根据 repositoryId 查询仓库信息
         RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, request);
-        Assert.notNull(repositoryModel, "无效的仓库信息");
+        Assert.notNull(repositoryModel, I18nMessageUtil.get("i18n.invalid_repository_info.b4ad"));
         // 如果是 GIT 需要检测分支是否存在
         if (RepositoryModel.RepoType.Git.getCode() == repositoryModel.getRepoType()) {
-            Assert.hasText(branchName, "请选择分支");
+            Assert.hasText(branchName, I18nMessageUtil.get("i18n.branch_required.5095"));
         } else if (RepositoryModel.RepoType.Svn.getCode() == repositoryModel.getRepoType()) {
             // 如果是 SVN
             branchName = "trunk";
@@ -203,29 +204,29 @@ public class BuildInfoController extends BaseServerController {
         ResultDirFileAction resultDirFileAction = ResultDirFileAction.parse(resultDirFile);
         resultDirFileAction.check();
         //
-        Assert.state(buildMode == 0 || buildMode == 1, "请选择正确的构建方式");
+        Assert.state(buildMode == 0 || buildMode == 1, I18nMessageUtil.get("i18n.select_correct_build_method.84c4"));
         if (buildMode == 1) {
             // 验证 dsl 内容
             this.checkDocker(script, request);
             // 容器构建不能使用 ant 模式
-            Assert.state(resultDirFileAction.getType() == ResultDirFileAction.Type.ORIGINAL, "容器构建的产物路径不能使用 ant 模式");
+            Assert.state(resultDirFileAction.getType() == ResultDirFileAction.Type.ORIGINAL, I18nMessageUtil.get("i18n.container_build_product_path_cannot_use_ant_pattern.ddc7"));
         } else {
             if (StrUtil.startWith(script, ServerConst.REF_SCRIPT)) {
                 String scriptId = StrUtil.removePrefix(script, ServerConst.REF_SCRIPT);
-                ScriptModel keyAndGlobal = scriptServer.getByKeyAndGlobal(scriptId, request, "请选择正确的脚本");
-                Assert.notNull(keyAndGlobal, "请选择正确的脚本");
+                ScriptModel keyAndGlobal = scriptServer.getByKeyAndGlobal(scriptId, request, I18nMessageUtil.get("i18n.select_correct_script.ff2d"));
+                Assert.notNull(keyAndGlobal, I18nMessageUtil.get("i18n.select_correct_script.ff2d"));
             }
         }
         if (buildExtConfig.isCheckDeleteCommand()) {
             // 判断删除命令
-            Assert.state(!CommandUtil.checkContainsDel(script), "构建命令不能包含删除命令");
+            Assert.state(!CommandUtil.checkContainsDel(script), I18nMessageUtil.get("i18n.build_command_no_delete.df52"));
         }
         // 查询构建信息
         BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);
         buildInfoModel = ObjectUtil.defaultIfNull(buildInfoModel, new BuildInfoModel());
         // 设置参数
-        Opt.ofBlankAble(webhook).ifPresent(s -> Validator.validateMatchRegex(RegexPool.URL_HTTP, s, "WebHooks 地址不合法"));
-        Opt.ofBlankAble(aliasCode).ifPresent(s -> Validator.validateGeneral(s, "别名码只能是英文、数字"));
+        Opt.ofBlankAble(webhook).ifPresent(s -> Validator.validateMatchRegex(RegexPool.URL_HTTP, s, I18nMessageUtil.get("i18n.invalid_webhooks_address.d836")));
+        Opt.ofBlankAble(aliasCode).ifPresent(s -> Validator.validateGeneral(s, I18nMessageUtil.get("i18n.alias_code_validation.8b99")));
         //
         buildInfoModel.setAutoBuildCron(this.checkCron(autoBuildCron));
         buildInfoModel.setWebhook(webhook);
@@ -242,7 +243,7 @@ public class BuildInfoController extends BaseServerController {
         buildInfoModel.setBuildEnvParameter(buildEnvParameter);
         // 发布方式
         BuildReleaseMethod releaseMethod1 = BaseEnum.getEnum(BuildReleaseMethod.class, releaseMethod);
-        Assert.notNull(releaseMethod1, "发布方法不正确");
+        Assert.notNull(releaseMethod1, I18nMessageUtil.get("i18n.incorrect_publish_method.e095"));
         buildInfoModel.setReleaseMethod(releaseMethod1.getCode());
         // 把 extraData 信息转换成 JSON 字符串 ,不能直接使用 io.jpom.build.BuildExtraModule
         JSONObject jsonObject = JSON.parseObject(extraData);
@@ -265,7 +266,7 @@ public class BuildInfoController extends BaseServerController {
         // 检查关联数据ID
         buildInfoModel.setReleaseMethodDataId(jsonObject.getString("releaseMethodDataId"));
         if (buildInfoModel.getReleaseMethod() != BuildReleaseMethod.No.getCode()) {
-            Assert.hasText(buildInfoModel.getReleaseMethodDataId(), "没有发布分发对应关联数据ID");
+            Assert.hasText(buildInfoModel.getReleaseMethodDataId(), I18nMessageUtil.get("i18n.no_publish_distribution_related_data_id.a077"));
         }
         // 验证服务端脚本
         String noticeScriptId = jsonObject.getString("noticeScriptId");
@@ -273,7 +274,7 @@ public class BuildInfoController extends BaseServerController {
             List<String> list = StrUtil.splitTrim(noticeScriptId, StrUtil.COMMA);
             for (String noticeScriptIdItem : list) {
                 ScriptModel scriptModel = scriptServer.getByKey(noticeScriptIdItem, request);
-                Assert.notNull(scriptModel, "不存在对应的服务端脚本,请重新选择");
+                Assert.notNull(scriptModel, I18nMessageUtil.get("i18n.server_script_not_exist.de24"));
             }
         }
         buildInfoModel.setExtraData(jsonObject.toJSONString());
@@ -283,11 +284,11 @@ public class BuildInfoController extends BaseServerController {
             // set default buildId
             buildInfoModel.setBuildId(0);
             buildInfoService.insert(buildInfoModel);
-            return JsonMessage.success("添加成功", buildInfoModel.getId());
+            return JsonMessage.success(I18nMessageUtil.get("i18n.addition_succeeded.3fda"), buildInfoModel.getId());
         }
 
         buildInfoService.updateById(buildInfoModel, request);
-        return JsonMessage.success("修改成功", buildInfoModel.getId());
+        return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"), buildInfoModel.getId());
     }
 
     private void checkDocker(String script, HttpServletRequest request) {
@@ -301,7 +302,7 @@ public class BuildInfoController extends BaseServerController {
         if (StrUtil.isNotEmpty(fromTag)) {
             //
             int count = dockerInfoService.countByTag(workspaceId, fromTag);
-            Assert.state(count > 0, fromTag + " 没有找到任何 docker。可能docker tag 填写不正确，需要为 docker 配置标签");
+            Assert.state(count > 0, fromTag + I18nMessageUtil.get("i18n.docker_not_found.2a2e"));
         }
     }
 
@@ -314,21 +315,21 @@ public class BuildInfoController extends BaseServerController {
     private void formatSsh(JSONObject jsonObject, HttpServletRequest request) {
         // 发布方式
         String releaseMethodDataId = jsonObject.getString("releaseMethodDataId_3");
-        Assert.hasText(releaseMethodDataId, "请选择分发SSH项");
+        Assert.hasText(releaseMethodDataId, I18nMessageUtil.get("i18n.ssh_item_distribution_required.2884"));
 
         String releasePath = jsonObject.getString("releasePath");
-        Assert.hasText(releasePath, "请输入发布到ssh中的目录");
+        Assert.hasText(releasePath, I18nMessageUtil.get("i18n.publish_to_ssh_directory_required.56a6"));
         releasePath = FileUtil.normalize(releasePath);
         String releaseCommand = jsonObject.getString("releaseCommand");
         List<String> strings = StrUtil.splitTrim(releaseMethodDataId, StrUtil.COMMA);
         for (String releaseMethodDataIdItem : strings) {
             SshModel sshServiceItem = sshService.getByKey(releaseMethodDataIdItem, request);
-            Assert.notNull(sshServiceItem, "没有对应的ssh项");
+            Assert.notNull(sshServiceItem, I18nMessageUtil.get("i18n.no_corresponding_ssh_item.2deb"));
             //
             if (releasePath.startsWith(StrUtil.SLASH)) {
                 // 以根路径开始
                 List<String> fileDirs = sshServiceItem.fileDirs();
-                Assert.notEmpty(fileDirs, sshServiceItem.getName() + "此ssh未授权操作此目录");
+                Assert.notEmpty(fileDirs, sshServiceItem.getName() + I18nMessageUtil.get("i18n.ssh_unauthorized_directory.df78"));
 
                 boolean find = false;
                 for (String fileDir : fileDirs) {
@@ -336,18 +337,18 @@ public class BuildInfoController extends BaseServerController {
                         find = true;
                     }
                 }
-                Assert.state(find, sshServiceItem.getName() + "此ssh未授权操作此目录");
+                Assert.state(find, sshServiceItem.getName() + I18nMessageUtil.get("i18n.ssh_unauthorized_directory.df78"));
             }
             // 发布命令
             if (StrUtil.isNotEmpty(releaseCommand)) {
                 int length = releaseCommand.length();
-                Assert.state(length <= 4000, "发布命令长度限制在4000字符");
+                Assert.state(length <= 4000, I18nMessageUtil.get("i18n.publish_command_length_limit.66b0"));
                 //return JsonMessage.getString(405, "请输入发布命令");
                 String[] commands = StrUtil.splitToArray(releaseCommand, StrUtil.LF);
 
                 for (String commandItem : commands) {
                     boolean checkInputItem = SshModel.checkInputItem(sshServiceItem, commandItem);
-                    Assert.state(checkInputItem, sshServiceItem.getName() + "发布命令中包含禁止执行的命令");
+                    Assert.state(checkInputItem, sshServiceItem.getName() + I18nMessageUtil.get("i18n.publish_command_contains_forbidden_command.097d"));
                 }
             }
         }
@@ -357,23 +358,23 @@ public class BuildInfoController extends BaseServerController {
     private String formatDocker(JSONObject jsonObject, HttpServletRequest request) {
         // 发布命令
         String dockerfile = jsonObject.getString("dockerfile");
-        Assert.hasText(dockerfile, "请填写要执行的 Dockerfile 路径");
+        Assert.hasText(dockerfile, I18nMessageUtil.get("i18n.dockerfile_path_required.69ac"));
         String fromTag = jsonObject.getString("fromTag");
         if (StrUtil.isNotEmpty(fromTag)) {
-            Assert.hasText(fromTag, "请填要执行 docker 标签");
+            Assert.hasText(fromTag, I18nMessageUtil.get("i18n.docker_label_required.b690"));
             String workspaceId = dockerInfoService.getCheckUserWorkspace(request);
             int count = dockerInfoService.countByTag(workspaceId, fromTag);
-            Assert.state(count > 0, "docker tag 填写不正确,没有找到任何docker");
+            Assert.state(count > 0, I18nMessageUtil.get("i18n.docker_tag_incorrect.8b62"));
         }
         String dockerTag = jsonObject.getString("dockerTag");
-        Assert.hasText(dockerTag, "请填写镜像标签");
+        Assert.hasText(dockerTag, I18nMessageUtil.get("i18n.image_tag_required.92cf"));
         //
         String dockerSwarmId = jsonObject.getString("dockerSwarmId");
         if (StrUtil.isEmpty(dockerSwarmId)) {
             return "DockerImage";
         }
         String dockerSwarmServiceName = jsonObject.getString("dockerSwarmServiceName");
-        Assert.hasText(dockerSwarmServiceName, "请填写集群中的服务名");
+        Assert.hasText(dockerSwarmServiceName, I18nMessageUtil.get("i18n.service_name_in_cluster_required.5446"));
         return dockerSwarmId;
     }
 
@@ -382,13 +383,13 @@ public class BuildInfoController extends BaseServerController {
         String releaseCommand = jsonObject.getString("releaseCommand");
         if (StrUtil.isNotEmpty(releaseCommand)) {
             int length = releaseCommand.length();
-            Assert.state(length <= 4000, "发布命令长度限制在4000字符");
+            Assert.state(length <= 4000, I18nMessageUtil.get("i18n.publish_command_length_limit.66b0"));
         }
     }
 
     private void formatOutGiving(JSONObject jsonObject) {
         String releaseMethodDataId = jsonObject.getString("releaseMethodDataId_1");
-        Assert.hasText(releaseMethodDataId, "请选择分发项目");
+        Assert.hasText(releaseMethodDataId, I18nMessageUtil.get("i18n.distribution_project_required.2560"));
         jsonObject.put("releaseMethodDataId", releaseMethodDataId);
         //
         this.checkProjectSecondaryDirectory(jsonObject);
@@ -404,12 +405,12 @@ public class BuildInfoController extends BaseServerController {
         String releaseMethodDataId2Node = jsonObject.getString("releaseMethodDataId_2_node");
         String releaseMethodDataId2Project = jsonObject.getString("releaseMethodDataId_2_project");
 
-        Assert.state(!StrUtil.hasEmpty(releaseMethodDataId2Node, releaseMethodDataId2Project), "请选择节点和项目");
+        Assert.state(!StrUtil.hasEmpty(releaseMethodDataId2Node, releaseMethodDataId2Project), I18nMessageUtil.get("i18n.select_node_and_project.6021"));
         jsonObject.put("releaseMethodDataId", String.format("%s:%s", releaseMethodDataId2Node, releaseMethodDataId2Project));
         //
         String afterOpt = jsonObject.getString("afterOpt");
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
-        Assert.notNull(afterOpt1, "请选择打包后的操作");
+        Assert.notNull(afterOpt1, I18nMessageUtil.get("i18n.post_packaging_action_required.bf66"));
         //
         String clearOld = jsonObject.getString("clearOld");
         jsonObject.put("afterOpt", afterOpt1.getCode());
@@ -421,7 +422,7 @@ public class BuildInfoController extends BaseServerController {
     private void checkProjectSecondaryDirectory(JSONObject jsonObject) {
         //
         String projectSecondaryDirectory = jsonObject.getString("projectSecondaryDirectory");
-        Opt.ofBlankAble(projectSecondaryDirectory).ifPresent(s -> FileUtils.checkSlip(s, e -> new IllegalArgumentException("二级目录不能越级：" + e.getMessage())));
+        Opt.ofBlankAble(projectSecondaryDirectory).ifPresent(s -> FileUtils.checkSlip(s, e -> new IllegalArgumentException(I18nMessageUtil.get("i18n.second_level_directory_cannot_skip_levels.c9fb") + e.getMessage())));
     }
 
     /**
@@ -434,16 +435,16 @@ public class BuildInfoController extends BaseServerController {
     @RequestMapping(value = "/build/branch-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<JSONObject> branchList(
-        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "仓库ID不能为空") String repositoryId) throws Exception {
+        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.repository_id_cannot_be_empty.a42c") String repositoryId) throws Exception {
         // 根据 repositoryId 查询仓库信息
         RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, false);
-        Assert.notNull(repositoryModel, "无效的仓库信息");
+        Assert.notNull(repositoryModel, I18nMessageUtil.get("i18n.invalid_repository_info.b4ad"));
         //
-        Assert.state(repositoryModel.getRepoType() == 0, "只有 GIT 仓库才有分支信息");
+        Assert.state(repositoryModel.getRepoType() == 0, I18nMessageUtil.get("i18n.only_git_repositories_have_branch_info.d7f7"));
         IPlugin plugin = PluginFactory.getPlugin("git-clone");
         Map<String, Object> map = repositoryModel.toMap();
         Tuple branchAndTagList = (Tuple) plugin.execute("branchAndTagList", map);
-        Assert.notNull(branchAndTagList, "没有任何分支");
+        Assert.notNull(branchAndTagList, I18nMessageUtil.get("i18n.no_any_branch.d042"));
         JSONObject jsonObject = new JSONObject();
         List<Object> collection = branchAndTagList.toList();
         jsonObject.put("branch", CollUtil.get(collection, 0));
@@ -460,16 +461,16 @@ public class BuildInfoController extends BaseServerController {
      */
     @PostMapping(value = "/build/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public IJsonMessage<Object> delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id, HttpServletRequest request) {
+    public IJsonMessage<Object> delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.data_id_not_found.1b0a") String id, HttpServletRequest request) {
         this.delById(id, request);
-        return JsonMessage.success("删除成功,并且清理历史构建产物成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success_with_cleanup.6155"));
     }
 
 
     private void delById(String id, HttpServletRequest request) {
         // 查询构建信息
         BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);
-        Objects.requireNonNull(buildInfoModel, "没有对应数据");
+        Objects.requireNonNull(buildInfoModel, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
         //
         String e = buildExecuteService.checkStatus(buildInfoModel);
         Assert.isNull(e, () -> e);
@@ -480,7 +481,7 @@ public class BuildInfoController extends BaseServerController {
         // 快速删除
         boolean fastDel = CommandUtil.systemFastDel(file);
         //
-        Assert.state(!fastDel, "清理历史构建产物失败,已经重新尝试");
+        Assert.state(!fastDel, I18nMessageUtil.get("i18n.cleanup_history_build_failed_retrying.088e"));
         // 删除构建信息数据
         buildInfoService.delByKey(buildInfoModel.getId(), request);
     }
@@ -493,12 +494,12 @@ public class BuildInfoController extends BaseServerController {
      */
     @PostMapping(value = "/build/batch-delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public IJsonMessage<Object> batchDelete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String ids, HttpServletRequest request) {
+    public IJsonMessage<Object> batchDelete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.data_id_not_found.1b0a") String ids, HttpServletRequest request) {
         List<String> list = StrUtil.splitTrim(ids, StrUtil.COMMA);
         for (String s : list) {
             this.delById(s, request);
         }
-        return JsonMessage.success("删除成功,并且清理历史构建产物成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success_with_cleanup.6155"));
     }
 
 
@@ -510,16 +511,16 @@ public class BuildInfoController extends BaseServerController {
      */
     @PostMapping(value = "/build/clean-source", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public IJsonMessage<Object> cleanSource(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据id") String id, HttpServletRequest request) {
+    public IJsonMessage<Object> cleanSource(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.data_id_not_found.1b0a") String id, HttpServletRequest request) {
         // 查询构建信息
         BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);
-        Objects.requireNonNull(buildInfoModel, "没有对应数据");
+        Objects.requireNonNull(buildInfoModel, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
         File source = BuildUtil.getSourceById(buildInfoModel.getId());
         // 快速删除
         boolean fastDel = CommandUtil.systemFastDel(source);
         //
-        Assert.state(!fastDel, "删除文件失败,请检查");
-        return JsonMessage.success("清理成功");
+        Assert.state(!fastDel, I18nMessageUtil.get("i18n.delete_file_failure.041f"));
+        return JsonMessage.success(I18nMessageUtil.get("i18n.cleanup_succeeded.02ea"));
     }
 
     /**
@@ -540,9 +541,9 @@ public class BuildInfoController extends BaseServerController {
         } else if (StrUtil.equalsIgnoreCase(method, "down")) {
             buildInfoService.sortMoveDown(id, compareId, request);
         } else {
-            return new JsonMessage<>(400, "不支持的方式" + method);
+            return new JsonMessage<>(400, I18nMessageUtil.get("i18n.unsupported_method.a1de") + method);
         }
-        return new JsonMessage<>(200, "操作成功");
+        return new JsonMessage<>(200, I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
 }

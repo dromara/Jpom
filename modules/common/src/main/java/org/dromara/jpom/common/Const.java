@@ -9,6 +9,10 @@
  */
 package org.dromara.jpom.common;
 
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
+
+import java.util.function.Supplier;
+
 /**
  * @author Hotstrip
  * Const class
@@ -17,7 +21,7 @@ public class Const {
     /**
      * 升级提示语
      */
-    public static final String UPGRADE_MSG = "升级(重启)中大约需要30秒～2分钟左右";
+    public static final Supplier<String> UPGRADE_MSG = () -> I18nMessageUtil.get("i18n.upgrade_duration_message.bab4");
 
     /**
      * 请求 header
@@ -34,7 +38,7 @@ public class Const {
     /**
      * 默认的分组名
      */
-    public static final String DEFAULT_GROUP_NAME = "默认";
+    public static final Supplier<String> DEFAULT_GROUP_NAME = () -> I18nMessageUtil.get("i18n.default_setting.18c6");
 //    /**
 //     * websocket 传输 agent 包 buffer size
 //     */

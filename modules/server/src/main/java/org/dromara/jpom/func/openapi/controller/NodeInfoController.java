@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.ServerOpenApi;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.interceptor.NotLogin;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
@@ -71,12 +72,12 @@ public class NodeInfoController extends BaseServerController {
      */
     @RequestMapping(value = ServerOpenApi.RECEIVE_PUSH, method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @NotLogin
-    public IJsonMessage<JSONObject> receivePush(@ValidatorItem(msg = "token empty") String token,
-                                                @ValidatorItem(msg = "ips empty") String ips,
-                                                @ValidatorItem(msg = "loginName empty") String loginName,
-                                                @ValidatorItem(msg = "loginPwd empty") String loginPwd,
-                                                @ValidatorItem(msg = "workspaceId empty") String workspaceId,
-                                                @ValidatorItem(value = ValidatorRule.NUMBERS, msg = "port error") int port,
+    public IJsonMessage<JSONObject> receivePush(@ValidatorItem(msg = "i18n.credential_cannot_be_empty.d055") String token,
+                                                @ValidatorItem(msg = "i18n.communication_ip_cannot_be_empty.ae35") String ips,
+                                                @ValidatorItem(msg = "i18n.login_name_cannot_be_empty.9a99") String loginName,
+                                                @ValidatorItem(msg = "i18n.password_cannot_be_empty.89b5") String loginPwd,
+                                                @ValidatorItem(msg = "i18n.workspace_id_required.c967") String workspaceId,
+                                                @ValidatorItem(value = ValidatorRule.NUMBERS, msg = "i18n.port_error.312e") int port,
                                                 String ping) {
         Assert.state(StrUtil.equals(token, JpomManifest.getInstance().randomIdSign()), "token error");
         boolean exists = workspaceService.exists(new WorkspaceModel(workspaceId));
@@ -96,7 +97,7 @@ public class NodeInfoController extends BaseServerController {
             try {
                 machineNodeServer.testNode(model);
             } catch (Exception e) {
-                log.warn("测试结果：{} {}", model.getJpomUrl(), e.getMessage());
+                log.warn(I18nMessageUtil.get("i18n.test_result.8441"), model.getJpomUrl(), e.getMessage());
                 return null;
             }
             return model;

@@ -13,6 +13,7 @@ import cn.hutool.core.thread.ExecutorBuilder;
 import cn.hutool.core.util.RuntimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.AssetsConfig;
 import org.springframework.stereotype.Service;
 
@@ -52,7 +53,7 @@ public class AssetsExecutorPoolService {
                     executorBuilder.setHandler(new ThreadPoolExecutor.DiscardPolicy() {
                         @Override
                         public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
-                            log.warn("资产监控线程池拒绝了任务：{}", r.getClass());
+                            log.warn(I18nMessageUtil.get("i18n.asset_monitoring_thread_pool_rejected_task.222e"), r.getClass());
                         }
                     });
                     threadPoolExecutor = executorBuilder.build();

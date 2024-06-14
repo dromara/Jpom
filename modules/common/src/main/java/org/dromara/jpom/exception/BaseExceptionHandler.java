@@ -16,6 +16,7 @@ import cn.hutool.system.SystemUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.controller.BaseMyErrorController;
 import org.dromara.jpom.system.JpomRuntimeException;
 import org.springframework.http.HttpStatus;
@@ -56,9 +57,9 @@ public abstract class BaseExceptionHandler {
             log.error("global handle exception: {}", request.getRequestURI(), e);
             boolean causedBy = ExceptionUtil.isCausedBy(e, AccessDeniedException.class);
             if (causedBy) {
-                return new JsonMessage<>(500, "操作文件权限异常,请手动处理：" + e.getMessage());
+                return new JsonMessage<>(500, I18nMessageUtil.get("i18n.operation_file_permission_exception.5a41") + e.getMessage());
             }
-            return new JsonMessage<>(500, "服务异常：" + e.getMessage());
+            return new JsonMessage<>(500, I18nMessageUtil.get("i18n.service_exception.3821") + e.getMessage());
         }
     }
 
@@ -67,7 +68,7 @@ public abstract class BaseExceptionHandler {
     public IJsonMessage<String> defNullPointerExceptionHandler(HttpServletRequest request, Exception e) {
         log.error("global NullPointerException: {}", request.getRequestURI(), e);
         String jpomType = SystemUtil.get("JPOM_TYPE", StrUtil.EMPTY);
-        return new JsonMessage<>(500, jpomType + "程序错误,空指针");
+        return new JsonMessage<>(500, jpomType + I18nMessageUtil.get("i18n.program_error_null_pointer.12e1"));
     }
 
     /**
@@ -91,20 +92,20 @@ public abstract class BaseExceptionHandler {
     @ExceptionHandler({HttpMessageNotReadableException.class, HttpMessageConversionException.class})
     @ResponseBody
     public IJsonMessage<String> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
-        log.warn("参数解析异常:{}", e.getMessage());
-        return new JsonMessage<>(HttpStatus.EXPECTATION_FAILED.value(), "传入的参数格式不正确");
+        log.warn(I18nMessageUtil.get("i18n.parameter_parsing_exception.0056"), e.getMessage());
+        return new JsonMessage<>(HttpStatus.EXPECTATION_FAILED.value(), I18nMessageUtil.get("i18n.incorrect_parameter_format.9efb"));
     }
 
     @ExceptionHandler({HttpRequestMethodNotSupportedException.class, HttpMediaTypeNotSupportedException.class})
     @ResponseBody
     public IJsonMessage<String> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
-        return new JsonMessage<>(HttpStatus.METHOD_NOT_ALLOWED.value(), "不被支持的请求方式", e.getMessage());
+        return new JsonMessage<>(HttpStatus.METHOD_NOT_ALLOWED.value(), I18nMessageUtil.get("i18n.unsupported_request_method.45d7"), e.getMessage());
     }
 
     @ExceptionHandler({NoHandlerFoundException.class})
     @ResponseBody
     public IJsonMessage<String> handleNoHandlerFoundException(NoHandlerFoundException e) {
-        return new JsonMessage<>(HttpStatus.NOT_FOUND.value(), "没有找到对应的资源", e.getMessage());
+        return new JsonMessage<>(HttpStatus.NOT_FOUND.value(), I18nMessageUtil.get("i18n.no_resource_found.dc22"), e.getMessage());
     }
 
     /**
@@ -115,22 +116,22 @@ public abstract class BaseExceptionHandler {
     @ExceptionHandler({MaxUploadSizeExceededException.class})
     @ResponseBody
     public IJsonMessage<String> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
-        log.error("上传文件大小超出限制", e);
-        return new JsonMessage<>(HttpStatus.NOT_ACCEPTABLE.value(), BaseMyErrorController.FILE_MAX_SIZE_MSG, e.getMessage());
+        log.error(I18nMessageUtil.get("i18n.file_size_exceeds_limit.8272"), e);
+        return new JsonMessage<>(HttpStatus.NOT_ACCEPTABLE.value(), BaseMyErrorController.FILE_MAX_SIZE_MSG.get(), e.getMessage());
     }
 
     @ExceptionHandler({ConstructorException.class})
     @ResponseBody
     public IJsonMessage<String> handleConstructorException(ConstructorException e) {
-        log.warn("yml 配置内容错误", e);
-        return new JsonMessage<>(HttpStatus.EXPECTATION_FAILED.value(), "yml 配置内容格式有误请检查后重新操作（请检查是否有非法字段）：" + e.getMessage());
+        log.warn(I18nMessageUtil.get("i18n.yml_configuration_content_error.08f8"), e);
+        return new JsonMessage<>(HttpStatus.EXPECTATION_FAILED.value(), I18nMessageUtil.get("i18n.yml_config_format_error_illegal_field.16ea") + e.getMessage());
     }
 
     @ExceptionHandler({ScannerException.class})
     @ResponseBody
     public IJsonMessage<String> handleScannerException(ScannerException e) {
         log.warn("ScannerException", e);
-        return new JsonMessage<>(HttpStatus.EXPECTATION_FAILED.value(), "yml 配置内容格式有误请检查后重新操作（不要使用 \\t(TAB) 缩进）：" + e.getMessage());
+        return new JsonMessage<>(HttpStatus.EXPECTATION_FAILED.value(), I18nMessageUtil.get("i18n.yml_config_format_error_tab.f629") + e.getMessage());
     }
 
 }

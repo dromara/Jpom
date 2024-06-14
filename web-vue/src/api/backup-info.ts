@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 ///
 /// Copyright (c) 2019 Of Him Code Technology Studio
 /// Jpom is licensed under Mulan PSL v2.
@@ -38,7 +39,7 @@ export function getTableNameList() {
 
 /**
  * 创建备份信息
- * @param tableNameList 需要备份的表名称列表，没有默认表示全量备份
+ * @param tableNameList 需要备份的表名称列表，没有默认表示api.backup-info.945bddc
  */
 export function createBackup(tableNameList) {
   const data = {
@@ -112,10 +113,10 @@ export function uploadBackupFile(formData) {
 }
 
 export const backupTypeArray = [
-  { key: 0, value: '全量备份', disabled: false },
-  { key: 1, value: '部分备份', disabled: false },
-  { key: 2, value: '导入备份', disabled: true },
-  { key: 3, value: '自动备份', disabled: true }
+  { key: 0, value: t('api.backup-info.945bddc'), disabled: false },
+  { key: 1, value: t('api.backup-info.4e769e75'), disabled: false },
+  { key: 2, value: t('api.backup-info.8cefd9a6'), disabled: true },
+  { key: 3, value: t('api.backup-info.bc583419'), disabled: true }
 ]
 
 export const arrayToMap = (arra) => {
@@ -129,7 +130,7 @@ export const arrayToMap = (arra) => {
 export const backupTypeMap = arrayToMap(backupTypeArray)
 
 export const backupStatusMap = {
-  0: '处理中',
-  1: '处理成功',
-  2: '处理失败'
+  0: t('api.backup-info.fc1391c9'),
+  1: t('api.backup-info.6d865b0a'),
+  2: t('api.backup-info.78bc7266')
 }

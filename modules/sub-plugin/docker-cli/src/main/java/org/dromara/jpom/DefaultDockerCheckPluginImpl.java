@@ -29,6 +29,7 @@ import com.github.dockerjava.core.RemoteApiVersion;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.plugin.IDefaultPlugin;
 import org.springframework.util.Assert;
 
@@ -184,15 +185,15 @@ public class DefaultDockerCheckPluginImpl implements IDefaultPlugin {
             dockerClient.pingCmd().exec();
             return null;
         } catch (UnauthorizedException unauthorizedException) {
-            log.warn("docker 授权失败:{}", unauthorizedException.getMessage());
-            return "授权失败:" + unauthorizedException.getMessage();
+            log.warn(I18nMessageUtil.get("i18n.docker_authorization_failed.8ede"), unauthorizedException.getMessage());
+            return I18nMessageUtil.get("i18n.auth_failed.2765") + unauthorizedException.getMessage();
         } catch (Exception e) {
-            log.warn("检查 docker url 异常 {}", e.getMessage());
+            log.warn(I18nMessageUtil.get("i18n.check_docker_url_exception.4302"), e.getMessage());
             if (ExceptionUtil.isCausedBy(e, SSLHandshakeException.class)) {
-                return "SSL 无法连接(请检查证书信任的地址和配置的 docker host 是否一致):" + e.getMessage();
+                return I18nMessageUtil.get("i18n.ssl_connection_failed.e26c") + e.getMessage();
             }
-            log.warn("检查 docker url 异常 {}", e.getMessage());
-            return StrUtil.emptyToDefault(e.getMessage(), "检查 docker 异常");
+            log.warn(I18nMessageUtil.get("i18n.check_docker_url_exception.4302"), e.getMessage());
+            return StrUtil.emptyToDefault(e.getMessage(), I18nMessageUtil.get("i18n.check_docker_exception.a6d1"));
         }
     }
 

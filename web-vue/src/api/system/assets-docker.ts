@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 ///
 /// Copyright (c) 2019 Of Him Code Technology Studio
 /// Jpom is licensed under Mulan PSL v2.
@@ -145,6 +146,6 @@ export function dockerListWorkspace(params) {
 }
 
 export const statusMap = {
-  0: { desc: '无法连接', color: 'red' },
-  1: { desc: '正常连接', color: 'green' }
+  0: { desc: t('api.system.assets-docker.b26020d2'), color: 'red' },
+  1: { desc: t('api.system.assets-docker.591ff086'), color: 'green' }
 }

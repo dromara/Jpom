@@ -21,6 +21,7 @@ import cn.keepbx.jpom.model.JsonMessage;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.controller.outgiving.OutGivingWhitelistService;
@@ -127,9 +128,9 @@ public class CertificateInfoController extends BaseServerController {
     @PostMapping(value = "import-file", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
     public IJsonMessage<String> importFile(MultipartFile file, @ValidatorItem String type, String password) {
-        Assert.notNull(file, "没有上传文件");
+        Assert.notNull(file, I18nMessageUtil.get("i18n.no_uploaded_file.07ef"));
         String filename = file.getOriginalFilename();
-        Assert.notNull(filename, "没有文件名");
+        Assert.notNull(filename, I18nMessageUtil.get("i18n.file_name_not_found.b0ed"));
         File tempPath = FileUtil.file(serverConfig.getUserTempPath(), "cert", IdUtil.fastSimpleUUID());
         CertificateInfoModel certificateInfoModel;
         try {
@@ -142,7 +143,7 @@ public class CertificateInfoController extends BaseServerController {
                     certificateInfoModel = this.resolveX509(file, tempPath);
                     break;
                 default:
-                    throw new IllegalArgumentException("不支持的模式：" + type);
+                    throw new IllegalArgumentException(I18nMessageUtil.get("i18n.unsupported_mode_with_colon.c6de") + type);
             }
         } catch (Exception e) {
             throw Lombok.sneakyThrow(e);
@@ -150,7 +151,7 @@ public class CertificateInfoController extends BaseServerController {
             FileUtil.file(tempPath);
         }
         certificateInfoService.insert(certificateInfoModel);
-        return JsonMessage.success("上传成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.upload_success.a769"));
     }
 
 
@@ -167,7 +168,7 @@ public class CertificateInfoController extends BaseServerController {
         FileUtil.mkdir(tempPath);
         String filename = multipartFile.getOriginalFilename();
         String extName = FileUtil.extName(filename);
-        Assert.state(StrUtil.containsIgnoreCase(extName, "zip"), "上传的文件不是 zip");
+        Assert.state(StrUtil.containsIgnoreCase(extName, "zip"), I18nMessageUtil.get("i18n.invalid_file_type.7246"));
         File saveFile = FileUtil.file(tempPath, filename);
         multipartFile.transferTo(saveFile);
         ZipUtil.unzip(saveFile, tempPath);
@@ -211,7 +212,7 @@ public class CertificateInfoController extends BaseServerController {
             ZipUtil.unzip(saveFile, tempPath);
             // 找到 suffix
             File[] files = tempPath.listFiles();
-            Assert.notEmpty(files, "压缩包里没有任何文件");
+            Assert.notEmpty(files, I18nMessageUtil.get("i18n.no_files_in_zip.1af6"));
             for (File file1 : files) {
                 String extName2 = FileUtil.extName(file1);
                 if (pfxFile == null && StrUtil.equalsIgnoreCase(extName2, suffix)) {
@@ -222,9 +223,9 @@ public class CertificateInfoController extends BaseServerController {
                 }
             }
         } else {
-            throw new IllegalArgumentException("不支持的文件格式");
+            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.file_format_not_supported.eac4"));
         }
-        Assert.notNull(pfxFile, "没有找到 " + suffix + " 文件");
+        Assert.notNull(pfxFile, StrUtil.format(I18nMessageUtil.get("i18n.no_file_found.6f1b"), suffix));
         try {
             char[] passwordChars = StrUtil.emptyToDefault(newPassword, StrUtil.EMPTY).toCharArray();
             KeyStore keyStore = StrUtil.equals(suffix, "jks") ? KeyUtil.readJKSKeyStore(pfxFile, passwordChars) : KeyUtil.readPKCS12KeyStore(pfxFile, passwordChars);
@@ -245,7 +246,7 @@ public class CertificateInfoController extends BaseServerController {
                 certificateInfoModel.setKeyAlias(keyAlias);
                 // 判断是否存在
                 Assert.state(!certificateInfoService.checkRepeat(certificateInfoModel.getSerialNumberStr(), certificateInfoModel.getKeyType()),
-                    "当前证书已经存在啦(系统全局范围内)");
+                    I18nMessageUtil.get("i18n.certificate_already_exists.adf9"));
                 //certificateInfoService.checkRepeat(certificateInfoModel.getSerialNumberStr(), certificateInfoModel.getKeyType());
 
                 certificateInfoModel.setCertPassword(newPassword);
@@ -257,13 +258,13 @@ public class CertificateInfoController extends BaseServerController {
                 FileUtil.move(pfxFile, file1, true);
                 return certificateInfoModel;
             } else {
-                throw new IllegalStateException("证书没有任何：aliases");
+                throw new IllegalStateException(I18nMessageUtil.get("i18n.certificate_has_no_aliases.3a2f"));
             }
         } catch (IllegalStateException | IllegalArgumentException e) {
             throw Lombok.sneakyThrow(e);
         } catch (Exception e) {
-            log.error("解析证书异常", e);
-            throw new IllegalStateException("解析证书发生未知错误：" + e.getMessage());
+            log.error(I18nMessageUtil.get("i18n.parse_certificate_exception.3b6c"), e);
+            throw new IllegalStateException(I18nMessageUtil.get("i18n.parse_certificate_unknown_error.c43c") + e.getMessage());
         }
     }
 
@@ -276,7 +277,7 @@ public class CertificateInfoController extends BaseServerController {
         MachineDockerModel machineDockerModel = new MachineDockerModel();
         machineDockerModel.setCertInfo(model.getSerialNumberStr() + StrUtil.COLON + model.getKeyType());
         long count = machineDockerServer.count(machineDockerModel);
-        Assert.state(count == 0, "当前证书被 docker 关联中,不能直接删除");
+        Assert.state(count == 0, I18nMessageUtil.get("i18n.certificate_in_use_by_docker.dd63"));
         //
         File file = certificateInfoService.getFilePath(model);
         FileUtil.del(file);
@@ -286,7 +287,7 @@ public class CertificateInfoController extends BaseServerController {
         }
         //
         certificateInfoService.delByKey(id);
-        return JsonMessage.success("删除成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -303,7 +304,7 @@ public class CertificateInfoController extends BaseServerController {
         //
         certificateInfoModel.setWorkspaceId(certificateInfoService.covertGlobalWorkspace(request));
         certificateInfoService.updateById(certificateInfoModel);
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 
     /**
@@ -315,7 +316,7 @@ public class CertificateInfoController extends BaseServerController {
     public void export(@ValidatorItem String id, HttpServletRequest request, HttpServletResponse response) {
         CertificateInfoModel model = certificateInfoService.getByKeyAndGlobal(id, request);
         File file = certificateInfoService.getFilePath(model);
-        Assert.state(!FileUtil.isEmpty(file), "证书文件丢失");
+        Assert.state(!FileUtil.isEmpty(file), I18nMessageUtil.get("i18n.certificate_file_missing.c663"));
 
         File userTempPath = serverConfig.getUserTempPath();
         File tempSave = FileUtil.file(userTempPath, IdUtil.fastSimpleUUID());
@@ -343,12 +344,12 @@ public class CertificateInfoController extends BaseServerController {
         // 判断参数
         ServerWhitelist configDeNewInstance = outGivingWhitelistService.getServerWhitelistData(request);
         List<String> whitelistServerOutGiving = configDeNewInstance.getOutGiving();
-        Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, releasePathParent), "请选择正确的项目路径,或者还没有配置授权");
-        Assert.hasText(releasePathSecondary, "请填写发布文件的二级目录");
+        Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, releasePathParent), I18nMessageUtil.get("i18n.select_correct_project_path_or_no_auth_configured.366a"));
+        Assert.hasText(releasePathSecondary, I18nMessageUtil.get("i18n.publish_file_second_level_directory_required.2f65"));
         // 判断证书是否存在
         CertificateInfoModel model = certificateInfoService.getByKeyAndGlobal(id, request);
         File file = certificateInfoService.getFilePath(model);
-        Assert.state(!FileUtil.isEmpty(file), "证书文件丢失");
+        Assert.state(!FileUtil.isEmpty(file), I18nMessageUtil.get("i18n.certificate_file_missing.c663"));
         File userTempPath = serverConfig.getUserTempPath();
         File tempSave = FileUtil.file(userTempPath, IdUtil.fastSimpleUUID());
         try {

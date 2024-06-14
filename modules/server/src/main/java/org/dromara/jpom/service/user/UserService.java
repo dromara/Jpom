@@ -19,6 +19,7 @@ import cn.hutool.crypto.SecureUtil;
 import cn.hutool.db.Entity;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.controller.user.UserWorkspaceModel;
 import org.dromara.jpom.model.data.WorkspaceModel;
 import org.dromara.jpom.model.dto.UserLoginDto;
@@ -113,9 +114,9 @@ public class UserService extends BaseDbService<UserModel> {
         String sql = "select password from " + this.tableName + " where id=?";
         List<Entity> query = super.query(sql, id);
         Entity first = CollUtil.getFirst(query);
-        Assert.notEmpty(first, "没有对应的用户信息");
+        Assert.notEmpty(first, I18nMessageUtil.get("i18n.no_user_info.0355"));
         String password = (String) first.get("password");
-        Assert.hasText(password, "没有对应的用户信息");
+        Assert.hasText(password, I18nMessageUtil.get("i18n.no_user_info.0355"));
         return new UserLoginDto(JwtUtil.builder(userModel, password), password);
     }
 
@@ -179,7 +180,7 @@ public class UserService extends BaseDbService<UserModel> {
         }
         String newPwd = RandomUtil.randomString(UserModel.SALT_LEN);
         this.updatePwd(queryByBean.getId(), SecureUtil.sha1(newPwd));
-        return StrUtil.format("重置超级管理员账号密码成功,登录账号为：{} 新密码为：{}", queryByBean.getId(), newPwd);
+        return StrUtil.format(I18nMessageUtil.get("i18n.reset_super_admin_password_success.50c6"), queryByBean.getId(), newPwd);
     }
 
     /**
@@ -193,7 +194,7 @@ public class UserService extends BaseDbService<UserModel> {
         UserModel update = new UserModel();
         update.setTwoFactorAuthKey(StrUtil.EMPTY);
         int count = super.update(super.dataBeanToEntity(update), super.dataBeanToEntity(where));
-        return StrUtil.format("成功关闭超级管理员账号 mfa 验证：{} ", count);
+        return StrUtil.format(I18nMessageUtil.get("i18n.super_admin_mfa_verification_disabled.b97d"), count);
     }
 
     /**
@@ -215,7 +216,7 @@ public class UserService extends BaseDbService<UserModel> {
      */
     public boolean hasBindMfa(String useId) {
         UserModel byKey = super.getByKey(useId, false);
-        Assert.notNull(byKey, "用户不存在");
+        Assert.notNull(byKey, I18nMessageUtil.get("i18n.user_not_exist.4892"));
         return !StrUtil.isEmpty(byKey.getTwoFactorAuthKey()) && !StrUtil.equals(byKey.getTwoFactorAuthKey(), "ignore");
     }
 
@@ -241,16 +242,16 @@ public class UserService extends BaseDbService<UserModel> {
      */
     public boolean verifyMfaCode(String userId, String code) {
         UserModel byKey = super.getByKey(userId, false);
-        Assert.notNull(byKey, "用户不存在");
+        Assert.notNull(byKey, I18nMessageUtil.get("i18n.user_not_exist.4892"));
         if (StrUtil.isEmpty(byKey.getTwoFactorAuthKey()) || StrUtil.equals(byKey.getTwoFactorAuthKey(), "ignore")) {
-            throw new IllegalStateException("当前账号没有开启两步验证");
+            throw new IllegalStateException(I18nMessageUtil.get("i18n.account_mfa_not_enabled.fd39"));
         }
         return TwoFactorAuthUtils.validateTFACode(byKey.getTwoFactorAuthKey(), code);
     }
 
     public List<UserWorkspaceModel> myWorkspace(UserModel user) {
         List<WorkspaceModel> models = userBindWorkspaceService.listUserWorkspaceInfo(user);
-        Assert.notEmpty(models, "当前账号没有绑定任何工作空间，请联系管理员处理");
+        Assert.notEmpty(models, I18nMessageUtil.get("i18n.account_not_bound_to_any_workspace.fd61"));
         JSONObject parametersServerConfig = systemParametersServer.getConfig("user-my-workspace-" + user.getId(), JSONObject.class);
         return models.stream()
             .map(workspaceModel -> {

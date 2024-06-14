@@ -30,6 +30,7 @@ import com.github.dockerjava.core.NameParser;
 import lombok.Lombok;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.util.Assert;
 
@@ -63,7 +64,7 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
             }
         }
         Method method = ReflectUtil.getMethodByName(this.getClass(), type + "Cmd");
-        Assert.notNull(method, "不支持的类型:" + type);
+        Assert.notNull(method, I18nMessageUtil.get("i18n.unsupported_type_with_colon.1050") + type);
         try {
             return ReflectUtil.invoke(this, method, parameter);
         } catch (InvocationTargetRuntimeException exception) {
@@ -88,7 +89,7 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
         String pruneTypeStr = (String) parameter.get("pruneType");
 
         PruneType pruneType = EnumUtil.fromString(PruneType.class, pruneTypeStr, null);
-        Assert.notNull(pruneType, "pruneType 未知");
+        Assert.notNull(pruneType, I18nMessageUtil.get("i18n.unknown_prune_type.0931"));
         String until = (String) parameter.get("until");
         String labels = (String) parameter.get("labels");
         String dangling = (String) parameter.get("dangling");
@@ -213,7 +214,7 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
 
         Consumer<String> logConsumer = (Consumer<String>) parameter.get("logConsumer");
         String repositoryStr = (String) parameter.get("repository");
-        Assert.hasText(repositoryStr, "请填写镜名称");
+        Assert.hasText(repositoryStr, I18nMessageUtil.get("i18n.image_name_required.ab44"));
         NameParser.ReposTag reposTag = NameParser.parseRepositoryTag(repositoryStr);
         // 解析 tag
         String tag = reposTag.tag;
@@ -354,7 +355,7 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
                 }
             }).awaitCompletion();
         } catch (InterruptedException e) {
-            logConsumer.accept("push image 被中断:" + e);
+            logConsumer.accept(I18nMessageUtil.get("i18n.push_image_interrupted.6377") + e);
         }
     }
 
@@ -420,7 +421,7 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
             }).awaitCompletion();
             return !hasError[0];
         } catch (InterruptedException e) {
-            logConsumer.accept("容器 build 被中断:" + e);
+            logConsumer.accept(I18nMessageUtil.get("i18n.container_build_interrupted.a17b") + e);
             return false;
         } finally {
             IoUtil.close(callback);
@@ -458,7 +459,7 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
                 }
             }).awaitCompletion();
         } catch (InterruptedException e) {
-            errorConsumer.accept("容器cli被中断:" + e);
+            errorConsumer.accept(I18nMessageUtil.get("i18n.container_cli_interrupted.b67f") + e);
         } finally {
             errorConsumer.accept("exit");
             IoUtil.close(callback);
@@ -505,7 +506,7 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
             Boolean timestamps = Convert.toBool(parameter.get("timestamps"));
             DockerClientUtil.pullLog(dockerClient, containerId, timestamps, tail, charset, consumer, autoCloseable -> DockerUtil.putClose(uuid, autoCloseable));
         } catch (InterruptedException e) {
-            consumer.accept("获取容器日志被中断:" + e);
+            consumer.accept(I18nMessageUtil.get("i18n.get_container_log_interrupted_message.83a5") + e);
         } finally {
             DockerUtil.close(uuid);
         }
@@ -577,7 +578,7 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
                 dockerClient.removeImageCmd(imageId).withForce(false).exec();
                 successCount++;
             } catch (Exception e) {
-                log.warn("删除容器异常", e);
+                log.warn(I18nMessageUtil.get("i18n.delete_container_exception.9ad8"), e);
             }
         }
         failCount = imagesIds.length - successCount;

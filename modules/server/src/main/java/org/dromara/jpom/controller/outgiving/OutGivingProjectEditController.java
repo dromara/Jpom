@@ -26,6 +26,7 @@ import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.AfterOpt;
 import org.dromara.jpom.model.BaseEnum;
@@ -98,7 +99,7 @@ public class OutGivingProjectEditController extends BaseServerController {
             //boolean general = StringUtil.isGeneral(id, 2, 20);
             //Assert.state(general, "分发id 不能为空并且长度在2-20（英文字母 、数字和下划线）");
             String checkId = StrUtil.replace(id, StrUtil.DASHED, StrUtil.UNDERLINE);
-            Validator.validateGeneral(checkId, 2, Const.ID_MAX_LEN, "分发id 不能为空并且长度在2-20（英文字母 、数字和下划线）");
+            Validator.validateGeneral(checkId, 2, Const.ID_MAX_LEN, I18nMessageUtil.get("i18n.distribute_id_requirements.9c63"));
             return addOutGiving(id, request);
         } else {
             return updateGiving(id, request);
@@ -115,13 +116,13 @@ public class OutGivingProjectEditController extends BaseServerController {
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<String> delete(String id, String thorough, HttpServletRequest request) {
         OutGivingModel outGivingModel = outGivingServer.getByKey(id, request);
-        Assert.notNull(outGivingModel, "没有对应的分发项目");
+        Assert.notNull(outGivingModel, I18nMessageUtil.get("i18n.no_corresponding_distribution_project.6dcd"));
 
         // 判断构建
         boolean releaseMethod = buildService.checkReleaseMethod(id, request, BuildReleaseMethod.Outgiving);
-        Assert.state(!releaseMethod, "当前分发存在构建项，不能删除");
+        Assert.state(!releaseMethod, I18nMessageUtil.get("i18n.distribution_with_build_items_message.45f5"));
         //
-        Assert.state(outGivingModel.outGivingProject(), "该项目不是节点分发项目,不能在此次删除");
+        Assert.state(outGivingModel.outGivingProject(), I18nMessageUtil.get("i18n.project_is_not_node_distribution_project_cannot_delete.2a5a"));
 
         List<OutGivingNodeProject> deleteNodeProject = outGivingModel.outGivingNodeProjectList();
         if (deleteNodeProject != null) {
@@ -130,7 +131,7 @@ public class OutGivingProjectEditController extends BaseServerController {
                 NodeModel nodeModel = nodeService.getByKey(outGivingNodeProject1.getNodeId());
                 JsonMessage<String> jsonMessage = this.deleteNodeProject(nodeModel, outGivingNodeProject1.getProjectId(), thorough);
                 if (!jsonMessage.success()) {
-                    return new JsonMessage<>(406, nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());
+                    return new JsonMessage<>(406, nodeModel.getName() + I18nMessageUtil.get("i18n.node_failed.20d5") + jsonMessage.getMsg());
                 }
             }
         }
@@ -142,13 +143,13 @@ public class OutGivingProjectEditController extends BaseServerController {
             where.set("outGivingId", id);
             dbOutGivingLogService.del(where);
         }
-        return JsonMessage.success("删除成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 
     private IJsonMessage<String> addOutGiving(String id, HttpServletRequest request) {
         // 全局判断 id
         OutGivingModel outGivingModel = outGivingServer.getByKey(id);
-        Assert.isNull(outGivingModel, "分发id已经存在啦");
+        Assert.isNull(outGivingModel, I18nMessageUtil.get("i18n.distribute_id_already_exists.2168"));
 
         outGivingModel = new OutGivingModel();
         outGivingModel.setOutGivingProject(true);
@@ -158,18 +159,18 @@ public class OutGivingProjectEditController extends BaseServerController {
 
         outGivingServer.insert(outGivingModel);
         IJsonMessage<String> error = saveNodeData(outGivingModel, tuples, false);
-        return Optional.ofNullable(error).orElseGet(() -> JsonMessage.success("添加成功"));
+        return Optional.ofNullable(error).orElseGet(() -> JsonMessage.success(I18nMessageUtil.get("i18n.addition_succeeded.3fda")));
     }
 
 
     private IJsonMessage<String> updateGiving(String id, HttpServletRequest request) {
         OutGivingModel outGivingModel = outGivingServer.getByKey(id, request);
-        Assert.notNull(outGivingModel, "没有找到对应的分发id");
+        Assert.notNull(outGivingModel, I18nMessageUtil.get("i18n.no_distribution_id_found.8df2"));
         List<Tuple> tuples = doData(outGivingModel, true, request);
 
         outGivingServer.updateById(outGivingModel);
         IJsonMessage<String> error = saveNodeData(outGivingModel, tuples, true);
-        return Optional.ofNullable(error).orElseGet(() -> JsonMessage.success("修改成功"));
+        return Optional.ofNullable(error).orElseGet(() -> JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be")));
     }
 
     /**
@@ -200,19 +201,19 @@ public class OutGivingProjectEditController extends BaseServerController {
                         fail = true;
                         outGivingServer.delByKey(outGivingModel.getId());
                     }
-                    return new JsonMessage<>(406, nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());
+                    return new JsonMessage<>(406, nodeModel.getName() + I18nMessageUtil.get("i18n.node_failed.20d5") + jsonMessage.getMsg());
                 }
                 success.add(tuple);
                 // 同步项目信息
                 projectInfoCacheService.syncNode(nodeModel, outGivingModel.getId());
             }
         } catch (Exception e) {
-            log.error("保存分发项目失败", e);
+            log.error(I18nMessageUtil.get("i18n.save_distribution_project_failed.ceec"), e);
             if (!edit) {
                 fail = true;
                 outGivingServer.delByKey(outGivingModel.getId());
             }
-            return new JsonMessage<>(500, "保存节点数据失败:" + e.getMessage());
+            return new JsonMessage<>(500, I18nMessageUtil.get("i18n.save_node_data_failed.f314") + e.getMessage());
         } finally {
             if (fail) {
                 try {
@@ -220,7 +221,7 @@ public class OutGivingProjectEditController extends BaseServerController {
                         deleteNodeProject(entry.get(0), outGivingModel.getId(), null);
                     }
                 } catch (Exception e) {
-                    log.error("还原项目失败", e);
+                    log.error(I18nMessageUtil.get("i18n.restore_project_failed.7f7c"), e);
                 }
             }
         }
@@ -288,12 +289,12 @@ public class OutGivingProjectEditController extends BaseServerController {
         String whitelistDirectory = getParameter("whitelistDirectory");
         ServerWhitelist configDeNewInstance = outGivingWhitelistService.getServerWhitelistData(request);
         List<String> whitelistServerOutGiving = configDeNewInstance.getOutGiving();
-        Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, whitelistDirectory), "请选择正确的项目路径,或者还没有配置授权");
+        Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, whitelistDirectory), I18nMessageUtil.get("i18n.select_correct_project_path_or_no_auth_configured.366a"));
 
         defData.put("whitelistDirectory", whitelistDirectory);
         String logPath = getParameter("logPath");
         if (StrUtil.isNotEmpty(logPath)) {
-            Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, logPath), "请选择正确的日志路径,或者还没有配置授权");
+            Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, logPath), I18nMessageUtil.get("i18n.select_correct_log_path_or_no_auth_configured.9a9b"));
             defData.put("logPath", logPath);
         }
         String lib = getParameter("lib");
@@ -315,7 +316,7 @@ public class OutGivingProjectEditController extends BaseServerController {
     private List<Tuple> doData(OutGivingModel outGivingModel, boolean edit, HttpServletRequest request) {
         outGivingModel.setName(getParameter("name"));
         outGivingModel.setGroup(getParameter("group"));
-        Assert.hasText(outGivingModel.getName(), "分发名称不能为空");
+        Assert.hasText(outGivingModel.getName(), I18nMessageUtil.get("i18n.distribute_name_cannot_be_empty.0637"));
         //
         int intervalTime = getParameterInt("intervalTime", 10);
         outGivingModel.setIntervalTime(intervalTime);
@@ -324,12 +325,12 @@ public class OutGivingProjectEditController extends BaseServerController {
         String nodeIdsStr = getParameter("nodeIds");
         List<String> nodeIds = StrUtil.splitTrim(nodeIdsStr, StrUtil.COMMA);
         //List<NodeModel> nodeModelList = nodeService.listByWorkspace(request);
-        Assert.notEmpty(nodeIds, "没有任何节点信息");
+        Assert.notEmpty(nodeIds, I18nMessageUtil.get("i18n.no_node_info.6366"));
 
         //
         String afterOpt = getParameter("afterOpt");
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
-        Assert.notNull(afterOpt1, "请选择分发后的操作");
+        Assert.notNull(afterOpt1, I18nMessageUtil.get("i18n.post_distribution_action_required.8cc8"));
         outGivingModel.setAfterOpt(afterOpt1.getCode());
         JSONObject defData = getDefData(outGivingModel, edit, request);
 
@@ -342,7 +343,7 @@ public class OutGivingProjectEditController extends BaseServerController {
 
         for (String nodeId : nodeIds) {
             NodeModel nodeModel = nodeService.getByKey(nodeId);
-            Assert.notNull(nodeModel, "对应的节点不存在");
+            Assert.notNull(nodeModel, I18nMessageUtil.get("i18n.node_not_exist.760e"));
             //String add = getParameter("add_" + nodeModel.getId());
 //			if (!nodeModel.getId().equals(add)) {
 //				iterator.remove();
@@ -354,7 +355,7 @@ public class OutGivingProjectEditController extends BaseServerController {
                     if (outGivingModel1.getId().equalsIgnoreCase(outGivingModel.getId())) {
                         continue;
                     }
-                    Assert.state(!outGivingModel1.checkContains(nodeModel.getId(), outGivingModel.getId()), "已经存在相同的分发项目:" + outGivingModel.getId());
+                    Assert.state(!outGivingModel1.checkContains(nodeModel.getId(), outGivingModel.getId()), I18nMessageUtil.get("i18n.same_distribution_project_exists.ff41") + outGivingModel.getId());
 
                 }
             }
@@ -381,7 +382,7 @@ public class OutGivingProjectEditController extends BaseServerController {
             allData.put("dslEnv", getParameter(StrUtil.format("{}_dslEnv", nodeModel.getId())));
             allData.put("nodeId", nodeModel.getId());
             JsonMessage<String> jsonMessage = this.sendData(nodeModel, allData, false);
-            Assert.state(jsonMessage.success(), nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());
+            Assert.state(jsonMessage.success(), nodeModel.getName() + I18nMessageUtil.get("i18n.node_failed.20d5") + jsonMessage.getMsg());
             tuples.add(new Tuple(nodeModel, allData));
         }
         // 删除已经删除的项目
@@ -396,7 +397,7 @@ public class OutGivingProjectEditController extends BaseServerController {
         String webhook = getParameter("webhook");
         webhook = Opt.ofBlankAble(webhook)
             .map(s -> {
-                Validator.validateMatchRegex(RegexPool.URL_HTTP, s, "WebHooks 地址不合法");
+                Validator.validateMatchRegex(RegexPool.URL_HTTP, s, I18nMessageUtil.get("i18n.invalid_webhooks_address.d836"));
                 return s;
             })
             .orElse(StrUtil.EMPTY);
@@ -411,7 +412,7 @@ public class OutGivingProjectEditController extends BaseServerController {
      * @param outGivingNodeProjects 新的节点项目
      */
     private void deleteProject(OutGivingModel outGivingModel, List<OutGivingNodeProject> outGivingNodeProjects) {
-        Assert.state(CollUtil.size(outGivingNodeProjects) >= 1, "至少选择一个节点及以上");
+        Assert.state(CollUtil.size(outGivingNodeProjects) >= 1, I18nMessageUtil.get("i18n.selected_node_required.d65a"));
         // 删除
         List<OutGivingNodeProject> deleteNodeProject = outGivingModel.getDelete(outGivingNodeProjects);
         if (deleteNodeProject != null) {
@@ -422,7 +423,7 @@ public class OutGivingProjectEditController extends BaseServerController {
                 //outGivingNodeProject1.getNodeData(true);
                 // 调用彻底删除
                 jsonMessage = this.deleteNodeProject(nodeModel, outGivingNodeProject1.getProjectId(), "thorough");
-                Assert.state(jsonMessage.success(), nodeModel.getName() + "节点失败：" + jsonMessage.getMsg());
+                Assert.state(jsonMessage.success(), nodeModel.getName() + I18nMessageUtil.get("i18n.node_failed.20d5") + jsonMessage.getMsg());
             }
         }
     }

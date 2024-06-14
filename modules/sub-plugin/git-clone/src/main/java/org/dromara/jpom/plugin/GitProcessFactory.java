@@ -13,6 +13,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.util.CommandUtil;
 
 import java.util.Map;
@@ -64,7 +65,7 @@ public class GitProcessFactory {
         if (osInfo.isWindows()) {
             result = CommandUtil.execSystemCommand(WIN_EXISTS_GIT);
             if (StrUtil.contains(result, ".exe")) {
-                log.info("git安装位置：{}", result);
+                log.info(I18nMessageUtil.get("i18n.git_installation_location.7984"), result);
                 return true;
             }
         } else if (osInfo.isLinux() || osInfo.isMac()) {
@@ -72,10 +73,10 @@ public class GitProcessFactory {
             if (StrUtil.containsAny(result, "no git", "not found")) {
                 return false;
             }
-            log.info("git安装位置：{}", result);
+            log.info(I18nMessageUtil.get("i18n.git_installation_location.7984"), result);
             return true;
         } else {
-            log.warn("不支持的系统类型：{}", osInfo.getName());
+            log.warn(I18nMessageUtil.get("i18n.unsupported_system_type_with_placeholder.d5cc"), osInfo.getName());
             return false;
         }
         return false;

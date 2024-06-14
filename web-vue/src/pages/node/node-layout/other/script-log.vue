@@ -17,7 +17,7 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$tl('p.name')"
+            :placeholder="$t('pages.node.node-layout.other.script-log.bb769c1d')"
             allow-clear
             class="search-input-item"
           />
@@ -35,7 +35,7 @@
               }
             "
             allow-clear
-            :placeholder="$tl('p.triggerType')"
+            :placeholder="$t('pages.node.node-layout.other.script-log.4abba04f')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
@@ -44,7 +44,10 @@
             allow-clear
             input-read-only
             :show-time="{ format: 'HH:mm:ss' }"
-            :placeholder="[$tl('p.startTime'), $tl('p.endTime')]"
+            :placeholder="[
+              $t('pages.node.node-layout.other.script-log.ac9ef5f5'),
+              $t('pages.node.node-layout.other.script-log.9376939d')
+            ]"
             format="YYYY-MM-DD HH:mm:ss"
             value-format="YYYY-MM-DD HH:mm:ss"
             @change="
@@ -57,15 +60,17 @@
               }
             "
           />
-          <a-tooltip :title="$tl('p.fastBackFirstPage')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
+          <a-tooltip :title="$t('pages.node.node-layout.other.script-log.c2e3463f')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{
+              $t('pages.node.node-layout.other.script-log.53c2763c')
+            }}</a-button>
           </a-tooltip>
           <a-tooltip>
             <template #title>
-              <div>{{ $tl('p.scriptTemplateInfo') }}</div>
+              <div>{{ $t('pages.node.node-layout.other.script-log.66889710') }}</div>
               <div>
                 <ul>
-                  <li>{{ $tl('p.dataDelay') }}</li>
+                  <li>{{ $t('pages.node.node-layout.other.script-log.b709d0b4') }}</li>
                 </ul>
               </div>
             </template>
@@ -86,11 +91,11 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'triggerExecType'">
-          <span>{{ triggerExecTypeMap[text] || $tl('p.unknown') }}</span>
+          <span>{{ triggerExecTypeMap[text] || $t('pages.node.node-layout.other.script-log.ca1cdfa6') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'workspaceId'">
-          <a-tag v-if="text === 'GLOBAL'">{{ $tl('p.scope') }}</a-tag>
-          <a-tag v-else>{{ $tl('p.workspace') }}</a-tag>
+          <a-tag v-if="text === 'GLOBAL'">{{ $t('pages.node.node-layout.other.script-log.8a2fc9dd') }}</a-tag>
+          <a-tag v-else>{{ $t('pages.node.node-layout.other.script-log.afacc4cb') }}</a-tag>
         </template>
         <template v-else-if="column.dataIndex === 'createTimeMillis'">
           <a-tooltip :title="`${parseTime(record.createTimeMillis)}`">
@@ -99,10 +104,12 @@
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="viewLog(record)">{{ $tl('p.viewLog') }}</a-button>
+            <a-button size="small" type="primary" @click="viewLog(record)">{{
+              $t('pages.node.node-layout.other.script-log.b51c8bb3')
+            }}</a-button>
 
             <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-              $tl('p.deleteAction')
+              $t('pages.node.node-layout.other.script-log.a58214f0')
             }}</a-button>
           </a-space>
         </template>
@@ -122,7 +129,6 @@
     />
   </div>
 </template>
-
 <script>
 import { getScriptLogList, scriptDel, triggerExecTypeMap } from '@/api/node-other'
 // import {triggerExecTypeMap} from "@/api/node-script";
@@ -158,38 +164,38 @@ export default {
       logVisible: 0,
       columns: [
         {
-          title: this.$tl('p.name'),
+          title: this.$t('pages.node.node-layout.other.script-log.bb769c1d'),
           dataIndex: 'scriptName',
           ellipsis: true,
           width: 100
         },
         {
-          title: this.$tl('p.executionTime'),
+          title: this.$t('pages.node.node-layout.other.script-log.40fb635f'),
           dataIndex: 'createTimeMillis',
           ellipsis: true,
           width: '160px'
         },
         {
-          title: this.$tl('p.triggerType'),
+          title: this.$t('pages.node.node-layout.other.script-log.4abba04f'),
           dataIndex: 'triggerExecType',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$tl('p.executionDomain'),
+          title: this.$t('pages.node.node-layout.other.script-log.3debe02b'),
           dataIndex: 'workspaceId',
           ellipsis: true,
 
           width: '90px'
         },
         {
-          title: this.$tl('p.executor'),
+          title: this.$t('pages.node.node-layout.other.script-log.cda0e062'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           width: 100
         },
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.node.node-layout.other.script-log.3bb962bf'),
           dataIndex: 'operation',
           align: 'center',
 
@@ -208,9 +214,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.nodeLayout.other.scriptLog.${key}`, ...args)
-    },
     // 加载数据
     loadData(pointerEvent) {
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page
@@ -233,11 +236,11 @@ export default {
     },
     handleDelete(record) {
       $confirm({
-        title: this.$tl('p.systemPrompt'),
+        title: this.$t('pages.node.node-layout.other.script-log.b22d55a0'),
         zIndex: 1009,
-        content: this.$tl('p.deleteConfirm'),
-        okText: this.$tl('p.confirm'),
-        cancelText: this.$tl('p.cancel'),
+        content: this.$t('pages.node.node-layout.other.script-log.2c8deda8'),
+        okText: this.$t('pages.node.node-layout.other.script-log.e8e9db25'),
+        cancelText: this.$t('pages.node.node-layout.other.script-log.b12468e9'),
         onOk: () => {
           return scriptDel({
             nodeId: this.nodeId,

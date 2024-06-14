@@ -22,6 +22,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.user.UserPermissionGroupBean;
@@ -116,7 +117,7 @@ public class UserPermissionGroupController extends BaseServerController {
             userPermissionGroupServer.insert(userPermissionGroupBean);
         } else {
             UserPermissionGroupBean permissionGroupBean = userPermissionGroupServer.getByKey(id);
-            Assert.notNull(permissionGroupBean, "数据不存在");
+            Assert.notNull(permissionGroupBean, I18nMessageUtil.get("i18n.data_does_not_exist.b201"));
             userPermissionGroupBean.setId(id);
             userPermissionGroupServer.updateById(userPermissionGroupBean);
         }
@@ -124,7 +125,7 @@ public class UserPermissionGroupController extends BaseServerController {
         JSONArray jsonArray = JSONArray.parseArray(workspace);
         List<String> workspaceList = jsonArray.toJavaList(String.class);
         userBindWorkspaceService.updateUserWorkspace(userPermissionGroupBean.getId(), workspaceList);
-        return new JsonMessage<>(200, "操作成功");
+        return new JsonMessage<>(200, I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
     private String resolveAllowExecute(String allowExecute) {
@@ -145,7 +146,7 @@ public class UserPermissionGroupController extends BaseServerController {
             }
             int[] weeks = week.stream().mapToInt(value -> {
                 int week1 = Convert.toInt(value, 0);
-                Assert.state(week1 >= 1 && week1 <= 7, "选择的周几不正确");
+                Assert.state(week1 >= 1 && week1 <= 7, I18nMessageUtil.get("i18n.selected_weekday_incorrect.4cd4"));
                 return week1;
             }).toArray();
             //
@@ -187,12 +188,12 @@ public class UserPermissionGroupController extends BaseServerController {
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<Object> delete(String id) {
         UserPermissionGroupBean groupBean = userPermissionGroupServer.getByKey(id);
-        Assert.notNull(groupBean, "数据不存在");
+        Assert.notNull(groupBean, I18nMessageUtil.get("i18n.data_does_not_exist.b201"));
         // 判断是否绑定用户
         Entity entity = Entity.create();
         entity.set("permissionGroup", StrUtil.format(" like '%{}{}{}%'", StrUtil.AT, id, StrUtil.AT));
         long count = userService.count(entity);
-        Assert.state(count == 0, "当前权限组还绑定用户,不能删除");
+        Assert.state(count == 0, I18nMessageUtil.get("i18n.user_binding_warning.16b0"));
         // 判断是否被 oauth2 绑定
         for (Map.Entry<String, Tuple> entry : BaseOauth2Config.DB_KEYS.entrySet()) {
             Tuple value = entry.getValue();
@@ -200,12 +201,12 @@ public class UserPermissionGroupController extends BaseServerController {
             BaseOauth2Config baseOauth2Config = systemParametersServer.getConfigDefNewInstance(dbKey, value.get(1));
             String permissionGroup = baseOauth2Config.getPermissionGroup();
             List<String> permissionGroupList = StrUtil.split(permissionGroup, StrUtil.AT, true, true);
-            Assert.state(!CollUtil.contains(permissionGroupList, groupBean.getId()), "当前权限组被 oauth2[" + baseOauth2Config.provide() + "] 绑定，不能删除");
+            Assert.state(!CollUtil.contains(permissionGroupList, groupBean.getId()), StrUtil.format(I18nMessageUtil.get("i18n.oauth2_binding_warning.d8f0"), baseOauth2Config.provide()));
         }
         //
         userPermissionGroupServer.delByKey(id);
         // 删除工作空间
         userBindWorkspaceService.deleteByUserId(id);
-        return JsonMessage.success("删除成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 }

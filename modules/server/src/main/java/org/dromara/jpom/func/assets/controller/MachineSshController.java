@@ -31,6 +31,7 @@ import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.jcraft.jsch.Session;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.interceptor.PermissionInterceptor;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
@@ -143,13 +144,13 @@ public class MachineSshController extends BaseGroupNameController {
      */
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public IJsonMessage<String> save(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "ssh名称不能为空") String name,
-                                     @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "host不能为空") String host,
-                                     @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "user不能为空") String user,
+    public IJsonMessage<String> save(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.parameter_error_ssh_name_cannot_be_empty.ff4f") String name,
+                                     @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.host_cannot_be_empty.644a") String host,
+                                     @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.parameter_error_user_cannot_be_empty.9239") String user,
                                      String password,
                                      MachineSshModel.ConnectType connectType,
                                      String privateKey,
-                                     @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "port错误") int port,
+                                     @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "i18n.parameter_error_port_error.810d") int port,
                                      String charset,
                                      String id,
                                      Integer timeout,
@@ -159,13 +160,13 @@ public class MachineSshController extends BaseGroupNameController {
         if (add) {
             // 优先判断参数 如果是 password 在修改时可以不填写
             if (connectType == MachineSshModel.ConnectType.PASS) {
-                Assert.hasText(password, "请填写登录密码");
+                Assert.hasText(password, I18nMessageUtil.get("i18n.login_password_required.9605"));
             } else if (connectType == MachineSshModel.ConnectType.PUBKEY) {
                 //Assert.hasText(privateKey, "请填写证书内容");
             }
         } else {
             boolean exists = machineSshServer.exists(new MachineSshModel(id));
-            Assert.state(exists, "不存在对应ssh");
+            Assert.state(exists, I18nMessageUtil.get("i18n.ssh_not_exist.2e40"));
         }
         MachineSshModel sshModel = new MachineSshModel();
         sshModel.setId(id);
@@ -175,12 +176,12 @@ public class MachineSshController extends BaseGroupNameController {
         Opt.ofBlankAble(password).ifPresent(sshModel::setPassword);
         if (StrUtil.startWith(privateKey, URLUtil.FILE_URL_PREFIX)) {
             String rsaPath = StrUtil.removePrefix(privateKey, URLUtil.FILE_URL_PREFIX);
-            Assert.state(FileUtil.isFile(rsaPath), "配置的私钥文件不存在");
+            Assert.state(FileUtil.isFile(rsaPath), I18nMessageUtil.get("i18n.private_key_file_not_exist.49ed"));
         }
         Opt.ofNullable(privateKey).ifPresent(sshModel::setPrivateKey);
 
         // 获取允许编辑的后缀
-        List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, "允许编辑的文件后缀不能为空");
+        List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, I18nMessageUtil.get("i18n.suffix_cannot_be_empty.ec72"));
         sshModel.allowEditSuffix(allowEditSuffixList);
         sshModel.setPort(port);
         sshModel.setUser(user);
@@ -191,7 +192,7 @@ public class MachineSshController extends BaseGroupNameController {
             Charset.forName(charset);
             sshModel.setCharset(charset);
         } catch (Exception e) {
-            return new JsonMessage<>(405, "请填写正确的编码格式," + e.getMessage());
+            return new JsonMessage<>(405, I18nMessageUtil.get("i18n.correct_encoding_format_required.1f7f") + e.getMessage());
         }
         // 判断重复
         Entity entity = Entity.create();
@@ -201,19 +202,19 @@ public class MachineSshController extends BaseGroupNameController {
         entity.set("connectType", sshModel.getConnectType());
         Opt.ofBlankAble(id).ifPresent(s -> entity.set("id", StrUtil.format(" <> {}", s)));
         boolean exists = machineSshServer.exists(entity);
-        Assert.state(!exists, "对应的SSH已经存在啦");
+        Assert.state(!exists, I18nMessageUtil.get("i18n.ssh_already_exists_with_message.d284"));
         try {
 
             String workspaceId = getWorkspaceId();
             Session session = machineSshServer.getSessionByModel(sshModel);
             JschUtil.close(session);
         } catch (Exception e) {
-            log.warn("ssh连接失败", e);
-            return new JsonMessage<>(505, "ssh连接失败,请检查用户名、密码、host、端口等填写是否正确，超时时间是否合理：" + e.getMessage());
+            log.warn(I18nMessageUtil.get("i18n.ssh_connection_failed.4719"), e);
+            return new JsonMessage<>(505, I18nMessageUtil.get("i18n.ssh_connection_failed.74ab") + e.getMessage());
         }
         sshModel.setStatus(1);
         int i = add ? machineSshServer.insert(sshModel) : machineSshServer.updateById(sshModel);
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
 
@@ -221,9 +222,9 @@ public class MachineSshController extends BaseGroupNameController {
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<String> delete(@ValidatorItem String id) {
         long count = sshService.countByMachine(id);
-        Assert.state(count <= 0, "当前机器SSH还关联" + count + "个ssh不能删除");
+        Assert.state(count <= 0, StrUtil.format(I18nMessageUtil.get("i18n.ssh_connections_warning.1ddb"), count));
         machineSshServer.delByKey(id);
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
     /**
@@ -236,14 +237,14 @@ public class MachineSshController extends BaseGroupNameController {
     public IJsonMessage<PageResultDto<SshTerminalExecuteLog>> logListData(HttpServletRequest request) {
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
         PageResultDto<SshTerminalExecuteLog> pageResult = sshTerminalExecuteLogService.listPage(paramMap);
-        return JsonMessage.success("获取成功", pageResult);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.get_success.fb55"), pageResult);
     }
 
     @GetMapping(value = "list-workspace-ssh", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<List<SshModel>> listWorkspaceSsh(@ValidatorItem String id) {
         MachineSshModel machineSshModel = machineSshServer.getByKey(id);
-        Assert.notNull(machineSshModel, "没有对应的机器");
+        Assert.notNull(machineSshModel, I18nMessageUtil.get("i18n.no_machine.89ed"));
         SshModel sshModel = new SshModel();
         sshModel.setMachineSshId(id);
         List<SshModel> modelList = sshService.listByBean(sshModel);
@@ -278,7 +279,7 @@ public class MachineSshController extends BaseGroupNameController {
             for (String s : list) {
                 String normalize = FileUtil.normalize(s + StrUtil.SLASH);
                 int count = StrUtil.count(normalize, StrUtil.SLASH);
-                Assert.state(count >= 2, "ssh 授权目录不能是根目录");
+                Assert.state(count >= 2, I18nMessageUtil.get("i18n.ssh_authorization_directory_cannot_be_root.8125"));
             }
             //
             UserModel userModel = getUser();
@@ -287,10 +288,10 @@ public class MachineSshController extends BaseGroupNameController {
         }
         sshModel.setNotAllowedCommand(notAllowedCommand);
         // 获取允许编辑的后缀
-        List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, "允许编辑的文件后缀不能为空");
+        List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, I18nMessageUtil.get("i18n.suffix_cannot_be_empty.ec72"));
         sshModel.allowEditSuffix(allowEditSuffixList);
         sshService.updateById(sshModel);
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
     /**
@@ -306,9 +307,9 @@ public class MachineSshController extends BaseGroupNameController {
         List<String> list = StrUtil.splitTrim(ids, StrUtil.COMMA);
         for (String id : list) {
             MachineSshModel machineSshModel = machineSshServer.getByKey(id);
-            Assert.notNull(machineSshModel, "没有对应的ssh");
+            Assert.notNull(machineSshModel, I18nMessageUtil.get("i18n.no_corresponding_ssh.aa68"));
             boolean exists = workspaceService.exists(new WorkspaceModel(workspaceId));
-            Assert.state(exists, "不存在对应的工作空间");
+            Assert.state(exists, I18nMessageUtil.get("i18n.workspace_not_exist.a6fd"));
             //
             if (!sshService.existsSsh2(workspaceId, id)) {
                 //
@@ -316,7 +317,7 @@ public class MachineSshController extends BaseGroupNameController {
             }
         }
 
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
     /**
@@ -333,7 +334,7 @@ public class MachineSshController extends BaseGroupNameController {
         machineSshModel.setPassword(StrUtil.EMPTY);
         machineSshModel.setPrivateKey(StrUtil.EMPTY);
         machineSshServer.updateById(machineSshModel);
-        return new JsonMessage<>(200, "操作成功");
+        return new JsonMessage<>(200, I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
     /**
@@ -342,7 +343,7 @@ public class MachineSshController extends BaseGroupNameController {
     @GetMapping(value = "import-template", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public void importTemplate(HttpServletResponse response) throws IOException {
-        String fileName = "ssh导入模板.csv";
+        String fileName = I18nMessageUtil.get("i18n.ssh_import_template_csv.14fa");
         this.setApplicationHeader(response, fileName);
         //
         CsvWriter writer = CsvUtil.getWriter(response.getWriter());
@@ -357,7 +358,8 @@ public class MachineSshController extends BaseGroupNameController {
     @GetMapping(value = "export-data", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DOWNLOAD)
     public void exportData(HttpServletResponse response, HttpServletRequest request) throws IOException {
-        String fileName = "导出的 ssh 数据 " + DateTime.now().toString(DatePattern.NORM_DATE_FORMAT) + ".csv";
+        String prefix = I18nMessageUtil.get("i18n.exported_ssh_data.2896");
+        String fileName = prefix + DateTime.now().toString(DatePattern.NORM_DATE_FORMAT) + ".csv";
         this.setApplicationHeader(response, fileName);
         //
         CsvWriter writer = CsvUtil.getWriter(response.getWriter());
@@ -404,10 +406,11 @@ public class MachineSshController extends BaseGroupNameController {
     @PostMapping(value = "import-data", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
     public IJsonMessage<String> importData(MultipartFile file) throws IOException {
-        Assert.notNull(file, "没有上传文件");
+        Assert.notNull(file, I18nMessageUtil.get("i18n.no_uploaded_file.07ef"));
         String originalFilename = file.getOriginalFilename();
         String extName = FileUtil.extName(originalFilename);
-        Assert.state(StrUtil.endWithIgnoreCase(extName, "csv"), "不允许的文件格式");
+        boolean csv = StrUtil.endWithIgnoreCase(extName, "csv");
+        Assert.state(csv, I18nMessageUtil.get("i18n.disallowed_file_format.d6e4"));
         assert originalFilename != null;
         File csvFile = FileUtil.file(serverConfig.getUserTempPath(), originalFilename);
         int addCount = 0, updateCount = 0;
@@ -423,26 +426,26 @@ public class MachineSshController extends BaseGroupNameController {
             try {
                 csvData = reader.read();
             } catch (Exception e) {
-                log.error("解析 csv 异常", e);
-                return new JsonMessage<>(405, "解析文件异常," + e.getMessage());
+                log.error(I18nMessageUtil.get("i18n.parse_csv_exception.885e"), e);
+                return new JsonMessage<>(405, I18nMessageUtil.get("i18n.parse_file_exception.374d") + e.getMessage());
             } finally {
                 IoUtil.close(reader);
             }
             List<CsvRow> rows = csvData.getRows();
-            Assert.notEmpty(rows, "没有任何数据");
+            Assert.notEmpty(rows, I18nMessageUtil.get("i18n.no_data.55a2"));
 
             for (int i = 0; i < rows.size(); i++) {
                 CsvRow csvRow = rows.get(i);
                 String name = csvRow.getByName("name");
                 int finalI = i;
-                Assert.hasText(name, () -> StrUtil.format("第 {} 行 name 字段不能位空", finalI + 1));
+                Assert.hasText(name, () -> StrUtil.format(I18nMessageUtil.get("i18n.name_field_required.e0c5"), finalI + 1));
                 String groupName = csvRow.getByName("groupName");
                 String host = csvRow.getByName("host");
-                Assert.hasText(host, () -> StrUtil.format("第 {} 行 host 字段不能位空", finalI + 1));
+                Assert.hasText(host, () -> StrUtil.format(I18nMessageUtil.get("i18n.host_field_required.5c36"), finalI + 1));
                 Integer port = Convert.toInt(csvRow.getByName("port"));
-                Assert.state(port != null && NetUtil.isValidPort(port), () -> StrUtil.format("第 {} 行 port 字段不能位空或者不正确", finalI + 1));
+                Assert.state(port != null && NetUtil.isValidPort(port), () -> StrUtil.format(I18nMessageUtil.get("i18n.port_field_required_or_incorrect.8426"), finalI + 1));
                 String user = csvRow.getByName("user");
-                Assert.hasText(host, () -> StrUtil.format("第 {} 行 user 字段不能位空", finalI + 1));
+                Assert.hasText(host, () -> StrUtil.format(I18nMessageUtil.get("i18n.user_field_required.8732"), finalI + 1));
                 String password = csvRow.getByName("password");
                 String charset = csvRow.getByName("charset");
                 //
@@ -485,6 +488,6 @@ public class MachineSshController extends BaseGroupNameController {
             FileUtil.del(csvFile);
         }
         String fileCharsetStr = Optional.ofNullable(fileCharset).map(Charset::name).orElse(StrUtil.EMPTY);
-        return JsonMessage.success("导入成功(编码格式：{}),添加 {} 条数据,修改 {} 条数据", fileCharsetStr, addCount, updateCount);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.import_success_with_details.a4a0"), fileCharsetStr, addCount, updateCount);
     }
 }

@@ -3,7 +3,6 @@
     <workspaceEnv ref="workspaceEnv" :workspace-id="getWorkspaceId()" :global="true" />
   </div>
 </template>
-
 <script>
 import workspaceEnv from '@/pages/system/workspace-env.vue'
 import { mapState } from 'pinia'
@@ -19,10 +18,6 @@ export default {
   },
   computed: { ...mapState(useAppStore, ['getWorkspaceId']) },
   created() {},
-  methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.script.env.${key}`, ...args)
-    }
-  }
+  methods: {}
 }
 </script>

@@ -7,21 +7,31 @@
       :label-col="{ span: 4 }"
       :wrapper-col="{ span: 20 }"
     >
-      <a-form-item :label="$tl('p.taskName')" name="name">
-        <a-input v-model:value="temp.name" :placeholder="$tl('p.taskNamePlaceholder')" :max-length="50" />
+      <a-form-item :label="$t('pages.file-manager.fileStorage.releaseFile.e62a5bf3')" name="name">
+        <a-input
+          v-model:value="temp.name"
+          :placeholder="$t('pages.file-manager.fileStorage.releaseFile.70cf48dc')"
+          :max-length="50"
+        />
       </a-form-item>
 
-      <a-form-item :label="$tl('p.publishMode')" name="taskType">
+      <a-form-item :label="$t('pages.file-manager.fileStorage.releaseFile.73754f45')" name="taskType">
         <a-radio-group v-model:value="temp.taskType" @change="taskTypeChange">
           <a-radio :value="0"> SSH </a-radio>
-          <a-radio :value="1"> {{ $tl('p.node') }} </a-radio>
+          <a-radio :value="1"> {{ $t('pages.file-manager.fileStorage.releaseFile.602a0a5e') }} </a-radio>
         </a-radio-group>
         <template #help>
-          <template v-if="temp.taskType === 0">{{ $tl('p.fileNameAfterPublish') }} </template>
+          <template v-if="temp.taskType === 0"
+            >{{ $t('pages.file-manager.fileStorage.releaseFile.469af1fa') }}
+          </template>
         </template>
       </a-form-item>
 
-      <a-form-item v-if="temp.taskType === 0" name="taskDataIds" :label="$tl('p.ssh')">
+      <a-form-item
+        v-if="temp.taskType === 0"
+        name="taskDataIds"
+        :label="$t('pages.file-manager.fileStorage.releaseFile.6ed1da89')"
+      >
         <a-row>
           <a-col :span="22">
             <a-select
@@ -38,7 +48,7 @@
                 }
               "
               mode="multiple"
-              :placeholder="$tl('p.sshPlaceholder')"
+              :placeholder="$t('pages.file-manager.fileStorage.releaseFile.f1f8e3bc')"
             >
               <a-select-option v-for="ssh in sshList" :key="ssh.id">
                 <a-tooltip :title="ssh.name"> {{ ssh.name }}</a-tooltip>
@@ -50,7 +60,11 @@
           </a-col>
         </a-row>
       </a-form-item>
-      <a-form-item v-else-if="temp.taskType === 1" name="taskDataIds" :label="$tl('p.publishNode')">
+      <a-form-item
+        v-else-if="temp.taskType === 1"
+        name="taskDataIds"
+        :label="$t('pages.file-manager.fileStorage.releaseFile.61c0e0ab')"
+      >
         <a-row>
           <a-col :span="22">
             <a-select
@@ -67,7 +81,7 @@
                 }
               "
               mode="multiple"
-              :placeholder="$tl('p.nodePlaceholder')"
+              :placeholder="$t('pages.file-manager.fileStorage.releaseFile.89a4deb8')"
             >
               <a-select-option v-for="ssh in nodeList" :key="ssh.id">
                 <a-tooltip :title="ssh.name"> {{ ssh.name }}</a-tooltip>
@@ -80,9 +94,9 @@
         </a-row>
       </a-form-item>
 
-      <a-form-item name="releasePathParent" :label="$tl('p.publishDir')">
+      <a-form-item name="releasePathParent" :label="$t('pages.file-manager.fileStorage.releaseFile.b6c9f9c')">
         <template #help>
-          <a-tooltip :title="$tl('p.authDirConfig')"
+          <a-tooltip :title="$t('pages.file-manager.fileStorage.releaseFile.61fec7a9')"
             ><a-button
               size="small"
               type="link"
@@ -92,7 +106,7 @@
                 }
               "
             >
-              <InfoCircleOutlined />{{ $tl('p.authDir') }}
+              <InfoCircleOutlined />{{ $t('pages.file-manager.fileStorage.releaseFile.31f003d') }}
             </a-button>
           </a-tooltip>
         </template>
@@ -102,7 +116,7 @@
             show-search
             allow-clear
             style="width: 30%"
-            :placeholder="$tl('p.firstLevelDir')"
+            :placeholder="$t('pages.file-manager.fileStorage.releaseFile.fda0ef21')"
           >
             <a-select-option v-for="item in accessList" :key="item">
               <a-tooltip :title="item">{{ item }}</a-tooltip>
@@ -115,7 +129,7 @@
             <a-input
               v-model:value="temp.releasePathSecondary"
               style="width: 70%"
-              :placeholder="$tl('p.secondLevelDir')"
+              :placeholder="$t('pages.file-manager.fileStorage.releaseFile.a6ba1641')"
             />
           </a-form-item-rest>
         </a-input-group>
@@ -123,25 +137,27 @@
 
       <a-form-item name="releaseBeforeCommand">
         <template #label>
-          {{ $tl('p.executeScript') }}
+          {{ $t('pages.file-manager.fileStorage.releaseFile.1cf6b640') }}
           <a-tooltip>
             <template #title>
               <ul>
-                <li>{{ $tl('p.scriptVariable') }}</li>
-                <li>{{ $tl('p.workspaceEnvVariable') }}</li>
-                <li>{{ $tl('p.renameFile') }}</li>
+                <li>{{ $t('pages.file-manager.fileStorage.releaseFile.9bab648c') }}</li>
+                <li>{{ $t('pages.file-manager.fileStorage.releaseFile.52373158') }}</li>
+                <li>{{ $t('pages.file-manager.fileStorage.releaseFile.6fcc2557') }}</li>
               </ul>
             </template>
             <QuestionCircleOutlined />
           </a-tooltip>
         </template>
         <template #help>
-          <div v-if="scriptTabKey === 'before'">{{ $tl('p.preUploadScript') }}</div>
-          <div v-else-if="scriptTabKey === 'after'">{{ $tl('p.postUploadScript') }}</div>
+          <div v-if="scriptTabKey === 'before'">{{ $t('pages.file-manager.fileStorage.releaseFile.5fcb4809') }}</div>
+          <div v-else-if="scriptTabKey === 'after'">
+            {{ $t('pages.file-manager.fileStorage.releaseFile.3fcb1a9a') }}
+          </div>
         </template>
         <a-form-item-rest>
           <a-tabs v-model:activeKey="scriptTabKey" tab-position="right" type="card">
-            <a-tab-pane key="before" :tab="$tl('c.content')">
+            <a-tab-pane key="before" :tab="$t('pages.file-manager.fileStorage.releaseFile.cb2367c')">
               <code-editor
                 v-model:content="temp.beforeScript"
                 height="40vh"
@@ -153,8 +169,8 @@
                 <template #tool_before>
                   <a-space>
                     <a-tag>
-                      <b>{{ $tl('c.content') }}</b>
-                      {{ $tl('p.execute') }}
+                      <b>{{ $t('pages.file-manager.fileStorage.releaseFile.cb2367c') }}</b>
+                      {{ $t('pages.file-manager.fileStorage.releaseFile.985968bf') }}
                     </a-tag>
                     <a-button
                       type="link"
@@ -163,14 +179,13 @@
                           chooseScriptVisible = 1
                         }
                       "
+                      >{{ $t('pages.file-manager.fileStorage.releaseFile.d236a971') }}</a-button
                     >
-                      脚本模板
-                    </a-button>
                   </a-space>
                 </template>
               </code-editor>
             </a-tab-pane>
-            <a-tab-pane key="after" :tab="$tl('p.afterUpload')">
+            <a-tab-pane key="after" :tab="$t('pages.file-manager.fileStorage.releaseFile.e643b0a1')">
               <code-editor
                 v-model:content="temp.afterScript"
                 height="40vh"
@@ -181,7 +196,7 @@
               >
                 <template #tool_before>
                   <a-space>
-                    <a-tag>{{ $tl('p.afterUploadExecute') }}</a-tag>
+                    <a-tag>{{ $t('pages.file-manager.fileStorage.releaseFile.278fde90') }}</a-tag>
                     <a-button
                       type="link"
                       @click="
@@ -189,9 +204,8 @@
                           chooseScriptVisible = 2
                         }
                       "
+                      >{{ $t('pages.file-manager.fileStorage.releaseFile.d236a971') }}</a-button
                     >
-                      脚本模板
-                    </a-button>
                   </a-space>
                 </template>
               </code-editor>
@@ -204,7 +218,7 @@
     <a-modal
       v-model:open="configDir"
       destroy-on-close
-      :title="`${$tl('p.authDirSetting')}`"
+      :title="`${$t('pages.file-manager.fileStorage.releaseFile.6978ea2b')}`"
       :footer="null"
       :mask-closable="false"
       @cancel="
@@ -224,10 +238,9 @@
       ></whiteList>
     </a-modal>
 
-    <!-- 选择脚本 -->
     <a-drawer
       destroy-on-close
-      title="选择脚本"
+      :title="$t('pages.file-manager.fileStorage.releaseFile.952117a8')"
       placement="right"
       :open="chooseScriptVisible != 0"
       width="70vw"
@@ -249,8 +262,8 @@
               ? temp.beforeScript?.replace('$ref.script.')
               : ''
             : temp.afterScript?.indexOf('$ref.script.') !== -1
-              ? temp.afterScript?.replace('$ref.script.')
-              : ''
+            ? temp.afterScript?.replace('$ref.script.')
+            : ''
         "
         mode="choose"
         @confirm="
@@ -277,9 +290,8 @@
                 chooseScriptVisible = false
               }
             "
+            >{{ $t('pages.file-manager.fileStorage.releaseFile.a0451c97') }}</a-button
           >
-            取消
-          </a-button>
           <a-button
             type="primary"
             @click="
@@ -287,15 +299,13 @@
                 $refs['scriptPage'].handerConfirm()
               }
             "
+            >{{ $t('pages.file-manager.fileStorage.releaseFile.1cbe2507') }}</a-button
           >
-            确认
-          </a-button>
         </a-space>
       </template>
     </a-drawer>
   </div>
 </template>
-
 <script>
 import { getSshListAll } from '@/api/ssh'
 import { getDispatchWhiteList } from '@/api/dispatch'
@@ -314,16 +324,25 @@ export default {
     return {
       temp: {},
       releaseFileRules: {
-        name: [{ required: true, message: this.$tl('p.taskNameInput'), trigger: 'blur' }],
-        taskType: [{ required: true, message: this.$tl('p.publishModeSelect'), trigger: 'blur' }],
+        name: [
+          { required: true, message: this.$t('pages.file-manager.fileStorage.releaseFile.378f28a1'), trigger: 'blur' }
+        ],
+
+        taskType: [
+          { required: true, message: this.$t('pages.file-manager.fileStorage.releaseFile.c33e3d16'), trigger: 'blur' }
+        ],
+
         releasePath: [
           {
             required: true,
-            message: this.$tl('p.publishDirSelect'),
+            message: this.$t('pages.file-manager.fileStorage.releaseFile.8092e55'),
             trigger: 'blur'
           }
         ],
-        taskDataIds: [{ required: true, message: this.$tl('p.sshSelect'), trigger: 'blur' }]
+
+        taskDataIds: [
+          { required: true, message: this.$t('pages.file-manager.fileStorage.releaseFile.6a05f5c8'), trigger: 'blur' }
+        ]
       },
       sshList: [],
       accessList: [],
@@ -339,9 +358,6 @@ export default {
     this.loadAccesList()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.fileManager.fileStorage.releaseFile.${key}`, ...args)
-    },
     taskTypeChange() {
       const value = this.temp.taskType
       this.temp = { ...this.temp, taskDataIds: undefined }

@@ -19,6 +19,7 @@ import cn.hutool.cron.task.CronTask;
 import cn.hutool.cron.task.Task;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -78,7 +79,7 @@ public class CronUtils {
 
         public void onFailed(String tag, Throwable exception) {
             this.failedCount.incrementAndGet();
-            log.error("定时任务异常 {}", tag, exception);
+            log.error(I18nMessageUtil.get("i18n.scheduled_task_exception.f077"), tag, exception);
         }
     }
 

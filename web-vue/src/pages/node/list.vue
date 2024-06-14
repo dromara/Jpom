@@ -1,19 +1,19 @@
 <template>
   <div class="">
     <template v-if="useSuggestions">
-      <a-result :title="$tl('p.noNodesInCurrentWorkspace')">
-        <template #subTitle> {{ $tl('p.installAgentAndAddNewNode') }} </template>
+      <a-result :title="$t('pages.node.list.2788c13d')">
+        <template #subTitle> {{ $t('pages.node.list.b48f7ec3') }} </template>
         <template #extra>
-          <a-button type="primary" @click="fastInstallNodeShow">{{ $tl('c.quickInstall') }} </a-button>
+          <a-button type="primary" @click="fastInstallNodeShow">{{ $t('pages.node.list.e083d2f7') }} </a-button>
           <router-link to="/system/assets/machine-list">
-            <a-button key="console" type="primary">{{ $tl('p.manualAddition') }}</a-button></router-link
+            <a-button key="console" type="primary">{{ $t('pages.node.list.2f070f1') }}</a-button></router-link
           >
         </template>
-        <a-alert :message="$tl('p.solution')" type="info" show-icon>
+        <a-alert :message="$t('pages.node.list.a5e1426d')" type="info" show-icon>
           <template #description>
             <ol>
-              <li>{{ $tl('p.recommendedQuickInstall') }}</li>
-              <li>{{ $tl('p.addNewNodeOrAuthorizeExistingMachine') }}</li>
+              <li>{{ $t('pages.node.list.c716210a') }}</li>
+              <li>{{ $t('pages.node.list.1ef2234b') }}</li>
             </ol>
           </template>
         </a-alert>
@@ -27,7 +27,7 @@
         :auto-refresh-time="30"
         :active-page="activePage"
         table-name="nodeSearch"
-        :empty-description="$tl('p.noNodes')"
+        :empty-description="$t('pages.node.list.c2a3f0cd')"
         :columns="columns"
         :data-source="list"
         bordered
@@ -60,7 +60,11 @@
       >
         <template #title>
           <a-space>
-            <a-input v-model:value="listQuery['%name%']" :placeholder="$tl('c.nodeName')" @press-enter="loadData" />
+            <a-input
+              v-model:value="listQuery['%name%']"
+              :placeholder="$t('pages.node.list.3614bbe4')"
+              @press-enter="loadData"
+            />
 
             <a-select
               v-model:value="listQuery.group"
@@ -76,13 +80,15 @@
                 }
               "
               allow-clear
-              :placeholder="$tl('p.grouping')"
+              :placeholder="$t('pages.node.list.3228ecae')"
               class="search-input-item"
             >
               <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
             </a-select>
-            <a-tooltip :title="$tl('p.quickReturnToFirstPage')">
-              <a-button :loading="loading" type="primary" @click="loadData">{{ $tl('p.search') }}</a-button>
+            <a-tooltip :title="$t('pages.node.list.767472f6')">
+              <a-button :loading="loading" type="primary" @click="loadData">{{
+                $t('pages.node.list.53c2763c')
+              }}</a-button>
             </a-tooltip>
             <a-button
               type="primary"
@@ -91,18 +97,18 @@
                   fastInstallNode = true
                 }
               "
-              >{{ $tl('c.quickInstall') }}
+              >{{ $t('pages.node.list.e083d2f7') }}
             </a-button>
             <a-dropdown v-if="layoutType === 'table'">
               <a-button
                 type="primary"
                 :disabled="!tableSelections || !tableSelections.length"
                 @click="syncToWorkspaceShow"
-                >{{ $tl('c.workspaceSync') }}</a-button
+                >{{ $t('pages.node.list.aa37b575') }}</a-button
               >
             </a-dropdown>
-            <a-tooltip v-else :title="$tl('p.onlyTableViewSupportsWorkspaceSync')">
-              <a-button :disabled="true" type="primary"> {{ $tl('c.workspaceSync') }} </a-button>
+            <a-tooltip v-else :title="$t('pages.node.list.11795378')">
+              <a-button :disabled="true" type="primary"> {{ $t('pages.node.list.aa37b575') }} </a-button>
             </a-tooltip>
           </a-space>
         </template>
@@ -111,11 +117,11 @@
             <template #title>
               <div>
                 <ul>
-                  <li>{{ $tl('p.modifyMonitoringFrequency') }}</li>
-                  <li>{{ $tl('p.hoverOverDashboardForDetails') }}</li>
-                  <li>{{ $tl('p.viewMonitoringHistoryData') }}</li>
-                  <li>{{ $tl('p.viewNetworkDelayHistoryData') }}</li>
-                  <li>{{ $tl('p.nodeStatisticsTimeout') }}</li>
+                  <li>{{ $t('pages.node.list.43ace0d9') }}</li>
+                  <li>{{ $t('pages.node.list.8b8c076') }}</li>
+                  <li>{{ $t('pages.node.list.36616e52') }}</li>
+                  <li>{{ $t('pages.node.list.6a4a7d4') }}</li>
+                  <li>{{ $t('pages.node.list.62be4cf2') }}</li>
                 </ul>
               </div>
             </template>
@@ -138,7 +144,7 @@
               </a-tooltip>
             </template>
             <template v-else>
-              <a-tooltip :title="`${text} ${$tl('c.enterNodeManagement')}`" @click="handleNode(record)">
+              <a-tooltip :title="`${text} ${$t('pages.node.list.546159c')}`" @click="handleNode(record)">
                 <a-button type="link" style="padding: 0" size="small">
                   <FullscreenOutlined /><span>{{ text }}</span>
                 </a-button>
@@ -148,17 +154,21 @@
           <template v-else-if="column.dataIndex === 'status'">
             <a-tooltip
               placement="topLeft"
-              :title="`${statusMap[record.machineNodeData && record.machineNodeData.status] || $tl('c.unknown')} ${record.machineNodeData && record.machineNodeData.statusMsg}`"
+              :title="`${
+                statusMap[record.machineNodeData && record.machineNodeData.status] || $t('pages.node.list.5f51a112')
+              } ${record.machineNodeData && record.machineNodeData.statusMsg}`"
             >
               <template v-if="record.openStatus === 1">
                 <a-tag
                   :color="record.machineNodeData && record.machineNodeData.status === 1 ? 'green' : 'pink'"
                   style="margin-right: 0"
                 >
-                  {{ statusMap[record.machineNodeData && record.machineNodeData.status] || $tl('c.unknown') }}
+                  {{
+                    statusMap[record.machineNodeData && record.machineNodeData.status] || $t('pages.node.list.5f51a112')
+                  }}
                 </a-tag>
               </template>
-              <a-tag v-else>{{ $tl('p.notEnabled') }}</a-tag>
+              <a-tag v-else>{{ $t('pages.node.list.edb35bf0') }}</a-tag>
             </a-tooltip>
           </template>
           <template v-else-if="column.dataIndex === 'osName'">
@@ -174,7 +184,11 @@
           <template v-else-if="column.dataIndex === 'jvmInfo'">
             <a-tooltip
               placement="topLeft"
-              :title="`${$tl('p.remainingMemory')}${renderSize(record.machineNodeData && record.machineNodeData.jvmFreeMemory)} ${$tl('p.totalMemory')}${renderSize(record.machineNodeData && record.machineNodeData.jvmTotalMemory)}`"
+              :title="`${$t('pages.node.list.56e59e5')}${renderSize(
+                record.machineNodeData && record.machineNodeData.jvmFreeMemory
+              )} ${$t('pages.node.list.8b8cc8a1')}${renderSize(
+                record.machineNodeData && record.machineNodeData.jvmTotalMemory
+              )}`"
             >
               <span
                 >{{ renderSize(record.machineNodeData && record.machineNodeData.jvmFreeMemory) }}
@@ -197,9 +211,9 @@
               <a-tooltip placement="topLeft">
                 <template #title>
                   <ul>
-                    <li>{{ $tl('p.projectCountInLogicalNodes') }}{{ text || 0 }}</li>
-                    <li>{{ $tl('p.projectCountInPhysicalNodes') }}{{ record.machineNodeData.jpomProjectCount }}</li>
-                    <li>{{ $tl('p.resyncProjectInfoInLogicalNodes') }}</li>
+                    <li>{{ $t('pages.node.list.a3b72d82') }}{{ text || 0 }}</li>
+                    <li>{{ $t('pages.node.list.44708423') }}{{ record.machineNodeData.jpomProjectCount }}</li>
+                    <li>{{ $t('pages.node.list.a1d9a917') }}</li>
                   </ul>
                 </template>
                 <a-tag>{{ text || 0 }} </a-tag>
@@ -213,11 +227,9 @@
               <a-tooltip placement="topLeft">
                 <template #title>
                   <ul>
-                    <li>{{ $tl('p.scriptTemplateCountInLogicalNodes') }}{{ text || 0 }}</li>
-                    <li>
-                      {{ $tl('p.scriptTemplateDataInPhysicalNodes') }}{{ record.machineNodeData.jpomScriptCount }}
-                    </li>
-                    <li>{{ $tl('p.resyncScriptTemplateInfoInLogicalNodes') }}</li>
+                    <li>{{ $t('pages.node.list.e27607ad') }}{{ text || 0 }}</li>
+                    <li>{{ $t('pages.node.list.ae871dd1') }}{{ record.machineNodeData.jpomScriptCount }}</li>
+                    <li>{{ $t('pages.node.list.c3ba1425') }}</li>
                   </ul>
                 </template>
                 <a-tag>{{ text || 0 }} </a-tag>
@@ -229,39 +241,41 @@
 
           <template v-else-if="column.dataIndex === 'operation'">
             <a-space>
-              <a-tooltip :title="$tl('p.buttonDisabledMeansNodeIsOff')">
+              <a-tooltip :title="$t('pages.node.list.68b2a086')">
                 <a-button size="small" type="primary" :disabled="record.openStatus !== 1" @click="handleNode(record)">{{
-                  $tl('p.management')
+                  $t('pages.node.list.63b11e73')
                 }}</a-button>
               </a-tooltip>
-              <a-tooltip :title="$tl('p.bindSshInfoToEnableFeature')">
+              <a-tooltip :title="$t('pages.node.list.423745e3')">
                 <a-button size="small" type="primary" :disabled="!record.sshId" @click="handleTerminal(record)"
-                  ><CodeOutlined />{{ $tl('p.terminal') }}</a-button
+                  ><CodeOutlined />{{ $t('pages.node.list.b5a97ef7') }}</a-button
                 >
               </a-tooltip>
 
               <a-dropdown>
                 <a @click="(e) => e.preventDefault()">
-                  {{ $tl('p.more') }}
+                  {{ $t('pages.node.list.6e071067') }}
                   <DownOutlined />
                 </a>
                 <template #overlay>
                   <a-menu>
                     <a-menu-item>
-                      <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('p.edit') }}</a-button>
+                      <a-button size="small" type="primary" @click="handleEdit(record)">{{
+                        $t('pages.node.list.64603c01')
+                      }}</a-button>
                     </a-menu-item>
 
                     <a-menu-item>
-                      <a-tooltip placement="leftBottom" :title="$tl('p.deletionCheck')">
+                      <a-tooltip placement="leftBottom" :title="$t('pages.node.list.d24d9b6d')">
                         <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-                          $tl('p.delete')
+                          $t('pages.node.list.dd20d11c')
                         }}</a-button>
                       </a-tooltip>
                     </a-menu-item>
                     <a-menu-item>
-                      <a-tooltip placement="leftBottom" :title="$tl('p.unbindCheck')">
+                      <a-tooltip placement="leftBottom" :title="$t('pages.node.list.ca6be4de')">
                         <a-button size="small" type="primary" danger @click="handleUnbind(record)">{{
-                          $tl('p.unbind')
+                          $t('pages.node.list.4c957529')
                         }}</a-button>
                       </a-tooltip>
                     </a-menu-item>
@@ -272,7 +286,7 @@
                         type="primary"
                         :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
                         @click="sortItemHander(record, index, 'top')"
-                        >{{ $tl('p.top') }}</a-button
+                        >{{ $t('pages.node.list.9e850907') }}</a-button
                       >
                     </a-menu-item>
                     <a-menu-item>
@@ -281,7 +295,7 @@
                         type="primary"
                         :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
                         @click="sortItemHander(record, index, 'up')"
-                        >{{ $tl('p.moveUp') }}</a-button
+                        >{{ $t('pages.node.list.6e79de86') }}</a-button
                       >
                     </a-menu-item>
                     <a-menu-item>
@@ -291,7 +305,7 @@
                         :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total"
                         @click="sortItemHander(record, index, 'down')"
                       >
-                        {{ $tl('p.moveDown') }}
+                        {{ $t('pages.node.list.78c0cb41') }}
                       </a-button>
                     </a-menu-item>
                   </a-menu>
@@ -307,9 +321,9 @@
                 <a-col :span="17" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
                   <a-tooltip>
                     <template #title>
-                      {{ $tl('c.enterNodeManagement') }}
-                      <div>{{ $tl('p.nodeName') }}{{ item.name }}</div>
-                      <div>{{ $tl('p.nodeAddress') }}{{ item.url }}</div>
+                      {{ $t('pages.node.list.546159c') }}
+                      <div>{{ $t('pages.node.list.fa8d810f') }}{{ item.name }}</div>
+                      <div>{{ $t('pages.node.list.a0d52737') }}{{ item.url }}</div>
                     </template>
 
                     <a-button type="link" style="padding: 0" size="small" @click="handleNode(item)">
@@ -320,9 +334,12 @@
                 <a-col :span="7" style="text-align: right">
                   <a-tooltip>
                     <template #title>
-                      <div>当前状态：{{ statusMap[item.machineNodeData && item.machineNodeData.status] }}</div>
                       <div>
-                        {{ $tl('p.statusDescription')
+                        {{ $t('pages.node.list.10775be3')
+                        }}{{ statusMap[item.machineNodeData && item.machineNodeData.status] }}
+                      </div>
+                      <div>
+                        {{ $t('pages.node.list.a622e852')
                         }}{{ (item.machineNodeData && item.machineNodeData.statusMsg) || '' }}
                       </div>
                     </template>
@@ -340,7 +357,7 @@
             <a-row :gutter="[8, 8]">
               <a-col :span="8" style="text-align: center">
                 <a-tooltip
-                  :title="`CPU ${$tl('p.occupancyRate')}${item.occupyCpu}%`"
+                  :title="`CPU ${$t('pages.node.list.6b3a1f7c')}${item.occupyCpu}%`"
                   @click="handleHistory(item, 'nodeTop')"
                 >
                   <a-progress
@@ -358,7 +375,7 @@
               </a-col>
               <a-col :span="8" style="text-align: center">
                 <a-tooltip
-                  :title="`${$tl('p.diskOccupancyRate')}${item.occupyDisk}%`"
+                  :title="`${$t('pages.node.list.d98a95f3')}${item.occupyDisk}%`"
                   @click="handleHistory(item, 'nodeTop')"
                 >
                   <a-progress
@@ -376,7 +393,7 @@
               </a-col>
               <a-col :span="8" style="text-align: center">
                 <a-tooltip
-                  :title="`${$tl('p.actualMemoryOccupancyRate')}${item.occupyMemory}%`"
+                  :title="`${$t('pages.node.list.7da0f839')}${item.occupyMemory}%`"
                   @click="handleHistory(item, 'nodeTop')"
                 >
                   <a-progress
@@ -397,11 +414,15 @@
             <a-row :gutter="[8, 8]" style="text-align: center">
               <a-col :span="8">
                 <a-tooltip
-                  :title="`${$tl('c.delay') + (formatDuration(item.machineNodeData && item.machineNodeData.networkDelay, '', 2) || '-') + $tl('p.viewHistoricalTrends')}`"
+                  :title="`${
+                    $t('pages.node.list.6e2c9ac6') +
+                    (formatDuration(item.machineNodeData && item.machineNodeData.networkDelay, '', 2) || '-') +
+                    $t('pages.node.list.4db198af')
+                  }`"
                   @click="handleHistory(item, 'networkDelay')"
                 >
                   <a-statistic
-                    :title="$tl('c.delay')"
+                    :title="$t('pages.node.list.6e2c9ac6')"
                     :value="item.machineNodeData && item.machineNodeData.networkDelay"
                     :value-style="statValueStyle"
                     :formatter="
@@ -417,7 +438,7 @@
                   :title="formatDuration(item.machineNodeData && item.machineNodeData.jpomUptime, '', 1) || '-'"
                 >
                   <a-statistic
-                    :title="$tl('p.runningTime')"
+                    :title="$t('pages.node.list.4a4e5b97')"
                     :value-style="statValueStyle"
                     :formatter="
                       (v) => {
@@ -430,7 +451,7 @@
               <a-col :span="8">
                 <a-tooltip :title="`${parseTime(item.machineNodeData && item.machineNodeData.modifyTimeMillis)}`">
                   <a-statistic
-                    :title="$tl('p.updateTime')"
+                    :title="$t('pages.node.list.3d55d8de')"
                     :value-style="statValueStyle"
                     :formatter="
                       (v) => {
@@ -494,30 +515,30 @@
       v-model:open="editNodeVisible"
       destroy-on-close
       width="50%"
-      :title="$tl('p.editNode')"
+      :title="$t('pages.node.list.9fa2f20c')"
       :confirm-loading="confirmLoading"
       :mask-closable="false"
       @ok="handleEditNodeOk"
     >
       <a-form ref="editNodeForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 19 }">
-        <a-form-item :label="$tl('c.nodeName')" name="name">
-          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$tl('c.nodeName')" />
+        <a-form-item :label="$t('pages.node.list.3614bbe4')" name="name">
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('pages.node.list.3614bbe4')" />
         </a-form-item>
-        <a-form-item :label="$tl('p.groupName')" name="group">
+        <a-form-item :label="$t('pages.node.list.12d0e469')" name="group">
           <custom-select
             v-model:value="temp.group"
             :data="groupList"
-            :input-placeholder="$tl('p.addGroup')"
-            :select-placeholder="$tl('p.selectGroupName')"
+            :input-placeholder="$t('pages.node.list.c50ead9c')"
+            :select-placeholder="$t('pages.node.list.c385f859')"
           >
           </custom-select>
         </a-form-item>
 
-        <a-form-item :label="$tl('p.nodeStatus')" name="openStatus">
+        <a-form-item :label="$t('pages.node.list.87c09576')" name="openStatus">
           <a-switch
             :checked="temp.openStatus == 1"
-            :checked-children="$tl('p.enable')"
-            :un-checked-children="$tl('p.disable')"
+            :checked-children="$t('pages.node.list.149265a9')"
+            :un-checked-children="$t('pages.node.list.287f3530')"
             default-checked
             @change="
               (checked) => {
@@ -526,7 +547,7 @@
             "
           />
         </a-form-item>
-        <a-form-item :label="$tl('p.bindSsh')" name="sshId">
+        <a-form-item :label="$t('pages.node.list.72435e8f')" name="sshId">
           <a-select
             v-model:value="temp.sshId"
             show-search
@@ -540,9 +561,9 @@
                 )
               }
             "
-            :placeholder="$tl('p.selectSsh')"
+            :placeholder="$t('pages.node.list.9275502b')"
           >
-            <a-select-option value="">{{ $tl('p.unbindSsh') }}</a-select-option>
+            <a-select-option value="">{{ $t('pages.node.list.33711dff') }}</a-select-option>
             <a-select-option v-for="ssh in sshList" :key="ssh.id" :disabled="ssh.disabled">{{
               ssh.name
             }}</a-select-option>
@@ -574,7 +595,7 @@
       v-model:open="fastInstallNode"
       destroy-on-close
       width="80%"
-      :title="$tl('p.quickInstallPlugin')"
+      :title="$t('pages.node.list.c0108a0')"
       :footer="null"
       :mask-closable="false"
       @cancel="
@@ -591,22 +612,22 @@
       v-model:open="syncToWorkspaceVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$tl('p.syncToOtherWorkspaces')"
+      :title="$t('pages.node.list.d3b55aa0')"
       :mask-closable="false"
       @ok="handleSyncToWorkspace"
     >
-      <a-alert :message="$tl('p.warmTip')" type="warning">
+      <a-alert :message="$t('pages.node.list.d5e02e8a')" type="warning">
         <template #description>
           <ul>
-            <li>{{ $tl('p.syncMechanism') }}</li>
-            <li>{{ $tl('p.createNewNode') }}</li>
-            <li>{{ $tl('p.syncNodeInfo') }}</li>
+            <li>{{ $t('pages.node.list.b74cd503') }}</li>
+            <li>{{ $t('pages.node.list.852c00af') }}</li>
+            <li>{{ $t('pages.node.list.c79623c0') }}</li>
           </ul>
         </template>
       </a-alert>
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
-        <a-form-item :label="$tl('p.selectWorkspace')" name="workspaceId">
+        <a-form-item :label="$t('pages.node.list.7ef9d8fb')" name="workspaceId">
           <a-select
             v-model:value="temp.workspaceId"
             show-search
@@ -620,7 +641,7 @@
                 )
               }
             "
-            :placeholder="$tl('c.selectWorkspace')"
+            :placeholder="$t('pages.node.list.3a321a02')"
           >
             <a-select-option v-for="item in workspaceList" :key="item.id" :disabled="getWorkspaceId() === item.id">{{
               item.name
@@ -634,7 +655,7 @@
       v-model:open="monitorVisible"
       destroy-on-close
       width="75%"
-      :title="`${temp.name}${$tl('p.historicalMonitoringChart')}`"
+      :title="`${temp.name}${$t('pages.node.list.d298e120')}`"
       :footer="null"
       :mask-closable="false"
     >
@@ -642,7 +663,6 @@
     </customModal>
   </div>
 </template>
-
 <script>
 import { mapState } from 'pinia'
 import { Empty } from 'ant-design-vue'
@@ -710,7 +730,7 @@ export default {
 
       columns: [
         {
-          title: this.$tl('c.nodeName'),
+          title: this.$t('pages.node.list.3614bbe4'),
           dataIndex: 'name',
           width: 200,
           sorter: true,
@@ -718,34 +738,34 @@ export default {
           ellipsis: true
         },
         {
-          title: this.$tl('p.statusValue'),
+          title: this.$t('pages.node.list.969229b3'),
           dataIndex: 'status',
           width: '100px',
           ellipsis: true
         },
         {
-          title: this.$tl('p.nodeIp'),
+          title: this.$t('pages.node.list.f48a6e61'),
           dataIndex: 'url',
           key: 'url',
           width: '190px',
           ellipsis: true
         },
         {
-          title: this.$tl('p.systemName'),
+          title: this.$t('pages.node.list.163de925'),
           dataIndex: 'osName',
           key: 'osName',
           width: '100px',
           ellipsis: true
         },
         {
-          title: `JDK ${this.$tl('p.version')}`,
+          title: `JDK ${this.$t('pages.node.list.d826aba2')}`,
           dataIndex: 'javaVersion',
           width: 100,
           key: 'javaVersion',
           ellipsis: true
         },
         {
-          title: `JVM ${this.$tl('p.info')}`,
+          title: `JVM ${this.$t('pages.node.list.2edcd34c')}`,
           dataIndex: 'jvmInfo',
           width: 100,
           ellipsis: true
@@ -753,25 +773,25 @@ export default {
         // { title: "JVM 剩余内存", dataIndex: "machineNodeData.jvmFreeMemory", ellipsis: true, },
 
         {
-          title: this.$tl('p.projectCount'),
+          title: this.$t('pages.node.list.293598cd'),
           dataIndex: 'jpomProjectCount',
           width: '90px'
         },
         {
-          title: this.$tl('p.scriptCount'),
+          title: this.$t('pages.node.list.f680ea25'),
           dataIndex: 'jpomScriptCount',
           width: '90px'
         },
 
         {
-          title: this.$tl('p.pluginRunning'),
+          title: this.$t('pages.node.list.b4c3a25d'),
           dataIndex: 'runTime',
           width: '100px',
           key: 'runTime',
           ellipsis: true
         },
         {
-          title: this.$tl('p.createTime'),
+          title: this.$t('pages.node.list.f5b90169'),
           dataIndex: 'createTimeMillis',
           ellipsis: true,
           sorter: true,
@@ -779,7 +799,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$tl('p.modifyTime'),
+          title: this.$t('pages.node.list.a2b40316'),
           dataIndex: 'modifyTimeMillis',
           ellipsis: true,
           sorter: true,
@@ -787,13 +807,13 @@ export default {
           width: '170px'
         },
         {
-          title: this.$tl('p.sortValue'),
+          title: this.$t('pages.node.list.f5049383'),
           dataIndex: 'sortValue',
           sorter: true,
           width: '80px'
         },
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.node.list.3bb962bf'),
           dataIndex: 'operation',
           key: 'operation',
           fixed: 'right',
@@ -804,7 +824,7 @@ export default {
       ],
 
       rules: {
-        name: [{ required: true, message: this.$tl('p.inputNodeName'), trigger: 'blur' }]
+        name: [{ required: true, message: this.$t('pages.node.list.807342c3'), trigger: 'blur' }]
       },
       workspaceList: [],
       tableSelections: [],
@@ -866,9 +886,6 @@ export default {
   },
 
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.list.${key}`, ...args)
-    },
     formatDuration,
     renderSize,
     // PAGE_DEFAULT_SHOW_TOTAL,
@@ -965,11 +982,11 @@ export default {
     },
     handleDelete(record) {
       $confirm({
-        title: this.$tl('c.systemPrompt'),
+        title: this.$t('pages.node.list.a8fe4c17'),
         zIndex: 1009,
-        content: this.$tl('p.confirmDeleteNode'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.node.list.6a7b3336'),
+        okText: this.$t('pages.node.list.7da4a591'),
+        cancelText: this.$t('pages.node.list.43105e21'),
         onOk: () => {
           return deleteNode(record.id).then((res) => {
             if (res.code === 200) {
@@ -985,22 +1002,22 @@ export default {
     // 解绑
     handleUnbind(record) {
       const html = `
-      <b style='font-size: 20px;'>${this.$tl('p.confirmUnbindNode')}</b>
+      <b style='font-size: 20px;'>${this.$t('pages.node.list.6d453736')}</b>
       <ul style='font-size: 20px;color:red;font-weight: bold;'>
-        <li>${this.$tl('p.unbindCheck_1')}</li>
-        <li>${this.$tl('p.unbindUsage')}</li>
-        <li>${this.$tl('p.misoperationWarning')}</li>
+        <li>${this.$t('pages.node.list.95f857c5')}</li>
+        <li>${this.$t('pages.node.list.260e16bd')}</li>
+        <li>${this.$t('pages.node.list.f9775b85')}</li>
       </ul>
 
       `
       $confirm({
-        title: this.$tl('p.dangerousOperation'),
+        title: this.$t('pages.node.list.cd503941'),
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
         okButtonProps: { size: 'small', danger: true, type: 'primary' },
         cancelButtonProps: { type: 'primary' },
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        okText: this.$t('pages.node.list.7da4a591'),
+        cancelText: this.$t('pages.node.list.43105e21'),
         onOk: () => {
           return unbind(record.id).then((res) => {
             if (res.code === 200) {
@@ -1077,7 +1094,7 @@ export default {
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
         $notification.warn({
-          message: this.$tl('c.selectWorkspace')
+          message: this.$t('pages.node.list.3a321a02')
         })
         return false
       }
@@ -1104,22 +1121,24 @@ export default {
     // 排序
     sortItemHander(record, index, method) {
       const msgData = {
-        top: this.$tl('p.confirmTop'),
-        up: this.$tl('p.confirmMoveUp'),
-        down: this.$tl('p.confirmMoveDown')
+        top: this.$t('pages.node.list.a3089bc1'),
+        up: this.$t('pages.node.list.2b25234c'),
+        down: this.$t('pages.node.list.8ad93f78')
       }
-      let msg = msgData[method] || this.$tl('p.confirmOperation')
+      let msg = msgData[method] || this.$t('pages.node.list.644ef343')
       if (!record.sortValue) {
-        msg += `${this.$tl('p.currentStatus')},${this.$tl('p.moveAdvice')},${this.$tl('p.expectedOrderAdvice')}`
+        msg += `${this.$t('pages.node.list.8a8e4923')},${this.$t('pages.node.list.4deb73b2')},${this.$t(
+          'pages.node.list.d9c5971d'
+        )}`
       }
       // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
       const compareId = this.list[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id
       $confirm({
-        title: this.$tl('c.systemPrompt'),
+        title: this.$t('pages.node.list.a8fe4c17'),
         zIndex: 1009,
         content: msg,
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        okText: this.$t('pages.node.list.7da4a591'),
+        cancelText: this.$t('pages.node.list.43105e21'),
         onOk: () => {
           return sortItem({
             id: record.id,
@@ -1176,5 +1195,3 @@ export default {
   }
 }
 </script>
-
-<style scoped></style>

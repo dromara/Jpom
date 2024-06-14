@@ -16,23 +16,25 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$tl('c.monitorName')"
+            :placeholder="$t('pages.monitor.operate-log.102669ac')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-select
             v-model:value="listQuery.status"
             allow-clear
-            :placeholder="$tl('c.status')"
+            :placeholder="$t('pages.monitor.operate-log.6e06fe4f')"
             class="search-input-item"
           >
-            <a-select-option :value="1">{{ $tl('c.on') }}</a-select-option>
-            <a-select-option :value="0">{{ $tl('c.off') }}</a-select-option>
+            <a-select-option :value="1">{{ $t('pages.monitor.operate-log.726bd72c') }}</a-select-option>
+            <a-select-option :value="0">{{ $t('pages.monitor.operate-log.8ca0a6dc') }}</a-select-option>
           </a-select>
-          <a-tooltip :title="$tl('p.quickReturn')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
+          <a-tooltip :title="$t('pages.monitor.operate-log.5da9e22d')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{
+              $t('pages.monitor.operate-log.53c2763c')
+            }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">{{ $tl('p.add') }}</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $t('pages.monitor.operate-log.7d46652a') }}</a-button>
         </a-space>
       </template>
       <template #bodyCell="{ column, text, record }">
@@ -42,13 +44,22 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'status'">
-          <a-switch size="small" :checked="text" :checked-children="$tl('c.on')" :un-checked-children="$tl('c.off')" />
+          <a-switch
+            size="small"
+            :checked="text"
+            :checked-children="$t('pages.monitor.operate-log.726bd72c')"
+            :un-checked-children="$t('pages.monitor.operate-log.8ca0a6dc')"
+          />
         </template>
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('p.edit') }}</a-button>
-            <a-button size="small" type="primary" danger @click="handleDelete(record)">{{ $tl('p.delete') }}</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{
+              $t('pages.monitor.operate-log.64603c01')
+            }}</a-button>
+            <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
+              $t('pages.monitor.operate-log.dd20d11c')
+            }}</a-button>
           </a-space>
         </template>
       </template>
@@ -59,59 +70,68 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="50vw"
-      :title="$tl('p.editMonitor')"
+      :title="$t('pages.monitor.operate-log.d6117b62')"
       :mask-closable="false"
       @ok="handleEditOperateMonitorOk"
     >
       <a-form ref="editMonitorForm" :rules="rules" :model="temp" :label-col="{ span: 5 }" :wrapper-col="{ span: 17 }">
-        <a-form-item :label="$tl('c.monitorName')" name="name">
-          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$tl('c.monitorName')" />
+        <a-form-item :label="$t('pages.monitor.operate-log.102669ac')" name="name">
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('pages.monitor.operate-log.102669ac')" />
         </a-form-item>
-        <a-form-item :label="$tl('c.status')" name="status">
+        <a-form-item :label="$t('pages.monitor.operate-log.6e06fe4f')" name="status">
           <a-switch
             v-model:checked="temp.start"
-            :checked-children="$tl('p.open')"
-            :un-checked-children="$tl('p.close')"
+            :checked-children="$t('pages.monitor.operate-log.412561bf')"
+            :un-checked-children="$t('pages.monitor.operate-log.99811dca')"
           />
         </a-form-item>
-        <a-form-item :label="$tl('p.monitorUser')" name="monitorUser">
+        <a-form-item :label="$t('pages.monitor.operate-log.ca5b0bf7')" name="monitorUser">
           <a-transfer
             :data-source="monitorUserList"
             :lazy="false"
             show-search
             :filter-option="filterOption"
             :target-keys="monitorUserKeys"
-            :render="(item) => item.title"
             @change="handleMonitorUserChange"
-          />
+          >
+            <template #render="item">
+              <a-tooltip :title="item.title">{{ item.title }} </a-tooltip>
+            </template>
+          </a-transfer>
         </a-form-item>
-        <a-form-item :label="$tl('p.monitorFunction')" name="monitorOpt">
+        <a-form-item :label="$t('pages.monitor.operate-log.59c90082')" name="monitorOpt">
           <a-transfer
             :data-source="classFeature"
             :lazy="false"
             show-search
             :filter-option="filterOption"
             :target-keys="classFeatureKeys"
-            :render="(item) => item.title"
             @change="handleClassFeatureChange"
-          />
+          >
+            <template #render="item">
+              <a-tooltip :title="item.title">{{ item.title }} </a-tooltip>
+            </template>
+          </a-transfer>
         </a-form-item>
-        <a-form-item :label="$tl('p.monitorOperation')" name="monitorOpt">
+        <a-form-item :label="$t('pages.monitor.operate-log.42cc6f66')" name="monitorOpt">
           <a-transfer
             :data-source="methodFeature"
             :lazy="false"
             show-search
             :filter-option="filterOption"
             :target-keys="methodFeatureKeys"
-            :render="(item) => item.title"
             @change="handleMethodFeatureChange"
-          />
+          >
+            <template #render="item">
+              <a-tooltip :title="item.title">{{ item.title }} </a-tooltip>
+            </template>
+          </a-transfer>
         </a-form-item>
         <a-form-item name="notifyUser" class="jpom-monitor-notify">
           <template #label>
             <a-tooltip>
-              {{ $tl('p.alarmContact') }}
-              <template #title> {{ $tl('p.noEmailSet') }} </template>
+              {{ $t('pages.monitor.operate-log.2e5898f2') }}
+              <template #title> {{ $t('pages.monitor.operate-log.4bff4306') }} </template>
               <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
@@ -121,15 +141,17 @@
             show-search
             :filter-option="filterOption"
             :target-keys="notifyUserKeys"
-            :render="(item) => item.title"
             @change="handleNotifyUserChange"
-          />
+          >
+            <template #render="item">
+              <a-tooltip :title="item.title">{{ item.title }} </a-tooltip>
+            </template>
+          </a-transfer>
         </a-form-item>
       </a-form>
     </a-modal>
   </div>
 </template>
-
 <script>
 import {
   deleteMonitorOperate,
@@ -159,19 +181,19 @@ export default {
       editOperateMonitorVisible: false,
       columns: [
         {
-          title: this.$tl('p.name'),
+          title: this.$t('pages.monitor.operate-log.bb769c1d'),
           dataIndex: 'name'
         },
         {
-          title: this.$tl('c.status'),
+          title: this.$t('pages.monitor.operate-log.6e06fe4f'),
           dataIndex: 'status'
         },
         {
-          title: this.$tl('p.modifier'),
+          title: this.$t('pages.monitor.operate-log.916db24b'),
           dataIndex: 'modifyUser'
         },
         {
-          title: this.$tl('p.modifiedTime'),
+          title: this.$t('pages.monitor.operate-log.fd921623'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           customRender: ({ text }) => {
@@ -183,18 +205,19 @@ export default {
           width: 180
         },
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.monitor.operate-log.3bb962bf'),
           dataIndex: 'operation',
           align: 'center',
           fixed: 'right',
           width: '120px'
         }
       ],
+
       rules: {
         name: [
           {
             required: true,
-            message: this.$tl('p.pleaseInputMonitorName'),
+            message: this.$t('pages.monitor.operate-log.a530a71d'),
             trigger: 'blur'
           }
         ]
@@ -213,9 +236,6 @@ export default {
     this.loadOptTypeData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.monitor.operateLog.${key}`, ...args)
-    },
     // 加载数据
     loadData(pointerEvent) {
       this.loading = true
@@ -312,25 +332,25 @@ export default {
       this.$refs['editMonitorForm'].validate().then(() => {
         if (this.monitorUserKeys.length === 0) {
           $notification.error({
-            message: this.$tl('p.pleaseSelectMonitorUser')
+            message: this.$t('pages.monitor.operate-log.328111cb')
           })
           return false
         }
         if (this.methodFeatureKeys.length === 0) {
           $notification.error({
-            message: this.$tl('p.pleaseSelectMonitorOperation')
+            message: this.$t('pages.monitor.operate-log.45c25649')
           })
           return false
         }
         if (this.classFeatureKeys.length === 0) {
           $notification.error({
-            message: this.$tl('p.pleaseSelectMonitorFunction')
+            message: this.$t('pages.monitor.operate-log.3a343686')
           })
           return false
         }
         if (this.notifyUserKeys.length === 0) {
           $notification.error({
-            message: this.$tl('p.pleaseSelectAlarmContact')
+            message: this.$t('pages.monitor.operate-log.1cf3e6f')
           })
           return false
         }
@@ -361,11 +381,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$tl('p.systemPrompt'),
+        title: this.$t('pages.monitor.operate-log.b22d55a0'),
         zIndex: 1009,
-        content: this.$tl('p.confirmDelete'),
-        okText: this.$tl('p.confirm'),
-        cancelText: this.$tl('p.cancel'),
+        content: this.$t('pages.monitor.operate-log.987c2cd6'),
+        okText: this.$t('pages.monitor.operate-log.e8e9db25'),
+        cancelText: this.$t('pages.monitor.operate-log.b12468e9'),
         onOk: () => {
           return deleteMonitorOperate(record.id).then((res) => {
             if (res.code === 200) {

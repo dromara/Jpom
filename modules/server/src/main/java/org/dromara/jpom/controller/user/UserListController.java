@@ -19,6 +19,7 @@ import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.user.UserModel;
@@ -114,23 +115,23 @@ public class UserListController extends BaseServerController {
             result.put("randomPwd", randomPwd);
         } else {
             UserModel model = userService.getByKey(userModel.getId());
-            Assert.notNull(model, "不存在对应的用户");
+            Assert.notNull(model, I18nMessageUtil.get("i18n.user_not_exist.5387"));
             boolean systemUser = userModel.isSystemUser();
             if (!systemUser) {
-                Assert.state(!model.isSuperSystemUser(), "不能取消超级管理员的权限");
+                Assert.state(!model.isSuperSystemUser(), I18nMessageUtil.get("i18n.cannot_cancel_super_admin_permissions.99b5"));
             }
             if (model.isSuperSystemUser()) {
-                Assert.state(userModel.getStatus() == 1, "不能禁用超级管理员");
+                Assert.state(userModel.getStatus() == 1, I18nMessageUtil.get("i18n.cannot_disable_super_admin.6429"));
             }
             UserModel optUser = getUser();
             if (StrUtil.equals(model.getId(), optUser.getId())) {
-                Assert.state(optUser.isSuperSystemUser(), "不能修改自己的信息");
+                Assert.state(optUser.isSuperSystemUser(), I18nMessageUtil.get("i18n.cannot_modify_own_info.4036"));
             }
             userService.updateById(userModel);
             // 删除旧数据
             userBindWorkspaceService.deleteByUserId(userModel.getId());
         }
-        return new JsonMessage<>(200, "操作成功", result);
+        return new JsonMessage<>(200, I18nMessageUtil.get("i18n.operation_succeeded.3313"), result);
     }
 
     private UserModel parseUser(boolean create) {
@@ -138,28 +139,28 @@ public class UserListController extends BaseServerController {
         boolean email = Validator.isEmail(id);
         if (email) {
             int length = id.length();
-            Assert.state(length <= Const.ID_MAX_LEN && length >= UserModel.USER_NAME_MIN_LEN, "登录名如果为邮箱格式,长度必须" + UserModel.USER_NAME_MIN_LEN + "-" + Const.ID_MAX_LEN);
+            Assert.state(length <= Const.ID_MAX_LEN && length >= UserModel.USER_NAME_MIN_LEN, StrUtil.format(I18nMessageUtil.get("i18n.login_name_email_format_length_range.25f3"), UserModel.USER_NAME_MIN_LEN, Const.ID_MAX_LEN));
         } else {
             String checkId = StrUtil.replace(id, "-", "_");
-            Validator.validateGeneral(checkId, UserModel.USER_NAME_MIN_LEN, Const.ID_MAX_LEN, "登录名格式不正确（英文字母 、数字和下划线）,并且长度必须" + UserModel.USER_NAME_MIN_LEN + "-" + Const.ID_MAX_LEN);
+            Validator.validateGeneral(checkId, UserModel.USER_NAME_MIN_LEN, Const.ID_MAX_LEN, StrUtil.format(I18nMessageUtil.get("i18n.login_name_format_incorrect.f789"), UserModel.USER_NAME_MIN_LEN, Const.ID_MAX_LEN));
         }
 
-        Assert.state(!StrUtil.equalsAnyIgnoreCase(id, UserModel.SYSTEM_OCCUPY_NAME, UserModel.SYSTEM_ADMIN), "当前登录名已经被系统占用");
+        Assert.state(!StrUtil.equalsAnyIgnoreCase(id, UserModel.SYSTEM_OCCUPY_NAME.get(), UserModel.SYSTEM_ADMIN), I18nMessageUtil.get("i18n.login_name_already_taken.5b46"));
 
         UserModel userModel = new UserModel();
         UserModel optUser = getUser();
         if (create) {
             // 登录名重复
             boolean exists = userService.exists(new UserModel(id));
-            Assert.state(!exists, "登录名已经存在");
+            Assert.state(!exists, I18nMessageUtil.get("i18n.login_name_already_exists.2511"));
             userModel.setParent(optUser.getId());
         }
         userModel.setId(id);
         //
         String name = getParameter("name");
-        Assert.hasText(name, "请输入账户昵称");
+        Assert.hasText(name, I18nMessageUtil.get("i18n.account_name_nickname_required.b757"));
         int len = name.length();
-        Assert.state(len <= 10 && len >= 2, "昵称长度只能是2-10");
+        Assert.state(len <= 10 && len >= 2, I18nMessageUtil.get("i18n.nickname_length_limit.6312"));
 
         userModel.setName(name);
 
@@ -177,11 +178,11 @@ public class UserListController extends BaseServerController {
         //
         String permissionGroup = getParameter("permissionGroup");
         List<String> permissionGroupList = StrUtil.split(permissionGroup, StrUtil.AT);
-        Assert.notEmpty(permissionGroupList, "用户未选择权限组");
+        Assert.notEmpty(permissionGroupList, I18nMessageUtil.get("i18n.user_not_select_permission_group.1091"));
         userModel.setPermissionGroup(CollUtil.join(permissionGroupList, StrUtil.AT, StrUtil.AT, StrUtil.AT));
         //
         int status = getParameterInt("status", 1);
-        Assert.state(status == 0 || status == 1, "选择的用户状态异常");
+        Assert.state(status == 0 || status == 1, I18nMessageUtil.get("i18n.selected_user_status_abnormal.efcf"));
         userModel.setStatus(status);
         return userModel;
     }
@@ -196,23 +197,23 @@ public class UserListController extends BaseServerController {
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<Object> deleteUser(String id) {
         UserModel userName = getUser();
-        Assert.state(!StrUtil.equals(userName.getId(), id), "不能删除自己");
+        Assert.state(!StrUtil.equals(userName.getId(), id), I18nMessageUtil.get("i18n.cannot_delete_self.fec9"));
 
         UserModel userModel = userService.getByKey(id);
-        Assert.notNull(userModel, "非法访问");
+        Assert.notNull(userModel, I18nMessageUtil.get("i18n.illegal_access.c365"));
         if (userModel.isSystemUser()) {
             // 如果是系统管理员，判断个数
-            Assert.state(userService.systemUserCount() > 1, "系统中的系统管理员账号数量必须存在一个以上");
+            Assert.state(userService.systemUserCount() > 1, I18nMessageUtil.get("i18n.admin_account_required.31e0"));
         }
-        Assert.state(!userModel.isSuperSystemUser(), "不能删除超级管理员");
+        Assert.state(!userModel.isSuperSystemUser(), I18nMessageUtil.get("i18n.cannot_delete_super_admin.68e2"));
         // 非系统管理员不支持删除演示账号
-        Assert.state(!userModel.isRealDemoUser(), "演示账号不支持删除");
+        Assert.state(!userModel.isRealDemoUser(), I18nMessageUtil.get("i18n.demo_account_not_support_delete.f9a6"));
         userService.delByKey(id);
         // 删除工作空间
         userBindWorkspaceService.deleteByUserId(id);
         //
         triggerTokenLogServer.delByUserId(id);
-        return JsonMessage.success("删除成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 
     /**
@@ -226,7 +227,7 @@ public class UserListController extends BaseServerController {
     public IJsonMessage<Object> unlock(@ValidatorItem String id) {
         UserModel update = UserModel.unLock(id);
         userService.updateById(update);
-        return JsonMessage.success("解锁成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.unlock_success.4cea"));
     }
 
     /**
@@ -242,7 +243,7 @@ public class UserListController extends BaseServerController {
         UserModel update = new UserModel(id);
         update.setTwoFactorAuthKey(StrUtil.EMPTY);
         userService.updateById(update);
-        return JsonMessage.success("关闭成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.close_success.8a31"));
     }
 
     /**
@@ -255,16 +256,16 @@ public class UserListController extends BaseServerController {
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<JSONObject> restUserPwd(@ValidatorItem String id) {
         UserModel userModel = userService.getByKey(id);
-        Assert.notNull(userModel, "账号不存在");
-        Assert.state(!userModel.isSuperSystemUser(), "超级管理员不能通过此方式重置密码");
+        Assert.notNull(userModel, I18nMessageUtil.get("i18n.account_does_not_exist.8402"));
+        Assert.state(!userModel.isSuperSystemUser(), I18nMessageUtil.get("i18n.super_admin_cannot_reset_password_this_way.0761"));
         //不支持重置演示账号
-        Assert.state(!userModel.isRealDemoUser(), "演示账号不支持重置密码");
+        Assert.state(!userModel.isRealDemoUser(), I18nMessageUtil.get("i18n.demo_account_not_support_reset_password.a595"));
         String randomPwd = RandomUtil.randomString(UserModel.SALT_LEN);
         String sha1Pwd = SecureUtil.sha1(randomPwd);
         userService.updatePwd(id, sha1Pwd);
         //
         JSONObject result = new JSONObject();
         result.put("randomPwd", randomPwd);
-        return JsonMessage.success("重置成功", result);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.reset_success.faa3"), result);
     }
 }

@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 ///
 /// Copyright (c) 2019 Of Him Code Technology Studio
 /// Jpom is licensed under Mulan PSL v2.
@@ -88,14 +89,14 @@ export function triggerUrl(params) {
 }
 
 export const sourceMap = {
-  0: '上传',
-  1: '构建',
-  2: '下载',
-  3: '证书'
+  0: t('api.file-manager.file-storage.ae09d79d'),
+  1: t('api.file-manager.file-storage.fe7ede8b'),
+  2: t('api.file-manager.file-storage.65b21404'),
+  3: t('api.file-manager.file-storage.481e8a05')
 }
 
 export const statusMap = {
-  0: '下载中',
-  1: '下载成功',
-  2: '下载异常'
+  0: t('api.file-manager.file-storage.d919f7c7'),
+  1: t('api.file-manager.file-storage.b46a531a'),
+  2: t('api.file-manager.file-storage.d43541fc')
 }

@@ -18,19 +18,19 @@
           <a-input
             v-model:value="viewOperationLogListQuery['modifyUser']"
             class="search-input-item"
-            :placeholder="$tl('p.operator')"
+            :placeholder="$t('pages.system.assets.ssh.operation-log.ed74cc37')"
             @press-enter="handleListLog"
           />
           <a-input
             v-model:value="viewOperationLogListQuery['%sshName%']"
             class="search-input-item"
-            :placeholder="$tl('p.sshName')"
+            :placeholder="$t('pages.system.assets.ssh.operation-log.dc77206e')"
             @press-enter="handleListLog"
           />
           <a-input
             v-model:value="viewOperationLogListQuery['%machineSshName%']"
             class="search-input-item"
-            :placeholder="$tl('p.machineSshName')"
+            :placeholder="$t('pages.system.assets.ssh.operation-log.c3368e35')"
             @press-enter="handleListLog"
           />
           <a-input
@@ -42,7 +42,7 @@
           <a-input
             v-model:value="viewOperationLogListQuery['%commands%']"
             class="search-input-item"
-            :placeholder="$tl('p.executeCommand')"
+            :placeholder="$t('pages.system.assets.ssh.operation-log.3e1a05c7')"
             @press-enter="handleListLog"
           />
           <a-range-picker
@@ -50,7 +50,9 @@
             format="YYYY-MM-DD HH:mm:ss"
             @change="onchangeListLogTime"
           />
-          <a-button type="primary" @click="handleListLog">{{ $tl('p.search') }}</a-button>
+          <a-button type="primary" @click="handleListLog">{{
+            $t('pages.system.assets.ssh.operation-log.53c2763c')
+          }}</a-button>
         </a-space>
       </template>
       <template #bodyCell="{ column, text, record }">
@@ -77,13 +79,16 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'refuse'">
-          <span>{{ text ? $tl('p.success') : $tl('p.denied') }}</span>
+          <span>{{
+            text
+              ? $t('pages.system.assets.ssh.operation-log.83aa7d3')
+              : $t('pages.system.assets.ssh.operation-log.5aedf375')
+          }}</span>
         </template>
       </template>
     </a-table>
   </div>
 </template>
-
 <script>
 import { getSshOperationLogList } from '@/api/ssh'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
@@ -115,27 +120,27 @@ export default {
       ),
       viewOperationLogColumns: [
         {
-          title: this.$tl('p.operatorName'),
+          title: this.$t('pages.system.assets.ssh.operation-log.9eb05c33'),
           dataIndex: 'modifyUser',
           width: 100
         },
         { title: 'IP', dataIndex: 'ip', width: '130px' },
         {
-          title: `ssh${this.$tl('p.name')}`,
+          title: `ssh${this.$t('pages.system.assets.ssh.operation-log.bb769c1d')}`,
           dataIndex: 'sshName',
           width: '200px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$tl('p.machineSshName2'),
+          title: this.$t('pages.system.assets.ssh.operation-log.4ca54ca0'),
           dataIndex: 'machineSshName',
           width: '200px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$tl('p.executeCommand'),
+          title: this.$t('pages.system.assets.ssh.operation-log.3e1a05c7'),
           dataIndex: 'commands',
           width: 200,
           ellipsis: true
@@ -148,7 +153,7 @@ export default {
         },
 
         {
-          title: this.$tl('p.operationTime'),
+          title: this.$t('pages.system.assets.ssh.operation-log.45e88a2c'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text }) => {
@@ -157,7 +162,7 @@ export default {
           width: '180px'
         },
         {
-          title: this.$tl('p.isSuccess'),
+          title: this.$t('pages.system.assets.ssh.operation-log.2bff48a0'),
           dataIndex: 'refuse',
           width: '100px',
           ellipsis: true,
@@ -175,9 +180,6 @@ export default {
     this.handleListLog()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.system.assets.ssh.operationLog.${key}`, ...args)
-    },
     handleListLog() {
       this.viewOperationLoading = true
       let api

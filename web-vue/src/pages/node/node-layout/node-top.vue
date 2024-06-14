@@ -5,9 +5,9 @@
         <a-range-picker
           v-model:value="timeRange"
           :presets="[
-            { label: $tl('p.today'), value: [dayjs().startOf('day'), dayjs()] },
+            { label: $t('pages.node.node-layout.node-top.39543acb'), value: [dayjs().startOf('day'), dayjs()] },
             {
-              label: $tl('p.yesterday'),
+              label: $t('pages.node.node-layout.node-top.c70ceee4'),
               value: [dayjs().add(-1, 'days').startOf('day'), dayjs().add(-1, 'days').endOf('day')]
             }
           ]"
@@ -21,15 +21,15 @@
           format="YYYY-MM-DD HH:mm:ss"
           value-format="YYYY-MM-DD HH:mm:ss"
         />
-        <a-button type="primary" @click="handleFilter">{{ $tl('p.search') }}</a-button>
+        <a-button type="primary" @click="handleFilter">{{ $t('pages.node.node-layout.node-top.53c2763c') }}</a-button>
         <a-tooltip>
           <template #title>
             <div>
               <ul>
-                <li>{{ $tl('p.linuxMemoryInfo') }}</li>
-                <li>{{ $tl('p.oshiLibrary') }}</li>
-                <li>{{ $tl('p.memUsageCalcWithAvailable') }}</li>
-                <li>{{ $tl('p.memUsageCalcWithoutAvailable') }}</li>
+                <li>{{ $t('pages.node.node-layout.node-top.cc1356') }}</li>
+                <li>{{ $t('pages.node.node-layout.node-top.419c88f7') }}</li>
+                <li>{{ $t('pages.node.node-layout.node-top.9bf77b59') }}</li>
+                <li>{{ $t('pages.node.node-layout.node-top.546feb81') }}</li>
               </ul>
             </div>
           </template>
@@ -41,13 +41,12 @@
     <a-empty
       v-else-if="nodeMonitorLoadStatus == -1"
       :image="Empty.PRESENTED_IMAGE_SIMPLE"
-      :description="$tl('p.noDataFound')"
+      :description="$t('pages.node.node-layout.node-top.751309a5')"
     >
     </a-empty>
     <a-skeleton v-else />
   </div>
 </template>
-
 <script>
 import { nodeMonitorData } from '@/api/node'
 import { drawChart, generateNodeTopChart, generateNodeNetworkTimeChart, generateNodeNetChart } from '@/api/node-stat'
@@ -92,9 +91,6 @@ export default {
     window.removeEventListener('resize', this.resize)
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.nodeLayout.nodeTop.${key}`, ...args)
-    },
     dayjs,
     // 刷新
     handleFilter() {
@@ -146,7 +142,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .historyChart {
   height: 50vh;

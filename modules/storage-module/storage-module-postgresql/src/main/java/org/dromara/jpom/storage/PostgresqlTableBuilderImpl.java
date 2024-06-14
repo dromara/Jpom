@@ -12,6 +12,7 @@ package org.dromara.jpom.storage;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.db.sql.Wrapper;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.db.*;
 import org.dromara.jpom.dialect.DialectUtil;
 import org.springframework.util.Assert;
@@ -75,7 +76,7 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
              */
             switch (indexType) {
                 case "ADD-UNIQUE": {
-                    Assert.notEmpty(fields, "索引未配置字段");
+                    Assert.notEmpty(fields, I18nMessageUtil.get("i18n.index_field_not_configured.96d9"));
                     stringBuilder.append("CALL drop_index_if_exists('").append(tableName).append("','").append(name).append("')").append(";").append(StrUtil.LF);
                     stringBuilder.append(this.delimiter()).append(StrUtil.LF);
                     stringBuilder.append("CREATE UNIQUE INDEX ").append(name)
@@ -84,7 +85,7 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
                     break;
                 }
                 case "ADD": {
-                    Assert.notEmpty(fields, "索引未配置字段");
+                    Assert.notEmpty(fields, I18nMessageUtil.get("i18n.index_field_not_configured.96d9"));
                     stringBuilder.append("CALL drop_index_if_exists('").append(tableName).append("','").append(name).append("')").append(";").append(StrUtil.LF);
                     stringBuilder.append(this.delimiter()).append(StrUtil.LF);
                     stringBuilder.append("CREATE INDEX ").append(name)
@@ -93,7 +94,7 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
                     break;
                 }
                 default:
-                    throw new IllegalArgumentException("不支持的类型：" + indexType);
+                    throw new IllegalArgumentException(I18nMessageUtil.get("i18n.unsupported_type_with_colon2.7de2") + indexType);
             }
             stringBuilder.append(";").append(StrUtil.LF);
             stringBuilder.append(this.delimiter()).append(StrUtil.LF);
@@ -108,7 +109,8 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
         for (TableViewAlterData viewAlterData : row) {
             String alterType = viewAlterData.getAlterType();
             String tableName = fieldWrapper.wrap(viewAlterData.getTableName());
-            String columnName = viewAlterData.getName().toLowerCase(); //不使用wrapper，存储过程调用时，column不需要包裹
+            //不使用wrapper，存储过程调用时，column不需要包裹
+            String columnName = viewAlterData.getName().toLowerCase();
             switch (alterType) {
                 case "DROP":
                     stringBuilder.append("CALL drop_column_if_exists('").append(tableName).append("', '").append(columnName).append("')");
@@ -137,7 +139,7 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
                     stringBuilder.append("drop table if exists ").append(viewAlterData.getTableName());
                     break;
                 default:
-                    throw new IllegalArgumentException("不支持的类型：" + alterType);
+                    throw new IllegalArgumentException(I18nMessageUtil.get("i18n.unsupported_type_with_colon2.7de2") + alterType);
             }
             stringBuilder.append(";").append(StrUtil.LF);
             stringBuilder.append(this.delimiter()).append(StrUtil.LF);
@@ -168,7 +170,7 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
             .filter(tableViewData -> tableViewData.getPrimaryKey() != null && tableViewData.getPrimaryKey())
             .map(viewData -> fieldWrapper.wrap(viewData.getName()))
             .collect(Collectors.toList());
-        Assert.notEmpty(primaryKeys, "表没有主键");
+        Assert.notEmpty(primaryKeys, I18nMessageUtil.get("i18n.table_without_primary_key.7392"));
         stringBuilder.append(StrUtil.TAB).append("PRIMARY KEY (").append(CollUtil.join(primaryKeys, StrUtil.COMMA)).append(")").append(StrUtil.LF);
         stringBuilder.append(");").append(StrUtil.LF);
         // 表注释
@@ -232,7 +234,7 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
         String columnSql = strBuilder.toString();
         columnSql = encode ? StrUtil.replace(columnSql, "'", "''") : columnSql;
         int length = StrUtil.length(columnSql);
-        Assert.state(length <= 180, "sql 语句太长啦");
+        Assert.state(length <= 180, I18nMessageUtil.get("i18n.sql_statement_too_long.38d6"));
         return columnSql;
     }
 
@@ -291,7 +293,7 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
             .append(StrUtil.DOT).append(name).append(" IS ")
             .append("'").append(comment).append("';");
 
-        Assert.state(strBuilder.length() <= 1000, "sql 语句太长啦");
+        Assert.state(strBuilder.length() <= 1000, I18nMessageUtil.get("i18n.sql_statement_too_long.38d6"));
         return strBuilder.toString();
     }
 
@@ -303,7 +305,7 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
 
 
     private String getColumnTypeStr(String tableName, String columnName, String type, Integer dataLen) {
-        Assert.hasText(type, "未正确配置数据类型");
+        Assert.hasText(type, I18nMessageUtil.get("i18n.data_type_not_configured_correctly.bf16"));
         type = type.toUpperCase();
         switch (type) {
             case "LONG":
@@ -325,7 +327,7 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
             case "DOUBLE":
                 return "DOUBLE PRECISION";
             default:
-                throw new IllegalArgumentException("不支持的数据类型:" + type);
+                throw new IllegalArgumentException(I18nMessageUtil.get("i18n.data_type_not_supported.fd03") + type);
         }
     }
 }

@@ -3,7 +3,6 @@
     <slot name="default"></slot>
   </a-modal>
 </template>
-
 <script lang="ts">
 import { modalProps } from 'ant-design-vue/es/modal/Modal'
 import { initDefaultProps } from 'ant-design-vue/es/_util/props-util'

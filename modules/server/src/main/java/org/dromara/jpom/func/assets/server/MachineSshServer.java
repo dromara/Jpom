@@ -20,7 +20,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.map.CaseInsensitiveMap;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.cron.task.Task;
 import cn.hutool.db.Entity;
@@ -36,6 +35,7 @@ import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.AssetsConfig;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.dialect.DialectUtil;
@@ -92,7 +92,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
     @Override
     protected void fillInsert(MachineSshModel machineSshModel) {
         super.fillInsert(machineSshModel);
-        machineSshModel.setGroupName(StrUtil.emptyToDefault(machineSshModel.getGroupName(), Const.DEFAULT_GROUP_NAME));
+        machineSshModel.setGroupName(StrUtil.emptyToDefault(machineSshModel.getGroupName(), Const.DEFAULT_GROUP_NAME.get()));
         machineSshModel.setStatus(ObjectUtil.defaultIfNull(machineSshModel.getStatus(), 0));
     }
 
@@ -113,12 +113,12 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
     public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
         long count = this.count();
         if (count != 0) {
-            log.debug("机器 SSH 表已经存在 {} 条数据，不需要修复机器 SSH 数据", count);
+            log.debug(I18nMessageUtil.get("i18n.ssh_data_repair_not_needed.203f"), count);
             return;
         }
         List<SshModel> list = sshService.list(false);
         if (CollUtil.isEmpty(list)) {
-            log.debug("没有任何ssh信息,不需要修复机器 SSH 数据");
+            log.debug(I18nMessageUtil.get("i18n.no_ssh_info_no_need_to_fix_machine_data.0946"));
             return;
         }
         Map<String, List<SshModel>> sshMap = CollStreamUtil.groupByKey(list, sshModel -> StrUtil.format("{} {} {} {}", sshModel.getHost(), sshModel.getPort(), sshModel.getUser(), sshModel.getConnectType()));
@@ -129,12 +129,12 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
             value.sort((o1, o2) -> CompareUtil.compare(o2.getModifyTimeMillis(), o1.getModifyTimeMillis()));
             SshModel first = CollUtil.getFirst(value);
             if (value.size() > 1) {
-                log.warn("SSH 地址 {} 存在多个数据，将自动合并使用 {} SSH的配置信息", entry.getKey(), first.getName());
+                log.warn(I18nMessageUtil.get("i18n.multiple_ssh_addresses_found.b3f7"), entry.getKey(), first.getName());
             }
             machineSshModels.add(this.sshInfoToMachineSsh(first));
         }
         this.insert(machineSshModels);
-        log.info("成功修复 {} 条机器 SSH 数据", machineSshModels.size());
+        log.info(I18nMessageUtil.get("i18n.machines_ssh_data_fixed.1387"), machineSshModels.size());
         // 更新 ssh 的机器id
         for (MachineSshModel value : machineSshModels) {
             Entity entity = Entity.create();
@@ -146,7 +146,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
             where.set(DialectUtil.wrapField("user"), value.getUser());
             where.set("connectType", value.getConnectType());
             int update = sshService.update(entity, where);
-            Assert.state(update > 0, "更新 SSH 表机器id 失败：" + value.getName());
+            Assert.state(update > 0, I18nMessageUtil.get("i18n.update_ssh_machine_id_failed.bd24") + value.getName());
         }
     }
 
@@ -187,7 +187,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
             String linkGroup = clusterInfoService.getCurrent().getLinkGroup();
             List<String> linkGroups = StrUtil.splitTrim(linkGroup, StrUtil.COMMA);
             if (CollUtil.isEmpty(linkGroups)) {
-                log.warn("当前集群还未绑定分组,不能监控 SSH 资产信息");
+                log.warn(I18nMessageUtil.get("i18n.cluster_not_bound_to_group_for_ssh_monitoring.c894"));
                 return;
             }
             entity.set("groupName", linkGroups);
@@ -216,7 +216,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
                 // 不需要更新
                 return;
             }
-            this.updateStatus(machineSshModel.id(), 2, "禁用监控");
+            this.updateStatus(machineSshModel.id(), 2, I18nMessageUtil.get("i18n.disable_monitoring.4615"));
             return;
         }
         Session session = null;
@@ -237,9 +237,9 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
         } catch (Exception e) {
             String message = e.getMessage();
             if (StrUtil.containsIgnoreCase(message, "timeout")) {
-                log.error("监控 ssh[{}] 超时 {}", machineSshModel.getName(), message);
+                log.error(I18nMessageUtil.get("i18n.monitor_ssh_timeout.59fd"), machineSshModel.getName(), message);
             } else {
-                log.error("监控 ssh[{}] 异常", machineSshModel.getName(), e);
+                log.error(I18nMessageUtil.get("i18n.monitor_ssh_exception.e9ce"), machineSshModel.getName(), e);
             }
             this.updateStatus(machineSshModel.getId(), 0, message);
         } finally {
@@ -257,13 +257,13 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
     private void updateMonitorInfo(MachineSshModel machineSshModel, List<String> listStr, List<String> errorList) {
         String error = CollUtil.join(errorList, StrUtil.LF);
         if (StrUtil.isNotEmpty(error)) {
-            log.error("{} ssh 监控执行存在异常信息：{}", machineSshModel.getName(), error);
+            log.error(I18nMessageUtil.get("i18n.ssh_monitor_execution_error.2d3c"), machineSshModel.getName(), error);
         }
         if (log.isDebugEnabled()) {
-            log.debug("{} ssh 监控信息结果：{} {}", machineSshModel.getName(), CollUtil.join(listStr, StrUtil.LF), error);
+            log.debug(I18nMessageUtil.get("i18n.ssh_monitor_info_result.a660"), machineSshModel.getName(), CollUtil.join(listStr, StrUtil.LF), error);
         }
         if (CollUtil.isEmpty(listStr)) {
-            this.updateStatus(machineSshModel.getId(), 1, "执行结果为空," + error);
+            this.updateStatus(machineSshModel.getId(), 1, I18nMessageUtil.get("i18n.empty_execution_result.9fe8") + error);
             return;
         }
         Map<String, List<String>> map = new CaseInsensitiveMap<>(listStr.size());
@@ -285,7 +285,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
                 DateTime dateTime = DateUtil.parse(uptime);
                 update.setOsSystemUptime((SystemClock.now() - dateTime.getTime()));
             } catch (Exception e) {
-                error = error + " 解析系统启动时间错误：" + e.getMessage();
+                error = error + I18nMessageUtil.get("i18n.parse_system_start_time_error.112c") + e.getMessage();
                 update.setOsSystemUptime(0L);
             }
         }
@@ -296,8 +296,8 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
         Long memoryTotal = Convert.toLong(this.getFirstValue(map, "memory total"), 0L);
         Long memoryUsed = Convert.toLong(this.getFirstValue(map, "memory used"), 0L);
         update.setOsMoneyTotal(memoryTotal * 1024);
-        error = Opt.ofBlankAble(error).map(s -> ",错误信息：" + s).orElse(StrUtil.EMPTY);
-        update.setStatusMsg("执行成功" + error);
+        error = Opt.ofBlankAble(error).map(s -> I18nMessageUtil.get("i18n.error_info.99ed") + s).orElse(StrUtil.EMPTY);
+        update.setStatusMsg(I18nMessageUtil.get("i18n.execution_succeeded.f56c") + error);
         update.setOsOccupyCpu(Convert.toDouble(this.getFirstValue(map, "cpu usage"), -0D));
         if (memoryTotal > 0) {
             update.setOsOccupyMemory(NumberUtil.div(memoryUsed, memoryTotal, 2).doubleValue());
@@ -404,7 +404,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
                 workspaceId = sshModel1.getWorkspaceId();
             }
         }
-        Assert.notNull(sshModel, "没有对应 SSH 信息");
+        Assert.notNull(sshModel, I18nMessageUtil.get("i18n.no_ssh_info.a8ec"));
         Session session = null;
         int timeout = sshModel.timeout();
         MachineSshModel.ConnectType connectType = sshModel.connectType();
@@ -438,14 +438,14 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
                     passwordByte);
             } else if (StrUtil.isEmpty(privateKey)) {
                 File home = FileUtil.getUserHomeDir();
-                Assert.notNull(home, "用户目录没有找到");
+                Assert.notNull(home, I18nMessageUtil.get("i18n.user_directory_not_found.cfe3"));
                 File identity = FileUtil.file(home, ".ssh", "identity");
                 rsaFile = FileUtil.isFile(identity) ? identity : null;
                 File idRsa = FileUtil.file(home, ".ssh", "id_rsa");
                 rsaFile = FileUtil.isFile(idRsa) ? idRsa : rsaFile;
                 File idDsa = FileUtil.file(home, ".ssh", "id_dsa");
                 rsaFile = FileUtil.isFile(idDsa) ? idDsa : rsaFile;
-                Assert.notNull(rsaFile, "用户目录没有找到私钥信息");
+                Assert.notNull(rsaFile, I18nMessageUtil.get("i18n.user_directory_not_found_private_key_info.6ce4"));
             } else {
                 //这里的实现，用于把 private key 写入到一个临时文件中，此方式不太采取
                 File tempPath = jpomApplication.getTempPath();
@@ -456,7 +456,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
             // 如果是私钥正文，则 session 已经初始化了
             if (session == null) {
                 // 简要私钥文件是否存在
-                Assert.state(FileUtil.isFile(rsaFile), "私钥文件不存在：" + FileUtil.getAbsolutePath(rsaFile));
+                Assert.state(FileUtil.isFile(rsaFile), I18nMessageUtil.get("i18n.private_key_file_not_found.4ad9") + FileUtil.getAbsolutePath(rsaFile));
                 session = JschUtil.createSession(sshModel.host(),
                     sshModel.port(), user, FileUtil.getAbsolutePath(rsaFile), passwordByte);
             }
@@ -464,7 +464,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
                 session.setServerAliveInterval(timeout);
                 session.setServerAliveCountMax(5);
             } catch (JSchException e) {
-                log.warn("配置 ssh serverAliveInterval 错误", e);
+                log.warn(I18nMessageUtil.get("i18n.ssh_server_alive_interval_config_error.1f11"), e);
             }
             try {
                 session.connect(timeout);
@@ -472,7 +472,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
                 throw Lombok.sneakyThrow(e);
             }
         } else {
-            throw new IllegalArgumentException("不支持的模式");
+            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.unsupported_mode.501d"));
         }
 
         return session;

@@ -15,10 +15,12 @@ import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.BaseUserModifyDbModel;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 /**
  * 用户实体
@@ -27,7 +29,8 @@ import java.util.concurrent.TimeUnit;
  * @since 2019/1/16
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "USER_INFO", name = "用户账号")
+@TableName(value = "USER_INFO",
+    nameKey = "i18n.user_account.cbf7")
 @Data
 @NoArgsConstructor
 public class UserModel extends BaseUserModifyDbModel {
@@ -46,7 +49,7 @@ public class UserModel extends BaseUserModifyDbModel {
     /**
      * 系统占用名
      */
-    public static final String SYSTEM_OCCUPY_NAME = "系统管理员";
+    public static final Supplier<String> SYSTEM_OCCUPY_NAME = () -> I18nMessageUtil.get("i18n.system_administrator.181f");
     /**
      * 用户名限制
      */

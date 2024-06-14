@@ -10,9 +10,11 @@
 package org.dromara.jpom.permission;
 
 import lombok.Getter;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.func.assets.server.MachineNodeServer;
 import org.dromara.jpom.func.assets.server.MachineSshServer;
+import org.dromara.jpom.func.assets.server.ScriptLibraryServer;
 import org.dromara.jpom.func.cert.service.CertificateInfoService;
 import org.dromara.jpom.func.files.service.FileReleaseTaskService;
 import org.dromara.jpom.func.files.service.FileStorageService;
@@ -42,6 +44,8 @@ import org.dromara.jpom.service.system.WorkspaceService;
 import org.dromara.jpom.service.user.UserPermissionGroupServer;
 import org.dromara.jpom.service.user.UserService;
 
+import java.util.function.Supplier;
+
 /**
  * 功能模块
  *
@@ -53,104 +57,105 @@ public enum ClassFeature {
     /**
      * 没有
      */
-    NULL("", null, null),
-    NODE("节点管理", NodeService.class),
-    NODE_STAT("节点统计", NodeService.class),
-    UPGRADE_NODE_LIST("节点升级", NodeService.class),
-    SEARCH_PROJECT("搜索项目", ProjectInfoCacheService.class),
-    SSH("SSH管理", SshService.class),
-    SSH_FILE("SSH文件管理", SshService.class),
-    SSH_TERMINAL("SSH终端", SshService.class),
-    SSH_TERMINAL_LOG("SSH终端日志", SshTerminalExecuteLogService.class),
-    SSH_COMMAND("SSH命令管理", SshCommandService.class),
-    SSH_COMMAND_LOG("SSH命令日志", CommandExecLogService.class),
-    OUTGIVING("分发管理", OutGivingServer.class),
-    LOG_READ("日志阅读", LogReadServer.class),
-    OUTGIVING_LOG("分发日志", DbOutGivingLogService.class),
-    OUTGIVING_CONFIG_WHITELIST("授权配置"),
-    MONITOR("项目监控", MonitorService.class),
-    MONITOR_LOG("监控日志", DbMonitorNotifyLogService.class),
-    OPT_MONITOR("操作监控", MonitorUserOptService.class),
-    DOCKER("Docker管理", DockerInfoService.class),
-    DOCKER_SWARM("容器集群", DockerSwarmInfoService.class),
+    NULL(() -> "", null, null),
+    NODE(() -> I18nMessageUtil.get("i18n.node_management.b26d"), NodeService.class),
+    NODE_STAT(() -> I18nMessageUtil.get("i18n.node_statistics.b4e1"), NodeService.class),
+    UPGRADE_NODE_LIST(() -> I18nMessageUtil.get("i18n.node_upgrade.3bf3"), NodeService.class),
+    SEARCH_PROJECT(() -> I18nMessageUtil.get("i18n.search_project.7e9b"), ProjectInfoCacheService.class),
+    SSH(() -> I18nMessageUtil.get("i18n.ssh_management.9e0f"), SshService.class),
+    SSH_FILE(() -> I18nMessageUtil.get("i18n.ssh_file_manager.1482"), SshService.class),
+    SSH_TERMINAL(() -> I18nMessageUtil.get("i18n.ssh_terminal.ec50"), SshService.class),
+    SSH_TERMINAL_LOG(() -> I18nMessageUtil.get("i18n.ssh_terminal_log.775f"), SshTerminalExecuteLogService.class),
+    SSH_COMMAND(() -> I18nMessageUtil.get("i18n.ssh_command_management.c40a"), SshCommandService.class),
+    SSH_COMMAND_LOG(() -> I18nMessageUtil.get("i18n.ssh_command_log.7fd1"), CommandExecLogService.class),
+    OUTGIVING(() -> I18nMessageUtil.get("i18n.distribute_management.3a2d"), OutGivingServer.class),
+    LOG_READ(() -> I18nMessageUtil.get("i18n.log_reading.a4c8"), LogReadServer.class),
+    OUTGIVING_LOG(() -> I18nMessageUtil.get("i18n.distribute_log.c612"), DbOutGivingLogService.class),
+    OUTGIVING_CONFIG_WHITELIST(() -> I18nMessageUtil.get("i18n.auth_config.3d48")),
+    MONITOR(() -> I18nMessageUtil.get("i18n.project_monitor.d2ff"), MonitorService.class),
+    MONITOR_LOG(() -> I18nMessageUtil.get("i18n.monitoring_logs.2217"), DbMonitorNotifyLogService.class),
+    OPT_MONITOR(() -> I18nMessageUtil.get("i18n.operation_monitoring.0cd5"), MonitorUserOptService.class),
+    DOCKER(() -> I18nMessageUtil.get("i18n.docker_management.e7e5"), DockerInfoService.class),
+    DOCKER_SWARM(() -> I18nMessageUtil.get("i18n.container_cluster.a5b4"), DockerSwarmInfoService.class),
     /**
      * ssh
      */
-    BUILD("在线构建", BuildInfoService.class),
-    BUILD_LOG("构建日志", DbBuildHistoryLogService.class),
-    BUILD_REPOSITORY("仓库信息", RepositoryService.class),
-    USER("用户管理", UserService.class),
-    USER_LOG("操作日志", DbUserOperateLogService.class),
-    USER_LOGIN_LOG("登录日志", UserLoginLogServer.class),
-    FILE_STORAGE("文件存储中心", FileStorageService.class),
-    STATIC_FILE_STORAGE("静态文件存储", StaticFileStorageService.class),
-    FILE_STORAGE_RELEASE("文件发布", FileReleaseTaskService.class),
-    CERTIFICATE_INFO("证书管理", CertificateInfoService.class),
-    USER_PERMISSION_GROUP("权限分组", UserPermissionGroupServer.class),
-    SYSTEM_EMAIL("邮箱配置"),
-    OAUTH_CONFIG("认证配置"),
-    SYSTEM_CACHE("系统缓存"),
-    SYSTEM_LOG("系统日志"),
-    SYSTEM_UPGRADE("在线升级"),
-    SYSTEM_ASSETS_MACHINE("机器资产管理", MachineNodeServer.class),
-    SYSTEM_ASSETS_MACHINE_SSH("SSH资产管理", MachineSshServer.class),
-    SYSTEM_ASSETS_MACHINE_DOCKER("DOCKER资产管理", MachineDockerServer.class),
-    SYSTEM_CONFIG("服务端系统配置"),
-    SYSTEM_EXT_CONFIG("系统配置目录"),
-    SYSTEM_CONFIG_IP("系统配置IP授权"),
+    BUILD(() -> I18nMessageUtil.get("i18n.online_build.6f7a"), BuildInfoService.class),
+    BUILD_LOG(() -> I18nMessageUtil.get("i18n.build_log.7c0e"), DbBuildHistoryLogService.class),
+    BUILD_REPOSITORY(() -> I18nMessageUtil.get("i18n.repository_info.22cd"), RepositoryService.class),
+    USER(() -> I18nMessageUtil.get("i18n.user_management.7d94"), UserService.class),
+    USER_LOG(() -> I18nMessageUtil.get("i18n.operation_log.cda8"), DbUserOperateLogService.class),
+    USER_LOGIN_LOG(() -> I18nMessageUtil.get("i18n.login_log.3fb2"), UserLoginLogServer.class),
+    FILE_STORAGE(() -> I18nMessageUtil.get("i18n.file_storage_center.6acf"), FileStorageService.class),
+    STATIC_FILE_STORAGE(() -> I18nMessageUtil.get("i18n.static_file_storage.35f6"), StaticFileStorageService.class),
+    FILE_STORAGE_RELEASE(() -> I18nMessageUtil.get("i18n.file_published.d1d9"), FileReleaseTaskService.class),
+    CERTIFICATE_INFO(() -> I18nMessageUtil.get("i18n.certificate_management.4001"), CertificateInfoService.class),
+    USER_PERMISSION_GROUP(() -> I18nMessageUtil.get("i18n.permission_group.ea59"), UserPermissionGroupServer.class),
+    SYSTEM_EMAIL(() -> I18nMessageUtil.get("i18n.email_configuration.b3f7")),
+    OAUTH_CONFIG(() -> I18nMessageUtil.get("i18n.authentication_config.964c")),
+    SYSTEM_CACHE(() -> I18nMessageUtil.get("i18n.system_cache.c4a8")),
+    SYSTEM_LOG(() -> I18nMessageUtil.get("i18n.system_logs.84aa")),
+    SYSTEM_UPGRADE(() -> I18nMessageUtil.get("i18n.online_upgrade.da8c")),
+    SYSTEM_ASSETS_MACHINE(() -> I18nMessageUtil.get("i18n.machine_asset_management.36ea"), MachineNodeServer.class),
+    SYSTEM_ASSETS_MACHINE_SSH(() -> I18nMessageUtil.get("i18n.ssh_asset_management.3b6c"), MachineSshServer.class),
+    SYSTEM_ASSETS_MACHINE_DOCKER(() -> I18nMessageUtil.get("i18n.docker_asset_management.96d9"), MachineDockerServer.class),
+    SYSTEM_ASSETS_GLOBAL_SCRIPT(() -> "脚本库", ScriptLibraryServer.class),
+    SYSTEM_CONFIG(() -> I18nMessageUtil.get("i18n.server_system_config.3181")),
+    SYSTEM_EXT_CONFIG(() -> I18nMessageUtil.get("i18n.system_configuration_directory.0f82")),
+    SYSTEM_CONFIG_IP(() -> I18nMessageUtil.get("i18n.system_IP_authorization.9c08")),
     //    SYSTEM_CONFIG_MENUS("系统菜单配置"),
-    SYSTEM_NODE_WHITELIST("节点授权分发"),
-    SYSTEM_BACKUP("数据库备份", BackupInfoService.class),
-    SYSTEM_WORKSPACE("工作空间", WorkspaceService.class),
-    SYSTEM_WORKSPACE_ENV("环境变量", WorkspaceEnvVarService.class),
-    CLUSTER_INFO("集群管理", ClusterInfoService.class),
+    SYSTEM_NODE_WHITELIST(() -> I18nMessageUtil.get("i18n.node_authorized_distribution.c5d7")),
+    SYSTEM_BACKUP(() -> I18nMessageUtil.get("i18n.database_backup_label.62d8"), BackupInfoService.class),
+    SYSTEM_WORKSPACE(() -> I18nMessageUtil.get("i18n.workspace_label.98d6"), WorkspaceService.class),
+    SYSTEM_WORKSPACE_ENV(() -> I18nMessageUtil.get("i18n.environment_variable.3867"), WorkspaceEnvVarService.class),
+    CLUSTER_INFO(() -> I18nMessageUtil.get("i18n.cluster_management.74ea"), ClusterInfoService.class),
 
-    SCRIPT("脚本模板", ScriptServer.class),
-    SCRIPT_LOG("脚本模板日志", ScriptExecuteLogServer.class),
+    SCRIPT(() -> I18nMessageUtil.get("i18n.script_template.54f2"), ScriptServer.class),
+    SCRIPT_LOG(() -> I18nMessageUtil.get("i18n.script_template_log.30cb"), ScriptExecuteLogServer.class),
 
     //******************************************     节点管理功能
-    PROJECT("项目管理", ClassFeature.NODE, ProjectInfoCacheService.class),
-    PROJECT_FILE("项目文件管理", ClassFeature.NODE, ProjectInfoCacheService.class),
-    PROJECT_LOG("项目日志", ClassFeature.NODE, ProjectInfoCacheService.class),
-    PROJECT_CONSOLE("项目控制台", ClassFeature.NODE, ProjectInfoCacheService.class),
+    PROJECT(() -> I18nMessageUtil.get("i18n.project_management.4363"), ClassFeature.NODE, ProjectInfoCacheService.class),
+    PROJECT_FILE(() -> I18nMessageUtil.get("i18n.project_file_manager.c8cb"), ClassFeature.NODE, ProjectInfoCacheService.class),
+    PROJECT_LOG(() -> I18nMessageUtil.get("i18n.project_log.2926"), ClassFeature.NODE, ProjectInfoCacheService.class),
+    PROJECT_CONSOLE(() -> I18nMessageUtil.get("i18n.project_console.3a94"), ClassFeature.NODE, ProjectInfoCacheService.class),
     //    JDK_LIST("JDK管理", ClassFeature.NODE),
-    NODE_SCRIPT("节点脚本模板", ClassFeature.NODE, NodeScriptServer.class),
-    NODE_SCRIPT_LOG("节点脚本模板日志", ClassFeature.NODE, NodeScriptExecuteLogServer.class),
-    AGENT_LOG("插件端系统日志", ClassFeature.NODE),
-    FREE_SCRIPT("自由脚本", ClassFeature.NODE, MachineNodeServer.class),
+    NODE_SCRIPT(() -> I18nMessageUtil.get("i18n.node_script_template.be6a"), ClassFeature.NODE, NodeScriptServer.class),
+    NODE_SCRIPT_LOG(() -> I18nMessageUtil.get("i18n.node_script_template_log.85e3"), ClassFeature.NODE, NodeScriptExecuteLogServer.class),
+    AGENT_LOG(() -> I18nMessageUtil.get("i18n.plugin_system_log.955c"), ClassFeature.NODE),
+    FREE_SCRIPT(() -> I18nMessageUtil.get("i18n.free_script.7760"), ClassFeature.NODE, MachineNodeServer.class),
 //    TOMCAT_FILE("Tomcat file", ClassFeature.NODE),
 //    TOMCAT_LOG("Tomcat log", ClassFeature.NODE),
 
 
-    NODE_CONFIG_WHITELIST("节点授权配置", ClassFeature.NODE),
-    NODE_CONFIG("节点授权配置", ClassFeature.NODE),
-    NODE_CACHE("节点缓存", ClassFeature.NODE),
-    NODE_LOG("节点系统日志", ClassFeature.NODE),
-    NODE_UPGRADE("节点在线升级", ClassFeature.NODE),
+    NODE_CONFIG_WHITELIST(() -> I18nMessageUtil.get("i18n.node_authorized_config.f934"), ClassFeature.NODE),
+    NODE_CONFIG(() -> I18nMessageUtil.get("i18n.node_authorized_config.f934"), ClassFeature.NODE),
+    NODE_CACHE(() -> I18nMessageUtil.get("i18n.node_cache.d68c"), ClassFeature.NODE),
+    NODE_LOG(() -> I18nMessageUtil.get("i18n.node_system_logs.3ac9"), ClassFeature.NODE),
+    NODE_UPGRADE(() -> I18nMessageUtil.get("i18n.node_online_upgrade.f144"), ClassFeature.NODE),
 
 
 //	PROJECT_RECOVER("项目回收", ClassFeature.NODE),
 
     ;
 
-    private final String name;
+    private final Supplier<String> name;
     private final ClassFeature parent;
     private final Class<? extends BaseDbService<?>> dbService;
 
-    ClassFeature(String name) {
+    ClassFeature(Supplier<String> name) {
         this(name, null, null);
     }
 
-    ClassFeature(String name, ClassFeature parent) {
+    ClassFeature(Supplier<String> name, ClassFeature parent) {
         this(name, parent, null);
     }
 
 
-    ClassFeature(String name, Class<? extends BaseDbService<?>> dbService) {
+    ClassFeature(Supplier<String> name, Class<? extends BaseDbService<?>> dbService) {
         this(name, null, dbService);
     }
 
-    ClassFeature(String name, ClassFeature parent, Class<? extends BaseDbService<?>> dbService) {
+    ClassFeature(Supplier<String> name, ClassFeature parent, Class<? extends BaseDbService<?>> dbService) {
         this.name = name;
         this.parent = parent;
         this.dbService = dbService;

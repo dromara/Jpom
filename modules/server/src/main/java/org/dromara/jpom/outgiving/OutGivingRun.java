@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.AfterOpt;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.log.OutGivingLog;
@@ -110,7 +111,7 @@ public class OutGivingRun {
                 OutGivingLog outGivingLog = new OutGivingLog();
                 outGivingLog.setId(logId);
                 outGivingLog.setStatus(OutGivingNodeProject.Status.ArtificialCancel.getCode());
-                outGivingLog.setResult("手动取消分发");
+                outGivingLog.setResult(I18nMessageUtil.get("i18n.manual_cancel_distribution.7bf6"));
                 dbOutGivingLogService.updateById(outGivingLog);
             }
             if (!map1.isEmpty()) {
@@ -124,16 +125,16 @@ public class OutGivingRun {
 
     public static String getLogId(String outId, OutGivingNodeProject nodeProject) {
         Map<String, String> map = LOG_CACHE_MAP.get(outId);
-        Assert.notNull(map, "当前分发数据丢失");
+        Assert.notNull(map, I18nMessageUtil.get("i18n.current_distribution_data_lost.f9f8"));
         String dataId = StrUtil.format("{}_{}", nodeProject.getNodeId(), nodeProject.getProjectId());
         String logId = map.get(dataId);
-        Assert.hasText(logId, "当前分发数据丢失，记录id 不存在");
+        Assert.hasText(logId, I18nMessageUtil.get("i18n.current_distribution_data_lost_record_id_not_exist.ca07"));
         return logId;
     }
 
     private void removeLogId(String outId, OutGivingNodeProject nodeProject) {
         Map<String, String> map = LOG_CACHE_MAP.get(outId);
-        Assert.notNull(map, "当前分发数据丢失");
+        Assert.notNull(map, I18nMessageUtil.get("i18n.current_distribution_data_lost.f9f8"));
         String dataId = StrUtil.format("{}_{}", nodeProject.getNodeId(), nodeProject.getProjectId());
         map.remove(dataId);
     }
@@ -154,7 +155,7 @@ public class OutGivingRun {
             OutGivingLog outGivingLog = new OutGivingLog();
             outGivingLog.setId(logId);
             outGivingLog.setStatus(OutGivingNodeProject.Status.Cancel.getCode());
-            outGivingLog.setResult("前一个节点分发失败，取消分发");
+            outGivingLog.setResult(I18nMessageUtil.get("i18n.previous_node_distribution_failure.d556"));
             dbOutGivingLogService.updateById(outGivingLog);
         }
     }
@@ -168,7 +169,7 @@ public class OutGivingRun {
     public Future<OutGivingModel.Status> startRun(String select) {
         OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
         OutGivingModel item = outGivingServer.getByKey(id);
-        Objects.requireNonNull(item, "不存在分发");
+        Objects.requireNonNull(item, I18nMessageUtil.get("i18n.no_distribution_exists.4425"));
         // 更新二级目录
         Opt.ofBlankAble(this.projectSecondaryDirectory).ifPresent(item::setSecondaryDirectory);
         //
@@ -176,7 +177,7 @@ public class OutGivingRun {
         StrictSyncFinisher syncFinisher;
         //
         List<OutGivingNodeProject> outGivingNodeProjects = item.outGivingNodeProjectList(select);
-        Assert.notEmpty(outGivingNodeProjects, "没有分发项目");
+        Assert.notEmpty(outGivingNodeProjects, I18nMessageUtil.get("i18n.no_distribution_project.d4d1"));
         int projectSize = outGivingNodeProjects.size();
         final List<OutGivingNodeProject.Status> statusList = new ArrayList<>(projectSize);
         // 开启线程
@@ -210,7 +211,7 @@ public class OutGivingRun {
                     List<OutGivingNodeProject> cancelList = CollUtil.sub(outGivingNodeProjects, nowIndex + 1, outGivingNodeProjects.size());
                     systemCancel(id, cancelList);
                 } catch (Exception e) {
-                    log.error("分发异常 {}", id, e);
+                    log.error(I18nMessageUtil.get("i18n.distribute_exception_with_detail.28fe"), id, e);
                 }
             });
         } else if (afterOpt == AfterOpt.Restart || afterOpt == AfterOpt.No) {
@@ -225,7 +226,7 @@ public class OutGivingRun {
                         // 删除标记 log
                         removeLogId(id, outGivingNodeProject);
                     } catch (Exception e) {
-                        log.error("分发异常", e);
+                        log.error(I18nMessageUtil.get("i18n.distribute_exception.da82"), e);
                     }
                 });
             }
@@ -247,28 +248,28 @@ public class OutGivingRun {
             OutGivingModel.Status status = null;
             try {
                 // 阻塞执行
-                Optional.ofNullable(logRecorder).ifPresent(logRecorder -> logRecorder.system("开始分发,需要分发 {} 个项目", projectSize));
+                Optional.ofNullable(logRecorder).ifPresent(logRecorder -> logRecorder.system(I18nMessageUtil.get("i18n.start_distribution_with_count.cdc7"), projectSize));
                 syncFinisher.start();
                 // 更新分发状态
                 String msg;
                 if (statusList.size() != projectSize) {
                     //
                     status = OutGivingModel.Status.FAIL;
-                    msg = StrUtil.format("完成的个数不足 {}/{}", statusList.size(), projectSize);
+                    msg = StrUtil.format(I18nMessageUtil.get("i18n.completed_count_insufficient.02e9"), statusList.size(), projectSize);
                 } else {
                     int successCount = statusList.stream().mapToInt(value -> value == OutGivingNodeProject.Status.Ok ? 1 : 0).sum();
                     if (successCount == projectSize) {
                         status = OutGivingModel.Status.DONE;
-                        msg = "分发成功 " + successCount;
+                        msg = I18nMessageUtil.get("i18n.distribute_success.c689") + successCount;
                     } else {
                         status = OutGivingModel.Status.FAIL;
-                        msg = StrUtil.format("完成并成功的个数不足 {}/{}", successCount, projectSize);
+                        msg = StrUtil.format(I18nMessageUtil.get("i18n.completed_and_successful_count_insufficient.92fa"), successCount, projectSize);
                     }
                 }
                 Optional.ofNullable(logRecorder).ifPresent(logRecorder -> logRecorder.system(msg));
                 updateStatus(id, status, msg, userModel);
             } catch (Exception e) {
-                log.error("分发线程异常", e);
+                log.error(I18nMessageUtil.get("i18n.distribute_thread_exception.9725"), e);
                 updateStatus(id, OutGivingModel.Status.FAIL, e.getMessage(), userModel);
             } finally {
                 if (doneDeleteFile) {
@@ -358,7 +359,7 @@ public class OutGivingRun {
                         map.put("JPOM_WEBHOOK_EVENT", DefaultWebhookPluginImpl.WebhookEvent.DISTRIBUTE);
                         plugin.execute(webhook, map);
                     } catch (Exception e) {
-                        log.error("WebHooks 调用错误", e);
+                        log.error(I18nMessageUtil.get("i18n.webhooks_invocation_error.9792"), e);
                     }
                 }));
     }

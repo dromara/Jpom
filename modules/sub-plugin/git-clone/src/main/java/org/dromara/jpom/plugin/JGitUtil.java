@@ -22,6 +22,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import lombok.Lombok;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -212,7 +213,7 @@ public class JGitUtil {
                 });
             });
         } else {
-            throw new IllegalStateException("不支持到协议类型");
+            throw new IllegalStateException(I18nMessageUtil.get("i18n.protocol_type_not_supported.7a66"));
         }
     }
 
@@ -456,27 +457,27 @@ public class JGitUtil {
         println(printWriter, "");
         Throwable causedBy = ExceptionUtil.getCausedBy(ex, NotSupportedException.class);
         if (causedBy != null) {
-            println(printWriter, "当前地址可能不是 git 仓库地址：" + causedBy.getMessage());
-            throw new IllegalStateException("当前地址可能不是 git 仓库地址：" + causedBy.getMessage(), ex);
+            println(printWriter, I18nMessageUtil.get("i18n.current_address_may_not_be_git.41c6") + causedBy.getMessage());
+            throw new IllegalStateException(I18nMessageUtil.get("i18n.current_address_may_not_be_git.41c6") + causedBy.getMessage(), ex);
         }
         causedBy = ExceptionUtil.getCausedBy(ex, NoRemoteRepositoryException.class);
         if (causedBy != null) {
-            println(printWriter, "当前地址远程不存在仓库：" + causedBy.getMessage());
-            throw new IllegalStateException("当前地址远程不存在仓库：" + causedBy.getMessage(), ex);
+            println(printWriter, I18nMessageUtil.get("i18n.remote_repository_does_not_exist.7009") + causedBy.getMessage());
+            throw new IllegalStateException(I18nMessageUtil.get("i18n.remote_repository_does_not_exist.7009") + causedBy.getMessage(), ex);
         }
         causedBy = ExceptionUtil.getCausedBy(ex, RepositoryNotFoundException.class);
         if (causedBy != null) {
-            println(printWriter, "当前地址不存在仓库：" + causedBy.getMessage());
-            throw new IllegalStateException("当前地址不存在仓库：" + causedBy.getMessage(), ex);
+            println(printWriter, I18nMessageUtil.get("i18n.current_address_no_repository.db31") + causedBy.getMessage());
+            throw new IllegalStateException(I18nMessageUtil.get("i18n.current_address_no_repository.db31") + causedBy.getMessage(), ex);
         }
         if (ex instanceof TransportException) {
             String msg = ex.getMessage();
             if (StrUtil.containsAny(msg, JGitText.get().notAuthorized, JGitText.get().authenticationNotSupported)) {
-                throw new IllegalArgumentException("账号密码不正确或者不支持的身份验证," + msg, ex);
+                throw new IllegalArgumentException(I18nMessageUtil.get("i18n.incorrect_account_credentials_or_unsupported_auth.1ef9") + msg, ex);
             }
             throw ex;
         } else if (ex instanceof NoHeadException) {
-            println(printWriter, "拉取代码异常,已经主动清理本地仓库缓存内容,请手动重试。" + ex.getMessage());
+            println(printWriter, I18nMessageUtil.get("i18n.pull_code_exception_with_cleanup.a887") + ex.getMessage());
             if (gitFile == null) {
                 throw ex;
             } else {
@@ -484,10 +485,10 @@ public class JGitUtil {
             }
             throw ex;
         } else if (ex instanceof CheckoutConflictException) {
-            println(printWriter, "拉取代码发生冲突,可以尝试清除构建或者解决仓库里面的冲突后重新操作。：" + ex.getMessage());
+            println(printWriter, I18nMessageUtil.get("i18n.code_pull_conflict.6e8e") + ex.getMessage());
             throw ex;
         } else {
-            println(printWriter, "拉取代码发生未知异常建议清除构建重新操作：" + ex.getMessage());
+            println(printWriter, I18nMessageUtil.get("i18n.unknown_exception_on_pull_code.2b2e") + ex.getMessage());
             throw ex;
         }
     }
@@ -558,7 +559,7 @@ public class JGitUtil {
     public static String[] getLastCommitMsg(File file, boolean tag, String refName) throws IOException, GitAPIException {
         try (Git git = Git.open(file)) {
             ObjectId anyObjectId = tag ? getTagAnyObjectId(git, refName) : getBranchAnyObjectId(git, refName);
-            Objects.requireNonNull(anyObjectId, "没有" + refName + "分支/标签");
+            Objects.requireNonNull(anyObjectId, StrUtil.format(I18nMessageUtil.get("i18n.no_branch_or_tag_message.8ae3"), refName));
             //System.out.println(anyObjectId.getName());
             String lastCommitMsg = getLastCommitMsg(file, refName, anyObjectId);
             return new String[]{anyObjectId.getName(), lastCommitMsg};

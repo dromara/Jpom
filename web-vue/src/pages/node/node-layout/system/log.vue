@@ -11,12 +11,14 @@
       <log-view2 :ref="`logView`" height="calc(100vh - 160px - 30px)">
         <template #before>
           <a-space>
-            <a-button type="primary" size="small" @click="loadData">{{ $tl('p.refresh') }}</a-button>
+            <a-button type="primary" size="small" @click="loadData">{{
+              $t('pages.node.node-layout.system.log.7bbd89a')
+            }}</a-button>
             <a-button type="primary" danger size="small" :disabled="!temp.path" @click="deleteLog">{{
-              $tl('p.delete')
+              $t('pages.node.node-layout.system.log.dd20d11c')
             }}</a-button>
             <a-button type="primary" size="small" :disabled="!temp.path" @click="downloadLog">{{
-              $tl('p.download')
+              $t('pages.node.node-layout.system.log.42c8e9c6')
             }}</a-button>
           </a-space>
         </template>
@@ -32,7 +34,6 @@
       </a-modal> -->
   </a-layout>
 </template>
-
 <script>
 import { getLogList, downloadFile, deleteLog } from '@/api/system'
 import { mapState } from 'pinia'
@@ -88,9 +89,6 @@ export default {
     this.close()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.nodeLayout.system.log.${key}`, ...args)
-    },
     close() {
       this.socket?.close()
     },
@@ -153,13 +151,15 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: `web socket ${this.$tl('p.error')},${this.$tl('p.checkWsProxy')}`
+          message: `web socket ${this.$t('pages.node.node-layout.system.log.d75d207f')},${this.$t(
+            'pages.node.node-layout.system.log.763330b'
+          )}`
         })
       }
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
-        $message.warning(this.$tl('p.sessionClosed') + node.dataRef.path)
+        $message.warning(this.$t('pages.node.node-layout.system.log.8a2aae09') + node.dataRef.path)
         // clearInterval(this.heart);
       }
     },
@@ -182,11 +182,11 @@ export default {
     // 删除文件
     deleteLog() {
       $confirm({
-        title: this.$tl('p.systemTip'),
+        title: this.$t('pages.node.node-layout.system.log.e422d0eb'),
         zIndex: 1009,
-        content: this.$tl('p.confirmDeleteLog'),
-        okText: this.$tl('p.confirm'),
-        cancelText: this.$tl('p.cancel'),
+        content: this.$t('pages.node.node-layout.system.log.5ef43186'),
+        okText: this.$t('pages.node.node-layout.system.log.e8e9db25'),
+        cancelText: this.$t('pages.node.node-layout.system.log.b12468e9'),
         onOk: () => {
           return deleteLog({
             machineId: this.machineId,
@@ -206,7 +206,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .log-layout {
   padding: 0;

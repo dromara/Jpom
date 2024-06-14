@@ -14,6 +14,7 @@ import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.model.data.AgentWhitelist;
 import org.dromara.jpom.model.data.NodeModel;
@@ -100,7 +101,7 @@ public class WhitelistDirectoryController extends BaseServerController {
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<String> whitelistDirectorySubmit(HttpServletRequest request, String machineId) {
         JsonMessage<String> objectJsonMessage = this.tryRequestNode(machineId, request, NodeUrl.WhitelistDirectory_Submit);
-        Assert.notNull(objectJsonMessage, "请选择节点");
+        Assert.notNull(objectJsonMessage, I18nMessageUtil.get("i18n.select_node.f8a6"));
         return objectJsonMessage;
     }
 }

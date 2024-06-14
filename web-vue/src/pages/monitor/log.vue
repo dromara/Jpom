@@ -17,7 +17,7 @@
           <a-select
             v-model:value="listQuery.nodeId"
             allow-clear
-            :placeholder="$tl('p.pleaseSelectNode')"
+            :placeholder="$t('pages.monitor.log.2c33c91c')"
             class="search-input-item"
           >
             <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
@@ -25,24 +25,26 @@
           <a-select
             v-model:value="listQuery.status"
             allow-clear
-            :placeholder="$tl('c.alarmStatus')"
+            :placeholder="$t('pages.monitor.log.95aeba54')"
             class="search-input-item"
           >
-            <a-select-option :value="1">{{ $tl('c.normal') }}</a-select-option>
-            <a-select-option :value="0">{{ $tl('c.abnormal') }}</a-select-option>
+            <a-select-option :value="1">{{ $t('pages.monitor.log.3483f3b7') }}</a-select-option>
+            <a-select-option :value="0">{{ $t('pages.monitor.log.346ba9a') }}</a-select-option>
           </a-select>
           <a-select
             v-model:value="listQuery.notifyStatus"
             allow-clear
-            :placeholder="$tl('c.notificationStatus')"
+            :placeholder="$t('pages.monitor.log.6abae0da')"
             class="search-input-item"
           >
-            <a-select-option :value="1">{{ $tl('c.success') }}</a-select-option>
-            <a-select-option :value="0">{{ $tl('c.failure') }}</a-select-option>
+            <a-select-option :value="1">{{ $t('pages.monitor.log.9d77d967') }}</a-select-option>
+            <a-select-option :value="0">{{ $t('pages.monitor.log.d3ec0514') }}</a-select-option>
           </a-select>
           <a-range-picker :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
-          <a-tooltip :title="$tl('p.quickReturnToFirstPage')">
-            <a-button :loading="loading" type="primary" @click="loadData">{{ $tl('p.search') }}</a-button>
+          <a-tooltip :title="$t('pages.monitor.log.767472f6')">
+            <a-button :loading="loading" type="primary" @click="loadData">{{
+              $t('pages.monitor.log.53c2763c')
+            }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -58,21 +60,29 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'status'">
-          <span>{{ text ? $tl('c.normal') : $tl('c.abnormal') }}</span>
+          <span>{{ text ? $t('pages.monitor.log.3483f3b7') : $t('pages.monitor.log.346ba9a') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'notifyStyle'">
-          {{ notifyStyle[text] || $tl('p.unknown') }}
+          {{ notifyStyle[text] || $t('pages.monitor.log.ca1cdfa6') }}
         </template>
         <template v-else-if="column.dataIndex === 'notifyStatus'">
-          <span>{{ text ? $tl('c.success') : $tl('c.failure') }}</span>
+          <span>{{ text ? $t('pages.monitor.log.9d77d967') : $t('pages.monitor.log.d3ec0514') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
-          <a-button size="small" type="primary" @click="handleDetail(record)">{{ $tl('p.details') }}</a-button>
+          <a-button size="small" type="primary" @click="handleDetail(record)">{{
+            $t('pages.monitor.log.151c73eb')
+          }}</a-button>
         </template>
       </template>
     </a-table>
     <!-- 详情区 -->
-    <a-modal v-model:open="detailVisible" destroy-on-close width="600px" :title="$tl('p.detailInfo')" :footer="null">
+    <a-modal
+      v-model:open="detailVisible"
+      destroy-on-close
+      width="600px"
+      :title="$t('pages.monitor.log.7990de3b')"
+      :footer="null"
+    >
       <a-list item-layout="horizontal" :data-source="detailData">
         <template #renderItem="{ item }">
           <a-list-item>
@@ -87,7 +97,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import { getMonitorLogList, notifyStyle } from '@/api/monitor'
 import { getNodeListAll } from '@/api/node'
@@ -106,40 +115,40 @@ export default {
       detailData: [],
       columns: [
         {
-          title: this.$tl('p.alarmTitle'),
+          title: this.$t('pages.monitor.log.f00e2365'),
           dataIndex: 'title',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$tl('p.nodeName'),
+          title: this.$t('pages.monitor.log.fa8d810f'),
           dataIndex: 'nodeId',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$tl('p.projectId'),
+          title: this.$t('pages.monitor.log.4eaba425'),
           dataIndex: 'projectId',
           width: 100,
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$tl('c.alarmStatus'),
+          title: this.$t('pages.monitor.log.95aeba54'),
           dataIndex: 'status',
           width: 100,
           align: 'center',
           ellipsis: true
         },
         {
-          title: this.$tl('p.alarmMethod'),
+          title: this.$t('pages.monitor.log.b93a2f3c'),
           dataIndex: 'notifyStyle',
           width: 100,
           align: 'center',
           ellipsis: true
         },
         {
-          title: this.$tl('p.alarmTime'),
+          title: this.$t('pages.monitor.log.ec06406f'),
           dataIndex: 'createTime',
           customRender: ({ text }) => {
             return parseTime(text)
@@ -147,13 +156,13 @@ export default {
           width: '170px'
         },
         {
-          title: this.$tl('c.notificationStatus'),
+          title: this.$t('pages.monitor.log.6abae0da'),
           dataIndex: 'notifyStatus',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.monitor.log.3bb962bf'),
           dataIndex: 'operation',
           align: 'center',
           fixed: 'right',
@@ -174,9 +183,6 @@ export default {
     })
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.monitor.log.${key}`, ...args)
-    },
     // 加载 node
     loadNodeList(fn) {
       getNodeListAll().then((res) => {
@@ -220,15 +226,15 @@ export default {
       this.detailData = []
       this.detailVisible = true
       this.temp = Object.assign({}, record)
-      this.detailData.push({ title: this.$tl('p.title'), description: this.temp.title })
-      this.detailData.push({ title: this.$tl('p.content'), description: this.temp.content })
+      this.detailData.push({ title: this.$t('pages.monitor.log.a1b6e465'), description: this.temp.title })
+      this.detailData.push({ title: this.$t('pages.monitor.log.99ff48c8'), description: this.temp.content })
       this.detailData.push({
-        title: this.$tl('p.notificationTarget'),
+        title: this.$t('pages.monitor.log.18ba4cd5'),
         description: this.temp.notifyObject
       })
       if (!this.temp.notifyStatus) {
         this.detailData.push({
-          title: this.$tl('p.notificationAbnormal'),
+          title: this.$t('pages.monitor.log.65f01a1b'),
           description: this.temp.notifyError
         })
       }

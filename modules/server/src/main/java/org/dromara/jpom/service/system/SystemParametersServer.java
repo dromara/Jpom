@@ -13,6 +13,7 @@ import cn.hutool.core.util.ReflectUtil;
 import cn.keepbx.jpom.model.BaseJsonModel;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.data.SystemParametersModel;
 import org.dromara.jpom.service.h2db.BaseDbService;
 import org.springframework.stereotype.Service;
@@ -104,7 +105,7 @@ public class SystemParametersServer extends BaseDbService<SystemParametersModel>
         try {
             config = this.getConfig(name, cls);
         } catch (Exception e) {
-            log.error("读取系统参数异常", e);
+            log.error(I18nMessageUtil.get("i18n.read_system_parameter_exception.ee72"), e);
             return ReflectUtil.newInstance(cls);
         }
         return config == null ? ReflectUtil.newInstance(cls) : config;

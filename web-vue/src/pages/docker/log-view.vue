@@ -3,7 +3,7 @@
   <div>
     <log-view2
       ref="logView"
-      :title-name="$tl('p.containerLog')"
+      :title-name="$t('pages.docker.log-view.648b57ff')"
       :visible="visible"
       @close="
         () => {
@@ -14,26 +14,32 @@
       <template #before>
         <a-space>
           <div>
-            <a-input-number v-model:value="tail" :placeholder="$tl('p.readRowCount')" style="width: 150px">
+            <a-input-number
+              v-model:value="tail"
+              :placeholder="$t('pages.docker.log-view.5af47e85')"
+              style="width: 150px"
+            >
               <template #addonBefore>
-                <a-tooltip :title="$tl('p.readLogLastLines')">{{ $tl('p.rowCount') }} </a-tooltip>
+                <a-tooltip :title="$t('pages.docker.log-view.d35b24b2')"
+                  >{{ $t('pages.docker.log-view.5866bf3c') }}
+                </a-tooltip>
               </template>
             </a-input-number>
           </div>
           <div>
-            {{ $tl('p.timestamp') }}
+            {{ $t('pages.docker.log-view.87ee22ec') }}
             <a-switch
               v-model:checked="timestamps"
-              :checked-children="$tl('p.show')"
-              :un-checked-children="$tl('p.hide')"
+              :checked-children="$t('pages.docker.log-view.d75b3b1a')"
+              :un-checked-children="$t('pages.docker.log-view.41cc2930')"
             />
           </div>
           <a-button type="primary" size="small" @click="initWebSocket"
-            ><ReloadOutlined /> {{ $tl('p.refresh') }}
+            ><ReloadOutlined /> {{ $t('pages.docker.log-view.7bbd89a') }}
           </a-button>
           |
           <a-button type="primary" :disabled="!logId" size="small" @click="download">
-            <DownloadOutlined /> {{ $tl('p.download') }}
+            <DownloadOutlined /> {{ $t('pages.docker.log-view.42c8e9c6') }}
           </a-button>
           |
         </a-space>
@@ -41,7 +47,6 @@
     </log-view2>
   </div>
 </template>
-
 <script>
 import { mapState } from 'pinia'
 import { getWebSocketUrl } from '@/api/config'
@@ -88,7 +93,9 @@ export default {
     socketUrl() {
       return getWebSocketUrl(
         '/socket/docker_log',
-        `userId=${this.getLongTermToken()}&id=${this.id}&machineDockerId=${this.machineDockerId}&type=dockerLog&nodeId=system&workspaceId=${this.getWorkspaceId()}`
+        `userId=${this.getLongTermToken()}&id=${this.id}&machineDockerId=${
+          this.machineDockerId
+        }&type=dockerLog&nodeId=system&workspaceId=${this.getWorkspaceId()}`
       )
     }
   },
@@ -103,9 +110,6 @@ export default {
     this.close()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.docker.logView.${key}`, ...args)
-    },
     close() {
       clearInterval(this.heart)
       this.socket?.close()
@@ -127,7 +131,7 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: `web socket ${this.$tl('p.error')},${this.$tl('p.checkWsProxy')}`
+          message: `web socket ${this.$t('pages.docker.log-view.d75d207f')},${this.$t('pages.docker.log-view.763330b')}`
         })
         clearInterval(this.heart)
       }
@@ -135,7 +139,7 @@ export default {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
         clearInterval(this.heart)
-        $message.warning(this.$tl('p.sessionClosed'))
+        $message.warning(this.$t('pages.docker.log-view.8a2aae09'))
       }
       this.socket.onmessage = (msg) => {
         if (msg.data.indexOf('code') > -1 && msg.data.indexOf('msg') > -1) {

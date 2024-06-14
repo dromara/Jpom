@@ -31,7 +31,7 @@
       >
         <template #rightExtra>
           <a-button type="primary" :disabled="!activeKey" @click="changeFileVisible(activeKey, true)">
-            {{ $tl('c.fileManagement') }}
+            {{ $t('pages.ssh.ssh-tabs.cfbfa5f8') }}
           </a-button>
         </template>
         <a-tab-pane
@@ -45,16 +45,16 @@
             <div v-if="pane.open" :style="{ height: `calc(100vh - 70px) ` }">
               <terminal1 :ssh-id="pane.id" />
             </div>
-            <a-result v-else status="warning" :title="$tl('p.terminalNotEnabled')">
+            <a-result v-else status="warning" :title="$t('pages.ssh.ssh-tabs.c7afc01b')">
               <template #extra>
-                <a-button type="primary" @click="open(pane.id)"> {{ $tl('p.openTerminal') }} </a-button>
+                <a-button type="primary" @click="open(pane.id)"> {{ $t('pages.ssh.ssh-tabs.66e81131') }} </a-button>
               </template>
             </a-result>
             <!-- 文件管理 -->
             <a-drawer
               v-if="pane.openFile"
               :get-container="`#paneDom${pane.id}`"
-              :title="`${pane.name}${$tl('c.fileManagement')}`"
+              :title="`${pane.name}${$t('pages.ssh.ssh-tabs.cfbfa5f8')}`"
               placement="right"
               width="90vw"
               :open="pane.fileVisible"
@@ -65,11 +65,10 @@
           </div>
         </a-tab-pane>
       </a-tabs>
-      <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="$tl('p.sshNotSelected')"></a-empty>
+      <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="$t('pages.ssh.ssh-tabs.e465bff1')"></a-empty>
     </a-layout-content>
   </a-layout>
 </template>
-
 <script>
 import { getSshListTree } from '@/api/ssh'
 import terminal1 from './terminal'
@@ -98,9 +97,6 @@ export default {
     this.listData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.ssh.sshTabs.${key}`, ...args)
-    },
     findItemById(list, id) {
       // 每次进来使用find遍历一次
       let res = list.find((item) => item.id == id)

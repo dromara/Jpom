@@ -13,6 +13,7 @@ import cn.hutool.core.lang.Opt;
 import cn.hutool.db.ds.DSFactory;
 import cn.hutool.setting.Setting;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.db.DbExtConfig;
 import org.dromara.jpom.db.IStorageService;
 import org.dromara.jpom.system.JpomRuntimeException;
@@ -30,7 +31,7 @@ public class PostgresqlStorageServiceImpl implements IStorageService {
 
     @Override
     public String dbUrl() {
-        Assert.hasText(this.dbUrl, "还没有初始化数据库");
+        Assert.hasText(this.dbUrl, I18nMessageUtil.get("i18n.database_not_initialized.e5e7"));
         return dbUrl;
     }
 
@@ -46,8 +47,8 @@ public class PostgresqlStorageServiceImpl implements IStorageService {
 
     @Override
     public DSFactory init(DbExtConfig dbExtConfig) {
-        Assert.isNull(this.dsFactory, "不要重复初始化数据库");
-        Assert.hasText(dbExtConfig.getUrl(), "没有配置数据库连接");
+        Assert.isNull(this.dsFactory, I18nMessageUtil.get("i18n.do_not_reinitialize_database.9bb5"));
+        Assert.hasText(dbExtConfig.getUrl(), I18nMessageUtil.get("i18n.database_connection_not_configured.c80e"));
         Setting setting = dbExtConfig.toSetting();
         this.dsFactory = DSFactory.create(setting);
         this.dbUrl = dbExtConfig.getUrl();
@@ -73,14 +74,14 @@ public class PostgresqlStorageServiceImpl implements IStorageService {
     }
 
     public DSFactory getDsFactory() {
-        Assert.notNull(this.dsFactory, "还没有初始化数据库");
+        Assert.notNull(this.dsFactory, I18nMessageUtil.get("i18n.database_not_initialized.e5e7"));
         return dsFactory;
     }
 
 
     @Override
     public JpomRuntimeException warpException(Exception e) {
-        return new JpomRuntimeException("数据库异常", e);
+        return new JpomRuntimeException(I18nMessageUtil.get("i18n.database_exception.4894"), e);
     }
 
 

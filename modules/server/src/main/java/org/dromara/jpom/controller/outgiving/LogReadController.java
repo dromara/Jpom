@@ -15,6 +15,7 @@ import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.outgiving.LogReadModel;
 import org.dromara.jpom.permission.ClassFeature;
@@ -68,7 +69,7 @@ public class LogReadController extends BaseServerController {
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<String> del(String id, HttpServletRequest request) {
         int byKey = logReadServer.delByKey(id, request);
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
     /**
@@ -82,17 +83,17 @@ public class LogReadController extends BaseServerController {
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<String> save(@RequestBody JSONObject jsonObject, HttpServletRequest request) {
-        Assert.notNull(jsonObject, "请传入参数");
+        Assert.notNull(jsonObject, I18nMessageUtil.get("i18n.please_pass_parameter.3182"));
         String id = jsonObject.getString("id");
         String name = jsonObject.getString("name");
-        Assert.hasText(name, "请填写名称");
+        Assert.hasText(name, I18nMessageUtil.get("i18n.name_required.856d"));
         JSONArray projectListArray = jsonObject.getJSONArray("projectList");
-        Assert.notEmpty(projectListArray, "请选择节点和项目");
+        Assert.notEmpty(projectListArray, I18nMessageUtil.get("i18n.select_node_and_project.6021"));
         List<LogReadModel.Item> projectList = projectListArray.toJavaList(LogReadModel.Item.class);
         projectList = projectList.stream()
             .filter(item -> StrUtil.isAllNotEmpty(item.getNodeId(), item.getProjectId()))
             .collect(Collectors.toList());
-        Assert.notEmpty(projectList, "请选择节点和项目");
+        Assert.notEmpty(projectList, I18nMessageUtil.get("i18n.select_node_and_project.6021"));
         LogReadModel logReadModel = new LogReadModel();
         logReadModel.setId(id);
         logReadModel.setName(name);
@@ -103,7 +104,7 @@ public class LogReadController extends BaseServerController {
         } else {
             logReadServer.updateById(logReadModel, request);
         }
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 
     /**
@@ -122,15 +123,15 @@ public class LogReadController extends BaseServerController {
     @RequestMapping(value = "update-cache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<String> updateCache(@RequestBody JSONObject jsonObject, HttpServletRequest request) {
-        Assert.notNull(jsonObject, "请传入参数");
+        Assert.notNull(jsonObject, I18nMessageUtil.get("i18n.please_pass_parameter.3182"));
         String id = jsonObject.getString("id");
-        Assert.hasText(id, "请传入参数");
+        Assert.hasText(id, I18nMessageUtil.get("i18n.please_pass_parameter.3182"));
         LogReadModel.CacheDta cacheDta = jsonObject.toJavaObject(LogReadModel.CacheDta.class);
 
         LogReadModel logReadModel = new LogReadModel();
         logReadModel.setId(id);
         logReadModel.setCacheData(JSONArray.toJSONString(cacheDta));
         logReadServer.updateById(logReadModel, request);
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 }

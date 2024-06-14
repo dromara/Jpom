@@ -15,6 +15,7 @@ import cn.hutool.db.dialect.impl.MysqlDialect;
 import cn.hutool.db.dialect.impl.PostgresqlDialect;
 import cn.hutool.db.sql.Wrapper;
 import cn.hutool.extra.spring.SpringUtil;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.db.DbExtConfig;
 
 import java.util.Set;
@@ -93,7 +94,7 @@ public class DialectUtil {
             case POSTGRESQL:
                 return getPostgresqlDialect();
             default:
-                throw new IllegalArgumentException("未知的数据库方言类型:" + mode);
+                throw new IllegalArgumentException(I18nMessageUtil.get("i18n.unknown_database_dialect_type.951b") + mode);
         }
     }
 
@@ -117,7 +118,7 @@ public class DialectUtil {
                 if (currentDbFieldWrapper == null) {
                     DbExtConfig dbExtConfig = SpringUtil.getBean(DbExtConfig.class);
                     if (dbExtConfig == null || dbExtConfig.getMode() == null) {
-                        throw new IllegalStateException("数据库Mode配置缺失");
+                        throw new IllegalStateException(I18nMessageUtil.get("i18n.database_mode_config_missing.ae5d"));
                     }
                     Dialect dialectByMode = getDialectByMode(dbExtConfig.getMode());
                     currentDbFieldWrapper = dialectByMode.getWrapper();

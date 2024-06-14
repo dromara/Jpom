@@ -11,6 +11,7 @@ package org.dromara.jpom.configuration;
 
 import cn.hutool.core.util.StrUtil;
 import lombok.Data;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -76,14 +77,14 @@ public class WebConfig {
     private String transportEncryption = "NONE";
 
     public String getName() {
-        return StrUtil.emptyToDefault(name, "Jpom项目运维系统");
+        return StrUtil.emptyToDefault(name, I18nMessageUtil.get("i18n.jpom_project_maintenance_system.7f8e"));
     }
 
     public String getSubTitle() {
-        return StrUtil.emptyToDefault(subTitle, "项目运维");
+        return StrUtil.emptyToDefault(subTitle, I18nMessageUtil.get("i18n.project_operations.03d9"));
     }
 
     public String getLoginTitle() {
-        return StrUtil.emptyToDefault(loginTitle, "登录JPOM");
+        return StrUtil.emptyToDefault(loginTitle, I18nMessageUtil.get("i18n.login_JPOM.0de6"));
     }
 }

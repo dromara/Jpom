@@ -2,7 +2,7 @@
   <div>
     <log-view
       :ref="`logView`"
-      :title-name="$tl('p.pullLog')"
+      :title-name="$t('pages.docker.pull-image-log.28d0ce86')"
       :visible="visible"
       @close="
         () => {
@@ -12,7 +12,6 @@
     />
   </div>
 </template>
-
 <script>
 import LogView from '@/components/logView'
 import { dockerImagePullImageLog } from '@/api/docker-api'
@@ -58,9 +57,6 @@ export default {
     this.pullLog()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.docker.pullImageLog.${key}`, ...args)
-    },
     nextPull() {
       this.logTimer && clearTimeout(this.logTimer)
       // 加载构建日志

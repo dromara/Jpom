@@ -29,6 +29,7 @@ import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.system.JpomRuntimeException;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.JsonFileUtil;
@@ -363,50 +364,50 @@ public class JpomManifest {
         File jarFile = new File(path);
         Tuple jarVersion = getJarVersion(jarFile);
         if (jarVersion == null) {
-            return new JsonMessage<>(405, "jar 包文件不合法");
+            return new JsonMessage<>(405, I18nMessageUtil.get("i18n.invalid_jar_file.e80a"));
         }
         try (JarFile jarFile1 = new JarFile(jarFile)) {
             //Manifest manifest = jarFile1.getManifest();
             //Attributes attributes = manifest.getMainAttributes();
             String mainClass = jarVersion.get(2);
             if (mainClass == null) {
-                return new JsonMessage<>(405, "清单文件中没有找到对应的MainClass属性");
+                return new JsonMessage<>(405, I18nMessageUtil.get("i18n.main_class_attribute_not_found.24c9"));
             }
             try (JarClassLoader jarClassLoader = JarClassLoader.load(jarFile)) {
                 jarClassLoader.loadClass(mainClass);
             } catch (ClassNotFoundException notFound) {
-                return new JsonMessage<>(405, "中没有找到对应的MainClass:" + mainClass);
+                return new JsonMessage<>(405, I18nMessageUtil.get("i18n.main_class_not_found.b4b7") + mainClass);
             }
             String applicationClass = type.getApplicationClass();
             ZipEntry entry = jarFile1.getEntry(StrUtil.format("BOOT-INF/classes/{}.class",
                 StrUtil.replace(applicationClass, ".", StrUtil.SLASH)));
             if (entry == null) {
-                return new JsonMessage<>(405, "此包不是Jpom【" + type.name() + "】包");
+                return new JsonMessage<>(405, StrUtil.format(I18nMessageUtil.get("i18n.not_jpom_package.ea3e"), type.name()));
             }
             String version = jarVersion.get(0);
             String timeStamp = jarVersion.get(1);
             String minVersion = jarVersion.get(4);
             if (StrUtil.hasEmpty(version, timeStamp, minVersion)) {
-                return new JsonMessage<>(405, "此包没有版本号、打包时间、最小兼容版本");
+                return new JsonMessage<>(405, I18nMessageUtil.get("i18n.package_missing_info.e277"));
             }
             if (checkRepeat) {
                 //
                 JpomManifest jpomManifest = JpomManifest.getInstance();
                 if (StrUtil.equals(version, jpomManifest.getVersion()) &&
                     StrUtil.equals(timeStamp, jpomManifest.getTimeStamp())) {
-                    return new JsonMessage<>(405, "新包和正在运行的包一致");
+                    return new JsonMessage<>(405, I18nMessageUtil.get("i18n.new_package_same_as_running_package.e25a"));
                 }
                 if (StrUtil.compareVersion(jpomManifest.getVersion(), minVersion) < 0) {
-                    return new JsonMessage<>(405, StrUtil.format("当前程序版本 {} 新版程序最低兼容 {} 不能直接升级", jpomManifest.getVersion(), minVersion));
+                    return new JsonMessage<>(405, StrUtil.format(I18nMessageUtil.get("i18n.incompatible_program_versions.5291"), jpomManifest.getVersion(), minVersion));
                 }
                 // 判断降级
                 if (!allowedDowngrade && StrUtil.compareVersion(version, jpomManifest.getVersion()) < 0) {
-                    return new JsonMessage<>(405, "在线升级不能降级操作");
+                    return new JsonMessage<>(405, I18nMessageUtil.get("i18n.online_upgrade_cannot_downgrade.d419"));
                 }
             }
         } catch (Exception e) {
-            log.error("解析jar", e);
-            return new JsonMessage<>(500, " 解析错误:" + e.getMessage());
+            log.error(I18nMessageUtil.get("i18n.parse_jar.a26e"), e);
+            return new JsonMessage<>(500, I18nMessageUtil.get("i18n.parse_error.da6d") + e.getMessage());
         }
         return new JsonMessage<>(200, "", jarVersion);
     }
@@ -468,7 +469,7 @@ public class JpomManifest {
         File runPath = getRunPath().getParentFile().getParentFile();
         String type = JpomApplication.getAppType().name();
         File scriptFile = FileUtil.file(runPath, "bin", StrUtil.format("{}.{}", type, CommandUtil.SUFFIX));
-        Assert.state(FileUtil.isFile(scriptFile), StrUtil.format("当前服务中没有命令脚本：{}.{}", type, CommandUtil.SUFFIX));
+        Assert.state(FileUtil.isFile(scriptFile), StrUtil.format(I18nMessageUtil.get("i18n.command_script_not_found_in_service.25ac"), type, CommandUtil.SUFFIX));
         return scriptFile;
     }
 
@@ -489,7 +490,7 @@ public class JpomManifest {
                     String typeName = type.name().toLowerCase();
                     return StrUtil.startWith(name, "lib/" + typeName) && StrUtil.endWith(name, ".jar");
                 }).findFirst();
-                Assert.state(first.isPresent(), "上传的压缩包不是 Jpom [" + type + "] 包");
+                Assert.state(first.isPresent(), StrUtil.format(I18nMessageUtil.get("i18n.invalid_zip_file.3092"), type));
                 //
                 ZipEntry zipEntry = first.get();
                 try (InputStream stream = ZipUtil.getStream(zipFile, zipEntry)) {
@@ -500,6 +501,6 @@ public class JpomManifest {
         } else if (StrUtil.endWithIgnoreCase(extName, "jar")) {
             return FileUtil.file(path);
         }
-        throw new IllegalArgumentException("此文件不是 jpom 安装包");
+        throw new IllegalArgumentException(I18nMessageUtil.get("i18n.not_jpom_install_package.2cca"));
     }
 }

@@ -2,7 +2,7 @@
   <div>
     <log-view1
       :ref="`logView`"
-      :title-name="$tl('p.executionLog')"
+      :title-name="$t('pages.node.node-layout.other.script-log-view.8fb8f5f9')"
       :visible="visible"
       @close="
         () => {
@@ -12,7 +12,6 @@
     />
   </div>
 </template>
-
 <script>
 import { scriptLog } from '@/api/node-other'
 import LogView1 from '@/components/logView'
@@ -47,9 +46,6 @@ export default {
     this.init()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.nodeLayout.other.scriptLogView.${key}`, ...args)
-    },
     init() {
       this.loadData()
       this.logTimer = setInterval(() => {

@@ -25,13 +25,14 @@ import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.build.BuildExtraModule;
 import org.dromara.jpom.build.BuildUtil;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.model.BaseDbModel;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.enums.BuildStatus;
 import org.dromara.jpom.model.log.BuildHistoryLog;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
-import org.dromara.jpom.configuration.BuildExtConfig;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -85,7 +86,7 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
      */
     public IJsonMessage<String> deleteLogAndFile(BuildHistoryLog buildHistoryLog) {
         if (buildHistoryLog == null) {
-            return JsonMessage.success("没有对应构建记录,忽略删除");
+            return JsonMessage.success(I18nMessageUtil.get("i18n.no_corresponding_build_record_ignore_deletion.86a0"));
         }
         BuildInfoModel item = buildService.getByKey(buildHistoryLog.getBuildDataId());
         if (item != null) {
@@ -95,13 +96,13 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
                 if (dataFile.exists()) {
                     boolean s = FileUtil.del(dataFile);
                     if (!s) {
-                        return new JsonMessage<>(500, "清理文件失败");
+                        return new JsonMessage<>(500, I18nMessageUtil.get("i18n.file_cleanup_failed.511e"));
                     }
                 }
             }
         }
         int count = this.delByKey(buildHistoryLog.getId());
-        return new JsonMessage<>(200, "删除成功", String.valueOf(count));
+        return new JsonMessage<>(200, I18nMessageUtil.get("i18n.delete_success.0007"), String.valueOf(count));
     }
 
     @Override
@@ -194,7 +195,7 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
             if (resultKeepDay == null || resultKeepDay <= 0) {
                 continue;
             }
-            log.debug("自动删除过期的构建历史相关文件：{} {}", buildInfoModel.getName(), resultKeepDay);
+            log.debug(I18nMessageUtil.get("i18n.auto_delete_expired_build_history_files.723b"), buildInfoModel.getName(), resultKeepDay);
             Entity entity = Entity.create();
             this.fillClearWhere(entity, buildInfoModel.getId());
             DateTime date = DateTime.now();

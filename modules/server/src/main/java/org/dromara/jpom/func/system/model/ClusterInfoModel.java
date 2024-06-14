@@ -19,7 +19,8 @@ import org.dromara.jpom.model.BaseUserModifyDbModel;
  * @since 2023/8/19
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "CLUSTER_INFO", name = "集群信息")
+@TableName(value = "CLUSTER_INFO",
+    nameKey = "i18n.cluster_info.32e0")
 @Data
 public class ClusterInfoModel extends BaseUserModifyDbModel {
     /**

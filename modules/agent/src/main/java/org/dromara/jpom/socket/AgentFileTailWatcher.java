@@ -12,6 +12,7 @@ package org.dromara.jpom.socket;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.map.SafeConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.util.BaseFileTailWatcher;
 import org.dromara.jpom.util.SocketSessionUtil;
 
@@ -52,19 +53,19 @@ public class AgentFileTailWatcher<T extends AutoCloseable> extends BaseFileTailW
      */
     public static boolean addWatcher(File file, Charset charset, Session session) throws IOException {
         if (!FileUtil.isFile(file)) {
-            log.warn("文件不存在或者是目录:" + file.getPath());
+            log.warn(I18nMessageUtil.get("i18n.file_or_directory_not_found.f03e") + file.getPath());
             return false;
         }
         AgentFileTailWatcher<Session> agentFileTailWatcher = CONCURRENT_HASH_MAP.computeIfAbsent(file, s -> {
             try {
                 return new AgentFileTailWatcher<>(file, charset);
             } catch (Exception e) {
-                log.error("创建文件监听失败", e);
+                log.error(I18nMessageUtil.get("i18n.create_file_watch_failure.bc1a"), e);
                 return null;
             }
         });
         if (agentFileTailWatcher == null) {
-            throw new IOException("加载文件失败:" + file.getPath());
+            throw new IOException(I18nMessageUtil.get("i18n.load_file_failure.86cc") + file.getPath());
         }
         if (agentFileTailWatcher.add(session, FileUtil.getName(file))) {
             agentFileTailWatcher.start();

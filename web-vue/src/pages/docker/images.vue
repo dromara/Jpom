@@ -16,28 +16,30 @@
         <a-space wrap class="search-box">
           <!-- <a-input v-model="listQuery['name']" @pressEnter="loadData" placeholder="名称" class="search-input-item" /> -->
           <div>
-            {{ $tl('p.showAll') }}
+            {{ $t('pages.docker.images.d2ef7608') }}
             <a-switch
               v-model:checked="listQuery['showAll']"
-              :checked-children="$tl('c.is')"
-              :un-checked-children="$tl('c.no')"
+              :checked-children="$t('pages.docker.images.47371c73')"
+              :un-checked-children="$t('pages.docker.images.1c77d6fb')"
             />
           </div>
           <div>
-            {{ $tl('p.suspended') }}
+            {{ $t('pages.docker.images.a8ad56bd') }}
             <a-switch
               v-model:checked="listQuery['dangling']"
-              :checked-children="$tl('c.is')"
-              :un-checked-children="$tl('c.no')"
+              :checked-children="$t('pages.docker.images.47371c73')"
+              :un-checked-children="$t('pages.docker.images.1c77d6fb')"
             />
           </div>
-          <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
+          <a-button type="primary" :loading="loading" @click="loadData">{{
+            $t('pages.docker.images.53c2763c')
+          }}</a-button>
           <a-button
             type="primary"
             danger
             :disabled="!tableSelections || !tableSelections.length"
             @click="batchDelete"
-            >{{ $tl('p.batchDelete') }}</a-button
+            >{{ $t('pages.docker.images.b5139d46') }}</a-button
           >
 
           |
@@ -45,7 +47,7 @@
           <a-input-search
             v-model:value="pullImageName"
             style="width: 260px"
-            :placeholder="$tl('p.pullImageName')"
+            :placeholder="$t('pages.docker.images.cf1010ee')"
             class="search-input-item"
             @search="pullImage"
           >
@@ -65,7 +67,7 @@
             :before-upload="beforeUpload"
           >
             <LoadingOutlined v-if="percentage" />
-            <a-button v-else type="primary"> <UploadOutlined />{{ $tl('p.importImage') }} </a-button>
+            <a-button v-else type="primary"> <UploadOutlined />{{ $t('pages.docker.images.9bf236cc') }} </a-button>
           </a-upload>
         </a-space>
       </template>
@@ -95,20 +97,20 @@
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-tooltip :title="$tl('p.createContainerWithImage')">
+            <a-tooltip :title="$t('pages.docker.images.eebc3517')">
               <a-button size="small" type="link" @click="createContainer(record)"><SelectOutlined /></a-button>
             </a-tooltip>
-            <a-tooltip :title="$tl('p.updateImage')">
+            <a-tooltip :title="$t('pages.docker.images.a2b28fd3')">
               <a-button size="small" type="link" :disabled="!record.repoTags" @click="tryPull(record)"
                 ><CloudDownloadOutlined
               /></a-button>
             </a-tooltip>
-            <a-tooltip :title="$tl('p.exportImage')">
+            <a-tooltip :title="$t('pages.docker.images.506feea7')">
               <a-button size="small" type="link" @click="saveImage(record.id.split(':')[1])"
                 ><DownloadOutlined
               /></a-button>
             </a-tooltip>
-            <a-tooltip :title="$tl('p.deleteImage')">
+            <a-tooltip :title="$t('pages.docker.images.33df7296')">
               <a-button size="small" type="link" @click="doAction(record, 'remove')"><DeleteOutlined /></a-button>
             </a-tooltip>
           </a-space>
@@ -150,7 +152,6 @@
     />
   </div>
 </template>
-
 <script>
 import { parseTime, renderSize } from '@/utils/const'
 import {
@@ -197,29 +198,29 @@ export default {
       temp: {},
       rules: {
         name: [
-          { required: true, message: this.$tl('p.containerNameRequired'), trigger: 'blur' },
+          { required: true, message: this.$t('pages.docker.images.2a85e8f3'), trigger: 'blur' },
           {
             pattern: /[a-zA-Z0-9][a-zA-Z0-9_.-]$/,
-            message: this.$tl('p.containerNameAlphanumeric'),
+            message: this.$t('pages.docker.images.7bfb5be2'),
             trigger: 'blur'
           }
         ]
       },
       columns: [
         {
-          title: this.$tl('p.serialNumber'),
+          title: this.$t('pages.docker.images.72cebb96'),
           width: '80px',
           ellipsis: true,
           align: 'center',
           customRender: ({ index }) => `${index + 1}`
         },
         {
-          title: this.$tl('p.name'),
+          title: this.$t('pages.docker.images.bb769c1d'),
           dataIndex: 'repoTags',
           ellipsis: true
         },
         {
-          title: this.$tl('p.imageId'),
+          title: this.$t('pages.docker.images.77c97b2c'),
           dataIndex: 'id',
           ellipsis: true,
           width: 140,
@@ -227,7 +228,7 @@ export default {
           id: true
         },
         {
-          title: this.$tl('p.parentId'),
+          title: this.$t('pages.docker.images.2a3c2758'),
           dataIndex: 'parentId',
           ellipsis: true,
           width: 140,
@@ -235,13 +236,13 @@ export default {
           id: true
         },
         {
-          title: this.$tl('p.spaceOccupied'),
+          title: this.$t('pages.docker.images.c2a7a92f'),
           dataIndex: 'size',
           ellipsis: true,
           width: 120
         },
         {
-          title: this.$tl('p.creationTime'),
+          title: this.$t('pages.docker.images.f06e8846'),
           dataIndex: 'created',
           sorter: (a, b) => new Number(a.created) - new Number(b.created),
           sortDirections: ['descend', 'ascend'],
@@ -254,15 +255,16 @@ export default {
         },
 
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.docker.images.3bb962bf'),
           dataIndex: 'operation',
           fixed: 'right',
           width: '160px'
         }
       ],
+
       action: {
         remove: {
-          msg: this.$tl('p.confirmDeleteImage'),
+          msg: this.$t('pages.docker.images.cde2002'),
           api: dockerImageRemove
         }
       },
@@ -288,9 +290,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.docker.images.${key}`, ...args)
-    },
     // 加载数据
     loadData() {
       this.loading = true
@@ -309,11 +308,11 @@ export default {
         return
       }
       $confirm({
-        title: this.$tl('c.systemHint'),
+        title: this.$t('pages.docker.images.75eab7c'),
         zIndex: 1009,
         content: action.msg,
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        okText: this.$t('pages.docker.images.7da4a591'),
+        cancelText: this.$t('pages.docker.images.43105e21'),
         onOk: () => {
           return action
             .api(this.urlPrefix, {
@@ -335,7 +334,7 @@ export default {
       const repoTags = record?.repoTags[0]
       if (!repoTags) {
         $notification.error({
-          message: this.$tl('p.incorrectImageName')
+          message: this.$t('pages.docker.images.817c9e61')
         })
         return
       }
@@ -411,7 +410,7 @@ export default {
     pullImage() {
       if (!this.pullImageName) {
         $notification.warn({
-          message: this.$tl('p.fillPullImageName')
+          message: this.$t('pages.docker.images.dcbbfcb4')
         })
         return
       }
@@ -440,11 +439,11 @@ export default {
       let ids = this.tableSelections
 
       $confirm({
-        title: this.$tl('c.systemHint'),
+        title: this.$t('pages.docker.images.75eab7c'),
         zIndex: 1009,
-        content: this.$tl('p.confirmBatchDeleteImage'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.docker.images.729feed'),
+        okText: this.$t('pages.docker.images.7da4a591'),
+        cancelText: this.$t('pages.docker.images.43105e21'),
         onOk: () => {
           return dockerImageBatchRemove(this.urlPrefix, {
             id: this.reqDataId,

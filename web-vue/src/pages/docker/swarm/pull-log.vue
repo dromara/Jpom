@@ -2,7 +2,7 @@
   <div>
     <log-view
       :ref="`logView`"
-      :title-name="$tl('p.taskLog')"
+      :title-name="$t('pages.docker.swarm.pull-log.3bbf92f2')"
       :visible="visible"
       @close="
         () => {
@@ -12,23 +12,31 @@
     >
       <template #before>
         <a-space>
-          <a-input-number v-model:value="tail" :placeholder="$tl('p.readLineCount')" style="width: 150px">
+          <a-input-number
+            v-model:value="tail"
+            :placeholder="$t('pages.docker.swarm.pull-log.2f7b59f')"
+            style="width: 150px"
+          >
             <template #addonBefore>
-              <a-tooltip :title="$tl('p.readLastLogLines')">{{ $tl('p.lineCount') }} </a-tooltip>
+              <a-tooltip :title="$t('pages.docker.swarm.pull-log.7dcebde4')"
+                >{{ $t('pages.docker.swarm.pull-log.b0482c76') }}
+              </a-tooltip>
             </template>
           </a-input-number>
           <div>
-            {{ $tl('p.timestamp') }}
+            {{ $t('pages.docker.swarm.pull-log.87ee22ec') }}
             <a-switch
               v-model:checked="timestamps"
-              :checked-children="$tl('p.show')"
-              :un-checked-children="$tl('p.hide')"
+              :checked-children="$t('pages.docker.swarm.pull-log.d75b3b1a')"
+              :un-checked-children="$t('pages.docker.swarm.pull-log.41cc2930')"
             />
           </div>
-          <a-button type="primary" size="small" @click="init"><ReloadOutlined /> {{ $tl('p.refresh') }} </a-button>
+          <a-button type="primary" size="small" @click="init"
+            ><ReloadOutlined /> {{ $t('pages.docker.swarm.pull-log.7bbd89a') }}
+          </a-button>
           |
           <a-button type="primary" :disabled="!logId" size="small" @click="download">
-            <DownloadOutlined /> {{ $tl('p.download') }}
+            <DownloadOutlined /> {{ $t('pages.docker.swarm.pull-log.42c8e9c6') }}
           </a-button>
           |
         </a-space>
@@ -36,7 +44,6 @@
     </log-view>
   </div>
 </template>
-
 <script>
 import LogView from '@/components/logView'
 import {
@@ -88,9 +95,6 @@ export default {
     this.init()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.docker.swarm.pullLog.${key}`, ...args)
-    },
     init() {
       this.logTimer && clearTimeout(this.logTimer)
       this.$refs.logView.clearLogCache()

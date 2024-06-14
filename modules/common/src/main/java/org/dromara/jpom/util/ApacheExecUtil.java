@@ -15,6 +15,7 @@ import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.exec.*;
 import org.apache.commons.exec.environment.EnvironmentUtils;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.system.ExtConfigBean;
 
 import java.io.File;
@@ -117,7 +118,7 @@ public class ApacheExecUtil {
         try {
             return executor.execute(commandLine, procEnvironment);
         } catch (ExecuteException executeException) {
-            logRecorder.systemWarning("执行异常：{}", executeException.getMessage());
+            logRecorder.systemWarning(I18nMessageUtil.get("i18n.execution_exception_with_detail.c142"), executeException.getMessage());
             return executeException.getExitValue();
         }
     }

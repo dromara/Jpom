@@ -23,7 +23,8 @@ import org.dromara.jpom.model.outgiving.OutGivingNodeProject;
  * @since 2019/7/19
  **/
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "OUTGIVINGLOG", name = "分发日志", parents = OutGivingModel.class, workspaceBind = 3)
+@TableName(value = "OUTGIVINGLOG",
+    nameKey = "i18n.distribute_log.c612", parents = OutGivingModel.class, workspaceBind = 3)
 @Data
 public class OutGivingLog extends BaseWorkspaceModel {
     /**

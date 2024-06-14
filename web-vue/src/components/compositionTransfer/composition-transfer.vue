@@ -19,9 +19,13 @@
               handleLeftChecked(_, props, [...selectedKeys, ...targetKeys], onItemSelect)
             }
           "
-        />
+        >
+          <template #title="{ title, key }">
+            <a-tooltip :title="title">{{ title }}</a-tooltip>
+          </template>
+        </a-tree>
         <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE">
-          <template #description>暂无数据</template>
+          <template #description>{{ $t('components.compositionTransfer.composition-transfer.f8525cf2') }}</template>
         </a-empty>
       </template>
       <template v-else-if="direction === 'right'">
@@ -36,15 +40,18 @@
               handleRightChecked(_, props, [...selectedKeys, ...targetKeys], onItemSelect)
             }
           "
-        />
+        >
+          <template #title="{ title, key }">
+            <a-tooltip :title="title">{{ title }}</a-tooltip>
+          </template>
+        </a-tree>
         <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE">
-          <template #description>暂无数据</template>
+          <template #description>{{ $t('components.compositionTransfer.composition-transfer.f8525cf2') }}</template>
         </a-empty>
       </template>
     </template>
   </a-transfer>
 </template>
-
 <script>
 import { cloneDeep, flatten, getTreeKeys, handleLeftTreeData, handleRightTreeData, isChecked } from './utils'
 import { Empty } from 'ant-design-vue'

@@ -25,6 +25,7 @@ import org.dromara.jpom.build.BuildExtraModule;
 import org.dromara.jpom.build.BuildUtil;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.func.files.model.FileStorageModel;
@@ -113,11 +114,11 @@ public class OutGivingProjectController extends BaseServerController {
     }
 
     @RequestMapping(value = "getItemData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<JSONObject> getItemData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "id error") String id,
+    public IJsonMessage<JSONObject> getItemData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.parameter_error_id_error.58ce") String id,
                                                 HttpServletRequest request) {
         String workspaceId = outGivingServer.getCheckUserWorkspace(request);
         OutGivingModel outGivingServerItem = outGivingServer.getByKey(id, request);
-        Objects.requireNonNull(outGivingServerItem, "没有数据");
+        Objects.requireNonNull(outGivingServerItem, I18nMessageUtil.get("i18n.no_data.1ac0"));
         List<OutGivingNodeProject> outGivingNodeProjectList = outGivingServerItem.outGivingNodeProjectList();
         //
         Set<String> nodeIds = outGivingNodeProjectList.stream().map(BaseNodeProject::getNodeId).collect(Collectors.toSet());
@@ -172,7 +173,7 @@ public class OutGivingProjectController extends BaseServerController {
                     break;
                 }
             }
-            Assert.state(zip, "不支持的文件类型:" + path.getName());
+            Assert.state(zip, I18nMessageUtil.get("i18n.file_type_not_supported.ae5d") + path.getName());
         }
         return path;
     }
@@ -194,11 +195,11 @@ public class OutGivingProjectController extends BaseServerController {
                                                String fileSumMd5,
                                                HttpServletRequest request) throws IOException {
         // 状态判断
-        this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"), request);
+        this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, I18nMessageUtil.get("i18n.distribution_in_progress.c3ae")), request);
         File userTempPath = serverConfig.getUserTempPath();
         // 保存文件
         this.uploadSharding(file, userTempPath.getAbsolutePath(), sliceId, totalSlice, nowSlice, fileSumMd5);
-        return JsonMessage.success("上传成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.upload_success.a769"));
     }
 
     /**
@@ -219,9 +220,9 @@ public class OutGivingProjectController extends BaseServerController {
                                        String sliceId,
                                        Integer totalSlice,
                                        String fileSumMd5, HttpServletRequest request) throws IOException {
-        this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"), request);
+        this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, I18nMessageUtil.get("i18n.distribution_in_progress.c3ae")), request);
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
-        Assert.notNull(afterOpt1, "请选择分发后的操作");
+        Assert.notNull(afterOpt1, I18nMessageUtil.get("i18n.post_distribution_action_required.8cc8"));
         //
         boolean unzip = Convert.toBool(autoUnzip, false);
         File file = FileUtil.file(JpomApplication.getInstance().getDataPath(), ServerConst.OUTGIVING_FILE, id);
@@ -253,12 +254,12 @@ public class OutGivingProjectController extends BaseServerController {
             .modeData(outGivingModel.getModeData())
             .stripComponents(stripComponentsValue);
         outGivingRunBuilder.build().startRun(selectProject);
-        return JsonMessage.success("上传成功,开始分发!");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.upload_success_and_distribute.f446"));
     }
 
     private OutGivingModel check(String id, BiConsumer<OutGivingModel.Status, OutGivingModel> consumer, HttpServletRequest request) {
         OutGivingModel outGivingModel = outGivingServer.getByKey(id, request);
-        Assert.notNull(outGivingModel, "上传失败,没有找到对应的分发项目");
+        Assert.notNull(outGivingModel, I18nMessageUtil.get("i18n.upload_failed_no_matching_project.b219"));
         // 检查状态
         Integer statusCode = outGivingModel.getStatus();
         OutGivingModel.Status status = BaseEnum.getEnum(OutGivingModel.Status.class, statusCode, OutGivingModel.Status.NO);
@@ -281,11 +282,11 @@ public class OutGivingProjectController extends BaseServerController {
                                                String stripComponents,
                                                String selectProject,
                                                HttpServletRequest request) {
-        Assert.hasText(url, "填写下载地址");
-        Assert.state(StrUtil.length(url) <= 200, "url 长度不能超过 200");
-        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"), request);
+        Assert.hasText(url, I18nMessageUtil.get("i18n.fill_download_address.763c"));
+        Assert.state(StrUtil.length(url) <= 200, I18nMessageUtil.get("i18n.url_length_exceeded.ca1c"));
+        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, I18nMessageUtil.get("i18n.distribution_in_progress.c3ae")), request);
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
-        Assert.notNull(afterOpt1, "请选择分发后的操作");
+        Assert.notNull(afterOpt1, I18nMessageUtil.get("i18n.post_distribution_action_required.8cc8"));
         // 验证远程 地址
         ServerWhitelist whitelist = outGivingWhitelistService.getServerWhitelistData(request);
         whitelist.checkAllowRemoteDownloadHost(url);
@@ -302,7 +303,7 @@ public class OutGivingProjectController extends BaseServerController {
         FileUtil.mkdir(file);
         File downloadFile = HttpUtil.downloadFileFromUrl(url, file);
         this.startTask(outGivingModel, downloadFile, autoUnzip, stripComponents, selectProject, true);
-        return JsonMessage.success("下载成功,开始分发!");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.download_success_and_distribute.ae94"));
     }
 
     /**
@@ -320,18 +321,18 @@ public class OutGivingProjectController extends BaseServerController {
                                          String selectProject,
                                          HttpServletRequest request) {
 
-        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"), request);
+        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, I18nMessageUtil.get("i18n.distribution_in_progress.c3ae")), request);
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
-        Assert.notNull(afterOpt1, "请选择分发后的操作");
+        Assert.notNull(afterOpt1, I18nMessageUtil.get("i18n.post_distribution_action_required.8cc8"));
 
         BuildInfoModel infoModel = buildInfoService.getByKey(buildId, request);
-        Assert.notNull(infoModel, "没有对应的构建");
+        Assert.notNull(infoModel, I18nMessageUtil.get("i18n.no_build.d163"));
         BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
         buildHistoryLog.setBuildDataId(infoModel.getId());
         Integer numberId = Convert.toInt(buildNumberId, 0);
         buildHistoryLog.setBuildNumberId(numberId);
         BuildHistoryLog historyLog = dbBuildHistoryLogService.queryByBean(buildHistoryLog);
-        Assert.notNull(historyLog, "没有对应的构建记录");
+        Assert.notNull(historyLog, I18nMessageUtil.get("i18n.no_build_record.66a2"));
         BuildExtraModule buildExtraModule = BuildExtraModule.build(historyLog);
         //String resultDirFileStr = buildExtraModule.getResultDirFile();
         EnvironmentMapBuilder environmentMapBuilder = buildHistoryLog.toEnvironmentMapBuilder();
@@ -359,7 +360,7 @@ public class OutGivingProjectController extends BaseServerController {
                 .stripComponents(stripComponentsValue);
             return outGivingRunBuilder.build().startRun(selectProject);
         });
-        return JsonMessage.success("开始分发!");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.start_distribution_exclamation.9fc2"));
     }
 
     /**
@@ -377,11 +378,11 @@ public class OutGivingProjectController extends BaseServerController {
                                                String selectProject,
                                                HttpServletRequest request) {
 
-        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"), request);
+        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, I18nMessageUtil.get("i18n.distribution_in_progress.c3ae")), request);
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
-        Assert.notNull(afterOpt1, "请选择分发后的操作");
+        Assert.notNull(afterOpt1, I18nMessageUtil.get("i18n.post_distribution_action_required.8cc8"));
         FileStorageModel storageModel = fileStorageService.getByKey(fileId, request);
-        Assert.notNull(storageModel, "对应的文件不存在");
+        Assert.notNull(storageModel, I18nMessageUtil.get("i18n.file_not_exist.5091"));
         //
         outGivingModel.setClearOld(Convert.toBool(clearOld, false));
         outGivingModel.setAfterOpt(afterOpt1.getCode());
@@ -392,7 +393,7 @@ public class OutGivingProjectController extends BaseServerController {
         File storageSavePath = serverConfig.fileStorageSavePath();
         File file = FileUtil.file(storageSavePath, storageModel.getPath());
         this.startTask(outGivingModel, file, autoUnzip, stripComponents, selectProject, false);
-        return JsonMessage.success("开始分发!");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.start_distribution_exclamation.9fc2"));
     }
 
     /**
@@ -410,9 +411,9 @@ public class OutGivingProjectController extends BaseServerController {
                                                      String selectProject,
                                                      HttpServletRequest request) {
 
-        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, "当前还在分发中,请等待分发结束"), request);
+        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status != OutGivingModel.Status.ING, I18nMessageUtil.get("i18n.distribution_in_progress.c3ae")), request);
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
-        Assert.notNull(afterOpt1, "请选择分发后的操作");
+        Assert.notNull(afterOpt1, I18nMessageUtil.get("i18n.post_distribution_action_required.8cc8"));
         StaticFileStorageModel storageModel = staticFileStorageService.getByKey(fileId);
         String workspaceId = outGivingServer.getCheckUserWorkspace(request);
         staticFileStorageService.checkStaticDir(storageModel, workspaceId);
@@ -426,7 +427,7 @@ public class OutGivingProjectController extends BaseServerController {
 
         File file = FileUtil.file(storageModel.getAbsolutePath());
         this.startTask(outGivingModel, file, autoUnzip, stripComponents, selectProject, false);
-        return JsonMessage.success("开始分发!");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.start_distribution_exclamation.9fc2"));
     }
 
     /**
@@ -442,7 +443,7 @@ public class OutGivingProjectController extends BaseServerController {
                            String stripComponents,
                            String selectProject,
                            boolean deleteFile) {
-        Assert.state(FileUtil.isFile(file), "当前文件丢失不能执行发布任务");
+        Assert.state(FileUtil.isFile(file), I18nMessageUtil.get("i18n.file_missing_cannot_publish.3818"));
         //
         boolean unzip = BooleanUtil.toBoolean(autoUnzip);
         //
@@ -467,27 +468,27 @@ public class OutGivingProjectController extends BaseServerController {
     @PostMapping(value = "cancel", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
     public IJsonMessage<String> cancel(@ValidatorItem String id, HttpServletRequest request) {
-        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status == OutGivingModel.Status.ING, "当前状态不是分发中"), request);
+        OutGivingModel outGivingModel = this.check(id, (status, outGivingModel1) -> Assert.state(status == OutGivingModel.Status.ING, I18nMessageUtil.get("i18n.status_not_distributing.6298")), request);
         OutGivingRun.cancel(outGivingModel.getId(), getUser());
         //
-        return JsonMessage.success("取消成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.cancel_success.285f"));
     }
 
     @PostMapping(value = "config-project", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<String> configProject(@RequestBody JSONObject jsonObject, HttpServletRequest request) {
-        Assert.notNull(jsonObject, "没有任何信息");
+        Assert.notNull(jsonObject, I18nMessageUtil.get("i18n.no_info.e59e"));
         String id = jsonObject.getString("id");
         List<OutGivingNodeProject> list = jsonObject.getList("data", OutGivingNodeProject.class);
-        Assert.notEmpty(list, "没有配置任何项目");
+        Assert.notEmpty(list, I18nMessageUtil.get("i18n.no_projects_configured.e873"));
         OutGivingModel outGivingModel = outGivingServer.getByKey(id, request);
-        Assert.notNull(outGivingModel, "没有找到对应的分发项目");
+        Assert.notNull(outGivingModel, I18nMessageUtil.get("i18n.no_distribution_project_found.90b0"));
         // 更新信息
         List<OutGivingNodeProject> outGivingNodeProjects = outGivingModel.outGivingNodeProjectList();
-        Assert.notEmpty(outGivingNodeProjects, "分发信息错误,没有任何项目");
+        Assert.notEmpty(outGivingNodeProjects, I18nMessageUtil.get("i18n.distribute_info_error_no_projects.e75f"));
         for (OutGivingNodeProject outGivingNodeProject : list) {
             OutGivingNodeProject nodeProject = OutGivingModel.getNodeProject(outGivingNodeProjects, outGivingNodeProject.getNodeId(), outGivingNodeProject.getProjectId());
-            Assert.notNull(nodeProject, "没有找到对应的项目信息");
+            Assert.notNull(nodeProject, I18nMessageUtil.get("i18n.no_project_info_found.725a"));
             nodeProject.setDisabled(outGivingNodeProject.getDisabled());
             nodeProject.setSortValue(outGivingNodeProject.getSortValue());
         }
@@ -496,7 +497,7 @@ public class OutGivingProjectController extends BaseServerController {
         update.setId(outGivingModel.getId());
         update.outGivingNodeProjectList(outGivingNodeProjects);
         outGivingServer.updateById(update);
-        return JsonMessage.success("更新成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.update_success.55aa"));
     }
 
     @GetMapping(value = "remove-project", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -506,11 +507,11 @@ public class OutGivingProjectController extends BaseServerController {
                                               @ValidatorItem String projectId,
                                               HttpServletRequest request) {
         OutGivingModel outGivingModel = outGivingServer.getByKey(id, request);
-        Assert.notNull(outGivingModel, "没有找到对应的分发项目");
+        Assert.notNull(outGivingModel, I18nMessageUtil.get("i18n.no_distribution_project_found.90b0"));
         List<OutGivingNodeProject> outGivingNodeProjects = outGivingModel.outGivingNodeProjectList();
-        Assert.notEmpty(outGivingNodeProjects, "分发信息错误,没有任何项目");
+        Assert.notEmpty(outGivingNodeProjects, I18nMessageUtil.get("i18n.distribute_info_error_no_projects.e75f"));
         //
-        Assert.state(outGivingNodeProjects.size() > 1, "当前分发只有一个项目啦,删除整个分发即可");
+        Assert.state(outGivingNodeProjects.size() > 1, I18nMessageUtil.get("i18n.current_distribution_has_only_one_project.cd59"));
         outGivingNodeProjects = outGivingNodeProjects.stream()
             .filter(nodeProject -> !StrUtil.equals(nodeProject.getProjectId(), projectId) || !StrUtil.equals(nodeProject.getNodeId(), nodeId))
             .collect(Collectors.toList());
@@ -519,6 +520,6 @@ public class OutGivingProjectController extends BaseServerController {
         update.setId(outGivingModel.getId());
         update.outGivingNodeProjectList(outGivingNodeProjects);
         outGivingServer.updateById(update);
-        return JsonMessage.success("删除成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 }

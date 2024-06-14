@@ -23,6 +23,7 @@ import cn.hutool.cron.pattern.CronPattern;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONException;
 import com.alibaba.fastjson2.JSONValidator;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.springframework.core.env.SimpleCommandLinePropertySource;
 
 import java.io.File;
@@ -213,7 +214,7 @@ public class StringUtil {
             try {
                 new CronPattern(newCron);
             } catch (Exception e) {
-                throw new IllegalArgumentException("cron 表达式格式不正确");
+                throw new IllegalArgumentException(I18nMessageUtil.get("i18n.cron_expression_format_error.6dcd"));
             }
         }
         return ObjectUtil.defaultIfNull(newCron, StrUtil.EMPTY);

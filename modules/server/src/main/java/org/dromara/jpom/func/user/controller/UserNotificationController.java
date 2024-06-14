@@ -12,6 +12,7 @@ package org.dromara.jpom.func.user.controller;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.func.user.dto.UserNotificationDto;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
@@ -67,9 +68,9 @@ public class UserNotificationController {
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<UserNotificationDto> saveNotification(HttpServletRequest request) {
         UserNotificationDto userNotification = ServletUtil.toBean(request, UserNotificationDto.class, true);
-        Assert.notNull(userNotification, "请配置用户通知");
+        Assert.notNull(userNotification, I18nMessageUtil.get("i18n.configure_user_notification.250d"));
         userNotification.verify();
         systemParametersServer.upsert(KEY, userNotification, "");
-        return JsonMessage.success("保存成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.save_succeeded.3b10"));
     }
 }

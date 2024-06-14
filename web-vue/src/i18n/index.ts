@@ -9,8 +9,8 @@
 ///
 
 import { createI18n } from 'vue-i18n'
-import zhCN from './locales/zh-CN'
-import enUS from './locales/en_US'
+// @ts-ignore 兼容i8n_tools插件
+import { zhCN, enUS } from './locales'
 
 import antdZhCN from 'ant-design-vue/es/locale/zh_CN'
 import antdEnUS from 'ant-design-vue/es/locale/en_US'
@@ -56,14 +56,17 @@ export const lang: { [key: string]: any } = {
   }
 }
 
-const i18n = createI18n({
+const i18n = createI18n<I18nLocaleType>({
   legacy: false,
   locale: 'zh-cn', //'en-us', // 默认显示语言
   messages: Object.keys(lang).reduce((pre: { [key: string]: any }, key: string) => {
     const { local } = lang[key]
     pre[key] = local
     return pre
-  }, {})
+  }, {}),
+  warnHtmlMessage: false
 })
 
 export default i18n
+
+export const { t } = i18n.global

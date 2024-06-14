@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.db.DbExtConfig;
 import org.dromara.jpom.db.StorageServiceFactory;
 import org.dromara.jpom.model.data.BackupInfoModel;
@@ -248,11 +249,11 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> implements
     public int delByKey(String keyValue) {
         // 根据 id 查询备份信息
         BackupInfoModel backupInfoModel = super.getByKey(keyValue);
-        Objects.requireNonNull(backupInfoModel, "备份数据不存在");
+        Objects.requireNonNull(backupInfoModel, I18nMessageUtil.get("i18n.backup_data_not_exist.f88c"));
 
         // 删除对应的文件
         boolean del = FileUtil.del(backupInfoModel.getFilePath());
-        Assert.state(del, "删除备份数据文件失败");
+        Assert.state(del, I18nMessageUtil.get("i18n.delete_backup_data_file_failure.2ebf"));
 
         // 删除备份信息
         return super.delByKey(keyValue);

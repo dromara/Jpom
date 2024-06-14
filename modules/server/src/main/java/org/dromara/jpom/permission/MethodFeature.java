@@ -10,6 +10,9 @@
 package org.dromara.jpom.permission;
 
 import lombok.Getter;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
+
+import java.util.function.Supplier;
 
 /**
  * 功能方法
@@ -22,19 +25,19 @@ public enum MethodFeature {
     /**
      * 没有
      */
-    NULL(""),
-    EDIT("修改、添加数据"),
-    DEL("删除数据"),
-    LIST("列表、查询"),
-    DOWNLOAD("下载"),
-    UPLOAD("上传"),
-    EXECUTE("执行"),
-    REMOTE_DOWNLOAD("下载远程文件"),
+    NULL(() -> ""),
+    EDIT(() -> I18nMessageUtil.get("i18n.modify_or_add_data.e1f0")),
+    DEL(() -> I18nMessageUtil.get("i18n.delete_data.40f8")),
+    LIST(() -> I18nMessageUtil.get("i18n.list_and_query.c783")),
+    DOWNLOAD(() -> I18nMessageUtil.get("i18n.download_action.f26e")),
+    UPLOAD(() -> I18nMessageUtil.get("i18n.upload_action.d5a7")),
+    EXECUTE(() -> I18nMessageUtil.get("i18n.execute.1a6a")),
+    REMOTE_DOWNLOAD(() -> I18nMessageUtil.get("i18n.download_remote_file.ae84")),
     ;
 
-    private final String name;
+    private final Supplier<String> name;
 
-    MethodFeature(String name) {
+    MethodFeature(Supplier<String> name) {
         this.name = name;
     }
 }

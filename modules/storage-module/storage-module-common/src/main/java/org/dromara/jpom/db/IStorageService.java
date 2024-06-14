@@ -11,6 +11,7 @@ package org.dromara.jpom.db;
 
 import cn.hutool.db.ds.DSFactory;
 import cn.hutool.setting.Setting;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.system.JpomRuntimeException;
 
 import java.io.File;
@@ -69,7 +70,7 @@ public interface IStorageService extends AutoCloseable, IMode {
      * @throws Exception 异常
      */
     default boolean hasDbData() throws Exception {
-        throw new UnsupportedOperationException("没有实现该功能");
+        throw new UnsupportedOperationException(I18nMessageUtil.get("i18n.no_implemented_feature.af80"));
     }
 
     /**
@@ -79,7 +80,7 @@ public interface IStorageService extends AutoCloseable, IMode {
      * @throws Exception 异常
      */
     default File recoverDb() throws Exception {
-        throw new UnsupportedOperationException("没有实现该功能");
+        throw new UnsupportedOperationException(I18nMessageUtil.get("i18n.no_implemented_feature.af80"));
     }
 
     /**
@@ -89,7 +90,7 @@ public interface IStorageService extends AutoCloseable, IMode {
      * @throws Exception 异常
      */
     default String deleteDbFiles() throws Exception {
-        throw new UnsupportedOperationException("没有实现该功能");
+        throw new UnsupportedOperationException(I18nMessageUtil.get("i18n.no_implemented_feature.af80"));
     }
 
     /**
@@ -98,7 +99,7 @@ public interface IStorageService extends AutoCloseable, IMode {
      * @param sqlFile sql 文件
      */
     default void transformSql(File sqlFile) {
-        throw new UnsupportedOperationException("没有实现该功能");
+        throw new UnsupportedOperationException(I18nMessageUtil.get("i18n.no_implemented_feature.af80"));
     }
 
     /**
@@ -112,7 +113,7 @@ public interface IStorageService extends AutoCloseable, IMode {
         if (recoverSqlFile == null) {
             return;
         }
-        throw new UnsupportedOperationException("没有实现该功能");
+        throw new UnsupportedOperationException(I18nMessageUtil.get("i18n.no_implemented_feature.af80"));
     }
 
     /**
@@ -124,7 +125,7 @@ public interface IStorageService extends AutoCloseable, IMode {
      * @throws SQLException sql 异常
      */
     default void alterUser(String oldUes, String newUse, String newPwd) throws SQLException {
-        throw new UnsupportedOperationException("没有实现该功能");
+        throw new UnsupportedOperationException(I18nMessageUtil.get("i18n.no_implemented_feature.af80"));
     }
 
     /**
@@ -138,7 +139,7 @@ public interface IStorageService extends AutoCloseable, IMode {
      * @throws Exception 异常
      */
     default void backupSql(String url, String user, String pass, String backupSqlPath, List<String> tableName) throws Exception {
-        throw new UnsupportedOperationException("没有实现该功能");
+        throw new UnsupportedOperationException(I18nMessageUtil.get("i18n.no_implemented_feature.af80"));
     }
 
     /**

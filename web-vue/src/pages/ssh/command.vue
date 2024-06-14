@@ -6,7 +6,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="ssh-command-list"
-      :empty-description="$tl('p.noSshScriptCommand')"
+      :empty-description="$t('pages.ssh.command.14c9322f')"
       :data-source="commandList"
       :columns="columns"
       size="middle"
@@ -24,28 +24,30 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$tl('p.searchCommand')"
+            :placeholder="$t('pages.ssh.command.b9a2e945')"
             class="search-input-item"
             @press-enter="getCommandData"
           />
           <a-input
             v-model:value="listQuery['%desc%']"
-            :placeholder="$tl('p.description')"
+            :placeholder="$t('pages.ssh.command.42e3c32a')"
             class="search-input-item"
             @press-enter="getCommandData"
           />
           <a-input
             v-model:value="listQuery['%autoExecCron%']"
-            :placeholder="$tl('c.schedulingExecution')"
+            :placeholder="$t('pages.ssh.command.8af26515')"
             class="search-input-item"
             @press-enter="getCommandData"
           />
-          <a-tooltip :title="$tl('p.quickBackToFirstPage')">
-            <a-button type="primary" :loading="loading" @click="getCommandData">{{ $tl('p.search') }}</a-button>
+          <a-tooltip :title="$t('pages.ssh.command.cb5a8131')">
+            <a-button type="primary" :loading="loading" @click="getCommandData">{{
+              $t('pages.ssh.command.53c2763c')
+            }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="createCommand">{{ $tl('p.addNew') }}</a-button>
+          <a-button type="primary" @click="createCommand">{{ $t('pages.ssh.command.e141baa9') }}</a-button>
           <a-dropdown>
-            <a @click="(e) => e.preventDefault()"> {{ $tl('p.more') }} <DownOutlined /> </a>
+            <a @click="(e) => e.preventDefault()"> {{ $t('pages.ssh.command.6e071067') }} <DownOutlined /> </a>
             <template #overlay>
               <a-menu>
                 <a-menu-item>
@@ -53,7 +55,7 @@
                     type="primary"
                     :disabled="!tableSelections || !tableSelections.length"
                     @click="syncToWorkspaceShow"
-                    >{{ $tl('p.workspaceSync') }}</a-button
+                    >{{ $t('pages.ssh.command.ff284043') }}</a-button
                   >
                 </a-menu-item>
               </a-menu>
@@ -64,17 +66,17 @@
       <template #tableHelp>
         <a-tooltip>
           <template #title>
-            <div>{{ $tl('p.commandTemplateDescription') }}</div>
+            <div>{{ $t('pages.ssh.command.fec2ae8a') }}</div>
 
             <div>
               <ul>
-                <li>{{ $tl('p.supportWorkspaceEnv') }}</li>
-                <li>{{ $tl('p.execCommandReplace') }}</li>
+                <li>{{ $t('pages.ssh.command.c963a5d') }}</li>
+                <li>{{ $t('pages.ssh.command.7aafc560') }}</li>
                 <li>
-                  {{ $tl('p.execCommandInclude') }}<b>#disabled-template-auto-evn</b>
-                  {{ $tl('p.cancelAutoLoadEnv') }}({{ $tl('p.noteNoSpace') }})
+                  {{ $t('pages.ssh.command.69f8dae') }}<b>#disabled-template-auto-evn</b>
+                  {{ $t('pages.ssh.command.cdfa84c1') }}({{ $t('pages.ssh.command.908d46ad') }})
                 </li>
-                <li>{{ $tl('p.commandFilePath') }}</li>
+                <li>{{ $t('pages.ssh.command.e62fd265') }}</li>
               </ul>
             </div>
           </template>
@@ -95,10 +97,18 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleExecute(record)">{{ $tl('c.execution') }}</a-button>
-            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('p.edit') }}</a-button>
-            <a-button size="small" type="primary" @click="handleTrigger(record)">{{ $tl('c.trigger') }}</a-button>
-            <a-button size="small" type="primary" danger @click="handleDelete(record)">{{ $tl('p.delete') }}</a-button>
+            <a-button size="small" type="primary" @click="handleExecute(record)">{{
+              $t('pages.ssh.command.178cb122')
+            }}</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{
+              $t('pages.ssh.command.64603c01')
+            }}</a-button>
+            <a-button size="small" type="primary" @click="handleTrigger(record)">{{
+              $t('pages.ssh.command.e81c0988')
+            }}</a-button>
+            <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
+              $t('pages.ssh.command.dd20d11c')
+            }}</a-button>
           </a-space>
         </template>
       </template>
@@ -108,23 +118,23 @@
       v-model:open="editCommandVisible"
       destroy-on-close
       width="80vw"
-      :title="$tl('p.editCommand')"
+      :title="$t('pages.ssh.command.b9ce0833')"
       :mask-closable="false"
       :confirm-loading="confirmLoading"
       @ok="handleEditCommandOk"
     >
       <a-form ref="editCommandForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
-        <a-form-item :label="$tl('c.commandName')" name="name">
-          <a-input v-model:value="temp.name" :max-length="100" :placeholder="$tl('c.commandName')" />
+        <a-form-item :label="$t('pages.ssh.command.ee8d727b')" name="name">
+          <a-input v-model:value="temp.name" :max-length="100" :placeholder="$t('pages.ssh.command.ee8d727b')" />
         </a-form-item>
 
-        <a-form-item name="command" :help="$tl('p.scriptPathAndExecMethod')">
+        <a-form-item name="command" :help="$t('pages.ssh.command.daf64952')">
           <template #label>
             <a-tooltip>
-              {{ $tl('p.commandContent') }}
+              {{ $t('pages.ssh.command.f0d88095') }}
               <template #title>
                 <ul>
-                  <li>{{ $tl('p.canReferenceWorkspaceEnv') }}</li>
+                  <li>{{ $t('pages.ssh.command.758e1c5d') }}</li>
                 </ul>
               </template>
               <QuestionCircleOutlined v-show="!temp.id" />
@@ -139,7 +149,7 @@
             ></code-editor>
           </a-form-item-rest>
         </a-form-item>
-        <a-form-item :label="$tl('c.sshNode')">
+        <a-form-item :label="$t('pages.ssh.command.9266c899')">
           <a-select
             v-model:value="chooseSsh"
             show-search
@@ -153,7 +163,7 @@
                 )
               }
             "
-            :placeholder="$tl('p.selectSshNode')"
+            :placeholder="$t('pages.ssh.command.728b3e2f')"
             mode="multiple"
           >
             <a-select-option v-for="item in sshList" :key="item.id" :value="item.id">
@@ -162,7 +172,7 @@
           </a-select>
         </a-form-item>
 
-        <a-form-item :label="$tl('p.defaultParam')">
+        <a-form-item :label="$t('pages.ssh.command.74765338')">
           <a-form-item-rest>
             <a-space direction="vertical" style="width: 100%">
               <a-row v-for="(item, index) in commandParams" :key="item.key">
@@ -170,13 +180,17 @@
                   <a-space direction="vertical" style="width: 100%">
                     <a-input
                       v-model:value="item.desc"
-                      :addon-before="$tl('p.paramDescription', { index: index + 1 })"
-                      :placeholder="`参数描述,${$tl('p.paramDescriptionNoEffect')},仅是用于提示参数的含义`"
+                      :addon-before="$t('pages.ssh.command.b31dbb3', { index: index + 1 })"
+                      :placeholder="
+                        $t('pages.ssh.command.4676a7bb', {
+                          slot1: $t('pages.ssh.command.6d8e653f')
+                        })
+                      "
                     />
                     <a-input
                       v-model:value="item.value"
-                      :addon-before="$tl('p.paramValue', { index: index + 1 })"
-                      :placeholder="`${$tl('c.paramValue')}${$tl('p.addNewDefaultParamNote')}`"
+                      :addon-before="$t('pages.ssh.command.5b6ebe20', { index: index + 1 })"
+                      :placeholder="`${$t('pages.ssh.command.20e8812c')}${$t('pages.ssh.command.fcb85bf9')}`"
                     />
                   </a-space>
                 </a-col>
@@ -189,26 +203,28 @@
                   </a-row>
                 </a-col>
               </a-row>
-              <a-button type="primary" @click="() => commandParams.push({})">{{ $tl('c.newParam') }}</a-button>
+              <a-button type="primary" @click="() => commandParams.push({})">{{
+                $t('pages.ssh.command.3ab8c616')
+              }}</a-button>
             </a-space>
           </a-form-item-rest>
         </a-form-item>
-        <a-form-item :label="$tl('p.autoExec')" name="autoExecCron">
+        <a-form-item :label="$t('pages.ssh.command.4c297ada')" name="autoExecCron">
           <a-auto-complete
             v-model:value="temp.autoExecCron"
-            :placeholder="$tl('p.cronExpression')"
+            :placeholder="$t('pages.ssh.command.50fcce7a')"
             :options="CRON_DATA_SOURCE"
           >
             <template #option="item"> {{ item.title }} {{ item.value }} </template>
           </a-auto-complete>
         </a-form-item>
-        <a-form-item :label="$tl('c.commandDescription')" name="desc">
+        <a-form-item :label="$t('pages.ssh.command.45fc5edb')" name="desc">
           <a-textarea
             v-model:value="temp.desc"
             :max-length="255"
             :rows="3"
             style="resize: none"
-            :placeholder="$tl('p.commandDetail')"
+            :placeholder="$t('pages.ssh.command.e83e719b')"
           />
         </a-form-item>
       </a-form>
@@ -218,17 +234,17 @@
       v-model:open="executeCommandVisible"
       destroy-on-close
       width="600px"
-      :title="$tl('p.executeCommand')"
+      :title="$t('pages.ssh.command.3e1a05c7')"
       :mask-closable="false"
       :confirm-loading="confirmLoading"
       @ok="handleExecuteCommandOk"
     >
       <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$tl('c.commandName')" name="name">
-          <a-input v-model:value="temp.name" :disabled="true" :placeholder="$tl('c.commandName')" />
+        <a-form-item :label="$t('pages.ssh.command.ee8d727b')" name="name">
+          <a-input v-model:value="temp.name" :disabled="true" :placeholder="$t('pages.ssh.command.ee8d727b')" />
         </a-form-item>
 
-        <a-form-item :label="$tl('c.sshNode')" required>
+        <a-form-item :label="$t('pages.ssh.command.9266c899')" required>
           <a-select
             v-model:value="chooseSsh"
             show-search
@@ -243,7 +259,7 @@
               }
             "
             mode="multiple"
-            :placeholder="$tl('p.selectSshNode_1')"
+            :placeholder="$t('pages.ssh.command.fe590413')"
           >
             <a-select-option v-for="item in sshList" :key="item.id" :value="item.id">
               {{ item.name }}
@@ -251,14 +267,19 @@
           </a-select>
         </a-form-item>
 
-        <a-form-item :label="$tl('p.commandParam')" :help="`${commandParams.length ? $tl('p.paramInstruction') : ''}`">
+        <a-form-item
+          :label="$t('pages.ssh.command.902dc6b3')"
+          :help="`${commandParams.length ? $t('pages.ssh.command.1d6f7ac3') : ''}`"
+        >
           <a-space direction="vertical" style="width: 100%">
             <a-row v-for="(item, index) in commandParams" :key="item.key">
               <a-col :span="22">
                 <a-input
                   v-model:value="item.value"
-                  :addon-before="`${$tl('p.paramName')}${index + 1}${$tl('p.paramValue_1')}`"
-                  :placeholder="`${$tl('p.paramName')}${$tl('p.paramValue_1')} ${item.desc ? ',' + item.desc : ''}`"
+                  :addon-before="`${$t('pages.ssh.command.2e7b13a9')}${index + 1}${$t('pages.ssh.command.9479b219')}`"
+                  :placeholder="`${$t('pages.ssh.command.2e7b13a9')}${$t('pages.ssh.command.9479b219')} ${
+                    item.desc ? ',' + item.desc : ''
+                  }`"
                 >
                   <template #suffix>
                     <a-tooltip v-if="item.desc" :title="item.desc">
@@ -276,7 +297,9 @@
                 </a-row>
               </a-col>
             </a-row>
-            <a-button type="primary" @click="() => commandParams.push({})">{{ $tl('c.newParam') }}</a-button>
+            <a-button type="primary" @click="() => commandParams.push({})">{{
+              $t('pages.ssh.command.3ab8c616')
+            }}</a-button>
           </a-space>
         </a-form-item>
       </a-form>
@@ -286,7 +309,7 @@
       v-model:open="logVisible"
       destroy-on-close
       :width="'80vw'"
-      :title="$tl('p.executeLog')"
+      :title="$t('pages.ssh.command.c6e39f6f')"
       :footer="null"
       :mask-closable="false"
     >
@@ -297,25 +320,25 @@
       v-model:open="syncToWorkspaceVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$tl('p.syncToOtherWorkspaces')"
+      :title="$t('pages.ssh.command.d3b55aa0')"
       :mask-closable="false"
       @ok="handleSyncToWorkspace"
     >
-      <a-alert :message="$tl('c.tips')" type="warning" show-icon>
+      <a-alert :message="$t('pages.ssh.command.43bd326')" type="warning" show-icon>
         <template #description>
           <ul>
             <li>
-              {{ $tl('p.syncMechanism') }}<b>{{ $tl('p.scriptName') }}</b
-              >{{ $tl('p.confirmSameScript') }}
+              {{ $t('pages.ssh.command.b74cd503') }}<b>{{ $t('pages.ssh.command.db9bba81') }}</b
+              >{{ $t('pages.ssh.command.51c8f417') }}
             </li>
-            <li>{{ $tl('p.createNewScriptIfNotExist') }}</li>
-            <li>{{ $tl('p.syncScriptInfoIfExists') }}</li>
+            <li>{{ $t('pages.ssh.command.7a9fb76a') }}</li>
+            <li>{{ $t('pages.ssh.command.ddda79c1') }}</li>
           </ul>
         </template>
       </a-alert>
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
-        <a-form-item :label="$tl('p.selectWorkspace')" name="workspaceId">
+        <a-form-item :label="$t('pages.ssh.command.7ef9d8fb')" name="workspaceId">
           <a-select
             v-model:value="temp.workspaceId"
             show-search
@@ -329,7 +352,7 @@
                 )
               }
             "
-            :placeholder="$tl('c.selectWorkspace')"
+            :placeholder="$t('pages.ssh.command.3a321a02')"
           >
             <a-select-option v-for="item in workspaceList" :key="item.id" :disabled="getWorkspaceId() === item.id">{{
               item.name
@@ -343,7 +366,7 @@
     <a-modal
       v-model:open="triggerVisible"
       destroy-on-close
-      :title="$tl('c.trigger')"
+      :title="$t('pages.ssh.command.e81c0988')"
       width="50%"
       :footer="null"
       :mask-closable="false"
@@ -351,30 +374,38 @@
       <a-form ref="editTriggerForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
           <template #rightExtra>
-            <a-tooltip :title="$tl('p.resetTriggerToken')">
-              <a-button type="primary" size="small" @click="resetTrigger">{{ $tl('p.reset') }}</a-button>
+            <a-tooltip :title="$t('pages.ssh.command.e172ddd8')">
+              <a-button type="primary" size="small" @click="resetTrigger">{{
+                $t('pages.ssh.command.da1d2343')
+              }}</a-button>
             </a-tooltip>
           </template>
-          <a-tab-pane key="1" :tab="$tl('c.execution')">
+          <a-tab-pane key="1" :tab="$t('pages.ssh.command.178cb122')">
             <a-space direction="vertical" style="width: 100%">
-              <a-alert :message="$tl('c.tips')" type="warning">
+              <a-alert :message="$t('pages.ssh.command.43bd326')" type="warning">
                 <template #description>
                   <ul>
-                    <li>{{ $tl('p.triggerUrlInfo') }}</li>
-                    <li>{{ $tl('p.regenerateTriggerUrl') }}</li>
-                    <li>{{ $tl('p.batchTriggerParams') }}</li>
-                    <li>{{ $tl('p.parseParamsAsEnv') }}</li>
+                    <li>{{ $t('pages.ssh.command.599402f8') }}</li>
+                    <li>{{ $t('pages.ssh.command.390d25c1') }}</li>
+                    <li>{{ $t('pages.ssh.command.789c025c') }}</li>
+                    <li>{{ $t('pages.ssh.command.9291c817') }}</li>
                   </ul>
                 </template>
               </a-alert>
-              <a-alert type="info" :message="`${$tl('p.singleTriggerUrl')}(${$tl('c.copy')})`">
+              <a-alert
+                type="info"
+                :message="`${$t('pages.ssh.command.627ba85c')}(${$t('pages.ssh.command.2dad29ac')})`"
+              >
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.triggerUrl }">
                     <a-tag>GET</a-tag> <span>{{ temp.triggerUrl }} </span>
                   </a-typography-paragraph>
                 </template>
               </a-alert>
-              <a-alert type="info" :message="`${$tl('p.batchTriggerUrls')}(${$tl('c.copy')})`">
+              <a-alert
+                type="info"
+                :message="`${$t('pages.ssh.command.c4994a4e')}(${$t('pages.ssh.command.2dad29ac')})`"
+              >
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchTriggerUrl }">
                     <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
@@ -388,7 +419,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import { deleteCommand, editCommand, executeBatch, getCommandList, syncToWorkspace, getTriggerUrl } from '@/api/command'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
@@ -420,25 +450,25 @@ export default {
       },
       columns: [
         {
-          title: this.$tl('c.commandName'),
+          title: this.$t('pages.ssh.command.ee8d727b'),
           dataIndex: 'name',
           ellipsis: true,
           width: 200
         },
         {
-          title: this.$tl('c.commandDescription'),
+          title: this.$t('pages.ssh.command.45fc5edb'),
           dataIndex: 'desc',
           ellipsis: true,
           width: 250
         },
         {
-          title: this.$tl('c.schedulingExecution'),
+          title: this.$t('pages.ssh.command.8af26515'),
           dataIndex: 'autoExecCron',
           ellipsis: true,
           width: 120
         },
         {
-          title: this.$tl('p.createTime'),
+          title: this.$t('pages.ssh.command.f5b90169'),
           dataIndex: 'createTimeMillis',
           ellipsis: true,
           sorter: true,
@@ -448,7 +478,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$tl('p.updateTime'),
+          title: this.$t('pages.ssh.command.3d55d8de'),
           dataIndex: 'modifyTimeMillis',
           width: '170px',
           ellipsis: true,
@@ -458,13 +488,13 @@ export default {
           }
         },
         {
-          title: this.$tl('p.lastOperator'),
+          title: this.$t('pages.ssh.command.358d534a'),
           dataIndex: 'modifyUser',
           width: 120,
           ellipsis: true
         },
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.ssh.command.3bb962bf'),
           dataIndex: 'operation',
           align: 'center',
 
@@ -472,6 +502,7 @@ export default {
           width: '240px'
         }
       ],
+
       tableSelections: [],
       syncToWorkspaceVisible: false,
       workspaceList: [],
@@ -501,9 +532,6 @@ export default {
     //this.getAllSSHList();
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.ssh.command.${key}`, ...args)
-    },
     // 编辑命令信息
     handleEditCommandOk() {
       this.$refs['editCommandForm'].validate().then(() => {
@@ -511,7 +539,7 @@ export default {
           for (let i = 0; i < this.commandParams.length; i++) {
             if (!this.commandParams[i].desc) {
               $notification.error({
-                message: this.$tl('p.fillParamDesc') + (i + 1) + this.$tl('p.paramDesc')
+                message: this.$t('pages.ssh.command.60a5d42c') + (i + 1) + this.$t('pages.ssh.command.7bedc1fb')
               })
               return false
             }
@@ -594,11 +622,11 @@ export default {
     //  删除命令
     handleDelete(row) {
       $confirm({
-        title: this.$tl('p.systemPrompt'),
+        title: this.$t('pages.ssh.command.b22d55a0'),
         zIndex: 1009,
-        content: this.$tl('p.confirmDeleteCommand') + row.name + this.$tl('p.deleteCommand'),
-        okText: this.$tl('p.confirm'),
-        cancelText: this.$tl('p.cancel'),
+        content: this.$t('pages.ssh.command.bddce4ff') + row.name + this.$t('pages.ssh.command.2d94a438'),
+        okText: this.$t('pages.ssh.command.e8e9db25'),
+        cancelText: this.$t('pages.ssh.command.b12468e9'),
         onOk: () => {
           return deleteCommand(row.id).then((res) => {
             if (res.code === 200) {
@@ -621,7 +649,7 @@ export default {
     handleExecuteCommandOk() {
       if (!this.chooseSsh || this.chooseSsh.length <= 0) {
         $notification.error({
-          message: this.$tl('p.selectExecuteNode')
+          message: this.$t('pages.ssh.command.7872c5ad')
         })
         return false
       }
@@ -668,7 +696,7 @@ export default {
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
         $notification.warn({
-          message: this.$tl('c.selectWorkspace')
+          message: this.$t('pages.ssh.command.3a321a02')
         })
         return false
       }
@@ -728,7 +756,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .config-editor {
   overflow-y: scroll;

@@ -5,7 +5,7 @@
       <template #before>
         <a-space>
           <a-button size="small" :disabled="project.status" :loading="optButtonLoading" type="primary" @click="start">{{
-            $tl('p.start')
+            $t('pages.node.node-layout.project.project-console.15f9c981')
           }}</a-button>
           <a-button
             size="small"
@@ -14,7 +14,7 @@
             type="primary"
             danger
             @click="restart"
-            >{{ $tl('p.restart') }}</a-button
+            >{{ $t('pages.node.node-layout.project.project-console.80c35a66') }}</a-button
           >
           <a-button
             size="small"
@@ -23,35 +23,41 @@
             type="primary"
             danger
             @click="stop"
-            >{{ $tl('p.stop') }}</a-button
+            >{{ $t('pages.node.node-layout.project.project-console.5c03f4ad') }}</a-button
           >
           <template v-if="project.runMode === 'Dsl'">
             <template v-if="canReload">
-              <a-popover :title="$tl('p.lastReloadResult')">
+              <a-popover :title="$t('pages.node.node-layout.project.project-console.376f2896')">
                 <template #content>
                   <template v-if="project.lastReloadResult">
                     <p>
-                      <a-tag v-if="project.lastReloadResult.success" color="green">{{ $tl('c.status') }}</a-tag>
-                      <a-tag v-else color="green">{{ $tl('c.status') }}</a-tag>
+                      <a-tag v-if="project.lastReloadResult.success" color="green">{{
+                        $t('pages.node.node-layout.project.project-console.6e06fe4f')
+                      }}</a-tag>
+                      <a-tag v-else color="green">{{
+                        $t('pages.node.node-layout.project.project-console.6e06fe4f')
+                      }}</a-tag>
                     </p>
                     <p v-for="(item, index) in project.lastReloadResult.msgs" :key="index">
                       {{ item }}
                     </p>
                   </template>
-                  <template v-else>{{ $tl('p.notExecutedReload') }}</template>
+                  <template v-else>{{ $t('pages.node.node-layout.project.project-console.fdc695b2') }}</template>
                 </template>
                 <a-button size="small" :loading="optButtonLoading" type="primary" @click="reload">{{
-                  $tl('c.reload')
+                  $t('pages.node.node-layout.project.project-console.b7be5506')
                 }}</a-button>
               </a-popover>
             </template>
             <template v-else>
               <a-button size="small" :disabled="true" :loading="optButtonLoading" type="primary">{{
-                $tl('c.reload')
+                $t('pages.node.node-layout.project.project-console.b7be5506')
               }}</a-button>
             </template>
           </template>
-          <a-button size="small" type="primary" @click="goFile">{{ $tl('p.fileManagement') }}</a-button>
+          <a-button size="small" type="primary" @click="goFile">{{
+            $t('pages.node.node-layout.project.project-console.502f94')
+          }}</a-button>
           <a-dropdown v-if="project.dslProcessInfo">
             <template #overlay>
               <a-menu>
@@ -60,7 +66,9 @@
                     <a-tag>
                       {{ item.process }}
                     </a-tag>
-                    <template v-if="item.type === 'file'">{{ $tl('p.projectFile') }}{{ item.scriptId }} </template>
+                    <template v-if="item.type === 'file'"
+                      >{{ $t('pages.node.node-layout.project.project-console.dcbad93b') }}{{ item.scriptId }}
+                    </template>
                     <template v-else-if="item.type === 'script'">
                       <a-button
                         type="link"
@@ -72,7 +80,7 @@
                           }
                         "
                       >
-                        <EditOutlined /> {{ $tl('p.nodeScript') }}
+                        <EditOutlined /> {{ $t('pages.node.node-layout.project.project-console.e0417750') }}
                       </a-button>
                     </template>
                   </template>
@@ -89,7 +97,9 @@
                 </a-menu-item>
               </a-menu>
             </template>
-            <a-button size="small" type="primary"> {{ $tl('p.associatedScript') }} <DownOutlined /> </a-button>
+            <a-button size="small" type="primary">
+              {{ $t('pages.node.node-layout.project.project-console.5453aa0b') }} <DownOutlined />
+            </a-button>
           </a-dropdown>
           <a-button
             size="small"
@@ -101,7 +111,7 @@
             "
           >
             <!-- <a-tag> -->
-            {{ $tl('p.logSize') }}: {{ project.logSize || '-' }}
+            {{ $t('pages.node.node-layout.project.project-console.1246c314') }}: {{ project.logSize || '-' }}
             <!-- 更多 -->
             <FullscreenOutlined />
             <!-- </a-tag> -->
@@ -115,7 +125,7 @@
     <a-modal
       v-model:open="lobbackVisible"
       destroy-on-close
-      :title="$tl('p.logBackupList')"
+      :title="$t('pages.node.node-layout.project.project-console.111eece')"
       width="850px"
       :footer="null"
       :mask-closable="false"
@@ -135,7 +145,6 @@
     ></ScriptEdit>
   </div>
 </template>
-
 <script>
 import { getProjectData, getProjectLogSize } from '@/api/node-project'
 import { getWebSocketUrl } from '@/api/config'
@@ -185,7 +194,9 @@ export default {
     socketUrl() {
       return getWebSocketUrl(
         '/socket/console',
-        `userId=${this.getLongTermToken()}&id=${this.id}&nodeId=${this.nodeId}&type=console&workspaceId=${this.getWorkspaceId()}`
+        `userId=${this.getLongTermToken()}&id=${this.id}&nodeId=${
+          this.nodeId
+        }&type=console&workspaceId=${this.getWorkspaceId()}`
       )
     }
   },
@@ -201,9 +212,6 @@ export default {
     this.close()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.nodeLayout.project.projectConsole.${key}`, ...args)
-    },
     close() {
       this.socket?.close()
 
@@ -242,14 +250,16 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: `web socket ${this.$tl('p.error')},${this.$tl('p.checkWsProxy')}`
+          message: `web socket ${this.$t('pages.node.node-layout.project.project-console.d75d207f')},${this.$t(
+            'pages.node.node-layout.project.project-console.763330b'
+          )}`
         })
         clearInterval(this.heart)
       }
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
-        $message.warning(this.$tl('p.sessionClosed'))
+        $message.warning(this.$t('pages.node.node-layout.project.project-console.8a2aae09'))
         clearInterval(this.heart)
       }
       this.socket.onmessage = (msg) => {
@@ -290,8 +300,14 @@ export default {
                   this.$refs.logView.appendLine(element)
                 })
               }
-              res.data.ports && this.$refs.logView.appendLine(this.$tl('p.port') + res.data.ports)
-              res.data.pids && this.$refs.logView.appendLine(this.$tl('p.processId') + res.data.pids.join(','))
+              res.data.ports &&
+                this.$refs.logView.appendLine(
+                  this.$t('pages.node.node-layout.project.project-console.a6c4bfd7') + res.data.ports
+                )
+              res.data.pids &&
+                this.$refs.logView.appendLine(
+                  this.$t('pages.node.node-layout.project.project-console.3cf2b4f7') + res.data.pids.join(',')
+                )
             }
             this.$refs.logView.appendLine(res.op + ' ' + res.msg)
             return
@@ -346,11 +362,11 @@ export default {
     // 重启
     restart() {
       $confirm({
-        title: this.$tl('c.systemMessage'),
+        title: this.$t('pages.node.node-layout.project.project-console.1da61c06'),
         zIndex: 1009,
-        content: this.$tl('p.confirmRestart'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.node.node-layout.project.project-console.fb372d35'),
+        okText: this.$t('pages.node.node-layout.project.project-console.7da4a591'),
+        cancelText: this.$t('pages.node.node-layout.project.project-console.43105e21'),
         onOk: () => {
           this.sendMsg('restart')
         }
@@ -359,11 +375,11 @@ export default {
     // 停止
     stop() {
       $confirm({
-        title: this.$tl('c.systemMessage'),
+        title: this.$t('pages.node.node-layout.project.project-console.1da61c06'),
         zIndex: 1009,
-        content: this.$tl('p.confirmStop'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.node.node-layout.project.project-console.2e391eba'),
+        okText: this.$t('pages.node.node-layout.project.project-console.7da4a591'),
+        cancelText: this.$t('pages.node.node-layout.project.project-console.43105e21'),
         onOk: () => {
           this.sendMsg('stop')
         }

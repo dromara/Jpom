@@ -3,7 +3,12 @@
     <a-layout-sider v-model:collapsed="collapsed" :theme="menuTheme" :trigger="null" collapsible>
       <a-layout-sider v-model:collapsed="collapsed" class="sider" :theme="menuTheme" :trigger="null" collapsible>
         <div class="sider-content">
-          <a-tooltip placement="right" :title="$tl('projectMaintenance.clickToCollapseLeftMenu')">
+          <a-tooltip placement="right">
+            <template #title>
+              {{ subTitle }}
+              <div>&nbsp;</div>
+              <div>{{ $t('pages.layout.default-index.f29dfeb9') }}</div>
+            </template>
             <div
               class="logo"
               :style="`color:${menuTheme === 'light' && theme === 'light' ? '#000' : '#fff'}`"
@@ -72,7 +77,7 @@
     </a-layout>
   </a-layout>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import SideMenu from './side-menu.vue'
 // import UserHeader from "./user-header";
 import ContentTab from './content-tab.vue'
@@ -80,10 +85,9 @@ import { checkSystem, loadingLogo } from '@/api/install'
 import defaultLogo from '@/assets/images/jpom.svg'
 import { useAllMenuStore } from '@/stores/menu2'
 import { UserNotificationType, systemNotification } from '@/api/user/user-notification'
-import { useI18nPage } from '@/i18n/hooks/useI18nPage'
 // import { SpaceSize } from 'ant-design-vue/es/space'
-
-const { $tl } = useI18nPage('pages.layout.defaultIndex')
+import { useI18n } from 'vue-i18n'
+const { t: $t } = useI18n()
 defineProps({
   mode: {
     type: String,
@@ -124,8 +128,7 @@ watch(
       // 登录登录会触发 tab 变化，这里不改变路由缓存。避免重新加载路由触发请求接口
       // 已经由 v-if="menuTabKeyList.length" 实现
       // return
-    }
-    // 获取已被删除的key
+    } // 获取已被删除的key
     oldKeys
       ?.filter((key) => {
         return !newKeys.includes(key)
@@ -141,7 +144,7 @@ watch(
 )
 
 const collapsed = ref(false)
-const subTitle = ref($tl('projectMaintenance.projectOperation'))
+const subTitle = ref($t('pages.layout.default-index.cf628a26'))
 const logoUrl = ref('')
 
 const _appStore = appStore()
@@ -220,7 +223,7 @@ const changeCollapsed = () => {
   _appStore.collapsed(collapsed.value)
 }
 </script>
-<style scoped lang="less">
+<style lang="less" scoped>
 #app-layout {
   min-height: 100vh;
 }
@@ -309,7 +312,6 @@ const changeCollapsed = () => {
   overflow-y: scroll;
 } */
 </style>
-
 <style>
 /* .layout-content { */
 /* margin: 0; */

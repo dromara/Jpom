@@ -20,6 +20,7 @@ import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.exception.AgentException;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.model.BaseDbModel;
@@ -48,7 +49,7 @@ public class NodeScriptExecuteLogServer extends BaseNodeService<NodeScriptExecut
 
     public NodeScriptExecuteLogServer(NodeService nodeService,
                                       WorkspaceService workspaceService) {
-        super(nodeService, workspaceService, "脚本模版日志");
+        super(nodeService, workspaceService, I18nMessageUtil.get("i18n.script_template_log2.6b2c"));
     }
 
     @Override
@@ -83,7 +84,7 @@ public class NodeScriptExecuteLogServer extends BaseNodeService<NodeScriptExecut
 
     @Override
     public List<NodeScriptExecuteLogCacheModel> lonelyDataArray(MachineNodeModel machineNodeModel) {
-        throw new IllegalStateException("不支持的模式，script log");
+        throw new IllegalStateException(I18nMessageUtil.get("i18n.unsupported_mode_with_script_log.6a7a"));
     }
 
     @Override
@@ -100,7 +101,7 @@ public class NodeScriptExecuteLogServer extends BaseNodeService<NodeScriptExecut
     public Collection<String> syncExecuteNodeInc(NodeModel nodeModel) {
         String nodeModelName = nodeModel.getName();
         if (!nodeModel.isOpenStatus()) {
-            log.debug("{} 节点未启用", nodeModelName);
+            log.debug(I18nMessageUtil.get("i18n.node_not_enabled.10ef"), nodeModelName);
             return null;
         }
         try {
@@ -131,8 +132,9 @@ public class NodeScriptExecuteLogServer extends BaseNodeService<NodeScriptExecut
             BaseServerController.resetInfo(UserModel.EMPTY);
             //
             models.forEach(NodeScriptExecuteLogServer.super::upsert);
+            String template = I18nMessageUtil.get("i18n.physical_node_pull_records.99df");
             String format = StrUtil.format(
-                "{} 物理节点拉取到 {} 个执行记录,更新 {} 个执行记录",
+                template,
                 nodeModelName, CollUtil.size(jsonArray),
                 CollUtil.size(models));
             log.debug(format);
@@ -160,7 +162,7 @@ public class NodeScriptExecuteLogServer extends BaseNodeService<NodeScriptExecut
                     }
                     return true;
                 } catch (Exception e) {
-                    log.error("自动清除数据错误 {} {}", executeLogModel.getNodeId(), executeLogModel.getScriptName(), e);
+                    log.error(I18nMessageUtil.get("i18n.auto_clear_data_errors.112f"), executeLogModel.getNodeId(), executeLogModel.getScriptName(), e);
                     return false;
                 }
             });
