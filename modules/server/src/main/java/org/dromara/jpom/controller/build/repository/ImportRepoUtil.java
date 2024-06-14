@@ -177,7 +177,7 @@ public class ImportRepoUtil {
                             entries.set(k, !value.equals(compareValue));
                             break;
                         default:
-                            throw new IllegalStateException("表达式目前仅支持 == 和 != 比较");
+                            throw new IllegalStateException(I18nMessageUtil.get("i18n.supported_comparison_operators_message.6d7a"));
                     }
                 } else {
                     entries.set(k, obj.get(v));

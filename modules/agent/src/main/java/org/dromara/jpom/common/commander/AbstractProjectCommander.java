@@ -291,7 +291,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
                 ThreadUtil.execute(() -> {
                     try {
                         String result = this.webHooks(s, nodeProjectInfoModel, type, other);
-                        Optional.ofNullable(result).ifPresent(s1 -> log.debug("[{}]-{}触发器结果：{}", nodeProjectInfoModel.getId(), type, s1));
+                        Optional.ofNullable(result).ifPresent(s1 -> log.debug(I18nMessageUtil.get("i18n.trigger_result.364e"), nodeProjectInfoModel.getId(), type, s1));
                     } catch (Exception e) {
                         log.error("project webhook", e);
                     }

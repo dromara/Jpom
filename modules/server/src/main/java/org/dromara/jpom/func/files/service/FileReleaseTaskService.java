@@ -379,7 +379,8 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                             double progressPercentage = Math.floor(((float) progressSize / total) * 100);
                             int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
                             if (progressRangeList.add(progressRange)) {
-                                finalLogRecorder.system("上传文件进度:{}/{} {}",
+                                String info = I18nMessageUtil.get("i18n.upload_progress_template.ac3f");
+                                finalLogRecorder.system(info,
                                     FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
                                     NumberUtil.formatPercent(((float) progressSize / total), 0));
                             }

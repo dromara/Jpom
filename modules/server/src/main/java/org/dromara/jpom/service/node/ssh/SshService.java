@@ -254,7 +254,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
                 int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
                 if (progressRangeList.add(progressRange)) {
                     //  total, progressSize
-                    logRecorder.system("上传文件进度:{} {}/{} {} ", desc,
+                    logRecorder.system(I18nMessageUtil.get("i18n.upload_progress_with_units.44ad"), desc,
                         FileUtil.readableFileSize(now), FileUtil.readableFileSize(max),
                         NumberUtil.formatPercent(((float) now / max), 0)
                     );

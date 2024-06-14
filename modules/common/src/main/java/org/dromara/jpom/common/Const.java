@@ -21,7 +21,7 @@ public class Const {
     /**
      * 升级提示语
      */
-    public static final Supplier<String> UPGRADE_MSG = () -> "升级(重启)中大约需要30秒～2分钟左右";
+    public static final Supplier<String> UPGRADE_MSG = () -> I18nMessageUtil.get("i18n.upgrade_duration_message.bab4");
 
     /**
      * 请求 header
