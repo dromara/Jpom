@@ -196,6 +196,7 @@
       :confirm-loading="confirmLoading"
       :title="$t('pages.repository.repository-list.b3885a87')"
       :mask-closable="false"
+      width="60%"
       @ok="handleEditOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">

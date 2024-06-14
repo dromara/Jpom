@@ -22,25 +22,15 @@
           <a-form-item :label="$t('pages.system.assets.machine.free-script.243b7015')" name="path">
             <a-input v-model:value="temp.path" :placeholder="$t('pages.system.assets.machine.free-script.8eec4f88')" />
           </a-form-item>
-          <!-- <a-form-item :wrapper-col="{ span: 14, offset: 2 }">
-            <a-space>
-              <a-button type="primary" danger :disabled="submitAble" @click="onSubmit(true)">保存并重启</a-button>
-            </a-space>
-          </a-form-item> -->
         </a-form>
       </a-col>
       <a-col :span="14">
         <log-view2 ref="logView" height="calc(100vh - 50px - 30px)">
           <template #before>
             <a-space>
-              <a-button
-                type="primary"
-                size="small"
-                :loading="loading"
-                :disabled="!temp.content"
-                @click="onSubmit(false)"
-                >{{ $t('pages.system.assets.machine.free-script.985968bf') }}</a-button
-              >
+              <a-button type="primary" size="small" :loading="loading" :disabled="!temp.content" @click="onSubmit()">{{
+                $t('pages.system.assets.machine.free-script.985968bf')
+              }}</a-button>
               <a-switch
                 v-model:checked="temp.appendTemplate"
                 :checked-children="$t('pages.system.assets.machine.free-script.f18e273b')"
@@ -54,8 +44,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-import codeEditor from '@/components/codeEditor'
-import LogView2 from '@/components/logView/index2'
+import codeEditor from '@/components/codeEditor/index.vue'
+import LogView2 from '@/components/logView/index2.vue'
 import { getWebSocketUrl } from '@/api/config'
 
 import { useI18n } from 'vue-i18n'
@@ -67,13 +57,14 @@ const props = defineProps({
   }
 })
 
-const socket = ref(null)
+const socketRef = ref<WebSocket>()
 const loading = ref(false)
 const logView = ref()
 const userStore_ = userStore()
 const temp = ref({
   appendTemplate: true,
-  content: ''
+  content: '',
+  path: ''
 })
 
 const socketUrl = computed(() => {
@@ -84,8 +75,7 @@ const socketUrl = computed(() => {
 })
 
 const conentScript = () => {
-  socket.vlaue?.close()
-  socket.vlaue = null
+  close()
   const socket_ = new WebSocket(socketUrl.value)
   logView.value.clearLogCache()
   // 连接成功后
@@ -111,7 +101,7 @@ const conentScript = () => {
     $message.warning($t('pages.system.assets.machine.free-script.8a2aae09'))
     // clearInterval(this.heart);
   }
-  socket.value = socket_
+  socketRef.value = socket_
 }
 
 // console.log(socketUrl)
@@ -122,8 +112,9 @@ const onSubmit = () => {
   conentScript()
 }
 const close = () => {
-  socket.vlaue?.close()
-  socket.vlaue = null
+  if (socketRef.value != null) {
+    socketRef.value?.close()
+  }
 }
 
 onMounted(() => {
