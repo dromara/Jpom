@@ -26,8 +26,8 @@ const main = async () => {
   const config = {
     projectPath: process.cwd(),
     globalPath: 'src',
-    includeDir: ['pages'],
-    exts: ['.vue'],
+    includeDir: ['api'],
+    exts: ['.vue', '.ts', '.js'],
     prettier: prettierrCconfig,
     lang: {
       primaryFile: {

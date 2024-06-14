@@ -4682,5 +4682,162 @@
         "dd255b35": "Are you sure you want to close the beta program?"
       }
     }
+  },
+  "api": {
+    "backup-info": {
+      "945bddc": "Full backup",
+      "4e769e75": "Partial backup",
+      "8cefd9a6": "Import backup",
+      "bc583419": "Automatic backup",
+      "fc1391c9": "Processing",
+      "6d865b0a": "Successfully processed",
+      "78bc7266": "Processing failed"
+    },
+    "build-info": {
+      "90b71abe": "Under construction",
+      "47e182a5": "Build completed",
+      "20ce2aae": "Build failed",
+      "e64e695c": "Publishing in progress",
+      "5fe167f7": "Successfully published",
+      "4adb4e9b": "Publishing failed",
+      "2ebf779c": "Cancel Build",
+      "f7ba88b7": "Build Interrupt",
+      "7c974164": "Queue waiting",
+      "7ab6f39e": "Abnormal shutdown",
+      "ea464dbb": "Do not publish",
+      "2341ce30": "Node distribution",
+      "a2c247c4": "project",
+      "a979b939": "Local commands",
+      "913d1c8d": "Docker image",
+      "4139f3b5": "Manual",
+      "44701ced": "trigger",
+      "5bccadd3": "timing",
+      "f6ef2a8": "Manual rollback",
+      "db53bc39": "Local Build",
+      "19d0a75": "Container construction"
+    },
+    "command": {
+      "5b123a0d": "In progress",
+      "f979b457": "end of execution",
+      "2e68c441": "Execution error",
+      "5da3d762": "Session exception",
+      "4139f3b5": "Manual",
+      "dc8de4ff": "automatic",
+      "44701ced": "trigger"
+    },
+    "config": {
+      "80d94c1b": "The internet has deviated! Please try again...:",
+      "e4090b01": "Status code error",
+      "26cb698e": "Prohibit access",
+      "50ec27cf": "Access prohibited, current IP restricts access",
+      "b12a126b": "Prompt information",
+      "f3e23cfc": "Login information expired",
+      "e50dee1a": "Attempting automatic renewal",
+      "a1387e97": "Attempted automatic renewal successfully",
+      "b40257fb": "Attempt to automatically renew failed",
+      "377b243": "After 2 seconds, it will automatically redirect to the login page"
+    },
+    "dispatch": {
+      "83fd11a1": "Do nothing",
+      "e77cefce": "Concurrent execution",
+      "c1710178": "Complete sequential execution (if there is an execution failure, the current execution will end)",
+      "54d3f1f5": "Sequential execution (will continue if execution fails)",
+      "865550b4": "Execute restart",
+      "afc66cc9": "Undistributed",
+      "a7e33987": "Distribution in progress",
+      "cce13f66": "Distribution successful",
+      "d9db160a": "Distribution failed",
+      "aab64cfb": "System Undistribution",
+      "9622bffb": "Prepare for distribution",
+      "5b773403": "Manually cancel distribution",
+      "f44cbbb4": "Distribution ended",
+      "fa14a52c": "Cancel distribution",
+      "17e12f0a": "Manual upload",
+      "5b364aef": "Remote download",
+      "3e0a458": "Build trigger",
+      "29329b03": "Building products",
+      "d0afc180": "Static files",
+      "ec4380bb": "File Center"
+    },
+    "docker-swarm": {
+      "d84cdb52": "New Status",
+      "f7d829eb": "Pending processing",
+      "8192b104": "Allocated",
+      "fc1391c9": "Processing",
+      "bda03d7d": "Preparing",
+      "2a21d3d2": "prepare",
+      "7487690f": "Start executing tasks",
+      "942d3df3": "During task execution",
+      "c1d43085": "Execution successful",
+      "24540de": "cease",
+      "d4ee19e9": "Execution failed",
+      "8582af3f": "refuse",
+      "65fcbd09": "remove",
+      "e99ab4ea": "Lost contact"
+    },
+    "file-manager": {
+      "file-storage": {
+        "ae09d79d": "upload",
+        "fe7ede8b": "structure",
+        "65b21404": "download",
+        "481e8a05": "certificate",
+        "d919f7c7": "Downloading",
+        "b46a531a": "Download successful",
+        "d43541fc": "Download exception"
+      },
+      "release-task-log": {
+        "4430873a": "Waiting to start",
+        "bfb17443": "In progress",
+        "a3ef7878": "Task Ended",
+        "4adb4e9b": "Publishing failed",
+        "8e26504a": "Cancel task",
+        "e076d90b": "node"
+      }
+    },
+    "monitor": {
+      "ca3e5e1b": "DingTalk",
+      "c654b275": "mailbox",
+      "6dcc4f03": "WeCom"
+    },
+    "node-other": {
+      "4139f3b5": "Manual",
+      "dc8de4ff": "automatic",
+      "44701ced": "trigger"
+    },
+    "node-project": {
+      "817ed490": "Custom script projects (Python, Nodejs, Go, Interface Exploration, ES) [Recommended]",
+      "ba1922ad": "Java 项目（java -classpath）",
+      "575da0af": "Java 项目（java -jar xxx）",
+      "1470f80e": "Java 项目（java -Djava.ext.dirs=lib -cp conf:run.jar $MAIN_CLASS）",
+      "9344737c": "Static file projects (front-end, logs, etc.)",
+      "442c1685": "Soft chain project (similar to files that use relevant paths for project replicas)",
+      "8117f976": "Java project (Java jar Springboot war) [not recommended]"
+    },
+    "node-stat": {
+      "b2fe8225": "CPU usage",
+      "f503ab56": "Disk occupancy",
+      "f892bef6": "Actual memory usage",
+      "9b6411f6": "Virtual memory usage",
+      "93a9742d": "Swap memory usage",
+      "9ffc4b4d": "receive",
+      "c60e4ac2": "send",
+      "bd96d908": "Network latency"
+    },
+    "server-script": {
+      "4139f3b5": "Manual",
+      "dc8de4ff": "automatic",
+      "44701ced": "trigger",
+      "a1e86c58": "Build Event"
+    },
+    "user": {
+      "user-login-log": {
+        "a1d02c3e": "Normal login",
+        "e5849544": "Password error",
+        "2d6b6d8f": "Account locked",
+        "d08efdf4": "automatic renewal ",
+        "227abc8e": "Account disabled",
+        "521c4ec2": "Login successful, MFA verification required"
+      }
+    }
   }
 }

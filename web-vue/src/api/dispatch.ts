@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 ///
 /// Copyright (c) 2019 Of Him Code Technology Studio
 /// Jpom is licensed under Mulan PSL v2.
@@ -276,40 +277,40 @@ export function saveDispatchProjectConfig(data) {
 }
 
 export const afterOptList = [
-  { title: '不做任何操作', value: 0 },
-  { title: '并发执行', value: 1 },
-  { title: '完整顺序执行(有执行失败将结束本次)', value: 2 },
-  { title: '顺序执行(有执行失败将继续)', value: 3 }
+  { title: t('api.dispatch.83fd11a1'), value: 0 },
+  { title: t('api.dispatch.e77cefce'), value: 1 },
+  { title: t('api.dispatch.c1710178'), value: 2 },
+  { title: t('api.dispatch.54d3f1f5'), value: 3 }
 ]
 
 export const afterOptListSimple = [
-  { title: '不做任何操作', value: 0 },
-  { title: '执行重启', value: 1 }
+  { title: t('api.dispatch.83fd11a1'), value: 0 },
+  { title: t('api.dispatch.865550b4'), value: 1 }
 ]
 
 export const dispatchStatusMap = {
-  0: '未分发',
-  1: '分发中',
-  2: '分发成功',
-  3: '分发失败',
-  4: '系统取消分发',
-  5: '准备分发',
-  6: '手动取消分发'
+  0: t('api.dispatch.afc66cc9'),
+  1: t('api.dispatch.a7e33987'),
+  2: t('api.dispatch.cce13f66'),
+  3: t('api.dispatch.d9db160a'),
+  4: t('api.dispatch.aab64cfb'),
+  5: t('api.dispatch.9622bffb'),
+  6: t('api.dispatch.5b773403')
 }
 
 export const statusMap = {
-  0: '未分发',
-  1: '分发中',
-  2: '分发结束',
-  3: '取消分发',
-  4: '分发失败'
+  0: t('api.dispatch.afc66cc9'),
+  1: t('api.dispatch.a7e33987'),
+  2: t('api.dispatch.f44cbbb4'),
+  3: t('api.dispatch.fa14a52c'),
+  4: t('api.dispatch.d9db160a')
 }
 
 export const dispatchMode = {
-  upload: '手动上传',
-  download: '远程下载',
-  'build-trigger': '构建触发',
-  'use-build': '构建产物',
-  'static-file-storage': '静态文件',
-  'file-storage': '文件中心'
+  upload: t('api.dispatch.17e12f0a'),
+  download: t('api.dispatch.5b364aef'),
+  'build-trigger': t('api.dispatch.3e0a458'),
+  'use-build': t('api.dispatch.29329b03'),
+  'static-file-storage': t('api.dispatch.d0afc180'),
+  'file-storage': t('api.dispatch.ec4380bb')
 }

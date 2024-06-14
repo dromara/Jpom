@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 ///
 /// Copyright (c) 2019 Of Him Code Technology Studio
 /// Jpom is licensed under Mulan PSL v2.
@@ -130,7 +131,7 @@ instance.interceptors.response.use(
       $notification.error({
         key: 'network-error-no-response',
         message: 'Network Error No response',
-        description: '网络开了小差！请重试...:' + error
+        description: t('api.config.80d94c1b') + error
       })
     } else if (!error.response.config.headers[NO_NOTIFY_KEY]) {
       const { status, statusText, data } = error.response
@@ -138,12 +139,12 @@ instance.interceptors.response.use(
         $notification.error({
           key: 'network-error-no-response',
           message: 'Network Error',
-          description: '网络开了小差！请重试...:' + error
+          description: t('api.config.80d94c1b') + error
         })
       } else {
         $notification.error({
           key: 'network-error-status-' + status,
-          message: '状态码错误 ' + status,
+          message: t('api.config.e4090b01') + status,
           description: (statusText || '') + (data || '')
         })
       }
@@ -167,9 +168,9 @@ async function request<T = any>(arg: string | AxiosRequestConfig, config?: Axios
   const options =
     typeof arg === 'string'
       ? {
-          url: arg,
-          ...config
-        }
+        url: arg,
+        ...config
+      }
       : arg
   const response = await instance.request<IResponse<T>>(options)
   const { data } = response
@@ -195,8 +196,8 @@ async function request<T = any>(arg: string | AxiosRequestConfig, config?: Axios
   if (data.code === 999) {
     $notification.error({
       key: 'prohibit-access',
-      message: '禁止访问',
-      description: '禁止访问,当前IP限制访问'
+      message: t('api.config.26cb698e'),
+      description: t('api.config.50ec27cf')
     })
     window.location.href = jpomWindow_.routerBase + '/prohibit-access'
     return Promise.reject(data)
@@ -207,7 +208,7 @@ async function request<T = any>(arg: string | AxiosRequestConfig, config?: Axios
     // 如果 headers 里面配置了 tip: no 就不用弹出提示信息
     if (!response.config.headers[NO_NOTIFY_KEY]) {
       $notification.error({
-        message: '提示信息 ' + (pro ? '' : response.config.url),
+        message: t('api.config.b12a126b') + (pro ? '' : response.config.url),
         description: data.msg
       })
       console.error(response.config.url, data)
@@ -226,8 +227,8 @@ async function handleRefreshTokenAndRetryQueue(config: InternalAxiosRequestConfi
       try {
         $notification.info({
           key: 'login-timeout',
-          message: '登录信息过期',
-          description: '尝试自动续签...'
+          message: t('api.config.f3e23cfc'),
+          description: t('api.config.e50dee1a')
         })
         // 执行续签操作
         const result = await refreshToken()
@@ -237,8 +238,8 @@ async function handleRefreshTokenAndRetryQueue(config: InternalAxiosRequestConfi
           await userStore.login(result.data)
           $notification.success({
             key: 'login-timeout',
-            message: '登录信息过期',
-            description: '尝试自动续签成功'
+            message: t('api.config.f3e23cfc'),
+            description: t('api.config.a1387e97')
           })
           // 更新token到config中，以便于后续请求使用新token
           config.headers[TOKEN_HEADER_KEY] = userStore.getToken()
@@ -246,12 +247,12 @@ async function handleRefreshTokenAndRetryQueue(config: InternalAxiosRequestConfi
           resolve(result2)
           isRefreshing = false
         } else {
-          toLoginOnly('登录信息过期', '尝试自动续签失败' + result.msg + ',2 秒后将自动跳转到登录页面')
+          toLoginOnly(t('api.config.f3e23cfc'), t('api.config.b40257fb') + result.msg + t('api.config.377b243'))
           return
         }
       } catch (error) {
         //reject('Failed to refresh token:' + error)
-        toLoginOnly('登录信息过期', '尝试自动续签失败' + error + ',2 秒后将自动跳转到登录页面')
+        toLoginOnly(t('api.config.f3e23cfc'), t('api.config.b40257fb') + error + t('api.config.377b243'))
       } finally {
       }
     })
@@ -272,7 +273,7 @@ async function handleRefreshTokenAndRetryQueue(config: InternalAxiosRequestConfi
 }
 
 function toLogin(res: IResponse<any>, response: AxiosResponse<IResponse<any>>) {
-  return toLogin2('提示信息 ' + (pro ? '' : response.config.url), res.msg)
+  return toLogin2(t('api.config.b12a126b') + (pro ? '' : response.config.url), res.msg)
 }
 
 function toLogin2(message: any, description: any) {
@@ -295,7 +296,7 @@ function toLogin2(message: any, description: any) {
     })
 
     setTimeout(() => {
-      ;(location.href as any) = pageUrl.href
+      ; (location.href as any) = pageUrl.href
     }, 2000)
   })
   return false
@@ -321,7 +322,7 @@ function toLoginOnly(message: any, description: any) {
     })
 
     setTimeout(() => {
-      ;(location.href as any) = pageUrl.href
+      ; (location.href as any) = pageUrl.href
     }, 2000)
   })
   return false
