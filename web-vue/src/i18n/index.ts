@@ -67,3 +67,6 @@ const i18n = createI18n({
 })
 
 export default i18n
+
+// @ts-ignore 兼容i8n_tools插件
+export const { t } = i18n.global
