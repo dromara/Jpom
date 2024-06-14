@@ -176,6 +176,7 @@
 	"i18n.close_session_exception.3491":"关闭会话异常",
 	"i18n.close_session_exception_with_detail.85f0":"关闭会话异常：{}",
 	"i18n.close_success.8a31":"关闭成功",
+	"i18n.close_thread_pool.4cd9":"关闭 {} 线程池",
 	"i18n.cloud_server_network_issues.a865":"云服务器的安全组配置等网络相关问题排查定位。",
 	"i18n.cluster_address_check_exception.cd92":"填写的集群地址检查异常,请确认集群地址是正确的服务端地址,",
 	"i18n.cluster_binding_success.eb7e":"集群绑定成功",
