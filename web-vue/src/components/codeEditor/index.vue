@@ -445,6 +445,7 @@ export default {
         { name: '3024-day', theme: '3024-day' },
         { name: '3024-night', theme: '3024-night' }
       ],
+
       loading: true
     }
   },

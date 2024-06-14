@@ -4857,5 +4857,38 @@
         "3eb8617a": "Disable monitoring"
       }
     }
+  },
+  "utils": {
+    "const": {
+      "4fcd2be0": "Total {total} items",
+      "1397b7fa": "Cancel timing and no longer execute on schedule (supports! Prefix disabling scheduled execution, such as:! 0 0/1 * *?)",
+      "f397fdb9": "Minute level",
+      "19a1647f": "1 minute",
+      "edee406c": "5 minutes",
+      "eff3c3f": "10 minutes",
+      "4cda3b42": "30 minutes",
+      "5057c1d0": "Hour level",
+      "f00f01ca": "Every hour",
+      "f661cf9a": "Day level",
+      "597995d3": "At midnight and noon",
+      "c9219cc4": "At midnight",
+      "c2d566f2": "Second level (seconds level is not enabled by default and needs to be modified in the configuration file: [system. timerMatchSecond])",
+      "a5ef245b": "Once every 5 seconds",
+      "222fa259": "Once every 10 seconds",
+      "7a431b98": "Once every 30 seconds",
+      "3d7f1632": "<strong>[Recommendation] WeChat Mini Program Search for Number Shield OTP</strong>",
+      "ee0d1cb6": "<strong>[Recommended] Tencent Authentication Code</strong>Simple and user-friendly<a href=_##_ https://a.app.qq.com/o/simple.jsp?pkgname=com.tencent.authenticator Android</a>",
+      "316edf4e": "<strong>Authy</strong>Rich features specially designed for two-step verification codes<a href=_##_ https://authy.com/download/ \"IOS/Android/Windows/Mac/Linux</a>&nbsp;<a=\" https://chrome.google.com/webstore/detail/authy/gaedmjdfmmahhbjefcbgaolhhanlaolb?hl=cn Chrome extension</a>",
+      "571efa83": "<strong>Google Authenticator</strong>Simple and easy to use, but does not support key export backup<a href=_##_ https://apps.apple.com/us/app/google-authenticator/id388497605 \"IOS</a><a=\" https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&amp ; Hl=cn>Android</a>",
+      "4c20714f": "<strong>Microsoft Authenticator</strong>Recommendation for using Microsoft Family Bucket<a href=_##_ https://www.microsoft.com/zh-cn/account/authenticator IOS/Android</a>",
+      "c0f69a6e": "<strong>1Password</strong>Powerful and secure password management paid application<a href=_##_ https://1password.com/zh-cn/downloads/ IOS/Android/Windows/Mac/Linux/ChromeOS</a>",
+      "ba767044": "#ScriptId can be the script file name in the project path or the script template ID in the system",
+      "59e55b4": "Description: Testing",
+      "42cca3ee": "#Execute in the specified directory:/ The project directory/root/specific directory defaults to {'${jpom-agent_data_path}'}/script_run_cache",
+      "5b2ef0bb": "#Number of backup files retained",
+      "c4682b3f": "#Restrict backup of specified file suffixes (supports regularization)",
+      "1f958da6": "#Project file backup path",
+      "ae41f11b": "#Is the log backup function enabled"
+    }
   }
 }
