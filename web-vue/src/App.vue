@@ -15,8 +15,7 @@
     </a-spin>
   </a-config-provider>
 </template>
-
-<script setup lang="ts">
+<script lang="ts" setup>
 import { theme } from 'ant-design-vue'
 import { onMounted, onUnmounted } from 'vue'
 import { SpinProps } from 'ant-design-vue/es/spin/Spin'
@@ -26,6 +25,7 @@ const routerActivation = ref(true)
 const useGuideStore = guideStore()
 const getGuideCache = useGuideStore.getGuideCache
 const i18nHook = useI18n()
+const t = i18nHook.t
 
 const nowLang = computed(() => {
   return useGuideStore.getLocale()
@@ -87,7 +87,7 @@ watch(pageLoadingStore, (newValue) => {
       pageloading.value = true
       globalLoading({
         spinning: true,
-        tip: '页面资源加载中....'
+        tip: t('App.a4e5a0a8')
       })
     }, 500)
   }
@@ -124,7 +124,7 @@ const reload = () => {
 
 const globalLoadingProps = ref<SpinProps>({
   spinning: false,
-  tip: '加载中...',
+  tip: t('App.ed2baf28'),
   size: 'large',
   delay: 500,
   wrapperClassName: ''
@@ -153,7 +153,6 @@ const globalLoading = (props: boolean | string | SpinProps) => {
 provide('reload', reload)
 provide('globalLoading', globalLoading)
 </script>
-
 <style lang="less">
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
@@ -173,7 +172,6 @@ provide('globalLoading', globalLoading)
   height: 100vh;
 }
 </style>
-
 <style scoped>
 .pageLoading {
   position: absolute;
