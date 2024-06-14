@@ -4601,6 +4601,15 @@
         "50d471b2": "Reset",
         "d2593287": "Switch Views",
         "5bb0e859": "Unknown table type"
+      },
+      "dict": {
+        "index": {
+          "2325de1c": "Extra large",
+          "80c1453f": "secondary",
+          "d39bbae4": "compact",
+          "4ff250dc": "form",
+          "7edad275": "card"
+        }
       }
     },
     "logView": {
@@ -4890,5 +4899,9 @@
       "1f958da6": "#Project file backup path",
       "ae41f11b": "#Is the log backup function enabled"
     }
+  },
+  "App": {
+    "a4e5a0a8": "Loading page resources",
+    "ed2baf28": "Loading"
   }
 }
