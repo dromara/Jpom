@@ -14,6 +14,7 @@ import cn.hutool.extra.servlet.ServletUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseJpomController;
 import org.dromara.jpom.common.ServerOpenApi;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.interceptor.NotLogin;
 import org.dromara.jpom.model.data.WorkspaceEnvVarModel;
 import org.dromara.jpom.model.user.UserModel;
@@ -55,25 +56,25 @@ public class WorkspaceEnvVarApiController extends BaseJpomController {
         WorkspaceEnvVarModel item = workspaceEnvVarService.getByKey(id);
         if (item == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            ServletUtil.write(response, "没有对应数据", MediaType.TEXT_PLAIN_VALUE);
+            ServletUtil.write(response, I18nMessageUtil.get("i18n.no_data_found.4ffb"), MediaType.TEXT_PLAIN_VALUE);
             return null;
         }
         if (!StrUtil.equals(token, item.getTriggerToken())) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            ServletUtil.write(response, "触发token错误,或者已经失效", MediaType.TEXT_PLAIN_VALUE);
+            ServletUtil.write(response, I18nMessageUtil.get("i18n.trigger_token_error_or_expired.8976"), MediaType.TEXT_PLAIN_VALUE);
             return null;
         }
         //
         UserModel userModel = triggerTokenLogServer.getUserByToken(token, workspaceEnvVarService.typeName());
         if (userModel == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            ServletUtil.write(response, "触发token错误,或者已经失效:-1", MediaType.TEXT_PLAIN_VALUE);
+            ServletUtil.write(response, I18nMessageUtil.get("i18n.trigger_token_error_or_expired_with_code.393b"), MediaType.TEXT_PLAIN_VALUE);
             return null;
         }
         Integer privacy = item.getPrivacy();
         if (privacy == null || privacy != 0) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            ServletUtil.write(response, "非明文变量不能查看", MediaType.TEXT_PLAIN_VALUE);
+            ServletUtil.write(response, I18nMessageUtil.get("i18n.non_plaintext_variable_cannot_view.50ca"), MediaType.TEXT_PLAIN_VALUE);
             return null;
         }
         return item;
@@ -128,7 +129,7 @@ public class WorkspaceEnvVarApiController extends BaseJpomController {
     private void update(String id, String token, String value, HttpServletResponse response) {
         if (StrUtil.isEmpty(value)) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            ServletUtil.write(response, "修改的值为空", MediaType.TEXT_PLAIN_VALUE);
+            ServletUtil.write(response, I18nMessageUtil.get("i18n.modified_value_is_empty.e4fa"), MediaType.TEXT_PLAIN_VALUE);
             return;
         }
         WorkspaceEnvVarModel item = this.get(id, token, response);

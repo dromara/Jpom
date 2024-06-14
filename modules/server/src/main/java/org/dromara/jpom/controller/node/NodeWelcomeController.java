@@ -22,6 +22,7 @@ import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.NodeConfig;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.assets.model.MachineNodeStatLogModel;
@@ -98,7 +99,7 @@ public class NodeWelcomeController extends BaseServerController {
             return NodeForward.request(node, request, NodeUrl.ProcessList);
         }
         MachineNodeModel model = machineNodeServer.getByKey(machineId);
-        Assert.notNull(model, "没有找到对应的机器");
+        Assert.notNull(model, I18nMessageUtil.get("i18n.no_machine_found.c16c"));
         return NodeForward.request(model, request, NodeUrl.ProcessList);
     }
 
@@ -110,7 +111,7 @@ public class NodeWelcomeController extends BaseServerController {
             return NodeForward.request(node, request, NodeUrl.Kill);
         }
         MachineNodeModel model = machineNodeServer.getByKey(machineId);
-        Assert.notNull(model, "没有找到对应的机器");
+        Assert.notNull(model, I18nMessageUtil.get("i18n.no_machine_found.c16c"));
         return NodeForward.request(model, request, NodeUrl.Kill);
     }
 
@@ -119,7 +120,7 @@ public class NodeWelcomeController extends BaseServerController {
         NodeModel nodeModel = tryGetNode();
         String useMachineId = Optional.ofNullable(nodeModel).map(BaseMachineModel::getMachineId).orElse(machineId);
         MachineNodeModel model = machineNodeServer.getByKey(useMachineId);
-        Assert.notNull(model, "没有找到对应的机器");
+        Assert.notNull(model, I18nMessageUtil.get("i18n.no_machine_found.c16c"));
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("data", model);
         jsonObject.put("heartSecond", nodeConfig.getHeartSecond());
@@ -133,7 +134,7 @@ public class NodeWelcomeController extends BaseServerController {
             return NodeForward.request(node, request, NodeUrl.DiskInfo);
         }
         MachineNodeModel model = machineNodeServer.getByKey(machineId);
-        Assert.notNull(model, "没有找到对应的机器");
+        Assert.notNull(model, I18nMessageUtil.get("i18n.no_machine_found.c16c"));
         return NodeForward.request(model, request, NodeUrl.DiskInfo);
     }
 
@@ -144,7 +145,7 @@ public class NodeWelcomeController extends BaseServerController {
             return NodeForward.request(node, request, NodeUrl.HwDiskInfo);
         }
         MachineNodeModel model = machineNodeServer.getByKey(machineId);
-        Assert.notNull(model, "没有找到对应的机器");
+        Assert.notNull(model, I18nMessageUtil.get("i18n.no_machine_found.c16c"));
         return NodeForward.request(model, request, NodeUrl.HwDiskInfo);
     }
 
@@ -155,7 +156,7 @@ public class NodeWelcomeController extends BaseServerController {
             return NodeForward.request(node, request, NodeUrl.NetworkInterfaces);
         }
         MachineNodeModel model = machineNodeServer.getByKey(machineId);
-        Assert.notNull(model, "没有找到对应的机器");
+        Assert.notNull(model, I18nMessageUtil.get("i18n.no_machine_found.c16c"));
         return NodeForward.request(model, request, NodeUrl.NetworkInterfaces);
     }
 }

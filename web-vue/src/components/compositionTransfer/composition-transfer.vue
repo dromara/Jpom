@@ -19,7 +19,11 @@
               handleLeftChecked(_, props, [...selectedKeys, ...targetKeys], onItemSelect)
             }
           "
-        />
+        >
+          <template #title="{ title, key }">
+            <a-tooltip :title="title">{{ title }}</a-tooltip>
+          </template>
+        </a-tree>
         <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE">
           <template #description>{{ $t('components.compositionTransfer.composition-transfer.f8525cf2') }}</template>
         </a-empty>
@@ -36,7 +40,11 @@
               handleRightChecked(_, props, [...selectedKeys, ...targetKeys], onItemSelect)
             }
           "
-        />
+        >
+          <template #title="{ title, key }">
+            <a-tooltip :title="title">{{ title }}</a-tooltip>
+          </template>
+        </a-tree>
         <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE">
           <template #description>{{ $t('components.compositionTransfer.composition-transfer.f8525cf2') }}</template>
         </a-empty>

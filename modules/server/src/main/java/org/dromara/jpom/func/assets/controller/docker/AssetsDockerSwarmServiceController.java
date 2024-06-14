@@ -10,6 +10,7 @@
 package org.dromara.jpom.func.assets.controller.docker;
 
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.controller.docker.base.BaseDockerSwarmServiceController;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
@@ -43,7 +44,7 @@ public class AssetsDockerSwarmServiceController extends BaseDockerSwarmServiceCo
     @Override
     protected Map<String, Object> toDockerParameter(String id) {
         MachineDockerModel machineDockerModel = machineDockerServer.getByKey(id, false);
-        Assert.notNull(machineDockerModel, "没有对应的 docker 信息");
+        Assert.notNull(machineDockerModel, I18nMessageUtil.get("i18n.no_corresponding_docker_info.c47a"));
         if (machineDockerModel.isControlAvailable()) {
             // 管理节点
             return machineDockerServer.toParameter(machineDockerModel);

@@ -18,7 +18,8 @@ import org.dromara.jpom.model.BaseNodeGroupModel;
  * @author bwcx_jzy
  * @since 2021/12/5
  */
-@TableName(value = "PROJECT_INFO", name = "项目信息")
+@TableName(value = "PROJECT_INFO",
+    nameKey = "i18n.project_info.6674")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ProjectInfoCacheModel extends BaseNodeGroupModel {

@@ -14,6 +14,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.text.StrSplitter;
 import cn.hutool.core.util.StrUtil;
 import org.dromara.jpom.common.JpomManifest;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,7 +39,7 @@ public class JvmUtil {
      */
     public final static Supplier<String> JPS_ERROR_MSG = () -> {
         checkJpsNormal();
-        return "当前服务器 jps 命令异常,请检查 jdk 是否完整,以及 java 环境变量是否配置正确";
+        return I18nMessageUtil.get("i18n.server_jps_command_exception.e380");
     };
 
     /**

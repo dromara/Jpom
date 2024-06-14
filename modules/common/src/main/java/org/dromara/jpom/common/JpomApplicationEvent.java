@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.util.JsonFileUtil;
@@ -127,16 +128,17 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
                 throw Lombok.sneakyThrow(e);
             }
             installId = jsonObject.getString("installId");
-            Assert.hasText(installId, "数据错误,安装 ID 不存在");
-            log.info("本机安装 ID 为：{}", installId);
+            Assert.hasText(installId, I18nMessageUtil.get("i18n.install_id_does_not_exist.6aee"));
+            log.info(I18nMessageUtil.get("i18n.machine_installation_id.d0b9"), installId);
         } else {
             JSONObject jsonObject = new JSONObject();
             installId = IdUtil.fastSimpleUUID();
             jsonObject.put("installId", installId);
             jsonObject.put("installTime", DateTime.now().toString());
-            jsonObject.put("desc", "请勿删除此文件,删除后关联 id 将失效");
+            String value = I18nMessageUtil.get("i18n.please_do_not_delete_this_file.0a7f");
+            jsonObject.put("desc", value);
             JsonFileUtil.saveJson(file.getAbsolutePath(), jsonObject);
-            log.info("安装成功,本机安装 ID 为：{}", installId);
+            log.info(I18nMessageUtil.get("i18n.installation_success_with_machine_id.1cd6"), installId);
         }
         JpomManifest.getInstance().setInstallId(installId);
     }
@@ -162,12 +164,12 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
                         File oldJars = JpomManifest.getOldJarsPath();
                         FileUtil.mkdir(oldJars);
                         FileUtil.move(beforeJarFile, oldJars, true);
-                        log.info("备份旧程序包：{}", beforeJar);
+                        log.info(I18nMessageUtil.get("i18n.backup_old_package.a7fc"), beforeJar);
                     } else {
-                        log.debug("备份旧程序包失败：{},因为新程序包不存在：{}", beforeJar, newJar);
+                        log.debug(I18nMessageUtil.get("i18n.backup_old_package_failure_due_to_new_package_absence.b90c"), beforeJar, newJar);
                     }
                 } else {
-                    log.debug("备份旧程序包失败：{},因为旧程序包不存在", beforeJar);
+                    log.debug(I18nMessageUtil.get("i18n.backup_old_package_failure_due_to_old_package_absence.53aa"), beforeJar);
                 }
             }
         }
@@ -210,7 +212,7 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
         // 删除文件
         files.forEach(file -> {
             FileUtil.del(file);
-            log.debug("删除旧程序包：{}", file.getAbsolutePath());
+            log.debug(I18nMessageUtil.get("i18n.delete_old_package.ca95"), file.getAbsolutePath());
         });
     }
 
@@ -271,10 +273,10 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
                 e1.addSuppressed(e);
                 boolean causedBy = ExceptionUtil.isCausedBy(e1, AccessDeniedException.class);
                 if (causedBy) {
-                    log.error("清除临时文件失败,请手动清理：" + FileUtil.getAbsolutePath(file), e);
+                    log.error(I18nMessageUtil.get("i18n.clear_temp_file_failed_manually.0dad") + FileUtil.getAbsolutePath(file), e);
                     return;
                 }
-                log.error("清除临时文件失败,请检查目录：" + FileUtil.getAbsolutePath(file), e);
+                log.error(I18nMessageUtil.get("i18n.clear_temp_file_failed_check_directory.7340") + FileUtil.getAbsolutePath(file), e);
             }
         }
     }
@@ -377,7 +379,7 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
                     this.executeTask();
                     this.refresh();
                 } catch (Exception e) {
-                    log.error("执行系统任务异常", e);
+                    log.error(I18nMessageUtil.get("i18n.system_task_execution_exception.d559"), e);
                 }
             });
         }

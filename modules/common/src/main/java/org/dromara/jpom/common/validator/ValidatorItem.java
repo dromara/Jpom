@@ -48,7 +48,7 @@ public @interface ValidatorItem {
      *
      * @return msg
      */
-    String msg() default "输入参数不正确";
+    String msg() default "";
 
     /**
      * 数字类型的范围

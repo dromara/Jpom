@@ -11,14 +11,18 @@
     >
       <a-menu-item key="admin-manager">
         <template v-if="mode === 'normal'">
-          <SettingOutlined :style="{ fontSize: '18px' }" />
+          <a-tooltip :title="$t('pages.layout.side-menu.73d81eb7')" color="cyan">
+            <SettingOutlined :style="{ fontSize: '18px' }" />
 
-          <span>{{ $t('pages.layout.side-menu.73d81eb7') }}</span>
+            <span>{{ $t('pages.layout.side-menu.73d81eb7') }}</span>
+          </a-tooltip>
         </template>
         <template v-if="mode === 'management'">
-          <DesktopOutlined :style="{ fontSize: '18px' }" />
+          <a-tooltip :title="$t('pages.layout.side-menu.c49bfeed')" color="cyan">
+            <DesktopOutlined :style="{ fontSize: '18px' }" />
 
-          <span>{{ $t('pages.layout.side-menu.c49bfeed') }}</span>
+            <span>{{ $t('pages.layout.side-menu.c49bfeed') }}</span>
+          </a-tooltip>
         </template>
       </a-menu-item>
     </a-menu>
@@ -34,7 +38,7 @@
         <template v-if="menu.childs && menu.childs.length">
           <a-sub-menu :key="menu.id">
             <template #title>
-              <a-tooltip :title="menu.title">
+              <a-tooltip :title="menu.title" color="cyan">
                 <icon :type="menu.icon_v3" :style="{ fontSize: '18px' }" />
                 <span>{{ menu.title }}</span>
               </a-tooltip>
@@ -45,13 +49,13 @@
               :p="(subMenu.parent = menu)"
               @click="handleClick(subMenu)"
             >
-              <a-tooltip :title="subMenu.title">{{ subMenu.title }}</a-tooltip>
+              <a-tooltip :title="subMenu.title" color="cyan">{{ subMenu.title }}</a-tooltip>
             </a-menu-item>
           </a-sub-menu>
         </template>
         <template v-else>
           <a-menu-item :key="menu.id" @click="handleClick(menu)">
-            <a-tooltip :title="menu.title">
+            <a-tooltip :title="menu.title" color="cyan">
               <icon :type="menu.icon_v3" :style="{ fontSize: '18px' }" />
               <span>{{ menu.title }}</span>
             </a-tooltip>

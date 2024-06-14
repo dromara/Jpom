@@ -24,6 +24,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.db.DbExtConfig;
@@ -66,10 +67,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class BackupInfoController extends BaseServerController {
 
-    /**
-     * 存储数据库表名称和别名的变量
-     */
-    private static Map<String, String> TABLE_NAME_MAP = new HashMap<>();
 
     private final BackupInfoService backupInfoService;
 
@@ -88,7 +85,7 @@ public class BackupInfoController extends BaseServerController {
         // 查询数据库
         PageResultDto<BackupInfoModel> pageResult = backupInfoService.listPage(request);
         pageResult.each(backupInfoModel -> backupInfoModel.setFileExist(FileUtil.exist(backupInfoModel.getFilePath())));
-        return JsonMessage.success("获取成功", pageResult);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.get_success.fb55"), pageResult);
     }
 
     /**
@@ -100,10 +97,10 @@ public class BackupInfoController extends BaseServerController {
     @PostMapping(value = "/system/backup/delete")
     @Feature(method = MethodFeature.DEL)
     @SystemPermission(superUser = true)
-    public IJsonMessage<String> deleteBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
+    public IJsonMessage<String> deleteBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.data_id_cannot_be_empty.403b") String id) {
         // 删除备份信息
         backupInfoService.delByKey(id);
-        return new JsonMessage<>(200, "删除成功");
+        return new JsonMessage<>(200, I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 
     /**
@@ -115,16 +112,16 @@ public class BackupInfoController extends BaseServerController {
      */
     @PostMapping(value = "/system/backup/restore")
     @Feature(method = MethodFeature.EXECUTE)
-    public IJsonMessage<String> restoreBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
+    public IJsonMessage<String> restoreBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.data_id_cannot_be_empty.403b") String id) {
         // 根据 id 查询备份信息
         BackupInfoModel backupInfoModel = backupInfoService.getByKey(id);
-        Objects.requireNonNull(backupInfoModel, "备份数据不存在");
+        Objects.requireNonNull(backupInfoModel, I18nMessageUtil.get("i18n.backup_data_not_exist.f88c"));
 
         // 检查备份文件是否存在
         String filePath = backupInfoModel.getFilePath();
         File file = new File(filePath);
         if (!FileUtil.exist(file)) {
-            return new JsonMessage<>(400, "备份文件不存在");
+            return new JsonMessage<>(400, I18nMessageUtil.get("i18n.backup_file_not_exist.9628"));
         }
         // 清空 sql 加载记录
         StorageServiceFactory.clearExecuteSqlLog();
@@ -133,9 +130,9 @@ public class BackupInfoController extends BaseServerController {
         if (flag) {
             // 还原备份数据成功之后需要修改当前备份信息的状态（因为备份的时候该备份信息状态是备份中）
             this.fuzzyUpdate(SecureUtil.sha1(file));
-            return new JsonMessage<>(200, "还原备份数据成功");
+            return new JsonMessage<>(200, I18nMessageUtil.get("i18n.restore_backup_data_success.253a"));
         }
-        return new JsonMessage<>(400, "还原备份数据失败");
+        return new JsonMessage<>(400, I18nMessageUtil.get("i18n.restore_backup_data_failed.58af"));
     }
 
     /**
@@ -162,7 +159,7 @@ public class BackupInfoController extends BaseServerController {
                     update.setStatus(BackupStatusEnum.SUCCESS.getCode());
                     update.setSha1Sum(sha1);
                     int updateCount = backupInfoService.updateById(update);
-                    log.debug("更新还原数据：{}", updateCount);
+                    log.debug(I18nMessageUtil.get("i18n.update_restore_data.1b0b"), updateCount);
                 }
             }
         });
@@ -179,7 +176,7 @@ public class BackupInfoController extends BaseServerController {
     public IJsonMessage<String> backup(@RequestBody Map<String, Object> map) {
         List<String> tableNameList = JSON.parseArray(JSON.toJSONString(map.get("tableNameList")), String.class);
         backupInfoService.backupToSql(tableNameList);
-        return new JsonMessage<>(200, "操作成功，请稍后刷新查看备份状态");
+        return new JsonMessage<>(200, I18nMessageUtil.get("i18n.operation_succeeded_refresh_backup.54a9"));
     }
 
     /**
@@ -193,7 +190,7 @@ public class BackupInfoController extends BaseServerController {
     public IJsonMessage<String> uploadBackupFile(MultipartFile file) throws IOException {
         String originalFilename = file.getOriginalFilename();
         String extName = FileUtil.extName(originalFilename);
-        Assert.state(StrUtil.containsAnyIgnoreCase(extName, "sql"), "不支持的文件类型：" + extName);
+        Assert.state(StrUtil.containsAnyIgnoreCase(extName, "sql"), I18nMessageUtil.get("i18n.file_type_not_supported2.d497") + extName);
         String saveFileName = UnicodeUtil.toUnicode(originalFilename);
         saveFileName = saveFileName.replace(StrUtil.BACKSLASH, "_");
         // 存储目录
@@ -211,7 +208,7 @@ public class BackupInfoController extends BaseServerController {
         boolean exists = backupInfoService.exists(backupInfoModel);
         if (exists) {
             FileUtil.del(backupSqlFile);
-            return new JsonMessage<>(400, "导入的数据已经存在啦");
+            return new JsonMessage<>(400, I18nMessageUtil.get("i18n.data_already_exists.0397"));
         }
 
         backupInfoModel.setName(backupSqlFile.getName());
@@ -223,7 +220,7 @@ public class BackupInfoController extends BaseServerController {
         backupInfoModel.setFilePath(FileUtil.getAbsolutePath(backupSqlFile));
         backupInfoService.insert(backupInfoModel);
 
-        return new JsonMessage<>(200, "导入成功");
+        return new JsonMessage<>(200, I18nMessageUtil.get("i18n.import_success.b6d1"));
     }
 
     /**
@@ -233,16 +230,16 @@ public class BackupInfoController extends BaseServerController {
      */
     @GetMapping(value = "/system/backup/download")
     @Feature(method = MethodFeature.DOWNLOAD)
-    public void downloadBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id, HttpServletResponse response) {
+    public void downloadBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.data_id_cannot_be_empty.403b") String id, HttpServletResponse response) {
         // 根据 id 查询备份信息
         BackupInfoModel backupInfoModel = backupInfoService.getByKey(id);
-        Objects.requireNonNull(backupInfoModel, "备份数据不存在");
+        Objects.requireNonNull(backupInfoModel, I18nMessageUtil.get("i18n.backup_data_not_exist.f88c"));
 
         // 检查备份文件是否存在
         File file = new File(backupInfoModel.getFilePath());
         if (!FileUtil.exist(file)) {
             //log.error("文件不存在，无法下载...backupId: {}", id);
-            ServletUtil.write(response, JsonMessage.getString(404, "文件不存在，无法下载"), ContentType.JSON.toString());
+            ServletUtil.write(response, JsonMessage.getString(404, I18nMessageUtil.get("i18n.file_does_not_exist_for_download.8dd6")), ContentType.JSON.toString());
             return;
         }
 
@@ -261,16 +258,16 @@ public class BackupInfoController extends BaseServerController {
         // 从数据库加载表名称列表
         List<String> tableNameList = backupInfoService.h2TableNameList();
         // 扫描程序，拿到表名称和别名
-        if (TABLE_NAME_MAP.isEmpty()) {
-            Set<Class<?>> classes = ClassUtil.scanPackageByAnnotation("org.dromara.jpom", TableName.class);
-            TABLE_NAME_MAP = CollStreamUtil.toMap(classes, aClass -> {
-                TableName tableName = aClass.getAnnotation(TableName.class);
-                return tableName.value();
-            }, aClass -> {
-                TableName tableName = aClass.getAnnotation(TableName.class);
-                return tableName.name();
-            });
-        }
+
+        Set<Class<?>> classes = ClassUtil.scanPackageByAnnotation("org.dromara.jpom", TableName.class);
+        Map<String, String> TABLE_NAME_MAP = CollStreamUtil.toMap(classes, aClass -> {
+            TableName tableName = aClass.getAnnotation(TableName.class);
+            return tableName.value();
+        }, aClass -> {
+            TableName tableName = aClass.getAnnotation(TableName.class);
+            return I18nMessageUtil.get(tableName.nameKey());
+        });
+
         List<JSONObject> list = tableNameList.stream().map(s -> {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("tableName", s);

@@ -14,6 +14,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.node.ProjectInfoCacheModel;
@@ -33,7 +34,7 @@ public class ProjectInfoCacheService extends BaseNodeService<ProjectInfoCacheMod
 
     public ProjectInfoCacheService(NodeService nodeService,
                                    WorkspaceService workspaceService) {
-        super(nodeService, workspaceService, "项目");
+        super(nodeService, workspaceService, I18nMessageUtil.get("i18n.project_name.31ec"));
     }
 
     /**

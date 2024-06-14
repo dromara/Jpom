@@ -11,6 +11,7 @@ package org.dromara.jpom.oauth2;
 
 import me.zhyd.oauth.config.AuthSource;
 import me.zhyd.oauth.request.AuthDefaultRequest;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.oauth2.platform.MaxKeyOauth2Config;
 import org.springframework.util.Assert;
 
@@ -27,19 +28,19 @@ public class Oauth2MaxKeyAuthSource implements AuthSource {
 
     @Override
     public String authorize() {
-        Assert.notNull(oauthConfig, "未配置 oauth2");
+        Assert.notNull(oauthConfig, I18nMessageUtil.get("i18n.oauth2_not_configured.9c85"));
         return oauthConfig.getAuthorizationUri();
     }
 
     @Override
     public String accessToken() {
-        Assert.notNull(oauthConfig, "未配置 oauth2");
+        Assert.notNull(oauthConfig, I18nMessageUtil.get("i18n.oauth2_not_configured.9c85"));
         return oauthConfig.getAccessTokenUri();
     }
 
     @Override
     public String userInfo() {
-        Assert.notNull(oauthConfig, "未配置 oauth2");
+        Assert.notNull(oauthConfig, I18nMessageUtil.get("i18n.oauth2_not_configured.9c85"));
         return oauthConfig.getUserInfoUri();
     }
 

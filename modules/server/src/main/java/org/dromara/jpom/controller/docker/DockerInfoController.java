@@ -17,6 +17,7 @@ import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
@@ -92,13 +93,13 @@ public class DockerInfoController extends BaseServerController {
         DockerInfoModel dockerInfoModel = new DockerInfoModel();
         dockerInfoModel.setId(id);
         dockerInfoModel.setName(name);
-        Assert.state(!StrUtil.contains(tags, StrUtil.COLON), "标签不能包含 ：");
+        Assert.state(!StrUtil.contains(tags, StrUtil.COLON), I18nMessageUtil.get("i18n.tag_cannot_contain_colon.f9ae"));
         List<String> tagList = StrUtil.splitTrim(tags, StrUtil.COMMA);
         String newTags = CollUtil.join(tagList, StrUtil.COLON, StrUtil.COLON, StrUtil.COLON);
         dockerInfoModel.setTags(newTags);
         dockerInfoService.updateById(dockerInfoModel, request);
         //
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
 
@@ -106,7 +107,7 @@ public class DockerInfoController extends BaseServerController {
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<Object> del(@ValidatorItem String id, HttpServletRequest request) throws Exception {
         dockerInfoService.delByKey(id, request);
-        return JsonMessage.success("删除成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 
 
@@ -125,7 +126,7 @@ public class DockerInfoController extends BaseServerController {
         //
         dockerInfoService.checkUserWorkspace(toWorkspaceId);
         dockerInfoService.syncToWorkspace(ids, nowWorkspaceId, toWorkspaceId);
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
     /**

@@ -20,6 +20,7 @@ import org.dromara.jpom.common.BaseJpomController;
 import org.dromara.jpom.common.ServerOpenApi;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.interceptor.NotLogin;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.node.NodeScriptCacheModel;
@@ -71,12 +72,12 @@ public class NodeScriptTriggerApiController extends BaseJpomController {
     @RequestMapping(value = ServerOpenApi.NODE_SCRIPT_TRIGGER_URL, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<JSONObject> trigger2(@PathVariable String id, @PathVariable String token, HttpServletRequest request) {
         NodeScriptCacheModel item = nodeScriptServer.getByKey(id);
-        Assert.notNull(item, "没有对应数据");
-        Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误,或者已经失效");
+        Assert.notNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
+        Assert.state(StrUtil.equals(token, item.getTriggerToken()), I18nMessageUtil.get("i18n.trigger_token_error_or_expired.8976"));
         //
         UserModel userModel = triggerTokenLogServer.getUserByToken(token, nodeScriptServer.typeName());
         //
-        Assert.notNull(userModel, "触发token错误,或者已经失效:-1");
+        Assert.notNull(userModel, I18nMessageUtil.get("i18n.trigger_token_error_or_expired_with_code.393b"));
 
         try {
             NodeModel nodeModel = nodeService.getByKey(item.getNodeId());
@@ -91,10 +92,10 @@ public class NodeScriptTriggerApiController extends BaseJpomController {
             } else {
                 jsonObject.put("msg", jsonMessage.getMsg());
             }
-            return JsonMessage.success("开始执行", jsonObject);
+            return JsonMessage.success(I18nMessageUtil.get("i18n.start_execution.00d7"), jsonObject);
         } catch (Exception e) {
-            log.error("触发自动执行服务器脚本异常", e);
-            return new JsonMessage<>(500, "执行异常：" + e.getMessage());
+            log.error(I18nMessageUtil.get("i18n.trigger_auto_execute_server_script_exception.8e84"), e);
+            return new JsonMessage<>(500, I18nMessageUtil.get("i18n.general_execution_exception.62e9") + e.getMessage());
         }
     }
 
@@ -131,17 +132,20 @@ public class NodeScriptTriggerApiController extends BaseJpomController {
                 String token = jsonObject.getString("token");
                 NodeScriptCacheModel item = nodeScriptServer.getByKey(id);
                 if (item == null) {
-                    jsonObject.put("msg", "没有对应数据");
+                    String string = I18nMessageUtil.get("i18n.no_data_found.4ffb");
+                    jsonObject.put("msg", string);
                     return;
                 }
                 UserModel userModel = triggerTokenLogServer.getUserByToken(token, nodeScriptServer.typeName());
                 if (userModel == null) {
-                    jsonObject.put("msg", "对应的用户不存在,触发器已失效");
+                    String string = I18nMessageUtil.get("i18n.user_not_exist_trigger_invalid.f375");
+                    jsonObject.put("msg", string);
                     return;
                 }
                 //
                 if (!StrUtil.equals(token, item.getTriggerToken())) {
-                    jsonObject.put("msg", "触发token错误,或者已经失效");
+                    String value = I18nMessageUtil.get("i18n.trigger_token_error_or_expired.8976");
+                    jsonObject.put("msg", value);
                     return;
                 }
                 NodeModel nodeModel = nodeService.getByKey(item.getNodeId());
@@ -155,10 +159,10 @@ public class NodeScriptTriggerApiController extends BaseJpomController {
                     jsonObject.put("msg", jsonMessage.getMsg());
                 }
             }).collect(Collectors.toList());
-            return JsonMessage.success("触发成功", collect);
+            return JsonMessage.success(I18nMessageUtil.get("i18n.trigger_success.f9d1"), collect);
         } catch (Exception e) {
-            log.error("服务端脚本批量触发异常", e);
-            return new JsonMessage<>(500, "触发异常" + e.getMessage());
+            log.error(I18nMessageUtil.get("i18n.batch_trigger_script_exception.8fb4"), e);
+            return new JsonMessage<>(500, I18nMessageUtil.get("i18n.trigger_exception.d624") + e.getMessage());
         }
     }
 }

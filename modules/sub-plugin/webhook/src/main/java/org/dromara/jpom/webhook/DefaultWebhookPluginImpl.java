@@ -16,6 +16,7 @@ import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import cn.keepbx.jpom.plugins.PluginConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.plugin.IDefaultPlugin;
 
 import java.util.Map;
@@ -69,7 +70,7 @@ public class DefaultWebhookPluginImpl implements IDefaultPlugin {
                 return body;
             }
         } catch (Exception e) {
-            log.error("WebHooks 调用错误", e);
+            log.error(I18nMessageUtil.get("i18n.webhooks_invocation_error.9792"), e);
             return "WebHooks error:" + e.getMessage();
         }
     }

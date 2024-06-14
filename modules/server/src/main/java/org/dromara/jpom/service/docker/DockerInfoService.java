@@ -14,6 +14,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.sql.Condition;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.docker.DockerInfoModel;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
@@ -110,13 +111,13 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> {
     public void syncToWorkspace(String ids, String nowWorkspaceId, String workspaceId) {
         StrUtil.splitTrim(ids, StrUtil.COMMA).forEach(id -> {
             DockerInfoModel data = super.getByKey(id, false, entity -> entity.set("workspaceId", nowWorkspaceId));
-            Assert.notNull(data, "没有对应到docker信息");
+            Assert.notNull(data, I18nMessageUtil.get("i18n.no_docker_details.3343"));
             //
             DockerInfoModel where = new DockerInfoModel();
             where.setWorkspaceId(workspaceId);
             where.setMachineDockerId(data.getMachineDockerId());
             DockerInfoModel exits = super.queryByBean(where);
-            Assert.isNull(exits, "对应工作空间已经存在对应的 docker 啦");
+            Assert.isNull(exits, I18nMessageUtil.get("i18n.docker_already_exists_in_workspace.a0de"));
             // 不存在则添加节点
             data.setId(null);
             data.setWorkspaceId(workspaceId);

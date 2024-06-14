@@ -12,6 +12,7 @@ package org.dromara.jpom.common.commander;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.system.JpomRuntimeException;
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
@@ -30,14 +31,14 @@ public class Commander {
         OsInfo osInfo = SystemUtil.getOsInfo();
         if (osInfo.isLinux()) {
             // Linux系统
-            log.debug("当前系统为：linux");
+            log.debug(I18nMessageUtil.get("i18n.current_system_is_linux.e377"));
         } else if (osInfo.isWindows()) {
             // Windows系统
-            log.debug("当前系统为：windows");
+            log.debug(I18nMessageUtil.get("i18n.current_system_is_windows.91d1"));
         } else if (osInfo.isMac()) {
-            log.debug("当前系统为：mac");
+            log.debug(I18nMessageUtil.get("i18n.current_system_is_mac.0139"));
         } else {
-            throw new JpomRuntimeException("不支持的：" + osInfo.getName());
+            throw new JpomRuntimeException(I18nMessageUtil.get("i18n.unsupported_item.bcf4") + osInfo.getName());
         }
     }
 

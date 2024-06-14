@@ -28,6 +28,7 @@ import cn.hutool.system.SystemUtil;
 import cn.keepbx.jpom.plugins.IPlugin;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.ProjectConfig;
 import org.dromara.jpom.configuration.ProjectLogConfig;
 import org.dromara.jpom.exception.IllegalArgument2Exception;
@@ -153,7 +154,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
         } else {
             String command = this.buildRunCommand(nodeProjectInfoModel, originalModel);
             if (command == null) {
-                return CommandOpResult.of(false, "没有需要执行的命令");
+                return CommandOpResult.of(false, I18nMessageUtil.get("i18n.no_command_to_execute.340b"));
             }
             Map<String, String> env = projectInfoService.getEnv(nodeProjectInfoModel.getWorkspaceId());
             // 执行命令
@@ -166,7 +167,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
                         CommandUtil.asyncExeLocalCommand(command, file, env);
                     }
                 } catch (Exception e) {
-                    log.error("执行命令失败", e);
+                    log.error(I18nMessageUtil.get("i18n.command_execution_failed.90ef"), e);
                 }
             });
         }
@@ -309,9 +310,9 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
                         ThreadUtil.execute(() -> {
                             try {
                                 CommandOpResult reload = this.reload(nodeProjectInfoModel, originalModel);
-                                log.info("触发项目 reload 事件：{}", reload);
+                                log.info(I18nMessageUtil.get("i18n.trigger_project_reload_event.a7dc"), reload);
                             } catch (Exception e) {
-                                log.error("重载项目异常", e);
+                                log.error(I18nMessageUtil.get("i18n.reload_project_exception.b566"), e);
                             }
                         });
                     }
@@ -403,12 +404,12 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
     private String checkStart(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel) {
         CommandOpResult status = this.status(nodeProjectInfoModel, originalModel);
         if (status.isSuccess()) {
-            return "当前程序正在运行中，不能重复启动,PID:" + status.getPid();
+            return I18nMessageUtil.get("i18n.program_already_running.96e1") + status.getPid();
         }
         File fileLib = projectInfoService.resolveLibFile(nodeProjectInfoModel);
         File[] files = fileLib.listFiles();
         if (files == null || files.length == 0) {
-            return "项目目录没有任何文件,请先到项目文件管理中上传文件";
+            return I18nMessageUtil.get("i18n.no_files_in_project_directory.108e");
         }
         //
 
@@ -422,7 +423,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
             try (JarClassLoader jarClassLoader = JarClassLoader.load(fileLib)) {
                 jarClassLoader.loadClass(mainClass);
             } catch (ClassNotFoundException notFound) {
-                return "没有找到对应的MainClass:" + mainClass;
+                return I18nMessageUtil.get("i18n.no_main_class_found.b001") + mainClass;
             } catch (IOException io) {
                 throw Lombok.sneakyThrow(io);
             }
@@ -430,7 +431,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
 
             List<File> fileList = this.listJars(checkRunMode, fileLib);
             if (fileList.isEmpty()) {
-                return String.format("一级目录没有%s包,请先到文件管理中上传程序的%s", checkRunMode.name(), checkRunMode.name());
+                return String.format(I18nMessageUtil.get("i18n.missing_package_in_root_dir.8bab"), checkRunMode.name(), checkRunMode.name());
             }
             File jarFile = fileList.get(0);
             String checkJar = checkJar(jarFile);
@@ -438,7 +439,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
                 return checkJar;
             }
         } else {
-            return "当前项目类型不支持启动";
+            return I18nMessageUtil.get("i18n.project_type_not_supported_for_startup.7bd1");
         }
         // 备份日志
         this.backLog(nodeProjectInfoModel, originalModel);
@@ -457,16 +458,16 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
             Attributes attributes = manifest.getMainAttributes();
             String mainClass = attributes.getValue(Attributes.Name.MAIN_CLASS);
             if (mainClass == null) {
-                return jarFile.getAbsolutePath() + "中没有找到对应的MainClass属性";
+                return jarFile.getAbsolutePath() + I18nMessageUtil.get("i18n.main_class_attribute_not_found.93e8");
             }
             try (JarClassLoader jarClassLoader = JarClassLoader.load(jarFile)) {
                 jarClassLoader.loadClass(mainClass);
             } catch (ClassNotFoundException notFound) {
-                return jarFile.getAbsolutePath() + "中没有找到对应的MainClass:" + mainClass;
+                return jarFile.getAbsolutePath() + I18nMessageUtil.get("i18n.main_class_not_found.b4b7") + mainClass;
             }
         } catch (Exception e) {
-            log.error("解析jar", e);
-            return jarFile.getAbsolutePath() + " 解析错误:" + e.getMessage();
+            log.error(I18nMessageUtil.get("i18n.parse_jar.a26e"), e);
+            return jarFile.getAbsolutePath() + I18nMessageUtil.get("i18n.parse_error.da6d") + e.getMessage();
         }
         return null;
     }
@@ -554,7 +555,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
     protected CommandOpResult status(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel) {
         RunMode runMode = originalModel.getRunMode();
         if (runMode == RunMode.File) {
-            return CommandOpResult.of(false, "file 类型项目没有运行状态");
+            return CommandOpResult.of(false, I18nMessageUtil.get("i18n.file_type_project_no_running_status.32a2"));
         }
         if (runMode == RunMode.Dsl) {
             DslYmlDto config = originalModel.mustDslConfig();
@@ -564,7 +565,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
                 Tuple tuple = dslScriptServer.syncRun(config, ConsoleCommandOp.status, nodeProjectInfoModel, originalModel);
                 status = tuple.get(1);
             } catch (IllegalArgument2Exception argument2Exception) {
-                log.warn("执行 DSL 脚本异常：{}", argument2Exception.getMessage());
+                log.warn(I18nMessageUtil.get("i18n.execute_dsl_script_exception.0882"), argument2Exception.getMessage());
                 status = CollUtil.newArrayList(argument2Exception.getMessage());
             }
 
@@ -600,7 +601,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
      */
     protected CommandOpResult reload(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel) {
         RunMode runMode = originalModel.getRunMode();
-        Assert.state(runMode == RunMode.Dsl, "非 DSL 项目不支持此操作");
+        Assert.state(runMode == RunMode.Dsl, I18nMessageUtil.get("i18n.non_dsl_project_unsupported_operation.5c09"));
         DslYmlDto config = originalModel.mustDslConfig();
         CommandOpResult commandOpResult;
         // 提前判断脚本 id,避免填写错误在删除项目检测状态时候异常
@@ -611,7 +612,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
             // 如果退出码为 0 认为执行成功
             commandOpResult = CommandOpResult.of(code == 0, list);
         } catch (IllegalArgument2Exception argument2Exception) {
-            log.warn("执行 DSL 脚本异常：{}", argument2Exception.getMessage());
+            log.warn(I18nMessageUtil.get("i18n.execute_dsl_script_exception.0882"), argument2Exception.getMessage());
             commandOpResult = CommandOpResult.of(false, argument2Exception.getMessage());
         }
         // 缓存执行结果

@@ -31,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.exception.LogRecorderCloseException;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
@@ -141,8 +142,8 @@ public class BuildExecuteManage implements Runnable {
         //
         int queueSize = threadPoolExecutor.getQueue().size();
         int size = BUILD_MANAGE_MAP.size();
-        logRecorder.system("当前构建中任务数：{},队列中任务数：{} {}", size, queueSize,
-            size > buildExtConfig.getPoolSize() ? "构建任务开始进入队列等待...." : StrUtil.EMPTY);
+        logRecorder.system(I18nMessageUtil.get("i18n.build_task_count_and_queue_count.f0b6"), size, queueSize,
+            size > buildExtConfig.getPoolSize() ? I18nMessageUtil.get("i18n.build_task_queue_waiting.5f06") : StrUtil.EMPTY);
         //BuildInfoManage manage = new BuildInfoManage(taskData);
         BUILD_MANAGE_MAP.put(buildInfoModel.getId(), this);
         threadPoolExecutor.execute(this);
@@ -182,7 +183,7 @@ public class BuildExecuteManage implements Runnable {
                 });
 
             } catch (Exception e) {
-                log.warn("清理构建资源失败", e);
+                log.warn(I18nMessageUtil.get("i18n.build_resource_cleanup_failed.c4cf"), e);
             }
         }
         String buildId = taskData.buildInfoModel.getId();
@@ -221,11 +222,11 @@ public class BuildExecuteManage implements Runnable {
             // 容器构建直接下载到 结果目录
             File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), resultDirFileAction.getPath());
             if (!FileUtil.exist(toFile)) {
-                String format = StrUtil.format("{} 不存在，处理构建产物失败", resultDirFileAction.getPath());
+                String format = StrUtil.format(I18nMessageUtil.get("i18n.non_existent_build_product.1df4"), resultDirFileAction.getPath());
                 logRecorder.systemError(format);
                 return format;
             }
-            logRecorder.system("备份产物 {} {}", resultDirFileAction.getPath(), buildInfoModel.getBuildId());
+            logRecorder.system(I18nMessageUtil.get("i18n.backup_product.53c0"), resultDirFileAction.getPath(), buildInfoModel.getBuildId());
             return null;
         }
         if (resultDirFileAction.getType() == ResultDirFileAction.Type.ANT_PATH) {
@@ -233,14 +234,14 @@ public class BuildExecuteManage implements Runnable {
             List<String> paths = AntPathUtil.antPathMatcher(this.gitFile, resultDirFileAction.getPath());
             int matcherSize = CollUtil.size(paths);
             if (matcherSize <= 0) {
-                String format = StrUtil.format("{} 没有匹配到任何文件", resultDirFileAction.getPath());
+                String format = StrUtil.format(I18nMessageUtil.get("i18n.no_matching_files.b7a6"), resultDirFileAction.getPath());
                 logRecorder.systemError(format);
                 return format;
             }
-            logRecorder.system("{} 模糊匹配到 {} 个文件", resultDirFileAction.getPath(), matcherSize);
+            logRecorder.system(I18nMessageUtil.get("i18n.fuzzy_match_files.139d"), resultDirFileAction.getPath(), matcherSize);
             String antSubMatch = resultDirFileAction.antSubMatch();
             ResultDirFileAction.AntFileUploadMode antFileUploadMode = resultDirFileAction.getAntFileUploadMode();
-            Assert.notNull(antFileUploadMode, "没有配置文件上传模式");
+            Assert.notNull(antFileUploadMode, I18nMessageUtil.get("i18n.file_upload_mode_not_configured.b3b2"));
             File historyPackageFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), StrUtil.SLASH);
             int subMatchCount = paths.stream()
                 .filter(s -> {
@@ -277,7 +278,7 @@ public class BuildExecuteManage implements Runnable {
                     } else if (antFileUploadMode == ResultDirFileAction.AntFileUploadMode.SAME_DIR) {
                         toFile = historyPackageFile;
                     } else {
-                        throw new IllegalStateException("暂不支持的模式：" + antFileUploadMode);
+                        throw new IllegalStateException(I18nMessageUtil.get("i18n.unsupported_mode.a3d3") + antFileUploadMode);
                     }
                     // 创建文件夹，避免出现文件全部为相关文件名（result）
                     BuildUtil.mkdirHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId());
@@ -292,7 +293,7 @@ public class BuildExecuteManage implements Runnable {
                     return 1;
                 }).sum();
             if (subMatchCount <= 0) {
-                String format = StrUtil.format("{} 没有匹配到任何文件", antSubMatch);
+                String format = StrUtil.format(I18nMessageUtil.get("i18n.no_matching_files.b7a6"), antSubMatch);
                 logRecorder.systemError(format);
                 return format;
             }
@@ -304,7 +305,7 @@ public class BuildExecuteManage implements Runnable {
         } else if (resultDirFileAction.getType() == ResultDirFileAction.Type.ORIGINAL) {
             File file = FileUtil.file(this.gitFile, resultDirFile);
             if (!file.exists()) {
-                String format = StrUtil.format("{} 不存在，处理构建产物失败", resultDirFile);
+                String format = StrUtil.format(I18nMessageUtil.get("i18n.non_existent_build_product.1df4"), resultDirFile);
                 logRecorder.systemError(format);
                 return format;
             }
@@ -342,16 +343,16 @@ public class BuildExecuteManage implements Runnable {
         this.gitFile = BuildUtil.getSourceById(buildInfoModel.getId());
 
         Integer delay = taskData.delay;
-        logRecorder.system("开始构建 #{} 构建执行路径 : {}", buildInfoModel.getBuildId(), FileUtil.getAbsolutePath(this.gitFile));
+        logRecorder.system(I18nMessageUtil.get("i18n.start_building_with_number_and_path.c41c"), buildInfoModel.getBuildId(), FileUtil.getAbsolutePath(this.gitFile));
         if (delay != null && delay > 0) {
             // 延迟执行
-            logRecorder.system("执行等待 {} 秒", delay);
+            logRecorder.system(I18nMessageUtil.get("i18n.wait_for_seconds.ff7b"), delay);
             ThreadUtil.sleep(delay, TimeUnit.SECONDS);
         }
         // 删除缓存
         Boolean cacheBuild = this.buildExtraModule.getCacheBuild();
         if (cacheBuild != null && !cacheBuild) {
-            logRecorder.system("删除构建缓存");
+            logRecorder.system(I18nMessageUtil.get("i18n.delete_build_cache.c7f3"));
             CommandUtil.systemFastDel(this.gitFile);
         }
         //
@@ -408,7 +409,7 @@ public class BuildExecuteManage implements Runnable {
                 }
                 Tuple tuple = (Tuple) plugin.execute("branchAndTagList", map);
                 //GitUtil.getBranchAndTagList(repositoryModel);
-                Assert.notNull(tuple, "获取仓库分支失败");
+                Assert.notNull(tuple, I18nMessageUtil.get("i18n.get_repository_branch_failure.37cc"));
                 map.put("reduceProgressRatio", buildExtConfig.getLogReduceProgressRatio());
                 map.put("logWriter", logRecorder.getPrintWriter());
                 map.put("savePath", gitFile);
@@ -451,14 +452,14 @@ public class BuildExecuteManage implements Runnable {
                 // 判断是否执行失败
                 String errorMsg = ArrayUtil.get(result, 2);
                 if (errorMsg != null) {
-                    logRecorder.systemError("拉取代码失败：{}", errorMsg);
+                    logRecorder.systemError(I18nMessageUtil.get("i18n.pull_code_failed.70d6"), errorMsg);
                     return errorMsg;
                 }
                 // 判断hash 码和上次构建是否一致
                 if (checkRepositoryDiff != null && checkRepositoryDiff) {
                     if (StrUtil.equals(repositoryLastCommitId, result[0])) {
                         // 如果一致，则不构建
-                        String format = StrUtil.format("仓库代码没有任何变动终止本次构建：{} {}", result[0], msg);
+                        String format = StrUtil.format(I18nMessageUtil.get("i18n.no_changes_in_repository_code_with_details.fd9f"), result[0], msg);
                         logRecorder.systemError(format);
                         throw new DiyInterruptException(format);
                     }
@@ -476,14 +477,14 @@ public class BuildExecuteManage implements Runnable {
                 if (checkRepositoryDiff != null && checkRepositoryDiff) {
                     if (StrUtil.equals(repositoryLastCommitId, result[0])) {
                         // 如果一致，则不构建
-                        String format = StrUtil.format("仓库代码没有任何变动终止本次构建：{}", result[0]);
+                        String format = StrUtil.format(I18nMessageUtil.get("i18n.no_changes_in_repository_code.b1aa"), result[0]);
                         logRecorder.systemError(format);
                         throw new DiyInterruptException(format);
                     }
                 }
                 taskData.repositoryLastCommitId = result[0];
             } else {
-                String format = StrUtil.format("不支持的类型：{}", repoType.getDesc());
+                String format = StrUtil.format(I18nMessageUtil.get("i18n.unsupported_type_with_placeholder.71a2"), repoType.getDesc());
                 logRecorder.systemError(format);
                 return format;
             }
@@ -497,7 +498,7 @@ public class BuildExecuteManage implements Runnable {
         Opt.ofBlankAble(attachEnv).ifPresent(s -> {
             UrlQuery of = UrlQuery.of(attachEnv, CharsetUtil.CHARSET_UTF_8);
             Map<CharSequence, CharSequence> queryMap = of.getQueryMap();
-            logRecorder.system("读取附加变量：{} {}", attachEnv, CollUtil.size(queryMap));
+            logRecorder.system(I18nMessageUtil.get("i18n.read_additional_variables.5eb0"), attachEnv, CollUtil.size(queryMap));
             //
             Optional.ofNullable(queryMap).ifPresent(map -> {
                 for (Map.Entry<CharSequence, CharSequence> entry : map.entrySet()) {
@@ -524,7 +525,7 @@ public class BuildExecuteManage implements Runnable {
         List<DockerInfoModel> dockerInfoModels = dockerInfoService
             .queryByTag(buildInfoModel.getWorkspaceId(), fromTag);
         Map<String, Object> map = machineDockerServer.dockerParameter(dockerInfoModels);
-        Assert.notNull(map, fromTag + " 没有可用的 docker server");
+        Assert.notNull(map, fromTag + I18nMessageUtil.get("i18n.no_available_docker_server.9fc6"));
         taskData.dockerParameter = new HashMap<>(map);
         logRecorder.system("use docker {}", map.get("name"));
         logRecorder.info("");
@@ -565,10 +566,10 @@ public class BuildExecuteManage implements Runnable {
             int resultCode = Convert.toInt(execute, -100);
             // 严格模式
             if (buildExtraModule.strictlyEnforce()) {
-                return resultCode == 0 ? null : StrUtil.format("执行命令退出码非0，{}", resultCode);
+                return resultCode == 0 ? null : StrUtil.format(I18nMessageUtil.get("i18n.command_non_zero_exit_code.a6e1"), resultCode);
             }
         } catch (Exception e) {
-            logRecorder.error("构建调用容器异常", e);
+            logRecorder.error(I18nMessageUtil.get("i18n.build_call_container_exception.6e04"), e);
             return e.getMessage();
         }
         return null;
@@ -588,16 +589,16 @@ public class BuildExecuteManage implements Runnable {
         }
         String script = buildInfoModel.getScript();
         if (StrUtil.isEmpty(script)) {
-            String info = "没有需要执行的命令";
+            String info = I18nMessageUtil.get("i18n.no_command_to_execute.340b");
             logRecorder.systemError(info);
             return info;
         }
         if (StrUtil.startWith(script, ServerConst.REF_SCRIPT)) {
             String scriptId = StrUtil.removePrefix(script, ServerConst.REF_SCRIPT);
             ScriptModel keyAndGlobal = scriptServer.getByKey(scriptId);
-            Assert.notNull(keyAndGlobal, "请选择正确的脚本");
+            Assert.notNull(keyAndGlobal, I18nMessageUtil.get("i18n.select_correct_script.ff2d"));
             script = keyAndGlobal.getContext();
-            logRecorder.system("引入脚本内容：{}[{}]", keyAndGlobal.getName(), scriptId);
+            logRecorder.system(I18nMessageUtil.get("i18n.introducing_script_content.a55b"), keyAndGlobal.getName(), scriptId);
         }
         Map<String, String> environment = taskData.environmentMapBuilder.environment();
 
@@ -622,13 +623,13 @@ public class BuildExecuteManage implements Runnable {
                     }
                 });
             BuildExecuteManage.this.process = null;
-            logRecorder.system("执行脚本的退出码是：{}", waitFor);
+            logRecorder.system(I18nMessageUtil.get("i18n.script_exit_code.716e"), waitFor);
             // 判断是否为严格执行
             if (buildExtraModule.strictlyEnforce()) {
-                return waitFor == 0 ? null : StrUtil.format("执行命令退出码非0，{}", waitFor);
+                return waitFor == 0 ? null : StrUtil.format(I18nMessageUtil.get("i18n.command_non_zero_exit_code.a6e1"), waitFor);
             }
         } catch (Exception e) {
-            logRecorder.error("执行异常", e);
+            logRecorder.error(I18nMessageUtil.get("i18n.execution_exception.b0d5"), e);
             return e.getMessage();
         }
         return null;
@@ -673,7 +674,7 @@ public class BuildExecuteManage implements Runnable {
         }
         //
         BuildStatus buildStatus = buildInfoModel1.getReleaseMethod() != BuildReleaseMethod.No.getCode() ? BuildStatus.PubSuccess : BuildStatus.Success;
-        buildExecuteService.updateStatus(buildInfoModel1.getId(), this.logId, this.taskData.buildInfoModel.getBuildId(), buildStatus, "任务正常结束");
+        buildExecuteService.updateStatus(buildInfoModel1.getId(), this.logId, this.taskData.buildInfoModel.getBuildId(), buildStatus, I18nMessageUtil.get("i18n.task_ended_successfully.e176"));
         // 判断是否保留产物
         Boolean saveBuildFile = this.buildExtraModule.getSaveBuildFile();
         if (saveBuildFile != null && !saveBuildFile) {
@@ -692,7 +693,7 @@ public class BuildExecuteManage implements Runnable {
         suppliers.put("startReady", new IProcessItem() {
             @Override
             public String name() {
-                return "准备构建";
+                return I18nMessageUtil.get("i18n.prepare_to_build.1830");
             }
 
             @Override
@@ -703,7 +704,7 @@ public class BuildExecuteManage implements Runnable {
         suppliers.put("pull", new IProcessItem() {
             @Override
             public String name() {
-                return "拉取仓库代码";
+                return I18nMessageUtil.get("i18n.pull_repository_code.3f51");
             }
 
             @Override
@@ -714,7 +715,7 @@ public class BuildExecuteManage implements Runnable {
         suppliers.put("executeCommand", new IProcessItem() {
             @Override
             public String name() {
-                return "执行构建命令";
+                return I18nMessageUtil.get("i18n.build_command_execution.a55c");
             }
 
             @Override
@@ -725,7 +726,7 @@ public class BuildExecuteManage implements Runnable {
         suppliers.put("packageFile", new IProcessItem() {
             @Override
             public String name() {
-                return "打包产物";
+                return I18nMessageUtil.get("i18n.package_product.bfbb");
             }
 
             @Override
@@ -736,7 +737,7 @@ public class BuildExecuteManage implements Runnable {
         suppliers.put("release", new IProcessItem() {
             @Override
             public String name() {
-                return "发布产物";
+                return I18nMessageUtil.get("i18n.publish_product.5925");
             }
 
             @Override
@@ -747,7 +748,7 @@ public class BuildExecuteManage implements Runnable {
         suppliers.put("finish", new IProcessItem() {
             @Override
             public String name() {
-                return "构建结束";
+                return I18nMessageUtil.get("i18n.build_finished.7f38");
             }
 
             @Override
@@ -777,20 +778,20 @@ public class BuildExecuteManage implements Runnable {
 
     public void runTask() {
         currentThread = Thread.currentThread();
-        logRecorder.system("开始执行构建任务,任务等待时间：{}", DateUtil.formatBetween(SystemClock.now() - submitTaskTime));
+        logRecorder.system(I18nMessageUtil.get("i18n.start_executing_build_task.a5ac"), DateUtil.formatBetween(SystemClock.now() - submitTaskTime));
 
         // 判断任务是否被取消
         BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(this.logId);
         if (buildHistoryLog == null) {
-            logRecorder.systemError("构建记录丢失,无法继续构建");
+            logRecorder.systemError(I18nMessageUtil.get("i18n.build_record_lost.f6a2"));
             return;
         }
         if (buildHistoryLog.getStatus() == null || buildHistoryLog.getStatus() == BuildStatus.Cancel.getCode()) {
-            logRecorder.systemError("构建状态异常或者被取消");
+            logRecorder.systemError(I18nMessageUtil.get("i18n.build_status_abnormal.8ca1"));
             return;
         }
         BuildInfoModel buildInfoModel = this.taskData.buildInfoModel;
-        buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Ing, "开始构建,构建线程执行");
+        buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Ing, I18nMessageUtil.get("i18n.start_building_with_thread_execution.83cd"));
         //
         Map<String, IProcessItem> processItemMap = this.createProcess();
         // 依次执行流程，发生异常结束整个流程
@@ -810,11 +811,11 @@ public class BuildExecuteManage implements Runnable {
                 IProcessItem processItem = stringSupplierEntry.getValue();
                 //
                 long processItemStartTime = SystemClock.now();
-                logRecorder.system("开始执行 {}流程", processItem.name());
+                logRecorder.system(I18nMessageUtil.get("i18n.start_executing_process.9cb8"), processItem.name());
                 String interruptMsg = this.asyncWebHooks(processName);
                 if (interruptMsg != null) {
                     // 事件脚本中断构建流程
-                    logRecorder.system("执行中断 {} 流程,原因事件脚本中断", processItem.name());
+                    logRecorder.system(I18nMessageUtil.get("i18n.execution_interrupted_reason.e3d7"), processItem.name());
                     this.asyncWebHooks("stop", "process", processName, "statusMsg", interruptMsg);
                     buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Interrupt, interruptMsg);
                     stop = true;
@@ -823,34 +824,35 @@ public class BuildExecuteManage implements Runnable {
                 String errorMsg = processItem.execute();
                 if (errorMsg != null) {
                     // 有条件结束构建流程
-                    logRecorder.systemError("执行异常[{}]流程：{}", processItem.name(), errorMsg);
+                    logRecorder.systemError(I18nMessageUtil.get("i18n.execution_exception_with_flow.6d4b"), processItem.name(), errorMsg);
                     this.asyncWebHooks("stop", "process", processName, "statusMsg", errorMsg);
                     buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Error, errorMsg);
                     stop = true;
                     break;
                 }
-                logRecorder.system("执行结束 {}流程,耗时：{}", processItem.name(), DateUtil.formatBetween(SystemClock.now() - processItemStartTime));
+                logRecorder.system(I18nMessageUtil.get("i18n.execution_ended_with_duration.a59b"), processItem.name(), DateUtil.formatBetween(SystemClock.now() - processItemStartTime));
             }
             if (!stop) { // 没有执行 stop
                 this.asyncWebHooks("success");
             }
         } catch (LogRecorderCloseException logRecorderCloseException) {
-            log.warn("构建日志记录器已关闭,可能手动取消停止构建,流程:{}", processName);
+            log.warn(I18nMessageUtil.get("i18n.build_log_recorder_closed.1cc7"), processName);
         } catch (DiyInterruptException diyInterruptException) {
             // 主动中断
             this.asyncWebHooks("stop", "process", processName, "statusMsg", diyInterruptException.getMessage());
             buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Interrupt, diyInterruptException.getMessage());
         } catch (java.util.concurrent.CancellationException interruptException) {
             // 异常中断
-            this.asyncWebHooks("stop", "process", processName, "statusMsg", "系统中断异常");
-            buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Interrupt, "系统中断异常");
+            String string = I18nMessageUtil.get("i18n.system_interruption.e37c");
+            this.asyncWebHooks("stop", "process", processName, "statusMsg", string);
+            buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Interrupt, string);
         } catch (Exception e) {
             buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Error, e.getMessage());
-            logRecorder.error("构建失败:" + processName, e);
+            logRecorder.error(I18nMessageUtil.get("i18n.build_failed.a79a") + processName, e);
             this.asyncWebHooks("error", "process", processName, "statusMsg", e.getMessage());
         } finally {
             this.clearResources();
-            logRecorder.system("构建结束-累计耗时:{}", DateUtil.formatBetween(SystemClock.now() - startTime));
+            logRecorder.system(I18nMessageUtil.get("i18n.build_finished_duration.7f7c"), DateUtil.formatBetween(SystemClock.now() - startTime));
             this.asyncWebHooks("done");
             IoUtil.close(logRecorder);
             BaseServerController.removeAll();
@@ -862,7 +864,7 @@ public class BuildExecuteManage implements Runnable {
         try {
             this.runTask();
         } catch (Exception e) {
-            log.error("构建发生未知错误", e);
+            log.error(I18nMessageUtil.get("i18n.build_unknown_error.dad6"), e);
         } finally {
             BUILD_MANAGE_MAP.remove(buildInfoModel.getId());
         }
@@ -903,7 +905,7 @@ public class BuildExecuteManage implements Runnable {
                         map.put("JPOM_WEBHOOK_EVENT", DefaultWebhookPluginImpl.WebhookEvent.BUILD);
                         plugin.execute(s, map);
                     } catch (Exception e) {
-                        log.error("WebHooks 调用错误", e);
+                        log.error(I18nMessageUtil.get("i18n.webhooks_invocation_error.9792"), e);
                     }
                 })
             );
@@ -911,8 +913,8 @@ public class BuildExecuteManage implements Runnable {
         try {
             return this.noticeScript(type, map);
         } catch (Exception e) {
-            log.error("noticeScript 调用错误", e);
-            logRecorder.error("执行事件脚本错误", e);
+            log.error(I18nMessageUtil.get("i18n.notice_script_invocation_error.9002"), e);
+            logRecorder.error(I18nMessageUtil.get("i18n.execute_event_script_error.7c69"), e);
             // 执行事件脚本发送异常不终止构建流程
             return null;
         }
@@ -951,15 +953,15 @@ public class BuildExecuteManage implements Runnable {
     private String noticeScript(String noticeScriptId, String type, Map<String, Object> map) {
         ScriptModel scriptModel = scriptServer.getByKey(noticeScriptId);
         if (scriptModel == null) {
-            logRecorder.systemWarning("事件脚本不存在:{} {}", type, noticeScriptId);
+            logRecorder.systemWarning(I18nMessageUtil.get("i18n.event_script_does_not_exist.e726"), type, noticeScriptId);
             return null;
         }
         // 判断是否包含需要执行的事件
         if (!StrUtil.containsAnyIgnoreCase(scriptModel.getDescription(), type, "all")) {
-            log.warn("忽略执行事件脚本 {} {} {}", type, scriptModel.getName(), noticeScriptId);
+            log.warn(I18nMessageUtil.get("i18n.ignore_execution_event_script.8872"), type, scriptModel.getName(), noticeScriptId);
             return null;
         }
-        logRecorder.system("开始执行事件脚本： {}", type);
+        logRecorder.system(I18nMessageUtil.get("i18n.start_executing_event_script.377e"), type);
         // 环境变量
         Map<String, String> environment = taskData.environmentMapBuilder.environment(map);
         ScriptExecuteLogModel logModel = scriptExecuteLogServer.create(scriptModel, 3, this.taskData.buildInfoModel.getWorkspaceId());
@@ -989,15 +991,15 @@ public class BuildExecuteManage implements Runnable {
                     throw Lombok.sneakyThrow(e);
                 }
             });
-            logRecorder.system("执行 {} 类型脚本的退出码是：{}", type, waitFor);
+            logRecorder.system(I18nMessageUtil.get("i18n.execute_script_exit_code.64a8"), type, waitFor);
             scriptExecuteLogServer.updateStatus(logModel.getId(), CommandExecLogModel.Status.DONE, waitFor);
             // 判断是否为严格执行
             if (buildExtraModule.strictlyEnforce() && waitFor != 0) {
                 //logRecorder.systemError("严格执行模式，事件脚本返回状态码异常");
-                return "严格执行模式，事件脚本返回状态码异常," + waitFor;
+                return I18nMessageUtil.get("i18n.strict_execution_mode_event_script_error.c82a") + waitFor;
             }
             if (StrUtil.startWithIgnoreCase(lastMsg[0], "interrupt " + type)) {
-                return "事件脚本中断：" + lastMsg[0];
+                return I18nMessageUtil.get("i18n.event_script_interrupted.8c79") + lastMsg[0];
             }
             return null;
         } finally {
@@ -1017,7 +1019,7 @@ public class BuildExecuteManage implements Runnable {
      */
     public static boolean cancelTaskById(String id) {
         return Optional.ofNullable(BuildExecuteManage.BUILD_MANAGE_MAP.get(id)).map(buildExecuteManage1 -> {
-            buildExecuteManage1.cancelTask("手动取消任务");
+            buildExecuteManage1.cancelTask(I18nMessageUtil.get("i18n.manual_cancel_task.e592"));
             return true;
         }).orElse(false);
     }
@@ -1030,7 +1032,7 @@ public class BuildExecuteManage implements Runnable {
      * @return 匹配到到值
      */
     private static String fuzzyMatch(List<String> list, String pattern) {
-        Assert.notEmpty(list, "仓库没有任何分支或者标签");
+        Assert.notEmpty(list, I18nMessageUtil.get("i18n.no_branches_or_tags_in_repository.76b6"));
         if (AntPathUtil.ANT_PATH_MATCHER.isPattern(pattern)) {
             List<String> collect = list.stream().filter(s -> AntPathUtil.ANT_PATH_MATCHER.match(pattern, s)).collect(Collectors.toList());
             return CollUtil.getFirst(collect);

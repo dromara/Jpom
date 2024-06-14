@@ -13,6 +13,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.util.CommandUtil;
 
 import java.util.Map;
@@ -75,7 +76,7 @@ public class GitProcessFactory {
             log.info("git安装位置：{}", result);
             return true;
         } else {
-            log.warn("不支持的系统类型：{}", osInfo.getName());
+            log.warn(I18nMessageUtil.get("i18n.unsupported_system_type_with_placeholder.d5cc"), osInfo.getName());
             return false;
         }
         return false;

@@ -21,6 +21,7 @@ import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.ServerOpenApi;
 import org.dromara.jpom.common.UrlRedirectUtil;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.controller.outgiving.OutGivingWhitelistService;
 import org.dromara.jpom.func.files.model.FileStorageModel;
@@ -122,7 +123,7 @@ public class FileStorageController extends BaseServerController {
                                                String fileSumMd5) throws IOException {
         File userTempPath = serverConfig.getUserTempPath();
         this.uploadSharding(file, userTempPath.getAbsolutePath(), sliceId, totalSlice, nowSlice, fileSumMd5);
-        return JsonMessage.success("上传成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.upload_success.a769"));
     }
 
     /**
@@ -143,14 +144,14 @@ public class FileStorageController extends BaseServerController {
                                             String description,
                                             String aliasCode,
                                             HttpServletRequest request) throws IOException {
-        Opt.ofBlankAble(aliasCode).ifPresent(s -> Validator.validateGeneral(s, "别名码只能是英文、数字"));
+        Opt.ofBlankAble(aliasCode).ifPresent(s -> Validator.validateGeneral(s, I18nMessageUtil.get("i18n.alias_code_validation.8b99")));
         File storageSavePath = serverConfig.fileStorageSavePath();
         // 验证文件
         FileStorageModel fileStorageModel1 = fileStorageService.getByKey(fileSumMd5);
         if (fileStorageModel1 != null) {
             // 如果存在记录，判断文件是否存在
             File file = FileUtil.file(storageSavePath, fileStorageModel1.getPath());
-            Assert.state(!FileUtil.exist(file), "当前文件已经存在啦，请勿重复上传");
+            Assert.state(!FileUtil.exist(file), I18nMessageUtil.get("i18n.file_already_exists.d60c"));
         }
         // 合并文件
         File userTempPath = serverConfig.getUserTempPath();
@@ -176,7 +177,7 @@ public class FileStorageController extends BaseServerController {
         fileStorageModel.validUntil(keepDay, null);
         //
         fileStorageService.insert(fileStorageModel);
-        return JsonMessage.success("上传成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.upload_success.a769"));
     }
 
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -187,7 +188,7 @@ public class FileStorageController extends BaseServerController {
                                      String description,
                                      String aliasCode,
                                      HttpServletRequest request) throws IOException {
-        Opt.ofBlankAble(aliasCode).ifPresent(s -> Validator.validateGeneral(s, "别名码只能是英文、数字"));
+        Opt.ofBlankAble(aliasCode).ifPresent(s -> Validator.validateGeneral(s, I18nMessageUtil.get("i18n.alias_code_validation.8b99")));
         FileStorageModel storageModel = fileStorageService.getByKeyAndGlobal(id, request);
 
         FileStorageModel fileStorageModel = new FileStorageModel();
@@ -200,7 +201,7 @@ public class FileStorageController extends BaseServerController {
         //
         fileStorageModel.validUntil(keepDay, storageModel.getCreateTimeMillis());
         fileStorageService.updateById(fileStorageModel);
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 
     @GetMapping(value = "del", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -211,7 +212,7 @@ public class FileStorageController extends BaseServerController {
         for (String s : list) {
             this.delItem(s, request);
         }
-        return JsonMessage.success("删除成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 
     private void delItem(String id, HttpServletRequest request) {
@@ -250,13 +251,13 @@ public class FileStorageController extends BaseServerController {
         String aliasCode,
         Boolean global,
         HttpServletRequest request) throws IOException {
-        Opt.ofBlankAble(aliasCode).ifPresent(s -> Validator.validateGeneral(s, "别名码只能是英文、数字"));
+        Opt.ofBlankAble(aliasCode).ifPresent(s -> Validator.validateGeneral(s, I18nMessageUtil.get("i18n.alias_code_validation.8b99")));
         // 验证远程 地址
         ServerWhitelist whitelist = outGivingWhitelistService.getServerWhitelistData(request);
         whitelist.checkAllowRemoteDownloadHost(url);
         String workspace = fileStorageService.getCheckUserWorkspace(request);
         fileStorageService.download(url, global, workspace, keepDay, description, aliasCode);
-        return JsonMessage.success("开始异步下载");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.start_async_download.78cc"));
     }
 
     /**
@@ -271,7 +272,7 @@ public class FileStorageController extends BaseServerController {
         UserModel user = getUser();
         // 查询当前工作空间
         FileStorageModel item = fileStorageService.getByKey(id, request);
-        Assert.notNull(item, "没有对应的文件信息");
+        Assert.notNull(item, I18nMessageUtil.get("i18n.no_file_info.db01"));
         //
         FileStorageModel updateInfo;
         if (StrUtil.isEmpty(item.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {
@@ -286,7 +287,8 @@ public class FileStorageController extends BaseServerController {
             updateInfo = item;
         }
         Map<String, String> map = this.getBuildToken(updateInfo, request);
-        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
+        String string = I18nMessageUtil.get("i18n.reset_success.faa3");
+        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : string, map);
     }
 
     private Map<String, String> getBuildToken(FileStorageModel item, HttpServletRequest request) {

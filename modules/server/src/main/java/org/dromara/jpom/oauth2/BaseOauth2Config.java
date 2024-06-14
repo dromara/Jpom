@@ -17,6 +17,7 @@ import cn.hutool.core.util.ReflectUtil;
 import lombok.Data;
 import me.zhyd.oauth.config.AuthConfig;
 import me.zhyd.oauth.request.AuthRequest;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.springframework.util.Assert;
 
 import java.lang.reflect.Field;
@@ -39,7 +40,7 @@ public abstract class BaseOauth2Config {
         Set<Class<?>> classes = ClassUtil.scanPackageBySuper(BaseOauth2Config.class.getPackage().getName(), BaseOauth2Config.class);
         for (Class<?> aClass : classes) {
             Field field = ReflectUtil.getField(aClass, "KEY");
-            Assert.notNull(field, "没有配置 KEY 字段," + aClass.getName());
+            Assert.notNull(field, I18nMessageUtil.get("i18n.key_field_not_configured.7b22") + aClass.getName());
             String staticFieldValue = (String) ReflectUtil.getStaticFieldValue(field);
             BaseOauth2Config baseOauth2Config = (BaseOauth2Config) ReflectUtil.newInstanceIfPossible(aClass);
             DB_KEYS.put(baseOauth2Config.provide(), new Tuple(staticFieldValue, aClass));
@@ -94,9 +95,9 @@ public abstract class BaseOauth2Config {
      * 验证数据
      */
     public void check() {
-        Assert.hasText(this.clientId, "没有配置 clientId");
-        Assert.hasText(this.clientSecret, "没有配置 clientSecret");
-        Validator.validateMatchRegex(RegexPool.URL_HTTP, this.redirectUri, "请配置正确的重定向 url");
+        Assert.hasText(this.clientId, I18nMessageUtil.get("i18n.client_id_not_configured.ab8e"));
+        Assert.hasText(this.clientSecret, I18nMessageUtil.get("i18n.client_secret_not_configured.6923"));
+        Validator.validateMatchRegex(RegexPool.URL_HTTP, this.redirectUri, I18nMessageUtil.get("i18n.configure_correct_redirect_url.058e"));
     }
 
     /**

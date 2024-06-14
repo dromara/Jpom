@@ -13,6 +13,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.NodeModel;
@@ -106,7 +107,7 @@ public class NodeEditController extends BaseServerController {
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<String> save(HttpServletRequest request) {
         nodeService.update(request);
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
 
@@ -119,14 +120,14 @@ public class NodeEditController extends BaseServerController {
     @PostMapping(value = "del.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<String> del(@ValidatorItem String id, HttpServletRequest request) {
-        this.checkDataBind(id, request, "删除");
+        this.checkDataBind(id, request, I18nMessageUtil.get("i18n.delete_action.2f4a"));
         //
         {
             ProjectInfoCacheModel projectInfoCacheModel = new ProjectInfoCacheModel();
             projectInfoCacheModel.setNodeId(id);
             projectInfoCacheModel.setWorkspaceId(projectInfoCacheService.getCheckUserWorkspace(request));
             boolean exists = projectInfoCacheService.exists(projectInfoCacheModel);
-            Assert.state(!exists, "该节点下还存在项目，不能删除");
+            Assert.state(!exists, I18nMessageUtil.get("i18n.project_exists.f4e0"));
         }
         //
         {
@@ -134,24 +135,24 @@ public class NodeEditController extends BaseServerController {
             nodeScriptCacheModel.setNodeId(id);
             nodeScriptCacheModel.setWorkspaceId(nodeScriptServer.getCheckUserWorkspace(request));
             boolean exists = nodeScriptServer.exists(nodeScriptCacheModel);
-            Assert.state(!exists, "该节点下还存在脚本模版，不能删除");
+            Assert.state(!exists, I18nMessageUtil.get("i18n.script_template_exists.3f86"));
         }
         //
         this.delNodeData(id, request);
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
     private void checkDataBind(String id, HttpServletRequest request, String msg) {
         //  判断分发
         boolean checkNode = outGivingServer.checkNode(id, request);
-        Assert.state(!checkNode, "该节点存在分发项目，不能" + msg);
+        Assert.state(!checkNode, I18nMessageUtil.get("i18n.node_has_distribution_projects_cannot_delete.3987") + msg);
         boolean checkLogRead = logReadServer.checkNode(id, request);
-        Assert.state(!checkLogRead, "该节点存在日志搜索（阅读）项目，不能" + msg);
+        Assert.state(!checkLogRead, I18nMessageUtil.get("i18n.node_has_log_search_projects_cannot_delete.a388") + msg);
         // 监控
         boolean checkNode1 = monitorService.checkNode(id);
-        Assert.state(!checkNode1, "该节点存在监控项，不能" + msg);
+        Assert.state(!checkNode1, I18nMessageUtil.get("i18n.node_has_monitoring_items_cannot_delete.0304") + msg);
         boolean checkNode2 = buildService.checkNode(id, request);
-        Assert.state(!checkNode2, "该节点存在构建项，不能" + msg);
+        Assert.state(!checkNode2, I18nMessageUtil.get("i18n.node_has_build_items_cannot_delete.a952") + msg);
     }
 
     private void delNodeData(String id, HttpServletRequest request) {
@@ -172,12 +173,12 @@ public class NodeEditController extends BaseServerController {
     @GetMapping(value = "unbind.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<String> unbind(String id, HttpServletRequest request) {
-        this.checkDataBind(id, request, "解绑");
+        this.checkDataBind(id, request, I18nMessageUtil.get("i18n.unbind.6633"));
         //
         projectInfoCacheService.delCache(id, request);
         nodeScriptServer.delCache(id, request);
         this.delNodeData(id, request);
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
 
@@ -196,7 +197,7 @@ public class NodeEditController extends BaseServerController {
         //
         nodeService.checkUserWorkspace(toWorkspaceId);
         nodeService.syncToWorkspace(ids, nowWorkspaceId, toWorkspaceId);
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
     /**
@@ -217,8 +218,8 @@ public class NodeEditController extends BaseServerController {
         } else if (StrUtil.equalsIgnoreCase(method, "down")) {
             nodeService.sortMoveDown(id, compareId, request);
         } else {
-            return new JsonMessage<>(400, "不支持的方式" + method);
+            return new JsonMessage<>(400, I18nMessageUtil.get("i18n.unsupported_method.a1de") + method);
         }
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 }

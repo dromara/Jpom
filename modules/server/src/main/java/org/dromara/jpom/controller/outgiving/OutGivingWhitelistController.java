@@ -18,6 +18,7 @@ import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.func.files.service.StaticFileStorageService;
 import org.dromara.jpom.model.data.AgentWhitelist;
 import org.dromara.jpom.model.data.ServerWhitelist;
@@ -110,25 +111,25 @@ public class OutGivingWhitelistController extends BaseServerController {
                                                           String staticDir,
                                                           String allowRemoteDownloadHost,
                                                           String workspaceId) {
-        List<String> list = AgentWhitelist.parseToList(outGiving, true, "授权目录不能为空");
-        list = AgentWhitelist.covertToArray(list, "授权目录不能位于Jpom目录下");
+        List<String> list = AgentWhitelist.parseToList(outGiving, true, I18nMessageUtil.get("i18n.auth_directory_cannot_be_empty.21ba"));
+        list = AgentWhitelist.covertToArray(list, I18nMessageUtil.get("i18n.auth_directory_cannot_be_under_jpom.bb67"));
         String error = AgentWhitelist.findStartsWith(list);
-        Assert.isNull(error, "授权目录中不能存在包含关系：" + error);
+        Assert.isNull(error, I18nMessageUtil.get("i18n.auth_directory_cannot_contain_hierarchy.d6ca") + error);
         //
-        List<String> staticDirList = AgentWhitelist.parseToList(staticDir, false, "静态目录授权不能为空");
-        staticDirList = AgentWhitelist.covertToArray(staticDirList, 100, "静态目录授权不能位于Jpom目录下");
+        List<String> staticDirList = AgentWhitelist.parseToList(staticDir, false, I18nMessageUtil.get("i18n.static_directory_auth_cannot_be_empty.2cb2"));
+        staticDirList = AgentWhitelist.covertToArray(staticDirList, 100, I18nMessageUtil.get("i18n.static_directory_auth_cannot_be_under_jpom.8879"));
         error = AgentWhitelist.findStartsWith(staticDirList);
-        Assert.isNull(error, "静态目录中不能存在包含关系：" + error);
+        Assert.isNull(error, I18nMessageUtil.get("i18n.static_directory_cannot_contain_relation.1a90") + error);
 
         ServerWhitelist serverWhitelist = outGivingWhitelistService.getServerWhitelistData(workspaceId);
         serverWhitelist.setOutGiving(list);
         serverWhitelist.setStaticDir(staticDirList);
         //
-        List<String> allowRemoteDownloadHostList = AgentWhitelist.parseToList(allowRemoteDownloadHost, "运行远程下载的 host 不能配置为空");
+        List<String> allowRemoteDownloadHostList = AgentWhitelist.parseToList(allowRemoteDownloadHost, I18nMessageUtil.get("i18n.remote_download_host_cannot_be_empty.cdf5"));
         //
         if (CollUtil.isNotEmpty(allowRemoteDownloadHostList)) {
             for (String s : allowRemoteDownloadHostList) {
-                Assert.state(ReUtil.isMatch(RegexPool.URL_HTTP, s), "配置的远程地址不规范,请重新填写：" + s);
+                Assert.state(ReUtil.isMatch(RegexPool.URL_HTTP, s), I18nMessageUtil.get("i18n.invalid_remote_address_format.7f32") + s);
             }
         }
         serverWhitelist.setAllowRemoteDownloadHost(allowRemoteDownloadHostList == null ? null : CollUtil.newHashSet(allowRemoteDownloadHostList));
@@ -143,10 +144,10 @@ public class OutGivingWhitelistController extends BaseServerController {
             try {
                 staticFileStorageService.startLoad();
             } catch (Exception e) {
-                log.error("静态文件任务加载失败", e);
+                log.error(I18nMessageUtil.get("i18n.static_file_task_load_failure.b995"), e);
             }
         });
 
-        return JsonMessage.success("保存成功", resultData);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.save_succeeded.3b10"), resultData);
     }
 }

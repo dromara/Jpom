@@ -19,6 +19,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.data.WorkspaceModel;
 import org.dromara.jpom.model.user.UserBindWorkspaceModel;
 import org.dromara.jpom.model.user.UserModel;
@@ -61,7 +62,7 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
      * @param workspace 工作空间信息
      */
     public void updateUserWorkspace(String userId, List<String> workspace) {
-        Assert.notEmpty(workspace, "没有任何工作空间信息");
+        Assert.notEmpty(workspace, I18nMessageUtil.get("i18n.no_workspace_info.75ae"));
         List<UserBindWorkspaceModel> list = new HashSet<>(workspace).stream()
             .filter(s -> {
                 // 过滤
@@ -131,7 +132,7 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
         Entity entity = Entity.create();
         entity.set("userId", list);
         List<UserBindWorkspaceModel> userBindWorkspaceModels = super.listByEntity(entity);
-        Assert.notEmpty(userBindWorkspaceModels, "没有任何工作空间信息,请联系管理授权");
+        Assert.notEmpty(userBindWorkspaceModels, I18nMessageUtil.get("i18n.no_workspace_info_contact_admin_for_authorization.825f"));
         List<String> collect = userBindWorkspaceModels.stream().map(UserBindWorkspaceModel::getWorkspaceId).collect(Collectors.toList());
         return workspaceService.listById(collect);
     }
@@ -190,7 +191,7 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
         if (CollUtil.isEmpty(workspaceModels)) {
             return UserBindWorkspaceModel.PermissionResult.builder()
                 .state(UserBindWorkspaceModel.PermissionResultEnum.FAIL)
-                .msg("您没有对应管理权限:-3")
+                .msg(I18nMessageUtil.get("i18n.no_management_permission2.35d4"))
                 .build();
         }
         List<String> permissionGroupIds = workspaceModels.stream()
@@ -200,7 +201,7 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
         if (CollUtil.isEmpty(permissionGroups)) {
             return UserBindWorkspaceModel.PermissionResult.builder()
                 .state(UserBindWorkspaceModel.PermissionResultEnum.FAIL)
-                .msg("您没有对应管理权限:-2")
+                .msg(I18nMessageUtil.get("i18n.no_management_permission.fd25"))
                 .build();
         }
         // 判断禁止执行
@@ -211,10 +212,10 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
                 String startTime = jsonObject.getString("startTime");
                 String endTime = jsonObject.getString("endTime");
                 if (StrUtil.isEmpty(reason)) {
-                    return StrUtil.format("【禁止操作】当前时段禁止执行 {} 至 {}", startTime, endTime);
+                    return StrUtil.format(I18nMessageUtil.get("i18n.forbidden_operation_time_range.92bf"), startTime, endTime);
                 }
-                return StrUtil.format("【禁止操作】{} {} 至 {}", reason, startTime, endTime);
-            }).orElse("【禁止操作】当前时段禁止执行");
+                return StrUtil.format(I18nMessageUtil.get("i18n.forbidden_operation_range.247f"), reason, startTime, endTime);
+            }).orElse(I18nMessageUtil.get("i18n.forbidden_operation_time.d83d"));
             return UserBindWorkspaceModel.PermissionResult.builder()
                 .state(UserBindWorkspaceModel.PermissionResultEnum.MISS_PROHIBIT)
                 .msg(msg)
@@ -279,12 +280,12 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
                     .collect(Collectors.joining(StrUtil.COMMA));
                 String startTime = jsonObject.getString("startTime");
                 String endTime = jsonObject.getString("endTime");
-                return StrUtil.format("周{} 的 {} 至 {}", weekStr, startTime, endTime);
+                return StrUtil.format(I18nMessageUtil.get("i18n.week_day_range_format.ebec"), weekStr, startTime, endTime);
             })
             .collect(Collectors.joining(StrUtil.SPACE));
         return UserBindWorkspaceModel.PermissionResult.builder()
             .state(UserBindWorkspaceModel.PermissionResultEnum.MISS_PERIOD)
-            .msg("【禁止操作】当前时间不在可执行的时间段内,限制时间段:" + ruleStr)
+            .msg(I18nMessageUtil.get("i18n.forbidden_operation_time_period.86a3") + ruleStr)
             .build();
     }
 

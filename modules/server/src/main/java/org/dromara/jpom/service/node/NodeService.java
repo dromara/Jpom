@@ -16,6 +16,7 @@ import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.data.SshModel;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
@@ -69,13 +70,13 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
         // 创建对象
         NodeModel nodeModel = ServletUtil.toBean(request, NodeModel.class, true);
         String id = nodeModel.getId();
-        Assert.hasText(id, "没有节点id");
-        Assert.hasText(nodeModel.getName(), "请填写节点名称");
+        Assert.hasText(id, I18nMessageUtil.get("i18n.node_id_not_found.2f9e"));
+        Assert.hasText(nodeModel.getName(), I18nMessageUtil.get("i18n.node_name_required.5bdf"));
         // 兼容就数据判断
         String checkId = StrUtil.replace(id, StrUtil.DASHED, StrUtil.UNDERLINE);
-        Validator.validateGeneral(checkId, 2, Const.ID_MAX_LEN, "节点id不能为空并且2-50（英文字母 、数字和下划线）");
+        Validator.validateGeneral(checkId, 2, Const.ID_MAX_LEN, I18nMessageUtil.get("i18n.node_id_required_and_format.5926"));
 
-        Assert.hasText(nodeModel.getName(), "节点名称 不能为空");
+        Assert.hasText(nodeModel.getName(), I18nMessageUtil.get("i18n.node_name_required.ac0f"));
         String workspaceId = this.getCheckUserWorkspace(request);
         nodeModel.setWorkspaceId(workspaceId);
 
@@ -83,7 +84,7 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
         String sshId = nodeModel.getSshId();
         if (StrUtil.isNotEmpty(sshId)) {
             SshModel byKey = sshService.getByKey(sshId, request);
-            Assert.notNull(byKey, "对应的 SSH 不存在");
+            Assert.notNull(byKey, I18nMessageUtil.get("i18n.ssh_does_not_exist.5bec"));
             Entity entity = Entity.create();
             entity.set("sshId", sshId);
             entity.set("workspaceId", workspaceId);
@@ -91,7 +92,7 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
                 entity.set("id", StrUtil.format(" <> {}", id));
             }
             boolean exists = super.exists(entity);
-            Assert.state(!exists, "对应的SSH已经被其他节点绑定啦");
+            Assert.state(!exists, I18nMessageUtil.get("i18n.ssh_already_bound_to_other_node.2d4e"));
         }
         NodeModel update = new NodeModel();
         update.setId(id);
@@ -121,7 +122,7 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
         where.setWorkspaceId(workspaceId);
         where.setMachineId(machineId);
         NodeModel nodeModel = this.queryByBean(where);
-        Assert.isNull(nodeModel, () -> "对应工作空间已经存在该节点啦:" + nodeModel.getName());
+        Assert.isNull(nodeModel, () -> I18nMessageUtil.get("i18n.node_already_exists_in_workspace.9499") + nodeModel.getName());
     }
 
     public boolean existsNode2(String workspaceId, String machineId) {
@@ -142,7 +143,7 @@ public class NodeService extends BaseWorkspaceService<NodeModel> {
     public void syncToWorkspace(String ids, String nowWorkspaceId, String workspaceId) {
         StrUtil.splitTrim(ids, StrUtil.COMMA).forEach(id -> {
             NodeModel data = this.getByKey(id, false, entity -> entity.set("workspaceId", nowWorkspaceId));
-            Assert.notNull(data, "没有对应到节点信息");
+            Assert.notNull(data, I18nMessageUtil.get("i18n.no_corresponding_node_info.cd24"));
             this.existsNode(workspaceId, data.getMachineId());
             // 不存在则添加节点
             data.setId(null);

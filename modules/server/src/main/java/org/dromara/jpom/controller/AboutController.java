@@ -18,6 +18,7 @@ import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.http.MediaType;
@@ -71,7 +72,7 @@ public class AboutController {
             .sorted((o1, o2) -> StrUtil.compare(o1.getFilename(), o2.getFilename(), true))
             .collect(Collectors.toList());
         Resource first = CollUtil.getFirst(resourceList);
-        Assert.notNull(first, "没有隐私文件");
+        Assert.notNull(first, I18nMessageUtil.get("i18n.private_file_not_found.ee45"));
         return JsonMessage.success("", IoUtil.readUtf8(first.getInputStream()));
     }
 

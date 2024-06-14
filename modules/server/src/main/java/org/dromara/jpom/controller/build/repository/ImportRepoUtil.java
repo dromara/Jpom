@@ -26,6 +26,7 @@ import lombok.Lombok;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
@@ -154,7 +155,7 @@ public class ImportRepoUtil {
                 total = StrUtil.isNotBlank(totalHeader) ? Integer.parseInt(totalHeader) : totalCount;
             }
             log.debug(String.format("status: %s body: %s headers: %s", status, body, headers));
-            Assert.state(execute.isOk(), String.format("请求失败: status: %s body: %s headers: %s", status, body, headers));
+            Assert.state(execute.isOk(), String.format(I18nMessageUtil.get("i18n.request_failed_message.9c71"), status, body, headers));
         }
         JSONArray jsonArray = JSONUtil.parse(body).getByPath(provider.getRepoListPath(), JSONArray.class);
         List<JSONObject> data = jsonArray.stream().map(o -> {
@@ -190,7 +191,7 @@ public class ImportRepoUtil {
 
     public String getCurrentUserName(String platform, String token, String baseUrl) {
         baseUrl = StrUtil.blankToDefault(baseUrl, getProviderConfig(platform).getBaseUrl());
-        Assert.state(StrUtil.isNotBlank(baseUrl), String.format("请填写 %s 的 地址", platform));
+        Assert.state(StrUtil.isNotBlank(baseUrl), String.format(I18nMessageUtil.get("i18n.please_fill_in_address_of.9e02"), platform));
         ImportRepoProviderConfig provider = getProviderConfig(platform);
         HttpRequest request = HttpUtil.createRequest(Method.valueOf(provider.getCurrentUserMethod()), baseUrl + provider.getCurrentUserUrl());
         setCommonParams(platform, request, token);
@@ -201,7 +202,7 @@ public class ImportRepoUtil {
             int status = execute.getStatus();
             Map<String, List<String>> headers = execute.headers();
             log.debug("status: {} body: {} headers: {}", status, body, headers);
-            Assert.state(execute.isOk(), String.format("请求失败: status: %s body: %s headers: %s", status, body, headers));
+            Assert.state(execute.isOk(), String.format(I18nMessageUtil.get("i18n.request_failed_message.9c71"), status, body, headers));
         }
         return JSONUtil.parse(body).getByPath(provider.getUserNamePath(), String.class);
     }

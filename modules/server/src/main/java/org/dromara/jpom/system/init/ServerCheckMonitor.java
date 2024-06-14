@@ -9,7 +9,6 @@
  */
 package org.dromara.jpom.system.init;
 
-import cn.hutool.core.thread.ThreadUtil;
 import cn.keepbx.jpom.event.ISystemTask;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
@@ -18,6 +17,7 @@ import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.common.RemoteVersion;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.func.assets.AssetsExecutorPoolService;
 import org.dromara.jpom.model.data.NodeModel;
@@ -72,10 +72,10 @@ public class ServerCheckMonitor implements ILoadEvent, ISystemTask {
             jsonObject.put("ids", strings);
             JsonMessage<Object> jsonMessage = NodeForward.requestBody(nodeModel, NodeUrl.SCRIPT_DEL_EXEC_LOG, jsonObject);
             if (!jsonMessage.success()) {
-                log.error("删除脚本模版执行数据错误:{}", jsonMessage);
+                log.error(I18nMessageUtil.get("i18n.delete_script_template_execution_error.8bc5"), jsonMessage);
             }
         } catch (Exception e) {
-            log.error("同步脚本异常", e);
+            log.error(I18nMessageUtil.get("i18n.synchronization_script_exception.9c70"), e);
         }
     }
 

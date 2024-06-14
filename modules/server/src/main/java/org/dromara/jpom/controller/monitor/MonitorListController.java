@@ -17,6 +17,7 @@ import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONArray;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.PageResultDto;
@@ -84,7 +85,7 @@ public class MonitorListController extends BaseServerController {
      */
     @RequestMapping(value = "deleteMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public IJsonMessage<Object> deleteMonitor(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败") String id, HttpServletRequest request) {
+    public IJsonMessage<Object> deleteMonitor(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.delete_failure.acf0") String id, HttpServletRequest request) {
         //
 
         int delByKey = monitorService.delByKey(id, request);
@@ -92,7 +93,7 @@ public class MonitorListController extends BaseServerController {
             // 删除日志
             dbMonitorNotifyLogService.delByWorkspace(request, entity -> entity.set("monitorId", id));
         }
-        return JsonMessage.success("删除成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 
 
@@ -107,8 +108,8 @@ public class MonitorListController extends BaseServerController {
     @RequestMapping(value = "updateMonitor", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<Object> updateMonitor(String id,
-                                              @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空") String name,
-                                              @ValidatorItem(msg = "请配置监控周期") String execCron,
+                                              @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.monitor_name_cannot_be_empty.514a") String name,
+                                              @ValidatorItem(msg = "i18n.configure_monitoring_interval.9741") String execCron,
                                               String notifyUser, String webhook,
                                               HttpServletRequest request) {
         String status = getParameter("status");
@@ -119,26 +120,26 @@ public class MonitorListController extends BaseServerController {
         List<String> notifyUserList = jsonArray.toJavaList(String.class);
         if (CollUtil.isNotEmpty(notifyUserList)) {
             for (String userId : notifyUserList) {
-                Assert.state(userService.exists(new UserModel(userId)), "没有对应的用户：" + userId);
+                Assert.state(userService.exists(new UserModel(userId)), I18nMessageUtil.get("i18n.no_user_specified.6650") + userId);
             }
         }
         String projects = getParameter("projects");
         JSONArray projectsArray = JSONArray.parseArray(projects);
         List<MonitorModel.NodeProject> nodeProjects = projectsArray.toJavaList(MonitorModel.NodeProject.class);
-        Assert.notEmpty(nodeProjects, "请至少选择一个节点");
+        Assert.notEmpty(nodeProjects, I18nMessageUtil.get("i18n.at_least_one_node_required.a290"));
         for (MonitorModel.NodeProject nodeProject : nodeProjects) {
-            Assert.notEmpty(nodeProject.getProjects(), "请至少选择一个项目");
+            Assert.notEmpty(nodeProject.getProjects(), I18nMessageUtil.get("i18n.at_least_one_project_required.2bbd"));
             for (String project : nodeProject.getProjects()) {
                 boolean exists = projectInfoCacheService.exists(nodeProject.getNode(), project);
-                Assert.state(exists, "没有对应的项目：" + project);
+                Assert.state(exists, I18nMessageUtil.get("i18n.no_project_specified.0076") + project);
             }
         }
         //
         // 设置参数
         if (StrUtil.isNotEmpty(webhook)) {
-            Validator.validateMatchRegex(RegexPool.URL_HTTP, webhook, "WebHooks 地址不合法");
+            Validator.validateMatchRegex(RegexPool.URL_HTTP, webhook, I18nMessageUtil.get("i18n.invalid_webhooks_address.d836"));
         }
-        Assert.state(CollUtil.isNotEmpty(notifyUserList) || StrUtil.isNotEmpty(webhook), "请选择一位报警联系人或者填写webhook");
+        Assert.state(CollUtil.isNotEmpty(notifyUserList) || StrUtil.isNotEmpty(webhook), I18nMessageUtil.get("i18n.alarm_contact_or_webhook_required.6c24"));
 
         boolean start = "on".equalsIgnoreCase(status);
         MonitorModel monitorModel = monitorService.getByKey(id);
@@ -156,10 +157,10 @@ public class MonitorListController extends BaseServerController {
         if (StrUtil.isEmpty(id)) {
             //添加监控
             monitorService.insert(monitorModel);
-            return JsonMessage.success("添加成功");
+            return JsonMessage.success(I18nMessageUtil.get("i18n.addition_succeeded.3fda"));
         }
 
         monitorService.updateById(monitorModel, request);
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 }

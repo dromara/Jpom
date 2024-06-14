@@ -12,6 +12,7 @@ package org.dromara.jpom.socket.handler;
 import cn.hutool.core.io.FileUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
@@ -71,7 +72,7 @@ public class SystemLogHandler extends BaseProxyHandler {
                 ServiceFileTailWatcher.addWatcher(file, session);
                 attributes.put("nowFile", file);
             } catch (Exception io) {
-                log.error("监听日志变化", io);
+                log.error(I18nMessageUtil.get("i18n.listen_log_changes.9081"), io);
                 SocketSessionUtil.send(session, io.getMessage());
             }
         }

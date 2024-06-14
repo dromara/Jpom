@@ -12,6 +12,7 @@ package org.dromara.jpom.storage;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.db.*;
 import org.springframework.util.Assert;
 
@@ -39,19 +40,19 @@ public class H2TableBuilderImpl implements IStorageSqlBuilderService {
                     //  CREATE UNIQUE INDEX IF NOT EXISTS SYSTEMMONITORLOG_INDEX1 ON PUBLIC.SYSTEMMONITORLOG (nodeId, monitorTime);
                     String field = viewIndexData.getField();
                     List<String> fields = StrUtil.splitTrim(field, "+");
-                    Assert.notEmpty(fields, "索引未配置字段");
+                    Assert.notEmpty(fields, I18nMessageUtil.get("i18n.index_field_not_configured.96d9"));
                     stringBuilder.append("CREATE UNIQUE INDEX IF NOT EXISTS ").append(viewIndexData.getName()).append(" ON PUBLIC.").append(viewIndexData.getTableName()).append(" (").append(CollUtil.join(fields, StrUtil.COMMA)).append(")");
                     break;
                 }
                 case "ADD": {
                     String field = viewIndexData.getField();
                     List<String> fields = StrUtil.splitTrim(field, "+");
-                    Assert.notEmpty(fields, "索引未配置字段");
+                    Assert.notEmpty(fields, I18nMessageUtil.get("i18n.index_field_not_configured.96d9"));
                     stringBuilder.append("CREATE INDEX IF NOT EXISTS ").append(viewIndexData.getName()).append(" ON PUBLIC.").append(viewIndexData.getTableName()).append(" (").append(CollUtil.join(fields, StrUtil.COMMA)).append(")");
                     break;
                 }
                 default:
-                    throw new IllegalArgumentException("不支持的类型：" + indexType);
+                    throw new IllegalArgumentException(I18nMessageUtil.get("i18n.unsupported_type_with_colon2.7de2") + indexType);
             }
             stringBuilder.append(";").append(StrUtil.LF);
 
@@ -83,7 +84,7 @@ public class H2TableBuilderImpl implements IStorageSqlBuilderService {
                     stringBuilder.append("drop table if exists ").append(viewAlterData.getTableName());
                     break;
                 default:
-                    throw new IllegalArgumentException("不支持的类型：" + alterType);
+                    throw new IllegalArgumentException(I18nMessageUtil.get("i18n.unsupported_type_with_colon2.7de2") + alterType);
             }
             stringBuilder.append(";").append(StrUtil.LF);
 
@@ -118,7 +119,7 @@ public class H2TableBuilderImpl implements IStorageSqlBuilderService {
             .filter(tableViewData -> tableViewData.getPrimaryKey() != null && tableViewData.getPrimaryKey())
             .map(TableViewRowData::getName)
             .collect(Collectors.toList());
-        Assert.notEmpty(primaryKeys, "表没有主键");
+        Assert.notEmpty(primaryKeys, I18nMessageUtil.get("i18n.table_without_primary_key.7392"));
         stringBuilder.append(StrUtil.TAB).append("CONSTRAINT ").append(name).append("_PK PRIMARY KEY (").append(CollUtil.join(primaryKeys, StrUtil.COMMA)).append(")").append(StrUtil.LF);
         stringBuilder.append(");").append(StrUtil.LF);
         // 表描述
@@ -132,7 +133,7 @@ public class H2TableBuilderImpl implements IStorageSqlBuilderService {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("`").append(tableViewRowData.getName()).append("`").append(StrUtil.SPACE);
         String type = tableViewRowData.getType();
-        Assert.hasText(type, "未正确配置数据类型");
+        Assert.hasText(type, I18nMessageUtil.get("i18n.data_type_not_configured_correctly.bf16"));
         type = type.toUpperCase();
         switch (type) {
             case "LONG":
@@ -157,7 +158,7 @@ public class H2TableBuilderImpl implements IStorageSqlBuilderService {
                 stringBuilder.append("DOUBLE").append(StrUtil.SPACE);
                 break;
             default:
-                throw new IllegalArgumentException("不支持的数据类型:" + type);
+                throw new IllegalArgumentException(I18nMessageUtil.get("i18n.data_type_not_supported.fd03") + type);
         }
         //
         Boolean notNull = tableViewRowData.getNotNull();

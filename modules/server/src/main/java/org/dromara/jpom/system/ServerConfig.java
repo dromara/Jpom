@@ -17,6 +17,7 @@ import cn.hutool.system.SystemUtil;
 import lombok.Data;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.*;
 import org.dromara.jpom.model.AgentFileModel;
 import org.dromara.jpom.model.user.UserModel;
@@ -125,7 +126,7 @@ public class ServerConfig implements InitializingBean {
     public File getUserTempPath() {
         UserModel userModel = BaseServerController.getUserModel();
         if (userModel == null) {
-            throw new JpomRuntimeException("没有登录");
+            throw new JpomRuntimeException(I18nMessageUtil.get("i18n.not_logged_in.6605"));
         }
         return getUserTempPath(userModel.getId());
     }
@@ -183,7 +184,7 @@ public class ServerConfig implements InitializingBean {
         ClusterConfig clusterConfig = this.getCluster();
         String clusterId1 = clusterConfig.getId();
         if (!Validator.isGeneral(clusterId1, 1, 20)) {
-            throw new JpomRuntimeException("请配置正确的集群Id,【jpom.clusterId】");
+            throw new JpomRuntimeException(I18nMessageUtil.get("i18n.configure_correct_cluster_id.5a78"));
         }
 
         int initReadLine = ObjectUtil.defaultIfNull(this.initReadLine, 10);

@@ -14,6 +14,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.Data;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.util.AntPathUtil;
 import org.dromara.jpom.util.FileUtils;
 import org.springframework.util.Assert;
@@ -91,7 +92,7 @@ public class ResultDirFileAction {
      */
     public void check() {
         if (this.getType() == Type.ORIGINAL) {
-            FileUtils.checkSlip(getPath(), e -> new IllegalArgumentException("产物目录不能越级：" + e.getMessage()));
+            FileUtils.checkSlip(getPath(), e -> new IllegalArgumentException(I18nMessageUtil.get("i18n.product_directory_cannot_skip_levels.3ad4") + e.getMessage()));
         } else if (this.getType() == Type.ANT_PATH) {
             // ant 模式存在特殊字符，直接判断会发生异常并且判断不到
         }
@@ -104,7 +105,7 @@ public class ResultDirFileAction {
      * @return ResultDirFileAction
      */
     public static ResultDirFileAction parse(String resultDirFile) {
-        Assert.notNull(resultDirFile, "resultDirFile 不能为空");
+        Assert.notNull(resultDirFile, I18nMessageUtil.get("i18n.result_dir_file_required.5f02"));
         return new ResultDirFileAction(resultDirFile);
     }
 

@@ -16,6 +16,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.data.SystemIpConfigModel;
 import org.dromara.jpom.service.system.SystemParametersServer;
 import org.springframework.context.annotation.Configuration;
@@ -65,7 +66,7 @@ public class IpInterceptor implements HandlerMethodInterceptor {
                 return true;
             }
         } catch (Exception e) {
-            log.warn("IP授权拦截异常,请检查配置是否正确", e);
+            log.warn(I18nMessageUtil.get("i18n.ip_authorization_interception_exception.8130"), e);
             return true;
         }
         ServletUtil.write(response, JsonMessage.getString(IP_ACCESS_CODE, "Prohibition of access"), MediaType.APPLICATION_JSON_VALUE);

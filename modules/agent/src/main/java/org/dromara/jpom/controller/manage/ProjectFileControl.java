@@ -28,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseAgentController;
 import org.dromara.jpom.common.commander.CommandOpResult;
 import org.dromara.jpom.common.commander.ProjectCommander;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.controller.manage.vo.DiffFileVo;
@@ -89,12 +90,12 @@ public class ProjectFileControl extends BaseAgentController {
         File fileDir = FileUtil.file(lib, StrUtil.emptyToDefault(path, FileUtil.FILE_SEPARATOR));
         boolean exist = FileUtil.exist(fileDir);
         if (!exist) {
-            return JsonMessage.success("查询成功", Collections.emptyList());
+            return JsonMessage.success(I18nMessageUtil.get("i18n.query_success.d72b"), Collections.emptyList());
         }
         //
         File[] filesAll = fileDir.listFiles();
         if (ArrayUtil.isEmpty(filesAll)) {
-            return JsonMessage.success("查询成功", Collections.emptyList());
+            return JsonMessage.success(I18nMessageUtil.get("i18n.query_success.d72b"), Collections.emptyList());
         }
         boolean disableScanDir = pim.isDisableScanDir();
         List<JSONObject> arrayFile = FileUtils.parseInfo(filesAll, false, lib, disableScanDir);
@@ -103,7 +104,7 @@ public class ProjectFileControl extends BaseAgentController {
             String filename = jsonObject.getString("filename");
             jsonObject.put("textFileEdit", AgentWhitelist.checkSilentFileSuffix(whitelist.getAllowEditSuffix(), filename));
         }
-        return JsonMessage.success("查询成功", arrayFile);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.query_success.d72b"), arrayFile);
     }
 
     /**
@@ -118,7 +119,7 @@ public class ProjectFileControl extends BaseAgentController {
         NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel(id);
         //
         List<DiffFileVo.DiffItem> data = diffFileVo.getData();
-        Assert.notEmpty(data, "没有要对比的数据");
+        Assert.notEmpty(data, I18nMessageUtil.get("i18n.comparison_data_not_found.413e"));
         // 扫描项目目录下面的所有文件
         File lib = projectInfoService.resolveLibFile(projectInfoModel);
         String path = FileUtil.file(lib, Opt.ofBlankAble(diffFileVo.getDir()).orElse(StrUtil.SLASH)).getAbsolutePath();
@@ -183,7 +184,7 @@ public class ProjectFileControl extends BaseAgentController {
         boolean closeFirst = BooleanUtil.toBoolean(closeFirstStr);
         if (closeFirst) {
             CommandOpResult result = projectCommander.execCommand(ConsoleCommandOp.stop, projectInfoModel);
-            Assert.state(result.isSuccess(), "关闭项目失败：" + result.msgStr());
+            Assert.state(result.isSuccess(), I18nMessageUtil.get("i18n.close_project_failure.a1d2") + result.msgStr());
         }
         String clearType = getParameter("clearType");
         // 判断是否需要清空
@@ -201,7 +202,7 @@ public class ProjectFileControl extends BaseAgentController {
         String tempPathName = agentConfig.getFixedTempPathName();
         this.uploadSharding(file, tempPathName, sliceId, totalSlice, nowSlice, fileSumMd5);
 
-        return JsonMessage.success("上传成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.upload_success.a769"));
     }
 
     @RequestMapping(value = "sharding-merge", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -245,7 +246,7 @@ public class ProjectFileControl extends BaseAgentController {
                     CompressionFileUtil.unCompress(file, lib, stripComponentsValue);
                 } finally {
                     if (!FileUtil.del(file)) {
-                        log.error("删除文件失败：" + file.getPath());
+                        log.error(I18nMessageUtil.get("i18n.delete_file_failure_with_full_stop.6c96") + file.getPath());
                     }
                 }
             } else {
@@ -262,24 +263,24 @@ public class ProjectFileControl extends BaseAgentController {
         } finally {
             projectFileBackupService.checkDiff(pim, backupId);
         }
-        return JsonMessage.success("上传成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.upload_success.a769"));
     }
 
     private JsonMessage<CommandOpResult> saveProjectFileAfter(String after, NodeProjectInfoModel pim) throws Exception {
         if (StrUtil.isEmpty(after)) {
             return null;
         }
-        log.debug("开始准备项目重启：{} {}", pim.getId(), after);
+        log.debug(I18nMessageUtil.get("i18n.prepare_restart.8251"), pim.getId(), after);
         //
         AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(after, AfterOpt.No.getCode()));
         if ("restart".equalsIgnoreCase(after) || afterOpt == AfterOpt.Restart) {
             CommandOpResult result = projectCommander.execCommand(ConsoleCommandOp.restart, pim);
 
-            return new JsonMessage<>(result.isSuccess() ? 200 : 405, "上传成功并重启", result);
+            return new JsonMessage<>(result.isSuccess() ? 200 : 405, I18nMessageUtil.get("i18n.upload_success_and_restart.7bc3"), result);
         } else if (afterOpt == AfterOpt.Order_Restart || afterOpt == AfterOpt.Order_Must_Restart) {
             CommandOpResult result = projectCommander.execCommand(ConsoleCommandOp.restart, pim);
 
-            return new JsonMessage<>(result.isSuccess() ? 200 : 405, "上传成功并重启", result);
+            return new JsonMessage<>(result.isSuccess() ? 200 : 405, I18nMessageUtil.get("i18n.upload_success_and_restart.7bc3"), result);
         }
         return null;
     }
@@ -296,20 +297,20 @@ public class ProjectFileControl extends BaseAgentController {
                 // 清空文件
                 if (FileUtil.clean(file)) {
                     projectCommander.asyncWebHooks(pim, "fileChange", "changeEvent", "delete", "levelName", levelName, "deleteType", type, "fileName", filename);
-                    return JsonMessage.success("清除成功");
+                    return JsonMessage.success(I18nMessageUtil.get("i18n.clear_success_message.51f4"));
                 }
                 boolean run = projectCommander.isRun(pim);
-                Assert.state(!run, "文件被占用，请先停止项目");
-                return new JsonMessage<>(500, "删除失败：" + file.getAbsolutePath());
+                Assert.state(!run, I18nMessageUtil.get("i18n.file_in_use_stop_project_first.a2c3"));
+                return new JsonMessage<>(500, I18nMessageUtil.get("i18n.delete_failure_with_colon_and_full_stop.bc42") + file.getAbsolutePath());
             } else {
                 // 删除文件
-                Assert.hasText(filename, "请选择要删除的文件");
+                Assert.hasText(filename, I18nMessageUtil.get("i18n.select_file_to_delete.33d6"));
                 file = FileUtil.file(file, filename);
                 if (FileUtil.del(file)) {
                     projectCommander.asyncWebHooks(pim, "fileChange", "changeEvent", "delete", "levelName", levelName, "deleteType", type, "fileName", filename);
-                    return JsonMessage.success("删除成功");
+                    return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
                 }
-                return new JsonMessage<>(500, "删除失败");
+                return new JsonMessage<>(500, I18nMessageUtil.get("i18n.delete_failure.acf0"));
             }
         } finally {
             projectFileBackupService.checkDiff(pim, backupId);
@@ -327,7 +328,7 @@ public class ProjectFileControl extends BaseAgentController {
         try {
             //
             List<DiffFileVo.DiffItem> data = diffFileVo.getData();
-            Assert.notEmpty(data, "没有要对比的数据");
+            Assert.notEmpty(data, I18nMessageUtil.get("i18n.comparison_data_not_found.413e"));
             File libFile = projectInfoService.resolveLibFile(projectInfoModel);
             //
             File path = FileUtil.file(libFile, Opt.ofBlankAble(dir).orElse(StrUtil.SLASH));
@@ -336,10 +337,10 @@ public class ProjectFileControl extends BaseAgentController {
                 if (FileUtil.del(file)) {
                     continue;
                 }
-                return new JsonMessage<>(500, "删除失败：" + file.getAbsolutePath());
+                return new JsonMessage<>(500, I18nMessageUtil.get("i18n.delete_failure_with_colon_and_full_stop.bc42") + file.getAbsolutePath());
             }
             projectCommander.asyncWebHooks(projectInfoModel, "fileChange", "changeEvent", "batch-delete", "levelName", dir);
-            return JsonMessage.success("删除成功");
+            return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
         } finally {
             projectFileBackupService.checkDiff(projectInfoModel, backupId);
         }
@@ -400,7 +401,7 @@ public class ProjectFileControl extends BaseAgentController {
         } else {
             FileUtil.copy(file, targetFile, false);
         }
-        return JsonMessage.success("复制成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.copy_success.20a4"));
     }
 
     /**
@@ -416,7 +417,7 @@ public class ProjectFileControl extends BaseAgentController {
         filePath = StrUtil.emptyToDefault(filePath, File.separator);
         File libFile = projectInfoService.resolveLibFile(pim);
         File file = FileUtil.file(libFile, filePath, filename);
-        Assert.state(FileUtil.isDirectory(file), "请选择文件夹进行压缩");
+        Assert.state(FileUtil.isDirectory(file), I18nMessageUtil.get("i18n.select_folder_to_compress.915f"));
         String ext;
         if (StrUtil.equals(type, "zip")) {
             ext = ".zip";
@@ -425,7 +426,7 @@ public class ProjectFileControl extends BaseAgentController {
         } else if (StrUtil.equals(type, "tar.gz")) {
             ext = ".tar.gz";
         } else {
-            return JsonMessage.fail("不支持的压缩类型," + type);
+            return JsonMessage.fail(I18nMessageUtil.get("i18n.compression_type_not_supported.9dea") + type);
         }
         int counter = 0;
         String baseName = FileUtil.mainName(file);
@@ -445,7 +446,7 @@ public class ProjectFileControl extends BaseAgentController {
         try (Archiver archiver = CompressUtil.createArchiver(Charset.defaultCharset(), FileUtil.extName(targetFile), targetFile)) {
             archiver.add(file);
         }
-        return JsonMessage.success("压缩成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.compression_success.80b3"));
     }
 
     /**
@@ -469,7 +470,7 @@ public class ProjectFileControl extends BaseAgentController {
         try {
             FileUtil.writeString(fileText, FileUtil.file(libFile, filePath, filename), charset);
             projectCommander.asyncWebHooks(pim, "fileChange", "changeEvent", "edit", "levelName", filePath, "fileName", filename);
-            return JsonMessage.success("文件写入成功");
+            return JsonMessage.success(I18nMessageUtil.get("i18n.file_write_success.804a"));
         } finally {
             projectFileBackupService.checkDiff(pim, backupId);
         }
@@ -485,7 +486,7 @@ public class ProjectFileControl extends BaseAgentController {
      */
     @GetMapping(value = "download", produces = MediaType.APPLICATION_JSON_VALUE)
     public void download(String id, String filename, String levelName, HttpServletResponse response) {
-        Assert.hasText(filename, "请选择文件");
+        Assert.hasText(filename, I18nMessageUtil.get("i18n.select_file.9feb"));
 //		String safeFileName = pathSafe(filename);
 //		if (StrUtil.isEmpty(safeFileName)) {
 //			return JsonMessage.getString(405, "非法操作");
@@ -495,13 +496,13 @@ public class ProjectFileControl extends BaseAgentController {
         try {
             File file = FileUtil.file(libFile, StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
             if (file.isDirectory()) {
-                ServletUtil.write(response, JsonMessage.getString(400, "暂不支持下载文件夹"), MediaType.APPLICATION_JSON_VALUE);
+                ServletUtil.write(response, JsonMessage.getString(400, I18nMessageUtil.get("i18n.folder_download_not_supported.c3b7")), MediaType.APPLICATION_JSON_VALUE);
                 return;
             }
             ServletUtil.write(response, file);
         } catch (Exception e) {
-            log.error("下载文件异常", e);
-            ServletUtil.write(response, JsonMessage.getString(400, "下载失败。请刷新页面后重试", e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
+            log.error(I18nMessageUtil.get("i18n.download_exception.e616"), e);
+            ServletUtil.write(response, JsonMessage.getString(400, I18nMessageUtil.get("i18n.download_failed_retry.c113"), e.getMessage()), MediaType.APPLICATION_JSON_VALUE);
         }
     }
 
@@ -517,7 +518,7 @@ public class ProjectFileControl extends BaseAgentController {
      */
     @PostMapping(value = "remote_download", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<String> remoteDownload(String id, String url, String levelName, String unzip, Integer stripComponents) {
-        Assert.hasText(url, "请输入正确的远程地址");
+        Assert.hasText(url, I18nMessageUtil.get("i18n.correct_remote_address_required.0ce1"));
         NodeProjectInfoModel pim = getProjectInfoModel();
         File libFile = projectInfoService.resolveLibFile(pim);
         String tempPathName = agentConfig.getTempPathName();
@@ -537,7 +538,7 @@ public class ProjectFileControl extends BaseAgentController {
                     CompressionFileUtil.unCompress(downloadFile, file, stripComponentsValue);
                 } finally {
                     if (!FileUtil.del(downloadFile)) {
-                        log.error("删除文件失败：" + file.getPath());
+                        log.error(I18nMessageUtil.get("i18n.delete_file_failure_with_full_stop.6c96") + file.getPath());
                     }
                 }
             } else {
@@ -545,10 +546,10 @@ public class ProjectFileControl extends BaseAgentController {
                 FileUtil.move(downloadFile, file, true);
             }
             projectCommander.asyncWebHooks(pim, "fileChange", "changeEvent", "remoteDownload", "levelName", levelName, "fileName", file.getName(), "url", url);
-            return JsonMessage.success("下载成功文件大小：" + fileSize);
+            return JsonMessage.success(I18nMessageUtil.get("i18n.download_file_size.d4de") + fileSize);
         } catch (Exception e) {
-            log.error("下载远程文件异常", e);
-            return new JsonMessage<>(500, "下载远程文件失败:" + e.getMessage());
+            log.error(I18nMessageUtil.get("i18n.download_remote_file_exception.3ee0"), e);
+            return new JsonMessage<>(500, I18nMessageUtil.get("i18n.download_remote_file_failed.fcc3") + e.getMessage());
         } finally {
             projectFileBackupService.checkDiff(pim, backupId);
         }
@@ -569,7 +570,7 @@ public class ProjectFileControl extends BaseAgentController {
         File libFile = projectInfoService.resolveLibFile(projectInfoModel);
         File file = FileUtil.file(libFile, StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
         //
-        Assert.state(!FileUtil.exist(file), "文件夹或者文件已存在");
+        Assert.state(!FileUtil.exist(file), I18nMessageUtil.get("i18n.folder_or_file_exists.c687"));
         boolean folder = !Convert.toBool(unFolder, false);
         if (folder) {
             FileUtil.mkdir(file);
@@ -577,7 +578,7 @@ public class ProjectFileControl extends BaseAgentController {
             FileUtil.touch(file);
         }
         projectCommander.asyncWebHooks(projectInfoModel, "fileChange", "changeEvent", "newFileOrFolder", "levelName", levelName, "fileName", filename, "folder", folder);
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
     /**
@@ -596,12 +597,12 @@ public class ProjectFileControl extends BaseAgentController {
         File file = FileUtil.file(libFile, StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
         File newFile = FileUtil.file(libFile, StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), newname);
 
-        Assert.state(FileUtil.exist(file), "文件不存在");
-        Assert.state(!FileUtil.exist(newFile), "文件名已经存在拉");
+        Assert.state(FileUtil.exist(file), I18nMessageUtil.get("i18n.file_not_found.d952"));
+        Assert.state(!FileUtil.exist(newFile), I18nMessageUtil.get("i18n.file_name_already_exists.0d4e"));
 
         FileUtil.rename(file, newname, false);
         projectCommander.asyncWebHooks(projectInfoModel, "fileChange", "changeEvent", "rename", "levelName", levelName, "fileName", filename, "newname", newname);
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
 }

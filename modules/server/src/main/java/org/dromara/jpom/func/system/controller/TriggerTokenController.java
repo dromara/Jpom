@@ -14,6 +14,7 @@ import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.BaseIdModel;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.user.TriggerTokenLogBean;
 import org.dromara.jpom.permission.ClassFeature;
@@ -58,7 +59,7 @@ public class TriggerTokenController {
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<String> delete(String id) {
         triggerTokenLogServer.delete(id);
-        return JsonMessage.success("删除成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 
     /**
@@ -74,15 +75,15 @@ public class TriggerTokenController {
             String type = triggerTokenLogBean.getType();
             ITriggerToken byType = triggerTokenLogServer.getByType(type);
             if (byType == null) {
-                triggerTokenLogBean.setDataName("ERROR:类型不存在" + type);
+                triggerTokenLogBean.setDataName(I18nMessageUtil.get("i18n.type_not_exist_error.09de") + type);
             } else {
                 BaseIdModel byKey = byType.getByKey(triggerTokenLogBean.getDataId());
                 if (byKey == null) {
-                    triggerTokenLogBean.setDataName("ERROR:关联数据丢失");
+                    triggerTokenLogBean.setDataName(I18nMessageUtil.get("i18n.associated_data_lost_error.becb"));
                 } else {
                     Object name = BeanUtil.getProperty(byKey, "name");
                     if (name == null) {
-                        triggerTokenLogBean.setDataName("ERROR:关联数据名称不存在");
+                        triggerTokenLogBean.setDataName(I18nMessageUtil.get("i18n.associated_data_name_not_exist_error.583e"));
                     } else {
                         triggerTokenLogBean.setDataName(name.toString());
                     }

@@ -19,6 +19,7 @@ import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseAgentController;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.commander.AbstractProjectCommander;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.configuration.AgentConfig;
@@ -113,7 +114,7 @@ public class AgentCacheManageController extends BaseAgentController implements I
      * @return json
      */
     @RequestMapping(value = "clearCache", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<String> clearCache(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "类型错误") String type) {
+    public IJsonMessage<String> clearCache(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.type_error.395f") String type) {
         switch (type) {
             case "pidPort":
                 AbstractProjectCommander.PID_PORT.clear();
@@ -121,20 +122,20 @@ public class AgentCacheManageController extends BaseAgentController implements I
             case "oldJarsSize": {
                 File oldJarsPath = JpomManifest.getOldJarsPath();
                 boolean clean = CommandUtil.systemFastDel(oldJarsPath);
-                Assert.state(!clean, "清空旧版本重新包失败");
+                Assert.state(!clean, I18nMessageUtil.get("i18n.clear_old_version_package_failed.021c"));
                 break;
             }
             case "fileSize": {
                 File tempPath = configBean.getTempPath();
                 boolean clean = CommandUtil.systemFastDel(tempPath);
-                Assert.state(!clean, "清空文件缓存失败");
+                Assert.state(!clean, I18nMessageUtil.get("i18n.clear_file_cache_failed.5cd1"));
                 break;
             }
             default:
-                return new JsonMessage<>(405, "没有对应类型：" + type);
+                return new JsonMessage<>(405, I18nMessageUtil.get("i18n.no_type_specified.8c65") + type);
 
         }
-        return JsonMessage.success("清空成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.clear_success.2685"));
     }
 
     @Override

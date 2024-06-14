@@ -15,6 +15,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
@@ -53,7 +54,7 @@ public class FreeScriptHandler extends BaseProxyHandler {
 
         String content = json.getString("content");
         if (StrUtil.isEmpty(content)) {
-            SocketSessionUtil.send(session, "没有需要执行的内容");
+            SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.no_content_to_execute.66aa"));
             session.close();
             return null;
         }
@@ -90,7 +91,7 @@ public class FreeScriptHandler extends BaseProxyHandler {
             try {
                 session.close();
             } catch (IOException e) {
-                log.error("关闭客户端回话异常", e);
+                log.error(I18nMessageUtil.get("i18n.close_client_session_exception.530a"), e);
             }
             return;
         }

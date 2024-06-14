@@ -15,6 +15,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.plugins.PluginConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.db.StorageServiceFactory;
 import org.h2.store.FileLister;
 import org.h2.tools.DeleteDbFiles;
@@ -76,7 +77,7 @@ public class DefaultDbH2PluginImpl implements IDefaultPlugin {
             String dbName = (String) parameter.get("dbName");
             return this.hasDbFiles(dbPath, dbName);
         } else {
-            throw new IllegalArgumentException("不支持的类型");
+            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.unsupported_type.7495"));
         }
         return "done";
     }

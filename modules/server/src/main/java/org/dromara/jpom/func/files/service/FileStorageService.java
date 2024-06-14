@@ -27,12 +27,13 @@ import cn.keepbx.jpom.event.ISystemTask;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.func.files.model.FileStorageModel;
 import org.dromara.jpom.service.IStatusRecover;
 import org.dromara.jpom.service.ITriggerToken;
 import org.dromara.jpom.service.h2db.BaseGlobalOrWorkspaceService;
 import org.dromara.jpom.system.ServerConfig;
-import org.dromara.jpom.configuration.BuildExtConfig;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -77,7 +78,7 @@ public class FileStorageService extends BaseGlobalOrWorkspaceService<FileStorage
         long startTime = SystemClock.now();
         {
             fileStorageModel.setId(uuid);
-            fileStorageModel.setName("文件下载中");
+            fileStorageModel.setName(I18nMessageUtil.get("i18n.file_downloading.7a8f"));
             String empty = StrUtil.emptyToDefault(description, StrUtil.EMPTY);
 
             fileStorageModel.setDescription(StrUtil.format("{} 远程下载 url：{}", empty, url));
@@ -108,7 +109,7 @@ public class FileStorageService extends BaseGlobalOrWorkspaceService<FileStorage
                 String md5 = SecureUtil.md5(fileFromUrl);
                 FileStorageModel storageModel = this.getByKey(md5);
                 if (storageModel != null) {
-                    this.updateError(uuid, "文件已经存在啦");
+                    this.updateError(uuid, I18nMessageUtil.get("i18n.file_already_exists.983d"));
                     FileUtil.del(fileFromUrl);
                     return;
                 }
@@ -133,7 +134,7 @@ public class FileStorageService extends BaseGlobalOrWorkspaceService<FileStorage
                 Entity id = Entity.create().set("id", uuid);
                 this.update(updateEntity, id);
             } catch (Exception e) {
-                log.error("下载文件失败", e);
+                log.error(I18nMessageUtil.get("i18n.download_failed_generic.be4f"), e);
                 this.updateError(uuid, e.getMessage());
             }
         });
@@ -180,11 +181,11 @@ public class FileStorageService extends BaseGlobalOrWorkspaceService<FileStorage
         fileStorageModel.setId(id);
         String fileSize = FileUtil.readableFileSize(progressSize);
         desc = StrUtil.emptyToDefault(desc, fileSize);
-        fileStorageModel.setName("文件下载中：" + desc);
+        fileStorageModel.setName(I18nMessageUtil.get("i18n.file_downloading_status.c995") + desc);
         fileStorageModel.setStatus(0);
         fileStorageModel.setSize(progressSize);
 
-        fileStorageModel.setProgressDesc(StrUtil.format("当前进度：{} ,文件总大小：{}，已经下载：{}", desc, FileUtil.readableFileSize(total), fileSize));
+        fileStorageModel.setProgressDesc(StrUtil.format(I18nMessageUtil.get("i18n.download_progress.898a"), desc, FileUtil.readableFileSize(total), fileSize));
         this.updateById(fileStorageModel);
     }
 
@@ -197,7 +198,7 @@ public class FileStorageService extends BaseGlobalOrWorkspaceService<FileStorage
     private void updateError(String id, String error) {
         FileStorageModel fileStorageModel = new FileStorageModel();
         fileStorageModel.setId(id);
-        fileStorageModel.setName("文件下载失败：" + StrUtil.maxLength(error, 200));
+        fileStorageModel.setName(I18nMessageUtil.get("i18n.file_download_failed.7983") + StrUtil.maxLength(error, 200));
         fileStorageModel.setStatus(2);
         fileStorageModel.setProgressDesc(error);
         this.updateById(fileStorageModel);
@@ -267,7 +268,7 @@ public class FileStorageService extends BaseGlobalOrWorkspaceService<FileStorage
         }
         File storageSavePath = serverConfig.fileStorageSavePath();
         for (FileStorageModel storageModel : storageModels) {
-            log.info("开始删除 {} 文件 {}", storageModel.getName(), storageModel.getPath());
+            log.info(I18nMessageUtil.get("i18n.start_deleting_files.210c"), storageModel.getName(), storageModel.getPath());
             File fileStorageFile = FileUtil.file(storageSavePath, storageModel.getPath());
             FileUtil.del(fileStorageFile);
             this.delByKey(storageModel.getId());
@@ -277,7 +278,7 @@ public class FileStorageService extends BaseGlobalOrWorkspaceService<FileStorage
     @Override
     public int statusRecover() {
         FileStorageModel update = new FileStorageModel();
-        update.setName("系统重启取消下载任务");
+        update.setName(I18nMessageUtil.get("i18n.system_restart_cancel_download.444e"));
         update.setModifyTimeMillis(SystemClock.now());
         update.setStatus(2);
         Entity updateEntity = this.dataBeanToEntity(update);

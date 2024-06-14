@@ -22,6 +22,7 @@ import cn.keepbx.jpom.plugins.IPlugin;
 import cn.keepbx.jpom.plugins.PluginConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.JpomManifest;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContextInitializer;
@@ -72,7 +73,7 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
     public static IPlugin getPlugin(String name) {
         List<PluginItemWrap> pluginItemWraps = PLUGIN_MAP.get(name);
         PluginItemWrap first = CollUtil.getFirst(pluginItemWraps);
-        Assert.notNull(first, "对应找到对应到插件：" + name);
+        Assert.notNull(first, I18nMessageUtil.get("i18n.plugin_not_found.a6e5") + name);
         return first.getPlugin();
     }
 
@@ -129,7 +130,7 @@ public class PluginFactory implements ApplicationContextInitializer<Configurable
     }
 
     private static void addPlugin(String pluginName, File file) {
-        log.info("加载：{} 插件", pluginName);
+        log.info(I18nMessageUtil.get("i18n.load_plugin.1f64"), pluginName);
         ClassLoader contextClassLoader = ClassLoaderUtil.getClassLoader();
         JarClassLoader.loadJar((URLClassLoader) contextClassLoader, file);
     }

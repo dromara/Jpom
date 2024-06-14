@@ -20,6 +20,7 @@ import cn.hutool.extra.servlet.ServletUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.ClientAbortException;
 import org.dromara.jpom.common.BaseJpomController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
 
@@ -42,7 +43,7 @@ public abstract class BaseDownloadApiController extends BaseJpomController {
 
     protected long[] resolveRange(HttpServletRequest request, long fileSize, String id, String name, HttpServletResponse response) {
         String range = ServletUtil.getHeader(request, HttpHeaders.RANGE, CharsetUtil.CHARSET_UTF_8);
-        log.debug("下载文件 {} {} {}", id, name, range);
+        log.debug(I18nMessageUtil.get("i18n.download_file_description.10cb"), id, name, range);
         long fromPos = 0, toPos, downloadSize;
         if (StrUtil.isEmpty(range)) {
             downloadSize = fileSize;
@@ -57,10 +58,10 @@ public abstract class BaseDownloadApiController extends BaseJpomController {
             //  Range: bytes=500- 表示从第 500 字节开始到文件结束部分的内容
             //  Range: bytes=0-0,-1 表示第一个和最后一个字节
             //  Range: bytes=500-600,601-999 同时指定几个范围
-            Assert.state(!StrUtil.contains(rangeByte, StrUtil.COMMA), "不支持分片多端下载");
+            Assert.state(!StrUtil.contains(rangeByte, StrUtil.COMMA), I18nMessageUtil.get("i18n.multi_download_not_supported.94b9"));
             // TODO 解析更多格式的 RANGE 请求头
             long[] split = StrUtil.splitToLong(rangeByte, StrUtil.DASHED);
-            Assert.state(split != null, "range 传入的信息不正确");
+            Assert.state(split != null, I18nMessageUtil.get("i18n.incorrect_range_information.a41c"));
             if (split.length == 2) {
                 // Range: bytes=0-499 表示第 0-499 字节范围的内容
                 toPos = split[1];
@@ -75,10 +76,10 @@ public abstract class BaseDownloadApiController extends BaseJpomController {
                     fromPos = split[0];
                     toPos = fileSize;
                 } else {
-                    throw new IllegalArgumentException("不支持的 range 格式 " + rangeByte);
+                    throw new IllegalArgumentException(I18nMessageUtil.get("i18n.range_format_not_supported.d69e") + rangeByte);
                 }
             } else {
-                throw new IllegalArgumentException("不支持的 range 格式 " + rangeByte);
+                throw new IllegalArgumentException(I18nMessageUtil.get("i18n.range_format_not_supported.d69e") + rangeByte);
             }
             downloadSize = toPos > fromPos ? (toPos - fromPos) : (fileSize - fromPos);
         }
@@ -97,7 +98,7 @@ public abstract class BaseDownloadApiController extends BaseJpomController {
     }
 
     public void download(File file, long fileSize, String name, long[] resolveRange, HttpServletResponse response) throws IOException {
-        Assert.state(FileUtil.isFile(file), "文件已经不存在啦");
+        Assert.state(FileUtil.isFile(file), I18nMessageUtil.get("i18n.file_does_not_exist_anymore.2fab"));
         String contentType = ObjectUtil.defaultIfNull(FileUtil.getMimeType(name), "application/octet-stream");
         String charset = ObjectUtil.defaultIfNull(response.getCharacterEncoding(), CharsetUtil.UTF_8);
         response.setHeader("Content-Disposition", StrUtil.format("attachment;filename=\"{}\"",
@@ -143,9 +144,9 @@ public abstract class BaseDownloadApiController extends BaseJpomController {
             }
             response.flushBuffer();
         } catch (ClientAbortException clientAbortException) {
-            log.warn("客户端终止连接：{}", clientAbortException.getMessage());
+            log.warn(I18nMessageUtil.get("i18n.client_terminated_connection.6886"), clientAbortException.getMessage());
         } catch (Exception e) {
-            log.error("数据下载失败", e);
+            log.error(I18nMessageUtil.get("i18n.data_download_failed.9499"), e);
             if (out != null) {
                 out.write(StrUtil.bytes("error:" + e.getMessage()));
             }

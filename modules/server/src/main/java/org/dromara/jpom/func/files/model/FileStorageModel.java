@@ -27,7 +27,8 @@ import org.dromara.jpom.model.BaseWorkspaceModel;
  * @since 2023/3/16
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "FILE_STORAGE", name = "文件管理中心")
+@TableName(value = "FILE_STORAGE",
+    nameKey = "i18n.file_management_center.0f5f")
 @Data
 @NoArgsConstructor
 public class FileStorageModel extends BaseWorkspaceModel implements IFileStorage {

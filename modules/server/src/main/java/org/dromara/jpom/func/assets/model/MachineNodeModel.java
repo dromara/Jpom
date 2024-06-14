@@ -30,7 +30,8 @@ import java.util.List;
  * @since 2023/2/18
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "MACHINE_NODE_INFO", name = "机器节点信息")
+@TableName(value = "MACHINE_NODE_INFO",
+    nameKey = "i18n.machine_node_info.6a75")
 @Data
 public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
     /**

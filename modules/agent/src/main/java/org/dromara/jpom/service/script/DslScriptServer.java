@@ -21,6 +21,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.ProjectLogConfig;
 import org.dromara.jpom.exception.IllegalArgument2Exception;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
@@ -116,12 +117,14 @@ public class DslScriptServer {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("status", false);
         if (scriptProcess == null) {
-            jsonObject.put("msg", "流程不存在");
+            String value = I18nMessageUtil.get("i18n.process_does_not_exist.4e39");
+            jsonObject.put("msg", value);
             return new Tuple(jsonObject, null);
         }
         String scriptId = scriptProcess.getScriptId();
         if (StrUtil.isEmpty(scriptId)) {
-            jsonObject.put("msg", "请填写脚本模板id");
+            String value = I18nMessageUtil.get("i18n.script_template_id_required.f339");
+            jsonObject.put("msg", value);
             return new Tuple(jsonObject, null);
         }
         //
@@ -142,7 +145,8 @@ public class DslScriptServer {
             jsonObject.put("scriptId", scriptId);
             return new Tuple(jsonObject, scriptFile);
         }
-        jsonObject.put("msg", "脚本模版不存在:" + scriptId);
+        String value = I18nMessageUtil.get("i18n.script_template_not_exist.e05f") + scriptId;
+        jsonObject.put("msg", value);
         return new Tuple(jsonObject, null);
     }
 

@@ -19,6 +19,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.system.AgentAutoUser;
 import org.dromara.jpom.system.JpomRuntimeException;
 import org.dromara.jpom.util.JsonFileUtil;
@@ -112,7 +113,7 @@ public class AgentAuthorize {
             // 生成密码授权字符串
             this.authorize = SecureUtil.sha1(this.agentName + "@" + this.agentPwd);
         } else {
-            log.warn("authorized 不能重复加载");
+            log.warn(I18nMessageUtil.get("i18n.authorized_cannot_be_reloaded.6ece"));
         }
         //
         JvmUtil.checkJpsNormal();

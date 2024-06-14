@@ -17,6 +17,7 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.interceptor.LoginInterceptor;
 import org.dromara.jpom.common.interceptor.NotLogin;
 import org.dromara.jpom.common.validator.ValidatorConfig;
@@ -74,19 +75,19 @@ public class InstallController extends BaseServerController {
     @NotLogin
     public IJsonMessage<JSONObject> installSubmit(
         @ValidatorConfig(value = {
-            @ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "登录名不能为空"),
-            @ValidatorItem(value = ValidatorRule.NOT_BLANK, range = UserModel.USER_NAME_MIN_LEN + ":" + Const.ID_MAX_LEN, msg = "登录名长度范围" + UserModel.USER_NAME_MIN_LEN + "-" + Const.ID_MAX_LEN),
-            @ValidatorItem(value = ValidatorRule.WORD, msg = "登录名不能包含汉字并且不能包含特殊字符")
+            @ValidatorItem(value = ValidatorRule.NOT_EMPTY, msg = "i18n.login_name_cannot_be_empty.9a99"),
+            @ValidatorItem(value = ValidatorRule.NOT_BLANK, range = UserModel.USER_NAME_MIN_LEN + ":" + Const.ID_MAX_LEN, msg = "i18n.login_name_length_range.fe8d"),
+            @ValidatorItem(value = ValidatorRule.WORD, msg = "i18n.login_name_cannot_contain_chinese_and_special_characters.48a8")
         }) String userName,
-        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空") String userPwd) {
+        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.password_cannot_be_empty.89b5") String userPwd) {
         //
-        Assert.state(!userService.canUse(), "系统已经初始化过啦，请勿重复初始化");
+        Assert.state(!userService.canUse(), I18nMessageUtil.get("i18n.system_already_initialized.743c"));
 
         boolean systemOccupyUserName = StrUtil.equalsAnyIgnoreCase(userName, UserModel.DEMO_USER, Const.SYSTEM_ID, UserModel.SYSTEM_ADMIN);
-        Assert.state(!systemOccupyUserName, "当前登录名已经被系统占用啦");
+        Assert.state(!systemOccupyUserName, I18nMessageUtil.get("i18n.login_name_already_taken_message.b01f"));
         // 创建用户
         UserModel userModel = new UserModel();
-        userModel.setName(UserModel.SYSTEM_OCCUPY_NAME);
+        userModel.setName(UserModel.SYSTEM_OCCUPY_NAME.get());
         userModel.setId(userName);
         userModel.setSalt(userService.generateSalt());
         userModel.setPassword(SecureUtil.sha1(userPwd + userModel.getSalt()));
@@ -96,8 +97,8 @@ public class InstallController extends BaseServerController {
             BaseServerController.resetInfo(userModel);
             userService.insert(userModel);
         } catch (Exception e) {
-            log.error("初始化用户失败", e);
-            return new JsonMessage<>(400, "初始化失败:" + e.getMessage());
+            log.error(I18nMessageUtil.get("i18n.initialize_user_failure.fe27"), e);
+            return new JsonMessage<>(400, I18nMessageUtil.get("i18n.initialization_failure.19e9") + e.getMessage());
         }
         //自动登录
         setSessionAttribute(LoginInterceptor.SESSION_NAME, userModel);
@@ -110,7 +111,7 @@ public class InstallController extends BaseServerController {
         jsonObject.put("mfaKey", tfaKey);
         jsonObject.put("url", TwoFactorAuthUtils.generateOtpAuthUrl(userName, tfaKey));
         jsonObject.put("tokenData", userLoginDto);
-        return JsonMessage.success("初始化成功", jsonObject);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.initialization_success.4725"), jsonObject);
     }
 
 }

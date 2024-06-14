@@ -17,6 +17,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.BaseWorkspaceModel;
 import org.dromara.jpom.script.CommandParam;
@@ -31,7 +32,8 @@ import java.io.InputStream;
  * @author bwcx_jzy
  * @since 2022/1/19
  */
-@TableName(value = "SERVER_SCRIPT_INFO", name = "脚本模版")
+@TableName(value = "SERVER_SCRIPT_INFO",
+    nameKey = "i18n.script_template.1f77")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ScriptModel extends BaseWorkspaceModel {
@@ -76,7 +78,7 @@ public class ScriptModel extends BaseWorkspaceModel {
 
     public static File scriptPath(String id) {
         if (StrUtil.isEmpty(id)) {
-            throw new IllegalArgumentException("id 为空");
+            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.id_is_empty.3bbf"));
         }
         File path = JpomApplication.getInstance().getScriptPath();
         return FileUtil.file(path, id);
