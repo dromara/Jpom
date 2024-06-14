@@ -374,7 +374,7 @@ public class ExtractI18nTest {
                     // 可以的后缀也等于值的 md5 前缀
                     return key;
                 }
-                System.out.println("翻译前后的值相等但是 md5 不一致：" + md5 + "," + last);
+                System.err.println("翻译前后的值相等但是 md5 不一致：" + md5 + "," + last);
             }
         }
         return null;
