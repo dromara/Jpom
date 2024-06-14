@@ -86,5 +86,5 @@ export const statusMap = {
 
 export const taskTypeMap = {
   0: 'SSH',
-  1: '节点'
+  1: t('api.file-manager.release-task-log.e076d90b')
 }
