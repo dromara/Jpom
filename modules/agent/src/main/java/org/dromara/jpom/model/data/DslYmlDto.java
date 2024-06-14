@@ -15,6 +15,7 @@ import cn.hutool.setting.yaml.YamlUtil;
 import cn.keepbx.jpom.model.BaseJsonModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.springframework.util.Assert;
 
 import java.io.ByteArrayInputStream;
@@ -218,7 +219,7 @@ public class DslYmlDto extends BaseJsonModel {
      */
     public DslYmlDto.BaseProcess getDslProcess(String opt) {
         DslYmlDto.BaseProcess baseProcess = this.tryDslProcess(opt);
-        Assert.notNull(baseProcess, StrUtil.format("DSL 未配置运行管理或者未配置 {} 流程", opt));
+        Assert.notNull(baseProcess, StrUtil.format(I18nMessageUtil.get("i18n.dsl_not_configured.8a57"), opt));
         return baseProcess;
     }
 }

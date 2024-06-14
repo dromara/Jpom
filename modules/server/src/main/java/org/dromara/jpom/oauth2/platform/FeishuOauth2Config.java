@@ -15,6 +15,7 @@ import lombok.EqualsAndHashCode;
 import me.zhyd.oauth.config.AuthDefaultSource;
 import me.zhyd.oauth.request.AuthFeishuRequest;
 import me.zhyd.oauth.request.AuthRequest;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.oauth2.BaseOauth2Config;
 import org.springframework.util.Assert;
 
@@ -36,7 +37,7 @@ public class FeishuOauth2Config extends BaseOauth2Config {
 
     @Override
     public AuthRequest authRequest() {
-        Assert.state(this.enabled(),  StrUtil.format("没有开启此 {} oauth2", this.provide()));
+        Assert.state(this.enabled(),  StrUtil.format(I18nMessageUtil.get("i18n.oauth2_not_enabled.c8b7"), this.provide()));
         return new AuthFeishuRequest(this.authConfig());
     }
 }

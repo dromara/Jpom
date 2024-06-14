@@ -24,7 +24,7 @@ import org.dromara.jpom.model.data.MonitorModel;
  */
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "MONITORNOTIFYLOG",
-    nameKey = "监控通知", parents = MonitorModel.class)
+    nameKey = "i18n.monitoring_notifications.de94", parents = MonitorModel.class)
 @Data
 public class MonitorNotifyLog extends BaseWorkspaceModel {
 

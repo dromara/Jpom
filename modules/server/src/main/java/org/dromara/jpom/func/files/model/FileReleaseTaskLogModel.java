@@ -21,7 +21,7 @@ import org.dromara.jpom.model.BaseWorkspaceModel;
  */
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "FILE_RELEASE_TASK_LOG",
-    nameKey = "文件发布任务记录", parents = FileStorageModel.class)
+    nameKey = "i18n.file_publish_task_record.edc4", parents = FileStorageModel.class)
 @Data
 @NoArgsConstructor
 public class FileReleaseTaskLogModel extends BaseWorkspaceModel {

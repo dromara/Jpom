@@ -15,6 +15,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.interceptor.LoginInterceptor;
 import org.dromara.jpom.common.interceptor.PermissionInterceptor;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
@@ -53,7 +54,7 @@ public abstract class BaseServerController extends BaseJpomController {
 
     protected NodeModel getNode() {
         NodeModel nodeModel = tryGetNode();
-        Assert.notNull(nodeModel, "节点信息不正确,对应对节点不存在");
+        Assert.notNull(nodeModel, I18nMessageUtil.get("i18n.incorrect_node_info_node_does_not_exist.2fd8"));
         return nodeModel;
     }
 
@@ -75,7 +76,7 @@ public abstract class BaseServerController extends BaseJpomController {
     protected <T> JsonMessage<T> tryRequestMachine(String machineId, HttpServletRequest request, NodeUrl nodeUrl, String... pars) {
         if (StrUtil.isNotEmpty(machineId)) {
             MachineNodeModel model = machineNodeServer.getByKey(machineId);
-            Assert.notNull(model, "没有找到对应的机器");
+            Assert.notNull(model, I18nMessageUtil.get("i18n.no_machine_found.c16c"));
             return NodeForward.request(model, request, nodeUrl, new String[]{}, pars);
         }
         return null;
@@ -98,7 +99,7 @@ public abstract class BaseServerController extends BaseJpomController {
         }
         if (StrUtil.isNotEmpty(machineId)) {
             MachineNodeModel model = machineNodeServer.getByKey(machineId);
-            Assert.notNull(model, "没有找到对应的机器");
+            Assert.notNull(model, I18nMessageUtil.get("i18n.no_machine_found.c16c"));
             return NodeForward.request(model, request, nodeUrl, new String[]{}, pars);
         }
         return null;
@@ -172,13 +173,13 @@ public abstract class BaseServerController extends BaseJpomController {
 
     @Override
     public void uploadSharding(MultipartFile file, String tempPath, String sliceId, Integer totalSlice, Integer nowSlice, String fileSumMd5, String... extNames) throws IOException {
-        Assert.state(BaseServerController.SHARDING_IDS.containsKey(sliceId), "不合法的分片id");
+        Assert.state(BaseServerController.SHARDING_IDS.containsKey(sliceId), I18nMessageUtil.get("i18n.invalid_shard_id.46fd"));
         super.uploadSharding(file, tempPath, sliceId, totalSlice, nowSlice, fileSumMd5, extNames);
     }
 
     @Override
     public File shardingTryMerge(String tempPath, String sliceId, Integer totalSlice, String fileSumMd5) throws IOException {
-        Assert.state(BaseServerController.SHARDING_IDS.containsKey(sliceId), "不合法的分片id");
+        Assert.state(BaseServerController.SHARDING_IDS.containsKey(sliceId), I18nMessageUtil.get("i18n.invalid_shard_id.46fd"));
         try {
             return super.shardingTryMerge(tempPath, sliceId, totalSlice, fileSumMd5);
         } finally {

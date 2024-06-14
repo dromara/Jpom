@@ -35,7 +35,7 @@ import java.util.Map;
  **/
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "BUILDHISTORYLOG",
-    nameKey = "构建历史", parents = BuildInfoModel.class)
+    nameKey = "i18n.build_history.a05c", parents = BuildInfoModel.class)
 @Data
 public class BuildHistoryLog extends BaseWorkspaceModel {
     /**

@@ -26,6 +26,7 @@ import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.command.RemoveSwarmNodeCmdImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.plugin.IDefaultPlugin;
 import org.springframework.util.Assert;
 
@@ -140,7 +141,7 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
             DockerUtil.putClose(uuid, exec);
             exec.awaitCompletion();
         } catch (InterruptedException e) {
-            consumer.accept("获取容器日志被中断:" + e);
+            consumer.accept(I18nMessageUtil.get("i18n.get_container_log_interrupted_message.83a5") + e);
         } finally {
             DockerUtil.close(uuid);
         }
@@ -166,16 +167,16 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
         InspectServiceCmd inspectServiceCmd = dockerClient.inspectServiceCmd(serviceId);
         Service service = inspectServiceCmd.exec();
         ServiceSpec spec = service.getSpec();
-        Assert.notNull(spec, "服务信息不完整不能操作");
+        Assert.notNull(spec, I18nMessageUtil.get("i18n.service_info_incomplete.968d"));
         TaskSpec taskTemplate = spec.getTaskTemplate();
-        Assert.notNull(taskTemplate, "服务信息不完整不能操作：-1");
+        Assert.notNull(taskTemplate, I18nMessageUtil.get("i18n.service_info_incomplete_with_code1.30f4"));
         ContainerSpec templateContainerSpec = taskTemplate.getContainerSpec();
-        Assert.notNull(templateContainerSpec, "服务信息不完整不能操作：-2");
+        Assert.notNull(templateContainerSpec, I18nMessageUtil.get("i18n.service_info_incomplete_with_code2.e9ca"));
         templateContainerSpec.withImage(image);
         //
         UpdateServiceCmd updateServiceCmd = dockerClient.updateServiceCmd(serviceId, spec);
         ResourceVersion version = service.getVersion();
-        Assert.notNull(version, "服务信息不完整不能操作：-3");
+        Assert.notNull(version, I18nMessageUtil.get("i18n.service_info_incomplete_with_code3.8612"));
         updateServiceCmd.withVersion(version.getIndex());
         updateServiceCmd.exec();
     }
@@ -469,7 +470,7 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
         DockerClient dockerClient = DockerUtil.get(parameter);
 
         DockerCmdExecFactory dockerCmdExecFactory = (DockerCmdExecFactory) ReflectUtil.getFieldValue(dockerClient, "dockerCmdExecFactory");
-        Assert.notNull(dockerCmdExecFactory, "当前方法不被支持，暂时不能使用");
+        Assert.notNull(dockerCmdExecFactory, I18nMessageUtil.get("i18n.method_not_supported.90c4"));
         String nodeId = (String) parameter.get("nodeId");
         RemoveSwarmNodeCmdImpl removeSwarmNodeCmd = new RemoveSwarmNodeCmdImpl(
             dockerCmdExecFactory.removeSwarmNodeCmdExec(), nodeId);
@@ -484,9 +485,9 @@ public class DefaultDockerSwarmPluginImpl implements IDefaultPlugin {
         List<SwarmNode> nodes = dockerClient.listSwarmNodesCmd()
             .withIdFilter(CollUtil.newArrayList(nodeId)).exec();
         SwarmNode swarmNode = CollUtil.getFirst(nodes);
-        Assert.notNull(swarmNode, "没有对应的节点");
+        Assert.notNull(swarmNode, I18nMessageUtil.get("i18n.no_node.2e83"));
         ObjectVersion version = swarmNode.getVersion();
-        Assert.notNull(version, "对应的节点信息不完整不能继续");
+        Assert.notNull(version, I18nMessageUtil.get("i18n.node_info_incomplete.3b69"));
         //
         String availabilityStr = (String) parameter.get("availability");
         String roleStr = (String) parameter.get("role");

@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  * @author Arno
  */
 @TableName(value = "MONITOR_USER_OPT",
-    nameKey = "监控用户操作")
+    nameKey = "i18n.monitoring_user_actions.f2d5")
 public class MonitorUserOptModel extends BaseWorkspaceModel {
     /**
      *

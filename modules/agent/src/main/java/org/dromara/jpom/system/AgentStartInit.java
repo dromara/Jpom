@@ -29,6 +29,7 @@ import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.common.RemoteVersion;
 import org.dromara.jpom.common.commander.ProjectCommander;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.AgentAuthorize;
 import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.configuration.ProjectLogConfig;
@@ -97,7 +98,7 @@ public class AgentStartInit implements ILoadEvent, ISystemTask {
                 //
                 list.forEach(this::checkProject);
             } catch (Exception e) {
-                log.error("定时备份日志失败", e);
+                log.error(I18nMessageUtil.get("i18n.scheduled_backup_log_failure.a0d7"), e);
             }
         });
     }
@@ -174,7 +175,7 @@ public class AgentStartInit implements ILoadEvent, ISystemTask {
                         projectCommander.execCommand(ConsoleCommandOp.start, nodeProjectInfoModel);
                     }
                 } catch (Exception e) {
-                    log.warn("自动启动项目失败：{} {}", nodeProjectInfoModel.getId(), e.getMessage());
+                    log.warn(I18nMessageUtil.get("i18n.auto_start_project_failed.c7b5"), nodeProjectInfoModel.getId(), e.getMessage());
                 }
             }
         });
@@ -189,17 +190,17 @@ public class AgentStartInit implements ILoadEvent, ISystemTask {
                 if (FileUtil.isDirectory(logBack)) {
                     File resolveLogBack = projectInfoService.resolveLogBack(nodeProjectInfoModel);
                     FileUtil.mkdir(resolveLogBack);
-                    log.info("自动迁移存在备份日志 {} -> {}", logBack.getAbsolutePath(), resolveLogBack);
+                    log.info(I18nMessageUtil.get("i18n.auto_migrate_exist_backup_logs.dc33"), logBack.getAbsolutePath(), resolveLogBack);
                     FileUtil.moveContent(logBack, resolveLogBack, true);
                     FileUtil.del(logBack);
                 }
                 if (FileUtil.isFile(log1)) {
                     if (projectCommander.isRun(nodeProjectInfoModel)) {
-                        log.warn("存在旧版项目日志但项目在运行中需要停止运行后手动迁移：{} {}", nodeProjectInfoModel.getName(), log1);
+                        log.warn(I18nMessageUtil.get("i18n.old_version_project_logs_exist_while_running.75ab"), nodeProjectInfoModel.getName(), log1);
                     } else {
                         File resolveLogBack = projectInfoService.resolveLogBack(nodeProjectInfoModel);
                         FileUtil.mkdir(resolveLogBack);
-                        log.info("自动迁移存在日志 {} -> {}", log1, resolveLogBack);
+                        log.info(I18nMessageUtil.get("i18n.auto_migrate_exist_logs.c169"), log1, resolveLogBack);
                         FileUtil.move(FileUtil.file(log1), resolveLogBack, true);
                     }
                 }

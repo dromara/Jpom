@@ -18,6 +18,7 @@ import cn.hutool.http.HtmlUtil;
 import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseJpomController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.interceptor.HandlerMethodInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.MethodParameter;
@@ -444,7 +445,7 @@ public class ParameterInterceptor implements HandlerMethodInterceptor {
         public void error(HttpServletRequest request, HttpServletResponse response, String parameterName, String value, ValidatorItem validatorItem) {
             String msg = validatorItem.msg();
             if (StrUtil.isEmpty(msg)) {
-                msg = "参数验证失败";
+                msg = I18nMessageUtil.get("i18n.parameter_validation_failed.f0a1");
             }
             JsonMessage<String> jsonMessage = new JsonMessage<>(validatorItem.code(), msg);
             log.warn("{} {} {} {} {}", request.getRequestURI(), parameterName, value, validatorItem.value(), jsonMessage);

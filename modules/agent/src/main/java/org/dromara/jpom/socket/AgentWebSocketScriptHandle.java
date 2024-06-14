@@ -13,6 +13,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.model.data.NodeScriptModel;
 import org.dromara.jpom.script.NodeScriptProcessBuilder;
@@ -53,20 +54,20 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
             String id = this.getParameters(session, "id");
             String workspaceId = this.getParameters(session, "workspaceId");
             if (StrUtil.hasEmpty(id, workspaceId)) {
-                SocketSessionUtil.send(session, "脚本模板或者工作空间未知");
+                SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.unknown_script_template_or_workspace.27f1"));
                 return;
             }
 
             NodeScriptModel nodeScriptModel = nodeScriptServer.getItem(id);
             if (nodeScriptModel == null) {
-                SocketSessionUtil.send(session, "没有找到对应的脚本模板");
+                SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.no_script_template_found.0498"));
                 return;
             }
-            SocketSessionUtil.send(session, "连接成功：" + nodeScriptModel.getName());
+            SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.connection_successful_with_message.5cf2") + nodeScriptModel.getName());
         } catch (Exception e) {
-            log.error("socket 错误", e);
+            log.error(I18nMessageUtil.get("i18n.socket_error.18c1"), e);
             try {
-                SocketSessionUtil.send(session, JsonMessage.getString(500, "系统错误!"));
+                SocketSessionUtil.send(session, JsonMessage.getString(500, I18nMessageUtil.get("i18n.system_error.9417")));
                 session.close();
             } catch (IOException e1) {
                 log.error(e1.getMessage(), e1);
@@ -80,7 +81,7 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
         String scriptId = json.getString("scriptId");
         NodeScriptModel nodeScriptModel = nodeScriptServer.getItem(scriptId);
         if (nodeScriptModel == null) {
-            SocketSessionUtil.send(session, "没有对应脚本模板:" + scriptId);
+            SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.no_script_template_specified.7d14") + scriptId);
             session.close();
             return;
         }
@@ -91,7 +92,7 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
                 String args = json.getString("args");
                 String executeId = json.getString("executeId");
                 if (StrUtil.isEmpty(executeId)) {
-                    SocketSessionUtil.send(session, "没有执行ID");
+                    SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.no_execution_id.68dc"));
                     session.close();
                     return;
                 }
@@ -101,7 +102,7 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
             case stop: {
                 String executeId = json.getString("executeId");
                 if (StrUtil.isEmpty(executeId)) {
-                    SocketSessionUtil.send(session, "没有执行ID");
+                    SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.no_execution_id.68dc"));
                     session.close();
                     return;
                 }
@@ -118,7 +119,7 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
         nodeScriptModel.setLastRunUser(name);
         nodeScriptServer.updateItem(nodeScriptModel);
         json.put("code", 200);
-        String value = "执行成功";
+        String value = I18nMessageUtil.get("i18n.execution_succeeded.f56c");
         json.put("msg", value);
         log.debug(json.toString());
         SocketSessionUtil.send(session, json.toString());

@@ -15,6 +15,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.system.JpomRuntimeException;
 
 import java.io.File;
@@ -42,7 +43,7 @@ public class JsonFileUtil {
      */
     public static JSONObject readJson(File file) throws FileNotFoundException {
         if (!file.exists()) {
-            throw new FileNotFoundException("没有找到对应配置文件：" + file.getAbsolutePath());
+            throw new FileNotFoundException(I18nMessageUtil.get("i18n.no_config_file_found.9720") + file.getAbsolutePath());
         }
         READ_LOCK.lock();
         // 防止多线程操作文件异常
@@ -54,7 +55,7 @@ public class JsonFileUtil {
             try {
                 return JSONObject.parseObject(json);
             } catch (Exception e) {
-                throw new JpomRuntimeException("数据文件内容错误，请检查文件是否被非法修改：" + file.getAbsolutePath(), e);
+                throw new JpomRuntimeException(I18nMessageUtil.get("i18n.data_file_content_error.e86f") + file.getAbsolutePath(), e);
             }
         } finally {
             READ_LOCK.unlock();

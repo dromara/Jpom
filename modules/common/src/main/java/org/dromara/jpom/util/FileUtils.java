@@ -20,6 +20,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.Lombok;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -168,7 +169,7 @@ public class FileUtils {
      * @param dir 目录
      */
     public static void checkSlip(String dir) {
-        checkSlip(dir, e -> new IllegalArgumentException("目录不能越级：" + e.getMessage()));
+        checkSlip(dir, e -> new IllegalArgumentException(I18nMessageUtil.get("i18n.directory_cannot_skip_levels.179e") + e.getMessage()));
     }
 
     /**

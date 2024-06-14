@@ -28,7 +28,7 @@ import org.dromara.jpom.util.StringUtil;
  */
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "BUILD_INFO",
-    nameKey = "构建信息")
+    nameKey = "i18n.build_info.224a")
 @Data
 @Builder
 public class BuildInfoModel extends BaseGroupModel {

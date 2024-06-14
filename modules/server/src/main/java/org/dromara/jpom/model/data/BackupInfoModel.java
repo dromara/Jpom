@@ -23,7 +23,7 @@ import org.dromara.jpom.model.BaseUserModifyDbModel;
  */
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "BACKUP_INFO",
-    nameKey = "数据备份", modes = DbExtConfig.Mode.H2)
+    nameKey = "i18n.data_backup.9e26", modes = DbExtConfig.Mode.H2)
 @Data
 public class BackupInfoModel extends BaseUserModifyDbModel {
 

@@ -19,6 +19,7 @@ import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.model.Frame;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.util.LogRecorder;
 import org.springframework.util.Assert;
 
@@ -98,7 +99,7 @@ public class DockerClientUtil {
                 TarArchiveEntry tarArchiveEntry;
                 while ((tarArchiveEntry = tarStream.getNextEntry()) != null) {
                     if (!tarStream.canReadEntryData(tarArchiveEntry)) {
-                        logRecorder.systemWarning("不能读取tarArchiveEntry {}", tarArchiveEntry.getName());
+                        logRecorder.systemWarning(I18nMessageUtil.get("i18n.cannot_read_tar_archive_entry.85d7"), tarArchiveEntry.getName());
                     }
                     if (tarArchiveEntry.isDirectory()) {
                         continue;
@@ -113,15 +114,15 @@ public class DockerClientUtil {
                     FileUtil.writeFromStream(tarStream, currentFile, false);
                 }
             } catch (NotFoundException notFoundException) {
-                logRecorder.systemWarning("容器中没有找到执行结果文件: {}", notFoundException.getMessage());
+                logRecorder.systemWarning(I18nMessageUtil.get("i18n.execution_result_file_not_found_in_container.cf18"), notFoundException.getMessage());
             } catch (Exception e) {
-                logRecorder.error("无法获取容器执行结果文件", e);
+                logRecorder.error(I18nMessageUtil.get("i18n.unable_to_get_container_execution_result_file.7b2c"), e);
             }
             // github pr 71
             // https://github.com/dromara/Jpom/pull/71
             File[] files = fileArchive.listFiles();
             if (files == null) {
-                logRecorder.systemWarning("临时结果文件不存在: {}", fileArchive.getAbsolutePath());
+                logRecorder.systemWarning(I18nMessageUtil.get("i18n.temporary_result_file_does_not_exist.1c7e"), fileArchive.getAbsolutePath());
                 return;
             }
             File resultFileOutFile = FileUtil.file(resultFileOut);

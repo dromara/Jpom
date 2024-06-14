@@ -30,7 +30,7 @@ import java.io.File;
  */
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "MACHINE_DOCKER_INFO",
-    nameKey = "机器DOCKER信息")
+    nameKey = "i18n.machine_docker_info.9914")
 @Data
 @NoArgsConstructor
 public class MachineDockerModel extends BaseGroupNameModel {

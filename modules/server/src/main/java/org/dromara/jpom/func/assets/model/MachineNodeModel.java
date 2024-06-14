@@ -31,7 +31,7 @@ import java.util.List;
  */
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "MACHINE_NODE_INFO",
-    nameKey = "机器节点信息")
+    nameKey = "i18n.machine_node_info.6a75")
 @Data
 public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
     /**

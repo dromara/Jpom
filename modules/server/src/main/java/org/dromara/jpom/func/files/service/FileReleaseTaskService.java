@@ -32,6 +32,7 @@ import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.files.model.FileReleaseTaskLogModel;
@@ -133,10 +134,10 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
      */
     private Tuple getFileStorage(String fileId, HttpServletRequest request) {
         FileStorageModel storageModel = fileStorageService.getByKey(fileId, request);
-        Assert.notNull(storageModel, "不存在对应的文件");
+        Assert.notNull(storageModel, I18nMessageUtil.get("i18n.file_not_exist.ea6a"));
         File storageSavePath = serverConfig.fileStorageSavePath();
         File file = FileUtil.file(storageSavePath, storageModel.getPath());
-        Assert.state(FileUtil.isFile(file), "当前文件丢失不能执行发布任务");
+        Assert.state(FileUtil.isFile(file), I18nMessageUtil.get("i18n.file_missing_cannot_publish.3818"));
 
         return new Tuple(file, storageModel);
     }
@@ -154,7 +155,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         String workspaceId = getWorkspaceId(request);
         staticFileStorageService.checkStaticDir(storageModel, workspaceId);
         File file = FileUtil.file(storageModel.getAbsolutePath());
-        Assert.state(FileUtil.isFile(file), "当前文件丢失不能执行发布任务");
+        Assert.state(FileUtil.isFile(file), I18nMessageUtil.get("i18n.file_missing_cannot_publish.3818"));
         return new Tuple(file, storageModel);
     }
 
@@ -190,7 +191,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                 tuple = this.getStaticFileStorage(fileId, request);
                 break;
             default:
-                throw new IllegalArgumentException("不支持的类型：" + fileType);
+                throw new IllegalArgumentException(I18nMessageUtil.get("i18n.unsupported_type_with_colon2.7de2") + fileType);
         }
         File file = tuple.get(0);
         IFileStorage storageModel = tuple.get(1);
@@ -199,13 +200,13 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         if (taskType == 0) {
             list = StrUtil.splitTrim(taskDataIds, StrUtil.COMMA);
             list = list.stream().filter(s -> sshService.exists(new SshModel(s))).collect(Collectors.toList());
-            Assert.notEmpty(list, "请选择正确的ssh");
+            Assert.notEmpty(list, I18nMessageUtil.get("i18n.select_correct_ssh.aa93"));
         } else if (taskType == 1) {
             list = StrUtil.splitTrim(taskDataIds, StrUtil.COMMA);
             list = list.stream().filter(s -> nodeService.exists(new NodeModel(s))).collect(Collectors.toList());
-            Assert.notEmpty(list, "请选择正确的节点");
+            Assert.notEmpty(list, I18nMessageUtil.get("i18n.select_correct_node.1b4e"));
         } else {
-            throw new IllegalArgumentException("不支持的方式");
+            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.unsupported_method.a1de"));
         }
         // 生成任务id
         FileReleaseTaskLogModel taskRoot = new FileReleaseTaskLogModel();
@@ -235,7 +236,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
             this.insert(releaseTaskLogModel);
         }
         this.startTask(taskRoot.getId(), file, env, storageModel);
-        return JsonMessage.success("创建成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.create_success.04a6"));
     }
 
     /**
@@ -246,12 +247,12 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
      */
     private void startTask(String taskId, File storageSaveFile, Map<String, String> env, IFileStorage storageModel) {
         FileReleaseTaskLogModel taskRoot = this.getByKey(taskId);
-        Assert.notNull(taskRoot, "没有找到父级任务");
+        Assert.notNull(taskRoot, I18nMessageUtil.get("i18n.parent_task_not_found.bac1"));
         //
         FileReleaseTaskLogModel fileReleaseTaskLogModel = new FileReleaseTaskLogModel();
         fileReleaseTaskLogModel.setTaskId(taskId);
         List<FileReleaseTaskLogModel> logModels = this.listByBean(fileReleaseTaskLogModel);
-        Assert.notEmpty(logModels, "没有对应的任务");
+        Assert.notEmpty(logModels, I18nMessageUtil.get("i18n.no_corresponding_task.3be5"));
         //
         EnvironmentMapBuilder environmentMapBuilder = workspaceEnvVarService.getEnv(taskRoot.getWorkspaceId());
         Optional.ofNullable(env).ifPresent(environmentMapBuilder::putStr);
@@ -269,7 +270,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
             // 节点
             crateTaskNodeWork(logModels, strictSyncFinisher, taskRoot, environmentMapBuilder, storageSaveFile, storageModel);
         } else {
-            throw new IllegalArgumentException("不支持的方式");
+            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.unsupported_method.a1de"));
         }
         ThreadUtil.execute(() -> {
             try {
@@ -278,10 +279,10 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                     // 任务来源被取消
                     this.cancelTaskUpdate(taskId);
                 } else {
-                    this.updateRootStatus(taskId, 2, "正常结束");
+                    this.updateRootStatus(taskId, 2, I18nMessageUtil.get("i18n.normal_end.3bfe"));
                 }
             } catch (Exception e) {
-                log.error("执行发布任务失败", e);
+                log.error(I18nMessageUtil.get("i18n.publish_task_execution_failed.b075"), e);
                 updateRootStatus(taskId, 3, e.getMessage());
             } finally {
                 SyncFinisherUtil.close(syncFinisherId);
@@ -306,12 +307,12 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         // 将未完成的任务标记为取消
         FileReleaseTaskLogModel update = new FileReleaseTaskLogModel();
         update.setStatus(4);
-        update.setStatusMsg("手动取消任务");
+        update.setStatusMsg(I18nMessageUtil.get("i18n.manual_cancel_task.e592"));
         Entity updateEntity = this.dataBeanToEntity(update);
         //
         Entity where = Entity.create().set("taskId", taskId).set("status", CollUtil.newArrayList(0, 1));
         this.update(updateEntity, where);
-        this.updateRootStatus(taskId, 4, "手动取消任务");
+        this.updateRootStatus(taskId, 4, I18nMessageUtil.get("i18n.manual_cancel_task.e592"));
     }
 
     /**
@@ -337,26 +338,26 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                 String modelId = model.getId();
                 LogRecorder logRecorder = null;
                 try {
-                    this.updateStatus(taskId, modelId, 1, "开始发布文件");
+                    this.updateStatus(taskId, modelId, 1, I18nMessageUtil.get("i18n.start_publishing_file.a14e"));
                     File logFile = logFile(model);
                     logRecorder = LogRecorder.builder().file(logFile).charset(CharsetUtil.CHARSET_UTF_8).build();
                     NodeModel item = nodeService.getByKey(model.getTaskDataId());
                     if (item == null) {
-                        logRecorder.systemError("没有找到对应的节点项：{}", model.getTaskDataId());
-                        this.updateStatus(taskId, modelId, 3, StrUtil.format("没有找到对应的节点项：{}", model.getTaskDataId()));
+                        logRecorder.systemError(I18nMessageUtil.get("i18n.no_node_entry_found.b1ef"), model.getTaskDataId());
+                        this.updateStatus(taskId, modelId, 3, StrUtil.format(I18nMessageUtil.get("i18n.no_node_entry_found.b1ef"), model.getTaskDataId()));
                         return;
                     }
 
                     String releasePath = model.getReleasePath();
                     String beforeScript = model.getBeforeScript();
                     if (StrUtil.isNotEmpty(beforeScript)) {
-                        logRecorder.system("开始执行上传前命令");
+                        logRecorder.system(I18nMessageUtil.get("i18n.start_executing_upload_pre_command.fb5c"));
                         if (StrUtil.startWith(beforeScript, ServerConst.REF_SCRIPT)) {
                             String scriptId = StrUtil.removePrefix(beforeScript, ServerConst.REF_SCRIPT);
                             ScriptModel keyAndGlobal = scriptServer.getByKey(scriptId);
-                            Assert.notNull(keyAndGlobal, "请选择正确的脚本");
+                            Assert.notNull(keyAndGlobal, I18nMessageUtil.get("i18n.select_correct_script.ff2d"));
                             beforeScript = keyAndGlobal.getContext();
-                            logRecorder.system("引入脚本内容：{}[{}]", keyAndGlobal.getName(), scriptId);
+                            logRecorder.system(I18nMessageUtil.get("i18n.introducing_script_content.a55b"), keyAndGlobal.getName(), scriptId);
                         }
                         this.runNodeScript(beforeScript, item, logRecorder, modelId, environmentMapBuilder, releasePath);
                     }
@@ -384,25 +385,25 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                             }
                         });
                     if (!jsonMessage.success()) {
-                        throw new IllegalStateException("上传文件失败：" + jsonMessage);
+                        throw new IllegalStateException(I18nMessageUtil.get("i18n.file_upload_failed.462e") + jsonMessage);
                     }
                     logRecorder.system("{} file upload done", item.getName());
 
                     String afterScript = model.getAfterScript();
                     if (StrUtil.isNotEmpty(afterScript)) {
-                        logRecorder.system("开始执行上传后命令");
+                        logRecorder.system(I18nMessageUtil.get("i18n.start_executing_upload_post_command.1c1b"));
                         if (StrUtil.startWith(afterScript, ServerConst.REF_SCRIPT)) {
                             String scriptId = StrUtil.removePrefix(afterScript, ServerConst.REF_SCRIPT);
                             ScriptModel keyAndGlobal = scriptServer.getByKey(scriptId);
-                            Assert.notNull(keyAndGlobal, "请选择正确的脚本");
+                            Assert.notNull(keyAndGlobal, I18nMessageUtil.get("i18n.select_correct_script.ff2d"));
                             afterScript = keyAndGlobal.getContext();
-                            logRecorder.system("引入脚本内容：{}[{}]", keyAndGlobal.getName(), scriptId);
+                            logRecorder.system(I18nMessageUtil.get("i18n.introducing_script_content.a55b"), keyAndGlobal.getName(), scriptId);
                         }
                         this.runNodeScript(afterScript, item, logRecorder, modelId, environmentMapBuilder, releasePath);
                     }
-                    this.updateStatus(taskId, modelId, 2, "发布成功");
+                    this.updateStatus(taskId, modelId, 2, I18nMessageUtil.get("i18n.publish_success.2fff"));
                 } catch (Exception e) {
-                    log.error("执行发布任务异常", e);
+                    log.error(I18nMessageUtil.get("i18n.publish_task_execution_exception.c296"), e);
                     updateStatus(taskId, modelId, 3, e.getMessage());
                 } finally {
                     IoUtil.close(logRecorder);
@@ -431,8 +432,8 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                     try {
                         proxySession.close();
                     } catch (IOException e) {
-                        log.error("关闭会话异常", e);
-                        logRecorder.systemError("关闭会话异常：{}", e.getMessage());
+                        log.error(I18nMessageUtil.get("i18n.close_session_exception.3491"), e);
+                        logRecorder.systemError(I18nMessageUtil.get("i18n.close_session_exception_with_detail.85f0"), e.getMessage());
                     }
                     return;
                 }
@@ -478,13 +479,13 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                 ChannelSftp channelSftp = null;
                 LogRecorder logRecorder = null;
                 try {
-                    this.updateStatus(taskId, modelId, 1, "开始发布文件");
+                    this.updateStatus(taskId, modelId, 1, I18nMessageUtil.get("i18n.start_publishing_file.a14e"));
                     File logFile = logFile(model);
                     logRecorder = LogRecorder.builder().file(logFile).charset(CharsetUtil.CHARSET_UTF_8).build();
                     SshModel item = sshService.getByKey(model.getTaskDataId());
                     if (item == null) {
-                        logRecorder.systemError("没有找到对应的ssh项：{}", model.getTaskDataId());
-                        this.updateStatus(taskId, modelId, 3, StrUtil.format("没有找到对应的ssh项：{}", model.getTaskDataId()));
+                        logRecorder.systemError(I18nMessageUtil.get("i18n.no_ssh_entry_found.d0e1"), model.getTaskDataId());
+                        this.updateStatus(taskId, modelId, 3, StrUtil.format(I18nMessageUtil.get("i18n.no_ssh_entry_found.d0e1"), model.getTaskDataId()));
                         return;
                     }
                     MachineSshModel machineSshModel = sshService.getMachineSshModel(item);
@@ -495,13 +496,13 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                     environmentMapBuilder.eachStr(logRecorder::system);
                     String beforeScript = model.getBeforeScript();
                     if (StrUtil.isNotEmpty(beforeScript)) {
-                        logRecorder.system("开始执行上传前命令");
+                        logRecorder.system(I18nMessageUtil.get("i18n.start_executing_upload_pre_command.fb5c"));
                         if (StrUtil.startWith(beforeScript, ServerConst.REF_SCRIPT)) {
                             String scriptId = StrUtil.removePrefix(beforeScript, ServerConst.REF_SCRIPT);
                             ScriptModel keyAndGlobal = scriptServer.getByKey(scriptId);
-                            Assert.notNull(keyAndGlobal, "请选择正确的脚本");
+                            Assert.notNull(keyAndGlobal, I18nMessageUtil.get("i18n.select_correct_script.ff2d"));
                             beforeScript = keyAndGlobal.getContext();
-                            logRecorder.system("引入脚本内容：{}[{}]", keyAndGlobal.getName(), scriptId);
+                            logRecorder.system(I18nMessageUtil.get("i18n.introducing_script_content.a55b"), keyAndGlobal.getName(), scriptId);
                         }
                         JschUtils.execCallbackLine(session, charset, timeout, beforeScript, StrUtil.EMPTY, environment, logRecorder::info);
                     }
@@ -517,19 +518,19 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
 
                     String afterScript = model.getAfterScript();
                     if (StrUtil.isNotEmpty(afterScript)) {
-                        logRecorder.system("开始执行上传后命令");
+                        logRecorder.system(I18nMessageUtil.get("i18n.start_executing_upload_post_command.1c1b"));
                         if (StrUtil.startWith(afterScript, ServerConst.REF_SCRIPT)) {
                             String scriptId = StrUtil.removePrefix(afterScript, ServerConst.REF_SCRIPT);
                             ScriptModel keyAndGlobal = scriptServer.getByKey(scriptId);
-                            Assert.notNull(keyAndGlobal, "请选择正确的脚本");
+                            Assert.notNull(keyAndGlobal, I18nMessageUtil.get("i18n.select_correct_script.ff2d"));
                             afterScript = keyAndGlobal.getContext();
-                            logRecorder.system("引入脚本内容：{}[{}]", keyAndGlobal.getName(), scriptId);
+                            logRecorder.system(I18nMessageUtil.get("i18n.introducing_script_content.a55b"), keyAndGlobal.getName(), scriptId);
                         }
                         JschUtils.execCallbackLine(session, charset, timeout, afterScript, StrUtil.EMPTY, environment, logRecorder::info);
                     }
-                    this.updateStatus(taskId, modelId, 2, "发布成功");
+                    this.updateStatus(taskId, modelId, 2, I18nMessageUtil.get("i18n.publish_success.2fff"));
                 } catch (Exception e) {
-                    log.error("执行发布任务异常", e);
+                    log.error(I18nMessageUtil.get("i18n.publish_task_execution_exception.c296"), e);
                     updateStatus(taskId, modelId, 3, e.getMessage());
                 } finally {
                     IoUtil.close(logRecorder);
@@ -562,19 +563,19 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
             // 0 等待开始 1 进行中 2 任务结束 3 失败
             switch (key) {
                 case 0:
-                    stringBuilder.append("等待开始:");
+                    stringBuilder.append(I18nMessageUtil.get("i18n.waiting_to_start.b267"));
                     break;
                 case 1:
-                    stringBuilder.append("进行中:");
+                    stringBuilder.append(I18nMessageUtil.get("i18n.in_progress.b851"));
                     break;
                 case 2:
-                    stringBuilder.append("任务结束:");
+                    stringBuilder.append(I18nMessageUtil.get("i18n.task_ended.b341"));
                     break;
                 case 3:
-                    stringBuilder.append("失败:");
+                    stringBuilder.append(I18nMessageUtil.get("i18n.failure_prefix.115a"));
                     break;
                 default:
-                    stringBuilder.append("未知：");
+                    stringBuilder.append(I18nMessageUtil.get("i18n.unknown_error.84d3"));
                     break;
             }
             stringBuilder.append(CollUtil.size(entry.getValue()));
@@ -620,7 +621,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         FileReleaseTaskLogModel update = new FileReleaseTaskLogModel();
         update.setModifyTimeMillis(SystemClock.now());
         update.setStatus(4);
-        update.setStatusMsg("系统取消");
+        update.setStatusMsg(I18nMessageUtil.get("i18n.system_cancel.3df2"));
         Entity updateEntity = this.dataBeanToEntity(update);
         //
         Entity where = Entity.create()

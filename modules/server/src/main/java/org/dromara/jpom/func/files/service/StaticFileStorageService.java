@@ -30,6 +30,7 @@ import cn.hutool.extra.servlet.ServletUtil;
 import cn.keepbx.jpom.event.IAsyncLoad;
 import cn.keepbx.jpom.model.BaseIdModel;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.FileStorageConfig;
 import org.dromara.jpom.controller.outgiving.OutGivingWhitelistService;
 import org.dromara.jpom.cron.CronUtils;
@@ -109,13 +110,13 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
     public void startLoad() {
         String scanStaticDirCron = fileStorageConfig.getScanStaticDirCron();
         if (StrUtil.isEmpty(scanStaticDirCron)) {
-            log.debug("未开启静态文件扫描");
+            log.debug(I18nMessageUtil.get("i18n.static_file_scanning_disabled.2b2b"));
             this.removeTask();
             return;
         }
         List<String> list = this.staticDir();
         if (CollUtil.isEmpty(list)) {
-            log.debug("未配置静态目录");
+            log.debug(I18nMessageUtil.get("i18n.static_directory_not_configured.acbc"));
             this.removeTask();
             return;
         }
@@ -130,7 +131,7 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
             for (String s : list) {
                 File file = FileUtil.file(s);
                 if (!FileUtil.exist(file)) {
-                    log.warn("被监控的目录不存在忽略创建监听器：{}", s);
+                    log.warn(I18nMessageUtil.get("i18n.monitored_directory_does_not_exist.fa4e"), s);
                     // 自动删除已经存在的任务
                     this.delete(file);
                     continue;
@@ -175,7 +176,7 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
             this.scanning = true;
             ServerWhitelist serverWhitelistData = outGivingWhitelistService.getServerWhitelistData(workspaceId);
             List<String> stringList = serverWhitelistData.staticDir();
-            Assert.notEmpty(stringList, "还未配置静态目录");
+            Assert.notEmpty(stringList, I18nMessageUtil.get("i18n.static_directory_not_configured.9bd6"));
             this.scanList(stringList);
         } finally {
             this.scanning = false;
@@ -205,7 +206,7 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
             this.scanning = true;
             List<String> list = this.staticDir();
             if (CollUtil.isEmpty(list)) {
-                log.warn("当前没有配置静态目录，自动取消定时任务");
+                log.warn(I18nMessageUtil.get("i18n.no_static_directory_configured.d3c0"));
                 this.removeTask();
                 return;
             }
@@ -244,7 +245,7 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
                 this.scanItem(staticDir, subFile.getAbsolutePath(), level + 1, taskId);
             }
         } else {
-            log.warn("不支持的文件类型:{}", file.getAbsolutePath());
+            log.warn(I18nMessageUtil.get("i18n.file_type_not_supported_with_placeholder.db22"), file.getAbsolutePath());
         }
     }
 
@@ -264,7 +265,7 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
         long lastModified = file.lastModified();
         String parentAbsolutePath = this.absNormalize(file.getParentFile());
         if (StrUtil.length(absolutePath) > 500) {
-            log.warn("文件目录长度超过 500 ，自动忽略此类文件：{}", absolutePath);
+            log.warn(I18nMessageUtil.get("i18n.file_directory_too_long.c101"), absolutePath);
             return;
         }
         StaticFileStorageModel storageModel = new StaticFileStorageModel();
@@ -301,7 +302,7 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
             File parentFile = file.getParentFile();
             String parentAbsolutePath = this.absNormalize(parentFile);
             if (StrUtil.length(absolutePath) > 500) {
-                log.warn("文件目录长度超过 500 ，自动忽略此类文件：{}", absolutePath);
+                log.warn(I18nMessageUtil.get("i18n.file_directory_too_long.c101"), absolutePath);
                 return;
             }
             // 计算层级
@@ -323,7 +324,7 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
             } else if (FileUtil.isDirectory(file)) {
                 storageModel.setType(0);
             } else {
-                log.warn("不支持的文件类型：{}", absolutePath);
+                log.warn(I18nMessageUtil.get("i18n.file_type_not_supported3.f551"), absolutePath);
                 return;
             }
             storageModel.setExtName(FileUtil.extName(file));
@@ -359,7 +360,7 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
                 }
             }
         } catch (Exception e) {
-            log.error("处理文件事件异常", e);
+            log.error(I18nMessageUtil.get("i18n.process_file_event_exception.e8e6"), e);
         }
     }
 
@@ -405,12 +406,12 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
             }
         }
         if (watchMonitor1 == null) {
-            log.warn("监听任务丢失或者未找到：{}", path);
+            log.warn(I18nMessageUtil.get("i18n.listen_task_lost_or_not_found.347f"), path);
             return null;
         }
         WatchKey watchKey = watchMonitor1.getWatchKey(path);
         if (watchKey == null) {
-            log.warn("没有找到监听 key" + path.getFileName());
+            log.warn(I18nMessageUtil.get("i18n.listener_key_not_found.6d3a") + path.getFileName());
             return null;
         }
         return watchKey;
@@ -434,13 +435,13 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
 
     @Override
     public void onCreate(WatchEvent<?> event, Path currentPath) {
-        log.debug("文件修改事件：{} {}", currentPath, event);
+        log.debug(I18nMessageUtil.get("i18n.file_modification_event.5bc2"), currentPath, event);
         this.onModify2(event, currentPath);
     }
 
     @Override
     public void onModify(WatchEvent<?> event, Path currentPath) {
-        log.debug("文件修改事件：{} {}", currentPath, event);
+        log.debug(I18nMessageUtil.get("i18n.file_modification_event.5bc2"), currentPath, event);
         this.onModify2(event, currentPath);
     }
 
@@ -449,17 +450,17 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
         if (context instanceof Path) {
             Path path = this.fullPath(currentPath, context);
             if (path != null) {
-                log.debug("文件全路径：{}", path);
+                log.debug(I18nMessageUtil.get("i18n.file_full_path.16cc"), path);
                 this.doFile(path, currentPath);
             }
         } else {
-            log.warn("不支持的事件类型：{}", context.getClass().getName());
+            log.warn(I18nMessageUtil.get("i18n.event_type_not_supported.e9c3"), context.getClass().getName());
         }
     }
 
     @Override
     public void onDelete(WatchEvent<?> event, Path currentPath) {
-        log.debug("文件删除事件：{} {}", currentPath, event);
+        log.debug(I18nMessageUtil.get("i18n.file_deletion_event_with_details.7537"), currentPath, event);
         Object context = event.context();
         if (context instanceof Path) {
             Path path = this.fullPath(currentPath, context);
@@ -469,11 +470,11 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
                     // 处理文件删除事件
                     this.delete(file);
                 } catch (Exception e) {
-                    log.error("处理文件删除异常", e);
+                    log.error(I18nMessageUtil.get("i18n.process_file_deletion_exception.1c6e"), e);
                 }
             }
         } else {
-            log.warn("不支持的事件类型：{}", context.getClass().getName());
+            log.warn(I18nMessageUtil.get("i18n.event_type_not_supported.e9c3"), context.getClass().getName());
         }
     }
 
@@ -499,7 +500,7 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
         storageModel.setId(md5);
         storageModel.setStatus(0);
         int update = this.updateById(storageModel);
-        log.debug("文件删除事件：{}", absolutePath);
+        log.debug(I18nMessageUtil.get("i18n.file_deletion_event.a51c"), absolutePath);
         if (update > 0) {
             StaticFileStorageModel model = this.getByKey(md5);
             if (model != null && model.type() == 0) {
@@ -527,7 +528,7 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
 
     @Override
     public void onOverflow(WatchEvent<?> event, Path currentPath) {
-        log.error("事件丢失或者执行错误：{} {}", currentPath, event.context());
+        log.error(I18nMessageUtil.get("i18n.event_loss_or_execution_error.7b14"), currentPath, event.context());
     }
 
     @Override
@@ -546,7 +547,7 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
      * @param storageModel 静态文件
      */
     public void checkStaticDir(StaticFileStorageModel storageModel, String workspaceId) {
-        org.springframework.util.Assert.notNull(storageModel, "没有对应的文件信息");
+        org.springframework.util.Assert.notNull(storageModel, I18nMessageUtil.get("i18n.no_file_info.db01"));
         ServerWhitelist whitelistData = outGivingWhitelistService.getServerWhitelistData(workspaceId);
         whitelistData.checkStaticDir(storageModel.getStaticDir());
     }

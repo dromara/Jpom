@@ -30,7 +30,7 @@ import java.util.Map;
  * 仓库地址实体类
  */
 @TableName(value = "REPOSITORY",
-    nameKey = "仓库信息")
+    nameKey = "i18n.repository_info.22cd")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class RepositoryModel extends BaseGroupModel {

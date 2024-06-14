@@ -11,6 +11,7 @@ package org.dromara.jpom.common.transport;
 
 import cn.hutool.core.util.ArrayUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.encrypt.Encryptor;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -46,7 +47,7 @@ public class MultipartRequestWrapper extends StandardMultipartHttpServletRequest
                 decryptMap.put(encryptor.decrypt(key), value);
             }
         } catch (Exception e) {
-            log.error("解密失败", e);
+            log.error(I18nMessageUtil.get("i18n.decrypt_failure.ad83"), e);
         }
         this.parameterMap = decryptMap;
         // 处理文件名
@@ -58,7 +59,7 @@ public class MultipartRequestWrapper extends StandardMultipartHttpServletRequest
             }
             setMultipartFiles(files);
         } catch (Exception e) {
-            log.error("解密失败", e);
+            log.error(I18nMessageUtil.get("i18n.decrypt_failure.ad83"), e);
         }
     }
 

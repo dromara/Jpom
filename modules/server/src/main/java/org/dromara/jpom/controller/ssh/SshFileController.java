@@ -14,6 +14,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.func.assets.controller.BaseSshFileController;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.model.data.SshModel;
@@ -43,7 +44,7 @@ public class SshFileController extends BaseSshFileController {
     @Override
     protected <T> T checkConfigPath(String id, BiFunction<MachineSshModel, ItemConfig, T> function) {
         SshModel sshModel = sshService.getByKey(id);
-        Assert.notNull(sshModel, "没有对应的ssh");
+        Assert.notNull(sshModel, I18nMessageUtil.get("i18n.no_corresponding_ssh.aa68"));
         MachineSshModel machineSshModel = machineSshServer.getByKey(sshModel.getMachineSshId(), false);
         return function.apply(machineSshModel, sshModel);
     }
@@ -54,11 +55,11 @@ public class SshFileController extends BaseSshFileController {
         Opt.ofBlankAble(children).ifPresent(FileUtils::checkSlip);
 
         SshModel sshModel = sshService.getByKey(id);
-        Assert.notNull(sshModel, "没有对应的ssh");
+        Assert.notNull(sshModel, I18nMessageUtil.get("i18n.no_corresponding_ssh.aa68"));
         List<String> fileDirs = sshModel.fileDirs();
         String normalize = FileUtil.normalize(StrUtil.SLASH + path + StrUtil.SLASH);
         //
-        Assert.state(CollUtil.contains(fileDirs, normalize), "不能操作当前目录");
+        Assert.state(CollUtil.contains(fileDirs, normalize), I18nMessageUtil.get("i18n.cannot_operate_current_directory.aa3d"));
         MachineSshModel machineSshModel = machineSshServer.getByKey(sshModel.getMachineSshId(), false);
         return function.apply(machineSshModel, sshModel);
     }

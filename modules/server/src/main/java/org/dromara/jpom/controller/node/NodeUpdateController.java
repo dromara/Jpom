@@ -21,6 +21,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.*;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.openapi.controller.NodeInfoController;
@@ -82,7 +83,7 @@ public class NodeUpdateController extends BaseServerController {
         Tuple download = RemoteVersion.download(saveDir, Type.Agent, false);
         // 保存文件
         this.saveAgentFile(download);
-        return JsonMessage.success("下载成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.download_success.5094"));
     }
 
     /**
@@ -128,7 +129,7 @@ public class NodeUpdateController extends BaseServerController {
                                                     String fileSumMd5) throws IOException {
         File userTempPath = serverConfig.getUserTempPath();
         this.uploadSharding(file, userTempPath.getAbsolutePath(), sliceId, totalSlice, nowSlice, fileSumMd5, "jar", "zip");
-        return JsonMessage.success("上传成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.upload_success.a769"));
     }
 
     @RequestMapping(value = "upload-agent-sharding-merge", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -155,7 +156,7 @@ public class NodeUpdateController extends BaseServerController {
         }
         // 保存文件
         this.saveAgentFile(error.getData());
-        return JsonMessage.success("上传成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.upload_success.a769"));
     }
 
     private void saveAgentFile(Tuple data) {
@@ -214,9 +215,9 @@ public class NodeUpdateController extends BaseServerController {
                                                                    @ValidatorItem String ip,
                                                                    int port) {
         JSONObject receiveCache = NodeInfoController.getReceiveCache(id);
-        Assert.notNull(receiveCache, "没有对应的缓存信息");
+        Assert.notNull(receiveCache, I18nMessageUtil.get("i18n.no_cache_info.fba1"));
         JSONArray jsonArray = receiveCache.getJSONArray("canUseNode");
-        Assert.notEmpty(jsonArray, "没有对应的缓存信息：-1");
+        Assert.notEmpty(jsonArray, I18nMessageUtil.get("i18n.no_cache_info_with_minus_one.52f2"));
         Optional<MachineNodeModel> any = jsonArray.stream().map(o -> {
             if (o instanceof MachineNodeModel) {
                 return (MachineNodeModel) o;
@@ -224,13 +225,13 @@ public class NodeUpdateController extends BaseServerController {
             JSONObject jsonObject = (JSONObject) o;
             return jsonObject.toJavaObject(MachineNodeModel.class);
         }).filter(nodeModel -> StrUtil.equals(nodeModel.getJpomUrl(), StrUtil.format("{}:{}", ip, port))).findAny();
-        Assert.state(any.isPresent(), "ip 地址信息不正确");
+        Assert.state(any.isPresent(), I18nMessageUtil.get("i18n.incorrect_ip_address.b872"));
         MachineNodeModel machineNodeModel = any.get();
         try {
             machineNodeServer.testNode(machineNodeModel);
         } catch (Exception e) {
-            log.warn("测试结果：{} {}", machineNodeModel.getJpomUrl(), e.getMessage());
-            return new JsonMessage<>(500, "节点连接失败：" + e.getMessage());
+            log.warn(I18nMessageUtil.get("i18n.test_result.8441"), machineNodeModel.getJpomUrl(), e.getMessage());
+            return new JsonMessage<>(500, I18nMessageUtil.get("i18n.node_connection_failure_message.aacc") + e.getMessage());
         }
         String workspaceId = nodeService.getCheckUserWorkspace(request);
 
@@ -240,12 +241,12 @@ public class NodeUpdateController extends BaseServerController {
             machineNodeServer.insertAndNode(machineNodeModel, workspaceId);
         } else {
             boolean exists = nodeService.existsNode2(workspaceId, existsMachine.getId());
-            Assert.state(!exists, "对应的节点已经存在拉");
+            Assert.state(!exists, I18nMessageUtil.get("i18n.i18n_node_already_exists.632d"));
             machineNodeServer.insertNode(machineNodeModel, workspaceId);
         }
         // 更新结果
         receiveCache.put("type", "success");
-        return JsonMessage.success("安装成功", NodeInfoController.listReceiveCache(null));
+        return JsonMessage.success(I18nMessageUtil.get("i18n.installation_success.811f"), NodeInfoController.listReceiveCache(null));
     }
 
 

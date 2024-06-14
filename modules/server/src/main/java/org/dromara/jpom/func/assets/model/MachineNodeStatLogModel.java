@@ -22,7 +22,7 @@ import org.dromara.jpom.model.data.NodeModel;
  */
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "MACHINE_NODE_STAT_LOG",
-    nameKey = "资产机器节点统计")
+    nameKey = "i18n.asset_machine_node_statistics.4a03")
 @Data
 public class MachineNodeStatLogModel extends BaseDbModel {
     /**

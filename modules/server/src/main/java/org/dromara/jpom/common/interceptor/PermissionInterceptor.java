@@ -48,7 +48,7 @@ public class PermissionInterceptor implements HandlerMethodInterceptor {
     private NodeService nodeService;
     @Resource
     private UserBindWorkspaceService userBindWorkspaceService;
-    public static final Supplier<String> DEMO_TIP = () -> "演示账号不能使用该功能";
+    public static final Supplier<String> DEMO_TIP = () -> I18nMessageUtil.get("i18n.demo_account_cannot_use_feature.a1a1");
     /**
      * demo 账号不能使用的功能
      */
@@ -113,7 +113,7 @@ public class PermissionInterceptor implements HandlerMethodInterceptor {
             String workspaceId = BaseWorkspaceService.getWorkspaceId(request);
             UserBindWorkspaceModel.PermissionResult permissionResult = userBindWorkspaceService.checkPermission(userModel, workspaceId + StrUtil.DASHED + method.name());
             if (!permissionResult.isSuccess()) {
-                this.errorMsg(response, permissionResult.errorMsg(StrUtil.format("对应功能【{}-{}】", I18nMessageUtil.get(classFeature.getName().get()), I18nMessageUtil.get(method.getName().get()))));
+                this.errorMsg(response, permissionResult.errorMsg(StrUtil.format(I18nMessageUtil.get("i18n.corresponding_function.5bb5"), I18nMessageUtil.get(classFeature.getName().get()), I18nMessageUtil.get(method.getName().get()))));
                 return false;
             }
         }
@@ -167,11 +167,11 @@ public class PermissionInterceptor implements HandlerMethodInterceptor {
             return true;
         }
         if (systemPermission.superUser() && !userModel.isSuperSystemUser()) {
-            this.errorMsg(response, "您不是超级管理员没有权限:-2");
+            this.errorMsg(response, I18nMessageUtil.get("i18n.not_super_admin.962e"));
             return false;
         }
         if (!userModel.isSystemUser()) {
-            this.errorMsg(response, "您没有服务端管理权限:-2");
+            this.errorMsg(response, I18nMessageUtil.get("i18n.no_server_management_permission.ee19"));
             return false;
         }
         return true;
@@ -183,7 +183,7 @@ public class PermissionInterceptor implements HandlerMethodInterceptor {
             // 节点信息
             NodeModel nodeModel = nodeService.getByKey(nodeId);
             if (nodeModel != null && !nodeModel.isOpenStatus()) {
-                throw new AgentException(nodeModel.getName() + "节点未启用");
+                throw new AgentException(nodeModel.getName() + I18nMessageUtil.get("i18n.node_not_enabled.a14d"));
             }
             request.setAttribute("node", nodeModel);
         }

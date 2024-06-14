@@ -27,6 +27,7 @@ import org.dromara.jpom.build.BuildUtil;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.configuration.ClusterConfig;
@@ -155,14 +156,14 @@ public class CacheManageController extends BaseServerController implements ICach
      */
     @RequestMapping(value = "clearCache.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public IJsonMessage<String> clearCache(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "类型错误") String type,
+    public IJsonMessage<String> clearCache(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.type_error.395f") String type,
                                            String machineId,
                                            HttpServletRequest request) {
         switch (type) {
             case "serviceCacheFileSize": {
                 File tempPath = JpomApplication.getInstance().getTempPath();
                 boolean clean = CommandUtil.systemFastDel(tempPath);
-                Assert.state(!clean, "清空文件缓存失败");
+                Assert.state(!clean, I18nMessageUtil.get("i18n.clear_file_cache_failed.5cd1"));
                 break;
             }
             case "serviceIpSize":
@@ -171,13 +172,13 @@ public class CacheManageController extends BaseServerController implements ICach
             case "serviceOldJarsSize": {
                 File oldJarsPath = JpomManifest.getOldJarsPath();
                 boolean clean = CommandUtil.systemFastDel(oldJarsPath);
-                Assert.state(!clean, "清空旧版本重新包失败");
+                Assert.state(!clean, I18nMessageUtil.get("i18n.clear_old_version_package_failed.021c"));
                 break;
             }
             default:
                 return this.tryRequestMachine(machineId, request, NodeUrl.ClearCache);
         }
-        return JsonMessage.success("清空成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.clear_success.2685"));
     }
 
     /**
@@ -190,23 +191,23 @@ public class CacheManageController extends BaseServerController implements ICach
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<String> clearErrorWorkspace(@ValidatorItem String tableName) {
         dataInitEvent.clearErrorWorkspace(tableName);
-        return JsonMessage.success("清理成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.cleanup_succeeded.02ea"));
     }
 
     @GetMapping(value = "async-refresh-cache", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<String> refresh() {
-        Assert.state(!this.refreshCacheIng, "正在刷新缓存中,请勿重复刷新");
+        Assert.state(!this.refreshCacheIng, I18nMessageUtil.get("i18n.refreshing_cache.c969"));
         ThreadUtil.execute(() -> {
             try {
                 this.refreshCacheIng = true;
                 this.executeTask();
             } catch (Exception e) {
-                log.error("手动刷新缓存异常", e);
+                log.error(I18nMessageUtil.get("i18n.manual_cache_refresh_exception.9d91"), e);
             } finally {
                 this.refreshCacheIng = false;
             }
         });
-        return JsonMessage.success("异步刷新中请稍后刷新页面查看");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.async_refresh_in_progress.5550"));
     }
 
     @Override

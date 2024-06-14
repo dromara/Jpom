@@ -108,10 +108,10 @@ public class MonitorUserOptListController extends BaseServerController {
      */
     @RequestMapping(value = "delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public IJsonMessage<Object> deleteMonitor(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "删除失败") String id, HttpServletRequest request) {
+    public IJsonMessage<Object> deleteMonitor(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.delete_failure.acf0") String id, HttpServletRequest request) {
         //
         monitorUserOptService.delByKey(id, request);
-        return JsonMessage.success("删除成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 
 
@@ -126,7 +126,7 @@ public class MonitorUserOptListController extends BaseServerController {
     @RequestMapping(value = "update", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<Object> updateMonitor(String id,
-                                              @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "监控名称不能为空") String name,
+                                              @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.monitor_name_cannot_be_empty.514a") String name,
                                               String notifyUser,
                                               String monitorUser,
                                               String monitorOpt,
@@ -140,7 +140,7 @@ public class MonitorUserOptListController extends BaseServerController {
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
-        Assert.notEmpty(notifyUsers, "请选择报警联系人");
+        Assert.notEmpty(notifyUsers, I18nMessageUtil.get("i18n.select_alarm_contact.d02a"));
 
 
         JSONArray monitorUserArray = JSONArray.parseArray(monitorUser);
@@ -149,7 +149,7 @@ public class MonitorUserOptListController extends BaseServerController {
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
-        Assert.notEmpty(monitorUserArrays, "请选择监控人员");
+        Assert.notEmpty(monitorUserArrays, I18nMessageUtil.get("i18n.select_monitoring_person.0756"));
 
 
         JSONArray monitorOptArray = JSONArray.parseArray(monitorOpt);
@@ -159,7 +159,7 @@ public class MonitorUserOptListController extends BaseServerController {
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
-        Assert.notEmpty(monitorOptArrays, "请选择监控的操作");
+        Assert.notEmpty(monitorOptArrays, I18nMessageUtil.get("i18n.select_monitoring_operation.3057"));
 
         JSONArray monitorFeatureArray = JSONArray.parseArray(monitorFeature);
         List<ClassFeature> monitorFeatureArrays = monitorFeatureArray
@@ -167,7 +167,7 @@ public class MonitorUserOptListController extends BaseServerController {
             .map(o -> EnumUtil.fromString(ClassFeature.class, StrUtil.toString(o), null))
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
-        Assert.notEmpty(monitorFeatureArrays, "请选择监控的功能");
+        Assert.notEmpty(monitorFeatureArrays, I18nMessageUtil.get("i18n.select_monitoring_function.c6e4"));
 
 
         boolean start = "on".equalsIgnoreCase(status);
@@ -185,10 +185,10 @@ public class MonitorUserOptListController extends BaseServerController {
         if (StrUtil.isEmpty(id)) {
             //添加监控
             monitorUserOptService.insert(monitorModel);
-            return JsonMessage.success("添加成功");
+            return JsonMessage.success(I18nMessageUtil.get("i18n.addition_succeeded.3fda"));
         }
         monitorUserOptService.updateById(monitorModel);
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 
     /**
@@ -200,15 +200,15 @@ public class MonitorUserOptListController extends BaseServerController {
      */
     @RequestMapping(value = "changeStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public IJsonMessage<Object> changeStatus(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "参数错误id不能为空") String id,
+    public IJsonMessage<Object> changeStatus(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.parameter_error_id_cannot_be_empty.86cc") String id,
                                              String status) {
         MonitorUserOptModel monitorModel = monitorUserOptService.getByKey(id);
-        Assert.notNull(monitorModel, "不存在监控项啦");
+        Assert.notNull(monitorModel, I18nMessageUtil.get("i18n.monitoring_item_not_exist.32c8"));
 
         boolean bStatus = Convert.toBool(status, false);
         monitorModel.setStatus(bStatus);
         monitorUserOptService.updateById(monitorModel);
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 
 

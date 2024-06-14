@@ -22,7 +22,7 @@ import org.dromara.jpom.model.BaseWorkspaceModel;
  */
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "USEROPERATELOGV1",
-    nameKey = "用户操作日志", workspaceBind = 2)
+    nameKey = "i18n.user_operation_log.2233", workspaceBind = 2)
 @Data
 public class UserOperateLogV1 extends BaseWorkspaceModel {
     /**

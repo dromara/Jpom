@@ -89,10 +89,10 @@ public class WorkspaceController extends BaseServerController {
                                        @ValidatorItem String name,
                                        @ValidatorItem String description,
                                        String group,
-                                       @ValidatorItem(msg = "请选择集群") String clusterInfoId) {
+                                       @ValidatorItem(msg = "i18n.select_cluster.f8c3") String clusterInfoId) {
         //
         ClusterInfoModel clusterInfoModel = clusterInfoService.getByKey(clusterInfoId);
-        Assert.notNull(clusterInfoModel, "对应的集群不存在");
+        Assert.notNull(clusterInfoModel, I18nMessageUtil.get("i18n.cluster_not_exist.4098"));
         this.checkInfo(id, name);
         //
         WorkspaceModel workspaceModel = new WorkspaceModel();
@@ -107,7 +107,7 @@ public class WorkspaceController extends BaseServerController {
             workspaceModel.setId(id);
             workspaceService.updateById(workspaceModel);
         }
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
     private void checkInfo(String id, String name) {
@@ -117,7 +117,7 @@ public class WorkspaceController extends BaseServerController {
             entity.set("id", StrUtil.format(" <> {}", id));
         }
         boolean exists = workspaceService.exists(entity);
-        Assert.state(!exists, "对应的工作空间名称已经存在啦");
+        Assert.state(!exists, I18nMessageUtil.get("i18n.workspace_name_already_exists.0f82"));
     }
 
     /**
@@ -165,9 +165,9 @@ public class WorkspaceController extends BaseServerController {
     @GetMapping(value = "pre-check-delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     @SystemPermission(superUser = true)
-    public IJsonMessage<Tree<String>> preCheckDelete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
+    public IJsonMessage<Tree<String>> preCheckDelete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.data_id_cannot_be_empty.403b") String id) {
         //
-        Assert.state(!StrUtil.equals(id, Const.WORKSPACE_DEFAULT_ID), "不能删除默认工作空间");
+        Assert.state(!StrUtil.equals(id, Const.WORKSPACE_DEFAULT_ID), I18nMessageUtil.get("i18n.cannot_delete_default_workspace.0c06"));
         // 判断是否存在关联数据
         Set<Class<?>> classes = BaseWorkspaceModel.allTableClass();
 
@@ -209,9 +209,9 @@ public class WorkspaceController extends BaseServerController {
     @GetMapping(value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     @SystemPermission(superUser = true)
-    public IJsonMessage<String> delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
+    public IJsonMessage<String> delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.data_id_cannot_be_empty.403b") String id) {
         //
-        Assert.state(!StrUtil.equals(id, Const.WORKSPACE_DEFAULT_ID), "不能删除默认工作空间");
+        Assert.state(!StrUtil.equals(id, Const.WORKSPACE_DEFAULT_ID), I18nMessageUtil.get("i18n.cannot_delete_default_workspace.0c06"));
         // 判断是否存在关联数据
         Set<Class<?>> classes = BaseWorkspaceModel.allTableClass();
 
@@ -225,25 +225,25 @@ public class WorkspaceController extends BaseServerController {
             } else if (workspaceBind == 3) {
                 // 父级不存在自动删除
                 Class<?> parents = tableName.parents();
-                Assert.state(parents != Void.class, "表信息配置错误");
+                Assert.state(parents != Void.class, I18nMessageUtil.get("i18n.table_info_configuration_error.b050"));
                 TableName tableName1 = parents.getAnnotation(TableName.class);
-                Assert.notNull(tableName1, "父级表信息配置错误," + aClass);
+                Assert.notNull(tableName1, I18nMessageUtil.get("i18n.parent_table_info_config_error.2f52") + aClass);
                 //
                 String sql = "select  count(1) as cnt from " + tableName1.value() + " where workspaceId=?";
                 int cnt = ObjectUtil.defaultIfNull(workspaceService.queryNumber(sql, id), Number::intValue, 0);
-                Assert.state(cnt <= 0, StrUtil.format("当前工作空间下还存在关联：{} 和 {} 数据", I18nMessageUtil.get(tableName.nameKey()), I18nMessageUtil.get(tableName1.nameKey())));
+                Assert.state(cnt <= 0, StrUtil.format(I18nMessageUtil.get("i18n.associated_data_and_exist_in_workspace.5fa7"), I18nMessageUtil.get(tableName.nameKey()), I18nMessageUtil.get(tableName1.nameKey())));
                 // 等待自动删除
                 autoDeleteClass.add(aClass);
             } else {
                 // 其他严格检查的情况
                 String sql = "select  count(1) as cnt from " + tableName.value() + " where workspaceId=?";
                 int cnt = ObjectUtil.defaultIfNull(workspaceService.queryNumber(sql, id), Number::intValue, 0);
-                Assert.state(cnt <= 0, "当前工作空间下还存在关联数据：" + I18nMessageUtil.get(tableName.nameKey()));
+                Assert.state(cnt <= 0, I18nMessageUtil.get("i18n.associated_data_exists_in_workspace.8827") + I18nMessageUtil.get(tableName.nameKey()));
             }
         }
         // 判断用户绑定关系
         boolean workspace = userBindWorkspaceService.existsWorkspace(id);
-        Assert.state(!workspace, "当前工作空间下还绑定着用户（权限组）信息");
+        Assert.state(!workspace, I18nMessageUtil.get("i18n.user_or_group_bindings_exist_in_workspace.d57b"));
         // 最后执行自动删除
         StringBuilder autoDelete = new StringBuilder(StrUtil.EMPTY);
         for (Class<?> aClass : autoDeleteClass) {
@@ -252,7 +252,7 @@ public class WorkspaceController extends BaseServerController {
             String sql = "delete from " + tableName.value() + " where workspaceId=?";
             int execute = workspaceService.execute(sql, id);
             if (execute > 0) {
-                autoDelete.append(StrUtil.format(" 自动删除 {} 表中数据 {} 条数据", tableName.value(), execute));
+                autoDelete.append(StrUtil.format(I18nMessageUtil.get("i18n.auto_delete_data.ca62"), tableName.value(), execute));
             }
         }
         // 删除缓存
@@ -263,7 +263,7 @@ public class WorkspaceController extends BaseServerController {
         systemParametersServer.delByKey(StrUtil.format("node_config_{}", id));
         // 删除信息
         workspaceService.delByKey(id);
-        return new JsonMessage<>(200, "删除成功:" + autoDelete);
+        return new JsonMessage<>(200, I18nMessageUtil.get("i18n.delete_success_with_colon.d44a") + autoDelete);
     }
 
     /**
@@ -275,7 +275,7 @@ public class WorkspaceController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<JSONObject> getMenusConfig(String workspaceId, HttpServletRequest request) {
         WorkspaceModel workspaceModel = workspaceService.getByKey(workspaceId);
-        Assert.notNull(workspaceModel, "不存在对应的工作空间");
+        Assert.notNull(workspaceModel, I18nMessageUtil.get("i18n.workspace_not_exist.a6fd"));
         JSONObject config = systemParametersServer.getConfigDefNewInstance(StrUtil.format("menus_config_{}", workspaceId), JSONObject.class);
         //"classpath:/menus/index.json"
         //"classpath:/menus/node-index.json"
@@ -288,7 +288,7 @@ public class WorkspaceController extends BaseServerController {
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<Object> saveMenusConfig(String serverMenuKeys, String nodeMenuKeys, String workspaceId) {
         WorkspaceModel workspaceModel = workspaceService.getByKey(workspaceId);
-        Assert.notNull(workspaceModel, "不存在对应的工作空间");
+        Assert.notNull(workspaceModel, I18nMessageUtil.get("i18n.workspace_not_exist.a6fd"));
         //
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("nodeMenuKeys", StrUtil.splitTrim(nodeMenuKeys, StrUtil.COMMA));
@@ -296,7 +296,7 @@ public class WorkspaceController extends BaseServerController {
         String format = StrUtil.format("menus_config_{}", workspaceId);
         systemParametersServer.upsert(format, jsonObject, format);
         //
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 
     private JSONArray readMenusJson(String path) {

@@ -23,6 +23,7 @@ import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
@@ -105,7 +106,7 @@ public class SystemExtConfigController extends BaseServerController {
     public IJsonMessage<Tree<String>> list() throws Exception {
         Map<String, TreeNode<String>> parentMap = new LinkedHashMap<>(10);
         // root 节点
-        parentMap.put(StrUtil.SLASH, new TreeNode<>(StrUtil.SLASH, null, "根路径", 0));
+        parentMap.put(StrUtil.SLASH, new TreeNode<>(StrUtil.SLASH, null, I18nMessageUtil.get("i18n.root_path.1396"), 0));
         Map<String, TreeNode<String>> listDir = this.listDir(parentMap);
         //
         PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
@@ -190,9 +191,9 @@ public class SystemExtConfigController extends BaseServerController {
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<Object> saveItem(@ValidatorItem String name, @ValidatorItem String content) {
         File configResourceFile = ExtConfigBean.getConfigResourceFile(name);
-        Assert.notNull(configResourceFile, "不能编辑对应的配置文件");
+        Assert.notNull(configResourceFile, I18nMessageUtil.get("i18n.cannot_edit_corresponding_config_file.8d10"));
         FileUtil.writeUtf8String(content, configResourceFile);
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 
     @GetMapping(value = "get-default-item", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -207,11 +208,11 @@ public class SystemExtConfigController extends BaseServerController {
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<Object> addItem(@ValidatorItem String name) {
         boolean existConfigResource = ExtConfigBean.existConfigResource(name);
-        Assert.state(!existConfigResource, "对应的配置文件已经存在啦");
+        Assert.state(!existConfigResource, I18nMessageUtil.get("i18n.config_file_already_exists.c5fe"));
         File resourceFile = ExtConfigBean.getConfigResourceFile(name);
-        Assert.notNull(resourceFile, "当前环境不能创建配置文件");
+        Assert.notNull(resourceFile, I18nMessageUtil.get("i18n.cannot_create_config_file_in_environment.55bb"));
         FileUtil.touch(resourceFile);
-        return JsonMessage.success("创建成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.create_success.04a6"));
     }
 
     private void buildParent(Map<String, TreeNode<String>> parentMap, String path) {

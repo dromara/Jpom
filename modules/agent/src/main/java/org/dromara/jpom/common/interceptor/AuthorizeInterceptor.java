@@ -13,6 +13,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.AgentAuthorize;
 import org.dromara.jpom.configuration.AgentConfig;
 import org.springframework.context.annotation.Configuration;
@@ -55,6 +56,6 @@ public class AuthorizeInterceptor implements HandlerMethodInterceptor {
     }
 
     private void error(HttpServletResponse response) {
-        ServletUtil.write(response, JsonMessage.getString(Const.AUTHORIZE_ERROR, "授权信息错误"), MediaType.APPLICATION_JSON_VALUE);
+        ServletUtil.write(response, JsonMessage.getString(Const.AUTHORIZE_ERROR, I18nMessageUtil.get("i18n.auth_info_error.c184")), MediaType.APPLICATION_JSON_VALUE);
     }
 }

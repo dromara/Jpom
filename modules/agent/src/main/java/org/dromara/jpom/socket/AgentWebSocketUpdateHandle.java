@@ -18,6 +18,7 @@ import org.apache.tomcat.websocket.Constants;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.JpomManifest;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.model.AgentFileModel;
 import org.dromara.jpom.model.UploadFileModel;
@@ -102,7 +103,7 @@ public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
             case "heart":
                 break;
             default:
-                log.warn("忽略的操作：{}", message);
+                log.warn(I18nMessageUtil.get("i18n.ignored_operation.edee"), message);
                 break;
         }
         SocketSessionUtil.send(session, model.toString());
@@ -144,8 +145,8 @@ public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
             JpomManifest.releaseJar(filePath, uploadFile.getVersion());
             JpomApplication.restart();
         } catch (Exception e) {
-            result = "重启失败" + e.getMessage();
-            log.error("重启失败", e);
+            result = I18nMessageUtil.get("i18n.restart_failed.f92a") + e.getMessage();
+            log.error(I18nMessageUtil.get("i18n.restart_failed.f92a"), e);
         }
         return result;
     }

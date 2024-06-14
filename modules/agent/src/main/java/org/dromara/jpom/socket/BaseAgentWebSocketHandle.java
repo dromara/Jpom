@@ -17,6 +17,7 @@ import cn.hutool.core.util.URLUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.AgentAuthorize;
 import org.dromara.jpom.util.SocketSessionUtil;
 
@@ -72,11 +73,11 @@ public abstract class BaseAgentWebSocketHandle {
         String authorize = this.getParameters(session, Const.JPOM_AGENT_AUTHORIZE);
         boolean ok = agentAuthorize.checkAuthorize(authorize);
         if (!ok) {
-            log.warn("socket 会话建立失败,授权信息错误");
+            log.warn(I18nMessageUtil.get("i18n.socket_session_establishment_failed.4924"));
             try {
-                session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "授权信息错误"));
+                session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, I18nMessageUtil.get("i18n.auth_info_error.c184")));
             } catch (Exception e) {
-                log.error("socket 错误", e);
+                log.error(I18nMessageUtil.get("i18n.socket_error.18c1"), e);
             }
             return true;
         }
@@ -101,10 +102,10 @@ public abstract class BaseAgentWebSocketHandle {
     public void onError(Session session, Throwable thr) {
         // java.io.IOException: Broken pipe
         try {
-            SocketSessionUtil.send(session, "服务端发生异常" + ExceptionUtil.stacktraceToString(thr));
+            SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.server_exception_occurred.9eb4") + ExceptionUtil.stacktraceToString(thr));
         } catch (IOException ignored) {
         }
-        log.error(session.getId() + "socket 异常", thr);
+        log.error(session.getId() + I18nMessageUtil.get("i18n.socket_exception.d836"), thr);
     }
 
     protected String getOptUserName(Session session) {
@@ -113,12 +114,12 @@ public abstract class BaseAgentWebSocketHandle {
     }
 
     public void onClose(Session session, CloseReason closeReason) {
-        log.debug("会话[{}]关闭原因：{}", session.getId(), closeReason);
+        log.debug(I18nMessageUtil.get("i18n.session_closed_reason.103a"), session.getId(), closeReason);
         // 清理日志监听
         try {
             AgentFileTailWatcher.offline(session);
         } catch (Exception e) {
-            log.error("关闭异常", e);
+            log.error(I18nMessageUtil.get("i18n.close_exception.5b86"), e);
         }
         // top
         //        TopManager.removeMonitor(session);

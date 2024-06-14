@@ -15,6 +15,7 @@ import cn.keepbx.jpom.model.JsonMessage;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSON;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.data.MailAccountModel;
 import org.dromara.jpom.monitor.EmailUtil;
 import org.dromara.jpom.permission.ClassFeature;
@@ -70,26 +71,26 @@ public class SystemMailConfigController extends BaseServerController {
     @PostMapping(value = "mailConfig_save.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<Object> listData(MailAccountModel mailAccountModel) throws Exception {
-        Assert.notNull(mailAccountModel, "请填写信息,并检查是否填写合法");
-        Assert.hasText(mailAccountModel.getHost(), "请填写host");
-        Assert.hasText(mailAccountModel.getUser(), "请填写user");
-        Assert.hasText(mailAccountModel.getFrom(), "请填写from");
+        Assert.notNull(mailAccountModel, I18nMessageUtil.get("i18n.please_fill_in_information_and_check_validity.771a"));
+        Assert.hasText(mailAccountModel.getHost(), I18nMessageUtil.get("i18n.please_fill_in_host.7922"));
+        Assert.hasText(mailAccountModel.getUser(), I18nMessageUtil.get("i18n.please_fill_in_user.5f52"));
+        Assert.hasText(mailAccountModel.getFrom(), I18nMessageUtil.get("i18n.please_fill_in_from.7268"));
         // 验证是否正确
         MailAccountModel item = systemParametersServer.getConfig(MailAccountModel.ID, MailAccountModel.class);
         if (item != null) {
             mailAccountModel.setPass(StrUtil.emptyToDefault(mailAccountModel.getPass(), item.getPass()));
         } else {
-            Assert.hasText(mailAccountModel.getPass(), "请填写pass");
+            Assert.hasText(mailAccountModel.getPass(), I18nMessageUtil.get("i18n.please_fill_in_password.455f"));
         }
         IPlugin plugin = PluginFactory.getPlugin("email");
         Object json = JSON.toJSON(mailAccountModel);
         Map<String, Object> map = new HashMap<>(1);
         map.put("data", json);
         boolean checkInfo = plugin.execute("checkInfo", map, Boolean.class);
-        Assert.state(checkInfo, "验证邮箱信息失败，请检查配置的邮箱信息。端口号、授权码等。");
+        Assert.state(checkInfo, I18nMessageUtil.get("i18n.email_verification_failed.5863"));
         systemParametersServer.upsert(MailAccountModel.ID, mailAccountModel, MailAccountModel.ID);
         //
         EmailUtil.refreshConfig();
-        return JsonMessage.success("保存成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.save_succeeded.3b10"));
     }
 }
