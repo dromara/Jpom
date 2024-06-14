@@ -259,6 +259,7 @@ import 'codemirror/addon/search/search.js'
 import 'codemirror/addon/display/autorefresh.js'
 import 'codemirror/addon/selection/mark-selection.js'
 import 'codemirror/addon/search/match-highlighter.js'
+import { t } from '@/i18n/index'
 
 // 文件后缀与语言对应表
 const fileSuffixToModeMap = {
@@ -308,7 +309,7 @@ export default {
     placeholder: {
       type: String,
       default: function () {
-        return this.$t('components.codeEditor.index.4ea93630')
+        return t('components.codeEditor.index.4ea93630')
       }
     }
   },
@@ -445,6 +446,7 @@ export default {
         { name: '3024-day', theme: '3024-day' },
         { name: '3024-night', theme: '3024-night' }
       ],
+
       loading: true
     }
   },
