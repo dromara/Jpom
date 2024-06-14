@@ -183,7 +183,7 @@ public class ParameterInterceptor implements HandlerMethodInterceptor {
         }
         if (method == null) {
             // 没有配置对应方法
-            log.error("{}未配置验证方法：{}", handlerMethod.getBeanType(), validatorConfig.customizeMethod());
+            log.error(I18nMessageUtil.get("i18n.verification_method_not_configured.7358"), handlerMethod.getBeanType(), validatorConfig.customizeMethod());
             interceptor.error(request, response, name, value, validatorItem);
             return false;
         }

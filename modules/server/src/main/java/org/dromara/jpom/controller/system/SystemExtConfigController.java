@@ -144,7 +144,7 @@ public class SystemExtConfigController extends BaseServerController {
                 String id = node.getId();
                 this.buildParent(parentMap, id);
                 //
-                node.setName(StrUtil.format("{} [默认]", node.getName()));
+                node.setName(StrUtil.format(I18nMessageUtil.get("i18n.default_value.1aa9"), node.getName()));
                 Map<String, Object> extra = node.getExtra();
                 extra.put("defaultConfig", true);
                 extra.put("hasDefault", true);

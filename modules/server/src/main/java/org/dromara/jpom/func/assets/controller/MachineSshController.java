@@ -210,7 +210,7 @@ public class MachineSshController extends BaseGroupNameController {
             JschUtil.close(session);
         } catch (Exception e) {
             log.warn(I18nMessageUtil.get("i18n.ssh_connection_failed.4719"), e);
-            return new JsonMessage<>(505, "ssh连接失败,请检查用户名、密码、host、端口等填写是否正确，超时时间是否合理：" + e.getMessage());
+            return new JsonMessage<>(505, I18nMessageUtil.get("i18n.ssh_connection_failed.74ab") + e.getMessage());
         }
         sshModel.setStatus(1);
         int i = add ? machineSshServer.insert(sshModel) : machineSshServer.updateById(sshModel);
@@ -343,7 +343,7 @@ public class MachineSshController extends BaseGroupNameController {
     @GetMapping(value = "import-template", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public void importTemplate(HttpServletResponse response) throws IOException {
-        String fileName = "ssh导入模板.csv";
+        String fileName = I18nMessageUtil.get("i18n.ssh_import_template_csv.14fa");
         this.setApplicationHeader(response, fileName);
         //
         CsvWriter writer = CsvUtil.getWriter(response.getWriter());

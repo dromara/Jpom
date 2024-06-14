@@ -355,7 +355,7 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
                 }
             }).awaitCompletion();
         } catch (InterruptedException e) {
-            logConsumer.accept("push image 被中断:" + e);
+            logConsumer.accept(I18nMessageUtil.get("i18n.push_image_interrupted.6377") + e);
         }
     }
 

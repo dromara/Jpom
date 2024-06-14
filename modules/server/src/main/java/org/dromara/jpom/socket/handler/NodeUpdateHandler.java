@@ -222,7 +222,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
             }
             JsonMessage<Tuple> error = JpomManifest.checkJpomJar(agentFileModel.getSavePath(), Type.Agent, false);
             if (!error.success()) {
-                this.onError(session, "Agent JAR 损坏请重新上传," + error.getMsg());
+                this.onError(session, I18nMessageUtil.get("i18n.agent_jar_damaged.74a8") + error.getMsg());
                 return;
             }
             for (int i = 0; i < ids.size(); i++) {
@@ -278,7 +278,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                         return true;
                     }
                 } catch (Exception e) {
-                    log.debug("{} 节点连接失败 {}", id, e.getMessage());
+                    log.debug(I18nMessageUtil.get("i18n.node_connection_failed.8497"), id, e.getMessage());
                 }
             }
             this.sendMsg(callbackRestartMessage.setData(I18nMessageUtil.get("i18n.reconnect_failure.7c01")), session);
@@ -320,7 +320,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                         return true;
                     }
                 } catch (Exception e) {
-                    log.debug("{} 节点连接失败 {}", id, e.getMessage());
+                    log.debug(I18nMessageUtil.get("i18n.node_connection_failed.8497"), id, e.getMessage());
                 }
                 ThreadUtil.sleep(1000L);
                 ++retryCount;

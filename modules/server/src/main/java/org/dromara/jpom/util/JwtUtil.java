@@ -20,6 +20,7 @@ import cn.hutool.jwt.JWTHeader;
 import cn.hutool.jwt.JWTValidator;
 import cn.hutool.jwt.signers.JWTSignerUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.UserConfig;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.system.ServerConfig;
@@ -67,7 +68,7 @@ public class JwtUtil {
         try {
             return parseBody(token);
         } catch (Exception e) {
-            log.warn("token 解析失败：" + token, e);
+            log.warn(I18nMessageUtil.get("i18n.token_parse_failed.cadf") + token, e);
             return null;
         }
     }

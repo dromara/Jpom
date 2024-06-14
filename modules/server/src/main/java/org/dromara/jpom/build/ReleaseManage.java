@@ -281,7 +281,7 @@ public class ReleaseManage {
                 .queryByTag(this.buildExtraModule.getWorkspaceId(), fromTag);
             Map<String, Object> map = machineDockerServer.dockerParameter(dockerInfoModels);
             if (map == null) {
-                String format = StrUtil.format("{} 没有可用的 docker server", fromTag);
+                String format = StrUtil.format(I18nMessageUtil.get("i18n.no_available_docker_server.6aaa"), fromTag);
                 logRecorder.systemError(format);
                 return format;
             }
