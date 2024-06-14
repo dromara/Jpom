@@ -27,7 +27,7 @@ const main = async () => {
     projectPath: process.cwd(),
     globalPath: 'src',
     includeDir: ['api', 'components', 'pages', 'stores', 'utils', 'App.vue'],
-    excludeFileOrDir: [path.join('utils', 'parse-ansi.ts')],
+    excludeFileOrDir: [],
     exts: ['.vue', '.ts', '.js'],
     prettier: prettierrCconfig,
     lang: {
