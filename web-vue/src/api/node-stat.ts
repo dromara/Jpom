@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 ///
 /// Copyright (c) 2019 Of Him Code Technology Studio
 /// Jpom is licensed under Mulan PSL v2.
@@ -104,7 +105,7 @@ const defaultData = {
  */
 export function generateNodeTopChart(data) {
   const cpuItem = {
-    name: 'cpu占用',
+    name: t('api.node-stat.b2fe8225'),
     type: 'line',
     data: [],
     showSymbol: false,
@@ -112,28 +113,28 @@ export function generateNodeTopChart(data) {
     smooth: true
   }
   const diskItem = {
-    name: '磁盘占用',
+    name: t('api.node-stat.f503ab56'),
     type: 'line',
     data: [],
     showSymbol: false,
     smooth: true
   }
   const memoryItem = {
-    name: '实际内存占用',
+    name: t('api.node-stat.f892bef6'),
     type: 'line',
     data: [],
     showSymbol: false,
     smooth: true
   }
   const virtualMemory = {
-    name: '虚拟内存占用',
+    name: t('api.node-stat.9b6411f6'),
     type: 'line',
     data: [],
     showSymbol: false,
     smooth: true
   }
   const swapMemory = {
-    name: '交换内存占用',
+    name: t('api.node-stat.93a9742d'),
     type: 'line',
     data: [],
     showSymbol: false,
@@ -211,7 +212,7 @@ export function generateNodeTopChart(data) {
  */
 export function generateNodeNetChart(data) {
   const rxItem = {
-    name: '接收',
+    name: t('api.node-stat.9ffc4b4d'),
     type: 'line',
     data: [],
     showSymbol: false,
@@ -219,7 +220,7 @@ export function generateNodeNetChart(data) {
     smooth: true
   }
   const txItem = {
-    name: '发送',
+    name: t('api.node-stat.c60e4ac2'),
     type: 'line',
     data: [],
     showSymbol: false,
@@ -280,7 +281,7 @@ export function generateNodeNetChart(data) {
  */
 export function generateNodeNetworkTimeChart(data) {
   const dataArray = {
-    name: '网络延迟',
+    name: t('api.node-stat.bd96d908'),
     type: 'line',
     data: [],
     showSymbol: false,

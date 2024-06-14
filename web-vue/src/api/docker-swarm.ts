@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 ///
 /// Copyright (c) 2019 Of Him Code Technology Studio
 /// Jpom is licensed under Mulan PSL v2.
@@ -203,19 +204,19 @@ export function dockerSwarmServicesDownloaLog(urlPrefix, id) {
             <a-select-option key="ORPHANED">已失联</a-select-option>
  */
 export const TASK_STATE = {
-  NEW: '新建状态',
+  NEW: t('api.docker-swarm.d84cdb52'),
   // ALLOCATED: "已分配",
-  PENDING: '待处理',
-  ASSIGNED: '已分配',
-  ACCEPTED: '处理中',
-  PREPARING: '准备中',
-  READY: '准备',
-  STARTING: '开始执行任务',
-  RUNNING: '执行任务中',
-  COMPLETE: '执行成功',
-  SHUTDOWN: '停止',
-  FAILED: '执行失败',
-  REJECTED: '拒绝',
-  REMOVE: '移除',
-  ORPHANED: '已失联'
+  PENDING: t('api.docker-swarm.f7d829eb'),
+  ASSIGNED: t('api.docker-swarm.8192b104'),
+  ACCEPTED: t('api.docker-swarm.fc1391c9'),
+  PREPARING: t('api.docker-swarm.bda03d7d'),
+  READY: t('api.docker-swarm.2a21d3d2'),
+  STARTING: t('api.docker-swarm.7487690f'),
+  RUNNING: t('api.docker-swarm.942d3df3'),
+  COMPLETE: t('api.docker-swarm.c1d43085'),
+  SHUTDOWN: t('api.docker-swarm.24540de'),
+  FAILED: t('api.docker-swarm.d4ee19e9'),
+  REJECTED: t('api.docker-swarm.8582af3f'),
+  REMOVE: t('api.docker-swarm.65fcbd09'),
+  ORPHANED: t('api.docker-swarm.e99ab4ea')
 }

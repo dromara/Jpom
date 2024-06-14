@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 ///
 /// Copyright (c) 2019 Of Him Code Technology Studio
 /// Jpom is licensed under Mulan PSL v2.
@@ -291,16 +292,16 @@ export function sortItem(params) {
 }
 
 export const statusMap = {
-  1: '构建中',
-  2: '构建完成',
-  3: '构建失败',
-  4: '发布中',
-  5: '发布成功',
-  6: '发布失败',
-  7: '取消构建',
-  8: '构建中断',
-  9: '队列等待',
-  10: '异常关闭'
+  1: t('api.build-info.90b71abe'),
+  2: t('api.build-info.47e182a5'),
+  3: t('api.build-info.20ce2aae'),
+  4: t('api.build-info.e64e695c'),
+  5: t('api.build-info.5fe167f7'),
+  6: t('api.build-info.4adb4e9b'),
+  7: t('api.build-info.2ebf779c'),
+  8: t('api.build-info.f7ba88b7'),
+  9: t('api.build-info.7c974164'),
+  10: t('api.build-info.7ab6f39e')
 }
 export const statusColor = {
   1: 'orange',
@@ -316,22 +317,22 @@ export const statusColor = {
 }
 
 export const releaseMethodMap = {
-  0: '不发布',
-  1: '节点分发',
-  2: '项目',
+  0: t('api.build-info.ea464dbb'),
+  1: t('api.build-info.2341ce30'),
+  2: t('api.build-info.a2c247c4'),
   3: 'SSH',
-  4: '本地命令',
-  5: 'Docker镜像'
+  4: t('api.build-info.a979b939'),
+  5: t('api.build-info.913d1c8d')
 }
 
 export const triggerBuildTypeMap = {
-  0: '手动',
-  1: '触发器',
-  2: '定时',
-  3: '手动回滚'
+  0: t('api.build-info.4139f3b5'),
+  1: t('api.build-info.44701ced'),
+  2: t('api.build-info.5bccadd3'),
+  3: t('api.build-info.f6ef2a8')
 }
 
 export const buildModeMap = {
-  0: '本地构建',
-  1: '容器构建'
+  0: t('api.build-info.db53bc39'),
+  1: t('api.build-info.19d0a75')
 }
