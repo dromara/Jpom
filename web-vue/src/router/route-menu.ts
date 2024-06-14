@@ -57,6 +57,7 @@ const routeMenuMap: Record<string, string> = {
   machine_ssh_info: '/system/assets/ssh-list',
   machine_docker_info: '/system/assets/docker-list',
   global_repository: '/system/assets/repository-list',
+  script_library: '/system/assets/script-library',
   configWorkspaceEnv: '/script/env-list',
   cronTools: '/tools/cron',
   netTools: '/tools/network',
