@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 ///
 /// Copyright (c) 2019 Of Him Code Technology Studio
 /// Jpom is licensed under Mulan PSL v2.
@@ -11,25 +12,25 @@
 export const tableSizeList = [
   {
     value: 'large',
-    label: '超大'
+    label: t('components.customTable.dict.index.2325de1c')
   },
   {
     value: 'middle',
-    label: '中等'
+    label: t('components.customTable.dict.index.80c1453f')
   },
   {
     value: 'small',
-    label: '紧凑'
+    label: t('components.customTable.dict.index.d39bbae4')
   }
 ]
 
 export const tableLayoutList = [
   {
     value: 'table',
-    label: '表格'
+    label: t('components.customTable.dict.index.4ff250dc')
   },
   {
     value: 'card',
-    label: '卡片'
+    label: t('components.customTable.dict.index.7edad275')
   }
 ]

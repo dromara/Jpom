@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 ///
 /// Copyright (c) 2019 Of Him Code Technology Studio
 /// Jpom is licensed under Mulan PSL v2.
@@ -60,7 +61,7 @@ export const PAGE_DEFAULT_SIZW_OPTIONS = ['5', '10', '15', '20', '25', '30', '35
  * @returns String
  */
 export function PAGE_DEFAULT_SHOW_TOTAL(total: number) {
-  return `总计 ${total} 条`
+  return t('utils.const.4fcd2be0', { total: total })
 }
 
 export const PAGE_DEFAULT_LIST_QUERY: any = {
@@ -141,7 +142,7 @@ export const RESTART_UPGRADE_WAIT_TIME_COUNT = 80
  */
 export const CRON_DATA_SOURCE = [
   {
-    title: '取消定时,不再定时执行（支持 ! 前缀禁用定时执行，如：!0 0/1 * * * ?）',
+    title: t('utils.const.1397b7fa'),
     options: [
       {
         title: '',
@@ -150,61 +151,61 @@ export const CRON_DATA_SOURCE = [
     ]
   },
   {
-    title: '分钟级别',
+    title: t('utils.const.f397fdb9'),
     options: [
       {
-        title: '1分钟',
+        title: t('utils.const.19a1647f'),
         value: '0 0/1 * * * ?'
       },
       {
-        title: '5分钟',
+        title: t('utils.const.edee406c'),
         value: '0 0/5 * * * ?'
       },
       {
-        title: '10分钟',
+        title: t('utils.const.eff3c3f'),
         value: '0 0/10 * * * ?'
       },
       {
-        title: '30分钟',
+        title: t('utils.const.4cda3b42'),
         value: '0 0/30 * * * ?'
       }
     ]
   },
   {
-    title: '小时级别',
+    title: t('utils.const.5057c1d0'),
     options: [
       {
-        title: '每小时',
+        title: t('utils.const.f00f01ca'),
         value: '0 0 0/1 * * ?'
       }
     ]
   },
   {
-    title: '天级别',
+    title: t('utils.const.f661cf9a'),
     options: [
       {
-        title: '凌晨0点和中午12点',
+        title: t('utils.const.597995d3'),
         value: '0 0 0,12 * * ?'
       },
       {
-        title: '凌晨0点',
+        title: t('utils.const.c9219cc4'),
         value: '0 0 0 * * ?'
       }
     ]
   },
   {
-    title: '秒级别（默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）',
+    title: t('utils.const.c2d566f2'),
     options: [
       {
-        title: '5秒一次',
+        title: t('utils.const.a5ef245b'),
         value: '0/5 * * * * ?'
       },
       {
-        title: '10秒一次',
+        title: t('utils.const.222fa259'),
         value: '0/10 * * * * ?'
       },
       {
-        title: '30秒一次',
+        title: t('utils.const.7a431b98'),
         value: '0/30 * * * * ?'
       }
     ]
@@ -220,20 +221,20 @@ export const ZIP_ACCEPT = '.tar,.bz2,.gz,.zip,.tar.bz2,.tar.gz'
  * mfa app 应用举例
  */
 export const MFA_APP_TIP_ARRAY = [
-  '<strong>【推荐】微信小程序搜索 数盾OTP</strong>',
-  '<strong>【推荐】腾讯身份验证码</strong> 简单好用 <a href="https://a.app.qq.com/o/simple.jsp?pkgname=com.tencent.authenticator">Android</a>',
-  '<strong>Authy</strong> 功能丰富 专为两步验证码 <a href="https://authy.com/download/">iOS/Android/Windows/Mac/Linux</a> &nbsp; <a href="https://chrome.google.com/webstore/detail/authy/gaedmjdfmmahhbjefcbgaolhhanlaolb?hl=cn">Chrome 扩展</a>',
-  '<strong>Google Authenticator</strong> 简单易用，但不支持密钥导出备份 <a href="https://apps.apple.com/us/app/google-authenticator/id388497605">iOS</a> <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&amp;hl=cn">Android</a>',
-  '<strong>Microsoft Authenticator</strong> 使用微软全家桶的推荐 <a href="https://www.microsoft.com/zh-cn/account/authenticator">iOS/Android</a>',
-  '<strong>1Password</strong> 强大安全的密码管理付费应用<a href="https://1password.com/zh-cn/downloads/">iOS/Android/Windows/Mac/Linux/ChromeOS</a>'
+  t('utils.const.3d7f1632'),
+  t('utils.const.ee0d1cb6'),
+  t('utils.const.316edf4e'),
+  t('utils.const.571efa83'),
+  t('utils.const.4c20714f'),
+  t('utils.const.c0f69a6e')
 ]
 
 /**
  * 项目 DSL 示例
  */
 export const PROJECT_DSL_DEFATUL =
-  '# scriptId 可以是项目路径下脚本文件名或者系统中的脚本模版ID\r\n' +
-  'description: 测试\r\n' +
+  t('utils.const.ba767044') +
+  t('utils.const.59e55b4') +
   'run:\r\n' +
   '  start:\r\n' +
   '#    scriptId: project.sh\r\n' +
@@ -262,17 +263,17 @@ export const PROJECT_DSL_DEFATUL =
   '#    scriptEnv:\r\n' +
   '#      "boot_active": test\r\n' +
   '#  fileChangeReload: true\r\n' +
-  '#  在指定目录执行: ./ 项目目录  /root/ 特定目录 默认在 ${jpom_agent_data_path}/script_run_cache \r\n' +
+  t('utils.const.42cca3ee') +
   '#  execPath: ./\r\n' +
   'file:\r\n' +
-  '# 备份文件保留个数\r\n' +
+  t('utils.const.5b2ef0bb') +
   '#  backupCount: 5\r\n' +
-  '# 限制备份指定文件后缀（支持正则）\r\n' +
+  t('utils.const.c4682b3f') +
   "#  backupSuffix: [ '.jar','.html','^.+\\.(?i)(txt)$' ]\r\n" +
-  '# 项目文件备份路径\r\n' +
+  t('utils.const.1f958da6') +
   '#  backupPath: /data/jpom_backup\r\n' +
   'config:\r\n' +
-  '# 是否开启日志备份功能\r\n' +
+  t('utils.const.ae41f11b') +
   '#  autoBackToFile: true\r\n' +
   '\r\n'
 
