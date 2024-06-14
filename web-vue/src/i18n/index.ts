@@ -56,7 +56,7 @@ export const lang: { [key: string]: any } = {
   }
 }
 
-const i18n = createI18n({
+const i18n = createI18n<I18nLocaleType>({
   legacy: false,
   locale: 'zh-cn', //'en-us', // 默认显示语言
   messages: Object.keys(lang).reduce((pre: { [key: string]: any }, key: string) => {
@@ -67,3 +67,5 @@ const i18n = createI18n({
 })
 
 export default i18n
+
+export const { t } = i18n.global
