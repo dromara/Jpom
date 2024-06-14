@@ -160,21 +160,21 @@ public class SystemGitProcess extends AbstractGitProcess {
                 printWriter.flush();
             }, "git", "fetch", "--all");
             if (code != 0 && strictlyEnforce) {
-                return new String[]{null, null, "git fetch失败状态码:" + code};
+                return new String[]{null, null, I18nMessageUtil.get("i18n.git_fetch_failed_status_code.5187") + code};
             }
             code = CommandUtil.exec(saveFile, null, line -> {
                 printWriter.println(line);
                 printWriter.flush();
             }, "git", "reset", "--hard", "origin/" + branchOrTag);
             if (code != 0 && strictlyEnforce) {
-                return new String[]{null, null, "git reset --hard失败状态码:" + code};
+                return new String[]{null, null, I18nMessageUtil.get("i18n.git_reset_hard_failed_status_code.d818") + code};
             }
             code = CommandUtil.exec(saveFile, null, line -> {
                 printWriter.println(line);
                 printWriter.flush();
             }, "git", "submodule", "update", "--init", "--remote", "-f", "--recursive");
             if (code != 0 && strictlyEnforce) {
-                return new String[]{null, null, "git submodule update 失败状态码:" + code};
+                return new String[]{null, null, I18nMessageUtil.get("i18n.git_submodule_update_failed_status_code.2218") + code};
             }
         }
         // 获取提交日志

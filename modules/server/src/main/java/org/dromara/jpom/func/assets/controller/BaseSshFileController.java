@@ -631,7 +631,7 @@ public abstract class BaseSshFileController extends BaseServerController {
             int permissions = Integer.parseInt(permissionValue, 8);
             client.chmod(permissions, remotePath);
         } catch (SftpException e) {
-            log.error("ssh修改文件权限异常...: {} {}", remotePath, permissionValue, e);
+            log.error(I18nMessageUtil.get("i18n.ssh_modify_permission_error.0cd3"), remotePath, permissionValue, e);
             return new JsonMessage<>(400, I18nMessageUtil.get("i18n.operation_failed.3d94") + e.getMessage());
         }
         return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));

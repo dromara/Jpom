@@ -204,7 +204,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
     protected CommandOpResult stop(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel, boolean sync) {
         RunMode runMode = nodeProjectInfoModel.getRunMode();
         if (runMode == RunMode.File) {
-            return CommandOpResult.of(true, "file 类型项目没有 stop");
+            return CommandOpResult.of(true, I18nMessageUtil.get("i18n.file_type_no_stop.00ff"));
         }
 
         Tuple tuple = this.stopBefore(nodeProjectInfoModel, originalModel);
@@ -360,7 +360,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
     protected CommandOpResult restart(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel) {
         RunMode runMode = originalModel.getRunMode();
         if (runMode == RunMode.File) {
-            return CommandOpResult.of(true, "file 类型项目没有 restart");
+            return CommandOpResult.of(true, I18nMessageUtil.get("i18n.file_type_no_restart.0977"));
         }
         this.asyncWebHooks(nodeProjectInfoModel, originalModel, "beforeRestart");
         if (runMode == RunMode.Dsl) {

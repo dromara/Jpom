@@ -124,14 +124,14 @@ public abstract class BaseExceptionHandler {
     @ResponseBody
     public IJsonMessage<String> handleConstructorException(ConstructorException e) {
         log.warn(I18nMessageUtil.get("i18n.yml_configuration_content_error.08f8"), e);
-        return new JsonMessage<>(HttpStatus.EXPECTATION_FAILED.value(), "yml 配置内容格式有误请检查后重新操作（请检查是否有非法字段）：" + e.getMessage());
+        return new JsonMessage<>(HttpStatus.EXPECTATION_FAILED.value(), I18nMessageUtil.get("i18n.yml_config_format_error_illegal_field.16ea") + e.getMessage());
     }
 
     @ExceptionHandler({ScannerException.class})
     @ResponseBody
     public IJsonMessage<String> handleScannerException(ScannerException e) {
         log.warn("ScannerException", e);
-        return new JsonMessage<>(HttpStatus.EXPECTATION_FAILED.value(), "yml 配置内容格式有误请检查后重新操作（不要使用 \\t(TAB) 缩进）：" + e.getMessage());
+        return new JsonMessage<>(HttpStatus.EXPECTATION_FAILED.value(), I18nMessageUtil.get("i18n.yml_config_format_error_tab.f629") + e.getMessage());
     }
 
 }

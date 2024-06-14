@@ -139,7 +139,7 @@ public class ServletWebSocketClientHandler extends AbstractWebSocketHandler impl
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
-        log.error("websocket 出现错误：{}", session.getId(), exception);
+        log.error(TransportI18nMessageUtil.get("i18n.websocket_error.2bb4"), session.getId(), exception);
     }
 
     @Override

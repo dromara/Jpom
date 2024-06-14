@@ -285,7 +285,7 @@ public class SshHandler extends BaseTerminalHandler {
                 }
             } catch (Exception e) {
                 if (!this.openSession.isConnected()) {
-                    log.error("ssh 错误：{}", e.getMessage());
+                    log.error(I18nMessageUtil.get("i18n.ssh_error_string.6bdb"), e.getMessage());
                     return;
                 }
                 log.error(I18nMessageUtil.get("i18n.read_error.7fa5"), e);

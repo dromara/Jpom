@@ -126,7 +126,7 @@ public class FileStorageApiController extends BaseDownloadApiController {
         //
         UserModel userModel = triggerTokenLogServer.getUserByToken(token, fileStorageService.typeName());
         //
-        Assert.notNull(userModel, "token错误,或者已经失效:-1");
+        Assert.notNull(userModel, I18nMessageUtil.get("i18n.token_invalid_or_expired.cb96"));
         //
         File storageSavePath = serverConfig.fileStorageSavePath();
         File fileStorageFile = FileUtil.file(storageSavePath, storageModel.getPath());

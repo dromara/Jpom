@@ -297,7 +297,7 @@ public class BuildExecuteManage implements Runnable {
                 logRecorder.systemError(format);
                 return format;
             }
-            logRecorder.system("{} 二级目录模糊匹配到 {} 个文件, 当前文件保留方式 {}", antSubMatch, subMatchCount, antFileUploadMode);
+            logRecorder.system(I18nMessageUtil.get("i18n.secondary_directory_match.0aec"), antSubMatch, subMatchCount, antFileUploadMode);
             // 更新产物路径为普通路径
             dbBuildHistoryLogService.updateResultDirFile(this.logId, StrUtil.SLASH);
             buildInfoModel.setResultDirFile(StrUtil.SLASH);
@@ -328,7 +328,7 @@ public class BuildExecuteManage implements Runnable {
                 .copy();
         }
         if (CollUtil.isNotEmpty(excludeReleaseAnts)) {
-            logRecorder.system("{} 累积过滤：{} 个文件 ", excludeReleaseAnt, excludeReleaseAntCount[0]);
+            logRecorder.system(I18nMessageUtil.get("i18n.cumulative_filter_files.448d"), excludeReleaseAnt, excludeReleaseAntCount[0]);
         }
         return null;
     }
