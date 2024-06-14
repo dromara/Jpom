@@ -8,7 +8,7 @@
       :footer="uploading ? null : undefined"
       width="50%"
       :keyboard="false"
-      :title="$tl('p.distributeProject') + data.name"
+      :title="$t('pages.dispatch.start.d935498a') + data.name"
       :mask-closable="false"
       @ok="handleDispatchOk"
       @cancel="
@@ -18,39 +18,39 @@
       "
     >
       <a-form ref="dispatchForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-item :label="$tl('p.method')" name="type">
+        <a-form-item :label="$t('pages.dispatch.start.b96b97fb')" name="type">
           <a-radio-group v-model:value="temp.type" name="type" :disabled="!!percentage" @change="restForm">
-            <a-radio :value="'use-build'">{{ $tl('p.buildProduct') }}</a-radio>
-            <a-radio :value="'file-storage'">{{ $tl('p.fileCenter') }}</a-radio>
-            <a-radio :value="'static-file-storage'">{{ $tl('p.staticFile') }}</a-radio>
-            <a-radio :value="'upload'">{{ $tl('p.uploadFile') }}</a-radio>
-            <a-radio :value="'download'">{{ $tl('p.remoteDownload') }}</a-radio>
+            <a-radio :value="'use-build'">{{ $t('pages.dispatch.start.7bcf90e5') }}</a-radio>
+            <a-radio :value="'file-storage'">{{ $t('pages.dispatch.start.f183985') }}</a-radio>
+            <a-radio :value="'static-file-storage'">{{ $t('pages.dispatch.start.c3a20e28') }}</a-radio>
+            <a-radio :value="'upload'">{{ $t('pages.dispatch.start.33ffacfb') }}</a-radio>
+            <a-radio :value="'download'">{{ $t('pages.dispatch.start.367f115c') }}</a-radio>
           </a-radio-group>
         </a-form-item>
         <!-- 手动上传 -->
-        <a-form-item v-if="temp.type === 'upload'" :label="$tl('p.selectDistributeFile')" name="clearOld">
+        <a-form-item v-if="temp.type === 'upload'" :label="$t('pages.dispatch.start.fc83ff3a')" name="clearOld">
           <a-progress v-if="percentage" :percent="percentage">
             <template #format="percent">
               {{ percent }}%
               <template v-if="percentageInfo.total"> ({{ renderSize(percentageInfo.total) }}) </template>
               <template v-if="percentageInfo.duration">
-                {{ $tl('p.usedTime') }}:{{ formatDuration(percentageInfo.duration) }}
+                {{ $t('pages.dispatch.start.bca9469e') }}:{{ formatDuration(percentageInfo.duration) }}
               </template>
             </template>
           </a-progress>
 
           <a-upload :file-list="fileList" :disabled="!!percentage" :before-upload="beforeUpload" @remove="handleRemove">
             <LoadingOutlined v-if="percentage" />
-            <a-button v-else type="primary"><UploadOutlined />{{ $tl('c.selectFile') }}</a-button>
+            <a-button v-else type="primary"><UploadOutlined />{{ $t('pages.dispatch.start.2a688d49') }}</a-button>
           </a-upload>
         </a-form-item>
         <!-- 远程下载 -->
-        <a-form-item v-else-if="temp.type === 'download'" :label="$tl('p.remoteDownloadURL')" name="url">
-          <a-input v-model:value="temp.url" :placeholder="$tl('p.remoteDownloadAddress')" />
+        <a-form-item v-else-if="temp.type === 'download'" :label="$t('pages.dispatch.start.94149f7b')" name="url">
+          <a-input v-model:value="temp.url" :placeholder="$t('pages.dispatch.start.40ced483')" />
         </a-form-item>
         <!-- 在线构建 -->
         <template v-else-if="temp.type == 'use-build'">
-          <a-form-item :label="$tl('c.selectBuild')">
+          <a-form-item :label="$t('pages.dispatch.start.afb1ec30')">
             <a-space>
               {{ chooseBuildInfo.name }}
               <a-button
@@ -61,11 +61,11 @@
                   }
                 "
               >
-                {{ $tl('c.selectBuild') }}
+                {{ $t('pages.dispatch.start.afb1ec30') }}
               </a-button>
             </a-space>
           </a-form-item>
-          <a-form-item :label="$tl('c.selectProduct')">
+          <a-form-item :label="$t('pages.dispatch.start.94cf01f8')">
             <a-space>
               <a-tag v-if="chooseBuildInfo.buildNumberId">#{{ chooseBuildInfo.buildNumberId }}</a-tag>
               <a-button
@@ -77,14 +77,14 @@
                   }
                 "
               >
-                {{ $tl('c.selectProduct') }}
+                {{ $t('pages.dispatch.start.94cf01f8') }}
               </a-button>
             </a-space>
           </a-form-item>
         </template>
         <!-- 文件中心 -->
         <template v-else-if="temp.type === 'file-storage'">
-          <a-form-item :label="$tl('c.selectFile')">
+          <a-form-item :label="$t('pages.dispatch.start.2a688d49')">
             <a-space>
               {{ chooseFileInfo.name }}
               <a-button
@@ -95,14 +95,14 @@
                   }
                 "
               >
-                {{ $tl('c.selectFile') }}
+                {{ $t('pages.dispatch.start.2a688d49') }}
               </a-button>
             </a-space>
           </a-form-item>
         </template>
         <!-- 静态文件 -->
         <template v-else-if="temp.type === 'static-file-storage'">
-          <a-form-item :label="$tl('c.selectFile')">
+          <a-form-item :label="$t('pages.dispatch.start.2a688d49')">
             <a-space>
               {{ chooseFileInfo.name }}
               <a-button
@@ -113,61 +113,65 @@
                   }
                 "
               >
-                {{ $tl('c.selectFile') }}
+                {{ $t('pages.dispatch.start.2a688d49') }}
               </a-button>
             </a-space>
           </a-form-item>
         </template>
         <a-form-item name="clearOld">
           <template #label>
-            {{ $tl('p.clearPublish') }}
+            {{ $t('pages.dispatch.start.fa8d15d') }}
             <a-tooltip>
-              <template #title> {{ $tl('undefined') }},{{ $tl('undefined') }} </template>
+              <template #title>{{ $t('pages.dispatch.start.81c6b18') }}</template>
               <QuestionCircleOutlined />
             </a-tooltip>
           </template>
           <a-switch
             v-model:checked="temp.clearOld"
-            :checked-children="$tl('c.yes')"
-            :un-checked-children="$tl('c.no')"
+            :checked-children="$t('pages.dispatch.start.d2fbce36')"
+            :un-checked-children="$t('pages.dispatch.start.1c77d6fb')"
           />
         </a-form-item>
         <a-form-item v-if="temp.type !== 'use-build'" name="unzip">
           <template #label>
-            {{ $tl('p.unZip') }}
+            {{ $t('pages.dispatch.start.23788e28') }}
             <a-tooltip>
-              <template #title> {{ $tl('p.autoUnZip') }}.bz2, tar.gz, tar, bz2, zip, gz </template>
+              <template #title> {{ $t('pages.dispatch.start.240759e7') }}.bz2, tar.gz, tar, bz2, zip, gz </template>
               <QuestionCircleOutlined />
             </a-tooltip>
           </template>
           <a-switch
             v-model:checked="temp.autoUnzip"
-            :checked-children="$tl('c.yes')"
-            :un-checked-children="$tl('c.no')"
+            :checked-children="$t('pages.dispatch.start.d2fbce36')"
+            :un-checked-children="$t('pages.dispatch.start.1c77d6fb')"
           />
         </a-form-item>
-        <a-form-item v-if="temp.autoUnzip" :label="$tl('p.excludeFolder')">
+        <a-form-item v-if="temp.autoUnzip" :label="$t('pages.dispatch.start.89d09852')">
           <a-input-number
             v-model:value="temp.stripComponents"
             style="width: 100%"
             :min="0"
-            :placeholder="$tl('p.excludeFolderDescription')"
+            :placeholder="$t('pages.dispatch.start.41a5bcc1')"
           />
         </a-form-item>
 
-        <a-form-item :label="$tl('p.postPublishAction')" name="afterOpt">
-          <a-select v-model:value="temp.afterOpt" :placeholder="$tl('c.selectPostPublishAction')">
+        <a-form-item :label="$t('pages.dispatch.start.3cb4eb3e')" name="afterOpt">
+          <a-select v-model:value="temp.afterOpt" :placeholder="$t('pages.dispatch.start.9c2b1069')">
             <a-select-option v-for="item in afterOptList" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item name="secondaryDirectory" :label="$tl('p.subDirectory')">
-          <a-input v-model:value="temp.secondaryDirectory" :placeholder="$tl('p.subDirectoryDescription')" />
+        <a-form-item name="secondaryDirectory" :label="$t('pages.dispatch.start.597f26e8')">
+          <a-input v-model:value="temp.secondaryDirectory" :placeholder="$t('pages.dispatch.start.51be1a6d')" />
         </a-form-item>
-        <a-form-item name="selectProject" :label="$tl('p.filterProject')" :help="$tl('p.filterProjectDescription')">
+        <a-form-item
+          name="selectProject"
+          :label="$t('pages.dispatch.start.ec12e21e')"
+          :help="$t('pages.dispatch.start.72a6a7a9')"
+        >
           <a-select
             v-model:value="temp.selectProjectArray"
             mode="multiple"
-            :placeholder="$tl('p.selectPublishProject')"
+            :placeholder="$t('pages.dispatch.start.56724111')"
           >
             <a-select-option v-for="item in itemProjectList" :key="item.id" :value="`${item.projectId}@${item.nodeId}`">
               {{ item.nodeName }}-{{ item.cacheProjectName || item.projectId }}
@@ -179,7 +183,7 @@
     <!-- 选择构建 -->
     <a-drawer
       destroy-on-close
-      :title="`${$tl('c.selectBuild')}`"
+      :title="`${$t('pages.dispatch.start.afb1ec30')}`"
       placement="right"
       :open="chooseVisible === 1"
       width="80vw"
@@ -221,7 +225,7 @@
               }
             "
           >
-            {{ $tl('c.cancel') }}
+            {{ $t('pages.dispatch.start.43105e21') }}
           </a-button>
           <a-button
             type="primary"
@@ -231,7 +235,7 @@
               }
             "
           >
-            {{ $tl('c.confirm') }}
+            {{ $t('pages.dispatch.start.7da4a591') }}
           </a-button>
         </a-space>
       </template>
@@ -239,7 +243,7 @@
     <!-- 选择构建产物 -->
     <a-drawer
       destroy-on-close
-      :title="`${$tl('p.selectBuildProduct')}`"
+      :title="`${$t('pages.dispatch.start.a2d28d82')}`"
       placement="right"
       :open="chooseVisible === 2"
       width="80vw"
@@ -282,7 +286,7 @@
               }
             "
           >
-            {{ $tl('c.cancel') }}
+            {{ $t('pages.dispatch.start.43105e21') }}
           </a-button>
           <a-button
             type="primary"
@@ -292,7 +296,7 @@
               }
             "
           >
-            {{ $tl('c.confirm') }}
+            {{ $t('pages.dispatch.start.7da4a591') }}
           </a-button>
         </a-space>
       </template>
@@ -300,7 +304,7 @@
     <!-- 选择文件 -->
     <a-drawer
       destroy-on-close
-      :title="`${$tl('c.selectFile')}`"
+      :title="`${$t('pages.dispatch.start.2a688d49')}`"
       placement="right"
       :open="chooseVisible === 3"
       width="80vw"
@@ -339,7 +343,7 @@
               }
             "
           >
-            {{ $tl('c.cancel') }}
+            {{ $t('pages.dispatch.start.43105e21') }}
           </a-button>
           <a-button
             type="primary"
@@ -349,7 +353,7 @@
               }
             "
           >
-            {{ $tl('c.confirm') }}
+            {{ $t('pages.dispatch.start.7da4a591') }}
           </a-button>
         </a-space>
       </template>
@@ -357,7 +361,7 @@
     <!-- 选择静态文件 -->
     <a-drawer
       destroy-on-close
-      :title="`${$tl('p.selectStaticFile')}`"
+      :title="`${$t('pages.dispatch.start.e5aa6b98')}`"
       placement="right"
       :open="chooseVisible === 4"
       width="80vw"
@@ -396,7 +400,7 @@
               }
             "
           >
-            {{ $tl('c.cancel') }}
+            {{ $t('pages.dispatch.start.43105e21') }}
           </a-button>
           <a-button
             type="primary"
@@ -406,14 +410,13 @@
               }
             "
           >
-            {{ $tl('c.confirm') }}
+            {{ $t('pages.dispatch.start.7da4a591') }}
           </a-button>
         </a-space>
       </template>
     </a-drawer>
   </div>
 </template>
-
 <script>
 import { uploadPieces } from '@/utils/upload-pieces'
 import {
@@ -458,8 +461,8 @@ export default {
       itemProjectList: [],
       fileList: [],
       rules: {
-        afterOpt: [{ required: true, message: this.$tl('c.selectPostPublishAction'), trigger: 'blur' }],
-        url: [{ required: true, message: this.$tl('p.pleaseInputRemoteAddress'), trigger: 'blur' }]
+        afterOpt: [{ required: true, message: this.$t('pages.dispatch.start.9c2b1069'), trigger: 'blur' }],
+        url: [{ required: true, message: this.$t('pages.dispatch.start.b843270d'), trigger: 'blur' }]
       },
       temp: { type: 'upload' },
       chooseVisible: 0,
@@ -528,9 +531,6 @@ export default {
     // console.log(this.temp);
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.dispatch.start.${key}`, ...args)
-    },
     renderSize,
     formatDuration,
     // 处理文件移除
@@ -561,7 +561,7 @@ export default {
           // 判断文件
           if (this.fileList.length === 0) {
             $notification.error({
-              message: this.$tl('p.pleaseSelectFile')
+              message: this.$t('pages.dispatch.start.25d31749')
             })
             return false
           }
@@ -648,7 +648,7 @@ export default {
         } else if (this.temp.type == 'download') {
           if (!this.temp.url) {
             $notification.error({
-              message: this.$tl('p.pleaseFillRemoteURL')
+              message: this.$t('pages.dispatch.start.95dc7228')
             })
             return false
           }
@@ -671,7 +671,7 @@ export default {
           // 构建
           if (!this.chooseBuildInfo || !this.chooseBuildInfo.id || !this.chooseBuildInfo.buildNumberId) {
             $notification.error({
-              message: this.$tl('p.pleaseFillBuildAndProduct')
+              message: this.$t('pages.dispatch.start.de346cfe')
             })
             return false
           }
@@ -698,7 +698,7 @@ export default {
           // 文件中心
           if (!this.chooseFileInfo || !this.chooseFileInfo.id) {
             $notification.error({
-              message: this.$tl('p.pleaseSelectFileCenterFile')
+              message: this.$t('pages.dispatch.start.346e59ed')
             })
             return false
           }
@@ -724,7 +724,7 @@ export default {
           // 文件中心
           if (!this.chooseFileInfo || !this.chooseFileInfo.id) {
             $notification.error({
-              message: this.$tl('p.pleaseSelectStaticFileFile')
+              message: this.$t('pages.dispatch.start.26b3a389')
             })
             return false
           }
@@ -759,7 +759,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 :deep(.ant-progress-text) {
   width: auto;

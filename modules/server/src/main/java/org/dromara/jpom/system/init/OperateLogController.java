@@ -26,6 +26,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.log.UserOperateLogV1;
 import org.dromara.jpom.model.user.UserModel;
@@ -82,20 +83,20 @@ public class OperateLogController implements AopLogInterface {
             return null;
         }
         if (!feature.log()) {
-            log.debug("忽略记录日志 {}", request.getRequestURI());
+            log.debug(I18nMessageUtil.get("i18n.ignore_log_record.48f5"), request.getRequestURI());
             return null;
         }
         Class<?> declaringClass = method.getDeclaringClass();
         MethodFeature methodFeature = feature.method();
         if (methodFeature == MethodFeature.NULL) {
-            log.error("权限分发配置错误：{}  {}", declaringClass, method.getName());
+            log.error(I18nMessageUtil.get("i18n.permission_distribution_config_error.e7fb"), declaringClass, method.getName());
             return null;
         }
         ClassFeature classFeature = feature.cls();
         if (classFeature == ClassFeature.NULL) {
             classFeature = this.findClassFeature(declaringClass, targetClass);
             if (classFeature == null || classFeature == ClassFeature.NULL) {
-                log.error("权限分发配置错误：{}  {} class not find", declaringClass, method.getName());
+                log.error(I18nMessageUtil.get("i18n.permission_distribution_config_error_class_not_found.ca67"), declaringClass, method.getName());
                 return null;
             }
         }
@@ -183,7 +184,7 @@ public class OperateLogController implements AopLogInterface {
                 return;
             }
             if (cacheInfo.classFeature == null || cacheInfo.methodFeature == null) {
-                log.warn("权限功能没有配置正确 {}", cacheInfo);
+                log.warn(I18nMessageUtil.get("i18n.permission_function_not_configured_correctly.84dd"), cacheInfo);
                 return;
             }
             UserModel userModel = BaseServerController.getUserByThreadLocal();

@@ -7,11 +7,11 @@
         <div class="dir-container">
           <template v-if="temp.projectList && temp.cacheData">
             <a-form layout="inline" autocomplete="off">
-              <a-form-item :label="$tl('p.node')">
+              <a-form-item :label="$t('pages.dispatch.logReadView.602a0a5e')">
                 <a-select
                   :value="`${temp.cacheData.useNodeId},${temp.cacheData.useProjectId}`"
                   style="width: 200px"
-                  :placeholder="$tl('p.chooseNode')"
+                  :placeholder="$t('pages.dispatch.logReadView.fa46eeab')"
                   @change="nodeChange"
                 >
                   <a-select-option v-for="item in temp.projectList" :key="`${item.nodeId},${item.projectId}`">
@@ -40,21 +40,21 @@
             <a-form layout="inline" autocomplete="off">
               <a-space direction="vertical" style="width: 100%">
                 <a-space>
-                  <a-form-item :label="$tl('p.searchKeyword')">
+                  <a-form-item :label="$t('pages.dispatch.logReadView.6dfb72aa')">
                     <!-- 关键词： -->
                     <!-- ^.*\d+.*$ -->
                     <!-- .*(0999996|0999995).*   .*(a|b).* -->
-                    <a-tooltip placement="right" :title="$tl('p.keywordHighlight')">
+                    <a-tooltip placement="right" :title="$t('pages.dispatch.logReadView.d98d089a')">
                       <a-input
                         v-model:value="temp.cacheData.keyword"
-                        :placeholder="$tl('p.keywordRegex')"
+                        :placeholder="$t('pages.dispatch.logReadView.302f617f')"
                         :style="`width: 250px`"
                         @press-enter="sendSearchLog"
                       >
                       </a-input>
                     </a-tooltip>
                   </a-form-item>
-                  <a-form-item :label="$tl('p.showFirstNLines')">
+                  <a-form-item :label="$t('pages.dispatch.logReadView.c100be5f')">
                     <a-input-number
                       id="inputNumber"
                       v-model:value="temp.cacheData.beforeCount"
@@ -63,7 +63,7 @@
                       @press-enter="sendSearchLog"
                     />
                   </a-form-item>
-                  <a-form-item :label="$tl('p.showLastNLines')">
+                  <a-form-item :label="$t('pages.dispatch.logReadView.919cda12')">
                     <a-input-number
                       id="inputNumber"
                       v-model:value="temp.cacheData.afterCount"
@@ -72,27 +72,28 @@
                       @press-enter="sendSearchLog"
                     />
                   </a-form-item>
-                  <a-popover :title="$tl('p.regexReference')">
+                  <a-popover :title="$t('pages.dispatch.logReadView.1c3a658d')">
                     <template #content>
                       <ul>
-                        <li><b>^.*\d+.*$</b> - {{ $tl('p.matchLinesWithNumbers') }}</li>
-                        <li><b>.*(a|b).*</b> - {{ $tl('p.matchLinesWithAorB') }}</li>
+                        <li><b>^.*\d+.*$</b> - {{ $t('pages.dispatch.logReadView.f272a03b') }}</li>
+                        <li><b>.*(a|b).*</b> - {{ $t('pages.dispatch.logReadView.86178136') }}</li>
                         <li>
-                          <b>.*({{ $tl('p.exception') }}).*</b> - {{ $tl('p.matchLinesWithException') }}
+                          <b>.*({{ $t('pages.dispatch.logReadView.5df14abf') }}).*</b> -
+                          {{ $t('pages.dispatch.logReadView.2b62360b') }}
                         </li>
                       </ul>
                     </template>
                     <a-button type="link" style="padding: 0"
                       ><UnorderedListOutlined /><span style="margin-left: 2px">{{
-                        $tl('p.syntaxReference')
+                        $t('pages.dispatch.logReadView.a4387127')
                       }}</span></a-button
                     >
                   </a-popover>
                 </a-space>
                 <a-space>
-                  <a-form-item :label="$tl('p.searchMode')">
+                  <a-form-item :label="$t('pages.dispatch.logReadView.d6d70eec')">
                     <!--  -->
-                    <a-tooltip placement="right" :title="$tl('p.searchModeDescription')">
+                    <a-tooltip placement="right" :title="$t('pages.dispatch.logReadView.688a9d49')">
                       <a-select
                         :style="`width: 250px`"
                         :value="temp.cacheData.first"
@@ -104,12 +105,12 @@
                           }
                         "
                       >
-                        <a-select-option value="false">{{ $tl('p.searchFromEnd') }}</a-select-option>
-                        <a-select-option value="true">{{ $tl('p.searchFromStart') }} </a-select-option>
+                        <a-select-option value="false">{{ $t('pages.dispatch.logReadView.11566afb') }}</a-select-option>
+                        <a-select-option value="true">{{ $t('pages.dispatch.logReadView.87580afa') }} </a-select-option>
                       </a-select>
                     </a-tooltip>
                   </a-form-item>
-                  <a-form-item :label="$tl('p.firstNFileLines')">
+                  <a-form-item :label="$t('pages.dispatch.logReadView.a1bcf223')">
                     <a-input-number
                       id="inputNumber"
                       v-model:value="temp.cacheData.head"
@@ -118,7 +119,7 @@
                       @press-enter="sendSearchLog"
                     />
                   </a-form-item>
-                  <a-form-item :label="$tl('p.lastNFileLines')">
+                  <a-form-item :label="$t('pages.dispatch.logReadView.809babf4')">
                     <a-input-number
                       id="inputNumber"
                       v-model:value="temp.cacheData.tail"
@@ -127,35 +128,42 @@
                       @press-enter="sendSearchLog"
                     />
                   </a-form-item>
-                  <a-popover :title="$tl('p.searchConfigReference')">
+                  <a-popover :title="$t('pages.dispatch.logReadView.9a3e275d')">
                     <template #content>
                       <ul>
                         <li>
-                          <b>{{ $tl('p.searchFromEndExample1') }}</b> - {{ $tl('p.searchLastNLines') }}
+                          <b>{{ $t('pages.dispatch.logReadView.10e4a1c0') }}</b> -
+                          {{ $t('pages.dispatch.logReadView.b0942cee') }}
                         </li>
                         <li>
-                          <b>{{ $tl('p.searchFromStartExample1') }}</b> - {{ $tl('p.searchLineRange1') }}
+                          <b>{{ $t('pages.dispatch.logReadView.33b45e7b') }}</b> -
+                          {{ $t('pages.dispatch.logReadView.6aca37a9') }}
                         </li>
                         <li>
-                          <b>{{ $tl('p.searchFromEndExample2') }}</b> - {{ $tl('p.searchLineRange2') }}
+                          <b>{{ $t('pages.dispatch.logReadView.89edf07a') }}</b> -
+                          {{ $t('pages.dispatch.logReadView.f3c36613') }}
                         </li>
                         <li>
-                          <b>{{ $tl('p.searchFromEndExample3') }}</b> - {{ $tl('p.searchLineRange3') }}
+                          <b>{{ $t('pages.dispatch.logReadView.feeac0ec') }}</b> -
+                          {{ $t('pages.dispatch.logReadView.84c45685') }}
                         </li>
                         <li>
-                          <b>{{ $tl('p.searchFromStartExample2') }}</b> - {{ $tl('p.searchLineRange4') }}
+                          <b>{{ $t('pages.dispatch.logReadView.aabd0fc1') }}</b> -
+                          {{ $t('pages.dispatch.logReadView.1aa0c326') }}
                         </li>
                         <li>
-                          <b>{{ $tl('p.searchFromEndExample4') }}</b> - {{ $tl('p.searchLineRange5') }}
+                          <b>{{ $t('pages.dispatch.logReadView.608e554f') }}</b> -
+                          {{ $t('pages.dispatch.logReadView.6da7f3b0') }}
                         </li>
                         <li>
-                          <b>{{ $tl('p.searchFromStartExample3') }}</b> - {{ $tl('p.searchLineRange6') }}
+                          <b>{{ $t('pages.dispatch.logReadView.ddba3f57') }}</b> -
+                          {{ $t('pages.dispatch.logReadView.f4aea20a') }}
                         </li>
                       </ul>
                     </template>
                     <a-button type="link" style="padding: 0"
                       ><UnorderedListOutlined /><span style="margin-left: 2px">{{
-                        $tl('p.searchReference')
+                        $t('pages.dispatch.logReadView.5ff0949a')
                       }}</span></a-button
                     >
                   </a-popover>
@@ -193,7 +201,6 @@
     </a-layout>
   </div>
 </template>
-
 <script>
 import { getNodeListAll, getProjectListAll } from '@/api/node'
 import { getFileList } from '@/api/node-project'
@@ -281,7 +288,9 @@ export default {
         })[0]
         const socketUrl = getWebSocketUrl(
           '/socket/console',
-          `userId=${this.getLongTermToken()}&id=${itemProjectData?.id}&nodeId=${item.nodeId}&type=console&workspaceId=${this.getWorkspaceId()}`
+          `userId=${this.getLongTermToken()}&id=${itemProjectData?.id}&nodeId=${
+            item.nodeId
+          }&type=console&workspaceId=${this.getWorkspaceId()}`
         )
         const domId = `pre-dom-${item.nodeId},${item.projectId}`
         this.socketCache = { ...this.socketCache, [domId]: {} }
@@ -317,9 +326,6 @@ export default {
     this.close()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.dispatch.logReadView.${key}`, ...args)
-    },
     close() {
       Object.keys(this.socketCache).forEach((item) => {
         clearInterval(this.socketCache[item].heart)
@@ -333,7 +339,9 @@ export default {
         console.error(err)
         $notification.error({
           key: 'log-read-error',
-          message: `web socket ${this.$tl('p.error')},${this.$tl('p.checkWsProxy')}`
+          message: `web socket ${this.$t('pages.dispatch.logReadView.d75d207f')},${this.$t(
+            'pages.dispatch.logReadView.763330b'
+          )}`
         })
         clearInterval(this.socketCache[id].heart)
       }
@@ -344,7 +352,7 @@ export default {
           key: 'log-read-close',
           message:
             ((this.nodeName[item.nodeId] && this.nodeName[item.nodeId].name) || '') +
-            ` ${this.$tl('p.sessionClosed')}[tail-log]-`
+            ` ${this.$t('pages.dispatch.logReadView.8a2aae09')}[tail-log]-`
         })
         clearInterval(this.socketCache[id].heart)
       }
@@ -441,7 +449,7 @@ export default {
           this.sendSearchLog()
         } else {
           //
-          $message.error(this.$tl('p.fileNotReadable'))
+          $message.error(this.$t('pages.dispatch.logReadView.a84270cf'))
         }
       }
     },
@@ -530,7 +538,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .sider {
   border: 1px solid #e2e2e2;

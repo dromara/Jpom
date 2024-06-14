@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="systemUserOperationLog"
-      :empty-description="$tl('p.noOperationLog')"
+      :empty-description="$t('pages.user.operation-log.ced5c864')"
       :data-source="list"
       :columns="columns"
       :pagination="pagination"
@@ -35,7 +35,7 @@
               }
             "
             allow-clear
-            :placeholder="$tl('p.selectOperator')"
+            :placeholder="$t('pages.user.operation-log.30f0d93')"
             class="search-input-item"
           >
             <a-select-option v-for="item in userList" :key="item.id">{{ item.name }}</a-select-option>
@@ -54,7 +54,7 @@
               }
             "
             allow-clear
-            :placeholder="$tl('p.selectNode')"
+            :placeholder="$t('pages.user.operation-log.580e6c10')"
             class="search-input-item"
           >
             <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
@@ -73,7 +73,7 @@
               }
             "
             allow-clear
-            :placeholder="$tl('p.operationFunction')"
+            :placeholder="$t('pages.user.operation-log.cb132686')"
             class="search-input-item"
           >
             <a-select-option v-for="item in classFeature" :key="item.value">{{ item.title }}</a-select-option>
@@ -92,14 +92,16 @@
               }
             "
             allow-clear
-            :placeholder="$tl('p.operationMethod')"
+            :placeholder="$t('pages.user.operation-log.19dfb1ba')"
             class="search-input-item"
           >
             <a-select-option v-for="item in methodFeature" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
           <a-range-picker :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
-          <a-tooltip :title="$tl('p.quickBackToFirstPage')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
+          <a-tooltip :title="$t('pages.user.operation-log.cb5a8131')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{
+              $t('pages.user.operation-log.53c2763c')
+            }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -134,19 +136,29 @@
         <template v-else-if="column.dataIndex === 'optStatus'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$tl('p.defaultStatusCode')},${$tl('p.partialOperationStatus')},${$tl('p.statusWithNoResult')}`"
+            :title="`${$t('pages.user.operation-log.f8c26fc9')},${$t('pages.user.operation-log.33046d7b')},${$t(
+              'pages.user.operation-log.abc9fa2f'
+            )}`"
           >
             <span>{{ text }}</span>
           </a-tooltip>
         </template>
 
         <template v-else-if="column.dataIndex === 'operation'">
-          <a-button size="small" type="primary" @click="handleDetail(record)">{{ $tl('p.details') }}</a-button>
+          <a-button size="small" type="primary" @click="handleDetail(record)">{{
+            $t('pages.user.operation-log.151c73eb')
+          }}</a-button>
         </template>
       </template>
     </CustomTable>
     <!-- 详情区 -->
-    <a-modal v-model:open="detailVisible" destroy-on-close width="600px" :title="$tl('p.detailInfo')" :footer="null">
+    <a-modal
+      v-model:open="detailVisible"
+      destroy-on-close
+      width="600px"
+      :title="$t('pages.user.operation-log.7990de3b')"
+      :footer="null"
+    >
       <a-list item-layout="horizontal" :data-source="detailData">
         <template #renderItem="{ item }">
           <a-list-item>
@@ -165,7 +177,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import { getOperationLogList } from '@/api/operation-log'
 import { getMonitorOperateTypeList } from '@/api/monitor'
@@ -192,31 +203,31 @@ export default {
       detailData: [],
       columns: [
         {
-          title: this.$tl('p.userId'),
+          title: this.$t('pages.user.operation-log.8384e057'),
           dataIndex: 'userId',
           ellipsis: true
         },
         {
-          title: this.$tl('p.userNickname'),
+          title: this.$t('pages.user.operation-log.7d2228ed'),
           dataIndex: 'username',
           ellipsis: true
         },
         { title: 'IP', dataIndex: 'ip' /*width: 130*/ },
         {
-          title: this.$tl('p.node'),
+          title: this.$t('pages.user.operation-log.602a0a5e'),
           dataIndex: 'nodeId',
           width: 120,
           ellipsis: true
         },
         {
-          title: this.$tl('p.dataName'),
+          title: this.$t('pages.user.operation-log.cd2442c1'),
           dataIndex: 'dataName',
           /*width: 240,*/
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$tl('p.workspaceName'),
+          title: this.$t('pages.user.operation-log.8d20cb3f'),
           dataIndex: 'workspaceName',
           /*width: 240,*/
           ellipsis: true,
@@ -224,24 +235,24 @@ export default {
         },
         // { title: "数据 ID", dataIndex: "dataId", /*width: 240,*/ ellipsis: true, },
         {
-          title: this.$tl('p.operationFunction'),
+          title: this.$t('pages.user.operation-log.cb132686'),
           dataIndex: 'classFeature',
           /*width: 240,*/
           ellipsis: true
         },
         {
-          title: this.$tl('p.operationMethod'),
+          title: this.$t('pages.user.operation-log.19dfb1ba'),
           dataIndex: 'methodFeature',
           /*width: 240,*/
           ellipsis: true
         },
         {
-          title: this.$tl('p.statusCode'),
+          title: this.$t('pages.user.operation-log.2cdc5dc2'),
           dataIndex: 'optStatus',
           width: 90
         },
         {
-          title: this.$tl('p.operationTime'),
+          title: this.$t('pages.user.operation-log.45e88a2c'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text, record }) => {
@@ -250,7 +261,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$tl('p.action'),
+          title: this.$t('pages.user.operation-log.a0fe2109'),
           align: 'center',
           dataIndex: 'operation',
           fixed: 'right',
@@ -284,9 +295,6 @@ export default {
     })
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.user.operationLog.${key}`, ...args)
-    },
     // 加载 node
     loadNodeList() {
       getNodeListAll().then((res) => {
@@ -343,18 +351,18 @@ export default {
       } catch (e) {
         console.error(e)
       }
-      this.detailData.push({ title: this.$tl('p.dataId'), description: this.temp.dataId })
+      this.detailData.push({ title: this.$t('pages.user.operation-log.a7ebd858'), description: this.temp.dataId })
       this.detailData.push({
-        title: this.$tl('p.browserIdentifier'),
+        title: this.$t('pages.user.operation-log.4ade0404'),
         description: this.temp.userAgent
       })
       this.detailData.push({
-        title: this.$tl('p.requestParams'),
+        title: this.$t('pages.user.operation-log.8749e9ed'),
         json: true,
         value: this.temp.reqData
       })
       this.detailData.push({
-        title: this.$tl('p.responseResult'),
+        title: this.$t('pages.user.operation-log.9585489'),
         json: true,
         value: this.temp.resultMsg
       })

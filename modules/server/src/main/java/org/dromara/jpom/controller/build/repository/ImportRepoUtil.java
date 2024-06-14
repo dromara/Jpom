@@ -26,6 +26,7 @@ import lombok.Lombok;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
@@ -48,27 +49,36 @@ public class ImportRepoUtil {
 
     private static final String IMPORT_REPO_PROVIDER_DIR = "/import-repo-provider/";
 
-    @SneakyThrows
     public Map<String, Map<String, Object>> getProviderList() {
-        Resource[] configResources = ExtConfigBean.getConfigResources("import-repo-provider/*.yml");
-        return Arrays.stream(configResources)
-                .map(resource -> {
-                    String filename = resource.getFilename();
-                    String mainName = FileUtil.mainName(filename);
+        Resource[] configResources = ExtConfigBean.getDefaultConfigResources("import-repo-provider/*.yml");
+        Map<String, Map<String, Object>> map = resourceToMap(configResources);
+        Resource[] diyConfigResources = ExtConfigBean.getConfigResources("import-repo-provider/*.yml");
+        map.putAll(resourceToMap(diyConfigResources));
+        return map;
+    }
 
-                    try (InputStream inputStream = resource.getInputStream()) {
-                        ImportRepoProviderConfig providerConfig = YamlUtil.load(inputStream, ImportRepoProviderConfig.class);
-                        Map<String, Object> map = new HashMap<>();
-                        map.put("name", mainName);
-                        map.put("baseUrl", providerConfig.getBaseUrl());
-                        // 是否支持查询
-                        map.put("query", providerConfig.getRepoListParam().values().stream().anyMatch(s -> s.contains("${query}")));
-                        return map;
-                    } catch (Exception e) {
-                        throw Lombok.sneakyThrow(e);
-                    }
-                })
-                .collect(Collectors.toMap(map -> (String) map.get("name"), map -> map));
+    private Map<String, Map<String, Object>> resourceToMap(Resource[] configResources) {
+        if (configResources == null) {
+            return new HashMap<>(1);
+        }
+        return Arrays.stream(configResources)
+            .map(resource -> {
+                String filename = resource.getFilename();
+                String mainName = FileUtil.mainName(filename);
+
+                try (InputStream inputStream = resource.getInputStream()) {
+                    ImportRepoProviderConfig providerConfig = YamlUtil.load(inputStream, ImportRepoProviderConfig.class);
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("name", mainName);
+                    map.put("baseUrl", providerConfig.getBaseUrl());
+                    // 是否支持查询
+                    map.put("query", providerConfig.getRepoListParam().values().stream().anyMatch(s -> s.contains("${query}")));
+                    return map;
+                } catch (Exception e) {
+                    throw Lombok.sneakyThrow(e);
+                }
+            })
+            .collect(Collectors.toMap(map -> (String) map.get("name"), map -> map));
     }
 
     @SneakyThrows
@@ -145,7 +155,7 @@ public class ImportRepoUtil {
                 total = StrUtil.isNotBlank(totalHeader) ? Integer.parseInt(totalHeader) : totalCount;
             }
             log.debug(String.format("status: %s body: %s headers: %s", status, body, headers));
-            Assert.state(execute.isOk(), String.format("请求失败: status: %s body: %s headers: %s", status, body, headers));
+            Assert.state(execute.isOk(), String.format(I18nMessageUtil.get("i18n.request_failed_message.9c71"), status, body, headers));
         }
         JSONArray jsonArray = JSONUtil.parse(body).getByPath(provider.getRepoListPath(), JSONArray.class);
         List<JSONObject> data = jsonArray.stream().map(o -> {
@@ -167,7 +177,7 @@ public class ImportRepoUtil {
                             entries.set(k, !value.equals(compareValue));
                             break;
                         default:
-                            throw new IllegalStateException("表达式目前仅支持 == 和 != 比较");
+                            throw new IllegalStateException(I18nMessageUtil.get("i18n.supported_comparison_operators_message.6d7a"));
                     }
                 } else {
                     entries.set(k, obj.get(v));
@@ -181,18 +191,18 @@ public class ImportRepoUtil {
 
     public String getCurrentUserName(String platform, String token, String baseUrl) {
         baseUrl = StrUtil.blankToDefault(baseUrl, getProviderConfig(platform).getBaseUrl());
-        Assert.state(StrUtil.isNotBlank(baseUrl), String.format("请填写 %s 的 地址", platform));
+        Assert.state(StrUtil.isNotBlank(baseUrl), String.format(I18nMessageUtil.get("i18n.please_fill_in_address_of.9e02"), platform));
         ImportRepoProviderConfig provider = getProviderConfig(platform);
         HttpRequest request = HttpUtil.createRequest(Method.valueOf(provider.getCurrentUserMethod()), baseUrl + provider.getCurrentUserUrl());
         setCommonParams(platform, request, token);
         String body;
-        log.debug(String.format("url: %s headers: %s form: %s", request.getUrl(), request.headers(), request.form()));
+        log.debug("url: {} headers: {} form: {}", request.getUrl(), request.headers(), request.form());
         try (HttpResponse execute = request.execute()) {
             body = execute.body();
             int status = execute.getStatus();
             Map<String, List<String>> headers = execute.headers();
-            log.debug(String.format("status: %s body: %s headers: %s", status, body, headers));
-            Assert.state(execute.isOk(), String.format("请求失败: status: %s body: %s headers: %s", status, body, headers));
+            log.debug("status: {} body: {} headers: {}", status, body, headers);
+            Assert.state(execute.isOk(), String.format(I18nMessageUtil.get("i18n.request_failed_message.9c71"), status, body, headers));
         }
         return JSONUtil.parse(body).getByPath(provider.getUserNamePath(), String.class);
     }

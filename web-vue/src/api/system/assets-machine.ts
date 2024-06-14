@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 ///
 /// Copyright (c) 2019 Of Him Code Technology Studio
 /// Jpom is licensed under Mulan PSL v2.
@@ -55,11 +56,11 @@ export function machineDistribute(params) {
 }
 
 export const statusMap = {
-  0: '无法连接',
-  1: '正常',
-  2: '授权信息错误',
-  3: '状态码错误',
-  4: '资源监控异常'
+  0: t('api.system.assets-machine.b26020d2'),
+  1: t('api.system.assets-machine.e039b9b5'),
+  2: t('api.system.assets-machine.2eff6016'),
+  3: t('api.system.assets-machine.8ae7a8a'),
+  4: t('api.system.assets-machine.f1e810b2')
 }
 
 // 查看机器关联节点
@@ -120,6 +121,14 @@ export function machineCorrectLonelyData(data) {
 export function machineMonitorConfig(data) {
   return axios({
     url: '/system/assets/machine/monitor-config',
+    method: 'get',
+    params: data
+  })
+}
+
+export function machineSearch(data) {
+  return axios({
+    url: '/system/assets/machine/search',
     method: 'get',
     params: data
   })

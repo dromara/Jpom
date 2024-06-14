@@ -15,6 +15,7 @@ import cn.hutool.crypto.SecureUtil;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.BaseDbModel;
 
@@ -22,7 +23,8 @@ import org.dromara.jpom.model.BaseDbModel;
  * @author bwcx_jzy
  * @since 2021/12/4
  */
-@TableName(value = "USER_BIND_WORKSPACE", name = "用户(权限组)工作空间关系表")
+@TableName(value = "USER_BIND_WORKSPACE",
+    nameKey = "i18n.user_workspace_relation_table.851e")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class UserBindWorkspaceModel extends BaseDbModel {
@@ -65,7 +67,7 @@ public class UserBindWorkspaceModel extends BaseDbModel {
         }
 
         public String errorMsg(String... pars) {
-            String errorMsg = StrUtil.emptyToDefault(msg, "您没有对应权限");
+            String errorMsg = StrUtil.emptyToDefault(msg, I18nMessageUtil.get("i18n.no_permission.e343"));
             return StrUtil.format("{} {}", ArrayUtil.join(pars, StrUtil.SPACE), errorMsg);
         }
     }

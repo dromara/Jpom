@@ -15,6 +15,7 @@ import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.configuration.SystemConfig;
 import org.dromara.jpom.system.LogbackConfig;
@@ -55,11 +56,11 @@ public class AgentWebSocketSystemLogHandle extends BaseAgentWebSocketHandle {
             if (super.checkAuthorize(session)) {
                 return;
             }
-            SocketSessionUtil.send(session, "连接成功：插件端日志");
+            SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.plugin_end_log_connection_successful.9035"));
         } catch (Exception e) {
-            log.error("socket 错误", e);
+            log.error(I18nMessageUtil.get("i18n.socket_error.18c1"), e);
             try {
-                SocketSessionUtil.send(session, JsonMessage.getString(500, "系统错误!"));
+                SocketSessionUtil.send(session, JsonMessage.getString(500, I18nMessageUtil.get("i18n.system_error.9417")));
                 session.close();
             } catch (IOException e1) {
                 log.error(e1.getMessage(), e1);
@@ -92,12 +93,12 @@ public class AgentWebSocketSystemLogHandle extends BaseAgentWebSocketHandle {
                 AgentFileTailWatcher.addWatcher(file, systemConfig.getLogCharset(), session);
                 CACHE_FILE.put(session.getId(), file);
             } catch (Exception io) {
-                log.error("监听日志变化", io);
+                log.error(I18nMessageUtil.get("i18n.listen_log_changes.9081"), io);
                 SocketSessionUtil.send(session, io.getMessage());
             }
         } catch (Exception e) {
-            log.error("执行命令失败", e);
-            SocketSessionUtil.send(session, "执行命令失败,详情如下：");
+            log.error(I18nMessageUtil.get("i18n.command_execution_failed.90ef"), e);
+            SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.command_execution_failed_details.77ed"));
             SocketSessionUtil.send(session, ExceptionUtil.stacktraceToString(e));
         }
     }

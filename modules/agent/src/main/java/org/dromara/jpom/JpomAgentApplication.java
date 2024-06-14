@@ -19,6 +19,7 @@ import cn.keepbx.jpom.JpomAppType;
 import cn.keepbx.jpom.Type;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.ServerOpenApi;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.system.AgentStartInit;
 import org.springframework.boot.Banner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -72,7 +73,7 @@ public class JpomAgentApplication {
             AgentStartInit autoRegSeverNode = SpringUtil.getBean(AgentStartInit.class);
             autoRegSeverNode.autoPushToServer(arg);
         } catch (Exception e) {
-            log.error("向服务端推送注册失败 {}", arg, e);
+            log.error(I18nMessageUtil.get("i18n.push_registration_to_server_failed.5949"), arg, e);
         }
     }
 

@@ -18,19 +18,19 @@
           <a-input
             v-model:value="viewOperationLogListQuery['userId']"
             class="search-input-item"
-            :placeholder="$tl('p.creatorExactMatch')"
+            :placeholder="$t('pages.system.trigger-token.46cac1')"
             @press-enter="handleListLog"
           />
           <a-input
             v-model:value="viewOperationLogListQuery['triggerToken']"
             class="search-input-item"
-            :placeholder="$tl('p.tokenExactMatch')"
+            :placeholder="$t('pages.system.trigger-token.ef1afc6c')"
             @press-enter="handleListLog"
           />
           <a-select
             v-model:value="viewOperationLogListQuery.type"
             allow-clear
-            :placeholder="$tl('p.type')"
+            :placeholder="$t('pages.system.trigger-token.698bb532')"
             class="search-input-item"
           >
             <a-select-option v-for="item in allTypeList" :key="item.name">{{ item.desc }}</a-select-option>
@@ -40,7 +40,7 @@
             format="YYYY-MM-DD HH:mm:ss"
             @change="onchangeListLogTime"
           />
-          <a-button type="primary" @click="handleListLog">{{ $tl('p.search') }}</a-button>
+          <a-button type="primary" @click="handleListLog">{{ $t('pages.system.trigger-token.53c2763c') }}</a-button>
         </a-space>
       </template>
       <template #bodyCell="{ column, text, record }">
@@ -63,14 +63,15 @@
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" danger @click="handleDelete(record)">{{ $tl('p.delete') }}</a-button>
+            <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
+              $t('pages.system.trigger-token.dd20d11c')
+            }}</a-button>
           </a-space>
         </template>
       </template>
     </a-table>
   </div>
 </template>
-
 <script>
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 import { triggerTokenList, triggerTokenAllType, triggerTokenDelete } from '@/api/trigger-token'
@@ -88,7 +89,7 @@ export default {
       ),
       viewOperationLogColumns: [
         {
-          title: this.$tl('p.creator'),
+          title: this.$t('pages.system.trigger-token.db3c9202'),
           dataIndex: 'userId',
           width: 100
         },
@@ -99,24 +100,24 @@ export default {
         },
 
         {
-          title: this.$tl('p.relatedDataName'),
+          title: this.$t('pages.system.trigger-token.8e4d106'),
           dataIndex: 'dataName'
           // width: 100
         },
         {
-          title: this.$tl('p.callTimes'),
+          title: this.$t('pages.system.trigger-token.948a121d'),
           dataIndex: 'triggerCount',
           width: 100,
           sorter: true
         },
         {
-          title: this.$tl('p.relatedData'),
+          title: this.$t('pages.system.trigger-token.733ffc6e'),
           dataIndex: 'dataId',
           width: 100
         },
 
         {
-          title: this.$tl('p.createTime'),
+          title: this.$t('pages.system.trigger-token.f5b90169'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text }) => {
@@ -125,7 +126,7 @@ export default {
           width: '180px'
         },
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.system.trigger-token.3bb962bf'),
           dataIndex: 'operation',
           width: '80px',
 
@@ -133,6 +134,7 @@ export default {
           fixed: 'right'
         }
       ],
+
       allTypeList: []
     }
   },
@@ -150,9 +152,6 @@ export default {
     this.handleListLog()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.system.triggerToken.${key}`, ...args)
-    },
     handleListLog() {
       this.viewOperationLoading = true
 
@@ -180,11 +179,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$tl('p.systemPrompt'),
+        title: this.$t('pages.system.trigger-token.b22d55a0'),
         zIndex: 1009,
-        content: this.$tl('p.confirmDeletion'),
-        okText: this.$tl('p.confirm'),
-        cancelText: this.$tl('p.cancel'),
+        content: this.$t('pages.system.trigger-token.e51646aa'),
+        okText: this.$t('pages.system.trigger-token.e8e9db25'),
+        cancelText: this.$t('pages.system.trigger-token.b12468e9'),
         onOk: () => {
           return triggerTokenDelete({
             id: record.id

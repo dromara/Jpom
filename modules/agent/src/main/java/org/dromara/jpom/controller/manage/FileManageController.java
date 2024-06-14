@@ -16,6 +16,7 @@ import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseAgentController;
 import org.dromara.jpom.common.commander.CommandOpResult;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.util.CompressionFileUtil;
@@ -50,7 +51,7 @@ public class FileManageController extends BaseAgentController {
                                                         String fileSumMd5) throws Exception {
         String tempPathName = agentConfig.getFixedTempPathName();
         this.uploadSharding(file, tempPathName, sliceId, totalSlice, nowSlice, fileSumMd5);
-        return JsonMessage.success("上传成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.upload_success.a769"));
     }
 
     @RequestMapping(value = "sharding-merge", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -71,7 +72,7 @@ public class FileManageController extends BaseAgentController {
                 CompressionFileUtil.unCompress(successFile, lib, stripComponentsValue);
             } finally {
                 if (!FileUtil.del(successFile)) {
-                    log.error("删除文件失败：" + successFile.getPath());
+                    log.error(I18nMessageUtil.get("i18n.delete_file_failure_with_full_stop.6c96") + successFile.getPath());
                 }
             }
         } else {
@@ -79,6 +80,6 @@ public class FileManageController extends BaseAgentController {
             FileUtil.mkdir(lib);
             FileUtil.move(successFile, lib, true);
         }
-        return JsonMessage.success("上传成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.upload_success.a769"));
     }
 }

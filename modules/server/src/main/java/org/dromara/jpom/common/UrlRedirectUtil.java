@@ -10,10 +10,8 @@
 package org.dromara.jpom.common;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.hutool.http.Header;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.function.Function;
@@ -135,26 +133,5 @@ public class UrlRedirectUtil {
             proxyPath = proxyPath.substring(0, proxyPath.length() - 1);
         }
         return proxyPath;
-    }
-
-    /**
-     * 获取语言
-     *
-     * @param request 请求
-     * @return 合法的语言
-     */
-    public static String parseLanguage(HttpServletRequest request) {
-        String language = ServletUtil.getHeader(request, Header.ACCEPT_LANGUAGE.getValue(), CharsetUtil.CHARSET_UTF_8);
-        language = StrUtil.emptyToDefault(language, "zh-cn");
-        language = language.toLowerCase();
-        switch (language) {
-            case "en-us":
-            case "en_us":
-                return "en-US";
-            case "zh_cn":
-            case "zh-cn":
-            default:
-                return "zh-CN";
-        }
     }
 }

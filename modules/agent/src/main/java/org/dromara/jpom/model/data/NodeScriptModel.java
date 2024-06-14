@@ -14,6 +14,7 @@ import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.jpom.JpomApplication;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.script.CommandParam;
 
 import java.io.File;
@@ -67,7 +68,7 @@ public class NodeScriptModel extends BaseWorkspaceModel {
 
     public static File scriptPath(String id) {
         if (StrUtil.isEmpty(id)) {
-            throw new IllegalArgumentException("id 为空");
+            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.id_is_empty.3bbf"));
         }
         File path = JpomApplication.getInstance().getScriptPath();
         return FileUtil.file(path, id);
@@ -75,7 +76,7 @@ public class NodeScriptModel extends BaseWorkspaceModel {
 
     public File logFile(String executeId) {
         if (StrUtil.isEmpty(getId())) {
-            throw new IllegalArgumentException("id 为空");
+            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.id_is_empty.3bbf"));
         }
         File path = JpomApplication.getInstance().getScriptPath();
         return FileUtil.file(path, getId(), "log", executeId + ".log");

@@ -16,7 +16,7 @@
               </div>
 
               <a-button size="small" type="primary" :disabled="!sshData.fileDirs" @click="handleFile()">{{
-                $tl('p.fileType')
+                $t('pages.ssh.full-terminal.741604c2')
               }}</a-button>
             </a-space>
           </template>
@@ -27,10 +27,14 @@
         </template>
         <terminal1 v-if="sshData" :ssh-id="sshData.id" />
         <template v-else>
-          <a-result status="404" :title="$tl('p.operationNotAllowed')" :sub-title="$tl('p.noSSH')">
+          <a-result
+            status="404"
+            :title="$t('pages.ssh.full-terminal.7aa434b')"
+            :sub-title="$t('pages.ssh.full-terminal.8e8e12b6')"
+          >
             <template #extra>
               <router-link :to="{ path: '/ssh', query: {} }">
-                <a-button type="primary">{{ $tl('p.goBackHome') }}</a-button>
+                <a-button type="primary">{{ $t('pages.ssh.full-terminal.edcf77ad') }}</a-button>
               </router-link>
             </template>
           </a-result>
@@ -40,13 +44,13 @@
     <!-- 文件管理 -->
     <a-drawer v-if="sshData" destroy-on-close placement="right" width="90vw" :open="drawerVisible" @close="onClose">
       <template #title>
-        {{ sshData.name }}<template v-if="sshData.host"> ({{ sshData.host }}) </template>{{ $tl('p.fileManagement') }}
+        {{ sshData.name }}<template v-if="sshData.host"> ({{ sshData.host }}) </template
+        >{{ $t('pages.ssh.full-terminal.502f94') }}
       </template>
       <ssh-file v-if="drawerVisible" :ssh-id="sshData.id" />
     </a-drawer>
   </div>
 </template>
-
 <script>
 import terminal1 from './terminal'
 import { getItem } from '@/api/ssh'
@@ -75,9 +79,6 @@ export default {
   },
   beforeUnmount() {},
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.ssh.fullTerminal.${key}`, ...args)
-    },
     loadItemData() {
       getItem({
         id: this.sshId

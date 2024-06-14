@@ -9,6 +9,7 @@
  */
 package org.dromara.jpom.controller.docker;
 
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.controller.docker.base.BaseDockerImagesController;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
@@ -46,9 +47,9 @@ public class DockerImagesController extends BaseDockerImagesController {
     @Override
     protected Map<String, Object> toDockerParameter(String id) {
         DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id);
-        Assert.notNull(dockerInfoModel, "没有对应 docker");
+        Assert.notNull(dockerInfoModel, I18nMessageUtil.get("i18n.no_docker_info.d685"));
         MachineDockerModel machineDockerModel = machineDockerServer.getByKey(dockerInfoModel.getMachineDockerId());
-        Assert.notNull(machineDockerModel, "没有对应的 docker 资产");
+        Assert.notNull(machineDockerModel, I18nMessageUtil.get("i18n.no_corresponding_docker_asset.6f06"));
         return machineDockerServer.toParameter(machineDockerModel);
     }
 }

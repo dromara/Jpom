@@ -22,6 +22,7 @@ import cn.hutool.extra.spring.SpringUtil;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.exception.PermissionException;
 import org.dromara.jpom.model.BaseWorkspaceModel;
@@ -206,7 +207,7 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
             entity.set("workspaceId", workspace);
             consumer.accept(entity);
             int size = entity.size();
-            Assert.state(size > 1, "没有添加任何参数");
+            Assert.state(size > 1, I18nMessageUtil.get("i18n.no_parameters_added.1721"));
         });
     }
 
@@ -226,7 +227,7 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
      */
     public String getCheckUserWorkspace(HttpServletRequest request) {
         String workspaceId = getWorkspaceId(request);
-        Assert.hasText(workspaceId, "请选择工作空间");
+        Assert.hasText(workspaceId, I18nMessageUtil.get("i18n.workspace_required.b3bd"));
         //
         this.checkUserWorkspace(workspaceId);
         return workspaceId;
@@ -248,7 +249,7 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
      * @param workspaceId 工作空间ID
      */
     protected void checkUserWorkspace(String workspaceId, UserModel userModel) {
-        Assert.notNull(userModel, "没有对应的用户");
+        Assert.notNull(userModel, I18nMessageUtil.get("i18n.no_user.3b69"));
         if (StrUtil.equals(userModel.getId(), UserModel.SYSTEM_ADMIN)) {
             // 系统执行，发行检查
             return;
@@ -265,7 +266,7 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
         UserBindWorkspaceService userBindWorkspaceService = SpringUtil.getBean(UserBindWorkspaceService.class);
         boolean exists = userBindWorkspaceService.exists(userModel, workspaceId);
         if (!exists) {
-            throw new PermissionException("没有对应的工作空间权限");
+            throw new PermissionException(I18nMessageUtil.get("i18n.no_corresponding_workspace_permission.8402"));
         }
     }
 
@@ -291,7 +292,7 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
 
 
     @Override
-    protected Order[] defaultOrders() {
+    public Order[] defaultOrders() {
         if (canSort) {
             return SORT_DEFAULT_ORDERS;
         }
@@ -305,7 +306,7 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
      * @param request 请求
      */
     public void sortToTop(String id, HttpServletRequest request) {
-        Assert.state(canSort, "当前数据不支持排序");
+        Assert.state(canSort, I18nMessageUtil.get("i18n.data_not_supported_for_sorting.5431"));
         String workspaceId = this.getCheckUserWorkspace(request);
         String maxSql = "select max(sortValue) as sortValue from " + this.tableName + " where workspaceId=?";
         List<Entity> query = this.query(maxSql, workspaceId);
@@ -349,9 +350,9 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
      * @param up        true 上移
      */
     private void sortMove(String id, String compareId, HttpServletRequest request, boolean up) {
-        Assert.state(canSort, "当前数据不支持排序");
-        Assert.hasText(id, "数据id 不存在");
-        Assert.hasText(compareId, "比较 id 不存在");
+        Assert.state(canSort, I18nMessageUtil.get("i18n.data_not_supported_for_sorting.5431"));
+        Assert.hasText(id, I18nMessageUtil.get("i18n.data_id_does_not_exist.a566"));
+        Assert.hasText(compareId, I18nMessageUtil.get("i18n.compare_id_not_exist.43be"));
         String workspaceId = this.getCheckUserWorkspace(request);
         String sql = "select sortValue as sortValue from " + this.tableName + " where id=? and workspaceId=?";
         List<Entity> query = this.query(sql, compareId, workspaceId);

@@ -19,6 +19,7 @@ import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.StrUtil;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.util.CommandUtil;
@@ -94,7 +95,7 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
             ProcessBuilder processBuilder = this.init();
             environmentMapBuilder.eachStr(this::info);
             //
-            this.system("开始执行: {}", this.action);
+            this.system(I18nMessageUtil.get("i18n.start_executing.f0b9"), this.action);
             process = processBuilder.start();
             inputStream = process.getInputStream();
             IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), (LineHandler) line -> {
@@ -104,10 +105,10 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
             //
             int waitFor = process.waitFor();
             //
-            this.system("执行结束: {} {}", this.action, waitFor);
+            this.system(I18nMessageUtil.get("i18n.execution_ended_with_detail.8f93"), this.action, waitFor);
         } catch (Exception e) {
-            log.error("执行异常", e);
-            this.systemError("执行异常：" + e.getMessage());
+            log.error(I18nMessageUtil.get("i18n.execution_exception.b0d5"), e);
+            this.systemError(I18nMessageUtil.get("i18n.general_execution_exception.62e9") + e.getMessage());
         } finally {
             this.close();
         }
@@ -137,11 +138,11 @@ public class DslScriptBuilder extends BaseRunScript implements Runnable {
             //
             waitFor = process.waitFor();
             // 插入第一行
-            result.add(0, this.formatLine(StrUtil.format("本次执行退出码: {}", waitFor)));
+            result.add(0, this.formatLine(StrUtil.format(I18nMessageUtil.get("i18n.exit_code.3b54"), waitFor)));
             //
         } catch (Exception e) {
-            log.error("执行异常", e);
-            result.add(this.formatLine(StrUtil.format("执行异常：", e.getMessage())));
+            log.error(I18nMessageUtil.get("i18n.execution_exception.b0d5"), e);
+            result.add(this.formatLine(StrUtil.format(I18nMessageUtil.get("i18n.general_execution_exception.62e9"), e.getMessage())));
         } finally {
             this.close();
         }

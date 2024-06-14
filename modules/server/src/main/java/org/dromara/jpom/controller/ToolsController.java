@@ -22,6 +22,7 @@ import cn.hutool.json.JSONObject;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import lombok.Lombok;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -58,7 +59,7 @@ public class ToolsController {
                 endDate = DateUtil.parse(split.get(1));
                 endDate = DateUtil.endOfDay(endDate);
             } catch (Exception e) {
-                return new JsonMessage<>(405, "日期格式错误:" + e.getMessage());
+                return new JsonMessage<>(405, I18nMessageUtil.get("i18n.date_format_error.3d1c") + e.getMessage());
             }
         }
         try {
@@ -70,7 +71,7 @@ public class ToolsController {
             }
             return JsonMessage.success("", dateList.stream().map(Date::getTime).collect(Collectors.toList()));
         } catch (Exception e) {
-            return new JsonMessage<>(405, "cron 表达式不正确," + e.getMessage());
+            return new JsonMessage<>(405, I18nMessageUtil.get("i18n.cron_expression_incorrect.b41a") + e.getMessage());
         }
     }
 

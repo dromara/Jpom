@@ -26,6 +26,7 @@ import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.model.*;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.util.LogRecorder;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.util.Assert;
@@ -98,7 +99,7 @@ public class DockerBuild implements AutoCloseable {
             try {
                 dockerClient.startContainerCmd(containerId).exec();
             } catch (RuntimeException e) {
-                logRecorder.error("容器启动失败:", e);
+                logRecorder.error(I18nMessageUtil.get("i18n.container_startup_failure.532e"), e);
                 return -101;
             }
             // 获取日志
@@ -191,10 +192,10 @@ public class DockerBuild implements AutoCloseable {
                     if (typeValue != null) {
                         ReflectUtil.setFieldValue(hostConfig, field, typeValue);
                     } else {
-                        log.warn("容器构建 hostConfig 参数 {} 转换失败：{}", key, value);
+                        log.warn(I18nMessageUtil.get("i18n.container_build_host_config_conversion_failure.27aa"), key, value);
                     }
                 } else {
-                    log.warn("容器构建 hostConfig 字段【{}】不存在", key);
+                    log.warn(I18nMessageUtil.get("i18n.container_build_host_config_field_not_exist.6f61"), key);
                 }
             }
         }
@@ -418,7 +419,7 @@ public class DockerBuild implements AutoCloseable {
             tags.add(image);
             try {
                 File file = plugin.getResourceToFile(String.format("runs/%s/" + DockerUtil.DOCKER_FILE, runsOn), tempDir);
-                Assert.notNull(file, "当前还不支持：" + runsOn);
+                Assert.notNull(file, I18nMessageUtil.get("i18n.unsupported_prefix.4f8c") + runsOn);
                 dockerClient.buildImageCmd(file)
                     .withTags(tags)
                     .exec(new ResultCallback.Adapter<BuildResponseItem>() {
@@ -429,7 +430,7 @@ public class DockerBuild implements AutoCloseable {
                         }
                     }).awaitCompletion();
             } catch (InterruptedException ex) {
-                logRecorder.error("构建 runsOn 镜像被中断", ex);
+                logRecorder.error(I18nMessageUtil.get("i18n.build_runs_on_image_interrupted.00fd"), ex);
             }
         }
     }
@@ -606,7 +607,7 @@ public class DockerBuild implements AutoCloseable {
             String containerId = createContainerResponse.getId();
             // 将脚本 复制到容器
             File pluginInstallResource = plugin.getResourceToFile("uses/" + pluginName + "/install.sh", tempDir);
-            Assert.notNull(pluginInstallResource, "当前不支持：" + pluginName);
+            Assert.notNull(pluginInstallResource, I18nMessageUtil.get("i18n.current_not_supported.78b7") + pluginName);
             dockerClient.copyArchiveToContainerCmd(containerId)
                 .withHostResource(pluginInstallResource.getAbsolutePath())
                 .withRemotePath("/tmp/")
@@ -625,9 +626,9 @@ public class DockerBuild implements AutoCloseable {
         try {
             DockerClientUtil.pullLog(dockerClient, containerId, false, null, StandardCharsets.UTF_8, logRecorder::append, null);
         } catch (InterruptedException e) {
-            logRecorder.error("获取容器日志操作被中断:", e);
+            logRecorder.error(I18nMessageUtil.get("i18n.get_container_log_interrupted.041d"), e);
         } catch (RuntimeException e) {
-            logRecorder.error("获取容器日志失败", e);
+            logRecorder.error(I18nMessageUtil.get("i18n.get_container_log_failure.915d"), e);
         }
     }
 
@@ -644,9 +645,9 @@ public class DockerBuild implements AutoCloseable {
             }).awaitCompletion();
 
         } catch (InterruptedException e) {
-            logRecorder.error("获取容器执行结果操作被中断:", e);
+            logRecorder.error(I18nMessageUtil.get("i18n.get_container_execution_result_interrupted.4a48"), e);
         } catch (RuntimeException e) {
-            logRecorder.error("获取容器执行结果失败", e);
+            logRecorder.error(I18nMessageUtil.get("i18n.get_container_execution_result_failure.1828"), e);
         }
         return statusCode[0];
     }

@@ -9,22 +9,27 @@
           :show-tool="true"
         >
           <template #tool_before>
-            <a-alert v-if="temp.file" show-icon :message="`${$tl('p.path')}:${temp.file}`" />
+            <a-alert
+              v-if="temp.file"
+              show-icon
+              :message="`${$t('pages.node.node-layout.system.config-file.ee016914')}:${temp.file}`"
+            />
           </template>
         </code-editor>
       </a-form-item>
       <a-form-item :wrapper-col="{ span: 14, offset: 2 }">
         <a-space>
-          <a-button type="primary" :disabled="submitAble" @click="onSubmit(false)">{{ $tl('p.save') }}</a-button>
+          <a-button type="primary" :disabled="submitAble" @click="onSubmit(false)">{{
+            $t('pages.node.node-layout.system.config-file.b033d8c5')
+          }}</a-button>
           <a-button type="primary" danger :disabled="submitAble" @click="onSubmit(true)">{{
-            $tl('p.saveAndRestart')
+            $t('pages.node.node-layout.system.config-file.fda40980')
           }}</a-button>
         </a-space>
       </a-form-item>
     </a-form>
   </div>
 </template>
-
 <script>
 import { getConfigData, editConfig, systemInfo } from '@/api/system'
 import codeEditor from '@/components/codeEditor'
@@ -55,9 +60,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.nodeLayout.system.configFile.${key}`, ...args)
-    },
     // load data
     loadData() {
       getConfigData({ machineId: this.machineId }).then((res) => {
@@ -92,7 +94,11 @@ export default {
       this.checkCount = 0
       this.globalLoading({
         spinning: true,
-        tip: (msg || this.$tl('p.restarting')) + `,${this.$tl('p.waitForRestart')},${this.$tl('p.autoRefresh')}`
+        tip:
+          (msg || this.$t('pages.node.node-layout.system.config-file.9e8c0aa9')) +
+          `,${this.$t('pages.node.node-layout.system.config-file.ba8fd88b')},${this.$t(
+            'pages.node.node-layout.system.config-file.536e5313'
+          )}`
       })
       setTimeout(() => {
         //
@@ -103,7 +109,7 @@ export default {
                 clearInterval(this.timer)
                 this.globalLoading(false)
                 $notification.success({
-                  message: this.$tl('p.restartSuccess')
+                  message: this.$t('pages.node.node-layout.system.config-file.a6229050')
                 })
 
                 setTimeout(() => {
@@ -112,7 +118,7 @@ export default {
               } else {
                 if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
                   $notification.warning({
-                    message: this.$tl('p.restartFailed') + (res.msg || '')
+                    message: this.$t('pages.node.node-layout.system.config-file.b0e4c704') + (res.msg || '')
                   })
                   this.globalLoading(false)
                   clearInterval(this.timer)
@@ -124,7 +130,7 @@ export default {
               if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
                 this.globalLoading(false)
                 $notification.error({
-                  message: this.$tl('p.restartTimeout')
+                  message: this.$t('pages.node.node-layout.system.config-file.48633a70')
                 })
                 clearInterval(this.timer)
               }
@@ -136,5 +142,3 @@ export default {
   }
 }
 </script>
-
-<style scoped></style>

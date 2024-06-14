@@ -1,20 +1,23 @@
 <template>
   <div>
     <a-space direction="vertical" style="width: 100%">
-      <a-tag>{{ $tl('p.consoleLogDescription') }}<b>jpom.project.log.auto-backup-to-file: false</b></a-tag>
+      <a-tag
+        >{{ $t('pages.node.node-layout.project.project-log.6424a544')
+        }}<b>jpom.project.log.auto-backup-to-file: false</b></a-tag
+      >
 
       <a-tag v-if="project.logPath" color="orange">
-        {{ $tl('p.consoleLogPath') }}: {{ project.logPath }}
+        {{ $t('pages.node.node-layout.project.project-log.f07e81ba') }}: {{ project.logPath }}
         <template v-if="project.logSize">
-          {{ $tl('p.currentLogFileSize') }}{{ project.logSize }}
+          {{ $t('pages.node.node-layout.project.project-log.afb07e2c') }}{{ project.logSize }}
           <a-button type="link" size="small" @click="handleDownload">
-            <DownloadOutlined />{{ $tl('p.export') }}
+            <DownloadOutlined />{{ $t('pages.node.node-layout.project.project-log.a5bebb0f') }}
           </a-button>
         </template>
       </a-tag>
 
       <a-tag v-if="project.logBackPath" color="orange"
-        >{{ $tl('p.consoleLogBackupPath') }}{{ project.logBackPath }}</a-tag
+        >{{ $t('pages.node.node-layout.project.project-log.f4e35807') }}{{ project.logBackPath }}</a-tag
       >
 
       <!-- 数据表格 -->
@@ -46,8 +49,12 @@
           </template>
           <template v-else-if="column.dataIndex === 'operation'">
             <a-space>
-              <a-button type="primary" @click="handleDownloadLogback(record)">{{ $tl('p.download') }}</a-button>
-              <a-button type="primary" danger @click="handleDelete(record)">{{ $tl('p.delete') }}</a-button>
+              <a-button type="primary" @click="handleDownloadLogback(record)">{{
+                $t('pages.node.node-layout.project.project-log.42c8e9c6')
+              }}</a-button>
+              <a-button type="primary" danger @click="handleDelete(record)">{{
+                $t('pages.node.node-layout.project.project-log.dd20d11c')
+              }}</a-button>
             </a-space>
           </template>
         </template>
@@ -55,7 +62,6 @@
     </a-space>
   </div>
 </template>
-
 <script>
 import {
   getLogBackList,
@@ -83,25 +89,25 @@ export default {
       logBackList: [],
       columns: [
         {
-          title: this.$tl('p.fileName'),
+          title: this.$t('pages.node.node-layout.project.project-log.a6eb2ded'),
           dataIndex: 'filename',
           width: 150,
           ellipsis: true
         },
         {
-          title: this.$tl('p.modifyTime'),
+          title: this.$t('pages.node.node-layout.project.project-log.a2b40316'),
           dataIndex: 'modifyTimeLong',
           width: 150,
           ellipsis: true
         },
         {
-          title: this.$tl('p.fileSize'),
+          title: this.$t('pages.node.node-layout.project.project-log.f087781'),
           dataIndex: 'fileSizeLong',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.node.node-layout.project.project-log.3bb962bf'),
           dataIndex: 'operation',
           align: 'center',
           fixed: 'right',
@@ -115,9 +121,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.nodeLayout.project.projectLog.${key}`, ...args)
-    },
     renderSize,
     parseTime,
     // 加载日志文件大小
@@ -175,11 +178,11 @@ export default {
     // 删除日志备份文件
     handleDelete(record) {
       $confirm({
-        title: this.$tl('p.systemPrompt'),
+        title: this.$t('pages.node.node-layout.project.project-log.b22d55a0'),
         zIndex: 1009,
-        content: this.$tl('p.confirmDelete'),
-        okText: this.$tl('p.confirm'),
-        cancelText: this.$tl('p.cancel'),
+        content: this.$t('pages.node.node-layout.project.project-log.987c2cd6'),
+        okText: this.$t('pages.node.node-layout.project.project-log.e8e9db25'),
+        cancelText: this.$t('pages.node.node-layout.project.project-log.b12468e9'),
         onOk: () => {
           return deleteProjectLogBackFile({
             nodeId: this.nodeId,

@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseAgentController;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.commander.ProjectCommander;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.RunMode;
 import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
@@ -66,26 +67,26 @@ public class ManageEditProjectController extends BaseAgentController {
         String id = projectInfo.getId();
         // 兼容 _
         String checkId = StrUtil.replace(id, StrUtil.DASHED, StrUtil.UNDERLINE);
-        Validator.validateGeneral(checkId, 2, Const.ID_MAX_LEN, "项目id 长度范围2-20（英文字母 、数字和下划线）");
-        Assert.state(!Const.SYSTEM_ID.equals(id), "项目id " + Const.SYSTEM_ID + " 关键词被系统占用");
+        Validator.validateGeneral(checkId, 2, Const.ID_MAX_LEN, I18nMessageUtil.get("i18n.project_id_length_range.7064"));
+        Assert.state(!Const.SYSTEM_ID.equals(id), StrUtil.format(I18nMessageUtil.get("i18n.project_id_keyword_occupied.1cae"), Const.SYSTEM_ID));
         // 运行模式
         RunMode runMode = projectInfo.getRunMode();
-        Assert.notNull(runMode, "请选择运行模式");
+        Assert.notNull(runMode, I18nMessageUtil.get("i18n.select_run_mode.5a5d"));
         // 监测
         if (runMode == RunMode.ClassPath || runMode == RunMode.JavaExtDirsCp) {
-            Assert.hasText(projectInfo.mainClass(), "ClassPath、JavaExtDirsCp 模式 MainClass必填");
+            Assert.hasText(projectInfo.mainClass(), I18nMessageUtil.get("i18n.class_path_and_java_ext_dirs_cp_required.7557"));
             if (runMode == RunMode.JavaExtDirsCp) {
-                Assert.hasText(projectInfo.javaExtDirsCp(), "JavaExtDirsCp 模式 javaExtDirsCp必填");
+                Assert.hasText(projectInfo.javaExtDirsCp(), I18nMessageUtil.get("i18n.java_ext_dirs_cp_required.1f4a"));
             }
         } else if (runMode == RunMode.Jar || runMode == RunMode.JarWar) {
             projectInfo.setMainClass(StrUtil.EMPTY);
         } else if (runMode == RunMode.Link) {
             String linkId = projectInfo.getLinkId();
-            Assert.hasText(linkId, "Link 模式 LinkId必填");
+            Assert.hasText(linkId, I18nMessageUtil.get("i18n.link_id_required.5dc7"));
             NodeProjectInfoModel item = projectInfoService.getItem(linkId);
-            Assert.notNull(item, "软链的项目部存在");
+            Assert.notNull(item, I18nMessageUtil.get("i18n.soft_link_project_department_exists.fa97"));
             RunMode itemRunMode = item.getRunMode();
-            Assert.state(itemRunMode != RunMode.File && itemRunMode != RunMode.Link, "被软链的项目不能是File或Link模式");
+            Assert.state(itemRunMode != RunMode.File && itemRunMode != RunMode.Link, I18nMessageUtil.get("i18n.soft_link_project_mode_error.ffa0"));
         }
         // 判断是否为分发添加
         String strOutGivingProject = getParameter("outGivingProject");
@@ -100,7 +101,7 @@ public class ManageEditProjectController extends BaseAgentController {
                     if (outGivingProject) {
                         whitelistDirectoryService.addProjectWhiteList(whitelistDirectory);
                     } else {
-                        throw new IllegalArgumentException("请选择正确的项目路径,或者还没有配置授权");
+                        throw new IllegalArgumentException(I18nMessageUtil.get("i18n.select_correct_project_path_or_no_auth_configured.366a"));
                     }
                 }
                 String logPath = projectInfo.logPath();
@@ -109,16 +110,16 @@ public class ManageEditProjectController extends BaseAgentController {
                         if (outGivingProject) {
                             whitelistDirectoryService.addProjectWhiteList(logPath);
                         } else {
-                            throw new IllegalArgumentException("请填写的项目日志存储路径,或者还没有配置授权");
+                            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.project_log_storage_path_required.d0bb"));
                         }
                     }
                 }
             }
             //
             String lib = projectInfo.getLib();
-            Assert.state(StrUtil.isNotEmpty(lib) && !StrUtil.SLASH.equals(lib) && !Validator.isChinese(lib), "项目路径不能为空,不能为顶级目录,不能包含中文");
+            Assert.state(StrUtil.isNotEmpty(lib) && !StrUtil.SLASH.equals(lib) && !Validator.isChinese(lib), I18nMessageUtil.get("i18n.invalid_project_path.04f7"));
 
-            FileUtils.checkSlip(lib, e -> new IllegalArgumentException("项目路径存在提升目录问题"));
+            FileUtils.checkSlip(lib, e -> new IllegalArgumentException(I18nMessageUtil.get("i18n.project_path_promotion_issue.2250")));
         }
     }
 
@@ -134,11 +135,11 @@ public class ManageEditProjectController extends BaseAgentController {
 
         // 自动生成log文件
         File checkFile = this.projectInfoService.resolveAbsoluteLogFile(projectInfo);
-        Assert.state(!FileUtil.exist(checkFile) || FileUtil.isFile(checkFile), "项目log是一个已经存在的文件夹");
+        Assert.state(!FileUtil.exist(checkFile) || FileUtil.isFile(checkFile), I18nMessageUtil.get("i18n.project_log_is_existing_folder.a80a"));
         //
         String token = projectInfo.token();
         if (StrUtil.isNotEmpty(token)) {
-            Validator.validateMatchRegex(RegexPool.URL_HTTP, token, "WebHooks 地址不合法");
+            Validator.validateMatchRegex(RegexPool.URL_HTTP, token, I18nMessageUtil.get("i18n.invalid_webhooks_address.d836"));
         }
         // 判断 yml
         this.checkDslYml(projectInfo);
@@ -149,9 +150,9 @@ public class ManageEditProjectController extends BaseAgentController {
     private void checkDslYml(NodeProjectInfoModel projectInfo) {
         if (projectInfo.getRunMode() == RunMode.Dsl) {
             String dslContent = projectInfo.getDslContent();
-            Assert.hasText(dslContent, "请配置 dsl 内容");
+            Assert.hasText(dslContent, I18nMessageUtil.get("i18n.configure_dsl_content.42e3"));
             DslYmlDto build = DslYmlDto.build(dslContent);
-            Assert.state(build.hasRunProcess(ConsoleCommandOp.status.name()), "没有配置 run.status");
+            Assert.state(build.hasRunProcess(ConsoleCommandOp.status.name()), I18nMessageUtil.get("i18n.run_status_not_configured.e959"));
         }
     }
 
@@ -171,19 +172,19 @@ public class ManageEditProjectController extends BaseAgentController {
         if (exits == null) {
             // 检查运行中的tag 是否被占用
             if (runMode != RunMode.File && runMode != RunMode.Dsl) {
-                Assert.state(!projectCommander.isRun(projectInfo), "当前项目id已经被正在运行的程序占用");
+                Assert.state(!projectCommander.isRun(projectInfo), I18nMessageUtil.get("i18n.project_id_in_use.1adb"));
             }
             if (previewData) {
                 // 预检查数据
-                return JsonMessage.success("检查通过");
+                return JsonMessage.success(I18nMessageUtil.get("i18n.check_passed.dce8"));
             } else {
                 projectInfoService.addItem(projectInfo);
-                return JsonMessage.success("新增成功！");
+                return JsonMessage.success(I18nMessageUtil.get("i18n.add_new_success.431a"));
             }
         }
         if (previewData) {
             // 预检查数据
-            return JsonMessage.success("检查通过");
+            return JsonMessage.success(I18nMessageUtil.get("i18n.check_passed.dce8"));
         } else {
             exits.setNodeId(projectInfo.getNodeId());
             exits.setName(projectInfo.getName());
@@ -202,7 +203,7 @@ public class ManageEditProjectController extends BaseAgentController {
             exits.setJavaExtDirsCp(projectInfo.javaExtDirsCp());
             if (runMode == RunMode.Link) {
                 // 如果是链接模式
-                Assert.state(runMode == exits.getRunMode(), "已经存在的项目不能修改为软链项目");
+                Assert.state(runMode == exits.getRunMode(), I18nMessageUtil.get("i18n.existing_project_cannot_be_soft_link.aa5a"));
             } else {
                 // 移动到新路径
                 this.moveTo(exits, projectInfo);
@@ -214,7 +215,7 @@ public class ManageEditProjectController extends BaseAgentController {
                 exits.setLogPath(projectInfo.logPath());
             }
             projectInfoService.updateById(exits, exits.getId());
-            return JsonMessage.success("修改成功");
+            return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
         }
     }
 
@@ -225,7 +226,7 @@ public class ManageEditProjectController extends BaseAgentController {
             File newLib = projectInfoService.resolveLibFile(news);
             if (!FileUtil.equals(oldLib, newLib)) {
                 // 正在运行的项目不能修改路径
-                this.projectMustNotRun(old, "正在运行的项目不能修改路径");
+                this.projectMustNotRun(old, I18nMessageUtil.get("i18n.running_project_cannot_change_path.5888"));
                 if (oldLib.exists()) {
                     FileUtils.tempMoveContent(oldLib, newLib);
                 }
@@ -237,7 +238,7 @@ public class ManageEditProjectController extends BaseAgentController {
             File newLog = projectInfoService.resolveAbsoluteLogFile(news);
             if (!FileUtil.equals(oldLog, newLog)) {
                 // 正在运行的项目不能修改路径
-                this.projectMustNotRun(old, "正在运行的项目不能修改路径");
+                this.projectMustNotRun(old, I18nMessageUtil.get("i18n.running_project_cannot_change_path.5888"));
                 if (oldLog.exists()) {
                     FileUtil.mkParentDirs(newLog);
                     FileUtil.move(oldLog, newLog, true);
@@ -264,7 +265,7 @@ public class ManageEditProjectController extends BaseAgentController {
      */
     private void checkPath(NodeProjectInfoModel nodeProjectInfoModel) {
         String id = nodeProjectInfoModel.getId();
-        Assert.state(!id.contains(StrUtil.SPACE), "项目Id不能包含空格");
+        Assert.state(!id.contains(StrUtil.SPACE), I18nMessageUtil.get("i18n.project_id_cannot_contain_spaces.251d"));
         RunMode runMode = nodeProjectInfoModel.getRunMode();
         if (runMode == RunMode.Link) {
             return;
@@ -276,9 +277,9 @@ public class ManageEditProjectController extends BaseAgentController {
         //
         String allLib = nodeProjectInfoModel.allLib();
         // 判断空格
-        Assert.state(!allLib.contains(StrUtil.SPACE), "项目路径不能包含空格");
+        Assert.state(!allLib.contains(StrUtil.SPACE), I18nMessageUtil.get("i18n.project_path_no_spaces.263c"));
         File checkFile = FileUtil.file(allLib);
-        Assert.state(!FileUtil.exist(checkFile) || FileUtil.isDirectory(checkFile), "项目路径是一个已经存在的文件");
+        Assert.state(!FileUtil.exist(checkFile) || FileUtil.isDirectory(checkFile), I18nMessageUtil.get("i18n.project_path_already_exists_as_file.a900"));
         // 重复lib
         for (NodeProjectInfoModel item : list) {
             if (item.getRunMode() == RunMode.Link) {
@@ -286,7 +287,7 @@ public class ManageEditProjectController extends BaseAgentController {
             }
             File fileLib = projectInfoService.resolveLibFile(item);
             if (!nodeProjectInfoModel.getId().equals(id) && FileUtil.equals(fileLib, checkFile)) {
-                throw new IllegalArgumentException("当前项目路径已经被【" + item.getName() + "】占用,请检查");
+                throw new IllegalArgumentException(StrUtil.format(I18nMessageUtil.get("i18n.project_path_occupied.cddd"), item.getName()));
             }
         }
 
@@ -310,7 +311,7 @@ public class ManageEditProjectController extends BaseAgentController {
             }
         }
         if (nodeProjectInfoModel1 != null) {
-            throw new IllegalArgumentException("项目路径和【" + nodeProjectInfoModel1.getName() + "】项目冲突:" + nodeProjectInfoModel1.allLib());
+            throw new IllegalArgumentException(StrUtil.format(I18nMessageUtil.get("i18n.project_path_conflict.8c6f"), nodeProjectInfoModel1.getName(), nodeProjectInfoModel1.allLib()));
         }
     }
 
@@ -324,24 +325,24 @@ public class ManageEditProjectController extends BaseAgentController {
         NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel();
         if (nodeProjectInfoModel == null) {
             // 返回正常 200 状态码，考虑节点分发重复操作
-            return JsonMessage.success("项目不存在");
+            return JsonMessage.success(I18nMessageUtil.get("i18n.project_does_not_exist.3029"));
         }
         // 运行判断
         boolean run = projectCommander.isRun(nodeProjectInfoModel);
-        Assert.state(!run, "不能删除正在运行的项目");
+        Assert.state(!run, I18nMessageUtil.get("i18n.cannot_delete_running_project.e56b"));
         // 判断是否被软链
         List<NodeProjectInfoModel> list = projectInfoService.list();
         for (NodeProjectInfoModel projectInfoModel : list) {
             if (nodeProjectInfoModel.getRunMode() != RunMode.Link) {
                 continue;
             }
-            Assert.state(!StrUtil.equals(projectInfoModel.getLinkId(), id), "项目被" + projectInfoModel.getName() + "软链中");
+            Assert.state(!StrUtil.equals(projectInfoModel.getLinkId(), id), StrUtil.format(I18nMessageUtil.get("i18n.project_soft_linked_by.8556"), projectInfoModel.getName()));
         }
         this.thorough(thorough, nodeProjectInfoModel);
         //
         projectInfoService.deleteItem(nodeProjectInfoModel.getId());
 
-        return JsonMessage.success("删除成功！");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.deletion_success_message.4359"));
 
     }
 
@@ -357,16 +358,16 @@ public class ManageEditProjectController extends BaseAgentController {
         }
         File logBack = this.projectInfoService.resolveLogBack(nodeProjectInfoModel);
         boolean fastDel = CommandUtil.systemFastDel(logBack);
-        Assert.state(!fastDel, "删除日志文件失败:" + logBack.getAbsolutePath());
+        Assert.state(!fastDel, I18nMessageUtil.get("i18n.delete_log_file_failure_with_colon.d867") + logBack.getAbsolutePath());
         File log = this.projectInfoService.resolveAbsoluteLogFile(nodeProjectInfoModel);
         fastDel = CommandUtil.systemFastDel(log);
-        Assert.state(!fastDel, "删除日志文件失败:" + log.getAbsolutePath());
+        Assert.state(!fastDel, I18nMessageUtil.get("i18n.delete_log_file_failure_with_colon.d867") + log.getAbsolutePath());
         //
         if (nodeProjectInfoModel.getRunMode() != RunMode.Link) {
             // 非软链项目才删除文件
             File allLib = projectInfoService.resolveLibFile(nodeProjectInfoModel);
             fastDel = CommandUtil.systemFastDel(allLib);
-            Assert.state(!fastDel, "删除项目文件失败:" + allLib.getAbsolutePath());
+            Assert.state(!fastDel, I18nMessageUtil.get("i18n.delete_project_file_failure.f007") + allLib.getAbsolutePath());
         }
     }
 
@@ -378,13 +379,13 @@ public class ManageEditProjectController extends BaseAgentController {
             update.setOutGivingProject(false);
             projectInfoService.updateById(update, nodeProjectInfoModel.getId());
         }
-        return JsonMessage.success("释放成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.release_successful.f2ca"));
     }
 
     @RequestMapping(value = "change-workspace-id", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<Object> changeWorkspaceId(String newWorkspaceId, String newNodeId) {
-        Assert.hasText(newWorkspaceId, "请选择要修改的工作空间");
-        Assert.hasText(newWorkspaceId, "请选择要修改的节");
+        Assert.hasText(newWorkspaceId, I18nMessageUtil.get("i18n.select_workspace_to_modify.ac87"));
+        Assert.hasText(newWorkspaceId, I18nMessageUtil.get("i18n.select_node_to_modify.6617"));
         NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel();
         if (nodeProjectInfoModel != null) {
             NodeProjectInfoModel update = new NodeProjectInfoModel();
@@ -392,6 +393,6 @@ public class ManageEditProjectController extends BaseAgentController {
             update.setWorkspaceId(newWorkspaceId);
             projectInfoService.updateById(update, nodeProjectInfoModel.getId());
         }
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 }

@@ -20,6 +20,7 @@ import cn.hutool.core.util.ServiceLoaderUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
@@ -61,7 +62,7 @@ public class StorageTableFactory {
                     .filter(StrUtil::isNotEmpty)
                     .findAny()
                     .orElse(null);
-                Assert.hasText(tableComment, key + " 没有描述");
+                Assert.hasText(tableComment, key + I18nMessageUtil.get("i18n.no_description.c231"));
                 stringBuffer.append(sqlBuilderService.generateTableSql(key, tableComment, value)).append(StrUtil.LF);
                 stringBuffer.append(sqlBuilderService.delimiter()).append(StrUtil.LF);
             }
@@ -107,7 +108,7 @@ public class StorageTableFactory {
      * @return 单例的 IStorageSqlBuilderService
      */
     public static IStorageSqlBuilderService get() {
-        Assert.notNull(StorageServiceFactory.getMode(), "当前数据库模式未知");
+        Assert.notNull(StorageServiceFactory.getMode(), I18nMessageUtil.get("i18n.unknown_database_mode.f9e5"));
         return Singleton.get(IStorageSqlBuilderService.class.getName(), (CheckedUtil.Func0Rt<IStorageSqlBuilderService>) () -> doCreateStorageService(StorageServiceFactory.getMode()));
     }
 

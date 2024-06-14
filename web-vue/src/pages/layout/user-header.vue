@@ -5,7 +5,11 @@
       <a-button v-if="mode === 'normal'" type="dashed" class="workspace jpom-workspace btn-group-item">
         <div class="workspace-name">
           <a-tooltip
-            :title="`${$tl('p.workspaceName')}${selectWorkspace.name} ${$tl('p.groupName')}${selectWorkspace.group || $tl('c.unConfigured')}${$tl('c.bracketRight')}`"
+            :title="`${$t('pages.layout.user-header.8d20cb3f')}${selectWorkspace.name} ${$t(
+              'pages.layout.user-header.12d0e469'
+            )}${selectWorkspace.group || $t('pages.layout.user-header.50acc5d6')}${$t(
+              'pages.layout.user-header.26e6628f'
+            )}`"
             placement="bottom"
           >
             <SwitcherOutlined />
@@ -29,7 +33,10 @@
       </a-button>
       <a-button v-if="mode === 'management'" type="dashed">
         <div class="workspace-name">
-          <a-tooltip :title="`${$tl('p.clusterName')}${selectCluster && selectCluster.name}`" placement="bottom">
+          <a-tooltip
+            :title="`${$t('pages.layout.user-header.c2dfe194')}${selectCluster && selectCluster.name}`"
+            placement="bottom"
+          >
             <ClusterOutlined />
             {{ selectCluster && selectCluster.name }}
           </a-tooltip>
@@ -48,7 +55,7 @@
             <template v-if="mode === 'normal'">
               <a-sub-menu>
                 <template #title>
-                  <a-button type="link"><RetweetOutlined />{{ $tl('p.switchWorkspace') }}</a-button>
+                  <a-button type="link"><RetweetOutlined />{{ $t('pages.layout.user-header.4e2553dc') }}</a-button>
                 </template>
                 <template v-if="myWorkspaceList.length == 1">
                   <template v-for="(item, index) in myWorkspaceList[0].children">
@@ -59,9 +66,9 @@
                       @click="handleWorkspaceChange(item)"
                     >
                       <a-button type="link" :disabled="item.id === selectWorkspace.id">
-                        {{ item.name || $tl('c.unConfigured') }}
+                        {{ item.name || $t('pages.layout.user-header.50acc5d6') }}
                         <template v-if="myClusterList.length > 1 && item.clusterInfoId">
-                          {{ $tl('c.bracketLeft')
+                          {{ $t('pages.layout.user-header.84fee7a4')
                           }}{{
                             myClusterList.find((item2) => {
                               return item2.id === item.clusterInfoId
@@ -69,7 +76,7 @@
                             myClusterList.find((item2) => {
                               return item2.id === item.clusterInfoId
                             }).name
-                          }}{{ $tl('c.bracketRight') }}
+                          }}{{ $t('pages.layout.user-header.26e6628f') }}
                         </template>
                       </a-button>
                     </a-menu-item>
@@ -81,7 +88,7 @@
                     <a-sub-menu>
                       <template #title>
                         <a-button type="link">
-                          {{ item1.value || $tl('c.unConfigured') }}
+                          {{ item1.value || $t('pages.layout.user-header.50acc5d6') }}
                         </a-button>
                       </template>
                       <template v-for="(item, index) in item1.children">
@@ -94,7 +101,7 @@
                           <a-button type="link" :disabled="item.id === selectWorkspace.id">
                             {{ item.name }}
                             <template v-if="myClusterList.length > 1 && item.clusterInfoId">
-                              {{ $tl('c.bracketLeft')
+                              {{ $t('pages.layout.user-header.84fee7a4')
                               }}{{
                                 myClusterList.find((item2) => {
                                   return item2.id === item.clusterInfoId
@@ -102,7 +109,7 @@
                                 myClusterList.find((item2) => {
                                   return item2.id === item.clusterInfoId
                                 }).name
-                              }}{{ $tl('c.bracketRight') }}
+                              }}{{ $t('pages.layout.user-header.26e6628f') }}
                             </template>
                           </a-button>
                         </a-menu-item>
@@ -119,7 +126,7 @@
             <template v-if="mode === 'management'">
               <a-sub-menu>
                 <template #title>
-                  <a-button type="link"><RetweetOutlined />{{ $tl('p.switchCluster') }}</a-button>
+                  <a-button type="link"><RetweetOutlined />{{ $t('pages.layout.user-header.85538864') }}</a-button>
                 </template>
                 <template v-for="(item, index) in myClusterList">
                   <a-menu-item
@@ -137,31 +144,31 @@
               </a-sub-menu>
             </template>
             <a-menu-item @click="handleUpdatePwd">
-              <a-button type="link"> <lock-outlined />{{ $tl('c.securityManagement') }} </a-button>
+              <a-button type="link"> <lock-outlined />{{ $t('pages.layout.user-header.3bab6668') }} </a-button>
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item @click="handleUpdateUser">
-              <a-button type="link"><profile-outlined /> {{ $tl('p.userProfile') }} </a-button>
+              <a-button type="link"><profile-outlined /> {{ $t('pages.layout.user-header.fd8cec21') }} </a-button>
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item @click="handleUserlog">
-              <a-button type="link"><bars-outlined /> {{ $tl('c.operationLog') }} </a-button>
+              <a-button type="link"><bars-outlined /> {{ $t('pages.layout.user-header.86d58c89') }} </a-button>
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item @click="customize">
-              <a-button type="link"><skin-outlined /> {{ $tl('p.personalConfiguration') }} </a-button>
+              <a-button type="link"><skin-outlined /> {{ $t('pages.layout.user-header.dca6da91') }} </a-button>
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item @click="logOut">
-              <a-button type="link"> <logout-outlined />{{ $tl('p.logout') }} </a-button>
+              <a-button type="link"> <logout-outlined />{{ $t('pages.layout.user-header.d2fe58b4') }} </a-button>
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item @click="logOutSwap">
-              <a-button type="link"> <SwapOutlined />{{ $tl('p.switchAccount') }} </a-button>
+              <a-button type="link"> <SwapOutlined />{{ $t('pages.layout.user-header.1da0b754') }} </a-button>
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item @click="logOutAll">
-              <a-button type="link"><RestOutlined /> {{ $tl('p.completeLogout') }} </a-button>
+              <a-button type="link"><RestOutlined /> {{ $t('pages.layout.user-header.6892c9ac') }} </a-button>
             </a-menu-item>
           </a-menu>
         </template>
@@ -173,12 +180,12 @@
       v-model:open="updateNameVisible"
       destroy-on-close
       :width="'60vw'"
-      :title="$tl('c.securityManagement')"
+      :title="$t('pages.layout.user-header.3bab6668')"
       :footer="null"
       :mask-closable="false"
     >
       <a-tabs v-model:active-key="temp.tabActiveKey" @change="tabChange">
-        <a-tab-pane :key="1" :tab="$tl('p.changePassword')">
+        <a-tab-pane :key="1" :tab="$t('pages.layout.user-header.cf2bc037')">
           <a-spin tip="Loading..." :spinning="confirmLoading">
             <a-form
               ref="pwdForm"
@@ -188,20 +195,23 @@
               :wrapper-col="{ span: 14 }"
               @finish="handleUpdatePwdOk"
             >
-              <a-form-item :label="$tl('p.originalPassword')" name="oldPwd">
-                <a-input-password v-model:value="temp.oldPwd" :placeholder="$tl('c.oldPassword')" />
+              <a-form-item :label="$t('pages.layout.user-header.1333b135')" name="oldPwd">
+                <a-input-password v-model:value="temp.oldPwd" :placeholder="$t('pages.layout.user-header.eda355b6')" />
               </a-form-item>
-              <a-form-item :label="$tl('p.newPassword')" name="newPwd">
-                <a-input-password v-model:value="temp.newPwd" :placeholder="$tl('c.newPassword')" />
+              <a-form-item :label="$t('pages.layout.user-header.4cb8151c')" name="newPwd">
+                <a-input-password v-model:value="temp.newPwd" :placeholder="$t('pages.layout.user-header.4575df08')" />
               </a-form-item>
-              <a-form-item :label="$tl('p.confirmPassword')" name="confirmPwd">
-                <a-input-password v-model:value="temp.confirmPwd" :placeholder="$tl('c.confirmPassword')" />
+              <a-form-item :label="$t('pages.layout.user-header.fd09d95a')" name="confirmPwd">
+                <a-input-password
+                  v-model:value="temp.confirmPwd"
+                  :placeholder="$t('pages.layout.user-header.b9c21ba3')"
+                />
               </a-form-item>
               <a-form-item>
                 <a-row type="flex" justify="center">
                   <a-col :span="2">
                     <a-button type="primary" html-type="submit" :loading="confirmLoading">{{
-                      $tl('p.confirmReset')
+                      $t('pages.layout.user-header.59bc9c6e')
                     }}</a-button>
                   </a-col>
                 </a-row>
@@ -209,15 +219,15 @@
             </a-form>
           </a-spin>
         </a-tab-pane>
-        <a-tab-pane :key="2" :tab="$tl('p.twoStepVerification')">
+        <a-tab-pane :key="2" :tab="$t('pages.layout.user-header.80647404')">
           <a-row>
             <a-col :span="24">
               <a-alert v-if="temp.needVerify" type="warning">
-                <template #message> {{ $tl('p.prompt') }} </template>
+                <template #message> {{ $t('pages.layout.user-header.85ddc1a3') }} </template>
                 <template #description>
                   <ul style="color: red">
-                    <li>{{ $tl('p.mfaKey') }}</li>
-                    <li>{{ $tl('p.pleaseScanQRCodeAndBindToken') }}</li>
+                    <li>{{ $t('pages.layout.user-header.3aee366c') }}</li>
+                    <li>{{ $t('pages.layout.user-header.dc59d40') }}</li>
                   </ul>
                 </template>
               </a-alert>
@@ -231,16 +241,16 @@
                 :wrapper-col="{ span: 14 }"
                 @finish="handleBindMfa"
               >
-                <a-form-item :label="$tl('p.currentStatus')" name="status">
+                <a-form-item :label="$t('pages.layout.user-header.8a8e4923')" name="status">
                   <a-switch
                     v-model:checked="temp.status"
-                    :checked-children="$tl('p.opening')"
+                    :checked-children="$t('pages.layout.user-header.690faca2')"
                     disabled
-                    :un-checked-children="$tl('p.closing')"
+                    :un-checked-children="$t('pages.layout.user-header.327893d5')"
                   />
                 </a-form-item>
                 <template v-if="temp.needVerify">
-                  <a-form-item :label="$tl('p.qrCode')">
+                  <a-form-item :label="$t('pages.layout.user-header.e3ff2149')">
                     <a-row>
                       <a-col :span="14">
                         <a-qrcode :value="temp.url" :status="temp.url ? 'active' : 'loading'" />
@@ -260,24 +270,40 @@
                   </a-form-item>
                 </template>
                 <!-- 不能使用  template 包裹 否则验证不能正常启用 -->
-                <a-form-item v-if="temp.needVerify" :label="$tl('c.verificationCode')" name="twoCode">
-                  <a-input ref="twoCode" v-model:value="temp.twoCode" :placeholder="$tl('c.twoStepVerificationCode')" />
+                <a-form-item v-if="temp.needVerify" :label="$t('pages.layout.user-header.f8317f5c')" name="twoCode">
+                  <a-input
+                    ref="twoCode"
+                    v-model:value="temp.twoCode"
+                    :placeholder="$t('pages.layout.user-header.8a6e74c3')"
+                  />
                 </a-form-item>
                 <a-form-item v-if="temp.needVerify">
                   <a-row type="flex" justify="center">
                     <a-col :span="2">
-                      <a-button type="primary" html-type="submit">{{ $tl('p.confirmBind') }}</a-button>
+                      <a-button type="primary" html-type="submit">{{
+                        $t('pages.layout.user-header.d1a3fb5f')
+                      }}</a-button>
                     </a-col>
                   </a-row>
                 </a-form-item>
                 <!-- 不能使用  template 包裹 否则验证不能正常启用 -->
-                <a-form-item v-if="!temp.needVerify && temp.status" :label="$tl('c.verificationCode')" name="twoCode">
-                  <a-input ref="twoCode" v-model:value="temp.twoCode" :placeholder="$tl('c.twoStepVerificationCode')" />
+                <a-form-item
+                  v-if="!temp.needVerify && temp.status"
+                  :label="$t('pages.layout.user-header.f8317f5c')"
+                  name="twoCode"
+                >
+                  <a-input
+                    ref="twoCode"
+                    v-model:value="temp.twoCode"
+                    :placeholder="$t('pages.layout.user-header.8a6e74c3')"
+                  />
                 </a-form-item>
                 <a-form-item v-if="!temp.needVerify && temp.status">
                   <a-row type="flex" justify="center">
                     <a-col :span="2">
-                      <a-button type="primary" html-type="submit">{{ $tl('p.confirmClose') }}</a-button>
+                      <a-button type="primary" html-type="submit">{{
+                        $t('pages.layout.user-header.1a20a2e7')
+                      }}</a-button>
                     </a-col>
                   </a-row>
                 </a-form-item>
@@ -285,14 +311,16 @@
                 <a-form-item v-if="!temp.needVerify && !temp.status">
                   <a-row type="flex" justify="center">
                     <a-col :span="2">
-                      <a-button type="primary" @click="openMfaFn">{{ $tl('p.enableMFA') }}</a-button>
+                      <a-button type="primary" @click="openMfaFn">{{
+                        $t('pages.layout.user-header.f0d95575')
+                      }}</a-button>
                     </a-col>
                   </a-row>
                 </a-form-item>
               </a-form>
             </a-col>
             <a-col :span="12">
-              <h3 :id="$tl('c.twoStepVerificationApp')">{{ $tl('c.twoStepVerificationApp') }}</h3>
+              <h3 :id="$t('pages.layout.user-header.d0d351d5')">{{ $t('pages.layout.user-header.d0d351d5') }}</h3>
               <p v-for="(html, index) in MFA_APP_TIP_ARRAY" :key="index" v-html="html" />
             </a-col>
           </a-row>
@@ -304,12 +332,12 @@
       v-model:open="updateUserVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$tl('p.editUserProfile')"
+      :title="$t('pages.layout.user-header.ef947269')"
       :mask-closable="false"
       @ok="handleUpdateUserOk"
     >
       <a-form ref="userForm" :rules="rules" :model="temp" :label-col="{ span: 8 }" :wrapper-col="{ span: 15 }">
-        <a-form-item :label="$tl('p.temporaryToken')" name="token">
+        <a-form-item :label="$t('pages.layout.user-header.135d4403')" name="token">
           <a-input v-model:value="temp.token" disabled placeholder="Token">
             <template #suffix>
               <a-typography-paragraph style="margin-bottom: 0" :copyable="{ tooltip: true, text: temp.token }">
@@ -317,7 +345,7 @@
             </template>
           </a-input>
         </a-form-item>
-        <a-form-item :label="$tl('p.permanentToken')" name="md5Token">
+        <a-form-item :label="$t('pages.layout.user-header.dd885a11')" name="md5Token">
           <a-input v-model:value="temp.md5Token" disabled placeholder="Token">
             <template #suffix>
               <a-typography-paragraph style="margin-bottom: 0" :copyable="{ tooltip: true, text: temp.md5Token }">
@@ -325,29 +353,29 @@
             </template>
           </a-input>
         </a-form-item>
-        <a-form-item :label="$tl('c.nickname')" name="name">
-          <a-input v-model:value="temp.name" :placeholder="$tl('c.nickname')" />
+        <a-form-item :label="$t('pages.layout.user-header.57c3af39')" name="name">
+          <a-input v-model:value="temp.name" :placeholder="$t('pages.layout.user-header.57c3af39')" />
         </a-form-item>
-        <a-form-item :label="$tl('c.emailAddress')" name="email">
-          <a-input v-model:value="temp.email" :placeholder="$tl('c.emailAddress')" />
+        <a-form-item :label="$t('pages.layout.user-header.55103071')" name="email">
+          <a-input v-model:value="temp.email" :placeholder="$t('pages.layout.user-header.55103071')" />
         </a-form-item>
-        <a-form-item v-show="showCode" :label="$tl('c.emailVerificationCode')" name="code">
+        <a-form-item v-show="showCode" :label="$t('pages.layout.user-header.989c1e9a')" name="code">
           <a-row :gutter="8">
             <a-col :span="15">
-              <a-input v-model:value="temp.code" :placeholder="$tl('c.emailVerificationCode')" />
+              <a-input v-model:value="temp.code" :placeholder="$t('pages.layout.user-header.989c1e9a')" />
             </a-col>
             <a-col :span="4">
               <a-button type="primary" :disabled="!temp.email" @click="sendEmailCode">{{
-                $tl('p.sendVerificationCode')
+                $t('pages.layout.user-header.26b1dc93')
               }}</a-button>
             </a-col>
           </a-row>
         </a-form-item>
-        <a-form-item :label="$tl('c.dingNotificationAddress')" name="dingDing">
-          <a-input v-model:value="temp.dingDing" :placeholder="$tl('c.dingNotificationAddress')" />
+        <a-form-item :label="$t('pages.layout.user-header.dd43783d')" name="dingDing">
+          <a-input v-model:value="temp.dingDing" :placeholder="$t('pages.layout.user-header.dd43783d')" />
         </a-form-item>
-        <a-form-item :label="$tl('c.enterpriseWeChatNotificationAddress')" name="workWx">
-          <a-input v-model:value="temp.workWx" :placeholder="$tl('c.enterpriseWeChatNotificationAddress')" />
+        <a-form-item :label="$t('pages.layout.user-header.a3bfcd9e')" name="workWx">
+          <a-input v-model:value="temp.workWx" :placeholder="$t('pages.layout.user-header.a3bfcd9e')" />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -355,16 +383,14 @@
     <a-modal
       v-model:open="customizeVisible"
       destroy-on-close
-      :title="$tl('p.personalConfigArea')"
+      :title="$t('pages.layout.user-header.3d14e1fe')"
       :footer="null"
       :mask-closable="false"
     >
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
         <a-alert banner>
           <template #message>
-            {{ $tl('p.theseConfigsOnlyEffectiveInCurrentBrowser') }},{{
-              $tl('p.clearingBrowserCacheWillRestoreDefaults')
-            }}
+            {{ $t('pages.layout.user-header.321ca5ab') }},{{ $t('pages.layout.user-header.681d0c4d') }}
           </template>
         </a-alert>
         <!-- <a-form-item label="页面导航">
@@ -383,15 +409,15 @@
             </div>
           </a-space>
         </a-form-item> -->
-        <a-form-item :label="$tl('p.menuConfig')">
+        <a-form-item :label="$t('pages.layout.user-header.a04d6e8d')">
           <a-space>
             <a-switch
-              :checked-children="$tl('p.yes')"
+              :checked-children="$t('pages.layout.user-header.f5bb2364')"
               :checked="menuMultipleFlag"
-              :un-checked-children="$tl('p.no')"
+              :un-checked-children="$t('pages.layout.user-header.5edb2e8a')"
               @click="toggleMenuMultiple"
             />
-            {{ $tl('p.expandMultipleAtOnce') }}
+            {{ $t('pages.layout.user-header.158342fd') }}
           </a-space>
         </a-form-item>
         <!-- <a-form-item label="页面配置">
@@ -416,52 +442,52 @@
             />
           </a-space>
         </a-form-item> -->
-        <a-form-item :label="$tl('p.fullScreenLog')">
+        <a-form-item :label="$t('pages.layout.user-header.a0f7ed4f')">
           <a-space>
             <a-switch
-              :checked-children="$tl('p.fullScreen')"
+              :checked-children="$t('pages.layout.user-header.4fc84727')"
               :checked="fullscreenViewLog"
-              :un-checked-children="$tl('p.notFullScreen')"
+              :un-checked-children="$t('pages.layout.user-header.bcb85748')"
               @click="toggleFullscreenViewLog"
             />
-            {{ $tl('p.viewLogInFullScreen') }}
+            {{ $t('pages.layout.user-header.378c8cf6') }}
           </a-space>
         </a-form-item>
-        <a-form-item :label="$tl('p.contentTheme')">
+        <a-form-item :label="$t('pages.layout.user-header.cf6a1e7a')">
           <a-space>
             <a-radio-group v-model:value="themeView" button-style="solid">
-              <a-radio-button value="light">{{ $tl('c.lightTheme') }}</a-radio-button>
-              <a-radio-button value="dark">{{ $tl('c.darkTheme') }}</a-radio-button>
-              <a-radio-button value="auto">{{ $tl('p.followSystem') }}</a-radio-button>
+              <a-radio-button value="light">{{ $t('pages.layout.user-header.a9bad4a1') }}</a-radio-button>
+              <a-radio-button value="dark">{{ $t('pages.layout.user-header.67b903b1') }}</a-radio-button>
+              <a-radio-button value="auto">{{ $t('pages.layout.user-header.58a45933') }}</a-radio-button>
             </a-radio-group>
-            {{ $tl('p.contentAreaThemeSwitch') }}
+            {{ $t('pages.layout.user-header.ad301071') }}
           </a-space>
         </a-form-item>
-        <a-form-item :label="$tl('p.menuTheme')">
+        <a-form-item :label="$t('pages.layout.user-header.e1e68c8b')">
           <a-space>
             <a-radio-group v-model:value="menuThemeView" button-style="solid">
-              <a-radio-button value="light">{{ $tl('c.lightTheme') }}</a-radio-button>
-              <a-radio-button value="dark">{{ $tl('c.darkTheme') }}</a-radio-button>
+              <a-radio-button value="light">{{ $t('pages.layout.user-header.a9bad4a1') }}</a-radio-button>
+              <a-radio-button value="dark">{{ $t('pages.layout.user-header.67b903b1') }}</a-radio-button>
             </a-radio-group>
-            {{ $tl('p.leftMenuThemeSwitch') }}
+            {{ $t('pages.layout.user-header.1c0c4705') }}
           </a-space>
         </a-form-item>
 
-        <a-form-item :label="$tl('p.compactMode')">
+        <a-form-item :label="$t('pages.layout.user-header.15692164')">
           <a-space>
             <a-switch
-              :checked-children="$tl('p.compact')"
+              :checked-children="$t('pages.layout.user-header.e39a73de')"
               :checked="compactView"
-              :un-checked-children="$tl('p.loose')"
+              :un-checked-children="$t('pages.layout.user-header.96425f5')"
               @click="toggleCompactView"
             />
-            {{ $tl('p.fontSpacingAdjustment') }}({{ $tl('p.onlyEffectiveInDarkMode') }})
+            {{ $t('pages.layout.user-header.1538a492') }}({{ $t('pages.layout.user-header.bb6fe415') }})
           </a-space>
         </a-form-item>
-        <a-form-item v-if="!isProduction" :label="$tl('p.language')">
+        <a-form-item v-if="!isProduction" :label="$t('pages.layout.user-header.ee091a03')">
           <a-space>
             <a-radio-group v-model:value="locale" button-style="solid">
-              <a-radio-button value="zh-cn">{{ $tl('p.chinese') }}</a-radio-button>
+              <a-radio-button value="zh-cn">{{ $t('pages.layout.user-header.9ca25f75') }}</a-radio-button>
               <a-radio-button value="en-us">English</a-radio-button>
             </a-radio-group>
           </a-space>
@@ -472,7 +498,7 @@
     <a-modal
       v-model:open="bindMfaTip"
       destroy-on-close
-      :title="$tl('c.securityReminder')"
+      :title="$t('pages.layout.user-header.49889c30')"
       :footer="null"
       :mask-closable="false"
       :closable="false"
@@ -480,15 +506,13 @@
     >
       <a-space direction="vertical">
         <a-alert
-          :message="$tl('c.securityReminder')"
-          :description="
-            $tl('p.forYourAccountSecurityTheSystemRequiresTwoStepVerificationToBeEnabledToEnsureAccountSafety')
-          "
+          :message="$t('pages.layout.user-header.49889c30')"
+          :description="$t('pages.layout.user-header.e805efb')"
           type="error"
           :closable="false"
         />
         <a-row align="middle" type="flex" justify="center">
-          <a-button type="danger" @click="toBindMfa"> {{ $tl('p.enableImmediately') }} </a-button>
+          <a-button type="danger" @click="toBindMfa"> {{ $t('pages.layout.user-header.c8507450') }} </a-button>
         </a-row>
       </a-space>
     </a-modal>
@@ -497,7 +521,7 @@
       v-model:open="viewLogVisible"
       destroy-on-close
       :width="'90vw'"
-      :title="$tl('c.operationLog')"
+      :title="$t('pages.layout.user-header.86d58c89')"
       :footer="null"
       :mask-closable="false"
     >
@@ -555,31 +579,35 @@ export default {
       // 表单校验规则
       rules: {
         name: [
-          { required: true, message: this.$tl('p.nickname'), trigger: 'blur' },
-          { max: 10, message: this.$tl('c.nicknameLength'), trigger: 'blur' },
-          { min: 2, message: this.$tl('c.nicknameLength'), trigger: 'blur' }
+          { required: true, message: this.$t('pages.layout.user-header.9b5a95d2'), trigger: 'blur' },
+          { max: 10, message: this.$t('pages.layout.user-header.dad8bc7b'), trigger: 'blur' },
+          { min: 2, message: this.$t('pages.layout.user-header.dad8bc7b'), trigger: 'blur' }
         ],
+
         oldPwd: [
-          { required: true, message: this.$tl('c.oldPassword'), trigger: 'blur' },
-          { max: 20, message: this.$tl('c.passwordLength'), trigger: 'blur' },
-          { min: 6, message: this.$tl('c.passwordLength'), trigger: 'blur' }
+          { required: true, message: this.$t('pages.layout.user-header.eda355b6'), trigger: 'blur' },
+          { max: 20, message: this.$t('pages.layout.user-header.254a970b'), trigger: 'blur' },
+          { min: 6, message: this.$t('pages.layout.user-header.254a970b'), trigger: 'blur' }
         ],
+
         newPwd: [
-          { required: true, message: this.$tl('c.newPassword'), trigger: 'blur' },
-          { max: 20, message: this.$tl('c.passwordLength'), trigger: 'blur' },
-          { min: 6, message: this.$tl('c.passwordLength'), trigger: 'blur' }
+          { required: true, message: this.$t('pages.layout.user-header.4575df08'), trigger: 'blur' },
+          { max: 20, message: this.$t('pages.layout.user-header.254a970b'), trigger: 'blur' },
+          { min: 6, message: this.$t('pages.layout.user-header.254a970b'), trigger: 'blur' }
         ],
+
         confirmPwd: [
-          { required: true, message: this.$tl('c.confirmPassword'), trigger: 'blur' },
-          { max: 20, message: this.$tl('c.passwordLength'), trigger: 'blur' },
-          { min: 6, message: this.$tl('c.passwordLength'), trigger: 'blur' }
+          { required: true, message: this.$t('pages.layout.user-header.b9c21ba3'), trigger: 'blur' },
+          { max: 20, message: this.$t('pages.layout.user-header.254a970b'), trigger: 'blur' },
+          { min: 6, message: this.$t('pages.layout.user-header.254a970b'), trigger: 'blur' }
         ],
+
         email: [
           // { required: true, message: "请输入邮箱", trigger: "blur" }
         ],
         twoCode: [
-          { required: true, message: this.$tl('p.twoStepVerificationCode'), trigger: ['change', 'blur'] },
-          { pattern: /^\d{6}$/, message: this.$tl('p.verificationCode6'), trigger: ['change', 'blur'] }
+          { required: true, message: this.$t('pages.layout.user-header.e794e5fe'), trigger: ['change', 'blur'] },
+          { pattern: /^\d{6}$/, message: this.$t('pages.layout.user-header.cf89eb17'), trigger: ['change', 'blur'] }
         ]
       },
       MFA_APP_TIP_ARRAY,
@@ -630,6 +658,11 @@ export default {
     locale: {
       set: function (value) {
         useGuideStore().changeLocale(value)
+        //清空本地 tabs
+        const menuStore = useAllMenuStore()
+        // 调用其他 action
+        menuStore.clearTabs('normal', { key: 'all' })
+        menuStore.clearTabs('management', { key: 'all' })
       },
       get: function () {
         return useGuideStore().getLocale()
@@ -660,9 +693,6 @@ export default {
     this.init()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.layout.userHeader.${key}`, ...args)
-    },
     customize() {
       this.customizeVisible = true
     },
@@ -720,11 +750,11 @@ export default {
         .then((flag) => {
           if (flag) {
             $notification.success({
-              message: this.$tl('p.closeOperationGuide')
+              message: this.$t('pages.layout.user-header.e805511')
             })
           } else {
             $notification.success({
-              message: this.$tl('p.openOperationGuide')
+              message: this.$t('pages.layout.user-header.8e6ecbdf')
             })
           }
         })
@@ -736,11 +766,11 @@ export default {
         .then((flag) => {
           if (flag) {
             $notification.success({
-              message: this.$tl('p.multipleMenusExpand')
+              message: this.$t('pages.layout.user-header.8ef644a1')
             })
           } else {
             $notification.success({
-              message: this.$tl('p.singleMenuExpand')
+              message: this.$t('pages.layout.user-header.38360e9e')
             })
           }
         })
@@ -752,11 +782,11 @@ export default {
         .then((flag) => {
           if (flag) {
             $notification.success({
-              message: this.$tl('p.autoExpandContent')
+              message: this.$t('pages.layout.user-header.cf4f7e81')
             })
           } else {
             $notification.success({
-              message: this.$tl('p.fullScreen_1')
+              message: this.$t('pages.layout.user-header.1f597ac0')
             })
           }
         })
@@ -768,11 +798,11 @@ export default {
         .then((flag) => {
           if (flag) {
             $notification.success({
-              message: this.$tl('p.scrollableContent')
+              message: this.$t('pages.layout.user-header.c688eb3d')
             })
           } else {
             $notification.success({
-              message: this.$tl('p.hiddenScrollbar')
+              message: this.$t('pages.layout.user-header.d0b833a')
             })
           }
         })
@@ -784,11 +814,11 @@ export default {
         .then((fullscreenViewLog) => {
           if (fullscreenViewLog) {
             $notification.success({
-              message: this.$tl('p.logDialogFullScreen')
+              message: this.$t('pages.layout.user-header.401a5b70')
             })
           } else {
             $notification.success({
-              message: this.$tl('p.logDialogNonFullScreen')
+              message: this.$t('pages.layout.user-header.17b81d98')
             })
           }
         })
@@ -799,11 +829,11 @@ export default {
         .then((compact) => {
           if (compact) {
             $notification.success({
-              message: this.$tl('p.compactMode_1')
+              message: this.$t('pages.layout.user-header.60dcf8ca')
             })
           } else {
             $notification.success({
-              message: this.$tl('p.looseMode')
+              message: this.$t('pages.layout.user-header.c08b9c0c')
             })
           }
         })
@@ -813,24 +843,24 @@ export default {
         .restGuide()
         .then(() => {
           $notification.success({
-            message: this.$tl('p.resetOperationGuideSuccess')
+            message: this.$t('pages.layout.user-header.3ea6d68c')
           })
         })
     },
     // 彻底退出登录
     logOutAll() {
       $confirm({
-        title: this.$tl('c.systemPrompt'),
+        title: this.$t('pages.layout.user-header.a8fe4c17'),
         zIndex: 1009,
-        content: this.$tl('p.quitConfirmation'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.layout.user-header.f63ebe16'),
+        okText: this.$t('pages.layout.user-header.7da4a591'),
+        cancelText: this.$t('pages.layout.user-header.43105e21'),
         onOk: () => {
           return useUserStore()
             .logOut()
             .then(() => {
               $notification.success({
-                message: this.$tl('c.logoutSuccess')
+                message: this.$t('pages.layout.user-header.ba1c6d1f')
               })
               localStorage.clear()
               this.$router.replace({
@@ -844,17 +874,17 @@ export default {
     // 切换账号登录
     logOutSwap() {
       $confirm({
-        title: this.$tl('c.systemPrompt'),
+        title: this.$t('pages.layout.user-header.a8fe4c17'),
         zIndex: 1009,
-        content: this.$tl('p.switchAccountConfirmation'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.layout.user-header.ed166c40'),
+        okText: this.$t('pages.layout.user-header.7da4a591'),
+        cancelText: this.$t('pages.layout.user-header.43105e21'),
         onOk: () => {
           return useUserStore()
             .logOut()
             .then(() => {
               $notification.success({
-                message: this.$tl('c.logoutSuccess')
+                message: this.$t('pages.layout.user-header.ba1c6d1f')
               })
               useAppStore().changeWorkspace('')
               this.$router.replace({
@@ -868,17 +898,17 @@ export default {
     // 退出登录
     logOut() {
       $confirm({
-        title: this.$tl('c.systemPrompt'),
+        title: this.$t('pages.layout.user-header.a8fe4c17'),
         zIndex: 1009,
-        content: this.$tl('p.quitSystemConfirmation'),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        content: this.$t('pages.layout.user-header.9f940811'),
+        okText: this.$t('pages.layout.user-header.7da4a591'),
+        cancelText: this.$t('pages.layout.user-header.43105e21'),
         onOk: () => {
           return useUserStore()
             .logOut()
             .then(() => {
               $notification.success({
-                message: this.$tl('c.logoutSuccess')
+                message: this.$t('pages.layout.user-header.ba1c6d1f')
               })
               const query = Object.assign({}, this.$route.query)
               this.$router.replace({
@@ -899,7 +929,7 @@ export default {
       // 判断两次新密码是否一致
       if (this.temp.newPwd !== this.temp.confirmPwd) {
         $notification.error({
-          message: this.$tl('p.passwordsNotMatch')
+          message: this.$t('pages.layout.user-header.12d0b15b')
         })
         return
       }
@@ -946,7 +976,7 @@ export default {
     sendEmailCode() {
       if (!this.temp.email) {
         $notification.error({
-          message: this.$tl('p.emailAddress')
+          message: this.$t('pages.layout.user-header.4fc329c6')
         })
         return
       }
@@ -1016,7 +1046,7 @@ export default {
         location.href = url
       } else {
         $notification.error({
-          message: this.$tl('p.clusterNotConfigured')
+          message: this.$t('pages.layout.user-header.b29d1268')
         })
       }
     },
@@ -1055,7 +1085,7 @@ export default {
 
           $notification.info({
             // placement: "",
-            message: this.$tl('p.verificationCodeRequired')
+            message: this.$t('pages.layout.user-header.ee23f800')
           })
         }
       })
@@ -1076,11 +1106,11 @@ export default {
         })
       } else {
         $confirm({
-          title: this.$tl('c.systemPrompt'),
+          title: this.$t('pages.layout.user-header.a8fe4c17'),
           zIndex: 1009,
-          content: this.$tl('p.disableTwoStepVerificationConfirmation'),
-          okText: this.$tl('c.confirm'),
-          cancelText: this.$tl('c.cancel'),
+          content: this.$t('pages.layout.user-header.b34c9126'),
+          okText: this.$t('pages.layout.user-header.7da4a591'),
+          cancelText: this.$t('pages.layout.user-header.43105e21'),
           onOk: () => {
             return closeMfa({
               code: this.temp.twoCode

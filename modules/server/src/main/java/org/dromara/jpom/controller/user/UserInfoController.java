@@ -15,6 +15,7 @@ import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.user.UserBindWorkspaceModel;
@@ -59,21 +60,21 @@ public class UserInfoController extends BaseServerController {
      * @return json
      */
     @RequestMapping(value = "updatePwd", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<String> updatePwd(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空") String oldPwd,
-                                          @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "密码不能为空") String newPwd,
+    public IJsonMessage<String> updatePwd(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.password_cannot_be_empty.89b5") String oldPwd,
+                                          @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.password_cannot_be_empty.89b5") String newPwd,
                                           HttpSession session) {
-        Assert.state(!StrUtil.equals(oldPwd, newPwd), "新旧密码一致");
+        Assert.state(!StrUtil.equals(oldPwd, newPwd), I18nMessageUtil.get("i18n.old_and_new_passwords_match.55b4"));
         UserModel userName = getUser();
-        Assert.state(!userName.isDemoUser(), "当前账户为演示账号，不支持修改密码");
+        Assert.state(!userName.isDemoUser(), I18nMessageUtil.get("i18n.demo_account_password_change_not_supported.91f4"));
 
         UserModel userModel = userService.simpleLogin(userName.getId(), oldPwd);
-        Assert.notNull(userModel, "旧密码不正确！");
-        Assert.state(ObjectUtil.defaultIfNull(userModel.getPwdErrorCount(), 0) <= 0, "当前账号被锁定中，不能修改密码");
+        Assert.notNull(userModel, I18nMessageUtil.get("i18n.old_password_incorrect.9cf6"));
+        Assert.state(ObjectUtil.defaultIfNull(userModel.getPwdErrorCount(), 0) <= 0, I18nMessageUtil.get("i18n.account_locked_cannot_change_password.d6ab"));
 
         userService.updatePwd(userName.getId(), newPwd);
         // 如果修改成功，则销毁会话
         session.invalidate();
-        return JsonMessage.success("修改密码成功！");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.password_change_success.8013"));
     }
 
     /**

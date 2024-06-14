@@ -25,6 +25,7 @@ import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.func.cert.model.CertificateInfoModel;
@@ -88,7 +89,8 @@ public class CertificateInfoService extends BaseGlobalOrWorkspaceService<Certifi
                     certificateInfoModel.setWorkspaceId(ServerConst.WORKSPACE_GLOBAL);
                     certificateInfoModel.setCreateUser(UserModel.SYSTEM_ADMIN);
                     certificateInfoModel.setModifyUser(UserModel.SYSTEM_ADMIN);
-                    certificateInfoModel.setDescription("docker[" + dockerModel.getName() + "] 资产导入");
+                    String description = StrUtil.format(I18nMessageUtil.get("i18n.docker_asset_imported.0ab4"), dockerModel.getName());
+                    certificateInfoModel.setDescription(description);
                     this.insert(certificateInfoModel);
                 }
                 // 更新
@@ -96,9 +98,9 @@ public class CertificateInfoService extends BaseGlobalOrWorkspaceService<Certifi
                 update.setId(dockerModel.getId());
                 update.setCertInfo(certificateInfoModel.getSerialNumberStr() + StrUtil.COLON + certificateInfoModel.getKeyType());
                 machineDockerServer.updateById(update);
-                log.info("docker[{}] 证书成功迁移到证书管理中", dockerModel.getName());
+                log.info(I18nMessageUtil.get("i18n.docker_certificate_migrated.b3d3"), dockerModel.getName());
             } catch (Exception e) {
-                log.error("迁移 docker[{}] 证书发生异常", dockerModel.getName(), e);
+                log.error(I18nMessageUtil.get("i18n.migration_docker_cert_error.a5ea"), dockerModel.getName(), e);
             }
         }
         return CollUtil.size(dockerModels);
@@ -116,17 +118,17 @@ public class CertificateInfoService extends BaseGlobalOrWorkspaceService<Certifi
         String[] pemNameSuffixes = new String[]{".crt", ".cer", ".pem"};
         // 找到 对应的文件
         File[] files = dir.listFiles();
-        Assert.notNull(files, "压缩包里没有任何文件");
+        Assert.notNull(files, I18nMessageUtil.get("i18n.no_files_in_zip.1af6"));
         File keyFile = Arrays.stream(files).filter(file -> StrUtil.endWithAnyIgnoreCase(file.getName(), keyNameSuffixes)).findAny().orElse(null);
-        Assert.notNull(keyFile, "压缩包里没有找到私钥文件");
+        Assert.notNull(keyFile, I18nMessageUtil.get("i18n.private_key_not_found_in_zip.e103"));
         //
         try {
             List<File> fileList = Arrays.stream(files)
                 .filter(file -> !FileUtil.equals(file, keyFile))
                 .filter(file -> StrUtil.endWithAnyIgnoreCase(file.getName(), pemNameSuffixes))
                 .collect(Collectors.toList());
-            Assert.notEmpty(fileList, "没有找到任何证书文件");
-            Assert.state(fileList.size() <= 2, "找到 2 个以上的证书文件");
+            Assert.notEmpty(fileList, I18nMessageUtil.get("i18n.no_certificate_files_found.ff6d"));
+            Assert.state(fileList.size() <= 2, I18nMessageUtil.get("i18n.multiple_certificate_files_found.bee3"));
             //
             List<Certificate> certificates = fileList.stream()
                 .map(file -> {
@@ -143,7 +145,7 @@ public class CertificateInfoService extends BaseGlobalOrWorkspaceService<Certifi
             X509Certificate x509Certificate1 = certificate1 != null ? X509Certificate.getInstance(certificate1.getEncoded()) : null;
             Principal issuerDN = x509Certificate0.getIssuerDN();
             Principal subjectDN = x509Certificate0.getSubjectDN();
-            Assert.state(issuerDN != null && subjectDN != null, "证书信息出现错误,未找到 issuerDN 或者 subjectDN");
+            Assert.state(issuerDN != null && subjectDN != null, I18nMessageUtil.get("i18n.certificate_info_error_issuer_or_subject_DN_not_found.805d"));
             int rootIndex = StrUtil.equals(issuerDN.getName(), subjectDN.getName()) ? 0 : 1;
             //
             PrivateKey privateKey;
@@ -169,7 +171,7 @@ public class CertificateInfoService extends BaseGlobalOrWorkspaceService<Certifi
             if (checkRepeat) {
                 //                this.checkRepeat(certificateInfoModel.getSerialNumberStr(), certificateInfoModel.getKeyType());
                 Assert.state(!this.checkRepeat(certificateInfoModel.getSerialNumberStr(), certificateInfoModel.getKeyType()),
-                    "当前证书已经存在啦(系统全局范围内)");
+                    I18nMessageUtil.get("i18n.certificate_already_exists.adf9"));
             }
             // 保存文件
             File file1 = this.getFilePath(certificateInfoModel);
@@ -184,8 +186,8 @@ public class CertificateInfoService extends BaseGlobalOrWorkspaceService<Certifi
         } catch (IllegalStateException | IllegalArgumentException e) {
             throw Lombok.sneakyThrow(e);
         } catch (Exception e) {
-            log.error("解析证书异常", e);
-            throw new IllegalStateException("解析证书发生未知错误：" + e.getMessage());
+            log.error(I18nMessageUtil.get("i18n.parse_certificate_exception.3b6c"), e);
+            throw new IllegalStateException(I18nMessageUtil.get("i18n.parse_certificate_unknown_error.c43c") + e.getMessage());
         }
     }
 
@@ -227,8 +229,8 @@ public class CertificateInfoService extends BaseGlobalOrWorkspaceService<Certifi
         List<String> list = StrUtil.splitTrim(certTag, StrUtil.COLON);
         String serialNumberStr = CollUtil.get(list, 0);
         String keyType = CollUtil.get(list, 1);
-        Assert.hasText(serialNumberStr, "没有证书序列号");
-        Assert.hasText(keyType, "没有证书类型");
+        Assert.hasText(serialNumberStr, I18nMessageUtil.get("i18n.certificate_serial_number_not_found.c8d1"));
+        Assert.hasText(keyType, I18nMessageUtil.get("i18n.certificate_type_not_found.6706"));
         CertificateInfoModel certificateInfoModel = new CertificateInfoModel();
         certificateInfoModel.setSerialNumberStr(serialNumberStr);
         certificateInfoModel.setKeyType(keyType);
@@ -243,9 +245,9 @@ public class CertificateInfoService extends BaseGlobalOrWorkspaceService<Certifi
      * @param privateKey 私钥
      */
     public void testKey(PublicKey pubkey, PrivateKey privateKey) {
-        Assert.state(pubkey != null && privateKey != null, "公钥或者私钥不存在");
+        Assert.state(pubkey != null && privateKey != null, I18nMessageUtil.get("i18n.public_key_or_private_key_does_not_exist.dc0d"));
         // 测试字符串
-        String str = "您好，Jpom";
+        String str = I18nMessageUtil.get("i18n.greeting.5ecd");
 
         // 判断算法名称是否包含 “RSA” 或 “EC”
         String algorithm = pubkey.getAlgorithm();
@@ -253,12 +255,12 @@ public class CertificateInfoService extends BaseGlobalOrWorkspaceService<Certifi
             RSA rsa = new RSA(privateKey, pubkey);
             String encryptStr = rsa.encryptBase64(str, KeyType.PublicKey);
             String decryptStr = rsa.decryptStr(encryptStr, KeyType.PrivateKey);
-            Assert.state(StrUtil.equals(str, decryptStr), "公钥和私钥不匹配");
+            Assert.state(StrUtil.equals(str, decryptStr), I18nMessageUtil.get("i18n.public_key_and_private_key_mismatch.4aa2"));
         } else if (algorithm.contains(ServerConst.EC)) {
             ECIES ecies = new ECIES(privateKey, pubkey);
             String encryptStr = ecies.encryptBase64(str, KeyType.PublicKey);
             String decryptStr = StrUtil.utf8Str(ecies.decrypt(encryptStr, KeyType.PrivateKey));
-            Assert.state(StrUtil.equals(str, decryptStr), "公钥和私钥不匹配");
+            Assert.state(StrUtil.equals(str, decryptStr), I18nMessageUtil.get("i18n.public_key_and_private_key_mismatch.4aa2"));
         }
     }
 

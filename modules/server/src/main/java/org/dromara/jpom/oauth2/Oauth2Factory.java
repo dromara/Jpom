@@ -14,6 +14,7 @@ import cn.hutool.core.map.SafeConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import me.zhyd.oauth.request.AuthRequest;
 import org.dromara.jpom.common.ILoadEvent;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.service.system.SystemParametersServer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
@@ -71,13 +72,13 @@ public class Oauth2Factory implements ILoadEvent {
      */
     public static BaseOauth2Config getConfig(String provide) {
         BaseOauth2Config oauth2Config = AUTH_CONFIG.get(provide);
-        Assert.notNull(oauth2Config, "没有找到对应的 oauth2," + provide);
+        Assert.notNull(oauth2Config, I18nMessageUtil.get("i18n.no_oauth2_found.ea74") + provide);
         return oauth2Config;
     }
 
     public static AuthRequest get(String provide) {
         AuthRequest authRequest = AUTH_REQUEST.get(provide);
-        Assert.notNull(authRequest, "没有找到对应的 oauth2," + provide);
+        Assert.notNull(authRequest, I18nMessageUtil.get("i18n.no_oauth2_found.ea74") + provide);
         return authRequest;
     }
 
@@ -88,7 +89,7 @@ public class Oauth2Factory implements ILoadEvent {
             String dbKey = value.get(0);
             BaseOauth2Config baseOauth2Config = systemParametersServer.getConfigDefNewInstance(dbKey, value.get(1));
             put(baseOauth2Config);
-            log.debug("加载 oauth2 配置 ：{} {}", entry.getKey(), dbKey);
+            log.debug(I18nMessageUtil.get("i18n.load_oauth2_config.da42"), entry.getKey(), dbKey);
         }
     }
 }

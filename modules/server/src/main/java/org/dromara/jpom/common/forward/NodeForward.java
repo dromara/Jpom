@@ -30,6 +30,7 @@ import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.NodeConfig;
 import org.dromara.jpom.exception.AgentAuthorizeException;
 import org.dromara.jpom.exception.AgentException;
@@ -90,10 +91,10 @@ public class NodeForward {
     }
 
     public static INodeInfo parseNodeInfo(NodeModel nodeModel) {
-        Assert.hasText(nodeModel.getMachineId(), "节点信息不完整,缺少机器id");
+        Assert.hasText(nodeModel.getMachineId(), I18nMessageUtil.get("i18n.incomplete_node_info_missing_machine_id.1c9a"));
         MachineNodeServer machineNodeServer = SpringUtil.getBean(MachineNodeServer.class);
         MachineNodeModel model = machineNodeServer.getByKey(nodeModel.getMachineId(), false);
-        Assert.notNull(model, "对应的机器信息不存在");
+        Assert.notNull(model, I18nMessageUtil.get("i18n.machine_info_not_exist.3468"));
         return model;
     }
 
@@ -342,7 +343,7 @@ public class NodeForward {
         NodeConfig nodeConfig = serverConfig.getNode();
         long length = file.length();
         String fileName = fileNameFn.apply(file);
-        Assert.state(length > 0, "空文件不能上传" + file.getAbsolutePath());
+        Assert.state(length > 0, I18nMessageUtil.get("i18n.empty_file_cannot_upload.88df") + file.getAbsolutePath());
         String md5 = SecureUtil.md5(file);
         int fileSliceSize = nodeConfig.getUploadFileSliceSize();
         //如果小数点大于1，整数加一 例如4.1 =》5
@@ -402,16 +403,16 @@ public class NodeForward {
                         streamProgress.accept(length, atomicProgressSize.get());
                         succeedMessage.set(message);
                     } else {
-                        log.warn("分片上传异常：{} {}", nodeUrl, message);
+                        log.warn(I18nMessageUtil.get("i18n.chunk_upload_exception.87c1"), nodeUrl, message);
                         // 终止上传
                         queueList.clear();
                         failureMessage.set(message);
                     }
                 } catch (Exception e) {
-                    log.error("分片上传文件异常", e);
+                    log.error(I18nMessageUtil.get("i18n.chunk_upload_file_exception.0dc3"), e);
                     // 终止上传
                     queueList.clear();
-                    failureMessage.set(new JsonMessage<>(500, "上传异常：" + e.getMessage()));
+                    failureMessage.set(new JsonMessage<>(500, I18nMessageUtil.get("i18n.upload_exception.cd6c") + e.getMessage()));
                 }
             };
             for (int i = 0; i < total; i++) {
@@ -424,7 +425,7 @@ public class NodeForward {
             return message;
         }
         // 判断是否都成功
-        Assert.state(success.size() == total, "上传异常,完成数量不匹配");
+        Assert.state(success.size() == total, I18nMessageUtil.get("i18n.upload_exception_mismatch.0b25"));
         //
         return Optional.ofNullable(doneCallback)
             .map(function -> function.apply(sliceData))
@@ -597,7 +598,7 @@ public class NodeForward {
             try {
                 params.put(s, new BytesResource(multipartFile.getBytes(), multipartFile.getOriginalFilename()));
             } catch (IOException e) {
-                log.error("转发文件异常", e);
+                log.error(I18nMessageUtil.get("i18n.file_transfer_exception.bda6"), e);
                 throw Lombok.sneakyThrow(e);
             }
         });
@@ -652,7 +653,7 @@ public class NodeForward {
 
     public static <T> T toJsonMessage(String body, TypeReference<T> tTypeReference) {
         if (StrUtil.isEmpty(body)) {
-            throw new AgentException("agent 端响应内容为空");
+            throw new AgentException(I18nMessageUtil.get("i18n.agent_response_empty.cc8e"));
         }
         T data = JSON.parseObject(body, tTypeReference);
         if (data instanceof JsonMessage) {
@@ -661,7 +662,7 @@ public class NodeForward {
                 throw new AgentAuthorizeException(new JsonMessage<>(jsonMessage.getCode(), jsonMessage.getMsg()));
             }
         } else {
-            throw new IllegalStateException("消息转换异常");
+            throw new IllegalStateException(I18nMessageUtil.get("i18n.message_conversion_exception.cce8"));
         }
         return data;
     }

@@ -15,6 +15,7 @@ import cn.hutool.extra.spring.SpringUtil;
 import cn.keepbx.jpom.cron.ICron;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.model.script.ScriptExecuteLogModel;
 import org.dromara.jpom.model.script.ScriptModel;
@@ -101,7 +102,7 @@ public class ScriptServer extends BaseGlobalOrWorkspaceService<ScriptModel> impl
         StrUtil.splitTrim(ids, StrUtil.COMMA)
             .forEach(id -> {
                 ScriptModel data = super.getByKey(id, false, entity -> entity.set("workspaceId", nowWorkspaceId));
-                Assert.notNull(data, "没有对应到脚本信息或者选择全局脚本");
+                Assert.notNull(data, I18nMessageUtil.get("i18n.no_corresponding_script_info_or_global_script_selected.765b"));
                 //
                 ScriptModel where = new ScriptModel();
                 where.setWorkspaceId(workspaceId);

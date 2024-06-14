@@ -20,7 +20,8 @@ import org.dromara.jpom.model.data.CommandExecLogModel;
  * @since 2022/1/19
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "SERVER_SCRIPT_EXECUTE_LOG", name = "脚本模版执行记录", parents = ScriptModel.class)
+@TableName(value = "SERVER_SCRIPT_EXECUTE_LOG",
+    nameKey = "i18n.script_template_execution_record.374b", parents = ScriptModel.class)
 @Data
 public class ScriptExecuteLogModel extends BaseWorkspaceModel {
 

@@ -19,6 +19,7 @@ import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.BaseModel;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.springframework.util.Assert;
@@ -73,15 +74,15 @@ public class AgentWhitelist extends BaseModel {
         return list.stream()
             .map(s -> {
                 String val = FileUtil.normalize(s);
-                Assert.state(FileUtil.isAbsolutePath(val), "需要配置绝对路径：" + val);
+                Assert.state(FileUtil.isAbsolutePath(val), I18nMessageUtil.get("i18n.need_configure_absolute_path.f2e6") + val);
                 File file = FileUtil.file(val);
                 File parentFile = file.getParentFile();
-                Assert.notNull(parentFile, "不能配置根路径：" + val);
+                Assert.notNull(parentFile, I18nMessageUtil.get("i18n.cannot_configure_root_path.d86e") + val);
                 // 判断是否保护jpom 路径
                 Assert.state(!StrUtil.startWith(ExtConfigBean.getPath(), val), errorMsg);
                 //
                 if (maxLen > 0) {
-                    Assert.state(StrUtil.length(val) <= maxLen, "配置路径超过" + maxLen + "长度限制:" + val);
+                    Assert.state(StrUtil.length(val) <= maxLen, StrUtil.format(I18nMessageUtil.get("i18n.config_path_exceeds_length_limit.f684"), maxLen, val));
                 }
                 return val;
             })
@@ -162,9 +163,9 @@ public class AgentWhitelist extends BaseModel {
      * @return charset 不能编辑情况会抛出异常
      */
     public static Charset checkFileSuffix(List<String> allowEditSuffix, String filename) {
-        Assert.notEmpty(allowEditSuffix, "没有配置可允许编辑的后缀");
+        Assert.notEmpty(allowEditSuffix, I18nMessageUtil.get("i18n.editable_suffixes_not_configured.5b41"));
         Charset charset = AgentWhitelist.parserFileSuffixMap(allowEditSuffix, filename);
-        Assert.notNull(charset, "不允许编辑的文件后缀");
+        Assert.notNull(charset, I18nMessageUtil.get("i18n.disallowed_file_extension.eb05"));
         return charset;
     }
 

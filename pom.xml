@@ -202,6 +202,7 @@
                                 <!-- <exclude>web-vue2/**</exclude>-->
                                 <!-- <exclude>**/*.yml</exclude>-->
                                 <exclude>**/*.md</exclude>
+                                <exclude>**/i18n/*.properties</exclude>
                                 <exclude>**/*.txt</exclude>
                                 <exclude>**/dist/assets/**</exclude>
                             </excludes>

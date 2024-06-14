@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseAgentController;
 import org.dromara.jpom.common.commander.CommandOpResult;
 import org.dromara.jpom.common.commander.ProjectCommander;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
@@ -53,9 +54,9 @@ public class ProjectStatusController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "getProjectStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<JSONObject> getProjectStatus(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id, String getCopy) {
+    public IJsonMessage<JSONObject> getProjectStatus(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.incorrect_project_id.5f70") String id, String getCopy) {
         NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel();
-        Assert.notNull(nodeProjectInfoModel, "项目id不存在");
+        Assert.notNull(nodeProjectInfoModel, I18nMessageUtil.get("i18n.project_id_does_not_exist.6b9b"));
         JSONObject jsonObject = new JSONObject();
         try {
             CommandUtil.openCache();
@@ -65,7 +66,7 @@ public class ProjectStatusController extends BaseAgentController {
                 jsonObject.put("pIds", status.getPids());
                 jsonObject.put("statusMsg", status.getStatusMsg());
             } catch (Exception e) {
-                log.error("获取项目pid 失败", e);
+                log.error(I18nMessageUtil.get("i18n.get_project_pid_failure.17b0"), e);
             }
         } finally {
             CommandUtil.closeCache();
@@ -81,7 +82,7 @@ public class ProjectStatusController extends BaseAgentController {
      */
     @RequestMapping(value = "getProjectPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<JSONObject> getProjectPort(String ids) {
-        Assert.hasText(ids, "没有要获取的信息");
+        Assert.hasText(ids, I18nMessageUtil.get("i18n.info_to_retrieve_not_found.96d7"));
         JSONArray jsonArray = JSONArray.parseArray(ids);
         JSONObject jsonObject = new JSONObject();
         try {
@@ -105,7 +106,7 @@ public class ProjectStatusController extends BaseAgentController {
                         itemObj.put("port", port);
                     }
                 } catch (Exception e) {
-                    log.error("获取端口错误", e);
+                    log.error(I18nMessageUtil.get("i18n.get_port_error.0698"), e);
                     itemObj.put("error", e.getMessage());
                 }
                 jsonObject.put(item, itemObj);
@@ -118,14 +119,16 @@ public class ProjectStatusController extends BaseAgentController {
 
 
     @RequestMapping(value = "operate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<CommandOpResult> operate(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "项目id 不正确") String id,
+    public IJsonMessage<CommandOpResult> operate(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.incorrect_project_id.5f70") String id,
                                                  @ValidatorItem String opt) throws Exception {
         NodeProjectInfoModel item = projectInfoService.getItem(id);
-        Assert.notNull(item, "没有找到对应的项目");
+        Assert.notNull(item, I18nMessageUtil.get("i18n.no_project_found.ef5e"));
         ConsoleCommandOp consoleCommandOp = EnumUtil.fromStringQuietly(ConsoleCommandOp.class, opt);
-        Assert.notNull(consoleCommandOp, "请选择操作类型");
-        Assert.state(consoleCommandOp.isCanOpt(), "不支持当前操作：" + opt);
+        Assert.notNull(consoleCommandOp, I18nMessageUtil.get("i18n.select_operation_type.63c6"));
+        Assert.state(consoleCommandOp.isCanOpt(), I18nMessageUtil.get("i18n.current_operation_not_supported.3aec") + opt);
         CommandOpResult result = projectCommander.execCommand(consoleCommandOp, item);
-        return new JsonMessage<>(result.isSuccess() ? 200 : 201, result.isSuccess() ? "操作成功" : "操作失败:" + result.msgStr(), result);
+        String success = I18nMessageUtil.get("i18n.operation_succeeded.3313");
+        String errorMsg = I18nMessageUtil.get("i18n.operation_failed_with_details.7280") + result.msgStr();
+        return new JsonMessage<>(result.isSuccess() ? 200 : 201, result.isSuccess() ? success : errorMsg, result);
     }
 }

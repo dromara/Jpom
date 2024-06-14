@@ -26,9 +26,21 @@
               margin: '0'
             }"
           >
-            <a-tab-pane v-if="tabs.includes('project')" key="project" :tab="$tl('p.projectManagement')"></a-tab-pane>
-            <a-tab-pane v-if="tabs.includes('scripct')" key="scripct" :tab="$tl('p.scriptManagement')"></a-tab-pane>
-            <a-tab-pane v-if="tabs.includes('scripct-log')" key="scripct-log" :tab="$tl('p.scriptLog')"></a-tab-pane>
+            <a-tab-pane
+              v-if="tabs.includes('project')"
+              key="project"
+              :tab="$t('pages.node.node-func.37f14108')"
+            ></a-tab-pane>
+            <a-tab-pane
+              v-if="tabs.includes('scripct')"
+              key="scripct"
+              :tab="$t('pages.node.node-func.2b56402a')"
+            ></a-tab-pane>
+            <a-tab-pane
+              v-if="tabs.includes('scripct-log')"
+              key="scripct-log"
+              :tab="$t('pages.node.node-func.52cb3797')"
+            ></a-tab-pane>
           </a-tabs>
         </div>
       </a-space>
@@ -40,7 +52,6 @@
     </div>
   </a-drawer>
 </template>
-
 <script>
 import { mapState } from 'pinia'
 import ScriptList from '@/pages/node/script-list'
@@ -81,11 +92,7 @@ export default {
     //
     this.current = this.tabs[0]
   },
-  methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.nodeFunc.${key}`, ...args)
-    }
-  }
+  methods: {}
 }
 </script>
 <style scoped>

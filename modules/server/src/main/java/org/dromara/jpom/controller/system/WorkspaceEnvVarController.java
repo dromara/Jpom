@@ -25,6 +25,7 @@ import org.dromara.jpom.common.ServerOpenApi;
 import org.dromara.jpom.common.UrlRedirectUtil;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.PageResultDto;
@@ -120,7 +121,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
                                      String privacy,
                                      String nodeIds) {
         if (!getUser().isSystemUser()) {
-            Assert.state(!StrUtil.equals(workspaceId, ServerConst.WORKSPACE_GLOBAL), "全局工作空间变量请到系统管理修改");
+            Assert.state(!StrUtil.equals(workspaceId, ServerConst.WORKSPACE_GLOBAL), I18nMessageUtil.get("i18n.global_workspace_variable_edit_in_system_management.58d2"));
         }
 
         workspaceEnvVarService.checkUserWorkspace(workspaceId);
@@ -135,11 +136,11 @@ public class WorkspaceEnvVarController extends BaseServerController {
                 workspaceModel.setValue(value);
             } else {
                 // 隐私字段 创建必填
-                Assert.state(StrUtil.isNotEmpty(id), "请填写参数值");
+                Assert.state(StrUtil.isNotEmpty(id), I18nMessageUtil.get("i18n.parameter_value_required.3a29"));
             }
         } else {
             // 非隐私必填
-            Assert.hasText(value, "请填写参数值");
+            Assert.hasText(value, I18nMessageUtil.get("i18n.parameter_value_required.3a29"));
             workspaceModel.setValue(value);
         }
         workspaceModel.setWorkspaceId(workspaceId);
@@ -153,8 +154,8 @@ public class WorkspaceEnvVarController extends BaseServerController {
             workspaceEnvVarService.insert(workspaceModel);
         } else {
             WorkspaceEnvVarModel byKey = workspaceEnvVarService.getByKey(id);
-            Assert.notNull(byKey, "没有对应的数据");
-            Assert.state(StrUtil.equals(workspaceId, byKey.getWorkspaceId()), "工作空间错误,或者没有权限编辑此数据");
+            Assert.notNull(byKey, I18nMessageUtil.get("i18n.no_corresponding_data.4703"));
+            Assert.state(StrUtil.equals(workspaceId, byKey.getWorkspaceId()), I18nMessageUtil.get("i18n.workspace_error_or_no_permission.7c8b"));
             oldNodeIds = byKey.getNodeIds();
             workspaceModel.setId(id);
             // 不能修改
@@ -162,17 +163,17 @@ public class WorkspaceEnvVarController extends BaseServerController {
             workspaceEnvVarService.updateById(workspaceModel);
         }
         this.syncNodeEnvVar(workspaceModel, oldNodeIds);
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
     private void syncDelNodeEnvVar(String name, Collection<String> delNode, String workspaceId) {
         for (String s : delNode) {
             NodeModel byKey = nodeService.getByKey(s);
-            Assert.state(StrUtil.equals(workspaceId, byKey.getWorkspaceId()), "选择节点错误");
+            Assert.state(StrUtil.equals(workspaceId, byKey.getWorkspaceId()), I18nMessageUtil.get("i18n.select_node_error.dc0f"));
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("name", name);
             JsonMessage<String> jsonMessage = NodeForward.request(byKey, NodeUrl.Workspace_EnvVar_Delete, jsonObject);
-            Assert.state(jsonMessage.success(), "处理 " + byKey.getName() + " 节点删除脚本失败" + jsonMessage.getMsg());
+            Assert.state(jsonMessage.success(), StrUtil.format(I18nMessageUtil.get("i18n.handle_node_deletion_script_failure.071b"), byKey.getName(), jsonMessage.getMsg()));
         }
     }
 
@@ -186,7 +187,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
         // 更新
         for (String newNodeId : newNodeIds) {
             NodeModel byKey = nodeService.getByKey(newNodeId);
-            Assert.state(StrUtil.equals(workspaceId, byKey.getWorkspaceId()), "选择节点错误");
+            Assert.state(StrUtil.equals(workspaceId, byKey.getWorkspaceId()), I18nMessageUtil.get("i18n.select_node_error.dc0f"));
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("description", workspaceEnvVarModel.getDescription());
             jsonObject.put("name", workspaceEnvVarModel.getName());
@@ -199,12 +200,12 @@ public class WorkspaceEnvVarController extends BaseServerController {
                 jsonObject.put("value", byKeyExits.getValue());
             }
             JsonMessage<String> jsonMessage = NodeForward.request(byKey, NodeUrl.Workspace_EnvVar_Update, jsonObject);
-            Assert.state(jsonMessage.getCode() == 200, "处理 " + byKey.getName() + " 节点同步脚本失败" + jsonMessage.getMsg());
+            Assert.state(jsonMessage.getCode() == 200, StrUtil.format(I18nMessageUtil.get("i18n.handle_node_sync_script_failure.e99f"), byKey.getName(), jsonMessage.getMsg()));
         }
     }
 
     private void checkInfo(String id, String name, String workspaceId) {
-        Validator.validateGeneral(name, 1, 50, "变量名称 1-50 英文字母 、数字和下划线");
+        Validator.validateGeneral(name, 1, 50, I18nMessageUtil.get("i18n.variable_name_rules.480a"));
         //
         Entity entity = Entity.create();
         entity.set("name", name);
@@ -215,7 +216,7 @@ public class WorkspaceEnvVarController extends BaseServerController {
             entity.set("id", StrUtil.format(" <> {}", id));
         }
         boolean exists = workspaceEnvVarService.exists(entity);
-        Assert.state(!exists, "对应的变量名称已经存在啦");
+        Assert.state(!exists, I18nMessageUtil.get("i18n.variable_name_already_exists.70f2"));
     }
 
 
@@ -227,21 +228,21 @@ public class WorkspaceEnvVarController extends BaseServerController {
      */
     @GetMapping(value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public IJsonMessage<Object> delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id,
+    public IJsonMessage<Object> delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.data_id_cannot_be_empty.403b") String id,
                                        @ValidatorItem String workspaceId) {
         if (!getUser().isSystemUser()) {
-            Assert.state(!StrUtil.equals(workspaceId, ServerConst.WORKSPACE_GLOBAL), "全局工作空间变量请到系统管理修改");
+            Assert.state(!StrUtil.equals(workspaceId, ServerConst.WORKSPACE_GLOBAL), I18nMessageUtil.get("i18n.global_workspace_variable_edit_in_system_management.58d2"));
         }
         workspaceEnvVarService.checkUserWorkspace(workspaceId);
         WorkspaceEnvVarModel byKey = workspaceEnvVarService.getByKey(id);
-        Assert.notNull(byKey, "没有对应的数据");
-        Assert.state(StrUtil.equals(workspaceId, byKey.getWorkspaceId()), "选择工作空间错误");
+        Assert.notNull(byKey, I18nMessageUtil.get("i18n.no_corresponding_data.4703"));
+        Assert.state(StrUtil.equals(workspaceId, byKey.getWorkspaceId()), I18nMessageUtil.get("i18n.select_workspace_error.426e"));
         String oldNodeIds = byKey.getNodeIds();
         List<String> delNode = StrUtil.splitTrim(oldNodeIds, StrUtil.COMMA);
         this.syncDelNodeEnvVar(byKey.getName(), delNode, workspaceId);
         // 删除信息
         workspaceEnvVarService.delByKey(id);
-        return JsonMessage.success("删除成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 
     /**
@@ -255,10 +256,10 @@ public class WorkspaceEnvVarController extends BaseServerController {
     public IJsonMessage<Map<String, String>> getTriggerUrl(@ValidatorItem String id, @ValidatorItem String workspaceId, String rest, HttpServletRequest request) {
         workspaceEnvVarService.checkUserWorkspace(workspaceId);
         WorkspaceEnvVarModel item = workspaceEnvVarService.getByKey(id);
-        Assert.notNull(item, "没有对应的环境变量");
-        Assert.state(StrUtil.equals(workspaceId, item.getWorkspaceId()), "选择工作空间错误");
+        Assert.notNull(item, I18nMessageUtil.get("i18n.no_environment_variable.c79f"));
+        Assert.state(StrUtil.equals(workspaceId, item.getWorkspaceId()), I18nMessageUtil.get("i18n.select_workspace_error.426e"));
         //
-        Assert.state(ObjectUtil.defaultIfNull(item.getPrivacy(), -1) == 0, "隐私变量不能生成触发器");
+        Assert.state(ObjectUtil.defaultIfNull(item.getPrivacy(), -1) == 0, I18nMessageUtil.get("i18n.privacy_variable_cannot_trigger.dbc9"));
         UserModel user = getUser();
         WorkspaceEnvVarModel updateInfo;
         if (StrUtil.isEmpty(item.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {
@@ -271,7 +272,8 @@ public class WorkspaceEnvVarController extends BaseServerController {
             updateInfo = item;
         }
         Map<String, String> map = this.getBuildToken(updateInfo, request);
-        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
+        String string = I18nMessageUtil.get("i18n.reset_success.faa3");
+        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : string, map);
     }
 
     private Map<String, String> getBuildToken(WorkspaceEnvVarModel item, HttpServletRequest request) {

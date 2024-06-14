@@ -13,9 +13,11 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.BaseEnum;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.data.BuildInfoModel;
@@ -71,7 +73,7 @@ public class BuildExecuteService {
      */
     public String checkStatus(BuildInfoModel buildInfoModel) {
         if (buildInfoModel == null) {
-            return "不存在对应的构建信息";
+            return I18nMessageUtil.get("i18n.build_info_not_exist.4470");
         }
         Integer status = buildInfoModel.getStatus();
         if (status == null) {
@@ -80,7 +82,7 @@ public class BuildExecuteService {
         BuildStatus nowStatus = BaseEnum.getEnum(BuildStatus.class, status);
         Objects.requireNonNull(nowStatus);
         if (nowStatus.isProgress()) {
-            return buildInfoModel.getName() + " 当前还在：" + nowStatus.getDesc();
+            return buildInfoModel.getName() + I18nMessageUtil.get("i18n.current_status.81c0") + nowStatus.getDesc();
         }
         return null;
     }
@@ -121,13 +123,13 @@ public class BuildExecuteService {
             Assert.isNull(e, () -> e);
             //
             boolean containsKey = BuildExecuteManage.BUILD_MANAGE_MAP.containsKey(buildInfoModel.getId());
-            Assert.state(!containsKey, "当前构建还在进行中");
+            Assert.state(!containsKey, I18nMessageUtil.get("i18n.build_in_progress.4d33"));
             //
             BuildExtraModule buildExtraModule = buildInfoModel.extraData();
-            Assert.notNull(buildExtraModule, "构建信息缺失");
+            Assert.notNull(buildExtraModule, I18nMessageUtil.get("i18n.build_info_missing.0ab0"));
             // load repository
             RepositoryModel repositoryModel = repositoryService.getByKey(buildInfoModel.getRepositoryId(), false);
-            Assert.notNull(repositoryModel, "仓库信息不存在");
+            Assert.notNull(repositoryModel, I18nMessageUtil.get("i18n.repository_info_does_not_exist.4142"));
             EnvironmentMapBuilder environmentMapBuilder = workspaceEnvVarService.getEnv(buildInfoModel.getWorkspaceId());
             // 解析外部变量
             environmentMapBuilder.putObjectArray(parametersEnv).putStr(StringUtil.parseEnvStr(buildInfoModel.getBuildEnvParameter()));
@@ -145,7 +147,9 @@ public class BuildExecuteService {
             //
             Opt.ofBlankAble(checkRepositoryDiff).map(Convert::toBool).ifPresent(taskBuilder::checkRepositoryDiff);
             this.runTask(taskBuilder.build(), buildExtraModule);
-            String msg = (delay == null || delay <= 0) ? "开始构建中" : "延迟" + delay + "秒后开始构建";
+            String startMsg = I18nMessageUtil.get("i18n.start_building.1039");
+            String delayMsg = StrUtil.format(I18nMessageUtil.get("i18n.delay_build.7d62"), delay);
+            String msg = (delay == null || delay <= 0) ? startMsg : delayMsg;
             return JsonMessage.success(msg, buildInfoModel.getBuildId());
         }
     }
@@ -181,7 +185,7 @@ public class BuildExecuteService {
             buildHistoryLog.setEndTime(null);
             dbBuildHistoryLogService.insert(buildHistoryLog);
             //
-            buildService.updateStatus(buildHistoryLog.getBuildDataId(), pubIng, "开始回滚执行");
+            buildService.updateStatus(buildHistoryLog.getBuildDataId(), pubIng, I18nMessageUtil.get("i18n.start_rolling_back_execution.a019"));
 
             BuildExtraModule buildExtraModule = BuildExtraModule.build(buildHistoryLog);
             //
@@ -199,7 +203,7 @@ public class BuildExecuteService {
                 .buildEnv(environmentMapBuilder)
                 .build();
             //
-            logRecorder.system("开始准备回滚：{} -> {}", fromBuildNumberId, buildId);
+            logRecorder.system(I18nMessageUtil.get("i18n.prepare_rollback.dba6"), fromBuildNumberId, buildId);
             //
             buildExecutorPoolService.execute(() -> manage.rollback(item));
             return buildId;
@@ -259,7 +263,7 @@ public class BuildExecuteService {
         buildHistoryLog.setExtraData(buildExtraModule.toJson().toString());
         dbBuildHistoryLogService.insert(buildHistoryLog);
         //
-        buildService.updateStatus(buildHistoryLog.getBuildDataId(), waitExec, "开始排队等待执行");
+        buildService.updateStatus(buildHistoryLog.getBuildDataId(), waitExec, I18nMessageUtil.get("i18n.start_queuing_for_execution.7417"));
         return buildHistoryLog.getId();
     }
 

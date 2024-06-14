@@ -16,6 +16,7 @@ import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.NodeModel;
@@ -82,8 +83,8 @@ public class NodeScriptLogController extends BaseServerController {
     public IJsonMessage<Object> del(@ValidatorItem String id, String executeId, HttpServletRequest request) {
         NodeModel node = getNode();
         NodeScriptExecuteLogCacheModel executeLogModel = nodeScriptExecuteLogServer.getByKey(executeId, request);
-        Assert.notNull(executeLogModel, "没有对应的执行日志");
-        Assert.state(StrUtil.equals(id, executeLogModel.getScriptId()), "数据关联的id 不一致");
+        Assert.notNull(executeLogModel, I18nMessageUtil.get("i18n.no_corresponding_execution_log.9545"));
+        Assert.state(StrUtil.equals(id, executeLogModel.getScriptId()), I18nMessageUtil.get("i18n.data_associated_id_inconsistent.59f7"));
 //        NodeScriptExecuteLogCacheModel nodeScriptExecuteLogCacheModel = new NodeScriptExecuteLogCacheModel();
 //        nodeScriptExecuteLogCacheModel.setId(executeId);
 //        nodeScriptExecuteLogCacheModel.setScriptId(id);

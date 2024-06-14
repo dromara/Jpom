@@ -15,6 +15,7 @@ import cn.hutool.extra.compress.extractor.Extractor;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.compressors.CompressorInputStream;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -68,7 +69,7 @@ public class CompressionFileUtil {
             try (Extractor extractor = CompressUtil.createExtractor(charset, compressFile)) {
                 extractor.extract(destDir, stripComponents);
             } catch (Exception e) {
-                log.warn("{} 解压异常 {} {}", compressFile.getName(), charset, e.getMessage());
+                log.warn(I18nMessageUtil.get("i18n.unzip_exception.453e"), compressFile.getName(), charset, e.getMessage());
                 if (i == CHARSETS.length - 1) {
                     // 最后一个
                     throw Lombok.sneakyThrow(e);
@@ -86,7 +87,7 @@ public class CompressionFileUtil {
                     extractor.extract(destDir, stripComponents);
                 }
             } catch (Exception e) {
-                log.warn("解压异常 {} by InputStream {}", charset, e.getMessage());
+                log.warn(I18nMessageUtil.get("i18n.unzip_exception.92cc"), charset, e.getMessage());
                 if (i == CHARSETS.length - 1) {
                     // 最后一个
                     throw Lombok.sneakyThrow(e);

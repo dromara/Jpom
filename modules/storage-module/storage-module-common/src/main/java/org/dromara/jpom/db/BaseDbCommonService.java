@@ -24,6 +24,7 @@ import cn.hutool.db.sql.Condition;
 import cn.hutool.extra.spring.SpringUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.system.JpomRuntimeException;
@@ -68,15 +69,15 @@ public abstract class BaseDbCommonService<T> {
     public BaseDbCommonService() {
         this.tClass = (Class<T>) TypeUtil.getTypeArgument(this.getClass());
         TableName annotation = tClass.getAnnotation(TableName.class);
-        Assert.notNull(annotation, "请配置 table Name");
+        Assert.notNull(annotation, I18nMessageUtil.get("i18n.configure_table_name.f6fd"));
         this.tableName = annotation.value();
         this.dbMode = SpringUtil.getBean(DbExtConfig.class).getMode();
     }
 
     public String getDataDesc() {
         TableName annotation = tClass.getAnnotation(TableName.class);
-        Assert.notNull(annotation, "请配置 table Name");
-        return annotation.name();
+        Assert.notNull(annotation, I18nMessageUtil.get("i18n.configure_table_name.f6fd"));
+        return I18nMessageUtil.get(annotation.nameKey());
     }
 
     protected DataSource getDataSource() {
@@ -142,7 +143,7 @@ public abstract class BaseDbCommonService<T> {
     protected final int updateDb(Entity entity, Entity where) {
         Db db = Db.use(this.getDataSource(), DialectUtil.getDialectByMode(dbMode));
         if (where.isEmpty()) {
-            throw new JpomRuntimeException("没有更新条件");
+            throw new JpomRuntimeException(I18nMessageUtil.get("i18n.update_condition_not_found.0870"));
         }
         entity.setTableName(tableName);
         where.setTableName(tableName);
@@ -216,7 +217,7 @@ public abstract class BaseDbCommonService<T> {
     public final int del(Entity where) {
         where.setTableName(tableName);
         if (where.isEmpty()) {
-            throw new JpomRuntimeException("没有删除条件");
+            throw new JpomRuntimeException(I18nMessageUtil.get("i18n.no_deletion_condition.19d0"));
         }
         try {
             Db db = Db.use(this.getDataSource(), DialectUtil.getDialectByMode(dbMode));
@@ -346,7 +347,7 @@ public abstract class BaseDbCommonService<T> {
         PageResultDto<T> pageResultDto = new PageResultDto(pageResult);
         pageResultDto.setResult(list);
         if (pageResultDto.isEmpty() && pageResultDto.getPage() > 1) {
-            Assert.state(pageResultDto.getTotal() <= 0, "筛选的分页有问题,当前页码查询不到任何数据");
+            Assert.state(pageResultDto.getTotal() <= 0, I18nMessageUtil.get("i18n.pagination_error.6759"));
         }
         return pageResultDto;
     }

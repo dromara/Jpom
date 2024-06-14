@@ -34,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.build.BuildUtil;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.controller.build.repository.ImportRepoUtil;
 import org.dromara.jpom.model.PageResultDto;
@@ -91,7 +92,7 @@ public class RepositoryController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public Object loadRepositoryList(HttpServletRequest request) {
         PageResultDto<RepositoryModel> pageResult = repositoryService.listPage(request);
-        return JsonMessage.success("获取成功", pageResult);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.get_success.fb55"), pageResult);
     }
 
     /**
@@ -113,7 +114,7 @@ public class RepositoryController extends BaseServerController {
     @GetMapping(value = "/build/repository/import-template", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public void importTemplate(HttpServletResponse response) throws IOException {
-        String fileName = "仓库信息导入模板.csv";
+        String fileName = I18nMessageUtil.get("i18n.repository_import_template.5e2d");
         this.setApplicationHeader(response, fileName);
         //
         CsvWriter writer = CsvUtil.getWriter(response.getWriter());
@@ -128,7 +129,8 @@ public class RepositoryController extends BaseServerController {
     @Feature(method = MethodFeature.DOWNLOAD)
     @SystemPermission
     public void exportRepositoryList(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String fileName = "导出的 仓库信息 数据 " + DateTime.now().toString(DatePattern.NORM_DATE_FORMAT) + ".csv";
+        String prex  = I18nMessageUtil.get("i18n.exported_repo_data.bac5");
+        String fileName = prex + DateTime.now().toString(DatePattern.NORM_DATE_FORMAT) + ".csv";
         this.setApplicationHeader(response, fileName);
         CsvWriter writer = CsvUtil.getWriter(response.getWriter());
         int pageInt = 0;
@@ -173,10 +175,11 @@ public class RepositoryController extends BaseServerController {
     @Feature(method = MethodFeature.UPLOAD)
     @SystemPermission
     public IJsonMessage<String> importData(MultipartFile file, HttpServletRequest request) throws IOException {
-        Assert.notNull(file, "没有上传文件");
+        Assert.notNull(file, I18nMessageUtil.get("i18n.no_uploaded_file.07ef"));
         String originalFilename = file.getOriginalFilename();
         String extName = FileUtil.extName(originalFilename);
-        Assert.state(StrUtil.endWithIgnoreCase(extName, "csv"), "不允许的文件格式");
+        boolean csv = StrUtil.endWithIgnoreCase(extName, "csv");
+        Assert.state(csv, I18nMessageUtil.get("i18n.disallowed_file_format.d6e4"));
         BomReader bomReader = IoUtil.getBomReader(file.getInputStream());
         CsvReadConfig csvReadConfig = CsvReadConfig.defaultConfig();
         csvReadConfig.setHeaderLineNo(0);
@@ -185,38 +188,38 @@ public class RepositoryController extends BaseServerController {
         try {
             csvData = reader.read();
         } catch (Exception e) {
-            log.error("解析 csv 异常", e);
-            return new JsonMessage<>(405, "解析文件异常," + e.getMessage());
+            log.error(I18nMessageUtil.get("i18n.parse_csv_exception.885e"), e);
+            return new JsonMessage<>(405, I18nMessageUtil.get("i18n.parse_file_exception.374d") + e.getMessage());
         }
         List<CsvRow> rows = csvData.getRows();
-        Assert.notEmpty(rows, "没有任何数据");
+        Assert.notEmpty(rows, I18nMessageUtil.get("i18n.no_data.55a2"));
         int addCount = 0, updateCount = 0;
         for (int i = 0; i < rows.size(); i++) {
             int finalI = i;
             CsvRow csvRow = rows.get(i);
             String name = csvRow.getByName("name");
-            Assert.hasText(name, () -> StrUtil.format("第 {} 行 name 字段不能位空", finalI + 1));
+            Assert.hasText(name, () -> StrUtil.format(I18nMessageUtil.get("i18n.name_field_required.e0c5"), finalI + 1));
             String group = csvRow.getByName("group");
             String address = csvRow.getByName("address");
-            Assert.hasText(address, () -> StrUtil.format("第 {} 行 address 字段不能位空", finalI + 1));
+            Assert.hasText(address, () -> StrUtil.format(I18nMessageUtil.get("i18n.address_field_required.3bc8"), finalI + 1));
             String type = csvRow.getByName("type");
-            Assert.hasText(type, () -> StrUtil.format("第 {} 行 type 字段不能位空", finalI + 1));
+            Assert.hasText(type, () -> StrUtil.format(I18nMessageUtil.get("i18n.type_field_required.7637"), finalI + 1));
             RepositoryModel.RepoType repoType = null;
             if ("Git".equalsIgnoreCase(type)) {
                 repoType = RepositoryModel.RepoType.Git;
             } else if ("Svn".equalsIgnoreCase(type)) {
                 repoType = RepositoryModel.RepoType.Svn;
             }
-            Assert.notNull(repoType, () -> StrUtil.format("第 {} 行 type 字段值错误（Git/Svn）", finalI + 1));
+            Assert.notNull(repoType, () -> StrUtil.format(I18nMessageUtil.get("i18n.type_field_value_error.14cf"), finalI + 1));
             String protocol = csvRow.getByName("protocol");
-            Assert.hasText(protocol, () -> StrUtil.format("第 {} 行 protocol 字段不能位空", finalI + 1));
+            Assert.hasText(protocol, () -> StrUtil.format(I18nMessageUtil.get("i18n.protocol_field_required.7cc2"), finalI + 1));
             GitProtocolEnum gitProtocolEnum = null;
             if ("http".equalsIgnoreCase(protocol) || "https".equalsIgnoreCase(protocol)) {
                 gitProtocolEnum = GitProtocolEnum.HTTP;
             } else if ("ssh".equalsIgnoreCase(protocol)) {
                 gitProtocolEnum = GitProtocolEnum.SSH;
             }
-            Assert.notNull(gitProtocolEnum, () -> StrUtil.format("第 {} 行 protocol 字段值错误（http/http/ssh）", finalI + 1));
+            Assert.notNull(gitProtocolEnum, () -> StrUtil.format(I18nMessageUtil.get("i18n.protocol_field_value_error.2b41"), finalI + 1));
             String privateRsa = csvRow.getByName("private rsa");
             String username = csvRow.getByName("username");
             String password = csvRow.getByName("password");
@@ -240,7 +243,7 @@ public class RepositoryController extends BaseServerController {
             where.setUserName(username);
             // 检查 rsa 私钥
             boolean andUpdateSshKey = this.checkAndUpdateSshKey(where);
-            Assert.state(andUpdateSshKey, StrUtil.format("第 {} 行 rsa 私钥文件不存在或者有误", finalI + 1));
+            Assert.state(andUpdateSshKey, StrUtil.format(I18nMessageUtil.get("i18n.rsa_private_key_file_error.b687"), finalI + 1));
             if (where.getRepoType() == RepositoryModel.RepoType.Git.getCode()) {
                 // 验证 git 仓库信息
                 try {
@@ -249,8 +252,8 @@ public class RepositoryController extends BaseServerController {
                     Tuple branchAndTagList = (Tuple) plugin.execute("branchAndTagList", map);
                     //Tuple tuple = GitUtil.getBranchAndTagList(repositoryModelReq);
                 } catch (Exception e) {
-                    log.warn("获取仓库分支失败", e);
-                    throw new IllegalStateException(StrUtil.format("第 {} 行 仓库信息有误", finalI + 1));
+                    log.warn(I18nMessageUtil.get("i18n.get_repository_branch_failure.37cc"), e);
+                    throw new IllegalStateException(StrUtil.format(I18nMessageUtil.get("i18n.repository_info_error.5b0a"), finalI + 1));
                 }
             }
             if (repositoryModel == null) {
@@ -263,7 +266,7 @@ public class RepositoryController extends BaseServerController {
                 updateCount++;
             }
         }
-        return JsonMessage.success("导入成功,添加 {} 条数据,修改 {} 条数据", addCount, updateCount);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.import_success_with_count.22b9"), addCount, updateCount);
     }
 
     /**
@@ -275,7 +278,7 @@ public class RepositoryController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<RepositoryModel> loadRepositoryGet(String id, HttpServletRequest request) {
         RepositoryModel repositoryModel = repositoryService.getByKey(id, request);
-        Assert.notNull(repositoryModel, "没有对应的仓库");
+        Assert.notNull(repositoryModel, I18nMessageUtil.get("i18n.no_corresponding_repository.dde9"));
         return JsonMessage.success("", repositoryModel);
     }
 
@@ -315,7 +318,7 @@ public class RepositoryController extends BaseServerController {
         this.checkInfo(repositoryModelReq, request);
         // 检查 rsa 私钥
         boolean andUpdateSshKey = this.checkAndUpdateSshKey(repositoryModelReq);
-        Assert.state(andUpdateSshKey, "rsa 私钥文件不存在或者有误");
+        Assert.state(andUpdateSshKey, I18nMessageUtil.get("i18n.rsa_private_key_file_invalid.5f12"));
 
         if (repositoryModelReq.getRepoType() == RepositoryModel.RepoType.Git.getCode()) {
             RepositoryModel repositoryModel = repositoryService.getByKey(repositoryModelReq.getId(), false);
@@ -330,8 +333,8 @@ public class RepositoryController extends BaseServerController {
                 Tuple branchAndTagList = (Tuple) plugin.execute("branchAndTagList", map);
                 //Tuple tuple = GitUtil.getBranchAndTagList(repositoryModelReq);
             } catch (Exception e) {
-                log.warn("获取仓库分支失败", e);
-                return new JsonMessage<>(500, "无法连接此仓库，" + e.getMessage());
+                log.warn(I18nMessageUtil.get("i18n.get_repository_branch_failure.37cc"), e);
+                return new JsonMessage<>(500, I18nMessageUtil.get("i18n.unable_to_connect_to_repository.52df") + e.getMessage());
             }
         }
         if (StrUtil.isEmpty(repositoryModelReq.getId())) {
@@ -344,7 +347,7 @@ public class RepositoryController extends BaseServerController {
             repositoryService.updateById(repositoryModelReq);
         }
 
-        return new JsonMessage<>(200, "操作成功");
+        return new JsonMessage<>(200, I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
     /**
@@ -363,7 +366,7 @@ public class RepositoryController extends BaseServerController {
         repositoryModel.setRsaPrv(StrUtil.EMPTY);
         repositoryModel.setRsaPub(StrUtil.EMPTY);
         repositoryService.updateById(repositoryModel, request);
-        return new JsonMessage<>(200, "操作成功");
+        return new JsonMessage<>(200, I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
     @GetMapping(value = "/build/repository/provider_info")
@@ -376,29 +379,31 @@ public class RepositoryController extends BaseServerController {
     @GetMapping(value = "/build/repository/authorize_repos")
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<PageResultDto<JSONObject>> authorizeRepos(HttpServletRequest request,
-                                                                 @ValidatorItem String token,
-                                                                 String address,
-                                                                 @ValidatorItem String type,
-                                                                 String condition) {
+                                                                  @ValidatorItem String token,
+                                                                  String address,
+                                                                  @ValidatorItem String type,
+                                                                  String condition) {
         // 获取分页信息
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
         Page page = repositoryService.parsePage(paramMap);
-        Assert.hasText(token, "请填写个人令牌");
+        Assert.hasText(token, I18nMessageUtil.get("i18n.please_fill_in_personal_token.970a"));
         // 搜索条件
         // 远程仓库
-        PageResultDto<JSONObject> pageResultDto;
-        ImportRepoUtil.getProviderConfig(type);
+        //ImportRepoUtil.getProviderConfig(type);
 
         String userName = ImportRepoUtil.getCurrentUserName(type, token, address);
         cn.hutool.json.JSONObject repoList = ImportRepoUtil.getRepoList(type, condition, page, token, userName, address);
-        pageResultDto = new PageResultDto<>(page.getPageNumber(), page.getPageSize(), repoList.getLong("total").intValue());
-        List<JSONObject> objects = repoList.getJSONArray("data").stream().map(o -> {
-            cn.hutool.json.JSONObject obj = (cn.hutool.json.JSONObject) o;
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.putAll(obj);
-            jsonObject.put("exists", RepositoryController.this.checkRepositoryUrl(obj.getStr("url"), request));
-            return jsonObject;
-        }).collect(Collectors.toList());
+        PageResultDto<JSONObject> pageResultDto = new PageResultDto<>(page.getPageNumber(), page.getPageSize(), repoList.getLong("total").intValue());
+        List<JSONObject> objects = repoList.getJSONArray("data")
+            .stream()
+            .map(o -> {
+                cn.hutool.json.JSONObject obj = (cn.hutool.json.JSONObject) o;
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.putAll(obj);
+                jsonObject.put("exists", RepositoryController.this.checkRepositoryUrl(obj.getStr("url"), request));
+                return jsonObject;
+            })
+            .collect(Collectors.toList());
         pageResultDto.setResult(objects);
         return JsonMessage.success(HttpStatus.OK.name(), pageResultDto);
     }
@@ -410,14 +415,14 @@ public class RepositoryController extends BaseServerController {
      * @param repositoryModelReq 仓库信息
      */
     private void checkInfo(RepositoryModel repositoryModelReq, HttpServletRequest request) {
-        Assert.notNull(repositoryModelReq, "请输入正确的信息");
-        Assert.hasText(repositoryModelReq.getName(), "请填写仓库名称");
+        Assert.notNull(repositoryModelReq, I18nMessageUtil.get("i18n.correct_information_required.5e12"));
+        Assert.hasText(repositoryModelReq.getName(), I18nMessageUtil.get("i18n.please_fill_in_repository_name.9f0d"));
         Integer repoType = repositoryModelReq.getRepoType();
-        Assert.state(repoType != null && (repoType == RepositoryModel.RepoType.Git.getCode() || repoType == RepositoryModel.RepoType.Svn.getCode()), "请选择仓库类型");
-        Assert.hasText(repositoryModelReq.getGitUrl(), "请填写仓库地址");
+        Assert.state(repoType != null && (repoType == RepositoryModel.RepoType.Git.getCode() || repoType == RepositoryModel.RepoType.Svn.getCode()), I18nMessageUtil.get("i18n.repository_type_required.9414"));
+        Assert.hasText(repositoryModelReq.getGitUrl(), I18nMessageUtil.get("i18n.please_fill_in_repository_address.0cf8"));
         //
         Integer protocol = repositoryModelReq.getProtocol();
-        Assert.state(protocol != null && (protocol == GitProtocolEnum.HTTP.getCode() || protocol == GitProtocolEnum.SSH.getCode()), "请选择拉取代码的协议");
+        Assert.state(protocol != null && (protocol == GitProtocolEnum.HTTP.getCode() || protocol == GitProtocolEnum.SSH.getCode()), I18nMessageUtil.get("i18n.select_pull_code_protocol.fc24"));
         // 修正字段
         if (protocol == GitProtocolEnum.HTTP.getCode()) {
             //  http
@@ -430,7 +435,7 @@ public class RepositoryController extends BaseServerController {
         String workspaceId = repositoryService.getCheckUserWorkspace(request);
         //
         boolean repositoryUrl = this.checkRepositoryUrl(workspaceId, repositoryModelReq.getId(), repositoryModelReq.getGitUrl());
-        Assert.state(!repositoryUrl, "已经存在对应的仓库信息啦");
+        Assert.state(!repositoryUrl, I18nMessageUtil.get("i18n.repo_already_exists.38a3"));
     }
 
     /**
@@ -445,7 +450,7 @@ public class RepositoryController extends BaseServerController {
         // 判断仓库是否重复
         Entity entity = Entity.create();
         if (StrUtil.isNotEmpty(id)) {
-            Validator.validateGeneral(id, "错误的ID");
+            Validator.validateGeneral(id, I18nMessageUtil.get("i18n.wrong_id.ab4d"));
             entity.set("id", "<> " + id);
         }
         entity.set("workspaceId", CollUtil.newArrayList(workspaceId, ServerConst.WORKSPACE_GLOBAL));
@@ -506,12 +511,12 @@ public class RepositoryController extends BaseServerController {
         Entity entity = Entity.create();
         entity.set("repositoryId", id);
         boolean exists = buildInfoService.exists(entity);
-        Assert.state(!exists, "当前仓库被构建关联，不能直接删除");
+        Assert.state(!exists, I18nMessageUtil.get("i18n.current_repository_associated_with_build.4b6e"));
         RepositoryModel keyAndGlobal = repositoryService.getByKeyAndGlobal(id, request);
         repositoryService.delByKey(keyAndGlobal.getId());
         File rsaFile = BuildUtil.getRepositoryRsaFile(id + ServerConst.ID_RSA);
         FileUtil.del(rsaFile);
-        return JsonMessage.success("删除成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 
     /**
@@ -525,8 +530,8 @@ public class RepositoryController extends BaseServerController {
     @GetMapping(value = "/build/repository/sort-item", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<String> sortItem(@ValidatorItem String id,
-                                        @ValidatorItem String method,
-                                        String compareId, HttpServletRequest request) {
+                                         @ValidatorItem String method,
+                                         String compareId, HttpServletRequest request) {
         if (StrUtil.equalsIgnoreCase(method, "top")) {
             repositoryService.sortToTop(id, request);
         } else if (StrUtil.equalsIgnoreCase(method, "up")) {
@@ -534,9 +539,9 @@ public class RepositoryController extends BaseServerController {
         } else if (StrUtil.equalsIgnoreCase(method, "down")) {
             repositoryService.sortMoveDown(id, compareId, request);
         } else {
-            return new JsonMessage<>(400, "不支持的方式" + method);
+            return new JsonMessage<>(400, I18nMessageUtil.get("i18n.unsupported_method.a1de") + method);
         }
-        return new JsonMessage<>(200, "操作成功");
+        return new JsonMessage<>(200, I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
 }

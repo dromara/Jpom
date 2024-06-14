@@ -22,6 +22,7 @@ import cn.hutool.extra.ssh.Sftp;
 import com.jcraft.jsch.*;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.util.StringUtil;
 
@@ -240,7 +241,7 @@ public class JschUtils {
                     // 删除 ssh 中临时文件
                     sftp.delFile(destFile);
                 } catch (Exception e) {
-                    log.warn("删除 ssh 临时文件失败", e);
+                    log.warn(I18nMessageUtil.get("i18n.delete_ssh_temp_file_failure.6e5f"), e);
                 }
                 // 删除临时文件
                 FileUtil.del(buildSsh);

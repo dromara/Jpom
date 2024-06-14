@@ -23,6 +23,7 @@ import cn.hutool.db.sql.Wrapper;
 import cn.hutool.setting.Setting;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.system.JpomRuntimeException;
@@ -70,18 +71,18 @@ public class StorageServiceFactory {
      * 将数据迁移到当前环境
      */
     public static void migrateH2ToNow(DbExtConfig dbExtConfig, String h2Url, String h2User, String h2Pass, DbExtConfig.Mode targetNode) {
-        log.info("开始迁移 h2 数据到 {}", dbExtConfig.getMode());
-        Assert.notNull(mode, "未指定目标数据库信息");
+        log.info(I18nMessageUtil.get("i18n.start_migrating_h2_data_to.f478"), dbExtConfig.getMode());
+        Assert.notNull(mode, I18nMessageUtil.get("i18n.target_database_info_not_specified.2ff6"));
         try {
             IStorageService h2StorageService = doCreateStorageService(DbExtConfig.Mode.H2);
             boolean hasDbData = h2StorageService.hasDbData();
             if (!hasDbData) {
-                throw new JpomRuntimeException("没有 h2 数据信息不用迁移");
+                throw new JpomRuntimeException(I18nMessageUtil.get("i18n.no_h2_data_info_for_migration.5799"));
             }
             long time = SystemClock.now();
             DSFactory h2DsFactory = h2StorageService.create(dbExtConfig, h2Url, h2User, h2Pass);
             h2DsFactory.getDataSource();
-            log.info("成功连接 H2 ,开始尝试自动备份");
+            log.info(I18nMessageUtil.get("i18n.h2_connection_successful.11f3"));
             // 设置默认备份 SQL 的文件地址
             String fileName = LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.PURE_DATETIME_PATTERN);
             File file = FileUtil.file(StorageServiceFactory.dbLocalPath(), DbExtConfig.BACKUP_DIRECTORY_NAME, fileName + DbExtConfig.SQL_FILE_SUFFIX);
@@ -92,12 +93,12 @@ public class StorageServiceFactory {
             String user = setting.get("user");
             String pass = setting.get("pass");
             h2StorageService.backupSql(url, user, pass, backupSqlPath, null);
-            log.info("H2 数据库备份成功：{}", backupSqlPath);
+            log.info(I18nMessageUtil.get("i18n.h2_database_backup_success.a099"), backupSqlPath);
             //
             IStorageService nowStorageService = doCreateStorageService(dbExtConfig.getMode());
             DSFactory nowDsFactory = nowStorageService.create(dbExtConfig, null, null, null);
             nowDsFactory.getDataSource();
-            log.info("成功连接 {} {}", dbExtConfig.getMode(), dbExtConfig.getUrl());
+            log.info(I18nMessageUtil.get("i18n.connection_successful.0515"), dbExtConfig.getMode(), dbExtConfig.getUrl());
             Set<Class<?>> classes = ClassUtil.scanPackageByAnnotation("org.dromara.jpom", TableName.class);
             classes = classes.stream()
                 .filter(aClass -> {
@@ -110,18 +111,18 @@ public class StorageServiceFactory {
                 })
                 .sorted((o1, o2) -> StrUtil.compare(o1.getSimpleName(), o2.getSimpleName(), false))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
-            log.info("准备迁移数据");
+            log.info(I18nMessageUtil.get("i18n.prepare_to_migrate_data.f251"));
             int total = 0;
             for (Class<?> aClass : classes) {
                 total += migrateH2ToNowItem(aClass, h2DsFactory, nowDsFactory, targetNode);
             }
             long endTime = SystemClock.now();
-            log.info("迁移完成,累计迁移 {} 条数据,耗时：{}", total, DateUtil.formatBetween(endTime - time));
+            log.info(I18nMessageUtil.get("i18n.migration_completed.7a30"), total, DateUtil.formatBetween(endTime - time));
             h2DsFactory.destroy();
             nowDsFactory.destroy();
-            log.info("准备删除当前数据库文件");
+            log.info(I18nMessageUtil.get("i18n.prepare_to_delete_current_database_file.1e6a"));
             String dbFiles = h2StorageService.deleteDbFiles();
-            log.info("自动备份 h2 数据库文件,备份文件位于：{}", dbFiles);
+            log.info(I18nMessageUtil.get("i18n.auto_backup_h2_database.2ed0"), dbFiles);
         } catch (Exception e) {
             throw Lombok.sneakyThrow(e);
         }
@@ -134,7 +135,8 @@ public class StorageServiceFactory {
             .map(Field::getName)
             .collect(Collectors.toSet());
 
-        log.info("开始迁移 {} {}", tableName.name(), tableName.value());
+        String tableDesc = I18nMessageUtil.get(tableName.nameKey());
+        log.info(I18nMessageUtil.get("i18n.start_migrating.20d6"), tableDesc, tableName.value());
         int total = 0;
         while (true) {
             Entity where = Entity.create(tableName.value());
@@ -193,7 +195,7 @@ public class StorageServiceFactory {
             deleteWhere.set("id", newResult.stream().map(entity -> entity.getStr("id")).collect(Collectors.toList()));
             db.del(deleteWhere);
         }
-        log.info("{} 迁移成功 {} 条数据", tableName.name(), total);
+        log.info(I18nMessageUtil.get("i18n.migration_success.b20d"), tableDesc, total);
         return total;
     }
 
@@ -251,7 +253,7 @@ public class StorageServiceFactory {
      * @return 单例的 IStorageService
      */
     public static IStorageService get() {
-        Assert.notNull(mode, "当前数据库模式未知");
+        Assert.notNull(mode, I18nMessageUtil.get("i18n.unknown_database_mode.f9e5"));
         return Singleton.get(IStorageService.class.getName(), (CheckedUtil.Func0Rt<IStorageService>) () -> doCreateStorageService(mode));
     }
 

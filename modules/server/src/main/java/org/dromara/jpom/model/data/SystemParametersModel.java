@@ -24,7 +24,8 @@ import java.util.List;
  * @since 2021/12/2
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "SYSTEM_PARAMETERS", name = "系统参数")
+@TableName(value = "SYSTEM_PARAMETERS",
+    nameKey = "i18n.system_parameters.c7b0")
 @Data
 public class SystemParametersModel extends BaseUserModifyDbModel {
 

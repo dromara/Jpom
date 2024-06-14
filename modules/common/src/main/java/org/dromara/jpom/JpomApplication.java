@@ -26,6 +26,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.JpomManifest;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.system.JpomRuntimeException;
 import org.dromara.jpom.util.CommandUtil;
@@ -175,7 +176,7 @@ public class JpomApplication implements DisposableBean, InitializingBean {
         Class<?> jpomAppClass = Optional.of(beansWithAnnotation)
             .map(map -> CollUtil.getFirst(map.values()))
             .map(Object::getClass)
-            .orElseThrow(() -> new RuntimeException("没有找到 Jpom 类型配置"));
+            .orElseThrow(() -> new RuntimeException(I18nMessageUtil.get("i18n.no_jpom_type_config_found.aa57")));
         JpomAppType jpomAppType = jpomAppClass.getAnnotation(JpomAppType.class);
         return jpomAppType.value();
     }
@@ -185,7 +186,7 @@ public class JpomApplication implements DisposableBean, InitializingBean {
         return Optional.of(beansWithAnnotation)
             .map(map -> CollUtil.getFirst(map.values()))
             .map(Object::getClass)
-            .orElseThrow(() -> new RuntimeException("没有找到运行的主类"));
+            .orElseThrow(() -> new RuntimeException(I18nMessageUtil.get("i18n.main_class_not_found.8a12")));
     }
 
     /**
@@ -227,7 +228,7 @@ public class JpomApplication implements DisposableBean, InitializingBean {
                     }
                 }
             } catch (Exception e) {
-                log.error("重启自身异常", e);
+                log.error(I18nMessageUtil.get("i18n.restart_self_exception.85b7"), e);
             }
         });
     }
@@ -254,7 +255,7 @@ public class JpomApplication implements DisposableBean, InitializingBean {
     public static void shutdownGlobalThreadPool() {
         LINK_EXECUTOR_SERVICE.forEach((s, executorService) -> {
             if (!executorService.isShutdown()) {
-                log.debug("shutdown {} ThreadPool", s);
+                log.debug(I18nMessageUtil.get("i18n.close_thread_pool.4cd9"), s);
                 executorService.shutdownNow();
             }
         });

@@ -16,7 +16,6 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.lang.Opt;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
@@ -28,6 +27,7 @@ import com.jcraft.jsch.Session;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ILoadEvent;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.AssetsConfig;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.func.assets.AssetsExecutorPoolService;
@@ -89,7 +89,7 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
     @Override
     protected void fillInsert(MachineDockerModel machineDockerModel) {
         super.fillInsert(machineDockerModel);
-        machineDockerModel.setGroupName(StrUtil.emptyToDefault(machineDockerModel.getGroupName(), Const.DEFAULT_GROUP_NAME));
+        machineDockerModel.setGroupName(StrUtil.emptyToDefault(machineDockerModel.getGroupName(), Const.DEFAULT_GROUP_NAME.get()));
         machineDockerModel.setStatus(ObjectUtil.defaultIfNull(machineDockerModel.getStatus(), 0));
     }
 
@@ -97,12 +97,12 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
     public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
         long count = this.count();
         if (count != 0) {
-            log.debug("机器 DOCKER 表已经存在 {} 条数据，不需要修复机器 DOCKER 数据", count);
+            log.debug(I18nMessageUtil.get("i18n.docker_data_repair_not_needed.0fb9"), count);
             return;
         }
         List<DockerInfoModel> list = dockerInfoService.list(false);
         if (CollUtil.isEmpty(list)) {
-            log.debug("没有任何 DOCKER 信息,不需要修复机器 DOCKER 数据");
+            log.debug(I18nMessageUtil.get("i18n.no_docker_info_no_need_to_fix_machine_data.f45e"));
             return;
         }
         Map<String, List<DockerInfoModel>> map = CollStreamUtil.groupByKey(list, DockerInfoModel::getHost);
@@ -113,12 +113,12 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
             value.sort((o1, o2) -> CompareUtil.compare(o2.getModifyTimeMillis(), o1.getModifyTimeMillis()));
             DockerInfoModel first = CollUtil.getFirst(value);
             if (value.size() > 1) {
-                log.warn("DOCKER 地址 {} 存在多个数据，将自动合并使用 {} DOCKER 的配置信息", entry.getKey(), first.getName());
+                log.warn(I18nMessageUtil.get("i18n.multiple_docker_addresses_found.0f82"), entry.getKey(), first.getName());
             }
             models.add(this.dockerInfoToMachineDocker(first));
         }
         this.insert(models);
-        log.info("成功修复 {} 条机器 DOCKER 数据", models.size());
+        log.info(I18nMessageUtil.get("i18n.machines_docker_data_fixed.af8a"), models.size());
         // 更新 docker 的机器id
         for (MachineDockerModel value : models) {
             Entity entity = Entity.create();
@@ -128,7 +128,7 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
                 Entity where = Entity.create();
                 where.set("host", value.getHost());
                 int update = dockerInfoService.update(entity, where);
-                Assert.state(update > 0, "更新 DOCKER 表机器id 失败：" + value.getName());
+                Assert.state(update > 0, I18nMessageUtil.get("i18n.update_docker_machine_id_failed.063d") + value.getName());
             }
         }
     }
@@ -167,7 +167,7 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
             String linkGroup = current.getLinkGroup();
             List<String> linkGroups = StrUtil.splitTrim(linkGroup, StrUtil.COMMA);
             if (CollUtil.isEmpty(linkGroups)) {
-                log.warn("当前集群还未绑定分组,不能监控 Docker 资产信息");
+                log.warn(I18nMessageUtil.get("i18n.cluster_not_bound_to_group_for_docker_monitoring.3926"));
                 return;
             }
             entity.set("groupName", linkGroups);
@@ -216,7 +216,7 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
                     swarmData = plugin.execute("inSpectSwarm", this.toParameter(managerDocker), JSONObject.class);
                 }
             } catch (Exception e) {
-                log.debug("获取 {} docker 集群失败 {}", dockerInfoModel.getName(), e.getMessage());
+                log.debug(I18nMessageUtil.get("i18n.get_docker_cluster_failure_with_placeholder.06cb"), dockerInfoModel.getName(), e.getMessage());
             }
             Optional.ofNullable(swarmData).ifPresent(jsonObject -> {
                 String swarmId = jsonObject.getString("id");
@@ -244,11 +244,11 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
         } catch (Exception e) {
             String message = e.getMessage();
             if (ExceptionUtil.isCausedBy(e, NoSuchFileException.class)) {
-                log.error("监控 docker[{}] 异常 {}", dockerInfoModel.getName(), message);
+                log.error(I18nMessageUtil.get("i18n.monitor_docker_exception_detail.e334"), dockerInfoModel.getName(), message);
             } else if (StrUtil.containsIgnoreCase(message, "Connection timed out")) {
-                log.error("监控 docker[{}] 超时 {}", dockerInfoModel.getName(), message);
+                log.error(I18nMessageUtil.get("i18n.monitor_docker_timeout.b03b"), dockerInfoModel.getName(), message);
             } else {
-                log.error("监控 docker[{}] 异常", dockerInfoModel.getName(), e);
+                log.error(I18nMessageUtil.get("i18n.monitor_docker_exception.e326"), dockerInfoModel.getName(), e);
             }
             this.updateStatus(dockerInfoModel.getId(), 0, message);
             return false;
@@ -270,7 +270,7 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
             IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
             return (boolean) plugin.execute("certPath", "certPath", filePath.getAbsolutePath());
         } catch (Exception e) {
-            log.warn("检查 docker 证书异常 {}", e.getMessage());
+            log.warn(I18nMessageUtil.get("i18n.check_docker_cert_exception.8042"), e.getMessage());
             return false;
         }
     }
@@ -286,7 +286,7 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
             IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
             return (boolean) plugin.execute("certPath", "certPath", path);
         } catch (Exception e) {
-            log.warn("检查 docker 证书异常 {}", e.getMessage());
+            log.warn(I18nMessageUtil.get("i18n.check_docker_cert_exception.8042"), e.getMessage());
             return false;
         }
     }
@@ -294,10 +294,10 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
     public void updateSwarmInfo(String id, JSONObject swarmData, JSONObject info) {
         //
         JSONObject swarm = info.getJSONObject("swarm");
-        Assert.notNull(swarm, "集群信息不完整,不能操作");
+        Assert.notNull(swarm, I18nMessageUtil.get("i18n.cluster_info_incomplete_for_operation.ad96"));
         String nodeAddr = swarm.getString("nodeAddr");
         String nodeId = swarm.getString("nodeID");
-        Assert.hasText(nodeAddr, "没有节点地址,不能继续操作");
+        Assert.hasText(nodeAddr, I18nMessageUtil.get("i18n.node_address_not_found.f955"));
         //
         Date createdAt = swarmData.getDate("createdAt");
         Date updatedAt = swarmData.getDate("updatedAt");
@@ -333,9 +333,9 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
     public Map<String, Object> dockerParameter(DockerInfoModel dockerInfoModel) {
         String machineDockerId = dockerInfoModel.getMachineDockerId();
         MachineDockerModel machineDockerModel = this.getByKey(machineDockerId, false);
-        Assert.notNull(machineDockerModel, "没有找到对应的 docker 信息");
+        Assert.notNull(machineDockerModel, I18nMessageUtil.get("i18n.no_docker_info_found.6d38"));
         Integer status = machineDockerModel.getStatus();
-        Assert.state(status != null && status == 1, "当前 " + machineDockerModel.getName() + " docker 不在线");
+        Assert.state(status != null && status == 1, StrUtil.format(I18nMessageUtil.get("i18n.current_docker_offline.a509"), machineDockerModel.getName()));
         return this.toParameter(machineDockerModel);
     }
 
@@ -370,15 +370,15 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
      */
     public Map<String, Object> dockerParameter(String workspaceSwarmId) {
         MachineDockerModel first = this.getMachineDocker(workspaceSwarmId);
-        Assert.notNull(first, "没有找到集群管理节点");
+        Assert.notNull(first, I18nMessageUtil.get("i18n.cluster_manager_node_not_found.1cd0"));
         Integer status = first.getStatus();
-        Assert.state(status != null && status == 1, "当前 " + first.getName() + " docker 集群没有管理节点在线");
+        Assert.state(status != null && status == 1, StrUtil.format(I18nMessageUtil.get("i18n.current_docker_cluster_has_no_management_nodes_online.56cd"), first.getName()));
         return toParameter(first);
     }
 
     private MachineDockerModel getMachineDocker(String workspaceSwarmId) {
         DockerSwarmInfoMode swarmInfoMode = dockerSwarmInfoService.getByKey(workspaceSwarmId);
-        Assert.notNull(swarmInfoMode, "没有找到对应的集群信息");
+        Assert.notNull(swarmInfoMode, I18nMessageUtil.get("i18n.no_cluster_info_found.fb40"));
         String modeSwarmId = swarmInfoMode.getSwarmId();
         //
         return this.getMachineDockerBySwarmId(modeSwarmId);
@@ -387,7 +387,7 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
     public MachineDockerModel getMachineDockerBySwarmId(String swarmId) {
         //
         MachineDockerModel dockerInfoModel = this.tryMachineDockerBySwarmId(swarmId);
-        Assert.notNull(dockerInfoModel, "当前集群未找到任何管理节点");
+        Assert.notNull(dockerInfoModel, I18nMessageUtil.get("i18n.no_manager_node_found.5934"));
         return dockerInfoModel;
     }
 
@@ -424,13 +424,13 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
         parameter.put("timeout", machineDockerModel.getHeartbeatTimeout());
         if (machineDockerModel.getTlsVerify()) {
             File filePath = certificateInfoService.getFilePath(machineDockerModel.getCertInfo());
-            Assert.notNull(filePath, "docker 证书文件丢失");
+            Assert.notNull(filePath, I18nMessageUtil.get("i18n.docker_certificate_file_missing.ad46"));
             parameter.put("dockerCertPath", filePath.getAbsolutePath());
         }
         if (Boolean.TRUE.equals(machineDockerModel.getEnableSsh()) && StrUtil.isNotEmpty(machineDockerModel.getMachineSshId())) {
             // 添加SSH的操作Session
             MachineSshModel sshModel = machineSshServer.getByKey(machineDockerModel.getMachineSshId());
-            Assert.notNull(sshModel, "ssh 信息不存在啦");
+            Assert.notNull(sshModel, I18nMessageUtil.get("i18n.ssh_info_does_not_exist.5ed0"));
             // 需要关闭之前的连接，避免阻塞
             parameter.put("closeBefore", true);
             parameter.put("session", (Supplier<Session>) () -> machineSshServer.getSessionByModel(sshModel));

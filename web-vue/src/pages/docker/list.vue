@@ -1,10 +1,10 @@
 <template>
   <div>
     <template v-if="useSuggestions">
-      <a-result :title="$tl('p.noDockerInWorkspace')" :sub-title="$tl('p.goToDockerManagement')">
+      <a-result :title="$t('pages.docker.list.dd2184f3')" :sub-title="$t('pages.docker.list.8fe35bdb')">
         <template #extra>
           <router-link to="/system/assets/docker-list">
-            <a-button key="console" type="primary">{{ $tl('p.goToNow') }}</a-button></router-link
+            <a-button key="console" type="primary">{{ $t('pages.docker.list.b533d598') }}</a-button></router-link
           >
         </template>
       </a-result>
@@ -16,7 +16,7 @@
       default-auto-refresh
       :auto-refresh-time="5"
       table-name="docker-list"
-      :empty-description="$tl('p.noDocker')"
+      :empty-description="$t('pages.docker.list.a3546162')"
       :active-page="activePage"
       size="middle"
       :data-source="list"
@@ -35,19 +35,21 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$tl('c.name')"
+            :placeholder="$t('pages.docker.list.3e34ec28')"
             class="search-input-item"
             @press-enter="loadData"
           />
 
-          <a-tooltip :title="$tl('p.quickReturn')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
+          <a-tooltip :title="$t('pages.docker.list.5da9e22d')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{
+              $t('pages.docker.list.53c2763c')
+            }}</a-button>
           </a-tooltip>
           <a-button
             type="primary"
             :disabled="!tableSelections || !tableSelections.length"
             @click="syncToWorkspaceShow"
-            >{{ $tl('p.workspaceSync') }}</a-button
+            >{{ $t('pages.docker.list.ff284043') }}</a-button
           >
         </a-space>
       </template>
@@ -60,14 +62,14 @@
 
         <template v-else-if="column.dataIndex instanceof Array && column.dataIndex.includes('status')">
           <template v-if="record.machineDocker">
-            <a-tag v-if="record.machineDocker.status === 1" color="green">{{ $tl('p.statusNormal') }}</a-tag>
+            <a-tag v-if="record.machineDocker.status === 1" color="green">{{ $t('pages.docker.list.52d29b16') }}</a-tag>
             <a-tooltip v-else :title="record.machineDocker.failureMsg">
-              <a-tag color="red">{{ $tl('p.unableToConnect') }}</a-tag>
+              <a-tag color="red">{{ $t('pages.docker.list.921c8b81') }}</a-tag>
             </a-tooltip>
           </template>
 
-          <a-tooltip v-else :title="$tl('p.dockerInfoLost')">
-            <a-tag color="red">{{ $tl('p.infoLost') }}</a-tag>
+          <a-tooltip v-else :title="$t('pages.docker.list.c69c4c30')">
+            <a-tag color="red">{{ $t('pages.docker.list.4f21c0a4') }}</a-tag>
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'tags'">
@@ -89,10 +91,14 @@
               type="primary"
               :disabled="!record.machineDocker || record.machineDocker.status !== 1"
               @click="handleConsole(record)"
-              >{{ $tl('p.console') }}</a-button
+              >{{ $t('pages.docker.list.5139b7d7') }}</a-button
             >
-            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('p.edit') }}</a-button>
-            <a-button size="small" type="primary" danger @click="handleDelete(record)">{{ $tl('p.delete') }}</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{
+              $t('pages.docker.list.64603c01')
+            }}</a-button>
+            <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
+              $t('pages.docker.list.dd20d11c')
+            }}</a-button>
           </a-space>
         </template>
       </template>
@@ -102,19 +108,23 @@
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$tl('p.editDocker')"
+      :title="$t('pages.docker.list.2e8ce846')"
       :mask-closable="false"
       @ok="handleEditOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$tl('c.containerName')" name="name">
-          <a-input v-model:value="temp.name" :placeholder="$tl('c.containerName')" />
+        <a-form-item :label="$t('pages.docker.list.cddbe6bd')" name="name">
+          <a-input v-model:value="temp.name" :placeholder="$t('pages.docker.list.cddbe6bd')" />
         </a-form-item>
 
         <a-form-item
-          :label="$tl('c.label')"
+          :label="$t('pages.docker.list.d2114ab5')"
           name="tagInput"
-          :help="`${$tl('c.label')} 用于容器构建选择容器功能（fromTag）`"
+          :help="
+            $t('pages.docker.list.3727734b', {
+              slot1: $t('pages.docker.list.d2114ab5')
+            })
+          "
         >
           <a-space direction="vertical" style="width: 100%">
             <div>
@@ -139,7 +149,7 @@
               v-model:value="temp.tagInput"
               type="text"
               size="small"
-              :placeholder="$tl('p.enterTagName')"
+              :placeholder="$t('pages.docker.list.2749e827')"
               @blur="handleInputConfirm"
               @keyup.enter="handleInputConfirm"
             />
@@ -149,7 +159,7 @@
                 style="borderstyle: dashed"
                 @click="showInput"
               >
-                <PlusOutlined /> {{ $tl('p.add') }}
+                <PlusOutlined /> {{ $t('pages.docker.list.7d46652a') }}
               </a-tag>
             </template>
           </a-space>
@@ -170,22 +180,22 @@
       v-model:open="syncToWorkspaceVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$tl('p.syncToOtherWorkspace')"
+      :title="$t('pages.docker.list.6cc42b32')"
       :mask-closable="false"
       @ok="handleSyncToWorkspace"
     >
-      <a-alert :message="$tl('p.warmTip')" type="warning">
+      <a-alert :message="$t('pages.docker.list.d5e02e8a')" type="warning">
         <template #description>
           <ul>
-            <li>{{ $tl('p.syncMechanism') }}</li>
-            <li>{{ $tl('p.createNewDocker') }}</li>
-            <li>{{ $tl('p.syncDockerInfo') }}</li>
+            <li>{{ $t('pages.docker.list.b74cd503') }}</li>
+            <li>{{ $t('pages.docker.list.f8158ed2') }}</li>
+            <li>{{ $t('pages.docker.list.a7db4ba1') }}</li>
           </ul>
         </template>
       </a-alert>
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
-        <a-form-item :label="$tl('p.chooseWorkspace')" name="workspaceId">
+        <a-form-item :label="$t('pages.docker.list.bc069d5d')" name="workspaceId">
           <a-select
             v-model:value="temp.workspaceId"
             show-search
@@ -199,7 +209,7 @@
                 )
               }
             "
-            :placeholder="$tl('c.selectWorkspace')"
+            :placeholder="$t('pages.docker.list.3a321a02')"
           >
             <a-select-option v-for="item in workspaceList" :key="item.id" :disabled="getWorkspaceId() === item.id">{{
               item.name
@@ -210,7 +220,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import { deleteDcoker, dockerList, editDocker, syncToWorkspace } from '@/api/docker-api'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
@@ -240,7 +249,7 @@ export default {
 
       columns: [
         {
-          title: this.$tl('c.name'),
+          title: this.$t('pages.docker.list.3e34ec28'),
           dataIndex: 'name',
           ellipsis: true,
           width: 100
@@ -253,33 +262,33 @@ export default {
           tooltip: true
         },
         {
-          title: this.$tl('p.status'),
+          title: this.$t('pages.docker.list.9c32c887'),
           dataIndex: ['machineDocker', 'status'],
           ellipsis: true,
           align: 'center',
           width: '100px'
         },
         {
-          title: `docker${this.$tl('p.version')}`,
+          title: `docker${this.$t('pages.docker.list.d826aba2')}`,
           dataIndex: ['machineDocker', 'dockerVersion'],
           ellipsis: true,
           width: '120px',
           tooltip: true
         },
         {
-          title: this.$tl('c.label'),
+          title: this.$t('pages.docker.list.d2114ab5'),
           dataIndex: 'tags',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$tl('p.lastModifiedBy'),
+          title: this.$t('pages.docker.list.7e27adb6'),
           dataIndex: 'modifyUser',
           width: '120px',
           ellipsis: true
         },
         {
-          title: this.$tl('p.creationTime'),
+          title: this.$t('pages.docker.list.f06e8846'),
           dataIndex: 'createTimeMillis',
           ellipsis: true,
           sorter: true,
@@ -287,7 +296,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$tl('p.modificationTime'),
+          title: this.$t('pages.docker.list.61164914'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -295,7 +304,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$tl('p.action'),
+          title: this.$t('pages.docker.list.a0fe2109'),
           dataIndex: 'operation',
 
           fixed: 'right',
@@ -303,18 +312,19 @@ export default {
           width: '190px'
         }
       ],
+
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
-        name: [{ required: true, message: this.$tl('p.enterContainerName'), trigger: 'blur' }],
-        host: [{ required: true, message: this.$tl('p.enterContainerAddress'), trigger: 'blur' }],
+        name: [{ required: true, message: this.$t('pages.docker.list.ce3b796b'), trigger: 'blur' }],
+        host: [{ required: true, message: this.$t('pages.docker.list.116c39f3'), trigger: 'blur' }],
         tagInput: [
           // { required: true, message: "Please input ID", trigger: "blur" },
-          { pattern: /^\w{1,10}$/, message: this.$tl('c.labelRestriction') }
+          { pattern: /^\w{1,10}$/, message: this.$t('pages.docker.list.a4c276e2') }
         ],
 
         tag: [
-          { required: true, message: this.$tl('p.enterAssociatedContainerTag'), trigger: 'blur' },
-          { pattern: /^\w{1,10}$/, message: this.$tl('c.labelRestriction') }
+          { required: true, message: this.$t('pages.docker.list.d6fbcd84'), trigger: 'blur' },
+          { pattern: /^\w{1,10}$/, message: this.$t('pages.docker.list.a4c276e2') }
         ]
       },
       workspaceList: [],
@@ -364,9 +374,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.docker.list.${key}`, ...args)
-    },
     // 加载数据
     loadData(pointerEvent) {
       this.loading = true
@@ -459,11 +466,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$tl('p.systemPrompt'),
+        title: this.$t('pages.docker.list.b22d55a0'),
         zIndex: 1009,
-        content: this.$tl('p.confirmDeletion'),
-        okText: this.$tl('p.confirm'),
-        cancelText: this.$tl('p.cancel'),
+        content: this.$t('pages.docker.list.e51646aa'),
+        okText: this.$t('pages.docker.list.e8e9db25'),
+        cancelText: this.$t('pages.docker.list.b12468e9'),
         onOk: () => {
           return deleteDcoker({
             id: record.id
@@ -537,7 +544,7 @@ export default {
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
         $notification.warn({
-          message: this.$tl('c.selectWorkspace')
+          message: this.$t('pages.docker.list.3a321a02')
         })
         return false
       }

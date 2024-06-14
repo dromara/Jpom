@@ -37,6 +37,7 @@ import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
@@ -127,7 +128,7 @@ public class ReleaseManage {
 //            File logFile = BuildUtil.getLogFile(buildExtraModule.getId(), this.buildNumberId);
 //            this.logRecorder = LogRecorder.builder().file(logFile).build();
 //        }
-        Assert.notNull(buildEnv, "没有找到任何环境变量");
+        Assert.notNull(buildEnv, I18nMessageUtil.get("i18n.no_environment_variables_found.46ad"));
     }
 
 
@@ -144,14 +145,14 @@ public class ReleaseManage {
         this.buildEnv.put("BUILD_RESULT_FILE", FileUtil.getAbsolutePath(this.resultFile));
         this.buildEnv.put("BUILD_RESULT_DIR_FILE", buildExtraModule.getResultDirFile());
         //
-        this.updateStatus(BuildStatus.PubIng, "开始发布中");
+        this.updateStatus(BuildStatus.PubIng, I18nMessageUtil.get("i18n.start_publishing.c0b9"));
         if (FileUtil.isEmpty(this.resultFile)) {
-            String info = "发布的文件或者文件夹为空,不能继续发布";
+            String info = I18nMessageUtil.get("i18n.empty_file_or_folder_for_publish.cae8");
             logRecorder.systemError(info);
             return info;
         }
         long resultFileSize = FileUtil.size(this.resultFile);
-        logRecorder.system("开始执行发布，需要发布的文件大小：{}", FileUtil.readableFileSize(resultFileSize));
+        logRecorder.system(I18nMessageUtil.get("i18n.start_executing_publishing_with_file_size.5039"), FileUtil.readableFileSize(resultFileSize));
         Optional.ofNullable(consumer).ifPresent(consumer1 -> consumer1.accept(resultFileSize));
         // 先同步到文件管理中心
         Boolean syncFileStorage = this.buildExtraModule.getSyncFileStorage();
@@ -162,25 +163,26 @@ public class ReleaseManage {
                     .map(integer -> Convert.toInt(buildExtraModule.getFileStorageKeepDay()))
                     .filter(integer -> integer > 0)
                     .orElse(null);
-            String keepMsg = fileStorageKeepDay == null ? StrUtil.EMPTY : StrUtil.format("，保留天数：{}", fileStorageKeepDay);
-            logRecorder.system("开始同步到文件管理中心{}", keepMsg);
+            String keepMsg = fileStorageKeepDay == null ? StrUtil.EMPTY : StrUtil.format(I18nMessageUtil.get("i18n.retention_days.3c7d"), fileStorageKeepDay);
+            logRecorder.system(I18nMessageUtil.get("i18n.start_syncing_to_file_management_center.0a03"), keepMsg);
             boolean tarGz = this.buildEnv.getBool(BuildUtil.USE_TAR_GZ, false);
             File dirPackage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, tarGz, (unZip, file) -> file);
+            String string = I18nMessageUtil.get("i18n.build_source.2ef9");
             String successMd5 = fileStorageService.addFile(dirPackage, 1,
                 buildInfoModel.getWorkspaceId(),
-                "构建来源," + buildInfoModel.getName(),
+                string + buildInfoModel.getName(),
                 // 默认的别名码为构建id
                 StrUtil.emptyToDefault(buildInfoModel.getAliasCode(), buildInfoModel.getId()),
                 fileStorageKeepDay);
             if (successMd5 != null) {
-                logRecorder.system("构建产物文件成功同步到文件管理中心，{}", successMd5);
+                logRecorder.system(I18nMessageUtil.get("i18n.build_product_sync_success.f7d1"), successMd5);
             } else {
-                logRecorder.systemWarning("构建产物文件同步到文件管理中心失败，当前文件已经存文件管理中心存在啦");
+                logRecorder.systemWarning(I18nMessageUtil.get("i18n.build_product_file_sync_failed.0e64"));
             }
         }
         //
         int releaseMethod = this.buildExtraModule.getReleaseMethod();
-        logRecorder.system("发布的方式：{}", BaseEnum.getDescByCode(BuildReleaseMethod.class, releaseMethod));
+        logRecorder.system(I18nMessageUtil.get("i18n.publish_method_format.4622"), BaseEnum.getDescByCode(BuildReleaseMethod.class, releaseMethod));
 
         if (releaseMethod == BuildReleaseMethod.Outgiving.getCode()) {
             //
@@ -196,7 +198,7 @@ public class ReleaseManage {
         } else if (releaseMethod == BuildReleaseMethod.No.getCode()) {
             return null;
         } else {
-            String format = StrUtil.format("没有实现的发布分发：{}", releaseMethod);
+            String format = StrUtil.format(I18nMessageUtil.get("i18n.no_implemented_publish_distribution.fcf8"), releaseMethod);
             logRecorder.systemError(format);
             return format;
         }
@@ -268,7 +270,7 @@ public class ReleaseManage {
             String dockerFile = CollUtil.getLast(list);
             File dockerfile = FileUtil.file(tempPath, dockerFile);
             if (!FileUtil.isFile(dockerfile)) {
-                String format = StrUtil.format("仓库目录下没有找到 Dockerfile 文件: {}", dockerFile);
+                String format = StrUtil.format(I18nMessageUtil.get("i18n.dockerfile_not_found_in_repository.4168"), dockerFile);
                 logRecorder.systemError(format);
                 return format;
             }
@@ -280,7 +282,7 @@ public class ReleaseManage {
                 .queryByTag(this.buildExtraModule.getWorkspaceId(), fromTag);
             Map<String, Object> map = machineDockerServer.dockerParameter(dockerInfoModels);
             if (map == null) {
-                String format = StrUtil.format("{} 没有可用的 docker server", fromTag);
+                String format = StrUtil.format(I18nMessageUtil.get("i18n.no_available_docker_server.6aaa"), fromTag);
                 logRecorder.systemError(format);
                 return format;
             }
@@ -288,9 +290,9 @@ public class ReleaseManage {
             for (DockerInfoModel infoModel : dockerInfoModels) {
                 boolean done = this.doDockerImage(infoModel, envMap, dockerfile, baseDir, dockerTag, this.buildExtraModule);
                 if (!done) {
-                    logRecorder.systemWarning("容器构建异常：{} -> {}", infoModel.getName(), dockerTag);
+                    logRecorder.systemWarning(I18nMessageUtil.get("i18n.container_build_exception.a98f"), infoModel.getName(), dockerTag);
                     if (buildExtraModule.strictlyEnforce()) {
-                        return "严格模式下镜像构建失败,终止任务";
+                        return I18nMessageUtil.get("i18n.strict_mode_image_build_failure.ecea");
                     }
                 }
             }
@@ -308,7 +310,7 @@ public class ReleaseManage {
                     try {
                         plugin.execute("pushImage", map);
                     } catch (Exception e) {
-                        logRecorder.error("推送镜像调用容器异常", e);
+                        logRecorder.error(I18nMessageUtil.get("i18n.push_image_container_exception.2090"), e);
                     }
                 }
             }
@@ -334,7 +336,7 @@ public class ReleaseManage {
             IPlugin plugin = PluginFactory.getPlugin(DockerSwarmInfoService.DOCKER_PLUGIN_NAME);
             plugin.execute("updateServiceImage", pluginMap);
         } catch (Exception e) {
-            logRecorder.error("更新容器服务调用容器异常", e);
+            logRecorder.error(I18nMessageUtil.get("i18n.update_container_service_exception.2249"), e);
             throw Lombok.sneakyThrow(e);
         }
     }
@@ -358,8 +360,8 @@ public class ReleaseManage {
         try {
             return (boolean) plugin.execute("buildImage", map);
         } catch (Exception e) {
-            log.error("构建镜像调用容器异常", e);
-            logRecorder.error("构建镜像调用容器异常", e);
+            log.error(I18nMessageUtil.get("i18n.build_image_call_container_exception.7e13"), e);
+            logRecorder.error(I18nMessageUtil.get("i18n.build_image_call_container_exception.7e13"), e);
             return false;
         }
     }
@@ -371,7 +373,7 @@ public class ReleaseManage {
         // 执行命令
         String releaseCommand = this.buildExtraModule.getReleaseCommand();
         if (StrUtil.isEmpty(releaseCommand)) {
-            logRecorder.systemError("没有需要执行的命令");
+            logRecorder.systemError(I18nMessageUtil.get("i18n.no_command_to_execute.340b"));
             return null;
         }
         logRecorder.system("{} start exec{}", DateUtil.now(), System.lineSeparator());
@@ -393,10 +395,10 @@ public class ReleaseManage {
                 }
             });
         ReleaseManage.this.process = null;
-        logRecorder.system("执行发布脚本的退出码是：{}", waitFor);
+        logRecorder.system(I18nMessageUtil.get("i18n.publish_script_exit_code.0f69"), waitFor);
         // 判断是否为严格执行
         if (buildExtraModule.strictlyEnforce()) {
-            return waitFor == 0 ? null : StrUtil.format("执行发布命令退出码非0，{}", waitFor);
+            return waitFor == 0 ? null : StrUtil.format(I18nMessageUtil.get("i18n.publish_command_non_zero_exit_code.ea80"), waitFor);
         }
         return null;
     }
@@ -411,7 +413,7 @@ public class ReleaseManage {
         for (String releaseMethodDataIdItem : strings) {
             SshModel item = sshService.getByKey(releaseMethodDataIdItem, false);
             if (item == null) {
-                logRecorder.systemError("没有找到对应的ssh项：{}", releaseMethodDataIdItem);
+                logRecorder.systemError(I18nMessageUtil.get("i18n.no_ssh_entry_found.d0e1"), releaseMethodDataIdItem);
                 continue;
             }
             this.doSsh(item, sshService);
@@ -432,12 +434,12 @@ public class ReleaseManage {
             // 执行发布前命令
             if (StrUtil.isNotEmpty(this.buildExtraModule.getReleaseBeforeCommand())) {
                 //
-                logRecorder.system("开始执行 {} 发布前命令", item.getName());
+                logRecorder.system(I18nMessageUtil.get("i18n.start_executing_pre_release_command.6c7e"), item.getName());
                 JschUtils.execCallbackLine(session, charset, timeout, this.buildExtraModule.getReleaseBeforeCommand(), StrUtil.EMPTY, envFileMap, logRecorder::info);
             }
 
             if (StrUtil.isEmpty(releasePath)) {
-                logRecorder.systemWarning("发布目录为空");
+                logRecorder.systemWarning(I18nMessageUtil.get("i18n.publish_directory_is_empty.79c6"));
             } else {
                 logRecorder.system("{} {} start ftp upload{}", DateUtil.now(), item.getName(), System.lineSeparator());
                 MySftp.ProgressMonitor sftpProgressMonitor = sshService.createProgressMonitor(logRecorder);
@@ -455,7 +457,7 @@ public class ReleaseManage {
                         }
                     } catch (Exception e) {
                         if (!StrUtil.startWithIgnoreCase(e.getMessage(), "No such file")) {
-                            logRecorder.error("清除构建产物失败", e);
+                            logRecorder.error(I18nMessageUtil.get("i18n.clear_build_product_failed.edd4"), e);
                         }
                     }
                 }
@@ -464,11 +466,11 @@ public class ReleaseManage {
             }
             // 执行发布后命令
             if (StrUtil.isEmpty(this.buildExtraModule.getReleaseCommand())) {
-                logRecorder.systemWarning("没有需要执行发布后的ssh命令");
+                logRecorder.systemWarning(I18nMessageUtil.get("i18n.no_ssh_commands_to_execute_after_publish.89ba"));
                 return;
             }
             //
-            logRecorder.system("开始执行 {} 发布后命令", item.getName());
+            logRecorder.system(I18nMessageUtil.get("i18n.start_executing_post_release_command.fd06"), item.getName());
             JschUtils.execCallbackLine(session, charset, timeout, this.buildExtraModule.getReleaseCommand(), StrUtil.EMPTY, envFileMap, logRecorder::info);
         } finally {
             JschUtil.close(channelSftp);
@@ -504,7 +506,7 @@ public class ReleaseManage {
         directory = Opt.ofBlankAble(directory).orElse(StrUtil.SLASH);
         jsonObject.put("dir", directory);
         JsonMessage<JSONObject> requestBody = NodeForward.requestBody(nodeModel, NodeUrl.MANAGE_FILE_DIFF_FILE, jsonObject);
-        Assert.state(requestBody.success(), "对比项目文件失败：" + requestBody);
+        Assert.state(requestBody.success(), I18nMessageUtil.get("i18n.compare_project_failure.e6ab") + requestBody);
 
         JSONObject data = requestBody.getData();
         JSONArray diff = data.getJSONArray("diff");
@@ -512,15 +514,15 @@ public class ReleaseManage {
         int delSize = CollUtil.size(del);
         int diffSize = CollUtil.size(diff);
         if (clearOld) {
-            logRecorder.system("对比文件结果，产物文件 {} 个、需要上传 {} 个、需要删除 {} 个", CollUtil.size(collect), CollUtil.size(diff), delSize);
+            logRecorder.system(I18nMessageUtil.get("i18n.compare_files_result_with_delete.033d"), CollUtil.size(collect), CollUtil.size(diff), delSize);
         } else {
-            logRecorder.system("对比文件结果，产物文件 {} 个、需要上传 {} 个", CollUtil.size(collect), CollUtil.size(diff));
+            logRecorder.system(I18nMessageUtil.get("i18n.compare_files_result.bec4"), CollUtil.size(collect), CollUtil.size(diff));
         }
         // 清空发布才先执行删除
         if (delSize > 0 && clearOld) {
             jsonObject.put("data", del);
             requestBody = NodeForward.requestBody(nodeModel, NodeUrl.MANAGE_FILE_BATCH_DELETE, jsonObject);
-            Assert.state(requestBody.success(), "删除项目文件失败：" + requestBody);
+            Assert.state(requestBody.success(), I18nMessageUtil.get("i18n.delete_project_file_failure_with_full_stop.85b8") + requestBody);
         }
         for (int i = 0; i < diffSize; i++) {
             boolean last = (i == diffSize - 1);
@@ -540,17 +542,18 @@ public class ReleaseManage {
                     int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
                     if (progressRangeList.add(progressRange)) {
                         //  total, progressSize
-                        logRecorder.system("上传文件进度：{}[{}/{}] {}/{} {} ", file.getName(),
+                        String info = I18nMessageUtil.get("i18n.upload_progress_message_format.b91c");
+                        logRecorder.system(info, file.getName(),
                             (finalI + 1), diffSize,
                             FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
                             NumberUtil.formatPercent(((float) progressSize / total), 0)
                         );
                     }
                 });
-            Assert.state(jsonMessage.success(), "同步项目文件失败：" + jsonMessage);
+            Assert.state(jsonMessage.success(), I18nMessageUtil.get("i18n.synchronize_project_files_failed.6aa4") + jsonMessage);
             if (last) {
                 // 最后一个
-                logRecorder.system("发布项目包成功：{}", jsonMessage);
+                logRecorder.system(I18nMessageUtil.get("i18n.publish_project_package_success.b0ce"), jsonMessage);
             }
         }
     }
@@ -570,7 +573,7 @@ public class ReleaseManage {
         }
         NodeService nodeService = SpringUtil.getBean(NodeService.class);
         NodeModel nodeModel = nodeService.getByKey(strings[0]);
-        Objects.requireNonNull(nodeModel, "节点不存在");
+        Objects.requireNonNull(nodeModel, I18nMessageUtil.get("i18n.node_does_not_exist.4ce4"));
         String projectId = strings[1];
         if (diffSync) {
             this.diffSyncProject(nodeModel, projectId, afterOpt, clearOld);
@@ -589,16 +592,16 @@ public class ReleaseManage {
                     double progressPercentage = Math.floor(((float) progressSize / total) * 100);
                     int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
                     if (progressRangeList.add(progressRange)) {
-                        logRecorder.system("上传文件进度：{} {}/{} {}", name,
+                        logRecorder.system(I18nMessageUtil.get("i18n.upload_progress_with_colon.dd5b"), name,
                             FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
                             NumberUtil.formatPercent(((float) progressSize / total), 0));
                     }
                 });
         });
         if (jsonMessage.success()) {
-            logRecorder.system("发布项目包成功：{}", jsonMessage);
+            logRecorder.system(I18nMessageUtil.get("i18n.publish_project_package_success.b0ce"), jsonMessage);
         } else {
-            throw new JpomRuntimeException("发布项目包失败：" + jsonMessage);
+            throw new JpomRuntimeException(I18nMessageUtil.get("i18n.publish_project_package_failed.9514") + jsonMessage);
         }
     }
 
@@ -627,9 +630,9 @@ public class ReleaseManage {
             return outGivingRunBuilder.build().startRun(selectProject);
         });
         //OutGivingRun.startRun(releaseMethodDataId, zipFile, userModel, unZip, 0);
-        logRecorder.system("开始执行分发包啦，请到分发中查看详情状态");
+        logRecorder.system(I18nMessageUtil.get("i18n.start_executing_distribution_package.a2cc"));
         OutGivingModel.Status status = statusFuture.get();
-        logRecorder.system("分发结果：{}", status.getDesc());
+        logRecorder.system(I18nMessageUtil.get("i18n.distribute_result.a230"), status.getDesc());
     }
 
     /**
@@ -643,18 +646,19 @@ public class ReleaseManage {
             this.init();
             //
             buildEnv.eachStr(logRecorder::system);
-            logRecorder.system("开始回滚：{}", DateTime.now());
+            logRecorder.system(I18nMessageUtil.get("i18n.start_rolling_back.f020"), DateTime.now());
             //
             String errorMsg = this.start(null, item);
-            logRecorder.system("执行回滚结束：{}", StrUtil.emptyToDefault(errorMsg, "ok"));
+            String emptied = StrUtil.emptyToDefault(errorMsg, "ok");
+            logRecorder.system(I18nMessageUtil.get("i18n.rollback_ended.fb1d"), emptied);
             if (errorMsg == null) {
-                this.updateStatus(BuildStatus.PubSuccess, "发布成功");
+                this.updateStatus(BuildStatus.PubSuccess, I18nMessageUtil.get("i18n.publish_success.2fff"));
             } else {
                 this.updateStatus(BuildStatus.PubError, errorMsg);
             }
         } catch (Exception e) {
-            log.error("执行发布异常", e);
-            logRecorder.error("执行发布异常", e);
+            log.error(I18nMessageUtil.get("i18n.publish_exception.cf0b"), e);
+            logRecorder.error(I18nMessageUtil.get("i18n.publish_exception.cf0b"), e);
             this.updateStatus(BuildStatus.PubError, e.getMessage());
         } finally {
             IoUtil.close(this.logRecorder);

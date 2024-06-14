@@ -1,7 +1,6 @@
 <template>
   <terminal :url="socketUrl" />
 </template>
-
 <script>
 import { mapState } from 'pinia'
 import { getWebSocketUrl } from '@/api/config'
@@ -37,16 +36,14 @@ export default {
     socketUrl() {
       return getWebSocketUrl(
         '/socket/docker_cli',
-        `userId=${this.getLongTermToken()}&id=${this.id}&machineDockerId=${this.machineDockerId}&nodeId=system&type=docker&containerId=${this.containerId}&workspaceId=${this.getWorkspaceId()}`
+        `userId=${this.getLongTermToken()}&id=${this.id}&machineDockerId=${
+          this.machineDockerId
+        }&nodeId=system&type=docker&containerId=${this.containerId}&workspaceId=${this.getWorkspaceId()}`
       )
     }
   },
   mounted() {},
   beforeUnmount() {},
-  methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.docker.terminal.${key}`, ...args)
-    }
-  }
+  methods: {}
 }
 </script>

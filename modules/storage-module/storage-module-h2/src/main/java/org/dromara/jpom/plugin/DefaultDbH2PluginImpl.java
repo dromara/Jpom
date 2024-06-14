@@ -15,6 +15,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.plugins.PluginConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.db.StorageServiceFactory;
 import org.h2.store.FileLister;
 import org.h2.tools.DeleteDbFiles;
@@ -76,7 +77,7 @@ public class DefaultDbH2PluginImpl implements IDefaultPlugin {
             String dbName = (String) parameter.get("dbName");
             return this.hasDbFiles(dbPath, dbName);
         } else {
-            throw new IllegalArgumentException("不支持的类型");
+            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.unsupported_type.7495"));
         }
         return "done";
     }
@@ -168,17 +169,17 @@ public class DefaultDbH2PluginImpl implements IDefaultPlugin {
         // 执行 SQL 备份脚本
         Shell shell = new Shell();
 
-		/*
-		  url 表示 h2 数据库的 jdbc url
-		 * user 表示登录的用户名
-		 * password 表示登录密码
-		 * driver 是 jdbc 驱动
-		 * sql 是备份的 sql 语句
-		 * - 案例：script drop to ${fileName1} table ${tableName1},${tableName2}...
-		 * - script drop to 表示备份数据库，drop 表示建表之前会先删除表
-		 * - ${fileName1} 表示备份之后的文件名
-		 * - table 表示需要备份的表名称，后面跟多个表名，用英文逗号分割
-		 */
+        /*
+         * url 表示 h2 数据库的 jdbc url
+         * user 表示登录的用户名
+         * password 表示登录密码
+         * driver 是 jdbc 驱动
+         * sql 是备份的 sql 语句
+         * - 案例：script drop to ${fileName1} table ${tableName1},${tableName2}...
+         * - script drop to 表示备份数据库，drop 表示建表之前会先删除表
+         * - ${fileName1} 表示备份之后的文件名
+         * - table 表示需要备份的表名称，后面跟多个表名，用英文逗号分割
+         */
         String[] params = new String[]{
             "-url", url,
             "-user", user,

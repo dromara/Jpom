@@ -31,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.BaseNodeModel;
@@ -129,7 +130,7 @@ public class ProjectManageControl extends BaseServerController {
                 return;
             }
         }
-        Assert.state(exists, "没有对应的数据或者没有此数据权限");
+        Assert.state(exists, I18nMessageUtil.get("i18n.no_corresponding_data_or_permission.1291"));
     }
 
     @RequestMapping(value = "getProjectData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -227,18 +228,18 @@ public class ProjectManageControl extends BaseServerController {
         NodeModel nodeModel = getNode();
         this.checkProjectPermission(id, request, nodeModel);
         // 检查节点分发
-        outGivingServer.checkNodeProject(nodeModel.getId(), id, request, "当前项目存在节点分发，不能直接删除");
+        outGivingServer.checkNodeProject(nodeModel.getId(), id, request, I18nMessageUtil.get("i18n.project_has_node_distribution_cannot_delete.41b0"));
         // 检查日志阅读
-        logReadServer.checkNodeProject(nodeModel.getId(), id, request, "当前项目存在日志阅读，不能直接删除");
+        logReadServer.checkNodeProject(nodeModel.getId(), id, request, I18nMessageUtil.get("i18n.project_has_logs_cannot_delete.1d2a"));
         // 项目监控
         List<MonitorModel> monitorModels = monitorService.listByWorkspace(request);
         if (monitorModels != null) {
             boolean match = monitorModels.stream().anyMatch(monitorModel -> monitorModel.checkNodeProject(nodeModel.getId(), id));
-            Assert.state(!match, "当前项目存在监控项，不能直接删除");
+            Assert.state(!match, I18nMessageUtil.get("i18n.project_has_monitoring_items_cannot_delete.c9a3"));
         }
         // 构建
         boolean releaseMethod = buildService.checkReleaseMethod(nodeModel.getId() + StrUtil.COLON + id, request, BuildReleaseMethod.Project);
-        Assert.state(!releaseMethod, "当前项目存在构建项，不能直接删除");
+        Assert.state(!releaseMethod, I18nMessageUtil.get("i18n.project_has_build_items_cannot_delete.c2df"));
 
         JsonMessage<String> jsonMessage = NodeForward.request(nodeModel, request, NodeUrl.Manage_DeleteProject);
         if (jsonMessage.success()) {
@@ -265,7 +266,7 @@ public class ProjectManageControl extends BaseServerController {
                 .map(buildInfoModel -> {
                     // 判断共享仓库
                     RepositoryModel repositoryModel = repositoryService.getByKey(buildInfoModel.getRepositoryId());
-                    Assert.notNull(repositoryModel, "仓库不存在");
+                    Assert.notNull(repositoryModel, I18nMessageUtil.get("i18n.repository_does_not_exist.3cdb"));
                     if (StrUtil.equals(repositoryModel.getWorkspaceId(), toWorkspaceId)) {
                         // 迁移前后是同一个工作空间
                         return null;
@@ -284,7 +285,7 @@ public class ProjectManageControl extends BaseServerController {
                                     return !StrUtil.equals(buildInfoModel2.getReleaseMethodDataId(), dataId);
                                 })
                                 .count();
-                            Assert.state(count <= 0, "当前【项目】关联的【在线构建】关联的【仓库(" + repositoryModel.getName() + ")】被其他 " + count + "个不同发布方式的【在线构建】绑定暂不支持迁移");
+                            Assert.state(count <= 0, StrUtil.format(I18nMessageUtil.get("i18n.current_project_associated_with_online_build_and_repository.96c5"), repositoryModel.getName(), count));
                         }
                     }
                     return new Tuple(buildInfoModel, repositoryModel);
@@ -328,9 +329,9 @@ public class ProjectManageControl extends BaseServerController {
                     Entity.create().set("buildDataId", infoModel.getId())
                 );
                 if (!repository.global()) {
-                    return StrUtil.format("自动迁移关联的构建：{} 和 仓库：{}", infoModel.getName(), repository.getName());
+                    return StrUtil.format(I18nMessageUtil.get("i18n.auto_migrate_associated_build_and_repo.0b3f"), infoModel.getName(), repository.getName());
                 }
-                return StrUtil.format("自动迁移关联的构建：{}", infoModel.getName());
+                return StrUtil.format(I18nMessageUtil.get("i18n.auto_migrate_associated_build.a060"), infoModel.getName());
             }).
             collect(Collectors.joining(" | "));
     }
@@ -349,25 +350,25 @@ public class ProjectManageControl extends BaseServerController {
                                                  @ValidatorItem(value = ValidatorRule.NOT_BLANK) String toNodeId,
                                                  HttpServletRequest request) {
         ProjectInfoCacheModel projectData = projectInfoCacheService.getByKey(id, request);
-        Assert.notNull(projectData, "项目不存在");
+        Assert.notNull(projectData, I18nMessageUtil.get("i18n.project_does_not_exist.3029"));
 
-        Assert.state(!StrUtil.equals(toWorkspaceId, projectData.getWorkspaceId()) || !StrUtil.equals(projectData.getNodeId(), toNodeId), "目标工作空间与当前工作空间一致并且目标节点与当前节点一致");
+        Assert.state(!StrUtil.equals(toWorkspaceId, projectData.getWorkspaceId()) || !StrUtil.equals(projectData.getNodeId(), toNodeId), I18nMessageUtil.get("i18n.target_workspace_consistency.e04c"));
         projectInfoCacheService.checkUserWorkspace(toWorkspaceId);
         //
         NodeModel nowNode = nodeService.getByKey(projectData.getNodeId());
-        Assert.notNull(nowNode, "当前对应的节点不存在");
+        Assert.notNull(nowNode, I18nMessageUtil.get("i18n.corresponding_node_does_not_exist.72cb"));
         NodeModel toNodeModel = nodeService.getByKey(toNodeId);
-        Assert.notNull(toNodeModel, "对应的节点不存在");
-        Assert.state(StrUtil.equals(toWorkspaceId, toNodeModel.getWorkspaceId()), "要迁移到的目标工作空间和节点不一致");
+        Assert.notNull(toNodeModel, I18nMessageUtil.get("i18n.node_not_exist.760e"));
+        Assert.state(StrUtil.equals(toWorkspaceId, toNodeModel.getWorkspaceId()), I18nMessageUtil.get("i18n.migration_target_workspace_node_mismatch.d9cf"));
         // 检查节点分发
-        outGivingServer.checkNodeProject(projectData.getNodeId(), projectData.getProjectId(), request, "当前项目存在节点分发，不能直接迁移");
+        outGivingServer.checkNodeProject(projectData.getNodeId(), projectData.getProjectId(), request, I18nMessageUtil.get("i18n.project_has_node_distribution_cannot_migrate.cc0e"));
         // 检查日志阅读
-        logReadServer.checkNodeProject(projectData.getNodeId(), projectData.getProjectId(), request, "当前项目存在日志阅读，不能直接迁移");
+        logReadServer.checkNodeProject(projectData.getNodeId(), projectData.getProjectId(), request, I18nMessageUtil.get("i18n.project_has_logs_cannot_migrate.2e0e"));
         // 项目监控
         List<MonitorModel> monitorModels = monitorService.listByWorkspace(request);
         if (monitorModels != null) {
             boolean match = monitorModels.stream().anyMatch(monitorModel -> monitorModel.checkNodeProject(projectData.getNodeId(), id));
-            Assert.state(!match, "当前项目存在监控项，不能直接迁移");
+            Assert.state(!match, I18nMessageUtil.get("i18n.project_has_monitoring_items_cannot_migrate.c7f6"));
         }
         // 检查构建
         List<Tuple> buildInfoModels = this.checkBuild(projectData, toWorkspaceId, request);
@@ -380,12 +381,12 @@ public class ProjectManageControl extends BaseServerController {
             jsonObject.put("id", projectData.getProjectId());
             JsonMessage<String> jsonMessage = NodeForward.request(nowNode, NodeUrl.Manage_ChangeWorkspaceId, jsonObject);
             if (!jsonMessage.success()) {
-                return new JsonMessage<>(406, nowNode.getName() + "节点迁移项目失败" + jsonMessage.getMsg());
+                return new JsonMessage<>(406, nowNode.getName() + I18nMessageUtil.get("i18n.node_migration_project_failure.d5ff") + jsonMessage.getMsg());
             }
             result = jsonMessage;
         } else {
             JSONObject item = projectInfoCacheService.getItem(nowNode, projectData.getProjectId());
-            Assert.notNull(item, "项目数据丢失");
+            Assert.notNull(item, I18nMessageUtil.get("i18n.project_data_lost.2ae3"));
             item = projectInfoCacheService.convertToRequestData(item);
             item.put("nodeId", toNodeId);
             item.put("workspaceId", toWorkspaceId);
@@ -393,12 +394,12 @@ public class ProjectManageControl extends BaseServerController {
             // 发起预检查数据
             JsonMessage<String> jsonMessage = NodeForward.request(toNodeModel, NodeUrl.Manage_SaveProject, item);
             if (!jsonMessage.success()) {
-                return new JsonMessage<>(406, toNodeModel.getName() + "节点与检查项目失败" + jsonMessage.getMsg());
+                return new JsonMessage<>(406, toNodeModel.getName() + I18nMessageUtil.get("i18n.node_and_check_project_failed.ac4b") + jsonMessage.getMsg());
             }
             item.remove("previewData");
             jsonMessage = NodeForward.request(toNodeModel, NodeUrl.Manage_SaveProject, item);
             if (!jsonMessage.success()) {
-                return new JsonMessage<>(406, toNodeModel.getName() + "节点同步项目失败" + jsonMessage.getMsg());
+                return new JsonMessage<>(406, toNodeModel.getName() + I18nMessageUtil.get("i18n.node_sync_project_failed.a2a7") + jsonMessage.getMsg());
             }
             // 删除之前节点项目
             JSONObject delData = new JSONObject();
@@ -407,7 +408,7 @@ public class ProjectManageControl extends BaseServerController {
             delData.put("thorough", "");
             JsonMessage<String> delJsonMeg = NodeForward.request(nowNode, NodeUrl.Manage_DeleteProject, delData);
             if (!delJsonMeg.success()) {
-                return new JsonMessage<>(406, nowNode.getName() + "节点删除项目失败" + delJsonMeg.getMsg());
+                return new JsonMessage<>(406, nowNode.getName() + I18nMessageUtil.get("i18n.node_delete_project_failed.534c") + delJsonMeg.getMsg());
             }
             result = jsonMessage;
         }
@@ -416,7 +417,7 @@ public class ProjectManageControl extends BaseServerController {
         // 刷新缓存
         projectInfoCacheService.syncExecuteNode(nowNode);
         projectInfoCacheService.syncExecuteNode(toNodeModel);
-        return new JsonMessage<>(200, "项目迁移成功：" + result.getMsg() + " | " + buildMsg);
+        return new JsonMessage<>(200, StrUtil.format(I18nMessageUtil.get("i18n.migration_success_message.e546"), result.getMsg(), buildMsg));
     }
 
     /**
@@ -440,7 +441,7 @@ public class ProjectManageControl extends BaseServerController {
     @GetMapping(value = "import-template", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public void importTemplate(HttpServletResponse response) throws IOException {
-        String fileName = "项目导入模板.csv";
+        String fileName = I18nMessageUtil.get("i18n.import_project_template_csv.c6f1");
         this.setApplicationHeader(response, fileName);
         //
         CsvWriter writer = CsvUtil.getWriter(response.getWriter());
@@ -461,7 +462,8 @@ public class ProjectManageControl extends BaseServerController {
     @Feature(method = MethodFeature.DOWNLOAD)
     public void exportData(HttpServletResponse response, HttpServletRequest request) throws IOException {
         String workspace = projectInfoCacheService.getCheckUserWorkspace(request);
-        String fileName = "导出的项目数据 " + DateTime.now().toString(DatePattern.NORM_DATE_FORMAT) + ".csv";
+        String prefix = I18nMessageUtil.get("i18n.exported_project_data.fd1f");
+        String fileName = prefix + DateTime.now().toString(DatePattern.NORM_DATE_FORMAT) + ".csv";
         this.setApplicationHeader(response, fileName);
         //
         CsvWriteConfig csvWriteConfig = CsvWriteConfig.defaultConfig();
@@ -528,12 +530,13 @@ public class ProjectManageControl extends BaseServerController {
     @PostMapping(value = "import-data", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
     public IJsonMessage<String> importData(MultipartFile file, HttpServletRequest request) throws IOException {
-        Assert.notNull(file, "没有上传文件");
+        Assert.notNull(file, I18nMessageUtil.get("i18n.no_uploaded_file.07ef"));
         String workspaceId = projectInfoCacheService.getCheckUserWorkspace(request);
         NodeModel node = getNode();
         String originalFilename = file.getOriginalFilename();
         String extName = FileUtil.extName(originalFilename);
-        Assert.state(StrUtil.endWithIgnoreCase(extName, "csv"), "不允许的文件格式");
+        boolean csv = StrUtil.endWithIgnoreCase(extName, "csv");
+        Assert.state(csv, I18nMessageUtil.get("i18n.disallowed_file_format.d6e4"));
         assert originalFilename != null;
         File csvFile = FileUtil.file(serverConfig.getUserTempPath(), originalFilename);
         int updateCount = 0, ignoreCount = 0;
@@ -550,13 +553,13 @@ public class ProjectManageControl extends BaseServerController {
             try {
                 csvData = reader.read();
             } catch (Exception e) {
-                log.error("解析项目 csv 异常", e);
-                return new JsonMessage<>(405, "解析文件异常," + e.getMessage());
+                log.error(I18nMessageUtil.get("i18n.parse_project_csv_exception.ece1"), e);
+                return new JsonMessage<>(405, I18nMessageUtil.get("i18n.parse_file_exception.374d") + e.getMessage());
             } finally {
                 IoUtil.close(reader);
             }
             List<CsvRow> rows = csvData.getRows();
-            Assert.notEmpty(rows, "没有任何数据");
+            Assert.notEmpty(rows, I18nMessageUtil.get("i18n.no_data.55a2"));
 
             for (int i = 0; i < rows.size(); i++) {
                 CsvRow csvRow = rows.get(i);
@@ -572,12 +575,12 @@ public class ProjectManageControl extends BaseServerController {
                         updateCount++;
                         continue;
                     }
-                    throw new IllegalArgumentException(StrUtil.format("导入第 {} 条数据保存失败:{}", i + 2, jsonMessage.getMsg()));
+                    throw new IllegalArgumentException(StrUtil.format(I18nMessageUtil.get("i18n.import_save_failure.001a"), i + 2, jsonMessage.getMsg()));
                 } catch (IllegalArgumentException | IllegalStateException e) {
                     throw Lombok.sneakyThrow(e);
                 } catch (Exception e) {
-                    log.error("导入保存项目异常", e);
-                    throw new IllegalArgumentException(StrUtil.format("导入第 {} 条数据异常:{}", i + 2, e.getMessage()));
+                    log.error(I18nMessageUtil.get("i18n.import_save_project_exception.cdbe"), e);
+                    throw new IllegalArgumentException(StrUtil.format(I18nMessageUtil.get("i18n.import_exception.04b6"), i + 2, e.getMessage()));
                 }
             }
             projectInfoCacheService.syncExecuteNode(node);
@@ -585,7 +588,7 @@ public class ProjectManageControl extends BaseServerController {
             FileUtil.del(csvFile);
         }
         String fileCharsetStr = Optional.ofNullable(fileCharset).map(Charset::name).orElse(StrUtil.EMPTY);
-        return JsonMessage.success("导入成功(编码格式：{}),更新 {} 条数据,因为节点分发/项目副本忽略 {} 条数据", fileCharsetStr, updateCount, ignoreCount);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.import_success_message.2df3"), fileCharsetStr, updateCount, ignoreCount);
     }
 
     private JSONObject loadProjectData(CsvRow csvRow, String workspaceId, NodeModel node) {

@@ -2,12 +2,13 @@
   <div>
     <log-view1 :ref="`logView`" height="calc(100vh - 140px)">
       <template #before>
-        <a-button type="primary" size="small" @click="goFile">{{ $tl('p.fileManagement') }}</a-button></template
+        <a-button type="primary" size="small" @click="goFile">{{
+          $t('pages.node.node-layout.project.project-file-read.502f94')
+        }}</a-button></template
       >
     </log-view1>
   </div>
 </template>
-
 <script>
 // import { getProjectData, getProjectLogSize, downloadProjectLogFile, getLogBackList, downloadProjectLogBackFile, deleteProjectLogBackFile } from "@/api/node-project";
 import { getWebSocketUrl } from '@/api/config'
@@ -56,7 +57,9 @@ export default {
     socketUrl() {
       return getWebSocketUrl(
         '/socket/console',
-        `userId=${this.getLongTermToken()}&id=${this.id}&nodeId=${this.nodeId}&type=console&workspaceId=${this.getWorkspaceId()}`
+        `userId=${this.getLongTermToken()}&id=${this.id}&nodeId=${
+          this.nodeId
+        }&type=console&workspaceId=${this.getWorkspaceId()}`
       )
     }
   },
@@ -72,9 +75,6 @@ export default {
     this.close()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.nodeLayout.project.projectFileRead.${key}`, ...args)
-    },
     close() {
       this.socket?.close()
 
@@ -97,7 +97,9 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: `web socket ${this.$tl('p.error')},${this.$tl('p.checkWsProxy')}`
+          message: `web socket ${this.$t('pages.node.node-layout.project.project-file-read.d75d207f')},${this.$t(
+            'pages.node.node-layout.project.project-file-read.763330b'
+          )}`
         })
         clearInterval(this.heart)
       }
@@ -105,7 +107,7 @@ export default {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
         clearInterval(this.heart)
-        $message.warning(this.$tl('p.sessionClosed'))
+        $message.warning(this.$t('pages.node.node-layout.project.project-file-read.8a2aae09'))
       }
       this.socket.onmessage = (msg) => {
         this.$refs.logView?.appendLine(msg.data)
@@ -135,7 +137,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .filter {
   margin: 0 0 10px;

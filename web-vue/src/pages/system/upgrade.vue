@@ -1,14 +1,14 @@
 <template>
   <div>
     <a-tabs type="card" default-active-key="1">
-      <a-tab-pane key="1" :tab="$tl('p.server')"> <upgrade></upgrade></a-tab-pane>
-      <a-tab-pane key="2" :tab="$tl('p.allNodes')">
+      <a-tab-pane key="1" :tab="$t('pages.system.upgrade.bd5f786d')"> <upgrade></upgrade></a-tab-pane>
+      <a-tab-pane key="2" :tab="$t('pages.system.upgrade.6a4f20af')">
         <CustomTable
           is-show-tools
           default-auto-refresh
           :auto-refresh-time="30"
           table-name="upgrade-node-list"
-          :empty-description="$tl('p.noNodes')"
+          :empty-description="$t('pages.system.upgrade.c2a3f0cd')"
           :active-page="activePage"
           :columns="columns"
           :data-source="list"
@@ -31,19 +31,19 @@
               <a-input
                 v-model:value="listQuery['%name%']"
                 class="search-input-item"
-                :placeholder="$tl('p.nodeName')"
+                :placeholder="$t('pages.system.upgrade.fa8d810f')"
                 @press-enter="getNodeList"
               />
               <a-input
                 v-model:value="listQuery['%jpomUrl%']"
                 class="search-input-item"
-                :placeholder="$tl('c.nodeAddress')"
+                :placeholder="$t('pages.system.upgrade.a918ed23')"
                 @press-enter="getNodeList"
               />
               <a-input
                 v-model:value="listQuery['%jpomVersion%']"
                 class="search-input-item"
-                :placeholder="$tl('p.pluginVersion')"
+                :placeholder="$t('pages.system.upgrade.24fef8f1')"
                 @press-enter="getNodeList"
               />
               <a-select
@@ -60,18 +60,24 @@
                   }
                 "
                 allow-clear
-                :placeholder="$tl('p.group')"
+                :placeholder="$t('pages.system.upgrade.e740d8cb')"
                 class="search-input-item"
               >
                 <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
               </a-select>
-              <a-button :loading="loading" type="primary" @click="getNodeList">{{ $tl('p.search') }}</a-button>
+              <a-button :loading="loading" type="primary" @click="getNodeList">{{
+                $t('pages.system.upgrade.53c2763c')
+              }}</a-button>
 
-              <a-select v-model:value="temp.protocol" :placeholder="$tl('p.upgradeProtocol')" class="search-input-item">
+              <a-select
+                v-model:value="temp.protocol"
+                :placeholder="$t('pages.system.upgrade.f5958e7d')"
+                class="search-input-item"
+              >
                 <a-select-option value="WebSocket">WebSocket</a-select-option>
                 <a-select-option value="Http">Http</a-select-option>
               </a-select>
-              <a-button type="primary" @click="batchUpdate">{{ $tl('p.batchUpdate') }}</a-button>
+              <a-button type="primary" @click="batchUpdate">{{ $t('pages.system.upgrade.1724d4b9') }}</a-button>
               |
               <a-upload
                 name="file"
@@ -83,17 +89,19 @@
                 :before-upload="beforeUpload"
               >
                 <LoadingOutlined v-if="percentage" />
-                <a-button v-else type="primary"> <UploadOutlined />{{ $tl('p.uploadPackage') }} </a-button>
+                <a-button v-else type="primary"> <UploadOutlined />{{ $t('pages.system.upgrade.bdc35ba3') }} </a-button>
               </a-upload>
 
               <!-- 打包时间：{{ agentTimeStamp | version }}</div> -->
             </a-space>
           </template>
           <template #toolPrefix>
-            <a-tooltip :title="`${$tl('p.packingTime')}${agentTimeStamp || $tl('c.unknown')}`">
-              Agent{{ $tl('p.version') }}{{ version_filter(agentVersion) }}
+            <a-tooltip
+              :title="`${$t('pages.system.upgrade.85c82af7')}${agentTimeStamp || $t('pages.system.upgrade.5f51a112')}`"
+            >
+              Agent{{ $t('pages.system.upgrade.d826aba2') }}{{ version_filter(agentVersion) }}
               <a-tag v-if="temp.upgrade" color="pink" @click="downloadRemoteEvent">
-                {{ $tl('p.newVersion') }}{{ temp.newVersion }} <DownloadOutlined />
+                {{ $t('pages.system.upgrade.19f7beca') }}{{ temp.newVersion }} <DownloadOutlined />
               </a-tag>
               <!-- </div> -->
             </a-tooltip></template
@@ -114,7 +122,7 @@
             </template>
             <template v-else-if="column.dataIndex === 'status'">
               <a-tag :color="text === 1 ? 'green' : 'pink'" style="margin-right: 0">
-                {{ statusMap[text] || $tl('c.unknown') }}
+                {{ statusMap[text] || $t('pages.system.upgrade.5f51a112') }}
               </a-tag>
             </template>
             <template v-else-if="column.dataIndex === 'updateStatus'">
@@ -126,13 +134,15 @@
               </div>
               <div v-if="text && text.type === 'uploading'">
                 <div class="text">
-                  {{ text.percent === 100 ? $tl('p.uploadSuccess') : $tl('p.uploadingFile') }}
+                  {{ text.percent === 100 ? $t('pages.system.upgrade.cabe384') : $t('pages.system.upgrade.3b5150a7') }}
                 </div>
                 <a-progress :percent="text.percent" />
               </div>
             </template>
             <template v-else-if="column.dataIndex === 'operation'">
-              <a-button type="primary" size="small" @click="updateNodeHandler(record)">{{ $tl('p.update') }}</a-button>
+              <a-button type="primary" size="small" @click="updateNodeHandler(record)">{{
+                $t('pages.system.upgrade.7f1798e3')
+              }}</a-button>
             </template>
           </template>
         </CustomTable>
@@ -140,7 +150,6 @@
     </a-tabs>
   </div>
 </template>
-
 <script>
 import upgrade from '@/components/upgrade'
 import { checkVersion, downloadRemote, uploadAgentFile, uploadAgentFileMerge } from '@/api/node'
@@ -168,13 +177,13 @@ export default {
       groupList: [],
       columns: [
         {
-          title: this.$tl('p.machineName'),
+          title: this.$t('pages.system.upgrade.255211fb'),
           dataIndex: 'name',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$tl('c.nodeAddress'),
+          title: this.$t('pages.system.upgrade.a918ed23'),
           dataIndex: 'jpomUrl',
           sorter: true,
           width: '150px',
@@ -182,51 +191,51 @@ export default {
           tooltip: true
         },
         {
-          title: this.$tl('p.groupName'),
+          title: this.$t('pages.system.upgrade.12d0e469'),
           dataIndex: 'groupName',
           ellipsis: true,
           width: '100px',
           tooltip: true
         },
         {
-          title: this.$tl('p.machineStatus'),
+          title: this.$t('pages.system.upgrade.71ffd54'),
           dataIndex: 'status',
           width: '130px',
           ellipsis: true
         },
         {
-          title: this.$tl('p.cacheVersion'),
+          title: this.$t('pages.system.upgrade.14777df6'),
           dataIndex: 'jpomVersion',
           width: '100px',
           ellipsis: true
         },
         {
-          title: this.$tl('p.realTimeVersion'),
+          title: this.$t('pages.system.upgrade.ff006622'),
           dataIndex: 'version',
           width: '100px',
           ellipsis: true
         },
         {
-          title: this.$tl('p.packingDateTime'),
+          title: this.$t('pages.system.upgrade.14b1dca5'),
           dataIndex: 'timeStamp',
           width: '170px',
           ellipsis: true
         },
         {
-          title: this.$tl('p.runningTime'),
+          title: this.$t('pages.system.upgrade.4a4e5b97'),
           dataIndex: 'upTime',
           width: '110px',
           ellipsis: true
         },
 
         {
-          title: this.$tl('p.updateStatus'),
+          title: this.$t('pages.system.upgrade.9f69259c'),
           dataIndex: 'updateStatus',
           ellipsis: true
         },
         // {title: '自动更新', dataIndex: 'autoUpdate', ellipsis: true,},
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.system.upgrade.3bb962bf'),
           dataIndex: 'operation',
           width: '80px',
 
@@ -234,6 +243,7 @@ export default {
           fixed: 'right'
         }
       ],
+
       nodeVersion: {},
       nodeStatus: {},
       tableSelections: [],
@@ -274,11 +284,8 @@ export default {
     this.close()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.system.upgrade.${key}`, ...args)
-    },
     status_filter(value) {
-      return (value && value) || this.$tl('c.unknown')
+      return (value && value) || this.$t('pages.system.upgrade.5f51a112')
     },
     version_filter(value) {
       return value || '---'
@@ -343,14 +350,14 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: `web socket ${this.$tl('p.error')},${this.$tl('p.checkWsProxy')}`
+          message: `web socket ${this.$t('pages.system.upgrade.d75d207f')},${this.$t('pages.system.upgrade.763330b')}`
         })
       }
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
         clearInterval(this.heart)
-        $message.warning(this.$tl('p.sessionClosed'))
+        $message.warning(this.$t('pages.system.upgrade.8a2aae09'))
       }
     },
     checkAgentFileVersion() {
@@ -393,7 +400,7 @@ export default {
     batchUpdate() {
       if (this.tableSelections.length === 0) {
         $notification.warning({
-          message: this.$tl('p.selectNodesToUpgrade')
+          message: this.$t('pages.system.upgrade.a57f20c2')
         })
         return
       }
@@ -498,33 +505,33 @@ export default {
     updateNode() {
       if (!this.agentVersion) {
         $notification.error({
-          message: this.$tl('p.uploadOrDownloadNewVersion')
+          message: this.$t('pages.system.upgrade.861928db')
         })
         return
       }
       const len = this.tableSelections.length
       const html = `
-        ${this.$tl('p.confirmUpgradeNodes')}
+        ${this.$t('pages.system.upgrade.beb005a')}
         <b style='color:red;font-size: 20px;'>
           ${len}
         </b>
-        ${this.$tl('p.upgradeNodesTo')}
+        ${this.$t('pages.system.upgrade.7c75700')}
         <b style='color:red;font-size: 20px;'>
           ${this.agentVersion || '--'}
         </b>
-        ${this.$tl('p.upgradeConfirmation')}
+        ${this.$t('pages.system.upgrade.b8e15906')}
         <ul style='color:red;'>
-          <li>${this.$tl('p.readUpdateLog')}<b>${this.$tl('c.backupData')}</b></li>
-          <li>${this.$tl('c.manualRecovery')}</li>
-          <li>${this.$tl('p.discourageDowngrade')}</li>
+          <li>${this.$t('pages.system.upgrade.94225c9f')}<b>${this.$t('pages.system.upgrade.3794dd57')}</b></li>
+          <li>${this.$t('pages.system.upgrade.d4b5dacd')}</li>
+          <li>${this.$t('pages.system.upgrade.81be8808')}</li>
         </ul>
       `
       $confirm({
-        title: this.$tl('c.systemPrompt'),
+        title: this.$t('pages.system.upgrade.a8fe4c17'),
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        okText: this.$t('pages.system.upgrade.7da4a591'),
+        cancelText: this.$t('pages.system.upgrade.43105e21'),
         onOk: () => {
           this.sendMsg('updateNode', {
             ids: this.tableSelections,
@@ -536,18 +543,18 @@ export default {
     },
     beforeUpload(file) {
       const html = `
-        ${this.$tl('p.confirmUploadLatestPackage')}
+        ${this.$t('pages.system.upgrade.add6ee25')}
         <ul style='color:red;'>
-          <li>${this.$tl('p.readUploadLog')}<b>${this.$tl('c.backupData')}</b></li>
-          <li>${this.$tl('p.checkPackageIntegrity')}</li>
+          <li>${this.$t('pages.system.upgrade.8d7b0c1f')}<b>${this.$t('pages.system.upgrade.3794dd57')}</b></li>
+          <li>${this.$t('pages.system.upgrade.ec360a25')}</li>
         </ul>
       `
       $confirm({
-        title: this.$tl('c.systemPrompt'),
+        title: this.$t('pages.system.upgrade.a8fe4c17'),
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        okText: this.$t('pages.system.upgrade.7da4a591'),
+        cancelText: this.$t('pages.system.upgrade.43105e21'),
         onOk: () => {
           this.percentage = 0
           uploadPieces({
@@ -607,20 +614,20 @@ export default {
     // 下载远程最新文件
     downloadRemoteEvent() {
       const html = `
-        ${this.$tl('p.confirmDownloadLatestVersion')}
+        ${this.$t('pages.system.upgrade.106295d')}
         <ul style='color:red;'>
-          <li>${this.$tl('p.downloadSpeed')}</li>
-          <li>${this.$tl('p.readDownloadLog')}<b>${this.$tl('c.backupData')}</b></li>
-          <li>${this.$tl('p.manualUpdateAfterDownload')}</li>
-          <li>${this.$tl('c.manualRecovery')}</li>
+          <li>${this.$t('pages.system.upgrade.5e362844')}</li>
+          <li>${this.$t('pages.system.upgrade.3e3c1748')}<b>${this.$t('pages.system.upgrade.3794dd57')}</b></li>
+          <li>${this.$t('pages.system.upgrade.8b2df049')}</li>
+          <li>${this.$t('pages.system.upgrade.d4b5dacd')}</li>
         </ul>
       `
       $confirm({
-        title: this.$tl('c.systemPrompt'),
+        title: this.$t('pages.system.upgrade.a8fe4c17'),
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        okText: this.$t('pages.system.upgrade.7da4a591'),
+        cancelText: this.$t('pages.system.upgrade.43105e21'),
         onOk: () => {
           return downloadRemote().then((res) => {
             if (res.code === 200) {

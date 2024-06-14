@@ -1,52 +1,57 @@
 <template>
   <div>
     <a-space direction="vertical" style="width: 100%">
-      <a-alert :message="$tl('p.warmReminder')" type="info" show-icon>
+      <a-alert :message="$t('pages.dispatch.white-list.30376d6d')" type="info" show-icon>
         <template #description>
           <ul>
-            <li>{{ $tl('p.distributionAuthorizationPathConfig') }}</li>
-            <li>{{ $tl('p.absolutePathRequired') }}</li>
+            <li>{{ $t('pages.dispatch.white-list.82002fa4') }}</li>
+            <li>{{ $t('pages.dispatch.white-list.468a7b4d') }}</li>
           </ul>
         </template>
       </a-alert>
       <!-- <a-alert message=",不支持软链" type="info" /> -->
 
       <a-form ref="editForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }" @finish="onSubmit">
-        <a-form-item :label="$tl('p.authorizationPath')" name="outGiving">
-          <template #help>{{ $tl('p.usageForCreatingDistributionProjects') }}</template>
+        <a-form-item :label="$t('pages.dispatch.white-list.87db3fab')" name="outGiving">
+          <template #help>{{ $t('pages.dispatch.white-list.ce6ec671') }}</template>
           <a-textarea
             v-model:value="temp.outGiving"
             :rows="5"
             style="resize: none"
-            :placeholder="$tl('p.inputAuthorizationPath')"
+            :placeholder="$t('pages.dispatch.white-list.b3f9e000')"
           />
         </a-form-item>
-        <a-form-item :label="$tl('p.staticDirectory')" name="staticDir">
-          <template #help>{{ $tl('p.usageForStaticFileBindingAndReading') }}</template>
+        <a-form-item :label="$t('pages.dispatch.white-list.b9e442da')" name="staticDir">
+          <template #help>{{ $t('pages.dispatch.white-list.e6655bef') }}</template>
           <a-textarea
             v-model:value="temp.staticDir"
             :rows="5"
             style="resize: none"
-            :placeholder="$tl('p.inputStaticPaths')"
+            :placeholder="$t('pages.dispatch.white-list.8190377f')"
           />
         </a-form-item>
-        <a-form-item :label="$tl('p.remoteDownloadSecureHost')" name="allowRemoteDownloadHost">
-          <template #help>{{ $tl('p.usageForDownloadingRemoteFiles') }}</template>
+        <a-form-item :label="$t('pages.dispatch.white-list.b850dd8a')" name="allowRemoteDownloadHost">
+          <template #help>{{ $t('pages.dispatch.white-list.cb53f096') }}</template>
           <a-textarea
             v-model:value="temp.allowRemoteDownloadHost"
             :rows="5"
             style="resize: none"
-            :placeholder="`${$tl('p.inputRemoteDownloadSecureHosts')}://www.test.com 等`"
+            :placeholder="
+              $t('pages.dispatch.white-list.99c74010', {
+                slot1: $t('pages.dispatch.white-list.a2b2c7e5')
+              })
+            "
           />
         </a-form-item>
         <a-form-item :wrapper-col="{ span: 14, offset: 6 }">
-          <a-button type="primary" html-type="submit" :disabled="submitAble">{{ $tl('p.submit') }}</a-button>
+          <a-button type="primary" html-type="submit" :disabled="submitAble">{{
+            $t('pages.dispatch.white-list.d8031ed8')
+          }}</a-button>
         </a-form-item>
       </a-form>
     </a-space>
   </div>
 </template>
-
 <script>
 import { getDispatchWhiteList, editDispatchWhiteList } from '@/api/dispatch'
 export default {
@@ -67,9 +72,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.dispatch.whiteList.${key}`, ...args)
-    },
     // load data
     loadData() {
       this.loading = true

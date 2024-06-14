@@ -15,6 +15,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseJpomController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.data.AgentWhitelist;
 import org.dromara.jpom.service.WhitelistDirectoryService;
 import org.springframework.http.MediaType;
@@ -52,9 +53,9 @@ public class WhitelistDirectoryController extends BaseJpomController {
 
 
                                                          String allowEditSuffix) {
-        List<String> list = AgentWhitelist.parseToList(project, true, "项目路径授权不能为空");
+        List<String> list = AgentWhitelist.parseToList(project, true, I18nMessageUtil.get("i18n.project_path_auth_required.9e58"));
         //
-        List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, "允许编辑的文件后缀不能为空");
+        List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, I18nMessageUtil.get("i18n.suffix_cannot_be_empty.ec72"));
         return save(list, allowEditSuffixList);
     }
 
@@ -64,9 +65,9 @@ public class WhitelistDirectoryController extends BaseJpomController {
                                      List<String> allowEditSuffixList) {
         List<String> projectArray;
         {
-            projectArray = AgentWhitelist.covertToArray(projects, "项目路径授权不能位于Jpom目录下");
+            projectArray = AgentWhitelist.covertToArray(projects, I18nMessageUtil.get("i18n.project_path_auth_not_under_jpom.0e18"));
             String error = findStartsWith(projectArray);
-            Assert.isNull(error, "授权目录中不能存在包含关系：" + error);
+            Assert.isNull(error, I18nMessageUtil.get("i18n.auth_directory_cannot_contain_hierarchy.d6ca") + error);
         }
 
         //
@@ -78,7 +79,7 @@ public class WhitelistDirectoryController extends BaseJpomController {
                     try {
                         CharsetUtil.charset(last);
                     } catch (Exception e) {
-                        throw new IllegalArgumentException("配置的字符编码格式不合法：" + s);
+                        throw new IllegalArgumentException(I18nMessageUtil.get("i18n.illegal_character_encoding_format.af7a") + s);
                     }
                 }
             }
@@ -89,7 +90,7 @@ public class WhitelistDirectoryController extends BaseJpomController {
         agentWhitelist.setProject(projectArray);
         agentWhitelist.setAllowEditSuffix(allowEditSuffixList);
         whitelistDirectoryService.saveWhitelistDirectory(agentWhitelist);
-        return new JsonMessage<>(200, "保存成功");
+        return new JsonMessage<>(200, I18nMessageUtil.get("i18n.save_succeeded.3b10"));
     }
 
     /**

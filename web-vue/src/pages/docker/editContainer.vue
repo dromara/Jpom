@@ -52,21 +52,27 @@
           <!-- // tx_bytes 网卡输出流量 -->
           <a-descriptions-item label="NET I/O rx">
             <div v-for="(item, index) in Object.keys(statsData.networks || {})" :key="index">
-              <a-tooltip :title="`${item} ${$tl('p.receive')}`">
+              <a-tooltip :title="`${item} ${$t('pages.docker.editContainer.8494950')}`">
                 {{ renderSize(statsData.networks[item] && statsData.networks[item].rxBytes) || 0 }}
               </a-tooltip>
             </div>
           </a-descriptions-item>
           <a-descriptions-item label="NET I/O tx">
             <div v-for="(item, index) in Object.keys(statsData.networks || {})" :key="index">
-              <a-tooltip :title="`${item} ${$tl('p.transmit')}`">
+              <a-tooltip :title="`${item} ${$t('pages.docker.editContainer.3365cdae')}`">
                 {{ renderSize(statsData.networks[item] && statsData.networks[item].txBytes) || 0 }}
               </a-tooltip>
             </div>
           </a-descriptions-item>
           <a-descriptions-item label="BLOCK I/O">
             <a-tooltip
-              :title="`${(statsData.blkioStats && statsData.blkioStats.ioServiceBytesRecursive && statsData.blkioStats.ioServiceBytesRecursive[0] && statsData.blkioStats.ioServiceBytesRecursive[0].op) || 'blkioStats'}`"
+              :title="`${
+                (statsData.blkioStats &&
+                  statsData.blkioStats.ioServiceBytesRecursive &&
+                  statsData.blkioStats.ioServiceBytesRecursive[0] &&
+                  statsData.blkioStats.ioServiceBytesRecursive[0].op) ||
+                'blkioStats'
+              }`"
             >
               {{
                 renderSize(
@@ -79,7 +85,13 @@
             </a-tooltip>
             /
             <a-tooltip
-              :title="`${(statsData.blkioStats && statsData.blkioStats.ioServiceBytesRecursive && statsData.blkioStats.ioServiceBytesRecursive[1] && statsData.blkioStats.ioServiceBytesRecursive[1].op) || 'blkioStats'}`"
+              :title="`${
+                (statsData.blkioStats &&
+                  statsData.blkioStats.ioServiceBytesRecursive &&
+                  statsData.blkioStats.ioServiceBytesRecursive[1] &&
+                  statsData.blkioStats.ioServiceBytesRecursive[1].op) ||
+                'blkioStats'
+              }`"
             >
               {{
                 renderSize(
@@ -102,107 +114,134 @@
         <a-form ref="editForm" :model="temp" :label-col="{ span: 7 }" :wrapper-col="{ span: 17 }">
           <a-form-item name="blkioWeight">
             <template #label>
-              Block IO {{ $tl('c.weight') }}
+              Block IO {{ $t('pages.docker.editContainer.12cbce12') }}
               <a-tooltip>
-                <template #title> Block IO {{ $tl('p.weight') }} </template>
+                <template #title> Block IO {{ $t('pages.docker.editContainer.e0fff8da') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
             <a-input-number
               v-model:value="temp.blkioWeight"
               style="width: 100%"
-              :placeholder="$tl('p.blockIOWeight')"
+              :placeholder="$t('pages.docker.editContainer.867f55f9')"
               :min="0"
               :max="1000"
             />
           </a-form-item>
           <a-form-item name="cpuShares">
             <template #label>
-              CPU {{ $tl('c.weight') }}
+              CPU {{ $t('pages.docker.editContainer.12cbce12') }}
               <a-tooltip>
-                <template #title> {{ $tl('c.cpuPeriod') }} </template>
+                <template #title> {{ $t('pages.docker.editContainer.f71d1b90') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
-            <a-input-number v-model:value="temp.cpuShares" style="width: 100%" :placeholder="$tl('c.cpuPeriod')" />
+            <a-input-number
+              v-model:value="temp.cpuShares"
+              style="width: 100%"
+              :placeholder="$t('pages.docker.editContainer.f71d1b90')"
+            />
           </a-form-item>
           <a-form-item name="cpusetCpus">
             <template #label>
-              {{ $tl('p.cpuSetCPUs') }}
+              {{ $t('pages.docker.editContainer.83d7b20') }}
               <a-tooltip>
-                <template #title> {{ $tl('p.cpuSetCPUsString') }},1）。 </template>
+                <template #title> {{ $t('pages.docker.editContainer.1cee12b3') }},1）。 </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
             <a-input
               v-model:value="temp.cpusetCpus"
               style="width: 100%"
-              placeholder="允许执行的 CPU（例如，0-3、0,1）。"
+              :placeholder="$t('pages.docker.editContainer.80a60c2e')"
             />
           </a-form-item>
           <a-form-item name="cpusetMems">
             <template #label>
               CpusetMems
               <a-tooltip>
-                <template #title> {{ $tl('p.cpuSetMEMs') }} (MEM) (0-3, 0,1)。 仅在 NUMA 系统上有效。 </template>
+                <template #title>
+                  {{ $t('pages.docker.editContainer.7014f5d1')
+                  }}{{ $t('pages.docker.editContainer.937d5c60') }}</template
+                >
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
-            <a-input v-model:value="temp.cpusetMems" style="width: 100%" :placeholder="$tl('p.cpuSetMEMsString')" />
+            <a-input
+              v-model:value="temp.cpusetMems"
+              style="width: 100%"
+              :placeholder="$t('pages.docker.editContainer.4b2e0fa0')"
+            />
           </a-form-item>
           <a-form-item name="cpuPeriod">
             <template #label>
-              CPU {{ $tl('p.period') }}
+              CPU {{ $t('pages.docker.editContainer.228ab355') }}
               <a-tooltip>
-                <template #title> CPU {{ $tl('p.periodUsec') }} </template>
+                <template #title> CPU {{ $t('pages.docker.editContainer.68d6d779') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
-            <a-input-number v-model:value="temp.cpuPeriod" style="width: 100%" :placeholder="$tl('p.cpuPeriodUsec')" />
+            <a-input-number
+              v-model:value="temp.cpuPeriod"
+              style="width: 100%"
+              :placeholder="$t('pages.docker.editContainer.63880a25')"
+            />
           </a-form-item>
           <a-form-item name="cpuQuota">
             <template #label>
-              CPU {{ $tl('p.quota') }}
+              CPU {{ $t('pages.docker.editContainer.e69c93e3') }}
               <a-tooltip>
-                <template #title> {{ $tl('c.cpuQuota') }} </template>
+                <template #title> {{ $t('pages.docker.editContainer.1175b2c1') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
-            <a-input-number v-model:value="temp.cpuQuota" style="width: 100%" :placeholder="$tl('c.cpuQuota')" />
+            <a-input-number
+              v-model:value="temp.cpuQuota"
+              style="width: 100%"
+              :placeholder="$t('pages.docker.editContainer.1175b2c1')"
+            />
           </a-form-item>
 
           <a-form-item name="memory">
             <template #label>
-              {{ $tl('p.memoryLimit') }}
+              {{ $t('pages.docker.editContainer.63465f7d') }}
               <a-tooltip>
-                <template #title> {{ $tl('c.memory') }} </template>
+                <template #title> {{ $t('pages.docker.editContainer.ff6baf66') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
-            <a-input v-model:value="temp.memory" style="width: 100%" :placeholder="$tl('c.memory')" />
+            <a-input
+              v-model:value="temp.memory"
+              style="width: 100%"
+              :placeholder="$t('pages.docker.editContainer.ff6baf66')"
+            />
           </a-form-item>
           <a-form-item name="memorySwap">
             <template #label>
-              {{ $tl('p.memoryTotal') }}
+              {{ $t('pages.docker.editContainer.deff5643') }}
               <a-tooltip>
-                <template #title> {{ $tl('c.memorySwap') }} </template>
+                <template #title> {{ $t('pages.docker.editContainer.e2c3c53c') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
-            <a-input v-model:value="temp.memorySwap" style="width: 100%" :placeholder="$tl('c.memorySwap')" />
+            <a-input
+              v-model:value="temp.memorySwap"
+              style="width: 100%"
+              :placeholder="$t('pages.docker.editContainer.e2c3c53c')"
+            />
           </a-form-item>
           <a-form-item name="memoryReservation">
             <template #label>
-              {{ $tl('p.memorySoftLimit') }}
+              {{ $t('pages.docker.editContainer.d117a15f') }}
               <a-tooltip>
-                <template #title> {{ $tl('c.memorySoftLimit') }} </template>
+                <template #title> {{ $t('pages.docker.editContainer.95dc63a6') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
             <a-input
               v-model:value="temp.memoryReservation"
               style="width: 100%"
-              :placeholder="$tl('c.memorySoftLimit')"
+              :placeholder="$t('pages.docker.editContainer.95dc63a6')"
             />
           </a-form-item>
         </a-form>
@@ -210,7 +249,6 @@
     </a-row>
   </div>
 </template>
-
 <script>
 import { dockerContainerStats, dockerInspectContainer, dockerUpdateContainer } from '@/api/docker-api'
 import { renderSize } from '@/utils/const'
@@ -250,9 +288,6 @@ export default {
     this.editContainer()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.docker.editContainer.${key}`, ...args)
-    },
     renderSize,
     // 编辑容器
     editContainer() {

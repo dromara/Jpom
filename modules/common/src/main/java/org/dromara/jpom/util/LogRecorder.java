@@ -19,10 +19,14 @@ import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.log.ILogRecorder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.exception.LogRecorderCloseException;
 import org.springframework.util.Assert;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.nio.charset.Charset;
 
 /**
@@ -173,7 +177,7 @@ public class LogRecorder extends OutputStream implements ILogRecorder, AutoClose
     }
 
     public long size() {
-        Assert.notNull(writer, "日志记录器未启用");
+        Assert.notNull(writer, I18nMessageUtil.get("i18n.log_recorder_not_enabled.5a4e"));
         return FileUtil.size(this.file);
     }
 

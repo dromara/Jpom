@@ -145,6 +145,11 @@ public enum NodeUrl {
     //    Script_Upload("/script/upload.json"),
     Script_Del("/script/del.json"),
 
+    SCRIPT_LIBRARY_LIST("/script-library/list"),
+    SCRIPT_LIBRARY_DEL("/script-library/del"),
+    SCRIPT_LIBRARY_SAVE("/script-library/save"),
+    SCRIPT_LIBRARY_GET("/script-library/get"),
+
     /**
      * Workspace
      */

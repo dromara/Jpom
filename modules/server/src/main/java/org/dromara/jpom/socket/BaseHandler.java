@@ -15,6 +15,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.BaseNodeModel;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.user.UserModel;
@@ -57,7 +58,7 @@ public abstract class BaseHandler extends TextWebSocketHandler {
     protected void showHelloMsg(Map<String, Object> attributes, WebSocketSession session) {
         UserModel userInfo = (UserModel) attributes.get("userInfo");
         if (userInfo != null) {
-            String payload = StrUtil.format("欢迎加入:{} 会话id:{} ", userInfo.getName(), session.getId() + StrUtil.CRLF);
+            String payload = StrUtil.format(I18nMessageUtil.get("i18n.welcome_join_session.1c16"), userInfo.getName(), session.getId() + StrUtil.CRLF);
             this.sendMsg(session, payload);
         }
     }
@@ -76,14 +77,14 @@ public abstract class BaseHandler extends TextWebSocketHandler {
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) {
-        log.error(session.getId() + "socket 异常", exception);
+        log.error(session.getId() + I18nMessageUtil.get("i18n.socket_exception.d836"), exception);
         destroy(session);
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         destroy(session);
-        log.debug("会话[{}]关闭原因：{}", session.getId(), status);
+        log.debug(I18nMessageUtil.get("i18n.session_closed_reason.103a"), session.getId(), status);
     }
 
     /**
@@ -97,7 +98,7 @@ public abstract class BaseHandler extends TextWebSocketHandler {
         try {
             SocketSessionUtil.send(session, msg);
         } catch (Exception e) {
-            log.error("发送消息失败", e);
+            log.error(I18nMessageUtil.get("i18n.send_message_failure.9621"), e);
         }
     }
 
@@ -148,7 +149,7 @@ public abstract class BaseHandler extends TextWebSocketHandler {
             OperateLogController operateLogController = SpringUtil.getBean(OperateLogController.class);
             operateLogController.log(userInfo, JSONObject.toJSONString(attributes), cacheInfo);
         } catch (Exception e) {
-            log.error("记录操作日志异常", e);
+            log.error(I18nMessageUtil.get("i18n.record_operation_log_exception.8012"), e);
         } finally {
             if (proxySession != null) {
                 attributes.put("proxySession", proxySession);

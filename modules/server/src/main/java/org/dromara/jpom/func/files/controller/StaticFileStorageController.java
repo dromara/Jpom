@@ -17,6 +17,7 @@ import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.ServerOpenApi;
 import org.dromara.jpom.common.UrlRedirectUtil;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.func.files.model.StaticFileStorageModel;
 import org.dromara.jpom.func.files.service.FileStorageService;
@@ -83,7 +84,7 @@ public class StaticFileStorageController extends BaseServerController {
         for (String s : list) {
             this.delItem(s, thorough, request);
         }
-        return JsonMessage.success("删除成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 
     /**
@@ -146,7 +147,8 @@ public class StaticFileStorageController extends BaseServerController {
             updateInfo = item;
         }
         Map<String, String> map = this.getBuildToken(updateInfo, request);
-        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
+        String string = I18nMessageUtil.get("i18n.reset_success.faa3");
+        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : string, map);
     }
 
     private Map<String, String> getBuildToken(StaticFileStorageModel item, HttpServletRequest request) {
@@ -175,7 +177,7 @@ public class StaticFileStorageController extends BaseServerController {
         fileStorageModel.setId(id);
         fileStorageModel.setDescription(description);
         staticFileStorageService.updateById(fileStorageModel);
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 
     /**
@@ -201,9 +203,9 @@ public class StaticFileStorageController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<String> scanner(HttpServletRequest request) {
         boolean scanning = staticFileStorageService.isScanning();
-        Assert.state(!scanning, "当前正在扫描中");
+        Assert.state(!scanning, I18nMessageUtil.get("i18n.scanning_in_progress.7444"));
         String workspace = fileStorageService.getCheckUserWorkspace(request);
         staticFileStorageService.scanByWorkspace(workspace);
-        return JsonMessage.success("扫描成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.scan_succeeded.7975"));
     }
 }

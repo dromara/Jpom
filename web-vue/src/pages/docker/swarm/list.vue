@@ -1,10 +1,10 @@
 <template>
   <div>
     <template v-if="useSuggestions">
-      <a-result :title="$tl('p.noDockerCluster')" :sub-title="$tl('p.goToAddDocker')">
+      <a-result :title="$t('pages.docker.swarm.list.67b40edb')" :sub-title="$t('pages.docker.swarm.list.b037a0fc')">
         <template #extra>
           <router-link to="/system/assets/docker-list">
-            <a-button key="console" type="primary">现在就去</a-button></router-link
+            <a-button key="console" type="primary">{{ $t('pages.docker.swarm.list.356927eb') }}</a-button></router-link
           >
         </template>
       </a-result>
@@ -15,7 +15,7 @@
       default-auto-refresh
       :auto-refresh-time="5"
       table-name="docker-swarm-list"
-      empty-description="没有docker集群"
+      :empty-description="$t('pages.docker.swarm.list.e33acb4f')"
       :active-page="activePage"
       size="middle"
       :data-source="list"
@@ -32,18 +32,20 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$tl('c.name')"
+            :placeholder="$t('pages.docker.swarm.list.3e34ec28')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%tag%']"
-            :placeholder="$tl('c.tag')"
+            :placeholder="$t('pages.docker.swarm.list.a4954c1c')"
             class="search-input-item"
             @press-enter="loadData"
           />
-          <a-tooltip :title="$tl('p.goToFirstPage')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $tl('p.search') }}</a-button>
+          <a-tooltip :title="$t('pages.docker.swarm.list.1bfed54a')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{
+              $t('pages.docker.swarm.list.53c2763c')
+            }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -56,14 +58,16 @@
         </template>
         <template v-else-if="column.dataIndex instanceof Array && column.dataIndex.includes('status')">
           <template v-if="record.machineDocker">
-            <a-tag v-if="record.machineDocker.status === 1" color="green">{{ $tl('p.normal') }}</a-tag>
+            <a-tag v-if="record.machineDocker.status === 1" color="green">{{
+              $t('pages.docker.swarm.list.c6b7c57f')
+            }}</a-tag>
             <a-tooltip v-else :title="record.machineDocker.failureMsg">
-              <a-tag color="red">{{ $tl('p.unableToConnect') }}</a-tag>
+              <a-tag color="red">{{ $t('pages.docker.swarm.list.921c8b81') }}</a-tag>
             </a-tooltip>
           </template>
 
-          <a-tooltip v-else :title="$tl('p.lostClusterInfo')">
-            <a-tag color="red">{{ $tl('p.lostInfo') }}</a-tag>
+          <a-tooltip v-else :title="$t('pages.docker.swarm.list.f27fdcf3')">
+            <a-tag color="red">{{ $t('pages.docker.swarm.list.6e514532') }}</a-tag>
           </a-tooltip>
         </template>
 
@@ -75,23 +79,31 @@
                 :disabled="record.machineDocker.status !== 1"
                 type="primary"
                 @click="handleConsole(record, 'server')"
-                >{{ $tl('c.service') }}</a-button
+                >{{ $t('pages.docker.swarm.list.13ea9c07') }}</a-button
               >
               <a-button
                 size="small"
                 :disabled="record.machineDocker.status !== 1"
                 type="primary"
                 @click="handleConsole(record, 'node')"
-                >{{ $tl('c.node') }}</a-button
+                >{{ $t('pages.docker.swarm.list.e5687a6b') }}</a-button
               >
             </template>
             <template v-else>
-              <a-button size="small" :disabled="true" type="primary">{{ $tl('c.service') }}</a-button>
-              <a-button size="small" :disabled="true" type="primary">{{ $tl('c.node') }}</a-button>
+              <a-button size="small" :disabled="true" type="primary">{{
+                $t('pages.docker.swarm.list.13ea9c07')
+              }}</a-button>
+              <a-button size="small" :disabled="true" type="primary">{{
+                $t('pages.docker.swarm.list.e5687a6b')
+              }}</a-button>
             </template>
 
-            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('p.edit') }}</a-button>
-            <a-button size="small" type="primary" danger @click="handleDelete(record)">{{ $tl('p.delete') }}</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{
+              $t('pages.docker.swarm.list.64603c01')
+            }}</a-button>
+            <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
+              $t('pages.docker.swarm.list.dd20d11c')
+            }}</a-button>
           </a-space>
         </template>
       </template>
@@ -101,17 +113,17 @@
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$tl('p.editDockerCluster')"
+      :title="$t('pages.docker.swarm.list.c34f0c3a')"
       :mask-closable="false"
       @ok="handleEditOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$tl('p.clusterName')" name="name">
-          <a-input v-model:value="temp.name" :placeholder="$tl('p.containerName')" />
+        <a-form-item :label="$t('pages.docker.swarm.list.c2dfe194')" name="name">
+          <a-input v-model:value="temp.name" :placeholder="$t('pages.docker.swarm.list.98c4138b')" />
         </a-form-item>
 
-        <a-form-item :label="$tl('c.tag')" name="tag"
-          ><a-input v-model:value="temp.tag" :placeholder="$tl('p.associatedContainerTag')" />
+        <a-form-item :label="$t('pages.docker.swarm.list.a4954c1c')" name="tag"
+          ><a-input v-model:value="temp.tag" :placeholder="$t('pages.docker.swarm.list.e50751c6')" />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -144,7 +156,6 @@
     <!-- </a-drawer> -->
   </div>
 </template>
-
 <script>
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 import { dockerSwarmList, editDockerSwarm, delSwarm } from '@/api/docker-swarm'
@@ -167,40 +178,40 @@ export default {
       consoleVisible: false,
       columns: [
         {
-          title: this.$tl('c.name'),
+          title: this.$t('pages.docker.swarm.list.3e34ec28'),
           dataIndex: 'name',
           ellipsis: true,
           tooltip: true
         },
 
         {
-          title: this.$tl('p.clusterID'),
+          title: this.$t('pages.docker.swarm.list.12a8d4cf'),
           dataIndex: 'swarmId',
           ellipsis: true,
           align: 'center',
           tooltip: true
         },
         {
-          title: this.$tl('p.containerTag'),
+          title: this.$t('pages.docker.swarm.list.e83d88b9'),
           dataIndex: 'tag',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$tl('p.status'),
+          title: this.$t('pages.docker.swarm.list.9c32c887'),
           dataIndex: ['machineDocker', 'status'],
           ellipsis: true,
           align: 'center',
           width: '100px'
         },
         {
-          title: this.$tl('p.lastModifier'),
+          title: this.$t('pages.docker.swarm.list.49942d36'),
           dataIndex: 'modifyUser',
           width: 120,
           ellipsis: true
         },
         {
-          title: this.$tl('p.modificationTime'),
+          title: this.$t('pages.docker.swarm.list.61164914'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -208,7 +219,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$tl('p.clusterCreationTime'),
+          title: this.$t('pages.docker.swarm.list.fb7465c4'),
           dataIndex: ['machineDocker', 'swarmCreatedAt'],
           sorter: true,
           ellipsis: true,
@@ -216,7 +227,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$tl('p.clusterModificationTime'),
+          title: this.$t('pages.docker.swarm.list.a0835704'),
           dataIndex: ['machineDocker', 'swarmUpdatedAt'],
           sorter: true,
           ellipsis: true,
@@ -224,20 +235,21 @@ export default {
           width: '170px'
         },
         {
-          title: this.$tl('p.operation'),
+          title: this.$t('pages.docker.swarm.list.3bb962bf'),
           dataIndex: 'operation',
           fixed: 'right',
           align: 'center',
           width: '220px'
         }
       ],
+
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
-        name: [{ required: true, message: this.$tl('p.pleaseFillClusterName'), trigger: 'blur' }],
+        name: [{ required: true, message: this.$t('pages.docker.swarm.list.b9de83e8'), trigger: 'blur' }],
 
         tag: [
-          { required: true, message: this.$tl('p.pleaseFillAssociatedContainerTag'), trigger: 'blur' },
-          { pattern: /^\w{1,10}$/, message: this.$tl('p.tagLimitation') }
+          { required: true, message: this.$t('pages.docker.swarm.list.226cdc3a'), trigger: 'blur' },
+          { pattern: /^\w{1,10}$/, message: this.$t('pages.docker.swarm.list.9976c029') }
         ]
       },
       confirmLoading: false
@@ -276,9 +288,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.docker.swarm.list.${key}`, ...args)
-    },
     // 加载数据
     loadData(pointerEvent) {
       this.loading = true
@@ -331,11 +340,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$tl('p.systemPrompt'),
+        title: this.$t('pages.docker.swarm.list.b22d55a0'),
         zIndex: 1009,
-        content: this.$tl('p.confirmDelete'),
-        okText: this.$tl('p.confirm'),
-        cancelText: this.$tl('p.cancel'),
+        content: this.$t('pages.docker.swarm.list.987c2cd6'),
+        okText: this.$t('pages.docker.swarm.list.e8e9db25'),
+        cancelText: this.$t('pages.docker.swarm.list.b12468e9'),
         onOk: () => {
           return delSwarm({
             id: record.id

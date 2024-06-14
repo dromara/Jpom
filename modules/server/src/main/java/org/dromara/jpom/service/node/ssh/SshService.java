@@ -22,12 +22,13 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.assets.server.MachineSshServer;
 import org.dromara.jpom.model.data.SshModel;
 import org.dromara.jpom.plugins.JschLogger;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
-import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.util.LogRecorder;
 import org.dromara.jpom.util.MySftp;
 import org.springframework.context.annotation.Lazy;
@@ -111,7 +112,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
      */
     public MachineSshModel getMachineSshModel(SshModel sshModel) {
         MachineSshModel sshModel1 = machineSshServer.getByKey(sshModel.getMachineSshId(), false);
-        Assert.notNull(sshModel1, "不存在对应的资产SSH");
+        Assert.notNull(sshModel1, I18nMessageUtil.get("i18n.asset_ssh_not_exist.cd43"));
         return sshModel1;
     }
 
@@ -176,13 +177,13 @@ public class SshService extends BaseWorkspaceService<SshModel> {
         StrUtil.splitTrim(ids, StrUtil.COMMA)
             .forEach(id -> {
                 SshModel data = super.getByKey(id, false, entity -> entity.set("workspaceId", nowWorkspaceId));
-                Assert.notNull(data, "没有对应的ssh信息");
+                Assert.notNull(data, I18nMessageUtil.get("i18n.no_corresponding_ssh_info.d864"));
                 //
                 SshModel where = new SshModel();
                 where.setWorkspaceId(workspaceId);
                 where.setMachineSsh(data.getMachineSsh());
                 SshModel sshModel = super.queryByBean(where);
-                Assert.isNull(sshModel, "对应的工作空间已经存在当前 SSH 啦");
+                Assert.isNull(sshModel, I18nMessageUtil.get("i18n.workspace_ssh_already_exists.ccc0"));
                 // 不存在则添加 信息
                 data.setId(null);
                 data.setWorkspaceId(workspaceId);
@@ -213,7 +214,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
         where.setWorkspaceId(workspaceId);
         where.setMachineSshId(machineSshId);
         SshModel data = this.queryByBean(where);
-        Assert.isNull(data, () -> "对应工作空间已经存在该 ssh 啦:" + data.getName());
+        Assert.isNull(data, () -> I18nMessageUtil.get("i18n.ssh_already_exists_in_workspace.569e") + data.getName());
     }
 
     public boolean existsSsh2(String workspaceId, String machineSshId) {
@@ -253,7 +254,7 @@ public class SshService extends BaseWorkspaceService<SshModel> {
                 int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
                 if (progressRangeList.add(progressRange)) {
                     //  total, progressSize
-                    logRecorder.system("上传文件进度:{} {}/{} {} ", desc,
+                    logRecorder.system(I18nMessageUtil.get("i18n.upload_progress_with_units.44ad"), desc,
                         FileUtil.readableFileSize(now), FileUtil.readableFileSize(max),
                         NumberUtil.formatPercent(((float) now / max), 0)
                     );

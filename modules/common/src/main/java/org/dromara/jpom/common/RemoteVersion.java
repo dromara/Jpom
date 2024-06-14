@@ -19,6 +19,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -62,10 +63,10 @@ public class RemoteVersion extends cn.keepbx.jpom.RemoteVersion {
      */
     public static Tuple download(String savePath, Type type, boolean checkRepeat) throws IOException {
         cn.keepbx.jpom.RemoteVersion remoteVersion = loadRemoteInfo();
-        Assert.notNull(remoteVersion, "没有可用的新版本升级:-1");
+        Assert.notNull(remoteVersion, I18nMessageUtil.get("i18n.no_available_new_version_upgrade.d8f2"));
         // 检查是否存在下载地址
         String remoteUrl = type.getRemoteUrl(remoteVersion);
-        Assert.hasText(remoteUrl, "存在新版本,下载地址不可用");
+        Assert.hasText(remoteUrl, I18nMessageUtil.get("i18n.new_version_exists_download_unavailable.4ba7"));
         // 下载
         File downloadFileFromUrl = HttpUtil.downloadFileFromUrl(remoteUrl, savePath);
         // 解析压缩包

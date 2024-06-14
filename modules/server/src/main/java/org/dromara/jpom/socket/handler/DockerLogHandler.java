@@ -22,6 +22,7 @@ import cn.keepbx.jpom.model.JsonMessage;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.model.user.UserModel;
@@ -62,7 +63,7 @@ public class DockerLogHandler extends BaseProxyHandler {
         Object machineData = attributes.get("machineDocker");
         String dataName = BeanUtil.getProperty(data, "name");
         String machineDataName = BeanUtil.getProperty(machineData, "name");
-        this.sendMsg(session, "连接成功：" + StrUtil.emptyToDefault(dataName, machineDataName) + StrUtil.CRLF);
+        this.sendMsg(session, I18nMessageUtil.get("i18n.connection_successful_with_message.5cf2") + StrUtil.emptyToDefault(dataName, machineDataName) + StrUtil.CRLF);
     }
 
     public DockerLogHandler() {
@@ -90,7 +91,7 @@ public class DockerLogHandler extends BaseProxyHandler {
             int tail = json.getIntValue("tail");
             UserModel userModel = (UserModel) attributes.get("userInfo");
             if (userModel == null) {
-                return "用户不存在";
+                return I18nMessageUtil.get("i18n.user_not_exist.4892");
             }
             if (tail > 0) {
                 map.put("tail", tail);
@@ -103,12 +104,12 @@ public class DockerLogHandler extends BaseProxyHandler {
                     logRecorder.append(s);
                     SocketSessionUtil.send(session, s);
                 } catch (IOException e) {
-                    log.error("发消息异常", e);
+                    log.error(I18nMessageUtil.get("i18n.send_message_exception.7817"), e);
                 }
             };
             attributes.put("uuid", uuid);
             attributes.put("logRecorder", logRecorder);
-            map.put("uuid", attributes.get("uuid"));
+            map.put("uuid", uuid);
             map.put("charset", CharsetUtil.CHARSET_UTF_8);
             map.put("consumer", consumer);
             map.put("timestamps", json.getBoolean("timestamps"));
@@ -118,14 +119,14 @@ public class DockerLogHandler extends BaseProxyHandler {
                 try {
                     plugin.execute("logContainer", map);
                 } catch (Exception e) {
-                    log.error("拉取 容器日志异常", e);
+                    log.error(I18nMessageUtil.get("i18n.container_log_fetch_exception.591a"), e);
                     try {
-                        SocketSessionUtil.send(session, "执行异常:" + e.getMessage());
+                        SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.execution_exception_message.ef79") + e.getMessage());
                     } catch (IOException ex) {
-                        log.error("发消息异常", e);
+                        log.error(I18nMessageUtil.get("i18n.send_message_exception.7817"), e);
                     }
                 }
-                log.debug("docker log 线程结束：{} {}", dockerInfoModel.getName(), attributes.get("uuid"));
+                log.debug(I18nMessageUtil.get("i18n.docker_log_thread_ended.8230"), dockerInfoModel.getName(), uuid);
             });
             SocketSessionUtil.send(session, JsonMessage.getString(200, "JPOM_MSG_UUID", uuid));
         } else {
@@ -146,7 +147,7 @@ public class DockerLogHandler extends BaseProxyHandler {
             Map<String, Object> map = MapUtil.of("uuid", uuid);
             plugin.execute("closeAsyncResource", map);
         } catch (Exception e) {
-            log.error("关闭资源失败", e);
+            log.error(I18nMessageUtil.get("i18n.close_resource_failure.dc66"), e);
         }
         LogRecorder logRecorder = (LogRecorder) attributes.get("logRecorder");
         IoUtil.close(logRecorder);

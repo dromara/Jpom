@@ -11,6 +11,7 @@ package org.dromara.jpom.util;
 
 import cn.hutool.core.map.SafeConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.springframework.util.unit.DataSize;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
@@ -54,7 +55,7 @@ public class SocketSessionUtil {
     public static boolean send(WebSocketSession session, WebSocketMessage<?> message) throws IOException {
         if (!session.isOpen()) {
             // 会话关闭不能发送消息 @author jzy 21-08-04
-            log.warn("会话已经关闭啦，不能发送消息：{}", message.getPayload());
+            log.warn(I18nMessageUtil.get("i18n.session_already_closed.8dcc"), message.getPayload());
             return false;
         }
         WebSocketSession webSocketSession = SOCKET_MAP.computeIfAbsent(session.getId(), s -> new ConcurrentWebSocketSessionDecorator(session, 60 * 1000, (int) DataSize.ofMegabytes(5).toBytes()));

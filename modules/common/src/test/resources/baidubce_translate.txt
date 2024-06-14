@@ -1,0 +1,15 @@
+You are the service that converts a user request JSON into a new (user-expected) JSON object based on the following JavaScript-defined JSON object:
+
+```
+// 将下面json中的 根据`值`的含义将 `key` 转为语义化且简短的首字母为小写的小驼峰英文变量名替换无意义字符串
+// 此处进行替换,禁止出现 k1 k2 k3
+const template = {
+ "key1": "string1",
+ "key2": "string2",
+}
+```
+
+The following is a user request:
+```
+const template = {REQUEST_STR}
+```

@@ -15,6 +15,7 @@ import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseAgentController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.socket.AgentFileTailWatcher;
@@ -52,23 +53,23 @@ public class LogManageController extends BaseAgentController {
 
     @RequestMapping(value = "log_del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public IJsonMessage<String> logData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path) {
+    public IJsonMessage<String> logData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.parameter_error_path_error.f482") String path) {
         File file = FileUtil.file(LogbackConfig.getPath(), path);
         // 判断修改时间
         long modified = file.lastModified();
-        Assert.state(System.currentTimeMillis() - modified > TimeUnit.DAYS.toMillis(1), "不能删除近一天相关的日志(文件修改时间)");
+        Assert.state(System.currentTimeMillis() - modified > TimeUnit.DAYS.toMillis(1), I18nMessageUtil.get("i18n.cannot_delete_recent_logs.ee19"));
         AgentFileTailWatcher.offlineFile(file);
         if (FileUtil.del(file)) {
             FileUtil.cleanEmpty(file.getParentFile());
-            return JsonMessage.success("删除成功");
+            return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
         }
-        return new JsonMessage<>(500, "删除失败");
+        return new JsonMessage<>(500, I18nMessageUtil.get("i18n.delete_failure.acf0"));
     }
 
 
     @RequestMapping(value = "log_download", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public void logDownload(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "path错误") String path, HttpServletResponse response) {
+    public void logDownload(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.parameter_error_path_error.f482") String path, HttpServletResponse response) {
         File file = FileUtil.file(LogbackConfig.getPath(), path);
         if (file.isFile()) {
             ServletUtil.write(response, file);

@@ -4,44 +4,54 @@
       <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1" type="card">
           <template #rightExtra>
-            <a-tooltip :title="$tl('p.resetTriggerTokenInfo')">
-              <a-button type="primary" size="small" @click="resetTrigger">{{ $tl('p.reset') }}</a-button>
+            <a-tooltip :title="$t('pages.build.trigger.c70e60e6')">
+              <a-button type="primary" size="small" @click="resetTrigger">{{
+                $t('pages.build.trigger.da1d2343')
+              }}</a-button>
             </a-tooltip>
           </template>
-          <a-tab-pane key="1" :tab="$tl('p.executeBuild')">
+          <a-tab-pane key="1" :tab="$t('pages.build.trigger.ca9188db')">
             <a-space direction="vertical" style="width: 100%">
-              <a-alert :message="$tl('c.warmPrompt')" type="warning" show-icon>
+              <a-alert :message="$t('pages.build.trigger.7feba425')" type="warning" show-icon>
                 <template #description>
                   <ul>
-                    <li>{{ $tl('p.warmPrompt1') }}</li>
+                    <li>{{ $t('pages.build.trigger.c16a1a40') }}</li>
                     <li>
-                      {{ $tl('p.warmPrompt2') }}
-                    </li>
-                    <li>{{ $tl('p.warmPrompt3') }} BODY json： [ { "id":"1", "token":"a", "delay":"0" } ]</li>
-                    <li>
-                      {{ $tl('p.warmPrompt4') }}
+                      {{ $t('pages.build.trigger.58634bfa') }}
                     </li>
                     <li>
-                      {{ $tl('p.warmPrompt5') }} BODY json： [ { "id":"1", "token":"a",
+                      {{ $t('pages.build.trigger.2f647b6c') }} BODY json： [ { "id":"1", "token":"a", "delay":"0" } ]
+                    </li>
+                    <li>
+                      {{ $t('pages.build.trigger.b100eecf') }}
+                    </li>
+                    <li>
+                      {{ $t('pages.build.trigger.c607de59') }} BODY json： [ { "id":"1", "token":"a",
                       "delay":"0","branchName":"test","branchTagName":"1.*","script":"mvn clean
                       package","resultDirFile":"/target/","webhook":"http://test.com/webhook" } ]
                     </li>
                     <li>
-                      {{ $tl('p.warmPrompt6') }} useQueue=true
-                      {{ $tl('p.warmPrompt7') }}
+                      {{ $t('pages.build.trigger.5f0e8fe3') }} useQueue=true
+                      {{ $t('pages.build.trigger.2809bf75') }}
                     </li>
-                    <li>{{ $tl('p.warmPrompt8') }}</li>
+                    <li>{{ $t('pages.build.trigger.b8b6a2e4') }}</li>
                   </ul>
                 </template>
               </a-alert>
-              <a-alert type="info" :message="`${$tl('p.singleTriggerAddress')}(${$tl('c.copyByClick')})`">
+              <a-alert
+                type="info"
+                :message="`${$t('pages.build.trigger.2cd9ba62')}(${$t('pages.build.trigger.a5873c3e')})`"
+              >
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.triggerBuildUrl }">
                     <a-tag>GET</a-tag> <span>{{ temp.triggerBuildUrl }} </span>
                   </a-typography-paragraph>
                 </template>
               </a-alert>
-              <a-alert type="info" :message="`${$tl('p.batchTriggerAddress')}(${$tl('c.copyByClick')})`">
+              <a-alert
+                type="info"
+                :message="`${$t('pages.build.trigger.4bd083f4')}(${$t('pages.build.trigger.a5873c3e')})`"
+              >
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchTriggerBuildUrl }">
                     <a-tag>POST</a-tag>
@@ -51,26 +61,30 @@
               </a-alert>
             </a-space>
           </a-tab-pane>
-          <a-tab-pane key="2" :tab="$tl('p.viewCurrentStatus')">
+          <a-tab-pane key="2" :tab="$t('pages.build.trigger.d18c2cea')">
             <a-space direction="vertical" style="width: 100%">
-              <a-alert :message="$tl('c.warmPrompt')" type="warning" show-icon>
+              <a-alert :message="$t('pages.build.trigger.7feba425')" type="warning" show-icon>
                 <template #description>
                   <ul>
-                    <li>{{ $tl('p.batchBuildParamsBodyJson') }}</li>
-                    <li>{{ $tl('p.idAndTokenSameAsTriggerBuild') }}</li>
+                    <li>{{ $t('pages.build.trigger.b2f32fef') }}</li>
+                    <li>{{ $t('pages.build.trigger.a96b1198') }}</li>
                     <li>
-                      <a-tag>No(0, "{{ $tl('p.notBuilt') }}")</a-tag>, <a-tag>Ing(1, "{{ $tl('p.building') }}")</a-tag>,
-                      <a-tag>Success(2, "{{ $tl('p.buildEnded') }}")</a-tag>,
-                      <a-tag>Error(3, "{{ $tl('p.buildFailed') }}")</a-tag>,
-                      <a-tag>PubIng(4, "{{ $tl('p.publishing') }}")</a-tag>,
-                      <a-tag>PubSuccess(5, "{{ $tl('p.publishSuccess') }}")</a-tag>,
-                      <a-tag>PubError(6, "{{ $tl('p.publishFailed') }}")</a-tag>,
-                      <a-tag>Cancel(7, "{{ $tl('p.cancelBuild') }}")</a-tag>,
+                      <a-tag>No(0, "{{ $t('pages.build.trigger.d0284f2b') }}")</a-tag>,
+                      <a-tag>Ing(1, "{{ $t('pages.build.trigger.dbbd0a62') }}")</a-tag>,
+                      <a-tag>Success(2, "{{ $t('pages.build.trigger.a2e56f86') }}")</a-tag>,
+                      <a-tag>Error(3, "{{ $t('pages.build.trigger.7cc0beda') }}")</a-tag>,
+                      <a-tag>PubIng(4, "{{ $t('pages.build.trigger.19653803') }}")</a-tag>,
+                      <a-tag>PubSuccess(5, "{{ $t('pages.build.trigger.5f7b06e9') }}")</a-tag>,
+                      <a-tag>PubError(6, "{{ $t('pages.build.trigger.50ad1198') }}")</a-tag>,
+                      <a-tag>Cancel(7, "{{ $t('pages.build.trigger.65add658') }}")</a-tag>,
                     </li>
                   </ul>
                 </template>
               </a-alert>
-              <a-alert type="info" :message="`${$tl('p.getSingleBuildStatusAddress')}(${$tl('c.copyByClick')})`">
+              <a-alert
+                type="info"
+                :message="`${$t('pages.build.trigger.2547e040')}(${$t('pages.build.trigger.a5873c3e')})`"
+              >
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchBuildStatusUrl2 }">
                     <a-tag>GET</a-tag>
@@ -78,7 +92,10 @@
                   </a-typography-paragraph>
                 </template>
               </a-alert>
-              <a-alert type="info" :message="`${$tl('p.batchGetBuildStatusAddress')}(${$tl('c.copyByClick')})`">
+              <a-alert
+                type="info"
+                :message="`${$t('pages.build.trigger.dd421d7f')}(${$t('pages.build.trigger.a5873c3e')})`"
+              >
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchBuildStatusUrl }">
                     <a-tag>POST</a-tag>
@@ -88,17 +105,20 @@
               </a-alert>
             </a-space>
           </a-tab-pane>
-          <a-tab-pane key="3" :tab="$tl('p.viewBuildLog')">
+          <a-tab-pane key="3" :tab="$t('pages.build.trigger.6b0809e7')">
             <a-space direction="vertical" style="width: 100%">
-              <a-alert :message="$tl('c.warmPrompt')" type="warning" show-icon>
+              <a-alert :message="$t('pages.build.trigger.7feba425')" type="warning" show-icon>
                 <template #description>
                   <ul>
-                    <li>{{ $tl('p.idAndTokenAndBuildNumIdSameAsTriggerBuild') }}</li>
-                    <li>{{ $tl('p.replaceBuildNumIdAccordingToActualSituation') }}</li>
+                    <li>{{ $t('pages.build.trigger.5c5f1276') }}</li>
+                    <li>{{ $t('pages.build.trigger.b8b189ad') }}</li>
                   </ul>
                 </template>
               </a-alert>
-              <a-alert type="info" :message="`${$tl('p.getSingleBuildLogAddress')}(${$tl('c.copyByClick')})`">
+              <a-alert
+                type="info"
+                :message="`${$t('pages.build.trigger.fee7ed9b')}(${$t('pages.build.trigger.a5873c3e')})`"
+              >
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.buildLogUrl }">
                     <a-tag>GET</a-tag> <span>{{ temp.buildLogUrl }} </span>
@@ -111,15 +131,16 @@
       </a-form>
     </div>
     <template v-else>
-      <a-result :title="$tl('p.noTriggerGeneratedForCurrentBuild')">
+      <a-result :title="$t('pages.build.trigger.2dfb8e28')">
         <template #extra>
-          <a-button key="console" type="primary" @click="handleTrigger"> {{ $tl('p.generateNow') }} </a-button>
+          <a-button key="console" type="primary" @click="handleTrigger">
+            {{ $t('pages.build.trigger.e8fee578') }}
+          </a-button>
         </template>
       </a-result>
     </template>
   </div>
 </template>
-
 <script>
 import { getTriggerUrl } from '@/api/build-info'
 export default {
@@ -142,9 +163,6 @@ export default {
     }
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.build.trigger.${key}`, ...args)
-    },
     // 触发器
     handleTrigger() {
       this.temp = {}

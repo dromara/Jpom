@@ -17,6 +17,7 @@ import cn.hutool.extra.servlet.ServletUtil;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.util.FileUtils;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
@@ -71,22 +72,22 @@ public abstract class BaseJpomController {
                                Integer nowSlice,
                                String fileSumMd5,
                                String... extNames) throws IOException {
-        Assert.hasText(fileSumMd5, "没有文件签名信息");
-        Assert.hasText(sliceId, "没有分片 id 信息");
+        Assert.hasText(fileSumMd5, I18nMessageUtil.get("i18n.file_signature_info_not_found.83bf"));
+        Assert.hasText(sliceId, I18nMessageUtil.get("i18n.no_shard_id_info.30f8"));
 
-        Assert.notNull(totalSlice, "上传信息不完成：totalSlice");
-        Assert.notNull(nowSlice, "上传信息不完成：nowSlice");
-        Assert.state(totalSlice > 0 && nowSlice > -1 && totalSlice >= nowSlice, "当前上传的分片信息错误");
+        Assert.notNull(totalSlice, I18nMessageUtil.get("i18n.incomplete_upload_info_total_slice.7e85"));
+        Assert.notNull(nowSlice, I18nMessageUtil.get("i18n.incomplete_upload_info_now_slice.34aa"));
+        Assert.state(totalSlice > 0 && nowSlice > -1 && totalSlice >= nowSlice, I18nMessageUtil.get("i18n.current_upload_chunk_info_incorrect.900e"));
         // 保存路径
         File slicePath = FileUtil.file(tempPath, "slice", sliceId);
         File sliceItemPath = FileUtil.file(slicePath, "items");
-        Assert.notNull(file, "没有上传文件");
+        Assert.notNull(file, I18nMessageUtil.get("i18n.no_uploaded_file.07ef"));
         String originalFilename = file.getOriginalFilename();
         // 截断序号 xxxxx.avi.1
         String realName = StrUtil.subBefore(originalFilename, StrUtil.DOT, true);
         if (ArrayUtil.isNotEmpty(extNames)) {
             String extName = FileUtil.extName(realName);
-            Assert.state(StrUtil.containsAnyIgnoreCase(extName, extNames), "不支持的文件类型：" + extName);
+            Assert.state(StrUtil.containsAnyIgnoreCase(extName, extNames), I18nMessageUtil.get("i18n.file_type_not_supported2.d497") + extName);
         }
         assert originalFilename != null;
         File slice = FileUtil.file(sliceItemPath, originalFilename);
@@ -109,10 +110,10 @@ public abstract class BaseJpomController {
                                  String sliceId,
                                  Integer totalSlice,
                                  String fileSumMd5) throws IOException {
-        Assert.hasText(fileSumMd5, "没有文件签名信息");
-        Assert.hasText(sliceId, "没有分片 id 信息");
+        Assert.hasText(fileSumMd5, I18nMessageUtil.get("i18n.file_signature_info_not_found.83bf"));
+        Assert.hasText(sliceId, I18nMessageUtil.get("i18n.no_shard_id_info.30f8"));
 
-        Assert.notNull(totalSlice, "上传信息不完成：totalSlice");
+        Assert.notNull(totalSlice, I18nMessageUtil.get("i18n.incomplete_upload_info_total_slice.7e85"));
 
         // 保存路径
         File slicePath = FileUtil.file(tempPath, "slice", sliceId);
@@ -121,7 +122,7 @@ public abstract class BaseJpomController {
         // 准备合并
         File[] files = sliceItemPath.listFiles();
         int length = ArrayUtil.length(files);
-        Assert.state(files != null && length == totalSlice, "文件上传失败,存在分片丢失的情况, " + length + " != " + totalSlice);
+        Assert.state(files != null && length == totalSlice, StrUtil.format(I18nMessageUtil.get("i18n.file_upload_failure_due_to_missing_chunks.1865"), length, totalSlice));
         // 文件真实名称
         String name = files[0].getName();
         name = StrUtil.subBefore(name, StrUtil.DOT, true);
@@ -147,8 +148,8 @@ public abstract class BaseJpomController {
         // 对比文件信息
         String newMd5 = SecureUtil.md5(successFile);
         Assert.state(StrUtil.equals(newMd5, fileSumMd5), () -> {
-            log.warn("文件合并异常 {}:{} -> {}", FileUtil.getAbsolutePath(successFile), newMd5, fileSumMd5);
-            return "文件合并后异常,文件不完成可能被损坏";
+            log.warn(I18nMessageUtil.get("i18n.file_merge_exception_details.e9d0"), FileUtil.getAbsolutePath(successFile), newMd5, fileSumMd5);
+            return I18nMessageUtil.get("i18n.file_merge_error.f32f");
         });
         return successFile;
     }

@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.ClusterConfig;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
@@ -75,7 +76,7 @@ public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implemen
      */
     public ClusterInfoModel getCurrent() {
         ClusterInfoModel clusterInfoModel = this.getByKey(JpomManifest.getInstance().getInstallId());
-        Assert.notNull(clusterInfoModel, "当前集群不存在");
+        Assert.notNull(clusterInfoModel, I18nMessageUtil.get("i18n.cluster_does_not_exist.97a4"));
         return clusterInfoModel;
     }
 
@@ -102,7 +103,7 @@ public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implemen
     public void run() {
         int heartSecond = clusterConfig.getHeartSecond();
         try {
-            CronUtils.TaskStat taskStat = CronUtils.getTaskStat(TASK_ID, StrUtil.format("{} 秒执行一次", heartSecond));
+            CronUtils.TaskStat taskStat = CronUtils.getTaskStat(TASK_ID, StrUtil.format(I18nMessageUtil.get("i18n.execution_frequency.d014"), heartSecond));
             taskStat.onStart();
             // 判断是否为多集群模式
             this.multiServer = this.count() > 1;
@@ -121,7 +122,7 @@ public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implemen
             ClusterInfoModel clusterInfoModel = new ClusterInfoModel();
             clusterInfoModel.setId(byKey.getId());
             if (!StrUtil.equals(byKey.getClusterId(), clusterConfig.getId())) {
-                log.warn("集群ID 发生变化：{} -> {}", byKey.getClusterId(), clusterConfig.getId());
+                log.warn(I18nMessageUtil.get("i18n.cluster_id_changed.6e49"), byKey.getClusterId(), clusterConfig.getId());
                 clusterInfoModel.setClusterId(clusterConfig.getId());
             }
             clusterInfoModel.setLocalHostName(NetUtil.getLocalHostName());
@@ -131,7 +132,7 @@ public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implemen
             try {
                 String url = byKey.getUrl();
                 if (StrUtil.isEmpty(url)) {
-                    clusterInfoModel.setStatusMsg("未配置地址");
+                    clusterInfoModel.setStatusMsg(I18nMessageUtil.get("i18n.address_not_configured.f2eb"));
                 } else {
                     this.testUrl(url);
                     clusterInfoModel.setStatusMsg("OK");
@@ -147,13 +148,13 @@ public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implemen
             List<ClusterInfoModel> clusterInfoModels = this.listByEntity(entity);
             if (CollUtil.isNotEmpty(clusterInfoModels)) {
                 for (ClusterInfoModel infoModel : clusterInfoModels) {
-                    log.error("{} 集群ID冲突：{} {}", clusterConfig.getId(), infoModel.getId(), infoModel.getName());
+                    log.error(I18nMessageUtil.get("i18n.cluster_id_conflict.45b7"), clusterConfig.getId(), infoModel.getId(), infoModel.getName());
                 }
             }
             // 通知任务结束
             taskStat.onSucceeded();
         } catch (Throwable throwable) {
-            CronUtils.TaskStat taskStat = CronUtils.getTaskStat(TASK_ID, StrUtil.format("{} 秒执行一次", heartSecond));
+            CronUtils.TaskStat taskStat = CronUtils.getTaskStat(TASK_ID, StrUtil.format(I18nMessageUtil.get("i18n.execution_frequency.d014"), heartSecond));
             taskStat.onFailed(TASK_ID, throwable);
         }
     }
@@ -172,15 +173,16 @@ public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implemen
             Assert.state(code == JsonMessage.DEFAULT_SUCCESS_CODE, () -> {
                 String msg = jsonObject.getString(JsonMessage.MSG);
                 msg = StrUtil.emptyToDefault(msg, jsonObject.toString());
-                return "集群状态码异常：" + code + " " + msg;
+                return StrUtil.format(I18nMessageUtil.get("i18n.cluster_status_code_exception.9d89"), code, msg);
             });
             //
             JSONObject data = jsonObject.getJSONObject("data");
-            Assert.notNull(data, "集群响应信息不正确,请确认集群地址是正确的服务端地址");
-            Assert.state(data.containsKey("routerBase") && data.containsKey("extendPlugins"), "填写的集群地址不正确");
+            Assert.notNull(data, I18nMessageUtil.get("i18n.cluster_response_incorrect.c08a"));
+            boolean expression = data.containsKey("routerBase") && data.containsKey("extendPlugins");
+            Assert.state(expression, I18nMessageUtil.get("i18n.incorrect_cluster_address.893f"));
         } catch (Exception e) {
-            log.error("检查集群信息异常", e);
-            throw new IllegalArgumentException("填写的集群地址检查异常,请确认集群地址是正确的服务端地址," + e.getMessage());
+            log.error(I18nMessageUtil.get("i18n.check_cluster_info_exception.7b0c"), e);
+            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.cluster_address_check_exception.cd92") + e.getMessage());
         }
     }
 
@@ -192,7 +194,7 @@ public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implemen
     private void bindDefault(String installId) {
         long count = this.count();
         if (count != 1) {
-            log.debug("系统中存在多个集群,不需要自动绑定数据");
+            log.debug(I18nMessageUtil.get("i18n.multiple_clusters_exist.196b"));
             return;
         }
         // 所以工作空间自动绑定集群Id
@@ -241,7 +243,7 @@ public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implemen
     private ClusterInfoModel createDefault(String installId) {
         ClusterInfoModel clusterInfoModel = new ClusterInfoModel();
         clusterInfoModel.setId(installId);
-        clusterInfoModel.setName("默认集群");
+        clusterInfoModel.setName(I18nMessageUtil.get("i18n.default_cluster.38cf"));
         clusterInfoModel.setCreateUser(UserModel.SYSTEM_ADMIN);
         clusterInfoModel.setClusterId(clusterConfig.getId());
         clusterInfoModel.setLastHeartbeat(SystemClock.now());

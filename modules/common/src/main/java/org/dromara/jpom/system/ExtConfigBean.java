@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.JpomManifest;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.util.FileUtils;
 import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.core.io.ClassPathResource;
@@ -81,7 +82,7 @@ public class ExtConfigBean {
                 ClassPathResource classPathResource = new ClassPathResource(Const.FILE_NAME);
                 return classPathResource.exists() ? classPathResource : new ClassPathResource("/config_default/" + Const.FILE_NAME);
             });
-        Assert.state(configResource.exists(), "均未找到配置文件");
+        Assert.state(configResource.exists(), I18nMessageUtil.get("i18n.config_file_not_found.fc87"));
         return configResource;
     }
 
@@ -129,7 +130,7 @@ public class ExtConfigBean {
      */
     public static InputStream getConfigResourceInputStream(String name) {
         InputStream inputStream = tryGetConfigResourceInputStream(name);
-        Assert.notNull(inputStream, "未找到配置文件:" + name);
+        Assert.notNull(inputStream, I18nMessageUtil.get("i18n.config_file_not_found.310e") + name);
         return inputStream;
     }
 
@@ -150,7 +151,7 @@ public class ExtConfigBean {
                 return null;
             })
             .orElseGet(() -> {
-                log.debug("外置配置不存在或者未配置：{},使用默认配置", name);
+                log.debug(I18nMessageUtil.get("i18n.external_config_not_exist_or_not_configured.f24e"), name);
                 return tryGetDefaultConfigResourceInputStream(name);
             });
     }
@@ -180,7 +181,7 @@ public class ExtConfigBean {
      */
     public static InputStream getDefaultConfigResourceInputStream(String name) {
         InputStream inputStream = tryGetDefaultConfigResourceInputStream(name);
-        Assert.notNull(inputStream, name + "配置文件不存在");
+        Assert.notNull(inputStream, name + I18nMessageUtil.get("i18n.config_file_not_exist.09dd"));
         return inputStream;
     }
 
@@ -193,26 +194,37 @@ public class ExtConfigBean {
     public static Resource[] getConfigResources(String matchStr) {
         PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
         File configResourceDir = getConfigResourceDir();
-        return Opt.ofBlankAble(configResourceDir).map(file -> {
-            try {
-                String format = StrUtil.format("{}{}/{}", ResourceUtils.FILE_URL_PREFIX, file.getAbsolutePath(), matchStr);
-                Resource[] resources = pathMatchingResourcePatternResolver.getResources(format);
-                if (ArrayUtil.isEmpty(resources)) {
-                    log.warn("配置文件不存在 {}", format);
-                    return null;
+        return Opt.ofBlankAble(configResourceDir)
+            .map(file -> {
+                try {
+                    String format = StrUtil.format("{}{}/{}", ResourceUtils.FILE_URL_PREFIX, file.getAbsolutePath(), matchStr);
+                    Resource[] resources = pathMatchingResourcePatternResolver.getResources(format);
+                    if (ArrayUtil.isEmpty(resources)) {
+                        log.warn(I18nMessageUtil.get("i18n.config_file_not_exist_with_message.6a40"), format);
+                        return null;
+                    }
+                    return resources;
+                } catch (IOException e) {
+                    throw Lombok.sneakyThrow(e);
                 }
-                return resources;
-            } catch (IOException e) {
-                throw Lombok.sneakyThrow(e);
-            }
-        }).orElseGet(() -> {
-            try {
-                String format = StrUtil.format("{}/config_default/{}", ResourceUtils.CLASSPATH_URL_PREFIX, matchStr);
-                return pathMatchingResourcePatternResolver.getResources(format);
-            } catch (IOException e) {
-                throw Lombok.sneakyThrow(e);
-            }
-        });
+            })
+            .orElse(null);
+    }
+
+    /**
+     * 模糊匹配获取配置文件资源
+     *
+     * @param matchStr 匹配关键词
+     * @return 资源
+     */
+    public static Resource[] getDefaultConfigResources(String matchStr) {
+        PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
+        try {
+            String format = StrUtil.format("{}/config_default/{}", ResourceUtils.CLASSPATH_URL_PREFIX, matchStr);
+            return pathMatchingResourcePatternResolver.getResources(format);
+        } catch (IOException e) {
+            throw Lombok.sneakyThrow(e);
+        }
     }
 
 
@@ -232,7 +244,7 @@ public class ExtConfigBean {
                 // 获取当前项目运行路径的父级
                 File file = JpomManifest.getRunPath();
                 if (!file.exists() && !file.isFile()) {
-                    throw new JpomRuntimeException("请配置运行路径属性【jpom.path】");
+                    throw new JpomRuntimeException(I18nMessageUtil.get("i18n.configure_run_path_property.356c"));
                 }
                 File parentFile = file.getParentFile().getParentFile();
                 path = FileUtil.getAbsolutePath(parentFile);

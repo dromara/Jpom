@@ -2,44 +2,44 @@
   <div>
     <div v-if="fastInstallInfo">
       <a-collapse v-model:activeKey="fastInstallActiveKey">
-        <a-collapse-panel key="1" :header="$tl('p.warmTip')">
+        <a-collapse-panel key="1" :header="$t('pages.node.fast-install.d5e02e8a')">
           <a-alert message="" type="warning" show-icon>
             <template #description>
               <ul>
                 <li>
-                  {{ $tl('p.copyCommand') }}<b>{{ $tl('p.firewallPort') }}</b
-                  >,<b>{{ $tl('p.securityGroupRule') }}</b
-                  >{{ $tl('p.networkPortRestriction') }}
+                  {{ $t('pages.node.fast-install.32fdd87c') }}<b>{{ $t('pages.node.fast-install.10b5da87') }}</b
+                  >,<b>{{ $t('pages.node.fast-install.c80b813d') }}</b
+                  >{{ $t('pages.node.fast-install.c390a968') }}
                 </li>
-                <li>{{ $tl('p.defaultPluginPort') }}<b>2123</b></li>
+                <li>{{ $t('pages.node.fast-install.72ca71a6') }}<b>2123</b></li>
                 <li>
-                  {{ $tl('p.checkAddressAccess') }}<b>{{ $tl('p.usePingCheck') }}</b>
+                  {{ $t('pages.node.fast-install.39badef3') }}<b>{{ $t('pages.node.fast-install.d6480653') }}</b>
                 </li>
-                <li>{{ $tl('p.reportNodeInfo') }}</li>
-                <li style="color: red">{{ $tl('p.confirmMultipleIps') }}</li>
+                <li>{{ $t('pages.node.fast-install.3f82fca3') }}</li>
+                <li style="color: red">{{ $t('pages.node.fast-install.bea26ef8') }}</li>
                 <li>
-                  {{ $tl('p.autoBindWorkspace') }}<b>{{ $tl('p.bindToCurrentWorkspace') }}</b
-                  >,{{ $tl('p.switchWorkspace') }}
-                </li>
-                <li>
-                  {{ $tl('p.commandExpireAfterRestart') }}<b>{{ $tl('p.commandInvalidateAfterRestart') }}</b
-                  >,{{ $tl('p.regainCommandAfterRestart') }}
+                  {{ $t('pages.node.fast-install.ba5049eb') }}<b>{{ $t('pages.node.fast-install.8716288a') }}</b
+                  >,{{ $t('pages.node.fast-install.4e2553dc') }}
                 </li>
                 <li>
-                  {{ $tl('p.supportSpecifyNetworkCard') }}<b>networkName</b
+                  {{ $t('pages.node.fast-install.5056e934') }}<b>{{ $t('pages.node.fast-install.6703099') }}</b
+                  >,{{ $t('pages.node.fast-install.fa70b3c9') }}
+                </li>
+                <li>
+                  {{ $t('pages.node.fast-install.5b7c9ba') }}<b>networkName</b
                   >{{
-                    $tl('p.networkCardExample')
+                    $t('pages.node.fast-install.32ef99d')
                   }}://192.168.31.175:2122/api/node/receive_push?token=xxx&workspaceId=xxx&networkName=en0
                 </li>
               </ul>
             </template>
           </a-alert>
         </a-collapse-panel>
-        <a-collapse-panel key="2" :header="$tl('p.quickInstall')">
+        <a-collapse-panel key="2" :header="$t('pages.node.fast-install.fa50cb40')">
           <a-tabs :default-active-key="0">
             <a-tab-pane v-for="(item, index) in fastInstallInfo.shUrls" :key="index" :tab="item.name">
               <div>
-                <a-alert type="info" :message="`${$tl('p.commandContent')}`">
+                <a-alert type="info" :message="`${$t('pages.node.fast-install.f0d88095')}`">
                   <template #description>
                     <a-typography-paragraph :copyable="{ tooltip: false, text: item.allText }">
                       <span>{{ item.allText }} </span>
@@ -50,8 +50,11 @@
             </a-tab-pane>
           </a-tabs>
         </a-collapse-panel>
-        <a-collapse-panel key="3" :header="$tl('p.quickBind')">
-          <a-alert type="info" :message="`${$tl('p.commandContent')}(${$tl('p.commandPathNote')})`">
+        <a-collapse-panel key="3" :header="$t('pages.node.fast-install.7e4f29f1')">
+          <a-alert
+            type="info"
+            :message="`${$t('pages.node.fast-install.f0d88095')}(${$t('pages.node.fast-install.bce891f2')})`"
+          >
             <template #description>
               <a-typography-paragraph :copyable="{ tooltip: false, text: fastInstallInfo.bindCommand }">
                 <span>{{ fastInstallInfo.bindCommand }} </span>
@@ -59,12 +62,16 @@
             </template>
           </a-alert>
         </a-collapse-panel>
-        <a-collapse-panel key="4" :header="$tl('p.executionResult')">
-          <div v-if="!pullFastInstallResultData || !pullFastInstallResultData.length">{{ $tl('p.noResultYet') }}</div>
+        <a-collapse-panel key="4" :header="$t('pages.node.fast-install.89283f33')">
+          <div v-if="!pullFastInstallResultData || !pullFastInstallResultData.length">
+            {{ $t('pages.node.fast-install.b01ed3b7') }}
+          </div>
           <a-alert
             v-for="(item, index) in pullFastInstallResultData"
             :key="`${index}-${new Date().getTime()}`"
-            :message="`${$tl('p.resultIndex')} ${index + 1} ${$tl('p.resultOrder')}`"
+            :message="`${$t('pages.node.fast-install.a3aba05c')} ${index + 1} ${$t(
+              'pages.node.fast-install.d6f154c5'
+            )}`"
             :type="`${item.type === 'success' ? 'success' : item.type === 'exists' ? 'error' : 'warning'}`"
             closable
             @close="clearPullFastInstallResult(item.id)"
@@ -72,23 +79,23 @@
             <template #description>
               <a-space direction="vertical" style="width: 100%">
                 <div v-if="item.type === 'canUseIpEmpty'">
-                  <a-tag color="orange">{{ $tl('p.cantCommunicateWithNode') }}</a-tag>
+                  <a-tag color="orange">{{ $t('pages.node.fast-install.3d731c66') }}</a-tag>
                 </div>
                 <div v-if="item.type === 'multiIp'">
-                  <a-tag color="green">{{ $tl('p.multipleIpsAvailable') }}</a-tag>
+                  <a-tag color="green">{{ $t('pages.node.fast-install.ece41c2a') }}</a-tag>
                 </div>
                 <div v-if="item.type === 'exists'">
-                  <a-tag color="orange">{{ $tl('p.nodeAlreadyExists') }}</a-tag>
+                  <a-tag color="orange">{{ $t('pages.node.fast-install.1d8067db') }}</a-tag>
                 </div>
                 <div v-if="item.type === 'success'">
-                  <a-tag color="orange">{{ $tl('p.bindSuccess') }}</a-tag>
+                  <a-tag color="orange">{{ $t('pages.node.fast-install.9c1bff84') }}</a-tag>
                 </div>
                 <div>
-                  {{ $tl('p.allIps')
+                  {{ $t('pages.node.fast-install.2112ed0f')
                   }}<a-tag v-for="(itemIp, indexIp) in item.allIp" :key="indexIp">{{ itemIp }}:{{ item.port }}</a-tag>
                 </div>
                 <div v-if="item.type === 'multiIp'">
-                  {{ $tl('p.communicableIps') }}({{ $tl('p.manualConfirmationRequired') }}):
+                  {{ $t('pages.node.fast-install.a38eb00c') }}({{ $t('pages.node.fast-install.a7e9d227') }}):
                   <a-tag
                     v-for="(itemIp, indexIp) in item.canUseIp"
                     :key="indexIp"
@@ -97,7 +104,7 @@
                   /></a-tag>
                 </div>
                 <div v-if="item.type === 'success' || item.type === 'exists'">
-                  {{ $tl('p.nodeIp') }}:
+                  {{ $t('pages.node.fast-install.f48a6e61') }}:
                   <a-tag v-for="(itemIp, indexIp) in item.canUseIp" :key="indexIp">{{ itemIp }}:{{ item.port }}</a-tag>
                 </div>
               </a-space>
@@ -109,7 +116,6 @@
     <div v-else>loading....</div>
   </div>
 </template>
-
 <script>
 import { mapState } from 'pinia'
 
@@ -140,9 +146,6 @@ export default {
     this.fastInstall()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.node.fastInstall.${key}`, ...args)
-    },
     // 关闭弹窗,关闭定时轮询
     cancelFastInstall() {
       if (this.pullFastInstallResultTime) {
@@ -158,7 +161,9 @@ export default {
           this.fastInstallNode = true
           this.fastInstallInfo = res.data
 
-          this.fastInstallInfo.host = `${location.protocol}//${location.host}${res.data.url}?token=${res.data.token}\\&workspaceId=${this.getWorkspaceId()}`
+          this.fastInstallInfo.host = `${location.protocol}//${location.host}${res.data.url}?token=${
+            res.data.token
+          }\\&workspaceId=${this.getWorkspaceId()}`
           this.fastInstallInfo.shUrls = res.data.shUrls.map((item) => {
             item.allText = `${item.url} ${this.fastInstallInfo.key} \\'${this.fastInstallInfo.host}\\'`
             return item

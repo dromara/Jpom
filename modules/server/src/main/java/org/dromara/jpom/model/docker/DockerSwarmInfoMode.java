@@ -23,7 +23,8 @@ import org.dromara.jpom.model.data.WorkspaceModel;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@TableName(value = "DOCKER_SWARM_INFO", name = "docker 集群信息")
+@TableName(value = "DOCKER_SWARM_INFO",
+    nameKey = "i18n.docker_cluster_info.a2eb")
 public class DockerSwarmInfoMode extends BaseWorkspaceModel {
     /**
      * 集群名称

@@ -22,7 +22,8 @@ import org.dromara.jpom.model.BaseUserModifyDbModel;
  * Backup info with H2 database
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "BACKUP_INFO", name = "数据备份", modes = DbExtConfig.Mode.H2)
+@TableName(value = "BACKUP_INFO",
+    nameKey = "i18n.data_backup.9e26", modes = DbExtConfig.Mode.H2)
 @Data
 public class BackupInfoModel extends BaseUserModifyDbModel {
 

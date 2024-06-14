@@ -11,9 +11,11 @@ package org.dromara.jpom.oauth2.platform;
 
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
+import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import me.zhyd.oauth.request.AuthRequest;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.oauth2.AuthOauth2MaxKeyRequest;
 import org.dromara.jpom.oauth2.BaseOauth2Config;
 import org.dromara.jpom.oauth2.Oauth2MaxKeyAuthSource;
@@ -38,9 +40,9 @@ public class MaxKeyOauth2Config extends BaseOauth2Config {
      */
     public void check() {
         super.check();
-        Validator.validateMatchRegex(RegexPool.URL_HTTP, this.authorizationUri, "请配置正确的授权 url");
-        Validator.validateMatchRegex(RegexPool.URL_HTTP, this.accessTokenUri, "请配置正确的令牌 url");
-        Validator.validateMatchRegex(RegexPool.URL_HTTP, this.userInfoUri, "请配置正确的用户信息 url");
+        Validator.validateMatchRegex(RegexPool.URL_HTTP, this.authorizationUri, I18nMessageUtil.get("i18n.configure_correct_auth_url.22e7"));
+        Validator.validateMatchRegex(RegexPool.URL_HTTP, this.accessTokenUri, I18nMessageUtil.get("i18n.configure_correct_token_url.7bba"));
+        Validator.validateMatchRegex(RegexPool.URL_HTTP, this.userInfoUri, I18nMessageUtil.get("i18n.configure_correct_user_info_url.1276"));
     }
 
     @Override
@@ -49,7 +51,7 @@ public class MaxKeyOauth2Config extends BaseOauth2Config {
     }
 
     public AuthRequest authRequest() {
-        Assert.state(this.enabled(), "没有开启此 " + this.provide() + " oauth2");
+        Assert.state(this.enabled(),  StrUtil.format(I18nMessageUtil.get("i18n.oauth2_not_enabled.c8b7"), this.provide()));
         Oauth2MaxKeyAuthSource oauth2MaxKeyAuthSource = new Oauth2MaxKeyAuthSource(this);
         return new AuthOauth2MaxKeyRequest(this.authConfig(), oauth2MaxKeyAuthSource);
     }

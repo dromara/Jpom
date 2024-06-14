@@ -15,6 +15,7 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.model.BaseWorkspaceModel;
 import org.dromara.jpom.model.data.NodeModel;
@@ -94,7 +95,7 @@ public abstract class BaseProxyHandler extends BaseHandler {
         IProxyWebSocket proxySession = TransportServerFactory.get().websocket(nodeInfo, urlItem, parameters);
         proxySession.onMessage(s -> onProxyMessage(session, s));
         if (!proxySession.connectBlocking()) {
-            this.sendMsg(session, "插件端连接失败");
+            this.sendMsg(session, I18nMessageUtil.get("i18n.plugin_connection_failed.02a1"));
             this.destroy(session);
             return;
         }
@@ -189,7 +190,7 @@ public abstract class BaseProxyHandler extends BaseHandler {
             try {
                 proxySession.close();
             } catch (Exception e) {
-                log.error("关闭异常", e);
+                log.error(I18nMessageUtil.get("i18n.close_exception.5b86"), e);
             }
         }
         SocketSessionUtil.close(session);

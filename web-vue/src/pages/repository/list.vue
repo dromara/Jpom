@@ -9,7 +9,6 @@
   >
   </repository>
 </template>
-
 <script>
 import repository from './repository-list.vue'
 import { mapState } from 'pinia'
@@ -29,9 +28,6 @@ export default {
   emits: ['confirm'],
   computed: { ...mapState(useAppStore, ['getWorkspaceId']) },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.repository.list.${key}`, ...args)
-    },
     confirm(data) {
       this.$emit('confirm', data)
     },

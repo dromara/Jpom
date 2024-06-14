@@ -10,6 +10,7 @@
 package org.dromara.jpom.socket.handler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.socket.BaseHandler;
 import org.dromara.jpom.util.SocketSessionUtil;
 import org.springframework.web.socket.BinaryMessage;
@@ -32,7 +33,7 @@ public abstract class BaseTerminalHandler extends BaseHandler {
         try {
             SocketSessionUtil.send(session, byteBuffer);
         } catch (IOException e) {
-            log.error("发送消息失败:" + msg, e);
+            log.error(I18nMessageUtil.get("i18n.send_message_failure_prefix.6f8c") + msg, e);
         }
     }
 }

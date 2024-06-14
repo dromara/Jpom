@@ -21,6 +21,7 @@ import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.func.BaseGroupNameController;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
@@ -111,7 +112,7 @@ public class MachineDockerController extends BaseGroupNameController {
             machineDockerServer.updateById(dockerInfoModel);
         }
         //
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
 
@@ -124,7 +125,7 @@ public class MachineDockerController extends BaseGroupNameController {
     private MachineDockerModel takeOverModel() throws Exception {
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_CHECK_PLUGIN_NAME);
         String name = getParameter("name");
-        Assert.hasText(name, "请填写 名称");
+        Assert.hasText(name, I18nMessageUtil.get("i18n.please_fill_in_name.52f3"));
         String host = getParameter("host");
         String id = getParameter("id");
         String tlsVerifyStr = getParameter("tlsVerify");
@@ -146,15 +147,15 @@ public class MachineDockerController extends BaseGroupNameController {
         //
         if (tlsVerify) {
             File filePath = certificateInfoService.getFilePath(certInfo);
-            Assert.notNull(filePath, "填写的证书信息错误");
+            Assert.notNull(filePath, I18nMessageUtil.get("i18n.incorrect_certificate_info.aee1"));
             // 验证证书文件是否正确
             boolean ok = (boolean) plugin.execute("certPath", "certPath", filePath.getAbsolutePath());
-            Assert.state(ok, "证书信息不正确,证书压缩包里面必须包含：ca.pem、key.pem、cert.pem");
+            Assert.state(ok, I18nMessageUtil.get("i18n.certificate_info_incorrect.a950"));
         } else {
             certInfo = StrUtil.emptyToDefault(certInfo, StrUtil.EMPTY);
         }
         boolean ok = (boolean) plugin.execute("host", "host", host);
-        Assert.state(ok, "请填写正确的 host");
+        Assert.state(ok, I18nMessageUtil.get("i18n.correct_host_required.8c49"));
         // 验证重复
         Entity entity = Entity.create();
         entity.set("host", host);
@@ -162,7 +163,7 @@ public class MachineDockerController extends BaseGroupNameController {
             entity.set("id", StrUtil.format(" <> {}", id));
         }
         boolean exists = machineDockerServer.exists(entity);
-        Assert.state(!exists, "对应的 docker 已经存在啦");
+        Assert.state(!exists, I18nMessageUtil.get("i18n.docker_already_exists.d9a5"));
         //
         MachineDockerModel machineDockerModel = new MachineDockerModel();
         machineDockerModel.setHeartbeatTimeout(heartbeatTimeout);
@@ -190,21 +191,21 @@ public class MachineDockerController extends BaseGroupNameController {
         Map<String, Object> parameter = machineDockerServer.toParameter(dockerInfoModel);
         parameter.put("closeBefore", true);
         String errorReason = (String) plugin.execute("ping", parameter);
-        Assert.isNull(errorReason, () -> "无法连接 docker 请检查 host 或者 TLS 证书 以及仓库信息配置是否正确。" + errorReason);
+        Assert.isNull(errorReason, () -> I18nMessageUtil.get("i18n.unable_to_connect_to_docker.2bb3") + errorReason);
         // 检查授权
         String registryUrl = dockerInfoModel.getRegistryUrl();
         if (StrUtil.isNotEmpty(registryUrl)) {
             MachineDockerModel oldInfoModel = machineDockerServer.getByKey(dockerInfoModel.getId(), false);
             String registryPassword = Optional.ofNullable(dockerInfoModel.getRegistryPassword()).orElseGet(() -> Optional.ofNullable(oldInfoModel).map(MachineDockerModel::getRegistryPassword).orElse(null));
-            Assert.hasText(registryPassword, "仓库密码不能为空");
+            Assert.hasText(registryPassword, I18nMessageUtil.get("i18n.repository_password_cannot_be_empty.20b3"));
             parameter.put("closeBefore", true);
             parameter.put("registryPassword", registryPassword);
             try {
                 JSONObject jsonObject = (JSONObject) plugin.execute("testAuth", parameter);
                 log.info("{}", jsonObject);
             } catch (Exception e) {
-                log.warn("仓库授权信息错误", e);
-                throw new IllegalArgumentException("仓库账号或者密码错误：" + e.getMessage());
+                log.warn(I18nMessageUtil.get("i18n.repository_authorization_error.4f50"), e);
+                throw new IllegalArgumentException(I18nMessageUtil.get("i18n.incorrect_repository_credentials.f1c8") + e.getMessage());
             }
         }
         // 修改状态为在线
@@ -221,17 +222,17 @@ public class MachineDockerController extends BaseGroupNameController {
             entity.set("host", dockerHost);
             boolean exists = machineDockerServer.exists(entity);
             if (exists) {
-                return new JsonMessage<>(405, "已经存在本地 docker 信息啦，不要重复添加：" + dockerHost);
+                return new JsonMessage<>(405, I18nMessageUtil.get("i18n.local_docker_exists.ec31") + dockerHost);
             }
             MachineDockerModel dockerModel = new MachineDockerModel();
             dockerModel.setHost(dockerHost);
             dockerModel.setName("localhost");
             dockerModel.setStatus(1);
             machineDockerServer.insert(dockerModel);
-            return new JsonMessage<>(200, "自动探测到本地 docker 并且自动添加：" + dockerHost);
+            return new JsonMessage<>(200, I18nMessageUtil.get("i18n.auto_detect_local_docker_and_add.af72") + dockerHost);
         } catch (Throwable e) {
-            log.error("探测本地 docker 异常", e);
-            return new JsonMessage<>(500, "探测本地 docker 异常：" + e.getMessage());
+            log.error(I18nMessageUtil.get("i18n.detect_local_docker_exception.ccfc"), e);
+            return new JsonMessage<>(500, I18nMessageUtil.get("i18n.detect_local_docker_exception_with_details.7cc9") + e.getMessage());
         }
     }
 
@@ -243,7 +244,7 @@ public class MachineDockerController extends BaseGroupNameController {
             DockerInfoModel dockerInfoModel = new DockerInfoModel();
             dockerInfoModel.setMachineDockerId(id);
             long count = dockerInfoService.count(dockerInfoModel);
-            Assert.state(count <= 0, "当前 docker 还关联" + count + "个 工作空间 docker 不能删除");
+            Assert.state(count <= 0, StrUtil.format(I18nMessageUtil.get("i18n.docker_associated_workspaces_message.de78"), count));
         }
         MachineDockerModel infoModel = machineDockerServer.getByKey(id);
         Optional.ofNullable(infoModel).ifPresent(machineDockerModel -> {
@@ -252,11 +253,11 @@ public class MachineDockerController extends BaseGroupNameController {
                 DockerSwarmInfoMode dockerInfoModel = new DockerSwarmInfoMode();
                 dockerInfoModel.setSwarmId(machineDockerModel.getSwarmId());
                 long count = dockerSwarmInfoService.count(dockerInfoModel);
-                Assert.state(count <= 0, "当前 docker 还关联" + count + "个 工作空间 docker 集群不能删除");
+                Assert.state(count <= 0, StrUtil.format(I18nMessageUtil.get("i18n.docker_cluster_associated_workspaces_message.5520"), count));
             }
         });
         machineDockerServer.delByKey(id);
-        return JsonMessage.success("删除成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 
 
@@ -273,9 +274,9 @@ public class MachineDockerController extends BaseGroupNameController {
         List<String> list = StrUtil.splitTrim(ids, StrUtil.COMMA);
         for (String id : list) {
             MachineDockerModel machineDockerModel = machineDockerServer.getByKey(id);
-            Assert.notNull(machineDockerModel, "没有对应的 docker");
+            Assert.notNull(machineDockerModel, I18nMessageUtil.get("i18n.no_corresponding_docker.733e"));
             boolean exists = workspaceService.exists(new WorkspaceModel(workspaceId));
-            Assert.state(exists, "不存在对应的工作空间");
+            Assert.state(exists, I18nMessageUtil.get("i18n.workspace_not_exist.a6fd"));
             if (StrUtil.equals(type, "docker")) {
                 DockerInfoModel dockerInfoModel = new DockerInfoModel();
                 dockerInfoModel.setMachineDockerId(id);
@@ -288,7 +289,7 @@ public class MachineDockerController extends BaseGroupNameController {
                     dockerInfoService.insert(dockerInfoModel);
                 }
             } else if (StrUtil.equals(type, "swarm")) {
-                Assert.hasText(machineDockerModel.getSwarmId(), () -> "当前 docker " + machineDockerModel.getName() + " 不在集群中");
+                Assert.hasText(machineDockerModel.getSwarmId(), () -> StrUtil.format(I18nMessageUtil.get("i18n.current_docker_not_in_cluster.f70c"), machineDockerModel.getName()));
                 DockerSwarmInfoMode dockerInfoModel = new DockerSwarmInfoMode();
                 dockerInfoModel.setSwarmId(machineDockerModel.getSwarmId());
                 dockerInfoModel.setWorkspaceId(workspaceId);
@@ -299,18 +300,18 @@ public class MachineDockerController extends BaseGroupNameController {
                     dockerSwarmInfoService.insert(dockerInfoModel);
                 }
             } else {
-                throw new IllegalArgumentException("未知参数");
+                throw new IllegalArgumentException(I18nMessageUtil.get("i18n.unknown_parameter.96dd"));
             }
         }
 
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
     @GetMapping(value = "list-workspace-docker", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<JSONObject> listWorkspaceSsh(@ValidatorItem String id) {
         MachineDockerModel machineDockerModel = machineDockerServer.getByKey(id);
-        Assert.notNull(machineDockerModel, "没有对应的 docker");
+        Assert.notNull(machineDockerModel, I18nMessageUtil.get("i18n.no_corresponding_docker.733e"));
         JSONObject jsonObject = new JSONObject();
         {
             DockerInfoModel dockerInfoModel = new DockerInfoModel();
@@ -349,13 +350,13 @@ public class MachineDockerController extends BaseGroupNameController {
     @PostMapping(value = "import-tls", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
     public IJsonMessage<String> importTls(MultipartFile file) throws Exception {
-        Assert.notNull(file, "没有上传文件");
+        Assert.notNull(file, I18nMessageUtil.get("i18n.no_uploaded_file.07ef"));
         // 保存路径
         File tempPath = FileUtil.file(serverConfig.getUserTempPath(), "docker", IdUtil.fastSimpleUUID());
         try {
             String originalFilename = file.getOriginalFilename();
             String extName = FileUtil.extName(originalFilename);
-            Assert.state(StrUtil.containsIgnoreCase(extName, "zip"), "上传的文件不是 zip");
+            Assert.state(StrUtil.containsIgnoreCase(extName, "zip"), I18nMessageUtil.get("i18n.invalid_file_type.7246"));
             File saveFile = FileUtil.file(tempPath, originalFilename);
             FileUtil.mkParentDirs(saveFile);
             file.transferTo(saveFile);
@@ -363,11 +364,11 @@ public class MachineDockerController extends BaseGroupNameController {
             ZipUtil.unzip(saveFile, tempPath);
             // 先判断文件
             boolean checkCertPath = machineDockerServer.checkCertPath(tempPath.getAbsolutePath());
-            Assert.state(checkCertPath, "证书信息不正确,证书压缩包里面必须包含：ca.pem、key.pem、cert.pem");
+            Assert.state(checkCertPath, I18nMessageUtil.get("i18n.certificate_info_incorrect.a950"));
             CertificateInfoModel certificateInfoModel = certificateInfoService.resolveX509(tempPath, true);
             certificateInfoModel.setWorkspaceId(ServerConst.WORKSPACE_GLOBAL);
             certificateInfoService.insert(certificateInfoModel);
-            return JsonMessage.success("导入成功");
+            return JsonMessage.success(I18nMessageUtil.get("i18n.import_success.b6d1"));
         } finally {
             FileUtil.del(tempPath);
         }

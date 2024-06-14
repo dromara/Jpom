@@ -5,10 +5,10 @@
         <template #before>
           <a-space>
             <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 0" type="primary" @click="start">{{
-              $tl('p.action')
+              $t('pages.script.script-console.a0fe2109')
             }}</a-button>
             <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 1" type="primary" @click="stop">{{
-              $tl('p.stop')
+              $t('pages.script.script-console.5c03f4ad')
             }}</a-button>
           </a-space>
         </template>
@@ -19,7 +19,7 @@
     <a-modal
       v-model:open="editArgs"
       destroy-on-close
-      :title="$tl('p.addParameter')"
+      :title="$t('pages.script.script-console.b7d5eb0d')"
       :confirm-loading="confirmLoading"
       :mask-closable="false"
       @ok="startExecution"
@@ -28,14 +28,21 @@
         <!-- <a-form-item label="执行参数" name="args">
             <a-input v-model="temp.args" placeholder="执行参数,没有参数可以不填写" />
           </a-form-item> -->
-        <a-form-item :label="$tl('p.commandArgs')" :help="`${commandParams.length ? $tl('p.executeScript') : ''}`">
+        <a-form-item
+          :label="$t('pages.script.script-console.af78e8cb')"
+          :help="`${commandParams.length ? $t('pages.script.script-console.1cf6b640') : ''}`"
+        >
           <a-space direction="vertical" style="width: 100%">
             <a-row v-for="(item, index) in commandParams" :key="item.key">
               <a-col :span="22">
                 <a-input
                   v-model:value="item.value"
-                  :addon-before="`${$tl('p.param')}${index + 1}${$tl('p.value')}`"
-                  :placeholder="`${$tl('p.param')}${$tl('p.value')} ${item.desc ? ',' + item.desc : ''}`"
+                  :addon-before="`${$t('pages.script.script-console.2e7ae087')}${index + 1}${$t(
+                    'pages.script.script-console.97f7c43a'
+                  )}`"
+                  :placeholder="`${$t('pages.script.script-console.2e7ae087')}${$t(
+                    'pages.script.script-console.97f7c43a'
+                  )} ${item.desc ? ',' + item.desc : ''}`"
                 >
                   <template #suffix>
                     <a-tooltip v-if="item.desc" :title="item.desc">
@@ -54,7 +61,7 @@
               </a-col>
             </a-row>
             <a-button type="primary" size="small" @click="() => commandParams.push({})">{{
-              $tl('p.newParam')
+              $t('pages.script.script-console.f621fcfd')
             }}</a-button>
           </a-space>
         </a-form-item>
@@ -62,7 +69,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import LogView1 from '@/components/logView/index2'
 import { getWebSocketUrl } from '@/api/config'
@@ -89,8 +95,7 @@ export default {
       editArgs: false,
       temp: {
         // args: "",
-      },
-      // 日志内容
+      }, // 日志内容
       // logContext: "loading ...",
       btnLoading: true,
       commandParams: [],
@@ -123,9 +128,6 @@ export default {
     this.close()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.script.scriptConsole.${key}`, ...args)
-    },
     close() {
       this.socket?.close()
 
@@ -149,7 +151,9 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: `web socket ${this.$tl('p.error')},${this.$tl('p.checkWsProxy')}`
+          message: `web socket ${this.$t('pages.script.script-console.d75d207f')},${this.$t(
+            'pages.script.script-console.763330b'
+          )}`
         })
         this.btnLoading = true
       }
@@ -159,7 +163,7 @@ export default {
 
         clearInterval(this.heart)
         this.btnLoading = true
-        $message.warning(this.$tl('p.sessionClosed'))
+        $message.warning(this.$t('pages.script.script-console.8a2aae09'))
       }
       this.socket.onmessage = (msg) => {
         if (msg.data.indexOf('JPOM_MSG') > -1 && msg.data.indexOf('op') > -1) {
@@ -221,5 +225,3 @@ export default {
   }
 }
 </script>
-
-<style scoped></style>

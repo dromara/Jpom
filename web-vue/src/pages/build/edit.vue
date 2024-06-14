@@ -1,39 +1,39 @@
 <template>
   <div>
-    <a-spin :tip="$tl('p.loadingBuildData')" :spinning="loading">
+    <a-spin :tip="$t('pages.build.edit.272043cf')" :spinning="loading">
       <a-card>
         <template #title>
           <a-steps v-model:current="stepsCurrent" size="small" :items="stepsItems" @change="stepsChange"></a-steps>
         </template>
         <a-form ref="editBuildForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
           <div v-show="stepsCurrent === 0">
-            <a-alert :message="$tl('p.howToChooseBuildMethod')" type="info" show-icon>
+            <a-alert :message="$t('pages.build.edit.f638b7f7')" type="info" show-icon>
               <template #description>
                 <ul>
                   <li>
-                    {{ $tl('p.howToList1') }}
+                    {{ $t('pages.build.edit.d5256619') }}
                     <ul>
-                      <li>{{ $tl('p.howToList2') }}</li>
-                      <li>{{ $tl('p.howToList3') }}</li>
-                      <li>{{ $tl('p.howToList4') }}</li>
+                      <li>{{ $t('pages.build.edit.4c2c37a3') }}</li>
+                      <li>{{ $t('pages.build.edit.3b2b0735') }}</li>
+                      <li>{{ $t('pages.build.edit.a54f9296') }}</li>
                     </ul>
                   </li>
                   <li>
-                    {{ $tl('p.howToList5') }}
+                    {{ $t('pages.build.edit.d248a200') }}
                     <ul>
-                      <li>{{ $tl('p.howToList6') }}</li>
+                      <li>{{ $t('pages.build.edit.4b41f3ba') }}</li>
                     </ul>
                   </li>
 
-                  <li>{{ $tl('p.howToList7') }}</li>
+                  <li>{{ $t('pages.build.edit.3c46c32c') }}</li>
                   <li v-if="getExtendPlugins.indexOf('inDocker') > -1" style="color: red">
-                    {{ $tl('p.howToList8') }}
+                    {{ $t('pages.build.edit.acf9debd') }}
                   </li>
                 </ul>
               </template>
             </a-alert>
             <a-form-item :name="['buildMode']">
-              <template #label> {{ $tl('c.buildMethod') }} </template>
+              <template #label> {{ $t('pages.build.edit.b5dfedd9') }} </template>
               <a-space>
                 <a-radio-group
                   v-model:value="temp.buildMode"
@@ -62,24 +62,25 @@
                       }
                     "
                   >
-                    {{ $tl('p.viewAvailableContainers') }}
+                    {{ $t('pages.build.edit.e50d0e17') }}
                   </a-button>
                 </template>
-                <template #label> {{ $tl('p.availableTags') }} </template>
-                <a-spin :tip="$tl('p.loadingContainerTags')" :spinning="dockerAllTagLoading">
+                <template #label> {{ $t('pages.build.edit.9dbe9df') }} </template>
+                <a-spin :tip="$t('pages.build.edit.b46f11d2')" :spinning="dockerAllTagLoading">
                   <a-space v-if="dockerAllTagList && dockerAllTagList.length">
                     <a-tag v-for="(item, index) in dockerAllTagList" :key="index">{{ item }}</a-tag>
                   </a-space>
-                  <span v-else style="color: red; font-weight: bold">{{ $tl('p.noContainerOrTag') }}</span>
+                  <span v-else style="color: red; font-weight: bold">{{ $t('pages.build.edit.1eb28553') }}</span>
                 </a-spin>
               </a-form-item>
-              <a-alert :message="$tl('p.containerBuildNote')" type="warning" show-icon>
+              <a-alert :message="$t('pages.build.edit.827a52c4')" type="warning" show-icon>
                 <template #description>
                   <ul>
-                    <li>{{ $tl('p.containerList1') }}</li>
-                    <li>{{ $tl('p.containerList2') }}</li>
+                    <li>{{ $t('pages.build.edit.33ba7e9') }}</li>
+                    <li>{{ $t('pages.build.edit.9a32f653') }}</li>
                     <li>
-                      {{ $tl('p.containerList3') }} <b style="color: red">fromTag</b> {{ $tl('p.containerList4') }}
+                      {{ $t('pages.build.edit.ed35c6c5') }} <b style="color: red">fromTag</b>
+                      {{ $t('pages.build.edit.73515366') }}
                     </li>
                   </ul>
                 </template>
@@ -87,12 +88,12 @@
             </template>
           </div>
           <div v-show="stepsCurrent === 1">
-            <a-form-item :label="$tl('c.name')" name="name">
+            <a-form-item :label="$t('pages.build.edit.3e34ec28')" name="name">
               <a-row>
                 <a-col :span="10">
-                  <a-input v-model:value="temp.name" :max-length="50" :placeholder="$tl('c.name')" />
+                  <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('pages.build.edit.3e34ec28')" />
                 </a-col>
-                <a-col :span="4" style="text-align: right">{{ $tl('p.groupName') }}</a-col>
+                <a-col :span="4" style="text-align: right">{{ $t('pages.build.edit.12d0e469') }}</a-col>
 
                 <a-col :span="10">
                   <a-form-item-rest>
@@ -100,20 +101,24 @@
                       v-model:value="temp.group"
                       :max-length="50"
                       :data="groupList"
-                      :input-placeholder="$tl('p.addGroup')"
-                      :select-placeholder="$tl('p.selectGroup')"
+                      :input-placeholder="$t('pages.build.edit.c50ead9c')"
+                      :select-placeholder="$t('pages.build.edit.761c903a')"
                     >
                     </custom-select>
                   </a-form-item-rest>
                 </a-col>
               </a-row>
             </a-form-item>
-            <a-form-item :label="$tl('p.sourceRepository')" name="repositoryId">
+            <a-form-item :label="$t('pages.build.edit.1beebcf2')" name="repositoryId">
               <a-input-search
-                :value="`${tempRepository ? tempRepository.name + '[' + tempRepository.gitUrl + ']' : $tl('c.selectRepository')}`"
+                :value="`${
+                  tempRepository
+                    ? tempRepository.name + '[' + tempRepository.gitUrl + ']'
+                    : $t('pages.build.edit.d62c383b')
+                }`"
                 read-only
-                :placeholder="$tl('c.selectRepository')"
-                :enter-button="$tl('c.chooseRepository')"
+                :placeholder="$t('pages.build.edit.d62c383b')"
+                :enter-button="$t('pages.build.edit.e95bc1a3')"
                 @search="
                   () => {
                     repositoryisible = true
@@ -122,7 +127,7 @@
               />
             </a-form-item>
             <template v-if="tempRepository && tempRepository.repoType === 0">
-              <a-form-item :label="$tl('p.branch')" name="branchName">
+              <a-form-item :label="$t('pages.build.edit.5cb4b684')" name="branchName">
                 <a-row>
                   <a-col :span="10">
                     <custom-select
@@ -130,8 +135,8 @@
                       :disabled="temp.branchTagName ? true : false"
                       :data="branchList"
                       :can-reload="true"
-                      :input-placeholder="$tl('p.customBranchWildcard')"
-                      :select-placeholder="$tl('p.selectBranchForBuild')"
+                      :input-placeholder="$t('pages.build.edit.8f70dedd')"
+                      :select-placeholder="$t('pages.build.edit.aa5164b0')"
                       @on-refresh-select="loadBranchList"
                       @change="
                         () => {
@@ -141,25 +146,25 @@
                     >
                       <template #inputTips>
                         <div>
-                          {{ $tl('c.supportWildcard') }}(AntPathMatcher)
+                          {{ $t('pages.build.edit.c0b8ef64') }}(AntPathMatcher)
                           <ul>
-                            <li>? {{ $tl('c.matchOneCharacter') }}</li>
-                            <li>* {{ $tl('c.matchZeroOrMoreCharacters') }}</li>
-                            <li>** {{ $tl('c.matchZeroOrMoreDirectories') }}</li>
+                            <li>? {{ $t('pages.build.edit.8bef7f5') }}</li>
+                            <li>* {{ $t('pages.build.edit.49902a8e') }}</li>
+                            <li>** {{ $t('pages.build.edit.6bd4dac4') }}</li>
                           </ul>
                         </div>
                       </template>
                     </custom-select>
                   </a-col>
-                  <a-col :span="4" style="text-align: right"> {{ $tl('p.tag') }}(TAG)：</a-col>
+                  <a-col :span="4" style="text-align: right"> {{ $t('pages.build.edit.83d5a14e') }}(TAG)：</a-col>
                   <a-col :span="10">
                     <a-form-item-rest>
                       <custom-select
                         v-model:value="temp.branchTagName"
                         :data="branchTagList"
                         :can-reload="true"
-                        :input-placeholder="$tl('p.customTagWildcard')"
-                        :select-placeholder="$tl('p.selectTagForBuild')"
+                        :input-placeholder="$t('pages.build.edit.b328c96c')"
+                        :select-placeholder="$t('pages.build.edit.a9be5a35')"
                         @on-refresh-select="loadBranchList"
                         @change="
                           () => {
@@ -169,11 +174,11 @@
                       >
                         <template #inputTips>
                           <div>
-                            {{ $tl('c.supportWildcard') }}(AntPathMatcher)
+                            {{ $t('pages.build.edit.c0b8ef64') }}(AntPathMatcher)
                             <ul>
-                              <li>? {{ $tl('c.matchOneCharacter') }}</li>
-                              <li>* {{ $tl('c.matchZeroOrMoreCharacters') }}</li>
-                              <li>** {{ $tl('c.matchZeroOrMoreDirectories') }}</li>
+                              <li>? {{ $t('pages.build.edit.8bef7f5') }}</li>
+                              <li>* {{ $t('pages.build.edit.49902a8e') }}</li>
+                              <li>** {{ $t('pages.build.edit.6bd4dac4') }}</li>
                             </ul>
                           </div>
                         </template>
@@ -184,13 +189,13 @@
               </a-form-item>
               <a-form-item
                 v-if="getExtendPlugins.indexOf('system-git') > -1"
-                :label="$tl('p.cloneDepth')"
+                :label="$t('pages.build.edit.7cc9f1bf')"
                 name="cloneDepth"
               >
                 <a-input-number
                   v-model:value="tempExtraData.cloneDepth"
                   style="width: 100%"
-                  :placeholder="$tl('p.customCloneDepth')"
+                  :placeholder="$t('pages.build.edit.718275d4')"
                 />
               </a-form-item>
             </template>
@@ -201,16 +206,17 @@
             <a-form-item v-if="temp.buildMode === 0" name="script">
               <template #label>
                 <a-tooltip>
-                  {{ $tl('p.buildCommand') }}
+                  {{ $t('pages.build.edit.264f7e9c') }}
                   <template #title>
-                    {{ $tl('p.buildCommandL1') }}<b>{{ $tl('p.buildCommandL2') }} </b>{{ $tl('p.buildCommandL3') }}
+                    {{ $t('pages.build.edit.2682adae') }}<b>{{ $t('pages.build.edit.bf8bfc14') }} </b
+                    >{{ $t('pages.build.edit.c88ccc82') }}
                     <b>cd xxx && mvn clean package</b>
                   </template>
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
               </template>
               <template #help>
-                {{ $tl('p.buildCommandHelp') }}
+                {{ $t('pages.build.edit.a4a03ee3') }}
               </template>
 
               <!-- <a-textarea
@@ -231,7 +237,7 @@
                           }
                         "
                       >
-                        {{ $tl('p.commonBuildCommandExample') }}
+                        {{ $t('pages.build.edit.24573653') }}
                       </a-button>
                       <a-button
                         type="link"
@@ -241,7 +247,7 @@
                           }
                         "
                       >
-                        {{ $tl('p.scriptTemplate') }}
+                        {{ $t('pages.build.edit.c086fc82') }}
                       </a-button>
                     </a-space>
                   </template>
@@ -251,27 +257,27 @@
             <a-form-item v-if="temp.buildMode === 1" name="script">
               <template #label>
                 <a-tooltip>
-                  DSL {{ $tl('p.content') }}
+                  DSL {{ $t('pages.build.edit.99ff48c8') }}
                   <template #title>
-                    <p>{{ $tl('p.dsl1') }}</p>
+                    <p>{{ $t('pages.build.edit.be74afcb') }}</p>
                     <ul>
-                      <li>{{ $tl('p.dsl2') }}</li>
-                      <li>{{ $tl('p.dsl3') }}</li>
-                      <li>{{ $tl('p.dsl4') }}</li>
+                      <li>{{ $t('pages.build.edit.277dfe71') }}</li>
+                      <li>{{ $t('pages.build.edit.507acee7') }}</li>
+                      <li>{{ $t('pages.build.edit.ce1e5b44') }}</li>
                     </ul>
                     <div>
-                      {{ $tl('p.dsl5') }}
+                      {{ $t('pages.build.edit.b9196bd2') }}
                       <ol>
                         <li>
-                          {{ $tl('p.dsl6') }}
+                          {{ $t('pages.build.edit.20103a68') }}
                         </li>
-                        <li>{{ $tl('p.dsl7') }}</li>
-                        <li>{{ $tl('p.dsl8') }}</li>
+                        <li>{{ $t('pages.build.edit.57170afe') }}</li>
+                        <li>{{ $t('pages.build.edit.c7a8176f') }}</li>
                         <li>
-                          {{ $tl('p.dsl9') }}
+                          {{ $t('pages.build.edit.b0af27f9') }}
                         </li>
                         <li>
-                          {{ $tl('p.dsl10') }}
+                          {{ $t('pages.build.edit.f8d3b0b6') }}
                         </li>
                       </ol>
                     </div>
@@ -311,17 +317,17 @@
                   height="40vh"
                   :show-tool="true"
                   :options="{ mode: 'yaml', tabSize: 2 }"
-                  :placeholder="$tl('p.buildDslConfigContent')"
+                  :placeholder="$t('pages.build.edit.5303e645')"
                 >
                   <template #tool_before>
                     <a-segmented
                       v-model:value="dslEditTabKey"
                       :options="[
                         {
-                          label: `DSL ${$tl('c.configuration')}`,
+                          label: `DSL ${$t('pages.build.edit.28f9e270')}`,
                           value: 'content'
                         },
-                        { label: $tl('c.configurationExample'), value: 'demo' }
+                        { label: $t('pages.build.edit.36177d5c'), value: 'demo' }
                       ]"
                     />
                   </template>
@@ -338,10 +344,10 @@
                       v-model:value="dslEditTabKey"
                       :options="[
                         {
-                          label: `DSL ${$tl('c.configuration')}`,
+                          label: `DSL ${$t('pages.build.edit.28f9e270')}`,
                           value: 'content'
                         },
-                        { label: $tl('c.configurationExample'), value: 'demo' }
+                        { label: $t('pages.build.edit.36177d5c'), value: 'demo' }
                       ]"
                     />
                   </template> </code-editor
@@ -350,21 +356,21 @@
             <a-form-item v-if="temp.buildMode !== undefined" name="resultDirFile" class="jpom-target-dir">
               <template #label>
                 <a-tooltip>
-                  {{ $tl('p.artifactDirectory') }}
+                  {{ $t('pages.build.edit.ed762599') }}
                   <template #title>
                     <div>
-                      {{ $tl('p.artifact1') }}
-                      <b>mvn clean package</b> {{ $tl('p.artifact2') }}
+                      {{ $t('pages.build.edit.9374a2e6') }}
+                      <b>mvn clean package</b> {{ $t('pages.build.edit.a7df35c') }}
                       <b> modules/server/target/server-2.4.2-release</b>
                     </div>
                     <div><br /></div>
                     <!-- 只有本地构建支持 模糊匹配 -->
                     <div v-if="temp.buildMode === 0">
-                      {{ $tl('c.supportWildcard') }}(AntPathMatcher){{ $tl('p.onlyUseFirstMatched') }}
+                      {{ $t('pages.build.edit.c0b8ef64') }}(AntPathMatcher){{ $t('pages.build.edit.507fac16') }}
                       <ul>
-                        <li>? {{ $tl('c.matchOneCharacter') }}</li>
-                        <li>* {{ $tl('c.matchZeroOrMoreCharacters') }}</li>
-                        <li>** {{ $tl('c.matchZeroOrMoreDirectories') }}</li>
+                        <li>? {{ $t('pages.build.edit.8bef7f5') }}</li>
+                        <li>* {{ $t('pages.build.edit.49902a8e') }}</li>
+                        <li>** {{ $t('pages.build.edit.6bd4dac4') }}</li>
                       </ul>
                     </div>
                   </template>
@@ -374,25 +380,25 @@
               <a-input
                 v-model:value="temp.resultDirFile"
                 :max-length="200"
-                :placeholder="$tl('p.buildArtifactsPath')"
+                :placeholder="$t('pages.build.edit.908d376f')"
               />
             </a-form-item>
 
-            <a-alert v-if="temp.buildMode === undefined" :message="$tl('p.noBuildMethodSelected')" banner />
+            <a-alert v-if="temp.buildMode === undefined" :message="$t('pages.build.edit.89aba1d1')" banner />
             <template v-else>
-              <a-form-item :label="$tl('p.environmentVariables')" name="buildEnvParameter">
+              <a-form-item :label="$t('pages.build.edit.c81b2c2e')" name="buildEnvParameter">
                 <a-textarea
                   v-model:value="temp.buildEnvParameter"
-                  :placeholder="$tl('p.enterBuildEnvVars')"
+                  :placeholder="$t('pages.build.edit.97d35a9f')"
                   :auto-size="{ minRows: 3, maxRows: 5 }"
                 />
               </a-form-item>
-              <a-form-item :label="$tl('p.executionMethod')" name="commandExecMode">
+              <a-form-item :label="$t('pages.build.edit.c41bc440')" name="commandExecMode">
                 <a-radio-group v-model:value="tempExtraData.commandExecMode" button-style="solid">
-                  <a-radio-button value="default">{{ $tl('p.default') }}</a-radio-button>
-                  <a-radio-button value="apache_exec">{{ $tl('p.multiThread') }}</a-radio-button>
+                  <a-radio-button value="default">{{ $t('pages.build.edit.846478be') }}</a-radio-button>
+                  <a-radio-button value="apache_exec">{{ $t('pages.build.edit.c48dabf9') }}</a-radio-button>
                 </a-radio-group>
-                <template #help>{{ $tl('p.experimentalFeature') }}</template>
+                <template #help>{{ $t('pages.build.edit.cf7b8625') }}</template>
               </a-form-item>
             </template>
           </div>
@@ -401,20 +407,20 @@
             <a-form-item name="releaseMethod">
               <template #label>
                 <a-tooltip>
-                  {{ $tl('c.publishOperation') }}
+                  {{ $t('pages.build.edit.7be4f983') }}
                   <template #title>
                     <ul>
-                      <li>{{ $tl('p.publish1') }}</li>
-                      <li>{{ $tl('p.publish2') }}</li>
-                      <li>{{ $tl('p.publish3') }}</li>
+                      <li>{{ $t('pages.build.edit.b86d61cb') }}</li>
+                      <li>{{ $t('pages.build.edit.21643071') }}</li>
+                      <li>{{ $t('pages.build.edit.566300e7') }}</li>
                       <li>
-                        {{ $tl('p.publish4') }}
+                        {{ $t('pages.build.edit.c8079544') }}
                       </li>
-                      <li>{{ $tl('p.publish5') }}</li>
+                      <li>{{ $t('pages.build.edit.bf00a5d2') }}</li>
                       <li>
-                        {{ $tl('p.publish6') }}
+                        {{ $t('pages.build.edit.2609f468') }}
                       </li>
-                      <li>{{ $tl('p.publish7') }}</li>
+                      <li>{{ $t('pages.build.edit.510ec4fe') }}</li>
                     </ul>
                   </template>
                   <QuestionCircleOutlined v-if="!temp.id" />
@@ -427,20 +433,20 @@
               </a-space>
             </a-form-item>
             <div v-if="!temp.releaseMethod" style="text-align: center">
-              {{ $tl('p.selectPublishMethod') }}
+              {{ $t('pages.build.edit.43706169') }}
             </div>
             <template v-else>
               <template v-if="temp.releaseMethod === 0">
-                {{ $tl('p.noPublish') }},{{ $tl('p.noPublishProcess') }}
+                {{ $t('pages.build.edit.b31e12fe') }},{{ $t('pages.build.edit.e3e80b89') }}
               </template>
               <!-- 节点分发 -->
               <template v-if="temp.releaseMethod === 1">
-                <a-form-item :label="$tl('p.distributeProject')" name="releaseMethodDataId">
+                <a-form-item :label="$t('pages.build.edit.d935498a')" name="releaseMethodDataId">
                   <a-select
                     v-model:value="tempExtraData.releaseMethodDataId_1"
                     show-search
                     allow-clear
-                    :placeholder="$tl('p.selectDistributeProject')"
+                    :placeholder="$t('pages.build.edit.145023e0')"
                   >
                     <a-select-option v-for="dispatch in dispatchList" :key="dispatch.id"
                       >{{ dispatch.name }}
@@ -450,54 +456,54 @@
                     </template>
                   </a-select>
                 </a-form-item>
-                <a-form-item name="projectSecondaryDirectory" :label="$tl('c.secondLevelDirectory')">
+                <a-form-item name="projectSecondaryDirectory" :label="$t('pages.build.edit.b07e882b')">
                   <a-input
                     v-model:value="tempExtraData.projectSecondaryDirectory"
-                    :placeholder="$tl('p.useNodeDistributeConfig')"
+                    :placeholder="$t('pages.build.edit.d5deb410')"
                   />
                 </a-form-item>
               </template>
 
               <!-- 项目 -->
               <template v-if="temp.releaseMethod === 2">
-                <a-form-item :label="$tl('p.publishProject')" name="releaseMethodDataIdList">
+                <a-form-item :label="$t('pages.build.edit.1fc809b5')" name="releaseMethodDataIdList">
                   <a-cascader
                     v-model:value="temp.releaseMethodDataIdList"
                     :options="cascaderList"
-                    :placeholder="$tl('p.selectNodeProject')"
+                    :placeholder="$t('pages.build.edit.496f23b1')"
                   >
                     <template #suffixIcon>
                       <ReloadOutlined @click="loadNodeProjectList" />
                     </template>
                   </a-cascader>
                 </a-form-item>
-                <a-form-item :label="$tl('p.postBuildActions')" name="afterOpt">
+                <a-form-item :label="$t('pages.build.edit.23d7171a')" name="afterOpt">
                   <a-select
                     v-model:value="tempExtraData.afterOpt"
                     show-search
                     allow-clear
-                    :placeholder="$tl('p.publishPostOperation')"
+                    :placeholder="$t('pages.build.edit.70a4cf1e')"
                   >
                     <a-select-option v-for="opt in afterOptListSimple" :key="opt.value">{{
                       opt.title
                     }}</a-select-option>
                   </a-select>
                 </a-form-item>
-                <a-form-item name="projectSecondaryDirectory" :label="$tl('c.secondLevelDirectory')">
+                <a-form-item name="projectSecondaryDirectory" :label="$t('pages.build.edit.b07e882b')">
                   <a-input
                     v-model:value="tempExtraData.projectSecondaryDirectory"
-                    :placeholder="$tl('p.publishToRoot')"
+                    :placeholder="$t('pages.build.edit.63b7357e')"
                   />
                 </a-form-item>
               </template>
               <!-- SSH -->
               <template v-if="temp.releaseMethod === 3">
-                <a-form-item name="releaseMethodDataId" :help="$tl('c.sshNotConfigured')">
+                <a-form-item name="releaseMethodDataId" :help="$t('pages.build.edit.8ef4635d')">
                   <template #label>
                     <a-tooltip>
-                      {{ $tl('p.publishViaSSH') }}
+                      {{ $t('pages.build.edit.324c2f16') }}
                       <template #title>
-                        {{ $tl('c.sshNotConfigured') }}
+                        {{ $t('pages.build.edit.8ef4635d') }}
                       </template>
                       <QuestionCircleOutlined v-if="!temp.id" />
                     </a-tooltip>
@@ -518,7 +524,7 @@
                           }
                         "
                         mode="multiple"
-                        :placeholder="$tl('c.selectSSH')"
+                        :placeholder="$t('pages.build.edit.b8bf68b')"
                       >
                         <a-select-option v-for="ssh in sshList" :key="ssh.id" :disabled="!ssh.fileDirs">
                           <a-tooltip :title="ssh.name"> {{ ssh.name }}</a-tooltip>
@@ -530,10 +536,10 @@
                     </a-col>
                   </a-row>
                 </a-form-item>
-                <a-form-item name="releaseMethodDataId" :help="$tl('c.sshDirectoryConfiguration')">
+                <a-form-item name="releaseMethodDataId" :help="$t('pages.build.edit.8d23f3a0')">
                   <template #label>
-                    <a-tooltip :title="$tl('c.sshDirectoryConfiguration')">
-                      {{ $tl('p.publishDirectory') }}
+                    <a-tooltip :title="$t('pages.build.edit.8d23f3a0')">
+                      {{ $t('pages.build.edit.e0389a4e') }}
                       <QuestionCircleOutlined v-if="!temp.id" />
                     </a-tooltip>
                   </template>
@@ -543,7 +549,7 @@
                       show-search
                       allow-clear
                       style="width: 30%"
-                      :placeholder="$tl('c.selectSSH')"
+                      :placeholder="$t('pages.build.edit.b8bf68b')"
                     >
                       <a-select-option v-for="item in selectSshDirs" :key="item">
                         <a-tooltip :title="item">{{ item }}</a-tooltip>
@@ -553,7 +559,7 @@
                       <a-input
                         v-model:value="tempExtraData.releasePath2"
                         style="width: 70%"
-                        :placeholder="$tl('p.releasePath2P')"
+                        :placeholder="$t('pages.build.edit.ec3e7305')"
                       />
                     </a-form-item-rest>
                   </a-input-group>
@@ -564,19 +570,19 @@
                 <!-- sshCommand -->
                 <template #label>
                   <a-tooltip>
-                    {{ $tl('p.prePublishCommand') }}
+                    {{ $t('pages.build.edit.8ed8f471') }}
                     <template #title>
-                      {{ $tl('p.prePublish1') }}
+                      {{ $t('pages.build.edit.4001461f') }}
                       <ul>
-                        <li>{{ $tl('p.prePublish2') }}</li>
-                        <li>{{ $tl('p.prePublish3') }}</li>
+                        <li>{{ $t('pages.build.edit.d90817a5') }}</li>
+                        <li>{{ $t('pages.build.edit.ae0f2733') }}</li>
                       </ul>
                     </template>
                     <QuestionCircleOutlined v-if="!temp.id" />
                   </a-tooltip>
                 </template>
                 <template #help>
-                  {{ $tl('p.prePublishHelp') }}
+                  {{ $t('pages.build.edit.f8795640') }}
                 </template>
                 <!-- <a-textarea
                   v-model:value="tempExtraData.releaseBeforeCommand"
@@ -593,7 +599,7 @@
                     :options="{ mode: 'shell' }"
                   >
                     <template #tool_before>
-                      <a-tag>{{ $tl('p.nonMandatory') }}</a-tag></template
+                      <a-tag>{{ $t('pages.build.edit.f3096daa') }}</a-tag></template
                     >
                   </code-editor>
                 </a-form-item-rest>
@@ -602,12 +608,12 @@
                 <!-- sshCommand LocalCommand -->
                 <template #label>
                   <a-tooltip>
-                    {{ $tl('p.postPublishCommand') }}
+                    {{ $t('pages.build.edit.51d17d70') }}
                     <template #title>
-                      {{ $tl('p.postPublish1') }}
+                      {{ $t('pages.build.edit.3bf075cd') }}
                       <ul>
-                        <li>{{ $tl('p.postPublish2') }}</li>
-                        <li>{{ $tl('p.postPublish3') }}</li>
+                        <li>{{ $t('pages.build.edit.a2f92477') }}</li>
+                        <li>{{ $t('pages.build.edit.d5fe14e1') }}</li>
                       </ul>
                     </template>
 
@@ -615,7 +621,7 @@
                   </a-tooltip>
                 </template>
                 <template #help>
-                  {{ $tl('p.postPublishHelp') }}
+                  {{ $t('pages.build.edit.48a510df') }}
                 </template>
                 <a-form-item-rest>
                   <code-editor
@@ -625,7 +631,7 @@
                     :options="{ mode: 'shell' }"
                   >
                     <template #tool_before>
-                      <a-tag>{{ $tl('p.mandatory') }}</a-tag></template
+                      <a-tag>{{ $t('pages.build.edit.ae45b99') }}</a-tag></template
                     >
                   </code-editor>
                 </a-form-item-rest>
@@ -634,9 +640,9 @@
               <a-form-item v-if="temp.releaseMethod === 2 || temp.releaseMethod === 3" name="clearOld">
                 <template #label>
                   <a-tooltip>
-                    {{ $tl('p.clearPublish') }}
+                    {{ $t('pages.build.edit.fa8d15d') }}
                     <template #title>
-                      {{ $tl('p.clearPublishTip') }}
+                      {{ $t('pages.build.edit.54849cc4') }}
                     </template>
                     <QuestionCircleOutlined v-if="!temp.id" />
                   </a-tooltip>
@@ -646,21 +652,21 @@
                     <a-col :span="4">
                       <a-switch
                         v-model:checked="tempExtraData.clearOld"
-                        :checked-children="$tl('c.yes')"
-                        :un-checked-children="$tl('c.no')"
+                        :checked-children="$t('pages.build.edit.d2fbce36')"
+                        :un-checked-children="$t('pages.build.edit.1c77d6fb')"
                       />
                     </a-col>
                     <template v-if="temp.releaseMethod === 2">
                       <a-col :span="4" style="text-align: right">
                         <a-tooltip>
-                          {{ $tl('p.diffPublish') }}
+                          {{ $t('pages.build.edit.5ac78351') }}
                           <template #title>
-                            {{ $tl('p.diffTip1') }}
+                            {{ $t('pages.build.edit.a0286c94') }}
                             <ul>
                               <li>
-                                {{ $tl('p.diffTip2') }}
+                                {{ $t('pages.build.edit.39213d2e') }}
                               </li>
-                              <li>{{ $tl('p.diffTip3') }}</li>
+                              <li>{{ $t('pages.build.edit.4e260db8') }}</li>
                             </ul>
                           </template>
                           <QuestionCircleOutlined v-if="!temp.id" />
@@ -669,15 +675,15 @@
                       <a-col :span="4">
                         <a-switch
                           v-model:checked="tempExtraData.diffSync"
-                          :checked-children="$tl('c.yes')"
-                          :un-checked-children="$tl('c.no')"
+                          :checked-children="$t('pages.build.edit.d2fbce36')"
+                          :un-checked-children="$t('pages.build.edit.1c77d6fb')"
                         />
                       </a-col>
                       <a-col :span="4" style="text-align: right">
                         <a-tooltip>
-                          {{ $tl('p.preStopPublish') }}
+                          {{ $t('pages.build.edit.d6cd4b4') }}
                           <template #title>
-                            {{ $tl('p.preStopPublishTip') }}
+                            {{ $t('pages.build.edit.13c98505') }}
                           </template>
                           <QuestionCircleOutlined v-if="!temp.id" />
                         </a-tooltip>
@@ -685,8 +691,8 @@
                       <a-col :span="4">
                         <a-switch
                           v-model:checked="tempExtraData.projectUploadCloseFirst"
-                          :checked-children="$tl('c.yes')"
-                          :un-checked-children="$tl('c.no')"
+                          :checked-children="$t('pages.build.edit.d2fbce36')"
+                          :un-checked-children="$t('pages.build.edit.1c77d6fb')"
                         />
                       </a-col>
                     </template>
@@ -698,40 +704,43 @@
                 <a-form-item name="fromTag">
                   <template #label>
                     <a-tooltip>
-                      {{ $tl('p.executeContainer') }}
+                      {{ $t('pages.build.edit.96f8e2b0') }}
                       <template #title>
-                        {{ $tl('p.executeContainerTip') }}
+                        {{ $t('pages.build.edit.6abeeb6a') }}
                       </template>
                       <QuestionCircleOutlined v-if="!temp.id" />
                     </a-tooltip>
                   </template>
-                  <a-input v-model:value="tempExtraData.fromTag" :placeholder="$tl('p.executeContainerTag')" />
+                  <a-input v-model:value="tempExtraData.fromTag" :placeholder="$t('pages.build.edit.21b4e4a5')" />
                 </a-form-item>
 
-                <a-tooltip :title="$tl('p.dockerfilePath')">
+                <a-tooltip :title="$t('pages.build.edit.83573626')">
                   <a-form-item name="dockerfile" label="Dockerfile">
-                    <a-input v-model:value="tempExtraData.dockerfile" :placeholder="$tl('p.dockerfilePathTip')" />
+                    <a-input v-model:value="tempExtraData.dockerfile" :placeholder="$t('pages.build.edit.301d915f')" />
                   </a-form-item>
                 </a-tooltip>
-                <a-form-item name="dockerTag" :label="$tl('p.imageTag')">
-                  <a-tooltip :title="$tl('p.containerTag')">
-                    <a-input v-model:value="tempExtraData.dockerTag" :placeholder="$tl('p.containerTags')" />
+                <a-form-item name="dockerTag" :label="$t('pages.build.edit.5af27a88')">
+                  <a-tooltip :title="$t('pages.build.edit.e83d88b9')">
+                    <a-input v-model:value="tempExtraData.dockerTag" :placeholder="$t('pages.build.edit.a95bf9ab')" />
                   </a-tooltip>
                 </a-form-item>
-                <a-form-item name="dockerBuildArgs" :label="$tl('p.buildParams')">
+                <a-form-item name="dockerBuildArgs" :label="$t('pages.build.edit.6d85135e')">
                   <a-row>
                     <a-col :span="10">
-                      <a-tooltip :title="$tl('p.buildParamsInput')">
-                        <a-input v-model:value="tempExtraData.dockerBuildArgs" :placeholder="$tl('p.buildParamsTip')" />
+                      <a-tooltip :title="$t('pages.build.edit.ebcb5889')">
+                        <a-input
+                          v-model:value="tempExtraData.dockerBuildArgs"
+                          :placeholder="$t('pages.build.edit.ead1cb46')"
+                        />
                       </a-tooltip>
                     </a-col>
-                    <a-col :span="4" style="text-align: right">{{ $tl('p.imageTags') }}</a-col>
+                    <a-col :span="4" style="text-align: right">{{ $t('pages.build.edit.f8373663') }}</a-col>
                     <a-col :span="10">
                       <a-form-item-rest>
-                        <a-tooltip :title="$tl('p.imageTagInput')">
+                        <a-tooltip :title="$t('pages.build.edit.6ae9b418')">
                           <a-input
                             v-model:value="tempExtraData.dockerImagesLabels"
-                            :placeholder="$tl('p.imageTagParamsTip')"
+                            :placeholder="$t('pages.build.edit.190b5c5e')"
                           /> </a-tooltip
                       ></a-form-item-rest>
                     </a-col>
@@ -740,9 +749,9 @@
                 <a-form-item name="swarmId">
                   <template #label>
                     <a-tooltip>
-                      {{ $tl('p.publishCluster') }}
+                      {{ $t('pages.build.edit.d5beb0cf') }}
                       <template #title>
-                        {{ $tl('p.dockerSwarmCluster') }}
+                        {{ $t('pages.build.edit.f50958d4') }}
                       </template>
                       <QuestionCircleOutlined v-if="!temp.id" />
                     </a-tooltip>
@@ -751,10 +760,10 @@
                     v-model:value="tempExtraData.dockerSwarmId"
                     show-search
                     allow-clear
-                    :placeholder="$tl('p.selectClusterForPublish')"
+                    :placeholder="$t('pages.build.edit.4ebd6b12')"
                     @change="selectSwarm()"
                   >
-                    <a-select-option value="">{{ $tl('p.noClusterPublish') }}</a-select-option>
+                    <a-select-option value="">{{ $t('pages.build.edit.515f42e5') }}</a-select-option>
                     <a-select-option v-for="item1 in dockerSwarmList" :key="item1.id">{{ item1.name }}</a-select-option>
                     <template #suffixIcon>
                       <ReloadOutlined @click="loadDockerSwarmListAll" />
@@ -767,34 +776,34 @@
                       <a-col :span="6" style="text-align: right">
                         <a-space>
                           <a-tooltip>
-                            {{ $tl('p.pushToRepositoryLabel') }}
+                            {{ $t('pages.build.edit.2098cd5f') }}
                             <template #title>
-                              {{ $tl('p.pushToRepository') }}
+                              {{ $t('pages.build.edit.e5cfe61c') }}
                             </template>
                             <QuestionCircleOutlined v-if="!temp.id" />
                           </a-tooltip>
 
                           <a-switch
                             v-model:checked="tempExtraData.pushToRepository"
-                            :checked-children="$tl('c.yes')"
-                            :un-checked-children="$tl('c.no')"
+                            :checked-children="$t('pages.build.edit.d2fbce36')"
+                            :un-checked-children="$t('pages.build.edit.1c77d6fb')"
                           />
                         </a-space>
                       </a-col>
                       <a-col :span="6" style="text-align: right">
                         <a-space>
                           <a-tooltip>
-                            {{ $tl('p.versionIncrement') }}
+                            {{ $t('pages.build.edit.b80c07b9') }}
                             <template #title>
-                              {{ $tl('p.versionIncrementTip') }}
+                              {{ $t('pages.build.edit.fcb6e167') }}
                             </template>
                             <QuestionCircleOutlined v-if="!temp.id" />
                           </a-tooltip>
 
                           <a-switch
                             v-model:checked="tempExtraData.dockerTagIncrement"
-                            :checked-children="$tl('c.yes')"
-                            :un-checked-children="$tl('c.no')"
+                            :checked-children="$t('pages.build.edit.d2fbce36')"
+                            :un-checked-children="$t('pages.build.edit.1c77d6fb')"
                           />
                         </a-space>
                       </a-col>
@@ -802,29 +811,29 @@
                         <a-space>
                           <a-tooltip>
                             no-cache
-                            <template #title>{{ $tl('p.noCacheBuild') }} </template>
+                            <template #title>{{ $t('pages.build.edit.4ad1689a') }} </template>
                             <QuestionCircleOutlined v-if="!temp.id" />
                           </a-tooltip>
 
                           <a-switch
                             v-model:checked="tempExtraData.dockerNoCache"
-                            :checked-children="$tl('c.yes')"
-                            :un-checked-children="$tl('c.no')"
+                            :checked-children="$t('pages.build.edit.d2fbce36')"
+                            :un-checked-children="$t('pages.build.edit.1c77d6fb')"
                           />
                         </a-space>
                       </a-col>
                       <a-col :span="6" style="text-align: right">
                         <a-space>
                           <a-tooltip>
-                            {{ $tl('p.updateImage') }}
-                            <template #title>{{ $tl('p.attemptToUpdateBaseImage') }} </template>
+                            {{ $t('pages.build.edit.a2b28fd3') }}
+                            <template #title>{{ $t('pages.build.edit.eab8e65b') }} </template>
                             <QuestionCircleOutlined v-if="!temp.id" />
                           </a-tooltip>
 
                           <a-switch
                             v-model:checked="tempExtraData.dockerBuildPull"
-                            :checked-children="$tl('c.yes')"
-                            :un-checked-children="$tl('c.no')"
+                            :checked-children="$t('pages.build.edit.d2fbce36')"
+                            :un-checked-children="$t('pages.build.edit.1c77d6fb')"
                           />
                         </a-space>
                       </a-col>
@@ -835,9 +844,9 @@
                   <a-form-item-rest>
                     <template #label>
                       <a-tooltip>
-                        {{ $tl('p.clusterService') }}
+                        {{ $t('pages.build.edit.5dd8de32') }}
                         <template #title>
-                          {{ $tl('p.selectServiceForPublish') }}
+                          {{ $t('pages.build.edit.ee2fca') }}
                         </template>
                         <QuestionCircleOutlined v-if="!temp.id" />
                       </a-tooltip>
@@ -845,7 +854,7 @@
                     <a-select
                       v-model:value="tempExtraData.dockerSwarmServiceName"
                       allow-clear
-                      :placeholder="$tl('p.selectedServiceForPublish')"
+                      :placeholder="$t('pages.build.edit.c2dca952')"
                     >
                       <a-select-option v-for="item2 in swarmServiceListOptions" :key="item2.spec.name">{{
                         item2.spec.name
@@ -861,9 +870,9 @@
             <a-form-item name="cacheBuild">
               <template #label>
                 <a-tooltip>
-                  {{ $tl('p.cacheBuild') }}
+                  {{ $t('pages.build.edit.fefad82f') }}
                   <template #title>
-                    {{ $tl('p.cacheBuildTip') }}
+                    {{ $t('pages.build.edit.5756ab9a') }}
                   </template>
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
@@ -871,26 +880,26 @@
               <a-form-item-rest>
                 <a-row>
                   <a-col :span="2">
-                    <a-tooltip :title="$tl('p.cacheBuildDirectory')">
+                    <a-tooltip :title="$t('pages.build.edit.a3affb5c')">
                       <a-switch
                         v-model:checked="tempExtraData.cacheBuild"
-                        :checked-children="$tl('c.yes')"
-                        :un-checked-children="$tl('c.no')"
+                        :checked-children="$t('pages.build.edit.d2fbce36')"
+                        :un-checked-children="$t('pages.build.edit.1c77d6fb')"
                       />
                     </a-tooltip>
                   </a-col>
                   <a-col :span="6" style="text-align: right">
                     <a-space>
                       <a-tooltip>
-                        {{ $tl('p.retainBuildArtifacts') }}
-                        <template #title> {{ $tl('p.retainBuildArtifactsInfo') }} </template>
+                        {{ $t('pages.build.edit.57a58211') }}
+                        <template #title> {{ $t('pages.build.edit.47d0ed86') }} </template>
 
                         <QuestionCircleOutlined v-if="!temp.id" />
                       </a-tooltip>
                       <a-switch
                         v-model:checked="tempExtraData.saveBuildFile"
-                        :checked-children="$tl('c.yes')"
-                        :un-checked-children="$tl('c.no')"
+                        :checked-children="$t('pages.build.edit.d2fbce36')"
+                        :un-checked-children="$t('pages.build.edit.1c77d6fb')"
                       />
                     </a-space>
                   </a-col>
@@ -898,33 +907,33 @@
                   <a-col :span="6" style="text-align: right">
                     <a-space>
                       <a-tooltip>
-                        {{ $tl('p.diffBuild') }}
+                        {{ $t('pages.build.edit.8692041e') }}
                         <template #title>
-                          {{ $tl('p.incrementalBuild') }}
+                          {{ $t('pages.build.edit.e8e74466') }}
                         </template>
 
                         <QuestionCircleOutlined v-if="!temp.id" />
                       </a-tooltip>
                       <a-switch
                         v-model:checked="tempExtraData.checkRepositoryDiff"
-                        :checked-children="$tl('c.yes')"
-                        :un-checked-children="$tl('c.no')"
+                        :checked-children="$t('pages.build.edit.d2fbce36')"
+                        :un-checked-children="$t('pages.build.edit.1c77d6fb')"
                       />
                     </a-space>
                   </a-col>
                   <a-col :span="6" style="text-align: right">
                     <a-space>
                       <a-tooltip>
-                        {{ $tl('p.strictExecution') }}
+                        {{ $t('pages.build.edit.419b3529') }}
                         <template #title>
-                          {{ $tl('p.strictExecutionTip') }}
+                          {{ $t('pages.build.edit.82be0bf8') }}
                         </template>
                         <QuestionCircleOutlined v-if="!temp.id" />
                       </a-tooltip>
                       <a-switch
                         v-model:checked="tempExtraData.strictlyEnforce"
-                        :checked-children="$tl('c.yes')"
-                        :un-checked-children="$tl('c.no')"
+                        :checked-children="$t('pages.build.edit.d2fbce36')"
+                        :un-checked-children="$t('pages.build.edit.1c77d6fb')"
                       />
                     </a-space>
                   </a-col>
@@ -937,21 +946,21 @@
                   WebHooks
                   <template #title>
                     <ul>
-                      <li>{{ $tl('p.webHookTip1') }}</li>
-                      <li>{{ $tl('p.webHookTip2') }}</li>
-                      <li>{{ $tl('p.webHookTip3') }}</li>
-                      <li>{{ $tl('p.webHookTip4') }}</li>
+                      <li>{{ $t('pages.build.edit.3b8c1c97') }}</li>
+                      <li>{{ $t('pages.build.edit.a2854d2d') }}</li>
+                      <li>{{ $t('pages.build.edit.d5827dbb') }}</li>
+                      <li>{{ $t('pages.build.edit.4be6e818') }}</li>
                     </ul>
                   </template>
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
               </template>
-              <a-input v-model:value="temp.webhook" :placeholder="$tl('p.buildProcessRequest')" />
+              <a-input v-model:value="temp.webhook" :placeholder="$t('pages.build.edit.c73fae64')" />
             </a-form-item>
-            <a-form-item :label="$tl('p.timedBuild')" name="autoBuildCron">
+            <a-form-item :label="$t('pages.build.edit.3f5140f1')" name="autoBuildCron">
               <a-auto-complete
                 v-model:value="temp.autoBuildCron"
-                :placeholder="$tl('p.cronExpression')"
+                :placeholder="$t('pages.build.edit.50fcce7a')"
                 :options="CRON_DATA_SOURCE"
               >
                 <template #option="item"> {{ item.title }} {{ item.value }} </template>
@@ -960,16 +969,16 @@
             <a-form-item name="noticeScriptId">
               <template #label>
                 <a-tooltip>
-                  {{ $tl('p.eventScript') }}
+                  {{ $t('pages.build.edit.ff095cb0') }}
                   <template #title>
                     <ul>
-                      <li>{{ $tl('p.eventScriptTip1') }}</li>
+                      <li>{{ $t('pages.build.edit.d8d80300') }}</li>
                       <li>
-                        {{ $tl('p.eventScriptTip2') }}
+                        {{ $t('pages.build.edit.41d152ba') }}
                       </li>
-                      <li>{{ $tl('p.eventScriptTip3') }}</li>
+                      <li>{{ $t('pages.build.edit.36d6622c') }}</li>
                       <li>
-                        <b>{{ $tl('p.eventScriptTip4') }}</b>
+                        <b>{{ $t('pages.build.edit.a8b2f78f') }}</b>
                       </li>
                     </ul>
                   </template>
@@ -977,10 +986,14 @@
                 </a-tooltip>
               </template>
               <a-input-search
-                :value="`${tempExtraData ? tempExtraData.noticeScriptId || $tl('c.selectScript') : $tl('c.selectScript')}`"
+                :value="`${
+                  tempExtraData
+                    ? tempExtraData.noticeScriptId || $t('pages.build.edit.2b4badd4')
+                    : $t('pages.build.edit.2b4badd4')
+                }`"
                 read-only
-                :placeholder="$tl('c.selectScript')"
-                :enter-button="$tl('c.chooseScript')"
+                :placeholder="$t('pages.build.edit.2b4badd4')"
+                :enter-button="$t('pages.build.edit.2fcc9ae3')"
                 @search="
                   () => {
                     chooseScriptVisible = 1
@@ -998,7 +1011,7 @@
                       }
                     "
                   >
-                    {{ $tl('p.resetSelection') }}
+                    {{ $t('pages.build.edit.311e1644') }}
                   </span>
                 </template>
               </a-input-search>
@@ -1006,31 +1019,31 @@
             <a-form-item name="attachEnv">
               <template #label>
                 <a-tooltip>
-                  {{ $tl('p.additionalEnvVars') }}
+                  {{ $t('pages.build.edit.3b9612e1') }}
                   <template #title>
                     <ul>
-                      <li>{{ $tl('p.additionalEnvVars1') }}</li>
-                      <li>{{ $tl('p.additionalEnvVars2') }}</li>
-                      <li>{{ $tl('p.additionalEnvVars3') }}</li>
-                      <li>{{ $tl('p.additionalEnvVars4') }}</li>
+                      <li>{{ $t('pages.build.edit.54eaab4b') }}</li>
+                      <li>{{ $t('pages.build.edit.cde3faf1') }}</li>
+                      <li>{{ $t('pages.build.edit.bae4ca67') }}</li>
+                      <li>{{ $t('pages.build.edit.24805fc4') }}</li>
                       <li>
-                        {{ $tl('p.additionalEnvVars5') }}<b>USE_TAR_GZ=1</b>
-                        {{ $tl('p.additionalEnvVars6') }}
-                        <b>tar.gz</b> {{ $tl('p.additionalEnvVars7') }}
+                        {{ $t('pages.build.edit.53876f52') }}<b>USE_TAR_GZ=1</b>
+                        {{ $t('pages.build.edit.ca8e3ee8') }}
+                        <b>tar.gz</b> {{ $t('pages.build.edit.bd890e7e') }}
                       </li>
                     </ul>
                   </template>
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
               </template>
-              <a-input v-model:value="tempExtraData.attachEnv" :placeholder="$tl('p.additionalEnvVarsInput')" />
+              <a-input v-model:value="tempExtraData.attachEnv" :placeholder="$t('pages.build.edit.336147d2')" />
             </a-form-item>
             <a-form-item name="cacheBuild">
               <template #label>
                 <a-tooltip>
-                  {{ $tl('p.fileManagementCenter') }}
+                  {{ $t('pages.build.edit.49370d30') }}
                   <template #title>
-                    {{ $tl('p.syncToFile') }}
+                    {{ $t('pages.build.edit.34a0a0e1') }}
                   </template>
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
@@ -1039,25 +1052,25 @@
                 <a-col :span="4">
                   <a-switch
                     v-model:checked="tempExtraData.syncFileStorage"
-                    :checked-children="$tl('p.sync')"
-                    :un-checked-children="$tl('p.noSync')"
+                    :checked-children="$t('pages.build.edit.c97e1761')"
+                    :un-checked-children="$t('pages.build.edit.d23107d6')"
                   />
                 </a-col>
                 <a-col :span="6" style="text-align: right">
                   <a-form-item-rest>
                     <a-space>
                       <a-tooltip>
-                        {{ $tl('p.publishHiddenFiles') }}
+                        {{ $t('pages.build.edit.67ac1467') }}
                         <template #title>
-                          {{ $tl('p.defaultIgnoreHiddenFiles') }},{{ $tl('p.publishAllFiles') }}
+                          {{ $t('pages.build.edit.ecb919ff') }},{{ $t('pages.build.edit.b71cfd19') }}
                         </template>
 
                         <QuestionCircleOutlined v-if="!temp.id" />
                       </a-tooltip>
                       <a-switch
                         v-model:checked="tempExtraData.releaseHideFile"
-                        :checked-children="$tl('c.yes')"
-                        :un-checked-children="$tl('c.no')"
+                        :checked-children="$t('pages.build.edit.d2fbce36')"
+                        :un-checked-children="$t('pages.build.edit.1c77d6fb')"
                       />
                     </a-space>
                   </a-form-item-rest>
@@ -1067,9 +1080,9 @@
                   <a-form-item-rest>
                     <a-space>
                       <a-tooltip>
-                        {{ $tl('p.retainDays') }}
+                        {{ $t('pages.build.edit.98db1c5') }}
                         <template #title>
-                          {{ $tl('p.retainDaysTip') }}
+                          {{ $t('pages.build.edit.897dca6a') }}
                         </template>
                         <QuestionCircleOutlined v-if="!temp.id" />
                       </a-tooltip>
@@ -1082,9 +1095,9 @@
                   <a-form-item-rest>
                     <a-space>
                       <a-tooltip>
-                        {{ $tl('p.retainCount') }}
+                        {{ $t('pages.build.edit.cae4df7d') }}
                         <template #title>
-                          {{ $tl('p.retainCountTip') }}
+                          {{ $t('pages.build.edit.8d20fad4') }}
                         </template>
                         <QuestionCircleOutlined v-if="!temp.id" />
                       </a-tooltip>
@@ -1094,13 +1107,17 @@
                 </a-col>
               </a-row>
             </a-form-item>
-            <a-form-item :label="$tl('p.aliasCode')" name="aliasCode" :help="$tl('p.aliasCodeInput')">
+            <a-form-item
+              :label="$t('pages.build.edit.9dfaff03')"
+              name="aliasCode"
+              :help="$t('pages.build.edit.fcf063a3')"
+            >
               <a-row>
                 <a-col :span="10">
                   <a-input-search
                     v-model:value="temp.aliasCode"
                     :max-length="50"
-                    :placeholder="$tl('p.enterAliasCode')"
+                    :placeholder="$t('pages.build.edit.85499185')"
                     @search="
                       () => {
                         temp = { ...temp, aliasCode: randomStr(6) }
@@ -1109,7 +1126,7 @@
                   >
                     <template #enterButton>
                       <a-button type="primary">
-                        {{ $tl('p.generateAliasCode') }}
+                        {{ $t('pages.build.edit.9aa1afd7') }}
                       </a-button>
                     </template>
                   </a-input-search>
@@ -1118,9 +1135,9 @@
                 <a-col :span="10">
                   <a-form-item-rest>
                     <a-tooltip>
-                      {{ $tl('p.retentionDays') }}
+                      {{ $t('pages.build.edit.d3bbfc0c') }}
                       <template #title>
-                        {{ $tl('p.retainDaysForArtifacts') }}
+                        {{ $t('pages.build.edit.31270908') }}
                       </template>
                       <QuestionCircleOutlined v-if="!temp.id" />
                     </a-tooltip>
@@ -1132,16 +1149,16 @@
             <a-form-item name="excludeReleaseAnt">
               <template #label>
                 <a-tooltip>
-                  {{ $tl('p.excludePublish') }}
+                  {{ $t('pages.build.edit.d8413005') }}
                   <template #title>
                     <ul>
-                      <li>{{ $tl('p.excludePublishAntExpression') }}</li>
+                      <li>{{ $t('pages.build.edit.c61621e9') }}</li>
                     </ul>
                   </template>
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
               </template>
-              <a-input v-model:value="tempExtraData.excludeReleaseAnt" :placeholder="$tl('p.exclusionForPublish')" />
+              <a-input v-model:value="tempExtraData.excludeReleaseAnt" :placeholder="$t('pages.build.edit.397732b1')" />
             </a-form-item>
           </div>
         </a-form>
@@ -1150,7 +1167,7 @@
     <!-- 选择仓库 -->
     <a-drawer
       destroy-on-close
-      :title="`${$tl('c.chooseRepository')}`"
+      :title="`${$t('pages.build.edit.e95bc1a3')}`"
       placement="right"
       :open="repositoryisible"
       width="85vw"
@@ -1195,7 +1212,7 @@
               }
             "
           >
-            {{ $tl('c.cancel') }}
+            {{ $t('pages.build.edit.43105e21') }}
           </a-button>
           <a-button
             type="primary"
@@ -1205,7 +1222,7 @@
               }
             "
           >
-            {{ $tl('c.confirm') }}
+            {{ $t('pages.build.edit.7da4a591') }}
           </a-button>
         </a-space>
       </template>
@@ -1213,7 +1230,7 @@
     <!-- 选择脚本 -->
     <a-drawer
       destroy-on-close
-      :title="`${$tl('c.chooseScript')}`"
+      :title="`${$t('pages.build.edit.2fcc9ae3')}`"
       placement="right"
       :open="chooseScriptVisible != 0"
       width="70vw"
@@ -1233,8 +1250,8 @@
           chooseScriptVisible === 1
             ? tempExtraData.noticeScriptId
             : temp.script && temp.script.indexOf('$ref.script.') != -1
-              ? temp.script.replace('$ref.script.')
-              : ''
+            ? temp.script.replace('$ref.script.')
+            : ''
         "
         mode="choose"
         @confirm="
@@ -1262,7 +1279,7 @@
               }
             "
           >
-            {{ $tl('c.cancel') }}
+            {{ $t('pages.build.edit.43105e21') }}
           </a-button>
           <a-button
             type="primary"
@@ -1272,7 +1289,7 @@
               }
             "
           >
-            {{ $tl('c.confirm') }}
+            {{ $t('pages.build.edit.7da4a591') }}
           </a-button>
         </a-space>
       </template>
@@ -1280,7 +1297,7 @@
     <!-- 查看容器 -->
     <a-drawer
       destroy-on-close
-      :title="`${$tl('p.viewContainer')}`"
+      :title="`${$t('pages.build.edit.eed6df5e')}`"
       placement="right"
       :open="dockerListVisible != 0"
       width="70vw"
@@ -1299,7 +1316,7 @@
       v-model:open="viewScriptTemplVisible"
       destroy-on-close
       width="50vw"
-      :title="$tl('p.buildCommandExample')"
+      :title="$t('pages.build.edit.e7ebed80')"
       :footer="null"
       :mask-closable="false"
     >
@@ -1334,7 +1351,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import codeEditor from '@/components/codeEditor'
 import repository from '@/pages/repository/list.vue'
@@ -1399,22 +1415,22 @@ export default {
       viewScriptTemplVisible: false,
       buildScipts: [
         {
-          title: this.$tl('p.buildSciptsInfo'),
+          title: this.$t('pages.build.edit.2a9ef0eb'),
           children: [
             {
-              title: '不执行，也不编译测试用例 mvn clean package -Dmaven.test.skip=true',
+              title: this.$t('pages.build.edit.9d427063'),
               value: 'mvn clean package -Dmaven.test.skip=true'
             },
             {
-              title: '打包生产环境包 mvn clean package -Dmaven.test.skip=true -Pprod',
+              title: this.$t('pages.build.edit.5659520'),
               value: 'mvn clean package -Dmaven.test.skip=true -Pprod'
             },
             {
-              title: '打包测试环境包 mvn clean package -Dmaven.test.skip=true -Ptest',
+              title: this.$t('pages.build.edit.f869e0df'),
               value: 'mvn clean package -Dmaven.test.skip=true -Ptest'
             },
             {
-              title: '不执行，但是编译测试用例 mvn clean package -DskipTests',
+              title: this.$t('pages.build.edit.34d8a5b'),
               value: 'mvn clean package -DskipTests'
             },
             {
@@ -1422,36 +1438,36 @@ export default {
               value: 'mvn clean package'
             },
             {
-              title: '指定 pom 文件打包 mvn -f xxx/pom.xml clean package',
+              title: this.$t('pages.build.edit.73512cae'),
               value: 'mvn -f xxx/pom.xml clean package'
             },
             {
-              title: '指定 settings 文件打包 mvn -s xxx/settings.xml clean package',
+              title: this.$t('pages.build.edit.4304fb7e'),
               value: 'mvn -s xxx/settings.xml clean package'
             }
           ]
         },
         {
-          title: 'vue 项目(示例参考，具体还需要根据项目实际情况来决定)',
+          title: this.$t('pages.build.edit.7e95f38d'),
           children: [
             {
-              title: '需要先安装依赖 npm i && npm run build',
+              title: this.$t('pages.build.edit.455f3ab2'),
               value: 'npm i && npm run build'
             },
             {
-              title: '打包正式环境 npm i && npm run build:prod',
+              title: this.$t('pages.build.edit.fda856b3'),
               value: 'npm i && npm run build:prod'
             },
             {
-              title: '打包预发布环境 npm i && npm run build:stage',
+              title: this.$t('pages.build.edit.2b4b3931'),
               value: 'npm i && npm run build:stage'
             },
             {
-              title: '需要先安装依赖 yarn && yarn run build',
+              title: this.$t('pages.build.edit.4d7ec7a'),
               value: 'yarn && yarn run build'
             },
             {
-              title: '指定目录打包 yarn && yarn --cwd xxx build',
+              title: this.$t('pages.build.edit.9b30b8b1'),
               value: 'yarn && yarn --cwd xxx build'
             }
           ]
@@ -1470,17 +1486,17 @@ export default {
       groupList: [],
       temp: {},
       rules: {
-        name: [{ required: true, message: this.$tl('p.rulesBuildName'), trigger: 'blur' }],
-        buildMode: [{ required: true, message: this.$tl('p.rulesBuildMode'), trigger: 'blur' }],
-        releaseMethod: [{ required: true, message: this.$tl('p.rulesReleaseMethod'), trigger: 'blur' }],
-        branchName: [{ required: true, message: this.$tl('p.rulesBranchName'), trigger: 'blur' }],
-        script: [{ required: true, message: this.$tl('p.rulesBranchName'), trigger: 'blur' }],
-        resultDirFile: [{ required: true, message: this.$tl('p.rulesResultDirFile'), trigger: 'blur' }],
+        name: [{ required: true, message: this.$t('pages.build.edit.2d3fee7b'), trigger: 'blur' }],
+        buildMode: [{ required: true, message: this.$t('pages.build.edit.e4d6d7d6'), trigger: 'blur' }],
+        releaseMethod: [{ required: true, message: this.$t('pages.build.edit.bbc5e270'), trigger: 'blur' }],
+        branchName: [{ required: true, message: this.$t('pages.build.edit.622dac4d'), trigger: 'blur' }],
+        script: [{ required: true, message: this.$t('pages.build.edit.622dac4d'), trigger: 'blur' }],
+        resultDirFile: [{ required: true, message: this.$t('pages.build.edit.7a12ba09'), trigger: 'blur' }],
         // releasePath: [{ required: true, message: '请填写发布目录', trigger: 'blur' }],
         repositoryId: [
           {
             required: true,
-            message: this.$tl('p.repositorySelection'),
+            message: this.$t('pages.build.edit.fdf774f1'),
             trigger: 'blur'
           }
         ]
@@ -1502,38 +1518,39 @@ export default {
       stepsCurrent: 0,
       stepsItems: [
         {
-          title: this.$tl('c.buildMethod')
+          title: this.$t('pages.build.edit.b5dfedd9')
         },
         {
-          title: this.$tl('p.basicInfo')
+          title: this.$t('pages.build.edit.ccf301b7')
 
           // status: 'process'
         },
         {
-          title: this.$tl('p.buildProcess')
+          title: this.$t('pages.build.edit.2e988cde')
 
           // status: 'wait'
         },
         {
-          title: this.$tl('c.publishOperation')
+          title: this.$t('pages.build.edit.7be4f983')
 
           // status: 'wait'
         },
         {
-          title: this.$tl('p.additionalConfig')
+          title: this.$t('pages.build.edit.8a367db')
 
           // status: 'wait'
         }
       ],
+
       dslDefault:
-        '# 基础镜像 目前仅支持 ubuntu-latest\n' +
+        this.$t('pages.build.edit.157cc1d7') +
         'runsOn: ubuntu-latest\n' +
-        '# 使用哪个 docker 构建,填写 docker 标签 默认查询可用的第一个,如果 tag 查询出多个也选择第一个结果\n' +
+        this.$t('pages.build.edit.29dc8c24') +
         'fromTag: xxx\n' +
-        '# version 需要在对应镜像源中存在\n' +
-        '# java 镜像源 https://mirrors.tuna.tsinghua.edu.cn/Adoptium/\n' +
-        '# maven 镜像源 https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/\n' +
-        '# node 镜像源 https://registry.npmmirror.com/-/binary/node/\n' +
+        this.$t('pages.build.edit.2c1567a3') +
+        this.$t('pages.build.edit.e97ba49b') +
+        this.$t('pages.build.edit.e989032a') +
+        this.$t('pages.build.edit.abb166fd') +
         'steps:\n' +
         '  - uses: java\n' +
         '    version: 8\n' +
@@ -1545,31 +1562,31 @@ export default {
         '#    version: 1.17.6\n' +
         '#  - uses: python3\n' +
         '#    version: 3.6.6\n' +
-        '# 将容器中的 maven 仓库文件缓存到 docker 卷中\n' +
+        this.$t('pages.build.edit.8d3bf857') +
         '  - uses: cache\n' +
         '    path: /root/.m2\n' +
-        '# 将此目录缓存到全局（多个构建可以共享此缓存目录）\n' +
+        this.$t('pages.build.edit.f4c0f558') +
         '    type: global\n' +
-        '# 将容器中的 node_modules 文件缓存到 docker 卷中\n' +
+        this.$t('pages.build.edit.2aacda2d') +
         '  - uses: cache\n' +
         '    path: ${JPOM_WORKING_DIR}/web-vue/node_modules\n' +
-        '# 使用 copy 文件的方式缓存，反之使用软链的形式。copy 文件方式缓存 node_modules 可以避免 npm WARN reify Removing non-directory\n' +
+        this.$t('pages.build.edit.19594154') +
         '    mode: copy\n' +
         '  - run: npm config set registry https://registry.npmmirror.com\n' +
-        '# 内置变量 ${JPOM_WORKING_DIR} ${JPOM_BUILD_ID}\n' +
+        this.$t('pages.build.edit.f3de78b') +
         '  - run: cd  ${JPOM_WORKING_DIR}/web-vue && npm i && npm run build\n' +
         '  - run: cd ${JPOM_WORKING_DIR} && mvn package -s script/settings.xml\n' +
-        '# 宿主机目录和容器目录挂载 /host:/container:ro\n' +
+        this.$t('pages.build.edit.c8899a6d') +
         '# binds:\n' +
         '#  - /Users/user/.m2/settings.xml:/root/.m2/\n' +
-        '# 宿主机文件上传到容器 /host:/container:true\n' +
+        this.$t('pages.build.edit.a6fcd6f4') +
         '# dirChildrenOnly = true will create /var/data/titi and /var/data/tata dirChildrenOnly = false will create /var/data/root/titi and /var/data/root/tata\n' +
         '# copy:\n' +
         '#  - /Users/user/.m2/settings.xml:/root/.m2/:false\n' +
-        '# 给容器新增环境变量\n' +
+        this.$t('pages.build.edit.af8e732e') +
         'env:\n' +
         '  NODE_OPTIONS: --max-old-space-size=900\n' +
-        '#配置说明：https://docs.docker.com/engine/api/v1.43/#tag/Container/operation/ContainerCreate\n' +
+        this.$t('pages.build.edit.5f8d5d96') +
         '#hostConfig:\n' +
         '#  CpuShares: 1',
       loading: false,
@@ -1634,9 +1651,6 @@ export default {
     this.loadGroupList()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.build.edit.${key}`, ...args)
-    },
     randomStr,
     refresh() {
       this.loading = true
@@ -1774,7 +1788,7 @@ export default {
               let findArra = res0.data.filter((res0Item) => {
                 return res0Item.id === item.value
               })
-              item.label = findArra.length ? findArra[0].name : this.$tl('p.unknown')
+              item.label = findArra.length ? findArra[0].name : this.$t('pages.build.edit.ca1cdfa6')
               item.children = item.children.map((item2) => {
                 return {
                   label: item2.name,
@@ -1823,7 +1837,7 @@ export default {
           if (this.temp.releaseMethod === 2) {
             if (this.temp.releaseMethodDataIdList.length < 2) {
               $notification.warn({
-                message: this.$tl('p.nodeProjectSelection')
+                message: this.$t('pages.build.edit.8e910076')
               })
               return false
             }

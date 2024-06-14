@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="server-script-list"
-      :empty-description="$tl('p.noScript')"
+      :empty-description="$t('pages.script.script-list.4d8019f5')"
       :data-source="list"
       size="middle"
       :columns="columns"
@@ -25,53 +25,55 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['id']"
-            :placeholder="$tl('p.scriptId')"
+            :placeholder="$t('pages.script.script-list.461afc3f')"
             allow-clear
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$tl('c.name')"
+            :placeholder="$t('pages.script.script-list.3e34ec28')"
             allow-clear
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%description%']"
-            :placeholder="$tl('c.description')"
+            :placeholder="$t('pages.script.script-list.4b2e093e')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%autoExecCron%']"
-            :placeholder="$tl('c.scheduleExecution')"
+            :placeholder="$t('pages.script.script-list.8d2c7731')"
             class="search-input-item"
             @press-enter="loadData"
           />
-          <a-tooltip :title="$tl('p.backToFirstPage')">
-            <a-button :loading="loading" type="primary" @click="loadData">{{ $tl('p.search') }}</a-button>
+          <a-tooltip :title="$t('pages.script.script-list.6ebd5885')">
+            <a-button :loading="loading" type="primary" @click="loadData">{{
+              $t('pages.script.script-list.53c2763c')
+            }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="createScript">{{ $tl('p.add') }}</a-button>
+          <a-button type="primary" @click="createScript">{{ $t('pages.script.script-list.7d46652a') }}</a-button>
           <a-button
             v-if="mode === 'manage'"
             type="primary"
             :disabled="!tableSelections || !tableSelections.length"
             @click="syncToWorkspaceShow"
-            >{{ $tl('p.workspaceSync') }}</a-button
+            >{{ $t('pages.script.script-list.ff284043') }}</a-button
           >
         </a-space>
       </template>
       <template #tableHelp>
         <a-tooltip>
           <template #title>
-            <div>{{ $tl('p.scriptTemplateDescription') }}</div>
+            <div>{{ $t('pages.script.script-list.a16c114a') }}</div>
 
             <div>
               <ul>
-                <li>{{ $tl('p.executionEnvNote') }}</li>
-                <li>{{ $tl('p.commandFilePath') }}</li>
-                <li>{{ $tl('p.distributionNodeDescription') }}</li>
+                <li>{{ $t('pages.script.script-list.75b12f79') }}</li>
+                <li>{{ $t('pages.script.script-list.e62fd265') }}</li>
+                <li>{{ $t('pages.script.script-list.7854fb71') }}</li>
               </ul>
             </div>
           </template>
@@ -95,31 +97,37 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'workspaceId'">
-          <a-tag v-if="text === 'GLOBAL'">{{ $tl('c.global') }}</a-tag>
-          <a-tag v-else>{{ $tl('p.workspace') }}</a-tag>
+          <a-tag v-if="text === 'GLOBAL'">{{ $t('pages.script.script-list.fd0310d0') }}</a-tag>
+          <a-tag v-else>{{ $t('pages.script.script-list.afacc4cb') }}</a-tag>
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <template v-if="mode === 'manage'">
-              <a-button size="small" type="primary" @click="handleExec(record)">{{ $tl('c.execute') }}</a-button>
-              <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('c.edit') }}</a-button>
-              <a-button size="small" type="primary" @click="handleLog(record)">{{ $tl('p.log') }}</a-button>
+              <a-button size="small" type="primary" @click="handleExec(record)">{{
+                $t('pages.script.script-list.d14160b')
+              }}</a-button>
+              <a-button size="small" type="primary" @click="handleEdit(record)">{{
+                $t('pages.script.script-list.e1224c34')
+              }}</a-button>
+              <a-button size="small" type="primary" @click="handleLog(record)">{{
+                $t('pages.script.script-list.f637e08')
+              }}</a-button>
               <a-dropdown>
                 <a @click="(e) => e.preventDefault()">
-                  {{ $tl('p.more') }}
+                  {{ $t('pages.script.script-list.6e071067') }}
                   <DownOutlined />
                 </a>
                 <template #overlay>
                   <a-menu>
                     <a-menu-item>
                       <a-button size="small" type="primary" @click="handleTrigger(record)">{{
-                        $tl('c.trigger')
+                        $t('pages.script.script-list.e81c0988')
                       }}</a-button>
                     </a-menu-item>
 
                     <a-menu-item>
                       <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-                        $tl('p.delete')
+                        $t('pages.script.script-list.dd20d11c')
                       }}</a-button>
                     </a-menu-item>
                     <a-menu-item>
@@ -129,7 +137,7 @@
                         danger
                         :disabled="!record.nodeIds"
                         @click="handleUnbind(record)"
-                        >{{ $tl('p.unbind') }}</a-button
+                        >{{ $t('pages.script.script-list.4c957529') }}</a-button
                       >
                     </a-menu-item>
                   </a-menu>
@@ -137,7 +145,9 @@
               </a-dropdown>
             </template>
             <template v-else>
-              <a-button size="small" type="primary" @click="handleEdit(record)">{{ $tl('c.edit') }}</a-button>
+              <a-button size="small" type="primary" @click="handleEdit(record)">{{
+                $t('pages.script.script-list.e1224c34')
+              }}</a-button>
             </template>
           </a-space>
         </template>
@@ -148,7 +158,7 @@
       v-model:open="editScriptVisible"
       destroy-on-close
       :z-index="1009"
-      :title="$tl('p.editScript')"
+      :title="$t('pages.script.script-list.c05890d1')"
       :mask-closable="false"
       width="80vw"
       :confirm-loading="confirmLoading"
@@ -158,10 +168,10 @@
         <a-form-item v-if="temp.id" label="ScriptId" name="id">
           <a-input v-model:value="temp.id" disabled read-only />
         </a-form-item>
-        <a-form-item :label="$tl('p.scriptName')" name="name">
-          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$tl('c.name')" />
+        <a-form-item :label="$t('pages.script.script-list.db9bba81')" name="name">
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('pages.script.script-list.3e34ec28')" />
         </a-form-item>
-        <a-form-item :label="$tl('p.scriptContent')" name="context">
+        <a-form-item :label="$t('pages.script.script-list.709314dd')" name="context">
           <a-form-item-rest>
             <code-editor v-model:content="temp.context" height="40vh" :options="{ mode: 'shell', tabSize: 2 }">
             </code-editor>
@@ -170,19 +180,19 @@
         <!-- <a-form-item label="默认参数" name="defArgs">
             <a-input v-model="temp.defArgs" placeholder="默认参数" />
           </a-form-item> -->
-        <a-form-item :label="$tl('p.defaultParam')">
+        <a-form-item :label="$t('pages.script.script-list.74765338')">
           <a-space direction="vertical" style="width: 100%">
             <a-row v-for="(item, index) in commandParams" :key="item.key">
               <a-col :span="22">
                 <a-space direction="vertical" style="width: 100%">
                   <a-input
                     v-model:value="item.desc"
-                    :addon-before="$tl('p.parameterContent', { count: index + 1 })"
-                    :placeholder="$tl('p.content1')" />
+                    :addon-before="$t('pages.script.script-list.17a3e7b', { count: index + 1 })"
+                    :placeholder="$t('pages.script.script-list.16fa5a7d')" />
                   <a-input
                     v-model:value="item.value"
-                    :addon-before="$tl('p.parameterValue', { count: index + 1 })"
-                    :placeholder="$tl('p.content2')"
+                    :addon-before="$t('pages.script.script-list.a94da34e', { count: index + 1 })"
+                    :placeholder="$t('pages.script.script-list.8ff30bc7')"
                 /></a-space>
               </a-col>
               <a-col :span="2">
@@ -196,43 +206,46 @@
             <a-divider style="margin: 5px 0" />
           </a-space>
 
-          <a-button type="primary" @click="() => commandParams.push({})">{{ $tl('p.addParam') }}</a-button>
+          <a-button type="primary" @click="() => commandParams.push({})">{{
+            $t('pages.script.script-list.c3495d0')
+          }}</a-button>
         </a-form-item>
-        <a-form-item :label="$tl('c.scheduleExecution')" name="autoExecCron">
+        <a-form-item :label="$t('pages.script.script-list.8d2c7731')" name="autoExecCron">
           <a-auto-complete
             v-model:value="temp.autoExecCron"
-            :placeholder="$tl('p.cronExpression')"
+            :placeholder="$t('pages.script.script-list.50fcce7a')"
             :options="CRON_DATA_SOURCE"
           >
             <template #option="item"> {{ item.title }} {{ item.value }} </template>
           </a-auto-complete>
         </a-form-item>
-        <a-form-item :label="$tl('c.description')" name="description">
+        <a-form-item :label="$t('pages.script.script-list.4b2e093e')" name="description">
           <a-textarea
             v-model:value="temp.description"
             :max-length="200"
             :rows="3"
             style="resize: none"
-            :placeholder="$tl('p.detailedDescription')"
+            :placeholder="$t('pages.script.script-list.419e634e')"
           />
         </a-form-item>
-        <a-form-item :label="$tl('c.share')" name="global">
+        <a-form-item :label="$t('pages.script.script-list.33b08707')" name="global">
           <a-radio-group v-model:value="temp.global">
-            <a-radio :value="true"> {{ $tl('c.global') }}</a-radio>
-            <a-radio :value="false"> {{ $tl('p.currentWorkspace') }}</a-radio>
+            <a-radio :value="true"> {{ $t('pages.script.script-list.fd0310d0') }}</a-radio>
+            <a-radio :value="false"> {{ $t('pages.script.script-list.919267cc') }}</a-radio>
           </a-radio-group>
         </a-form-item>
-        <a-form-item v-if="temp.prohibitSync" :label="$tl('p.disableDistributionNode')">
-          <template #help>{{ $tl('p.controlNodeDistribution') }}</template>
+        <a-form-item v-if="temp.prohibitSync" :label="$t('pages.script.script-list.f4167923')">
+          <template #help>{{ $t('pages.script.script-list.5a0d0c9f') }}</template>
           <a-tag v-for="(item, index) in temp.nodeList" :key="index"
-            >{{ $tl('p.nodeName') }}{{ item.nodeName }} {{ $tl('p.selectedWorkspace') }}{{ item.workspaceName }}</a-tag
+            >{{ $t('pages.script.script-list.fa8d810f') }}{{ item.nodeName }}
+            {{ $t('pages.script.script-list.19b80eba') }}{{ item.workspaceName }}</a-tag
           >
         </a-form-item>
         <a-form-item v-else>
           <template #label>
             <a-tooltip>
-              {{ $tl('p.distributionNodeLabel') }}
-              <template #title> {{ $tl('p.content3') }} </template>
+              {{ $t('pages.script.script-list.aa8dba24') }}
+              <template #title> {{ $t('pages.script.script-list.f8f43b51') }} </template>
               <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
@@ -249,7 +262,7 @@
                 )
               }
             "
-            :placeholder="$tl('p.distributeToNode')"
+            :placeholder="$t('pages.script.script-list.1a5a95a')"
             mode="multiple"
           >
             <a-select-option v-for="item in nodeList" :key="item.id" :value="item.id">
@@ -275,25 +288,25 @@
       v-model:open="syncToWorkspaceVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$tl('p.syncToOtherWorkspaces')"
+      :title="$t('pages.script.script-list.d3b55aa0')"
       :mask-closable="false"
       @ok="handleSyncToWorkspace"
     >
-      <a-alert :message="$tl('c.warmTips')" type="warning" show-icon>
+      <a-alert :message="$t('pages.script.script-list.da2f7ff0')" type="warning" show-icon>
         <template #description>
           <ul>
             <li>
-              {{ $tl('p.syncMechanism') }}<b>{{ $tl('p.scriptName_1') }}</b
-              >{{ $tl('p.isSameScript') }}
+              {{ $t('pages.script.script-list.b74cd503') }}<b>{{ $t('pages.script.script-list.24087b5d') }}</b
+              >{{ $t('pages.script.script-list.81c3b287') }}
             </li>
-            <li>{{ $tl('p.createScriptIfNotExist') }}</li>
-            <li>{{ $tl('p.syncScriptContentAndInfo') }}</li>
+            <li>{{ $t('pages.script.script-list.4d913a22') }}</li>
+            <li>{{ $t('pages.script.script-list.936eff64') }}</li>
           </ul>
         </template>
       </a-alert>
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
-        <a-form-item :label="$tl('p.selectWorkspace')" name="workspaceId">
+        <a-form-item :label="$t('pages.script.script-list.7ef9d8fb')" name="workspaceId">
           <a-select
             v-model:value="temp.workspaceId"
             show-search
@@ -307,7 +320,7 @@
                 )
               }
             "
-            :placeholder="$tl('c.selectWorkspace')"
+            :placeholder="$t('pages.script.script-list.3a321a02')"
           >
             <a-select-option v-for="item in workspaceList" :key="item.id" :disabled="getWorkspaceId() === item.id">{{
               item.name
@@ -320,7 +333,7 @@
     <a-modal
       v-model:open="triggerVisible"
       destroy-on-close
-      :title="$tl('c.trigger')"
+      :title="$t('pages.script.script-list.e81c0988')"
       width="50%"
       :footer="null"
       :mask-closable="false"
@@ -328,30 +341,38 @@
       <a-form ref="editTriggerForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
           <template #rightExtra>
-            <a-tooltip :title="$tl('p.resetTriggerToken')">
-              <a-button type="primary" size="small" @click="resetTrigger">{{ $tl('p.reset') }}</a-button>
+            <a-tooltip :title="$t('pages.script.script-list.e172ddd8')">
+              <a-button type="primary" size="small" @click="resetTrigger">{{
+                $t('pages.script.script-list.da1d2343')
+              }}</a-button>
             </a-tooltip>
           </template>
-          <a-tab-pane key="1" :tab="$tl('c.execute')">
+          <a-tab-pane key="1" :tab="$t('pages.script.script-list.d14160b')">
             <a-space direction="vertical" style="width: 100%">
-              <a-alert :message="$tl('c.warmTips')" type="warning">
+              <a-alert :message="$t('pages.script.script-list.da2f7ff0')" type="warning">
                 <template #description>
                   <ul>
-                    <li>{{ $tl('p.triggerAddressInfo') }}</li>
-                    <li>{{ $tl('p.resetTriggerAddress') }}</li>
-                    <li>{{ $tl('p.batchTriggerParams') }}</li>
-                    <li>{{ $tl('p.triggerParamsAsEnv') }}</li>
+                    <li>{{ $t('pages.script.script-list.8f9bc485') }}</li>
+                    <li>{{ $t('pages.script.script-list.21ae4cfc') }}</li>
+                    <li>{{ $t('pages.script.script-list.789c025c') }}</li>
+                    <li>{{ $t('pages.script.script-list.c4162f74') }}</li>
                   </ul>
                 </template>
               </a-alert>
-              <a-alert type="info" :message="`${$tl('p.singleTriggerAddress')}(${$tl('c.copyOnClick')})`">
+              <a-alert
+                type="info"
+                :message="`${$t('pages.script.script-list.2cd9ba62')}(${$t('pages.script.script-list.da836fdd')})`"
+              >
                 <template #description>
                   <a-typography-paragraph :copyable="{ text: temp.triggerUrl }">
                     <a-tag>GET</a-tag> <span>{{ temp.triggerUrl }} </span>
                   </a-typography-paragraph>
                 </template>
               </a-alert>
-              <a-alert type="info" :message="`${$tl('p.batchTriggerAddress')}(${$tl('c.copyOnClick')})`">
+              <a-alert
+                type="info"
+                :message="`${$t('pages.script.script-list.4bd083f4')}(${$t('pages.script.script-list.da836fdd')})`"
+              >
                 <template #description>
                   <a-typography-paragraph :copyable="{ text: temp.batchTriggerUrl }">
                     <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
@@ -366,7 +387,7 @@
     <!-- 脚本日志 -->
     <a-drawer
       destroy-on-close
-      :title="$tl('p.scriptExecutionHistory')"
+      :title="$t('pages.script.script-list.85cd9f11')"
       width="70vw"
       :open="drawerLogVisible"
       @close="
@@ -399,15 +420,14 @@
               }
             "
           >
-           {{$tl('c.cancel')}}
+           {{$t('pages.script.script-list.43105e21')}}
           </a-button>
-          <a-button type="primary" @click="handerConfirm"> {{$tl('c.confirm')}} </a-button>
+          <a-button type="primary" @click="handerConfirm"> {{$t('pages.script.script-list.7da4a591')}} </a-button>
         </a-space>
       </div>
     </div> -->
   </div>
 </template>
-
 <script>
 import {
   deleteScript,
@@ -473,14 +493,14 @@ export default {
           tooltip: true
         },
         {
-          title: this.$tl('c.name'),
+          title: this.$t('pages.script.script-list.3e34ec28'),
           dataIndex: 'name',
           ellipsis: true,
           sorter: true,
           width: 150
         },
         {
-          title: this.$tl('c.share'),
+          title: this.$t('pages.script.script-list.33b08707'),
           dataIndex: 'workspaceId',
           sorter: true,
           ellipsis: true,
@@ -488,14 +508,14 @@ export default {
           width: '90px'
         },
         {
-          title: this.$tl('c.description'),
+          title: this.$t('pages.script.script-list.4b2e093e'),
           dataIndex: 'description',
           ellipsis: true,
           width: 100,
           tooltip: true
         },
         {
-          title: this.$tl('c.scheduleExecution'),
+          title: this.$t('pages.script.script-list.8d2c7731'),
           dataIndex: 'autoExecCron',
           ellipsis: true,
           sorter: true,
@@ -503,7 +523,7 @@ export default {
           tooltip: true
         },
         {
-          title: this.$tl('p.modifyTime'),
+          title: this.$t('pages.script.script-list.a2b40316'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           width: '170px',
@@ -511,7 +531,7 @@ export default {
           customRender: ({ text }) => parseTime(text)
         },
         {
-          title: this.$tl('p.createTime'),
+          title: this.$t('pages.script.script-list.f5b90169'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           width: '170px',
@@ -519,21 +539,21 @@ export default {
           customRender: ({ text }) => parseTime(text)
         },
         {
-          title: this.$tl('p.creator'),
+          title: this.$t('pages.script.script-list.db3c9202'),
           dataIndex: 'createUser',
           ellipsis: true,
           tooltip: true,
           width: '120px'
         },
         {
-          title: this.$tl('p.modifier'),
+          title: this.$t('pages.script.script-list.916db24b'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           tooltip: true,
           width: '120px'
         },
         {
-          title: this.$tl('p.lastExecutor'),
+          title: this.$t('pages.script.script-list.15597f1f'),
           dataIndex: 'lastRunUser',
           ellipsis: true,
           width: '120px',
@@ -541,7 +561,7 @@ export default {
         },
         this.mode === 'manage'
           ? {
-              title: this.$tl('c.operation'),
+              title: this.$t('pages.script.script-list.cadc075'),
               dataIndex: 'operation',
               align: 'center',
 
@@ -549,7 +569,7 @@ export default {
               width: '240px'
             }
           : {
-              title: this.$tl('c.operation'),
+              title: this.$t('pages.script.script-list.cadc075'),
               dataIndex: 'operation',
               align: 'center',
 
@@ -557,9 +577,10 @@ export default {
               width: '100px'
             }
       ],
+
       rules: {
-        name: [{ required: true, message: this.$tl('p.inputScriptName'), trigger: 'blur' }],
-        context: [{ required: true, message: this.$tl('p.inputScriptContent'), trigger: 'blur' }]
+        name: [{ required: true, message: this.$t('pages.script.script-list.beb9cb37'), trigger: 'blur' }],
+        context: [{ required: true, message: this.$t('pages.script.script-list.52049f49'), trigger: 'blur' }]
       },
       tableSelections: [],
       syncToWorkspaceVisible: false,
@@ -613,9 +634,6 @@ export default {
     this.loadData()
   },
   methods: {
-    $tl(key, ...args) {
-      return this.$t(`pages.script.scriptList.${key}`, ...args)
-    },
     // 加载数据
     loadData(pointerEvent) {
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page
@@ -673,7 +691,8 @@ export default {
           for (let i = 0; i < this.commandParams.length; i++) {
             if (!this.commandParams[i].desc) {
               $notification.error({
-                message: this.$tl('p.paramDescriptionPrefix') + (i + 1) + this.$tl('p.paramDescriptionSuffix')
+                message:
+                  this.$t('pages.script.script-list.b2a4dc0e') + (i + 1) + this.$t('pages.script.script-list.94a5dd5e')
               })
               return false
             }
@@ -706,11 +725,11 @@ export default {
     },
     handleDelete(record) {
       $confirm({
-        title: this.$tl('p.systemTip'),
-        content: this.$tl('p.confirmDeleteScript'),
+        title: this.$t('pages.script.script-list.e422d0eb'),
+        content: this.$t('pages.script.script-list.9924957'),
         zIndex: 1009,
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        okText: this.$t('pages.script.script-list.7da4a591'),
+        cancelText: this.$t('pages.script.script-list.43105e21'),
         onOk: () => {
           return deleteScript({
             id: record.id
@@ -728,7 +747,7 @@ export default {
     // 执行 Script
     handleExec(record) {
       this.temp = Object.assign(record)
-      this.drawerTitle = `${this.$tl('p.console')}(${this.temp.name})`
+      this.drawerTitle = `${this.$t('pages.script.script-list.5139b7d7')}(${this.temp.name})`
       this.drawerConsoleVisible = true
     },
     // 关闭 console
@@ -743,20 +762,20 @@ export default {
     // 解绑
     handleUnbind(record) {
       const html =
-        "<b style='font-size: 20px;'>this.$tl('p.confirmUnbindNode')</b>" +
+        "<b style='font-size: 20px;'>this.$t('pages.script.script-list.6d453736')</b>" +
         "<ul style='font-size: 20px;color:red;font-weight: bold;'>" +
-        `<li>${this.$tl('p.unbindNodeNote')}</b></li>` +
-        `<li>${this.$tl('p.unbindNodeForUnreachableServer')}</li>` +
-        `<li>${this.$tl('p.redundantDataWarning')}</li>` +
+        `<li>${this.$t('pages.script.script-list.2076b8b4')}</b></li>` +
+        `<li>${this.$t('pages.script.script-list.f4e01a2c')}</li>` +
+        `<li>${this.$t('pages.script.script-list.c354703b')}</li>` +
         '</ul>'
       $confirm({
-        title: this.$tl('p.dangerousOperationWarning'),
+        title: this.$t('pages.script.script-list.f2ce74e2'),
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
         okButtonProps: { type: 'primary', danger: true, size: 'small' },
         cancelButtonProps: { type: 'primary' },
-        okText: this.$tl('c.confirm'),
-        cancelText: this.$tl('c.cancel'),
+        okText: this.$t('pages.script.script-list.7da4a591'),
+        cancelText: this.$t('pages.script.script-list.43105e21'),
         onOk: () => {
           return unbindScript({
             id: record.id
@@ -791,7 +810,7 @@ export default {
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
         $notification.warn({
-          message: this.$tl('c.selectWorkspace')
+          message: this.$t('pages.script.script-list.3a321a02')
         })
         return false
       }
@@ -856,7 +875,7 @@ export default {
     handerConfirm() {
       if (!this.tableSelections.length) {
         $notification.warning({
-          message: this.$tl('p.selectScript')
+          message: this.$t('pages.script.script-list.3198b463')
         })
         return
       }
