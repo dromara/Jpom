@@ -8,6 +8,7 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseAgentController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.data.ScriptLibraryModel;
 import org.springframework.http.MediaType;
@@ -49,7 +50,7 @@ public class ScriptLibraryController extends BaseAgentController {
                     scriptModel.setScript(null);
                     return scriptModel;
                 } catch (Exception e) {
-                    log.error("读取全局脚本文件失败", e);
+                    log.error(I18nMessageUtil.get("i18n.read_global_script_file_error.0d4c"), e);
                 }
                 return null;
             })
@@ -68,12 +69,12 @@ public class ScriptLibraryController extends BaseAgentController {
             scriptModel.setTag(FileUtil.mainName(file));
             return JsonMessage.success("", scriptModel);
         }
-        return JsonMessage.fail("找不到对应的脚本");
+        return JsonMessage.fail(I18nMessageUtil.get("i18n.missing_script_message.af89"));
     }
 
     @RequestMapping(value = "save", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<String> save(@ValidatorItem String id,
-                                     @ValidatorItem(msg = "脚本内容不能为空") String script,
+                                     @ValidatorItem(msg = "i18n.script_content_cannot_be_empty.49be") String script,
                                      String description,
                                      String version) {
         File file = FileUtil.file(globalScriptDir, id + ".json");
@@ -83,13 +84,13 @@ public class ScriptLibraryController extends BaseAgentController {
         scriptModel.setDescription(description);
         scriptModel.setVersion(version);
         FileUtil.writeUtf8String(JSONObject.toJSONString(scriptModel), file);
-        return JsonMessage.success("保存成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.save_succeeded.3b10"));
     }
 
     @RequestMapping(value = "del", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<String> del(@ValidatorItem String id) {
         File file = FileUtil.file(globalScriptDir, id + ".json");
         FileUtil.del(file);
-        return JsonMessage.success("删除成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 }
