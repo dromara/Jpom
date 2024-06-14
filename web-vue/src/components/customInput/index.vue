@@ -9,15 +9,21 @@
       >
         <template #addonBefore>
           <a-tooltip>
-            <template #title>
-              引用工作空间环境变量可以方便后面多处使用相同的密码统一修改
-
+            <template #title
+              >{{ $t('components.customInput.index.cee23a04') }}
               <ul v-if="!envList.length">
-                当前没有可以引用的环境变量
+                {{
+                  $t('components.customInput.index.8a9fee0b')
+                }}
               </ul>
             </template>
-            <a-select v-model:value="selectData" placeholder="引用环境变量" style="width: 120px" @change="selectChange">
-              <a-select-option value="">不引用环境变量</a-select-option>
+            <a-select
+              v-model:value="selectData"
+              :placeholder="$t('components.customInput.index.fca5b3d2')"
+              style="width: 120px"
+              @change="selectChange"
+            >
+              <a-select-option value="">{{ $t('components.customInput.index.38f36dfa') }}</a-select-option>
               <a-select-option v-for="item in envList" :key="item.id" :value="item.name"
                 >{{ item.name }}
               </a-select-option>
@@ -30,14 +36,21 @@
       <a-input v-model:value="inputData" :placeholder="placeholder" :disabled="!!selectData" @change="inputChange">
         <template #addonBefore>
           <a-tooltip>
-            <template #title>
-              引用工作空间环境变量可以方便后面多处使用相同的密码统一修改
+            <template #title
+              >{{ $t('components.customInput.index.cee23a04') }}
               <ul v-if="!envList.length">
-                当前没有可以引用的环境变量
+                {{
+                  $t('components.customInput.index.8a9fee0b')
+                }}
               </ul>
             </template>
-            <a-select v-model:value="selectData" placeholder="引用环境变量" style="width: 120px" @change="selectChange">
-              <a-select-option value="">引用环境变量</a-select-option>
+            <a-select
+              v-model:value="selectData"
+              :placeholder="$t('components.customInput.index.fca5b3d2')"
+              style="width: 120px"
+              @change="selectChange"
+            >
+              <a-select-option value="">{{ $t('components.customInput.index.fca5b3d2') }}</a-select-option>
               <a-select-option v-for="item in envList" :key="item.id" :value="item.name"
                 >{{ item.name }}
               </a-select-option>
@@ -48,7 +61,6 @@
     </template>
   </div>
 </template>
-
 <script>
 export default {
   components: {},
@@ -63,7 +75,9 @@ export default {
     },
     placeholder: {
       type: String,
-      default: '请输入...'
+      default: function () {
+        return this.$t('components.customInput.index.769d59d')
+      }
     },
     type: {
       type: String,

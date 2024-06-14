@@ -9,30 +9,34 @@
       }"
       @click="handleAdd"
     >
-      <PlusOutlined /> 添加
-    </a-tag>
+      <PlusOutlined />{{ $t('components.parameterWidget.index.42cbc280') }}</a-tag
+    >
 
     <!-- 编辑区 -->
     <a-modal
       v-model:open="editVisible"
       :z-index="1009"
       destroy-on-close
-      title="编辑变量"
+      :title="$t('components.parameterWidget.index.77ecbd27')"
       :mask-closable="false"
       @ok="handleEditOk"
     >
       <a-form ref="editForm" :model="temp" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="key" name="key">
-          <a-input v-model:value="temp.key" :disabled="!!temp.oldKey" placeholder="请输入 key 的值" />
+          <a-input
+            v-model:value="temp.key"
+            :disabled="!!temp.oldKey"
+            :placeholder="$t('components.parameterWidget.index.1bb65976')"
+          />
         </a-form-item>
         <a-form-item label="value" name="value">
-          <a-input v-model:value="temp.value" placeholder="请输入 value 的值" />
+          <a-input v-model:value="temp.value" :placeholder="$t('components.parameterWidget.index.8485924b')" />
         </a-form-item>
       </a-form>
     </a-modal>
   </div>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import Qs from 'qs'
 const props = withDefaults(
   defineProps<{
@@ -86,7 +90,7 @@ watch(
 )
 
 const rules = ref({
-  key: [{ required: true, message: '请输入 key 的值', trigger: 'blur' }]
+  key: [{ required: true, message: this.$t('components.parameterWidget.index.1bb65976'), trigger: 'blur' }]
 })
 
 const editVisible = ref(false)
