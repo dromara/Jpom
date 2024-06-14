@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 ///
 /// Copyright (c) 2019 Of Him Code Technology Studio
 /// Jpom is licensed under Mulan PSL v2.
@@ -76,11 +77,11 @@ export function taskLogInfoList(params) {
 }
 
 export const statusMap = {
-  0: '等待开始',
-  1: '进行中',
-  2: '任务结束',
-  3: '发布失败',
-  4: '取消任务'
+  0: t('api.file-manager.release-task-log.4430873a'),
+  1: t('api.file-manager.release-task-log.bfb17443'),
+  2: t('api.file-manager.release-task-log.a3ef7878'),
+  3: t('api.file-manager.release-task-log.4adb4e9b'),
+  4: t('api.file-manager.release-task-log.8e26504a')
 }
 
 export const taskTypeMap = {
