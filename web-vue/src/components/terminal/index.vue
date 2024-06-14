@@ -1,14 +1,13 @@
 <template>
   <div class="flex-100">
-    <a-result v-if="disconnect" status="warning" title="已经断开连接啦">
+    <a-result v-if="disconnect" status="warning" :title="$t('components.terminal.index.67fd1abc')">
       <template #extra>
-        <a-button type="primary" @click="initSocket">重连 </a-button>
+        <a-button type="primary" @click="initSocket">{{ $t('components.terminal.index.48f23b5f') }}</a-button>
       </template>
     </a-result>
     <div v-else :id="domId" class="flex-100"></div>
   </div>
 </template>
-
 <script>
 import 'xterm/css/xterm.css'
 import 'xterm/lib/xterm.js'
@@ -74,7 +73,7 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: 'web socket 错误,请检查是否开启 ws 代理'
+          message: this.$t('components.terminal.index.d827b290')
         })
         this.dispose()
       }
@@ -82,7 +81,7 @@ export default {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
         this.dispose()
-        $message.warning('会话已经关闭[ssh-terminal]')
+        $message.warning(this.$t('components.terminal.index.b9b2db53'))
       }
     },
     dispose() {
@@ -162,7 +161,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .flex-100 {
   display: flex;
@@ -174,4 +172,3 @@ export default {
   /* box-shadow: inset 0 0 10px 0 #e8e8e8; */
 }
 </style>
-<style></style>
