@@ -4898,6 +4898,13 @@
       "c4682b3f": "#Restrict backup of specified file suffixes (supports regularization)",
       "1f958da6": "#Project file backup path",
       "ae41f11b": "#Is the log backup function enabled"
+    },
+    "upload-pieces": {
+      "ea2d7f82": "The file cannot be empty",
+      "f3b7ae3a": "Your browser version is too low to support this feature",
+      "e7ba3a8": "Parsing files, preparing to upload",
+      "997a109d": "File upload ID generation failed:",
+      "b6c41759": "Parsing file failed:"
     }
   },
   "App": {
