@@ -168,9 +168,9 @@ async function request<T = any>(arg: string | AxiosRequestConfig, config?: Axios
   const options =
     typeof arg === 'string'
       ? {
-        url: arg,
-        ...config
-      }
+          url: arg,
+          ...config
+        }
       : arg
   const response = await instance.request<IResponse<T>>(options)
   const { data } = response
@@ -296,7 +296,7 @@ function toLogin2(message: any, description: any) {
     })
 
     setTimeout(() => {
-      ; (location.href as any) = pageUrl.href
+      ;(location.href as any) = pageUrl.href
     }, 2000)
   })
   return false
@@ -322,7 +322,7 @@ function toLoginOnly(message: any, description: any) {
     })
 
     setTimeout(() => {
-      ; (location.href as any) = pageUrl.href
+      ;(location.href as any) = pageUrl.href
     }, 2000)
   })
   return false

@@ -124,7 +124,7 @@ export function importData(formData) {
 }
 
 export const statusMap = {
-  0: { desc: '无法连接', color: 'red' },
-  1: { desc: '正常', color: 'green' },
-  2: { desc: '禁用监控', color: 'orange' }
+  0: { desc: t('api.system.assets-ssh.b26020d2'), color: 'red' },
+  1: { desc: t('api.system.assets-ssh.e039b9b5'), color: 'green' },
+  2: { desc: t('api.system.assets-ssh.3eb8617a'), color: 'orange' }
 }

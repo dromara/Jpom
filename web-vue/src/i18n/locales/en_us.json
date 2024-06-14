@@ -4838,6 +4838,24 @@
         "227abc8e": "Account disabled",
         "521c4ec2": "Login successful, MFA verification required"
       }
+    },
+    "system": {
+      "assets-docker": {
+        "b26020d2": "cannot connect",
+        "591ff086": "Normal connection"
+      },
+      "assets-machine": {
+        "b26020d2": "cannot connect",
+        "e039b9b5": "normal",
+        "2eff6016": "Authorization information error",
+        "8ae7a8a": "Status code error",
+        "f1e810b2": "Resource monitoring exception"
+      },
+      "assets-ssh": {
+        "b26020d2": "cannot connect",
+        "e039b9b5": "normal",
+        "3eb8617a": "Disable monitoring"
+      }
     }
   }
 }
