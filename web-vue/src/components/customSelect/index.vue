@@ -26,7 +26,7 @@
 </template>
 <script>
 import { Select } from 'ant-design-vue'
-
+import { t } from '@/i18n/index'
 export default {
   components: {
     ASelect: Select,
@@ -52,13 +52,13 @@ export default {
     inputPlaceholder: {
       type: String,
       default: function () {
-        return this.$t('components.customSelect.index.769d59d')
+        return t('components.customSelect.index.769d59d')
       }
     },
     selectPlaceholder: {
       type: String,
       default: function () {
-        return this.$t('components.customSelect.index.3bb646e4')
+        return t('components.customSelect.index.3bb646e4')
       }
     },
     selStyle: { type: String, default: '' },

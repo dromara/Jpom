@@ -62,6 +62,7 @@
   </div>
 </template>
 <script>
+import { t } from '@/i18n/index'
 export default {
   components: {},
   props: {
@@ -76,7 +77,7 @@ export default {
     placeholder: {
       type: String,
       default: function () {
-        return this.$t('components.customInput.index.769d59d')
+        return t('components.customInput.index.769d59d')
       }
     },
     type: {
