@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 ///
 /// Copyright (c) 2019 Of Him Code Technology Studio
 /// Jpom is licensed under Mulan PSL v2.
@@ -54,10 +55,10 @@ export const uploadPieces = ({
 }: PiecesPar) => {
   // 如果文件传入为空直接 return 返回
   if (!file || file.length < 1) {
-    return error('文件不能为空')
+    return error(t('utils.upload-pieces.ea2d7f82'))
   }
   if (!window.FileReader) {
-    return error('您的浏览器版本太低，不支持该功能')
+    return error(t('utils.upload-pieces.f3b7ae3a'))
   }
   let fileMd5: string = '' //
   let sliceId: string = ''
@@ -66,7 +67,8 @@ export const uploadPieces = ({
   const chunkList: number[] = [] // 分片列表
   const uploaded: number[] = [] // 已经上传的
   let total: number = 0
-  const blobSlice = (<any>File.prototype).slice || (<any>File.prototype).mozSlice || (<any>File.prototype).webkitSlice
+  const blobSlice =
+    (File.prototype as any).slice || (File.prototype as any).mozSlice || (File.prototype as any).webkitSlice
 
   /***
    * 获取md5
@@ -85,7 +87,8 @@ export const uploadPieces = ({
     const batch = 1024 * 1024 * 2
     const asyncUpdate = function () {
       if (start < total) {
-        resolveFileProcess && resolveFileProcess('解析文件,准备上传中 ' + ((start / total) * 100).toFixed(2) + '%')
+        resolveFileProcess &&
+          resolveFileProcess(t('utils.upload-pieces.e7ba3a8') + ((start / total) * 100).toFixed(2) + '%')
         const end = Math.min(start + batch, total)
         reader.readAsArrayBuffer(blobSlice.call(file, start, end))
         start = end
@@ -116,7 +119,7 @@ export const uploadPieces = ({
           sliceId = res.data
           concurrentUpload()
         } else {
-          error('文件上传id生成失败：' + res.msg)
+          error(t('utils.upload-pieces.997a109d') + res.msg)
         }
       })
     }
@@ -126,7 +129,7 @@ export const uploadPieces = ({
         asyncUpdate()
       } catch (e) {
         // Vue.prototype.$setLoading('closeAll')
-        error('解析文件失败：' + e)
+        error(t('utils.upload-pieces.b6c41759') + e)
       }
     }
     asyncUpdate()
@@ -147,11 +150,11 @@ export const uploadPieces = ({
   /***
    * 获取每一个分片的详情
    **/
-  const getChunkInfo = (file: File, currentChunk: number, chunkSize: number) => {
+  const getChunkInfo = (file: File, currentChunk: number, chunkSize: number): IChunkInfo => {
     const start: number = currentChunk * chunkSize
     const end: number = Math.min(file.size, start + chunkSize)
     const chunk: Blob = blobSlice.call(file, start, end)
-    return <IChunkInfo>{
+    return {
       start,
       end,
       chunk
