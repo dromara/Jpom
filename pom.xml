@@ -78,6 +78,7 @@
                                 <exclude>**/*.md</exclude>
                                 <exclude>**/*.txt</exclude>
                                 <exclude>**/dist/assets/**</exclude>
+                                <exclude>**/i18n/*.properties</exclude>
                             </excludes>
                         </licenseSet>
                     </licenseSets>
