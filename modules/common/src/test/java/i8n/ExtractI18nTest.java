@@ -29,12 +29,8 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.function.Consumer;
@@ -83,18 +79,19 @@ public class ExtractI18nTest {
      */
     private final Pattern[] chinesePatterns = new Pattern[]{
         // 中文开头
-        Pattern.compile("\"[\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
+        Pattern.compile("\"[\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。～！=/|]*\""),
         // 序号开头
         Pattern.compile("\"\\d+\\..*[\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
         // 符合开头
-        Pattern.compile("\"[,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。][\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
+        Pattern.compile("\"[,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。].*[\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
         // 空格开头
         Pattern.compile("\"[\\s+][\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
         Pattern.compile("\"[a-zA-Z.·\\d][\\u4e00-\\u9fa5]*[\\u4e00-\\u9fa5.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
         Pattern.compile("\"[\\d.]\\s[\\u4e00-\\u9fa5]*[\\u4e00-\\u9fa5.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
         Pattern.compile("\"[\\u4e00-\\u9fa5]+[a-zA-Z]\""),
         // 字母开头
-        Pattern.compile("\"[a-zA-Z{} ].*[\\u4e00-\\u9fa5]\""),
+        Pattern.compile("\"[a-zA-Z{} ].*[\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
+        Pattern.compile("\"[a-zA-Z{} ].*[\\d\\s].*[\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
     };
     /**
      * 代码中关联（引用） key 的正则
@@ -231,22 +228,16 @@ public class ExtractI18nTest {
         }
         // 代码中已经使用到的 key
         Collection<Object> useKeys = new HashSet<>();
-        // 临时文件
-        File tempDir = FileUtil.file(rootFile, "i18n-temp");
-        // 删除临时文件
-        FileUtil.del(tempDir);
         // 替换中文
         walkFile(rootFile, file1 -> {
             try {
                 for (Pattern chinesePattern : chinesePatterns) {
-                    replaceQuotedChineseInFile(file1, tempDir, chinesePattern, chineseMap, useKeys);
+                    replaceQuotedChineseInFile(file1, chinesePattern, chineseMap, useKeys);
                 }
             } catch (Exception e) {
                 throw Lombok.sneakyThrow(e);
             }
         });
-        // 删除临时文件
-        FileUtil.del(tempDir);
         //
         boolean isChange = false;
         for (Object keyObj : CollUtil.newArrayList(zhProperties.keySet())) {
@@ -396,11 +387,11 @@ public class ExtractI18nTest {
                 // 变动才保存
                 // 根据 key 排序
                 TreeMap<String, Object> sort = MapUtil.sort(updateAfter);
-                FileUtil.writeString(JSONArray.toJSONString(sort, JSONWriter.Feature.PrettyFormat), wordsFile, StandardCharsets.UTF_8);
+                FileUtil.writeString(JSONArray.toJSONString(sort, JSONWriter.Feature.PrettyFormat), wordsFile, charset);
             }
         } else {
             TreeMap<String, Object> sort = MapUtil.sort(jsonObject);
-            FileUtil.writeString(JSONArray.toJSONString(sort, JSONWriter.Feature.PrettyFormat), wordsFile, StandardCharsets.UTF_8);
+            FileUtil.writeString(JSONArray.toJSONString(sort, JSONWriter.Feature.PrettyFormat), wordsFile, charset);
         }
     }
 
@@ -464,7 +455,7 @@ public class ExtractI18nTest {
                 return;
             }
             String path = FileUtil.getAbsolutePath(file1);
-            if (StrUtil.containsAny(path, "/test/", "/i18n-temp/", "\\test\\", "\\i18n-temp\\")) {
+            if (StrUtil.containsAny(path, "/test/", "\\test\\")) {
                 return;
             }
             if (StrUtil.equals("java", FileUtil.extName(file1))) {
@@ -481,14 +472,12 @@ public class ExtractI18nTest {
      * @param pattern 当前匹配的正则
      * @throws IOException io 异常
      */
-    private void replaceQuotedChineseInFile(File file, File tempDir, Pattern pattern, Map<String, String> chineseMap, Collection<Object> useKeys) throws Exception {
-        String subPath = FileUtil.subPath(rootFile.getAbsolutePath(), file);
+    private void replaceQuotedChineseInFile(File file, Pattern pattern, Map<String, String> chineseMap, Collection<Object> useKeys) throws Exception {
+        //String subPath = FileUtil.subPath(rootFile.getAbsolutePath(), file);
         // 先存储于临时文件
-        File tempFile = FileUtil.file(tempDir, subPath);
-        FileUtil.mkParentDirs(tempFile);
         boolean modified = false;
-        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8);
-             BufferedWriter writer = Files.newBufferedWriter(tempFile.toPath())) {
+        StringWriter writer = new StringWriter();
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), charset)) {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (canIgnore(line)) {
@@ -532,18 +521,21 @@ public class ExtractI18nTest {
                         useKeys.add(key);
                     }
                     matcher.appendTail(modifiedLine);
-
-                    writer.write(modifiedLine.toString());
-                    modified = true;
+                    String lineString = modifiedLine.toString();
+                    if (canIgnore(lineString)) {
+                        throw new IllegalStateException("替换后成为忽略行：" + line + " \n" + lineString);
+                    }
+                    writer.write(lineString);
+                    if (!modified) {
+                        modified = !StrUtil.equals(line, lineString);
+                    }
                 }
-                writer.newLine();
+                writer.write(FileUtil.getLineSeparator());
             }
         }
         if (modified) {
             // 移动到原路径
-            FileUtil.move(tempFile, file, true);
-        } else {
-            FileUtil.del(tempFile);
+            FileUtil.writeString(writer.toString(), file, charset);
         }
     }
 

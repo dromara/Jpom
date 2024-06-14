@@ -9,12 +9,14 @@
  */
 package org.dromara.jpom.exception;
 
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
+
 /**
  * @author bwcx_jzy
  * @since 24/1/4 004
  */
 public class LogRecorderCloseException extends IllegalStateException {
     public LogRecorderCloseException() {
-        super("日志记录器被关闭/或者未启用");
+        super(I18nMessageUtil.get("i18n.log_recorder_error_message.ee3e"));
     }
 }

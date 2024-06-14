@@ -71,7 +71,7 @@ public class ToolsController {
             }
             return JsonMessage.success("", dateList.stream().map(Date::getTime).collect(Collectors.toList()));
         } catch (Exception e) {
-            return new JsonMessage<>(405, "cron 表达式不正确," + e.getMessage());
+            return new JsonMessage<>(405, I18nMessageUtil.get("i18n.cron_expression_incorrect.b41a") + e.getMessage());
         }
     }
 

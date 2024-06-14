@@ -486,8 +486,8 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
             try {
                 NetUtil.netCat(host, port, StrUtil.EMPTY.getBytes());
             } catch (Exception e) {
-                log.warn("HTTP代理地址不可用:" + httpProxy, e);
-                throw new IllegalArgumentException("HTTP代理地址不可用:" + e.getMessage());
+                log.warn(I18nMessageUtil.get("i18n.http_proxy_address_unavailable.b3f2") + httpProxy, e);
+                throw new IllegalArgumentException(I18nMessageUtil.get("i18n.http_proxy_address_unavailable.b3f2") + e.getMessage());
             }
         }
     }

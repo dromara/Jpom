@@ -16,12 +16,8 @@ import lombok.Lombok;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -53,13 +49,11 @@ public class RestoreI18nTest {
         try (BufferedReader inputStream = FileUtil.getReader(zhPropertiesFile, charset)) {
             zhProperties.load(inputStream);
         }
-        // 临时文件
-        File tempDir = FileUtil.file(rootFile, "i18n-temp");
         // 提取中文
         ExtractI18nTest.walkFile(rootFile, file1 -> {
             try {
                 for (Pattern pattern : ExtractI18nTest.messageKeyPatterns) {
-                    restoreChineseInFile(file1, tempDir, pattern, zhProperties);
+                    restoreChineseInFile(file1, pattern, zhProperties);
                 }
             } catch (Exception e) {
                 throw Lombok.sneakyThrow(e);
@@ -67,14 +61,10 @@ public class RestoreI18nTest {
         });
     }
 
-    private void restoreChineseInFile(File file, File tempDir, Pattern pattern, Properties zhProperties) throws Exception {
-        String subPath = FileUtil.subPath(rootFile.getAbsolutePath(), file);
-        // 先存储于临时文件
-        File tempFile = FileUtil.file(tempDir, subPath);
-        FileUtil.mkParentDirs(tempFile);
+    private void restoreChineseInFile(File file, Pattern pattern, Properties zhProperties) throws Exception {
+        StringWriter writer = new StringWriter();
         boolean modified = false;
-        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8);
-             BufferedWriter writer = Files.newBufferedWriter(tempFile.toPath())) {
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), charset)) {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (ExtractI18nTest.canIgnore(line)) {
@@ -114,17 +104,18 @@ public class RestoreI18nTest {
                         }
                         matcher.appendTail(modifiedLine);
                     }
-                    writer.write(modifiedLine.toString());
-                    modified = true;
+                    String lineString = modifiedLine.toString();
+                    writer.write(lineString);
+                    if (!modified) {
+                        modified = !StrUtil.equals(line, lineString);
+                    }
                 }
-                writer.newLine();
+                writer.write(FileUtil.getLineSeparator());
             }
         }
         if (modified) {
             // 移动到原路径
-            FileUtil.move(tempFile, file, true);
-        } else {
-            FileUtil.del(tempFile);
+            FileUtil.writeString(writer.toString(), file, charset);
         }
     }
 }

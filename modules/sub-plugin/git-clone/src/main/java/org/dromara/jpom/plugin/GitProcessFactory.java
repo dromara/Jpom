@@ -65,7 +65,7 @@ public class GitProcessFactory {
         if (osInfo.isWindows()) {
             result = CommandUtil.execSystemCommand(WIN_EXISTS_GIT);
             if (StrUtil.contains(result, ".exe")) {
-                log.info("git安装位置：{}", result);
+                log.info(I18nMessageUtil.get("i18n.git_installation_location.7984"), result);
                 return true;
             }
         } else if (osInfo.isLinux() || osInfo.isMac()) {
@@ -73,7 +73,7 @@ public class GitProcessFactory {
             if (StrUtil.containsAny(result, "no git", "not found")) {
                 return false;
             }
-            log.info("git安装位置：{}", result);
+            log.info(I18nMessageUtil.get("i18n.git_installation_location.7984"), result);
             return true;
         } else {
             log.warn(I18nMessageUtil.get("i18n.unsupported_system_type_with_placeholder.d5cc"), osInfo.getName());

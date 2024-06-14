@@ -109,7 +109,7 @@ public class DockerLogHandler extends BaseProxyHandler {
             };
             attributes.put("uuid", uuid);
             attributes.put("logRecorder", logRecorder);
-            map.put("uuid", attributes.get("uuid"));
+            map.put("uuid", uuid);
             map.put("charset", CharsetUtil.CHARSET_UTF_8);
             map.put("consumer", consumer);
             map.put("timestamps", json.getBoolean("timestamps"));
@@ -126,7 +126,7 @@ public class DockerLogHandler extends BaseProxyHandler {
                         log.error(I18nMessageUtil.get("i18n.send_message_exception.7817"), e);
                     }
                 }
-                log.debug("docker log 线程结束：{} {}", dockerInfoModel.getName(), attributes.get("uuid"));
+                log.debug(I18nMessageUtil.get("i18n.docker_log_thread_ended.8230"), dockerInfoModel.getName(), uuid);
             });
             SocketSessionUtil.send(session, JsonMessage.getString(200, "JPOM_MSG_UUID", uuid));
         } else {

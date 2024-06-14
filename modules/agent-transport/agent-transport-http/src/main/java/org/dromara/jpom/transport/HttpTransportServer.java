@@ -114,7 +114,7 @@ public class HttpTransportServer implements TransportServer {
             String body = response.body();
             log.debug("Completed {}", body);
             if (status != HttpStatus.HTTP_OK) {
-                log.warn("{} 响应异常 状态码错误：{} {}", nodeInfo.name(), status, body);
+                log.warn(TransportI18nMessageUtil.get("i18n.response_exception_status_code.cbca"), nodeInfo.name(), status, body);
                 throw new TransportAgentException(nodeInfo.name() + TransportI18nMessageUtil.get("i18n.node_response_error.efc6") + status);
             }
             return body;

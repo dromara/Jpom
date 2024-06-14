@@ -210,7 +210,7 @@ public class RepositoryController extends BaseServerController {
             } else if ("Svn".equalsIgnoreCase(type)) {
                 repoType = RepositoryModel.RepoType.Svn;
             }
-            Assert.notNull(repoType, () -> StrUtil.format("第 {} 行 type 字段值错误（Git/Svn）", finalI + 1));
+            Assert.notNull(repoType, () -> StrUtil.format(I18nMessageUtil.get("i18n.type_field_value_error.14cf"), finalI + 1));
             String protocol = csvRow.getByName("protocol");
             Assert.hasText(protocol, () -> StrUtil.format(I18nMessageUtil.get("i18n.protocol_field_required.7cc2"), finalI + 1));
             GitProtocolEnum gitProtocolEnum = null;
@@ -219,7 +219,7 @@ public class RepositoryController extends BaseServerController {
             } else if ("ssh".equalsIgnoreCase(protocol)) {
                 gitProtocolEnum = GitProtocolEnum.SSH;
             }
-            Assert.notNull(gitProtocolEnum, () -> StrUtil.format("第 {} 行 protocol 字段值错误（http/http/ssh）", finalI + 1));
+            Assert.notNull(gitProtocolEnum, () -> StrUtil.format(I18nMessageUtil.get("i18n.protocol_field_value_error.2b41"), finalI + 1));
             String privateRsa = csvRow.getByName("private rsa");
             String username = csvRow.getByName("username");
             String password = csvRow.getByName("password");

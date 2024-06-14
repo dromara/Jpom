@@ -257,10 +257,10 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
     private void updateMonitorInfo(MachineSshModel machineSshModel, List<String> listStr, List<String> errorList) {
         String error = CollUtil.join(errorList, StrUtil.LF);
         if (StrUtil.isNotEmpty(error)) {
-            log.error("{} ssh 监控执行存在异常信息：{}", machineSshModel.getName(), error);
+            log.error(I18nMessageUtil.get("i18n.ssh_monitor_execution_error.2d3c"), machineSshModel.getName(), error);
         }
         if (log.isDebugEnabled()) {
-            log.debug("{} ssh 监控信息结果：{} {}", machineSshModel.getName(), CollUtil.join(listStr, StrUtil.LF), error);
+            log.debug(I18nMessageUtil.get("i18n.ssh_monitor_info_result.a660"), machineSshModel.getName(), CollUtil.join(listStr, StrUtil.LF), error);
         }
         if (CollUtil.isEmpty(listStr)) {
             this.updateStatus(machineSshModel.getId(), 1, I18nMessageUtil.get("i18n.empty_execution_result.9fe8") + error);

@@ -148,7 +148,7 @@ public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implemen
             List<ClusterInfoModel> clusterInfoModels = this.listByEntity(entity);
             if (CollUtil.isNotEmpty(clusterInfoModels)) {
                 for (ClusterInfoModel infoModel : clusterInfoModels) {
-                    log.error("{} 集群ID冲突：{} {}", clusterConfig.getId(), infoModel.getId(), infoModel.getName());
+                    log.error(I18nMessageUtil.get("i18n.cluster_id_conflict.45b7"), clusterConfig.getId(), infoModel.getId(), infoModel.getName());
                 }
             }
             // 通知任务结束

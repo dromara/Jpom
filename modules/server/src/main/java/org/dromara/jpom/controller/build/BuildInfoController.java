@@ -364,7 +364,7 @@ public class BuildInfoController extends BaseServerController {
             Assert.hasText(fromTag, I18nMessageUtil.get("i18n.docker_label_required.b690"));
             String workspaceId = dockerInfoService.getCheckUserWorkspace(request);
             int count = dockerInfoService.countByTag(workspaceId, fromTag);
-            Assert.state(count > 0, "docker tag 填写不正确,没有找到任何docker");
+            Assert.state(count > 0, I18nMessageUtil.get("i18n.docker_tag_incorrect.8b62"));
         }
         String dockerTag = jsonObject.getString("dockerTag");
         Assert.hasText(dockerTag, I18nMessageUtil.get("i18n.image_tag_required.92cf"));

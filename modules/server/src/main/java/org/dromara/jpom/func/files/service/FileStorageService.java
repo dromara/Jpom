@@ -81,7 +81,7 @@ public class FileStorageService extends BaseGlobalOrWorkspaceService<FileStorage
             fileStorageModel.setName(I18nMessageUtil.get("i18n.file_downloading.7a8f"));
             String empty = StrUtil.emptyToDefault(description, StrUtil.EMPTY);
 
-            fileStorageModel.setDescription(StrUtil.format("{} 远程下载 url：{}", empty, url));
+            fileStorageModel.setDescription(StrUtil.format(I18nMessageUtil.get("i18n.remote_download_url.011f"), empty, url));
             String extName = "download";
             String path = StrUtil.format("/{}/{}.{}", DateTime.now().toString(DatePattern.PURE_DATE_FORMAT), uuid, extName);
             fileStorageModel.setExtName("download");
