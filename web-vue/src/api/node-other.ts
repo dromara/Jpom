@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 ///
 /// Copyright (c) 2019 Of Him Code Technology Studio
 /// Jpom is licensed under Mulan PSL v2.
@@ -86,9 +87,9 @@ export function syncScript(params) {
   })
 }
 export const triggerExecTypeMap = {
-  0: '手动',
-  1: '自动',
-  2: '触发器'
+  0: t('api.node-other.4139f3b5'),
+  1: t('api.node-other.dc8de4ff'),
+  2: t('api.node-other.44701ced')
 }
 
 /**
