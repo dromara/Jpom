@@ -657,7 +657,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         return this.listPageDb(where, page, fill);
     }
 
-    protected Order[] defaultOrders() {
+    public Order[] defaultOrders() {
         return DEFAULT_ORDERS;
     }
 

@@ -10,16 +10,20 @@ import org.dromara.jpom.model.BaseUserModifyDbModel;
  * @since 2024/6/1
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "SCRIPT_LIBRARY", name = "脚本库信息")
+@TableName(value = "SCRIPT_LIBRARY", nameKey = "脚本库信息")
 @Data
 public class ScriptLibraryModel extends BaseUserModifyDbModel {
     /**
      * 脚本唯一的标签
      */
     private String tag;
-
+    /**
+     * 脚本内容
+     */
     private String script;
-
+    /**
+     * 描述
+     */
     private String description;
     /**
      * 版本

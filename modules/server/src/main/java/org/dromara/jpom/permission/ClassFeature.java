@@ -14,6 +14,7 @@ import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.func.assets.server.MachineNodeServer;
 import org.dromara.jpom.func.assets.server.MachineSshServer;
+import org.dromara.jpom.func.assets.server.ScriptLibraryServer;
 import org.dromara.jpom.func.cert.service.CertificateInfoService;
 import org.dromara.jpom.func.files.service.FileReleaseTaskService;
 import org.dromara.jpom.func.files.service.FileStorageService;
@@ -98,6 +99,7 @@ public enum ClassFeature {
     SYSTEM_ASSETS_MACHINE(() -> I18nMessageUtil.get("i18n.machine_asset_management.36ea"), MachineNodeServer.class),
     SYSTEM_ASSETS_MACHINE_SSH(() -> I18nMessageUtil.get("i18n.ssh_asset_management.3b6c"), MachineSshServer.class),
     SYSTEM_ASSETS_MACHINE_DOCKER(() -> I18nMessageUtil.get("i18n.docker_asset_management.96d9"), MachineDockerServer.class),
+    SYSTEM_ASSETS_GLOBAL_SCRIPT(() -> "脚本库", ScriptLibraryServer.class),
     SYSTEM_CONFIG(() -> I18nMessageUtil.get("i18n.server_system_config.3181")),
     SYSTEM_EXT_CONFIG(() -> I18nMessageUtil.get("i18n.system_configuration_directory.0f82")),
     SYSTEM_CONFIG_IP(() -> I18nMessageUtil.get("i18n.system_IP_authorization.9c08")),

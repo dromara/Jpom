@@ -292,7 +292,7 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
 
 
     @Override
-    protected Order[] defaultOrders() {
+    public Order[] defaultOrders() {
         if (canSort) {
             return SORT_DEFAULT_ORDERS;
         }

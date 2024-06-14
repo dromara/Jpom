@@ -10,6 +10,7 @@
 package org.dromara.jpom.func.assets.controller;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.db.Entity;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
@@ -41,6 +42,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * 机器节点
@@ -76,6 +78,30 @@ public class MachineNodeController extends BaseGroupNameController {
     public IJsonMessage<PageResultDto<MachineNodeModel>> listJson(HttpServletRequest request) {
         PageResultDto<MachineNodeModel> pageResultDto = machineNodeServer.listPage(request);
         return JsonMessage.success("", pageResultDto);
+    }
+
+    @GetMapping(value = "search", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public IJsonMessage<List<MachineNodeModel>> search(String name, String appendIds, int limit) {
+        Entity entity = new Entity();
+        if (StrUtil.isNotEmpty(name)) {
+            entity.set("name", StrUtil.format(" like '%{}%'", name));
+        }
+        limit = Math.max(limit, 1);
+        List<String> appendIdList = StrUtil.splitTrim(appendIds, StrUtil.COMMA);
+        List<MachineNodeModel> machineNodeModels = machineNodeServer.queryList(entity, limit, machineNodeServer.defaultOrders());
+        appendIdList = appendIdList.stream()
+            .filter(s -> machineNodeModels.stream()
+                .noneMatch(machineNodeModel -> StrUtil.equals(s, machineNodeModel.getId())))
+            .collect(Collectors.toList());
+        for (String s : appendIdList) {
+            MachineNodeModel nodeModel = machineNodeServer.getByKey(s);
+            if (nodeModel == null) {
+                continue;
+            }
+            machineNodeModels.add(nodeModel);
+        }
+        return JsonMessage.success("", machineNodeModels);
     }
 
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
