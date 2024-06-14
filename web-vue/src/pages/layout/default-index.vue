@@ -3,7 +3,12 @@
     <a-layout-sider v-model:collapsed="collapsed" :theme="menuTheme" :trigger="null" collapsible>
       <a-layout-sider v-model:collapsed="collapsed" class="sider" :theme="menuTheme" :trigger="null" collapsible>
         <div class="sider-content">
-          <a-tooltip placement="right" :title="$t('pages.layout.default-index.f29dfeb9')">
+          <a-tooltip placement="right">
+            <template #title>
+              {{ subTitle }}
+              <div>&nbsp;</div>
+              <div>{{ $t('pages.layout.default-index.f29dfeb9') }}</div>
+            </template>
             <div
               class="logo"
               :style="`color:${menuTheme === 'light' && theme === 'light' ? '#000' : '#fff'}`"
