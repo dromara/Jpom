@@ -14,17 +14,19 @@
 
         <a-col v-if="extendBar" style="padding-left: 10px">
           <a-space>
-            <a-tooltip title="清空当前缓冲区内容">
-              <a-button type="primary" size="small" @click="clearLogCache"><DeleteOutlined />清空</a-button>
+            <a-tooltip :title="$t('components.logView.index2.4cf99f17')">
+              <a-button type="primary" size="small" @click="clearLogCache"
+                ><DeleteOutlined />{{ $t('components.logView.index2.7333c7f7') }}</a-button
+              >
             </a-tooltip>
             <!-- <a-tooltip title="内容超过边界自动换行">
                   <a-switch v-model="temp.wordBreak" checked-children="自动换行" un-checked-children="不换行" @change="onChange" />
                 </a-tooltip> -->
-            <a-tooltip title="有新内容后是否自动滚动到底部">
+            <a-tooltip :title="$t('components.logView.index2.96536900')">
               <a-switch
                 v-model:checked="temp.logScroll"
-                checked-children="自动滚动"
-                un-checked-children="不滚动"
+                :checked-children="$t('components.logView.index2.d04d40c8')"
+                :un-checked-children="$t('components.logView.index2.aebe0b63')"
                 @change="onChange"
               />
             </a-tooltip>
@@ -36,7 +38,6 @@
     <viewPre ref="viewPre" :height="`calc(${height} - 35px - 20px)`" :config="temp"></viewPre>
   </div>
 </template>
-
 <script>
 import viewPre from './view-pre.vue'
 
@@ -95,7 +96,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .log-filter {
   padding: 0 10px;
