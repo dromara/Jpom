@@ -16,35 +16,43 @@
                 </template>
                 <a-form-item>
                   <template #label>
-                    <span style="font-weight: normal">自动刷新</span>
+                    <span style="font-weight: normal">{{ $t('components.customTable.index.155dfc81') }}</span>
                   </template>
                   <a-space v-if="!props.isHideAutoRefresh">
                     <a-switch
                       v-model:checked="countdownSwitch"
-                      checked-children="开"
-                      un-checked-children="关"
+                      :checked-children="$t('components.customTable.index.f5a0a9cd')"
+                      :un-checked-children="$t('components.customTable.index.44f44561')"
                       @change="countDownChange"
                     />
                     <a-divider v-if="countdownSwitch" type="vertical" />
                     <div class="header-statistic">
                       <a-statistic-countdown
                         v-if="countdownSwitch"
-                        format="&nbsp; s 秒"
-                        title="刷新倒计时"
+                        format="&nbsp;s"
+                        :title="$t('components.customTable.index.b02c67c3')"
                         :value="countdownNumber"
                         @finish="countDownFinish"
-                      />
+                      >
+                        <template #suffix>
+                          <div style="font-size: 12px">{{ $t('components.customTable.index.de756058') }}</div>
+                        </template>
+                      </a-statistic-countdown>
                     </div>
                   </a-space>
                 </a-form-item>
                 <a-form-item>
-                  <a-tooltip v-if="!props.isHideRefresh" title="刷新">
+                  <a-tooltip v-if="!props.isHideRefresh" :title="$t('components.customTable.index.b76d94e0')">
                     <ReloadOutlined class="table-action__icon" @click="refreshClick" />
                   </a-tooltip>
                 </a-form-item>
 
                 <a-form-item>
-                  <a-popover title="列宽" trigger="click" placement="bottomRight">
+                  <a-popover
+                    :title="$t('components.customTable.index.7c3745c1')"
+                    trigger="click"
+                    placement="bottomRight"
+                  >
                     <template #content>
                       <a-radio-group v-model:value="tableSize" class="custom-size-list">
                         <div v-for="item in tableSizeList" :key="item.value">
@@ -52,7 +60,7 @@
                         </div>
                       </a-radio-group>
                     </template>
-                    <a-tooltip title="列宽">
+                    <a-tooltip :title="$t('components.customTable.index.7c3745c1')">
                       <ColumnHeightOutlined class="table-action__icon" />
                     </a-tooltip>
                   </a-popover>
@@ -62,8 +70,10 @@
                   <a-popover v-if="props.tableName" trigger="click" placement="bottomRight">
                     <template #title>
                       <div class="custom-column-list__title">
-                        <div>列设置</div>
-                        <a-button type="link" size="small" @click="resetCustomColumn">重置</a-button>
+                        <div>{{ $t('components.customTable.index.381c1f59') }}</div>
+                        <a-button type="link" size="small" @click="resetCustomColumn">{{
+                          $t('components.customTable.index.50d471b2')
+                        }}</a-button>
                       </div>
                     </template>
                     <template #content>
@@ -93,14 +103,14 @@
                         </Container>
                       </a-checkbox-group>
                     </template>
-                    <a-tooltip title="列设置">
+                    <a-tooltip :title="$t('components.customTable.index.381c1f59')">
                       <SettingOutlined />
                     </a-tooltip>
                   </a-popover>
                 </a-form-item>
 
                 <a-form-item v-if="canChangeLayout">
-                  <a-tooltip title="切换视图">
+                  <a-tooltip :title="$t('components.customTable.index.d2593287')">
                     <!-- <ReloadOutlined   /> -->
                     <TableOutlined v-if="tableLayout === 'card'" class="table-action__icon" @click="tableLayoutClick" />
                     <LayoutOutlined v-else class="table-action__icon" @click="tableLayoutClick" />
@@ -148,7 +158,7 @@
             </a-space>
             <!-- <slot name="cardPageTool"></slot> -->
           </template>
-          <template v-else>未知的表格类型</template>
+          <template v-else>{{ $t('components.customTable.index.5bb0e859') }}</template>
         </a-card>
       </a-card>
     </div>
@@ -184,7 +194,7 @@ export default defineComponent({
       prefix: 'table:catch__' + userStore?.userInfo?.id,
       // 存储前拦截器
       beforeStorage(storageObject, defaultConfig) {
-        // 判断刷新是否为默认
+        // 判断components.customTable.index.b76d94e0是否为默认
         const defaultAutoRefresh: number = props.defaultAutoRefresh ? 1 : 0
         if (defaultAutoRefresh === storageObject?.refresh?.isAutoRefresh) {
           storageObject.refresh = defaultConfig.refresh
@@ -217,7 +227,7 @@ export default defineComponent({
     const countdownNumber = ref(0)
     const countDownFinish = () => {
       if (props.activePage) {
-        // 仅当页面处于活跃才刷新
+        // 仅当页面处于活跃才components.customTable.index.b76d94e0
         emit('refresh', 'silence')
       }
       countdownNumber.value = getCountdown()
@@ -244,7 +254,7 @@ export default defineComponent({
       countdownNumber.value = getCountdown()
       emit('refresh', 'click')
     }
-    // 表格列宽调整hooks
+    // 表格components.customTable.index.7c3745c1调整hooks
     const tableSize = ref<SizeType>('middle')
     watch(
       () => tableSize.value,

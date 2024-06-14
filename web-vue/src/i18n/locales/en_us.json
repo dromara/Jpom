@@ -4547,5 +4547,140 @@
         "bd29775b": "Browser"
       }
     }
+  },
+  "components": {
+    "codeEditor": {
+      "index": {
+        "23a71197": "Load Editor",
+        "18a600ba": "Skin:",
+        "b93f2874": "Please select skin",
+        "9ffb8723": "Language:",
+        "ce1e3802": "Please select language mode",
+        "49d615d0": "Grey green Abbott",
+        "5d5fcf0c": "Grey green abcdef",
+        "8b36cd9a": "Black and white ambient mobile",
+        "f135212d": "Black and white ambiance",
+        "1eeb7ec7": "Dark Dracula",
+        "5cb430c4": "Light Eclipse",
+        "e26f389a": "Dark 2 Blackboard",
+        "10adc4a3": "Light color idea",
+        "4ea93630": "Please enter the content"
+      }
+    },
+    "compositionTransfer": {
+      "composition-transfer": {
+        "f8525cf2": "There is currently no data available"
+      }
+    },
+    "customInput": {
+      "index": {
+        "cee23a04": "Referencing workspace environment variables can facilitate the unified modification of multiple locations using the same password in the future",
+        "8a9fee0b": "There are currently no environment variables that can be referenced",
+        "fca5b3d2": "Referencing environment variables",
+        "38f36dfa": "Do not reference environment variables",
+        "769d59d": "Please enter"
+      }
+    },
+    "customSelect": {
+      "index": {
+        "1644b775": "New addition",
+        "769d59d": "Please enter",
+        "3bb646e4": "Please select"
+      }
+    },
+    "customTable": {
+      "index": {
+        "155dfc81": "auto refresh",
+        "f5a0a9cd": "open",
+        "44f44561": "shut",
+        "de756058": " s",
+        "b02c67c3": "Refresh Countdown ",
+        "b76d94e0": "Refresh",
+        "7c3745c1": "Column width",
+        "381c1f59": "Column settings",
+        "50d471b2": "Reset",
+        "d2593287": "Switch Views",
+        "5bb0e859": "Unknown table type"
+      }
+    },
+    "logView": {
+      "index": {
+        "96536900": "Does it automatically scroll to the bottom when there is new content",
+        "4cf99f17": "Clear the current buffer content",
+        "7333c7f7": "empty",
+        "d04d40c8": "Automatic scrolling",
+        "aebe0b63": "No scrolling"
+      },
+      "index2": {
+        "96536900": "Does it automatically scroll to the bottom when there is new content",
+        "4cf99f17": "Clear the current buffer content",
+        "7333c7f7": "empty",
+        "d04d40c8": "Automatic scrolling",
+        "aebe0b63": "No scrolling"
+      }
+    },
+    "parameterWidget": {
+      "index": {
+        "42cbc280": "Add",
+        "77ecbd27": "Edit variables",
+        "1bb65976": "Please enter the value of the key",
+        "8485924b": "Please enter the value of value"
+      }
+    },
+    "terminal": {
+      "index": {
+        "67fd1abc": "The connection has been disconnected",
+        "48f23b5f": "Reconnection",
+        "d827b290": "Web socket error, please check if the ws proxy is enabled",
+        "b9b2db53": "The session has been closed [ssh terminal]"
+      }
+    },
+    "upgrade": {
+      "index": {
+        "54432619": "Beta Plan:",
+        "62143313": "Process number:",
+        "d2c7486a": "Current program packaging time:",
+        "56586b89": "Current front-end packaging time:",
+        "e17b386": "join",
+        "8b04d374": "Not joined",
+        "75e06a52": "Close beta plan",
+        "543ffe88": "Joining the beta program can provide timely access to the latest features, some optimization features, and the fastest bug fixing versions. However, the beta version may also have instability in some new features. You need to evaluate whether you can join the beta based on your business situation. If you encounter any problems during the use of the beta version, please feel free to give us feedback and we will answer your questions as soon as possible.",
+        "434e69f1": "I want to join",
+        "463be5e9": "Current version number:",
+        "e3b19e4f": "New version:",
+        "44a6a440": "Elapsed time:",
+        "4ea00d5b": "Port number:",
+        "35d94d7e": "Do not manually delete files under the data directory. If you need to delete them, you need to backup them in advance or confirm that the corresponding files will be discarded before deleting them",
+        "4593b845": "Data storage directory:",
+        "3a69c395": "Running Jar package:",
+        "dc168b2": "Select upgrade file",
+        "b6ecd3cc": "Upload upgrade package",
+        "50cfdf2b": "uninitialized",
+        "597788c9": "Are you sure you want to upload the file update to the latest version<ul style=_#_color:red;_#_>",
+        "5739dd8b": "<li>Before uploading updates, please read the instructions and precautions in the update log, and be sure to backup data to prevent data loss</b></li>",
+        "ccb42e58": "<li>Before uploading, please check if the package is complete, otherwise there may be situations where it cannot start normally after the update</li>",
+        "50e3ae59": "<li>If the upgrade fails, manual recovery is required</li>",
+        "3875bf60": "System prompt",
+        "1cbe2507": "confirm",
+        "a0451c97": "cancel",
+        "351dd143": "Upgrading, please wait",
+        "ad5617c0": "Please be patient and do not need to refresh the page temporarily. It will automatically refresh after the upgrade is successful",
+        "7a1c1ded": "Upgrade successful",
+        "3fa2ee24": "Unsuccessful upgrade:",
+        "306c5167": "Upgrade timeout, please go to the server to check the console logs for troubleshooting issues",
+        "c133eb37": "New version detected",
+        "24fbf1fa": "。请前往：<a target=_#__blank_#_ href=_#_",
+        "3f944483": "</a>Download the installation package",
+        "4b9cc2c4": "No latest version detected",
+        "444e366f": "Are you sure you want to download and update the latest version<ul style=_#_color:red;_#_>",
+        "95b27c31": "<li>The download speed is determined based on the network speed. If the network is poor, the download will be slower</li>",
+        "4e82a639": "<li>Please read the instructions and precautions in the update log before downloading, and be sure to backup data to prevent data loss</b></li>",
+        "85c315ec": "Are you sure you want to join the beta program<ul style=_#_color:red;_#_>",
+        "f35152df": "<li><b>Joining the beta program can provide timely access to the latest features, some optimization features, and the fastest bug fixing versions. However, the beta version may also have instability in some new features</b></li>",
+        "c6733249": "<li><b>You need to evaluate whether you can join the beta based on your business situation</b></li>",
+        "1365438c": "<li>If you encounter any problems during the use of the beta version, please feel free to give us feedback and we will answer them as soon as possible</li>",
+        "dd255b35": "Are you sure you want to close the beta program?"
+      }
+    }
   }
 }
