@@ -28,6 +28,11 @@
         "id": "global_repository",
         "title": "共享仓库",
         "role": "system"
+      },
+      {
+        "id": "script_library",
+        "title": "脚本库",
+        "role": "system"
       }
     ]
   },

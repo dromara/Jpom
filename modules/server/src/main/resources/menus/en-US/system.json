@@ -28,6 +28,11 @@
         "id": "global_repository",
         "title": "Shared warehouse",
         "role": "system"
+      },
+      {
+        "id": "script_library",
+        "title": "Script Library",
+        "role": "system"
       }
     ]
   },
