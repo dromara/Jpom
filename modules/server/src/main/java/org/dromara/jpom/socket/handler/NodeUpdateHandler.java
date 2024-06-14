@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.NodeConfig;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.assets.server.MachineNodeServer;
@@ -103,7 +104,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
         List<String> split = StrUtil.split(ids, StrUtil.COMMA);
         List<MachineNodeModel> nodeModelList = machineNodeServer.listById(split);
         if (nodeModelList == null) {
-            this.onError(session, "没有查询到节点信息：" + ids);
+            this.onError(session, I18nMessageUtil.get("i18n.node_info_not_found.2c8c") + ids);
             return;
         }
         for (MachineNodeModel model : nodeModelList) {
@@ -125,10 +126,10 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                     nodeClient.send(command.toString());
                 } catch (Exception e) {
                     String closeStatusMsg = nodeClient.getCloseStatusMsg();
-                    log.error("创建插件端连接失败 {}", closeStatusMsg, e);
+                    log.error(I18nMessageUtil.get("i18n.create_plugin_endpoint_connection_failure.30f8"), closeStatusMsg, e);
                     IProxyWebSocket webSocket = clientMap.remove(model.getId());
                     IoUtil.close(webSocket);
-                    this.onError(session, StrUtil.format("连接插件端失败：{} {} {}", closeStatusMsg, e.getMessage(), model.getId()));
+                    this.onError(session, StrUtil.format(I18nMessageUtil.get("i18n.connect_plugin_failed.e492"), closeStatusMsg, e.getMessage(), model.getId()));
                 }
             });
         }
@@ -141,7 +142,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                 try {
                     iProxyWebSocket.close();
                 } catch (Exception e) {
-                    log.error("关闭连接异常", e);
+                    log.error(I18nMessageUtil.get("i18n.close_connection_exception.c855"), e);
                 }
             }
         });
@@ -169,7 +170,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                     try {
                         iProxyWebSocket.send(model.toString());
                     } catch (Exception e) {
-                        log.error("心跳消息转发失败 {} {}", key, e.getMessage());
+                        log.error(I18nMessageUtil.get("i18n.heartbeat_message_forwarding_failed.89cc"), key, e.getMessage());
                     }
                 }
                 break;
@@ -216,7 +217,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
             AgentFileModel agentFileModel = systemParametersServer.getConfig(AgentFileModel.ID, AgentFileModel.class);
             //
             if (agentFileModel == null || !FileUtil.exist(agentFileModel.getSavePath())) {
-                this.onError(session, "Agent JAR包不存在");
+                this.onError(session, I18nMessageUtil.get("i18n.agent_jar_not_exist.28ac"));
                 return;
             }
             JsonMessage<Tuple> error = JpomManifest.checkJpomJar(agentFileModel.getSavePath(), Type.Agent, false);
@@ -228,14 +229,14 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                 String id = ids.getString(i);
                 MachineNodeModel node = machineNodeServer.getByKey(id);
                 if (node == null) {
-                    this.onError(session, "没有对应的节点：" + id);
+                    this.onError(session, I18nMessageUtil.get("i18n.no_node_specified.fa3d") + id);
                     continue;
                 }
                 ThreadUtil.execute(() -> this.updateNodeItem(id, node, session, agentFileModel, http));
             }
         } catch (Exception e) {
-            log.error("升级失败", e);
-            this.onError(session, "升级失败:" + e.getMessage());
+            log.error(I18nMessageUtil.get("i18n.upgrade_failure.4ae2"), e);
+            this.onError(session, I18nMessageUtil.get("i18n.upgrade_failure_with_colon.59f1") + e.getMessage());
         }
     }
 
@@ -273,17 +274,17 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                     ThreadUtil.sleep(1000L);
                     JsonMessage<Object> jsonMessage = NodeForward.request(machineNodeModel, StrUtil.EMPTY, NodeUrl.Info, "nodeId", id);
                     if (jsonMessage.success()) {
-                        this.sendMsg(callbackRestartMessage.setData("重启完成"), session);
+                        this.sendMsg(callbackRestartMessage.setData(I18nMessageUtil.get("i18n.restart_completed.42b8")), session);
                         return true;
                     }
                 } catch (Exception e) {
                     log.debug("{} 节点连接失败 {}", id, e.getMessage());
                 }
             }
-            this.sendMsg(callbackRestartMessage.setData("重连失败"), session);
+            this.sendMsg(callbackRestartMessage.setData(I18nMessageUtil.get("i18n.reconnect_failure.7c01")), session);
         } catch (Exception e) {
-            log.error("升级后重连插件端失败:" + id, e);
-            this.sendMsg(callbackRestartMessage.setData("重连插件端失败"), session);
+            log.error(I18nMessageUtil.get("i18n.reconnect_plugin_failure_after_upgrade.73e3") + id, e);
+            this.sendMsg(callbackRestartMessage.setData(I18nMessageUtil.get("i18n.reconnect_plugin_failure.cc6c")), session);
         }
         return false;
     }
@@ -315,7 +316,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
             while (retryCount <= CHECK_COUNT) {
                 try {
                     if (client.reconnect()) {
-                        this.sendMsg(restartMessage.setData("重启完成"), session);
+                        this.sendMsg(restartMessage.setData(I18nMessageUtil.get("i18n.restart_completed.42b8")), session);
                         return true;
                     }
                 } catch (Exception e) {
@@ -324,10 +325,10 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                 ThreadUtil.sleep(1000L);
                 ++retryCount;
             }
-            this.sendMsg(restartMessage.setData("重连失败"), session);
+            this.sendMsg(restartMessage.setData(I18nMessageUtil.get("i18n.reconnect_failure.7c01")), session);
         } catch (Exception e) {
-            log.error("升级后重连插件端失败:" + id, e);
-            this.sendMsg(restartMessage.setData("重连插件端失败"), session);
+            log.error(I18nMessageUtil.get("i18n.reconnect_plugin_failure_after_upgrade.73e3") + id, e);
+            this.sendMsg(restartMessage.setData(I18nMessageUtil.get("i18n.reconnect_plugin_failure.cc6c")), session);
         }
         return false;
     }
@@ -336,7 +337,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
         try {
             IProxyWebSocket client = clientMap.get(node.getId());
             if (client == null) {
-                this.onError(session, "对应的插件端还没有被初始化", id);
+                this.onError(session, I18nMessageUtil.get("i18n.plugin_not_initialized.3ea9"), id);
                 return;
             }
             if (client.isConnected()) {
@@ -347,11 +348,11 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                     client.send(command.toString());
                 }
             } else {
-                this.onError(session, "节点连接丢失或者还没有连接上", id);
+                this.onError(session, I18nMessageUtil.get("i18n.node_connection_lost.b6c7"), id);
             }
         } catch (Exception e) {
-            log.error("升级失败:" + id, e);
-            this.onError(session, "节点升级失败：" + e.getMessage(), id);
+            log.error(I18nMessageUtil.get("i18n.upgrade_failure_with_colon.59f1") + id, e);
+            this.onError(session, I18nMessageUtil.get("i18n.node_upgrade_failed.4493") + e.getMessage(), id);
         }
     }
 

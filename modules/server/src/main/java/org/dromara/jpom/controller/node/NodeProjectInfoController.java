@@ -18,6 +18,7 @@ import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.ServerOpenApi;
 import org.dromara.jpom.common.UrlRedirectUtil;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.NodeModel;
@@ -106,10 +107,10 @@ public class NodeProjectInfoController extends BaseServerController {
     @Feature(cls = ClassFeature.PROJECT, method = MethodFeature.DEL)
     public IJsonMessage<Object> syncProject(String nodeId, HttpServletRequest request) {
         NodeModel nodeModel = nodeService.getByKey(nodeId);
-        Assert.notNull(nodeModel, "对应的节点不存在");
+        Assert.notNull(nodeModel, I18nMessageUtil.get("i18n.node_not_exist.760e"));
         int count = projectInfoCacheService.delCache(nodeId, request);
         String msg = projectInfoCacheService.syncExecuteNode(nodeModel);
-        return JsonMessage.success("主动清除：" + count + StrUtil.SPACE + msg);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.active_clearance_colon.96a6") + count + StrUtil.SPACE + msg);
     }
 
     /**
@@ -130,9 +131,9 @@ public class NodeProjectInfoController extends BaseServerController {
         } else if (StrUtil.equalsIgnoreCase(method, "down")) {
             projectInfoCacheService.sortMoveDown(id, compareId, request);
         } else {
-            return new JsonMessage<>(400, "不支持的方式" + method);
+            return new JsonMessage<>(400, I18nMessageUtil.get("i18n.unsupported_method.a1de") + method);
         }
-        return new JsonMessage<>(200, "操作成功");
+        return new JsonMessage<>(200, I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
     /**
@@ -157,7 +158,7 @@ public class NodeProjectInfoController extends BaseServerController {
             updateItem = item;
         }
         Map<String, String> map = this.getBuildToken(updateItem, request);
-        String string = "重置成功";
+        String string = I18nMessageUtil.get("i18n.reset_success.faa3");
         return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : string, map);
     }
 

@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseAgentController;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.springframework.boot.env.YamlPropertySourceLoader;
@@ -56,18 +57,18 @@ public class SystemConfigController extends BaseAgentController {
     }
 
     @RequestMapping(value = "save_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<String> saveConfig(@ValidatorItem(msg = "内容不能为空") String content, String restart) throws IOException {
+    public IJsonMessage<String> saveConfig(@ValidatorItem(msg = "i18n.content_cannot_be_empty.9f0d") String content, String restart) throws IOException {
         try {
             YamlPropertySourceLoader yamlPropertySourceLoader = new YamlPropertySourceLoader();
             // @author hjk 前端编辑器允许使用tab键，并设定为2个空格，再转换为yml时要把tab键换成2个空格
             ByteArrayResource resource = new ByteArrayResource(content.replace("\t", "  ").getBytes(StandardCharsets.UTF_8));
             yamlPropertySourceLoader.load("test", resource);
         } catch (Exception e) {
-            log.warn("内容格式错误，请检查修正", e);
-            return new JsonMessage<>(500, "内容格式错误，请检查修正:" + e.getMessage());
+            log.warn(I18nMessageUtil.get("i18n.content_format_error.ce15"), e);
+            return new JsonMessage<>(500, I18nMessageUtil.get("i18n.content_format_error_with_detail.c846") + e.getMessage());
         }
         Resource resource = ExtConfigBean.getResource();
-        Assert.state(resource.isFile(), "当前环境下不支持在线修改配置文件");
+        Assert.state(resource.isFile(), I18nMessageUtil.get("i18n.configuration_modification_not_supported.5872"));
         FileUtil.writeString(content, resource.getFile(), CharsetUtil.CHARSET_UTF_8);
 
         if (Convert.toBool(restart, false)) {
@@ -75,6 +76,6 @@ public class SystemConfigController extends BaseAgentController {
             JpomApplication.restart();
             return JsonMessage.success(Const.UPGRADE_MSG.get());
         }
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 }

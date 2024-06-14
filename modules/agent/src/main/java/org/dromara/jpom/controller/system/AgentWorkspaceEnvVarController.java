@@ -13,6 +13,7 @@ import cn.hutool.core.map.MapUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseAgentController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.system.WorkspaceEnvVarModel;
 import org.dromara.jpom.service.system.AgentWorkspaceEnvVarService;
@@ -68,7 +69,7 @@ public class AgentWorkspaceEnvVarController extends BaseAgentController {
                 agentWorkspaceEnvVarService.updateItem(item);
             }
         }
-        return JsonMessage.success("更新成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.update_success.55aa"));
     }
 
 
@@ -89,7 +90,7 @@ public class AgentWorkspaceEnvVarController extends BaseAgentController {
                 agentWorkspaceEnvVarService.updateItem(item);
             }
         }
-        return JsonMessage.success("删除成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 
 }

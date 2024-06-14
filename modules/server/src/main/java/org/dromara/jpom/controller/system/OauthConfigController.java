@@ -13,6 +13,7 @@ import cn.hutool.core.lang.Tuple;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.oauth2.BaseOauth2Config;
 import org.dromara.jpom.oauth2.Oauth2Factory;
 import org.dromara.jpom.permission.ClassFeature;
@@ -49,7 +50,7 @@ public class OauthConfigController {
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<BaseOauth2Config> oauth2(String provide) {
         Tuple tuple = BaseOauth2Config.getDbKey(provide);
-        Assert.notNull(tuple, "没有对应的类型");
+        Assert.notNull(tuple, I18nMessageUtil.get("i18n.no_type.9153"));
         BaseOauth2Config configDefNewInstance = systemParametersServer.getConfigDefNewInstance(tuple.get(0), tuple.get(1));
         return JsonMessage.success("", configDefNewInstance);
     }
@@ -58,16 +59,16 @@ public class OauthConfigController {
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<Object> saveOauth2(HttpServletRequest request, String provide) {
         Tuple tuple = BaseOauth2Config.getDbKey(provide);
-        Assert.notNull(tuple, "没有对应的类型");
+        Assert.notNull(tuple, I18nMessageUtil.get("i18n.no_type.9153"));
         Class<BaseOauth2Config> oauth2ConfigClass = tuple.get(1);
         BaseOauth2Config oauth2Config = ServletUtil.toBean(request, oauth2ConfigClass, true);
-        Assert.notNull(tuple, "没有对应的类型");
+        Assert.notNull(tuple, I18nMessageUtil.get("i18n.no_type.9153"));
         if (oauth2Config.enabled()) {
             oauth2Config.check();
         }
         systemParametersServer.upsert(tuple.get(0), oauth2Config, oauth2Config.provide());
         //
         Oauth2Factory.put(oauth2Config);
-        return JsonMessage.success("保存成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.save_succeeded.3b10"));
     }
 }

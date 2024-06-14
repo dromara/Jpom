@@ -115,18 +115,18 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
             return null;
         }
         Map<String, Object> map = new LinkedHashMap<>();
-        map.put("数据id", dataId);
+        map.put(I18nMessageUtil.get("i18n.data_id_label.81b6"), dataId);
         BaseDbService<?> baseDbCommonService = SpringUtil.getBean(dbService);
         Object data = baseDbCommonService.getData(nodeId, dataId);
-        map.put("数据名称", this.tryGetBeanName(data));
+        map.put(I18nMessageUtil.get("i18n.data_name_label.5a14"), this.tryGetBeanName(data));
         //
-        map.put("节点id", nodeId);
+        map.put(I18nMessageUtil.get("i18n.node_id.c90a"), nodeId);
         ClassFeature parent = classFeature.getParent();
         if (parent == ClassFeature.NODE) {
             Class<? extends BaseDbService<?>> dbServiceParent = parent.getDbService();
             BaseDbService<?> baseDbCommonServiceParent = SpringUtil.getBean(dbServiceParent);
             Object dataParent = baseDbCommonServiceParent.getData(nodeId, dataId);
-            map.put("节点名称", this.tryGetBeanName(dataParent));
+            map.put(I18nMessageUtil.get("i18n.node_name.b178"), this.tryGetBeanName(dataParent));
         }
         return map;
     }
@@ -143,14 +143,14 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
 
     private String buildContent(UserModel optUserItem, Map<String, Object> dataMap, WorkspaceModel workspaceModel, String optTypeMsg, UserOperateLogV1 userOperateLogV1) {
         Map<String, Object> map = new LinkedHashMap<>(10);
-        map.put("操作用户", optUserItem.getName());
-        map.put("操作状态码", userOperateLogV1.getOptStatus());
-        map.put("操作类型", optTypeMsg);
+        map.put(I18nMessageUtil.get("i18n.operation_user.4c89"), optUserItem.getName());
+        map.put(I18nMessageUtil.get("i18n.operation_status_code.8231"), userOperateLogV1.getOptStatus());
+        map.put(I18nMessageUtil.get("i18n.operation_type.de9c"), optTypeMsg);
         if (workspaceModel != null) {
-            map.put("所属工作空间", workspaceModel.getName());
+            map.put(I18nMessageUtil.get("i18n.associated_workspace.885b"), workspaceModel.getName());
         }
-        map.put("操作IP", userOperateLogV1.getIp());
-        map.put("操作时间", DateTime.now().toString());
+        map.put(I18nMessageUtil.get("i18n.operation_ip.cbd4"), userOperateLogV1.getIp());
+        map.put(I18nMessageUtil.get("i18n.operation_time.7e95"), DateTime.now().toString());
         if (dataMap != null) {
             map.putAll(dataMap);
         }
@@ -205,9 +205,9 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
                     MonitorModel.Notify notify1 = new MonitorModel.Notify(MonitorModel.NotifyType.mail, email);
                     ThreadUtil.execute(() -> {
                         try {
-                            NotifyUtil.send(notify1, "用户操作报警", context);
+                            NotifyUtil.send(notify1, I18nMessageUtil.get("i18n.user_operation_alarm.15b9"), context);
                         } catch (Exception e) {
-                            log.error("发送报警信息错误", e);
+                            log.error(I18nMessageUtil.get("i18n.send_alert_error.cd38"), e);
                         }
                     });
 
@@ -218,9 +218,9 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
                     MonitorModel.Notify notify1 = new MonitorModel.Notify(MonitorModel.NotifyType.dingding, dingDing);
                     ThreadUtil.execute(() -> {
                         try {
-                            NotifyUtil.send(notify1, "用户操作报警", context);
+                            NotifyUtil.send(notify1, I18nMessageUtil.get("i18n.user_operation_alarm.15b9"), context);
                         } catch (Exception e) {
-                            log.error("发送报警信息错误", e);
+                            log.error(I18nMessageUtil.get("i18n.send_alert_error.cd38"), e);
                         }
                     });
                 }
@@ -230,9 +230,9 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
                     MonitorModel.Notify notify1 = new MonitorModel.Notify(MonitorModel.NotifyType.workWx, workWx);
                     ThreadUtil.execute(() -> {
                         try {
-                            NotifyUtil.send(notify1, "用户操作报警", context);
+                            NotifyUtil.send(notify1, I18nMessageUtil.get("i18n.user_operation_alarm.15b9"), context);
                         } catch (Exception e) {
-                            log.error("发送报警信息错误", e);
+                            log.error(I18nMessageUtil.get("i18n.send_alert_error.cd38"), e);
                         }
                     });
                 }
@@ -260,20 +260,20 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
                 Optional.ofNullable(workspaceModel).ifPresent(workspaceModel1 -> update.setWorkspaceName(workspaceModel1.getName()));
                 this.updateById(update);
             } catch (Exception e) {
-                log.error("更新操作日志失败", e);
+                log.error(I18nMessageUtil.get("i18n.update_operation_log_failed.d348"), e);
             }
             // 检查操作监控
             try {
                 Map<String, Object> monitor = this.checkMonitor(userOperateLogV1, cacheInfo);
                 if (monitor != null) {
-                    String dataName = Optional.ofNullable(monitor.get("数据名称")).map(StrUtil::toStringOrNull).orElse(StrUtil.DASHED);
+                    String dataName = Optional.ofNullable(monitor.get(I18nMessageUtil.get("i18n.data_name_label.5a14"))).map(StrUtil::toStringOrNull).orElse(StrUtil.DASHED);
                     UserOperateLogV1 userOperateLogV11 = new UserOperateLogV1();
                     userOperateLogV11.setDataName(dataName);
                     userOperateLogV11.setId(userOperateLogV1.getId());
                     super.updateById(userOperateLogV11);
                 }
             } catch (Exception e) {
-                log.error("执行操作监控错误", e);
+                log.error(I18nMessageUtil.get("i18n.operation_monitoring_error.8036"), e);
             }
         });
     }

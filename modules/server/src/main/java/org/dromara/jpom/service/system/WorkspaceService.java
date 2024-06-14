@@ -11,6 +11,7 @@ package org.dromara.jpom.service.system;
 
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.BaseWorkspaceModel;
 import org.dromara.jpom.model.data.WorkspaceModel;
@@ -35,7 +36,7 @@ public class WorkspaceService extends BaseDbService<WorkspaceModel> implements I
             WorkspaceModel defaultWorkspace = new WorkspaceModel();
             defaultWorkspace.setId(Const.WORKSPACE_DEFAULT_ID);
             defaultWorkspace.setName(Const.DEFAULT_GROUP_NAME.get());
-            defaultWorkspace.setDescription("系统默认的工作空间,不能删除");
+            defaultWorkspace.setDescription(I18nMessageUtil.get("i18n.default_workspace_cannot_delete.18b4"));
             super.insert(defaultWorkspace);
 
             log.info("init created default workspace");

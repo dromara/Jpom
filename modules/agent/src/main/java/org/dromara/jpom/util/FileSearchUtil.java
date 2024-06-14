@@ -14,6 +14,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -61,7 +62,7 @@ public class FileSearchUtil {
             strings = FileSearchUtil.readRangeLine(file, charset, calculate);
         }
         int showLine = searchList(strings, searchKey, cacheBeforeCount, afterCount, consumer);
-        return StrUtil.format("在 {} 行中搜索到并显示 {} 行", CollUtil.size(strings), showLine);
+        return StrUtil.format(I18nMessageUtil.get("i18n.search_result_display.d2c3"), CollUtil.size(strings), showLine);
     }
 
     private static int searchList(Collection<Tuple> strings, String searchKey, int beforeCount, int afterCount, Consumer<Tuple> consumer) {

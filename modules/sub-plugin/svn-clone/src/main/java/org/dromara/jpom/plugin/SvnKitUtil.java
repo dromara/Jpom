@@ -12,6 +12,7 @@ package org.dromara.jpom.plugin;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.system.JpomRuntimeException;
 import org.dromara.jpom.util.CommandUtil;
 import org.tmatesoft.svn.core.*;
@@ -89,7 +90,7 @@ public class SvnKitUtil {
                 }
             }
         } else {
-            throw new IllegalStateException("不支持的协议类型");
+            throw new IllegalStateException(I18nMessageUtil.get("i18n.protocol_type_not_supported2.e519"));
         }
         // 超时时间
         Integer timeout = (Integer) map.get("timeout");
@@ -184,9 +185,9 @@ public class SvnKitUtil {
         try {
             // 要把版本库的内容check out到的目录
             long workingVersion = updateClient.doCheckout(svnurl, targetPath, SVNRevision.HEAD, SVNRevision.HEAD, SVNDepth.INFINITY, true);
-            return new String[]{workingVersion + "", String.format("把版本：%s check out ", workingVersion)};
+            return new String[]{workingVersion + "", String.format(I18nMessageUtil.get("i18n.checkout_version.a586"), workingVersion)};
         } catch (SVNAuthenticationException s) {
-            throw new JpomRuntimeException("账号密码不正确", s);
+            throw new JpomRuntimeException(I18nMessageUtil.get("i18n.incorrect_account_credentials.b2c5"), s);
         }
     }
 }

@@ -24,6 +24,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.IDockerConfigPlugin;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.model.docker.DockerInfoModel;
 import org.dromara.jpom.plugin.PluginFactory;
@@ -113,9 +114,9 @@ public class DockerYmlDsl extends BaseJsonModel {
                       MachineDockerServer machineDockerServer,
                       String workspaceId,
                       IDockerConfigPlugin plugin) {
-        Assert.hasText(runsOn, "请填写runsOn。");
-        Validator.validateMatchRegex(StringUtil.GENERAL_STR, runsOn, "runsOn 镜像名称不合法");
-        Assert.state(CollUtil.isNotEmpty(steps), "请填写 steps");
+        Assert.hasText(runsOn, I18nMessageUtil.get("i18n.please_fill_in_runs_on.c2ff"));
+        Validator.validateMatchRegex(StringUtil.GENERAL_STR, runsOn, I18nMessageUtil.get("i18n.invalid_runs_on_image_name.4b96"));
+        Assert.state(CollUtil.isNotEmpty(steps), I18nMessageUtil.get("i18n.please_fill_in_steps.229d"));
         this.stepsCheck(dockerInfoService, machineDockerServer, workspaceId, plugin);
     }
 
@@ -133,11 +134,11 @@ public class DockerYmlDsl extends BaseJsonModel {
             }
             if (step.containsKey("env")) {
                 Object env1 = step.get("env");
-                Assert.isInstanceOf(Map.class, env1, "env 必须是 map 类型");
+                Assert.isInstanceOf(Map.class, env1, I18nMessageUtil.get("i18n.env_must_be_map_type.f8ad"));
             }
             if (step.containsKey("uses")) {
                 Object uses1 = step.get("uses");
-                Assert.isInstanceOf(String.class, uses1, "uses 只支持 String 类型");
+                Assert.isInstanceOf(String.class, uses1, I18nMessageUtil.get("i18n.uses_only_supports_string_type.ac54"));
                 String uses = (String) step.get("uses");
                 if ("node".equals(uses)) {
                     nodePluginCheck(step);
@@ -159,7 +160,7 @@ public class DockerYmlDsl extends BaseJsonModel {
                     File pluginInstallResource = null;
                     try {
                         pluginInstallResource = plugin.getResourceToFile("uses/" + uses + "/install.sh", tmpDir);
-                        Assert.notNull(pluginInstallResource, StrUtil.format("当前还不支持 {} 插件", uses));
+                        Assert.notNull(pluginInstallResource, StrUtil.format(I18nMessageUtil.get("i18n.unsupported_plugin_message.2889"), uses));
                     } finally {
                         FileUtil.del(pluginInstallResource);
                     }
@@ -168,17 +169,17 @@ public class DockerYmlDsl extends BaseJsonModel {
             }
         }
         if (usesSet.contains("maven") && !usesSet.contains("java")) {
-            throw new IllegalArgumentException("maven 插件依赖 java , 使用 maven 插件必须优先引入 java 插件");
+            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.maven_plugin_depends_on_java.23f8"));
         }
         if (usesSet.contains("gradle") && !usesSet.contains("java")) {
-            throw new IllegalArgumentException("gradle 插件依赖 java , 使用 gradle 插件必须优先引入 java 插件");
+            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.gradle_plugin_depends_on_java.2bb3"));
         }
-        Assert.isTrue(containsRun, "steps 中没有发现任何 run , run 用于执行命令");
+        Assert.isTrue(containsRun, I18nMessageUtil.get("i18n.no_run_found_in_steps.a141"));
     }
 
     private void cachePluginCheck(Map<String, Object> step) {
         Object path = step.get("path");
-        Assert.notNull(path, "cache 插件 path 不能为空");
+        Assert.notNull(path, I18nMessageUtil.get("i18n.cache_plugin_path_required.2093"));
     }
 
     /**
@@ -188,7 +189,7 @@ public class DockerYmlDsl extends BaseJsonModel {
      */
     private void mavenPluginCheck(Map<String, Object> step, DockerInfoService dockerInfoService, MachineDockerServer machineDockerServer, String workspaceId) {
         Object version1 = step.get("version");
-        Assert.notNull(version1, "maven 插件 version 不能为空");
+        Assert.notNull(version1, I18nMessageUtil.get("i18n.maven_plugin_version_required.71f1"));
         String version = String.valueOf(version1);
         String link = String.format("https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/%s/binaries/apache-maven-%s-bin.tar.gz", version, version);
         HttpRequest request = HttpUtil.createRequest(Method.HEAD, link);
@@ -217,11 +218,11 @@ public class DockerYmlDsl extends BaseJsonModel {
                 }
             }
         } catch (Exception e) {
-            log.warn("检查 docker 依赖错误:{}", e.getMessage());
+            log.warn(I18nMessageUtil.get("i18n.check_docker_dependency_error.60f7"), e.getMessage());
         }
         // 提示远程版本
         Collection<String> pluginVersion = this.listMavenPluginVersion();
-        throw new IllegalArgumentException("请填入正确的 maven 版本号,可用的版本如下：" + CollUtil.join(pluginVersion, StrUtil.COMMA));
+        throw new IllegalArgumentException(I18nMessageUtil.get("i18n.please_fill_in_correct_maven_version.468c") + CollUtil.join(pluginVersion, StrUtil.COMMA));
     }
 
 
@@ -233,7 +234,7 @@ public class DockerYmlDsl extends BaseJsonModel {
             .map(s -> StrUtil.removeSuffix(s, StrUtil.SLASH))
             .filter(StrUtil::isNotEmpty)
             .collect(Collectors.toSet());
-        Assert.notEmpty(set, "maven 镜像库中没有找到任何可用的 maven 版本");
+        Assert.notEmpty(set, I18nMessageUtil.get("i18n.no_available_maven_versions.dffe"));
         return set;
     }
 
@@ -244,10 +245,10 @@ public class DockerYmlDsl extends BaseJsonModel {
      */
     private void javaPluginCheck(Map<String, Object> step) {
         Object version1 = step.get("version");
-        Assert.notNull(version1, "java 插件 version 不能为空");
+        Assert.notNull(version1, I18nMessageUtil.get("i18n.java_plugin_version_required.de39"));
         Integer version = Integer.valueOf(String.valueOf(version1));
         List<Integer> supportedVersions = ListUtil.of(8, 11, 17, 18);
-        Assert.isTrue(supportedVersions.contains(version), String.format("目前java 插件支持的版本: %s", supportedVersions));
+        Assert.isTrue(supportedVersions.contains(version), String.format(I18nMessageUtil.get("i18n.supported_java_plugin_versions.bd70"), supportedVersions));
     }
 
 
@@ -258,13 +259,13 @@ public class DockerYmlDsl extends BaseJsonModel {
      */
     private void gradlePluginCheck(Map<String, Object> step) {
         Object version1 = step.get("version");
-        Assert.notNull(version1, "gradle 插件 version 不能为空");
+        Assert.notNull(version1, I18nMessageUtil.get("i18n.gradle_plugin_version_required.b983"));
         String version = String.valueOf(version1);
         String link = String.format("https://downloads.gradle-dn.com/distributions/gradle-%s-bin.zip", version);
         HttpUtil.createRequest(Method.HEAD, link).thenFunction(httpResponse -> {
             Assert.isTrue(httpResponse.isOk() ||
                 httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP ||
-                httpResponse.getStatus() == HttpStatus.HTTP_SEE_OTHER, "请填入正确的 gradle 版本号");
+                httpResponse.getStatus() == HttpStatus.HTTP_SEE_OTHER, I18nMessageUtil.get("i18n.please_fill_in_correct_gradle_version.6e19"));
             return null;
         });
     }
@@ -276,11 +277,11 @@ public class DockerYmlDsl extends BaseJsonModel {
      */
     private void nodePluginCheck(Map<String, Object> step) {
         Object version1 = step.get("version");
-        Assert.notNull(version1, "node 插件 version 不能为空");
+        Assert.notNull(version1, I18nMessageUtil.get("i18n.node_plugin_version_required.2318"));
         String version = String.valueOf(version1);
         String link = String.format("https://registry.npmmirror.com/-/binary/node/v%s/node-v%s-linux-x64.tar.gz", version, version);
         HttpResponse httpResponse = HttpUtil.createRequest(Method.HEAD, link).execute();
-        Assert.isTrue(httpResponse.isOk() || httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP, "请填入正确的 node 版本号");
+        Assert.isTrue(httpResponse.isOk() || httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP, I18nMessageUtil.get("i18n.please_fill_in_correct_node_version.8483"));
     }
 
     /**
@@ -290,7 +291,7 @@ public class DockerYmlDsl extends BaseJsonModel {
      */
     private void goPluginCheck(Map<String, Object> step) {
         Object version1 = step.get("version");
-        Assert.notNull(version1, "go 插件 version 不能为空");
+        Assert.notNull(version1, I18nMessageUtil.get("i18n.go_plugin_version_required.ccf6"));
         String version = String.valueOf(version1);
         String link = String.format("https://studygolang.com/dl/golang/go%s.linux-amd64.tar.gz", version);
         HttpUtil.createRequest(Method.HEAD, link).thenFunction(new Function<HttpResponse, Object>() {
@@ -298,7 +299,7 @@ public class DockerYmlDsl extends BaseJsonModel {
             public Object apply(HttpResponse httpResponse) {
                 Assert.isTrue(httpResponse.isOk() ||
                     httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP ||
-                    httpResponse.getStatus() == HttpStatus.HTTP_SEE_OTHER, "请填入正确的 go 版本号");
+                    httpResponse.getStatus() == HttpStatus.HTTP_SEE_OTHER, I18nMessageUtil.get("i18n.please_fill_in_correct_go_version.44ed"));
                 return null;
             }
         });
@@ -311,18 +312,18 @@ public class DockerYmlDsl extends BaseJsonModel {
      */
     private void python3PluginCheck(Map<String, Object> step) {
         Object version1 = step.get("version");
-        Assert.notNull(version1, "python3 插件 version 不能为空");
+        Assert.notNull(version1, I18nMessageUtil.get("i18n.python3_plugin_version_required.a0ce"));
         String version = String.valueOf(version1);
         Assert.state(StrUtil.startWith(version, "3."), () -> {
             //
-            return "请填入正确的 python3 版本号";
+            return I18nMessageUtil.get("i18n.please_fill_in_correct_python3_version.abb1");
         });
         String link = String.format("https://repo.huaweicloud.com/python/%s/Python-%s.tar.xz", version, version);
         HttpUtil.createRequest(Method.HEAD, link).thenFunction(new Function<HttpResponse, Object>() {
             @Override
             public Object apply(HttpResponse httpResponse) {
                 Assert.isTrue(httpResponse.isOk() ||
-                    httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP, "请填入正确的 python3 版本号");
+                    httpResponse.getStatus() == HttpStatus.HTTP_MOVED_TEMP, I18nMessageUtil.get("i18n.please_fill_in_correct_python3_version.abb1"));
                 return null;
             }
         });

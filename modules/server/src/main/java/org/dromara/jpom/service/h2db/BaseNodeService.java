@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.exception.AgentAuthorizeException;
 import org.dromara.jpom.exception.AgentException;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
@@ -78,7 +79,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
         ThreadUtil.execute(() -> {
             List<NodeModel> list = nodeService.list();
             if (CollUtil.isEmpty(list)) {
-                log.debug("没有任何节点");
+                log.debug(I18nMessageUtil.get("i18n.no_nodes.17b4"));
                 return;
             }
             // 排序 避免项目被个节点绑定
@@ -146,7 +147,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
                         String s = nodeIdMap.put(key, beanId);
                         if (StrUtil.isNotEmpty(s) && !StrUtil.equals(s, beanId)) {
                             // 对比已经存在的数据
-                            log.error("项目数据工作空间ID[{}]查询出节点ID不一致, 旧数据: {}, 新数据: {}", key, s, beanId);
+                            log.error(I18nMessageUtil.get("i18n.project_data_workspace_id_inconsistency.7ed6"), key, s, beanId);
                         }
                     }
                     return true;
@@ -191,8 +192,8 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
     public String syncExecuteNode(NodeModel nodeModel) {
         String nodeModelName = nodeModel.getName();
         if (!nodeModel.isOpenStatus()) {
-            log.debug("{} 节点未启用", nodeModelName);
-            return "节点未启用";
+            log.debug(I18nMessageUtil.get("i18n.node_not_enabled.10ef"), nodeModelName);
+            return I18nMessageUtil.get("i18n.node_not_enabled.a14d");
         }
         try {
             JSONArray jsonArray = this.getLitDataArray(nodeModel);
@@ -202,7 +203,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
                 int del = super.del(entity);
                 //
                 log.debug("{} 节点没有拉取到任何 {},但是删除了数据：{}", nodeModelName, dataName, del);
-                return "节点没有拉取到任何" + dataName;
+                return I18nMessageUtil.get("i18n.node_did_not_pull_anything.8af5") + dataName;
             }
             // 查询现在存在的项目
             T where = ReflectUtil.newInstance(this.tClass);
@@ -225,7 +226,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
                             try {
                                 return DateUtil.parse(s);
                             } catch (Exception e) {
-                                log.warn("数据创建时间格式不正确 {} {}", s, jsonObject);
+                                log.warn(I18nMessageUtil.get("i18n.data_creation_time_format_incorrect.7772"), s, jsonObject);
                                 return null;
                             }
                         }).ifPresent(s -> t.setCreateTimeMillis(s.getTime()));
@@ -235,7 +236,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
                             try {
                                 return DateUtil.parse(s);
                             } catch (Exception e) {
-                                log.warn("数据修改时间格式不正确 {} {}", s, jsonObject);
+                                log.warn(I18nMessageUtil.get("i18n.data_modification_time_format_incorrect.7ffe"), s, jsonObject);
                                 return null;
                             }
                         })
@@ -262,7 +263,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
                 .peek(item -> {
                     item.setNodeName(nodeModel.getName());
                     WorkspaceModel workspaceModel = workspaceService.getByKey(nodeModel.getWorkspaceId());
-                    item.setWorkspaceName(Optional.ofNullable(workspaceModel).map(WorkspaceModel::getName).orElse("数据不存在"));
+                    item.setWorkspaceName(Optional.ofNullable(workspaceModel).map(WorkspaceModel::getName).orElse(I18nMessageUtil.get("i18n.data_does_not_exist.b201")));
                     cacheIds.remove(item.dataId());
                     // 需要删除相反的工作空间的数据（避免出现一个脚本同步出2条数据的问题）
                     if (StrUtil.equals(item.getWorkspaceId(), ServerConst.WORKSPACE_GLOBAL)) {
@@ -289,7 +290,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
                 delCount = super.delByKey(needDelete, null);
             }
             int size = CollUtil.size(projectInfoModels);
-            String template = "{} 物理节点拉取到 {} 个{},当前工作空间逻辑节点已经缓存 {} 个{},更新 {} 个{},删除 {} 个缓存";
+            String template = I18nMessageUtil.get("i18n.physical_node_pull.874e");
             String format = StrUtil.format(
                 template,
                 nodeModelName, CollUtil.size(jsonArray), dataName,
@@ -320,18 +321,18 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
         if (e instanceof AgentException) {
             AgentException agentException = (AgentException) e;
             log.error("{} 同步失败 {}", nodeModelName, agentException.getMessage());
-            return "同步失败" + agentException.getMessage();
+            return I18nMessageUtil.get("i18n.synchronization_failed.d610") + agentException.getMessage();
         } else if (e instanceof AgentAuthorizeException) {
             AgentAuthorizeException agentAuthorizeException = (AgentAuthorizeException) e;
             log.error("{} 授权异常 {}", nodeModelName, agentAuthorizeException.getMessage());
-            return "授权异常" + agentAuthorizeException.getMessage();
+            return I18nMessageUtil.get("i18n.auth_exception.27be") + agentAuthorizeException.getMessage();
         }
 //        else if (e instanceof JSONException) {
 //            log.error("{} 消息解析失败 {}", nodeModelName, e.getMessage());
 //            return "消息解析失败" + e.getMessage();
 //        }
-        log.error("同步节点{}失败:{}", dataName, nodeModelName, e);
-        return StrUtil.format("同步节点 {} 失败 {}", dataName, e.getMessage());
+        log.error(I18nMessageUtil.get("i18n.synchronization_node_failure_with_details.8660"), dataName, nodeModelName, e);
+        return StrUtil.format(I18nMessageUtil.get("i18n.synchronization_node_failure.8a2c"), dataName, e.getMessage());
     }
 
     /**
@@ -343,7 +344,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
     public void syncNode(final NodeModel nodeModel, String id) {
         String nodeModelName = nodeModel.getName();
         if (!nodeModel.isOpenStatus()) {
-            log.debug("{} 节点未启用", nodeModelName);
+            log.debug(I18nMessageUtil.get("i18n.node_not_enabled.10ef"), nodeModelName);
             return;
         }
         ThreadUtil.execute(() -> {

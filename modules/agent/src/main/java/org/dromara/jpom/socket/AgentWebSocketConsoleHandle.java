@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.commander.CommandOpResult;
 import org.dromara.jpom.common.commander.ProjectCommander;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.configuration.ProjectLogConfig;
 import org.dromara.jpom.model.RunMode;
@@ -76,12 +77,12 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                     return;
                 }
                 //
-                SocketSessionUtil.send(session, "连接成功：" + nodeProjectInfoModel.getName());
+                SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.connection_successful_with_message.5cf2") + nodeProjectInfoModel.getName());
             }
         } catch (Exception e) {
-            log.error("socket 错误", e);
+            log.error(I18nMessageUtil.get("i18n.socket_error.18c1"), e);
             try {
-                SocketSessionUtil.send(session, JsonMessage.getString(500, "系统错误!"));
+                SocketSessionUtil.send(session, JsonMessage.getString(500, I18nMessageUtil.get("i18n.system_error.9417")));
                 session.close();
             } catch (IOException e1) {
                 log.error(e1.getMessage(), e1);
@@ -110,7 +111,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
     private NodeProjectInfoModel checkProject(String projectId, Session session) throws IOException {
         NodeProjectInfoModel nodeProjectInfoModel = projectInfoService.getItem(projectId);
         if (nodeProjectInfoModel == null) {
-            SocketSessionUtil.send(session, "没有对应项目：" + projectId);
+            SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.no_project_specified2.a7f5") + projectId);
             session.close();
             return null;
         }
@@ -157,7 +158,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                     logUser = true;
                     strResult = projectCommander.execCommand(consoleCommandOp, nodeProjectInfoModel);
                     if (strResult.isSuccess()) {
-                        resultData = new JsonMessage<>(200, "操作成功", strResult);
+                        resultData = new JsonMessage<>(200, I18nMessageUtil.get("i18n.operation_succeeded.3313"), strResult);
                     } else {
                         resultData = new JsonMessage<>(400, strResult.msgStr());
                     }
@@ -167,9 +168,9 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                     // 获取项目状态
                     strResult = projectCommander.execCommand(consoleCommandOp, nodeProjectInfoModel);
                     if (strResult.isSuccess()) {
-                        resultData = new JsonMessage<>(200, "运行中", strResult);
+                        resultData = new JsonMessage<>(200, I18nMessageUtil.get("i18n.running_status.d679"), strResult);
                     } else {
-                        resultData = new JsonMessage<>(404, "未运行", strResult);
+                        resultData = new JsonMessage<>(404, I18nMessageUtil.get("i18n.not_running.4f8a"), strResult);
                     }
                     break;
                 }
@@ -184,12 +185,12 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                     break;
                 }
                 default:
-                    resultData = new JsonMessage<>(404, "不支持的方式：" + consoleCommandOp.name());
+                    resultData = new JsonMessage<>(404, I18nMessageUtil.get("i18n.unsupported_method_with_colon.eae8") + consoleCommandOp.name());
                     break;
             }
         } catch (Exception e) {
-            log.error("执行命令失败", e);
-            SocketSessionUtil.send(session, "执行命令失败,详情如下：");
+            log.error(I18nMessageUtil.get("i18n.command_execution_failed.90ef"), e);
+            SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.command_execution_failed_details.77ed"));
             SocketSessionUtil.send(session, ExceptionUtil.stacktraceToString(e));
             return;
         } finally {
@@ -235,7 +236,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
         File libFile = projectInfoService.resolveLibFile(nodeProjectInfoModel);
         File file = FileUtil.file(libFile, fileName);
         if (!FileUtil.isFile(file)) {
-            return new JsonMessage<>(404, "文件不存在");
+            return new JsonMessage<>(404, I18nMessageUtil.get("i18n.file_not_found.d952"));
         }
         ThreadUtil.execute(() -> {
             try {
@@ -257,9 +258,9 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                 });
                 SocketSessionUtil.send(session, resultMsg);
             } catch (Exception e) {
-                log.error("文件搜索失败", e);
+                log.error(I18nMessageUtil.get("i18n.file_search_failed.231b"), e);
                 try {
-                    SocketSessionUtil.send(session, "执行命令失败,详情如下：");
+                    SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.command_execution_failed_details.77ed"));
                 } catch (IOException ignored) {
                 }
             }
@@ -281,10 +282,10 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
             Charset charset = logConfig.getFileCharset();
             boolean watcher = AgentFileTailWatcher.addWatcher(file, charset, session);
             if (!watcher) {
-                SocketSessionUtil.send(session, "监听文件失败,可能文件不存在");
+                SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.listen_file_failed_may_not_exist.fd56"));
             }
         } catch (Exception io) {
-            log.error("监听日志变化", io);
+            log.error(I18nMessageUtil.get("i18n.listen_log_changes.9081"), io);
             SocketSessionUtil.send(session, io.getMessage());
         }
     }

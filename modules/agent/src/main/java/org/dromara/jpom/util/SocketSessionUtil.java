@@ -12,6 +12,7 @@ package org.dromara.jpom.util;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.springframework.util.Assert;
 
 import javax.websocket.Session;
@@ -61,7 +62,7 @@ public class SocketSessionUtil {
                     exception = null;
                     break;
                 } catch (IOException e) {
-                    log.error("发送消息失败:" + tryCount, e);
+                    log.error(I18nMessageUtil.get("i18n.send_message_failure_prefix.6f8c") + tryCount, e);
                     exception = e;
                 }
             } while (tryCount <= ERROR_TRY_COUNT);

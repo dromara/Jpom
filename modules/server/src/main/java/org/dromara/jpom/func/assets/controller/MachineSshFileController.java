@@ -13,6 +13,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
@@ -39,7 +40,7 @@ public class MachineSshFileController extends BaseSshFileController {
     @Override
     protected <T> T checkConfigPath(String id, BiFunction<MachineSshModel, ItemConfig, T> function) {
         MachineSshModel machineSshModel = machineSshServer.getByKey(id, false);
-        Assert.notNull(machineSshModel, "没有对应的ssh");
+        Assert.notNull(machineSshModel, I18nMessageUtil.get("i18n.no_corresponding_ssh.aa68"));
         return function.apply(machineSshModel, new ItemConfig() {
             @Override
             public List<String> allowEditSuffix() {

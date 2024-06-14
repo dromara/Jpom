@@ -25,6 +25,7 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.data.MonitorModel;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.log.MonitorNotifyLog;
@@ -132,7 +133,7 @@ public class MonitorItem implements Task {
                     context = jsonMessage.toString();
                 }
             } catch (Exception e) {
-                log.error("监控 {} 节点异常 {}", nodeModel.getName(), e.getMessage());
+                log.error(I18nMessageUtil.get("i18n.monitor_node_exception.6ff1"), nodeModel.getName(), e.getMessage());
                 //
                 title = StrUtil.format("【{}】节点的运行状态异常", nodeModel.getName());
                 context = ExceptionUtil.stacktraceToString(e);
@@ -191,15 +192,15 @@ public class MonitorItem implements Task {
                     } else {
                         title = StrUtil.format("【{}】节点的【{}】项目{}已经停止，已经执行重启操作,结果失败", nodeModel.getName(), id, copyMsg);
                     }
-                    context = "重启结果：" + reJson;
+                    context = I18nMessageUtil.get("i18n.restart_result.253f") + reJson;
                 } catch (Exception e) {
-                    log.error("执行重启操作", e);
+                    log.error(I18nMessageUtil.get("i18n.restart_operation.5e3a"), e);
                     title = StrUtil.format("【{}】节点的【{}】项目{}已经停止，重启操作异常", nodeModel.getName(), id, copyMsg);
                     context = ExceptionUtil.stacktraceToString(e);
                 }
             } else {
                 title = StrUtil.format("【{}】节点的【{}】项目{}已经没有运行", nodeModel.getName(), id, copyMsg);
-                context = "请及时检查";
+                context = I18nMessageUtil.get("i18n.please_check_in_time.3b4f");
             }
         }
         if (!pre && !runStatus) {
@@ -209,7 +210,7 @@ public class MonitorItem implements Task {
         MonitorNotifyLog monitorNotifyLog = new MonitorNotifyLog();
         monitorNotifyLog.setStatus(runStatus);
         monitorNotifyLog.setTitle(title);
-        monitorNotifyLog.setContent(StrUtil.format("报警内容：{} 状态消息：{}", context, statusMsg));
+        monitorNotifyLog.setContent(StrUtil.format(I18nMessageUtil.get("i18n.alert_content_and_status.6ed1"), context, statusMsg));
         monitorNotifyLog.setCreateTime(System.currentTimeMillis());
         monitorNotifyLog.setNodeId(nodeModel.getId());
         monitorNotifyLog.setProjectId(id);
@@ -284,7 +285,7 @@ public class MonitorItem implements Task {
                 plugin.execute(webhook, map);
                 dbMonitorNotifyLogService.updateStatus(logId, true, null);
             } catch (Exception e) {
-                log.error("WebHooks 调用错误", e);
+                log.error(I18nMessageUtil.get("i18n.webhooks_invocation_error.9792"), e);
                 dbMonitorNotifyLogService.updateStatus(logId, false, ExceptionUtil.stacktraceToString(e));
             }
         });
@@ -335,11 +336,11 @@ public class MonitorItem implements Task {
             return;
         }
         monitorNotifyLog.setId(IdUtil.fastSimpleUUID());
-        monitorNotifyLog.setNotifyObject("报警联系人异常");
+        monitorNotifyLog.setNotifyObject(I18nMessageUtil.get("i18n.alert_contact_exception.2cec"));
         monitorNotifyLog.setNotifyStyle(MonitorModel.NotifyType.mail.getCode());
         monitorNotifyLog.setNotifyStatus(false);
-        String userNotFound = "联系人不存在";
-        String notifyError = "报警联系人异常:" + (item == null ? userNotFound : "");
+        String userNotFound = I18nMessageUtil.get("i18n.contact_does_not_exist.3369");
+        String notifyError = I18nMessageUtil.get("i18n.alert_contact_exception_message.1072") + (item == null ? userNotFound : "");
         monitorNotifyLog.setNotifyError(notifyError);
         dbMonitorNotifyLogService.insert(monitorNotifyLog);
     }
@@ -351,7 +352,7 @@ public class MonitorItem implements Task {
                 NotifyUtil.send(notify, title, context);
                 dbMonitorNotifyLogService.updateStatus(logId, true, null);
             } catch (Exception e) {
-                log.error("发送报警通知异常", e);
+                log.error(I18nMessageUtil.get("i18n.send_alert_notification_exception.6788"), e);
                 dbMonitorNotifyLogService.updateStatus(logId, false, ExceptionUtil.stacktraceToString(e));
             }
         });

@@ -15,6 +15,7 @@ import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.func.BaseGroupNameController;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
@@ -81,16 +82,16 @@ public class MachineNodeController extends BaseGroupNameController {
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<String> save(HttpServletRequest request) {
         machineNodeServer.update(request);
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
     @PostMapping(value = "delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<String> delete(@ValidatorItem String id) {
         long count = nodeService.countByMachine(id);
-        Assert.state(count <= 0, StrUtil.format("当前机器还关联{}个节点，不能直接删除（需要提前解绑或者删除关联数据后才能删除）", count));
+        Assert.state(count <= 0, StrUtil.format(I18nMessageUtil.get("i18n.associated_nodes_warning.64d8"), count));
         machineNodeServer.delByKey(id);
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
     /**
@@ -106,10 +107,10 @@ public class MachineNodeController extends BaseGroupNameController {
         List<String> list = StrUtil.splitTrim(ids, StrUtil.COMMA);
         for (String id : list) {
             MachineNodeModel machineNodeModel = machineNodeServer.getByKey(id);
-            Assert.notNull(machineNodeModel, "没有对应的机器");
+            Assert.notNull(machineNodeModel, I18nMessageUtil.get("i18n.no_machine.89ed"));
             WorkspaceModel workspaceModel = new WorkspaceModel(workspaceId);
             boolean exists = workspaceService.exists(workspaceModel);
-            Assert.state(exists, "不存在对应的工作空间");
+            Assert.state(exists, I18nMessageUtil.get("i18n.workspace_not_exist.a6fd"));
             //
             if (!nodeService.existsNode2(workspaceId, id)) {
                 //
@@ -117,14 +118,14 @@ public class MachineNodeController extends BaseGroupNameController {
             }
         }
 
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
     @GetMapping(value = "list-node", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<List<NodeModel>> listData(@ValidatorItem String id) {
         MachineNodeModel machineNodeModel = machineNodeServer.getByKey(id);
-        Assert.notNull(machineNodeModel, "没有对应的机器");
+        Assert.notNull(machineNodeModel, I18nMessageUtil.get("i18n.no_machine.89ed"));
         NodeModel nodeModel = new NodeModel();
         nodeModel.setMachineId(id);
         List<NodeModel> modelList = nodeService.listByBean(nodeModel);
@@ -157,37 +158,37 @@ public class MachineNodeController extends BaseGroupNameController {
      */
     @RequestMapping(value = "save-whitelist", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.SYSTEM_NODE_WHITELIST, method = MethodFeature.EDIT)
-    public IJsonMessage<Object> saveWhitelist(@ValidatorItem(msg = "请选择分发的机器") String ids,
+    public IJsonMessage<Object> saveWhitelist(@ValidatorItem(msg = "i18n.distribution_machine_required.5921") String ids,
                                               HttpServletRequest request) {
         //
         List<String> idList = StrUtil.splitTrim(ids, StrUtil.COMMA);
         for (String s : idList) {
             MachineNodeModel machineNodeModel = machineNodeServer.getByKey(s);
-            Assert.notNull(machineNodeModel, "没有对应的机器");
+            Assert.notNull(machineNodeModel, I18nMessageUtil.get("i18n.no_machine.89ed"));
             JsonMessage<String> jsonMessage = NodeForward.request(machineNodeModel, request, NodeUrl.WhitelistDirectory_Submit);
-            Assert.state(jsonMessage.success(), StrUtil.format("分发 {} 节点授权失败 {}", machineNodeModel.getName(), jsonMessage.getMsg()));
+            Assert.state(jsonMessage.success(), StrUtil.format(I18nMessageUtil.get("i18n.distribute_node_authorization_failure.bb92"), machineNodeModel.getName(), jsonMessage.getMsg()));
         }
-        return JsonMessage.success("保存成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.save_succeeded.3b10"));
     }
 
 
     @PostMapping(value = "save-node-config", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.SYSTEM_CONFIG, method = MethodFeature.EDIT)
     @SystemPermission(superUser = true)
-    public IJsonMessage<Object> saveNodeConfig(@ValidatorItem(msg = "请选择分发的机器") String ids,
+    public IJsonMessage<Object> saveNodeConfig(@ValidatorItem(msg = "i18n.distribution_machine_required.5921") String ids,
                                                String content,
                                                String restart) {
         List<String> idList = StrUtil.splitTrim(ids, StrUtil.COMMA);
         for (String s : idList) {
             MachineNodeModel machineNodeModel = machineNodeServer.getByKey(s);
-            Assert.notNull(machineNodeModel, "没有对应的机器");
+            Assert.notNull(machineNodeModel, I18nMessageUtil.get("i18n.no_machine.89ed"));
             JSONObject reqData = new JSONObject();
             reqData.put("content", content);
             reqData.put("restart", restart);
             JsonMessage<String> jsonMessage = NodeForward.request(machineNodeModel, NodeUrl.SystemSaveConfig, reqData);
-            Assert.state(jsonMessage.success(), StrUtil.format("分发 {} 节点配置失败 {}", machineNodeModel.getName(), jsonMessage.getMsg()));
+            Assert.state(jsonMessage.success(), StrUtil.format(I18nMessageUtil.get("i18n.distribute_node_configuration_failure.8146"), machineNodeModel.getName(), jsonMessage.getMsg()));
         }
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 
     /**
@@ -200,7 +201,7 @@ public class MachineNodeController extends BaseGroupNameController {
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<Object> lonelyData(@ValidatorItem String id) {
         MachineNodeModel machineNodeModel = machineNodeServer.getByKey(id);
-        Assert.notNull(machineNodeModel, "没有对应的机器");
+        Assert.notNull(machineNodeModel, I18nMessageUtil.get("i18n.no_machine.89ed"));
         List<ProjectInfoCacheModel> models = projectInfoCacheService.lonelyDataArray(machineNodeModel);
         List<NodeScriptCacheModel> scriptCacheModels = nodeScriptServer.lonelyDataArray(machineNodeModel);
         JSONObject jsonObject = new JSONObject();
@@ -216,19 +217,19 @@ public class MachineNodeController extends BaseGroupNameController {
                                                   @ValidatorItem String dataId,
                                                   @ValidatorItem String toNodeId) {
         MachineNodeModel machineNodeModel = machineNodeServer.getByKey(id);
-        Assert.notNull(machineNodeModel, "没有对应的机器");
+        Assert.notNull(machineNodeModel, I18nMessageUtil.get("i18n.no_machine.89ed"));
         {
             NodeModel nodeModel = nodeService.getByKey(toNodeId);
-            Assert.notNull(nodeModel, "没有对应的节点");
-            Assert.hasText(nodeModel.getWorkspaceId(), "节点没有工作空间");
-            Assert.state(StrUtil.equals(nodeModel.getMachineId(), machineNodeModel.getId()), "资产集群和节点不匹配");
+            Assert.notNull(nodeModel, I18nMessageUtil.get("i18n.no_node.2e83"));
+            Assert.hasText(nodeModel.getWorkspaceId(), I18nMessageUtil.get("i18n.node_has_no_workspace.69c0"));
+            Assert.state(StrUtil.equals(nodeModel.getMachineId(), machineNodeModel.getId()), I18nMessageUtil.get("i18n.asset_cluster_and_node_mismatch.8964"));
             NodeUrl nodeUrl;
             if (StrUtil.equalsIgnoreCase(type, "script")) {
                 nodeUrl = NodeUrl.Script_ChangeWorkspaceId;
             } else if (StrUtil.equalsIgnoreCase(type, "project")) {
                 nodeUrl = NodeUrl.Manage_ChangeWorkspaceId;
             } else {
-                throw new IllegalArgumentException("不支持的类型：" + type);
+                throw new IllegalArgumentException(I18nMessageUtil.get("i18n.unsupported_type_with_colon2.7de2") + type);
             }
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("newWorkspaceId", nodeModel.getWorkspaceId());
@@ -236,7 +237,7 @@ public class MachineNodeController extends BaseGroupNameController {
             jsonObject.put("id", dataId);
             JsonMessage<String> jsonMessage = NodeForward.request(machineNodeModel, nodeUrl, jsonObject);
             if (!jsonMessage.success()) {
-                return new JsonMessage<>(406, "修正数据失败：" + jsonMessage.getMsg());
+                return new JsonMessage<>(406, I18nMessageUtil.get("i18n.correction_data_failure.dac6") + jsonMessage.getMsg());
             }
         }
         // 重新同步节点数据
@@ -252,14 +253,14 @@ public class MachineNodeController extends BaseGroupNameController {
                 }
             }
         }
-        return JsonMessage.success("修正成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.correction_success.38bc"));
     }
 
     @GetMapping(value = "monitor-config", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<JSONObject> monitorConfig(HttpServletRequest request, String id) {
         IJsonMessage<JSONObject> message = this.tryRequestMachine(id, request, NodeUrl.Info);
-        Assert.notNull(message, "没有对应的资产机器");
+        Assert.notNull(message, I18nMessageUtil.get("i18n.no_asset_machine.c77c"));
         Assert.state(message.success(), message.getMsg());
         JSONObject data = message.getData();
         JSONObject monitor = Optional.ofNullable(data).map(jsonObject -> jsonObject.getJSONObject("monitor")).orElse(null);

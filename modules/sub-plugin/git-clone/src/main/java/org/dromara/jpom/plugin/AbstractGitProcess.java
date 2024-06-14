@@ -10,6 +10,7 @@
 package org.dromara.jpom.plugin;
 
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 
 import java.io.File;
 import java.util.Map;
@@ -42,7 +43,7 @@ public abstract class AbstractGitProcess implements GitProcess {
             parameter.put("password", workspaceEnvPlugin.convertRefEnvValue(parameter, "password"));
             parameter.put("username", workspaceEnvPlugin.convertRefEnvValue(parameter, "username"));
         } catch (Exception e) {
-            log.error("解密参数失败", e);
+            log.error(I18nMessageUtil.get("i18n.decrypt_parameter_failure.d10a"), e);
         }
         return parameter;
     }

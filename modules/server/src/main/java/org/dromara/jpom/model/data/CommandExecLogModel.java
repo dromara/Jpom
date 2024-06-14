@@ -26,7 +26,7 @@ import java.io.File;
  * @since 2021/12/22
  */
 @TableName(value = "COMMAND_EXEC_LOG",
-    nameKey = "命令执行记录", parents = CommandModel.class)
+    nameKey = "i18n.command_execution_record.56d5", parents = CommandModel.class)
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class CommandExecLogModel extends BaseWorkspaceModel {

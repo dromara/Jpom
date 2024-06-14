@@ -19,7 +19,7 @@ import org.dromara.jpom.model.BaseUserModifyDbModel;
  * @since 2022/8/3
  */
 @TableName(value = "USER_PERMISSION_GROUP",
-    nameKey = "用户权限组")
+    nameKey = "i18n.user_permission_group.52a4")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class UserPermissionGroupBean extends BaseUserModifyDbModel {

@@ -26,7 +26,7 @@ import org.dromara.jpom.model.BaseMachineModel;
  */
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "NODE_INFO",
-    nameKey = "节点信息")
+    nameKey = "i18n.node_info.2dcf")
 @Data
 @NoArgsConstructor
 public class NodeModel extends BaseMachineModel {

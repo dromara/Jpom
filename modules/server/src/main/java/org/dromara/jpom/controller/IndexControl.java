@@ -263,13 +263,13 @@ public class IndexControl extends BaseServerController {
                 extendPlugins.add("system-git");
             }
         } catch (Exception e) {
-            log.warn("检查 git 客户端异常", e);
+            log.warn(I18nMessageUtil.get("i18n.check_git_client_exception.42a3"), e);
         }
         data.put("extendPlugins", extendPlugins);
         if (userService.canUse()) {
             return JsonMessage.success("success", data);
         }
-        return new JsonMessage<>(222, "需要初始化系统", data);
+        return new JsonMessage<>(222, I18nMessageUtil.get("i18n.need_initialize_system.fb62"), data);
     }
 
 
@@ -312,7 +312,7 @@ public class IndexControl extends BaseServerController {
             }
             return true;
         }).collect(Collectors.toList());
-        Assert.notEmpty(jsonArray, "没有任何菜单,请联系管理员");
+        Assert.notEmpty(jsonArray, I18nMessageUtil.get("i18n.no_menus_contact_admin.cfec"));
         return JsonMessage.success("", collect1);
     }
 
@@ -351,7 +351,7 @@ public class IndexControl extends BaseServerController {
             }
             return true;
         }).collect(Collectors.toList());
-        Assert.notEmpty(jsonArray, "没有任何菜单,请联系管理员");
+        Assert.notEmpty(jsonArray, I18nMessageUtil.get("i18n.no_menus_contact_admin.cfec"));
         return JsonMessage.success("", collect1);
     }
 
@@ -397,7 +397,7 @@ public class IndexControl extends BaseServerController {
     public IJsonMessage<String> generateShardingId() {
         Cache<String, String> shardingIds = BaseServerController.SHARDING_IDS;
         int size = shardingIds.size();
-        Assert.state(size <= 100, "分片id最大同时使用 100 个");
+        Assert.state(size <= 100, I18nMessageUtil.get("i18n.max_concurrent_shard_ids.f89c"));
         String uuid = IdUtil.fastSimpleUUID();
         shardingIds.put(uuid, uuid);
         return JsonMessage.success(uuid, uuid);

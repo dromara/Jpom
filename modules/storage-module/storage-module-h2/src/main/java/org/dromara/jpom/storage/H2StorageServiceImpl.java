@@ -24,6 +24,7 @@ import cn.keepbx.jpom.plugins.IPlugin;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.JpomManifest;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.db.DbExtConfig;
 import org.dromara.jpom.db.IStorageService;
 import org.dromara.jpom.db.StorageServiceFactory;
@@ -55,7 +56,7 @@ public class H2StorageServiceImpl implements IStorageService {
 
     @Override
     public String dbUrl() {
-        Assert.hasText(this.dbUrl, "还没有初始化数据库");
+        Assert.hasText(this.dbUrl, I18nMessageUtil.get("i18n.database_not_initialized.e5e7"));
         return dbUrl;
     }
 
@@ -89,7 +90,7 @@ public class H2StorageServiceImpl implements IStorageService {
 
     @Override
     public DSFactory init(DbExtConfig dbExtConfig) {
-        Assert.isNull(this.dsFactory, "不要重复初始化数据库");
+        Assert.isNull(this.dsFactory, I18nMessageUtil.get("i18n.do_not_reinitialize_database.9bb5"));
         Setting setting = dbExtConfig.toSetting();
         //
         String dbUrl = this.getDbUrl(dbExtConfig);
@@ -102,7 +103,7 @@ public class H2StorageServiceImpl implements IStorageService {
     }
 
     public DSFactory getDsFactory() {
-        Assert.notNull(this.dsFactory, "还没有初始化数据库");
+        Assert.notNull(this.dsFactory, I18nMessageUtil.get("i18n.database_not_initialized.e5e7"));
         return dsFactory;
     }
 
@@ -122,7 +123,7 @@ public class H2StorageServiceImpl implements IStorageService {
         if (!JpomManifest.getInstance().isDebug() && h2ConsoleEnabled
             && StrUtil.equals(dbExtConfig.userName(), DbExtConfig.DEFAULT_USER_OR_AUTHORIZATION)
             && StrUtil.equals(dbExtConfig.userPwd(), DbExtConfig.DEFAULT_USER_OR_AUTHORIZATION)) {
-            throw new JpomRuntimeException("【安全警告】数据库账号密码使用默认的情况下不建议开启 h2 数据 web 控制台");
+            throw new JpomRuntimeException(I18nMessageUtil.get("i18n.security_warning_h2_console.4669"));
         }
     }
 
@@ -160,19 +161,19 @@ public class H2StorageServiceImpl implements IStorageService {
         if (e instanceof MVStoreException || ExceptionUtil.isCausedBy(e, MVStoreException.class)) {
             if (StrUtil.containsIgnoreCase(message, "The write format 1 is smaller than the supported format 2")) {
                 log.warn(message);
-                String tip = "升级数据库流程：" + StrUtil.LF;
-                tip += StrUtil.TAB + "1. 导出低版本数据 【启动程序参数里面添加 --backup-h2】" + StrUtil.LF;
-                tip += StrUtil.TAB + "2. 将导出的低版本数据( sql 文件) 导入到新版本中【启动程序参数里面添加 --replace-import-h2-sql=/xxxx.sql (路径需要替换为第一步控制台输出的 sql 文件保存路径)】";
-                return new JpomRuntimeException("数据库版本不兼容,需要处理跨版本升级。" + StrUtil.LF + tip + StrUtil.LF, -1);
+                String tip = I18nMessageUtil.get("i18n.upgrade_database_process.e604") + StrUtil.LF;
+                tip += StrUtil.TAB + I18nMessageUtil.get("i18n.export_low_version_data.f1aa") + StrUtil.LF;
+                tip += StrUtil.TAB + I18nMessageUtil.get("i18n.import_low_version_data_to_new_version.247b");
+                return new JpomRuntimeException(I18nMessageUtil.get("i18n.incompatible_database_version.8f7b") + StrUtil.LF + tip + StrUtil.LF, -1);
             }
         }
         if (e instanceof JdbcSQLNonTransientException || ExceptionUtil.isCausedBy(e, JdbcSQLNonTransientException.class)) {
-            return new JpomRuntimeException("数据库异常,可能数据库文件已经损坏(可能丢失部分数据),需要重新初始化。可以尝试在启动参数里面添加 --recover:h2db 来自动恢复,：" + message, e);
+            return new JpomRuntimeException(I18nMessageUtil.get("i18n.database_corrupted.944e") + message, e);
         }
         if (e instanceof JdbcSQLNonTransientConnectionException) {
-            return new JpomRuntimeException("数据库异常,可能因为服务器资源不足（内存、硬盘）等原因造成数据异常关闭。需要手动重启服务端来恢复，：" + message, e);
+            return new JpomRuntimeException(I18nMessageUtil.get("i18n.database_exception_due_to_resources.dbf1") + message, e);
         }
-        return new JpomRuntimeException("数据库异常", e);
+        return new JpomRuntimeException(I18nMessageUtil.get("i18n.database_exception.4894"), e);
     }
 
 

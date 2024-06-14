@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  * @since 2019/8/9
  */
 @TableName(value = "SSH_INFO",
-    nameKey = "SSH 信息")
+    nameKey = "i18n.ssh_info.ebe6")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor

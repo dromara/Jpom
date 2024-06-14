@@ -17,6 +17,7 @@ import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.build.BuildUtil;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorConfig;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
@@ -66,7 +67,7 @@ public class BuildInfoHistoryController extends BaseServerController {
      */
     @RequestMapping(value = "/build/history/download_file", method = RequestMethod.GET)
     @Feature(method = MethodFeature.DOWNLOAD)
-    public void downloadFile(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId, HttpServletRequest request, HttpServletResponse response) {
+    public void downloadFile(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.no_data.1ac0") String logId, HttpServletRequest request, HttpServletResponse response) {
         BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, request, false);
         this.downloadFile(buildHistoryLog, response);
     }
@@ -79,7 +80,7 @@ public class BuildInfoHistoryController extends BaseServerController {
      */
     @RequestMapping(value = "/build/history/download_file_by_build", method = RequestMethod.GET)
     @Feature(method = MethodFeature.DOWNLOAD)
-    public void downloadFile(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String buildId,
+    public void downloadFile(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.no_data.1ac0") String buildId,
                              @ValidatorItem(ValidatorRule.NUMBERS) int buildNumberId,
                              HttpServletResponse response,
                              HttpServletRequest request) {
@@ -96,7 +97,7 @@ public class BuildInfoHistoryController extends BaseServerController {
 
     private void downloadFile(BuildHistoryLog buildHistoryLog, HttpServletResponse response) {
         if (buildHistoryLog == null) {
-            ServletUtil.write(response, JsonMessage.getString(404, "构建记录不存在"), MediaType.APPLICATION_JSON_VALUE);
+            ServletUtil.write(response, JsonMessage.getString(404, I18nMessageUtil.get("i18n.build_record_not_exist.8186")), MediaType.APPLICATION_JSON_VALUE);
             return;
         }
         EnvironmentMapBuilder environmentMapBuilder = buildHistoryLog.toEnvironmentMapBuilder();
@@ -109,7 +110,7 @@ public class BuildInfoHistoryController extends BaseServerController {
 
     @RequestMapping(value = "/build/history/download_log", method = RequestMethod.GET)
     @Feature(method = MethodFeature.DOWNLOAD)
-    public void downloadLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId, HttpServletRequest request, HttpServletResponse response) {
+    public void downloadLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.no_data.1ac0") String logId, HttpServletRequest request, HttpServletResponse response) {
         BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, request);
         Objects.requireNonNull(buildHistoryLog);
         BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId());
@@ -134,7 +135,7 @@ public class BuildInfoHistoryController extends BaseServerController {
             File logFile = BuildUtil.getLogFile(buildHistoryLog.getBuildDataId(), buildHistoryLog.getBuildNumberId());
             buildHistoryLog.setHasLog(FileUtil.exist(logFile));
         });
-        return JsonMessage.success("获取成功", pageResultTemp);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.get_success.fb55"), pageResultTemp);
     }
 
     /**
@@ -145,7 +146,7 @@ public class BuildInfoHistoryController extends BaseServerController {
      */
     @RequestMapping(value = "/build/history/delete_log.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public IJsonMessage<String> delete(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String logId, HttpServletRequest request) {
+    public IJsonMessage<String> delete(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.no_data.1ac0")) String logId, HttpServletRequest request) {
         List<String> strings = StrUtil.splitTrim(logId, StrUtil.COMMA);
         for (String itemId : strings) {
             BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(itemId, request);
@@ -154,6 +155,6 @@ public class BuildInfoHistoryController extends BaseServerController {
                 return jsonMessage;
             }
         }
-        return new JsonMessage<>(200, "删除成功");
+        return new JsonMessage<>(200, I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 }

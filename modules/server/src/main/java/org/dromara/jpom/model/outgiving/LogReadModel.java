@@ -25,7 +25,7 @@ import java.util.List;
  * @since 2022/5/15
  */
 @TableName(value = "LOG_READ",
-    nameKey = "日志阅读")
+    nameKey = "i18n.log_reading.a4c8")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class LogReadModel extends BaseWorkspaceModel {

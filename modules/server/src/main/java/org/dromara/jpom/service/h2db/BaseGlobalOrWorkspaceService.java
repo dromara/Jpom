@@ -16,6 +16,7 @@ import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.BaseWorkspaceModel;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.user.UserModel;
@@ -95,7 +96,7 @@ public abstract class BaseGlobalOrWorkspaceService<T extends BaseWorkspaceModel>
             entity.set("workspaceId", CollUtil.newArrayList(workspaceId, ServerConst.WORKSPACE_GLOBAL));
             consumer.accept(entity);
             int size = entity.size();
-            Assert.state(size > 1, "没有添加任何参数");
+            Assert.state(size > 1, I18nMessageUtil.get("i18n.no_parameters_added.1721"));
         });
     }
 
@@ -112,7 +113,7 @@ public abstract class BaseGlobalOrWorkspaceService<T extends BaseWorkspaceModel>
      * @return data
      */
     public T getByKeyAndGlobal(String keyValue, HttpServletRequest request) {
-        return this.getByKeyAndGlobal(keyValue, request, "数据不存在");
+        return this.getByKeyAndGlobal(keyValue, request, I18nMessageUtil.get("i18n.data_does_not_exist.b201"));
     }
 
     /**
@@ -126,10 +127,10 @@ public abstract class BaseGlobalOrWorkspaceService<T extends BaseWorkspaceModel>
         T byKey = this.getByKey(keyValue, request);
         Assert.notNull(byKey, errorMsg);
         UserModel userModel = BaseServerController.getUserByThreadLocal();
-        Assert.notNull(userModel, "当前未登录不能操作此数据");
+        Assert.notNull(userModel, I18nMessageUtil.get("i18n.not_logged_in.c89f"));
         if (StrUtil.equals(byKey.getWorkspaceId(), ServerConst.WORKSPACE_GLOBAL) && !userModel.isSystemUser()) {
             // 是全局共享数据，并且不是管理员
-            Assert.state(StrUtil.equals(userModel.getId(), byKey.getCreateUser()), "没有当前数据权限,需要管理员或者数据创建人才操作该数据");
+            Assert.state(StrUtil.equals(userModel.getId(), byKey.getCreateUser()), I18nMessageUtil.get("i18n.no_current_data_permission.17d7"));
         }
         return byKey;
     }

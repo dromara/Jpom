@@ -20,6 +20,7 @@ import cn.keepbx.jpom.cron.ICron;
 import com.jcraft.jsch.Session;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
@@ -144,7 +145,7 @@ public class SshCommandService extends BaseWorkspaceService<CommandModel> implem
                 CommandModel commandModel = SshCommandService.this.getByKey(this.id);
                 SshCommandService.this.executeBatch(commandModel, commandModel.getDefParams(), commandModel.getSshIds(), 1);
             } catch (Exception e) {
-                log.error("触发自动执行命令模版异常", e);
+                log.error(I18nMessageUtil.get("i18n.trigger_auto_execute_command_template_exception.4e01"), e);
             } finally {
                 BaseServerController.removeEmpty();
             }
@@ -187,9 +188,9 @@ public class SshCommandService extends BaseWorkspaceService<CommandModel> implem
      * @return 批次ID
      */
     public String executeBatch(CommandModel commandModel, String params, String nodes, int triggerExecType, Map<String, String> envMap) {
-        Assert.notNull(commandModel, "没有对应对命令");
+        Assert.notNull(commandModel, I18nMessageUtil.get("i18n.no_corresponding_command.165e"));
         List<String> sshIds = StrUtil.split(nodes, StrUtil.COMMA, true, true);
-        Assert.notEmpty(sshIds, "请选择 ssh 节点");
+        Assert.notEmpty(sshIds, I18nMessageUtil.get("i18n.ssh_node_required.4566"));
         String batchId = IdUtil.fastSimpleUUID();
         String name = "ssh-command-batch:" + batchId;
         StrictSyncFinisher syncFinisher = SyncFinisherUtil.create(name, sshIds.size());
@@ -200,7 +201,7 @@ public class SshCommandService extends BaseWorkspaceService<CommandModel> implem
             try {
                 syncFinisher.start();
             } catch (Exception e) {
-                log.error("ssh 批量执行命令异常", e);
+                log.error(I18nMessageUtil.get("i18n.ssh_batch_command_execution_exception.029a"), e);
             } finally {
                 SyncFinisherUtil.close(name);
             }
@@ -230,7 +231,7 @@ public class SshCommandService extends BaseWorkspaceService<CommandModel> implem
         if (sshModel != null) {
             commandExecLogModel.setSshName(sshModel.getName());
         } else {
-            commandExecLogModel.setSshName("SSH不存在");
+            commandExecLogModel.setSshName(I18nMessageUtil.get("i18n.ssh_not_exist.08a2"));
         }
         commandExecLogModel.setStatus(CommandExecLogModel.Status.ING.getCode());
         // 拼接参数
@@ -241,7 +242,7 @@ public class SshCommandService extends BaseWorkspaceService<CommandModel> implem
             try {
                 this.execute(commandModel, commandExecLogModel, sshModel, commandParamsLine, envMap);
             } catch (Exception e) {
-                log.error("命令模版执行链接异常", e);
+                log.error(I18nMessageUtil.get("i18n.command_template_execution_link_exception.51cf"), e);
                 this.updateStatus(commandExecLogModel.getId(), CommandExecLogModel.Status.SESSION_ERROR);
             }
         });
@@ -260,7 +261,7 @@ public class SshCommandService extends BaseWorkspaceService<CommandModel> implem
         File file = commandExecLogModel.logFile();
         try (LogRecorder logRecorder = LogRecorder.builder().file(file).charset(CharsetUtil.CHARSET_UTF_8).build()) {
             if (sshModel == null) {
-                logRecorder.systemError("ssh 不存在");
+                logRecorder.systemError(I18nMessageUtil.get("i18n.ssh_does_not_exist.88d7"));
                 this.updateStatus(commandExecLogModel.getId(), CommandExecLogModel.Status.ERROR, -100);
                 return;
             }
@@ -281,15 +282,15 @@ public class SshCommandService extends BaseWorkspaceService<CommandModel> implem
                 //
                 session = sshService.getSessionByModel(machineSshModel);
                 int exitCode = JschUtils.execCallbackLine(session, charset, timeout, commands, commandParamsLine, logRecorder::info);
-                logRecorder.system("执行退出码：{}", exitCode);
+                logRecorder.system(I18nMessageUtil.get("i18n.exit_code.ea65"), exitCode);
                 // 更新状态
                 this.updateStatus(commandExecLogModel.getId(), CommandExecLogModel.Status.DONE, exitCode);
             } catch (Exception e) {
-                log.error("执行命令错误", e);
+                log.error(I18nMessageUtil.get("i18n.command_error.d0b4"), e);
                 // 更新状态
                 this.updateStatus(commandExecLogModel.getId(), CommandExecLogModel.Status.ERROR);
                 // 记录错误日志
-                logRecorder.error("执行命令错误", e);
+                logRecorder.error(I18nMessageUtil.get("i18n.command_error.d0b4"), e);
             } finally {
                 JschUtil.close(session);
             }
@@ -332,7 +333,7 @@ public class SshCommandService extends BaseWorkspaceService<CommandModel> implem
         StrUtil.splitTrim(ids, StrUtil.COMMA)
             .forEach(id -> {
                 CommandModel data = super.getByKey(id, false, entity -> entity.set("workspaceId", nowWorkspaceId));
-                Assert.notNull(data, "没有对应的ssh脚本信息");
+                Assert.notNull(data, I18nMessageUtil.get("i18n.no_corresponding_ssh_script_info.1c12"));
                 //
                 CommandModel where = new CommandModel();
                 where.setWorkspaceId(workspaceId);

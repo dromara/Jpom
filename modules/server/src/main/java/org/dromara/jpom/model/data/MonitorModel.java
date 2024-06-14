@@ -29,7 +29,7 @@ import java.util.List;
  */
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "MONITOR_INFO",
-    nameKey = "监控信息")
+    nameKey = "i18n.monitor_info.f299")
 @Data
 public class MonitorModel extends BaseWorkspaceModel {
 

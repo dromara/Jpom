@@ -21,6 +21,7 @@ import org.dromara.jpom.common.ServerOpenApi;
 import org.dromara.jpom.common.UrlRedirectUtil;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.NodeModel;
@@ -119,7 +120,7 @@ public class ScriptController extends BaseServerController {
         scriptModel.setDefArgs(CommandParam.checkStr(defArgs));
         scriptModel.setWorkspaceId(scriptServer.covertGlobalWorkspace(request));
 
-        Assert.hasText(scriptModel.getContext(), "内容为空");
+        Assert.hasText(scriptModel.getContext(), I18nMessageUtil.get("i18n.content_is_empty.3122"));
         //
         scriptModel.setAutoExecCron(this.checkCron(autoExecCron));
         //
@@ -128,12 +129,12 @@ public class ScriptController extends BaseServerController {
             scriptServer.insert(scriptModel);
         } else {
             ScriptModel byKey = scriptServer.getByKeyAndGlobal(id, request);
-            Assert.notNull(byKey, "没有对应的数据");
+            Assert.notNull(byKey, I18nMessageUtil.get("i18n.no_corresponding_data.4703"));
             oldNodeIds = byKey.getNodeIds();
             scriptServer.updateById(scriptModel, request);
         }
         this.syncNodeScript(scriptModel, oldNodeIds, request);
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 
     private void syncDelNodeScript(ScriptModel scriptModel, Collection<String> delNode) {
@@ -142,7 +143,7 @@ public class ScriptController extends BaseServerController {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("id", scriptModel.getId());
             JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.Script_Del, jsonObject);
-            Assert.state(request.getCode() == 200, StrUtil.format("处理 {} 节点删除脚本失败{}", byKey.getName(), request.getMsg()));
+            Assert.state(request.getCode() == 200, StrUtil.format(I18nMessageUtil.get("i18n.handle_node_deletion_script_failure_duplicate.821e"), byKey.getName(), request.getMsg()));
             nodeScriptServer.syncNode(byKey);
         }
     }
@@ -156,7 +157,7 @@ public class ScriptController extends BaseServerController {
         // 更新
         for (String newNodeId : newNodeIds) {
             NodeModel byKey = nodeService.getByKey(newNodeId);
-            Assert.notNull(byKey, "没有找到对应的节点");
+            Assert.notNull(byKey, I18nMessageUtil.get("i18n.no_node_found.6f85"));
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("id", scriptModel.getId());
             jsonObject.put("type", "sync");
@@ -169,7 +170,7 @@ public class ScriptController extends BaseServerController {
             jsonObject.put("global", scriptModel.global());
             jsonObject.put("nodeId", byKey.getId());
             JsonMessage<String> jsonMessage = NodeForward.request(byKey, NodeUrl.Script_Save, jsonObject);
-            Assert.state(jsonMessage.success(), StrUtil.format("处理 {} 节点同步脚本失败 {}", byKey.getName(), jsonMessage.getMsg()));
+            Assert.state(jsonMessage.success(), StrUtil.format(I18nMessageUtil.get("i18n.handle_node_sync_script_failure.e99f"), byKey.getName(), jsonMessage.getMsg()));
             nodeScriptServer.syncNode(byKey);
         }
     }
@@ -181,7 +182,7 @@ public class ScriptController extends BaseServerController {
         if (server != null) {
             File file = server.scriptPath();
             boolean del = FileUtil.del(file);
-            Assert.state(del, "清理脚本文件失败");
+            Assert.state(del, I18nMessageUtil.get("i18n.clear_script_file_failed.f595"));
             // 删除节点中的脚本
             String nodeIds = server.getNodeIds();
             List<String> delNode = StrUtil.splitTrim(nodeIds, StrUtil.COMMA);
@@ -190,7 +191,7 @@ public class ScriptController extends BaseServerController {
             //
             scriptExecuteLogServer.delByWorkspace(request, entity -> entity.set("scriptId", id));
         }
-        return JsonMessage.success("删除成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 
     @GetMapping(value = "get", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -198,7 +199,7 @@ public class ScriptController extends BaseServerController {
     public IJsonMessage<JSONObject> get(String id, HttpServletRequest request) {
         String workspaceId = scriptServer.getCheckUserWorkspace(request);
         ScriptModel server = scriptServer.getByKeyAndGlobal(id, request);
-        Assert.notNull(server, "没有对应的脚本");
+        Assert.notNull(server, I18nMessageUtil.get("i18n.no_script.93c4"));
         String nodeIds = server.getNodeIds();
         List<String> newNodeIds = StrUtil.splitTrim(nodeIds, StrUtil.COMMA);
         List<JSONObject> nodeList = newNodeIds.stream()
@@ -206,13 +207,13 @@ public class ScriptController extends BaseServerController {
                 JSONObject jsonObject = new JSONObject();
                 NodeModel nodeModel = nodeService.getByKey(s);
                 if (nodeModel == null) {
-                    jsonObject.put("nodeName", "未知(数据丢失)");
+                    jsonObject.put("nodeName", I18nMessageUtil.get("i18n.unknown_data_loss.5a24"));
                 } else {
                     jsonObject.put("nodeName", nodeModel.getName());
                     jsonObject.put("nodeId", nodeModel.getId());
                     jsonObject.put("workspaceId", nodeModel.getWorkspaceId());
                     WorkspaceModel workspaceModel = workspaceService.getByKey(nodeModel.getWorkspaceId());
-                    jsonObject.put("workspaceName", Optional.ofNullable(workspaceModel).map(WorkspaceModel::getName).orElse("未知(数据丢失)"));
+                    jsonObject.put("workspaceName", Optional.ofNullable(workspaceModel).map(WorkspaceModel::getName).orElse(I18nMessageUtil.get("i18n.unknown_data_loss.5a24")));
                 }
                 return jsonObject;
             })
@@ -244,7 +245,7 @@ public class ScriptController extends BaseServerController {
         update.setId(id);
         update.setNodeIds(StrUtil.EMPTY);
         scriptServer.updateById(update, request);
-        return JsonMessage.success("解绑成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.unbind_success.1c43"));
     }
 
     /**
@@ -262,7 +263,7 @@ public class ScriptController extends BaseServerController {
         //
         scriptServer.checkUserWorkspace(toWorkspaceId);
         scriptServer.syncToWorkspace(ids, nowWorkspaceId, toWorkspaceId);
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
     /**
@@ -287,7 +288,7 @@ public class ScriptController extends BaseServerController {
             updateInfo = item;
         }
         Map<String, String> map = this.getBuildToken(updateInfo, request);
-        String string = "重置成功";
+        String string = I18nMessageUtil.get("i18n.reset_success.faa3");
         return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : string, map);
     }
 

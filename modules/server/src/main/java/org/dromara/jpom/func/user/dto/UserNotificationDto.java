@@ -11,6 +11,7 @@ package org.dromara.jpom.func.user.dto;
 
 import cn.hutool.core.util.StrUtil;
 import lombok.Data;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.springframework.util.Assert;
 
 /**
@@ -46,7 +47,7 @@ public class UserNotificationDto {
 
     public void verify() {
         if (this.enabled != null && this.enabled) {
-            Assert.state(!StrUtil.isAllBlank(this.title, this.content), "请配置公告标题或者内容");
+            Assert.state(!StrUtil.isAllBlank(this.title, this.content), I18nMessageUtil.get("i18n.configure_announcement_title_or_content.7894"));
         }
     }
 }

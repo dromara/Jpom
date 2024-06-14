@@ -12,6 +12,7 @@ package org.dromara.jpom.storage;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.db.*;
 import org.springframework.util.Assert;
 
@@ -41,7 +42,7 @@ public class MysqlTableBuilderImpl implements IStorageSqlBuilderService {
                     //ADD UNIQUE INDEX `workspaceId`(`workspaceId` ASC, `strike` ASC, `modifyUser`) USING BTREE;
                     String field = viewIndexData.getField();
                     List<String> fields = StrUtil.splitTrim(field, "+");
-                    Assert.notEmpty(fields, "索引未配置字段");
+                    Assert.notEmpty(fields, I18nMessageUtil.get("i18n.index_field_not_configured.96d9"));
                     stringBuilder.append("call drop_index_if_exists('").append(viewIndexData.getTableName()).append("','").append(viewIndexData.getName()).append("')").append(";").append(StrUtil.LF);
                     stringBuilder.append(this.delimiter()).append(StrUtil.LF);
                     stringBuilder.append("ALTER TABLE ").append(viewIndexData.getTableName()).append(" ADD UNIQUE INDEX ").append(viewIndexData.getName()).append(" (").append(CollUtil.join(fields, StrUtil.COMMA)).append(")");
@@ -53,14 +54,14 @@ public class MysqlTableBuilderImpl implements IStorageSqlBuilderService {
                     //ADD UNIQUE INDEX `workspaceId`(`workspaceId` ASC, `strike` ASC, `modifyUser`) USING BTREE;
                     String field = viewIndexData.getField();
                     List<String> fields = StrUtil.splitTrim(field, "+");
-                    Assert.notEmpty(fields, "索引未配置字段");
+                    Assert.notEmpty(fields, I18nMessageUtil.get("i18n.index_field_not_configured.96d9"));
                     stringBuilder.append("call drop_index_if_exists('").append(viewIndexData.getTableName()).append("','").append(viewIndexData.getName()).append("')").append(";").append(StrUtil.LF);
                     stringBuilder.append(this.delimiter()).append(StrUtil.LF);
                     stringBuilder.append("ALTER TABLE ").append(viewIndexData.getTableName()).append(" ADD INDEX ").append(viewIndexData.getName()).append(" (").append(CollUtil.join(fields, StrUtil.COMMA)).append(")");
                     break;
                 }
                 default:
-                    throw new IllegalArgumentException("不支持的类型：" + indexType);
+                    throw new IllegalArgumentException(I18nMessageUtil.get("i18n.unsupported_type_with_colon2.7de2") + indexType);
             }
             stringBuilder.append(";").append(StrUtil.LF);
             stringBuilder.append(this.delimiter()).append(StrUtil.LF);
@@ -93,7 +94,7 @@ public class MysqlTableBuilderImpl implements IStorageSqlBuilderService {
                     stringBuilder.append("drop table if exists ").append(viewAlterData.getTableName());
                     break;
                 default:
-                    throw new IllegalArgumentException("不支持的类型：" + alterType);
+                    throw new IllegalArgumentException(I18nMessageUtil.get("i18n.unsupported_type_with_colon2.7de2") + alterType);
             }
             stringBuilder.append(";").append(StrUtil.LF);
             stringBuilder.append(this.delimiter()).append(StrUtil.LF);
@@ -129,7 +130,7 @@ public class MysqlTableBuilderImpl implements IStorageSqlBuilderService {
             .filter(tableViewData -> tableViewData.getPrimaryKey() != null && tableViewData.getPrimaryKey())
             .map(TableViewRowData::getName)
             .collect(Collectors.toList());
-        Assert.notEmpty(primaryKeys, "表没有主键");
+        Assert.notEmpty(primaryKeys, I18nMessageUtil.get("i18n.table_without_primary_key.7392"));
         stringBuilder.append(StrUtil.TAB).append("PRIMARY KEY (").append(CollUtil.join(primaryKeys, StrUtil.COMMA)).append(")").append(StrUtil.LF);
         stringBuilder.append(") ").append("COMMENT=").append("'").append(desc).append("';");
         return stringBuilder.toString();
@@ -145,7 +146,7 @@ public class MysqlTableBuilderImpl implements IStorageSqlBuilderService {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("`").append(tableViewRowData.getName()).append("`").append(StrUtil.SPACE);
         String type = tableViewRowData.getType();
-        Assert.hasText(type, "未正确配置数据类型");
+        Assert.hasText(type, I18nMessageUtil.get("i18n.data_type_not_configured_correctly.bf16"));
         type = type.toUpperCase();
         switch (type) {
             case "LONG":
@@ -170,7 +171,7 @@ public class MysqlTableBuilderImpl implements IStorageSqlBuilderService {
                 stringBuilder.append("double").append(StrUtil.SPACE);
                 break;
             default:
-                throw new IllegalArgumentException("不支持的数据类型:" + type);
+                throw new IllegalArgumentException(I18nMessageUtil.get("i18n.data_type_not_supported.fd03") + type);
         }
         //
         Boolean notNull = tableViewRowData.getNotNull();
@@ -189,7 +190,7 @@ public class MysqlTableBuilderImpl implements IStorageSqlBuilderService {
             columnSql = StrUtil.replace(columnSql, "'", "\\'");
         }
         int length = StrUtil.length(columnSql);
-        Assert.state(length <= 180, "sql 语句太长啦");
+        Assert.state(length <= 180, I18nMessageUtil.get("i18n.sql_statement_too_long.38d6"));
         return columnSql;
     }
 

@@ -15,6 +15,7 @@ import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.PageResultDto;
@@ -90,9 +91,9 @@ public class ScriptLogController extends BaseServerController {
         }
         File logFile = item == null ? ScriptModel.logFile(id, executeId) : item.logFile(executeId);
         boolean fastDel = CommandUtil.systemFastDel(logFile);
-        Assert.state(!fastDel, "删除日志文件失败");
+        Assert.state(!fastDel, I18nMessageUtil.get("i18n.delete_log_file_failure.bf0b"));
         scriptExecuteLogServer.delByKey(executeId);
-        return JsonMessage.success("删除成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 
     /**
@@ -107,12 +108,12 @@ public class ScriptLogController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<JSONObject> getNowLog(@ValidatorItem() String id,
                                               @ValidatorItem() String executeId,
-                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "行号错误") int line,
+                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "i18n.line_number_error.c65d") int line,
                                               HttpServletRequest request) {
         ScriptModel item = scriptServer.getByKey(id, request);
-        Assert.notNull(item, "没有对应数据");
+        Assert.notNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
         File logFile = item.logFile(executeId);
-        Assert.state(FileUtil.isFile(logFile), "日志文件错误");
+        Assert.state(FileUtil.isFile(logFile), I18nMessageUtil.get("i18n.log_file_error.473b"));
         JSONObject data = FileUtils.readLogFile(logFile, line);
         // 运行中
         data.put("run", ServerScriptProcessBuilder.isRun(executeId));

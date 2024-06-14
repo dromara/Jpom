@@ -20,6 +20,7 @@ import org.dromara.jpom.build.BuildExecuteService;
 import org.dromara.jpom.build.BuildUtil;
 import org.dromara.jpom.build.ResultDirFileAction;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorConfig;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
@@ -76,7 +77,7 @@ public class BuildInfoManageController extends BaseServerController {
      */
     @RequestMapping(value = "/build/manage/start", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public IJsonMessage<Integer> start(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
+    public IJsonMessage<Integer> start(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.no_data.1ac0") String id,
                                        String buildRemark,
                                        String resultDirFile,
                                        String branchName,
@@ -87,7 +88,7 @@ public class BuildInfoManageController extends BaseServerController {
                                        String dispatchSelectProject,
                                        HttpServletRequest request) {
         BuildInfoModel item = buildInfoService.getByKey(id, request);
-        Assert.notNull(item, "没有对应数据");
+        Assert.notNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
         // 更新数据
         BuildInfoModel update = new BuildInfoModel();
         Opt.ofBlankAble(resultDirFile).ifPresent(s -> {
@@ -98,7 +99,7 @@ public class BuildInfoManageController extends BaseServerController {
         Opt.ofBlankAble(branchName).ifPresent(update::setBranchName);
         Opt.ofBlankAble(branchTagName).ifPresent(update::setBranchTagName);
         Opt.ofBlankAble(projectSecondaryDirectory).ifPresent(s -> {
-            FileUtils.checkSlip(s, e -> new IllegalArgumentException("二级目录不能越级：" + e.getMessage()));
+            FileUtils.checkSlip(s, e -> new IllegalArgumentException(I18nMessageUtil.get("i18n.second_level_directory_cannot_skip_levels.c9fb") + e.getMessage()));
             //
             String extraData = item.getExtraData();
             JSONObject jsonObject = JSONObject.parseObject(extraData);
@@ -124,21 +125,21 @@ public class BuildInfoManageController extends BaseServerController {
      */
     @RequestMapping(value = "/build/manage/cancel", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public IJsonMessage<String> cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据")) String id, HttpServletRequest request) {
+    public IJsonMessage<String> cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.no_data.1ac0")) String id, HttpServletRequest request) {
         BuildInfoModel item = buildInfoService.getByKey(id, request);
-        Objects.requireNonNull(item, "没有对应数据");
+        Objects.requireNonNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
         String checkStatus = buildExecuteService.checkStatus(item);
         BuildStatus nowStatus = BaseEnum.getEnum(BuildStatus.class, item.getStatus());
         Objects.requireNonNull(nowStatus);
         if (checkStatus == null) {
-            return JsonMessage.success("当前状态不在进行中," + nowStatus.getDesc());
+            return JsonMessage.success(I18nMessageUtil.get("i18n.status_not_in_progress.f410") + nowStatus.getDesc());
         }
         boolean status = BuildExecuteManage.cancelTaskById(item.getId());
         if (!status) {
             // 缓存中可能不存在数据,还是需要执行取消
-            buildInfoService.updateStatus(id, BuildStatus.Cancel, "手动取消");
+            buildInfoService.updateStatus(id, BuildStatus.Cancel, I18nMessageUtil.get("i18n.manual_cancel.8464"));
         }
-        return JsonMessage.success("取消成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.cancel_success.285f"));
     }
 
     /**
@@ -149,15 +150,15 @@ public class BuildInfoManageController extends BaseServerController {
      */
     @RequestMapping(value = "/build/manage/reRelease", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public IJsonMessage<Integer> reRelease(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String logId,
+    public IJsonMessage<Integer> reRelease(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.no_data.1ac0") String logId,
                                            HttpServletRequest request) {
         String workspaceId = dbBuildHistoryLogService.getCheckUserWorkspace(request);
         BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, false, entity -> entity.set("workspaceId", workspaceId));
-        Objects.requireNonNull(buildHistoryLog, "没有对应构建记录.");
+        Objects.requireNonNull(buildHistoryLog, I18nMessageUtil.get("i18n.no_corresponding_build_record.b3b2"));
         BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId(), request);
-        Objects.requireNonNull(item, "没有对应数据");
+        Objects.requireNonNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
         int buildId = buildExecuteService.rollback(buildHistoryLog, item, getUser());
-        return JsonMessage.success("重新发布中", buildId);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.republishing.131d"), buildId);
     }
 
     /**
@@ -170,28 +171,28 @@ public class BuildInfoManageController extends BaseServerController {
      */
     @RequestMapping(value = "/build/manage/get-now-log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<JSONObject> getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
-                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "没有buildId") int buildId,
-                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "行号错误") int line,
+    public IJsonMessage<JSONObject> getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.no_data.1ac0") String id,
+                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "i18n.no_build_id.a0b8") int buildId,
+                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "i18n.line_number_error.c65d") int line,
                                               HttpServletRequest request) {
         BuildInfoModel item = buildInfoService.getByKey(id, request);
-        Assert.notNull(item, "没有对应数据");
-        Assert.state(buildId <= item.getBuildId(), "还没有对应的构建记录");
+        Assert.notNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
+        Assert.state(buildId <= item.getBuildId(), I18nMessageUtil.get("i18n.no_build_record_found.76f4"));
 
         BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
         buildHistoryLog.setBuildDataId(id);
         buildHistoryLog.setBuildNumberId(buildId);
         BuildHistoryLog queryByBean = dbBuildHistoryLogService.queryByBean(buildHistoryLog);
-        Assert.notNull(queryByBean, "没有对应的构建历史");
+        Assert.notNull(queryByBean, I18nMessageUtil.get("i18n.no_build_history.39f7"));
 
         File file = BuildUtil.getLogFile(item.getId(), buildId);
-        Assert.state(FileUtil.isFile(file), "日志文件不存在或者错误");
+        Assert.state(FileUtil.isFile(file), I18nMessageUtil.get("i18n.log_file_does_not_exist_or_error.a0e7"));
 
         if (!file.exists()) {
             if (buildId == item.getBuildId()) {
-                return new JsonMessage<>(201, "还没有日志文件");
+                return new JsonMessage<>(201, I18nMessageUtil.get("i18n.no_log_file.bacf"));
             }
-            return new JsonMessage<>(300, "日志文件不存在");
+            return new JsonMessage<>(300, I18nMessageUtil.get("i18n.log_file_does_not_exist.f6c6"));
         }
         JSONObject data = FileUtils.readLogFile(file, line);
         // 运行中

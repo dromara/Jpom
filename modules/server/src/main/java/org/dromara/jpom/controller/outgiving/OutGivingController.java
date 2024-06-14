@@ -24,6 +24,7 @@ import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.AfterOpt;
 import org.dromara.jpom.model.BaseEnum;
@@ -110,7 +111,7 @@ public class OutGivingController extends BaseServerController {
         if ("add".equalsIgnoreCase(type)) {
             //
             String checkId = StrUtil.replace(id, StrUtil.DASHED, StrUtil.UNDERLINE);
-            Validator.validateGeneral(checkId, 2, Const.ID_MAX_LEN, "分发id 不能为空并且长度在2-20（英文字母 、数字和下划线）");
+            Validator.validateGeneral(checkId, 2, Const.ID_MAX_LEN, I18nMessageUtil.get("i18n.distribute_id_requirements.9c63"));
             //boolean general = StringUtil.isGeneral(id, 2, 20);
             //Assert.state(general, );
             return addOutGiving(id, request);
@@ -121,29 +122,29 @@ public class OutGivingController extends BaseServerController {
 
     private IJsonMessage<String> addOutGiving(String id, HttpServletRequest request) {
         OutGivingModel outGivingModel = outGivingServer.getByKey(id);
-        Assert.isNull(outGivingModel, "分发id已经存在啦,分发id需要全局唯一");
+        Assert.isNull(outGivingModel, I18nMessageUtil.get("i18n.distribute_id_already_exists_globally.6478"));
         //
         outGivingModel = new OutGivingModel();
         outGivingModel.setId(id);
         this.doData(outGivingModel, request);
         //
         outGivingServer.insert(outGivingModel);
-        return JsonMessage.success("添加成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.addition_succeeded.3fda"));
     }
 
     private IJsonMessage<String> updateGiving(String id, HttpServletRequest request) {
         OutGivingModel outGivingModel = outGivingServer.getByKey(id, request);
-        Assert.notNull(outGivingModel, "没有找到对应的分发id");
+        Assert.notNull(outGivingModel, I18nMessageUtil.get("i18n.no_distribution_id_found.8df2"));
         doData(outGivingModel, request);
 
         outGivingServer.updateById(outGivingModel);
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 
     private void doData(OutGivingModel outGivingModel, HttpServletRequest request) {
         outGivingModel.setName(getParameter("name"));
         outGivingModel.setGroup(getParameter("group"));
-        Assert.hasText(outGivingModel.getName(), "分发名称不能为空");
+        Assert.hasText(outGivingModel.getName(), I18nMessageUtil.get("i18n.distribute_name_cannot_be_empty.0637"));
         List<OutGivingModel> outGivingModels = outGivingServer.list();
         //
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
@@ -157,10 +158,10 @@ public class OutGivingController extends BaseServerController {
                 //
                 String nodeIdProject = stringStringEntry.getValue();
                 NodeModel nodeModel = nodeService.getByKey(nodeId);
-                Assert.notNull(nodeModel, "不存在对应的节点");
+                Assert.notNull(nodeModel, I18nMessageUtil.get("i18n.node_not_exist.0027"));
                 //
                 boolean exists = projectInfoCacheService.exists(nodeModel.getWorkspaceId(), nodeModel.getId(), nodeIdProject);
-                Assert.state(exists, "没有找到对应的项目id:" + nodeIdProject);
+                Assert.state(exists, I18nMessageUtil.get("i18n.no_project_id_found.0f21") + nodeIdProject);
                 //
                 OutGivingNodeProject outGivingNodeProject = outGivingModel.getNodeProject(nodeModel.getId(), nodeIdProject);
                 if (outGivingNodeProject == null) {
@@ -178,18 +179,18 @@ public class OutGivingController extends BaseServerController {
                             continue;
                         }
                         boolean checkContains = outGivingModel1.checkContains(outGivingNodeProject.getNodeId(), outGivingNodeProject.getProjectId());
-                        Assert.state(!checkContains, "已经存在相同的分发项目:" + outGivingNodeProject.getProjectId());
+                        Assert.state(!checkContains, I18nMessageUtil.get("i18n.same_distribution_project_exists.ff41") + outGivingNodeProject.getProjectId());
                     }
                 }
             }).collect(Collectors.toList());
 
-        Assert.state(CollUtil.size(outGivingNodeProjects) >= 1, "至少选择1个节点项目");
+        Assert.state(CollUtil.size(outGivingNodeProjects) >= 1, I18nMessageUtil.get("i18n.select_at_least_one_node_project.637c"));
 
         outGivingModel.outGivingNodeProjectList(outGivingNodeProjects);
         //
         String afterOpt = getParameter("afterOpt");
         AfterOpt afterOpt1 = BaseEnum.getEnum(AfterOpt.class, Convert.toInt(afterOpt, 0));
-        Assert.notNull(afterOpt1, "请选择分发后的操作");
+        Assert.notNull(afterOpt1, I18nMessageUtil.get("i18n.post_distribution_action_required.8cc8"));
         outGivingModel.setAfterOpt(afterOpt1.getCode());
         //
         int intervalTime = getParameterInt("intervalTime", 10);
@@ -204,7 +205,7 @@ public class OutGivingController extends BaseServerController {
         String webhook = getParameter("webhook");
         webhook = Opt.ofBlankAble(webhook)
             .map(s -> {
-                Validator.validateMatchRegex(RegexPool.URL_HTTP, s, "WebHooks 地址不合法");
+                Validator.validateMatchRegex(RegexPool.URL_HTTP, s, I18nMessageUtil.get("i18n.invalid_webhooks_address.d836"));
                 return s;
             })
             .orElse(StrUtil.EMPTY);
@@ -222,7 +223,7 @@ public class OutGivingController extends BaseServerController {
     public IJsonMessage<Object> releaseDel(String id, HttpServletRequest request) {
         // 判断构建
         boolean releaseMethod = buildService.checkReleaseMethod(id, request, BuildReleaseMethod.Outgiving);
-        Assert.state(!releaseMethod, "当前分发存在构建项，不能直接删除（需要提前解绑或者删除关联数据后才能删除）");
+        Assert.state(!releaseMethod, I18nMessageUtil.get("i18n.distribution_with_build_items_message.45f5"));
 
         OutGivingModel outGivingServerItem = outGivingServer.getByKey(id, request);
 
@@ -234,7 +235,7 @@ public class OutGivingController extends BaseServerController {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("id", outGivingNodeProject.getProjectId());
                 JsonMessage<String> message = NodeForward.request(item, NodeUrl.Manage_ReleaseOutGiving, jsonObject);
-                Assert.state(message.success(), "释放节点项目失败：" + message.getMsg());
+                Assert.state(message.success(), I18nMessageUtil.get("i18n.release_node_project_failed.764e") + message.getMsg());
             });
         }
 
@@ -245,7 +246,7 @@ public class OutGivingController extends BaseServerController {
             where.set("outGivingId", id);
             dbOutGivingLogService.del(where);
         }
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
     /**
@@ -258,10 +259,10 @@ public class OutGivingController extends BaseServerController {
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<Object> unbind(String id, HttpServletRequest request) {
         OutGivingModel outGivingServerItem = outGivingServer.getByKey(id, request);
-        Assert.notNull(outGivingServerItem, "对应的分发不存在");
+        Assert.notNull(outGivingServerItem, I18nMessageUtil.get("i18n.distribution_not_exist.cf8a"));
         // 判断构建
         boolean releaseMethod = buildService.checkReleaseMethod(id, request, BuildReleaseMethod.Outgiving);
-        Assert.state(!releaseMethod, "当前分发存在构建项，不能解绑");
+        Assert.state(!releaseMethod, I18nMessageUtil.get("i18n.current_distribution_has_build_items_cannot_unbind.a8e9"));
 
         int byKey = outGivingServer.delByKey(id, request);
         if (byKey > 0) {
@@ -270,6 +271,6 @@ public class OutGivingController extends BaseServerController {
             where.set("outGivingId", id);
             dbOutGivingLogService.del(where);
         }
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 }

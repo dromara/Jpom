@@ -9,6 +9,8 @@
  */
 package org.dromara.jpom.common;
 
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
+
 import java.util.function.Supplier;
 
 /**
@@ -36,7 +38,7 @@ public class Const {
     /**
      * 默认的分组名
      */
-    public static final Supplier<String> DEFAULT_GROUP_NAME = () -> "默认";
+    public static final Supplier<String> DEFAULT_GROUP_NAME = () -> I18nMessageUtil.get("i18n.default_setting.18c6");
 //    /**
 //     * websocket 传输 agent 包 buffer size
 //     */

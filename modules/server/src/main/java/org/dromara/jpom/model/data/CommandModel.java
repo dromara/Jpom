@@ -21,7 +21,7 @@ import org.dromara.jpom.model.BaseWorkspaceModel;
  * @since : 2021/12/4 18:38
  */
 @TableName(value = "COMMAND_INFO",
-    nameKey = "命令管理")
+    nameKey = "i18n.command_management.621f")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class CommandModel extends BaseWorkspaceModel {

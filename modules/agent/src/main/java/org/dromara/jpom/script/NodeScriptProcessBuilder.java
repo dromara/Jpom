@@ -24,6 +24,7 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.data.NodeScriptModel;
 import org.dromara.jpom.service.system.AgentWorkspaceEnvVarService;
@@ -119,7 +120,7 @@ public class NodeScriptProcessBuilder extends BaseRunScript implements Runnable 
                     try {
                         SocketSessionUtil.send(session, line);
                     } catch (IOException e) {
-                        log.error("发送消息失败", e);
+                        log.error(I18nMessageUtil.get("i18n.send_message_failure.9621"), e);
                     }
                 });
             }
@@ -157,7 +158,7 @@ public class NodeScriptProcessBuilder extends BaseRunScript implements Runnable 
     public static void stopRun(String executeId) {
         NodeScriptProcessBuilder nodeScriptProcessBuilder = FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP.get(executeId);
         if (nodeScriptProcessBuilder != null) {
-            nodeScriptProcessBuilder.end("停止运行");
+            nodeScriptProcessBuilder.end(I18nMessageUtil.get("i18n.stop_running.1d4e"));
         }
     }
 
@@ -170,16 +171,16 @@ public class NodeScriptProcessBuilder extends BaseRunScript implements Runnable 
             inputStream = process.getInputStream();
             IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), (LineHandler) NodeScriptProcessBuilder.this::info);
             int waitFor = process.waitFor();
-            this.system("执行结束:{}", waitFor);
-            JsonMessage<String> jsonMessage = new JsonMessage<>(200, "执行完毕:" + waitFor);
+            this.system(I18nMessageUtil.get("i18n.execution_ended.b793"), waitFor);
+            JsonMessage<String> jsonMessage = new JsonMessage<>(200, I18nMessageUtil.get("i18n.execution_completed.24a1") + waitFor);
             JSONObject jsonObject = jsonMessage.toJson();
             jsonObject.put(Const.SOCKET_MSG_TAG, Const.SOCKET_MSG_TAG);
             jsonObject.put("op", ConsoleCommandOp.stop.name());
             this.end(jsonObject.toString());
         } catch (Exception e) {
-            log.error("执行异常", e);
-            this.systemError("执行异常", e.getMessage());
-            this.end("执行异常：" + e.getMessage());
+            log.error(I18nMessageUtil.get("i18n.execution_exception.b0d5"), e);
+            this.systemError(I18nMessageUtil.get("i18n.execution_exception.b0d5"), e.getMessage());
+            this.end(I18nMessageUtil.get("i18n.general_execution_exception.62e9") + e.getMessage());
         } finally {
             this.close();
         }
@@ -198,7 +199,7 @@ public class NodeScriptProcessBuilder extends BaseRunScript implements Runnable 
             try {
                 SocketSessionUtil.send(session, msg);
             } catch (IOException e) {
-                log.error("发送消息失败", e);
+                log.error(I18nMessageUtil.get("i18n.send_message_failure.9621"), e);
             }
             iterator.remove();
         }
@@ -224,7 +225,7 @@ public class NodeScriptProcessBuilder extends BaseRunScript implements Runnable 
             try {
                 SocketSessionUtil.send(session, info);
             } catch (IOException e) {
-                log.error("发送消息失败", e);
+                log.error(I18nMessageUtil.get("i18n.send_message_failure.9621"), e);
                 iterator.remove();
             }
         }

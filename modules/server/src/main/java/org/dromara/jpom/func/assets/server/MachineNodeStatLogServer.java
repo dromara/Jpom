@@ -14,6 +14,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.db.Entity;
 import cn.keepbx.jpom.event.ISystemTask;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.NodeConfig;
 import org.dromara.jpom.func.assets.model.MachineNodeStatLogModel;
 import org.dromara.jpom.service.h2db.BaseDbService;
@@ -37,7 +38,7 @@ public class MachineNodeStatLogServer extends BaseDbService<MachineNodeStatLogMo
     @Override
     public void executeTask() {
         int statLogKeepDays = nodeConfig.getStatLogKeepDays();
-        log.debug("统计日志保留天数 {}", statLogKeepDays);
+        log.debug(I18nMessageUtil.get("i18n.log_retention_days.99d1"), statLogKeepDays);
         if (statLogKeepDays <= 0) {
             return;
         }
@@ -46,6 +47,6 @@ public class MachineNodeStatLogServer extends BaseDbService<MachineNodeStatLogMo
         dateTime = DateUtil.offsetDay(dateTime, -statLogKeepDays);
         entity.set(" monitorTime", "< " + dateTime.getTime());
         int del = this.del(entity);
-        log.info("自动清理 {} 条机器节点统计日志", del);
+        log.info(I18nMessageUtil.get("i18n.auto_clear_machine_node_stats_logs.5279"), del);
     }
 }

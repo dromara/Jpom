@@ -25,6 +25,7 @@ import cn.keepbx.jpom.model.JsonMessage;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.permission.Feature;
@@ -64,7 +65,7 @@ public abstract class BaseDockerSwarmServiceController extends BaseDockerControl
         // 监控过期
         LOG_CACHE.setListener((key, userIds) -> {
             try {
-                log.debug("异步资源过期,需要主动关闭,{} {}", key, userIds);
+                log.debug(I18nMessageUtil.get("i18n.async_resource_expired.2ddc"), key, userIds);
                 IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
                 Map<String, Object> map = MapUtil.of("uuid", key);
                 plugin.execute("closeAsyncResource", map);
@@ -74,7 +75,7 @@ public abstract class BaseDockerSwarmServiceController extends BaseDockerControl
                     FileUtil.del(file);
                 }
             } catch (Exception e) {
-                log.error("关闭资源失败", e);
+                log.error(I18nMessageUtil.get("i18n.close_resource_failure.dc66"), e);
             }
         });
     }
@@ -118,7 +119,7 @@ public abstract class BaseDockerSwarmServiceController extends BaseDockerControl
         Map<String, Object> map = this.toDockerParameter(id);
         map.put("serviceId", serviceId);
         plugin.execute("removeService", map);
-        return new JsonMessage<>(200, "删除服务成功");
+        return new JsonMessage<>(200, I18nMessageUtil.get("i18n.delete_service_success.4d73"));
     }
 
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -130,7 +131,7 @@ public abstract class BaseDockerSwarmServiceController extends BaseDockerControl
         Map<String, Object> map = this.toDockerParameter(id);
         map.putAll(jsonObject);
         plugin.execute("updateService", map);
-        return new JsonMessage<>(200, "修改服务成功");
+        return new JsonMessage<>(200, I18nMessageUtil.get("i18n.modify_service_success.bd75"));
     }
 
 
@@ -171,14 +172,14 @@ public abstract class BaseDockerSwarmServiceController extends BaseDockerControl
                 plugin.execute(StrUtil.equalsIgnoreCase(type, "service") ? "logService" : "logTask", parameter);
                 logRecorder.system("pull end");
             } catch (Exception e) {
-                logRecorder.error("拉取日志异常", e);
+                logRecorder.error(I18nMessageUtil.get("i18n.pull_log_exception.cc3e"), e);
             } finally {
                 IoUtil.close(logRecorder);
             }
         });
         // 添加到缓存中
         LOG_CACHE.put(uuid, CollUtil.newHashSet(getUser().getId()));
-        return JsonMessage.success("开始拉取", uuid);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.start_pulling.57ab"), uuid);
     }
 
     /**
@@ -190,11 +191,11 @@ public abstract class BaseDockerSwarmServiceController extends BaseDockerControl
      */
     @GetMapping(value = "pull-log", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<JSONObject> getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
-                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "行号错误") int line) {
+    public IJsonMessage<JSONObject> getNowLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.no_data.1ac0") String id,
+                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "i18n.line_number_error.c65d") int line) {
         File file = FileUtil.file(serverConfig.getUserTempPath(), "docker-swarm-log", id + ".log");
         if (!file.exists()) {
-            return new JsonMessage<>(201, "还没有日志文件");
+            return new JsonMessage<>(201, I18nMessageUtil.get("i18n.no_log_file.bacf"));
         }
         JSONObject data = FileUtils.readLogFile(file, line);
         // 更新缓存，避免超时被清空
@@ -213,11 +214,11 @@ public abstract class BaseDockerSwarmServiceController extends BaseDockerControl
      */
     @GetMapping(value = "download-log")
     @Feature(method = MethodFeature.DOWNLOAD)
-    public void downloadLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
+    public void downloadLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.no_data.1ac0") String id,
                             HttpServletResponse response) {
         File file = FileUtil.file(serverConfig.getUserTempPath(), "docker-swarm-log", id + ".log");
         if (!file.exists()) {
-            ServletUtil.write(response, new JsonMessage<>(201, "还没有日志文件").toString(), MediaType.APPLICATION_JSON_VALUE);
+            ServletUtil.write(response, new JsonMessage<>(201, I18nMessageUtil.get("i18n.no_log_file.bacf")).toString(), MediaType.APPLICATION_JSON_VALUE);
             return;
         }
         ServletUtil.write(response, file);

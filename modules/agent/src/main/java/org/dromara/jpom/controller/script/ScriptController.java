@@ -21,6 +21,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseAgentController;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.data.NodeScriptExecLogModel;
@@ -75,8 +76,8 @@ public class ScriptController extends BaseAgentController {
 
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<Object> save(NodeScriptModel nodeScriptModel, String type, String global, String nodeId) {
-        Assert.notNull(nodeScriptModel, "没有数据");
-        Assert.hasText(nodeScriptModel.getContext(), "内容为空");
+        Assert.notNull(nodeScriptModel, I18nMessageUtil.get("i18n.no_data.1ac0"));
+        Assert.hasText(nodeScriptModel.getContext(), I18nMessageUtil.get("i18n.content_is_empty.3122"));
         //
         String autoExecCron = nodeScriptModel.getAutoExecCron();
         autoExecCron = StringUtil.checkCron(autoExecCron, s -> s);
@@ -92,12 +93,12 @@ public class ScriptController extends BaseAgentController {
         NodeScriptModel eModel = nodeScriptServer.getItem(nodeScriptModel.getId());
         boolean needCreate = false;
         if ("add".equalsIgnoreCase(type)) {
-            Assert.isNull(eModel, "id已经存在啦");
+            Assert.isNull(eModel, I18nMessageUtil.get("i18n.id_already_exists.6208"));
 
             nodeScriptModel.setId(IdUtil.fastSimpleUUID());
             nodeScriptModel.setNodeId(nodeId);
             nodeScriptServer.addItem(nodeScriptModel);
-            return JsonMessage.success("添加成功");
+            return JsonMessage.success(I18nMessageUtil.get("i18n.addition_succeeded.3fda"));
         } else if ("sync".equalsIgnoreCase(type)) {
             // 同步脚本
             if (eModel == null) {
@@ -114,7 +115,7 @@ public class ScriptController extends BaseAgentController {
             eModel.setScriptType("server-sync");
             eModel.setWorkspaceId(nodeScriptModel.getWorkspaceId());
         }
-        Assert.notNull(eModel, "对应数据不存在");
+        Assert.notNull(eModel, I18nMessageUtil.get("i18n.data_not_exist.41f9"));
         eModel.setName(nodeScriptModel.getName());
         eModel.setAutoExecCron(autoExecCron);
         eModel.setDescription(nodeScriptModel.getDescription());
@@ -125,13 +126,13 @@ public class ScriptController extends BaseAgentController {
         } else {
             nodeScriptServer.updateItem(eModel);
         }
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 
     @RequestMapping(value = "del.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<Object> del(String id) {
         nodeScriptServer.deleteItem(id);
-        return JsonMessage.success("删除成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 
     /**
@@ -145,11 +146,11 @@ public class ScriptController extends BaseAgentController {
     @RequestMapping(value = "log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<JSONObject> getNowLog(@ValidatorItem() String id,
                                               @ValidatorItem() String executeId,
-                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "行号不正确") int line) {
+                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "i18n.incorrect_line_number.5877") int line) {
         NodeScriptModel item = nodeScriptServer.getItem(id);
-        Assert.notNull(item, "没有对应数据");
+        Assert.notNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
         File logFile = item.logFile(executeId);
-        Assert.state(FileUtil.isFile(logFile), "日志文件错误");
+        Assert.state(FileUtil.isFile(logFile), I18nMessageUtil.get("i18n.log_file_error.473b"));
 
         JSONObject data = FileUtils.readLogFile(logFile, line);
         // 运行中
@@ -169,13 +170,13 @@ public class ScriptController extends BaseAgentController {
                                        @ValidatorItem() String executeId) {
         NodeScriptModel item = nodeScriptServer.getItem(id);
         if (item == null) {
-            return JsonMessage.success("对应的脚本模版已经不存在拉");
+            return JsonMessage.success(I18nMessageUtil.get("i18n.script_template_not_exist.1d5b"));
         }
-        Assert.notNull(item, "没有对应数据");
+        Assert.notNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
         File logFile = item.logFile(executeId);
         boolean fastDel = CommandUtil.systemFastDel(logFile);
-        Assert.state(!fastDel, "删除日志文件失败");
-        return JsonMessage.success("删除成功");
+        Assert.state(!fastDel, I18nMessageUtil.get("i18n.delete_log_file_failure.bf0b"));
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 
     /**
@@ -189,7 +190,7 @@ public class ScriptController extends BaseAgentController {
     @RequestMapping(value = "exec", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<String> exec(@ValidatorItem() String id, String args, String params) {
         NodeScriptModel item = nodeScriptServer.getItem(id);
-        Assert.notNull(item, "对应脚本已经不存在啦");
+        Assert.notNull(item, I18nMessageUtil.get("i18n.script_not_exist.b180"));
         String nowUserName = getNowUserName();
 
         Map<String, String> paramMap = Opt.ofBlankAble(params)
@@ -207,7 +208,7 @@ public class ScriptController extends BaseAgentController {
         //
 
         String execute = nodeScriptServer.execute(item, 2, nowUserName, null, args, paramMap);
-        return JsonMessage.success("开始执行", execute);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.start_execution.00d7"), execute);
     }
 
     /**
@@ -242,20 +243,20 @@ public class ScriptController extends BaseAgentController {
                 nodeScriptExecLogServer.deleteItem(idStr);
             }
         }
-        return JsonMessage.success("删除成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 
     @RequestMapping(value = "change-workspace-id", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<Object> changeWorkspaceId(@ValidatorItem() String id, String newWorkspaceId, String newNodeId) {
-        Assert.hasText(newWorkspaceId, "请选择要修改的工作空间");
-        Assert.hasText(newWorkspaceId, "请选择要修改的节");
+        Assert.hasText(newWorkspaceId, I18nMessageUtil.get("i18n.select_workspace_to_modify.ac87"));
+        Assert.hasText(newWorkspaceId, I18nMessageUtil.get("i18n.select_node_to_modify.6617"));
         NodeScriptModel item = nodeScriptServer.getItem(id);
-        Assert.notNull(item, "找不到对应的脚本信息");
+        Assert.notNull(item, I18nMessageUtil.get("i18n.script_info_not_found.bd8d"));
         //
         NodeScriptModel update = new NodeScriptModel();
         update.setNodeId(newNodeId);
         update.setWorkspaceId(newWorkspaceId);
         nodeScriptServer.updateById(update, item.getId());
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 }

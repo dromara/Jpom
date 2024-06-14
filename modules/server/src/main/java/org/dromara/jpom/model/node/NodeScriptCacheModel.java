@@ -22,7 +22,7 @@ import org.dromara.jpom.script.CommandParam;
  * @since 2021/12/12
  **/
 @TableName(value = "SCRIPT_INFO",
-    nameKey = "节点脚本模版")
+    nameKey = "i18n.node_script_template_title.4e74")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class NodeScriptCacheModel extends BaseNodeModel {

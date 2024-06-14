@@ -17,6 +17,7 @@ import cn.hutool.extra.mail.MailUtil;
 import cn.keepbx.jpom.plugins.PluginConfig;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.plugin.IDefaultPlugin;
 
 import javax.mail.Session;
@@ -60,11 +61,11 @@ public class DefaultEmailPluginImpl implements IDefaultPlugin {
                 }
                 return true;
             } catch (Exception e) {
-                log.warn("检查邮箱信息错误：{}", e.getMessage());
+                log.warn(I18nMessageUtil.get("i18n.check_email_error.636c"), e.getMessage());
                 return false;
             }
         }
-        throw new IllegalArgumentException("不支持的类型：" + main);
+        throw new IllegalArgumentException(I18nMessageUtil.get("i18n.unsupported_type_with_colon2.7de2") + main);
     }
 
     /**
@@ -75,7 +76,7 @@ public class DefaultEmailPluginImpl implements IDefaultPlugin {
      */
     private MailAccount getAccount(Object main) {
         if (!(main instanceof JSONObject)) {
-            throw new IllegalArgumentException("插件端使用参数不正确");
+            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.plugin_parameter_incorrect.a355"));
         }
         JSONObject data = (JSONObject) main;
         MailAccount mailAccount = new MailAccount();

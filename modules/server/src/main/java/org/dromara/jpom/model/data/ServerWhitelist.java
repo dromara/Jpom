@@ -15,6 +15,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.model.BaseJsonModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -85,7 +86,7 @@ public class ServerWhitelist extends BaseJsonModel {
     public void checkStaticDir(String path) {
         List<String> dir = this.staticDir;
         boolean contains = CollUtil.contains(dir, path);
-        Assert.state(contains, "没有当前静态目录权限");
+        Assert.state(contains, I18nMessageUtil.get("i18n.no_current_static_directory_permission.ed70"));
     }
 
     /**
@@ -95,10 +96,10 @@ public class ServerWhitelist extends BaseJsonModel {
      */
     public void checkAllowRemoteDownloadHost(String url) {
         Set<String> allowRemoteDownloadHost = this.getAllowRemoteDownloadHost();
-        Assert.state(CollUtil.isNotEmpty(allowRemoteDownloadHost), "还没有配置允许的远程地址");
+        Assert.state(CollUtil.isNotEmpty(allowRemoteDownloadHost), I18nMessageUtil.get("i18n.remote_addresses_not_configured.275e"));
         List<String> collect = allowRemoteDownloadHost.stream()
             .filter(s -> StrUtil.startWith(url, s))
             .collect(Collectors.toList());
-        Assert.state(CollUtil.isNotEmpty(collect), "不允许下载当前地址的文件");
+        Assert.state(CollUtil.isNotEmpty(collect), I18nMessageUtil.get("i18n.disallowed_download.06a3"));
     }
 }

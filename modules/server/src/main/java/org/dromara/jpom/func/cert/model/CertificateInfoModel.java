@@ -22,7 +22,7 @@ import org.dromara.jpom.model.BaseWorkspaceModel;
  */
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "CERTIFICATE_INFO",
-    nameKey = "证书信息表")
+    nameKey = "i18n.certificate_info_table.fff8")
 @Data
 @NoArgsConstructor
 public class CertificateInfoModel extends BaseWorkspaceModel {

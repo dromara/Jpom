@@ -23,7 +23,7 @@ import org.dromara.jpom.model.BaseUserModifyDbModel;
  */
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "WORKSPACE",
-    nameKey = "工作空间")
+    nameKey = "i18n.workspace_label.98d6")
 @Data
 @NoArgsConstructor
 public class WorkspaceModel extends BaseUserModifyDbModel {
