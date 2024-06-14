@@ -484,7 +484,7 @@
             {{ $t('pages.layout.user-header.1538a492') }}({{ $t('pages.layout.user-header.bb6fe415') }})
           </a-space>
         </a-form-item>
-        <a-form-item v-if="!isProduction" :label="$t('pages.layout.user-header.ee091a03')">
+        <a-form-item :label="$t('pages.layout.user-header.ee091a03')">
           <a-space>
             <a-radio-group v-model:value="locale" button-style="solid">
               <a-radio-button value="zh-cn">{{ $t('pages.layout.user-header.9ca25f75') }}</a-radio-button>
@@ -618,7 +618,7 @@ export default {
   },
   computed: {
     ...mapState(useUserStore, ['getToken', 'getUserInfo']),
-    ...mapState(useAppStore, ['getWorkspaceId', 'isProduction']),
+    ...mapState(useAppStore, ['getWorkspaceId']),
     ...mapState(useGuideStore, ['getGuideCache', 'getDisabledGuide', 'getThemeView', 'getMenuThemeView', 'getLocale']),
     showCode() {
       return this.getUserInfo.email !== this.temp.email

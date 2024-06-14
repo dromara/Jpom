@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.assets.model.ScriptLibraryModel;
 import org.dromara.jpom.func.assets.server.ScriptLibraryServer;
@@ -62,9 +63,9 @@ public class ScriptLibraryController extends BaseServerController {
     public IJsonMessage<String> save(HttpServletRequest request) {
         ScriptLibraryModel scriptLibraryModel = ServletUtil.toBean(request, ScriptLibraryModel.class, true);
         String tag = scriptLibraryModel.getTag();
-        Assert.hasText(tag, "标签不能为空");
-        Validator.validateGeneral(tag, 4, 20, "标签只能包含字母、数字、下划线");
-        Assert.hasText(scriptLibraryModel.getScript(), "脚本不能为空");
+        Assert.hasText(tag, I18nMessageUtil.get("i18n.mark_cannot_be_empty.1927"));
+        Validator.validateGeneral(tag, 4, 20, I18nMessageUtil.get("i18n.mark_must_contain_letters_numbers_underscores.667d"));
+        Assert.hasText(scriptLibraryModel.getScript(), I18nMessageUtil.get("i18n.script_cannot_be_empty.f566"));
         //
         Entity entity = Entity.create();
         entity.set("tag", tag);
@@ -72,13 +73,13 @@ public class ScriptLibraryController extends BaseServerController {
         if (StrUtil.isNotEmpty(id)) {
             entity.set("id", StrUtil.format(" <> {}", id));
         }
-        Assert.state(!scriptLibraryServer.exists(entity), "标签已存在");
+        Assert.state(!scriptLibraryServer.exists(entity), I18nMessageUtil.get("i18n.mark_already_exists.0ccc"));
         String oldIds = StrUtil.EMPTY;
         String version = StrUtil.sub(SecureUtil.md5(scriptLibraryModel.getScript()), 0, 6);
         if (StrUtil.isNotEmpty(id)) {
             ScriptLibraryModel libraryModel = scriptLibraryServer.getByKey(id);
-            Assert.notNull(libraryModel, "数据不存在");
-            Assert.state(StrUtil.equals(libraryModel.getTag(), tag), "脚本标签不能修改");
+            Assert.notNull(libraryModel, I18nMessageUtil.get("i18n.data_does_not_exist.b201"));
+            Assert.state(StrUtil.equals(libraryModel.getTag(), tag), I18nMessageUtil.get("i18n.script_tag_modification_not_allowed.cb75"));
             oldIds = libraryModel.getMachineIds();
             if (StrUtil.equals(libraryModel.getScript(), scriptLibraryModel.getScript())) {
                 // 内容没有变化不
@@ -97,7 +98,7 @@ public class ScriptLibraryController extends BaseServerController {
         }
         // 同步到机器节点
         this.syncMachineNodeScript(scriptLibraryModel, oldIds, request);
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
     private void syncMachineNodeScript(ScriptLibraryModel scriptModel, String oldMachineIds, HttpServletRequest request) {
@@ -109,7 +110,7 @@ public class ScriptLibraryController extends BaseServerController {
         // 更新
         for (String machineId : newNodeIds) {
             MachineNodeModel byKey = machineNodeServer.getByKey(machineId);
-            Assert.notNull(byKey, "没有找到对应的节点");
+            Assert.notNull(byKey, I18nMessageUtil.get("i18n.no_node_found.6f85"));
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("id", scriptModel.getTag());
             jsonObject.put("description", scriptModel.getDescription());
@@ -117,7 +118,7 @@ public class ScriptLibraryController extends BaseServerController {
             jsonObject.put("script", scriptModel.getScript());
             jsonObject.put("version", scriptModel.getVersion());
             JsonMessage<String> jsonMessage = NodeForward.request(byKey, NodeUrl.SCRIPT_LIBRARY_SAVE, jsonObject);
-            String message = StrUtil.format("处理 {} 节点同步脚本库失败 {}", byKey.getName(), jsonMessage.getMsg());
+            String message = StrUtil.format(I18nMessageUtil.get("i18n.handle_node_synchronization_script_library_failure.14e4"), byKey.getName(), jsonMessage.getMsg());
             Assert.state(jsonMessage.success(), message);
         }
     }
@@ -133,7 +134,7 @@ public class ScriptLibraryController extends BaseServerController {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("id", tag);
             JsonMessage<String> request = NodeForward.request(byKey, NodeUrl.SCRIPT_LIBRARY_DEL, jsonObject);
-            String message = StrUtil.format("处理 {} 节点删除脚本库失败 {}", byKey.getName(), request.getMsg());
+            String message = StrUtil.format(I18nMessageUtil.get("i18n.handle_node_deletion_script_library_failure.4205"), byKey.getName(), request.getMsg());
             Assert.state(request.getCode() == 200, message);
         }
     }
@@ -149,6 +150,6 @@ public class ScriptLibraryController extends BaseServerController {
             this.syncDelMachineNodeScriptLibrary(server.getTag(), delNode);
             scriptLibraryServer.delByKey(id);
         }
-        return JsonMessage.success("删除成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 }

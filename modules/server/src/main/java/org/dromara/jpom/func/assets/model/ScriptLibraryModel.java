@@ -14,7 +14,7 @@ import org.dromara.jpom.model.BaseUserModifyDbModel;
 @Data
 public class ScriptLibraryModel extends BaseUserModifyDbModel {
     /**
-     * 脚本唯一的标签
+     * 脚本唯一的标记
      */
     private String tag;
     /**
