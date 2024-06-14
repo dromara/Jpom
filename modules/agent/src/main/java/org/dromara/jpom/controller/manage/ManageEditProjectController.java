@@ -179,7 +179,7 @@ public class ManageEditProjectController extends BaseAgentController {
                 return JsonMessage.success(I18nMessageUtil.get("i18n.check_passed.dce8"));
             } else {
                 projectInfoService.addItem(projectInfo);
-                return JsonMessage.success("新增成功！");
+                return JsonMessage.success(I18nMessageUtil.get("i18n.add_new_success.431a"));
             }
         }
         if (previewData) {
@@ -342,7 +342,7 @@ public class ManageEditProjectController extends BaseAgentController {
         //
         projectInfoService.deleteItem(nodeProjectInfoModel.getId());
 
-        return JsonMessage.success("删除成功！");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.deletion_success_message.4359"));
 
     }
 

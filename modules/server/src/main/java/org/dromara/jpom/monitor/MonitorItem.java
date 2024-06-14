@@ -129,13 +129,13 @@ public class MonitorItem implements Task {
                     }
                     return runStatus && CollUtil.isEmpty(booleanList);
                 } else {
-                    title = StrUtil.format("【{}】节点的状态码异常：{}", nodeModel.getName(), jsonMessage.getCode());
+                    title = StrUtil.format(I18nMessageUtil.get("i18n.node_status_code_abnormal.4d22"), nodeModel.getName(), jsonMessage.getCode());
                     context = jsonMessage.toString();
                 }
             } catch (Exception e) {
                 log.error(I18nMessageUtil.get("i18n.monitor_node_exception.6ff1"), nodeModel.getName(), e.getMessage());
                 //
-                title = StrUtil.format("【{}】节点的运行状态异常", nodeModel.getName());
+                title = StrUtil.format(I18nMessageUtil.get("i18n.node_running_status_abnormal.3160"), nodeModel.getName());
                 context = ExceptionUtil.stacktraceToString(e);
             }
             // 获取上次状态
@@ -176,7 +176,7 @@ public class MonitorItem implements Task {
         if (runStatus) {
             if (!pre) {
                 // 上次是异常状态
-                title = StrUtil.format("【{}】节点的【{}】项目{}已经恢复正常运行", nodeModel.getName(), id, copyMsg);
+                title = StrUtil.format(I18nMessageUtil.get("i18n.node_service_resumed_normal_operation.2cbd"), nodeModel.getName(), id, copyMsg);
                 context = "";
             }
         } else {
@@ -188,23 +188,23 @@ public class MonitorItem implements Task {
                     if (reJson.success()) {
                         // 重启成功
                         runStatus = true;
-                        title = StrUtil.format("【{}】节点的【{}】项目{}已经停止，已经执行重启操作,结果成功", nodeModel.getName(), id, copyMsg);
+                        title = StrUtil.format(I18nMessageUtil.get("i18n.node_service_stopped_successful_restart.603b"), nodeModel.getName(), id, copyMsg);
                     } else {
-                        title = StrUtil.format("【{}】节点的【{}】项目{}已经停止，已经执行重启操作,结果失败", nodeModel.getName(), id, copyMsg);
+                        title = StrUtil.format(I18nMessageUtil.get("i18n.node_service_stopped_failed_restart.4307"), nodeModel.getName(), id, copyMsg);
                     }
                     context = I18nMessageUtil.get("i18n.restart_result.253f") + reJson;
                 } catch (Exception e) {
                     log.error(I18nMessageUtil.get("i18n.restart_operation.5e3a"), e);
-                    title = StrUtil.format("【{}】节点的【{}】项目{}已经停止，重启操作异常", nodeModel.getName(), id, copyMsg);
+                    title = StrUtil.format(I18nMessageUtil.get("i18n.node_service_stopped_abnormal_restart.a5c0"), nodeModel.getName(), id, copyMsg);
                     context = ExceptionUtil.stacktraceToString(e);
                 }
             } else {
-                title = StrUtil.format("【{}】节点的【{}】项目{}已经没有运行", nodeModel.getName(), id, copyMsg);
+                title = StrUtil.format(I18nMessageUtil.get("i18n.node_service_not_running.ad89"), nodeModel.getName(), id, copyMsg);
                 context = I18nMessageUtil.get("i18n.please_check_in_time.3b4f");
             }
         }
         if (!pre && !runStatus) {
-            // 上一次也是异常，并且当前也是异常
+            // 上一次是异常，并且当前还是异常
             return false;
         }
         MonitorNotifyLog monitorNotifyLog = new MonitorNotifyLog();

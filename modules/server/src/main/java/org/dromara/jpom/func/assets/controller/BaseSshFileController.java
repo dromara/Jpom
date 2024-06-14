@@ -557,7 +557,7 @@ public abstract class BaseSshFileController extends BaseServerController {
                                               @ValidatorItem String allowPathParent,
                                               @ValidatorItem String nextPath,
                                               @ValidatorItem String name, String unFolder) {
-        Assert.state(!StrUtil.contains(name, StrUtil.SLASH), "文件名不能包含/");
+        Assert.state(!StrUtil.contains(name, StrUtil.SLASH), I18nMessageUtil.get("i18n.file_name_error_message.7a25"));
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
             Session session = null;

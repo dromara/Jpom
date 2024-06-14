@@ -169,17 +169,17 @@ public class DefaultDbH2PluginImpl implements IDefaultPlugin {
         // 执行 SQL 备份脚本
         Shell shell = new Shell();
 
-		/*
-		  url 表示 h2 数据库的 jdbc url
-		 * user 表示登录的用户名
-		 * password 表示登录密码
-		 * driver 是 jdbc 驱动
-		 * sql 是备份的 sql 语句
-		 * - 案例：script drop to ${fileName1} table ${tableName1},${tableName2}...
-		 * - script drop to 表示备份数据库，drop 表示建表之前会先删除表
-		 * - ${fileName1} 表示备份之后的文件名
-		 * - table 表示需要备份的表名称，后面跟多个表名，用英文逗号分割
-		 */
+        /*
+         * url 表示 h2 数据库的 jdbc url
+         * user 表示登录的用户名
+         * password 表示登录密码
+         * driver 是 jdbc 驱动
+         * sql 是备份的 sql 语句
+         * - 案例：script drop to ${fileName1} table ${tableName1},${tableName2}...
+         * - script drop to 表示备份数据库，drop 表示建表之前会先删除表
+         * - ${fileName1} 表示备份之后的文件名
+         * - table 表示需要备份的表名称，后面跟多个表名，用英文逗号分割
+         */
         String[] params = new String[]{
             "-url", url,
             "-user", user,

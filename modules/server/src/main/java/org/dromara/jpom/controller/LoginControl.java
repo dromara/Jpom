@@ -318,7 +318,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
             userLoginLogServer.success(userModel, 6, false, request);
             return JsonMessage.success(I18nMessageUtil.get("i18n.login_success.71fa"), userLoginDto);
         }
-        return new JsonMessage<>(400, "OAuth 2 登录失败,请联系管理员！" + authResponse.getMsg());
+        return new JsonMessage<>(400, I18nMessageUtil.get("i18n.login_failure_O_auth2_message.3e91") + authResponse.getMsg());
     }
 
     /**

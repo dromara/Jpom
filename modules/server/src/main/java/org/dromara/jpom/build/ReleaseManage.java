@@ -590,7 +590,7 @@ public class ReleaseManage {
                     double progressPercentage = Math.floor(((float) progressSize / total) * 100);
                     int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
                     if (progressRangeList.add(progressRange)) {
-                        logRecorder.system("上传文件进度：{} {}/{} {}", name,
+                        logRecorder.system(I18nMessageUtil.get("i18n.upload_progress_with_colon.dd5b"), name,
                             FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
                             NumberUtil.formatPercent(((float) progressSize / total), 0));
                     }

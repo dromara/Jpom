@@ -83,11 +83,11 @@ public class ExtractI18nTest {
      */
     private final Pattern[] chinesePatterns = new Pattern[]{
         // 中文开头
-        Pattern.compile("\"[\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
+        Pattern.compile("\"[\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。～！=/|]*\""),
         // 序号开头
         Pattern.compile("\"\\d+\\..*[\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
         // 符合开头
-        Pattern.compile("\"[,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。][\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
+        Pattern.compile("\"[,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。].*[\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
         // 空格开头
         Pattern.compile("\"[\\s+][\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
         Pattern.compile("\"[a-zA-Z.·\\d][\\u4e00-\\u9fa5]*[\\u4e00-\\u9fa5.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
@@ -95,6 +95,7 @@ public class ExtractI18nTest {
         Pattern.compile("\"[\\u4e00-\\u9fa5]+[a-zA-Z]\""),
         // 字母开头
         Pattern.compile("\"[a-zA-Z{} ].*[\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
+        Pattern.compile("\"[a-zA-Z{} ].*[\\d\\s].*[\\u4e00-\\u9fa5][\\u4e00-\\u9fa5\\w.,;:'!?()~，><#@$%{}【】、（）：\\[\\]+\" \\-。]*\""),
     };
     /**
      * 代码中关联（引用） key 的正则
@@ -532,8 +533,11 @@ public class ExtractI18nTest {
                         useKeys.add(key);
                     }
                     matcher.appendTail(modifiedLine);
-
-                    writer.write(modifiedLine.toString());
+                    String lineString = modifiedLine.toString();
+                    if (canIgnore(lineString)) {
+                        throw new IllegalStateException("替换后成为忽略行：" + line + " \n" + lineString);
+                    }
+                    writer.write(lineString);
                     modified = true;
                 }
                 writer.newLine();
