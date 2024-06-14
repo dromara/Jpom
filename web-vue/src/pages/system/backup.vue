@@ -135,9 +135,12 @@
             show-search
             :filter-option="filterOption"
             :target-keys="targetKeys"
-            :render="(item) => item.title"
             @change="handleChange"
-          />
+          >
+            <template #render="item">
+              <a-tooltip :title="item.title">{{ item.title }} </a-tooltip>
+            </template>
+          </a-transfer>
         </a-form-item>
       </a-form>
     </a-modal>

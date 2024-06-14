@@ -14,6 +14,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.system.SystemUtil;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -27,7 +28,7 @@ public abstract class LogbackConfig extends PropertyDefinerBase {
 
     public static String getPath() {
         String jpomLog = SystemUtil.get(JPOM_LOG);
-        Assert.hasText(jpomLog, "没有配置 JPOM_LOG");
+        Assert.hasText(jpomLog, I18nMessageUtil.get("i18n.jpom_log_not_configured.3153"));
         return jpomLog;
     }
 

@@ -17,6 +17,7 @@ import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.func.system.model.ClusterInfoModel;
@@ -129,14 +130,14 @@ public class ClusterInfoController {
      */
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public IJsonMessage<String> edit(@ValidatorItem(msg = "数据 id 不能为空") String id,
-                                     @ValidatorItem(msg = "请填写集群名称") String name,
+    public IJsonMessage<String> edit(@ValidatorItem(msg = "i18n.data_id_cannot_be_empty.403b") String id,
+                                     @ValidatorItem(msg = "i18n.cluster_name_required.5ca6") String name,
                                      String url,
-                                     @ValidatorItem(msg = "请选择关联分组") String linkGroup) {
-        Opt.ofBlankAble(url).ifPresent(s -> Validator.validateUrl(s, "请填写正确的 url"));
+                                     @ValidatorItem(msg = "i18n.associated_group_required.5889") String linkGroup) {
+        Opt.ofBlankAble(url).ifPresent(s -> Validator.validateUrl(s, I18nMessageUtil.get("i18n.correct_url_required.67a3")));
         //
         List<String> list = StrUtil.splitTrim(linkGroup, StrUtil.COMMA);
-        Assert.notEmpty(list, "请选择关联的分组");
+        Assert.notEmpty(list, I18nMessageUtil.get("i18n.associated_group2_required.bd05"));
         //
         ClusterInfoModel infoModel = new ClusterInfoModel();
         infoModel.setId(id);
@@ -144,7 +145,7 @@ public class ClusterInfoController {
         infoModel.setLinkGroup(linkGroup);
         infoModel.setUrl(url);
         clusterInfoService.updateById(infoModel);
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 
 
@@ -157,18 +158,18 @@ public class ClusterInfoController {
     @GetMapping(value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     @SystemPermission(superUser = true)
-    public IJsonMessage<String> delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "数据 id 不能为空") String id) {
+    public IJsonMessage<String> delete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.data_id_cannot_be_empty.403b") String id) {
         //
         ClusterInfoModel infoModel = clusterInfoService.getByKey(id);
-        Assert.notNull(infoModel, "对应的集群不存在");
-        Assert.state(!clusterInfoService.online(infoModel), "不能删除在线的集群");
+        Assert.notNull(infoModel, I18nMessageUtil.get("i18n.cluster_not_exist.4098"));
+        Assert.state(!clusterInfoService.online(infoModel), I18nMessageUtil.get("i18n.cannot_delete_online_cluster.11ad"));
         // 如果还有工作空间绑定,不能删除集群
         WorkspaceModel workspaceModel = new WorkspaceModel();
         workspaceModel.setClusterInfoId(infoModel.getId());
         long count = workspaceService.count(workspaceModel);
-        Assert.state(count == 0, "当前集群还被工作空间绑定不能删除");
+        Assert.state(count == 0, I18nMessageUtil.get("i18n.current_cluster_is_bound_to_workspace_cannot_be_deleted_directly.94c2"));
         //
         clusterInfoService.delByKey(id);
-        return JsonMessage.success("删除成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 }

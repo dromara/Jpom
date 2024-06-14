@@ -31,6 +31,7 @@ import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.db.DbExtConfig;
 import org.dromara.jpom.db.StorageServiceFactory;
 import org.dromara.jpom.model.data.SystemIpConfigModel;
@@ -118,7 +119,7 @@ public class SystemConfigController extends BaseServerController {
         if (jsonMessage != null) {
             return jsonMessage;
         }
-        Assert.hasText(content, "内容不能为空");
+        Assert.hasText(content, I18nMessageUtil.get("i18n.content_cannot_be_empty.9f0d"));
 
         ByteArrayResource byteArrayResource;
         try {
@@ -127,8 +128,8 @@ public class SystemConfigController extends BaseServerController {
             byteArrayResource = new ByteArrayResource(content.replace("\t", "  ").getBytes(StandardCharsets.UTF_8));
             yamlPropertySourceLoader.load("test", byteArrayResource);
         } catch (Exception e) {
-            log.warn("内容格式错误，请检查修正", e);
-            return new JsonMessage<>(500, "内容格式错误，请检查修正:" + e.getMessage());
+            log.warn(I18nMessageUtil.get("i18n.content_format_error.ce15"), e);
+            return new JsonMessage<>(500, I18nMessageUtil.get("i18n.content_format_error_with_detail.c846") + e.getMessage());
         }
         boolean restartBool = Convert.toBool(restart, false);
         // 修改数据库密码
@@ -137,9 +138,9 @@ public class SystemConfigController extends BaseServerController {
 
         Map<String, Object> yamlMap = yamlMapFactoryBean.getObject();
         ConfigurationProperties configurationProperties = DbExtConfig.class.getAnnotation(ConfigurationProperties.class);
-        Assert.notNull(configurationProperties, "没有找到数据库配置标识头");
+        Assert.notNull(configurationProperties, I18nMessageUtil.get("i18n.no_database_config_header_found.9ee3"));
         Map<String, Object> dbYamlMap = BeanUtil.getProperty(yamlMap, configurationProperties.prefix());
-        Assert.notNull(dbYamlMap, "未解析出配置文件中的数据库配置信息");
+        Assert.notNull(dbYamlMap, I18nMessageUtil.get("i18n.config_file_database_config_not_parsed.47b2"));
         // 解析字段密码
         DbExtConfig dbExtConfig2 = BeanUtil.toBean(dbYamlMap, DbExtConfig.class, CopyOptions.create()
             .setIgnoreError(true)
@@ -147,7 +148,7 @@ public class SystemConfigController extends BaseServerController {
                 String camelCase = StrUtil.toCamelCase(s);
                 return StrUtil.toCamelCase(camelCase, CharPool.DASHED);
             }));
-        Assert.hasText(dbExtConfig2.getUserName(), "未配置(未解析到)数据库用户名");
+        Assert.hasText(dbExtConfig2.getUserName(), I18nMessageUtil.get("i18n.database_username_not_configured.a048"));
         if (dbExtConfig2.getMode() == DbExtConfig.Mode.H2) {
             String newDbExtConfigUserName = dbExtConfig2.userName();
             String newDbExtConfigUserPwd = dbExtConfig2.userPwd();
@@ -155,20 +156,20 @@ public class SystemConfigController extends BaseServerController {
             String oldDbExtConfigUserPwd = dbExtConfig.userPwd();
             if (!StrUtil.equals(oldDbExtConfigUserName, newDbExtConfigUserName) || !StrUtil.equals(oldDbExtConfigUserPwd, newDbExtConfigUserPwd)) {
                 // 执行修改数据库账号密码
-                Assert.state(restartBool, "修改数据库密码必须重启");
+                Assert.state(restartBool, I18nMessageUtil.get("i18n.modify_db_password_must_restart.d08d"));
                 StorageServiceFactory.get().alterUser(oldDbExtConfigUserName, newDbExtConfigUserName, newDbExtConfigUserPwd);
             }
         }
         Resource resource = ExtConfigBean.getResource();
-        Assert.state(resource.isFile(), "当前环境下不支持在线修改配置文件");
+        Assert.state(resource.isFile(), I18nMessageUtil.get("i18n.configuration_modification_not_supported.5872"));
         FileUtil.writeString(content, resource.getFile(), CharsetUtil.CHARSET_UTF_8);
 
         if (restartBool) {
             // 重启
             JpomApplication.restart();
-            return JsonMessage.success(Const.UPGRADE_MSG);
+            return JsonMessage.success(Const.UPGRADE_MSG.get());
         }
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 
 
@@ -188,7 +189,7 @@ public class SystemConfigController extends BaseServerController {
         }
         //jsonObject.put("path", FileUtil.getAbsolutePath(systemIpConfigService.filePath()));
         jsonObject.put("ip", getIp());
-        return JsonMessage.success("加载成功", jsonObject);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.load_success.154e"), jsonObject);
     }
 
     @RequestMapping(value = "save_ip_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -204,7 +205,7 @@ public class SystemConfigController extends BaseServerController {
         this.checkIpV4(prohibited1);
         systemParametersServer.upsert(SystemIpConfigModel.ID, systemIpConfigModel, SystemIpConfigModel.ID);
         //
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 
     /**
@@ -228,24 +229,24 @@ public class SystemConfigController extends BaseServerController {
             }
             if (StrUtil.contains(itemIp, Ipv4Util.IP_MASK_SPLIT_MARK)) {
                 String[] param = StrUtil.splitToArray(itemIp, Ipv4Util.IP_MASK_SPLIT_MARK);
-                Assert.state(Validator.isIpv4(param[0]), "请填写 ipv4 地址：" + itemIp);
+                Assert.state(Validator.isIpv4(param[0]), I18nMessageUtil.get("i18n.please_fill_in_ipv4_address.d23a") + itemIp);
                 int count1 = StrUtil.count(param[0], StrUtil.DOT);
                 int count2 = StrUtil.count(param[1], StrUtil.DOT);
                 if (count1 == 3 && count2 == 3) {
                     //192.168.1.0/192.168.1.200
-                    Assert.state(Validator.isIpv4(param[1]), "请填写 ipv4 地址：" + itemIp);
+                    Assert.state(Validator.isIpv4(param[1]), I18nMessageUtil.get("i18n.please_fill_in_ipv4_address.d23a") + itemIp);
                     continue;
                 }
                 if (count1 == 3 && count2 == 0) {
                     //192.168.1.0/24
                     int maskBit = Convert.toInt(param[1], 0);
                     String s = MaskBit.get(maskBit);
-                    Assert.hasText(s, "子掩码不正确：" + itemIp);
+                    Assert.hasText(s, I18nMessageUtil.get("i18n.subnet_mask_incorrect.6c27") + itemIp);
                     continue;
                 }
             }
             boolean ipv4 = Validator.isIpv4(itemIp);
-            Assert.state(ipv4, "请填写 ipv4 地址：" + itemIp);
+            Assert.state(ipv4, I18nMessageUtil.get("i18n.please_fill_in_ipv4_address.d23a") + itemIp);
         }
     }
 
@@ -278,7 +279,7 @@ public class SystemConfigController extends BaseServerController {
         }
         systemParametersServer.upsert(ProxySelectorConfig.KEY, proxys, ProxySelectorConfig.KEY);
         proxySelectorConfig.refreshCache();
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 
 }

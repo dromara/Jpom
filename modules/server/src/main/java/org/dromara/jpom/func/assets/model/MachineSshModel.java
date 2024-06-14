@@ -32,7 +32,8 @@ import java.util.concurrent.TimeUnit;
  * @since 2023/2/25
  */
 @EqualsAndHashCode(callSuper = true)
-@TableName(value = "MACHINE_SSH_INFO", name = "机器SSH信息")
+@TableName(value = "MACHINE_SSH_INFO",
+    nameKey = "i18n.machine_ssh_info.8dbb")
 @Data
 @NoArgsConstructor
 public class MachineSshModel extends BaseGroupNameModel implements ISshInfo {

@@ -19,6 +19,7 @@ import org.dromara.jpom.common.ServerOpenApi;
 import org.dromara.jpom.common.UrlRedirectUtil;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.NodeModel;
@@ -92,7 +93,7 @@ public class NodeScriptController extends BaseServerController {
                 return;
             }
         }
-        Assert.state(exists, "没有对应的数据或者没有此数据权限");
+        Assert.state(exists, I18nMessageUtil.get("i18n.no_corresponding_data_or_permission.1291"));
     }
 
     @GetMapping(value = "item.json", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -147,7 +148,7 @@ public class NodeScriptController extends BaseServerController {
         NodeModel node = getNode();
         int cache = nodeScriptServer.delCache(node.getId(), request);
         String msg = nodeScriptServer.syncExecuteNode(node);
-        return JsonMessage.success("主动清除 " + cache + StrUtil.SPACE + msg);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.active_clearance.5870") + cache + StrUtil.SPACE + msg);
     }
 
     /**
@@ -161,7 +162,7 @@ public class NodeScriptController extends BaseServerController {
     @SystemPermission
     public IJsonMessage<String> unbind(@ValidatorItem String id, HttpServletRequest request) {
         nodeScriptServer.delByKey(id, request);
-        return JsonMessage.success("解绑成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.unbind_success.1c43"));
     }
 
     /**
@@ -186,7 +187,8 @@ public class NodeScriptController extends BaseServerController {
             updateInfo = item;
         }
         Map<String, String> map = this.getBuildToken(updateInfo, request);
-        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
+        String string = I18nMessageUtil.get("i18n.reset_success.faa3");
+        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : string, map);
     }
 
     private Map<String, String> getBuildToken(NodeScriptCacheModel item, HttpServletRequest request) {

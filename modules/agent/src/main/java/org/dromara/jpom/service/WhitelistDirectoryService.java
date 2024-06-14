@@ -14,6 +14,7 @@ import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.AgentConst;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.data.AgentWhitelist;
 import org.dromara.jpom.util.JsonFileUtil;
 import org.springframework.stereotype.Service;
@@ -61,7 +62,7 @@ public class WhitelistDirectoryService extends BaseOperService<AgentWhitelist> {
      */
     public void addProjectWhiteList(String item) {
         ArrayList<String> list = CollUtil.newArrayList(item);
-        List<String> checkOk = AgentWhitelist.covertToArray(list, "项目路径授权不能位于Jpom目录下");
+        List<String> checkOk = AgentWhitelist.covertToArray(list, I18nMessageUtil.get("i18n.project_path_auth_not_under_jpom.0e18"));
 
         AgentWhitelist agentWhitelist = getWhitelist();
         List<String> project = agentWhitelist.getProject();

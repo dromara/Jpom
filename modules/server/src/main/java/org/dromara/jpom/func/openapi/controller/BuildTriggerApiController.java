@@ -33,6 +33,7 @@ import org.dromara.jpom.build.ResultDirFileAction;
 import org.dromara.jpom.common.BaseJpomController;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.ServerOpenApi;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.interceptor.NotLogin;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
@@ -115,12 +116,12 @@ public class BuildTriggerApiController extends BaseJpomController implements IAs
                                           String delay,
                                           String buildRemark, String useQueue) {
         BuildInfoModel item = buildInfoService.getByKey(id);
-        Assert.notNull(item, "没有对应数据");
+        Assert.notNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
         UserModel userModel = this.triggerTokenLogServer.getUserByToken(token, buildInfoService.typeName());
         //
-        Assert.notNull(userModel, "触发token错误,或者已经失效:-1");
+        Assert.notNull(userModel, I18nMessageUtil.get("i18n.trigger_token_error_or_expired_with_code.393b"));
 
-        Assert.state(StrUtil.equals(token, item.getTriggerToken()), "触发token错误,或者已经失效");
+        Assert.state(StrUtil.equals(token, item.getTriggerToken()), I18nMessageUtil.get("i18n.trigger_token_error_or_expired.8976"));
         // 构建外部参数
         Object[] parametersEnv = this.buildParametersEnv(request, null);
         Integer delay1 = Convert.toInt(delay, 0);
@@ -135,7 +136,7 @@ public class BuildTriggerApiController extends BaseJpomController implements IAs
             //
             Queue<BuildCache> buildCaches = waitQueue.computeIfAbsent(id, s -> new ConcurrentLinkedDeque<>());
             buildCaches.add(buildCache);
-            return JsonMessage.success("提交任务队列成功,当前队列数：" + buildCaches.size());
+            return JsonMessage.success(I18nMessageUtil.get("i18n.submit_task_queue_success.5f5b") + buildCaches.size());
         }
 
         BaseServerController.resetInfo(userModel);
@@ -169,7 +170,7 @@ public class BuildTriggerApiController extends BaseJpomController implements IAs
     public IJsonMessage<List<Object>> triggerBatch(HttpServletRequest request) {
         String body = ServletUtil.getBody(request);
         if (StrUtil.isEmpty(body)) {
-            return new JsonMessage<>(405, "请传入 body 参数");
+            return new JsonMessage<>(405, I18nMessageUtil.get("i18n.please_pass_body_parameter.4e5c"));
         }
         try {
             // 构建外部参数
@@ -184,17 +185,20 @@ public class BuildTriggerApiController extends BaseJpomController implements IAs
                 String useQueue = jsonObject.getString("useQueue");
                 BuildInfoModel item = buildInfoService.getByKey(id);
                 if (item == null) {
-                    jsonObject.put("msg", "没有对应数据");
+                    String value = I18nMessageUtil.get("i18n.no_data_found.4ffb");
+                    jsonObject.put("msg", value);
                     return;
                 }
                 UserModel userModel = triggerTokenLogServer.getUserByToken(token, buildInfoService.typeName());
                 if (userModel == null) {
-                    jsonObject.put("msg", "对应的用户不存在,触发器已失效");
+                    String value = I18nMessageUtil.get("i18n.user_not_exist_trigger_invalid.f375");
+                    jsonObject.put("msg", value);
                     return;
                 }
                 //
                 if (!StrUtil.equals(token, item.getTriggerToken())) {
-                    jsonObject.put("msg", "触发token错误,或者已经失效");
+                    String value = I18nMessageUtil.get("i18n.trigger_token_error_or_expired.8976");
+                    jsonObject.put("msg", value);
                     return;
                 }
                 // 更新字段
@@ -214,7 +218,7 @@ public class BuildTriggerApiController extends BaseJpomController implements IAs
                     //
                     Queue<BuildCache> buildCaches = waitQueue.computeIfAbsent(id, s -> new ConcurrentLinkedDeque<>());
                     buildCaches.add(buildCache);
-                    jsonObject.put("msg", "提交任务队列成功,当前队列数：" + buildCaches.size());
+                    jsonObject.put("msg", I18nMessageUtil.get("i18n.submit_task_queue_success.5f5b") + buildCaches.size());
                 } else {
                     BaseServerController.resetInfo(userModel);
                     //
@@ -223,9 +227,9 @@ public class BuildTriggerApiController extends BaseJpomController implements IAs
                     jsonObject.put("buildId", start.getData());
                 }
             }).collect(Collectors.toList());
-            return JsonMessage.success("触发成功", collect);
+            return JsonMessage.success(I18nMessageUtil.get("i18n.trigger_success.f9d1"), collect);
         } catch (Exception e) {
-            throw new JpomRuntimeException("构建触发批量触发异常", e);
+            throw new JpomRuntimeException(I18nMessageUtil.get("i18n.build_trigger_batch_exception.47d5"), e);
             //log.error("构建触发批量触发异常", e);
             //return JsonMessage.getString(500, "触发异常", e.getMessage());
         }
@@ -262,7 +266,7 @@ public class BuildTriggerApiController extends BaseJpomController implements IAs
         }
         if (StrUtil.isNotEmpty(webhook)) {
             if (!Validator.isMatchRegex(RegexPool.URL_HTTP, webhook)) {
-                return "WebHooks 地址不合法";
+                return I18nMessageUtil.get("i18n.invalid_webhooks_address.d836");
             }
             item.setWebhook(webhook);
         }
@@ -295,22 +299,22 @@ public class BuildTriggerApiController extends BaseJpomController implements IAs
                             HttpServletResponse response) throws IOException {
         BuildInfoModel item = buildInfoService.getByKey(id);
         if (item == null) {
-            ServletUtil.write(response, "没有对应数据", ContentType.TEXT_PLAIN.getValue());
+            ServletUtil.write(response, I18nMessageUtil.get("i18n.no_data_found.4ffb"), ContentType.TEXT_PLAIN.getValue());
             return;
         }
         UserModel userModel = triggerTokenLogServer.getUserByToken(token, buildInfoService.typeName());
         if (userModel == null) {
-            ServletUtil.write(response, "对应的用户不存在,触发器已失效", ContentType.TEXT_PLAIN.getValue());
+            ServletUtil.write(response, I18nMessageUtil.get("i18n.user_not_exist_trigger_invalid.f375"), ContentType.TEXT_PLAIN.getValue());
             return;
         }
         //
         if (!StrUtil.equals(token, item.getTriggerToken())) {
-            ServletUtil.write(response, "触发token错误,或者已经失效", ContentType.TEXT_PLAIN.getValue());
+            ServletUtil.write(response, I18nMessageUtil.get("i18n.trigger_token_error_or_expired.8976"), ContentType.TEXT_PLAIN.getValue());
             return;
         }
         File file = BuildUtil.getLogFile(item.getId(), buildNumId);
         if (!FileUtil.isFile(file)) {
-            ServletUtil.write(response, "日志文件错误", ContentType.TEXT_PLAIN.getValue());
+            ServletUtil.write(response, I18nMessageUtil.get("i18n.log_file_error.473b"), ContentType.TEXT_PLAIN.getValue());
             return;
         }
         try (BufferedInputStream inputStream = FileUtil.getInputStream(file)) {
@@ -336,8 +340,8 @@ public class BuildTriggerApiController extends BaseJpomController implements IAs
             }).collect(Collectors.toList());
             return JsonMessage.success("", collect);
         } catch (Exception e) {
-            log.error("获取构建状态异常", e);
-            return new JsonMessage<>(500, "发生异常" + e.getMessage());
+            log.error(I18nMessageUtil.get("i18n.get_build_status_exception.914e"), e);
+            return new JsonMessage<>(500, I18nMessageUtil.get("i18n.unexpected_exception.2b52") + e.getMessage());
         }
     }
 
@@ -345,17 +349,20 @@ public class BuildTriggerApiController extends BaseJpomController implements IAs
         JSONObject jsonObject = new JSONObject();
         BuildInfoModel item = buildInfoService.getByKey(id);
         if (item == null) {
-            jsonObject.put("msg", "没有对应数据");
+            String value = I18nMessageUtil.get("i18n.no_data_found.4ffb");
+            jsonObject.put("msg", value);
             return jsonObject;
         }
         UserModel userModel = triggerTokenLogServer.getUserByToken(token, buildInfoService.typeName());
         if (userModel == null) {
-            jsonObject.put("msg", "对应的用户不存在,触发器已失效");
+            String value = I18nMessageUtil.get("i18n.user_not_exist_trigger_invalid.f375");
+            jsonObject.put("msg", value);
             return jsonObject;
         }
         //
         if (!StrUtil.equals(token, item.getTriggerToken())) {
-            jsonObject.put("msg", "触发token错误,或者已经失效");
+            String value = I18nMessageUtil.get("i18n.trigger_token_error_or_expired.8976");
+            jsonObject.put("msg", value);
             return jsonObject;
         }
         // 更新字段
@@ -406,13 +413,13 @@ public class BuildTriggerApiController extends BaseJpomController implements IAs
         String id = "build_trigger_queue";
         int heartSecond = 5;
         try {
-            CronUtils.TaskStat taskStat = CronUtils.getTaskStat(id, StrUtil.format("{} 秒执行一次", heartSecond));
+            CronUtils.TaskStat taskStat = CronUtils.getTaskStat(id, StrUtil.format(I18nMessageUtil.get("i18n.execution_frequency.d014"), heartSecond));
             taskStat.onStart();
             //
             this.runQueue();
             taskStat.onSucceeded();
         } catch (Throwable throwable) {
-            CronUtils.TaskStat taskStat = CronUtils.getTaskStat(id, StrUtil.format("{} 秒执行一次", heartSecond));
+            CronUtils.TaskStat taskStat = CronUtils.getTaskStat(id, StrUtil.format(I18nMessageUtil.get("i18n.execution_frequency.d014"), heartSecond));
             taskStat.onFailed(id, throwable);
         }
     }
@@ -430,19 +437,19 @@ public class BuildTriggerApiController extends BaseJpomController implements IAs
         }
         int size = waitQueue.size();
         if (size > 0) {
-            log.debug("需要处理构建微队列数：{}", size);
+            log.debug(I18nMessageUtil.get("i18n.need_handle_build_micro_queue_count.3010"), size);
             // 遍历队列中的数据
             waitQueue.forEach((buildId, buildCaches) -> {
                 synchronized (buildId.intern()) {
-                    log.debug("需要处理的 {} 构建队列数：{}", buildId, buildCaches.size());
+                    log.debug(I18nMessageUtil.get("i18n.need_handle_build_queue_count.c01e"), buildId, buildCaches.size());
                     BuildInfoModel item = buildInfoService.getByKey(buildId);
                     if (item == null) {
-                        log.error("构建数据不存在：{},任务自动丢弃:{}", buildId, buildCaches.poll());
+                        log.error(I18nMessageUtil.get("i18n.build_data_not_exist.0225"), buildId, buildCaches.poll());
                         return;
                     }
                     String statusMsg = buildExecuteService.checkStatus(item);
                     if (statusMsg != null) {
-                        log.debug("构建任务继续等待:{} {}", buildId, statusMsg);
+                        log.debug(I18nMessageUtil.get("i18n.build_task_waiting.e303"), buildId, statusMsg);
                         return;
                     }
                     BuildCache cache = buildCaches.poll();
@@ -452,9 +459,9 @@ public class BuildTriggerApiController extends BaseJpomController implements IAs
                     try {
                         BaseServerController.resetInfo(cache.userModel);
                         IJsonMessage<Integer> message = buildExecuteService.start(cache.id, cache.userModel, cache.delay, 1, cache.buildRemark, cache.parametersEnv);
-                        log.info("构建触发器队列执行结果：{}", message);
+                        log.info(I18nMessageUtil.get("i18n.build_trigger_queue_result.a1fe"), message);
                     } catch (Exception e) {
-                        log.error("创建构建任务异常", e);
+                        log.error(I18nMessageUtil.get("i18n.create_build_task_exception.06f1"), e);
                         // 重新添加任务
                         buildCaches.add(cache);
                     }

@@ -15,6 +15,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.controller.docker.base.BaseDockerSwarmInfoController;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
@@ -98,7 +99,7 @@ public class DockerSwarmInfoController extends BaseDockerSwarmInfoController {
                                     HttpServletRequest request) throws Exception {
         String workspaceId = dockerSwarmInfoService.getCheckUserWorkspace(request);
         DockerSwarmInfoMode dockerSwarmInfoMode1 = dockerSwarmInfoService.getByKey(id, request);
-        Assert.notNull(dockerSwarmInfoMode1, "对应的集群不存在");
+        Assert.notNull(dockerSwarmInfoMode1, I18nMessageUtil.get("i18n.cluster_not_exist.4098"));
         // 更新集群信息
         DockerSwarmInfoMode dockerSwarmInfoMode = new DockerSwarmInfoMode();
         dockerSwarmInfoMode.setId(id);
@@ -109,7 +110,7 @@ public class DockerSwarmInfoController extends BaseDockerSwarmInfoController {
         MachineDockerModel dockerModel = new MachineDockerModel();
         dockerModel.setSwarmId(dockerSwarmInfoMode1.getSwarmId());
         List<MachineDockerModel> machineDockerModels = machineDockerServer.listByBean(dockerModel);
-        Assert.notEmpty(machineDockerModels, "当前集群未找到 docker 信息");
+        Assert.notEmpty(machineDockerModels, I18nMessageUtil.get("i18n.docker_info_not_found.4f64"));
         for (MachineDockerModel machineDockerModel : machineDockerModels) {
             DockerInfoModel queryWhere = new DockerInfoModel();
             queryWhere.setMachineDockerId(machineDockerModel.getId());
@@ -132,14 +133,14 @@ public class DockerSwarmInfoController extends BaseDockerSwarmInfoController {
             }
         }
         //
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 
     @GetMapping(value = "del", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<Object> del(@ValidatorItem String id, HttpServletRequest request) throws Exception {
         dockerSwarmInfoService.delByKey(id, request);
-        return JsonMessage.success("删除成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 
 

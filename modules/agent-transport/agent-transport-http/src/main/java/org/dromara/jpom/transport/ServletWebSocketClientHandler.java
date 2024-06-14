@@ -13,6 +13,7 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.SystemPropsUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.transport.i18n.TransportI18nMessageUtil;
 import org.springframework.util.Assert;
 import org.springframework.util.unit.DataSize;
 import org.springframework.web.socket.BinaryMessage;
@@ -118,13 +119,13 @@ public class ServletWebSocketClientHandler extends AbstractWebSocketHandler impl
 
     @Override
     public void send(String msg) throws IOException {
-        Assert.notNull(this.session, "还没有连接上");
+        Assert.notNull(this.session, TransportI18nMessageUtil.get("i18n.not_connected.fa55"));
         session.sendMessage(new TextMessage(msg));
     }
 
     @Override
     public void send(ByteBuffer bytes) throws IOException {
-        Assert.notNull(this.session, "还没有连接上");
+        Assert.notNull(this.session, TransportI18nMessageUtil.get("i18n.not_connected.fa55"));
         session.sendMessage(new BinaryMessage(bytes));
     }
 
@@ -144,7 +145,7 @@ public class ServletWebSocketClientHandler extends AbstractWebSocketHandler impl
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         this.closeStatus = status;
-        log.warn("连接关闭 {} {}", status.getCode(), status.getReason());
+        log.warn(TransportI18nMessageUtil.get("i18n.connection_closed.6d4e"), status.getCode(), status.getReason());
     }
 
     @Override

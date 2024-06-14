@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.interceptor.PermissionInterceptor;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.assets.server.MachineNodeServer;
@@ -47,6 +48,7 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * socket 拦截器、鉴权
@@ -105,7 +107,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
         String type = httpServletRequest.getParameter("type");
         HandlerType handlerType = EnumUtil.fromString(HandlerType.class, type, null);
         if (handlerType == null) {
-            log.warn("传入的类型错误：{}", type);
+            log.warn(I18nMessageUtil.get("i18n.incorrect_type_passed.d42e"), type);
         }
         return handlerType;
     }
@@ -202,21 +204,25 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
             attributes.put("workspaceId", workspaceId);
             UserModel userModel = userService.checkUser(userId);
             if (userModel == null) {
-                attributes.put("permissionMsg", "用户不存在");
+                String string = I18nMessageUtil.get("i18n.user_not_exist.4892");
+                attributes.put("permissionMsg", string);
                 return true;
             }
             HandlerType handlerType = this.fromType(httpServletRequest);
             if (handlerType == null) {
-                attributes.put("permissionMsg", "未匹配到合适的处理类型");
+                String string = I18nMessageUtil.get("i18n.no_matching_process_type.b468");
+                attributes.put("permissionMsg", string);
                 return true;
             }
             boolean checkNode = this.checkNode(httpServletRequest, attributes, userModel);
             if (!checkNode) {
-                attributes.put("permissionMsg", "未匹配到合适的权限不足");
+                String string = I18nMessageUtil.get("i18n.no_matching_permission.09cf");
+                attributes.put("permissionMsg", string);
                 return true;
             }
             if (!this.checkHandlerType(handlerType, userModel, httpServletRequest, attributes)) {
-                attributes.put("permissionMsg", "未找到匹配的数据");
+                String string = I18nMessageUtil.get("i18n.no_matching_data_found.fe9d");
+                attributes.put("permissionMsg", string);
                 return true;
             }
             // 判断权限
@@ -257,12 +263,12 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
             // 数据工作空间
             useWorkspaceId = workspaceId;
             if (optData instanceof BaseWorkspaceModel && !StrUtil.equals(workspaceId, (String) attributes.get("workspaceId"))) {
-                return "数据工作空间和操作工作空间不一致";
+                return I18nMessageUtil.get("i18n.data_workspace_mismatch.ae1d");
             }
         }
         if (optData instanceof BaseWorkspaceModel) {
             if (StrUtil.isEmpty(useWorkspaceId)) {
-                return "没有找到数据对应的工作空间,不能进行操作";
+                return I18nMessageUtil.get("i18n.no_workspace_found_for_data.ac0f");
             }
             // 将数据的工作空间设置为当前操作的工作空间
             BeanUtil.setProperty(optData, "workspaceId", useWorkspaceId);
@@ -272,21 +278,22 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
             return StrUtil.EMPTY;
         }
         if (userInfo.isDemoUser()) {
-            return PermissionInterceptor.DEMO_TIP;
+            return PermissionInterceptor.DEMO_TIP.get();
         }
         boolean isAssetsManager = Convert.toBool(attributes.get("isAssetsManager"), false);
         if (isAssetsManager && !userInfo.isSystemUser()) {
             // 判断资产权限
-            return "您没有资产管理权限";
+            return I18nMessageUtil.get("i18n.no_asset_management_permission.739e");
         }
+        Supplier<String> nodeUpgradeName = ClassFeature.NODE_UPGRADE.getName();
         if (handlerType == HandlerType.nodeUpdate) {
-            return StrUtil.format("您没有对应功能【{}】管理权限", ClassFeature.NODE_UPGRADE.getName());
+            return StrUtil.format(I18nMessageUtil.get("i18n.no_permission_for_function.b63d"), I18nMessageUtil.get(nodeUpgradeName.get()));
         }
         Class<?> handlerClass = handlerType.getHandlerClass();
         SystemPermission systemPermission = handlerClass.getAnnotation(SystemPermission.class);
         if (systemPermission != null) {
             if (!userInfo.isSuperSystemUser()) {
-                return StrUtil.format("您没有对应功能【{}】管理权限", ClassFeature.NODE_UPGRADE.getName());
+                return StrUtil.format(I18nMessageUtil.get("i18n.no_permission_for_function.b63d"), I18nMessageUtil.get(nodeUpgradeName.get()));
             }
         }
         Feature feature = handlerClass.getAnnotation(Feature.class);
@@ -296,7 +303,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
         if (permissionResult.isSuccess()) {
             return StrUtil.EMPTY;
         }
-        return permissionResult.errorMsg(StrUtil.format("对应功能【{}-{}】", cls.getName(), method.getName()));
+        return permissionResult.errorMsg(StrUtil.format(I18nMessageUtil.get("i18n.corresponding_function.5bb5"), I18nMessageUtil.get(cls.getName().get()), I18nMessageUtil.get(method.getName().get())));
     }
 
     private BaseWorkspaceModel checkData(HandlerType handlerType, UserModel userModel, HttpServletRequest httpServletRequest) {

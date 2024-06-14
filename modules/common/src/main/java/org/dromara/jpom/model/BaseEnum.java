@@ -12,6 +12,7 @@ package org.dromara.jpom.model;
 import cn.hutool.log.StaticLog;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -160,7 +161,7 @@ public interface BaseEnum {
     @SuppressWarnings("rawtypes")
     static JSONArray toJSONArray(Class<? extends Enum<?>> cls) {
         if (!cls.isEnum()) {
-            throw new IllegalArgumentException("不是枚举");
+            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.not_an_enumeration.8244"));
         }
         JSONArray getJsonArray = Cache.JSON_ARRAY_MAP.computeIfAbsent(cls, aClass -> {
             JSONArray jsonArray = new JSONArray();

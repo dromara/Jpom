@@ -15,6 +15,7 @@ import cn.hutool.core.io.file.Tailer;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -85,7 +86,7 @@ public abstract class BaseFileTailWatcher<T extends AutoCloseable> {
                     iterator.remove();
                 }
             } catch (Exception e) {
-                log.error("发送消息失败", e);
+                log.error(I18nMessageUtil.get("i18n.send_message_failure.9621"), e);
                 this.errorAutoClose(socketSession);
                 iterator.remove();
             }
@@ -96,13 +97,13 @@ public abstract class BaseFileTailWatcher<T extends AutoCloseable> {
     }
 
     private void errorAutoClose(T socketSession) {
-        log.warn("消息发送失败,自动移除此会话:{}", this.getId(socketSession));
+        log.warn(I18nMessageUtil.get("i18n.message_send_failed.4dbe"), this.getId(socketSession));
         IoUtil.close(socketSession);
     }
 
     private String getId(T session) {
         Method byName = ReflectUtil.getMethodByName(session.getClass(), "getId");
-        Assert.notNull(byName, "没有  getId 方法");
+        Assert.notNull(byName, I18nMessageUtil.get("i18n.no_get_id_method.2a65"));
         return ReflectUtil.invoke(session, byName);
     }
 
@@ -124,7 +125,7 @@ public abstract class BaseFileTailWatcher<T extends AutoCloseable> {
             return false;
         }
         if (this.socketSessions.add(session)) {
-            this.send(session, StrUtil.format("监听{}日志成功,目前共有{}个会话正在查看", name, this.socketSessions.size()));
+            this.send(session, StrUtil.format(I18nMessageUtil.get("i18n.listen_log_success_currently_sessions_viewing.a74a"), name, this.socketSessions.size()));
             // 开发发送头信息
             for (String s : limitQueue) {
                 this.send(session, s);

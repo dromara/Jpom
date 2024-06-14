@@ -18,6 +18,7 @@ import cn.keepbx.jpom.model.JsonMessage;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.permission.Feature;
@@ -71,7 +72,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
         //
         Long spaceReclaimed = plugin.execute("prune", parameter, Long.class);
         spaceReclaimed = ObjectUtil.defaultIfNull(spaceReclaimed, 0L);
-        return JsonMessage.success("修剪完成,总回收空间：" + FileUtil.readableFileSize(spaceReclaimed));
+        return JsonMessage.success(I18nMessageUtil.get("i18n.trim_completed_with_recovered_space.0463") + FileUtil.readableFileSize(spaceReclaimed));
     }
 
     /**
@@ -116,7 +117,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("containerId", containerId);
         plugin.execute("removeContainer", parameter);
-        return JsonMessage.success("执行成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.execution_succeeded.f56c"));
     }
 
     /**
@@ -129,7 +130,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("containerId", containerId);
         plugin.execute("startContainer", parameter);
-        return JsonMessage.success("执行成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.execution_succeeded.f56c"));
     }
 
 
@@ -143,7 +144,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("containerId", containerId);
         plugin.execute("stopContainer", parameter);
-        return JsonMessage.success("执行成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.execution_succeeded.f56c"));
     }
 
 
@@ -157,7 +158,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("containerId", containerId);
         plugin.execute("restartContainer", parameter);
-        return JsonMessage.success("执行成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.execution_succeeded.f56c"));
     }
 
     /**
@@ -170,7 +171,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("containerId", containerId);
         Map<String, JSONObject> stats = (Map<String, JSONObject>) plugin.execute("stats", parameter);
-        return JsonMessage.success("执行成功", stats);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.execution_succeeded.f56c"), stats);
     }
 
     /**
@@ -183,7 +184,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("containerId", containerId);
         JSONObject results = (JSONObject) plugin.execute("inspectContainer", parameter);
-        return JsonMessage.success("执行成功", results);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.execution_succeeded.f56c"), results);
     }
 
     /**
@@ -197,13 +198,13 @@ public abstract class BaseDockerContainerController extends BaseDockerController
     public IJsonMessage<JSONObject> updateContainer(@RequestBody JSONObject jsonObject) throws Exception {
         // @ValidatorItem String id, String containerId
         String id = jsonObject.getString("id");
-        Assert.hasText(id, "id 不能为空");
+        Assert.hasText(id, I18nMessageUtil.get("i18n.id_cannot_be_empty.8f2c"));
         jsonObject.remove("id");
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.putAll(jsonObject);
         JSONObject results = (JSONObject) plugin.execute("updateContainer", parameter);
-        return JsonMessage.success("执行成功", results);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.execution_succeeded.f56c"), results);
     }
 
     /**
@@ -216,9 +217,11 @@ public abstract class BaseDockerContainerController extends BaseDockerController
     public IJsonMessage<Object> reBuildContainer(@RequestBody JSONObject jsonObject) throws Exception {
         String id = jsonObject.getString("id");
         String containerId = jsonObject.getString("containerId");
-        Assert.hasText(id, "id 不能为空");
-        Assert.hasText(jsonObject.getString("imageId"), "镜像不能为空");
-        Assert.hasText(jsonObject.getString("name"), "容器名称不能为空");
+        Assert.hasText(id, I18nMessageUtil.get("i18n.id_cannot_be_empty.8f2c"));
+        String imageId = jsonObject.getString("imageId");
+        Assert.hasText(imageId, I18nMessageUtil.get("i18n.image_cannot_be_empty.1600"));
+        String name = jsonObject.getString("name");
+        Assert.hasText(name, I18nMessageUtil.get("i18n.container_name_cannot_be_empty.14b1"));
 
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
@@ -236,7 +239,7 @@ public abstract class BaseDockerContainerController extends BaseDockerController
         // create new container
         parameter.putAll(jsonObject);
         plugin.execute("createContainer", parameter);
-        return JsonMessage.success("重建成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.rebuild_success.5938"));
     }
 
     /**
@@ -246,11 +249,11 @@ public abstract class BaseDockerContainerController extends BaseDockerController
      */
     @GetMapping(value = "download-log")
     @Feature(method = MethodFeature.DOWNLOAD)
-    public void downloadLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "没有数据") String id,
+    public void downloadLog(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.no_data.1ac0") String id,
                             HttpServletResponse response) {
         File file = FileUtil.file(serverConfig.getUserTempPath(), "docker-log", id + ".log");
         if (!file.exists()) {
-            ServletUtil.write(response, new JsonMessage<>(201, "还没有日志文件").toString(), MediaType.APPLICATION_JSON_VALUE);
+            ServletUtil.write(response, new JsonMessage<>(201, I18nMessageUtil.get("i18n.no_log_file.bacf")).toString(), MediaType.APPLICATION_JSON_VALUE);
             return;
         }
         ServletUtil.write(response, file);

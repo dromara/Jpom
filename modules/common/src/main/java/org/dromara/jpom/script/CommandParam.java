@@ -16,6 +16,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONValidator;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.util.StringUtil;
 
 import java.util.*;
@@ -101,7 +102,7 @@ public class CommandParam extends BaseJsonModel {
                 for (int i = 0; i < strings.size(); i++) {
                     CommandParam commandParam = new CommandParam();
                     commandParam.setValue(strings.get(i));
-                    commandParam.setDesc("参数" + (i + 1));
+                    commandParam.setDesc(I18nMessageUtil.get("i18n.parameter.3d0a") + (i + 1));
                     commandParams1.add(commandParam);
                 }
                 return commandParams1;

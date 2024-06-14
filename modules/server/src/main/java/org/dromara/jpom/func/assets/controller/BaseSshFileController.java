@@ -31,6 +31,7 @@ import com.jcraft.jsch.SftpException;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.assets.server.MachineSshServer;
@@ -122,13 +123,13 @@ public abstract class BaseSshFileController extends BaseServerController {
                          HttpServletResponse response) throws IOException {
         MachineSshModel machineSshModel = this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel1, itemConfig) -> machineSshModel1);
         if (machineSshModel == null) {
-            ServletUtil.write(response, "ssh error 或者 没有配置此文件夹", MediaType.TEXT_HTML_VALUE);
+            ServletUtil.write(response, I18nMessageUtil.get("i18n.ssh_error_or_folder_not_configured.c087"), MediaType.TEXT_HTML_VALUE);
             return;
         }
         try {
             this.downloadFile(machineSshModel, allowPathParent, nextPath, name, response);
         } catch (SftpException e) {
-            log.error("下载失败", e);
+            log.error(I18nMessageUtil.get("i18n.download_failed.65e2"), e);
             ServletUtil.write(response, "download error", MediaType.TEXT_HTML_VALUE);
         }
     }
@@ -206,7 +207,7 @@ public abstract class BaseSshFileController extends BaseServerController {
                 FileUtil.del(file);
             }
             //
-            return JsonMessage.success("修改成功");
+            return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
         });
     }
 
@@ -313,12 +314,12 @@ public abstract class BaseSshFileController extends BaseServerController {
             try {
                 vector = channel.ls(allPath);
             } catch (Exception e) {
-                log.warn("获取文件夹失败", e);
+                log.warn(I18nMessageUtil.get("i18n.get_folder_failure.0fda"), e);
                 Throwable causedBy = ExceptionUtil.getCausedBy(e, SftpException.class);
                 if (causedBy != null) {
-                    throw new IllegalStateException("查询文件夹 SFTP 失败," + causedBy.getMessage());
+                    throw new IllegalStateException(I18nMessageUtil.get("i18n.query_folder_sftp_failed.9d35") + causedBy.getMessage());
                 }
-                throw new IllegalStateException("查询文件夹失败," + e.getMessage());
+                throw new IllegalStateException(I18nMessageUtil.get("i18n.query_folder_failed.3f0e") + e.getMessage());
             }
             for (ChannelSftp.LsEntry lsEntry : vector) {
                 String filename = lsEntry.getFilename();
@@ -403,7 +404,7 @@ public abstract class BaseSshFileController extends BaseServerController {
                                        String name) {
         // name 可能为空，为空情况是删除目录
         String name2 = StrUtil.emptyToDefault(name, StrUtil.EMPTY);
-        Assert.state(!StrUtil.equals(name2, StrUtil.SLASH), "不能删除根目录");
+        Assert.state(!StrUtil.equals(name2, StrUtil.SLASH), I18nMessageUtil.get("i18n.cannot_delete_root_dir.fcdc"));
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
             Session session = null;
@@ -411,19 +412,19 @@ public abstract class BaseSshFileController extends BaseServerController {
             try {
                 //
                 String normalize = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name2);
-                Assert.state(!StrUtil.equals(normalize, StrUtil.SLASH), "不能删除根目录");
+                Assert.state(!StrUtil.equals(normalize, StrUtil.SLASH), I18nMessageUtil.get("i18n.cannot_delete_root_dir.fcdc"));
                 session = sshService.getSessionByModel(machineSshModel);
                 sftp = new Sftp(session, machineSshModel.charset(), machineSshModel.timeout());
                 // 尝试删除
                 boolean dirOrFile = this.tryDelDirOrFile(sftp, normalize);
                 if (dirOrFile) {
                     String parent = FileUtil.getParent(normalize, 1);
-                    return JsonMessage.success("删除成功", parent);
+                    return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"), parent);
                 }
-                return JsonMessage.success("删除成功");
+                return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
             } catch (Exception e) {
-                log.error("ssh删除文件异常", e);
-                return new JsonMessage<>(400, "删除失败:" + e.getMessage());
+                log.error(I18nMessageUtil.get("i18n.ssh_file_deletion_exception.5ba5"), e);
+                return new JsonMessage<>(400, I18nMessageUtil.get("i18n.delete_failure_with_colon.b429") + e.getMessage());
             } finally {
                 IoUtil.close(sftp);
                 JschUtil.close(session);
@@ -451,13 +452,13 @@ public abstract class BaseSshFileController extends BaseServerController {
                 String newPath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + newname);
                 channel.rename(oldPath, newPath);
             } catch (Exception e) {
-                log.error("ssh重命名失败异常", e);
-                return new JsonMessage<>(400, "重命名失败:" + e.getMessage());
+                log.error(I18nMessageUtil.get("i18n.ssh_rename_failed_exception.94aa"), e);
+                return new JsonMessage<>(400, I18nMessageUtil.get("i18n.rename_failed.0c76") + e.getMessage());
             } finally {
                 JschUtil.close(channel);
                 JschUtil.close(session);
             }
-            return JsonMessage.success("操作成功");
+            return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
         });
     }
 
@@ -506,7 +507,7 @@ public abstract class BaseSshFileController extends BaseServerController {
                 //
                 if (Convert.toBool(unzip, false)) {
                     String extName = FileUtil.extName(originalFilename);
-                    Assert.state(StrUtil.containsAnyIgnoreCase(extName, StringUtil.PACKAGE_EXT), "不支持的文件类型：" + extName);
+                    Assert.state(StrUtil.containsAnyIgnoreCase(extName, StringUtil.PACKAGE_EXT), I18nMessageUtil.get("i18n.file_type_not_supported2.d497") + extName);
                     file.transferTo(filePath);
                     // 解压
                     File tempUnzipPath = FileUtil.file(savePath, IdUtil.fastSimpleUUID());
@@ -529,13 +530,13 @@ public abstract class BaseSshFileController extends BaseServerController {
                 }
 
             } catch (Exception e) {
-                log.error("ssh上传文件异常", e);
-                return new JsonMessage<>(400, "上传失败:" + e.getMessage());
+                log.error(I18nMessageUtil.get("i18n.ssh_file_upload_exception.5c1c"), e);
+                return new JsonMessage<>(400, I18nMessageUtil.get("i18n.upload_failed.b019") + e.getMessage());
             } finally {
                 JschUtil.close(channel);
                 JschUtil.close(session);
             }
-            return JsonMessage.success("操作成功");
+            return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
         });
     }
 
@@ -567,7 +568,7 @@ public abstract class BaseSshFileController extends BaseServerController {
                 int timeout = machineSshModel.timeout();
                 try (Sftp sftp = new Sftp(session, charset, timeout)) {
                     if (sftp.exist(remotePath)) {
-                        return new JsonMessage<>(400, "文件夹或者文件已存在");
+                        return new JsonMessage<>(400, I18nMessageUtil.get("i18n.folder_or_file_exists.c687"));
                     }
                     StringBuilder command = new StringBuilder();
                     if (Convert.toBool(unFolder, false)) {
@@ -579,17 +580,17 @@ public abstract class BaseSshFileController extends BaseServerController {
                         try {
                             if (sftp.mkdir(remotePath)) {
                                 // 创建成功
-                                return JsonMessage.success("操作成功");
+                                return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
                             }
                         } catch (Exception e) {
-                            log.error("ssh创建文件夹异常", e);
-                            return new JsonMessage<>(500, "创建文件夹失败（文件夹名可能已经存在啦）:" + e.getMessage());
+                            log.error(I18nMessageUtil.get("i18n.ssh_folder_creation_exception.6ed2"), e);
+                            return new JsonMessage<>(500, I18nMessageUtil.get("i18n.create_folder_failure.b632") + e.getMessage());
                         }
                     }
                     List<String> result = new ArrayList<>();
                     JschUtils.execCallbackLine(session, charset, timeout, command.toString(), StrUtil.EMPTY, result::add);
 
-                    return JsonMessage.success("操作成功 " + CollUtil.join(result, StrUtil.LF));
+                    return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded_with_details.c773") + CollUtil.join(result, StrUtil.LF));
                 } catch (IOException e) {
                     throw Lombok.sneakyThrow(e);
                 }
@@ -618,7 +619,7 @@ public abstract class BaseSshFileController extends BaseServerController {
                                                          @ValidatorItem String permissionValue) {
         MachineSshModel machineSshModel = this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel1, itemConfig) -> machineSshModel1);
         if (machineSshModel == null) {
-            return new JsonMessage<>(400, "ssh error 或者 没有配置此文件夹");
+            return new JsonMessage<>(400, I18nMessageUtil.get("i18n.ssh_error_or_folder_not_configured.c087"));
         }
         Session session = sshService.getSessionByModel(machineSshModel);
         Charset charset = machineSshModel.charset();
@@ -631,8 +632,8 @@ public abstract class BaseSshFileController extends BaseServerController {
             client.chmod(permissions, remotePath);
         } catch (SftpException e) {
             log.error("ssh修改文件权限异常...: {} {}", remotePath, permissionValue, e);
-            return new JsonMessage<>(400, "操作失败 " + e.getMessage());
+            return new JsonMessage<>(400, I18nMessageUtil.get("i18n.operation_failed.3d94") + e.getMessage());
         }
-        return JsonMessage.success("操作成功 ");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 }

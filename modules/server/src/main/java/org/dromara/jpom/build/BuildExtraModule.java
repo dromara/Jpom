@@ -12,6 +12,7 @@ package org.dromara.jpom.build;
 import cn.hutool.core.io.FileUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.AfterOpt;
 import org.dromara.jpom.model.BaseModel;
 import org.dromara.jpom.model.data.BuildInfoModel;
@@ -222,7 +223,7 @@ public class BuildExtraModule extends BaseModel {
 
     public static BuildExtraModule build(BuildHistoryLog buildHistoryLog) {
         BuildExtraModule buildExtraModule = StringUtil.jsonConvert(buildHistoryLog.getExtraData(), BuildExtraModule.class);
-        Assert.notNull(buildExtraModule, "数据不完整，暂不支持操作");
+        Assert.notNull(buildExtraModule, I18nMessageUtil.get("i18n.incomplete_data_not_supported.b5d3"));
         buildExtraModule.setId(buildHistoryLog.getBuildDataId());
         buildExtraModule.setName(buildHistoryLog.getBuildName());
         buildExtraModule.setReleaseMethod(buildHistoryLog.getReleaseMethod());

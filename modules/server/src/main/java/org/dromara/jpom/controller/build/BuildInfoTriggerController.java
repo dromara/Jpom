@@ -17,6 +17,7 @@ import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.ServerOpenApi;
 import org.dromara.jpom.common.UrlRedirectUtil;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.permission.ClassFeature;
@@ -74,7 +75,8 @@ public class BuildInfoTriggerController extends BaseServerController {
             updateInfo = item;
         }
         Map<String, String> map = this.getBuildToken(updateInfo, request);
-        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : "重置成功", map);
+        String string = I18nMessageUtil.get("i18n.reset_success.faa3");
+        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : string, map);
     }
 
     private Map<String, String> getBuildToken(BuildInfoModel item, HttpServletRequest request) {

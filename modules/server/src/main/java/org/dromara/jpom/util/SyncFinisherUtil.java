@@ -12,6 +12,7 @@ package org.dromara.jpom.util;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.util.RuntimeUtil;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.springframework.util.Assert;
 
 import java.util.Map;
@@ -71,7 +72,7 @@ public final class SyncFinisherUtil {
      * @param syncFinisher 同步器
      */
     public static void put(String name, StrictSyncFinisher syncFinisher) {
-        Assert.state(!SYNC_FINISHER_MAP.containsKey(name), "任务已经存在啦");
+        Assert.state(!SYNC_FINISHER_MAP.containsKey(name), I18nMessageUtil.get("i18n.task_already_exists.f59a"));
         SYNC_FINISHER_MAP.put(name, syncFinisher);
     }
 

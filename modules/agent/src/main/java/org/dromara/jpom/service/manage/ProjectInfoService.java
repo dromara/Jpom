@@ -12,6 +12,7 @@ package org.dromara.jpom.service.manage;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import org.dromara.jpom.common.AgentConst;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.RunMode;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
@@ -56,7 +57,7 @@ public class ProjectInfoService extends BaseWorkspaceOptService<NodeProjectInfoM
             return nodeProjectInfoModel;
         }
         NodeProjectInfoModel item = this.getItem(nodeProjectInfoModel.getLinkId());
-        Assert.notNull(item, "被软链的项目已经不存在啦，" + nodeProjectInfoModel.getLinkId());
+        Assert.notNull(item, I18nMessageUtil.get("i18n.soft_link_project_does_not_exist.8ad2") + nodeProjectInfoModel.getLinkId());
         return item;
     }
 
@@ -70,7 +71,7 @@ public class ProjectInfoService extends BaseWorkspaceOptService<NodeProjectInfoM
         RunMode runMode = nodeProjectInfoModel.getRunMode();
         if (runMode == RunMode.Link) {
             NodeProjectInfoModel item = this.getItem(nodeProjectInfoModel.getLinkId());
-            Assert.notNull(item, "软链项目已经不存在啦");
+            Assert.notNull(item, I18nMessageUtil.get("i18n.soft_link_project_does_not_exist.4e4f"));
             return item.allLib();
         }
         return nodeProjectInfoModel.allLib();
@@ -107,7 +108,7 @@ public class ProjectInfoService extends BaseWorkspaceOptService<NodeProjectInfoM
      */
     private File resolveLogPath(NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel) {
         String id = nodeProjectInfoModel.getId();
-        Assert.hasText(id, "没有项目id");
+        Assert.hasText(id, I18nMessageUtil.get("i18n.project_id_not_found.b87e"));
         String loggedPath = originalModel.logPath();
         if (StrUtil.isNotEmpty(loggedPath)) {
             return FileUtil.file(loggedPath, id);

@@ -221,7 +221,9 @@
                   {{ item.name }}
                 </a-tooltip>
               </template>
-              <template v-else> {{ item.name }}</template>
+              <template v-else>
+                <a-tooltip :title="item.name"> {{ item.name }}</a-tooltip>
+              </template>
             </template>
           </a-transfer>
         </a-form-item>

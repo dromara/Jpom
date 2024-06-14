@@ -18,6 +18,7 @@ import com.alibaba.fastjson2.JSON;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.BaseEnum;
 import org.dromara.jpom.model.BaseGroupModel;
@@ -35,7 +36,8 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @since 2019/4/21
  */
-@TableName(value = "OUT_GIVING", name = "节点分发")
+@TableName(value = "OUT_GIVING",
+    nameKey = "i18n.node_distribution.ae68")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class OutGivingModel extends BaseGroupModel {
@@ -118,7 +120,7 @@ public class OutGivingModel extends BaseGroupModel {
 
     public void setSecondaryDirectory(String secondaryDirectory) {
         this.secondaryDirectory = Opt.ofBlankAble(secondaryDirectory).map(s -> {
-            FileUtils.checkSlip(s, e -> new IllegalArgumentException("二级目录不能越级：" + e.getMessage()));
+            FileUtils.checkSlip(s, e -> new IllegalArgumentException(I18nMessageUtil.get("i18n.second_level_directory_cannot_skip_levels.c9fb") + e.getMessage()));
             return s;
         }).orElse(StrUtil.EMPTY);
     }

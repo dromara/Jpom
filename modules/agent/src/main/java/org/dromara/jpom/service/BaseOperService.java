@@ -20,6 +20,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.JpomApplication;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.BaseModel;
 import org.dromara.jpom.system.JpomRuntimeException;
 import org.dromara.jpom.util.JsonFileUtil;
@@ -72,7 +73,7 @@ public abstract class BaseOperService<T extends BaseModel> {
     }
 
     public JSONObject getJSONObject() {
-        Objects.requireNonNull(fileName, "没有配置fileName");
+        Objects.requireNonNull(fileName, I18nMessageUtil.get("i18n.file_name_not_configured.39fa"));
         return getJSONObject(fileName);
     }
 
@@ -83,7 +84,7 @@ public abstract class BaseOperService<T extends BaseModel> {
      * @return T
      */
     public T getItem(String id) {
-        Objects.requireNonNull(fileName, "没有配置fileName");
+        Objects.requireNonNull(fileName, I18nMessageUtil.get("i18n.file_name_not_configured.39fa"));
         return getJsonObjectById(fileName, id, typeArgument);
     }
 
@@ -94,7 +95,7 @@ public abstract class BaseOperService<T extends BaseModel> {
      * @param t 实体
      */
     public void addItem(T t) {
-        Objects.requireNonNull(fileName, "没有配置fileName");
+        Objects.requireNonNull(fileName, I18nMessageUtil.get("i18n.file_name_not_configured.39fa"));
         try {
             lock.lock();
             saveJson(fileName, t);
@@ -109,7 +110,7 @@ public abstract class BaseOperService<T extends BaseModel> {
      * @param id 数据id
      */
     public void deleteItem(String id) {
-        Objects.requireNonNull(fileName, "没有配置fileName");
+        Objects.requireNonNull(fileName, I18nMessageUtil.get("i18n.file_name_not_configured.39fa"));
         try {
             lock.lock();
             deleteJson(fileName, id);
@@ -124,7 +125,7 @@ public abstract class BaseOperService<T extends BaseModel> {
      * @param t 实体
      */
     public void updateItem(T t) {
-        Objects.requireNonNull(fileName, "没有配置fileName");
+        Objects.requireNonNull(fileName, I18nMessageUtil.get("i18n.file_name_not_configured.39fa"));
         try {
             lock.lock();
             updateJson(fileName, t);
@@ -140,11 +141,11 @@ public abstract class BaseOperService<T extends BaseModel> {
      * @param id         数据Id
      */
     public void updateById(T updateData, String id) {
-        Objects.requireNonNull(fileName, "没有配置fileName");
+        Objects.requireNonNull(fileName, I18nMessageUtil.get("i18n.file_name_not_configured.39fa"));
         try {
             lock.lock();
             T item = getItem(id);
-            Assert.notNull(item, "数据不存在");
+            Assert.notNull(item, I18nMessageUtil.get("i18n.data_does_not_exist.b201"));
             BeanUtil.copyProperties(updateData, item, CopyOptions.create().ignoreNullValue());
             updateJson(fileName, item);
         } finally {
@@ -175,7 +176,7 @@ public abstract class BaseOperService<T extends BaseModel> {
         if (allData != null) {
             // 判断是否存在数据
             if (allData.containsKey(key)) {
-                throw new JpomRuntimeException("数据Id已经存在啦：" + filename + " :" + key);
+                throw new JpomRuntimeException(StrUtil.format(I18nMessageUtil.get("i18n.data_id_already_exists.28b6"), filename, key));
             }
         } else {
             allData = new JSONObject();
@@ -198,7 +199,7 @@ public abstract class BaseOperService<T extends BaseModel> {
 
         // 判断是否存在数据
         if (MapUtil.isEmpty(data)) {
-            throw new JpomRuntimeException("数据不存在:" + key);
+            throw new JpomRuntimeException(I18nMessageUtil.get("i18n.data_does_not_exist_with_details.d9b5") + key);
         } else {
             allData.put(key, json.toJson());
             JsonFileUtil.saveJson(getDataFilePath(filename), allData);

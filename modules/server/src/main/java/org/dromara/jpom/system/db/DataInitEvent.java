@@ -17,6 +17,7 @@ import cn.keepbx.jpom.model.BaseIdModel;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.BaseWorkspaceModel;
 import org.dromara.jpom.model.data.WorkspaceModel;
@@ -66,7 +67,7 @@ public class DataInitEvent implements ILoadEvent, ICacheTask {
         statusRecoverMap.forEach((name, iCron) -> {
             int count = iCron.statusRecover();
             if (count > 0) {
-                log.info("{} 恢复 {} 条异常数据", name, count);
+                log.info(I18nMessageUtil.get("i18n.recover_abnormal_data.9adf"), name, count);
             }
         });
         //  同步项目
@@ -93,10 +94,10 @@ public class DataInitEvent implements ILoadEvent, ICacheTask {
             if (workspaceBind == 3) {
                 // 父级不存在自动删除
                 Class<?> parents = tableName.parents();
-                Assert.state(parents != Void.class, "表信息配置错误," + aClass);
+                Assert.state(parents != Void.class, I18nMessageUtil.get("i18n.table_info_configuration_error_message.6452") + aClass);
                 //
                 TableName tableName1 = parents.getAnnotation(TableName.class);
-                Assert.notNull(tableName1, "父级表信息配置错误," + aClass);
+                Assert.notNull(tableName1, I18nMessageUtil.get("i18n.parent_table_info_config_error.2f52") + aClass);
             }
             String sql = "select workspaceId,count(1) as allCount from " + tableName.value() + " group by workspaceId";
             List<Entity> query = workspaceService.query(sql);
@@ -106,7 +107,7 @@ public class DataInitEvent implements ILoadEvent, ICacheTask {
                 if (workspaceIds.contains(workspaceId)) {
                     continue;
                 }
-                String format = StrUtil.format("表 {}[{}] 存在 {} 条错误工作空间数据 -> {}", tableName.name(), tableName.value(), allCount, workspaceId);
+                String format = StrUtil.format(I18nMessageUtil.get("i18n.table_error_workspace_data.9021"), I18nMessageUtil.get(tableName.nameKey()), tableName.value(), allCount, workspaceId);
                 log.error(format);
                 List<String> stringList = errorWorkspaceTable.computeIfAbsent(tableName.value(), s -> new ArrayList<>());
                 stringList.add(format);
@@ -128,7 +129,7 @@ public class DataInitEvent implements ILoadEvent, ICacheTask {
     }
 
     public void clearErrorWorkspace(String tableName) {
-        Assert.state(errorWorkspaceTable.containsKey(tableName), "当前表没有错误数据");
+        Assert.state(errorWorkspaceTable.containsKey(tableName), I18nMessageUtil.get("i18n.no_error_data_in_table.3092"));
         Set<String> workspaceIds = this.allowWorkspaceIds();
         String sql = "select workspaceId,count(1) as allCount from " + tableName + " group by workspaceId";
         List<Entity> query = workspaceService.query(sql);
@@ -139,7 +140,7 @@ public class DataInitEvent implements ILoadEvent, ICacheTask {
             }
             String deleteSql = "delete from " + tableName + " where workspaceId=?";
             int execute = workspaceService.execute(deleteSql, workspaceId);
-            log.info("删除表 {} 中 {} 条工作空间id为：{} 的数据", tableName, execute, workspaceId);
+            log.info(I18nMessageUtil.get("i18n.delete_table_data.c813"), tableName, execute, workspaceId);
         }
         this.checkErrorWorkspace();
     }
@@ -149,7 +150,7 @@ public class DataInitEvent implements ILoadEvent, ICacheTask {
         try {
             checkErrorWorkspace();
         } catch (Exception e) {
-            log.error("查询错误的工作空间失败", e);
+            log.error(I18nMessageUtil.get("i18n.query_workspace_error.6a0d"), e);
         }
     }
 }

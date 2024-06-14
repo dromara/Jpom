@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.websocket.Constants;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.system.ExtConfigBean;
@@ -65,11 +66,11 @@ public class AgentFreeWebSocketScriptHandle extends BaseAgentWebSocketHandle {
             if (super.checkAuthorize(session)) {
                 return;
             }
-            SocketSessionUtil.send(session, "连接成功");
+            SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.connection_successful.b331"));
         } catch (Exception e) {
-            log.error("socket 错误", e);
+            log.error(I18nMessageUtil.get("i18n.socket_error.18c1"), e);
             try {
-                SocketSessionUtil.send(session, JsonMessage.getString(500, "系统错误!"));
+                SocketSessionUtil.send(session, JsonMessage.getString(500, I18nMessageUtil.get("i18n.system_error.9417")));
                 session.close();
             } catch (IOException e1) {
                 log.error(e1.getMessage(), e1);
@@ -86,7 +87,7 @@ public class AgentFreeWebSocketScriptHandle extends BaseAgentWebSocketHandle {
     @OnMessage(maxMessageSize = 5 * 1024 * 1024)
     public void onMessage(String message, Session session) throws Exception {
         if (CACHE.containsKey(session.getId())) {
-            SocketSessionUtil.send(session, JsonMessage.getString(500, "不要重复打开"));
+            SocketSessionUtil.send(session, JsonMessage.getString(500, I18nMessageUtil.get("i18n.do_not_reopen.f86a")));
             return;
         }
         JSONObject json = JSONObject.parseObject(message);
@@ -102,11 +103,11 @@ public class AgentFreeWebSocketScriptHandle extends BaseAgentWebSocketHandle {
         JSONObject environment = json.getJSONObject("environment");
         String content = json.getString("content");
         if (StrUtil.hasEmpty(path, tag, content)) {
-            SocketSessionUtil.send(session, JsonMessage.getString(500, "参数存在不正确"));
+            SocketSessionUtil.send(session, JsonMessage.getString(500, I18nMessageUtil.get("i18n.incorrect_parameter.02ce")));
             return;
         }
         if (environment == null) {
-            SocketSessionUtil.send(session, JsonMessage.getString(500, "没有环境变量"));
+            SocketSessionUtil.send(session, JsonMessage.getString(500, I18nMessageUtil.get("i18n.environment_variables_not_found.dbd4")));
             return;
         }
         Map<String, EnvironmentMapBuilder.Item> map = environment.to(new TypeReference<Map<String, EnvironmentMapBuilder.Item>>() {
@@ -117,7 +118,7 @@ public class AgentFreeWebSocketScriptHandle extends BaseAgentWebSocketHandle {
             try {
                 SocketSessionUtil.send(session, line);
             } catch (IOException e) {
-                log.error("发送消息失败", e);
+                log.error(I18nMessageUtil.get("i18n.send_message_failure.9621"), e);
             }
         });
     }
@@ -190,7 +191,7 @@ public class AgentFreeWebSocketScriptHandle extends BaseAgentWebSocketHandle {
             inputStream = process.getInputStream();
             IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), lineHandler);
             int waitFor = process.waitFor();
-            lineHandler.handle(StrUtil.format("执行结束:{}", waitFor));
+            lineHandler.handle(StrUtil.format(I18nMessageUtil.get("i18n.execution_ended.b793"), waitFor));
             // 客户端可以关闭会话啦
             lineHandler.handle("JPOM_SYSTEM_TAG:" + tag);
         }

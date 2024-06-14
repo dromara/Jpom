@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 /**
  * 登录拦截器
@@ -47,7 +48,7 @@ public class LoginInterceptor implements HandlerMethodInterceptor {
      */
     public static final String SESSION_NAME = "user";
 
-    private static final Map<Integer, String> MSG_CACHE = new HashMap<>(3);
+    private static final Map<Integer, Supplier<String>> MSG_CACHE = new HashMap<>(3);
 
     private final UserConfig userConfig;
 
@@ -172,8 +173,8 @@ public class LoginInterceptor implements HandlerMethodInterceptor {
      */
     private void responseLogin(HttpServletRequest request, HttpSession session, HttpServletResponse response, int code) throws IOException {
         session.removeAttribute(LoginInterceptor.SESSION_NAME);
-        String msg = MSG_CACHE.getOrDefault(code, ServerConst.LOGIN_TIP);
-        ServletUtil.write(response, JsonMessage.getString(code, msg), MediaType.APPLICATION_JSON_VALUE);
+        Supplier<String> msg = MSG_CACHE.getOrDefault(code, ServerConst.LOGIN_TIP);
+        ServletUtil.write(response, JsonMessage.getString(code, msg.get()), MediaType.APPLICATION_JSON_VALUE);
     }
 
     @Override

@@ -11,10 +11,8 @@ package org.dromara.jpom.controller.user;
 
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.collection.CollStreamUtil;
-import cn.hutool.core.comparator.CompareUtil;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
@@ -26,6 +24,7 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.JpomManifest;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.interceptor.PermissionInterceptor;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
@@ -36,7 +35,6 @@ import org.dromara.jpom.func.user.model.UserLoginLogModel;
 import org.dromara.jpom.func.user.server.UserLoginLogServer;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.MailAccountModel;
-import org.dromara.jpom.model.data.WorkspaceModel;
 import org.dromara.jpom.model.log.BuildHistoryLog;
 import org.dromara.jpom.model.log.UserOperateLogV1;
 import org.dromara.jpom.model.user.UserModel;
@@ -130,16 +128,16 @@ public class UserBasicInfoController extends BaseServerController {
     @RequestMapping(value = "save_basicInfo.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<String> saveBasicInfo(String email,
                                               String dingDing, String workWx, String code,
-                                              @ValidatorItem(value = ValidatorRule.NOT_BLANK, range = "2:10", msg = "昵称长度只能是2-10") String name) {
+                                              @ValidatorItem(value = ValidatorRule.NOT_BLANK, range = "2:10", msg = "i18n.nickname_length_limit.6312") String name) {
         UserModel user = getUser();
         UserModel userModel = userService.getByKey(user.getId());
         UserModel updateModel = new UserModel(user.getId());
         // 判断是否一样
         if (StrUtil.isNotEmpty(email) && !StrUtil.equals(email, userModel.getEmail())) {
-            Validator.validateEmail(email, "邮箱格式不正确");
+            Validator.validateEmail(email, I18nMessageUtil.get("i18n.invalid_email_format.7526"));
             Integer cacheCode = CACHE.get(email);
             if (cacheCode == null || !Objects.equals(cacheCode.toString(), code)) {
-                return new JsonMessage<>(405, "请输入正确验证码");
+                return new JsonMessage<>(405, I18nMessageUtil.get("i18n.correct_verification_code2_required.df13"));
             }
             updateModel.setEmail(email);
         }
@@ -147,15 +145,15 @@ public class UserBasicInfoController extends BaseServerController {
         updateModel.setName(name);
         //
         if (StrUtil.isNotEmpty(dingDing) && !Validator.isUrl(dingDing)) {
-            Validator.validateMatchRegex(RegexPool.URL_HTTP, dingDing, "请输入正确钉钉地址");
+            Validator.validateMatchRegex(RegexPool.URL_HTTP, dingDing, I18nMessageUtil.get("i18n.correct_dingtalk_address_required.2b4a"));
         }
         updateModel.setDingDing(dingDing);
         if (StrUtil.isNotEmpty(workWx)) {
-            Validator.validateMatchRegex(RegexPool.URL_HTTP, workWx, "请输入正确企业微信地址");
+            Validator.validateMatchRegex(RegexPool.URL_HTTP, workWx, I18nMessageUtil.get("i18n.correct_enterprise_wechat_address_required.5f2d"));
         }
         updateModel.setWorkWx(workWx);
         userService.updateById(updateModel);
-        return JsonMessage.success("修改成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 
     /**
@@ -165,18 +163,19 @@ public class UserBasicInfoController extends BaseServerController {
      * @return msg
      */
     @RequestMapping(value = "sendCode.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<String> sendCode(@ValidatorItem(value = ValidatorRule.EMAIL, msg = "邮箱格式不正确") String email) {
+    public IJsonMessage<String> sendCode(@ValidatorItem(value = ValidatorRule.EMAIL, msg = "i18n.invalid_email_format.7526") String email) {
         MailAccountModel config = systemParametersServer.getConfig(MailAccountModel.ID, MailAccountModel.class);
-        Assert.notNull(config, "管理员还没有配置系统邮箱,请联系管理配置发件信息");
+        Assert.notNull(config, I18nMessageUtil.get("i18n.admin_email_not_configured.ecb8"));
         int randomInt = RandomUtil.randomInt(1000, 9999);
         try {
-            EmailUtil.send(email, "Jpom 验证码", "验证码是：" + randomInt);
+            String title = I18nMessageUtil.get("i18n.jpom_verification_code.5b5b");
+            EmailUtil.send(email, title, StrUtil.format(I18nMessageUtil.get("i18n.verification_code_is.5af5"), randomInt));
         } catch (Exception e) {
-            log.error("发送失败", e);
-            return new JsonMessage<>(500, "发送邮件失败：" + e.getMessage());
+            log.error(I18nMessageUtil.get("i18n.send_failed.9ca6"), e);
+            return new JsonMessage<>(500, I18nMessageUtil.get("i18n.send_email_failure.1ab3") + e.getMessage());
         }
         CACHE.put(email, randomInt);
-        return JsonMessage.success("发送成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.send_success.9db9"));
     }
 
     /**
@@ -198,15 +197,16 @@ public class UserBasicInfoController extends BaseServerController {
      */
     @PostMapping(value = "save-workspace", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<String> saveWorkspace(@RequestBody List<UserWorkspaceModel> workspaceModels) {
-        Assert.notEmpty(workspaceModels, "没有选择任何工作空间");
+        Assert.notEmpty(workspaceModels, I18nMessageUtil.get("i18n.no_workspace_selected.33d5"));
         List<UserWorkspaceModel> collect = workspaceModels.stream()
             .filter(workspaceModel -> StrUtil.isNotEmpty(workspaceModel.getId()))
             .peek(userWorkspaceModel -> userWorkspaceModel.setOriginalName(null))
             .collect(Collectors.toList());
         UserModel user = getUser();
         Map<String, UserWorkspaceModel> map = CollStreamUtil.toMap(collect, UserWorkspaceModel::getId, workspaceModel -> workspaceModel);
-        systemParametersServer.upsert("user-my-workspace-" + user.getId(), map, "用户自定义工作空间");
-        return JsonMessage.success("保存成功");
+        String name = "user-my-workspace-" + user.getId();
+        systemParametersServer.upsert(name, map, I18nMessageUtil.get("i18n.user_custom_workspace.ef93"));
+        return JsonMessage.success(I18nMessageUtil.get("i18n.save_succeeded.3b10"));
     }
 
     /**
@@ -218,11 +218,11 @@ public class UserBasicInfoController extends BaseServerController {
     public IJsonMessage<Object> closeMfa(@ValidatorItem String code) {
         UserModel user = getUser();
         boolean mfaCode = userService.verifyMfaCode(user.getId(), code);
-        Assert.state(mfaCode, "验证码不正确");
+        Assert.state(mfaCode, I18nMessageUtil.get("i18n.verification_code_incorrect.d8c0"));
         UserModel userModel = new UserModel(user.getId());
         userModel.setTwoFactorAuthKey(StrUtil.EMPTY);
         userService.updateById(userModel);
-        return JsonMessage.success("关闭成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.close_success.8a31"));
     }
 
     @GetMapping(value = "generate_mfa", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -247,14 +247,14 @@ public class UserBasicInfoController extends BaseServerController {
         //
         UserModel user = getUser();
         boolean bindMfa = userService.hasBindMfa(user.getId());
-        Assert.state(!bindMfa, "当前账号已经绑定 mfa 啦");
+        Assert.state(!bindMfa, I18nMessageUtil.get("i18n.account_already_bound_to_mfa.5122"));
         // demo
         Assert.state(!user.isDemoUser(), PermissionInterceptor.DEMO_TIP);
         //
         boolean tfaCode = TwoFactorAuthUtils.validateTFACode(mfa, twoCode);
-        Assert.state(tfaCode, " mfa 验证码不正确");
+        Assert.state(tfaCode, I18nMessageUtil.get("i18n.mfa_incorrect_code.8783"));
         userService.bindMfa(user.getId(), mfa);
-        return JsonMessage.success("绑定成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.binding_success.1974"));
     }
 
     /**

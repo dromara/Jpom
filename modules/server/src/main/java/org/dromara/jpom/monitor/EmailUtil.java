@@ -14,6 +14,7 @@ import cn.hutool.extra.spring.SpringUtil;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSON;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.data.MailAccountModel;
 import org.dromara.jpom.model.data.MonitorModel;
 import org.dromara.jpom.plugin.PluginFactory;
@@ -69,7 +70,7 @@ public class EmailUtil implements INotify {
             refreshConfig();
         }
         if (config == null || StrUtil.isEmpty(config.getHost())) {
-            log.error("未配置邮箱服务不能发送邮件：{} {}", email, title);
+            log.error(I18nMessageUtil.get("i18n.email_service_not_configured.3180"), email, title);
             return;
         }
         //

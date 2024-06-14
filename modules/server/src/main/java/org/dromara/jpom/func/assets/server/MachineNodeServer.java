@@ -31,6 +31,7 @@ import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.NodeConfig;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.exception.AgentAuthorizeException;
@@ -94,7 +95,7 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
     @Override
     protected void fillInsert(MachineNodeModel machineNodeModel) {
         super.fillInsert(machineNodeModel);
-        machineNodeModel.setGroupName(StrUtil.emptyToDefault(machineNodeModel.getGroupName(), Const.DEFAULT_GROUP_NAME));
+        machineNodeModel.setGroupName(StrUtil.emptyToDefault(machineNodeModel.getGroupName(), Const.DEFAULT_GROUP_NAME.get()));
         //
         machineNodeModel.setTransportMode(0);
     }
@@ -109,12 +110,12 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
     public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
         long count = this.count();
         if (count != 0) {
-            log.debug("节点机器表已经存在 {} 条数据，不需要修复机器数据", count);
+            log.debug(I18nMessageUtil.get("i18n.node_machine_table_exists_no_need_to_fix.2625"), count);
             return;
         }
         List<NodeModel> list = nodeService.list(false);
         if (CollUtil.isEmpty(list)) {
-            log.debug("没有任何节点信息,不需要修复机器数据");
+            log.debug(I18nMessageUtil.get("i18n.no_node_info_no_need_to_fix_machine_data.562e"));
             return;
         }
         // delete from MACHINE_NODE_INFO;
@@ -127,12 +128,12 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
             value.sort((o1, o2) -> CompareUtil.compare(o2.getModifyTimeMillis(), o1.getModifyTimeMillis()));
             NodeModel first = CollUtil.getFirst(value);
             if (value.size() > 1) {
-                log.warn("节点地址 {} 存在多个数据，将自动合并使用 {} 节点的配置信息", entry.getKey(), first.getName());
+                log.warn(I18nMessageUtil.get("i18n.multiple_node_data_exists_merge_config.043f"), entry.getKey(), first.getName());
             }
             machineNodeModels.add(this.nodeInfoToMachineNode(first));
         }
         this.insert(machineNodeModels);
-        log.info("成功修复 {} 条机器节点数据", machineNodeModels.size());
+        log.info(I18nMessageUtil.get("i18n.machines_node_data_fixed.7744"), machineNodeModels.size());
         // 更新节点的机器id
         for (MachineNodeModel value : machineNodeModels) {
             Entity entity = Entity.create();
@@ -140,7 +141,7 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
             Entity where = Entity.create();
             where.set("url", value.getJpomUrl());
             int update = nodeService.update(entity, where);
-            Assert.state(update > 0, "更新节点表机器 id 失败：" + value.getName());
+            Assert.state(update > 0, I18nMessageUtil.get("i18n.update_node_machine_id_failed.51d9") + value.getName());
         }
     }
 
@@ -195,7 +196,7 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
             String linkGroup = clusterInfoService.getCurrent().getLinkGroup();
             List<String> linkGroups = StrUtil.splitTrim(linkGroup, StrUtil.COMMA);
             if (CollUtil.isEmpty(linkGroups)) {
-                log.warn("当前集群还未绑定分组,不能监控集群节点资产信息");
+                log.warn(I18nMessageUtil.get("i18n.cluster_not_bound_to_group_for_node_monitoring.1586"));
                 return;
             }
             entity.set("groupName", linkGroups);
@@ -203,7 +204,7 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         entity.set("transportMode", 0);
         int heartSecond = nodeConfig.getHeartSecond();
         try {
-            CronUtils.TaskStat taskStat = CronUtils.getTaskStat(TASK_ID, StrUtil.format("{} 秒执行一次", heartSecond));
+            CronUtils.TaskStat taskStat = CronUtils.getTaskStat(TASK_ID, StrUtil.format(I18nMessageUtil.get("i18n.execution_frequency.d014"), heartSecond));
             taskStat.onStart();
             //MachineNodeModel machineNodeModel = new MachineNodeModel();
             //machineNodeModel.setTransportMode(0);
@@ -211,7 +212,7 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
             this.checkList(machineNodeModels);
             taskStat.onSucceeded();
         } catch (Throwable throwable) {
-            CronUtils.TaskStat taskStat = CronUtils.getTaskStat(TASK_ID, StrUtil.format("{} 秒执行一次", heartSecond));
+            CronUtils.TaskStat taskStat = CronUtils.getTaskStat(TASK_ID, StrUtil.format(I18nMessageUtil.get("i18n.execution_frequency.d014"), heartSecond));
             taskStat.onFailed(TASK_ID, throwable);
         }
     }
@@ -247,7 +248,7 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
                     this.updateStatus(machineNodeModel, 0, e.getMessage());
                 } catch (Exception e) {
                     this.updateStatus(machineNodeModel, 0, e.getMessage());
-                    log.error("获取节点监控信息失败", e);
+                    log.error(I18nMessageUtil.get("i18n.get_node_monitoring_info_failure.595a"), e);
                 } finally {
                     BaseServerController.removeEmpty();
                 }
@@ -389,11 +390,11 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
     private MachineNodeModel resolveMachineData(HttpServletRequest request) {
         // 创建对象
         MachineNodeModel machineNodeModel = ServletUtil.toBean(request, MachineNodeModel.class, true);
-        Assert.hasText(machineNodeModel.getName(), "请填写机器名称");
-        Assert.hasText(machineNodeModel.getJpomUrl(), "请填写 节点地址");
-        Assert.hasText(machineNodeModel.getJpomUsername(), "请填写节点账号");
+        Assert.hasText(machineNodeModel.getName(), I18nMessageUtil.get("i18n.machine_name_required.e8cf"));
+        Assert.hasText(machineNodeModel.getJpomUrl(), I18nMessageUtil.get("i18n.please_fill_in_node_address.e77e"));
+        Assert.hasText(machineNodeModel.getJpomUsername(), I18nMessageUtil.get("i18n.node_account_required.2d90"));
 
-        Assert.hasText(machineNodeModel.getJpomProtocol(), "请选择协议");
+        Assert.hasText(machineNodeModel.getJpomProtocol(), I18nMessageUtil.get("i18n.protocol_required.b4f8"));
         //
         MachineNodeModel update = new MachineNodeModel();
         update.setId(machineNodeModel.getId());
@@ -412,7 +413,7 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
     }
 
     public boolean existsByUrl(String jpomUrl, String id) {
-        Assert.hasText(jpomUrl, "节点地址不能为空");
+        Assert.hasText(jpomUrl, I18nMessageUtil.get("i18n.node_address_required.71f1"));
         //
         Entity entity = Entity.create();
         entity.set("jpomUrl", jpomUrl);
@@ -432,7 +433,7 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
     public void update(HttpServletRequest request) {
         MachineNodeModel machineNodeModel = this.resolveMachineData(request);
         boolean exists = this.existsByUrl(machineNodeModel.getJpomUrl(), machineNodeModel.getId());
-        Assert.state(!exists, "对应的节点已经存在啦");
+        Assert.state(!exists, I18nMessageUtil.get("i18n.node_already_exists.28ea"));
         this.testNode(machineNodeModel);
         // 更新状态
         machineNodeModel.setStatus(1);
@@ -460,10 +461,10 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         JsonMessage<JpomManifest> objectJsonMessage = NodeForward.request(nodeModel, StrUtil.EMPTY, NodeUrl.Info, "nodeId", nodeModel.getId());
         try {
             JpomManifest jpomManifest = objectJsonMessage.getData(JpomManifest.class);
-            Assert.notNull(jpomManifest, "节点连接失败，请检查节点是否在线");
+            Assert.notNull(jpomManifest, I18nMessageUtil.get("i18n.node_connection_failure.896d"));
         } catch (Exception e) {
-            log.error("节点连接失败，请检查节点是否在线", e);
-            throw new IllegalStateException("节点返回信息异常,请检查节点地址是否配置正确或者代理配置是否正确");
+            log.error(I18nMessageUtil.get("i18n.node_connection_failure.896d"), e);
+            throw new IllegalStateException(I18nMessageUtil.get("i18n.node_return_info_exception.0961"));
         }
         //
         nodeModel.setJpomTimeout(timeout);
@@ -477,10 +478,10 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
     public void testHttpProxy(String httpProxy) {
         if (StrUtil.isNotEmpty(httpProxy)) {
             List<String> split = StrUtil.splitTrim(httpProxy, StrUtil.COLON);
-            Assert.isTrue(CollUtil.size(split) == 2, "HTTP代理地址格式不正确");
+            Assert.isTrue(CollUtil.size(split) == 2, I18nMessageUtil.get("i18n.invalid_http_proxy_address.1da1"));
             String host = split.get(0);
             int port = Convert.toInt(split.get(1), 0);
-            Assert.isTrue(StrUtil.isNotEmpty(host) && NetUtil.isValidPort(port), "HTTP代理地址格式不正确");
+            Assert.isTrue(StrUtil.isNotEmpty(host) && NetUtil.isValidPort(port), I18nMessageUtil.get("i18n.invalid_http_proxy_address.1da1"));
             //
             try {
                 NetUtil.netCat(host, port, StrUtil.EMPTY.getBytes());

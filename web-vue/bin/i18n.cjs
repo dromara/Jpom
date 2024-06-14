@@ -1,21 +1,34 @@
 const { i18nTools } = require('jpom-i18n')
 const path = require('path')
+const fs = require('fs')
 const dotEnv = require('dotenv')
 dotEnv.config()
-const main = async () => {
-  const config = {
-    projectPath: process.cwd(),
-    globalPath: 'src',
-    includeDir: ['pages'],
-    exts: ['.vue'],
-    prettier: {
+
+let prettierrCconfig
+try {
+  const prettierrcPath = path.join(process.cwd(), '.prettierrc.json')
+  prettierrCconfig = fs.readFileSync(prettierrcPath, 'utf-8')
+} catch (e) {
+  //
+}
+prettierrCconfig = prettierrCconfig
+  ? JSON.parse(prettierrCconfig)
+  : {
       semi: false,
       singleQuote: true,
       endOfLine: 'auto',
       proseWrap: 'never',
       printWidth: 120,
       trailingComma: 'none'
-    },
+    }
+
+const main = async () => {
+  const config = {
+    projectPath: process.cwd(),
+    globalPath: 'src',
+    includeDir: ['pages'],
+    exts: ['.vue'],
+    prettier: prettierrCconfig,
     lang: {
       primaryFile: {
         lang: 'zh',

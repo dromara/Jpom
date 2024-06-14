@@ -19,6 +19,7 @@ import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.func.assets.server.MachineSshServer;
@@ -122,7 +123,7 @@ public class SshController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<SshModel> getItem(@ValidatorItem String id, HttpServletRequest request) {
         SshModel byKey = sshService.getByKey(id, request);
-        Assert.notNull(byKey, "对应的 ssh 不存在");
+        Assert.notNull(byKey, I18nMessageUtil.get("i18n.ssh_does_not_exist_with_message.de6c"));
         return new JsonMessage<>(200, "", byKey);
     }
 
@@ -149,7 +150,7 @@ public class SshController extends BaseServerController {
      */
     @PostMapping(value = "save.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public IJsonMessage<String> save(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "ssh名称不能为空") String name,
+    public IJsonMessage<String> save(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.parameter_error_ssh_name_cannot_be_empty.ff4f") String name,
                                      String id,
                                      String group,
                                      HttpServletRequest request) {
@@ -158,7 +159,7 @@ public class SshController extends BaseServerController {
         sshModel.setGroup(group);
         sshModel.setId(id);
         sshService.updateById(sshModel, request);
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
 
@@ -166,15 +167,15 @@ public class SshController extends BaseServerController {
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<Object> del(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id, HttpServletRequest request) {
         boolean checkSsh = buildInfoService.checkReleaseMethodByLike(id, request, BuildReleaseMethod.Ssh);
-        Assert.state(!checkSsh, "当前ssh存在构建项，不能删除");
+        Assert.state(!checkSsh, I18nMessageUtil.get("i18n.ssh_with_build_items_message.0f6d"));
         // 判断是否绑定节点
         List<NodeModel> nodeBySshId = nodeService.getNodeBySshId(id);
-        Assert.state(CollUtil.isEmpty(nodeBySshId), "当前ssh被节点绑定，不能删除");
+        Assert.state(CollUtil.isEmpty(nodeBySshId), I18nMessageUtil.get("i18n.ssh_bound_to_node_message.7b64"));
 
         sshService.delByKey(id, request);
         //
         int logCount = sshTerminalExecuteLogService.delByWorkspace(request, entity -> entity.set("sshId", id));
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
     @PostMapping(value = "del-fore", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -182,15 +183,15 @@ public class SshController extends BaseServerController {
     @SystemPermission
     public IJsonMessage<Object> delFore(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id) {
         boolean checkSsh = buildInfoService.checkReleaseMethodByLike(id, BuildReleaseMethod.Ssh);
-        Assert.state(!checkSsh, "当前ssh存在构建项，不能删除");
+        Assert.state(!checkSsh, I18nMessageUtil.get("i18n.ssh_with_build_items_message.0f6d"));
         // 判断是否绑定节点
         List<NodeModel> nodeBySshId = nodeService.getNodeBySshId(id);
-        Assert.state(CollUtil.isEmpty(nodeBySshId), "当前ssh被节点绑定，不能删除");
+        Assert.state(CollUtil.isEmpty(nodeBySshId), I18nMessageUtil.get("i18n.ssh_bound_to_node_message.7b64"));
 
         sshService.delByKey(id);
         //
         int logCount = sshTerminalExecuteLogService.delByKey(null, entity -> entity.set("sshId", id));
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
     /**
@@ -202,7 +203,7 @@ public class SshController extends BaseServerController {
     @Feature(cls = ClassFeature.SSH_TERMINAL_LOG, method = MethodFeature.LIST)
     public IJsonMessage<PageResultDto<SshTerminalExecuteLog>> logListData(HttpServletRequest request) {
         PageResultDto<SshTerminalExecuteLog> pageResult = sshTerminalExecuteLogService.listPage(request);
-        return JsonMessage.success("获取成功", pageResult);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.get_success.fb55"), pageResult);
     }
 
     /**
@@ -222,6 +223,6 @@ public class SshController extends BaseServerController {
         //
         sshService.checkUserWorkspace(toWorkspaceId);
         sshService.syncToWorkspace(ids, nowWorkspaceId, toWorkspaceId);
-        return JsonMessage.success("操作成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 }

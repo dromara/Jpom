@@ -25,6 +25,7 @@ import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.model.data.SshModel;
 import org.dromara.jpom.model.user.UserModel;
@@ -101,8 +102,8 @@ public class SshHandler extends BaseTerminalHandler {
             handlerItem.startRead();
         } catch (Exception e) {
             // 输出超时日志 @author jzy
-            log.error("ssh 控制台连接超时", e);
-            sendBinary(session, "ssh 控制台连接超时");
+            log.error(I18nMessageUtil.get("i18n.ssh_console_connection_timeout.8eb3"), e);
+            sendBinary(session, I18nMessageUtil.get("i18n.ssh_console_connection_timeout.8eb3"));
             this.destroy(session);
             return;
         }
@@ -115,7 +116,7 @@ public class SshHandler extends BaseTerminalHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         HandlerItem handlerItem = HANDLER_ITEM_CONCURRENT_HASH_MAP.get(session.getId());
         if (handlerItem == null) {
-            sendBinary(session, "已经离线啦");
+            sendBinary(session, I18nMessageUtil.get("i18n.already_offline.d3b5"));
             IoUtil.close(session);
             return;
         }
@@ -143,7 +144,7 @@ public class SshHandler extends BaseTerminalHandler {
             this.sendCommand(handlerItem, payload, userInfo, sshCommandNotLimited);
         } catch (Exception e) {
             sendBinary(session, "Failure:" + e.getMessage());
-            log.error("执行命令异常", e);
+            log.error(I18nMessageUtil.get("i18n.command_execution_exception.4ccd"), e);
         }
     }
 
@@ -151,7 +152,7 @@ public class SshHandler extends BaseTerminalHandler {
         if (handlerItem.checkInput(data, userInfo, sshCommandNotLimited)) {
             handlerItem.outputStream.write(data.getBytes());
         } else {
-            handlerItem.outputStream.write("没有执行相关命令权限".getBytes());
+            handlerItem.outputStream.write(I18nMessageUtil.get("i18n.no_permission_to_execute_command.04d4").getBytes());
             handlerItem.outputStream.flush();
             handlerItem.outputStream.write(new byte[]{3});
         }
@@ -287,7 +288,7 @@ public class SshHandler extends BaseTerminalHandler {
                     log.error("ssh 错误：{}", e.getMessage());
                     return;
                 }
-                log.error("读取错误", e);
+                log.error(I18nMessageUtil.get("i18n.read_error.7fa5"), e);
                 SshHandler.this.destroy(this.session);
             }
         }

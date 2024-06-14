@@ -12,6 +12,7 @@ package org.dromara.jpom.controller.outgiving;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.log.OutGivingLog;
 import org.dromara.jpom.permission.ClassFeature;
@@ -47,6 +48,6 @@ public class OutGivingLogController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<PageResultDto<OutGivingLog>> listData(HttpServletRequest request) {
         PageResultDto<OutGivingLog> pageResult = dbOutGivingLogService.listPage(request);
-        return JsonMessage.success("获取成功", pageResult);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.get_success.fb55"), pageResult);
     }
 }

@@ -11,6 +11,7 @@ package org.dromara.jpom.plugins;
 
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 
 /**
  * @author bwcx_
@@ -33,7 +34,7 @@ public class JschLogger implements com.jcraft.jsch.Logger {
             case FATAL:
                 return log.isErrorEnabled();
             default:
-                log.warn("未知的 jsch 日志级别：{}", level);
+                log.warn(I18nMessageUtil.get("i18n.unknown_jsch_log_level.6a5c"), level);
                 return false;
         }
     }
@@ -59,7 +60,7 @@ public class JschLogger implements com.jcraft.jsch.Logger {
                 log.error(message);
                 break;
             default:
-                log.warn("未知的 jsch 日志级别：{} {}", level, message);
+                log.warn(I18nMessageUtil.get("i18n.unknown_jsch_log_level_with_details.1f9a"), level, message);
         }
     }
 }

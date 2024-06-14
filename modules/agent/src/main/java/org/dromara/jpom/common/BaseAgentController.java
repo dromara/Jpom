@@ -13,6 +13,7 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.service.manage.ProjectInfoService;
 import org.springframework.util.Assert;
@@ -73,7 +74,7 @@ public abstract class BaseAgentController extends BaseJpomController {
     protected NodeProjectInfoModel getProjectInfoModel() {
         String id = getParameter("id");
         NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel(id);
-        Assert.notNull(nodeProjectInfoModel, "获取项目信息失败:" + id);
+        Assert.notNull(nodeProjectInfoModel, I18nMessageUtil.get("i18n.get_project_info_failure.ddff") + id);
         return nodeProjectInfoModel;
     }
 
@@ -84,7 +85,7 @@ public abstract class BaseAgentController extends BaseJpomController {
      */
     protected NodeProjectInfoModel getProjectInfoModel(String id) {
         NodeProjectInfoModel nodeProjectInfoModel = tryGetProjectInfoModel(id);
-        Assert.notNull(nodeProjectInfoModel, "获取项目信息失败:" + id);
+        Assert.notNull(nodeProjectInfoModel, I18nMessageUtil.get("i18n.get_project_info_failure.ddff") + id);
         return nodeProjectInfoModel;
     }
 
