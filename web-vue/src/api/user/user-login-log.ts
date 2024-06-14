@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 ///
 /// Copyright (c) 2019 Of Him Code Technology Studio
 /// Jpom is licensed under Mulan PSL v2.
@@ -19,11 +20,11 @@ export function userLoginLgin(params) {
 }
 
 export const operateCodeMap = {
-  0: '正常登录',
-  1: '密码错误',
-  2: '账号被锁定',
-  3: '自动续期',
-  4: '账号被禁用',
-  5: '登录成功,需要验证 MFA',
+  0: t('api.user.user-login-log.a1d02c3e'),
+  1: t('api.user.user-login-log.e5849544'),
+  2: t('api.user.user-login-log.2d6b6d8f'),
+  3: t('api.user.user-login-log.d08efdf4'),
+  4: t('api.user.user-login-log.227abc8e'),
+  5: t('api.user.user-login-log.521c4ec2'),
   6: 'oauth2'
 }

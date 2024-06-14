@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 ///
 /// Copyright (c) 2019 Of Him Code Technology Studio
 /// Jpom is licensed under Mulan PSL v2.
@@ -139,8 +140,8 @@ export function deleteMonitorOperate(id) {
 }
 
 export const notifyStyle = {
-  0: '钉钉',
-  1: '邮箱',
-  2: '企业微信',
+  0: t('api.monitor.ca3e5e1b'),
+  1: t('api.monitor.c654b275'),
+  2: t('api.monitor.6dcc4f03'),
   3: 'webhook'
 }
