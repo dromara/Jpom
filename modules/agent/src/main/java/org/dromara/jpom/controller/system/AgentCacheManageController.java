@@ -25,9 +25,11 @@ import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.configuration.SystemConfig;
 import org.dromara.jpom.cron.CronUtils;
+import org.dromara.jpom.model.data.ScriptLibraryModel;
 import org.dromara.jpom.model.system.WorkspaceEnvVarModel;
 import org.dromara.jpom.plugin.PluginFactory;
 import org.dromara.jpom.service.script.NodeScriptExecLogServer;
+import org.dromara.jpom.service.script.ScriptLibraryService;
 import org.dromara.jpom.service.system.AgentWorkspaceEnvVarService;
 import org.dromara.jpom.socket.AgentFileTailWatcher;
 import org.dromara.jpom.util.CommandUtil;
@@ -39,8 +41,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 /**
  * 缓存管理
@@ -56,6 +60,7 @@ public class AgentCacheManageController extends BaseAgentController implements I
     private final JpomApplication configBean;
     private final NodeScriptExecLogServer nodeScriptExecLogServer;
     private final SystemConfig systemConfig;
+    private final ScriptLibraryService scriptLibraryService;
 
     private long dataSize;
     private long oldJarsSize;
@@ -64,11 +69,13 @@ public class AgentCacheManageController extends BaseAgentController implements I
     public AgentCacheManageController(AgentWorkspaceEnvVarService agentWorkspaceEnvVarService,
                                       JpomApplication configBean,
                                       NodeScriptExecLogServer nodeScriptExecLogServer,
-                                      AgentConfig agentConfig) {
+                                      AgentConfig agentConfig,
+                                      ScriptLibraryService scriptLibraryService) {
         this.agentWorkspaceEnvVarService = agentWorkspaceEnvVarService;
         this.configBean = configBean;
         this.nodeScriptExecLogServer = nodeScriptExecLogServer;
         this.systemConfig = agentConfig.getSystem();
+        this.scriptLibraryService = scriptLibraryService;
     }
 
     /**
@@ -97,6 +104,12 @@ public class AgentCacheManageController extends BaseAgentController implements I
                 jsonObject.put("envVarKeys", varData.keySet());
             }
         }
+        //
+        List<ScriptLibraryModel> scriptLibraryModels = scriptLibraryService.list();
+        Map<String, String> scriptLibraryTagMap = scriptLibraryModels.stream()
+            .collect(Collectors.toMap(ScriptLibraryModel::getTag, ScriptLibraryModel::getVersion));
+        jsonObject.put("scriptLibraryTagMap", scriptLibraryTagMap);
+        //
         jsonObject.put("dateTime", DateTime.now().toString());
         jsonObject.put("timeZoneId", TimeZone.getDefault().getID());
         // 待同步待日志数

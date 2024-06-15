@@ -68,11 +68,27 @@
           <a-timeline-item>
             <div class="layui-elem-quote">
               {{ $t('pages.node.node-layout.system.cache.c317de67') }}
-              <a-tag v-for="(item, index) in temp.envVarKeys" :key="index">
-                <a-tooltip :title="`${$t('pages.node.node-layout.system.cache.632d5d79')}:${item}`">
-                  {{ item }}
-                </a-tooltip>
-              </a-tag>
+              <template v-if="temp.envVarKeys?.length">
+                <a-tag v-for="(item, index) in temp.envVarKeys" :key="index">
+                  <a-tooltip :title="`${$t('pages.node.node-layout.system.cache.632d5d79')}:${item}`">
+                    {{ item }}
+                  </a-tooltip>
+                </a-tag>
+              </template>
+              <template v-else>-</template>
+            </div>
+          </a-timeline-item>
+          <a-timeline-item>
+            <div class="layui-elem-quote">
+              脚本库：
+              <template v-if="temp.scriptLibraryTagMap && Object.keys(temp.scriptLibraryTagMap).length">
+                <a-tag v-for="(item, key) in temp.scriptLibraryTagMap" :key="key">
+                  <a-tooltip :title="`脚本版本:${item}`">
+                    {{ key }}
+                  </a-tooltip>
+                </a-tag>
+              </template>
+              <template v-else>-</template>
             </div>
           </a-timeline-item>
         </a-timeline>

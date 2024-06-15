@@ -1,5 +1,5 @@
 <template>
-  <defaultBg :show-footer="false">
+  <defaultBg :show-footer="true">
     <template #content>
       <a-card class="login-card" hoverable>
         <a-card-meta :title="`${loginTitle}`" style="text-align: center" description="" />

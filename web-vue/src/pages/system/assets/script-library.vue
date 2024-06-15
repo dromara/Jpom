@@ -108,7 +108,12 @@
         </a-form-item>
         <a-form-item label="内容" name="script">
           <a-form-item-rest>
-            <code-editor v-model:content="temp.script" height="40vh" :options="{ mode: 'shell', tabSize: 2 }">
+            <code-editor
+              v-model:content="temp.script"
+              :show-tool="true"
+              height="40vh"
+              :options="{ mode: 'shell', tabSize: 2 }"
+            >
             </code-editor>
           </a-form-item-rest>
         </a-form-item>
@@ -131,6 +136,7 @@
               <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
+          <template #help>下拉搜索默认搜索关键词相关的前 10 个，以及已经选择的机器节点</template>
           <a-select
             v-model:value="temp.chooseNode"
             show-search

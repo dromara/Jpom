@@ -70,3 +70,14 @@ const i18n = createI18n<I18nLocaleType>({
 export default i18n
 
 export const { t } = i18n.global
+
+export const supportLang = [
+  {
+    label: '\u7b80\u4f53\u4e2d\u6587',
+    value: 'zh-cn'
+  },
+  {
+    label: 'English',
+    value: 'en-us'
+  }
+]

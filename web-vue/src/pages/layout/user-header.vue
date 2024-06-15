@@ -386,6 +386,7 @@
       :title="$t('pages.layout.user-header.3d14e1fe')"
       :footer="null"
       :mask-closable="false"
+      width="50%"
     >
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
         <a-alert banner>
@@ -410,15 +411,14 @@
           </a-space>
         </a-form-item> -->
         <a-form-item :label="$t('pages.layout.user-header.a04d6e8d')">
-          <a-space>
-            <a-switch
-              :checked-children="$t('pages.layout.user-header.f5bb2364')"
-              :checked="menuMultipleFlag"
-              :un-checked-children="$t('pages.layout.user-header.5edb2e8a')"
-              @click="toggleMenuMultiple"
-            />
-            {{ $t('pages.layout.user-header.158342fd') }}
-          </a-space>
+          <template #help>{{ $t('pages.layout.user-header.158342fd') }}</template>
+
+          <a-switch
+            :checked-children="$t('pages.layout.user-header.f5bb2364')"
+            :checked="menuMultipleFlag"
+            :un-checked-children="$t('pages.layout.user-header.5edb2e8a')"
+            @click="toggleMenuMultiple"
+          />
         </a-form-item>
         <!-- <a-form-item label="页面配置">
           <a-space>
@@ -443,53 +443,50 @@
           </a-space>
         </a-form-item> -->
         <a-form-item :label="$t('pages.layout.user-header.a0f7ed4f')">
-          <a-space>
-            <a-switch
-              :checked-children="$t('pages.layout.user-header.4fc84727')"
-              :checked="fullscreenViewLog"
-              :un-checked-children="$t('pages.layout.user-header.bcb85748')"
-              @click="toggleFullscreenViewLog"
-            />
-            {{ $t('pages.layout.user-header.378c8cf6') }}
-          </a-space>
+          <template #help>{{ $t('pages.layout.user-header.378c8cf6') }}</template>
+
+          <a-switch
+            :checked-children="$t('pages.layout.user-header.4fc84727')"
+            :checked="fullscreenViewLog"
+            :un-checked-children="$t('pages.layout.user-header.bcb85748')"
+            @click="toggleFullscreenViewLog"
+          />
         </a-form-item>
         <a-form-item :label="$t('pages.layout.user-header.cf6a1e7a')">
-          <a-space>
-            <a-radio-group v-model:value="themeView" button-style="solid">
-              <a-radio-button value="light">{{ $t('pages.layout.user-header.a9bad4a1') }}</a-radio-button>
-              <a-radio-button value="dark">{{ $t('pages.layout.user-header.67b903b1') }}</a-radio-button>
-              <a-radio-button value="auto">{{ $t('pages.layout.user-header.58a45933') }}</a-radio-button>
-            </a-radio-group>
-            {{ $t('pages.layout.user-header.ad301071') }}
-          </a-space>
+          <a-radio-group v-model:value="themeView" button-style="solid">
+            <a-radio-button value="light">{{ $t('pages.layout.user-header.a9bad4a1') }}</a-radio-button>
+            <a-radio-button value="dark">{{ $t('pages.layout.user-header.67b903b1') }}</a-radio-button>
+            <a-radio-button value="auto">{{ $t('pages.layout.user-header.58a45933') }}</a-radio-button>
+          </a-radio-group>
+
+          <template #help>{{ $t('pages.layout.user-header.ad301071') }}</template>
         </a-form-item>
         <a-form-item :label="$t('pages.layout.user-header.e1e68c8b')">
-          <a-space>
-            <a-radio-group v-model:value="menuThemeView" button-style="solid">
-              <a-radio-button value="light">{{ $t('pages.layout.user-header.a9bad4a1') }}</a-radio-button>
-              <a-radio-button value="dark">{{ $t('pages.layout.user-header.67b903b1') }}</a-radio-button>
-            </a-radio-group>
-            {{ $t('pages.layout.user-header.1c0c4705') }}
-          </a-space>
+          <a-radio-group v-model:value="menuThemeView" button-style="solid">
+            <a-radio-button value="light">{{ $t('pages.layout.user-header.a9bad4a1') }}</a-radio-button>
+            <a-radio-button value="dark">{{ $t('pages.layout.user-header.67b903b1') }}</a-radio-button>
+          </a-radio-group>
+
+          <template #help>{{ $t('pages.layout.user-header.1c0c4705') }}</template>
         </a-form-item>
 
         <a-form-item :label="$t('pages.layout.user-header.15692164')">
-          <a-space>
-            <a-switch
-              :checked-children="$t('pages.layout.user-header.e39a73de')"
-              :checked="compactView"
-              :un-checked-children="$t('pages.layout.user-header.96425f5')"
-              @click="toggleCompactView"
-            />
+          <a-switch
+            :checked-children="$t('pages.layout.user-header.e39a73de')"
+            :checked="compactView"
+            :un-checked-children="$t('pages.layout.user-header.96425f5')"
+            @click="toggleCompactView"
+          />
+
+          <template #help>
             {{ $t('pages.layout.user-header.1538a492') }}({{ $t('pages.layout.user-header.bb6fe415') }})
-          </a-space>
+          </template>
         </a-form-item>
         <a-form-item :label="$t('pages.layout.user-header.ee091a03')">
           <a-space>
-            <a-radio-group v-model:value="locale" button-style="solid">
-              <a-radio-button value="zh-cn">{{ $t('pages.layout.user-header.9ca25f75') }}</a-radio-button>
-              <a-radio-button value="en-us">English</a-radio-button>
-            </a-radio-group>
+            <a-select v-model:value="locale">
+              <a-select-option v-for="item in supportLang" :key="item.value">{{ item.label }}</a-select-option>
+            </a-select>
           </a-space>
         </a-form-item>
       </a-form>
@@ -550,7 +547,7 @@ import { mapState } from 'pinia'
 import { useUserStore } from '@/stores/user'
 import { useAppStore } from '@/stores/app'
 import { useGuideStore } from '@/stores/guide'
-
+import { supportLang } from '@/i18n'
 import { useAllMenuStore } from '@/stores/menu2'
 export default {
   components: {
@@ -565,6 +562,7 @@ export default {
   },
   data() {
     return {
+      supportLang,
       collapsed: false,
       // 修改密码框
       updateNameVisible: false,
@@ -658,11 +656,6 @@ export default {
     locale: {
       set: function (value) {
         useGuideStore().changeLocale(value)
-        //清空本地 tabs
-        const menuStore = useAllMenuStore()
-        // 调用其他 action
-        menuStore.clearTabs('normal', { key: 'all' })
-        menuStore.clearTabs('management', { key: 'all' })
       },
       get: function () {
         return useGuideStore().getLocale()

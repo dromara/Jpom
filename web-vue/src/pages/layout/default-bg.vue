@@ -37,18 +37,39 @@
     </div>
 
     <div v-show="showFooter" class="footer">
-      <a-button type="text">
-        <a href="https://jpom.top" target="_blank">
-          Jpom ©2019-{{ new Date().getFullYear() }} Of Him Code Technology Studio
-        </a>
-      </a-button>
+      <a-space>
+        <template #split>
+          <a-divider type="vertical" />
+        </template>
+        <a-button type="text">
+          <a href="https://jpom.top" target="_blank">
+            Jpom ©2019-{{ new Date().getFullYear() }} Of Him Code Technology Studio
+          </a>
+        </a-button>
+        <a-select v-model:value="nowLang" size="small">
+          <a-select-option v-for="item in supportLang" :key="item.value">{{ item.label }}</a-select-option>
+        </a-select>
+      </a-space>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
+import { supportLang } from '@/i18n'
+
 const guideStore1 = guideStore()
+const useGuideStore = guideStore()
+
 const theme = computed(() => {
   return guideStore1.getThemeView()
+})
+
+const nowLang = computed({
+  get() {
+    return useGuideStore.getLocale()
+  },
+  set(newValue) {
+    useGuideStore.changeLocale(newValue)
+  }
 })
 
 defineProps({

@@ -8,6 +8,7 @@
 /// See the Mulan PSL v2 for more details.
 ///
 
+import { useAllMenuStore } from './menu2'
 /**
  * 引导相关 store
  *
@@ -142,6 +143,12 @@ export const useGuideStore = defineStore('guide', {
       const cache = this.getGuideCache
       cache.locale = locale || 'zh-cn'
       this.setGuideCache(cache)
+      //
+      //清空本地 tabs
+      const menuStore = useAllMenuStore()
+      // 调用其他 action
+      menuStore.clearTabs('normal', { key: 'all' })
+      menuStore.clearTabs('management', { key: 'all' })
       location.reload()
     }
   },
