@@ -157,7 +157,7 @@
 </template>
 <script lang="ts" setup>
 import { bindMfa } from '@/api/user/user'
-import { MFA_APP_TIP_ARRAY } from '@/utils/const'
+import { MFA_APP_TIP_ARRAY } from '@/utils/const-i18n'
 import sha1 from 'js-sha1'
 import { checkSystem } from '@/api/install'
 import { initInstall } from '@/api/install'

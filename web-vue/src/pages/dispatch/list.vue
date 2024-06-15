@@ -1061,11 +1061,11 @@ import {
   CHANGE_PAGE,
   COMPUTED_PAGINATION,
   PAGE_DEFAULT_LIST_QUERY,
-  PROJECT_DSL_DEFATUL,
   randomStr,
   itemGroupBy,
   parseTime
 } from '@/utils/const'
+import { PROJECT_DSL_DEFATUL } from '@/utils/const-i18n'
 import scriptPage from '@/pages/script/script-list'
 import CustomSelect from '@/components/customSelect'
 import whiteList from '@/pages/dispatch/white-list'

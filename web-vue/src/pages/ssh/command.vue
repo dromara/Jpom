@@ -421,7 +421,8 @@
 </template>
 <script>
 import { deleteCommand, editCommand, executeBatch, getCommandList, syncToWorkspace, getTriggerUrl } from '@/api/command'
-import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
+import { CRON_DATA_SOURCE } from '@/utils/const-i18n'
 import { getSshListAll } from '@/api/ssh'
 import codeEditor from '@/components/codeEditor'
 import CommandLog from './command-view-log'

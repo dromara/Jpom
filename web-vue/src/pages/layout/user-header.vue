@@ -541,7 +541,8 @@ import {
 
 import sha1 from 'js-sha1'
 // import Vue from 'vue'
-import { MFA_APP_TIP_ARRAY, itemGroupBy } from '@/utils/const'
+import { itemGroupBy } from '@/utils/const'
+import { MFA_APP_TIP_ARRAY } from '@/utils/const-i18n'
 import UserLog from './user-log.vue'
 import { mapState } from 'pinia'
 import { useUserStore } from '@/stores/user'
