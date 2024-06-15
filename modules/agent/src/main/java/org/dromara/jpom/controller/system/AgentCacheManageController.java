@@ -117,7 +117,7 @@ public class AgentCacheManageController extends BaseAgentController implements I
         jsonObject.put("scriptExecLogSize", size);
         jsonObject.put("timerMatchSecond", systemConfig.isTimerMatchSecond());
         //
-        return JsonMessage.success("ok", jsonObject);
+        return JsonMessage.success("", jsonObject);
     }
 
     /**

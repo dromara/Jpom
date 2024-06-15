@@ -70,7 +70,7 @@ public class NodeProjectInfoController extends BaseServerController {
     @PostMapping(value = "project_list", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<PageResultDto<ProjectInfoCacheModel>> projectList(HttpServletRequest request) {
         PageResultDto<ProjectInfoCacheModel> resultDto = projectInfoCacheService.listPage(request);
-        return JsonMessage.success("success", resultDto);
+        return JsonMessage.success("", resultDto);
     }
 
     /**

@@ -155,7 +155,7 @@ public class ScriptController extends BaseAgentController {
         JSONObject data = FileUtils.readLogFile(logFile, line);
         // 运行中
         data.put("run", NodeScriptProcessBuilder.isRun(executeId));
-        return JsonMessage.success("ok", data);
+        return JsonMessage.success("", data);
     }
 
     /**

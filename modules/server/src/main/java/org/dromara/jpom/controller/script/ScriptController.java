@@ -86,7 +86,7 @@ public class ScriptController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<PageResultDto<ScriptModel>> scriptList(HttpServletRequest request) {
         PageResultDto<ScriptModel> pageResultDto = scriptServer.listPage(request);
-        return JsonMessage.success("success", pageResultDto);
+        return JsonMessage.success("", pageResultDto);
     }
 
     /**
@@ -98,7 +98,7 @@ public class ScriptController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<List<ScriptModel>> scriptListAll(HttpServletRequest request) {
         List<ScriptModel> pageResultDto = scriptServer.listByWorkspace(request);
-        return JsonMessage.success("success", pageResultDto);
+        return JsonMessage.success("", pageResultDto);
     }
 
     @RequestMapping(value = "save.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

@@ -97,7 +97,7 @@ public class MonitorUserOptListController extends BaseServerController {
             .collect(Collectors.toList());
         jsonObject.put("methodFeature", methodFeatureList);
 
-        return JsonMessage.success("success", jsonObject);
+        return JsonMessage.success("", jsonObject);
     }
 
     /**

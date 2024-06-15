@@ -87,7 +87,7 @@ public class WhitelistDirectoryController extends BaseServerController {
                 }
             }
         }
-        return JsonMessage.success("ok", map);
+        return JsonMessage.success("", map);
     }
 
 

@@ -176,7 +176,7 @@ public class SystemExtConfigController extends BaseServerController {
         Tree<String> stringTree = TreeUtil.buildSingle(allList, StrUtil.SLASH);
         stringTree.setName(StrUtil.SLASH);
 
-        return JsonMessage.success("ok", stringTree);
+        return JsonMessage.success("", stringTree);
     }
 
     @GetMapping(value = "get-item", produces = MediaType.APPLICATION_JSON_VALUE)
