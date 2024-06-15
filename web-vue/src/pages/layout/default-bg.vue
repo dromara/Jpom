@@ -46,13 +46,48 @@
             Jpom ©2019-{{ new Date().getFullYear() }} Of Him Code Technology Studio
           </a>
         </a-button>
-        <a-select v-model:value="nowLang" size="small">
-          <a-select-option v-for="item in supportLang" :key="item.value">
-            <a-tooltip :title="`${item.label}(${item.value})`">
-              {{ item.label }}
-            </a-tooltip>
-          </a-select-option>
-        </a-select>
+        <a-dropdown>
+          <a-button type="text">
+            {{
+              supportLang.find((item) => {
+                return item.value === nowLang
+              })?.label
+            }}
+            <DownOutlined />
+          </a-button>
+          <template #overlay>
+            <a-menu>
+              <a-menu-item v-for="item in supportLang" :key="item.value">
+                <span @click="useGuideStore.changeLocale(item.value)">
+                  <a-tooltip :title="`${item.label}(${item.value})`">
+                    {{ item.label }}
+                  </a-tooltip>
+                </span>
+              </a-menu-item>
+            </a-menu>
+          </template>
+        </a-dropdown>
+        <a-dropdown>
+          <a-button type="text">
+            {{
+              useGuideStore.getSupportThemes.find((item) => {
+                return item.value === theme
+              })?.label
+            }}
+            <DownOutlined />
+          </a-button>
+          <template #overlay>
+            <a-menu>
+              <a-menu-item v-for="item in useGuideStore.getSupportThemes" :key="item.value">
+                <span @click="useGuideStore.toggleThemeView(item.value)">
+                  <a-tooltip :title="`${item.label}(${item.value})`">
+                    {{ item.label }}
+                  </a-tooltip>
+                </span>
+              </a-menu-item>
+            </a-menu>
+          </template>
+        </a-dropdown>
       </a-space>
     </div>
   </div>

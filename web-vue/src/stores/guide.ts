@@ -168,6 +168,22 @@ export const useGuideStore = defineStore('guide', {
         return state.guideCache.themeView || 'auto'
       }
     },
+    getSupportThemes: () => {
+      return [
+        {
+          label: '跟随系统',
+          value: 'auto'
+        },
+        {
+          label: '浅色',
+          value: 'light'
+        },
+        {
+          label: '深色',
+          value: 'dark'
+        }
+      ]
+    },
     getThemeView: (state) => {
       return () => {
         const themeView = state?.getCatchThemeView ? state.getCatchThemeView() : 'light'
