@@ -14,6 +14,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.http.Header;
+import cn.hutool.system.SystemUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,10 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.function.Supplier;
 
 /**
  * 国际化转换工具类
@@ -32,6 +36,53 @@ import java.util.Locale;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
 public class I18nMessageUtil {
+    /**
+     * 线程中的语言
+     */
+    private static final ThreadLocal<String> LANGUAGE = new ThreadLocal<>();
+    /**
+     * 语言获取方式
+     */
+    private static final List<Supplier<String>> LANGUAGE_OBTAIN = new ArrayList<>();
+
+    static {
+        // 线程变量获取
+        LANGUAGE_OBTAIN.add(LANGUAGE::get);
+        // http 请求获取
+        LANGUAGE_OBTAIN.add(I18nMessageUtil::getLanguageByRequest);
+        // 系统配置获取
+        LANGUAGE_OBTAIN.add(() -> SystemUtil.get("JPOM_LANG"));
+    }
+
+    /**
+     * 设置语言
+     *
+     * @param language 语言
+     */
+    public static void setLanguage(String language) {
+        LANGUAGE.set(language);
+    }
+
+    /**
+     * 清除语言
+     */
+    public static void clearLanguage() {
+        LANGUAGE.remove();
+    }
+
+    /**
+     * 获取语言 通过 http 请求
+     *
+     * @return 语言
+     */
+    public static String getLanguageByRequest() {
+        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (servletRequestAttributes != null) {
+            HttpServletRequest request = servletRequestAttributes.getRequest();
+            return ServletUtil.getHeader(request, Header.ACCEPT_LANGUAGE.getValue(), CharsetUtil.CHARSET_UTF_8);
+        }
+        return null;
+    }
 
     /**
      * 获取语言
@@ -42,7 +93,17 @@ public class I18nMessageUtil {
     public static String parseLanguage(HttpServletRequest request) {
         String language = ServletUtil.getHeader(request, Header.ACCEPT_LANGUAGE.getValue(), CharsetUtil.CHARSET_UTF_8);
         language = StrUtil.emptyToDefault(language, "zh-cn");
-        language = language.toLowerCase();
+        return normalLanguage(language);
+    }
+
+    /**
+     * 语言格式化
+     *
+     * @param language 语言
+     * @return 语言
+     */
+    private static String normalLanguage(String language) {
+        language = language != null ? language.toLowerCase() : StrUtil.EMPTY;
         switch (language) {
             case "en-us":
             case "en_us":
@@ -64,12 +125,14 @@ public class I18nMessageUtil {
         if (StrUtil.isEmpty(key)) {
             return StrUtil.EMPTY;
         }
-        String language = "zh-CN";
-        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (servletRequestAttributes != null) {
-            HttpServletRequest request = servletRequestAttributes.getRequest();
-            language = parseLanguage(request);
+        String language = null;
+        for (Supplier<String> supplier : LANGUAGE_OBTAIN) {
+            language = supplier.get();
+            if (language != null) {
+                break;
+            }
         }
+        language = normalLanguage(language);
         Locale locale;
         switch (language) {
             case "zh-CN":

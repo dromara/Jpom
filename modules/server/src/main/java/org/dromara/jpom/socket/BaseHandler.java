@@ -25,6 +25,7 @@ import org.dromara.jpom.system.init.OperateLogController;
 import org.dromara.jpom.util.SocketSessionUtil;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
@@ -39,20 +40,48 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public abstract class BaseHandler extends TextWebSocketHandler {
 
-    @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        Map<String, Object> attributes = session.getAttributes();
-        //
-        this.showHelloMsg(attributes, session);
-        //
-        String permissionMsg = (String) attributes.get("permissionMsg");
-        if (StrUtil.isNotEmpty(permissionMsg)) {
-            this.sendMsg(session, permissionMsg);
-            ThreadUtil.sleep(2, TimeUnit.SECONDS);
-            this.destroy(session);
+    protected void setLanguage(WebSocketSession session) {
+        if (session == null) {
             return;
         }
-        this.afterConnectionEstablishedImpl(session);
+        Map<String, Object> attributes = session.getAttributes();
+        String lang = (String) attributes.get("lang");
+        I18nMessageUtil.setLanguage(lang);
+    }
+
+    protected void clearLanguage() {
+        I18nMessageUtil.clearLanguage();
+    }
+
+    @Override
+    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+        setLanguage(session);
+        try {
+            Map<String, Object> attributes = session.getAttributes();
+            //
+            this.showHelloMsg(attributes, session);
+            //
+            String permissionMsg = (String) attributes.get("permissionMsg");
+            if (StrUtil.isNotEmpty(permissionMsg)) {
+                this.sendMsg(session, permissionMsg);
+                ThreadUtil.sleep(2, TimeUnit.SECONDS);
+                this.destroy(session);
+                return;
+            }
+            this.afterConnectionEstablishedImpl(session);
+        } finally {
+            clearLanguage();
+        }
+    }
+
+    @Override
+    public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
+        try {
+            setLanguage(session);
+            super.handleMessage(session, message);
+        } finally {
+            clearLanguage();
+        }
     }
 
     protected void showHelloMsg(Map<String, Object> attributes, WebSocketSession session) {
@@ -77,7 +106,7 @@ public abstract class BaseHandler extends TextWebSocketHandler {
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) {
-        log.error(session.getId() + I18nMessageUtil.get("i18n.socket_exception.d836"), exception);
+        log.error("{}{}", session.getId(), I18nMessageUtil.get("i18n.socket_exception.d836"), exception);
         destroy(session);
     }
 

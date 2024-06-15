@@ -202,6 +202,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
             String userId = httpServletRequest.getParameter("userId");
             String workspaceId = httpServletRequest.getParameter(ServerConst.WORKSPACE_ID_REQ_HEADER);
             attributes.put("workspaceId", workspaceId);
+            attributes.put("lang", httpServletRequest.getParameter("lang"));
             UserModel userModel = userService.checkUser(userId);
             if (userModel == null) {
                 String string = I18nMessageUtil.get("i18n.user_not_exist.4892");
