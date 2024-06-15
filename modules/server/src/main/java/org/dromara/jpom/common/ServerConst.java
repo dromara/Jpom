@@ -43,7 +43,6 @@ public class ServerConst extends Const {
 
     public static final String PROXY_PATH = "Jpom-ProxyPath";
 
-
     /**
      * 分发包存储路径
      */

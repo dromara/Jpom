@@ -303,6 +303,9 @@
             :checked-children="$t('pages.system.assets.docker.list.b1d6efbd')"
             :un-checked-children="$t('pages.system.assets.docker.list.b6bb836')"
           />
+          <template #help>
+            <div v-if="temp.enableSsh">SSH方式连接的 docker 不建议用于容器构建（SSH 方式用于构建非常不稳定）</div>
+          </template>
         </a-form-item>
         <a-form-item v-if="temp.enableSsh" :label="$t('pages.system.assets.docker.list.3c5f6a8d')" name="enableSsh">
           <a-select

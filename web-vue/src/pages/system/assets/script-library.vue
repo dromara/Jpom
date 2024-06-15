@@ -202,7 +202,7 @@ export default {
           title: '描述',
           dataIndex: 'description',
           ellipsis: true,
-          width: 100,
+          width: 200,
           tooltip: true
         },
         {
@@ -242,7 +242,7 @@ export default {
           align: 'center',
 
           fixed: 'right',
-          width: '240px'
+          width: '140px'
         }
       ],
       rules: {
