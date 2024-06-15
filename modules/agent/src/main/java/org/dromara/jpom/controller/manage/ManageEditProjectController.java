@@ -196,7 +196,7 @@ public class ManageEditProjectController extends BaseAgentController {
             exits.setJvm(projectInfo.getJvm());
             exits.setArgs(projectInfo.getArgs());
             if (StrUtil.isNotEmpty(exits.getWorkspaceId())) {
-                Assert.state(StrUtil.equals(exits.getWorkspaceId(), workspaceId), "当前项目已经被其他工作空间关联,请检查确认后再操作或者使用孤独数据修正");
+                Assert.state(StrUtil.equals(exits.getWorkspaceId(), workspaceId), I18nMessageUtil.get("i18n.project_associated_with_other_workspaces_message.299c"));
             }
             exits.setWorkspaceId(workspaceId);
             exits.setOutGivingProject(projectInfo.outGivingProject());

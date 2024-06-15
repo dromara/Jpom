@@ -63,6 +63,7 @@ public class AgentFreeWebSocketScriptHandle extends BaseAgentWebSocketHandle {
     @OnOpen
     public void onOpen(Session session) {
         try {
+            setLanguage(session);
             if (super.checkAuthorize(session)) {
                 return;
             }
@@ -75,6 +76,8 @@ public class AgentFreeWebSocketScriptHandle extends BaseAgentWebSocketHandle {
             } catch (IOException e1) {
                 log.error(e1.getMessage(), e1);
             }
+        } finally {
+            clearLanguage();
         }
     }
 
@@ -86,41 +89,46 @@ public class AgentFreeWebSocketScriptHandle extends BaseAgentWebSocketHandle {
      */
     @OnMessage(maxMessageSize = 5 * 1024 * 1024)
     public void onMessage(String message, Session session) throws Exception {
-        if (CACHE.containsKey(session.getId())) {
-            SocketSessionUtil.send(session, JsonMessage.getString(500, I18nMessageUtil.get("i18n.do_not_reopen.f86a")));
-            return;
-        }
-        JSONObject json = JSONObject.parseObject(message);
-        String type = json.getString("type");
-        if (StrUtil.equals(type, "close")) {
-            // 关闭、停止脚本执行
-            IoUtil.close(CACHE.remove(session.getId()));
-            session.close();
-            return;
-        }
-        String path = json.getString("path");
-        String tag = json.getString("tag");
-        JSONObject environment = json.getJSONObject("environment");
-        String content = json.getString("content");
-        if (StrUtil.hasEmpty(path, tag, content)) {
-            SocketSessionUtil.send(session, JsonMessage.getString(500, I18nMessageUtil.get("i18n.incorrect_parameter.02ce")));
-            return;
-        }
-        if (environment == null) {
-            SocketSessionUtil.send(session, JsonMessage.getString(500, I18nMessageUtil.get("i18n.environment_variables_not_found.dbd4")));
-            return;
-        }
-        Map<String, EnvironmentMapBuilder.Item> map = environment.to(new TypeReference<Map<String, EnvironmentMapBuilder.Item>>() {
-        });
-        ScriptProcess scriptProcess = new ScriptProcess(content, map, path, tag);
-        CACHE.put(session.getId(), scriptProcess);
-        scriptProcess.run(line -> {
-            try {
-                SocketSessionUtil.send(session, line);
-            } catch (IOException e) {
-                log.error(I18nMessageUtil.get("i18n.send_message_failure.9621"), e);
+        try {
+            setLanguage(session);
+            if (CACHE.containsKey(session.getId())) {
+                SocketSessionUtil.send(session, JsonMessage.getString(500, I18nMessageUtil.get("i18n.do_not_reopen.f86a")));
+                return;
             }
-        });
+            JSONObject json = JSONObject.parseObject(message);
+            String type = json.getString("type");
+            if (StrUtil.equals(type, "close")) {
+                // 关闭、停止脚本执行
+                IoUtil.close(CACHE.remove(session.getId()));
+                session.close();
+                return;
+            }
+            String path = json.getString("path");
+            String tag = json.getString("tag");
+            JSONObject environment = json.getJSONObject("environment");
+            String content = json.getString("content");
+            if (StrUtil.hasEmpty(path, tag, content)) {
+                SocketSessionUtil.send(session, JsonMessage.getString(500, I18nMessageUtil.get("i18n.incorrect_parameter.02ce")));
+                return;
+            }
+            if (environment == null) {
+                SocketSessionUtil.send(session, JsonMessage.getString(500, I18nMessageUtil.get("i18n.environment_variables_not_found.dbd4")));
+                return;
+            }
+            Map<String, EnvironmentMapBuilder.Item> map = environment.to(new TypeReference<Map<String, EnvironmentMapBuilder.Item>>() {
+            });
+            ScriptProcess scriptProcess = new ScriptProcess(content, map, path, tag);
+            CACHE.put(session.getId(), scriptProcess);
+            scriptProcess.run(line -> {
+                try {
+                    SocketSessionUtil.send(session, line);
+                } catch (IOException e) {
+                    log.error(I18nMessageUtil.get("i18n.send_message_failure.9621"), e);
+                }
+            });
+        } finally {
+            clearLanguage();
+        }
     }
 
 

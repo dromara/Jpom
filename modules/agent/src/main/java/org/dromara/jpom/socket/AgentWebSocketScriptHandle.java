@@ -48,6 +48,7 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
     @OnOpen
     public void onOpen(Session session) {
         try {
+            setLanguage(session);
             if (super.checkAuthorize(session)) {
                 return;
             }
@@ -72,57 +73,64 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
             } catch (IOException e1) {
                 log.error(e1.getMessage(), e1);
             }
+        } finally {
+            clearLanguage();
         }
     }
 
     @OnMessage
     public void onMessage(String message, Session session) throws Exception {
-        JSONObject json = JSONObject.parseObject(message);
-        String scriptId = json.getString("scriptId");
-        NodeScriptModel nodeScriptModel = nodeScriptServer.getItem(scriptId);
-        if (nodeScriptModel == null) {
-            SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.no_script_template_specified.7d14") + scriptId);
-            session.close();
-            return;
-        }
-        String op = json.getString("op");
-        ConsoleCommandOp consoleCommandOp = ConsoleCommandOp.valueOf(op);
-        switch (consoleCommandOp) {
-            case start: {
-                String args = json.getString("args");
-                String executeId = json.getString("executeId");
-                if (StrUtil.isEmpty(executeId)) {
-                    SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.no_execution_id.68dc"));
-                    session.close();
-                    return;
-                }
-                NodeScriptProcessBuilder.addWatcher(nodeScriptModel, executeId, args, session);
-                break;
-            }
-            case stop: {
-                String executeId = json.getString("executeId");
-                if (StrUtil.isEmpty(executeId)) {
-                    SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.no_execution_id.68dc"));
-                    session.close();
-                    return;
-                }
-                NodeScriptProcessBuilder.stopRun(executeId);
-                break;
-            }
-            case heart:
-            default:
+        try {
+            setLanguage(session);
+            JSONObject json = JSONObject.parseObject(message);
+            String scriptId = json.getString("scriptId");
+            NodeScriptModel nodeScriptModel = nodeScriptServer.getItem(scriptId);
+            if (nodeScriptModel == null) {
+                SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.no_script_template_specified.7d14") + scriptId);
+                session.close();
                 return;
+            }
+            String op = json.getString("op");
+            ConsoleCommandOp consoleCommandOp = ConsoleCommandOp.valueOf(op);
+            switch (consoleCommandOp) {
+                case start: {
+                    String args = json.getString("args");
+                    String executeId = json.getString("executeId");
+                    if (StrUtil.isEmpty(executeId)) {
+                        SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.no_execution_id.68dc"));
+                        session.close();
+                        return;
+                    }
+                    NodeScriptProcessBuilder.addWatcher(nodeScriptModel, executeId, args, session);
+                    break;
+                }
+                case stop: {
+                    String executeId = json.getString("executeId");
+                    if (StrUtil.isEmpty(executeId)) {
+                        SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.no_execution_id.68dc"));
+                        session.close();
+                        return;
+                    }
+                    NodeScriptProcessBuilder.stopRun(executeId);
+                    break;
+                }
+                case heart:
+                default:
+                    return;
+            }
+            // 记录操作人
+            nodeScriptModel = nodeScriptServer.getItem(scriptId);
+            String name = getOptUserName(session);
+            nodeScriptModel.setLastRunUser(name);
+            nodeScriptServer.updateItem(nodeScriptModel);
+            json.put("code", 200);
+            String value = I18nMessageUtil.get("i18n.execution_succeeded.f56c");
+            json.put("msg", value);
+            log.debug(json.toString());
+            SocketSessionUtil.send(session, json.toString());
+        } finally {
+            clearLanguage();
         }
-        // 记录操作人
-        nodeScriptModel = nodeScriptServer.getItem(scriptId);
-        String name = getOptUserName(session);
-        nodeScriptModel.setLastRunUser(name);
-        nodeScriptServer.updateItem(nodeScriptModel);
-        json.put("code", 200);
-        String value = I18nMessageUtil.get("i18n.execution_succeeded.f56c");
-        json.put("msg", value);
-        log.debug(json.toString());
-        SocketSessionUtil.send(session, json.toString());
     }
 
 

@@ -159,8 +159,8 @@ public class BaiduBceRpcTexttransTest {
         httpRequest.header(Header.ACCEPT, ContentType.JSON.getValue());
         JSONObject json = httpRequest.thenFunction(httpResponse -> {
             int status = httpResponse.getStatus();
-            Assert.assertEquals("token 生成异常", HttpStatus.HTTP_OK, status);
             String body = httpResponse.body();
+            Assert.assertEquals("token 生成异常," + body, HttpStatus.HTTP_OK, status);
             return JSONObject.parse(body);
         });
         String token = json.getString("access_token");

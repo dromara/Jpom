@@ -66,6 +66,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
     @OnOpen
     public void onOpen(Session session) {
         try {
+            setLanguage(session);
             if (super.checkAuthorize(session)) {
                 return;
             }
@@ -87,6 +88,8 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
             } catch (IOException e1) {
                 log.error(e1.getMessage(), e1);
             }
+        } finally {
+            clearLanguage();
         }
     }
 
@@ -120,26 +123,31 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
 
     @OnMessage
     public void onMessage(String message, Session session) throws Exception {
-        JSONObject json = JSONObject.parseObject(message);
-        String op = json.getString("op");
-        ConsoleCommandOp consoleCommandOp = ConsoleCommandOp.valueOf(op);
-        if (silentMsg(consoleCommandOp, session)) {
-            return;
+        try {
+            setLanguage(session);
+            JSONObject json = JSONObject.parseObject(message);
+            String op = json.getString("op");
+            ConsoleCommandOp consoleCommandOp = ConsoleCommandOp.valueOf(op);
+            if (silentMsg(consoleCommandOp, session)) {
+                return;
+            }
+            String projectId = json.getString("projectId");
+            NodeProjectInfoModel nodeProjectInfoModel = this.checkProject(projectId, session);
+            if (nodeProjectInfoModel == null) {
+                return;
+            }
+            // DSL
+            RunMode runMode = nodeProjectInfoModel.getRunMode();
+            if (runMode == RunMode.Dsl) {
+                // 判断是否可以执行 reload 事件
+                DslYmlDto dslYmlDto = nodeProjectInfoModel.mustDslConfig();
+                boolean b = dslYmlDto.hasRunProcess(ConsoleCommandOp.reload.name());
+                json.put("canReload", b);
+            }
+            runMsg(consoleCommandOp, session, nodeProjectInfoModel, json);
+        } finally {
+            clearLanguage();
         }
-        String projectId = json.getString("projectId");
-        NodeProjectInfoModel nodeProjectInfoModel = this.checkProject(projectId, session);
-        if (nodeProjectInfoModel == null) {
-            return;
-        }
-        // DSL
-        RunMode runMode = nodeProjectInfoModel.getRunMode();
-        if (runMode == RunMode.Dsl) {
-            // 判断是否可以执行 reload 事件
-            DslYmlDto dslYmlDto = nodeProjectInfoModel.mustDslConfig();
-            boolean b = dslYmlDto.hasRunProcess(ConsoleCommandOp.reload.name());
-            json.put("canReload", b);
-        }
-        runMsg(consoleCommandOp, session, nodeProjectInfoModel, json);
     }
 
     private void runMsg(ConsoleCommandOp consoleCommandOp, Session session, NodeProjectInfoModel nodeProjectInfoModel, JSONObject reqJson) throws Exception {

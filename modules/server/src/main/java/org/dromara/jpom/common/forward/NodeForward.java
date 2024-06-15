@@ -172,6 +172,8 @@ public class NodeForward {
         Map<String, String> header = new HashMap<>();
         UserModel userByThreadLocal = BaseServerController.getUserByThreadLocal();
         header.put(Const.JPOM_SERVER_USER_NAME, Optional.ofNullable(userByThreadLocal).map(BaseIdModel::getId).orElse(StrUtil.EMPTY));
+        // 语言
+        header.put(HttpHeaders.ACCEPT_LANGUAGE, I18nMessageUtil.getLanguageByRequest());
         return header;
     }
 

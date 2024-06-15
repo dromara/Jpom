@@ -47,7 +47,7 @@
         "role": "system"
       },
       {
-        "id": "surveorConfigEmail",
+        "id": "monitorConfigEmail",
         "title": "Mailbox configuration",
         "role": "system"
       },
