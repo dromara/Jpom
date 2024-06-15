@@ -26,6 +26,7 @@ import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.permission.Feature;
@@ -167,7 +168,7 @@ public abstract class BaseDockerSwarmServiceController extends BaseDockerControl
         parameter.put("timestamps", timestamps);
         // 操作id
         parameter.put("uuid", uuid);
-        ThreadUtil.execute(() -> {
+        I18nThreadUtil.execute(() -> {
             try {
                 plugin.execute(StrUtil.equalsIgnoreCase(type, "service") ? "logService" : "logTask", parameter);
                 logRecorder.system("pull end");

@@ -33,6 +33,7 @@ import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.files.model.FileReleaseTaskLogModel;
@@ -272,7 +273,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         } else {
             throw new IllegalArgumentException(I18nMessageUtil.get("i18n.unsupported_method.a1de"));
         }
-        ThreadUtil.execute(() -> {
+        I18nThreadUtil.execute(() -> {
             try {
                 strictSyncFinisher.start();
                 if (cancelTag.containsKey(taskId)) {

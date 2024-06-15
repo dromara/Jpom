@@ -483,11 +483,12 @@
           </template>
         </a-form-item>
         <a-form-item :label="$t('pages.layout.user-header.ee091a03')">
-          <a-space>
-            <a-select v-model:value="locale">
-              <a-select-option v-for="item in supportLang" :key="item.value">{{ item.label }}</a-select-option>
-            </a-select>
-          </a-space>
+          <template #help>{{ $t('pages.layout.user-header.8263b5e7') }}</template>
+          <a-radio-group v-model:value="locale" button-style="solid">
+            <a-radio-button v-for="item in supportLang" :key="item.value" :value="item.value">{{
+              item.label
+            }}</a-radio-button>
+          </a-radio-group>
         </a-form-item>
       </a-form>
     </a-modal>

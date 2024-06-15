@@ -286,7 +286,7 @@ public class IndexControl extends BaseServerController {
         UserModel userModel = getUserModel();
         String workspaceId = nodeService.getCheckUserWorkspace(request);
         JSONObject config = systemParametersServer.getConfigDefNewInstance(StrUtil.format("menus_config_{}", workspaceId), JSONObject.class);
-        String language = I18nMessageUtil.parseLanguage(request);
+        String language = I18nMessageUtil.tryGetLanguage();
         // 菜单
         InputStream inputStream = ResourceUtil.getStream("classpath:/menus/" + language + "/index.json");
         JSONArray showArray = config.getJSONArray("serverMenuKeys");
@@ -328,7 +328,7 @@ public class IndexControl extends BaseServerController {
     @SystemPermission
     public IJsonMessage<List<Object>> systemMenusData(HttpServletRequest request) {
         UserModel userModel = getUserModel();
-        String language = I18nMessageUtil.parseLanguage(request);
+        String language = I18nMessageUtil.tryGetLanguage();
         // 菜单
         InputStream inputStream = ResourceUtil.getStream("classpath:/menus/" + language + "/system.json");
         String json = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);

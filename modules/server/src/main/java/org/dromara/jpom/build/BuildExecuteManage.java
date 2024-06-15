@@ -32,6 +32,7 @@ import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.exception.LogRecorderCloseException;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
@@ -905,7 +906,7 @@ public class BuildExecuteManage implements Runnable {
 
         Opt.ofBlankAble(buildInfoModel.getWebhook())
             .ifPresent(s ->
-                ThreadUtil.execute(() -> {
+                I18nThreadUtil.execute(() -> {
                     try {
                         IPlugin plugin = PluginFactory.getPlugin("webhook");
                         map.put("JPOM_WEBHOOK_EVENT", DefaultWebhookPluginImpl.WebhookEvent.BUILD);

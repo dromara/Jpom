@@ -29,6 +29,7 @@ import cn.keepbx.jpom.plugins.IPlugin;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.configuration.ProjectConfig;
 import org.dromara.jpom.configuration.ProjectLogConfig;
 import org.dromara.jpom.exception.IllegalArgument2Exception;
@@ -158,7 +159,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
             }
             Map<String, String> env = projectInfoService.getEnv(nodeProjectInfoModel.getWorkspaceId());
             // 执行命令
-            ThreadUtil.execute(() -> {
+            I18nThreadUtil.execute(() -> {
                 try {
                     File file = projectInfoService.resolveLibFile(nodeProjectInfoModel);
                     if (SystemUtil.getOsInfo().isWindows()) {
@@ -288,7 +289,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
         // webhook 通知
         Opt.ofBlankAble(nodeProjectInfoModel.token())
             .ifPresent(s ->
-                ThreadUtil.execute(() -> {
+                I18nThreadUtil.execute(() -> {
                     try {
                         String result = this.webHooks(s, nodeProjectInfoModel, type, other);
                         Optional.ofNullable(result).ifPresent(s1 -> log.debug(I18nMessageUtil.get("i18n.trigger_result.364e"), nodeProjectInfoModel.getId(), type, s1));
@@ -307,7 +308,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
                     Boolean fileChangeReload = run.getFileChangeReload();
                     if (fileChangeReload != null && fileChangeReload) {
                         // 需要执行重载事件
-                        ThreadUtil.execute(() -> {
+                        I18nThreadUtil.execute(() -> {
                             try {
                                 CommandOpResult reload = this.reload(nodeProjectInfoModel, originalModel);
                                 log.info(I18nMessageUtil.get("i18n.trigger_project_reload_event.a7dc"), reload);

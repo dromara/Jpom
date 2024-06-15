@@ -22,6 +22,7 @@ import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.permission.Feature;
@@ -136,7 +137,7 @@ public abstract class BaseDockerImagesController extends BaseDockerController {
         logRecorder.system("start pull {}", repository);
         Consumer<String> logConsumer = logRecorder::info;
         parameter.put("logConsumer", logConsumer);
-        ThreadUtil.execute(() -> {
+        I18nThreadUtil.execute(() -> {
             try {
                 plugin.execute("pullImage", parameter);
                 logRecorder.system("pull end");

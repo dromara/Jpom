@@ -50,8 +50,17 @@ public class I18nMessageUtil {
         LANGUAGE_OBTAIN.add(LANGUAGE::get);
         // http 请求获取
         LANGUAGE_OBTAIN.add(I18nMessageUtil::getLanguageByRequest);
-        // 系统配置获取
+        // Jpom 配置获取
         LANGUAGE_OBTAIN.add(() -> SystemUtil.get("JPOM_LANG"));
+        // 系统语言
+        LANGUAGE_OBTAIN.add(() -> {
+            Locale locale = Locale.getDefault();
+            String country = locale.getCountry();
+            if (StrUtil.equals("zh", country)) {
+                return "zh-CN";
+            }
+            return "en-US";
+        });
     }
 
     /**
@@ -85,18 +94,6 @@ public class I18nMessageUtil {
     }
 
     /**
-     * 获取语言
-     *
-     * @param request 请求
-     * @return 合法的语言
-     */
-    public static String parseLanguage(HttpServletRequest request) {
-        String language = ServletUtil.getHeader(request, Header.ACCEPT_LANGUAGE.getValue(), CharsetUtil.CHARSET_UTF_8);
-        language = StrUtil.emptyToDefault(language, "zh-cn");
-        return normalLanguage(language);
-    }
-
-    /**
      * 语言格式化
      *
      * @param language 语言
@@ -116,6 +113,22 @@ public class I18nMessageUtil {
     }
 
     /**
+     * 尝试获取语言
+     *
+     * @return 语言
+     */
+    public static String tryGetLanguage() {
+        String language = null;
+        for (Supplier<String> supplier : LANGUAGE_OBTAIN) {
+            language = supplier.get();
+            if (language != null) {
+                break;
+            }
+        }
+        return language;
+    }
+
+    /**
      * 根据key信息获取对应语言的内容
      *
      * @param key 消息key值
@@ -125,13 +138,7 @@ public class I18nMessageUtil {
         if (StrUtil.isEmpty(key)) {
             return StrUtil.EMPTY;
         }
-        String language = null;
-        for (Supplier<String> supplier : LANGUAGE_OBTAIN) {
-            language = supplier.get();
-            if (language != null) {
-                break;
-            }
-        }
+        String language = tryGetLanguage();
         language = normalLanguage(language);
         Locale locale;
         switch (language) {

@@ -62,15 +62,13 @@
           <a-tooltip>
             <template #title>
               <ul>
-                <li>Ctrl-F / Cmd-F Start searching</li>
-                <li>Ctrl-G / Cmd-G Find next</li>
-                <li>Shift-Ctrl-G / Shift-Cmd-G Find previous</li>
-                <li>Shift-Ctrl-F / Cmd-Option-F Replace</li>
-                <li>Shift-Ctrl-R / Shift-Cmd-Option-F Replace all</li>
-                <li>
-                  Alt-F Persistent search (dialog doesn't autoclose, enter to find next, Shift-Enter to find previous)
-                </li>
-                <li>Alt-G Jump to line</li>
+                <li><b>Ctrl-F / Cmd-F</b>&nbsp;{{ $t('components.codeEditor.index.77c1e63d') }}</li>
+                <li><b>Ctrl-G / Cmd-G</b>&nbsp;{{ $t('components.codeEditor.index.4f85e42e') }}</li>
+                <li><b>Shift-Ctrl-G / Shift-Cmd-G</b>&nbsp;{{ $t('components.codeEditor.index.e9f2ef9a') }}</li>
+                <li><b>Shift-Ctrl-F / Cmd-Option-F</b>&nbsp;{{ $t('components.codeEditor.index.6a91de60') }}</li>
+                <li><b>Shift-Ctrl-R / Shift-Cmd-Option-F</b>&nbsp;{{ $t('components.codeEditor.index.d720ba75') }}</li>
+                <li><b>Alt-F</b>&nbsp;{{ $t('components.codeEditor.index.6bcfa0bc') }}</li>
+                <li><b>Alt-G</b>&nbsp;{{ $t('components.codeEditor.index.e2621574') }}</li>
               </ul>
             </template>
             <QuestionCircleOutlined />

@@ -31,6 +31,7 @@ import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.model.AfterOpt;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.log.OutGivingLog;
@@ -343,7 +344,7 @@ public class OutGivingRun {
                 Opt.ofBlankAble(outGivingModel2.getWebhook())
                     .orElse(null))
             .ifPresent(webhook ->
-                ThreadUtil.execute(() -> {
+                I18nThreadUtil.execute(() -> {
                     // outGivingId、outGivingName、status、statusMsg、executeTime
                     Map<String, Object> map = new HashMap<>(10);
                     map.put("outGivingId", outGivingId);

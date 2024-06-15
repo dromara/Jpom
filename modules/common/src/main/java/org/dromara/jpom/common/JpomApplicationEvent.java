@@ -225,7 +225,7 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
             cronMap.forEach((name, iCron) -> {
                 int startCron = iCron.startCron();
                 if (startCron > 0) {
-                    log.debug("{} scheduling has been started:{}", name, startCron);
+                    log.debug("{} 定时任务已经自动启动:{}", name, startCron);
                 }
             });
             Map<String, IAsyncLoad> asyncLoadMap = SpringUtil.getApplicationContext().getBeansOfType(IAsyncLoad.class);
