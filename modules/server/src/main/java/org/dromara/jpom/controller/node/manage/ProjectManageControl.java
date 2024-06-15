@@ -151,7 +151,7 @@ public class ProjectManageControl extends BaseServerController {
     @RequestMapping(value = "project-access-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<List<String>> projectAccessList() {
         List<String> jsonArray = whitelistDirectoryService.getProjectDirectory(getNode());
-        return JsonMessage.success("success", jsonArray);
+        return JsonMessage.success("", jsonArray);
     }
 
     /**

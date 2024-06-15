@@ -85,7 +85,7 @@ public class OutGivingWhitelistController extends BaseServerController {
                 map.put(field.getName() + "Array", fieldValue);
             }
         }
-        return JsonMessage.success("ok", map);
+        return JsonMessage.success("", map);
     }
 
 

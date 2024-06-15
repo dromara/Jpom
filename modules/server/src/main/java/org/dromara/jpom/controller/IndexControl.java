@@ -267,7 +267,7 @@ public class IndexControl extends BaseServerController {
         }
         data.put("extendPlugins", extendPlugins);
         if (userService.canUse()) {
-            return JsonMessage.success("success", data);
+            return JsonMessage.success("", data);
         }
         return new JsonMessage<>(222, I18nMessageUtil.get("i18n.need_initialize_system.fb62"), data);
     }

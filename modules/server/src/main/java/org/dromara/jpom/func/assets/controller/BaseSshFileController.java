@@ -148,7 +148,7 @@ public abstract class BaseSshFileController extends BaseServerController {
         //
         return this.checkConfigPath(id, (machineSshModel, itemConfig) -> {
             JSONArray listDir = listRootDir(machineSshModel, itemConfig.fileDirs());
-            return JsonMessage.success("ok", listDir);
+            return JsonMessage.success("", listDir);
         });
     }
 
@@ -161,7 +161,7 @@ public abstract class BaseSshFileController extends BaseServerController {
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             try {
                 JSONArray listDir = listDir(machineSshModel, allowPathParent, nextPath, itemConfig);
-                return JsonMessage.success("ok", listDir);
+                return JsonMessage.success("", listDir);
             } catch (SftpException e) {
                 throw Lombok.sneakyThrow(e);
             }
@@ -181,7 +181,7 @@ public abstract class BaseSshFileController extends BaseServerController {
             Charset charset = AgentWhitelist.checkFileSuffix(allowEditSuffix, name);
             //
             String content = this.readFile(machineSshModel, allowPathParent, nextPath, name, charset);
-            return JsonMessage.success("ok", content);
+            return JsonMessage.success("", content);
         });
     }
 

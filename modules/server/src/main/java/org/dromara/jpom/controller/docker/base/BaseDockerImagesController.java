@@ -210,7 +210,7 @@ public abstract class BaseDockerImagesController extends BaseDockerController {
             return new JsonMessage<>(201, I18nMessageUtil.get("i18n.no_log_file.bacf"));
         }
         JSONObject data = FileUtils.readLogFile(file, line);
-        return JsonMessage.success("ok", data);
+        return JsonMessage.success("", data);
     }
 
     /**

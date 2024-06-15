@@ -66,7 +66,7 @@ public class LogBackController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<JSONObject> logBackList(HttpServletRequest request) {
         JSONObject jsonObject = NodeForward.requestData(getNode(), NodeUrl.Manage_Log_logBack, request, JSONObject.class);
-        return JsonMessage.success("success", jsonObject);
+        return JsonMessage.success("", jsonObject);
     }
 
     @RequestMapping(value = "logBack_download", method = RequestMethod.GET)

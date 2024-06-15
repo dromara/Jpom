@@ -87,7 +87,7 @@ public class OutGivingController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<PageResultDto<OutGivingModel>> dispatchList(HttpServletRequest request) {
         PageResultDto<OutGivingModel> pageResultDto = outGivingServer.listPage(request);
-        return JsonMessage.success("success", pageResultDto);
+        return JsonMessage.success("", pageResultDto);
     }
 
     /**

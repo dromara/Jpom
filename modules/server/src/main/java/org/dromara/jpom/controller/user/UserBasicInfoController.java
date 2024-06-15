@@ -122,7 +122,7 @@ public class UserBasicInfoController extends BaseServerController {
         boolean bindMfa = userService.hasBindMfa(userModel.getId());
         map.put("bindMfa", bindMfa);
         map.put("forceMfa", userConfig.isForceMfa());
-        return JsonMessage.success("success", map);
+        return JsonMessage.success("", map);
     }
 
     @RequestMapping(value = "save_basicInfo.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

@@ -66,7 +66,7 @@ public class ScriptLogController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<PageResultDto<ScriptExecuteLogModel>> scriptList(HttpServletRequest request) {
         PageResultDto<ScriptExecuteLogModel> pageResultDto = scriptExecuteLogServer.listPage(request);
-        return JsonMessage.success("success", pageResultDto);
+        return JsonMessage.success("", pageResultDto);
     }
 
     /**
@@ -117,6 +117,6 @@ public class ScriptLogController extends BaseServerController {
         JSONObject data = FileUtils.readLogFile(logFile, line);
         // 运行中
         data.put("run", ServerScriptProcessBuilder.isRun(executeId));
-        return JsonMessage.success("ok", data);
+        return JsonMessage.success("", data);
     }
 }

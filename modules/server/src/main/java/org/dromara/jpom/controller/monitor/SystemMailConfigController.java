@@ -65,7 +65,7 @@ public class SystemMailConfigController extends BaseServerController {
         if (item != null) {
             item.setPass(null);
         }
-        return JsonMessage.success("success", item);
+        return JsonMessage.success("", item);
     }
 
     @PostMapping(value = "mailConfig_save.json", produces = MediaType.APPLICATION_JSON_VALUE)

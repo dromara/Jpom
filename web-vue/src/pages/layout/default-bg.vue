@@ -47,7 +47,11 @@
           </a>
         </a-button>
         <a-select v-model:value="nowLang" size="small">
-          <a-select-option v-for="item in supportLang" :key="item.value">{{ item.label }}</a-select-option>
+          <a-select-option v-for="item in supportLang" :key="item.value">
+            <a-tooltip :title="`${item.label}(${item.value})`">
+              {{ item.label }}
+            </a-tooltip>
+          </a-select-option>
         </a-select>
       </a-space>
     </div>

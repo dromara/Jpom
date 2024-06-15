@@ -89,7 +89,7 @@ public class UserListController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<List<UserModel>> getUserListAll() {
         List<UserModel> list = userService.list();
-        return JsonMessage.success("success", list);
+        return JsonMessage.success("", list);
     }
 
     /**

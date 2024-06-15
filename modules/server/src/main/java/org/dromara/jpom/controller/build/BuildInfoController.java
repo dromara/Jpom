@@ -449,7 +449,7 @@ public class BuildInfoController extends BaseServerController {
         List<Object> collection = branchAndTagList.toList();
         jsonObject.put("branch", CollUtil.get(collection, 0));
         jsonObject.put("tags", CollUtil.get(collection, 1));
-        return JsonMessage.success("ok", jsonObject);
+        return JsonMessage.success("", jsonObject);
     }
 
 

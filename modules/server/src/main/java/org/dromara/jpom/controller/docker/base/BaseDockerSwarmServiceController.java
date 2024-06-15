@@ -204,7 +204,7 @@ public abstract class BaseDockerSwarmServiceController extends BaseDockerControl
             userIds.add(getUser().getId());
             LOG_CACHE.put(id, userIds);
         }
-        return JsonMessage.success("ok", data);
+        return JsonMessage.success("", data);
     }
 
     /**

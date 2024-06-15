@@ -53,7 +53,7 @@ public class SystemConfigController extends BaseAgentController {
         JSONObject json = new JSONObject();
         json.put("content", content);
         json.put("file", FileUtil.getAbsolutePath(resource.getFile()));
-        return JsonMessage.success("ok", json);
+        return JsonMessage.success("", json);
     }
 
     @RequestMapping(value = "save_config.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

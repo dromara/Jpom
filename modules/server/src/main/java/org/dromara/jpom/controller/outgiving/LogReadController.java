@@ -56,7 +56,7 @@ public class LogReadController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<PageResultDto<LogReadModel>> list(HttpServletRequest request) {
         PageResultDto<LogReadModel> pageResultDto = logReadServer.listPage(request);
-        return JsonMessage.success("success", pageResultDto);
+        return JsonMessage.success("", pageResultDto);
     }
 
     /**
