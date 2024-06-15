@@ -28,6 +28,7 @@ import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.model.data.NodeScriptModel;
+import org.dromara.jpom.model.data.ScriptLibraryModel;
 import org.dromara.jpom.script.DslScriptBuilder;
 import org.dromara.jpom.service.manage.ProjectInfoService;
 import org.dromara.jpom.service.system.AgentWorkspaceEnvVarService;
@@ -53,17 +54,20 @@ public class DslScriptServer {
     private final ProjectLogConfig logConfig;
     private final JpomApplication jpomApplication;
     private final ProjectInfoService projectInfoService;
+    private final ScriptLibraryService scriptLibraryService;
 
     public DslScriptServer(AgentWorkspaceEnvVarService agentWorkspaceEnvVarService,
                            NodeScriptServer nodeScriptServer,
                            ProjectLogConfig logConfig,
                            JpomApplication jpomApplication,
-                           ProjectInfoService projectInfoService) {
+                           ProjectInfoService projectInfoService,
+                           ScriptLibraryService scriptLibraryService) {
         this.agentWorkspaceEnvVarService = agentWorkspaceEnvVarService;
         this.nodeScriptServer = nodeScriptServer;
         this.logConfig = logConfig;
         this.jpomApplication = jpomApplication;
         this.projectInfoService = projectInfoService;
+        this.scriptLibraryService = scriptLibraryService;
     }
 
     /**
@@ -127,6 +131,20 @@ public class DslScriptServer {
             jsonObject.put("msg", value);
             return new Tuple(jsonObject, null);
         }
+        if (StrUtil.startWithIgnoreCase(scriptId, "G@")) {
+            // 判断是否引用脚本库
+            scriptId = scriptId.substring(2);
+            ScriptLibraryModel libraryModel = scriptLibraryService.get(scriptId);
+            if (libraryModel != null) {
+                jsonObject.put("status", true);
+                jsonObject.put("type", "library");
+                jsonObject.put("scriptId", scriptId);
+                return new Tuple(jsonObject, libraryModel);
+            } else {
+                jsonObject.put("msg", "对应的脚本库不存在：" + scriptId);
+                return new Tuple(jsonObject, null);
+            }
+        }
         //
         NodeScriptModel item = nodeScriptServer.getItem(scriptId);
         if (item != null) {
@@ -177,8 +195,16 @@ public class DslScriptServer {
         File scriptFile;
         boolean autoDelete = false;
         if (StrUtil.equals(type, "file")) {
+            // 项目文件
             scriptFile = tuple.get(1);
+        } else if ("library".equals(type)) {
+            // 脚本库
+            ScriptLibraryModel libraryModel = tuple.get(1);
+            scriptFile = this.initScriptFile(libraryModel);
+            // 系统生成的脚本需要自动删除
+            autoDelete = true;
         } else {
+            // 节点脚本
             NodeScriptModel item = tuple.get(1);
             scriptFile = this.initScriptFile(item);
             // 系统生成的脚本需要自动删除
@@ -201,6 +227,21 @@ public class DslScriptServer {
         File scriptFile = FileUtil.file(dataPath, Const.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
         // 替换内容
         String context = scriptModel.getContext();
+        FileUtils.writeScript(context, scriptFile, ExtConfigBean.getConsoleLogCharset());
+        return scriptFile;
+    }
+
+    /**
+     * 创建脚本文件
+     *
+     * @param scriptModel 脚本对象
+     * @return file
+     */
+    private File initScriptFile(ScriptLibraryModel scriptModel) {
+        String dataPath = jpomApplication.getDataPath();
+        File scriptFile = FileUtil.file(dataPath, Const.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
+        // 替换内容
+        String context = scriptModel.getScript();
         FileUtils.writeScript(context, scriptFile, ExtConfigBean.getConsoleLogCharset());
         return scriptFile;
     }

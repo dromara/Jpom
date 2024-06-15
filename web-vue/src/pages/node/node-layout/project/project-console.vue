@@ -83,6 +83,9 @@
                         <EditOutlined /> {{ $t('pages.node.node-layout.project.project-console.e0417750') }}
                       </a-button>
                     </template>
+                    <template v-else-if="item.type === 'library'">
+                      <a-button type="link" size="small" disabled=""> 脚本库 {{ item.scriptId }}</a-button>
+                    </template>
                   </template>
                   <template v-else>
                     <a-space>

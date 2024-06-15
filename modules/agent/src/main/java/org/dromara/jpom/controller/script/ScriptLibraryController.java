@@ -41,12 +41,8 @@ public class ScriptLibraryController extends BaseAgentController {
 
     @RequestMapping(value = "get", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<ScriptLibraryModel> get(@ValidatorItem String id) {
-        File file = FileUtil.file(scriptLibraryService.getGlobalScriptDir(), id + ".json");
-        if (FileUtil.exist(file)) {
-            String string = FileUtil.readUtf8String(file);
-            ScriptLibraryModel scriptModel = JSONObject.parseObject(string, ScriptLibraryModel.class);
-            // 以文件名为脚本标签
-            scriptModel.setTag(FileUtil.mainName(file));
+        ScriptLibraryModel scriptModel = scriptLibraryService.get(id);
+        if (scriptModel != null) {
             return JsonMessage.success("", scriptModel);
         }
         return JsonMessage.fail(I18nMessageUtil.get("i18n.missing_script_message.af89"));

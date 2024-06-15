@@ -4,6 +4,8 @@
     <a-spin :tip="$t('pages.node.node-layout.project.project-edit.a5c1d44')" :spinning="loading">
       <a-form ref="editProjectForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item :label="$t('pages.node.node-layout.project.project-edit.4eaba425')" name="id">
+          <template #help>项目ID仅会在机器节点中限制唯一，不同工作空间（相同的工作空间）下是允许相同的项目ID</template>
+
           <a-input
             v-if="temp.type === 'edit'"
             v-model:value="temp.id"

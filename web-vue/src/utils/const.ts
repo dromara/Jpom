@@ -234,30 +234,38 @@ export const MFA_APP_TIP_ARRAY = [
  */
 export const PROJECT_DSL_DEFATUL =
   t('utils.const.ba767044') +
+  '\n' +
+  '# scriptId 可以引用脚本库中的脚本（G@xxx）其中 xxx 为脚本库中的脚本标记，前提需要提取将对应脚本同步至对应机器节点\n' +
   t('utils.const.59e55b4') +
+  '\n' +
   'run:\r\n' +
   '  start:\r\n' +
   '#    scriptId: project.sh\r\n' +
+  '#    scriptId: G@xxxx\r\n' +
   '    scriptId: \r\n' +
   '    scriptArgs: start\r\n' +
   '    scriptEnv:\r\n' +
   '      "boot_active": test\r\n' +
   '  status:\r\n' +
   '#    scriptId: project.sh\r\n' +
+  '#    scriptId: G@xxxx\r\n' +
   '    scriptId: \r\n' +
   '    scriptArgs: status\r\n' +
   '  stop:\r\n' +
   '#    scriptId: project.sh\r\n' +
+  '#    scriptId: G@xxxx\r\n' +
   '    scriptId: \r\n' +
   '    scriptArgs: stop\r\n' +
   '#  restart:\r\n' +
   '##    scriptId: project.sh\r\n' +
+  '#    scriptId: G@xxxx\r\n' +
   '#    scriptId: \r\n' +
   '#    scriptArgs: restart\r\n' +
   '#    scriptEnv:\r\n' +
   '#      "boot_active": test\r\n' +
   '#  reload:\r\n' +
   '##    scriptId: project.sh\r\n' +
+  '#    scriptId: G@xxxx\r\n' +
   '#    scriptId: \r\n' +
   '#    scriptArgs: reload\r\n' +
   '#    scriptEnv:\r\n' +

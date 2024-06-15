@@ -32,6 +32,11 @@ public class ScriptLibraryService {
         this.globalScriptDir = FileUtil.file(jpomApplication.getDataPath(), "global-script");
     }
 
+    /**
+     * 获取脚本库列表
+     *
+     * @return list
+     */
     public List<ScriptLibraryModel> list() {
         List<File> list = FileUtil.loopFiles(globalScriptDir, 1, pathname -> StrUtil.equals("json", FileUtil.extName(pathname)));
         return list.stream()
@@ -51,5 +56,26 @@ public class ScriptLibraryService {
             })
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
+    }
+
+    /**
+     * 获取脚本库
+     *
+     * @param id id
+     * @return model
+     */
+    public ScriptLibraryModel get(String id) {
+        if (StrUtil.isEmpty(id)) {
+            return null;
+        }
+        File file = FileUtil.file(globalScriptDir, id + ".json");
+        if (FileUtil.exist(file)) {
+            String string = FileUtil.readUtf8String(file);
+            ScriptLibraryModel scriptModel = JSONObject.parseObject(string, ScriptLibraryModel.class);
+            // 以文件名为脚本标签
+            scriptModel.setTag(FileUtil.mainName(file));
+            return scriptModel;
+        }
+        return null;
     }
 }
