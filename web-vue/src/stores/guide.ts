@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 ///
 /// Copyright (c) 2019 Of Him Code Technology Studio
 /// Jpom is licensed under Mulan PSL v2.
@@ -171,15 +172,15 @@ export const useGuideStore = defineStore('guide', {
     getSupportThemes: () => {
       return [
         {
-          label: '跟随系统',
+          label: t('stores.guide.78aea169'),
           value: 'auto'
         },
         {
-          label: '浅色',
+          label: t('stores.guide.1ba0e8eb'),
           value: 'light'
         },
         {
-          label: '深色',
+          label: t('stores.guide.1e29d47d'),
           value: 'dark'
         }
       ]

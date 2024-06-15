@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="script-library"
-      empty-description="没有任何的脚本库"
+      :empty-description="$t('pages.system.assets.script-library.65418a5e')"
       :data-source="list"
       size="middle"
       :columns="columns"
@@ -24,39 +24,43 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%tag%']"
-            placeholder="脚本标记"
+            :placeholder="$t('pages.system.assets.script-library.95547f9')"
             allow-clear
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%version%']"
-            placeholder="版本"
+            :placeholder="$t('pages.system.assets.script-library.81634069')"
             allow-clear
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%description%']"
-            placeholder="描述"
+            :placeholder="$t('pages.system.assets.script-library.f89e58f1')"
             class="search-input-item"
             @press-enter="loadData"
           />
 
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
+          <a-tooltip :title="$t('pages.system.assets.script-library.986e8dc2')">
+            <a-button :loading="loading" type="primary" @click="loadData">{{
+              $t('pages.system.assets.script-library.43934f6d')
+            }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="createScript">创建</a-button>
+          <a-button type="primary" @click="createScript">{{
+            $t('pages.system.assets.script-library.9f3089ce')
+          }}</a-button>
         </a-space>
       </template>
       <template #tableHelp>
         <a-tooltip>
           <template #title>
-            <div>脚本库用于存储管理通用的脚本,脚本库中的脚本不能直接执行。</div>
+            <div>{{ $t('pages.system.assets.script-library.41c0cbe5') }}</div>
 
             <div>
               <ul>
-                <li>可以将脚本分发到机器节点中在 DSL 项目中引用，达到多个项目共用相同脚本</li>
+                <li>{{ $t('pages.system.assets.script-library.423e1405') }}</li>
               </ul>
             </div>
           </template>
@@ -77,36 +81,40 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEdit(record)">编辑</a-button>
-            <a-button size="small" type="primary" danger @click="handleDelete(record)">删除</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{
+              $t('pages.system.assets.script-library.ad207008')
+            }}</a-button>
+            <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
+              $t('pages.system.assets.script-library.ecbd7449')
+            }}</a-button>
           </a-space>
         </template>
       </template>
     </CustomTable>
-    <!-- 编辑区 -->
+    <!-- pages.system.assets.script-library.ad207008区 -->
     <a-modal
       v-model:open="editScriptVisible"
       destroy-on-close
       :z-index="1009"
-      title="编辑脚本"
+      :title="$t('pages.system.assets.script-library.16a6aab6')"
       :mask-closable="false"
       width="80vw"
       :confirm-loading="confirmLoading"
       @ok="handleEditScriptOk"
     >
       <a-form ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 19 }">
-        <a-form-item v-if="temp.id" label="版本" name="id">
+        <a-form-item v-if="temp.id" :label="$t('pages.system.assets.script-library.81634069')" name="id">
           <a-input v-model:value="temp.version" disabled read-only />
         </a-form-item>
-        <a-form-item label="标记" name="tag">
+        <a-form-item :label="$t('pages.system.assets.script-library.2d62ebdb')" name="tag">
           <a-input
             v-model:value="temp.tag"
             :max-length="50"
-            placeholder="请输入脚本标记，标记只能是字母或者数字长度需要小于 20 并且全局唯一"
+            :placeholder="$t('pages.system.assets.script-library.e37b1ac9')"
             :disabled="!!temp.id"
           />
         </a-form-item>
-        <a-form-item label="内容" name="script">
+        <a-form-item :label="$t('pages.system.assets.script-library.3e7aa0ad')" name="script">
           <a-form-item-rest>
             <code-editor
               v-model:content="temp.script"
@@ -118,30 +126,30 @@
           </a-form-item-rest>
         </a-form-item>
 
-        <a-form-item label="描述" name="description">
+        <a-form-item :label="$t('pages.system.assets.script-library.f89e58f1')" name="description">
           <a-textarea
             v-model:value="temp.description"
             :max-length="200"
             :rows="3"
             style="resize: none"
-            placeholder="请输入脚本描述"
+            :placeholder="$t('pages.system.assets.script-library.43075dd9')"
           />
         </a-form-item>
 
         <a-form-item>
           <template #label>
-            <a-tooltip>
-              分发机器
-              <template #title> 将脚本分发到对应的机器节点中，对应的机器节点可以引用对应的脚本 </template>
+            <a-tooltip
+              >{{ $t('pages.system.assets.script-library.4f5ca5e3')
+              }}<template #title>{{ $t('pages.system.assets.script-library.33437c9b') }}</template>
               <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
-          <template #help>下拉搜索默认搜索关键词相关的前 10 个，以及已经选择的机器节点</template>
+          <template #help>{{ $t('pages.system.assets.script-library.5251812f') }}</template>
           <a-select
             v-model:value="temp.chooseNode"
             show-search
             :filter-option="false"
-            placeholder="请选择要分发到的机器节点"
+            :placeholder="$t('pages.system.assets.script-library.4722ff63')"
             mode="multiple"
             @search="searchMachineList"
           >
@@ -154,7 +162,6 @@
     </a-modal>
   </div>
 </template>
-
 <script>
 import { getScriptLibraryList, editScriptLibrary, delScriptLibrary } from '@/api/system/script-library'
 import codeEditor from '@/components/codeEditor'
@@ -184,14 +191,14 @@ export default {
       drawerConsoleVisible: false,
       columns: [
         {
-          title: '标记',
+          title: this.$t('pages.system.assets.script-library.2d62ebdb'),
           dataIndex: 'tag',
           ellipsis: true,
           sorter: true,
           width: 150
         },
         {
-          title: '版本',
+          title: this.$t('pages.system.assets.script-library.81634069'),
           dataIndex: 'version',
           ellipsis: true,
           sorter: true,
@@ -199,14 +206,14 @@ export default {
           tooltip: true
         },
         {
-          title: '描述',
+          title: this.$t('pages.system.assets.script-library.f89e58f1'),
           dataIndex: 'description',
           ellipsis: true,
           width: 200,
           tooltip: true
         },
         {
-          title: '修改时间',
+          title: this.$t('pages.system.assets.script-library.d3b29478'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           width: '170px',
@@ -214,7 +221,7 @@ export default {
           customRender: ({ text }) => parseTime(text)
         },
         {
-          title: '创建时间',
+          title: this.$t('pages.system.assets.script-library.efaf9956'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           width: '170px',
@@ -222,14 +229,14 @@ export default {
           customRender: ({ text }) => parseTime(text)
         },
         {
-          title: '创建人',
+          title: this.$t('pages.system.assets.script-library.339d15b5'),
           dataIndex: 'createUser',
           ellipsis: true,
           tooltip: true,
           width: '120px'
         },
         {
-          title: '修改人',
+          title: this.$t('pages.system.assets.script-library.8605b4f2'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           tooltip: true,
@@ -237,7 +244,7 @@ export default {
         },
 
         {
-          title: '操作',
+          title: this.$t('pages.system.assets.script-library.fe731dfc'),
           dataIndex: 'operation',
           align: 'center',
 
@@ -245,11 +252,11 @@ export default {
           width: '140px'
         }
       ],
+
       rules: {
         // name: [{ required: true, message: this.$tl('p.inputScriptName'), trigger: 'blur' }],
         // context: [{ required: true, message: this.$tl('p.inputScriptContent'), trigger: 'blur' }]
       },
-
       confirmLoading: false
     }
   },
@@ -349,11 +356,11 @@ export default {
     },
     handleDelete(record) {
       $confirm({
-        title: '系统提示',
-        content: '确定要删除此脚本库吗？',
+        title: this.$t('pages.system.assets.script-library.3875bf60'),
+        content: this.$t('pages.system.assets.script-library.72df294d'),
         zIndex: 1009,
-        okText: '确定',
-        cancelText: '取消',
+        okText: this.$t('pages.system.assets.script-library.d507abff'),
+        cancelText: this.$t('pages.system.assets.script-library.a0451c97'),
         onOk: () => {
           return delScriptLibrary({
             id: record.id

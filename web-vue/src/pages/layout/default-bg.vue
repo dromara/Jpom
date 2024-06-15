@@ -57,7 +57,7 @@
           </a-button>
           <template #overlay>
             <a-menu>
-              <a-menu-item v-for="item in supportLang" :key="item.value">
+              <a-menu-item v-for="item in supportLang" :key="item.value" :disabled="nowLang === item.value">
                 <span @click="useGuideStore.changeLocale(item.value)">
                   <a-tooltip :title="`${item.label}(${item.value})`">
                     {{ item.label }}
@@ -78,7 +78,11 @@
           </a-button>
           <template #overlay>
             <a-menu>
-              <a-menu-item v-for="item in useGuideStore.getSupportThemes" :key="item.value">
+              <a-menu-item
+                v-for="item in useGuideStore.getSupportThemes"
+                :key="item.value"
+                :disabled="theme === item.value"
+              >
                 <span @click="useGuideStore.toggleThemeView(item.value)">
                   <a-tooltip :title="`${item.label}(${item.value})`">
                     {{ item.label }}

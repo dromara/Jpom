@@ -1,3 +1,4 @@
+import { t } from '@/i18n'
 ///
 /// Copyright (c) 2019 Of Him Code Technology Studio
 /// Jpom is licensed under Mulan PSL v2.
@@ -62,7 +63,7 @@ export const customTableProps = initDefaultProps(
     // 空数据时现在内容
     emptyDescription: {
       type: String,
-      deafult: '暂无任何数据'
+      deafult: t('components.customTable.props.d9634f4e')
     }
   },
   {
@@ -72,6 +73,6 @@ export const customTableProps = initDefaultProps(
     isHideRefresh: false,
     autoRefreshTime: 10,
     activePage: false,
-    emptyDescription: '暂无任何数据'
+    emptyDescription: t('components.customTable.props.d9634f4e')
   }
 )
