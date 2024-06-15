@@ -10,7 +10,7 @@
               <div>{{ $t('pages.layout.default-index.f29dfeb9') }}</div>
             </template>
             <div
-              class="logo"
+              class="logo text-overflow-hidden"
               :style="`color:${menuTheme === 'light' && theme === 'light' ? '#000' : '#fff'}`"
               @click="changeCollapsed()"
             >

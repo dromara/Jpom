@@ -92,6 +92,9 @@ public class ScriptLibraryController extends BaseServerController {
                 scriptLibraryModel.setVersion(StrUtil.format("{}#{}", nextIncVersion, version));
             }
             scriptLibraryServer.updateById(scriptLibraryModel);
+            if (scriptLibraryModel.getVersion() == null) {
+                scriptLibraryModel.setVersion(libraryModel.getVersion());
+            }
         } else {
             scriptLibraryModel.setVersion(StrUtil.format("1#{}", version));
             scriptLibraryServer.insert(scriptLibraryModel);
