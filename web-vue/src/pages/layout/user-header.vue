@@ -454,9 +454,9 @@
         </a-form-item>
         <a-form-item :label="$t('pages.layout.user-header.cf6a1e7a')">
           <a-radio-group v-model:value="themeView" button-style="solid">
-            <a-radio-button value="light">{{ $t('pages.layout.user-header.a9bad4a1') }}</a-radio-button>
-            <a-radio-button value="dark">{{ $t('pages.layout.user-header.67b903b1') }}</a-radio-button>
-            <a-radio-button value="auto">{{ $t('pages.layout.user-header.58a45933') }}</a-radio-button>
+            <a-radio-button v-for="item in getSupportThemes" :key="item.value" :value="item.value">
+              {{ item.label }}
+            </a-radio-button>
           </a-radio-group>
 
           <template #help>{{ $t('pages.layout.user-header.ad301071') }}</template>
@@ -617,7 +617,14 @@ export default {
   computed: {
     ...mapState(useUserStore, ['getToken', 'getUserInfo']),
     ...mapState(useAppStore, ['getWorkspaceId']),
-    ...mapState(useGuideStore, ['getGuideCache', 'getDisabledGuide', 'getThemeView', 'getMenuThemeView', 'getLocale']),
+    ...mapState(useGuideStore, [
+      'getGuideCache',
+      'getDisabledGuide',
+      'getThemeView',
+      'getMenuThemeView',
+      'getLocale',
+      'getSupportThemes'
+    ]),
     showCode() {
       return this.getUserInfo.email !== this.temp.email
     },
