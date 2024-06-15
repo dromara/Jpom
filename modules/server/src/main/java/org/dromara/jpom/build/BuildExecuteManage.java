@@ -87,6 +87,7 @@ public class BuildExecuteManage implements Runnable {
     private File gitFile;
     private Thread currentThread;
     private ReleaseManage releaseManage;
+    private String language;
 
     /**
      * 提交任务时间
@@ -133,6 +134,7 @@ public class BuildExecuteManage implements Runnable {
     public void submitTask() {
         this.loadService();
         submitTaskTime = SystemClock.now();
+        language = I18nMessageUtil.getLanguageByRequest();
         // 创建线程池
         ThreadPoolExecutor threadPoolExecutor = buildExecutorPoolService.getThreadPoolExecutor();
         //
@@ -864,11 +866,13 @@ public class BuildExecuteManage implements Runnable {
     public void run() {
         BuildInfoModel buildInfoModel = this.taskData.buildInfoModel;
         try {
+            I18nMessageUtil.setLanguage(this.language);
             this.runTask();
         } catch (Exception e) {
             log.error(I18nMessageUtil.get("i18n.build_unknown_error.dad6"), e);
         } finally {
             BUILD_MANAGE_MAP.remove(buildInfoModel.getId());
+            I18nMessageUtil.clearLanguage();
         }
     }
 

@@ -56,6 +56,10 @@ public abstract class BaseSystemConfig {
      * 使用前提需要配置 sudo 免密
      */
     private boolean commandUseSudo = false;
+    /**
+     * 系统语言：zh-CN、en-US
+     */
+    private String lang;
 
     public void setTimerMatchSecond(boolean timerMatchSecond) {
         this.timerMatchSecond = timerMatchSecond;
@@ -71,6 +75,11 @@ public abstract class BaseSystemConfig {
     public void setRemoteVersionUrl(String remoteVersionUrl) {
         this.remoteVersionUrl = remoteVersionUrl;
         RemoteVersion.setRemoteVersionUrl(remoteVersionUrl);
+    }
+
+    public void setLang(String lang) {
+        this.lang = lang;
+        SystemUtil.set("JPOM_LANG", lang);
     }
 
     /**

@@ -4935,7 +4935,7 @@
       "c4682b3f": "#Restrict backup of specified file suffixes (supports regularization)",
       "1f958da6": "#Project file backup path",
       "ae41f11b": "#Is the log backup function enabled",
-      "95d754a0": "#ScriptId can reference scripts in the script library (G @ xxx), where xxx is the script tag in the script library, provided that the corresponding script is extracted and synchronized to the corresponding machine node"
+      "95d754a0": "#ScriptId can reference scripts in the script library (G{'@'}xxx), where xxx is the script tag in the script library, provided that the corresponding script is extracted and synchronized to the corresponding machine node"
     },
     "upload-pieces": {
       "ea2d7f82": "The file cannot be empty",

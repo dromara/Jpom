@@ -266,6 +266,7 @@ async function handleRefreshTokenAndRetryQueue(config: InternalAxiosRequestConfi
           const result2 = await request(config)
           resolve(result2)
         } else {
+          //
         }
       }, 100) // 检查间隔设置为100毫秒
     })
@@ -347,5 +348,7 @@ export function loadRouterBase(url: string, params: any) {
 export function getWebSocketUrl(url: string, parameter: any) {
   const protocol: string = location.protocol === 'https:' ? 'wss://' : 'ws://'
   const fullUrl: string = (baseURL + routerBase + url).replace(new RegExp('//', 'gm'), '/')
+  const useGuideStore = guideStore()
+  parameter += `&lang=${useGuideStore.getLocale()}`
   return `${protocol}${location.host}${fullUrl}?${parameter}`
 }

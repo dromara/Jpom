@@ -11,9 +11,11 @@ package org.dromara.jpom.common.validator;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.lang.Validator;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
+import cn.hutool.http.Header;
 import cn.hutool.http.HtmlUtil;
 import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -84,7 +86,8 @@ public class ParameterInterceptor implements HandlerMethodInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
-
+        String language = ServletUtil.getHeader(request, Header.ACCEPT_LANGUAGE.getValue(), CharsetUtil.CHARSET_UTF_8);
+        I18nMessageUtil.setLanguage(language);
         MethodParameter[] methodParameters = handlerMethod.getMethodParameters();
         for (MethodParameter item : methodParameters) {
             ValidatorItem[] validatorItems;
@@ -410,6 +413,7 @@ public class ParameterInterceptor implements HandlerMethodInterceptor {
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         BaseJpomController.clearResources();
+        I18nMessageUtil.clearLanguage();
     }
 
     /**
