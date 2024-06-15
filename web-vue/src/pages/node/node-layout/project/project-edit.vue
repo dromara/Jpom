@@ -220,7 +220,7 @@
                 {{ $t('pages.node.node-layout.project.project-edit.41ceb72c') }}
               </a-button>
             </div>
-            <div>scriptId也可以引入脚本库中的脚本,需要提前同步至机器节点中</div>
+            <div>{{ $t('pages.node.node-layout.project.project-edit.f6a317f0') }}</div>
             <!-- </a-space> -->
           </template>
           <a-form-item-rest>
@@ -470,7 +470,8 @@
 import CustomSelect from '@/components/customSelect'
 import NodeFunc from '@/pages/node/node-func'
 import codeEditor from '@/components/codeEditor'
-import { PROJECT_DSL_DEFATUL, randomStr } from '@/utils/const'
+import { randomStr } from '@/utils/const'
+import { PROJECT_DSL_DEFATUL } from '@/utils/const-i18n'
 import whiteList from '@/pages/node/node-layout/system/white-list.vue'
 
 import {

@@ -38,8 +38,7 @@ public class WorkspaceService extends BaseDbService<WorkspaceModel> implements I
             defaultWorkspace.setName(Const.DEFAULT_GROUP_NAME.get());
             defaultWorkspace.setDescription(I18nMessageUtil.get("i18n.default_workspace_cannot_delete.18b4"));
             super.insert(defaultWorkspace);
-
-            log.info("init created default workspace");
+            log.info(I18nMessageUtil.get("i18n.initialize_workspace.bc97"), Const.DEFAULT_GROUP_NAME.get());
         }
 
         Set<Class<?>> classes = BaseWorkspaceModel.allClass();
@@ -52,7 +51,7 @@ public class WorkspaceService extends BaseDbService<WorkspaceModel> implements I
             String sql = "update " + tableName.value() + " set workspaceId=? where (workspaceId is null or workspaceId='' or workspaceId='null')";
             int execute = this.execute(sql, Const.WORKSPACE_DEFAULT_ID);
             if (execute > 0) {
-                log.info("convertNullWorkspaceId {} {}", tableName.value(), execute);
+                log.info(I18nMessageUtil.get("i18n.fix_null_workspace_data.4d0b"), tableName.value(), execute);
             }
             total += execute;
         }

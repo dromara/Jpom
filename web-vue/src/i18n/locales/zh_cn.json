@@ -2428,7 +2428,8 @@
             "bf4a219b": "请输入项目名称",
             "4551702c": "请选择项目运行方式",
             "b5d7203a": "请输入项目文件夹",
-            "d074a68": "独立的项目分发请到分发管理中去修改"
+            "d074a68": "独立的项目分发请到分发管理中去修改",
+            "f6a317f0": "scriptId也可以引入脚本库中的脚本,需要提前同步至机器节点中"
           },
           "project-file-backup": {
             "64408008": "目录",
@@ -4907,35 +4908,11 @@
   "utils": {
     "const": {
       "4fcd2be0": "总计 {total} 条",
-      "1397b7fa": "取消定时,不再定时执行（支持 ! 前缀禁用定时执行，如：!0 0/1 * * * ?）",
-      "f397fdb9": "分钟级别",
-      "19a1647f": "1分钟",
-      "edee406c": "5分钟",
-      "eff3c3f": "10分钟",
-      "4cda3b42": "30分钟",
-      "5057c1d0": "小时级别",
-      "f00f01ca": "每小时",
-      "f661cf9a": "天级别",
-      "597995d3": "凌晨0点和中午12点",
-      "c9219cc4": "凌晨0点",
-      "c2d566f2": "秒级别（默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）",
-      "a5ef245b": "5秒一次",
-      "222fa259": "10秒一次",
-      "7a431b98": "30秒一次",
-      "3d7f1632": "<strong>【推荐】微信小程序搜索 数盾OTP</strong>",
-      "ee0d1cb6": "<strong>【推荐】腾讯身份验证码</strong> 简单好用 <a href=_##_https://a.app.qq.com/o/simple.jsp?pkgname=com.tencent.authenticator\">Android</a>",
-      "316edf4e": "<strong>Authy</strong> 功能丰富 专为两步验证码 <a href=_##_https://authy.com/download/\">iOS/Android/Windows/Mac/Linux</a> &nbsp; <a href=\"https://chrome.google.com/webstore/detail/authy/gaedmjdfmmahhbjefcbgaolhhanlaolb?hl=cn\">Chrome 扩展</a>",
-      "571efa83": "<strong>Google Authenticator</strong> 简单易用，但不支持密钥导出备份 <a href=_##_https://apps.apple.com/us/app/google-authenticator/id388497605\">iOS</a> <a href=\"https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&amp;hl=cn\">Android</a>",
-      "4c20714f": "<strong>Microsoft Authenticator</strong> 使用微软全家桶的推荐 <a href=_##_https://www.microsoft.com/zh-cn/account/authenticator\">iOS/Android</a>",
-      "c0f69a6e": "<strong>1Password</strong> 强大安全的密码管理付费应用<a href=_##_https://1password.com/zh-cn/downloads/\">iOS/Android/Windows/Mac/Linux/ChromeOS</a>",
-      "ba767044": "# scriptId 可以是项目路径下脚本文件名或者系统中的脚本模版ID",
-      "59e55b4": "description: 测试",
-      "42cca3ee": "#  在指定目录执行: ./ 项目目录  /root/ 特定目录 默认在 {'${jpom_agent_data_path}'}/script_run_cache ",
-      "5b2ef0bb": "# 备份文件保留个数",
-      "c4682b3f": "# 限制备份指定文件后缀（支持正则）",
-      "1f958da6": "# 项目文件备份路径",
-      "ae41f11b": "# 是否开启日志备份功能",
-      "95d754a0": "# scriptId 可以引用脚本库中的脚本（G{'@'}xxx）其中 xxx 为脚本库中的脚本标记，前提需要提取将对应脚本同步至对应机器节点"
+      "3509a9f8": "天",
+      "e3db239d": "小时",
+      "3b1bb444": "分钟",
+      "acabc771": "秒",
+      "4a28d11c": "毫秒"
     },
     "upload-pieces": {
       "ea2d7f82": "文件不能为空",

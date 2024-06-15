@@ -1,4 +1,3 @@
-import { t } from '@/i18n'
 ///
 /// Copyright (c) 2019 Of Him Code Technology Studio
 /// Jpom is licensed under Mulan PSL v2.
@@ -8,6 +7,9 @@ import { t } from '@/i18n'
 /// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 /// See the Mulan PSL v2 for more details.
 ///
+
+import { t } from '@/i18n'
+import dayjs from 'dayjs'
 
 // 常量池
 export const USER_NAME_KEY = 'Jpom-UserName'
@@ -44,17 +46,31 @@ export const NO_NOTIFY_KEY = 'tip'
 
 export const NO_LOADING_KEY = 'loading'
 
-const cachePageLimitKeyName = 'page_limit'
-import dayjs from 'dayjs'
-export function getCachePageLimit(): number {
-  return parseInt(localStorage.getItem(cachePageLimitKeyName) || '10')
-}
-
 /**
  * 分页选择条
  */
 export const PAGE_DEFAULT_SIZW_OPTIONS = ['5', '10', '15', '20', '25', '30', '35', '40', '50']
 
+/**
+ * 缓存当前的工作空间 ID
+ */
+export const CACHE_WORKSPACE_ID = 'workspaceId'
+
+/**
+ * 升级 重启检查等待次数
+ */
+export const RESTART_UPGRADE_WAIT_TIME_COUNT = 80
+
+/**
+ * 压缩文件格式
+ */
+export const ZIP_ACCEPT = '.tar,.bz2,.gz,.zip,.tar.bz2,.tar.gz'
+
+const cachePageLimitKeyName = 'page_limit'
+
+export function getCachePageLimit(): number {
+  return parseInt(localStorage.getItem(cachePageLimitKeyName) || '10')
+}
 /**
  * 展示总条数计算方法
  * @param {Number} total 总记录数
@@ -124,167 +140,6 @@ export function CHANGE_PAGE(listQuery, { pagination, sorter }) {
   }
   return listQuery
 }
-
-/**
- * 缓存当前的工作空间 ID
- */
-export const CACHE_WORKSPACE_ID = 'workspaceId'
-
-/**
- * 升级 重启检查等待次数
- */
-export const RESTART_UPGRADE_WAIT_TIME_COUNT = 80
-
-/**
- * 定时 cron 默认提示
- *
- * https://www.npmjs.com/package/cron-parser
- */
-export const CRON_DATA_SOURCE = [
-  {
-    title: t('utils.const.1397b7fa'),
-    options: [
-      {
-        title: '',
-        value: ''
-      }
-    ]
-  },
-  {
-    title: t('utils.const.f397fdb9'),
-    options: [
-      {
-        title: t('utils.const.19a1647f'),
-        value: '0 0/1 * * * ?'
-      },
-      {
-        title: t('utils.const.edee406c'),
-        value: '0 0/5 * * * ?'
-      },
-      {
-        title: t('utils.const.eff3c3f'),
-        value: '0 0/10 * * * ?'
-      },
-      {
-        title: t('utils.const.4cda3b42'),
-        value: '0 0/30 * * * ?'
-      }
-    ]
-  },
-  {
-    title: t('utils.const.5057c1d0'),
-    options: [
-      {
-        title: t('utils.const.f00f01ca'),
-        value: '0 0 0/1 * * ?'
-      }
-    ]
-  },
-  {
-    title: t('utils.const.f661cf9a'),
-    options: [
-      {
-        title: t('utils.const.597995d3'),
-        value: '0 0 0,12 * * ?'
-      },
-      {
-        title: t('utils.const.c9219cc4'),
-        value: '0 0 0 * * ?'
-      }
-    ]
-  },
-  {
-    title: t('utils.const.c2d566f2'),
-    options: [
-      {
-        title: t('utils.const.a5ef245b'),
-        value: '0/5 * * * * ?'
-      },
-      {
-        title: t('utils.const.222fa259'),
-        value: '0/10 * * * * ?'
-      },
-      {
-        title: t('utils.const.7a431b98'),
-        value: '0/30 * * * * ?'
-      }
-    ]
-  }
-]
-
-/**
- * 压缩文件格式
- */
-export const ZIP_ACCEPT = '.tar,.bz2,.gz,.zip,.tar.bz2,.tar.gz'
-
-/**
- * mfa app 应用举例
- */
-export const MFA_APP_TIP_ARRAY = [
-  t('utils.const.3d7f1632'),
-  t('utils.const.ee0d1cb6'),
-  t('utils.const.316edf4e'),
-  t('utils.const.571efa83'),
-  t('utils.const.4c20714f'),
-  t('utils.const.c0f69a6e')
-]
-
-/**
- * 项目 DSL 示例
- */
-export const PROJECT_DSL_DEFATUL =
-  t('utils.const.ba767044') +
-  '\n' +
-  t('utils.const.95d754a0') +
-  '\n' +
-  t('utils.const.59e55b4') +
-  '\n' +
-  'run:\r\n' +
-  '  start:\r\n' +
-  '#    scriptId: project.sh\r\n' +
-  '#    scriptId: G@xxxx\r\n' +
-  '    scriptId: \r\n' +
-  '    scriptArgs: start\r\n' +
-  '    scriptEnv:\r\n' +
-  '      "boot_active": test\r\n' +
-  '  status:\r\n' +
-  '#    scriptId: project.sh\r\n' +
-  '#    scriptId: G@xxxx\r\n' +
-  '    scriptId: \r\n' +
-  '    scriptArgs: status\r\n' +
-  '  stop:\r\n' +
-  '#    scriptId: project.sh\r\n' +
-  '#    scriptId: G@xxxx\r\n' +
-  '    scriptId: \r\n' +
-  '    scriptArgs: stop\r\n' +
-  '#  restart:\r\n' +
-  '##    scriptId: project.sh\r\n' +
-  '#    scriptId: G@xxxx\r\n' +
-  '#    scriptId: \r\n' +
-  '#    scriptArgs: restart\r\n' +
-  '#    scriptEnv:\r\n' +
-  '#      "boot_active": test\r\n' +
-  '#  reload:\r\n' +
-  '##    scriptId: project.sh\r\n' +
-  '#    scriptId: G@xxxx\r\n' +
-  '#    scriptId: \r\n' +
-  '#    scriptArgs: reload\r\n' +
-  '#    scriptEnv:\r\n' +
-  '#      "boot_active": test\r\n' +
-  '#  fileChangeReload: true\r\n' +
-  t('utils.const.42cca3ee') +
-  '#  execPath: ./\r\n' +
-  'file:\r\n' +
-  t('utils.const.5b2ef0bb') +
-  '#  backupCount: 5\r\n' +
-  t('utils.const.c4682b3f') +
-  "#  backupSuffix: [ '.jar','.html','^.+\\.(?i)(txt)$' ]\r\n" +
-  t('utils.const.1f958da6') +
-  '#  backupPath: /data/jpom_backup\r\n' +
-  'config:\r\n' +
-  t('utils.const.ae41f11b') +
-  '#  autoBackToFile: true\r\n' +
-  '\r\n'
 
 /**
  * 并发执行
@@ -473,7 +328,7 @@ export function itemGroupBy(arr, groupKey, key, dataKey) {
  * @param {String} levelCount 格式化个数
  * @returns
  */
-export function formatDuration(ms: any, seg: string = '', levelCount: number = 5) {
+export function formatDuration(ms: any, seg: string = ',', levelCount: number = 5) {
   let msNum = Number(ms)
   if (isNaN(msNum)) {
     return ms
@@ -485,13 +340,12 @@ export function formatDuration(ms: any, seg: string = '', levelCount: number = 5
   seg = seg || ''
   levelCount = levelCount || 5
   if (msNum < 0) msNum = -msNum
-  const time = {
-    天: Math.floor(msNum / 86400000),
-    小时: Math.floor(msNum / 3600000) % 24,
-    分钟: Math.floor(msNum / 60000) % 60,
-    秒: Math.floor(msNum / 1000) % 60,
-    毫秒: Math.floor(msNum) % 1000
-  }
+  const time = {} as any
+  ;(time[t('utils.const.3509a9f8')] = Math.floor(msNum / 86400000)),
+    (time[t('utils.const.e3db239d')] = Math.floor(msNum / 3600000) % 24),
+    (time[t('utils.const.3b1bb444')] = Math.floor(msNum / 60000) % 60),
+    (time[t('utils.const.acabc771')] = Math.floor(msNum / 1000) % 60),
+    (time[t('utils.const.4a28d11c')] = Math.floor(msNum) % 1000)
   return Object.entries(time)
     .filter((val) => val[1] !== 0)
     .map(([key, val]) => `${val}${key}`)
@@ -508,13 +362,12 @@ export function formatPercent(point, keep = 2) {
 }
 
 //小数转换为分数(小数先转换成number类型，并且保留2位小数)
-export function formatPercent2(point, keep = 2) {
+export function formatPercent2(point: any, keep = 2) {
   if (null == point) {
     return '-'
   }
-  let percent = Number(Number(point).toFixed(keep))
-  percent += '%'
-  return percent
+  const percent = Number(Number(point).toFixed(keep))
+  return percent + '%'
 }
 
 //小数转换为分数(小数先转换成number类型，再乘以100，并且保留2位小数)
@@ -565,9 +418,9 @@ export function compareVersion(version1, version2) {
 
 // 当前页面构建信息
 export function pageBuildInfo() {
-  const htmlVersion = document.head.querySelector('[name~=jpom-version][content]').content
-  const buildTime = document.head.querySelector('[name~=build-time][content]').content
-  const buildEnv = document.head.querySelector('[name~=build-env][content]').content
+  const htmlVersion = document.head.querySelector('[name~=jpom-version][content]')?.content
+  const buildTime = document.head.querySelector('[name~=build-time][content]')?.content
+  const buildEnv = document.head.querySelector('[name~=build-env][content]')?.content
   return {
     v: htmlVersion,
     t: buildTime,

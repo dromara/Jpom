@@ -1371,7 +1371,8 @@ import { getRepositoryInfo } from '@/api/repository'
 import { getNodeListAll, getProjectListAll } from '@/api/node'
 // import { getScriptListAll } from "@/api/server-script";
 import { getDishPatchListAll } from '@/api/dispatch'
-import { itemGroupBy, CRON_DATA_SOURCE, randomStr } from '@/utils/const'
+import { itemGroupBy, randomStr } from '@/utils/const'
+import { CRON_DATA_SOURCE } from '@/utils/const-i18n'
 
 import { useGuideStore } from '@/stores/guide'
 import { afterOptListSimple } from '@/api/dispatch'

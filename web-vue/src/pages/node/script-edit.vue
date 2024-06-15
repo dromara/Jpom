@@ -110,7 +110,7 @@
 <script>
 import codeEditor from '@/components/codeEditor'
 import { editScript, itemScript } from '@/api/node-other'
-import { CRON_DATA_SOURCE } from '@/utils/const'
+import { CRON_DATA_SOURCE } from '@/utils/const-i18n'
 import { getNodeListAll } from '@/api/node'
 export default {
   components: {

@@ -441,8 +441,8 @@ import {
 import codeEditor from '@/components/codeEditor'
 import { getNodeListAll } from '@/api/node'
 import ScriptConsole from '@/pages/script/script-console'
-import { CHANGE_PAGE, COMPUTED_PAGINATION, CRON_DATA_SOURCE, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
-
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
+import { CRON_DATA_SOURCE } from '@/utils/const-i18n'
 import { getWorkSpaceListAll } from '@/api/workspace'
 
 import ScriptLog from '@/pages/script/script-log'
