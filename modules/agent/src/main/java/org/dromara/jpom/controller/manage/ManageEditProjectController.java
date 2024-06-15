@@ -167,7 +167,8 @@ public class ManageEditProjectController extends BaseAgentController {
         this.checkPath(projectInfo);
         //
         NodeProjectInfoModel exits = projectInfoService.getItem(projectInfo.getId());
-        projectInfo.setWorkspaceId(this.getWorkspaceId());
+        String workspaceId = this.getWorkspaceId();
+        projectInfo.setWorkspaceId(workspaceId);
         RunMode runMode = projectInfo.getRunMode();
         if (exits == null) {
             // 检查运行中的tag 是否被占用
@@ -194,7 +195,10 @@ public class ManageEditProjectController extends BaseAgentController {
             exits.setMainClass(projectInfo.mainClass());
             exits.setJvm(projectInfo.getJvm());
             exits.setArgs(projectInfo.getArgs());
-            exits.setWorkspaceId(this.getWorkspaceId());
+            if (StrUtil.isNotEmpty(exits.getWorkspaceId())) {
+                Assert.state(StrUtil.equals(exits.getWorkspaceId(), workspaceId), "当前项目已经被其他工作空间关联,请检查确认后再操作或者使用孤独数据修正");
+            }
+            exits.setWorkspaceId(workspaceId);
             exits.setOutGivingProject(projectInfo.outGivingProject());
             exits.setRunMode(runMode);
             exits.setToken(projectInfo.token());
