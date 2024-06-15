@@ -1880,7 +1880,6 @@
         "bcb85748": "Not Full Screen",
         "378c8cf6": "View Log in Full Screen",
         "cf6a1e7a": "Content Theme",
-        "58a45933": "Follow System",
         "ad301071": "Content Area Theme Switch",
         "e1e68c8b": "Menu Theme",
         "1c0c4705": "Left Menu Theme Switch",
@@ -1889,7 +1888,6 @@
         "1538a492": "Font Spacing Adjustment",
         "bb6fe415": "Only Effective in Dark Mode",
         "ee091a03": "Language",
-        "9ca25f75": "Chinese",
         "e805efb": "For the security of your account, the system requires two-step verification to be enabled to ensure account safety.",
         "c8507450": "Enable immediately",
         "9b5a95d2": "Please enter a nickname",
@@ -2345,11 +2343,13 @@
             "a6c4bfd7": "Port:",
             "3cf2b4f7": "Process ID:",
             "fb372d35": "Are you sure you want to restart the project?",
-            "2e391eba": "Are you sure you want to stop the project?"
+            "2e391eba": "Are you sure you want to stop the project?",
+            "bbbe8e9b": "Script Library"
           },
           "project-edit": {
             "17924912": "jvm{slot1},{slot2}.Example: -Xms512m -Xmx512m",
             "28952768": "The project folder is the actual directory name where the project is stored",
+            "49427983": "The project ID will only be limited to uniqueness within the machine node, and the same project ID is allowed in different workspaces (the same workspace)",
             "89967495": "Please fill in the project DSL configuration content. You can click the tab above to view the configuration example",
             "92ebd5f0": "Cannot be modified after creation",
             "7cb5b39": "Project name",
@@ -2601,7 +2601,9 @@
             "2774e4a7": "Friendly reminder",
             "b28bd9b1": "If there is original associated data after modification, it will be invalidated and need to be reconfigured",
             "478331d8": "If the node option is disabled, it means that there is a recommended associated node for the corresponding data (this situation may occur in low-version project data)",
-            "580e6c10": "Select node"
+            "580e6c10": "Select node",
+            "dcead53c": "Script library:",
+            "a0b29171": "Script version: {item}"
           },
           "config-file": {
             "ee016914": "Configuration file path",
@@ -3441,7 +3443,8 @@
             "3e4f81f9": "Please backup your data before operating",
             "5d61d6da": "Please do not exit the management node first",
             "f698fdd9": "The operation cannot be undone",
-            "a8707f4a": "Please select the allocation type"
+            "a8707f4a": "Please select the allocation type",
+            "eb19be5d": "Dockers connected via SSH are not recommended for container construction (SSH is very unstable for construction)"
           }
         },
         "machine": {
@@ -3816,6 +3819,37 @@
             "885b965f": "Are you sure you want to delete the SSH for the corresponding workspace?",
             "8ad9d6d6": "Are you sure you want to clear the SSH hidden field information? (password, private key)"
           }
+        },
+        "script-library": {
+          "81634069": "version",
+          "65418a5e": "There are no script libraries available",
+          "95547f9": "Script markers",
+          "f89e58f1": "describe",
+          "986e8dc2": "Hold down the Ctr or Alt/Option keys and click the button to quickly return to the first page",
+          "43934f6d": "search",
+          "9f3089ce": "establish",
+          "41c0cbe5": "The script library is used to store and manage general scripts, and the scripts in the script library cannot be directly executed.",
+          "423e1405": "Scripts can be distributed to machine nodes and referenced in DSL projects, achieving multiple projects sharing the same script",
+          "ad207008": "edit",
+          "ecbd7449": "delete",
+          "16a6aab6": "Edit Script",
+          "2d62ebdb": "sign",
+          "e37b1ac9": "Please enter the script tag, which can only be letters or numbers. The length of the tag must be less than 20 and must be globally unique",
+          "3e7aa0ad": "content",
+          "43075dd9": "Please enter a script description",
+          "4f5ca5e3": "Distribution machine",
+          "33437c9b": "Distribute the script to the corresponding machine nodes, which can reference the corresponding script",
+          "5251812f": "Dropdown search defaults to the top 10 relevant search keywords, as well as the selected machine nodes",
+          "4722ff63": "Please select the machine nodes to distribute to",
+          "d3b29478": "Modification time",
+          "efaf9956": "Creation time",
+          "339d15b5": "Creator",
+          "8605b4f2": "Modified by",
+          "fe731dfc": "operation",
+          "3875bf60": "System prompt",
+          "72df294d": "Are you sure you want to delete this script library?",
+          "d507abff": "confirm",
+          "a0451c97": "cancel"
         }
       },
       "backup": {
@@ -4610,6 +4644,9 @@
           "4ff250dc": "form",
           "7edad275": "card"
         }
+      },
+      "props": {
+        "d9634f4e": "There is currently no data available"
       }
     },
     "logView": {
@@ -4897,7 +4934,8 @@
       "5b2ef0bb": "#Number of backup files retained",
       "c4682b3f": "#Restrict backup of specified file suffixes (supports regularization)",
       "1f958da6": "#Project file backup path",
-      "ae41f11b": "#Is the log backup function enabled"
+      "ae41f11b": "#Is the log backup function enabled",
+      "95d754a0": "#ScriptId can reference scripts in the script library (G @ xxx), where xxx is the script tag in the script library, provided that the corresponding script is extracted and synchronized to the corresponding machine node"
     },
     "upload-pieces": {
       "ea2d7f82": "The file cannot be empty",
@@ -4910,5 +4948,12 @@
   "App": {
     "a4e5a0a8": "Loading page resources",
     "ed2baf28": "Loading"
+  },
+  "stores": {
+    "guide": {
+      "78aea169": "Follow system",
+      "1ba0e8eb": "Light color",
+      "1e29d47d": "Dark color"
+    }
   }
 }

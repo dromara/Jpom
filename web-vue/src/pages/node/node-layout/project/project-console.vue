@@ -84,7 +84,10 @@
                       </a-button>
                     </template>
                     <template v-else-if="item.type === 'library'">
-                      <a-button type="link" size="small" disabled=""> 脚本库 {{ item.scriptId }}</a-button>
+                      <a-button type="link" size="small" disabled=""
+                        >{{ $t('pages.node.node-layout.project.project-console.bbbe8e9b')
+                        }}{{ item.scriptId }}</a-button
+                      >
                     </template>
                   </template>
                   <template v-else>

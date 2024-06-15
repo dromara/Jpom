@@ -80,10 +80,10 @@
           </a-timeline-item>
           <a-timeline-item>
             <div class="layui-elem-quote">
-              脚本库：
-              <template v-if="temp.scriptLibraryTagMap && Object.keys(temp.scriptLibraryTagMap).length">
+              {{ $t('pages.node.node-layout.system.cache.dcead53c')
+              }}<template v-if="temp.scriptLibraryTagMap && Object.keys(temp.scriptLibraryTagMap).length">
                 <a-tag v-for="(item, key) in temp.scriptLibraryTagMap" :key="key">
-                  <a-tooltip :title="`脚本版本:${item}`">
+                  <a-tooltip :title="$t('pages.node.node-layout.system.cache.a0b29171', { item: item })">
                     {{ key }}
                   </a-tooltip>
                 </a-tag>
