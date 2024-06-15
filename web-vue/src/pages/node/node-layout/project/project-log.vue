@@ -1,10 +1,10 @@
 <template>
   <div>
     <a-space direction="vertical" style="width: 100%">
-      <a-tag
-        >{{ $t('pages.node.node-layout.project.project-log.6424a544')
-        }}<b>jpom.project.log.auto-backup-to-file: false</b></a-tag
-      >
+      <a-tag style="display: inline-grid">
+        {{ $t('pages.node.node-layout.project.project-log.6424a544') }}
+        <b>jpom.project.log.auto-backup-to-file: false</b>
+      </a-tag>
 
       <a-tag v-if="project.logPath" color="orange">
         {{ $t('pages.node.node-layout.project.project-log.f07e81ba') }}: {{ project.logPath }}

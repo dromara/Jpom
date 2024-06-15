@@ -78,7 +78,7 @@ public abstract class BaseProxyHandler extends BaseHandler {
 
         Object[] parameters = this.getParameters(attributes);
         UserModel userModel = (UserModel) attributes.get("userInfo");
-        parameters = ArrayUtil.append(parameters, "optUser", userModel.getId());
+        parameters = ArrayUtil.append(parameters, "optUser", userModel.getId(), "lang", attributes.get("lang"));
         // 连接节点
         INodeInfo nodeInfo = Optional.ofNullable(machine)
             .map(NodeForward::coverNodeInfo)

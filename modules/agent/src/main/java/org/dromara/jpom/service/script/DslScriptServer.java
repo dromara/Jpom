@@ -141,7 +141,8 @@ public class DslScriptServer {
                 jsonObject.put("scriptId", scriptId);
                 return new Tuple(jsonObject, libraryModel);
             } else {
-                jsonObject.put("msg", "对应的脚本库不存在：" + scriptId);
+                String string = I18nMessageUtil.get("i18n.missing_script_library_message.be9a") + scriptId;
+                jsonObject.put("msg", string);
                 return new Tuple(jsonObject, null);
             }
         }

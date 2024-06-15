@@ -49,6 +49,16 @@ public abstract class BaseAgentWebSocketHandle {
         BaseAgentWebSocketHandle.agentAuthorize = agentAuthorize;
     }
 
+    protected void setLanguage(Session session) {
+        Map<String, List<String>> requestParameterMap = session.getRequestParameterMap();
+        List<String> lang = requestParameterMap.get("lang");
+        I18nMessageUtil.setLanguage(CollUtil.getFirst(lang));
+    }
+
+    protected void clearLanguage() {
+        I18nMessageUtil.clearLanguage();
+    }
+
     protected String getParameters(Session session, String name) {
         Map<String, List<String>> requestParameterMap = session.getRequestParameterMap();
         Map<String, String> parameters = session.getPathParameters();

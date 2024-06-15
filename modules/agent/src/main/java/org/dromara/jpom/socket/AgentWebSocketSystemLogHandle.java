@@ -53,6 +53,7 @@ public class AgentWebSocketSystemLogHandle extends BaseAgentWebSocketHandle {
     @OnOpen
     public void onOpen(Session session) {
         try {
+            setLanguage(session);
             if (super.checkAuthorize(session)) {
                 return;
             }
@@ -65,18 +66,25 @@ public class AgentWebSocketSystemLogHandle extends BaseAgentWebSocketHandle {
             } catch (IOException e1) {
                 log.error(e1.getMessage(), e1);
             }
+        } finally {
+            clearLanguage();
         }
     }
 
     @OnMessage
     public void onMessage(String message, Session session) throws Exception {
-        JSONObject json = JSONObject.parseObject(message);
-        String op = json.getString("op");
-        ConsoleCommandOp consoleCommandOp = ConsoleCommandOp.valueOf(op);
-        if (consoleCommandOp == ConsoleCommandOp.heart) {
-            return;
+        try {
+            setLanguage(session);
+            JSONObject json = JSONObject.parseObject(message);
+            String op = json.getString("op");
+            ConsoleCommandOp consoleCommandOp = ConsoleCommandOp.valueOf(op);
+            if (consoleCommandOp == ConsoleCommandOp.heart) {
+                return;
+            }
+            runMsg(session, json);
+        } finally {
+            clearLanguage();
         }
-        runMsg(session, json);
     }
 
     private void runMsg(Session session, JSONObject reqJson) throws Exception {
