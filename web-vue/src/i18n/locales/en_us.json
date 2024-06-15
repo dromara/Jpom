@@ -1913,7 +1913,8 @@
         "4fc329c6": "Please enter an email address",
         "b29d1268": "The cluster address has not been configured yet, and the cluster cannot be switched",
         "ee23f800": "A verification code is required. It will take effect after confirmation of binding",
-        "b34c9126": "Are you sure you want to disable two-step verification? Disabling it will affect the security of your account, and existing mfa keys will be invalidated"
+        "b34c9126": "Are you sure you want to disable two-step verification? Disabling it will affect the security of your account, and existing mfa keys will be invalidated",
+        "8263b5e7": "After switching languages, the page will automatically refresh, and any opened tab menus (tabs) will be cleared together"
       },
       "user-log": {
         "3ce54760": "Function",
@@ -4599,7 +4600,14 @@
         "5cb430c4": "Light Eclipse",
         "e26f389a": "Dark 2 Blackboard",
         "10adc4a3": "Light color idea",
-        "4ea93630": "Please enter the content"
+        "4ea93630": "Please enter the content",
+        "77c1e63d": "Start Search",
+        "4f85e42e": "Find Next",
+        "e9f2ef9a": "Find Previous",
+        "6a91de60": "replace",
+        "d720ba75": "replace all",
+        "6bcfa0bc": "Continuous search (dialog box will not automatically close, press Enter to find next, press Shift Enter to find previous)",
+        "e2621574": "Jump to row"
       }
     },
     "compositionTransfer": {
@@ -4920,6 +4928,37 @@
       "e7ba3a8": "Parsing files, preparing to upload",
       "997a109d": "File upload ID generation failed:",
       "b6c41759": "Parsing file failed:"
+    },
+    "const-i18n": {
+      "1397b7fa": "Cancel timing and no longer execute on schedule (supports! Prefix disabling scheduled execution, such as:! 0 0/1 * *?)",
+      "f397fdb9": "Minute level",
+      "19a1647f": "1 minute",
+      "edee406c": "5 minutes",
+      "eff3c3f": "10 minutes",
+      "4cda3b42": "30 minutes",
+      "5057c1d0": "Hour level",
+      "f00f01ca": "Every hour",
+      "f661cf9a": "Day level",
+      "597995d3": "At midnight and noon",
+      "c9219cc4": "At midnight",
+      "c2d566f2": "Second level (seconds level is not enabled by default and needs to be modified in the configuration file: [system. timerMatchSecond])",
+      "a5ef245b": "Once every 5 seconds",
+      "222fa259": "Once every 10 seconds",
+      "7a431b98": "Once every 30 seconds",
+      "3d7f1632": "<strong>[Recommendation] WeChat Mini Program Search for Number Shield OTP</strong>",
+      "ee0d1cb6": "<strong>[Recommended] Tencent Authentication Code</strong>Simple and user-friendly<a href=_##_ https://a.app.qq.com/o/simple.jsp?pkgname=com.tencent.authenticator Android</a>",
+      "316edf4e": "<strong>Authy</strong>Rich features specially designed for two-step verification codes<a href=_##_ https://authy.com/download/ \"IOS/Android/Windows/Mac/Linux</a>&nbsp;<a=\" https://chrome.google.com/webstore/detail/authy/gaedmjdfmmahhbjefcbgaolhhanlaolb?hl=cn Chrome extension</a>",
+      "571efa83": "<strong>Google Authenticator</strong>Simple and easy to use, but does not support key export backup<a href=_##_ https://apps.apple.com/us/app/google-authenticator/id388497605 \"IOS</a><a=\" https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&amp ; Hl=cn>Android</a>",
+      "4c20714f": "<strong>Microsoft Authenticator</strong>Recommendation for using Microsoft Family Bucket<a href=_##_ https://www.microsoft.com/zh-cn/account/authenticator IOS/Android</a>",
+      "c0f69a6e": "<strong>1Password</strong>Powerful and secure password management paid application<a href=_##_ https://1password.com/zh-cn/downloads/ IOS/Android/Windows/Mac/Linux/ChromeOS</a>",
+      "ba767044": "#ScriptId can be the script file name in the project path or the script template ID in the system",
+      "42cca3ee": "#Execute in the specified directory:/ The project directory/root/specific directory defaults to {'${jpom-agent_data_path} '}/script_run_cache",
+      "5b2ef0bb": "#Number of backup files retained",
+      "c4682b3f": "#Restrict backup of specified file suffixes (supports regularization)",
+      "1f958da6": "#Project file backup path",
+      "ae41f11b": "#Is the log backup function enabled",
+      "95d754a0": "#ScriptId can reference scripts in the script library (G {'@'} xxx), where xxx is the script tag in the script library, provided that the corresponding script is extracted and synchronized to the corresponding machine node",
+      "9daba997": "test"
     }
   },
   "App": {

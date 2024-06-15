@@ -16,7 +16,6 @@ import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.StreamProgress;
 import cn.hutool.core.io.unit.DataSize;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
@@ -28,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.func.files.model.FileStorageModel;
 import org.dromara.jpom.service.IStatusRecover;
@@ -99,7 +99,7 @@ public class FileStorageService extends BaseGlobalOrWorkspaceService<FileStorage
             this.insert(fileStorageModel);
         }
         // 异步下载
-        ThreadUtil.execute(() -> {
+        I18nThreadUtil.execute(() -> {
             try {
                 File tempPath = configBean.getTempPath();
                 File file = FileUtil.file(tempPath, "file-storage-download", uuid);

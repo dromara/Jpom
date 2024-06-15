@@ -21,6 +21,7 @@ import com.jcraft.jsch.Session;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
@@ -197,7 +198,7 @@ public class SshCommandService extends BaseWorkspaceService<CommandModel> implem
         for (String sshId : sshIds) {
             this.executeItem(syncFinisher, commandModel, params, sshId, batchId, triggerExecType, envMap);
         }
-        ThreadUtil.execute(() -> {
+        I18nThreadUtil.execute(() -> {
             try {
                 syncFinisher.start();
             } catch (Exception e) {

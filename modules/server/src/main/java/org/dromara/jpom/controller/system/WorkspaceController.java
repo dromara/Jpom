@@ -279,7 +279,7 @@ public class WorkspaceController extends BaseServerController {
         JSONObject config = systemParametersServer.getConfigDefNewInstance(StrUtil.format("menus_config_{}", workspaceId), JSONObject.class);
         //"classpath:/menus/index.json"
         //"classpath:/menus/node-index.json"
-        String language = I18nMessageUtil.parseLanguage(request);
+        String language = I18nMessageUtil.tryGetLanguage();
         config.put("serverMenus", this.readMenusJson("classpath:/menus/" + language + "/index.json"));
         return JsonMessage.success("", config);
     }

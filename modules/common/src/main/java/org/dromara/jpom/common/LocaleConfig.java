@@ -22,7 +22,6 @@ public class LocaleConfig {
 
     @Bean
     public ResourceBundleMessageSource messageSource() {
-        //Locale.setDefault(Locale.CHINA);
         ResourceBundleMessageSource source = new ResourceBundleMessageSource();
         //设置国际化文件存储路径   resources目录下
         source.setBasenames("i18n/messages");

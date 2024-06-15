@@ -23,6 +23,7 @@ import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.model.user.UserModel;
@@ -113,7 +114,7 @@ public class DockerLogHandler extends BaseProxyHandler {
             map.put("charset", CharsetUtil.CHARSET_UTF_8);
             map.put("consumer", consumer);
             map.put("timestamps", json.getBoolean("timestamps"));
-            ThreadUtil.execute(() -> {
+            I18nThreadUtil.execute(() -> {
                 attributes.put("thread", Thread.currentThread());
                 IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
                 try {

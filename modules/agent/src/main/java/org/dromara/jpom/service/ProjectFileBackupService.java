@@ -23,6 +23,7 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.configuration.ProjectConfig;
 import org.dromara.jpom.model.data.DslYmlDto;
@@ -187,7 +188,7 @@ public class ProjectFileBackupService {
         File projectPath = projectInfoService.resolveLibFile(infoModel);
         DslYmlDto dslYmlDto = infoModel.dslConfig();
         // 考虑到大文件对比，比较耗时。需要异步对比文件
-        ThreadUtil.execute(() -> {
+        I18nThreadUtil.execute(() -> {
             try {
                 //String useBackupPath = resolveBackupPath(dslYmlDto);
                 File backupItemPath = this.pathProjectBackup(infoModel, backupId);

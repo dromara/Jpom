@@ -26,6 +26,7 @@ import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.configuration.NodeConfig;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.assets.server.MachineNodeServer;
@@ -117,7 +118,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                 return proxySession;
             });
             // 连接节点
-            ThreadUtil.execute(() -> {
+            I18nThreadUtil.execute(() -> {
                 try {
                     if (!nodeClient.isConnected()) {
                         nodeClient.reconnectBlocking();

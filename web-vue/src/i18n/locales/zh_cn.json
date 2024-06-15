@@ -1913,7 +1913,8 @@
         "4fc329c6": "请输入邮箱地址",
         "b29d1268": "还未配置集群地址,不能切换集群",
         "ee23f800": "需要输入验证码,确认绑定后才生效奥",
-        "b34c9126": "确定要关闭两步验证吗？关闭后账号安全性将受到影响,关闭后已经存在的 mfa key 将失效"
+        "b34c9126": "确定要关闭两步验证吗？关闭后账号安全性将受到影响,关闭后已经存在的 mfa key 将失效",
+        "8263b5e7": "切换语言后页面将自动刷新，已经打开的标签菜单（选项卡）将一并清空"
       },
       "user-log": {
         "3ce54760": "操作功能",
@@ -4599,7 +4600,14 @@
         "5cb430c4": "浅色 eclipse",
         "e26f389a": "深色2 blackboard",
         "10adc4a3": "浅色 idea",
-        "4ea93630": "请输入内容"
+        "4ea93630": "请输入内容",
+        "77c1e63d": " 开始搜索",
+        "4f85e42e": " 查找下一个",
+        "e9f2ef9a": " 查找上一个",
+        "6a91de60": " 替换",
+        "d720ba75": " 全部替换",
+        "6bcfa0bc": " 持续搜索（对话框不会自动关闭，按 Enter 查找下一个，按 Shift-Enter 查找上一个）",
+        "e2621574": " 跳至行"
       }
     },
     "compositionTransfer": {
@@ -4913,6 +4921,37 @@
       "3b1bb444": "分钟",
       "acabc771": "秒",
       "4a28d11c": "毫秒"
+    },
+    "const-i18n": {
+      "1397b7fa": "取消定时,不再定时执行（支持 ! 前缀禁用定时执行，如：!0 0/1 * * * ?）",
+      "f397fdb9": "分钟级别",
+      "19a1647f": "1分钟",
+      "edee406c": "5分钟",
+      "eff3c3f": "10分钟",
+      "4cda3b42": "30分钟",
+      "5057c1d0": "小时级别",
+      "f00f01ca": "每小时",
+      "f661cf9a": "天级别",
+      "597995d3": "凌晨0点和中午12点",
+      "c9219cc4": "凌晨0点",
+      "c2d566f2": "秒级别（默认未开启秒级别,需要去修改配置文件中:[system.timerMatchSecond]）",
+      "a5ef245b": "5秒一次",
+      "222fa259": "10秒一次",
+      "7a431b98": "30秒一次",
+      "3d7f1632": "<strong>【推荐】微信小程序搜索 数盾OTP</strong>",
+      "ee0d1cb6": "<strong>【推荐】腾讯身份验证码</strong> 简单好用 <a href=_##_https://a.app.qq.com/o/simple.jsp?pkgname=com.tencent.authenticator\">Android</a>",
+      "316edf4e": "<strong>Authy</strong> 功能丰富 专为两步验证码 <a href=_##_https://authy.com/download/\">iOS/Android/Windows/Mac/Linux</a> &nbsp; <a href=\"https://chrome.google.com/webstore/detail/authy/gaedmjdfmmahhbjefcbgaolhhanlaolb?hl=cn\">Chrome 扩展</a>",
+      "571efa83": "<strong>Google Authenticator</strong> 简单易用，但不支持密钥导出备份 <a href=_##_https://apps.apple.com/us/app/google-authenticator/id388497605\">iOS</a> <a href=\"https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&amp;hl=cn\">Android</a>",
+      "4c20714f": "<strong>Microsoft Authenticator</strong> 使用微软全家桶的推荐 <a href=_##_https://www.microsoft.com/zh-cn/account/authenticator\">iOS/Android</a>",
+      "c0f69a6e": "<strong>1Password</strong> 强大安全的密码管理付费应用<a href=_##_https://1password.com/zh-cn/downloads/\">iOS/Android/Windows/Mac/Linux/ChromeOS</a>",
+      "ba767044": "# scriptId 可以是项目路径下脚本文件名或者系统中的脚本模版ID",
+      "42cca3ee": "#  在指定目录执行: ./ 项目目录  /root/ 特定目录 默认在 {'${jpom_agent_data_path}'}/script_run_cache ",
+      "5b2ef0bb": "# 备份文件保留个数",
+      "c4682b3f": "# 限制备份指定文件后缀（支持正则）",
+      "1f958da6": "# 项目文件备份路径",
+      "ae41f11b": "# 是否开启日志备份功能",
+      "95d754a0": "# scriptId 可以引用脚本库中的脚本（G{'@'}xxx）其中 xxx 为脚本库中的脚本标记，前提需要提取将对应脚本同步至对应机器节点",
+      "9daba997": "测试"
     },
     "upload-pieces": {
       "ea2d7f82": "文件不能为空",

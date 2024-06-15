@@ -12,7 +12,6 @@ package org.dromara.jpom.socket;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
@@ -21,6 +20,7 @@ import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.commander.CommandOpResult;
 import org.dromara.jpom.common.commander.ProjectCommander;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.configuration.ProjectLogConfig;
 import org.dromara.jpom.model.RunMode;
@@ -246,7 +246,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
         if (!FileUtil.isFile(file)) {
             return new JsonMessage<>(404, I18nMessageUtil.get("i18n.file_not_found.d952"));
         }
-        ThreadUtil.execute(() -> {
+        I18nThreadUtil.execute(() -> {
             try {
                 boolean first = Convert.toBool(reqJson.getString("first"), false);
                 int head = reqJson.getIntValue("head");

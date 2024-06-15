@@ -28,6 +28,7 @@ import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.configuration.ClusterConfig;
@@ -197,7 +198,7 @@ public class CacheManageController extends BaseServerController implements ICach
     @GetMapping(value = "async-refresh-cache", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<String> refresh() {
         Assert.state(!this.refreshCacheIng, I18nMessageUtil.get("i18n.refreshing_cache.c969"));
-        ThreadUtil.execute(() -> {
+        I18nThreadUtil.execute(() -> {
             try {
                 this.refreshCacheIng = true;
                 this.executeTask();

@@ -19,6 +19,7 @@ import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.func.files.service.StaticFileStorageService;
 import org.dromara.jpom.model.data.AgentWhitelist;
 import org.dromara.jpom.model.data.ServerWhitelist;
@@ -140,7 +141,7 @@ public class OutGivingWhitelistController extends BaseServerController {
 
         String resultData = AgentWhitelist.convertToLine(list);
         // 重新检查静态目录任务状态
-        ThreadUtil.execute(() -> {
+        I18nThreadUtil.execute(() -> {
             try {
                 staticFileStorageService.startLoad();
             } catch (Exception e) {

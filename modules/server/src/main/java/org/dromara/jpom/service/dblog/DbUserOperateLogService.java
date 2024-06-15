@@ -19,6 +19,7 @@ import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.MonitorModel;
 import org.dromara.jpom.model.data.MonitorUserOptModel;
@@ -203,7 +204,7 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
                 String email = item.getEmail();
                 if (StrUtil.isNotEmpty(email)) {
                     MonitorModel.Notify notify1 = new MonitorModel.Notify(MonitorModel.NotifyType.mail, email);
-                    ThreadUtil.execute(() -> {
+                    I18nThreadUtil.execute(() -> {
                         try {
                             NotifyUtil.send(notify1, I18nMessageUtil.get("i18n.user_operation_alarm.15b9"), context);
                         } catch (Exception e) {
@@ -216,7 +217,7 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
                 String dingDing = item.getDingDing();
                 if (StrUtil.isNotEmpty(dingDing)) {
                     MonitorModel.Notify notify1 = new MonitorModel.Notify(MonitorModel.NotifyType.dingding, dingDing);
-                    ThreadUtil.execute(() -> {
+                    I18nThreadUtil.execute(() -> {
                         try {
                             NotifyUtil.send(notify1, I18nMessageUtil.get("i18n.user_operation_alarm.15b9"), context);
                         } catch (Exception e) {
@@ -228,7 +229,7 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
                 String workWx = item.getWorkWx();
                 if (StrUtil.isNotEmpty(workWx)) {
                     MonitorModel.Notify notify1 = new MonitorModel.Notify(MonitorModel.NotifyType.workWx, workWx);
-                    ThreadUtil.execute(() -> {
+                    I18nThreadUtil.execute(() -> {
                         try {
                             NotifyUtil.send(notify1, I18nMessageUtil.get("i18n.user_operation_alarm.15b9"), context);
                         } catch (Exception e) {
@@ -249,7 +250,7 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
      */
     public void insert(UserOperateLogV1 userOperateLogV1, OperateLogController.CacheInfo cacheInfo) {
         super.insert(userOperateLogV1);
-        ThreadUtil.execute(() -> {
+        I18nThreadUtil.execute(() -> {
             // 更新用户名和工作空间名
             try {
                 UserOperateLogV1 update = new UserOperateLogV1();
