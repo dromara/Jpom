@@ -163,16 +163,16 @@
                 record.link
                   ? $t('pages.ssh.ssh-file.56bb0bdf')
                   : text
-                    ? $t('pages.ssh.ssh-file.535422c2')
-                    : $t('pages.ssh.ssh-file.ec88a43e')
+                  ? $t('pages.ssh.ssh-file.535422c2')
+                  : $t('pages.ssh.ssh-file.ec88a43e')
               }`"
             >
               <span>{{
                 record.link
                   ? $t('pages.ssh.ssh-file.56bb0bdf')
                   : text
-                    ? $t('pages.ssh.ssh-file.535422c2')
-                    : $t('pages.ssh.ssh-file.ec88a43e')
+                  ? $t('pages.ssh.ssh-file.535422c2')
+                  : $t('pages.ssh.ssh-file.ec88a43e')
               }}</span>
             </a-tooltip>
           </template>

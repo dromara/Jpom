@@ -150,6 +150,7 @@
               <QuestionCircleOutlined v-show="!envTemp.id" />
             </a-tooltip>
           </template>
+          <template #help>{{ $t('pages.system.workspace-env.d330bbb7') }}</template>
           <a-select
             v-model:value="envTemp.chooseNode"
             show-search

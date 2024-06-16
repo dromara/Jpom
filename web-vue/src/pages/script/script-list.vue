@@ -180,7 +180,9 @@
               :options="{ mode: 'shell', tabSize: 2 }"
             >
               <template #tool_before>
-                <a-button type="link" @click="scriptLibraryVisible = true">脚本库 </a-button>
+                <a-button type="link" @click="scriptLibraryVisible = true">{{
+                  $t('pages.script.script-list.b52fd8d6')
+                }}</a-button>
               </template>
             </code-editor>
           </a-form-item-rest>
@@ -408,11 +410,11 @@
     >
       <script-log v-if="drawerLogVisible" :script-id="temp.id" />
     </CustomDrawer>
-    <!-- 查看脚本库 -->
+    <!-- pages.script.script-list.a36f20d3 -->
     <CustomDrawer
       v-if="scriptLibraryVisible"
       destroy-on-close
-      title="查看脚本库"
+      :title="$t('pages.script.script-list.a36f20d3')"
       placement="right"
       :open="scriptLibraryVisible"
       width="85vw"
@@ -447,9 +449,8 @@
                 scriptLibraryVisible = false
               }
             "
+            >{{ $t('pages.script.script-list.a0451c97') }}</a-button
           >
-            取消
-          </a-button>
           <a-button
             type="primary"
             @click="
@@ -457,9 +458,8 @@
                 $refs['scriptLibraryRef'].handerScriptConfirm()
               }
             "
+            >{{ $t('pages.script.script-list.703db0bd') }}</a-button
           >
-            替换引用
-          </a-button>
           <a-button
             type="primary"
             @click="
@@ -467,9 +467,8 @@
                 $refs['scriptLibraryRef'].handerTagConfirm()
               }
             "
+            >{{ $t('pages.script.script-list.4f288de9') }}</a-button
           >
-            标记引用
-          </a-button>
         </a-space>
       </template>
     </CustomDrawer>
@@ -518,10 +517,8 @@ import codeEditor from '@/components/codeEditor'
 import { getNodeListAll } from '@/api/node'
 import ScriptConsole from '@/pages/script/script-console'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
-
 import { CRON_DATA_SOURCE } from '@/utils/const-i18n'
 import { getWorkSpaceListAll } from '@/api/workspace'
-
 import ScriptLog from '@/pages/script/script-log'
 import ScriptLibraryNoPermission from '@/pages/system/assets/script-library/no-permission'
 import { mapState } from 'pinia'

@@ -92,7 +92,7 @@
         <a-card size="small">
           <template #title> {{ $t('pages.layout.overview.b75360fe') }} </template>
           <template #extra>
-            <a href="#" @click="handleUserlog(2)">更多</a>
+            <a href="#" @click="handleUserlog(2)">{{ $t('pages.layout.overview.3081870c') }}</a>
           </template>
           <a-timeline v-if="loginLog && loginLog.length">
             <a-timeline-item v-for="(item, index) in loginLog" :key="index" :color="item.success ? 'green' : 'red'">
@@ -115,7 +115,7 @@
             <a-tooltip :title="$t('pages.layout.overview.a53992b3')"><QuestionCircleOutlined /></a-tooltip>
           </template>
           <template #extra>
-            <a href="#" @click="handleUserlog(1)">更多</a>
+            <a href="#" @click="handleUserlog(1)">{{ $t('pages.layout.overview.3081870c') }}</a>
           </template>
           <a-timeline v-if="operateLog && operateLog.length">
             <a-timeline-item

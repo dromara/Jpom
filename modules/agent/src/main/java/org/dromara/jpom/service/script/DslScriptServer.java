@@ -224,12 +224,7 @@ public class DslScriptServer {
      * @return file
      */
     private File initScriptFile(NodeScriptModel scriptModel) {
-        String dataPath = jpomApplication.getDataPath();
-        File scriptFile = FileUtil.file(dataPath, Const.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
-        // 替换内容
-        String context = scriptModel.getContext();
-        FileUtils.writeScript(context, scriptFile, ExtConfigBean.getConsoleLogCharset());
-        return scriptFile;
+        return nodeScriptServer.toExecuteFile(scriptModel);
     }
 
     /**

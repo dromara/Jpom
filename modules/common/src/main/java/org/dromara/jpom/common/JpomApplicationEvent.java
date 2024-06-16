@@ -225,7 +225,7 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
             cronMap.forEach((name, iCron) -> {
                 int startCron = iCron.startCron();
                 if (startCron > 0) {
-                    log.debug("{} 定时任务已经自动启动:{}", name, startCron);
+                    log.debug(I18nMessageUtil.get("i18n.auto_start_timed_task_message.9637"), name, startCron);
                 }
             });
             Map<String, IAsyncLoad> asyncLoadMap = SpringUtil.getApplicationContext().getBeansOfType(IAsyncLoad.class);

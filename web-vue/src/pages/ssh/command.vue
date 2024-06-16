@@ -150,7 +150,9 @@
               :show-tool="true"
             >
               <template #tool_before>
-                <a-button type="link" @click="scriptLibraryVisible = true">脚本库 </a-button>
+                <a-button type="link" @click="scriptLibraryVisible = true">{{
+                  $t('pages.ssh.command.b52fd8d6')
+                }}</a-button>
               </template>
             </code-editor>
           </a-form-item-rest>
@@ -427,11 +429,11 @@
         </a-tabs>
       </a-form>
     </CustomModal>
-    <!-- 查看脚本库 -->
+    <!-- pages.ssh.command.a36f20d3 -->
     <CustomDrawer
       v-if="scriptLibraryVisible"
       destroy-on-close
-      title="查看脚本库"
+      :title="$t('pages.ssh.command.a36f20d3')"
       placement="right"
       :open="scriptLibraryVisible"
       width="85vw"
@@ -466,9 +468,8 @@
                 scriptLibraryVisible = false
               }
             "
+            >{{ $t('pages.ssh.command.a0451c97') }}</a-button
           >
-            取消
-          </a-button>
           <a-button
             type="primary"
             @click="
@@ -476,9 +477,8 @@
                 $refs['scriptLibraryRef'].handerScriptConfirm()
               }
             "
+            >{{ $t('pages.ssh.command.703db0bd') }}</a-button
           >
-            替换引用
-          </a-button>
           <a-button
             type="primary"
             @click="
@@ -486,9 +486,8 @@
                 $refs['scriptLibraryRef'].handerTagConfirm()
               }
             "
+            >{{ $t('pages.ssh.command.4f288de9') }}</a-button
           >
-            标记引用
-          </a-button>
         </a-space>
       </template>
     </CustomDrawer>
@@ -578,6 +577,7 @@ export default {
           width: '240px'
         }
       ],
+
       scriptLibraryVisible: false,
       tableSelections: [],
       syncToWorkspaceVisible: false,

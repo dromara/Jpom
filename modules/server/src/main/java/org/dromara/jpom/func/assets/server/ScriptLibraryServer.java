@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.PatternPool;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.func.assets.model.ScriptLibraryModel;
 import org.dromara.jpom.service.h2db.BaseDbService;
 import org.springframework.stereotype.Service;
@@ -50,7 +51,7 @@ public class ScriptLibraryServer extends BaseDbService<ScriptLibraryModel> {
                     map.put(tag, scriptLibraryModel);
                 }
             }
-            Assert.notNull(scriptLibraryModel, StrUtil.format("未找到脚本库信息:{},请检查引用标记是否正确或者脚本是否被删除", tag));
+            Assert.notNull(scriptLibraryModel, StrUtil.format(I18nMessageUtil.get("i18n.error_message.483d"), tag));
             matcher.appendReplacement(modified, scriptLibraryModel.getScript());
         }
         matcher.appendTail(modified);

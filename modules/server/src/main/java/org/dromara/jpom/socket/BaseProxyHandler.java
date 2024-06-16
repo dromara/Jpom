@@ -129,8 +129,8 @@ public abstract class BaseProxyHandler extends BaseHandler {
                 this.sendMsg(session, textMessage);
             }
         } catch (Exception e) {
-            log.error("处理消息异常", e);
-            this.sendMsg(session, "处理消息异常：" + e.getMessage());
+            log.error(I18nMessageUtil.get("i18n.handle_message_exception.0bdc"), e);
+            this.sendMsg(session, I18nMessageUtil.get("i18n.handle_message_exception_with_colon.56f0") + e.getMessage());
         }
     }
 
