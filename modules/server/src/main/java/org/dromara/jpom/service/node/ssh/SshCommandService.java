@@ -9,7 +9,6 @@
  */
 package org.dromara.jpom.service.node.ssh;
 
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -24,6 +23,7 @@ import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
+import org.dromara.jpom.func.assets.server.ScriptLibraryServer;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.data.CommandExecLogModel;
 import org.dromara.jpom.model.data.CommandModel;
@@ -60,15 +60,18 @@ public class SshCommandService extends BaseWorkspaceService<CommandModel> implem
     private final SshService sshService;
     private final CommandExecLogService commandExecLogService;
     private final WorkspaceEnvVarService workspaceEnvVarService;
+    private final ScriptLibraryServer scriptLibraryServer;
 
     private static final byte[] LINE_BYTES = SystemUtil.getOsInfo().getLineSeparator().getBytes(CharsetUtil.CHARSET_UTF_8);
 
     public SshCommandService(SshService sshService,
                              CommandExecLogService commandExecLogService,
-                             WorkspaceEnvVarService workspaceEnvVarService) {
+                             WorkspaceEnvVarService workspaceEnvVarService,
+                             ScriptLibraryServer scriptLibraryServer) {
         this.sshService = sshService;
         this.commandExecLogService = commandExecLogService;
         this.workspaceEnvVarService = workspaceEnvVarService;
+        this.scriptLibraryServer = scriptLibraryServer;
     }
 
     @Override
@@ -273,7 +276,8 @@ public class SshCommandService extends BaseWorkspaceService<CommandModel> implem
             environmentMapBuilder.eachStr(logRecorder::system);
             Map<String, String> environment = environmentMapBuilder.environment();
             String commands = StringUtil.formatStrByMap(commandModel.getCommand(), environment);
-
+            // 替换全局脚本
+            commands = scriptLibraryServer.referenceReplace(commands);
             MachineSshModel machineSshModel = sshService.getMachineSshModel(sshModel);
             //
             Session session = null;

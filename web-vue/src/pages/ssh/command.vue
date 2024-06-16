@@ -114,7 +114,8 @@
       </template>
     </CustomTable>
     <!-- 编辑命令 -->
-    <a-modal
+    <CustomModal
+      v-if="editCommandVisible"
       v-model:open="editCommandVisible"
       destroy-on-close
       width="80vw"
@@ -146,7 +147,12 @@
               v-model:content="temp.command"
               height="40vh"
               :options="{ mode: 'shell', tabSize: 2 }"
-            ></code-editor>
+              :show-tool="true"
+            >
+              <template #tool_before>
+                <a-button type="link" @click="scriptLibraryVisible = true">脚本库 </a-button>
+              </template>
+            </code-editor>
           </a-form-item-rest>
         </a-form-item>
         <a-form-item :label="$t('pages.ssh.command.9266c899')">
@@ -228,7 +234,7 @@
           />
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
 
     <a-modal
       v-model:open="executeCommandVisible"
@@ -417,6 +423,71 @@
         </a-tabs>
       </a-form>
     </a-modal>
+    <!-- 查看脚本库 -->
+    <CustomDrawer
+      v-if="scriptLibraryVisible"
+      destroy-on-close
+      title="查看脚本库"
+      placement="right"
+      :open="scriptLibraryVisible"
+      width="85vw"
+      :footer-style="{ textAlign: 'right' }"
+      @close="
+        () => {
+          scriptLibraryVisible = false
+        }
+      "
+    >
+      <ScriptLibraryNoPermission
+        v-if="scriptLibraryVisible"
+        ref="scriptLibraryRef"
+        @script-confirm="
+          (script) => {
+            temp = { ...temp, command: script }
+            scriptLibraryVisible = false
+          }
+        "
+        @tag-confirm="
+          (tag) => {
+            temp = { ...temp, command: (temp.command || '') + `\nG@(\&quot;${tag}\&quot;)` }
+            scriptLibraryVisible = false
+          }
+        "
+      ></ScriptLibraryNoPermission>
+      <template #footer>
+        <a-space>
+          <a-button
+            @click="
+              () => {
+                scriptLibraryVisible = false
+              }
+            "
+          >
+            取消
+          </a-button>
+          <a-button
+            type="primary"
+            @click="
+              () => {
+                $refs['scriptLibraryRef'].handerScriptConfirm()
+              }
+            "
+          >
+            替换引用
+          </a-button>
+          <a-button
+            type="primary"
+            @click="
+              () => {
+                $refs['scriptLibraryRef'].handerTagConfirm()
+              }
+            "
+          >
+            标记引用
+          </a-button>
+        </a-space>
+      </template>
+    </CustomDrawer>
   </div>
 </template>
 <script>
@@ -426,12 +497,12 @@ import { CRON_DATA_SOURCE } from '@/utils/const-i18n'
 import { getSshListAll } from '@/api/ssh'
 import codeEditor from '@/components/codeEditor'
 import CommandLog from './command-view-log'
-
+import ScriptLibraryNoPermission from '@/pages/system/assets/script-library/no-permission'
 import { getWorkSpaceListAll } from '@/api/workspace'
 import { mapState } from 'pinia'
 import { useAppStore } from '@/stores/app'
 export default {
-  components: { codeEditor, CommandLog },
+  components: { codeEditor, CommandLog, ScriptLibraryNoPermission },
   data() {
     return {
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
@@ -503,7 +574,7 @@ export default {
           width: '240px'
         }
       ],
-
+      scriptLibraryVisible: false,
       tableSelections: [],
       syncToWorkspaceVisible: false,
       workspaceList: [],

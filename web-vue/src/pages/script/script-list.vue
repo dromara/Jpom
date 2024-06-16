@@ -430,7 +430,7 @@
         "
         @tag-confirm="
           (tag) => {
-            temp = { ...temp, context: temp.context + `\nG@(\&quot;${tag}\&quot;)` }
+            temp = { ...temp, context: (temp.context || '') + `\nG@(\&quot;${tag}\&quot;)` }
             scriptLibraryVisible = false
           }
         "
