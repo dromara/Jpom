@@ -102,7 +102,8 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal
+    <CustomModal
+      v-if="editMonitorVisible"
       v-model:open="editMonitorVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -247,7 +248,7 @@
           <a-input v-model:value="temp.webhook" :placeholder="$t('pages.monitor.list.76e16851')" />
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

@@ -222,7 +222,8 @@
       </template>
     </CustomTable>
     <!-- 编辑区 -->
-    <a-modal
+    <CustomModal
+      v-if="editVisible"
       v-model:open="editVisible"
       destroy-on-close
       width="50%"
@@ -400,9 +401,10 @@
           </a-collapse-panel>
         </a-collapse>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 创建集群 -->
-    <a-modal
+    <CustomModal
+      v-if="initSwarmVisible"
       v-model:open="initSwarmVisible"
       destroy-on-close
       :title="$t('pages.system.assets.docker.list.72c164e9')"
@@ -415,9 +417,10 @@
           <template #description> {{ $t('pages.system.assets.docker.list.aaeec58d') }} </template>
         </a-alert>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 加入集群 -->
-    <a-modal
+    <CustomModal
+      v-if="joinSwarmVisible"
       v-model:open="joinSwarmVisible"
       destroy-on-close
       :title="$t('pages.system.assets.docker.list.eb93f2a5')"
@@ -470,7 +473,7 @@
           </a-radio-group>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 控制台 -->
 
     <console
@@ -493,7 +496,8 @@
     ></swarm-console>
 
     <!-- 分配到其他工作空间 -->
-    <a-modal
+    <CustomModal
+      v-if="syncToWorkspaceVisible"
       v-model:open="syncToWorkspaceVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -531,9 +535,10 @@
           </a-select>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 查看 docker 关联工作空间的信息 -->
-    <a-modal
+    <CustomModal
+      v-if="viewWorkspaceDocker"
       v-model:open="viewWorkspaceDocker"
       destroy-on-close
       width="50%"
@@ -585,7 +590,7 @@
           </a-tab-pane>
         </a-tabs>
       </a-space>
-    </a-modal>
+    </CustomModal>
     <!-- 选择证书文件 -->
     <CustomDrawer
       v-if="certificateVisible"

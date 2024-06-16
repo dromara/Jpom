@@ -512,6 +512,7 @@
 
     <!-- 编辑区 -->
     <customModal
+      v-if="editNodeVisible"
       v-model:open="editNodeVisible"
       destroy-on-close
       width="50%"
@@ -575,6 +576,7 @@
     <NodeFunc v-if="drawerVisible" :id="temp.id" :name="temp.name" @close="onClose"></NodeFunc>
     <!-- Terminal -->
     <customModal
+      v-if="terminalVisible"
       v-model:open="terminalVisible"
       :body-style="{
         padding: '0 10px',
@@ -592,6 +594,7 @@
 
     <!-- 快速安装插件端 -->
     <CustomModal
+      v-if="fastInstallNode"
       v-model:open="fastInstallNode"
       destroy-on-close
       width="80%"
@@ -609,6 +612,7 @@
     </CustomModal>
     <!-- 同步到其他工作空间 -->
     <customModal
+      v-if="syncToWorkspaceVisible"
       v-model:open="syncToWorkspaceVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -652,6 +656,7 @@
     </customModal>
     <!-- 历史监控 -->
     <customModal
+      v-if="monitorVisible"
       v-model:open="monitorVisible"
       destroy-on-close
       width="75%"

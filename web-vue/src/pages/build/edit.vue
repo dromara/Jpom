@@ -1312,7 +1312,8 @@
     </CustomDrawer>
 
     <!-- 查看命令示例 -->
-    <a-modal
+    <CustomModal
+      v-if="viewScriptTemplVisible"
       v-model:open="viewScriptTemplVisible"
       destroy-on-close
       width="50vw"
@@ -1348,7 +1349,7 @@
           </a-list>
         </a-collapse-panel>
       </a-collapse>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

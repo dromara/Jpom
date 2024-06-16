@@ -280,7 +280,8 @@
           </template>
         </CustomTable>
         <!-- 编辑区 -->
-        <a-modal
+        <CustomModal
+          v-if="editSshVisible"
           v-model:open="editSshVisible"
           destroy-on-close
           :confirm-loading="confirmLoading"
@@ -423,9 +424,10 @@
               />
             </a-form-item>
           </a-form>
-        </a-modal>
+        </CustomModal>
         <!-- 安装节点 -->
-        <a-modal
+        <CustomModal
+          v-if="nodeVisible"
           v-model:open="nodeVisible"
           destroy-on-close
           width="80%"
@@ -440,9 +442,10 @@
           "
         >
           <fastInstall v-if="nodeVisible"></fastInstall>
-        </a-modal>
+        </CustomModal>
         <!-- 文件管理 -->
-        <a-drawer
+        <CustomDrawer
+          v-if="drawerVisible"
           destroy-on-close
           :title="`${temp.name} ${$t('pages.system.assets.ssh.ssh-list.502f94')}`"
           placement="right"
@@ -455,9 +458,10 @@
           "
         >
           <ssh-file v-if="drawerVisible" :machine-ssh-id="temp.id" />
-        </a-drawer>
+        </CustomDrawer>
         <!-- Terminal -->
-        <a-modal
+        <CustomModal
+          v-if="terminalVisible"
           v-model:open="terminalVisible"
           destroy-on-close
           :style="{
@@ -479,9 +483,10 @@
           :mask-closable="false"
         >
           <terminal2 v-if="terminalVisible" :machine-ssh-id="temp.id" />
-        </a-modal>
+        </CustomModal>
         <!-- 操作日志 -->
-        <a-modal
+        <CustomModal
+          v-if="viewOperationLog"
           v-model:open="viewOperationLog"
           destroy-on-close
           :title="$t('pages.system.assets.ssh.ssh-list.9c06953e')"
@@ -490,9 +495,10 @@
           :mask-closable="false"
         >
           <OperationLog v-if="viewOperationLog" :machine-ssh-id="temp.id"></OperationLog>
-        </a-modal>
+        </CustomModal>
         <!-- 查看 ssh 关联工作空间的信息 -->
-        <a-modal
+        <CustomModal
+          v-if="viewWorkspaceSsh"
           v-model:open="viewWorkspaceSsh"
           destroy-on-close
           width="50%"
@@ -529,8 +535,9 @@
               </template>
             </a-list>
           </a-space>
-        </a-modal>
-        <a-modal
+        </CustomModal>
+        <CustomModal
+          v-if="configWorkspaceSshVisible"
           v-model:open="configWorkspaceSshVisible"
           destroy-on-close
           :confirm-loading="confirmLoading"
@@ -610,9 +617,10 @@
               />
             </a-form-item>
           </a-form>
-        </a-modal>
+        </CustomModal>
         <!-- 分配到其他工作空间 -->
-        <a-modal
+        <CustomModal
+          v-if="syncToWorkspaceVisible"
           v-model:open="syncToWorkspaceVisible"
           destroy-on-close
           :confirm-loading="confirmLoading"
@@ -646,7 +654,7 @@
               </a-form-item>
             </a-form>
           </a-space>
-        </a-modal>
+        </CustomModal>
       </a-tab-pane>
       <a-tab-pane key="2" :tab="$t('pages.system.assets.ssh.ssh-list.8a2d08b3')">
         <OperationLog type="machinessh"></OperationLog

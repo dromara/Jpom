@@ -429,7 +429,8 @@
       </a-form>
     </a-spin>
     <!-- 配置节点授权目录 -->
-    <a-modal
+    <CustomModal
+      v-if="configDir"
       v-model:open="configDir"
       destroy-on-close
       :title="`${$t('pages.node.node-layout.project.project-edit.277cb48f')}`"
@@ -451,7 +452,7 @@
           }
         "
       ></whiteList>
-    </a-modal>
+    </CustomModal>
     <!-- 管理节点 -->
     <NodeFunc
       v-if="drawerVisible"

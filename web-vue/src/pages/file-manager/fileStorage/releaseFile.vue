@@ -215,7 +215,8 @@
       </a-form-item>
     </a-form>
     <!-- 配置授权目录 -->
-    <a-modal
+    <CustomModal
+      v-if="configDir"
       v-model:open="configDir"
       destroy-on-close
       :title="`${$t('pages.file-manager.fileStorage.releaseFile.6978ea2b')}`"
@@ -236,7 +237,7 @@
           }
         "
       ></whiteList>
-    </a-modal>
+    </CustomModal>
     <!-- 选择脚本 -->
     <CustomDrawer
       v-if="chooseScriptVisible != 0"

@@ -143,7 +143,8 @@
       </template>
     </CustomTable>
     <!-- 编辑区 -->
-    <a-modal
+    <CustomModal
+      v-if="editUserVisible"
       v-model:open="editUserVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -248,8 +249,9 @@
           </a-select>
         </a-form-item>
       </a-form>
-    </a-modal>
-    <a-modal
+    </CustomModal>
+    <CustomModal
+      v-if="showUserPwd"
       v-model:open="showUserPwd"
       destroy-on-close
       :title="$t('pages.user.index.7c2c151')"
@@ -270,9 +272,10 @@
           <div style="color: red">{{ $t('pages.user.index.e3c8dd83') }}</div>
         </template>
       </a-result>
-    </a-modal>
+    </CustomModal>
     <!-- 系统公告  -->
-    <a-modal
+    <CustomModal
+      v-if="systemNotificationOpen"
       v-model:open="systemNotificationOpen"
       destroy-on-close
       :title="$t('pages.user.index.712db580')"
@@ -281,7 +284,7 @@
       :footer="null"
     >
       <notification />
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

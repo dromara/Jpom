@@ -336,7 +336,8 @@
     <!-- </template> -->
     <!-- </a-card> -->
     <!-- 编辑区 -->
-    <a-modal
+    <CustomModal
+      v-if="editVisible"
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -476,7 +477,7 @@
           </a-collapse-panel>
         </a-collapse>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 机器信息组件 -->
 
     <machine-info
@@ -503,7 +504,8 @@
     />
 
     <!-- 分配到其他工作空间 -->
-    <a-modal
+    <CustomModal
+      v-if="syncToWorkspaceVisible"
       v-model:open="syncToWorkspaceVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -532,10 +534,11 @@
           </a-select>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
 
     <!-- 查看机器关联节点 -->
-    <a-modal
+    <CustomModal
+      v-if="viewLinkNode"
       v-model:open="viewLinkNode"
       destroy-on-close
       width="50%"
@@ -568,9 +571,10 @@
           </template>
         </a-list>
       </a-space>
-    </a-modal>
+    </CustomModal>
     <!-- 分发节点授权 -->
-    <a-modal
+    <CustomModal
+      v-if="whiteConfigVisible"
       v-model:open="whiteConfigVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -627,9 +631,10 @@
           />
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 分发机器配置 -->
     <CustomModal
+      v-if="nodeConfigVisible"
       v-model:open="nodeConfigVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"

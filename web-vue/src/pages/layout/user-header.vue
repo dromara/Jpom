@@ -176,7 +176,8 @@
     </a-button-group>
 
     <!-- 修改密码区 -->
-    <a-modal
+    <CustomModal
+      v-if="updateNameVisible"
       v-model:open="updateNameVisible"
       destroy-on-close
       :width="'60vw'"
@@ -326,9 +327,10 @@
           </a-row>
         </a-tab-pane>
       </a-tabs>
-    </a-modal>
+    </CustomModal>
     <!-- 修改用户资料区 -->
-    <a-modal
+    <CustomModal
+      v-if="updateUserVisible"
       v-model:open="updateUserVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -378,9 +380,10 @@
           <a-input v-model:value="temp.workWx" :placeholder="$t('pages.layout.user-header.a3bfcd9e')" />
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 个性配置区 -->
-    <a-modal
+    <CustomModal
+      v-if="customizeVisible"
       v-model:open="customizeVisible"
       destroy-on-close
       :title="$t('pages.layout.user-header.3d14e1fe')"
@@ -491,9 +494,10 @@
           </a-radio-group>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- mfa 提示 -->
-    <a-modal
+    <CustomModal
+      v-if="bindMfaTip"
       v-model:open="bindMfaTip"
       destroy-on-close
       :title="$t('pages.layout.user-header.49889c30')"
@@ -513,9 +517,10 @@
           <a-button type="danger" @click="toBindMfa"> {{ $t('pages.layout.user-header.c8507450') }} </a-button>
         </a-row>
       </a-space>
-    </a-modal>
+    </CustomModal>
     <!-- 查看操作日志 -->
-    <a-modal
+    <CustomModal
+      v-if="viewLogVisible"
       v-model:open="viewLogVisible"
       destroy-on-close
       :width="'90vw'"
@@ -524,7 +529,7 @@
       :mask-closable="false"
     >
       <user-log v-if="viewLogVisible"></user-log>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

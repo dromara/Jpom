@@ -149,7 +149,8 @@
       </a-tab-pane>
     </a-tabs>
     <!-- 分配到其他工作空间 -->
-    <a-modal
+    <CustomModal
+      v-if="correctLonelyOpen"
       v-model:open="correctLonelyOpen"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -191,7 +192,7 @@
           </a-form-item>
         </a-form>
       </a-space>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

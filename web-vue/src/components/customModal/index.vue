@@ -23,7 +23,7 @@ export default defineComponent({
   slots: Object as CustomSlotsType<{ default: any; footer?: any }>,
   setup(props, { emit, slots }) {
     const bodyStyle: CSSProperties = {
-      maxHeight: 'calc(100vh - 196px )',
+      maxHeight: 'calc(100vh - 240px )',
       overflowY: 'auto',
       ...props.bodyStyle
     }

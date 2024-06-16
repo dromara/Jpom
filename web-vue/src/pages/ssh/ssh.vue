@@ -264,7 +264,8 @@
       </template>
     </CustomTable>
     <!-- 编辑区 -->
-    <a-modal
+    <CustomModal
+      v-if="editSshVisible"
       v-model:open="editSshVisible"
       destroy-on-close
       width="600px"
@@ -298,10 +299,11 @@
           </custom-select>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
 
     <!-- 文件管理 -->
-    <a-drawer
+    <CustomDrawer
+      v-if="drawerVisible"
       destroy-on-close
       :open="drawerVisible"
       :title="`${temp.name} ${$t('pages.ssh.ssh.502f94')}`"
@@ -314,9 +316,10 @@
       "
     >
       <ssh-file v-if="drawerVisible" :ssh-id="temp.id" />
-    </a-drawer>
+    </CustomDrawer>
     <!-- Terminal -->
-    <a-modal
+    <CustomModal
+      v-if="terminalVisible"
       v-model:open="terminalVisible"
       destroy-on-close
       :style="{
@@ -338,9 +341,10 @@
       <!-- <div :style="`height: ${this.terminalFullscreen ? 'calc(100vh - 70px - 20px)' : 'calc(70vh - 20px)'}`"> -->
       <terminal1 v-if="terminalVisible" :ssh-id="temp.id" />
       <!-- </div> -->
-    </a-modal>
+    </CustomModal>
     <!-- 操作日志 -->
-    <a-modal
+    <CustomModal
+      v-if="viewOperationLog"
       v-model:open="viewOperationLog"
       destroy-on-close
       :title="$t('pages.ssh.ssh.9c06953e')"
@@ -349,9 +353,10 @@
       :mask-closable="false"
     >
       <OperationLog v-if="viewOperationLog" :ssh-id="temp.id"></OperationLog>
-    </a-modal>
+    </CustomModal>
     <!-- 同步到其他工作空间 -->
-    <a-modal
+    <CustomModal
+      v-if="syncToWorkspaceVisible"
       v-model:open="syncToWorkspaceVisible"
       destroy-on-close
       :title="$t('pages.ssh.ssh.d3b55aa0')"
@@ -392,7 +397,7 @@
           </a-select>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

@@ -109,7 +109,8 @@
       </template>
     </CustomTable>
     <!-- 编辑集群区 -->
-    <a-modal
+    <CustomModal
+      v-if="editVisible"
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -126,10 +127,10 @@
           ><a-input v-model:value="temp.tag" :placeholder="$t('pages.docker.swarm.list.e50751c6')" />
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
 
     <!-- 控制台 -->
-    <!-- <a-drawer
+    <!-- <CustomDrawer
       destroyOnClose
       :title="`${temp.name} 控制台`"
       placement="right"

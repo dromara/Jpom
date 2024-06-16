@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-drawer
+    <CustomDrawer
       destroy-on-close
       :open="true"
       width="80vw"
@@ -439,7 +439,7 @@
         </a-space>
         <!-- </div> -->
       </template>
-    </a-drawer>
+    </CustomDrawer>
   </div>
 </template>
 <script>

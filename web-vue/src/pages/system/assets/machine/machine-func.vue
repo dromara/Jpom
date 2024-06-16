@@ -1,5 +1,5 @@
 <template>
-  <a-drawer
+  <CustomDrawer
     destroy-on-close
     placement="right"
     :width="`${getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"
@@ -46,7 +46,7 @@
       <config-file v-if="current === 'config'" :machine-id="machineId" />
       <freeScript v-if="current === 'freeScript'" :machine-id="machineId" />
     </div>
-  </a-drawer>
+  </CustomDrawer>
 </template>
 <script>
 import { mapState } from 'pinia'

@@ -1,5 +1,6 @@
 <template>
-  <a-modal
+  <CustomModal
+    v-if="visibleModel"
     v-model:open="visibleModel"
     destroy-on-close
     :width="style.width"
@@ -43,7 +44,7 @@
     </template>
 
     <viewPre ref="viewPre" :height="`calc(${style.bodyStyle.height} - 40px)`" :config="temp"></viewPre>
-  </a-modal>
+  </CustomModal>
 </template>
 <script>
 import viewPre from './view-pre'

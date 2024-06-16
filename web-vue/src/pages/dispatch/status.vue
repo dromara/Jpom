@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-drawer
+    <CustomDrawer
       destroy-on-close
       :title="`${$t('pages.dispatch.status.1ba84995')} ${name} ${$t('pages.dispatch.status.6e06fe4f')}`"
       placement="right"
@@ -215,10 +215,11 @@
           </div>
         </a-tab-pane>
       </a-tabs>
-    </a-drawer>
+    </CustomDrawer>
 
     <!-- 项目文件组件 -->
-    <a-drawer
+    <CustomDrawer
+      v-if="drawerFileVisible"
       destroy-on-close
       :title="drawerTitle"
       placement="right"
@@ -234,9 +235,10 @@
         @go-console="goConsole"
         @go-read-file="goReadFile"
       />
-    </a-drawer>
+    </CustomDrawer>
     <!-- 项目控制台组件 -->
-    <a-drawer
+    <CustomDrawer
+      v-if="drawerConsoleVisible"
       destroy-on-close
       :title="drawerTitle"
       placement="right"
@@ -251,9 +253,10 @@
         :project-id="temp.projectId"
         @go-file="goFile"
       />
-    </a-drawer>
+    </CustomDrawer>
     <!-- 项目跟踪文件组件 -->
-    <a-drawer
+    <CustomDrawer
+      v-if="drawerReadFileVisible"
       destroy-on-close
       :title="drawerTitle"
       placement="right"
@@ -269,7 +272,7 @@
         :project-id="temp.projectId"
         @go-file="goFile"
       />
-    </a-drawer>
+    </CustomDrawer>
   </div>
 </template>
 <script>

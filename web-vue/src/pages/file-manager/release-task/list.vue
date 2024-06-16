@@ -138,7 +138,8 @@
       </template>
     </a-table>
     <!-- 任务详情 -->
-    <a-drawer
+    <CustomDrawer
+      v-if="detailsVisible"
       :title="$t('pages.file-manager.release-task.list.cc90625')"
       placement="right"
       :width="'80vw'"
@@ -150,14 +151,15 @@
       "
     >
       <task-details-page v-if="detailsVisible" :task-id="temp.id" />
-    </a-drawer>
+    </CustomDrawer>
     <!-- 重建任务 -->
-    <a-modal
+    <CustomModal
+      v-if="releaseFileVisible"
       v-model:open="releaseFileVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
       :title="$t('pages.file-manager.release-task.list.68203efe')"
-      width="60%"
+      width="70%"
       :mask-closable="false"
       @ok="handleReCrateTask"
     >
@@ -291,9 +293,10 @@
           </a-form-item-rest>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 查看文件 -->
-    <a-modal
+    <CustomModal
+      v-if="viewFileVisible"
       v-model:open="viewFileVisible"
       destroy-on-close
       :title="`${$t('pages.file-manager.release-task.list.35c3c1fa')}`"
@@ -328,7 +331,7 @@
           {{ temp.description }}
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

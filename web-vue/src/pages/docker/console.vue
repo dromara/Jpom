@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- 控制台 -->
-    <a-drawer
+    <CustomDrawer
       destroy-on-close
       placement="right"
       :width="`${getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"
@@ -95,7 +95,7 @@
         />
         <!-- </a-layout-content> -->
       </div>
-    </a-drawer>
+    </CustomDrawer>
   </div>
 </template>
 <script>

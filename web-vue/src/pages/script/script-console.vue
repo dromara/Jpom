@@ -16,7 +16,8 @@
     </div>
 
     <!--  -->
-    <a-modal
+    <CustomModal
+      v-if="editArgs"
       v-model:open="editArgs"
       destroy-on-close
       :title="$t('pages.script.script-console.b7d5eb0d')"
@@ -66,7 +67,7 @@
           </a-space>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

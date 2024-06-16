@@ -128,7 +128,8 @@
       </template>
     </log-view2>
     <!-- 日志备份 -->
-    <a-modal
+    <CustomModal
+      v-if="lobbackVisible"
       v-model:open="lobbackVisible"
       destroy-on-close
       :title="$t('pages.node.node-layout.project.project-console.111eece')"
@@ -137,7 +138,7 @@
       :mask-closable="false"
     >
       <ProjectLog v-if="lobbackVisible" :node-id="nodeId" :project-id="projectId"></ProjectLog>
-    </a-modal>
+    </CustomModal>
     <!-- 编辑区 -->
     <ScriptEdit
       v-if="editScriptVisible"

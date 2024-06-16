@@ -147,7 +147,8 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal
+    <CustomModal
+      v-if="editVisible"
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -218,9 +219,10 @@
           />
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 环境变量 -->
-    <a-modal
+    <CustomModal
+      v-if="envVarListVisible"
       v-model:open="envVarListVisible"
       destroy-on-close
       :title="`${temp.name} ${$t('pages.system.workspace-list.58f9d869')}`"
@@ -229,9 +231,10 @@
       :mask-closable="false"
     >
       <workspaceEnv v-if="envVarListVisible" ref="workspaceEnv" :workspace-id="temp.id" />
-    </a-modal>
+    </CustomModal>
     <!-- 工作空间菜单 -->
-    <a-modal
+    <CustomModal
+      v-if="configMenuVisible"
       v-model:open="configMenuVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -264,9 +267,10 @@
           </a-col>
         </a-row>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 配置授权目录 -->
-    <a-modal
+    <CustomModal
+      v-if="configDir"
       v-model:open="configDir"
       destroy-on-close
       :title="`${$t('pages.system.workspace-list.fcce7810')}`"
@@ -288,9 +292,10 @@
           }
         "
       ></whiteList>
-    </a-modal>
+    </CustomModal>
     <!-- 删除工作空间检查 -->
-    <a-modal
+    <CustomModal
+      v-if="preDeleteVisible"
       v-model:open="preDeleteVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -332,7 +337,7 @@
           </template>
         </template>
       </a-tree>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>
