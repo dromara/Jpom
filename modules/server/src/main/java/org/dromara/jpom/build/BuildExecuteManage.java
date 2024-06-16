@@ -978,7 +978,7 @@ public class BuildExecuteManage implements Runnable {
         final String[] lastMsg = new String[1];
         try {
             // 创建执行器
-            scriptFile = scriptModel.scriptFile();
+            scriptFile = scriptExecuteLogServer.toExecLogFile(scriptModel);
             scriptExecuteLogServer.updateStatus(logModel.getId(), CommandExecLogModel.Status.ING);
             int waitFor = JpomApplication.getInstance().execScript(scriptModel.getContext(), file -> {
                 try {

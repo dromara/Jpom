@@ -587,14 +587,13 @@
       </a-space>
     </a-modal>
     <!-- 选择证书文件 -->
-    <a-drawer
+    <CustomDrawer
       v-if="certificateVisible"
       destroy-on-close
       :title="`${$t('pages.system.assets.docker.list.5540289f')}`"
       placement="right"
       :open="certificateVisible"
       width="85vw"
-      :z-index="1009"
       :footer-style="{ textAlign: 'right' }"
       @close="
         () => {
@@ -641,7 +640,7 @@
           </a-button>
         </a-space>
       </template>
-    </a-drawer>
+    </CustomDrawer>
   </div>
 </template>
 <script>

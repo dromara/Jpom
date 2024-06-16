@@ -63,12 +63,16 @@ public class ServerScriptProcessBuilder extends BaseRunScript implements Runnabl
 
     private ServerScriptProcessBuilder(ScriptModel nodeScriptModel, String executeId, String args, Map<String, String> paramMap) {
         super(nodeScriptModel.logFile(executeId), CharsetUtil.CHARSET_UTF_8);
+        //
+        if (scriptExecuteLogServer == null) {
+            scriptExecuteLogServer = SpringUtil.getBean(ScriptExecuteLogServer.class);
+        }
         this.executeId = executeId;
         //
         WorkspaceEnvVarService workspaceEnvVarService = SpringUtil.getBean(WorkspaceEnvVarService.class);
         environmentMapBuilder = workspaceEnvVarService.getEnv(nodeScriptModel.getWorkspaceId());
         environmentMapBuilder.putStr(paramMap);
-        scriptFile = nodeScriptModel.scriptFile();
+        scriptFile = scriptExecuteLogServer.toExecLogFile(nodeScriptModel);
         //
         String script = FileUtil.getAbsolutePath(scriptFile);
         processBuilder = new ProcessBuilder();
@@ -81,10 +85,6 @@ public class ServerScriptProcessBuilder extends BaseRunScript implements Runnabl
         Map<String, String> environment = processBuilder.environment();
         environment.putAll(environmentMapBuilder.environment());
         processBuilder.directory(scriptFile.getParentFile());
-        //
-        if (scriptExecuteLogServer == null) {
-            scriptExecuteLogServer = SpringUtil.getBean(ScriptExecuteLogServer.class);
-        }
     }
 
     /**

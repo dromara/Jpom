@@ -10,23 +10,16 @@
 package org.dromara.jpom.model.script;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.jpom.JpomApplication;
-import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.BaseWorkspaceModel;
 import org.dromara.jpom.script.CommandParam;
-import org.dromara.jpom.system.ExtConfigBean;
-import org.dromara.jpom.util.CommandUtil;
-import org.dromara.jpom.util.FileUtils;
 
 import java.io.File;
-import java.io.InputStream;
 
 /**
  * @author bwcx_jzy
@@ -93,22 +86,6 @@ public class ScriptModel extends BaseWorkspaceModel {
     public static File logFile(String id, String executeId) {
         File path = scriptPath(id);
         return FileUtil.file(path, "log", executeId + ".log");
-    }
-
-    /**
-     * 加载脚本文件
-     *
-     * @return file
-     */
-    public File scriptFile() {
-        InputStream templateInputStream = ExtConfigBean.getConfigResourceInputStream("/exec/template." + CommandUtil.SUFFIX);
-        String defaultTemplate = IoUtil.readUtf8(templateInputStream);
-
-        String dataPath = JpomApplication.getInstance().getDataPath();
-
-        File scriptFile = FileUtil.file(dataPath, Const.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
-        FileUtils.writeScript(defaultTemplate + this.getContext(), scriptFile, ExtConfigBean.getConsoleLogCharset());
-        return scriptFile;
     }
 
     @Override

@@ -118,14 +118,19 @@ public abstract class BaseProxyHandler extends BaseHandler {
         JSONObject json = JSONObject.parseObject(msg);
         String op = json.getString("op");
         ConsoleCommandOp consoleCommandOp = StrUtil.isNotEmpty(op) ? ConsoleCommandOp.valueOf(op) : null;
-        String textMessage;
-        if (proxySession != null) {
-            textMessage = this.handleTextMessage(attributes, session, proxySession, json, consoleCommandOp);
-        } else {
-            textMessage = this.handleTextMessage(attributes, session, json, consoleCommandOp);
-        }
-        if (textMessage != null) {
-            this.sendMsg(session, textMessage);
+        try {
+            String textMessage;
+            if (proxySession != null) {
+                textMessage = this.handleTextMessage(attributes, session, proxySession, json, consoleCommandOp);
+            } else {
+                textMessage = this.handleTextMessage(attributes, session, json, consoleCommandOp);
+            }
+            if (textMessage != null) {
+                this.sendMsg(session, textMessage);
+            }
+        } catch (Exception e) {
+            log.error("处理消息异常", e);
+            this.sendMsg(session, "处理消息异常：" + e.getMessage());
         }
     }
 

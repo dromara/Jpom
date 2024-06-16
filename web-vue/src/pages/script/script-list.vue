@@ -154,10 +154,10 @@
       </template>
     </CustomTable>
     <!-- 编辑区 -->
-    <a-modal
+    <CustomModal
+      v-if="editScriptVisible"
       v-model:open="editScriptVisible"
       destroy-on-close
-      :z-index="1009"
       :title="$t('pages.script.script-list.c05890d1')"
       :mask-closable="false"
       width="80vw"
@@ -173,13 +173,19 @@
         </a-form-item>
         <a-form-item :label="$t('pages.script.script-list.709314dd')" name="context">
           <a-form-item-rest>
-            <code-editor v-model:content="temp.context" height="40vh" :options="{ mode: 'shell', tabSize: 2 }">
+            <code-editor
+              v-model:content="temp.context"
+              height="40vh"
+              :show-tool="true"
+              :options="{ mode: 'shell', tabSize: 2 }"
+            >
+              <template #tool_before>
+                <a-button type="link" @click="scriptLibraryVisible = true">脚本库 </a-button>
+              </template>
             </code-editor>
           </a-form-item-rest>
         </a-form-item>
-        <!-- <a-form-item label="默认参数" name="defArgs">
-            <a-input v-model="temp.defArgs" placeholder="默认参数" />
-          </a-form-item> -->
+
         <a-form-item :label="$t('pages.script.script-list.74765338')">
           <a-space direction="vertical" style="width: 100%">
             <a-row v-for="(item, index) in commandParams" :key="item.key">
@@ -271,7 +277,7 @@
           </a-select>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 脚本控制台组件 -->
     <a-drawer
       destroy-on-close
@@ -398,6 +404,72 @@
     >
       <script-log v-if="drawerLogVisible" :script-id="temp.id" />
     </a-drawer>
+    <!-- 查看脚本库 -->
+    <CustomDrawer
+      v-if="scriptLibraryVisible"
+      destroy-on-close
+      title="查看脚本库"
+      placement="right"
+      :open="scriptLibraryVisible"
+      width="85vw"
+      :footer-style="{ textAlign: 'right' }"
+      @close="
+        () => {
+          scriptLibraryVisible = false
+        }
+      "
+    >
+      <ScriptLibraryNoPermission
+        v-if="scriptLibraryVisible"
+        ref="scriptLibraryRef"
+        @script-confirm="
+          (script) => {
+            temp = { ...temp, context: script }
+            scriptLibraryVisible = false
+          }
+        "
+        @tag-confirm="
+          (tag) => {
+            temp = { ...temp, context: temp.context + `\nG@(\&quot;${tag}\&quot;)` }
+            scriptLibraryVisible = false
+          }
+        "
+      ></ScriptLibraryNoPermission>
+      <template #footer>
+        <a-space>
+          <a-button
+            @click="
+              () => {
+                scriptLibraryVisible = false
+              }
+            "
+          >
+            取消
+          </a-button>
+          <a-button
+            type="primary"
+            @click="
+              () => {
+                $refs['scriptLibraryRef'].handerScriptConfirm()
+              }
+            "
+          >
+            替换引用
+          </a-button>
+          <a-button
+            type="primary"
+            @click="
+              () => {
+                $refs['scriptLibraryRef'].handerTagConfirm()
+              }
+            "
+          >
+            标记引用
+          </a-button>
+        </a-space>
+      </template>
+    </CustomDrawer>
+
     <!-- <div style="padding-top: 50px" v-if="mode === 'choose'">
       <div
         :style="{
@@ -442,17 +514,20 @@ import codeEditor from '@/components/codeEditor'
 import { getNodeListAll } from '@/api/node'
 import ScriptConsole from '@/pages/script/script-console'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
+
 import { CRON_DATA_SOURCE } from '@/utils/const-i18n'
 import { getWorkSpaceListAll } from '@/api/workspace'
 
 import ScriptLog from '@/pages/script/script-log'
+import ScriptLibraryNoPermission from '@/pages/system/assets/script-library/no-permission'
 import { mapState } from 'pinia'
 import { useAppStore } from '@/stores/app'
 export default {
   components: {
     ScriptConsole,
     codeEditor,
-    ScriptLog
+    ScriptLog,
+    ScriptLibraryNoPermission
   },
   props: {
     choose: {
@@ -588,7 +663,8 @@ export default {
       triggerVisible: false,
       commandParams: [],
       drawerLogVisible: false,
-      confirmLoading: false
+      confirmLoading: false,
+      scriptLibraryVisible: false
     }
   },
   computed: {
@@ -599,6 +675,7 @@ export default {
     activePage() {
       return this.$attrs.routerUrl === this.$route.path
     },
+
     rowSelection() {
       return {
         onChange: (selectedRowKeys) => {

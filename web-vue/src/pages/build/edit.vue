@@ -1165,13 +1165,13 @@
       </a-card>
     </a-spin>
     <!-- 选择仓库 -->
-    <a-drawer
+    <CustomDrawer
+      v-if="repositoryisible"
       destroy-on-close
       :title="`${$t('pages.build.edit.e95bc1a3')}`"
       placement="right"
       :open="repositoryisible"
       width="85vw"
-      :z-index="1009"
       :footer-style="{ textAlign: 'right' }"
       @close="
         () => {
@@ -1226,15 +1226,15 @@
           </a-button>
         </a-space>
       </template>
-    </a-drawer>
+    </CustomDrawer>
     <!-- 选择脚本 -->
-    <a-drawer
+    <CustomDrawer
+      v-if="chooseScriptVisible != 0"
       destroy-on-close
       :title="`${$t('pages.build.edit.2fcc9ae3')}`"
       placement="right"
       :open="chooseScriptVisible != 0"
       width="70vw"
-      :z-index="1009"
       :footer-style="{ textAlign: 'right' }"
       @close="
         () => {
@@ -1249,9 +1249,9 @@
         :choose-val="
           chooseScriptVisible === 1
             ? tempExtraData.noticeScriptId
-            : temp.script && temp.script.indexOf('$ref.script.') != -1
-            ? temp.script.replace('$ref.script.')
-            : ''
+            : temp.script?.indexOf('$ref.script.') != -1
+              ? temp.script.replace('$ref.script.', '')
+              : ''
         "
         mode="choose"
         @confirm="
@@ -1293,15 +1293,15 @@
           </a-button>
         </a-space>
       </template>
-    </a-drawer>
+    </CustomDrawer>
     <!-- 查看容器 -->
-    <a-drawer
+    <CustomDrawer
+      v-if="dockerListVisible != 0"
       destroy-on-close
       :title="`${$t('pages.build.edit.eed6df5e')}`"
       placement="right"
       :open="dockerListVisible != 0"
       width="70vw"
-      :z-index="1009"
       @close="
         () => {
           dockerListVisible = 0
@@ -1309,7 +1309,7 @@
       "
     >
       <docker-list v-if="dockerListVisible" ref="dockerlist"></docker-list>
-    </a-drawer>
+    </CustomDrawer>
 
     <!-- 查看命令示例 -->
     <a-modal

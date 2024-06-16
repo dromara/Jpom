@@ -459,11 +459,11 @@
       </a-form>
     </a-modal>
     <!-- 创建/编辑分发项目 -->
-    <a-modal
+    <CustomModal
+      v-if="editDispatchVisible"
       v-model:open="editDispatchVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :z-index="900"
       width="60vw"
       :title="temp.type === 'edit' ? $t('pages.dispatch.list.7d755f9b') : $t('pages.dispatch.list.898758b9')"
       :mask-closable="false"
@@ -965,7 +965,7 @@
           </a-collapse>
         </a-form>
       </a-spin>
-    </a-modal>
+    </CustomModal>
     <!-- 分发项目 -->
     <start-dispatch
       v-if="dispatchVisible"
@@ -1014,13 +1014,13 @@
       ></whiteList>
     </a-modal>
     <!-- 查看服务端脚本 -->
-    <a-drawer
+    <CustomDrawer
+      v-if="viewScriptVisible"
       destroy-on-close
       :title="`${$t('pages.dispatch.list.9bc942bf')}`"
       placement="right"
       :open="viewScriptVisible"
       width="70vw"
-      :z-index="1109"
       @close="
         () => {
           viewScriptVisible = false
@@ -1036,7 +1036,7 @@
           }
         "
       ></scriptPage>
-    </a-drawer>
+    </CustomDrawer>
   </div>
 </template>
 <script>

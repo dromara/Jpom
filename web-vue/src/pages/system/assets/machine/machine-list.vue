@@ -629,7 +629,7 @@
       </a-form>
     </a-modal>
     <!-- 分发机器配置 -->
-    <a-modal
+    <CustomModal
       v-model:open="nodeConfigVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -686,7 +686,7 @@
           ></code-editor>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

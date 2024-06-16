@@ -189,9 +189,9 @@
       </template>
     </CustomTable>
     <!-- 编辑区 -->
-    <a-modal
+    <CustomModal
+      v-if="editVisible"
       v-model:open="editVisible"
-      :z-index="1009"
       destroy-on-close
       :confirm-loading="confirmLoading"
       :title="$t('pages.repository.repository-list.b3885a87')"
@@ -413,10 +413,10 @@
           />
         </a-form-item>
       </a-form>
-    </a-modal>
-    <a-modal
+    </CustomModal>
+    <CustomModal
+      v-if="giteeImportVisible"
       v-model:open="giteeImportVisible"
-      :z-index="1009"
       destroy-on-close
       :title="$t('pages.repository.repository-list.3f4ed4fb')"
       width="80%"
@@ -526,7 +526,7 @@
           </template>
         </template>
       </a-table>
-    </a-modal>
+    </CustomModal>
     <!-- 选择仓库确认区域 -->
     <!-- <div style="padding-top: 50px" v-if="this.choose">
       <div

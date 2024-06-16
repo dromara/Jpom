@@ -237,14 +237,14 @@
         "
       ></whiteList>
     </a-modal>
-
-    <a-drawer
+    <!-- 选择脚本 -->
+    <CustomDrawer
+      v-if="chooseScriptVisible != 0"
       destroy-on-close
       :title="$t('pages.file-manager.fileStorage.releaseFile.952117a8')"
       placement="right"
       :open="chooseScriptVisible != 0"
       width="70vw"
-      :z-index="1009"
       :footer-style="{ textAlign: 'right' }"
       @close="
         () => {
@@ -259,11 +259,11 @@
         :choose-val="
           chooseScriptVisible === 1
             ? temp.beforeScript?.indexOf('$ref.script.') !== -1
-              ? temp.beforeScript?.replace('$ref.script.')
+              ? temp.beforeScript?.replace('$ref.script.', '')
               : ''
             : temp.afterScript?.indexOf('$ref.script.') !== -1
-            ? temp.afterScript?.replace('$ref.script.')
-            : ''
+              ? temp.afterScript?.replace('$ref.script.', '')
+              : ''
         "
         mode="choose"
         @confirm="
@@ -303,7 +303,7 @@
           >
         </a-space>
       </template>
-    </a-drawer>
+    </CustomDrawer>
   </div>
 </template>
 <script>

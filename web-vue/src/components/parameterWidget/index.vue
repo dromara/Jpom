@@ -19,9 +19,9 @@
     >
 
     <!-- 编辑区 -->
-    <a-modal
+    <CustomModal
+      v-if="editVisible"
       v-model:open="editVisible"
-      :z-index="1009"
       destroy-on-close
       :title="$t('components.parameterWidget.index.77ecbd27')"
       :mask-closable="false"
@@ -39,7 +39,7 @@
           <a-input v-model:value="temp.value" :placeholder="$t('components.parameterWidget.index.8485924b')" />
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script lang="ts" setup>
