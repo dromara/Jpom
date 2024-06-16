@@ -181,13 +181,13 @@
       </a-form>
     </a-modal>
     <!-- 选择构建 -->
-    <a-drawer
+    <CustomDrawer
+      v-if="chooseVisible === 1"
       destroy-on-close
       :title="`${$t('pages.dispatch.start.afb1ec30')}`"
       placement="right"
       :open="chooseVisible === 1"
       width="80vw"
-      :z-index="1009"
       :footer-style="{ textAlign: 'right' }"
       @close="
         () => {
@@ -239,15 +239,15 @@
           </a-button>
         </a-space>
       </template>
-    </a-drawer>
+    </CustomDrawer>
     <!-- 选择构建产物 -->
-    <a-drawer
+    <CustomDrawer
+      v-if="chooseVisible === 2"
       destroy-on-close
       :title="`${$t('pages.dispatch.start.a2d28d82')}`"
       placement="right"
       :open="chooseVisible === 2"
       width="80vw"
-      :z-index="1009"
       :footer-style="{ textAlign: 'right' }"
       @close="
         () => {
@@ -300,15 +300,15 @@
           </a-button>
         </a-space>
       </template>
-    </a-drawer>
+    </CustomDrawer>
     <!-- 选择文件 -->
-    <a-drawer
+    <CustomDrawer
+      v-if="chooseVisible === 3"
       destroy-on-close
       :title="`${$t('pages.dispatch.start.2a688d49')}`"
       placement="right"
       :open="chooseVisible === 3"
       width="80vw"
-      :z-index="1009"
       :footer-style="{ textAlign: 'right' }"
       @close="
         () => {
@@ -357,15 +357,15 @@
           </a-button>
         </a-space>
       </template>
-    </a-drawer>
+    </CustomDrawer>
     <!-- 选择静态文件 -->
-    <a-drawer
+    <CustomDrawer
+      v-if="chooseVisible === 4"
       destroy-on-close
       :title="`${$t('pages.dispatch.start.e5aa6b98')}`"
       placement="right"
       :open="chooseVisible === 4"
       width="80vw"
-      :z-index="1009"
       :footer-style="{ textAlign: 'right' }"
       @close="
         () => {
@@ -414,7 +414,7 @@
           </a-button>
         </a-space>
       </template>
-    </a-drawer>
+    </CustomDrawer>
   </div>
 </template>
 <script>

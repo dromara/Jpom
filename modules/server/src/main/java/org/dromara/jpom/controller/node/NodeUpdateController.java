@@ -11,6 +11,7 @@ package org.dromara.jpom.controller.node;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
@@ -31,7 +32,6 @@ import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.permission.SystemPermission;
 import org.dromara.jpom.service.system.SystemParametersServer;
-import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.system.ServerConfig;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -180,7 +180,8 @@ public class NodeUpdateController extends BaseServerController {
     @GetMapping(value = "fast_install.json", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<JSONObject> fastInstall(HttpServletRequest request) {
         boolean beta = RemoteVersion.betaRelease();
-        InputStream inputStream = ExtConfigBean.getConfigResourceInputStream(beta ? "/fast-install-beta.json" : "/fast-install-release.json");
+        String language = I18nMessageUtil.tryGetLanguage();
+        InputStream inputStream = ResourceUtil.getStream("classpath:/fast-install/" + language + (beta ? "/beta.json" : "/release.json"));
         String json = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
         JSONObject jsonObject = new JSONObject();
         JpomManifest instance = JpomManifest.getInstance();

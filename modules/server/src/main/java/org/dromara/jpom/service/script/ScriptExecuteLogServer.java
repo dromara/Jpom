@@ -9,14 +9,24 @@
  */
 package org.dromara.jpom.service.script;
 
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
+import org.dromara.jpom.JpomApplication;
+import org.dromara.jpom.common.Const;
+import org.dromara.jpom.func.assets.server.ScriptLibraryServer;
 import org.dromara.jpom.model.data.CommandExecLogModel;
 import org.dromara.jpom.model.script.ScriptExecuteLogModel;
 import org.dromara.jpom.model.script.ScriptModel;
 import org.dromara.jpom.service.h2db.BaseGlobalOrWorkspaceService;
+import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.util.CommandUtil;
+import org.dromara.jpom.util.FileUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.InputStream;
 
 /**
  * @author bwcx_jzy
@@ -24,6 +34,15 @@ import java.io.File;
  */
 @Service
 public class ScriptExecuteLogServer extends BaseGlobalOrWorkspaceService<ScriptExecuteLogModel> {
+
+    private final ScriptLibraryServer scriptLibraryServer;
+    private final JpomApplication jpomApplication;
+
+    public ScriptExecuteLogServer(ScriptLibraryServer scriptLibraryServer,
+                                  JpomApplication jpomApplication) {
+        this.scriptLibraryServer = scriptLibraryServer;
+        this.jpomApplication = jpomApplication;
+    }
 
     /**
      * 创建执行记录
@@ -77,6 +96,24 @@ public class ScriptExecuteLogServer extends BaseGlobalOrWorkspaceService<ScriptE
         model.setExitCode(exitCode);
         model.setStatus(status.getCode());
         this.updateById(model);
+    }
+
+    /**
+     * 加载脚本文件
+     *
+     * @param scriptModel 脚本对象
+     * @return file
+     */
+    public File toExecLogFile(ScriptModel scriptModel) {
+        InputStream templateInputStream = ExtConfigBean.getConfigResourceInputStream("/exec/template." + CommandUtil.SUFFIX);
+        String defaultTemplate = IoUtil.readUtf8(templateInputStream);
+        String context = defaultTemplate + scriptModel.getContext();
+        context = scriptLibraryServer.referenceReplace(context);
+        //
+        String dataPath = jpomApplication.getDataPath();
+        File scriptFile = FileUtil.file(dataPath, Const.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
+        FileUtils.writeScript(context, scriptFile, ExtConfigBean.getConsoleLogCharset());
+        return scriptFile;
     }
 
 

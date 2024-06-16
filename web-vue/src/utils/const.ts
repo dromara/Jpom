@@ -291,7 +291,7 @@ export function formatUnits(value: any, base: number, unitArr: string[], default
  */
 declare global {
   interface Array<T> {
-    groupBy(fn: (ix: T) => T): T[]
+    groupBy(fn: (ix: T) => any): any[]
   }
 }
 if (!Array.prototype.groupBy) {
@@ -299,7 +299,7 @@ if (!Array.prototype.groupBy) {
     enumerable: false,
     writable: false,
     configurable: false,
-    value: function groupBy<T>(this: T[], group: (ix: T) => T): T[] {
+    value: function groupBy<T>(this: T[], group: (ix: T) => any): any[] {
       return this.reduce(function (c: any, v: any) {
         const k = group(v)
         c[k] = v

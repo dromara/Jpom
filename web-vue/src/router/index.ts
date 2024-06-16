@@ -190,7 +190,7 @@ const management = [
   {
     path: '/system/assets/script-library',
     name: 'system-script-library',
-    component: () => import('../pages/system/assets/script-library.vue')
+    component: () => import('../pages/system/assets/script-library/script-library.vue')
   },
   {
     path: '/user/permission-group',

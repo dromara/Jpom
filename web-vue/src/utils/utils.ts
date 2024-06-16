@@ -16,3 +16,10 @@ export function getHashQuery() {
   })
   return querys
 }
+
+const zIndexStart = 1009
+let incCount = 0
+
+export function increaseZIndex() {
+  return zIndexStart + incCount++
+}
