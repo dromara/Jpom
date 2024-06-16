@@ -108,6 +108,7 @@ public class ScriptExecuteLogServer extends BaseGlobalOrWorkspaceService<ScriptE
         InputStream templateInputStream = ExtConfigBean.getConfigResourceInputStream("/exec/template." + CommandUtil.SUFFIX);
         String defaultTemplate = IoUtil.readUtf8(templateInputStream);
         String context = defaultTemplate + scriptModel.getContext();
+        // 替换全局变量
         context = scriptLibraryServer.referenceReplace(context);
         //
         String dataPath = jpomApplication.getDataPath();
