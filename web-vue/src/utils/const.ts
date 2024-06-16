@@ -118,7 +118,7 @@ export function COMPUTED_PAGINATION(queryParam: any, pageSizeOptions = PAGE_DEFA
  * @param {JSON} param1
  * @returns
  */
-export function CHANGE_PAGE(listQuery, { pagination, sorter }) {
+export function CHANGE_PAGE(listQuery: { [key: string]: any }, { pagination, sorter }: any) {
   if (pagination && Object.keys(pagination).length) {
     let limit = pagination.pageSize || pagination.limit || listQuery.limit
     if (limit === -1) {
@@ -148,11 +148,11 @@ export function CHANGE_PAGE(listQuery, { pagination, sorter }) {
  * @params asyncHandle {Function} - 对`list`的每一个项的处理函数，参数为当前处理项，必须 return 一个Promise来确定是否继续进行迭代
  * @return {Promise} - 返回一个 Promise 值来确认所有数据是否迭代完成
  */
-export function concurrentExecution(list, limit, asyncHandle) {
+export function concurrentExecution(list: any[], limit: number, asyncHandle: any) {
   // 递归执行
-  const recursion = (arr) => {
+  const recursion = (arr: any) => {
     // 执行方法 arr.shift() 取出并移除第一个数据
-    return asyncHandle(arr.shift()).then((res) => {
+    return asyncHandle(arr.shift()).then((res: any) => {
       // 数组还未迭代完，递归继续进行迭代
       if (arr.length !== 0) {
         return recursion(arr)
@@ -162,7 +162,7 @@ export function concurrentExecution(list, limit, asyncHandle) {
     })
   }
   // 创建新的并发数组
-  const listCopy = [].concat(list)
+  const listCopy = [...list]
   // 正在进行的所有并发异步操作
   const asyncList = []
   limit = limit > listCopy.length ? listCopy.length : limit
@@ -180,7 +180,7 @@ export function concurrentExecution(list, limit, asyncHandle) {
  * @param limit 并发控制
  * @param asyncHandle 任务处理函数
  */
-export async function concurrentJobs(list, limit, asyncHandle) {
+export async function concurrentJobs(list: any[], limit: number, asyncHandle: any) {
   const arr = [...list]
   const result = []
   for (let i = 0; i < arr.length; i += limit) {
@@ -189,7 +189,7 @@ export async function concurrentJobs(list, limit, asyncHandle) {
   return result
 }
 
-export function readJsonStrField(json, key) {
+export function readJsonStrField(json: string, key: string) {
   try {
     const data = JSON.parse(json)[key] || ''
     if (Object.prototype.toString.call(data) === '[object Object]') {
@@ -247,7 +247,7 @@ export function parseTime(time: any, cFormat = 'YYYY-MM-DD HH:mm:ss') {
  * @param defaultValue
  * @returns
  */
-export function renderSize(value, defaultValue = '-') {
+export function renderSize(value: any, defaultValue = '-') {
   return formatUnits(value, 1024, ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'], defaultValue)
 }
 
@@ -257,7 +257,7 @@ export function renderSize(value, defaultValue = '-') {
  * @param defaultValue
  * @returns
  */
-export function renderBpsSize(value, defaultValue = '-') {
+export function renderBpsSize(value: any, defaultValue = '-') {
   return formatUnits(value, 1024, ['bps', 'Kbps', 'Mbps', 'Gbps', 'Tbps', 'Pbps', 'Ebps', 'Zbps', 'Ybps'], defaultValue)
 }
 
@@ -267,7 +267,7 @@ export function renderBpsSize(value, defaultValue = '-') {
  * @param defaultValue
  * @returns
  */
-export function formatUnits(value, base, unitArr, defaultValue = '-') {
+export function formatUnits(value: any, base: number, unitArr: string[], defaultValue = '-') {
   if (null == value || value === '') {
     return defaultValue
   }
@@ -279,9 +279,9 @@ export function formatUnits(value, base, unitArr, defaultValue = '-') {
   }
   // console.log(value, srcsize);
   index = Math.floor(Math.log(srcsize) / Math.log(base))
-  let size = srcsize / Math.pow(base, index)
-  size = size.toFixed(2) //保留的小数位数
-  return size + unitArr[index]
+  const size = srcsize / Math.pow(base, index)
+  //保留的小数位数
+  return size.toFixed(2) + unitArr[index]
 }
 
 /**
@@ -289,26 +289,37 @@ export function formatUnits(value, base, unitArr, defaultValue = '-') {
  * @param {function} group
  * @returns Object
  */
-Array.prototype.groupBy = function (group) {
-  return group && typeof group === 'function'
-    ? Array.prototype.reduce.call(
-        this,
-        function (c, v) {
-          const k = group(v)
-          c[k] = v
-          return c
-        },
-        {}
-      )
-    : this
+declare global {
+  interface Array<T> {
+    groupBy(fn: (ix: T) => T): T[]
+  }
 }
+if (!Array.prototype.groupBy) {
+  Object.defineProperty(Array.prototype, 'groupBy', {
+    enumerable: false,
+    writable: false,
+    configurable: false,
+    value: function groupBy<T>(this: T[], group: (ix: T) => T): T[] {
+      return this.reduce(function (c: any, v: any) {
+        const k = group(v)
+        c[k] = v
+        return c
+      }, {})
+    }
+  })
+}
+// Array.prototype.groupBy = function (group: any) {
+//   return group && typeof group === 'function'
+//     ?
+//     : this
+// }
 //
-export function itemGroupBy(arr, groupKey, key, dataKey) {
+export function itemGroupBy(arr: any[], groupKey: string, key: string, dataKey: string) {
   key = key || 'type'
   dataKey = dataKey || 'data'
 
-  const newArr = [],
-    types = {}
+  const newArr: any[] = []
+  const types: { [key: string]: any } = {}
   let i, j, cur
   for (i = 0, j = arr.length; i < j; i++) {
     cur = arr[i]
@@ -340,7 +351,7 @@ export function formatDuration(ms: any, seg: string = ',', levelCount: number = 
   seg = seg || ''
   levelCount = levelCount || 5
   if (msNum < 0) msNum = -msNum
-  const time = {} as any
+  const time: { [key: string]: number } = {}
   ;(time[t('utils.const.3509a9f8')] = Math.floor(msNum / 86400000)),
     (time[t('utils.const.e3db239d')] = Math.floor(msNum / 3600000) % 24),
     (time[t('utils.const.3b1bb444')] = Math.floor(msNum / 60000) % 60),
@@ -354,7 +365,7 @@ export function formatDuration(ms: any, seg: string = ',', levelCount: number = 
 }
 
 //小数转换为分数(小数先转换成number类型，再乘以100，并且保留2位小数)
-export function formatPercent(point, keep = 2) {
+export function formatPercent(point: any, keep = 2) {
   if (!point) {
     return '-'
   }
@@ -378,7 +389,7 @@ export function formatPercent2Number(point: any, keep = 2) {
   return Number(Number(point).toFixed(keep))
 }
 
-export function compareVersion(version1, version2) {
+export function compareVersion(version1: string, version2: string) {
   if (version1 == null && version2 == null) {
     return 0
   } else if (version1 == null) {

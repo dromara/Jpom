@@ -25,6 +25,8 @@
         </div>
 
         <a-directory-tree
+          v-model:expandedKeys="expandedKeys"
+          v-model:selectedKeys="selectedKeys"
           :field-names="treeReplaceFields"
           :load-data="onTreeData"
           :tree-data="treeList"
@@ -229,7 +231,8 @@ export default {
     return {
       treeReplaceFields: {
         title: 'filename',
-        isLeaf: 'isDirectory'
+        isLeaf: 'isDirectory',
+        key: 'key'
       },
       tempNode: {},
       tempFileNode: {},
@@ -240,7 +243,9 @@ export default {
       nodeList: [],
       nodeName: {},
       temp: {},
-      socketCache: {}
+      socketCache: {},
+      expandedKeys: [],
+      selectedKeys: []
     }
   },
   computed: {
@@ -352,7 +357,7 @@ export default {
           key: 'log-read-close',
           message:
             ((this.nodeName[item.nodeId] && this.nodeName[item.nodeId].name) || '') +
-            ` ${this.$t('pages.dispatch.logReadView.8a2aae09')}[tail-log]-`
+            ` ${this.$t('pages.dispatch.logReadView.8a2aae09')}[tail-log]`
         })
         clearInterval(this.socketCache[id].heart)
       }
@@ -489,36 +494,39 @@ export default {
     // 加载子节点
     loadNode(data, resolve) {
       this.tempNode = data
+      if (data.children) {
+        resolve()
+        return
+      }
       // 如果是目录
       if (data.isDirectory) {
-        setTimeout(() => {
-          // 请求参数
-          const cacheData = this.temp.cacheData
+        // 请求参数
+        const cacheData = this.temp.cacheData
 
-          const params = {
-            nodeId: cacheData.useNodeId,
-            id: cacheData.useProjectId,
-            path: this.selectPath
+        const params = {
+          nodeId: cacheData.useNodeId,
+          id: cacheData.useProjectId,
+          path: this.selectPath
+        }
+
+        // 加载文件
+        getFileList(params).then((res) => {
+          if (res.code === 200) {
+            data.children = res.data.map((ele) => {
+              ele.isLeaf = !ele.isDirectory
+              ele.key = ele.filename + '-' + new Date().getTime()
+              //ele.disabled = ele.textFileEdit;
+
+              return ele
+            })
+
+            this.treeList = [...this.treeList]
+
+            resolve()
+          } else {
+            resolve()
           }
-
-          // 加载文件
-          getFileList(params).then((res) => {
-            if (res.code === 200) {
-              data.children = res.data.map((ele) => {
-                ele.isLeaf = !ele.isDirectory
-                ele.key = ele.filename + '-' + new Date().getTime()
-                //ele.disabled = ele.textFileEdit;
-
-                return ele
-              })
-
-              this.treeList = [...this.treeList]
-              resolve()
-            } else {
-              resolve()
-            }
-          })
-        }, 500)
+        })
       } else {
         resolve()
       }

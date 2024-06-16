@@ -94,6 +94,8 @@ declare module 'vue' {
     BlockOutlined: typeof import('@ant-design/icons-vue')['BlockOutlined']
     CheckCircleFilled: typeof import('@ant-design/icons-vue')['CheckCircleFilled']
     CheckCircleOutlined: typeof import('@ant-design/icons-vue')['CheckCircleOutlined']
+    CheckOutlined: typeof import('@ant-design/icons-vue')['CheckOutlined']
+    CloseOutlined: typeof import('@ant-design/icons-vue')['CloseOutlined']
     CloudDownloadOutlined: typeof import('@ant-design/icons-vue')['CloudDownloadOutlined']
     CloudOutlined: typeof import('@ant-design/icons-vue')['CloudOutlined']
     CloudServerOutlined: typeof import('@ant-design/icons-vue')['CloudServerOutlined']
