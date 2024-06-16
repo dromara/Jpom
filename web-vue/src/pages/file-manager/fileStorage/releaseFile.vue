@@ -263,8 +263,8 @@
               ? temp.beforeScript?.replace('$ref.script.', '')
               : ''
             : temp.afterScript?.indexOf('$ref.script.') !== -1
-              ? temp.afterScript?.replace('$ref.script.', '')
-              : ''
+            ? temp.afterScript?.replace('$ref.script.', '')
+            : ''
         "
         mode="choose"
         @confirm="

@@ -1,6 +1,7 @@
 package org.dromara.jpom.service.script;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.lang.PatternPool;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.Getter;
@@ -9,10 +10,15 @@ import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.data.ScriptLibraryModel;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -27,9 +33,39 @@ public class ScriptLibraryService {
      * 脚本库目录
      */
     private final File globalScriptDir;
+    private final Pattern pattern = PatternPool.get("G@\\(\"(.*?)\"\\)", Pattern.DOTALL);
 
     public ScriptLibraryService(JpomApplication jpomApplication) {
         this.globalScriptDir = FileUtil.file(jpomApplication.getDataPath(), "global-script");
+    }
+
+    /**
+     * 引用替换
+     *
+     * @param script 脚本
+     * @return 替换后的脚本
+     */
+    public String referenceReplace(String script) {
+        if (StrUtil.isEmpty(script)) {
+            return script;
+        }
+        Map<String, ScriptLibraryModel> map = new HashMap<>(3);
+        Matcher matcher = pattern.matcher(script);
+        StringBuffer modified = new StringBuffer();
+        while (matcher.find()) {
+            String tag = matcher.group(1);
+            ScriptLibraryModel scriptLibraryModel = map.get(tag);
+            if (scriptLibraryModel == null) {
+                scriptLibraryModel = this.get(tag);
+                if (scriptLibraryModel != null) {
+                    map.put(tag, scriptLibraryModel);
+                }
+            }
+            Assert.notNull(scriptLibraryModel, StrUtil.format(I18nMessageUtil.get("i18n.error_message.483d"), tag));
+            matcher.appendReplacement(modified, scriptLibraryModel.getScript());
+        }
+        matcher.appendTail(modified);
+        return modified.toString();
     }
 
     /**

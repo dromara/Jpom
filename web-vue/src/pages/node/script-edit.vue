@@ -40,13 +40,18 @@
             <a-input v-model:value="temp.name" :placeholder="$t('pages.node.script-edit.bb769c1d')" />
           </a-form-item>
           <a-form-item :label="$t('pages.node.script-edit.709314dd')" name="context">
+            <template #help>{{ $t('pages.node.script-edit.2cc2c670') }}</template>
             <a-form-item-rest>
-              <code-editor v-model:content="temp.context" height="40vh" :options="{ mode: 'shell' }"></code-editor>
+              <code-editor v-model:content="temp.context" height="40vh" :show-tool="true" :options="{ mode: 'shell' }">
+                <template #tool_before>
+                  <a-button type="link" @click="scriptLibraryVisible = true">{{
+                    $t('pages.node.script-edit.b52fd8d6')
+                  }}</a-button>
+                </template>
+              </code-editor>
             </a-form-item-rest>
           </a-form-item>
-          <!-- <a-form-item label="默认参数" name="defArgs">
-            <a-input v-model="temp.defArgs" placeholder="默认参数" />
-          </a-form-item> -->
+
           <a-form-item :label="$t('pages.node.script-edit.337801c6')">
             <a-space style="width: 100%" direction="vertical">
               <a-row v-for="(item, index) in commandParams" :key="item.key">
@@ -105,6 +110,68 @@
         </template>
       </a-form>
     </CustomModal>
+    <!-- pages.node.script-edit.a36f20d3 -->
+    <CustomDrawer
+      v-if="scriptLibraryVisible"
+      destroy-on-close
+      :title="$t('pages.node.script-edit.a36f20d3')"
+      placement="right"
+      :open="scriptLibraryVisible"
+      width="85vw"
+      :footer-style="{ textAlign: 'right' }"
+      @close="
+        () => {
+          scriptLibraryVisible = false
+        }
+      "
+    >
+      <ScriptLibraryNoPermission
+        v-if="scriptLibraryVisible"
+        ref="scriptLibraryRef"
+        @script-confirm="
+          (script) => {
+            temp = { ...temp, context: script }
+            scriptLibraryVisible = false
+          }
+        "
+        @tag-confirm="
+          (tag) => {
+            temp = { ...temp, context: (temp.context || '') + `\nG@(\&quot;${tag}\&quot;)` }
+            scriptLibraryVisible = false
+          }
+        "
+      ></ScriptLibraryNoPermission>
+      <template #footer>
+        <a-space>
+          <a-button
+            @click="
+              () => {
+                scriptLibraryVisible = false
+              }
+            "
+            >{{ $t('pages.node.script-edit.a0451c97') }}</a-button
+          >
+          <a-button
+            type="primary"
+            @click="
+              () => {
+                $refs['scriptLibraryRef'].handerScriptConfirm()
+              }
+            "
+            >{{ $t('pages.node.script-edit.703db0bd') }}</a-button
+          >
+          <a-button
+            type="primary"
+            @click="
+              () => {
+                $refs['scriptLibraryRef'].handerTagConfirm()
+              }
+            "
+            >{{ $t('pages.node.script-edit.4f288de9') }}</a-button
+          >
+        </a-space>
+      </template>
+    </CustomDrawer>
   </div>
 </template>
 <script>
@@ -112,9 +179,11 @@ import codeEditor from '@/components/codeEditor'
 import { editScript, itemScript } from '@/api/node-other'
 import { CRON_DATA_SOURCE } from '@/utils/const-i18n'
 import { getNodeListAll } from '@/api/node'
+import ScriptLibraryNoPermission from '@/pages/system/assets/script-library/no-permission'
 export default {
   components: {
-    codeEditor
+    codeEditor,
+    ScriptLibraryNoPermission
   },
   props: {
     nodeId: {
@@ -137,7 +206,8 @@ export default {
         name: [{ required: true, message: this.$t('pages.node.script-edit.661c0530'), trigger: 'blur' }],
         context: [{ required: true, message: this.$t('pages.node.script-edit.a48e24b3'), trigger: 'blur' }]
       },
-      confirmLoading: false
+      confirmLoading: false,
+      scriptLibraryVisible: false
     }
   },
   mounted() {

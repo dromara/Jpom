@@ -16,22 +16,20 @@ import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.data.NodeScriptModel;
+import org.dromara.jpom.service.script.NodeScriptServer;
 import org.dromara.jpom.service.system.AgentWorkspaceEnvVarService;
 import org.dromara.jpom.socket.ConsoleCommandOp;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.util.CommandUtil;
-import org.dromara.jpom.util.FileUtils;
 import org.dromara.jpom.util.SocketSessionUtil;
 
 import javax.websocket.Session;
@@ -58,15 +56,16 @@ public class NodeScriptProcessBuilder extends BaseRunScript implements Runnable 
     private final String executeId;
     private final File scriptFile;
     private final EnvironmentMapBuilder environmentMapBuilder;
+    private NodeScriptServer nodeScriptServer;
 
     private NodeScriptProcessBuilder(NodeScriptModel nodeScriptModel, String executeId, String args, Map<String, String> paramMap) {
         super(nodeScriptModel.logFile(executeId), CharsetUtil.CHARSET_UTF_8);
         this.executeId = executeId;
+        if (nodeScriptServer == null) {
+            nodeScriptServer = SpringUtil.getBean(NodeScriptServer.class);
+        }
         //
-        String dataPath = JpomApplication.getInstance().getDataPath();
-        scriptFile = FileUtil.file(dataPath, Const.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
-
-        FileUtils.writeScript(nodeScriptModel.getContext(), scriptFile, ExtConfigBean.getConsoleLogCharset());
+        scriptFile = nodeScriptServer.toExecuteFile(nodeScriptModel);
         //
         String script = FileUtil.getAbsolutePath(scriptFile);
         processBuilder = new ProcessBuilder();

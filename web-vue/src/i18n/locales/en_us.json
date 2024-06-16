@@ -1804,7 +1804,8 @@
         "a1f47198": "Local script",
         "602a0a5e": "Node",
         "82ff11f5": "Cluster",
-        "30d0bb03": "Dynamic file"
+        "30d0bb03": "Dynamic file",
+        "3081870c": "more"
       },
       "side-menu": {
         "73d81eb7": "System management",
@@ -2670,7 +2671,13 @@
         "a48e24b3": "Please enter script content",
         "dbed11aa": "You cannot save the script without selecting a node",
         "4149d069": "Please fill in the description for the ",
-        "94a5dd5e": "th parameter"
+        "94a5dd5e": "th parameter",
+        "2cc2c670": "If referencing a script library, it is necessary to distribute the corresponding script to machine nodes in advance in order to use it properly",
+        "b52fd8d6": "Script Library",
+        "a36f20d3": "View Script Library",
+        "a0451c97": "cancel",
+        "703db0bd": "Replace reference",
+        "4f288de9": "Mark reference"
       },
       "script-list": {
         "65860154": "Share",
@@ -3046,7 +3053,12 @@
         "17a3e7b": "Parameter {count} description",
         "a94da34e": "Parameter {count} value",
         "b2a4dc0e": "Please fill in the number",
-        "94a5dd5e": "Description of parameters"
+        "94a5dd5e": "Description of parameters",
+        "b52fd8d6": "Script Library",
+        "a36f20d3": "View Script Library",
+        "a0451c97": "cancel",
+        "703db0bd": "Replace reference",
+        "4f288de9": "Mark reference"
       },
       "script-log-view": {
         "52cb3797": "Script log"
@@ -3179,7 +3191,12 @@
         "e8e9db25": "Confirm",
         "b12468e9": "Cancel",
         "7872c5ad": "Please select the execution node",
-        "4676a7bb": "Parameter description, {slot1}, is only used to indicate the meaning of the parameter"
+        "4676a7bb": "Parameter description, {slot1}, is only used to indicate the meaning of the parameter",
+        "b52fd8d6": "Script Library",
+        "a36f20d3": "View Script Library",
+        "a0451c97": "cancel",
+        "703db0bd": "Replace reference",
+        "4f288de9": "Mark reference"
       },
       "full-terminal": {
         "741604c2": "File",
@@ -3851,7 +3868,25 @@
           "3875bf60": "System prompt",
           "72df294d": "Are you sure you want to delete this script library?",
           "d507abff": "confirm",
-          "a0451c97": "cancel"
+          "a0451c97": "cancel",
+          "no-permission": {
+            "81634069": "version",
+            "67b6615f": "No script library available",
+            "95547f9": "Script markers",
+            "f89e58f1": "describe",
+            "986e8dc2": "Hold down the Ctr or Alt/Option keys and click the button to quickly return to the first page",
+            "43934f6d": "search",
+            "b01c1e10": "check",
+            "b6fd5f4e": "View Script",
+            "2d62ebdb": "sign",
+            "3e7aa0ad": "content",
+            "d3b29478": "Modification time",
+            "efaf9956": "Creation time",
+            "339d15b5": "Creator",
+            "8605b4f2": "Modified by",
+            "fe731dfc": "operation",
+            "286031ba": "Please select the script to reference"
+          }
         }
       },
       "backup": {
@@ -4261,7 +4296,8 @@
         "2c32d62b": "System Tips",
         "987c2cd6": "Are you sure you want to delete the current variable?",
         "e8e9db25": "Confirm",
-        "b12468e9": "Cancel"
+        "b12468e9": "Cancel",
+        "d330bbb7": "When distributing to nodes, it is important to note that cross workspace duplicates will be overwritten by the last synchronization"
       },
       "workspace-list": {
         "d83f3e09": "Workspace Name",

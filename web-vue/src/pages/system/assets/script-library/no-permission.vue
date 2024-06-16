@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="script-library-no-permission"
-      empty-description="没有任何脚本库"
+      :empty-description="$t('pages.system.assets.script-library.no-permission.67b6615f')"
       :data-source="list"
       size="middle"
       :columns="columns"
@@ -25,27 +25,29 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%tag%']"
-            placeholder="脚本标记"
+            :placeholder="$t('pages.system.assets.script-library.no-permission.95547f9')"
             allow-clear
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%version%']"
-            placeholder="版本"
+            :placeholder="$t('pages.system.assets.script-library.no-permission.81634069')"
             allow-clear
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%description%']"
-            placeholder="描述"
+            :placeholder="$t('pages.system.assets.script-library.no-permission.f89e58f1')"
             class="search-input-item"
             @press-enter="loadData"
           />
 
-          <a-tooltip title="按住 Ctr 或者 Alt/Option 键点击按钮快速回到第一页">
-            <a-button :loading="loading" type="primary" @click="loadData">搜索</a-button>
+          <a-tooltip :title="$t('pages.system.assets.script-library.no-permission.986e8dc2')">
+            <a-button :loading="loading" type="primary" @click="loadData">{{
+              $t('pages.system.assets.script-library.no-permission.43934f6d')
+            }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -64,7 +66,9 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEdit(record)"> 查看</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{
+              $t('pages.system.assets.script-library.no-permission.b01c1e10')
+            }}</a-button>
           </a-space>
         </template>
       </template>
@@ -74,19 +78,19 @@
       v-if="editScriptVisible"
       v-model:open="editScriptVisible"
       destroy-on-close
-      title="查看脚本"
+      :title="$t('pages.system.assets.script-library.no-permission.b6fd5f4e')"
       :mask-closable="false"
       width="80vw"
       :footer="false"
     >
       <a-form ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 19 }">
-        <a-form-item label="版本" name="id">
+        <a-form-item :label="$t('pages.system.assets.script-library.no-permission.81634069')" name="id">
           <a-input v-model:value="temp.version" disabled read-only />
         </a-form-item>
-        <a-form-item label="标记" name="tag">
+        <a-form-item :label="$t('pages.system.assets.script-library.no-permission.2d62ebdb')" name="tag">
           <a-input v-model:value="temp.tag" :max-length="50" disabled />
         </a-form-item>
-        <a-form-item label="内容" name="script">
+        <a-form-item :label="$t('pages.system.assets.script-library.no-permission.3e7aa0ad')" name="script">
           <a-form-item-rest>
             <code-editor
               v-model:content="temp.script"
@@ -98,7 +102,7 @@
           </a-form-item-rest>
         </a-form-item>
 
-        <a-form-item label="描述" name="description">
+        <a-form-item :label="$t('pages.system.assets.script-library.no-permission.f89e58f1')" name="description">
           <a-textarea v-model:value="temp.description" :max-length="200" :rows="3" style="resize: none" disabled />
         </a-form-item>
       </a-form>
@@ -135,14 +139,14 @@ export default {
       drawerConsoleVisible: false,
       columns: [
         {
-          title: '标记',
+          title: this.$t('pages.system.assets.script-library.no-permission.2d62ebdb'),
           dataIndex: 'tag',
           ellipsis: true,
           sorter: true,
           width: 150
         },
         {
-          title: '版本',
+          title: this.$t('pages.system.assets.script-library.no-permission.81634069'),
           dataIndex: 'version',
           ellipsis: true,
           sorter: true,
@@ -150,14 +154,14 @@ export default {
           tooltip: true
         },
         {
-          title: '描述',
+          title: this.$t('pages.system.assets.script-library.no-permission.f89e58f1'),
           dataIndex: 'description',
           ellipsis: true,
           width: 200,
           tooltip: true
         },
         {
-          title: '修改时间',
+          title: this.$t('pages.system.assets.script-library.no-permission.d3b29478'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           width: '170px',
@@ -165,7 +169,7 @@ export default {
           customRender: ({ text }) => parseTime(text)
         },
         {
-          title: '创建时间',
+          title: this.$t('pages.system.assets.script-library.no-permission.efaf9956'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           width: '170px',
@@ -173,14 +177,14 @@ export default {
           customRender: ({ text }) => parseTime(text)
         },
         {
-          title: '创建人',
+          title: this.$t('pages.system.assets.script-library.no-permission.339d15b5'),
           dataIndex: 'createUser',
           ellipsis: true,
           tooltip: true,
           width: '120px'
         },
         {
-          title: '修改人',
+          title: this.$t('pages.system.assets.script-library.no-permission.8605b4f2'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           tooltip: true,
@@ -188,7 +192,7 @@ export default {
         },
 
         {
-          title: '操作',
+          title: this.$t('pages.system.assets.script-library.no-permission.fe731dfc'),
           dataIndex: 'operation',
           align: 'center',
 
@@ -196,6 +200,7 @@ export default {
           width: '140px'
         }
       ],
+
       tableSelections: [],
       selectedRowKeys: [],
       rules: {}
@@ -251,7 +256,7 @@ export default {
     handerScriptConfirm() {
       if (!this.tableSelections.length) {
         $notification.warning({
-          message: '请选择要引用的脚本'
+          message: this.$t('pages.system.assets.script-library.no-permission.286031ba')
         })
         return
       }
@@ -263,7 +268,7 @@ export default {
     handerTagConfirm() {
       if (!this.tableSelections.length) {
         $notification.warning({
-          message: '请选择要引用的脚本'
+          message: this.$t('pages.system.assets.script-library.no-permission.286031ba')
         })
         return
       }

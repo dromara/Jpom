@@ -16,12 +16,17 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.keepbx.jpom.cron.ICron;
+import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.AgentConst;
+import org.dromara.jpom.common.Const;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.model.data.NodeScriptExecLogModel;
 import org.dromara.jpom.model.data.NodeScriptModel;
 import org.dromara.jpom.script.NodeScriptProcessBuilder;
 import org.dromara.jpom.service.BaseWorkspaceOptService;
+import org.dromara.jpom.system.ExtConfigBean;
+import org.dromara.jpom.util.CommandUtil;
+import org.dromara.jpom.util.FileUtils;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.stereotype.Service;
 
@@ -38,10 +43,16 @@ import java.util.Map;
 @Service
 public class NodeScriptServer extends BaseWorkspaceOptService<NodeScriptModel> implements ICron<NodeScriptModel> {
     private final NodeScriptExecLogServer execLogServer;
+    private final JpomApplication jpomApplication;
+    private final ScriptLibraryService scriptLibraryService;
 
-    public NodeScriptServer(NodeScriptExecLogServer execLogServer) {
+    public NodeScriptServer(NodeScriptExecLogServer execLogServer,
+                            JpomApplication jpomApplication,
+                            ScriptLibraryService scriptLibraryService) {
         super(AgentConst.SCRIPT);
         this.execLogServer = execLogServer;
+        this.jpomApplication = jpomApplication;
+        this.scriptLibraryService = scriptLibraryService;
     }
 
     @Override
@@ -70,6 +81,16 @@ public class NodeScriptServer extends BaseWorkspaceOptService<NodeScriptModel> i
         super.deleteItem(id);
         String taskId = "script:" + id;
         CronUtils.remove(taskId);
+    }
+
+    public File toExecuteFile(NodeScriptModel nodeScriptModel) {
+        String dataPath = jpomApplication.getDataPath();
+        File scriptFile = FileUtil.file(dataPath, Const.SCRIPT_RUN_CACHE_DIRECTORY, StrUtil.format("{}.{}", IdUtil.fastSimpleUUID(), CommandUtil.SUFFIX));
+        String context = nodeScriptModel.getContext();
+        //
+        context = scriptLibraryService.referenceReplace(context);
+        FileUtils.writeScript(context, scriptFile, ExtConfigBean.getConsoleLogCharset());
+        return scriptFile;
     }
 
     @Override
