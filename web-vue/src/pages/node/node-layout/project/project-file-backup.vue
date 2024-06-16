@@ -68,6 +68,8 @@
         </div>
 
         <a-directory-tree
+          v-model:expandedKeys="expandedKeys"
+          v-model:selectedKeys="selectedKeys"
           :field-names="treeReplaceFields"
           :load-data="onTreeData"
           :tree-data="treeList"
@@ -249,7 +251,8 @@ export default {
         children: 'children',
         label: 'filename'
       },
-
+      expandedKeys: [],
+      selectedKeys: [],
       columns: [
         {
           title: this.$t('pages.node.node-layout.project.project-file-backup.6a721706'),

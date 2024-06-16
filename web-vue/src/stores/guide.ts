@@ -166,7 +166,8 @@ export const useGuideStore = defineStore('guide', {
     getCatchThemeView: (state) => {
       return () => {
         // 新用户未设置过为跟随系统
-        return state.guideCache.themeView || 'auto'
+        const theme = state.guideCache.themeView || 'auto'
+        return allowThemeView.includes(theme) ? theme : 'auto'
       }
     },
     getSupportThemes: () => {
@@ -187,19 +188,11 @@ export const useGuideStore = defineStore('guide', {
     },
     getThemeView: (state) => {
       return () => {
-        const themeView = state?.getCatchThemeView ? state.getCatchThemeView() : 'light'
-        if (allowThemeView.includes(themeView)) {
-          if (themeView === 'auto') {
-            if (state.systemIsDark) {
-              return 'dark'
-            } else {
-              return 'light'
-            }
-          } else {
-            return themeView
-          }
+        const themeView = state?.getCatchThemeView ? state.getCatchThemeView() : 'auto'
+        if (themeView === 'auto') {
+          return state.systemIsDark ? 'dark' : 'light'
         } else {
-          return 'light'
+          return themeView
         }
       }
     },
@@ -271,9 +264,9 @@ export const useGuideStore = defineStore('guide', {
     },
     getLocale: (state) => {
       return () => {
-        const locale = state.guideCache.locale || 'zh-cn'
-        const array = ['zh-cn', 'en-us']
-        if (array.includes(locale)) {
+        const locale = state.guideCache.locale || navigator.language
+        const array = ['zh-cn', 'en-us', 'zh_cn', 'en_us']
+        if (array.includes(locale.toLowerCase())) {
           // 避免非法字符串
           return locale
         }

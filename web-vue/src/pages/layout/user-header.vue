@@ -650,7 +650,7 @@ export default {
         useGuideStore().toggleThemeView(value)
       },
       get: function () {
-        return useGuideStore().guideCache.themeView
+        return useGuideStore().getCatchThemeView()
         // return this.getThemeView()
       }
     },

@@ -471,6 +471,7 @@ export default {
               this.data = res.data?.data || {}
               let oldProjectList = this.list
               let oldProjectMap = oldProjectList.groupBy((item) => item.id)
+              //console.log(oldProjectList, oldProjectMap)
               projectList = projectList.map((item) => {
                 return Object.assign({}, oldProjectMap[item.id], item)
               })

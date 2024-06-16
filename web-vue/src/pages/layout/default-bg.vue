@@ -57,8 +57,13 @@
           </a-button>
           <template #overlay>
             <a-menu>
-              <a-menu-item v-for="item in supportLang" :key="item.value" :disabled="nowLang === item.value">
-                <span @click="useGuideStore.changeLocale(item.value)">
+              <a-menu-item
+                v-for="item in supportLang"
+                :key="item.value"
+                :disabled="nowLang === item.value"
+                @click="useGuideStore.changeLocale(item.value)"
+              >
+                <span>
                   <a-tooltip :title="`${item.label}(${item.value})`">
                     {{ item.label }}
                   </a-tooltip>
@@ -71,7 +76,7 @@
           <a-button type="text">
             {{
               useGuideStore.getSupportThemes.find((item) => {
-                return item.value === theme
+                return item.value === themeValue
               })?.label
             }}
             <DownOutlined />
@@ -81,9 +86,10 @@
               <a-menu-item
                 v-for="item in useGuideStore.getSupportThemes"
                 :key="item.value"
-                :disabled="theme === item.value"
+                :disabled="themeValue === item.value"
+                @click="useGuideStore.toggleThemeView(item.value)"
               >
-                <span @click="useGuideStore.toggleThemeView(item.value)">
+                <span>
                   <a-tooltip :title="`${item.label}(${item.value})`">
                     {{ item.label }}
                   </a-tooltip>
@@ -99,11 +105,10 @@
 <script lang="ts" setup>
 import { supportLang } from '@/i18n'
 
-const guideStore1 = guideStore()
 const useGuideStore = guideStore()
 
-const theme = computed(() => {
-  return guideStore1.getThemeView()
+const themeValue = computed(() => {
+  return useGuideStore.getCatchThemeView()
 })
 
 const nowLang = computed({
@@ -124,7 +129,9 @@ defineProps({
 
 const backgroundImage = computed(() => {
   const color =
-    theme.value === 'light' ? 'linear-gradient(#1890ff, #66a9c9)' : 'linear-gradient(rgb(38 46 55), rgb(27 33 36))'
+    useGuideStore.getThemeView() === 'light'
+      ? 'linear-gradient(#1890ff, #66a9c9)'
+      : 'linear-gradient(rgb(38 46 55), rgb(27 33 36))'
 
   // background: linear-gradient(#1890ff, #66a9c9);
   return {
