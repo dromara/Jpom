@@ -67,6 +67,7 @@ declare module 'vue' {
     ArrowRightOutlined: typeof import('@ant-design/icons-vue')['ArrowRightOutlined']
     ASegmented: typeof import('ant-design-vue/es')['Segmented']
     ASelect: typeof import('ant-design-vue/es')['Select']
+    ASelectOptGroup: typeof import('ant-design-vue/es')['SelectOptGroup']
     ASelectOption: typeof import('ant-design-vue/es')['SelectOption']
     ASkeleton: typeof import('ant-design-vue/es')['Skeleton']
     ASpace: typeof import('ant-design-vue/es')['Space']
@@ -181,5 +182,6 @@ declare module 'vue' {
     VerticalLeftOutlined: typeof import('@ant-design/icons-vue')['VerticalLeftOutlined']
     ViewPre: typeof import('./../components/logView/view-pre.vue')['default']
     WarningOutlined: typeof import('@ant-design/icons-vue')['WarningOutlined']
+    WarningTwoTone: typeof import('@ant-design/icons-vue')['WarningTwoTone']
   }
 }

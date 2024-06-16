@@ -191,7 +191,8 @@
       </template>
     </a-table>
     <!-- 编辑节点 -->
-    <a-modal
+    <CustomModal
+      v-if="editVisible"
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -214,7 +215,7 @@
           </a-radio-group>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

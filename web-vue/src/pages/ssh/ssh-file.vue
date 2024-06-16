@@ -163,16 +163,16 @@
                 record.link
                   ? $t('pages.ssh.ssh-file.56bb0bdf')
                   : text
-                  ? $t('pages.ssh.ssh-file.535422c2')
-                  : $t('pages.ssh.ssh-file.ec88a43e')
+                    ? $t('pages.ssh.ssh-file.535422c2')
+                    : $t('pages.ssh.ssh-file.ec88a43e')
               }`"
             >
               <span>{{
                 record.link
                   ? $t('pages.ssh.ssh-file.56bb0bdf')
                   : text
-                  ? $t('pages.ssh.ssh-file.535422c2')
-                  : $t('pages.ssh.ssh-file.ec88a43e')
+                    ? $t('pages.ssh.ssh-file.535422c2')
+                    : $t('pages.ssh.ssh-file.ec88a43e')
               }}</span>
             </a-tooltip>
           </template>
@@ -209,7 +209,8 @@
         </template>
       </a-table>
       <!-- 上传文件 -->
-      <a-modal
+      <CustomModal
+        v-if="uploadFileVisible"
         v-model:open="uploadFileVisible"
         destroy-on-close
         width="300px"
@@ -240,9 +241,10 @@
           @click="startUpload"
           >{{ $t('pages.ssh.ssh-file.c07b9648') }}</a-button
         >
-      </a-modal>
+      </CustomModal>
       <!--  新增文件 目录    -->
-      <a-modal
+      <CustomModal
+        v-if="addFileFolderVisible"
         v-model:open="addFileFolderVisible"
         width="300px"
         :title="temp.addFileOrFolderType === 1 ? $t('pages.ssh.ssh-file.f4dc8e4b') : $t('pages.ssh.ssh-file.8cccdefa')"
@@ -264,9 +266,10 @@
             >
           </a-row>
         </a-space>
-      </a-modal>
+      </CustomModal>
 
-      <a-modal
+      <CustomModal
+        v-if="editFileVisible"
         v-model:open="editFileVisible"
         destroy-on-close
         :confirm-loading="confirmLoading"
@@ -289,9 +292,10 @@
             </a-tag>
           </template>
         </code-editor>
-      </a-modal>
+      </CustomModal>
       <!-- 从命名文件/文件夹 -->
-      <a-modal
+      <CustomModal
+        v-if="renameFileFolderVisible"
         v-model:open="renameFileFolderVisible"
         destroy-on-close
         width="300px"
@@ -312,10 +316,11 @@
             >
           </a-row>
         </a-space>
-      </a-modal>
+      </CustomModal>
 
       <!-- 修改文件权限 -->
-      <a-modal
+      <CustomModal
+        v-if="editFilePermissionVisible"
         v-model:open="editFilePermissionVisible"
         destroy-on-close
         width="400px"
@@ -385,7 +390,7 @@
         <!-- <a-row>
             <a-alert style="margin-top: 20px" :message="permissionTips" type="success" />
           </a-row> -->
-      </a-modal>
+      </CustomModal>
     </a-layout-content>
   </a-layout>
 </template>

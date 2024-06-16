@@ -52,7 +52,8 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal
+    <CustomModal
+      v-if="editVisible"
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -140,9 +141,10 @@
           </a-space>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 实时阅读 -->
-    <a-drawer
+    <CustomDrawer
+      v-if="logReadVisible"
       destroy-on-close
       placement="right"
       :width="`${getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"
@@ -168,7 +170,7 @@
           }
         "
       ></logReadView>
-    </a-drawer>
+    </CustomDrawer>
   </div>
 </template>
 <script>

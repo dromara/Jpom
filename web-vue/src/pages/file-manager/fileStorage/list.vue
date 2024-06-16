@@ -136,7 +136,8 @@
         </template>
       </a-table>
       <!-- 上传文件 -->
-      <a-modal
+      <CustomModal
+        v-if="uploadVisible"
         v-model:open="uploadVisible"
         destroy-on-close
         :confirm-loading="confirmLoading"
@@ -223,9 +224,10 @@
             />
           </a-form-item>
         </a-form>
-      </a-modal>
+      </CustomModal>
       <!-- 编辑文件 -->
-      <a-modal
+      <CustomModal
+        v-if="editVisible"
         v-model:open="editVisible"
         destroy-on-close
         :confirm-loading="confirmLoading"
@@ -278,9 +280,10 @@
             />
           </a-form-item>
         </a-form>
-      </a-modal>
+      </CustomModal>
       <!--远程下载  -->
-      <a-modal
+      <CustomModal
+        v-if="uploadRemoteFileVisible"
         v-model:open="uploadRemoteFileVisible"
         destroy-on-close
         :title="$t('pages.file-manager.fileStorage.list.d78f10d3')"
@@ -333,9 +336,10 @@
             />
           </a-form-item>
         </a-form>
-      </a-modal>
+      </CustomModal>
       <!-- 断点下载 -->
-      <a-modal
+      <CustomModal
+        v-if="triggerVisible"
         v-model:open="triggerVisible"
         destroy-on-close
         :title="$t('pages.file-manager.fileStorage.list.a7210bdc')"
@@ -411,19 +415,20 @@
             </a-tab-pane>
           </a-tabs>
         </a-form>
-      </a-modal>
+      </CustomModal>
       <!-- 发布文件 -->
-      <a-modal
+      <CustomModal
+        v-if="releaseFileVisible"
         v-model:open="releaseFileVisible"
         destroy-on-close
         :confirm-loading="confirmLoading"
         :title="$t('pages.file-manager.fileStorage.list.b104cb8')"
-        width="60%"
+        width="70%"
         :mask-closable="false"
         @ok="releaseFileOk()"
       >
         <releaseFile v-if="releaseFileVisible" ref="releaseFile" @commit="handleCommitTask"></releaseFile>
-      </a-modal>
+      </CustomModal>
     </div>
     <!-- 选择确认区域 -->
     <div v-if="choose" style="padding-top: 50px">

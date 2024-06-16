@@ -236,7 +236,8 @@
       </a-form>
     </CustomModal>
 
-    <a-modal
+    <CustomModal
+      v-if="executeCommandVisible"
       v-model:open="executeCommandVisible"
       destroy-on-close
       width="600px"
@@ -309,9 +310,10 @@
           </a-space>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 执行日志 -->
-    <a-modal
+    <CustomModal
+      v-if="logVisible"
       v-model:open="logVisible"
       destroy-on-close
       :width="'80vw'"
@@ -320,9 +322,10 @@
       :mask-closable="false"
     >
       <command-log v-if="logVisible" :temp="temp" />
-    </a-modal>
+    </CustomModal>
     <!-- 同步到其他工作空间 -->
-    <a-modal
+    <CustomModal
+      v-if="syncToWorkspaceVisible"
       v-model:open="syncToWorkspaceVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -366,10 +369,11 @@
           </a-select>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
 
     <!-- 触发器 -->
-    <a-modal
+    <CustomModal
+      v-if="triggerVisible"
       v-model:open="triggerVisible"
       destroy-on-close
       :title="$t('pages.ssh.command.e81c0988')"
@@ -422,7 +426,7 @@
           </a-tab-pane>
         </a-tabs>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 查看脚本库 -->
     <CustomDrawer
       v-if="scriptLibraryVisible"

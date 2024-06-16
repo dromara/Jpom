@@ -110,7 +110,8 @@
     </a-table>
 
     <!-- 编辑区 -->
-    <a-modal
+    <CustomModal
+      v-if="editVisible"
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -152,7 +153,7 @@
           <a-input v-model:value="temp.url" :placeholder="$t('pages.system.cluster-list.12f26edc')" />
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

@@ -279,7 +279,8 @@
       </a-form>
     </CustomModal>
     <!-- 脚本控制台组件 -->
-    <a-drawer
+    <CustomDrawer
+      v-if="drawerConsoleVisible"
       destroy-on-close
       :title="drawerTitle"
       placement="right"
@@ -288,9 +289,10 @@
       @close="onConsoleClose"
     >
       <script-console v-if="drawerConsoleVisible" :id="temp.id" :def-args="temp.defArgs" />
-    </a-drawer>
+    </CustomDrawer>
     <!-- 同步到其他工作空间 -->
-    <a-modal
+    <CustomModal
+      v-if="syncToWorkspaceVisible"
       v-model:open="syncToWorkspaceVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -334,9 +336,10 @@
           </a-select>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 触发器 -->
-    <a-modal
+    <CustomModal
+      v-if="triggerVisible"
       v-model:open="triggerVisible"
       destroy-on-close
       :title="$t('pages.script.script-list.e81c0988')"
@@ -389,9 +392,10 @@
           </a-tab-pane>
         </a-tabs>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 脚本日志 -->
-    <a-drawer
+    <CustomDrawer
+      v-if="drawerLogVisible"
       destroy-on-close
       :title="$t('pages.script.script-list.85cd9f11')"
       width="70vw"
@@ -403,7 +407,7 @@
       "
     >
       <script-log v-if="drawerLogVisible" :script-id="temp.id" />
-    </a-drawer>
+    </CustomDrawer>
     <!-- 查看脚本库 -->
     <CustomDrawer
       v-if="scriptLibraryVisible"

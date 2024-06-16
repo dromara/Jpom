@@ -25,13 +25,13 @@
       </log-view2>
     </a-layout-content>
     <!-- 对话框 -->
-    <!-- <a-modal v-model="visible" title="系统提示" :footer="null">
+    <!-- <CustomModal v-if="visible" v-model="visible" title="系统提示" :footer="null">
         <a-space>
           <a-button type="primary" danger @click="deleteLog">删除日志文件</a-button>
           <a-button type="primary" @click="downloadLog">下载日志文件</a-button>
           <a-button @click="visible = false">取消</a-button>
         </a-space>
-      </a-modal> -->
+      </CustomModal> -->
   </a-layout>
 </template>
 <script>

@@ -651,7 +651,8 @@
     />
 
     <!-- Terminal -->
-    <a-modal
+    <CustomModal
+      v-if="terminalVisible"
       v-model:open="terminalVisible"
       width="80vw"
       :body-style="{
@@ -665,9 +666,10 @@
       :mask-closable="false"
     >
       <terminal2 v-if="terminalVisible" :id="id" :machine-docker-id="machineDockerId" :container-id="temp.id" />
-    </a-modal>
+    </CustomModal>
     <!-- 编辑容器配置 -->
-    <a-modal
+    <CustomModal
+      v-if="editVisible"
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -695,7 +697,7 @@
         :url-prefix="urlPrefix"
         :container-id="temp.id"
       ></editContainer>
-    </a-modal>
+    </CustomModal>
     <!-- rebuild container -->
 
     <BuildContainer

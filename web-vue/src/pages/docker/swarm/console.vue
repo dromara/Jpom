@@ -1,5 +1,5 @@
 <template>
-  <a-drawer
+  <CustomDrawer
     destroy-on-close
     placement="right"
     :width="`${getCollapsed ? 'calc(100vw - 80px)' : 'calc(100vw - 200px)'}`"
@@ -34,7 +34,7 @@
       <swarm-service v-show="menuKey === 'server'" :id="id" :visible="visible" :url-prefix="urlPrefix" />
       <swarm-task v-show="menuKey === 'task'" :id="id" :visible="visible" :url-prefix="urlPrefix" />
     </div>
-  </a-drawer>
+  </CustomDrawer>
 </template>
 <script>
 import SwarmNode from './node'

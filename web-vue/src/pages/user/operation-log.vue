@@ -152,8 +152,10 @@
       </template>
     </CustomTable>
     <!-- 详情区 -->
-    <a-modal
+    <CustomModal
+      v-if="detailVisible"
       v-model:open="detailVisible"
+      detail-visible
       destroy-on-close
       width="600px"
       :title="$t('pages.user.operation-log.7990de3b')"
@@ -174,7 +176,7 @@
           </a-list-item>
         </template>
       </a-list>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

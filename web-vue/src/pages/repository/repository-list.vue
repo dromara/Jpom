@@ -557,7 +557,8 @@
       </div> -->
     <!-- </div> -->
     <!-- 关联构建 -->
-    <a-modal
+    <CustomModal
+      v-if="viewBuildVisible"
       v-model:open="viewBuildVisible"
       destroy-on-close
       width="80vw"
@@ -567,7 +568,7 @@
     >
       <buildList-component v-if="viewBuildVisible" :repository-id="temp.id" :full-content="false" />
       <a-spin v-else>loading....</a-spin>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

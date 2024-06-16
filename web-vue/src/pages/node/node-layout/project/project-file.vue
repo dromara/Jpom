@@ -206,7 +206,8 @@
             </template>
           </a-table>
           <!-- 批量上传文件 -->
-          <a-modal
+          <CustomModal
+            v-if="uploadFileVisible"
             v-model:open="uploadFileVisible"
             destroy-on-close
             :closable="!uploading"
@@ -273,9 +274,10 @@
                 $t('pages.node.node-layout.project.project-file.c9b65c5c')
               }}</a-button>
             </a-space>
-          </a-modal>
+          </CustomModal>
           <!-- 上传压缩文件 -->
-          <a-modal
+          <CustomModal
+            v-if="uploadZipFileVisible"
             v-model:open="uploadZipFileVisible"
             destroy-on-close
             :closable="!uploading"
@@ -348,9 +350,10 @@
                 $t('pages.node.node-layout.project.project-file.c9b65c5c')
               }}</a-button>
             </a-space>
-          </a-modal>
+          </CustomModal>
 
-          <a-modal
+          <CustomModal
+            v-if="editFileVisible"
             v-model:open="editFileVisible"
             destroy-on-close
             width="80vw"
@@ -392,9 +395,10 @@
                 {{ $t('pages.node.node-layout.project.project-file.e4584755') }}
               </a-button>
             </template>
-          </a-modal>
+          </CustomModal>
           <!--远程下载  -->
-          <a-modal
+          <CustomModal
+            v-if="uploadRemoteFileVisible"
             v-model:open="uploadRemoteFileVisible"
             destroy-on-close
             :confirm-loading="confirmLoading"
@@ -435,9 +439,10 @@
                 />
               </a-form-item>
             </a-form>
-          </a-modal>
+          </CustomModal>
           <!-- 创建文件/文件夹 -->
-          <a-modal
+          <CustomModal
+            v-if="addFileFolderVisible"
             v-model:open="addFileFolderVisible"
             destroy-on-close
             width="300px"
@@ -465,9 +470,10 @@
                 }}</a-button>
               </a-row>
             </a-space>
-          </a-modal>
+          </CustomModal>
           <!-- 从命名文件/文件夹 -->
-          <a-modal
+          <CustomModal
+            v-if="renameFileFolderVisible"
             v-model:open="renameFileFolderVisible"
             destroy-on-close
             width="300px"
@@ -487,12 +493,13 @@
                 }}</a-button>
               </a-row>
             </a-space>
-          </a-modal>
+          </CustomModal>
         </a-layout-content>
       </a-layout>
     </a-spin>
     <!-- 查看备份列表 -->
-    <a-modal
+    <CustomModal
+      v-if="backupListVisible"
       v-model:open="backupListVisible"
       destroy-on-close
       width="80vw"
@@ -507,7 +514,7 @@
       "
     >
       <projectFileBackup v-if="backupListVisible" :node-id="nodeId" :project-id="projectId"></projectFileBackup>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

@@ -230,7 +230,8 @@
       </template>
     </CustomTable>
     <!-- 新增/编辑关联项目 -->
-    <a-modal
+    <CustomModal
+      v-if="linkDispatchVisible"
       v-model:open="linkDispatchVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -457,7 +458,7 @@
           <a-input v-model:value="temp.webhook" :placeholder="$t('pages.dispatch.list.ad9cad23')" />
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 创建/编辑分发项目 -->
     <CustomModal
       v-if="editDispatchVisible"
@@ -990,7 +991,8 @@
       "
     />
     <!-- 配置工作空间授权目录 -->
-    <a-modal
+    <CustomModal
+      v-if="configDir"
       v-model:open="configDir"
       destroy-on-close
       :title="`${$t('pages.dispatch.list.1cc6d443')}`"
@@ -1012,7 +1014,7 @@
           }
         "
       ></whiteList>
-    </a-modal>
+    </CustomModal>
     <!-- 查看服务端脚本 -->
     <CustomDrawer
       v-if="viewScriptVisible"

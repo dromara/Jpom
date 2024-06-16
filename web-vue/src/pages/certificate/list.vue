@@ -92,7 +92,8 @@
       </template>
     </CustomTable>
     <!-- 导入 -->
-    <a-modal
+    <CustomModal
+      v-if="editCertVisible"
       v-model:open="editCertVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -141,9 +142,10 @@
           <a-input v-model:value="temp.password" :placeholder="$t('pages.certificate.list.ac2ef19e')" />
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 编辑证书 -->
-    <a-modal
+    <CustomModal
+      v-if="editVisible"
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -162,20 +164,21 @@
           <a-textarea v-model:value="temp.description" :placeholder="$t('pages.certificate.list.5e6ba316')" />
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 发布文件 -->
-    <a-modal
+    <CustomModal
+      v-if="releaseFileVisible"
       v-model:open="releaseFileVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
       :title="$t('pages.certificate.list.25775bd2')"
-      width="60%"
+      width="70%"
       :mask-closable="false"
       @ok="releaseFileOk()"
     >
       <a-alert :message="$t('pages.certificate.list.f2e66875')" type="info" show-icon style="margin-bottom: 10px" />
       <releaseFile v-if="releaseFileVisible" ref="releaseFile" @commit="handleCommitTask"></releaseFile>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

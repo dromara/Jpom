@@ -149,7 +149,8 @@
       </a-table>
 
       <!-- 编辑文件 -->
-      <a-modal
+      <CustomModal
+        v-if="editVisible"
         v-model:open="editVisible"
         destroy-on-close
         :title="`${$t('pages.file-manager.staticFileStorage.list.41bfad43')}`"
@@ -173,10 +174,11 @@
             />
           </a-form-item>
         </a-form>
-      </a-modal>
+      </CustomModal>
 
       <!-- 断点下载 -->
-      <a-modal
+      <CustomModal
+        v-if="triggerVisible"
         v-model:open="triggerVisible"
         destroy-on-close
         :title="$t('pages.file-manager.staticFileStorage.list.b1634db3')"
@@ -255,23 +257,25 @@
             </a-tab-pane>
           </a-tabs>
         </a-form>
-      </a-modal>
+      </CustomModal>
       <!-- 发布文件 -->
-      <a-modal
+      <CustomModal
+        v-if="releaseFileVisible"
         v-model:open="releaseFileVisible"
         destroy-on-close
         :title="$t('pages.file-manager.staticFileStorage.list.68203efe')"
-        width="50%"
+        width="70%"
         :mask-closable="false"
         :confirm-loading="confirmLoading"
         @ok="releaseFileOk()"
       >
         <releaseFile v-if="releaseFileVisible" ref="releaseFile" @commit="handleCommitTask"></releaseFile>
-      </a-modal>
+      </CustomModal>
     </div>
 
     <!-- 配置工作空间授权目录 -->
-    <a-modal
+    <CustomModal
+      v-if="configDir"
       v-model:open="configDir"
       destroy-on-close
       :title="`${$t('pages.file-manager.staticFileStorage.list.4457e1f9')}`"
@@ -293,7 +297,7 @@
           }
         "
       ></whiteList>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

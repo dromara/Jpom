@@ -139,7 +139,8 @@
       </template>
     </a-table>
     <!-- 编辑节点 -->
-    <a-modal
+    <CustomModal
+      v-if="editVisible"
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -590,9 +591,10 @@
           </a-form-item-rest>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 查看任务 -->
-    <a-modal
+    <CustomModal
+      v-if="taskVisible"
       v-model:open="taskVisible"
       destroy-on-close
       :title="$t('pages.docker.swarm.service.103e3206')"
@@ -608,7 +610,7 @@
         :service-id="temp.id"
         :url-prefix="urlPrefix"
       />
-    </a-modal>
+    </CustomModal>
     <!-- 查看日志 -->
 
     <pull-log

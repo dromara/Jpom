@@ -20,7 +20,8 @@
     </div>
 
     <!--运行  -->
-    <a-modal
+    <CustomModal
+      v-if="editArgs"
       v-model:open="editArgs"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -67,7 +68,7 @@
           </a-space>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

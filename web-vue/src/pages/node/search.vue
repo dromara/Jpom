@@ -368,7 +368,8 @@
       </template>
     </CustomTable>
     <!-- 项目文件组件 -->
-    <a-drawer
+    <CustomDrawer
+      v-if="drawerFileVisible"
       destroy-on-close
       :title="drawerTitle"
       placement="right"
@@ -384,9 +385,10 @@
         @go-console="goConsole"
         @go-read-file="goReadFile"
       />
-    </a-drawer>
+    </CustomDrawer>
     <!-- 项目控制台组件 -->
-    <a-drawer
+    <CustomDrawer
+      v-if="drawerConsoleVisible"
       destroy-on-close
       :title="drawerTitle"
       placement="right"
@@ -401,9 +403,10 @@
         :project-id="temp.projectId"
         @go-file="goFile"
       />
-    </a-drawer>
+    </CustomDrawer>
     <!-- 项目跟踪文件组件 -->
-    <a-drawer
+    <CustomDrawer
+      v-if="drawerReadFileVisible"
       destroy-on-close
       :title="drawerTitle"
       placement="right"
@@ -419,9 +422,16 @@
         :project-id="temp.projectId"
         @go-file="goFile"
       />
-    </a-drawer>
+    </CustomDrawer>
     <!-- 批量操作状态 -->
-    <a-modal v-model:open="batchVisible" destroy-on-close :title="temp.title" :footer="null" @cancel="batchClose">
+    <CustomModal
+      v-if="batchVisible"
+      v-model:open="batchVisible"
+      destroy-on-close
+      :title="temp.title"
+      :footer="null"
+      @cancel="batchClose"
+    >
       <a-list bordered :data-source="temp.data">
         <template #renderItem="{ item }">
           <a-list-item>
@@ -439,9 +449,10 @@
           </a-list-item>
         </template>
       </a-list>
-    </a-modal>
+    </CustomModal>
     <!-- 触发器 -->
-    <a-modal
+    <CustomModal
+      v-if="triggerVisible"
       v-model:open="triggerVisible"
       destroy-on-close
       :title="$t('pages.node.search.e81c0988')"
@@ -500,9 +511,10 @@
           </a-tab-pane>
         </a-tabs>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 编辑区 -->
-    <a-modal
+    <CustomModal
+      v-if="editProjectVisible"
       v-model:open="editProjectVisible"
       destroy-on-close
       width="60vw"
@@ -540,9 +552,10 @@
           }
         "
       />
-    </a-modal>
+    </CustomModal>
     <!-- 迁移到其他工作空间 -->
-    <a-modal
+    <CustomModal
+      v-if="migrateWorkspaceVisible"
       v-model:open="migrateWorkspaceVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -622,9 +635,10 @@
           </a-select>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 日志备份 -->
-    <a-modal
+    <CustomModal
+      v-if="lobbackVisible"
       v-model:open="lobbackVisible"
       destroy-on-close
       :title="$t('pages.node.search.111eece')"
@@ -633,7 +647,7 @@
       :mask-closable="false"
     >
       <ProjectLog v-if="lobbackVisible" :node-id="temp.nodeId" :project-id="temp.projectId"></ProjectLog>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

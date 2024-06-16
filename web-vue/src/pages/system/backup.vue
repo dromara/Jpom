@@ -106,7 +106,8 @@
       </template>
     </a-table>
     <!-- 创建备份信息区 -->
-    <a-modal
+    <CustomModal
+      v-if="createBackupVisible"
       v-model:open="createBackupVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -143,9 +144,10 @@
           </a-transfer>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 上传 SQL 备份文件 -->
-    <a-modal
+    <CustomModal
+      v-if="uploadSqlFileVisible"
       v-model:open="uploadSqlFileVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -163,7 +165,7 @@
           <a-radio :value="1">部分备份</a-radio>
         </a-radio-group>
         <br /> -->
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

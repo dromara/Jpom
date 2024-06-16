@@ -87,7 +87,8 @@
     </a-table>
 
     <!-- 环境变量编辑区 -->
-    <a-modal
+    <CustomModal
+      v-if="editEnvVisible"
       v-model:open="editEnvVisible"
       :confirm-loading="confirmLoading"
       :title="$t('pages.system.workspace-env.f48b76ed')"
@@ -171,9 +172,10 @@
           </a-select>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 触发器 -->
-    <a-modal
+    <CustomModal
+      v-if="triggerVisible"
       v-model:open="triggerVisible"
       destroy-on-close
       :title="$t('pages.system.workspace-env.e81c0988')"
@@ -238,7 +240,7 @@
           </a-tab-pane>
         </a-tabs>
       </a-form>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

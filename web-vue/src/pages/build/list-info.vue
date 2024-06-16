@@ -587,7 +587,8 @@
       "
     />
     <!-- 构建确认 -->
-    <a-modal
+    <CustomModal
+      v-if="buildConfirmVisible"
       v-model:open="buildConfirmVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -718,7 +719,7 @@
           </a-select>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- 编辑区 -->
-    <a-drawer
+    <CustomDrawer
       destroy-on-close
       :open="true"
       :body-style="{
@@ -110,7 +110,7 @@
           </a-button>
         </a-space>
       </template>
-    </a-drawer>
+    </CustomDrawer>
   </div>
 </template>
 <script>

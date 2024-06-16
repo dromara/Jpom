@@ -140,7 +140,8 @@
       </template>
     </CustomTable>
     <!-- 详情区 -->
-    <a-modal
+    <CustomModal
+      v-if="detailVisible"
       v-model:open="detailVisible"
       destroy-on-close
       width="600px"
@@ -161,7 +162,7 @@
           </a-list-item>
         </template>
       </a-list>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

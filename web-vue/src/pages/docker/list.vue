@@ -104,7 +104,8 @@
       </template>
     </CustomTable>
     <!-- 编辑区 -->
-    <a-modal
+    <CustomModal
+      v-if="editVisible"
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -165,7 +166,7 @@
           </a-space>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
 
     <console
       v-if="consoleVisible"
@@ -176,7 +177,8 @@
     ></console>
     <!-- </a-drawer> -->
     <!-- 同步到其他工作空间 -->
-    <a-modal
+    <CustomModal
+      v-if="syncToWorkspaceVisible"
       v-model:open="syncToWorkspaceVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -217,7 +219,7 @@
           </a-select>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

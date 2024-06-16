@@ -514,7 +514,8 @@
     </a-tabs>
 
     <!-- 历史监控 -->
-    <a-modal
+    <CustomModal
+      v-if="monitorVisible.visible"
       v-model:open="monitorVisible.visible"
       destroy-on-close
       width="75%"
@@ -528,7 +529,7 @@
         :machine-id="machineId"
         :type="monitorVisible.type"
       ></node-top>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-modal
+    <CustomModal
       destroy-on-close
       :confirm-loading="confirmLoading"
       :open="true"
@@ -179,7 +179,7 @@
           </a-select>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
     <!-- 选择构建 -->
     <CustomDrawer
       v-if="chooseVisible === 1"

@@ -65,7 +65,8 @@
       </template>
     </a-table>
     <!-- 编辑区 -->
-    <a-modal
+    <CustomModal
+      v-if="editOperateMonitorVisible"
       v-model:open="editOperateMonitorVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
@@ -149,7 +150,7 @@
           </a-transfer>
         </a-form-item>
       </a-form>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

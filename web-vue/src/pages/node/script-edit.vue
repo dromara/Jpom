@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-modal
+    <CustomModal
       destroy-on-close
       :open="true"
       :title="$t('pages.node.script-edit.c05890d1')"
@@ -104,7 +104,7 @@
           </a-form-item>
         </template>
       </a-form>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

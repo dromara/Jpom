@@ -42,13 +42,20 @@
       </a-card>
     </a-spin>
     <!-- 文件管理 -->
-    <a-drawer v-if="sshData" destroy-on-close placement="right" width="90vw" :open="drawerVisible" @close="onClose">
+    <CustomDrawer
+      v-if="sshData && drawerVisible"
+      destroy-on-close
+      placement="right"
+      width="90vw"
+      :open="drawerVisible"
+      @close="onClose"
+    >
       <template #title>
         {{ sshData.name }}<template v-if="sshData.host"> ({{ sshData.host }}) </template
         >{{ $t('pages.ssh.full-terminal.502f94') }}
       </template>
       <ssh-file v-if="drawerVisible" :ssh-id="sshData.id" />
-    </a-drawer>
+    </CustomDrawer>
   </div>
 </template>
 <script>

@@ -108,7 +108,8 @@
       </template>
     </a-table>
     <!-- 构建日志 -->
-    <a-modal
+    <CustomModal
+      v-if="logVisible"
       v-model:open="logVisible"
       destroy-on-close
       :width="style.width"
@@ -119,7 +120,7 @@
       :mask-closable="false"
     >
       <command-log v-if="logVisible" :height="style.bodyStyle.height" :temp="temp" />
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

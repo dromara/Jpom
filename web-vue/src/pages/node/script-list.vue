@@ -173,7 +173,8 @@
       "
     ></ScriptEdit>
     <!-- 脚本控制台组件 -->
-    <a-drawer
+    <CustomDrawer
+      v-if="drawerConsoleVisible"
       :title="drawerTitle"
       placement="right"
       width="85vw"
@@ -191,9 +192,10 @@
         :def-args="temp.defArgs"
         :script-id="temp.scriptId"
       />
-    </a-drawer>
+    </CustomDrawer>
     <!-- 脚本日志 -->
-    <a-drawer
+    <CustomDrawer
+      v-if="drawerLogVisible"
       destroy-on-close
       :title="drawerTitle"
       width="50vw"
@@ -205,9 +207,10 @@
       "
     >
       <script-log v-if="drawerLogVisible" :script-id="temp.scriptId" :node-id="temp.nodeId" />
-    </a-drawer>
+    </CustomDrawer>
     <!-- 触发器 -->
-    <a-modal
+    <CustomModal
+      v-if="triggerVisible"
       v-model:open="triggerVisible"
       destroy-on-close
       :title="$t('pages.node.script-list.e81c0988')"
@@ -259,7 +262,7 @@
           </a-tab-pane>
         </a-tabs>
       </a-form>
-    </a-modal>
+    </CustomModal>
   </div>
 </template>
 <script>

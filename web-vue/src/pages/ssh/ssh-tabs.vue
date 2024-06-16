@@ -51,7 +51,7 @@
               </template>
             </a-result>
             <!-- 文件管理 -->
-            <a-drawer
+            <CustomDrawer
               v-if="pane.openFile"
               :get-container="`#paneDom${pane.id}`"
               :title="`${pane.name}${$t('pages.ssh.ssh-tabs.cfbfa5f8')}`"
@@ -61,7 +61,7 @@
               @close="changeFileVisible(pane.id, false)"
             >
               <ssh-file v-if="pane.openFile" :ssh-id="pane.id" />
-            </a-drawer>
+            </CustomDrawer>
           </div>
         </a-tab-pane>
       </a-tabs>
