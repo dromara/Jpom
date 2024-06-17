@@ -14,7 +14,6 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.NioUtil;
 import cn.hutool.core.map.SafeConcurrentHashMap;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.extra.ssh.ChannelType;
@@ -26,6 +25,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.model.data.SshModel;
 import org.dromara.jpom.model.user.UserModel;
@@ -208,7 +208,7 @@ public class SshHandler extends BaseTerminalHandler {
 
         void startRead() throws JSchException {
             this.channel.connect(machineSshModel.timeout());
-            ThreadUtil.execute(this);
+            I18nThreadUtil.execute(this);
         }
 
         /**
