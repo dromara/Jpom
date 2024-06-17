@@ -60,6 +60,9 @@ const themeAlgorithm = computed(() => {
   }
   const themeDiy = useGuideStore.getThemeView()
   if (themeDiy === 'light') {
+    if (getGuideCache.compactView) {
+      return algorithm
+    }
     algorithm.push(theme.defaultAlgorithm)
   } else if (themeDiy === 'dark') {
     algorithm.push(theme.darkAlgorithm)

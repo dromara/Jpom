@@ -480,10 +480,6 @@
             :un-checked-children="$t('pages.layout.user-header.96425f5')"
             @click="toggleCompactView"
           />
-
-          <template #help>
-            {{ $t('pages.layout.user-header.1538a492') }}({{ $t('pages.layout.user-header.bb6fe415') }})
-          </template>
         </a-form-item>
         <a-form-item :label="$t('pages.layout.user-header.ee091a03')">
           <template #help>{{ $t('pages.layout.user-header.8263b5e7') }}</template>
