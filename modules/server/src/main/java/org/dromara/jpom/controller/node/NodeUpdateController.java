@@ -180,7 +180,7 @@ public class NodeUpdateController extends BaseServerController {
     @GetMapping(value = "fast_install.json", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<JSONObject> fastInstall(HttpServletRequest request) {
         boolean beta = RemoteVersion.betaRelease();
-        String language = I18nMessageUtil.tryGetLanguage();
+        String language = I18nMessageUtil.tryGetNormalLanguage();
         InputStream inputStream = ResourceUtil.getStream("classpath:/fast-install/" + language + (beta ? "/beta.json" : "/release.json"));
         String json = IoUtil.read(inputStream, CharsetUtil.CHARSET_UTF_8);
         JSONObject jsonObject = new JSONObject();
