@@ -157,4 +157,9 @@ public class BuildInfoModel extends BaseGroupModel {
     public static String getBuildIdStr(int buildId) {
         return String.format("#%s", buildId);
     }
+
+    @Override
+    protected boolean hasCreateUser() {
+        return true;
+    }
 }

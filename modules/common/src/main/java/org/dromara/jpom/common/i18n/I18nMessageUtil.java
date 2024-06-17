@@ -101,11 +101,14 @@ public class I18nMessageUtil {
      */
     private static String normalLanguage(String language) {
         language = language != null ? language.toLowerCase() : StrUtil.EMPTY;
+        language = StrUtil.replace(language, "_", "-");
         switch (language) {
             case "en-us":
-            case "en_us":
                 return "en-US";
-            case "zh_cn":
+            case "zh-tw":
+                return "zh-TW";
+            case "zh-hk":
+                return "zh-HK";
             case "zh-cn":
             default:
                 return "zh-CN";
@@ -145,6 +148,12 @@ public class I18nMessageUtil {
             case "zh-CN":
                 locale = Locale.CHINA;
                 break;
+            case "zh-TW":
+                locale = Locale.TAIWAN;
+                break;
+            case "zh-HK":
+                locale = getZhHkInstance();
+                break;
             case "en-US":
                 locale = Locale.US;
                 break;
@@ -168,11 +177,19 @@ public class I18nMessageUtil {
         return Lazy.MESSAGE_SOURCE;
     }
 
+    private static Locale getZhHkInstance() {
+        return LazyZhHk.LOCALE;
+    }
+
     /**
      * 使用懒加载方式实例化messageSource国际化工具
      */
     private static class Lazy {
         private static final MessageSource MESSAGE_SOURCE = SpringUtil.getBean(MessageSource.class);
+    }
+
+    private static class LazyZhHk {
+        private static final Locale LOCALE = new Locale("zh", "HK");
     }
 
 }
