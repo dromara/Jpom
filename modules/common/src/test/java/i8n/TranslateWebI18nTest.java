@@ -3,7 +3,9 @@ package i8n;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.PageUtil;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import i8n.api.VolcTranslateApiTest;
@@ -39,6 +41,8 @@ public class TranslateWebI18nTest {
         this.generateWaitMap(zhCn, "", enUs, jsonObject1);
         //
         this.doTranslate(jsonObject1, "en");
+        MapUtil.sort(jsonObject1);
+//        jsonObject1.fluentPut()
         System.out.println(jsonObject1);
     }
 
@@ -48,25 +52,30 @@ public class TranslateWebI18nTest {
         {
             int total = CollUtil.size(entries);
             int page = PageUtil.totalPage(total, pageSize);
-
-
             for (int i = PageUtil.getFirstPageNo(); i <= page; i++) {
                 int start = PageUtil.getStart(i, pageSize);
                 int end = PageUtil.getEnd(i, pageSize);
 
                 List<Map.Entry<String, Object>> values2 = CollUtil.sub(entries, start, end);
                 List<String> collected = values2.stream().map(entry -> (String) entry.getValue()).collect(Collectors.toList());
-                if (CollUtil.isEmpty(collected)) {
-                    continue;
-                }
+
                 JSONArray translateText = translateApi.translate("zh", toLanguage, collected);
                 System.out.println(collected);
                 System.out.println(translateText);
                 System.out.println("=================");
                 for (int i1 = 0; i1 < collected.size(); i1++) {
-                    String key = values2.get(i1).getKey();
-                    System.out.println(key);
-                    BeanUtil.setProperty(result, key, translateText.getJSONObject(i1).getString("Translation"));
+                    String keyPath = values2.get(i1).getKey();
+
+                    String key = StrUtil.subAfter(keyPath, ".", true);
+                    String group = StrUtil.subBefore(keyPath, ".", true);
+                    JSONObject groupValue = BeanUtil.getProperty(result, group);
+                    if (groupValue == null) {
+                        groupValue = new JSONObject(new TreeMap<>());
+                        BeanUtil.setProperty(result, group, groupValue);
+                    }
+                    groupValue.put(key, translateText.getJSONObject(i1).getString("Translation"));
+                    //System.out.println(key);
+                    //BeanUtil.setProperty(result, key, );
                     //enProperties.put(useKeys.get(i1), translateText.getJSONObject(i1).getString("Translation"));
                     System.out.println(result);
                 }
@@ -112,24 +121,33 @@ public class TranslateWebI18nTest {
 
                 for (int i1 = 0; i1 < keySet2.size(); i1++) {
                     String key = keySet2.get(i1);
-                    String keyPath = rootPath + "['" + key + "']";
+                    String keyPath = rootPath + "." + key;
+                    //"['" + key + "']";
                     Object propertyVal = BeanUtil.getProperty(cache, keyPath);
                     if (propertyVal != null) {
                         // 已经存在
                         BeanUtil.setProperty(result, keyPath, propertyVal);
                         continue;
                     }
-                    waitMap.put(keyPath, values2.get(i1));
+                    Object value = values2.get(i1);
+                    if ((value instanceof String)) {
+                        waitMap.put(keyPath, value);
+                    } else if (value instanceof JSONObject) {
+                        generateWaitMap((JSONObject) value, rootPath, result, cache);
+                    } else {
+                        throw new Exception("不支持的数据格式：" + keyPath + "  " + value);
+                    }
+
                 }
             }
         }
 
     }
 
-    @Test
-    public void testJson() {
-        JSONObject jsonObject = new JSONObject();
-        BeanUtil.setProperty(jsonObject, "test.a", "123");
-        System.out.println(jsonObject);
-    }
+//    @Test
+//    public void testJson() {
+//        JSONObject jsonObject = new JSONObject();
+//        BeanUtil.setProperty(jsonObject, "test.a", "123");
+//        System.out.println(jsonObject);
+//    }
 }
