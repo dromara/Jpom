@@ -21,6 +21,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.func.assets.model.MachineDockerModel;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.model.docker.DockerInfoModel;
@@ -132,7 +133,7 @@ public class DockerCliHandler extends BaseTerminalHandler {
         }
 
         void startRead() {
-            ThreadUtil.execute(this);
+            I18nThreadUtil.execute(this);
         }
 
         private void sendCommand(String data) throws Exception {

@@ -14,7 +14,6 @@ import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.net.url.UrlQuery;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -22,6 +21,7 @@ import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.configuration.ProjectLogConfig;
 import org.dromara.jpom.exception.IllegalArgument2Exception;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
@@ -79,7 +79,7 @@ public class DslScriptServer {
     public void run(DslYmlDto dslYmlDto, ConsoleCommandOp consoleCommandOp, NodeProjectInfoModel nodeProjectInfoModel, NodeProjectInfoModel originalModel, boolean sync) throws Exception {
         String log = projectInfoService.resolveAbsoluteLog(nodeProjectInfoModel, originalModel);
         DslScriptBuilder builder = this.create(dslYmlDto, consoleCommandOp, nodeProjectInfoModel, originalModel, log);
-        Future<?> execute = ThreadUtil.execAsync(builder);
+        Future<?> execute = I18nThreadUtil.execAsync(builder);
         if (sync) {
             execute.get();
         }

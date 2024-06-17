@@ -14,7 +14,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.map.SafeConcurrentHashMap;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
@@ -23,6 +22,7 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.data.CommandExecLogModel;
 import org.dromara.jpom.model.script.ScriptModel;
@@ -109,7 +109,7 @@ public class ServerScriptProcessBuilder extends BaseRunScript implements Runnabl
     public static ServerScriptProcessBuilder create(ScriptModel nodeScriptModel, String executeId, String args, Map<String, String> paramMap) {
         return FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP.computeIfAbsent(executeId, file1 -> {
             ServerScriptProcessBuilder serverScriptProcessBuilder1 = new ServerScriptProcessBuilder(nodeScriptModel, executeId, args, paramMap);
-            ThreadUtil.execute(serverScriptProcessBuilder1);
+            I18nThreadUtil.execute(serverScriptProcessBuilder1);
             return serverScriptProcessBuilder1;
         });
     }
