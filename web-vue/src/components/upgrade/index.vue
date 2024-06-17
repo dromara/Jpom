@@ -439,13 +439,11 @@ export default {
         if (upgrade && tip) {
           //
           const dUrl = data.downloadUrl || 'https://jpom.top'
+          const htmlAref = `<a href='${dUrl}' target='_blank'>${dUrl}</a>`
           const html =
             this.$t('components.upgrade.index.c133eb37') +
             tagName +
-            this.$t('components.upgrade.index.24fbf1fa') +
-            dUrl +
-            "'>" +
-            dUrl +
+            htmlAref +
             this.$t('components.upgrade.index.3f944483')
           $notification.success({
             duration: 10,
