@@ -120,6 +120,15 @@ public class I18nMessageUtil {
      *
      * @return 语言
      */
+    public static String tryGetNormalLanguage() {
+        return normalLanguage(tryGetLanguage());
+    }
+
+    /**
+     * 尝试获取语言
+     *
+     * @return 语言
+     */
     public static String tryGetLanguage() {
         String language = null;
         for (Supplier<String> supplier : LANGUAGE_OBTAIN) {
