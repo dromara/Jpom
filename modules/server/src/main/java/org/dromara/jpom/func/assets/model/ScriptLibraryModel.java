@@ -33,4 +33,9 @@ public class ScriptLibraryModel extends BaseUserModifyDbModel {
      * 关联的资产机器节点
      */
     private String machineIds;
+
+    @Override
+    protected boolean hasCreateUser() {
+        return true;
+    }
 }

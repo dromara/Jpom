@@ -272,13 +272,30 @@ public class ExtractI18nTest {
         try (BufferedReader inputStream = FileUtil.getReader(zhPropertiesFile, charset)) {
             zhProperties.load(inputStream);
         }
-        // 加载英文配置
-        File enPropertiesFile = FileUtil.file(rootFile, "common/src/main/resources/i18n/messages_en_US.properties");
+        Map<String, String> map = new HashMap<>();
+        map.put("en_US", "en");
+        map.put("zh_HK", "zh-Hant-hk");
+        map.put("zh_TW", "zh-Hant-tw");
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+
+            this.syncZhToProperties(entry.getKey(), entry.getValue());
+        }
+    }
+
+    private void syncZhToProperties(String language, String volcLang) throws Exception {
+        // 加载中文配置
+        Properties zhProperties = new Properties();
+        try (BufferedReader inputStream = FileUtil.getReader(zhPropertiesFile, charset)) {
+            zhProperties.load(inputStream);
+        }
+
+        // 加载配置
+        File enPropertiesFile = FileUtil.file(rootFile, "common/src/main/resources/i18n/messages_" + language + ".properties");
         Properties enEexitsProperties = new Properties();
         try (BufferedReader inputStream = FileUtil.getReader(enPropertiesFile, charset)) {
             enEexitsProperties.load(inputStream);
         }
-        // 翻译成英文
+        // 翻译成目标语言
         VolcTranslateApiTest translateApi = new VolcTranslateApiTest();
         Set<Object> keySets = zhProperties.keySet();
         // 接口限制、不能超过 16
@@ -307,7 +324,7 @@ public class ExtractI18nTest {
                 useKeys.add(key);
             }
             if (CollUtil.isNotEmpty(values)) {
-                JSONArray translateText = translateApi.translate("zh", "en", values);
+                JSONArray translateText = translateApi.translate("zh", volcLang, values);
                 System.out.println(values);
                 System.out.println(translateText);
                 System.out.println("=================");
@@ -318,7 +335,7 @@ public class ExtractI18nTest {
         }
         if (!ObjectUtil.equals(enEexitsProperties, enProperties)) {
             try (BufferedWriter writer = FileUtil.getWriter(enPropertiesFile, charset, false)) {
-                enProperties.store(writer, "i18n en");
+                enProperties.store(writer, "i18n " + language);
             }
         }
     }

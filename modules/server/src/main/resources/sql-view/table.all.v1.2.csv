@@ -33,6 +33,7 @@ SCRIPT_LIBRARY,id,String,50,,true,true,id,静态文件管理
 SCRIPT_LIBRARY,createTimeMillis,Long,,,false,false,数据创建时间,
 SCRIPT_LIBRARY,modifyTimeMillis,Long,,,false,false,数据修改时间,
 SCRIPT_LIBRARY,modifyUser,String,50,,false,false,修改人,
+SCRIPT_LIBRARY,createUser,String,50,,true,false,创建人,
 SCRIPT_LIBRARY,tag,String,50,,true,false,标签,
 SCRIPT_LIBRARY,description,String,255,,false,false,描述,
 SCRIPT_LIBRARY,script,text,,,false,false,描述,

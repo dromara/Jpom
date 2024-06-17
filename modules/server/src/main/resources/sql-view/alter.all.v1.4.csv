@@ -16,3 +16,4 @@ ALTER,STATIC_FILE_STORAGE,name,String,100,,文件名,false
 ADD,TRIGGER_TOKEN_LOG,triggerCount,Integer,,,触发次数
 ADD,USER_INFO,source,String,100,,账号来源
 ADD,MACHINE_NODE_INFO,extendInfo,TEXT,,,扩展信息
+ADD,BUILD_INFO,createUser,String,50,,创建人,false
