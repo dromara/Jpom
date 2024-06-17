@@ -61,6 +61,12 @@
             <div>
               <ul>
                 <li>{{ $t('pages.system.assets.script-library.423e1405') }}</li>
+                <li>
+                  {{ $t('pages.system.assets.script-library.script-library.8cc019db') }}
+                </li>
+                <li>
+                  {{ $t('pages.system.assets.script-library.script-library.1b3a0157') }}
+                </li>
               </ul>
             </div>
           </template>
