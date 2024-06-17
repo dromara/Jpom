@@ -7,6 +7,9 @@
     <template v-if="slots.extra" #extra>
       <slot name="extra"></slot>
     </template>
+    <template v-if="slots.title" #title>
+      <slot name="title"></slot>
+    </template>
   </a-drawer>
 </template>
 <script lang="ts">
@@ -19,7 +22,7 @@ import { increaseZIndex } from '@/utils/utils'
 export default defineComponent({
   name: 'CustomDrawer',
   props: initDefaultProps(drawerProps(), {}),
-  slots: Object as CustomSlotsType<{ default: any; footer?: any; extra?: any }>,
+  slots: Object as CustomSlotsType<{ default: any; footer?: any; extra?: any; title?: any }>,
   setup(props, { emit, slots }) {
     const rootStyle: CSSProperties = {
       zIndex: increaseZIndex(),
