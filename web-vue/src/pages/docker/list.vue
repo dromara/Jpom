@@ -149,7 +149,9 @@
             <template v-else>
               <a-tag
                 v-if="!temp.tagsArray || temp.tagsArray.length < 10"
-                style="borderstyle: dashed"
+                :style="{
+                  borderStyle: dashed
+                }"
                 @click="showInput"
               >
                 <PlusOutlined /> {{ $t('i18n.66ab5e9f24') }}
