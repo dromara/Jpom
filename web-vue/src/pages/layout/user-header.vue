@@ -63,15 +63,15 @@
                       <a-button type="link" :disabled="item.id === selectWorkspace.id">
                         {{ item.name || $t('i18n_71dc8feb59') }}
                         <template v-if="myClusterList.length > 1 && item.clusterInfoId">
-                          {{ $t('i18n_0341329b1d')
-                          }}{{
+                          <!-- 【】\u3010\u3011 -->
+                          \u3010{{
                             myClusterList.find((item2) => {
                               return item2.id === item.clusterInfoId
                             }) &&
                             myClusterList.find((item2) => {
                               return item2.id === item.clusterInfoId
                             }).name
-                          }}{{ $t('i18n_5942e7ebd0') }}
+                          }}\u3011
                         </template>
                       </a-button>
                     </a-menu-item>
@@ -96,15 +96,16 @@
                           <a-button type="link" :disabled="item.id === selectWorkspace.id">
                             {{ item.name }}
                             <template v-if="myClusterList.length > 1 && item.clusterInfoId">
-                              {{ $t('i18n_0341329b1d')
-                              }}{{
+                              \u3010
+                              {{
                                 myClusterList.find((item2) => {
                                   return item2.id === item.clusterInfoId
                                 }) &&
                                 myClusterList.find((item2) => {
                                   return item2.id === item.clusterInfoId
                                 }).name
-                              }}{{ $t('i18n_5942e7ebd0') }}
+                              }}
+                              \u3011
                             </template>
                           </a-button>
                         </a-menu-item>
