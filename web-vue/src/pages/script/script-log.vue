@@ -17,7 +17,7 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%scriptName%']"
-            :placeholder="$t('i18n.d7ec2d3fea')"
+            :placeholder="$t('i18n_d7ec2d3fea')"
             allow-clear
             class="search-input-item"
             @press-enter="loadData"
@@ -36,7 +36,7 @@
               }
             "
             allow-clear
-            :placeholder="$t('i18n.ff9814bf6b')"
+            :placeholder="$t('i18n_ff9814bf6b')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
@@ -55,7 +55,7 @@
               }
             "
             allow-clear
-            :placeholder="$t('i18n.3fea7ca76c')"
+            :placeholder="$t('i18n_3fea7ca76c')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
@@ -64,7 +64,7 @@
             allow-clear
             input-read-only
             :show-time="{ format: 'HH:mm:ss' }"
-            :placeholder="[$t('i18n.7fbc0f9aae'), $t('i18n.cbc44b5663')]"
+            :placeholder="[$t('i18n_7fbc0f9aae'), $t('i18n_cbc44b5663')]"
             format="YYYY-MM-DD HH:mm:ss"
             value-format="YYYY-MM-DD HH:mm:ss"
             @change="
@@ -77,8 +77,8 @@
               }
             "
           />
-          <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
+          <a-tooltip :title="$t('i18n_4838a3bd20')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -94,11 +94,11 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'triggerExecType'">
-          <span>{{ triggerExecTypeMap[text] || $t('i18n.1622dc9b6b') }}</span>
+          <span>{{ triggerExecTypeMap[text] || $t('i18n_1622dc9b6b') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'workspaceId'">
-          <a-tag v-if="text === 'GLOBAL'">{{ $t('i18n.2be75b1044') }}</a-tag>
-          <a-tag v-else>{{ $t('i18n.98d69f8b62') }}</a-tag>
+          <a-tag v-if="text === 'GLOBAL'">{{ $t('i18n_2be75b1044') }}</a-tag>
+          <a-tag v-else>{{ $t('i18n_98d69f8b62') }}</a-tag>
         </template>
         <template v-else-if="column.dataIndex === 'createTimeMillis'">
           <a-tooltip :title="`${parseTime(record.createTimeMillis)}`">
@@ -106,7 +106,7 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'exitCode'">
-          <a-tag v-if="text == 0" color="green">{{ $t('i18n.330363dfc5') }}</a-tag>
+          <a-tag v-if="text == 0" color="green">{{ $t('i18n_330363dfc5') }}</a-tag>
           <a-tag v-else color="orange">{{ text || '-' }}</a-tag>
         </template>
         <template v-else-if="column.dataIndex === 'status'">
@@ -114,10 +114,10 @@
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button type="primary" size="small" @click="viewLog(record)">{{ $t('i18n.0ea78e4279') }}</a-button>
+            <a-button type="primary" size="small" @click="viewLog(record)">{{ $t('i18n_0ea78e4279') }}</a-button>
 
             <a-button type="primary" danger size="small" @click="handleDelete(record)">{{
-              $t('i18n.2f4aaddde3')
+              $t('i18n_2f4aaddde3')
             }}</a-button>
           </a-space>
         </template>
@@ -164,51 +164,51 @@ export default {
       logVisible: 0,
       columns: [
         {
-          title: this.$t('i18n.d7ec2d3fea'),
+          title: this.$t('i18n_d7ec2d3fea'),
           dataIndex: 'scriptName',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.70b3635aa3'),
+          title: this.$t('i18n_70b3635aa3'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           ellipsis: true,
           width: '160px'
         },
         {
-          title: this.$t('i18n.ff9814bf6b'),
+          title: this.$t('i18n_ff9814bf6b'),
           dataIndex: 'triggerExecType',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.3fea7ca76c'),
+          title: this.$t('i18n_3fea7ca76c'),
           dataIndex: 'status',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.2a0bea27c4'),
+          title: this.$t('i18n_2a0bea27c4'),
           dataIndex: 'workspaceId',
           ellipsis: true,
 
           width: '90px'
         },
         {
-          title: this.$t('i18n.3fb63afb4e'),
+          title: this.$t('i18n_3fb63afb4e'),
           dataIndex: 'exitCode',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.a497562c8e'),
+          title: this.$t('i18n_a497562c8e'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           width: '100px'
         },
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
           align: 'center',
           fixed: 'right',
@@ -247,11 +247,11 @@ export default {
     },
     handleDelete(record) {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
-        content: this.$t('i18n.7b8e7d4abc'),
+        title: this.$t('i18n_c4535759ee'),
+        content: this.$t('i18n_7b8e7d4abc'),
         zIndex: 1009,
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return scriptDel({
             id: record.scriptId,

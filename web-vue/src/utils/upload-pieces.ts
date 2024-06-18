@@ -55,10 +55,10 @@ export const uploadPieces = ({
 }: PiecesPar) => {
   // 如果文件传入为空直接 return 返回
   if (!file || file.length < 1) {
-    return error(t('i18n.6e69656ffb'))
+    return error(t('i18n_6e69656ffb'))
   }
   if (!window.FileReader) {
-    return error(t('i18n.a050cbc36d'))
+    return error(t('i18n_a050cbc36d'))
   }
   let fileMd5: string = '' //
   let sliceId: string = ''
@@ -87,7 +87,7 @@ export const uploadPieces = ({
     const batch = 1024 * 1024 * 2
     const asyncUpdate = function () {
       if (start < total) {
-        resolveFileProcess && resolveFileProcess(t('i18n.6a8402afcb') + ((start / total) * 100).toFixed(2) + '%')
+        resolveFileProcess && resolveFileProcess(t('i18n_6a8402afcb') + ((start / total) * 100).toFixed(2) + '%')
         const end = Math.min(start + batch, total)
         reader.readAsArrayBuffer(blobSlice.call(file, start, end))
         start = end
@@ -118,7 +118,7 @@ export const uploadPieces = ({
           sliceId = res.data
           concurrentUpload()
         } else {
-          error(t('i18n.695344279b') + res.msg)
+          error(t('i18n_695344279b') + res.msg)
         }
       })
     }
@@ -128,7 +128,7 @@ export const uploadPieces = ({
         asyncUpdate()
       } catch (e) {
         // Vue.prototype.$setLoading('closeAll')
-        error(t('i18n.fb5bc565f3') + e)
+        error(t('i18n_fb5bc565f3') + e)
       }
     }
     asyncUpdate()

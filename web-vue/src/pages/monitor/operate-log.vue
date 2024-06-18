@@ -16,23 +16,23 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$t('i18n.f976e8fcf4')"
+            :placeholder="$t('i18n_f976e8fcf4')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-select
             v-model:value="listQuery.status"
             allow-clear
-            :placeholder="$t('i18n.a4f5cae8d2')"
+            :placeholder="$t('i18n_a4f5cae8d2')"
             class="search-input-item"
           >
-            <a-select-option :value="1">{{ $t('i18n.cc42dd3170') }}</a-select-option>
-            <a-select-option :value="0">{{ $t('i18n.b15d91274e') }}</a-select-option>
+            <a-select-option :value="1">{{ $t('i18n_cc42dd3170') }}</a-select-option>
+            <a-select-option :value="0">{{ $t('i18n_b15d91274e') }}</a-select-option>
           </a-select>
-          <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
+          <a-tooltip :title="$t('i18n_4838a3bd20')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">{{ $t('i18n.66ab5e9f24') }}</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $t('i18n_66ab5e9f24') }}</a-button>
         </a-space>
       </template>
       <template #bodyCell="{ column, text, record }">
@@ -45,16 +45,16 @@
           <a-switch
             size="small"
             :checked="text"
-            :checked-children="$t('i18n.cc42dd3170')"
-            :un-checked-children="$t('i18n.b15d91274e')"
+            :checked-children="$t('i18n_cc42dd3170')"
+            :un-checked-children="$t('i18n_b15d91274e')"
           />
         </template>
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n.95b351c862') }}</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n_95b351c862') }}</a-button>
             <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-              $t('i18n.2f4aaddde3')
+              $t('i18n_2f4aaddde3')
             }}</a-button>
           </a-space>
         </template>
@@ -67,22 +67,22 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="50vw"
-      :title="$t('i18n.ebc2a1956b')"
+      :title="$t('i18n_ebc2a1956b')"
       :mask-closable="false"
       @ok="handleEditOperateMonitorOk"
     >
       <a-form ref="editMonitorForm" :rules="rules" :model="temp" :label-col="{ span: 5 }" :wrapper-col="{ span: 17 }">
-        <a-form-item :label="$t('i18n.f976e8fcf4')" name="name">
-          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n.f976e8fcf4')" />
+        <a-form-item :label="$t('i18n_f976e8fcf4')" name="name">
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n_f976e8fcf4')" />
         </a-form-item>
-        <a-form-item :label="$t('i18n.a4f5cae8d2')" name="status">
+        <a-form-item :label="$t('i18n_a4f5cae8d2')" name="status">
           <a-switch
             v-model:checked="temp.start"
-            :checked-children="$t('i18n.8493205602')"
-            :un-checked-children="$t('i18n.d58a55bcee')"
+            :checked-children="$t('i18n_8493205602')"
+            :un-checked-children="$t('i18n_d58a55bcee')"
           />
         </a-form-item>
-        <a-form-item :label="$t('i18n.5e46f842d8')" name="monitorUser">
+        <a-form-item :label="$t('i18n_5e46f842d8')" name="monitorUser">
           <a-transfer
             :data-source="monitorUserList"
             :lazy="false"
@@ -96,7 +96,7 @@
             </template>
           </a-transfer>
         </a-form-item>
-        <a-form-item :label="$t('i18n.5cb39287a8')" name="monitorOpt">
+        <a-form-item :label="$t('i18n_5cb39287a8')" name="monitorOpt">
           <a-transfer
             :data-source="classFeature"
             :lazy="false"
@@ -110,7 +110,7 @@
             </template>
           </a-transfer>
         </a-form-item>
-        <a-form-item :label="$t('i18n.3e7ef69c98')" name="monitorOpt">
+        <a-form-item :label="$t('i18n_3e7ef69c98')" name="monitorOpt">
           <a-transfer
             :data-source="methodFeature"
             :lazy="false"
@@ -127,8 +127,8 @@
         <a-form-item name="notifyUser" class="jpom-monitor-notify">
           <template #label>
             <a-tooltip>
-              {{ $t('i18n.09723d428d') }}
-              <template #title> {{ $t('i18n.067eb0fa04') }} </template>
+              {{ $t('i18n_09723d428d') }}
+              <template #title> {{ $t('i18n_067eb0fa04') }} </template>
               <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
@@ -178,19 +178,19 @@ export default {
       editOperateMonitorVisible: false,
       columns: [
         {
-          title: this.$t('i18n.d7ec2d3fea'),
+          title: this.$t('i18n_d7ec2d3fea'),
           dataIndex: 'name'
         },
         {
-          title: this.$t('i18n.a4f5cae8d2'),
+          title: this.$t('i18n_a4f5cae8d2'),
           dataIndex: 'status'
         },
         {
-          title: this.$t('i18n.9baca0054e'),
+          title: this.$t('i18n_9baca0054e'),
           dataIndex: 'modifyUser'
         },
         {
-          title: this.$t('i18n.1303e638b5'),
+          title: this.$t('i18n_1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           customRender: ({ text }) => {
@@ -202,7 +202,7 @@ export default {
           width: 180
         },
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
           align: 'center',
           fixed: 'right',
@@ -214,7 +214,7 @@ export default {
         name: [
           {
             required: true,
-            message: this.$t('i18n.c68dc88c51'),
+            message: this.$t('i18n_c68dc88c51'),
             trigger: 'blur'
           }
         ]
@@ -329,25 +329,25 @@ export default {
       this.$refs['editMonitorForm'].validate().then(() => {
         if (this.monitorUserKeys.length === 0) {
           $notification.error({
-            message: this.$t('i18n.83c61f7f9e')
+            message: this.$t('i18n_83c61f7f9e')
           })
           return false
         }
         if (this.methodFeatureKeys.length === 0) {
           $notification.error({
-            message: this.$t('i18n.fabc07a4f1')
+            message: this.$t('i18n_fabc07a4f1')
           })
           return false
         }
         if (this.classFeatureKeys.length === 0) {
           $notification.error({
-            message: this.$t('i18n.c6e4cddba0')
+            message: this.$t('i18n_c6e4cddba0')
           })
           return false
         }
         if (this.notifyUserKeys.length === 0) {
           $notification.error({
-            message: this.$t('i18n.d02a9a85df')
+            message: this.$t('i18n_d02a9a85df')
           })
           return false
         }
@@ -378,11 +378,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.b63c057330'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_b63c057330'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return deleteMonitorOperate(record.id).then((res) => {
             if (res.code === 200) {

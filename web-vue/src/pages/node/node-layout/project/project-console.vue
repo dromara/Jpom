@@ -5,7 +5,7 @@
       <template #before>
         <a-space>
           <a-button size="small" :disabled="project.status" :loading="optButtonLoading" type="primary" @click="start">{{
-            $t('i18n.8e54ddfe24')
+            $t('i18n_8e54ddfe24')
           }}</a-button>
           <a-button
             size="small"
@@ -14,7 +14,7 @@
             type="primary"
             danger
             @click="restart"
-            >{{ $t('i18n.01b4e06f39') }}</a-button
+            >{{ $t('i18n_01b4e06f39') }}</a-button
           >
           <a-button
             size="small"
@@ -23,35 +23,35 @@
             type="primary"
             danger
             @click="stop"
-            >{{ $t('i18n.095e938e2a') }}</a-button
+            >{{ $t('i18n_095e938e2a') }}</a-button
           >
           <template v-if="project.runMode === 'Dsl'">
             <template v-if="canReload">
-              <a-popover :title="$t('i18n.8b2e274414')">
+              <a-popover :title="$t('i18n_8b2e274414')">
                 <template #content>
                   <template v-if="project.lastReloadResult">
                     <p>
-                      <a-tag v-if="project.lastReloadResult.success" color="green">{{ $t('i18n.330363dfc5') }}</a-tag>
-                      <a-tag v-else color="green">{{ $t('i18n.330363dfc5') }}</a-tag>
+                      <a-tag v-if="project.lastReloadResult.success" color="green">{{ $t('i18n_330363dfc5') }}</a-tag>
+                      <a-tag v-else color="green">{{ $t('i18n_330363dfc5') }}</a-tag>
                     </p>
                     <p v-for="(item, index) in project.lastReloadResult.msgs" :key="index">
                       {{ item }}
                     </p>
                   </template>
-                  <template v-else>{{ $t('i18n.14dcfcc4fa') }}</template>
+                  <template v-else>{{ $t('i18n_14dcfcc4fa') }}</template>
                 </template>
                 <a-button size="small" :loading="optButtonLoading" type="primary" @click="reload">{{
-                  $t('i18n.aaeb54633e')
+                  $t('i18n_aaeb54633e')
                 }}</a-button>
               </a-popover>
             </template>
             <template v-else>
               <a-button size="small" :disabled="true" :loading="optButtonLoading" type="primary">{{
-                $t('i18n.aaeb54633e')
+                $t('i18n_aaeb54633e')
               }}</a-button>
             </template>
           </template>
-          <a-button size="small" type="primary" @click="goFile">{{ $t('i18n.8780e6b3d1') }}</a-button>
+          <a-button size="small" type="primary" @click="goFile">{{ $t('i18n_8780e6b3d1') }}</a-button>
           <a-dropdown v-if="project.dslProcessInfo">
             <template #overlay>
               <a-menu>
@@ -60,7 +60,7 @@
                     <a-tag>
                       {{ item.process }}
                     </a-tag>
-                    <template v-if="item.type === 'file'">{{ $t('i18n.4df483b9c7') }}{{ item.scriptId }} </template>
+                    <template v-if="item.type === 'file'">{{ $t('i18n_4df483b9c7') }}{{ item.scriptId }} </template>
                     <template v-else-if="item.type === 'script'">
                       <a-button
                         type="link"
@@ -72,12 +72,12 @@
                           }
                         "
                       >
-                        <EditOutlined /> {{ $t('i18n.e0ba3b9145') }}
+                        <EditOutlined /> {{ $t('i18n_e0ba3b9145') }}
                       </a-button>
                     </template>
                     <template v-else-if="item.type === 'library'">
                       <a-button type="link" size="small" disabled=""
-                        >{{ $t('i18n.91a10b8776') }}{{ item.scriptId }}</a-button
+                        >{{ $t('i18n_91a10b8776') }}{{ item.scriptId }}</a-button
                       >
                     </template>
                   </template>
@@ -94,7 +94,7 @@
                 </a-menu-item>
               </a-menu>
             </template>
-            <a-button size="small" type="primary"> {{ $t('i18n.ce40cd6390') }} <DownOutlined /> </a-button>
+            <a-button size="small" type="primary"> {{ $t('i18n_ce40cd6390') }} <DownOutlined /> </a-button>
           </a-dropdown>
           <a-button
             size="small"
@@ -106,7 +106,7 @@
             "
           >
             <!-- <a-tag> -->
-            {{ $t('i18n.76aebf3cc6') }}: {{ project.logSize || '-' }}
+            {{ $t('i18n_76aebf3cc6') }}: {{ project.logSize || '-' }}
             <!-- 更多 -->
             <FullscreenOutlined />
             <!-- </a-tag> -->
@@ -121,7 +121,7 @@
       v-if="lobbackVisible"
       v-model:open="lobbackVisible"
       destroy-on-close
-      :title="$t('i18n.15f01c43e8')"
+      :title="$t('i18n_15f01c43e8')"
       width="850px"
       :footer="null"
       :mask-closable="false"
@@ -246,14 +246,14 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: `web socket ${this.$t('i18n.7030ff6470')},${this.$t('i18n.226a6f9cdd')}`
+          message: `web socket ${this.$t('i18n_7030ff6470')},${this.$t('i18n_226a6f9cdd')}`
         })
         clearInterval(this.heart)
       }
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
-        $message.warning(this.$t('i18n.d6cdafe552'))
+        $message.warning(this.$t('i18n_d6cdafe552'))
         clearInterval(this.heart)
       }
       this.socket.onmessage = (msg) => {
@@ -294,8 +294,8 @@ export default {
                   this.$refs.logView.appendLine(element)
                 })
               }
-              res.data.ports && this.$refs.logView.appendLine(this.$t('i18n.b6c9619081') + res.data.ports)
-              res.data.pids && this.$refs.logView.appendLine(this.$t('i18n.2b04210d33') + res.data.pids.join(','))
+              res.data.ports && this.$refs.logView.appendLine(this.$t('i18n_b6c9619081') + res.data.ports)
+              res.data.pids && this.$refs.logView.appendLine(this.$t('i18n_2b04210d33') + res.data.pids.join(','))
             }
             this.$refs.logView.appendLine(res.op + ' ' + res.msg)
             return
@@ -350,11 +350,11 @@ export default {
     // 重启
     restart() {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.989f1f2b61'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_989f1f2b61'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           this.sendMsg('restart')
         }
@@ -363,11 +363,11 @@ export default {
     // 停止
     stop() {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.010865ca50'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_010865ca50'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           this.sendMsg('stop')
         }

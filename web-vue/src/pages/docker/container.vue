@@ -16,50 +16,50 @@
           <a-space>
             <a-input
               v-model:value="listQuery['name']"
-              :placeholder="$t('i18n.d7ec2d3fea')"
+              :placeholder="$t('i18n_d7ec2d3fea')"
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['containerId']"
-              :placeholder="$t('i18n.74dc77d4f7')"
+              :placeholder="$t('i18n_74dc77d4f7')"
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['imageId']"
-              :placeholder="$t('i18n.72e7a5d105')"
+              :placeholder="$t('i18n_72e7a5d105')"
               class="search-input-item"
               @keyup.enter="loadData"
             />
             <div>
-              {{ $t('i18n.607e7a4f37') }}
+              {{ $t('i18n_607e7a4f37') }}
               <a-switch
                 v-model:checked="listQuery['showAll']"
-                :checked-children="$t('i18n.9a7b52fc86')"
-                :un-checked-children="$t('i18n.d679aea3aa')"
+                :checked-children="$t('i18n_9a7b52fc86')"
+                :un-checked-children="$t('i18n_d679aea3aa')"
               />
             </div>
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
             <a-statistic-countdown
               format="s"
-              :title="$t('i18n.0f8403d07e') + ' '"
+              :title="$t('i18n_0f8403d07e') + ' '"
               :value="countdownTime"
               @finish="autoUpdate"
             >
               <template #suffix>
-                <div style="font-size: 12px">{{ $t('i18n.ee6ce96abb') }}</div>
+                <div style="font-size: 12px">{{ $t('i18n_ee6ce96abb') }}</div>
               </template>
             </a-statistic-countdown>
           </a-space>
         </template>
         <template #bodyCell="{ column, text, record }">
           <template v-if="column.dataIndex === 'names'">
-            <a-popover :title="`${$t('i18n.0c256f73b8')}${(text || []).join(',')}`">
+            <a-popover :title="`${$t('i18n_0c256f73b8')}${(text || []).join(',')}`">
               <template #content>
-                <p>{{ $t('i18n.abee751418') }}{{ record.id }}</p>
-                <p>{{ $t('i18n.26eccfaad1') }}{{ record.image }}</p>
-                <p>{{ $t('i18n.c87bd94cd7') }}{{ record.imageId }}</p>
+                <p>{{ $t('i18n_abee751418') }}{{ record.id }}</p>
+                <p>{{ $t('i18n_26eccfaad1') }}{{ record.image }}</p>
+                <p>{{ $t('i18n_c87bd94cd7') }}{{ record.imageId }}</p>
               </template>
 
               <span>{{ (text || []).join(',') }}</span>
@@ -67,7 +67,7 @@
           </template>
 
           <template v-else-if="column.dataIndex === 'labels'">
-            <a-popover :title="`${$t('i18n.89cfb655e0')}`">
+            <a-popover :title="`${$t('i18n_89cfb655e0')}`">
               <template #content>
                 <template v-if="record.labels">
                   <p v-for="(value, key) in record.labels" :key="key">
@@ -85,15 +85,15 @@
             </a-popover>
           </template>
           <template v-else-if="column.dataIndex === 'mounts'">
-            <a-popover :title="`${$t('i18n.9964d6ed3f')}`">
+            <a-popover :title="`${$t('i18n_9964d6ed3f')}`">
               <template #content>
                 <template v-if="record.mounts">
                   <div v-for="(item, index) in record.mounts" :key="index">
                     <p>
-                      {{ $t('i18n.5b47861521') }}{{ item.name }}
-                      <a-tag>{{ item.rw ? $t('i18n.2300ad28b8') : $t('i18n.75769d1ac8') }}</a-tag>
+                      {{ $t('i18n_5b47861521') }}{{ item.name }}
+                      <a-tag>{{ item.rw ? $t('i18n_2300ad28b8') : $t('i18n_75769d1ac8') }}</a-tag>
                     </p>
-                    <p>{{ $t('i18n.e362bc0e8a') }}</p>
+                    <p>{{ $t('i18n_e362bc0e8a') }}</p>
                     <a-divider></a-divider>
                   </div>
                 </template>
@@ -121,7 +121,7 @@
           <template v-else-if="column.dataIndex === 'ports'">
             <a-popover placement="topLeft">
               <template #title>
-                {{ $t('i18n.d94167ab19') }}
+                {{ $t('i18n_d94167ab19') }}
                 <ul>
                   <li v-for="(item, index) in text || []" :key="index">
                     {{ item.type + ' ' + (item.ip || '') + ':' + (item.publicPort || '') + ':' + item.privatePort }}
@@ -132,7 +132,7 @@
                 <template v-if="record.networkSettings">
                   <template v-if="record.networkSettings.networks">
                     <template v-if="record.networkSettings.networks.bridge">
-                      {{ $t('i18n.71ee088528') }}
+                      {{ $t('i18n_71ee088528') }}
                       <p v-if="record.networkSettings.networks.bridge.ipAddress">
                         IP:
                         <a-tag>{{ record.networkSettings.networks.bridge.ipAddress }}</a-tag>
@@ -142,7 +142,7 @@
                         <a-tag>{{ record.networkSettings.networks.bridge.macAddress }}</a-tag>
                       </p>
                       <p v-if="record.networkSettings.networks.bridge.gateway">
-                        {{ $t('i18n.f332f2c8df') }}:
+                        {{ $t('i18n_f332f2c8df') }}:
                         <a-tag>{{ record.networkSettings.networks.bridge.gateway }}</a-tag>
                       </p>
                       <p v-if="record.networkSettings.networks.bridge.networkID">
@@ -164,7 +164,7 @@
                         <a-tag>{{ record.networkSettings.networks.ingress.macAddress }}</a-tag>
                       </p>
                       <p v-if="record.networkSettings.networks.ingress.gateway">
-                        {{ $t('i18n.f332f2c8df') }}:
+                        {{ $t('i18n_f332f2c8df') }}:
                         <a-tag>{{ record.networkSettings.networks.ingress.gateway }}</a-tag>
                       </p>
                       <p v-if="record.networkSettings.networks.ingress.networkID">
@@ -191,7 +191,7 @@
           </template>
 
           <template v-else-if="column.dataIndex === 'state'">
-            <a-tooltip :title="(record.status || '') + $t('i18n.aac62bc255')" @click="viewLog(record)">
+            <a-tooltip :title="(record.status || '') + $t('i18n_aac62bc255')" @click="viewLog(record)">
               <a-switch :checked="text === 'running'" :disabled="true">
                 <template #checkedChildren>
                   <CheckCircleOutlined />
@@ -205,7 +205,7 @@
           <template v-else-if="column.dataIndex === 'operation'">
             <a-space>
               <template v-if="record.state === 'running'">
-                <a-tooltip :title="$t('i18n.4fb2400af7')">
+                <a-tooltip :title="$t('i18n_4fb2400af7')">
                   <a-button
                     size="small"
                     type="link"
@@ -214,23 +214,23 @@
                     ><CodeOutlined
                   /></a-button>
                 </a-tooltip>
-                <a-tooltip :title="$t('i18n.095e938e2a')">
+                <a-tooltip :title="$t('i18n_095e938e2a')">
                   <a-button size="small" type="link" @click="doAction(record, 'stop')"><StopOutlined /></a-button>
                 </a-tooltip>
-                <a-tooltip :title="$t('i18n.01b4e06f39')">
+                <a-tooltip :title="$t('i18n_01b4e06f39')">
                   <a-button size="small" type="link" @click="doAction(record, 'restart')"><ReloadOutlined /></a-button>
                 </a-tooltip>
               </template>
               <template v-else>
-                <a-tooltip :title="$t('i18n.8e54ddfe24')">
+                <a-tooltip :title="$t('i18n_8e54ddfe24')">
                   <a-button size="small" type="link" @click="doAction(record, 'start')">
                     <PlayCircleOutlined />
                   </a-button>
                 </a-tooltip>
-                <a-tooltip :title="$t('i18n.095e938e2a')">
+                <a-tooltip :title="$t('i18n_095e938e2a')">
                   <a-button size="small" type="link" :disabled="true"><StopOutlined /></a-button>
                 </a-tooltip>
-                <a-tooltip :title="$t('i18n.01b4e06f39')">
+                <a-tooltip :title="$t('i18n_01b4e06f39')">
                   <a-button size="small" type="link" :disabled="true"><ReloadOutlined /></a-button>
                 </a-tooltip>
               </template>
@@ -242,35 +242,35 @@
                 <template #overlay>
                   <a-menu>
                     <a-menu-item>
-                      <a-tooltip :title="$t('i18n.48a536d0bb')">
+                      <a-tooltip :title="$t('i18n_48a536d0bb')">
                         <a-button size="small" type="link" @click="rebuild(record)"
-                          ><RedoOutlined />{{ $t('i18n.9e09315960') }}</a-button
+                          ><RedoOutlined />{{ $t('i18n_9e09315960') }}</a-button
                         >
                       </a-tooltip>
                     </a-menu-item>
                     <a-menu-item>
-                      <a-tooltip :title="$t('i18n.211a60b1d6')">
+                      <a-tooltip :title="$t('i18n_211a60b1d6')">
                         <a-button
                           size="small"
                           type="link"
                           :disabled="record.state !== 'running'"
                           @click="editContainer(record)"
                         >
-                          <EditOutlined />{{ $t('i18n.95b351c862') }}
+                          <EditOutlined />{{ $t('i18n_95b351c862') }}
                         </a-button>
                       </a-tooltip>
                     </a-menu-item>
                     <a-menu-item>
-                      <a-tooltip :title="$t('i18n.aac62bc255')">
+                      <a-tooltip :title="$t('i18n_aac62bc255')">
                         <a-button size="small" type="link" @click="viewLog(record)"
-                          ><MessageOutlined />{{ $t('i18n.456d29ef8b') }}</a-button
+                          ><MessageOutlined />{{ $t('i18n_456d29ef8b') }}</a-button
                         >
                       </a-tooltip>
                     </a-menu-item>
                     <a-menu-item>
-                      <a-tooltip :title="$t('i18n.ba20f0444c')">
+                      <a-tooltip :title="$t('i18n_ba20f0444c')">
                         <a-button size="small" type="link" @click="doAction(record, 'remove')">
-                          <DeleteOutlined />{{ $t('i18n.2f4aaddde3') }}
+                          <DeleteOutlined />{{ $t('i18n_2f4aaddde3') }}
                         </a-button>
                       </a-tooltip>
                     </a-menu-item>
@@ -288,39 +288,39 @@
           <a-space>
             <a-input
               v-model:value="listQuery['name']"
-              :placeholder="$t('i18n.d7ec2d3fea')"
+              :placeholder="$t('i18n_d7ec2d3fea')"
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['containerId']"
-              :placeholder="$t('i18n.74dc77d4f7')"
+              :placeholder="$t('i18n_74dc77d4f7')"
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['imageId']"
-              :placeholder="$t('i18n.72e7a5d105')"
+              :placeholder="$t('i18n_72e7a5d105')"
               class="search-input-item"
               @keyup.enter="loadData"
             />
             <div>
-              {{ $t('i18n.607e7a4f37') }}
+              {{ $t('i18n_607e7a4f37') }}
               <a-switch
                 v-model:checked="listQuery['showAll']"
-                :checked-children="$t('i18n.9a7b52fc86')"
-                :un-checked-children="$t('i18n.d679aea3aa')"
+                :checked-children="$t('i18n_9a7b52fc86')"
+                :un-checked-children="$t('i18n_d679aea3aa')"
               />
             </div>
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
             <a-statistic-countdown
               format="s"
-              :title="$t('i18n.0f8403d07e') + ' '"
+              :title="$t('i18n_0f8403d07e') + ' '"
               :value="countdownTime"
               @finish="autoUpdate"
             >
               <template #suffix>
-                <div style="font-size: 12px">{{ $t('i18n.ee6ce96abb') }}</div>
+                <div style="font-size: 12px">{{ $t('i18n_ee6ce96abb') }}</div>
               </template>
             </a-statistic-countdown>
           </a-space>
@@ -365,11 +365,11 @@
             >
               <template #bodyCell="{ column, text, record }">
                 <template v-if="column.dataIndex === 'names'">
-                  <a-popover :title="`${$t('i18n.0c256f73b8')}${(text || []).join(',')}`">
+                  <a-popover :title="`${$t('i18n_0c256f73b8')}${(text || []).join(',')}`">
                     <template #content>
-                      <p>{{ $t('i18n.abee751418') }}{{ record.id }}</p>
-                      <p>{{ $t('i18n.26eccfaad1') }}{{ record.image }}</p>
-                      <p>{{ $t('i18n.c87bd94cd7') }}{{ record.imageId }}</p>
+                      <p>{{ $t('i18n_abee751418') }}{{ record.id }}</p>
+                      <p>{{ $t('i18n_26eccfaad1') }}{{ record.image }}</p>
+                      <p>{{ $t('i18n_c87bd94cd7') }}{{ record.imageId }}</p>
                     </template>
 
                     <span>{{ (text || []).join(',') }}</span>
@@ -377,7 +377,7 @@
                 </template>
 
                 <template v-else-if="column.dataIndex === 'labels'">
-                  <a-popover :title="`${$t('i18n.89cfb655e0')}`">
+                  <a-popover :title="`${$t('i18n_89cfb655e0')}`">
                     <template #content>
                       <template v-if="record.labels">
                         <p v-for="(value, key) in record.labels" :key="key">
@@ -395,16 +395,16 @@
                   </a-popover>
                 </template>
                 <template v-else-if="column.dataIndex === 'mounts'">
-                  <a-popover :title="`${$t('i18n.9964d6ed3f')}`">
+                  <a-popover :title="`${$t('i18n_9964d6ed3f')}`">
                     <template #content>
                       <template v-if="record.mounts">
                         <div v-for="(item, idx) in record.mounts" :key="idx">
                           <p>
-                            {{ $t('i18n.5b47861521') }}{{ item.name }}
-                            <a-tag>{{ item.rw ? $t('i18n.2300ad28b8') : $t('i18n.75769d1ac8') }}</a-tag>
+                            {{ $t('i18n_5b47861521') }}{{ item.name }}
+                            <a-tag>{{ item.rw ? $t('i18n_2300ad28b8') : $t('i18n_75769d1ac8') }}</a-tag>
                           </p>
                           <p>
-                            {{ $t('i18n.e362bc0e8a', { source: item.source, destination: item.destination }) }}
+                            {{ $t('i18n_e362bc0e8a', { source: item.source, destination: item.destination }) }}
                           </p>
                           <a-divider></a-divider>
                         </div>
@@ -433,7 +433,7 @@
                 <template v-else-if="column.dataIndex === 'ports'">
                   <a-popover placement="topLeft">
                     <template #title>
-                      {{ $t('i18n.d94167ab19') }}
+                      {{ $t('i18n_d94167ab19') }}
                       <ul>
                         <li v-for="(item, idx) in text || []" :key="idx">
                           {{
@@ -446,7 +446,7 @@
                       <template v-if="record.networkSettings">
                         <template v-if="record.networkSettings.networks">
                           <template v-if="record.networkSettings.networks.bridge">
-                            {{ $t('i18n.71ee088528') }}
+                            {{ $t('i18n_71ee088528') }}
                             <p v-if="record.networkSettings.networks.bridge.ipAddress">
                               IP:
                               <a-tag>{{ record.networkSettings.networks.bridge.ipAddress }}</a-tag>
@@ -456,7 +456,7 @@
                               <a-tag>{{ record.networkSettings.networks.bridge.macAddress }}</a-tag>
                             </p>
                             <p v-if="record.networkSettings.networks.bridge.gateway">
-                              {{ $t('i18n.f332f2c8df') }}:
+                              {{ $t('i18n_f332f2c8df') }}:
                               <a-tag>{{ record.networkSettings.networks.bridge.gateway }}</a-tag>
                             </p>
                             <p v-if="record.networkSettings.networks.bridge.networkID">
@@ -478,7 +478,7 @@
                               <a-tag>{{ record.networkSettings.networks.ingress.macAddress }}</a-tag>
                             </p>
                             <p v-if="record.networkSettings.networks.ingress.gateway">
-                              {{ $t('i18n.f332f2c8df') }}:
+                              {{ $t('i18n_f332f2c8df') }}:
                               <a-tag>{{ record.networkSettings.networks.ingress.gateway }}</a-tag>
                             </p>
                             <p v-if="record.networkSettings.networks.ingress.networkID">
@@ -504,7 +504,7 @@
                 </template>
 
                 <template v-else-if="column.dataIndex === 'state'">
-                  <a-tooltip :title="(record.status || '') + $t('i18n.aac62bc255')" @click="viewLog(record)">
+                  <a-tooltip :title="(record.status || '') + $t('i18n_aac62bc255')" @click="viewLog(record)">
                     <a-switch :checked="record.state === 'running'" :disabled="true">
                       <template #checkedChildren>
                         <CheckCircleOutlined />
@@ -518,28 +518,28 @@
                 <template v-else-if="column.dataIndex === 'operation'">
                   <a-space>
                     <template v-if="record.state === 'running'">
-                      <a-tooltip :title="$t('i18n.4fb2400af7')">
+                      <a-tooltip :title="$t('i18n_4fb2400af7')">
                         <a-button size="small" type="link" @click="handleTerminal(record)"><CodeOutlined /></a-button>
                       </a-tooltip>
-                      <a-tooltip :title="$t('i18n.095e938e2a')">
+                      <a-tooltip :title="$t('i18n_095e938e2a')">
                         <a-button size="small" type="link" @click="doAction(record, 'stop')"><StopOutlined /></a-button>
                       </a-tooltip>
-                      <a-tooltip :title="$t('i18n.01b4e06f39')">
+                      <a-tooltip :title="$t('i18n_01b4e06f39')">
                         <a-button size="small" type="link" @click="doAction(record, 'restart')">
                           <ReloadOutlined />
                         </a-button>
                       </a-tooltip>
                     </template>
                     <template v-else>
-                      <a-tooltip :title="$t('i18n.8e54ddfe24')">
+                      <a-tooltip :title="$t('i18n_8e54ddfe24')">
                         <a-button size="small" type="link" @click="doAction(record, 'start')">
                           <PlayCircleOutlined />
                         </a-button>
                       </a-tooltip>
-                      <a-tooltip :title="$t('i18n.095e938e2a')">
+                      <a-tooltip :title="$t('i18n_095e938e2a')">
                         <a-button size="small" type="link" :disabled="true"><StopOutlined /></a-button>
                       </a-tooltip>
-                      <a-tooltip :title="$t('i18n.01b4e06f39')">
+                      <a-tooltip :title="$t('i18n_01b4e06f39')">
                         <a-button size="small" type="link" :disabled="true"><ReloadOutlined /></a-button>
                       </a-tooltip>
                     </template>
@@ -551,35 +551,35 @@
                       <template #overlay>
                         <a-menu>
                           <a-menu-item>
-                            <a-tooltip :title="$t('i18n.48a536d0bb')">
+                            <a-tooltip :title="$t('i18n_48a536d0bb')">
                               <a-button size="small" type="link" @click="rebuild(record)"
-                                ><RedoOutlined />{{ $t('i18n.9e09315960') }}</a-button
+                                ><RedoOutlined />{{ $t('i18n_9e09315960') }}</a-button
                               >
                             </a-tooltip>
                           </a-menu-item>
                           <a-menu-item>
-                            <a-tooltip :title="$t('i18n.211a60b1d6')">
+                            <a-tooltip :title="$t('i18n_211a60b1d6')">
                               <a-button
                                 size="small"
                                 type="link"
                                 :disabled="record.state !== 'running'"
                                 @click="editContainer(record)"
                               >
-                                <EditOutlined />{{ $t('i18n.95b351c862') }}
+                                <EditOutlined />{{ $t('i18n_95b351c862') }}
                               </a-button>
                             </a-tooltip>
                           </a-menu-item>
                           <a-menu-item>
-                            <a-tooltip :title="$t('i18n.aac62bc255')">
+                            <a-tooltip :title="$t('i18n_aac62bc255')">
                               <a-button size="small" type="link" @click="viewLog(record)">
-                                <MessageOutlined />{{ $t('i18n.456d29ef8b') }}
+                                <MessageOutlined />{{ $t('i18n_456d29ef8b') }}
                               </a-button>
                             </a-tooltip>
                           </a-menu-item>
                           <a-menu-item>
-                            <a-tooltip :title="$t('i18n.ba20f0444c')">
+                            <a-tooltip :title="$t('i18n_ba20f0444c')">
                               <a-button size="small" type="link" @click="doAction(record, 'remove')">
-                                <DeleteOutlined />{{ $t('i18n.2f4aaddde3') }}
+                                <DeleteOutlined />{{ $t('i18n_2f4aaddde3') }}
                               </a-button>
                             </a-tooltip>
                           </a-menu-item>
@@ -593,7 +593,7 @@
           </a-collapse-panel>
         </a-collapse>
         <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE">
-          <template #description>{{ $t('i18n.21efd88b67') }}</template>
+          <template #description>{{ $t('i18n_21efd88b67') }}</template>
         </a-empty>
       </a-card>
 
@@ -658,7 +658,7 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="60vw"
-      :title="$t('i18n.1ba584c974')"
+      :title="$t('i18n_1ba584c974')"
       :mask-closable="false"
       @ok="
         () => {
@@ -766,34 +766,34 @@ export default {
       confirmLoading: false,
       columns: [
         {
-          title: this.$t('i18n.faaadc447b'),
+          title: this.$t('i18n_faaadc447b'),
           width: '60px',
           // ellipsis: true,
           align: 'center',
           customRender: ({ index }) => `${index + 1}`
         },
         {
-          title: this.$t('i18n.d7ec2d3fea'),
+          title: this.$t('i18n_d7ec2d3fea'),
           dataIndex: 'names',
           ellipsis: true
           // width: 150
         },
         {
-          title: this.$t('i18n.87d50f8e03'),
+          title: this.$t('i18n_87d50f8e03'),
           dataIndex: 'id',
           ellipsis: true,
           width: '10px',
           showid: true
         },
         {
-          title: this.$t('i18n.40aff14380'),
+          title: this.$t('i18n_40aff14380'),
           dataIndex: 'imageId',
           ellipsis: true,
           width: '130px',
           showid: true
         },
         {
-          title: this.$t('i18n.3fea7ca76c'),
+          title: this.$t('i18n_3fea7ca76c'),
           dataIndex: 'state',
           // ellipsis: true,
           align: 'center',
@@ -801,33 +801,33 @@ export default {
         },
 
         {
-          title: this.$t('i18n.c76cfefe72'),
+          title: this.$t('i18n_c76cfefe72'),
           dataIndex: 'ports',
           ellipsis: true,
           width: '100px'
         },
 
         {
-          title: this.$t('i18n.14d342362f'),
+          title: this.$t('i18n_14d342362f'),
           dataIndex: 'labels',
           ellipsis: true,
           width: '50px'
         },
         {
-          title: this.$t('i18n.9964d6ed3f'),
+          title: this.$t('i18n_9964d6ed3f'),
           dataIndex: 'mounts',
           ellipsis: true,
           width: '50px'
         },
         {
-          title: this.$t('i18n.ddf7d2a5ce'),
+          title: this.$t('i18n_ddf7d2a5ce'),
           dataIndex: 'command',
           ellipsis: true,
           width: 150,
           tooltip: true
         },
         {
-          title: this.$t('i18n.eca37cb072'),
+          title: this.$t('i18n_eca37cb072'),
           dataIndex: 'created',
           ellipsis: true,
           sorter: (a, b) => Number(a.created) - new Number(b.created),
@@ -837,7 +837,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
           fixed: 'right',
 
@@ -874,19 +874,19 @@ export default {
       // ],
       action: {
         remove: {
-          msg: this.$t('i18n.c469afafe0'),
+          msg: this.$t('i18n_c469afafe0'),
           api: dockerContainerRemove
         },
         stop: {
-          msg: this.$t('i18n.60b4c08f5c'),
+          msg: this.$t('i18n_60b4c08f5c'),
           api: dockerContainerStop
         },
         restart: {
-          msg: this.$t('i18n.bf77165638'),
+          msg: this.$t('i18n_bf77165638'),
           api: dockerContainerRestart
         },
         start: {
-          msg: this.$t('i18n.2b0aa77353'),
+          msg: this.$t('i18n_2b0aa77353'),
           api: dockerContainerStart
         }
       },
@@ -959,11 +959,11 @@ export default {
         return
       }
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
         content: action.msg,
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return action
             .api(this.urlPrefix, {

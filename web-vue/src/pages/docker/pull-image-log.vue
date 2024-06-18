@@ -2,7 +2,7 @@
   <div>
     <log-view
       :ref="`logView`"
-      :title-name="$t('i18n.de5dadc480')"
+      :title-name="$t('i18n_de5dadc480')"
       :visible="visible"
       @close="
         () => {

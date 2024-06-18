@@ -77,14 +77,14 @@ export function taskLogInfoList(params) {
 }
 
 export const statusMap = {
-  0: t('i18n.a87818b04f'),
-  1: t('i18n.fb852fc6cc'),
-  2: t('i18n.5ab90c17a3'),
-  3: t('i18n.250688d7c9'),
-  4: t('i18n.d926e2f58e')
+  0: t('i18n_a87818b04f'),
+  1: t('i18n_fb852fc6cc'),
+  2: t('i18n_5ab90c17a3'),
+  3: t('i18n_250688d7c9'),
+  4: t('i18n_d926e2f58e')
 }
 
 export const taskTypeMap = {
   0: 'SSH',
-  1: t('i18n.3bf3c0a8d6')
+  1: t('i18n_3bf3c0a8d6')
 }

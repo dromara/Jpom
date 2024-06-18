@@ -3,31 +3,31 @@
     <a-timeline>
       <a-timeline-item>
         <span class="layui-elem-quote"
-          >{{ $t('i18n.231f655e35') }}{{ temp.timeStamp }}
+          >{{ $t('i18n_231f655e35') }}{{ temp.timeStamp }}
           <a-tag v-if="nodeId || machineId">agent</a-tag>
           <a-tag v-else>server</a-tag>
         </span>
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote">{{ $t('i18n.e60389f6d6') }}{{ temp.vueTimeStamp }}</span>
+        <span class="layui-elem-quote">{{ $t('i18n_e60389f6d6') }}{{ temp.vueTimeStamp }}</span>
       </a-timeline-item>
       <a-timeline-item v-if="!nodeId && !machineId">
-        <span class="layui-elem-quote">{{ $t('i18n.bdc1fdde6c') }}</span>
+        <span class="layui-elem-quote">{{ $t('i18n_bdc1fdde6c') }}</span>
         <a-space>
           <a-switch
             v-model:checked="temp.joinBetaRelease"
-            :checked-children="$t('i18n.c8a2447aa9')"
-            :un-checked-children="$t('i18n.ae17005c0c')"
+            :checked-children="$t('i18n_c8a2447aa9')"
+            :un-checked-children="$t('i18n_ae17005c0c')"
             :disabled="true"
           />
           <template v-if="temp.joinBetaRelease">
-            <a-button type="link" @click="handleChangeBetaRelease(false)">{{ $t('i18n.8ef0f6c275') }}</a-button>
+            <a-button type="link" @click="handleChangeBetaRelease(false)">{{ $t('i18n_8ef0f6c275') }}</a-button>
           </template>
           <template v-else>
             <a-tooltip>
-              <template #title>{{ $t('i18n.31bca0fc93') }}</template>
+              <template #title>{{ $t('i18n_31bca0fc93') }}</template>
               <a-button type="link" @click="handleChangeBetaRelease(true)"
-                ><QuestionCircleOutlined />{{ $t('i18n.d17eac5b5e') }}</a-button
+                ><QuestionCircleOutlined />{{ $t('i18n_d17eac5b5e') }}</a-button
               >
             </a-tooltip>
           </template>
@@ -35,10 +35,10 @@
       </a-timeline-item>
       <a-timeline-item>
         <a-space>
-          <span class="layui-elem-quote">{{ $t('i18n.07683555af') }}{{ temp.version }} </span>
+          <span class="layui-elem-quote">{{ $t('i18n_07683555af') }}{{ temp.version }} </span>
           <template v-if="temp.upgrade !== undefined">
             <a-tag v-if="temp.upgrade" color="pink" @click="upgrageVerion"
-              >{{ $t('i18n.ac2f4259f1') }}{{ temp.newVersion }} {{ temp.newBeta ? '/beta' : '' }}
+              >{{ $t('i18n_ac2f4259f1') }}{{ temp.newVersion }} {{ temp.newBeta ? '/beta' : '' }}
               <DownloadOutlined />
             </a-tag>
             <a-tag v-else color="orange" @click="checkVersion">
@@ -48,26 +48,26 @@
         </a-space>
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote">{{ $t('i18n.b57ecea951') }}{{ formatDuration(temp.upTime) }}</span>
+        <span class="layui-elem-quote">{{ $t('i18n_b57ecea951') }}{{ formatDuration(temp.upTime) }}</span>
       </a-timeline-item>
       <a-timeline-item>
         <span class="layui-elem-quote"
-          >{{ $t('i18n.4c096c51a3') }}<a-tag>{{ temp.port }}</a-tag></span
+          >{{ $t('i18n_4c096c51a3') }}<a-tag>{{ temp.port }}</a-tag></span
         >
         <span class="layui-elem-quote">&nbsp;&nbsp;</span>
         <span class="layui-elem-quote"
-          >{{ $t('i18n.2b04210d33') }}<a-tag>{{ temp.pid }}</a-tag></span
+          >{{ $t('i18n_2b04210d33') }}<a-tag>{{ temp.pid }}</a-tag></span
         >
       </a-timeline-item>
       <a-timeline-item>
-        <a-alert :message="$t('i18n.5785f004ea')" type="warning" show-icon />
+        <a-alert :message="$t('i18n_5785f004ea')" type="warning" show-icon />
       </a-timeline-item>
       <a-timeline-item>
         <span class="layui-elem-quote"
-          >{{ $t('i18n.a9add9b059') }}<a-tag>{{ temp.dataPath }}</a-tag>
+          >{{ $t('i18n_a9add9b059') }}<a-tag>{{ temp.dataPath }}</a-tag>
         </span>
         <span v-if="temp.jarFile" class="layui-elem-quote"
-          >{{ $t('i18n.9ce5d5202a') }}<a-tag>{{ temp.jarFile }}</a-tag>
+          >{{ $t('i18n_9ce5d5202a') }}<a-tag>{{ temp.jarFile }}</a-tag>
         </span>
       </a-timeline-item>
     </a-timeline>
@@ -83,7 +83,7 @@
             @remove="handleRemove"
           >
             <LoadingOutlined v-if="percentage" />
-            <a-button v-else><UploadOutlined />{{ $t('i18n.d615ea8e30') }}</a-button>
+            <a-button v-else><UploadOutlined />{{ $t('i18n_d615ea8e30') }}</a-button>
           </a-upload>
           <a-row v-if="percentage">
             <a-col span="20">
@@ -91,7 +91,7 @@
             </a-col>
           </a-row>
           <a-button type="primary" :disabled="fileList.length === 0 || !!percentage" @click="startUpload">{{
-            $t('i18n.3dd6c10ffd')
+            $t('i18n_3dd6c10ffd')
           }}</a-button>
         </a-space>
       </a-col>
@@ -185,7 +185,7 @@ export default {
     uploadPieces,
     formatDuration,
     renderMarkdown(markdown) {
-      return (this.markdownit && this.markdownit.render(markdown)) || this.$t('i18n.aeade8e979')
+      return (this.markdownit && this.markdownit.render(markdown)) || this.$t('i18n_aeade8e979')
     },
     // 加载数据
     loadData() {
@@ -245,9 +245,9 @@ export default {
     },
     // 开始上传文件
     startUpload() {
-      const title = this.$t('i18n.458331a965')
-      const alterB = this.$t('i18n.ddf0c97bce')
-      const liArray = [this.$t('i18n.a38ed189a2'), this.$t('i18n.a5daa9be44'), this.$t('i18n.a52a10123f')]
+      const title = this.$t('i18n_458331a965')
+      const alterB = this.$t('i18n_ddf0c97bce')
+      const liArray = [this.$t('i18n_a38ed189a2'), this.$t('i18n_a5daa9be44'), this.$t('i18n_a52a10123f')]
 
       const html = `${title}
       <ul style="color:red;">
@@ -258,11 +258,11 @@ export default {
       `
 
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
-        okText: this.$t('i18n.e83a256e4f'),
+        okText: this.$t('i18n_e83a256e4f'),
         zIndex: 1009,
-        cancelText: this.$t('i18n.625fb26b4b'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           const file = this.fileList[0]
           this.percentage = 0
@@ -345,7 +345,7 @@ export default {
 
       this.globalLoading({
         spinning: true,
-        tip: (msg || this.$t('i18n.589060f38e')) + this.$t('i18n.9ba71275d3')
+        tip: (msg || this.$t('i18n_589060f38e')) + this.$t('i18n_9ba71275d3')
       })
       //
       this.timer = setInterval(() => {
@@ -361,7 +361,7 @@ export default {
               })
               clearInterval(this.timer)
               $notification.success({
-                message: this.$t('i18n.e64d788d11')
+                message: this.$t('i18n_e64d788d11')
               })
               this.temp = manifest
               setTimeout(() => {
@@ -370,7 +370,7 @@ export default {
             } else {
               if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
                 $notification.warning({
-                  message: this.$t('i18n.2a38b6c0ae') + (res.msg || '')
+                  message: this.$t('i18n_2a38b6c0ae') + (res.msg || '')
                 })
                 this.globalLoading({
                   spinning: false
@@ -387,12 +387,12 @@ export default {
               })
               clearInterval(this.timer)
               $notification.error({
-                message: this.$t('i18n.2191afee6e')
+                message: this.$t('i18n_2191afee6e')
               })
             } else {
               this.globalLoading({
                 spinning: true,
-                tip: (msg || this.$t('i18n.589060f38e')) + this.$t('i18n.9ba71275d3')
+                tip: (msg || this.$t('i18n_589060f38e')) + this.$t('i18n_9ba71275d3')
               })
             }
           })
@@ -440,8 +440,8 @@ export default {
           //
           const dUrl = data.downloadUrl || 'https://jpom.top'
           const htmlAref = `<a href='${dUrl}' target='_blank'>${dUrl}</a>`
-          const title = this.$t('i18n.2314f99795')
-          const tip = this.$t('i18n.ab3615a5ad')
+          const title = this.$t('i18n_2314f99795')
+          const tip = this.$t('i18n_ab3615a5ad')
           const html = `${title} ${tagName} ${htmlAref} ${tip}`
 
           $notification.success({
@@ -457,7 +457,7 @@ export default {
           this.temp = { ...this.temp, upgrade: false }
           if (tip) {
             $notification.success({
-              message: this.$t('i18n.e6cde5a4bc')
+              message: this.$t('i18n_e6cde5a4bc')
             })
           }
           resolve(false)
@@ -475,7 +475,7 @@ export default {
         }
         if (tip) {
           $notification.success({
-            message: this.temp.upgrade ? this.$t('i18n.2314f99795') + data.tagName : this.$t('i18n.e6cde5a4bc')
+            message: this.temp.upgrade ? this.$t('i18n_2314f99795') + data.tagName : this.$t('i18n_e6cde5a4bc')
           })
         }
         resolve(data.upgrade)
@@ -483,9 +483,9 @@ export default {
     },
     // 升级
     upgrageVerion() {
-      const title = this.$t('i18n.ec6e39a177')
-      const alterB = this.$t('i18n.ddf0c97bce')
-      const li = [this.$t('i18n.a94feac256'), this.$t('i18n.b55f286cba'), this.$t('i18n.a52a10123f')]
+      const title = this.$t('i18n_ec6e39a177')
+      const alterB = this.$t('i18n_ddf0c97bce')
+      const li = [this.$t('i18n_a94feac256'), this.$t('i18n_b55f286cba'), this.$t('i18n_a52a10123f')]
 
       const html = `${title}
       <ul style="color:red;">
@@ -495,11 +495,11 @@ export default {
       </ul>
       `
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
-        okText: this.$t('i18n.e83a256e4f'),
+        okText: this.$t('i18n_e83a256e4f'),
         zIndex: 1009,
-        cancelText: this.$t('i18n.625fb26b4b'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return remoteUpgrade({
             nodeId: this.nodeId,
@@ -519,8 +519,8 @@ export default {
     handleChangeBetaRelease(beta) {
       let html
       if (beta) {
-        const title = this.$t('i18n.d64cf79bd4')
-        const li = [this.$t('i18n.d31d625029'), this.$t('i18n.d8db440b83'), this.$t('i18n.73b7e8e09e')]
+        const title = this.$t('i18n_d64cf79bd4')
+        const li = [this.$t('i18n_d31d625029'), this.$t('i18n_d8db440b83'), this.$t('i18n_73b7e8e09e')]
 
         html = `${title}
         <ul <ul style="color:red;">
@@ -530,15 +530,15 @@ export default {
         </ul>
         `
       } else {
-        html = this.$t('i18n.87659a4953')
+        html = this.$t('i18n_87659a4953')
       }
 
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         content: h('div', {}, [h('p', { innerHTML: html })]),
-        okText: this.$t('i18n.e83a256e4f'),
+        okText: this.$t('i18n_e83a256e4f'),
         zIndex: 1009,
-        cancelText: this.$t('i18n.625fb26b4b'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return changBetaRelease({
             beta: beta

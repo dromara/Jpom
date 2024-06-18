@@ -120,14 +120,14 @@ export function getTriggerUrl(data) {
 }
 
 export const statusMap = {
-  0: t('i18n.46e3867956'),
-  1: t('i18n.ec219f99ee'),
-  2: t('i18n.05f6e923af'),
-  3: t('i18n.e2f942759e')
+  0: t('i18n_46e3867956'),
+  1: t('i18n_ec219f99ee'),
+  2: t('i18n_05f6e923af'),
+  3: t('i18n_e2f942759e')
 }
 
 export const triggerExecTypeMap = {
-  0: t('i18n.2a3e7f5c38'),
-  1: t('i18n.3aed2c11e9'),
-  2: t('i18n.4696724ed3')
+  0: t('i18n_2a3e7f5c38'),
+  1: t('i18n_3aed2c11e9'),
+  2: t('i18n_4696724ed3')
 }

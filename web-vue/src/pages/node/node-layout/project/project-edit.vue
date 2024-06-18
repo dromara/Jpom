@@ -1,23 +1,23 @@
 <template>
   <div>
     <!-- 编辑区 -->
-    <a-spin :tip="$t('i18n.2770db3a99')" :spinning="loading">
+    <a-spin :tip="$t('i18n_2770db3a99')" :spinning="loading">
       <a-form ref="editProjectForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$t('i18n.4fdd2213b5')" name="id">
-          <template #help>{{ $t('i18n.e2b0f27424') }}</template>
+        <a-form-item :label="$t('i18n_4fdd2213b5')" name="id">
+          <template #help>{{ $t('i18n_e2b0f27424') }}</template>
 
           <a-input
             v-if="temp.type === 'edit'"
             v-model:value="temp.id"
             :max-length="50"
             :disabled="temp.type === 'edit'"
-            :placeholder="$t('i18n.7ce511154f')"
+            :placeholder="$t('i18n_7ce511154f')"
           />
           <template v-else>
             <a-input-search
               v-model:value="temp.id"
               :max-length="50"
-              :placeholder="$t('i18n.7ce511154f')"
+              :placeholder="$t('i18n_7ce511154f')"
               @search="
                 () => {
                   temp = { ...temp, id: randomStr(6) }
@@ -25,26 +25,26 @@
               "
             >
               <template #enterButton>
-                <a-button type="primary"> {{ $t('i18n.6709f4548f') }} </a-button>
+                <a-button type="primary"> {{ $t('i18n_6709f4548f') }} </a-button>
               </template>
             </a-input-search>
           </template>
         </a-form-item>
 
-        <a-form-item :label="$t('i18n.738a41f965')" name="name">
+        <a-form-item :label="$t('i18n_738a41f965')" name="name">
           <a-row>
             <a-col :span="10">
-              <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n.738a41f965')" />
+              <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n_738a41f965')" />
             </a-col>
-            <a-col :span="4" style="text-align: right">{{ $t('i18n.1b973fc4d1') }}</a-col>
+            <a-col :span="4" style="text-align: right">{{ $t('i18n_1b973fc4d1') }}</a-col>
             <a-col :span="10">
               <a-form-item-rest>
                 <custom-select
                   v-model:value="temp.group"
                   :max-length="50"
                   :data="groupList"
-                  :input-placeholder="$t('i18n.bd0362bed3')"
-                  :select-placeholder="$t('i18n.3e8c9c54ee')"
+                  :input-placeholder="$t('i18n_bd0362bed3')"
+                  :select-placeholder="$t('i18n_3e8c9c54ee')"
                 >
                 </custom-select>
               </a-form-item-rest>
@@ -54,29 +54,29 @@
         <a-form-item name="runMode">
           <template #label>
             <a-tooltip>
-              {{ $t('i18n.17d444b642') }}
+              {{ $t('i18n_17d444b642') }}
               <template #title>
                 <ul>
-                  <li><b>Dsl</b> {{ $t('i18n.2356fe4af2') }}</li>
-                  <li><b>ClassPath</b> java -classpath xxx {{ $t('i18n.fa4aa1b93b') }}</li>
-                  <li><b>Jar</b> java -jar xxx {{ $t('i18n.fa4aa1b93b') }}</li>
+                  <li><b>Dsl</b> {{ $t('i18n_2356fe4af2') }}</li>
+                  <li><b>ClassPath</b> java -classpath xxx {{ $t('i18n_fa4aa1b93b') }}</li>
+                  <li><b>Jar</b> java -jar xxx {{ $t('i18n_fa4aa1b93b') }}</li>
                   <li>
                     <b>JarWar</b> java -jar Springboot war
-                    {{ $t('i18n.fa4aa1b93b') }}
+                    {{ $t('i18n_fa4aa1b93b') }}
                   </li>
                   <li>
                     <b>JavaExtDirsCp</b> java -Djava.ext.dirs=lib -cp conf:run.jar $MAIN_CLASS
-                    {{ $t('i18n.fa4aa1b93b') }}
+                    {{ $t('i18n_fa4aa1b93b') }}
                   </li>
-                  <li><b>File</b> {{ $t('i18n.5d6f47d670') }},{{ $t('i18n.61955b0e4b') }}</li>
+                  <li><b>File</b> {{ $t('i18n_5d6f47d670') }},{{ $t('i18n_61955b0e4b') }}</li>
                 </ul>
               </template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
           </template>
-          <a-select v-model:value="temp.runMode" :placeholder="$t('i18n.26a3378645')" @change="changeRunMode">
+          <a-select v-model:value="temp.runMode" :placeholder="$t('i18n_26a3378645')" @change="changeRunMode">
             <a-select-option v-for="item in runModeArray" :key="item.name">
-              <template v-if="item.desc.indexOf($t('i18n.888df7a89e')) > -1">
+              <template v-if="item.desc.indexOf($t('i18n_888df7a89e')) > -1">
                 <s>
                   <b>[{{ item.name }}]</b> {{ item.desc }}
                 </s>
@@ -88,8 +88,8 @@
           </a-select>
         </a-form-item>
         <template v-if="temp.runMode === 'Link'">
-          <a-form-item :label="$t('i18n.be166de983')" name="linkId">
-            <a-select v-model:value="temp.linkId" :placeholder="$t('i18n.1ba141c9ac')" @change="changeLinkId">
+          <a-form-item :label="$t('i18n_be166de983')" name="linkId">
+            <a-select v-model:value="temp.linkId" :placeholder="$t('i18n_1ba141c9ac')" @change="changeLinkId">
               <a-select-option
                 v-for="item in projectList"
                 :key="item.projectId"
@@ -104,14 +104,14 @@
           <a-form-item name="whitelistDirectory">
             <template #label>
               <a-tooltip>
-                {{ $t('i18n.aabdc3b7c0') }}
+                {{ $t('i18n_aabdc3b7c0') }}
                 <template #title>
                   <ul>
-                    <li>{{ $t('i18n.f89cc4807e') }}</li>
-                    <li>{{ $t('i18n.94763baf5f') }}</li>
-                    <li>{{ $t('i18n.fe828cefd9') }}</li>
+                    <li>{{ $t('i18n_f89cc4807e') }}</li>
+                    <li>{{ $t('i18n_94763baf5f') }}</li>
+                    <li>{{ $t('i18n_fe828cefd9') }}</li>
                     <li>
-                      {{ $t('i18n.556499017a') }} <br />&nbsp;&nbsp;<b>{{ $t('i18n.67141abed6') }}</b>
+                      {{ $t('i18n_556499017a') }} <br />&nbsp;&nbsp;<b>{{ $t('i18n_67141abed6') }}</b>
                     </li>
                   </ul>
                 </template>
@@ -120,7 +120,7 @@
             </template>
             <template #help>
               <div>
-                {{ $t('i18n.fde1b6fb37') }}
+                {{ $t('i18n_fde1b6fb37') }}
                 <a-button
                   type="link"
                   size="small"
@@ -130,18 +130,18 @@
                     }
                   "
                 >
-                  <InfoCircleOutlined /> {{ $t('i18n.23b444d24c') }}
+                  <InfoCircleOutlined /> {{ $t('i18n_23b444d24c') }}
                 </a-button>
               </div>
             </template>
             <a-input-group compact>
-              <a-select v-model:value="temp.whitelistDirectory" style="width: 50%" :placeholder="$t('i18n.1d38b2b2bc')">
+              <a-select v-model:value="temp.whitelistDirectory" style="width: 50%" :placeholder="$t('i18n_1d38b2b2bc')">
                 <a-select-option v-for="access in accessList" :key="access">
                   <a-tooltip :title="access">{{ access }}</a-tooltip>
                 </a-select-option>
               </a-select>
               <a-form-item-rest>
-                <a-input v-model:value="temp.lib" style="width: 50%" :placeholder="$t('i18n.1dc518bddb')" />
+                <a-input v-model:value="temp.lib" style="width: 50%" :placeholder="$t('i18n_1dc518bddb')" />
               </a-form-item-rest>
             </a-input-group>
             <template #extra>
@@ -149,23 +149,23 @@
             </template>
           </a-form-item>
 
-          <a-form-item v-show="filePath !== ''" :label="$t('i18n.8283f063d7')">
+          <a-form-item v-show="filePath !== ''" :label="$t('i18n_8283f063d7')">
             <a-alert :message="filePath" type="success" />
           </a-form-item>
         </template>
         <a-form-item v-show="temp.runMode === 'Dsl'" name="dslContent">
           <template #label>
             <a-tooltip>
-              DSL {{ $t('i18n.2d711b09bd') }}
+              DSL {{ $t('i18n_2d711b09bd') }}
               <template #title>
-                <p>{{ $t('i18n.73d8160821') }}</p>
-                <p>{{ $t('i18n.3517aa30c2') }}</p>
+                <p>{{ $t('i18n_73d8160821') }}</p>
+                <p>{{ $t('i18n_3517aa30c2') }}</p>
                 <p>
                   <b>status</b>
-                  {{ $t('i18n.ca69dad8fc') }}:$pid <b>$pid {{ $t('i18n.07a8af8c03') }}</b
-                  >{{ $t('i18n.d2f484ff7e') }}
+                  {{ $t('i18n_ca69dad8fc') }}:$pid <b>$pid {{ $t('i18n_07a8af8c03') }}</b
+                  >{{ $t('i18n_d2f484ff7e') }}
                 </p>
-                <p>{{ $t('i18n.9f52492fbc') }}</p>
+                <p>{{ $t('i18n_9f52492fbc') }}</p>
               </template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
@@ -176,7 +176,7 @@
                 <a-divider type="vertical" />
               </template> -->
             <div>
-              scriptId{{ $t('i18n.21da885538') }}
+              scriptId{{ $t('i18n_21da885538') }}
               <a-button
                 type="link"
                 size="small"
@@ -186,10 +186,10 @@
                   }
                 "
               >
-                {{ $t('i18n.35134b6f94') }}
+                {{ $t('i18n_35134b6f94') }}
               </a-button>
             </div>
-            <div>{{ $t('i18n.6a359e2ab3') }}</div>
+            <div>{{ $t('i18n_6a359e2ab3') }}</div>
             <!-- </a-space> -->
           </template>
           <a-form-item-rest>
@@ -199,14 +199,14 @@
               height="40vh"
               :show-tool="true"
               :options="{ mode: 'yaml', tabSize: 2 }"
-              :placeholder="$t('i18n.1c8190b0eb')"
+              :placeholder="$t('i18n_1c8190b0eb')"
             >
               <template #tool_before>
                 <a-segmented
                   v-model:value="dslEditTabKey"
                   :options="[
-                    { label: `DSL ${$t('i18n.224e2ccda8')}`, value: 'content' },
-                    { label: $t('i18n.da79c2ec32'), value: 'demo' }
+                    { label: `DSL ${$t('i18n_224e2ccda8')}`, value: 'content' },
+                    { label: $t('i18n_da79c2ec32'), value: 'demo' }
                   ]"
                 />
               </template>
@@ -222,8 +222,8 @@
                 <a-segmented
                   v-model:value="dslEditTabKey"
                   :options="[
-                    { label: `DSL ${$t('i18n.224e2ccda8')}`, value: 'content' },
-                    { label: $t('i18n.da79c2ec32'), value: 'demo' }
+                    { label: `DSL ${$t('i18n_224e2ccda8')}`, value: 'content' },
+                    { label: $t('i18n_da79c2ec32'), value: 'demo' }
                   ]"
                 />
               </template>
@@ -233,19 +233,19 @@
         <a-form-item v-show="noFileModes.includes(temp.runMode) && temp.runMode !== 'Link'">
           <template #label>
             <a-tooltip>
-              {{ $t('i18n.2ce44aba57') }}
+              {{ $t('i18n_2ce44aba57') }}
               <template #title>
                 <ul>
-                  <li>{{ $t('i18n.12934d1828') }}</li>
-                  <li>{{ $t('i18n.138776a1dc') }}</li>
-                  <li>{{ $t('i18n.95c5c939e4') }}</li>
+                  <li>{{ $t('i18n_12934d1828') }}</li>
+                  <li>{{ $t('i18n_138776a1dc') }}</li>
+                  <li>{{ $t('i18n_95c5c939e4') }}</li>
                 </ul>
               </template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
           </template>
-          <a-select v-model:value="temp.logPath" :placeholder="$t('i18n.1d38b2b2bc')">
-            <a-select-option key="" value="">{{ $t('i18n.138776a1dc') }}</a-select-option>
+          <a-select v-model:value="temp.logPath" :placeholder="$t('i18n_1d38b2b2bc')">
+            <a-select-option key="" value="">{{ $t('i18n_138776a1dc') }}</a-select-option>
             <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
           </a-select>
         </a-form-item>
@@ -258,7 +258,7 @@
           label="Main Class"
           name="mainClass"
         >
-          <a-input v-model:value="temp.mainClass" :placeholder="$t('i18n.ef800ed466')" />
+          <a-input v-model:value="temp.mainClass" :placeholder="$t('i18n_ef800ed466')" />
         </a-form-item>
         <a-form-item
           v-show="
@@ -270,39 +270,39 @@
         >
           <a-input
             v-model:value="temp.javaExtDirsCp"
-            :placeholder="`-Dext.dirs=xxx: -cp xx  ${$t('i18n.c53021f06d')}:xx】`"
+            :placeholder="`-Dext.dirs=xxx: -cp xx  ${$t('i18n_c53021f06d')}:xx】`"
           />
         </a-form-item>
         <a-form-item
           v-show="javaModes.includes(temp.runMode) || javaModes.includes(linkProjectData.runMode)"
-          :label="$t('i18n.497bc3532b')"
+          :label="$t('i18n_497bc3532b')"
           name="jvm"
         >
           <a-textarea
             v-model:value="temp.jvm"
             :auto-size="{ minRows: 3, maxRows: 3 }"
-            :placeholder="$t('i18n.eef3653e9a', { slot1: $t('i18n.3d0a2df9ec'), slot2: $t('i18n.eb5bab1c31') })"
+            :placeholder="$t('i18n_eef3653e9a', { slot1: $t('i18n_3d0a2df9ec'), slot2: $t('i18n_eb5bab1c31') })"
           />
         </a-form-item>
         <a-form-item
           v-show="javaModes.includes(temp.runMode) || javaModes.includes(linkProjectData.runMode)"
-          :label="$t('i18n.e5098786d3')"
+          :label="$t('i18n_e5098786d3')"
           name="args"
         >
           <a-textarea
             v-model:value="temp.args"
             :auto-size="{ minRows: 3, maxRows: 3 }"
-            :placeholder="`Main ${$t('i18n.6a9231c3ba')}. ${$t('i18n.848e4e21da')}.port=8080`"
+            :placeholder="`Main ${$t('i18n_6a9231c3ba')}. ${$t('i18n_848e4e21da')}.port=8080`"
           />
         </a-form-item>
         <a-form-item
           v-if="temp.runMode === 'Dsl' || linkProjectData.runMode === 'Dsl'"
           name="dslEnv"
-          :label="$t('i18n.fba5f4f19a')"
+          :label="$t('i18n_fba5f4f19a')"
         >
           <!-- <a-input
             v-model:value="temp.dslEnv"
-            placeholder="DSL{{$t('i18n.3867e350eb')}},{{$t('i18n.9324290bfe')}}=values1&keyvalue2"
+            placeholder="DSL{{$t('i18n_3867e350eb')}},{{$t('i18n_9324290bfe')}}=values1&keyvalue2"
           /> -->
           <parameter-widget v-model:value="temp.dslEnv"></parameter-widget>
         </a-form-item>
@@ -310,39 +310,39 @@
         <a-form-item v-show="noFileModes.includes(temp.runMode)" name="autoStart">
           <template #label>
             <a-tooltip>
-              {{ $t('i18n.8388c637f6') }}
-              <template #title>{{ $t('i18n.d4e03f60a9') }}</template>
+              {{ $t('i18n_8388c637f6') }}
+              <template #title>{{ $t('i18n_d4e03f60a9') }}</template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
           </template>
           <template #help>
             <div>
-              {{ $t('i18n.71584de972') }}<b>{{ $t('i18n.1e4a59829d') }}</b
-              >{{ $t('i18n.0360fffb40') }}
+              {{ $t('i18n_71584de972') }}<b>{{ $t('i18n_1e4a59829d') }}</b
+              >{{ $t('i18n_0360fffb40') }}
             </div>
           </template>
           <div>
             <a-switch
               v-model:checked="temp.autoStart"
-              :checked-children="$t('i18n.8493205602')"
-              :un-checked-children="$t('i18n.d58a55bcee')"
+              :checked-children="$t('i18n_8493205602')"
+              :un-checked-children="$t('i18n_d58a55bcee')"
             />
-            {{ $t('i18n.1022c545d1') }}
+            {{ $t('i18n_1022c545d1') }}
           </div>
         </a-form-item>
 
         <a-form-item name="disableScanDir">
           <template #label>
-            <a-tooltip> {{ $t('i18n.df59a2804d') }} </a-tooltip>
+            <a-tooltip> {{ $t('i18n_df59a2804d') }} </a-tooltip>
           </template>
           <template #help>
-            <div>{{ $t('i18n.b7c139ed75') }}</div>
+            <div>{{ $t('i18n_b7c139ed75') }}</div>
           </template>
           <div>
             <a-switch
               v-model:checked="temp.disableScanDir"
-              :checked-children="$t('i18n.ced3d28cd1')"
-              :un-checked-children="$t('i18n.56525d62ac')"
+              :checked-children="$t('i18n_ced3d28cd1')"
+              :un-checked-children="$t('i18n_56525d62ac')"
             />
           </div>
         </a-form-item>
@@ -353,25 +353,25 @@
               WebHooks
               <template #title>
                 <ul>
-                  <li>{{ $t('i18n.a24d80c8fa') }}</li>
-                  <li>{{ $t('i18n.b91961bf0b') }}</li>
-                  <li>type {{ $t('i18n.5a63277941') }}</li>
-                  <li>DSL {{ $t('i18n.f8f456eb9a') }}</li>
+                  <li>{{ $t('i18n_a24d80c8fa') }}</li>
+                  <li>{{ $t('i18n_b91961bf0b') }}</li>
+                  <li>type {{ $t('i18n_5a63277941') }}</li>
+                  <li>DSL {{ $t('i18n_f8f456eb9a') }}</li>
                 </ul>
               </template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
           </template>
-          <a-input v-model:value="temp.token" :placeholder="$t('i18n.6c776e9d91')" />
+          <a-input v-model:value="temp.token" :placeholder="$t('i18n_6c776e9d91')" />
         </a-form-item>
 
         <a-form-item
           v-if="temp.runCommand"
           v-show="temp.type === 'edit' && javaModes.includes(temp.runMode)"
-          :label="$t('i18n.ce559ba296')"
+          :label="$t('i18n_ce559ba296')"
           name="runCommand"
         >
-          <a-alert :message="temp.runCommand || $t('i18n.d81bb206a8')" type="success" />
+          <a-alert :message="temp.runCommand || $t('i18n_d81bb206a8')" type="success" />
         </a-form-item>
       </a-form>
     </a-spin>
@@ -380,7 +380,7 @@
       v-if="configDir"
       v-model:open="configDir"
       destroy-on-close
-      :title="`${$t('i18n.eee6510292')}`"
+      :title="`${$t('i18n_eee6510292')}`"
       :footer="null"
       :mask-closable="false"
       @cancel="
@@ -404,7 +404,7 @@
     <NodeFunc
       v-if="drawerVisible"
       :id="nodeId"
-      :name="$t('i18n.35134b6f94')"
+      :name="$t('i18n_35134b6f94')"
       :tabs="['scripct']"
       @close="
         () => {
@@ -465,15 +465,15 @@ export default {
       temp: {},
       drawerVisible: false,
       rules: {
-        id: [{ required: true, message: this.$t('i18n.646a518953'), trigger: 'blur' }],
+        id: [{ required: true, message: this.$t('i18n_646a518953'), trigger: 'blur' }],
 
-        name: [{ required: true, message: this.$t('i18n.4371e2b426'), trigger: 'blur' }],
+        name: [{ required: true, message: this.$t('i18n_4371e2b426'), trigger: 'blur' }],
 
-        runMode: [{ required: true, message: this.$t('i18n.4310e9ed7d'), trigger: 'blur' }],
+        runMode: [{ required: true, message: this.$t('i18n_4310e9ed7d'), trigger: 'blur' }],
 
-        whitelistDirectory: [{ required: true, message: this.$t('i18n.1d38b2b2bc'), trigger: 'blur' }],
+        whitelistDirectory: [{ required: true, message: this.$t('i18n_1d38b2b2bc'), trigger: 'blur' }],
 
-        lib: [{ required: true, message: this.$t('i18n.d9657e2b5f'), trigger: 'blur' }]
+        lib: [{ required: true, message: this.$t('i18n_d9657e2b5f'), trigger: 'blur' }]
       },
       linkProjectData: {},
       loading: true,
@@ -587,7 +587,7 @@ export default {
       return new Promise((resolve, reject) => {
         if (this.temp.outGivingProject) {
           $notification.warning({
-            message: this.$t('i18n.869b506d66')
+            message: this.$t('i18n_869b506d66')
           })
           reject(false)
           return

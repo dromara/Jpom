@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="repository-list"
-      :empty-description="$t('i18n.e07cbb381c')"
+      :empty-description="$t('i18n_e07cbb381c')"
       size="middle"
       :columns="columns"
       :data-source="list"
@@ -31,19 +31,19 @@
           <a-input
             v-model:value="listQuery['%name%']"
             class="search-input-item"
-            :placeholder="$t('i18n.f967131d9d')"
+            :placeholder="$t('i18n_f967131d9d')"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%gitUrl%']"
             class="search-input-item"
-            :placeholder="$t('i18n.e4bea943de')"
+            :placeholder="$t('i18n_e4bea943de')"
             @press-enter="loadData"
           />
           <a-select
             v-model:value="listQuery.repoType"
             allow-clear
-            :placeholder="$t('i18n.4ce606413e')"
+            :placeholder="$t('i18n_4ce606413e')"
             class="search-input-item"
           >
             <a-select-option :value="'0'">GIT</a-select-option>
@@ -63,34 +63,34 @@
               }
             "
             allow-clear
-            :placeholder="$t('i18n.829abe5a8d')"
+            :placeholder="$t('i18n_829abe5a8d')"
             class="search-input-item"
           >
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
           </a-select>
 
-          <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
+          <a-tooltip :title="$t('i18n_4838a3bd20')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">{{ $t('i18n.66ab5e9f24') }}</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $t('i18n_66ab5e9f24') }}</a-button>
           <a-tooltip>
-            <template #title> {{ $t('i18n.77c262950c') }} </template>
+            <template #title> {{ $t('i18n_77c262950c') }} </template>
             <a-button type="primary" @click="handleAddGitee"
-              ><QuestionCircleOutlined />{{ $t('i18n.e354969500') }}</a-button
+              ><QuestionCircleOutlined />{{ $t('i18n_e354969500') }}</a-button
             >
           </a-tooltip>
         </a-space>
       </template>
       <template #toolPrefix>
         <a-button type="primary" size="small" @click="handlerExportData"
-          ><DownloadOutlined />{{ $t('i18n.55405ea6ff') }}</a-button
+          ><DownloadOutlined />{{ $t('i18n_55405ea6ff') }}</a-button
         >
         <a-dropdown>
           <template #overlay>
             <a-menu>
               <a-menu-item key="1">
                 <a-button type="primary" size="small" @click="handlerImportTemplate()">{{
-                  $t('i18n.2e505d23f7')
+                  $t('i18n_2e505d23f7')
                 }}</a-button>
               </a-menu-item>
             </a-menu>
@@ -105,7 +105,7 @@
             :before-upload="beforeUpload"
           >
             <a-button type="primary" size="small"
-              ><UploadOutlined /> {{ $t('i18n.8d9a071ee2') }} <DownOutlined />
+              ><UploadOutlined /> {{ $t('i18n_8d9a071ee2') }} <DownOutlined />
             </a-button>
           </a-upload>
         </a-dropdown>
@@ -120,7 +120,7 @@
         <template v-else-if="column.dataIndex === 'repoType'">
           <span v-if="text === 0">GIT</span>
           <span v-else-if="text === 1">SVN</span>
-          <span v-else>{{ $t('i18n.1622dc9b6b') }}</span>
+          <span v-else>{{ $t('i18n_1622dc9b6b') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'protocol'">
           <span v-if="text === 0">HTTP(S)</span>
@@ -129,22 +129,22 @@
           <span v-else>{{ record.gitUrl.indexOf('http') > -1 ? 'HTTP(S)' : 'SSH' }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'workspaceId'">
-          <a-tag v-if="text === 'GLOBAL'">{{ $t('i18n.2be75b1044') }}</a-tag>
-          <a-tag v-else>{{ $t('i18n.98d69f8b62') }}</a-tag>
+          <a-tag v-if="text === 'GLOBAL'">{{ $t('i18n_2be75b1044') }}</a-tag>
+          <a-tag v-else>{{ $t('i18n_98d69f8b62') }}</a-tag>
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button type="primary" size="small" @click="handleEdit(record)">{{ $t('i18n.95b351c862') }}</a-button>
+            <a-button type="primary" size="small" @click="handleEdit(record)">{{ $t('i18n_95b351c862') }}</a-button>
             <a-button v-if="global" type="primary" size="small" @click="viewBuild(record)">{{
-              $t('i18n.1c3cf7f5f0')
+              $t('i18n_1c3cf7f5f0')
             }}</a-button>
             <a-button type="primary" danger size="small" @click="handleDelete(record)">{{
-              $t('i18n.2f4aaddde3')
+              $t('i18n_2f4aaddde3')
             }}</a-button>
 
             <a-dropdown>
               <a @click="(e) => e.preventDefault()">
-                {{ $t('i18n.0ec9eaf9c3') }}
+                {{ $t('i18n_0ec9eaf9c3') }}
                 <DownOutlined />
               </a>
               <template #overlay>
@@ -155,7 +155,7 @@
                       type="primary"
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
                       @click="sortItemHander(record, index, 'top')"
-                      >{{ $t('i18n.3d43ff1199') }}</a-button
+                      >{{ $t('i18n_3d43ff1199') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
@@ -164,7 +164,7 @@
                       type="primary"
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
                       @click="sortItemHander(record, index, 'up')"
-                      >{{ $t('i18n.315eacd193') }}</a-button
+                      >{{ $t('i18n_315eacd193') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
@@ -174,7 +174,7 @@
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total"
                       @click="sortItemHander(record, index, 'down')"
                     >
-                      {{ $t('i18n.17acd250da') }}
+                      {{ $t('i18n_17acd250da') }}
                     </a-button>
                   </a-menu-item>
                 </a-menu>
@@ -190,32 +190,32 @@
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$t('i18n.ed39deafd8')"
+      :title="$t('i18n_ed39deafd8')"
       :mask-closable="false"
       width="60%"
       @ok="handleEditOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-item :label="$t('i18n.f967131d9d')" name="name">
-          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n.f967131d9d')" />
+        <a-form-item :label="$t('i18n_f967131d9d')" name="name">
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n_f967131d9d')" />
         </a-form-item>
-        <a-form-item :label="$t('i18n.829abe5a8d')" name="group">
+        <a-form-item :label="$t('i18n_829abe5a8d')" name="group">
           <custom-select
             v-model:value="temp.group"
             :data="groupList"
-            :input-placeholder="$t('i18n.bd0362bed3')"
-            :select-placeholder="$t('i18n.9cac799f2f')"
+            :input-placeholder="$t('i18n_bd0362bed3')"
+            :select-placeholder="$t('i18n_9cac799f2f')"
           >
           </custom-select>
         </a-form-item>
-        <a-form-item :label="$t('i18n.e4bea943de')" name="gitUrl">
+        <a-form-item :label="$t('i18n_e4bea943de')" name="gitUrl">
           <a-input-group compact>
             <a-form-item-rest>
               <a-select
                 v-model:value="temp.repoType"
                 style="width: 20%"
                 name="repoType"
-                :placeholder="$t('i18n.4ce606413e')"
+                :placeholder="$t('i18n_4ce606413e')"
               >
                 <a-select-option :value="0">GIT</a-select-option>
                 <a-select-option :value="1">SVN</a-select-option>
@@ -225,11 +225,11 @@
               v-model:value="temp.gitUrl"
               style="width: 80%"
               :max-length="250"
-              :placeholder="$t('i18n.e4bea943de')"
+              :placeholder="$t('i18n_e4bea943de')"
             />
           </a-input-group>
         </a-form-item>
-        <a-form-item :label="$t('i18n.faa1ad5e5c')" name="protocol">
+        <a-form-item :label="$t('i18n_faa1ad5e5c')" name="protocol">
           <a-radio-group v-model:value="temp.protocol" name="protocol">
             <a-radio :value="0">HTTP(S)</a-radio>
             <a-radio :value="1">SSH</a-radio>
@@ -240,9 +240,9 @@
           <a-form-item name="userName">
             <template #label>
               <a-tooltip>
-                {{ $t('i18n.7035c62fb0') }}
+                {{ $t('i18n_7035c62fb0') }}
                 <template #title>
-                  {{ $t('i18n.f0a1428f65') }}<b>$ref.wEnv.xxxx</b> xxxx {{ $t('i18n.c1b72e7ded') }}</template
+                  {{ $t('i18n_f0a1428f65') }}<b>$ref.wEnv.xxxx</b> xxxx {{ $t('i18n_c1b72e7ded') }}</template
                 >
                 <QuestionCircleOutlined v-if="!temp.id" />
               </a-tooltip>
@@ -252,7 +252,7 @@
               :input="temp.userName"
               :env-list="envVarList"
               type="text"
-              :placeholder="`${$t('i18n.fc4e2c6151')}`"
+              :placeholder="`${$t('i18n_fc4e2c6151')}`"
               @change="
                 (v) => {
                   temp = { ...temp, userName: v }
@@ -264,9 +264,9 @@
           <a-form-item name="password">
             <template #label>
               <a-tooltip>
-                {{ $t('i18n.a810520460') }}
+                {{ $t('i18n_a810520460') }}
                 <template #title>
-                  {{ $t('i18n.63dd96a28a') }}<b>$ref.wEnv.xxxx</b> xxxx {{ $t('i18n.c1b72e7ded') }}</template
+                  {{ $t('i18n_63dd96a28a') }}<b>$ref.wEnv.xxxx</b> xxxx {{ $t('i18n_c1b72e7ded') }}</template
                 >
                 <QuestionCircleOutlined v-if="!temp.id" />
               </a-tooltip>
@@ -275,7 +275,7 @@
             <custom-input
               :input="temp.password"
               :env-list="envVarList"
-              :placeholder="`${!temp.id ? $t('i18n.2646b813e8') : $t('i18n.b90a30dd20')}`"
+              :placeholder="`${!temp.id ? $t('i18n_2646b813e8') : $t('i18n_b90a30dd20')}`"
               @change="
                 (v) => {
                   temp = { ...temp, password: v }
@@ -284,23 +284,23 @@
             >
             </custom-input>
             <template #help>
-              <a-tooltip v-if="temp.id" :title="$t('i18n.b408105d69')">
+              <a-tooltip v-if="temp.id" :title="$t('i18n_b408105d69')">
                 <a-button style="margin: 5px" size="small" type="primary" danger @click="restHideField(temp)">{{
-                  $t('i18n.4403fca0c0')
+                  $t('i18n_4403fca0c0')
                 }}</a-button>
               </a-tooltip>
             </template>
           </a-form-item>
         </template>
-        <a-form-item v-if="temp.repoType === 1 && temp.protocol === 1" :label="$t('i18n.7035c62fb0')" name="userName">
-          <a-input v-model:value="temp.userName" :placeholder="$t('i18n.f04a289502')">
+        <a-form-item v-if="temp.repoType === 1 && temp.protocol === 1" :label="$t('i18n_7035c62fb0')" name="userName">
+          <a-input v-model:value="temp.userName" :placeholder="$t('i18n_f04a289502')">
             <template #prefix>
               <UserOutlined />
             </template>
             <template #suffix>
-              <a-tooltip v-if="temp.id" :title="$t('i18n.b408105d69')">
+              <a-tooltip v-if="temp.id" :title="$t('i18n_b408105d69')">
                 <a-button size="small" type="primary" danger @click="restHideField(temp)">{{
-                  $t('i18n.4403fca0c0')
+                  $t('i18n_4403fca0c0')
                 }}</a-button>
               </a-tooltip>
             </template>
@@ -311,9 +311,9 @@
           <a-form-item name="password">
             <template #label>
               <a-tooltip>
-                {{ $t('i18n.a810520460') }}
+                {{ $t('i18n_a810520460') }}
                 <template #title>
-                  {{ $t('i18n.63dd96a28a') }}<b>$ref.wEnv.xxxx</b> xxxx {{ $t('i18n.c1b72e7ded') }}</template
+                  {{ $t('i18n_63dd96a28a') }}<b>$ref.wEnv.xxxx</b> xxxx {{ $t('i18n_c1b72e7ded') }}</template
                 >
                 <QuestionCircleOutlined v-if="!temp.id" />
               </a-tooltip>
@@ -321,7 +321,7 @@
             <custom-input
               :input="temp.password"
               :env-list="envVarList"
-              :placeholder="`${$t('i18n.45028ad61d')}`"
+              :placeholder="`${$t('i18n_45028ad61d')}`"
               @change="
                 (v) => {
                   temp = { ...temp, password: v }
@@ -330,26 +330,26 @@
             >
             </custom-input>
           </a-form-item>
-          <a-form-item :label="$t('i18n.d0eddb45e2')" name="rsaPrv">
+          <a-form-item :label="$t('i18n_d0eddb45e2')" name="rsaPrv">
             <a-tooltip placement="topLeft">
               <template #title>
                 <div>
                   <p style="color: #faa">
-                    {{ $t('i18n.43c61e76e7') }} "{{ $t('i18n.3bc5e602b2') }}" {{ $t('i18n.9e560a4162') }} <br />{{
-                      $t('i18n.8c66392870')
+                    {{ $t('i18n_43c61e76e7') }} "{{ $t('i18n_3bc5e602b2') }}" {{ $t('i18n_9e560a4162') }} <br />{{
+                      $t('i18n_8c66392870')
                     }}
-                    "{{ $t('i18n.3bc5e602b2') }}" {{ $t('i18n.d0a864909b') }}<br />
+                    "{{ $t('i18n_3bc5e602b2') }}" {{ $t('i18n_d0a864909b') }}<br />
                   </p>
-                  <p>{{ $t('i18n.8fb7785809') }}</p>
-                  <p>{{ $t('i18n.0af04cdc22') }}</p>
+                  <p>{{ $t('i18n_8fb7785809') }}</p>
+                  <p>{{ $t('i18n_0af04cdc22') }}</p>
                   <p>
-                    1. {{ $t('i18n.f5d0b69533') }}: <br />-----BEGIN RSA PRIVATE KEY-----
+                    1. {{ $t('i18n_f5d0b69533') }}: <br />-----BEGIN RSA PRIVATE KEY-----
                     <br />
                     ..... <br />
                     -----END RSA PRIVATE KEY-----
                   </p>
                   <p>
-                    2. {{ $t('i18n.becc848a54') }}: {{ $t('i18n.4c9bb42608') }}) {{ $t('i18n.bcc4f9e5ca') }}:
+                    2. {{ $t('i18n_becc848a54') }}: {{ $t('i18n_4c9bb42608') }}) {{ $t('i18n_bcc4f9e5ca') }}:
                     <br />file:/Users/Hotstrip/.ssh/id_rsa
                   </p>
                 </div>
@@ -357,31 +357,31 @@
               <a-textarea
                 v-model:value="temp.rsaPrv"
                 :auto-size="{ minRows: 3, maxRows: 3 }"
-                :placeholder="$t('i18n.d7ee59f327')"
+                :placeholder="$t('i18n_d7ee59f327')"
               ></a-textarea>
             </a-tooltip>
           </a-form-item>
           <!-- 公钥暂时没用到 -->
-          <a-form-item v-if="false" :label="$t('i18n.b939d47e23')" name="rsaPub">
+          <a-form-item v-if="false" :label="$t('i18n_b939d47e23')" name="rsaPub">
             <a-textarea
               v-model:value="temp.rsaPub"
               :auto-size="{ minRows: 3, maxRows: 3 }"
-              :placeholder="$t('i18n.db686f0328')"
+              :placeholder="$t('i18n_db686f0328')"
             ></a-textarea>
           </a-form-item>
         </template>
-        <a-form-item v-if="workspaceId !== 'GLOBAL'" :label="$t('i18n.fffd3ce745')" name="global">
+        <a-form-item v-if="workspaceId !== 'GLOBAL'" :label="$t('i18n_fffd3ce745')" name="global">
           <a-radio-group v-model:value="temp.global">
-            <a-radio :value="true"> {{ $t('i18n.2be75b1044') }}</a-radio>
-            <a-radio :value="false"> {{ $t('i18n.691b11e443') }}</a-radio>
+            <a-radio :value="true"> {{ $t('i18n_2be75b1044') }}</a-radio>
+            <a-radio :value="false"> {{ $t('i18n_691b11e443') }}</a-radio>
           </a-radio-group>
         </a-form-item>
 
-        <a-form-item :label="$t('i18n.67425c29a5')" name="timeout">
+        <a-form-item :label="$t('i18n_67425c29a5')" name="timeout">
           <a-input-number
             v-model:value="temp.timeout"
             :min="0"
-            :placeholder="$t('i18n.ea9f824647')"
+            :placeholder="$t('i18n_ea9f824647')"
             style="width: 100%"
           />
         </a-form-item>
@@ -391,7 +391,7 @@
       v-if="giteeImportVisible"
       v-model:open="giteeImportVisible"
       destroy-on-close
-      :title="$t('i18n.c8633b4b77')"
+      :title="$t('i18n_c8633b4b77')"
       width="80%"
       :footer="null"
       :mask-closable="false"
@@ -403,10 +403,10 @@
         :model="giteeImportForm"
         :wrapper-col="{ span: 20 }"
       >
-        <a-form-item name="token" :label="$t('i18n.8ba971a184')" :help="$t('i18n.e30a93415b')">
+        <a-form-item name="token" :label="$t('i18n_8ba971a184')" :help="$t('i18n_e30a93415b')">
           <a-form-item-rest>
             <a-tooltip
-              :title="`${giteeImportForm.type} ${$t('i18n.32d0576d85')}${importTypePlaceholder[giteeImportForm.type]}`"
+              :title="`${giteeImportForm.type} ${$t('i18n_32d0576d85')}${importTypePlaceholder[giteeImportForm.type]}`"
             >
               <a-input-group compact>
                 <a-select v-model:value="giteeImportForm.type" style="width: 10%" @change="importChange">
@@ -427,16 +427,16 @@
             </a-tooltip>
           </a-form-item-rest>
         </a-form-item>
-        <a-form-item name="address" :label="$t('i18n.7650487a87')">
-          <a-input v-model:value="giteeImportForm.address" :placeholder="$t('i18n.9412eb8f99')" />
+        <a-form-item name="address" :label="$t('i18n_7650487a87')">
+          <a-input v-model:value="giteeImportForm.address" :placeholder="$t('i18n_9412eb8f99')" />
         </a-form-item>
         <a-form-item
           v-if="providerData[giteeImportForm.type]?.query"
           name="condition"
-          :label="$t('i18n.e5f71fc31e')"
-          :help="$t('i18n.bf0e1e0c16', { slot1: $t('i18n.e5f71fc31e') })"
+          :label="$t('i18n_e5f71fc31e')"
+          :help="$t('i18n_bf0e1e0c16', { slot1: $t('i18n_e5f71fc31e') })"
         >
-          <a-input v-model:value="giteeImportForm.condition" :placeholder="$t('i18n.e72f2b8806')" />
+          <a-input v-model:value="giteeImportForm.condition" :placeholder="$t('i18n_e72f2b8806')" />
         </a-form-item>
       </a-form>
       <a-table
@@ -476,7 +476,7 @@
 
           <template v-else-if="column.dataIndex === 'operation'">
             <a-button type="primary" size="small" :disabled="record.exists" @click="handleGiteeRepoAdd(record)">{{
-              record.exists ? $t('i18n.cb951984f2') : $t('i18n.66ab5e9f24')
+              record.exists ? $t('i18n_cb951984f2') : $t('i18n_66ab5e9f24')
             }}</a-button>
           </template>
         </template>
@@ -517,7 +517,7 @@
       v-model:open="viewBuildVisible"
       destroy-on-close
       width="80vw"
-      :title="$t('i18n.1c13276448')"
+      :title="$t('i18n_1c13276448')"
       :mask-closable="false"
       :footer="null"
     >
@@ -593,7 +593,7 @@ export default {
 
       columns: [
         {
-          title: this.$t('i18n.f967131d9d'),
+          title: this.$t('i18n_f967131d9d'),
           dataIndex: 'name',
           width: 200,
           sorter: true,
@@ -601,14 +601,14 @@ export default {
           tooltip: true
         },
         {
-          title: this.$t('i18n.b37b786351'),
+          title: this.$t('i18n_b37b786351'),
           dataIndex: 'group',
           ellipsis: true,
           width: '100px',
           tooltip: true
         },
         {
-          title: this.$t('i18n.e4bea943de'),
+          title: this.$t('i18n_e4bea943de'),
           dataIndex: 'gitUrl',
           width: 300,
           sorter: true,
@@ -616,62 +616,62 @@ export default {
           tooltip: true
         },
         {
-          title: this.$t('i18n.4ce606413e'),
+          title: this.$t('i18n_4ce606413e'),
           dataIndex: 'repoType',
           width: 100,
           sorter: true,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.faa1ad5e5c'),
+          title: this.$t('i18n_faa1ad5e5c'),
           dataIndex: 'protocol',
           width: 100,
           sorter: true,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.fffd3ce745'),
+          title: this.$t('i18n_fffd3ce745'),
           dataIndex: 'workspaceId',
           ellipsis: true,
 
           width: '90px'
         },
         {
-          title: this.$t('i18n.95a43eaa59'),
+          title: this.$t('i18n_95a43eaa59'),
           dataIndex: 'createUser',
           ellipsis: true,
           tooltip: true,
           width: '120px'
         },
         {
-          title: this.$t('i18n.9baca0054e'),
+          title: this.$t('i18n_9baca0054e'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           tooltip: true,
           width: '120px'
         },
         {
-          title: this.$t('i18n.eca37cb072'),
+          title: this.$t('i18n_eca37cb072'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
-          title: this.$t('i18n.1303e638b5'),
+          title: this.$t('i18n_1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
-          title: this.$t('i18n.c35c1a1330'),
+          title: this.$t('i18n_c35c1a1330'),
           dataIndex: 'sortValue',
           sorter: true,
           width: '80px'
         },
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
           fixed: 'right',
           align: 'center',
@@ -681,12 +681,12 @@ export default {
 
       reposColumns: [
         {
-          title: this.$t('i18n.f967131d9d'),
+          title: this.$t('i18n_f967131d9d'),
           dataIndex: 'name',
           ellipsis: true
         },
         {
-          title: this.$t('i18n.42b6bd1b2f'),
+          title: this.$t('i18n_42b6bd1b2f'),
           dataIndex: 'full_name',
           ellipsis: true
         },
@@ -697,19 +697,19 @@ export default {
         },
 
         {
-          title: this.$t('i18n.3bdd08adab'),
+          title: this.$t('i18n_3bdd08adab'),
           dataIndex: 'description',
 
           ellipsis: true
         },
         {
-          title: this.$t('i18n.3dc5185d81'),
+          title: this.$t('i18n_3dc5185d81'),
           dataIndex: 'private',
           width: 80,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
           width: 100,
 
@@ -723,21 +723,21 @@ export default {
         address: 'https://gitee.com'
       }),
       giteeImportFormRules: {
-        token: [{ required: true, message: this.$t('i18n.76530bff27'), trigger: 'blur' }]
+        token: [{ required: true, message: this.$t('i18n_76530bff27'), trigger: 'blur' }]
         // address: [{ required: true, message: "请填写平台地址", trigger: "blur" }],
       },
       rules: {
-        name: [{ required: true, message: this.$t('i18n.9f0de3800b'), trigger: 'blur' }],
-        gitUrl: [{ required: true, message: this.$t('i18n.0cf81d77bb'), trigger: 'blur' }]
+        name: [{ required: true, message: this.$t('i18n_9f0de3800b'), trigger: 'blur' }],
+        gitUrl: [{ required: true, message: this.$t('i18n_0cf81d77bb'), trigger: 'blur' }]
       },
       importTypePlaceholder: {
-        gitee: this.$t('i18n.233fb56ab2'),
-        github: this.$t('i18n.4b1835640f'),
-        gitlab_v3: this.$t('i18n.5bd1d267a9'),
-        gitlab: this.$t('i18n.5bd1d267a9'),
-        gitea: this.$t('i18n.cd1aedc667'),
-        gogs: this.$t('i18n.cd1aedc667'),
-        other: this.$t('i18n.76530bff27')
+        gitee: this.$t('i18n_233fb56ab2'),
+        github: this.$t('i18n_4b1835640f'),
+        gitlab_v3: this.$t('i18n_5bd1d267a9'),
+        gitlab: this.$t('i18n_5bd1d267a9'),
+        gitea: this.$t('i18n_cd1aedc667'),
+        gogs: this.$t('i18n_cd1aedc667'),
+        other: this.$t('i18n_76530bff27')
       },
       tableSelections: [],
       envVarList: [],
@@ -945,10 +945,10 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
-        content: this.$t('i18n.7dfc7448ec'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        title: this.$t('i18n_c4535759ee'),
+        content: this.$t('i18n_7dfc7448ec'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         zIndex: 1009,
         onOk: () => {
           return deleteRepository({
@@ -968,10 +968,10 @@ export default {
     // 清除隐藏字段
     restHideField(record) {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
-        content: this.$t('i18n.664c205cc3'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        title: this.$t('i18n_c4535759ee'),
+        content: this.$t('i18n_664c205cc3'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         zIndex: 1009,
         onOk: () => {
           return restHideField(record.id).then((res) => {
@@ -989,21 +989,21 @@ export default {
     // 排序
     sortItemHander(record, index, method) {
       const msgData = {
-        top: this.$t('i18n.0079d91f95'),
-        up: this.$t('i18n.b166a66d67'),
-        down: this.$t('i18n.7a7e25e9eb')
+        top: this.$t('i18n_0079d91f95'),
+        up: this.$t('i18n_b166a66d67'),
+        down: this.$t('i18n_7a7e25e9eb')
       }
-      let msg = msgData[method] || this.$t('i18n.49574eee58')
+      let msg = msgData[method] || this.$t('i18n_49574eee58')
       if (!record.sortValue) {
-        msg += ` ${this.$t('i18n.57c0a41ec6')},${this.$t('i18n.066f903d75')},${this.$t('i18n.c4e2cd2266')}`
+        msg += ` ${this.$t('i18n_57c0a41ec6')},${this.$t('i18n_066f903d75')},${this.$t('i18n_c4e2cd2266')}`
       }
       // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
       const compareId = this.list[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         content: msg,
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         zIndex: 1009,
         onOk: () => {
           return sortItem({
@@ -1027,7 +1027,7 @@ export default {
     handerConfirm() {
       if (!this.tableSelections.length) {
         $notification.warning({
-          message: this.$t('i18n.be381ac957')
+          message: this.$t('i18n_be381ac957')
         })
         return
       }

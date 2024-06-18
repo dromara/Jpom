@@ -3,7 +3,7 @@
   <div>
     <log-view2
       ref="logView"
-      :title-name="$t('i18n.cac26240b5')"
+      :title-name="$t('i18n_cac26240b5')"
       :visible="visible"
       @close="
         () => {
@@ -14,26 +14,26 @@
       <template #before>
         <a-space>
           <div>
-            <a-input-number v-model:value="tail" :placeholder="$t('i18n.5734b2db4e')" style="width: 150px">
+            <a-input-number v-model:value="tail" :placeholder="$t('i18n_5734b2db4e')" style="width: 150px">
               <template #addonBefore>
-                <a-tooltip :title="$t('i18n.25b6c22d8a')">{{ $t('i18n.87eb55155a') }} </a-tooltip>
+                <a-tooltip :title="$t('i18n_25b6c22d8a')">{{ $t('i18n_87eb55155a') }} </a-tooltip>
               </template>
             </a-input-number>
           </div>
           <div>
-            {{ $t('i18n.d731dc9325') }}
+            {{ $t('i18n_d731dc9325') }}
             <a-switch
               v-model:checked="timestamps"
-              :checked-children="$t('i18n.4d775d4cd7')"
-              :un-checked-children="$t('i18n.2064fc6808')"
+              :checked-children="$t('i18n_4d775d4cd7')"
+              :un-checked-children="$t('i18n_2064fc6808')"
             />
           </div>
           <a-button type="primary" size="small" @click="initWebSocket"
-            ><ReloadOutlined /> {{ $t('i18n.694fc5efa9') }}
+            ><ReloadOutlined /> {{ $t('i18n_694fc5efa9') }}
           </a-button>
           |
           <a-button type="primary" :disabled="!logId" size="small" @click="download">
-            <DownloadOutlined /> {{ $t('i18n.f26ef91424') }}
+            <DownloadOutlined /> {{ $t('i18n_f26ef91424') }}
           </a-button>
           |
         </a-space>
@@ -125,7 +125,7 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: `web socket ${this.$t('i18n.7030ff6470')},${this.$t('i18n.226a6f9cdd')}`
+          message: `web socket ${this.$t('i18n_7030ff6470')},${this.$t('i18n_226a6f9cdd')}`
         })
         clearInterval(this.heart)
       }
@@ -133,7 +133,7 @@ export default {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
         clearInterval(this.heart)
-        $message.warning(this.$t('i18n.948171025e'))
+        $message.warning(this.$t('i18n_948171025e'))
       }
       this.socket.onmessage = (msg) => {
         if (msg.data.indexOf('code') > -1 && msg.data.indexOf('msg') > -1) {

@@ -124,7 +124,7 @@ export function importData(formData) {
 }
 
 export const statusMap = {
-  0: { desc: t('i18n.757a730c9e'), color: 'red' },
-  1: { desc: t('i18n.fd6e80f1e0'), color: 'green' },
-  2: { desc: t('i18n.46158d0d6e'), color: 'orange' }
+  0: { desc: t('i18n_757a730c9e'), color: 'red' },
+  1: { desc: t('i18n_fd6e80f1e0'), color: 'green' },
+  2: { desc: t('i18n_46158d0d6e'), color: 'orange' }
 }

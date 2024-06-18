@@ -24,40 +24,40 @@
           <a-space>
             <a-input
               v-model:value="listQuery['%name%']"
-              :placeholder="$t('i18n.d2e2560089')"
+              :placeholder="$t('i18n_d2e2560089')"
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['%aliasCode%']"
-              :placeholder="$t('i18n.2f5e828ecd')"
+              :placeholder="$t('i18n_2f5e828ecd')"
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['extName']"
-              :placeholder="$t('i18n.ae809e0295')"
+              :placeholder="$t('i18n_ae809e0295')"
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['id']"
-              :placeholder="$t('i18n.2168394b82')"
+              :placeholder="$t('i18n_2168394b82')"
               class="search-input-item"
               @press-enter="loadData"
             />
-            <a-tooltip :title="$t('i18n.4838a3bd20')">
-              <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
+            <a-tooltip :title="$t('i18n_4838a3bd20')">
+              <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
             </a-tooltip>
-            <a-button type="primary" @click="handleUpload">{{ $t('i18n.a6fc9e3ae6') }}</a-button>
-            <a-button type="primary" @click="handleRemoteDownload">{{ $t('i18n.bd7043cae3') }}</a-button>
+            <a-button type="primary" @click="handleUpload">{{ $t('i18n_a6fc9e3ae6') }}</a-button>
+            <a-button type="primary" @click="handleRemoteDownload">{{ $t('i18n_bd7043cae3') }}</a-button>
             <a-button
               type="primary"
               danger
               :disabled="!tableSelections || tableSelections.length <= 0"
               @click="handleBatchDelete"
             >
-              {{ $t('i18n.7fb62b3011') }}
+              {{ $t('i18n_7fb62b3011') }}
             </a-button>
           </a-space>
         </template>
@@ -74,14 +74,14 @@
             </a-tooltip>
           </template>
           <template v-else-if="column.dataIndex === 'name'">
-            <a-popover :title="$t('i18n.73485331c2')">
+            <a-popover :title="$t('i18n_73485331c2')">
               <template #content>
-                <p>{{ $t('i18n.b9c52d9a85') }}{{ text }}</p>
-                <p>{{ $t('i18n.46a04cdc9c') }}{{ record.description }}</p>
+                <p>{{ $t('i18n_b9c52d9a85') }}{{ text }}</p>
+                <p>{{ $t('i18n_46a04cdc9c') }}{{ record.description }}</p>
                 <p v-if="record.status !== undefined">
-                  {{ $t('i18n.53365c29c8') }}{{ statusMap[record.status] || $t('i18n.1622dc9b6b') }}
+                  {{ $t('i18n_53365c29c8') }}{{ statusMap[record.status] || $t('i18n_1622dc9b6b') }}
                 </p>
-                <p v-if="record.progressDesc">{{ $t('i18n.fb3a2241bb') }}{{ record.progressDesc }}</p>
+                <p v-if="record.progressDesc">{{ $t('i18n_fb3a2241bb') }}{{ record.progressDesc }}</p>
               </template>
               <!-- {{ text }} -->
               <a-button type="link" style="padding: 0" size="small" @click="handleEdit(record)">{{ text }}</a-button>
@@ -94,30 +94,30 @@
             </a-tooltip>
           </template>
           <template v-else-if="column.dataIndex === 'source'">
-            <a-tooltip placement="topLeft" :title="sourceMap[text] || $t('i18n.1622dc9b6b')">
-              <span>{{ sourceMap[text] || $t('i18n.1622dc9b6b') }}</span>
+            <a-tooltip placement="topLeft" :title="sourceMap[text] || $t('i18n_1622dc9b6b')">
+              <span>{{ sourceMap[text] || $t('i18n_1622dc9b6b') }}</span>
             </a-tooltip>
           </template>
 
           <template v-else-if="column.dataIndex === 'exists'">
-            <a-tag v-if="text" color="green">{{ $t('i18n.df9497ea98') }}</a-tag>
-            <a-tag v-else color="red">{{ $t('i18n.162e219f6d') }}</a-tag>
+            <a-tag v-if="text" color="green">{{ $t('i18n_df9497ea98') }}</a-tag>
+            <a-tag v-else color="red">{{ $t('i18n_162e219f6d') }}</a-tag>
           </template>
           <template v-else-if="column.dataIndex === 'workspaceId'">
-            <a-tag v-if="text === 'GLOBAL'">{{ $t('i18n.2be75b1044') }}</a-tag>
-            <a-tag v-else>{{ $t('i18n.98d69f8b62') }}</a-tag>
+            <a-tag v-if="text === 'GLOBAL'">{{ $t('i18n_2be75b1044') }}</a-tag>
+            <a-tag v-else>{{ $t('i18n_98d69f8b62') }}</a-tag>
           </template>
           <template v-else-if="column.dataIndex === 'operation'">
             <a-space>
               <!-- <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button> -->
               <a-button size="small" :disabled="!record.exists" type="primary" @click="handleDownloadUrl(record)">{{
-                $t('i18n.f26ef91424')
+                $t('i18n_f26ef91424')
               }}</a-button>
               <a-button size="small" :disabled="!record.exists" type="primary" @click="handleReleaseFile(record)">{{
-                $t('i18n.83611abd5f')
+                $t('i18n_83611abd5f')
               }}</a-button>
               <a-button type="primary" danger size="small" @click="handleDelete(record)">{{
-                $t('i18n.2f4aaddde3')
+                $t('i18n_2f4aaddde3')
               }}</a-button>
             </a-space>
           </template>
@@ -132,18 +132,18 @@
         :closable="!uploading"
         :footer="uploading ? null : undefined"
         :keyboard="false"
-        :title="`${$t('i18n.a6fc9e3ae6')}`"
+        :title="`${$t('i18n_a6fc9e3ae6')}`"
         :mask-closable="false"
         @ok="handleUploadOk"
       >
         <a-form ref="form" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-          <a-form-item :label="$t('i18n.fd7e0c997d')" name="file">
+          <a-form-item :label="$t('i18n_fd7e0c997d')" name="file">
             <a-progress v-if="percentage" :percent="percentage">
               <template #format="percent">
                 {{ percent }}%
                 <template v-if="percentageInfo.total"> ({{ renderSize(percentageInfo.total) }}) </template>
                 <template v-if="percentageInfo.duration">
-                  {{ $t('i18n.e710da3487') }}:{{ formatDuration(percentageInfo.duration) }}
+                  {{ $t('i18n_e710da3487') }}:{{ formatDuration(percentageInfo.duration) }}
                 </template>
               </template>
             </a-progress>
@@ -166,28 +166,28 @@
               "
             >
               <LoadingOutlined v-if="percentage" />
-              <a-button v-else type="primary"><UploadOutlined />{{ $t('i18n.fd7e0c997d') }}</a-button>
+              <a-button v-else type="primary"><UploadOutlined />{{ $t('i18n_fd7e0c997d') }}</a-button>
             </a-upload>
           </a-form-item>
-          <a-form-item :label="$t('i18n.824607be6b')" name="keepDay">
+          <a-form-item :label="$t('i18n_824607be6b')" name="keepDay">
             <a-input-number
               v-model:value="temp.keepDay"
               :min="1"
               style="width: 100%"
-              :placeholder="$t('i18n.e9ea1e7c02')"
+              :placeholder="$t('i18n_e9ea1e7c02')"
             />
           </a-form-item>
-          <a-form-item :label="$t('i18n.3a6970ac26')" name="global">
+          <a-form-item :label="$t('i18n_3a6970ac26')" name="global">
             <a-radio-group v-model:value="temp.global">
-              <a-radio :value="true"> {{ $t('i18n.2be75b1044') }} </a-radio>
-              <a-radio :value="false"> {{ $t('i18n.691b11e443') }} </a-radio>
+              <a-radio :value="true"> {{ $t('i18n_2be75b1044') }} </a-radio>
+              <a-radio :value="false"> {{ $t('i18n_691b11e443') }} </a-radio>
             </a-radio-group>
           </a-form-item>
-          <a-form-item :label="$t('i18n.2f5e828ecd')" name="aliasCode" :help="$t('i18n.41638b0a48')">
+          <a-form-item :label="$t('i18n_2f5e828ecd')" name="aliasCode" :help="$t('i18n_41638b0a48')">
             <a-input-search
               v-model:value="temp.aliasCode"
               :max-length="50"
-              :placeholder="$t('i18n.8fbcdbc785')"
+              :placeholder="$t('i18n_8fbcdbc785')"
               @search="
                 () => {
                   temp = { ...temp, aliasCode: randomStr(6) }
@@ -195,12 +195,12 @@
               "
             >
               <template #enterButton>
-                <a-button type="primary"> {{ $t('i18n.6709f4548f') }} </a-button>
+                <a-button type="primary"> {{ $t('i18n_6709f4548f') }} </a-button>
               </template>
             </a-input-search>
           </a-form-item>
-          <a-form-item :label="$t('i18n.8d6f38b4b1')" name="description">
-            <a-textarea v-model:value="temp.description" :placeholder="$t('i18n.411672c954')" />
+          <a-form-item :label="$t('i18n_8d6f38b4b1')" name="description">
+            <a-textarea v-model:value="temp.description" :placeholder="$t('i18n_411672c954')" />
           </a-form-item>
         </a-form>
       </CustomModal>
@@ -210,33 +210,33 @@
         v-model:open="editVisible"
         destroy-on-close
         :confirm-loading="confirmLoading"
-        :title="`${$t('i18n.5c3b53e66c')}`"
+        :title="`${$t('i18n_5c3b53e66c')}`"
         :mask-closable="false"
         @ok="handleEditOk"
       >
         <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-          <a-form-item :label="$t('i18n.29139c2a1a')" name="name">
-            <a-input v-model:value="temp.name" :placeholder="$t('i18n.29139c2a1a')" />
+          <a-form-item :label="$t('i18n_29139c2a1a')" name="name">
+            <a-input v-model:value="temp.name" :placeholder="$t('i18n_29139c2a1a')" />
           </a-form-item>
-          <a-form-item :label="$t('i18n.824607be6b')" name="keepDay">
+          <a-form-item :label="$t('i18n_824607be6b')" name="keepDay">
             <a-input-number
               v-model:value="temp.keepDay"
               :min="1"
               style="width: 100%"
-              :placeholder="$t('i18n.e9ea1e7c02')"
+              :placeholder="$t('i18n_e9ea1e7c02')"
             />
           </a-form-item>
-          <a-form-item :label="$t('i18n.3a6970ac26')" name="global">
+          <a-form-item :label="$t('i18n_3a6970ac26')" name="global">
             <a-radio-group v-model:value="temp.global">
-              <a-radio :value="true"> {{ $t('i18n.2be75b1044') }} </a-radio>
-              <a-radio :value="false"> {{ $t('i18n.691b11e443') }} </a-radio>
+              <a-radio :value="true"> {{ $t('i18n_2be75b1044') }} </a-radio>
+              <a-radio :value="false"> {{ $t('i18n_691b11e443') }} </a-radio>
             </a-radio-group>
           </a-form-item>
-          <a-form-item :label="$t('i18n.2f5e828ecd')" name="aliasCode" :help="$t('i18n.41638b0a48')">
+          <a-form-item :label="$t('i18n_2f5e828ecd')" name="aliasCode" :help="$t('i18n_41638b0a48')">
             <a-input-search
               v-model:value="temp.aliasCode"
               :max-length="50"
-              :placeholder="$t('i18n.8fbcdbc785')"
+              :placeholder="$t('i18n_8fbcdbc785')"
               @search="
                 () => {
                   temp = { ...temp, aliasCode: randomStr(6) }
@@ -244,12 +244,12 @@
               "
             >
               <template #enterButton>
-                <a-button type="primary"> {{ $t('i18n.6709f4548f') }} </a-button>
+                <a-button type="primary"> {{ $t('i18n_6709f4548f') }} </a-button>
               </template>
             </a-input-search>
           </a-form-item>
-          <a-form-item :label="$t('i18n.8d6f38b4b1')" name="description">
-            <a-textarea v-model:value="temp.description" :placeholder="$t('i18n.411672c954')" />
+          <a-form-item :label="$t('i18n_8d6f38b4b1')" name="description">
+            <a-textarea v-model:value="temp.description" :placeholder="$t('i18n_411672c954')" />
           </a-form-item>
         </a-form>
       </CustomModal>
@@ -258,34 +258,34 @@
         v-if="uploadRemoteFileVisible"
         v-model:open="uploadRemoteFileVisible"
         destroy-on-close
-        :title="$t('i18n.5d488af335')"
+        :title="$t('i18n_5d488af335')"
         :mask-closable="false"
         :confirm-loading="confirmLoading"
         @ok="handleRemoteUpload"
       >
         <a-form ref="remoteForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }" :rules="rules">
-          <a-form-item :label="$t('i18n.a66fff7541')" name="url">
-            <a-input v-model:value="temp.url" :placeholder="$t('i18n.7457228a61')" />
+          <a-form-item :label="$t('i18n_a66fff7541')" name="url">
+            <a-input v-model:value="temp.url" :placeholder="$t('i18n_7457228a61')" />
           </a-form-item>
-          <a-form-item :label="$t('i18n.824607be6b')" name="keepDay">
+          <a-form-item :label="$t('i18n_824607be6b')" name="keepDay">
             <a-input-number
               v-model:value="temp.keepDay"
               :min="1"
               style="width: 100%"
-              :placeholder="$t('i18n.e9ea1e7c02')"
+              :placeholder="$t('i18n_e9ea1e7c02')"
             />
           </a-form-item>
-          <a-form-item :label="$t('i18n.3a6970ac26')" name="global">
+          <a-form-item :label="$t('i18n_3a6970ac26')" name="global">
             <a-radio-group v-model:value="temp.global">
-              <a-radio :value="true"> {{ $t('i18n.2be75b1044') }} </a-radio>
-              <a-radio :value="false"> {{ $t('i18n.691b11e443') }} </a-radio>
+              <a-radio :value="true"> {{ $t('i18n_2be75b1044') }} </a-radio>
+              <a-radio :value="false"> {{ $t('i18n_691b11e443') }} </a-radio>
             </a-radio-group>
           </a-form-item>
-          <a-form-item :label="$t('i18n.2f5e828ecd')" name="aliasCode" :help="$t('i18n.41638b0a48')">
+          <a-form-item :label="$t('i18n_2f5e828ecd')" name="aliasCode" :help="$t('i18n_41638b0a48')">
             <a-input-search
               v-model:value="temp.aliasCode"
               :max-length="50"
-              :placeholder="$t('i18n.8fbcdbc785')"
+              :placeholder="$t('i18n_8fbcdbc785')"
               @search="
                 () => {
                   temp = { ...temp, aliasCode: randomStr(6) }
@@ -293,12 +293,12 @@
               "
             >
               <template #enterButton>
-                <a-button type="primary"> {{ $t('i18n.6709f4548f') }} </a-button>
+                <a-button type="primary"> {{ $t('i18n_6709f4548f') }} </a-button>
               </template>
             </a-input-search>
           </a-form-item>
-          <a-form-item :label="$t('i18n.8d6f38b4b1')" name="description">
-            <a-textarea v-model:value="temp.description" :placeholder="$t('i18n.411672c954')" />
+          <a-form-item :label="$t('i18n_8d6f38b4b1')" name="description">
+            <a-textarea v-model:value="temp.description" :placeholder="$t('i18n_411672c954')" />
           </a-form-item>
         </a-form>
       </CustomModal>
@@ -307,7 +307,7 @@
         v-if="triggerVisible"
         v-model:open="triggerVisible"
         destroy-on-close
-        :title="$t('i18n.e7e8d4c1fb')"
+        :title="$t('i18n_e7e8d4c1fb')"
         width="50%"
         :footer="null"
         :mask-closable="false"
@@ -315,13 +315,13 @@
         <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
           <a-tabs default-active-key="1">
             <template #rightExtra>
-              <a-tooltip :title="$t('i18n.84415a6bb1')">
-                <a-button type="primary" size="small" @click="resetTrigger">{{ $t('i18n.4b9c3271dc') }}</a-button>
+              <a-tooltip :title="$t('i18n_84415a6bb1')">
+                <a-button type="primary" size="small" @click="resetTrigger">{{ $t('i18n_4b9c3271dc') }}</a-button>
               </a-tooltip>
             </template>
-            <a-tab-pane key="1" :tab="$t('i18n.0b58866c3e')">
+            <a-tab-pane key="1" :tab="$t('i18n_0b58866c3e')">
               <a-space direction="vertical" style="width: 100%">
-                <a-alert type="info" :message="`${$t('i18n.d911cffcd5')}(${$t('i18n.00a070c696')})`">
+                <a-alert type="info" :message="`${$t('i18n_d911cffcd5')}(${$t('i18n_00a070c696')})`">
                   <template #description>
                     <a-typography-paragraph :copyable="{ tooltip: false, text: temp.triggerDownloadUrl }">
                       <a-tag>GET</a-tag>
@@ -330,26 +330,26 @@
                   </template>
                 </a-alert>
                 <a :href="temp.triggerDownloadUrl" target="_blank">
-                  <a-button size="small" type="primary"><DownloadOutlined />{{ $t('i18n.2a813bc3eb') }}</a-button>
+                  <a-button size="small" type="primary"><DownloadOutlined />{{ $t('i18n_2a813bc3eb') }}</a-button>
                 </a>
               </a-space>
             </a-tab-pane>
-            <a-tab-pane v-if="temp.triggerAliasDownloadUrl" :tab="$t('i18n.d61af4e686')">
+            <a-tab-pane v-if="temp.triggerAliasDownloadUrl" :tab="$t('i18n_d61af4e686')">
               <a-space direction="vertical" style="width: 100%">
-                <a-alert :message="$t('i18n.947d983961')" type="warning">
+                <a-alert :message="$t('i18n_947d983961')" type="warning">
                   <template #description>
                     <ul>
                       <li>
-                        {{ $t('i18n.ac762710a5') }}=createTimeMillis:desc
+                        {{ $t('i18n_ac762710a5') }}=createTimeMillis:desc
 
-                        <p>{{ $t('i18n.35fbad84cb') }}</p>
+                        <p>{{ $t('i18n_35fbad84cb') }}</p>
                       </li>
-                      <li>{{ $t('i18n.c83752739f') }}</li>
-                      <li>{{ $t('i18n.4055a1ee9c') }}</li>
+                      <li>{{ $t('i18n_c83752739f') }}</li>
+                      <li>{{ $t('i18n_4055a1ee9c') }}</li>
                     </ul>
                   </template>
                 </a-alert>
-                <a-alert type="info" :message="`${$t('i18n.d911cffcd5')}(${$t('i18n.00a070c696')})`">
+                <a-alert type="info" :message="`${$t('i18n_d911cffcd5')}(${$t('i18n_00a070c696')})`">
                   <template #description>
                     <a-typography-paragraph :copyable="{ tooltip: false, text: temp.triggerAliasDownloadUrl }">
                       <a-tag>GET</a-tag>
@@ -358,7 +358,7 @@
                   </template>
                 </a-alert>
                 <a :href="temp.triggerAliasDownloadUrl" target="_blank">
-                  <a-button size="small" type="primary"><DownloadOutlined />{{ $t('i18n.2a813bc3eb') }}</a-button>
+                  <a-button size="small" type="primary"><DownloadOutlined />{{ $t('i18n_2a813bc3eb') }}</a-button>
                 </a>
               </a-space>
             </a-tab-pane>
@@ -371,7 +371,7 @@
         v-model:open="releaseFileVisible"
         destroy-on-close
         :confirm-loading="confirmLoading"
-        :title="$t('i18n.7e930b95ef')"
+        :title="$t('i18n_7e930b95ef')"
         width="70%"
         :mask-closable="false"
         @ok="releaseFileOk()"
@@ -402,10 +402,10 @@
               }
             "
           >
-            {{ $t('i18n.625fb26b4b') }}
+            {{ $t('i18n_625fb26b4b') }}
           </a-button>
           <a-button type="primary" @click="handerConfirm">
-            {{ $t('i18n.38cf16f220') }}
+            {{ $t('i18n_38cf16f220') }}
           </a-button>
         </a-space>
       </div>
@@ -459,26 +459,26 @@ export default {
       list: [],
       columns: [
         {
-          title: this.$t('i18n.c11eb9deff'),
+          title: this.$t('i18n_c11eb9deff'),
           dataIndex: 'id',
           ellipsis: true,
           width: 100
         },
         {
-          title: this.$t('i18n.d7ec2d3fea'),
+          title: this.$t('i18n_d7ec2d3fea'),
           dataIndex: 'name',
           ellipsis: true,
           width: 150
         },
         {
-          title: this.$t('i18n.2f5e828ecd'),
+          title: this.$t('i18n_2f5e828ecd'),
           dataIndex: 'aliasCode',
           ellipsis: true,
           width: 100,
           tooltip: true
         },
         {
-          title: this.$t('i18n.58f9666705'),
+          title: this.$t('i18n_58f9666705'),
           dataIndex: 'size',
           sorter: true,
           ellipsis: true,
@@ -486,28 +486,28 @@ export default {
           width: '100px'
         },
         {
-          title: this.$t('i18n.242d641eab'),
+          title: this.$t('i18n_242d641eab'),
           dataIndex: 'extName',
           ellipsis: true,
           tooltip: true,
           width: '80px'
         },
         {
-          title: this.$t('i18n.fffd3ce745'),
+          title: this.$t('i18n_fffd3ce745'),
           dataIndex: 'workspaceId',
           ellipsis: true,
 
           width: '90px'
         },
         {
-          title: this.$t('i18n.26ca20b161'),
+          title: this.$t('i18n_26ca20b161'),
           dataIndex: 'source',
           ellipsis: true,
 
           width: '80px'
         },
         {
-          title: this.$t('i18n.eaa5d7cb9b'),
+          title: this.$t('i18n_eaa5d7cb9b'),
           dataIndex: 'validUntil',
           sorter: true,
           customRender: ({ text }) => {
@@ -519,42 +519,42 @@ export default {
           width: '100px'
         },
         {
-          title: this.$t('i18n.a3d0154996'),
+          title: this.$t('i18n_a3d0154996'),
           dataIndex: 'exists',
           ellipsis: true,
 
           width: '80px'
         },
         {
-          title: this.$t('i18n.95a43eaa59'),
+          title: this.$t('i18n_95a43eaa59'),
           dataIndex: 'createUser',
           ellipsis: true,
           tooltip: true,
           width: '120px'
         },
         {
-          title: this.$t('i18n.9baca0054e'),
+          title: this.$t('i18n_9baca0054e'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           tooltip: true,
           width: '120px'
         },
         {
-          title: this.$t('i18n.eca37cb072'),
+          title: this.$t('i18n_eca37cb072'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
-          title: this.$t('i18n.1303e638b5'),
+          title: this.$t('i18n_1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
           align: 'center',
           ellipsis: true,
@@ -565,8 +565,8 @@ export default {
       ],
 
       rules: {
-        name: [{ required: true, message: this.$t('i18n.7aa81d1573'), trigger: 'blur' }],
-        url: [{ required: true, message: this.$t('i18n.f4dd45fca9'), trigger: 'blur' }]
+        name: [{ required: true, message: this.$t('i18n_7aa81d1573'), trigger: 'blur' }],
+        url: [{ required: true, message: this.$t('i18n_f4dd45fca9'), trigger: 'blur' }]
       },
 
       temp: {},
@@ -635,7 +635,7 @@ export default {
         // 判断文件
         if (this.fileList.length === 0) {
           $notification.success({
-            message: this.$t('i18n.9febf31146')
+            message: this.$t('i18n_9febf31146')
           })
           return false
         }
@@ -663,9 +663,9 @@ export default {
                   if (res.data) {
                     //
                     $notification.warning({
-                      message: `${this.$t('i18n.a17b5ab021')},${this.$t('i18n.b9c52d9a85')}${res.data.name} ,${this.$t(
-                        'i18n.ee992d9744'
-                      )}${res.data.workspaceId === 'GLOBAL' ? this.$t('i18n.0a60ac8f02') : this.$t('i18n.c9744f45e7')}`
+                      message: `${this.$t('i18n_a17b5ab021')},${this.$t('i18n_b9c52d9a85')}${res.data.name} ,${this.$t(
+                        'i18n_ee992d9744'
+                      )}${res.data.workspaceId === 'GLOBAL' ? this.$t('i18n_0a60ac8f02') : this.$t('i18n_c9744f45e7')}`
                     })
                     //
                     this.uploading = false
@@ -769,11 +769,11 @@ export default {
     // 删除文件
     handleDelete(record) {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.3787283bf4') + record.name,
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_3787283bf4') + record.name,
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return delFile({
             id: record.id
@@ -792,16 +792,16 @@ export default {
     handleBatchDelete() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
         $notification.error({
-          message: this.$t('i18n.5d817c403e')
+          message: this.$t('i18n_5d817c403e')
         })
         return
       }
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.52d24791ab'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_52d24791ab'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return delFile({ ids: this.tableSelections.join(',') }).then((res) => {
             if (res.code === 200) {
@@ -915,7 +915,7 @@ export default {
     handerConfirm() {
       if (!this.tableSelections.length) {
         $notification.warning({
-          message: this.$t('i18n.8d62b202d9')
+          message: this.$t('i18n_8d62b202d9')
         })
         return
       }
@@ -924,7 +924,7 @@ export default {
       })
       if (!selectData.length) {
         $notification.warning({
-          message: this.$t('i18n.8d62b202d9')
+          message: this.$t('i18n_8d62b202d9')
         })
         return
       }

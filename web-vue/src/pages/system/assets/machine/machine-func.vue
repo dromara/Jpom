@@ -25,13 +25,13 @@
               margin: '0'
             }"
           >
-            <a-tab-pane key="info" :tab="$t('i18n.9e5ffa068e')"></a-tab-pane>
-            <a-tab-pane key="cache" :tab="$t('i18n.e976b537f1')"></a-tab-pane>
-            <a-tab-pane key="config" :tab="$t('i18n.787fdcca55')"></a-tab-pane>
-            <a-tab-pane key="freeScript" :tab="$t('i18n.7760785daf')"></a-tab-pane>
-            <a-tab-pane key="path-config" :tab="$t('i18n.3d48c9da09')"></a-tab-pane>
-            <a-tab-pane key="upgrade" :tab="$t('i18n.da8cb77838')"></a-tab-pane>
-            <a-tab-pane key="log" :tab="$t('i18n.84aa0038cf')"></a-tab-pane>
+            <a-tab-pane key="info" :tab="$t('i18n_9e5ffa068e')"></a-tab-pane>
+            <a-tab-pane key="cache" :tab="$t('i18n_e976b537f1')"></a-tab-pane>
+            <a-tab-pane key="config" :tab="$t('i18n_787fdcca55')"></a-tab-pane>
+            <a-tab-pane key="freeScript" :tab="$t('i18n_7760785daf')"></a-tab-pane>
+            <a-tab-pane key="path-config" :tab="$t('i18n_3d48c9da09')"></a-tab-pane>
+            <a-tab-pane key="upgrade" :tab="$t('i18n_da8cb77838')"></a-tab-pane>
+            <a-tab-pane key="log" :tab="$t('i18n_84aa0038cf')"></a-tab-pane>
           </a-tabs>
         </div>
       </a-space>

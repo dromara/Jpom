@@ -15,25 +15,25 @@
           <a-input
             v-if="!serviceId"
             v-model:value="listQuery['serviceId']"
-            :placeholder="$t('i18n.dbb166cf29')"
+            :placeholder="$t('i18n_dbb166cf29')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['taskName']"
-            :placeholder="$t('i18n.78caf7115c')"
+            :placeholder="$t('i18n_78caf7115c')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['taskId']"
-            :placeholder="$t('i18n.ac0158db83')"
+            :placeholder="$t('i18n_ac0158db83')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['taskNode']"
-            :placeholder="$t('i18n.c90a1f37ce')"
+            :placeholder="$t('i18n_c90a1f37ce')"
             class="search-input-item"
             @press-enter="loadData"
           />
@@ -53,17 +53,17 @@
                 }
               "
               allow-clear
-              :placeholder="$t('i18n.3fea7ca76c')"
+              :placeholder="$t('i18n_3fea7ca76c')"
               class="search-input-item"
             >
               <a-select-option v-for="(item, key) in TASK_STATE" :key="key">{{ item }}- {{ key }}</a-select-option>
-              <a-select-option value="">{{ $t('i18n.3fea7ca76c') }}</a-select-option>
+              <a-select-option value="">{{ $t('i18n_3fea7ca76c') }}</a-select-option>
             </a-select>
           </a-tooltip>
-          <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
-          <a-statistic-countdown format="s" :title="$t('i18n.0f8403d07e')" :value="countdownTime" @finish="loadData">
+          <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
+          <a-statistic-countdown format="s" :title="$t('i18n_0f8403d07e')" :value="countdownTime" @finish="loadData">
             <template #suffix>
-              <div style="font-size: 12px">{{ $t('i18n.ee6ce96abb') }}</div>
+              <div style="font-size: 12px">{{ $t('i18n_ee6ce96abb') }}</div>
             </template>
           </a-statistic-countdown>
         </a-space>
@@ -84,21 +84,21 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'desiredState'">
-          <a-popover :title="`${$t('i18n.ec989813ed')}${TASK_STATE[text]}`" placement="topLeft">
+          <a-popover :title="`${$t('i18n_ec989813ed')}${TASK_STATE[text]}`" placement="topLeft">
             <template #content>
               <p>
-                {{ $t('i18n.e703c7367c') }}<a-tag>{{ text }}-{{ TASK_STATE[text] }}</a-tag>
+                {{ $t('i18n_e703c7367c') }}<a-tag>{{ text }}-{{ TASK_STATE[text] }}</a-tag>
               </p>
-              <p v-if="record.status && record.status.err">{{ $t('i18n.f66335b5bf') }}{{ record.status.err }}</p>
+              <p v-if="record.status && record.status.err">{{ $t('i18n_f66335b5bf') }}{{ record.status.err }}</p>
               <p v-if="record.status && record.status.state">
-                {{ $t('i18n.bec98b4d6a') }}<a-tag>{{ record.status.state }}</a-tag>
+                {{ $t('i18n_bec98b4d6a') }}<a-tag>{{ record.status.state }}</a-tag>
               </p>
 
               <p v-if="record.status && record.status.message">
-                {{ $t('i18n.a90cf0796b') }}<a-tag>{{ record.status.message }} </a-tag>
+                {{ $t('i18n_a90cf0796b') }}<a-tag>{{ record.status.message }} </a-tag>
               </p>
               <p v-if="record.status && record.status.timestamp">
-                {{ $t('i18n.780fb9f3d0') }}<a-tag>{{ parseTime(record.status.timestamp) }} </a-tag>
+                {{ $t('i18n_780fb9f3d0') }}<a-tag>{{ parseTime(record.status.timestamp) }} </a-tag>
               </p>
             </template>
 
@@ -122,7 +122,7 @@
         <template v-else-if="column.dataIndex === 'updatedAt'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$t('i18n.bf94b97d1a')}${text} ${$t('i18n.312f45014a')}${record.createdAt}`"
+            :title="`${$t('i18n_bf94b97d1a')}${text} ${$t('i18n_312f45014a')}${record.createdAt}`"
           >
             <span>
               {{ parseTime(text) }}
@@ -132,7 +132,7 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleLog(record)">{{ $t('i18n.456d29ef8b') }}</a-button>
+            <a-button size="small" type="primary" @click="handleLog(record)">{{ $t('i18n_456d29ef8b') }}</a-button>
           </a-space>
         </template>
       </template>
@@ -193,37 +193,37 @@ export default {
       autoUpdateTime: null,
       logVisible: 0,
       rules: {
-        role: [{ required: true, message: this.$t('i18n.9d7d471b77'), trigger: 'blur' }],
-        availability: [{ required: true, message: this.$t('i18n.4c7c58b208'), trigger: 'blur' }]
+        role: [{ required: true, message: this.$t('i18n_9d7d471b77'), trigger: 'blur' }],
+        availability: [{ required: true, message: this.$t('i18n_4c7c58b208'), trigger: 'blur' }]
       },
       columns: [
         {
-          title: this.$t('i18n.faaadc447b'),
+          title: this.$t('i18n_faaadc447b'),
           width: '80px',
           ellipsis: true,
           align: 'center',
           customRender: ({ index }) => `${index + 1}`
         },
         {
-          title: this.$t('i18n.6da242ea50'),
+          title: this.$t('i18n_6da242ea50'),
           dataIndex: 'id',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('i18n.a472019766'),
+          title: this.$t('i18n_a472019766'),
           dataIndex: 'nodeId',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('i18n.b7ec1d09c4'),
+          title: this.$t('i18n_b7ec1d09c4'),
           dataIndex: 'serviceId',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('i18n.3477228591'),
+          title: this.$t('i18n_3477228591'),
           dataIndex: ['spec', 'containerSpec', 'image'],
           ellipsis: true,
           width: 120,
@@ -233,13 +233,13 @@ export default {
         // { title: "端点", dataIndex: "spec.endpointSpec.mode", ellipsis: true, width: 100, },
         // { title: "节点地址", width: 150, dataIndex: "status.address", ellipsis: true,  },
         {
-          title: this.$t('i18n.3fea7ca76c'),
+          title: this.$t('i18n_3fea7ca76c'),
           width: 140,
           dataIndex: 'desiredState',
           ellipsis: true
         },
         {
-          title: this.$t('i18n.4604d50234'),
+          title: this.$t('i18n_4604d50234'),
           width: 150,
           dataIndex: ['status', 'err'],
           ellipsis: true,
@@ -263,7 +263,7 @@ export default {
         //   width: 170,
         // },
         {
-          title: this.$t('i18n.1303e638b5'),
+          title: this.$t('i18n_1303e638b5'),
           dataIndex: 'updatedAt',
           ellipsis: true,
 
@@ -273,7 +273,7 @@ export default {
           width: '180px'
         },
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
           fixed: 'right',
           align: 'center',

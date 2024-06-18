@@ -105,7 +105,7 @@ const defaultData = {
  */
 export function generateNodeTopChart(data) {
   const cpuItem = {
-    name: t('i18n.7f5bcd975b'),
+    name: t('i18n_7f5bcd975b'),
     type: 'line',
     data: [],
     showSymbol: false,
@@ -113,28 +113,28 @@ export function generateNodeTopChart(data) {
     smooth: true
   }
   const diskItem = {
-    name: t('i18n.f5d14ee3f8'),
+    name: t('i18n_f5d14ee3f8'),
     type: 'line',
     data: [],
     showSymbol: false,
     smooth: true
   }
   const memoryItem = {
-    name: t('i18n.883848dd37'),
+    name: t('i18n_883848dd37'),
     type: 'line',
     data: [],
     showSymbol: false,
     smooth: true
   }
   const virtualMemory = {
-    name: t('i18n.07a03567aa'),
+    name: t('i18n_07a03567aa'),
     type: 'line',
     data: [],
     showSymbol: false,
     smooth: true
   }
   const swapMemory = {
-    name: t('i18n.0895c740a6'),
+    name: t('i18n_0895c740a6'),
     type: 'line',
     data: [],
     showSymbol: false,
@@ -212,7 +212,7 @@ export function generateNodeTopChart(data) {
  */
 export function generateNodeNetChart(data) {
   const rxItem = {
-    name: t('i18n.15e9238b79'),
+    name: t('i18n_15e9238b79'),
     type: 'line',
     data: [],
     showSymbol: false,
@@ -220,7 +220,7 @@ export function generateNodeNetChart(data) {
     smooth: true
   }
   const txItem = {
-    name: t('i18n.1535fcfa4c'),
+    name: t('i18n_1535fcfa4c'),
     type: 'line',
     data: [],
     showSymbol: false,
@@ -281,7 +281,7 @@ export function generateNodeNetChart(data) {
  */
 export function generateNodeNetworkTimeChart(data) {
   const dataArray = {
-    name: t('i18n.204222d167'),
+    name: t('i18n_204222d167'),
     type: 'line',
     data: [],
     showSymbol: false,

@@ -277,40 +277,40 @@ export function saveDispatchProjectConfig(data) {
 }
 
 export const afterOptList = [
-  { title: t('i18n.a2ebd000e4'), value: 0 },
-  { title: t('i18n.82915930eb'), value: 1 },
-  { title: t('i18n.0e1ecdae4a'), value: 2 },
-  { title: t('i18n.8887e94cb7'), value: 3 }
+  { title: t('i18n_a2ebd000e4'), value: 0 },
+  { title: t('i18n_82915930eb'), value: 1 },
+  { title: t('i18n_0e1ecdae4a'), value: 2 },
+  { title: t('i18n_8887e94cb7'), value: 3 }
 ]
 
 export const afterOptListSimple = [
-  { title: t('i18n.a2ebd000e4'), value: 0 },
-  { title: t('i18n.913ef5d129'), value: 1 }
+  { title: t('i18n_a2ebd000e4'), value: 0 },
+  { title: t('i18n_913ef5d129'), value: 1 }
 ]
 
 export const dispatchStatusMap = {
-  0: t('i18n.29efa328e5'),
-  1: t('i18n.5b3ffc2910'),
-  2: t('i18n.7e300e89b1'),
-  3: t('i18n.2a049f4f5b'),
-  4: t('i18n.036c0dc2aa'),
-  5: t('i18n.339097ba2e'),
-  6: t('i18n.7bf62f7284')
+  0: t('i18n_29efa328e5'),
+  1: t('i18n_5b3ffc2910'),
+  2: t('i18n_7e300e89b1'),
+  3: t('i18n_2a049f4f5b'),
+  4: t('i18n_036c0dc2aa'),
+  5: t('i18n_339097ba2e'),
+  6: t('i18n_7bf62f7284')
 }
 
 export const statusMap = {
-  0: t('i18n.29efa328e5'),
-  1: t('i18n.5b3ffc2910'),
-  2: t('i18n.3ea6c5e8ec'),
-  3: t('i18n.30e855a053'),
-  4: t('i18n.2a049f4f5b')
+  0: t('i18n_29efa328e5'),
+  1: t('i18n_5b3ffc2910'),
+  2: t('i18n_3ea6c5e8ec'),
+  3: t('i18n_30e855a053'),
+  4: t('i18n_2a049f4f5b')
 }
 
 export const dispatchMode = {
-  upload: t('i18n.bd7c8c96bc'),
-  download: t('i18n.bd7043cae3'),
-  'build-trigger': t('i18n.74d5f61b9f'),
-  'use-build': t('i18n.c1af35d001'),
-  'static-file-storage': t('i18n.28f6e7a67b'),
-  'file-storage': t('i18n.26183c99bf')
+  upload: t('i18n_bd7c8c96bc'),
+  download: t('i18n_bd7043cae3'),
+  'build-trigger': t('i18n_74d5f61b9f'),
+  'use-build': t('i18n_c1af35d001'),
+  'static-file-storage': t('i18n_28f6e7a67b'),
+  'file-storage': t('i18n_26183c99bf')
 }

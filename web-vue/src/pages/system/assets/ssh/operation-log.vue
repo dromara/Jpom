@@ -18,19 +18,19 @@
           <a-input
             v-model:value="viewOperationLogListQuery['modifyUser']"
             class="search-input-item"
-            :placeholder="$t('i18n.f9ac4b2aa6')"
+            :placeholder="$t('i18n_f9ac4b2aa6')"
             @press-enter="handleListLog"
           />
           <a-input
             v-model:value="viewOperationLogListQuery['%sshName%']"
             class="search-input-item"
-            :placeholder="$t('i18n.28e1c746f7')"
+            :placeholder="$t('i18n_28e1c746f7')"
             @press-enter="handleListLog"
           />
           <a-input
             v-model:value="viewOperationLogListQuery['%machineSshName%']"
             class="search-input-item"
-            :placeholder="$t('i18n.bb4409015b')"
+            :placeholder="$t('i18n_bb4409015b')"
             @press-enter="handleListLog"
           />
           <a-input
@@ -42,7 +42,7 @@
           <a-input
             v-model:value="viewOperationLogListQuery['%commands%']"
             class="search-input-item"
-            :placeholder="$t('i18n.24cc0de832')"
+            :placeholder="$t('i18n_24cc0de832')"
             @press-enter="handleListLog"
           />
           <a-range-picker
@@ -50,7 +50,7 @@
             format="YYYY-MM-DD HH:mm:ss"
             @change="onchangeListLogTime"
           />
-          <a-button type="primary" @click="handleListLog">{{ $t('i18n.e5f71fc31e') }}</a-button>
+          <a-button type="primary" @click="handleListLog">{{ $t('i18n_e5f71fc31e') }}</a-button>
         </a-space>
       </template>
       <template #bodyCell="{ column, text, record }">
@@ -77,7 +77,7 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'refuse'">
-          <span>{{ text ? $t('i18n.330363dfc5') : $t('i18n.7173f80900') }}</span>
+          <span>{{ text ? $t('i18n_330363dfc5') : $t('i18n_7173f80900') }}</span>
         </template>
       </template>
     </a-table>
@@ -114,27 +114,27 @@ export default {
       ),
       viewOperationLogColumns: [
         {
-          title: this.$t('i18n.6b0bc6432d'),
+          title: this.$t('i18n_6b0bc6432d'),
           dataIndex: 'modifyUser',
           width: 100
         },
         { title: 'IP', dataIndex: 'ip', width: '130px' },
         {
-          title: `ssh${this.$t('i18n.4f8ca95e7b')}`,
+          title: `ssh${this.$t('i18n_4f8ca95e7b')}`,
           dataIndex: 'sshName',
           width: '200px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('i18n.18b0ab4dd2'),
+          title: this.$t('i18n_18b0ab4dd2'),
           dataIndex: 'machineSshName',
           width: '200px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('i18n.24cc0de832'),
+          title: this.$t('i18n_24cc0de832'),
           dataIndex: 'commands',
           width: 200,
           ellipsis: true
@@ -147,7 +147,7 @@ export default {
         },
 
         {
-          title: this.$t('i18n.7e951d56d9'),
+          title: this.$t('i18n_7e951d56d9'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text }) => {
@@ -156,7 +156,7 @@ export default {
           width: '180px'
         },
         {
-          title: this.$t('i18n.5e9f2dedca'),
+          title: this.$t('i18n_5e9f2dedca'),
           dataIndex: 'refuse',
           width: '100px',
           ellipsis: true,

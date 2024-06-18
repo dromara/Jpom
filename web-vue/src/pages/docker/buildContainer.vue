@@ -4,7 +4,7 @@
       destroy-on-close
       :open="true"
       width="80vw"
-      :title="$t('i18n.585ae8592f')"
+      :title="$t('i18n_585ae8592f')"
       :mask-closable="false"
       :footer-style="{ textAlign: 'right' }"
       @close="
@@ -16,37 +16,37 @@
       <a-alert
         v-if="containerData && Object.keys(containerData).length"
         style="margin-bottom: 10px"
-        :message="$t('i18n.a35740ae41')"
+        :message="$t('i18n_a35740ae41')"
         type="warning"
         show-icon
       >
         <template #description>
-          {{ $t('i18n.77688e95af') }}
+          {{ $t('i18n_77688e95af') }}
           <div>
-            <b style="color: red">{{ $t('i18n.c3490e81bf') }}</b
-            >,{{ $t('i18n.765592aa05') }}
+            <b style="color: red">{{ $t('i18n_c3490e81bf') }}</b
+            >,{{ $t('i18n_765592aa05') }}
           </div>
           <div>
-            <b>{{ $t('i18n.706333387b') }}</b>
+            <b>{{ $t('i18n_706333387b') }}</b>
           </div>
         </template>
       </a-alert>
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
-        <a-form-item :label="$t('i18n.42a93314b4')" name="name">
+        <a-form-item :label="$t('i18n_42a93314b4')" name="name">
           <a-row>
             <a-col :span="10">
               <a-input v-model:value="temp.image" disabled placeholder="" />
             </a-col>
-            <a-col :span="4" style="text-align: right">{{ $t('i18n.0c256f73b8') }}</a-col>
+            <a-col :span="4" style="text-align: right">{{ $t('i18n_0c256f73b8') }}</a-col>
             <a-col :span="10">
               <a-form-item-rest>
-                <a-input v-model:value="temp.name" :placeholder="$t('i18n.a51cd0898f')" />
+                <a-input v-model:value="temp.name" :placeholder="$t('i18n_a51cd0898f')" />
               </a-form-item-rest>
             </a-col>
           </a-row>
         </a-form-item>
 
-        <a-form-item :label="$t('i18n.c76cfefe72')">
+        <a-form-item :label="$t('i18n_c76cfefe72')">
           <a-form-item-rest>
             <a-space direction="vertical" style="width: 100%">
               <a-row v-for="(item, index) in temp.exposedPorts" :key="index">
@@ -55,29 +55,29 @@
                     <a-input-group>
                       <a-row>
                         <a-col :span="8">
-                          <a-input v-model:value="item.ip" addon-before="IP" :placeholder="$t('i18n.8e89763d95')">
+                          <a-input v-model:value="item.ip" addon-before="IP" :placeholder="$t('i18n_8e89763d95')">
                           </a-input>
                         </a-col>
                         <a-col :span="6" :offset="1">
                           <a-input
                             v-model:value="item.publicPort"
-                            :addon-before="$t('i18n.c76cfefe72')"
-                            :placeholder="$t('i18n.c76cfefe72')"
+                            :addon-before="$t('i18n_c76cfefe72')"
+                            :placeholder="$t('i18n_c76cfefe72')"
                           >
                           </a-input>
                         </a-col>
                         <a-col :span="8" :offset="1">
                           <a-input
                             v-model:value="item.port"
-                            :addon-before="$t('i18n.22c799040a')"
+                            :addon-before="$t('i18n_22c799040a')"
                             :disabled="item.disabled"
-                            :placeholder="$t('i18n.ceee1db95a')"
+                            :placeholder="$t('i18n_ceee1db95a')"
                           >
                             <template #addonAfter>
                               <a-select
                                 v-model:value="item.scheme"
                                 :disabled="item.disabled"
-                                :placeholder="$t('i18n.0739b9551d')"
+                                :placeholder="$t('i18n_0739b9551d')"
                               >
                                 <a-select-option value="tcp">tcp</a-select-option>
                                 <a-select-option value="udp">udp</a-select-option>
@@ -118,23 +118,23 @@
           </a-form-item-rest>
         </a-form-item>
 
-        <a-form-item :label="$t('i18n.640374b7ae')">
+        <a-form-item :label="$t('i18n_640374b7ae')">
           <a-form-item-rest>
             <a-space direction="vertical" style="width: 100%">
               <a-row v-for="(item, index) in temp.volumes" :key="index">
                 <a-col :span="10">
                   <a-input
                     v-model:value="item.host"
-                    :addon-before="$t('i18n.ad4b4a5b3b')"
-                    :placeholder="$t('i18n.90eac06e61')"
+                    :addon-before="$t('i18n_ad4b4a5b3b')"
+                    :placeholder="$t('i18n_90eac06e61')"
                   />
                 </a-col>
                 <a-col :span="10" :offset="1">
                   <a-input
                     v-model:value="item.container"
-                    :addon-before="$t('i18n.22c799040a')"
+                    :addon-before="$t('i18n_22c799040a')"
                     :disabled="item.disabled"
-                    :placeholder="$t('i18n.b3401c3657')"
+                    :placeholder="$t('i18n_b3401c3657')"
                   />
                 </a-col>
                 <a-col :span="2" :offset="1">
@@ -161,15 +161,15 @@
             </a-space>
           </a-form-item-rest>
         </a-form-item>
-        <a-form-item :label="$t('i18n.3867e350eb')">
+        <a-form-item :label="$t('i18n_3867e350eb')">
           <a-form-item-rest>
             <a-space direction="vertical" style="width: 100%">
               <a-row v-for="(item, index) in temp.env" :key="index">
                 <a-col :span="10">
-                  <a-input v-model:value="item.key" :placeholder="$t('i18n.a25657422b')" />
+                  <a-input v-model:value="item.key" :placeholder="$t('i18n_a25657422b')" />
                 </a-col>
                 <a-col :span="10" :offset="1">
-                  <a-input v-model:value="item.value" :placeholder="$t('i18n.9a2ee7044f')" />
+                  <a-input v-model:value="item.value" :placeholder="$t('i18n_9a2ee7044f')" />
                 </a-col>
                 <a-col :span="2" :offset="1">
                   <a-space>
@@ -195,15 +195,15 @@
             </a-space>
           </a-form-item-rest>
         </a-form-item>
-        <a-form-item :label="$t('i18n.ddf7d2a5ce')">
+        <a-form-item :label="$t('i18n_ddf7d2a5ce')">
           <a-form-item-rest>
             <a-space direction="vertical" style="width: 100%">
               <a-row v-for="(item, index) in temp.commands" :key="index">
                 <a-col :span="20">
                   <a-input
                     v-model:value="item.value"
-                    :addon-before="$t('i18n.579a6d0d92')"
-                    :placeholder="$t('i18n.2a6a516f9d')"
+                    :addon-before="$t('i18n_579a6d0d92')"
+                    :placeholder="$t('i18n_2a6a516f9d')"
                   />
                 </a-col>
 
@@ -231,27 +231,27 @@
           </a-form-item-rest>
         </a-form-item>
         <a-form-item label="hostname" name="hostname">
-          <a-input v-model:value="temp.hostname" :placeholder="$t('i18n.f9361945f3')" />
+          <a-input v-model:value="temp.hostname" :placeholder="$t('i18n_f9361945f3')" />
         </a-form-item>
-        <a-form-item :label="$t('i18n.7ddbe15c84')">
+        <a-form-item :label="$t('i18n_7ddbe15c84')">
           <a-auto-complete
             v-model:value="temp.networkMode"
-            :placeholder="$t('i18n.abd9ee868a')"
+            :placeholder="$t('i18n_abd9ee868a')"
             :options="[
               {
-                title: $t('i18n.c36ab9a223'),
+                title: $t('i18n_c36ab9a223'),
                 value: 'bridge'
               },
               {
-                title: $t('i18n.3d6acaa5ca'),
+                title: $t('i18n_3d6acaa5ca'),
                 value: 'none'
               },
               {
-                title: $t('i18n.fcaef5b17a'),
+                title: $t('i18n_fcaef5b17a'),
                 value: 'container:<name|id>'
               },
               {
-                title: $t('i18n.ff39c45fbc'),
+                title: $t('i18n_ff39c45fbc'),
                 value: 'host'
               }
             ]"
@@ -261,25 +261,25 @@
             </template>
           </a-auto-complete>
         </a-form-item>
-        <a-form-item :label="$t('i18n.5805998e42')">
+        <a-form-item :label="$t('i18n_5805998e42')">
           <a-auto-complete
             v-model:value="temp.restartPolicy"
-            :placeholder="$t('i18n.32dcc6f36e')"
+            :placeholder="$t('i18n_32dcc6f36e')"
             :options="[
               {
-                title: $t('i18n.0c1f1cd79b'),
+                title: $t('i18n_0c1f1cd79b'),
                 value: 'no'
               },
               {
-                title: $t('i18n.7006410585'),
+                title: $t('i18n_7006410585'),
                 value: 'always'
               },
               {
-                title: $t('i18n.2456d2c0f8'),
+                title: $t('i18n_2456d2c0f8'),
                 value: 'on-failure:1'
               },
               {
-                title: $t('i18n.c97e6e823a'),
+                title: $t('i18n_c97e6e823a'),
                 value: 'unless-stopped'
               }
             ]"
@@ -289,12 +289,12 @@
             </template>
           </a-auto-complete>
         </a-form-item>
-        <a-form-item :label="$t('i18n.3c586b2cc0')">
+        <a-form-item :label="$t('i18n_3c586b2cc0')">
           <a-form-item-rest>
             <a-space direction="vertical" style="width: 100%">
               <a-row v-for="(item, index) in temp.extraHosts" :key="index">
                 <a-col :span="20">
-                  <a-input v-model:value="temp.extraHosts[index]" :placeholder="$t('i18n.5bca8cf7ee')" />
+                  <a-input v-model:value="temp.extraHosts[index]" :placeholder="$t('i18n_5bca8cf7ee')" />
                 </a-col>
 
                 <a-col :span="2" :offset="1">
@@ -320,15 +320,15 @@
             </a-space>
           </a-form-item-rest>
         </a-form-item>
-        <a-form-item :label="$t('i18n.64933b1012')">
+        <a-form-item :label="$t('i18n_64933b1012')">
           <a-form-item-rest>
             <a-space direction="vertical" style="width: 100%">
               <a-row v-for="(item, index) in temp.storageOpt" :key="index">
                 <a-col :span="10">
-                  <a-input v-model:value="item.key" :placeholder="$t('i18n.930fdcdf90')" />
+                  <a-input v-model:value="item.key" :placeholder="$t('i18n_930fdcdf90')" />
                 </a-col>
                 <a-col :span="10" :offset="1">
-                  <a-input v-model:value="item.value" :placeholder="$t('i18n.e84b981eb4')" />
+                  <a-input v-model:value="item.value" :placeholder="$t('i18n_e84b981eb4')" />
                 </a-col>
                 <a-col :span="2" :offset="1">
                   <a-space>
@@ -355,20 +355,20 @@
           </a-form-item-rest>
         </a-form-item>
         <a-form-item label="runtime">
-          <a-input v-model:value="temp.runtime" :placeholder="$t('i18n.96e6f43118')" />
+          <a-input v-model:value="temp.runtime" :placeholder="$t('i18n_96e6f43118')" />
         </a-form-item>
-        <a-form-item :label="$t('i18n.a823cfa70c')">
+        <a-form-item :label="$t('i18n_a823cfa70c')">
           <parameter-widget v-model:value="temp.labels"></parameter-widget>
-          <!-- <a-input v-model:value="temp.labels" :placeholder="$t('i18n.4b404646f4')" /> -->
+          <!-- <a-input v-model:value="temp.labels" :placeholder="$t('i18n_4b404646f4')" /> -->
         </a-form-item>
-        <a-form-item :label="$t('i18n.7307ca1021')">
+        <a-form-item :label="$t('i18n_7307ca1021')">
           <a-form-item-rest>
             <a-row>
               <a-col :span="4"
                 ><a-switch
                   v-model:checked="temp.autorun"
-                  :checked-children="$t('i18n.8e54ddfe24')"
-                  :un-checked-children="$t('i18n.f4baf7c6c0')"
+                  :checked-children="$t('i18n_8e54ddfe24')"
+                  :un-checked-children="$t('i18n_f4baf7c6c0')"
               /></a-col>
               <a-col :span="4" style="text-align: right">
                 <a-tooltip>
@@ -377,23 +377,23 @@
                     <ul>
                       privileged=true|false
                       {{
-                        $t('i18n.61a3ec6656')
+                        $t('i18n_61a3ec6656')
                       }}
-                      <li>true container{{ $t('i18n.9c2f1d3f39') }}</li>
-                      <li>false container{{ $t('i18n.211354a780') }}</li>
-                      <li>privileged{{ $t('i18n.ffaf95f0ef') }}</li>
+                      <li>true container{{ $t('i18n_9c2f1d3f39') }}</li>
+                      <li>false container{{ $t('i18n_211354a780') }}</li>
+                      <li>privileged{{ $t('i18n_ffaf95f0ef') }}</li>
                     </ul>
                   </template>
 
                   <QuestionCircleOutlined v-if="!temp.id" />
-                  {{ $t('i18n.059ac641c0') }}
+                  {{ $t('i18n_059ac641c0') }}
                 </a-tooltip>
               </a-col>
               <a-col :span="4">
                 <a-switch
                   v-model:checked="temp.privileged"
-                  :checked-children="$t('i18n.0a60ac8f02')"
-                  :un-checked-children="$t('i18n.c9744f45e7')"
+                  :checked-children="$t('i18n_0a60ac8f02')"
+                  :un-checked-children="$t('i18n_c9744f45e7')"
                 />
               </a-col>
             </a-row>
@@ -422,10 +422,10 @@
               }
             "
           >
-            {{ $t('i18n.625fb26b4b') }}
+            {{ $t('i18n_625fb26b4b') }}
           </a-button>
           <a-button type="primary" :loading="loading" @click="handleBuildOk">
-            {{ $t('i18n.e83a256e4f') }}
+            {{ $t('i18n_e83a256e4f') }}
           </a-button>
         </a-space>
         <!-- </div> -->
@@ -473,10 +473,10 @@ export default {
       temp: {},
       rules: {
         name: [
-          { required: true, message: this.$t('i18n.5c502af799'), trigger: 'blur' },
+          { required: true, message: this.$t('i18n_5c502af799'), trigger: 'blur' },
           {
             pattern: /[a-zA-Z0-9][a-zA-Z0-9_.-]$/,
-            message: this.$t('i18n.8d5c1335b6'),
+            message: this.$t('i18n_8d5c1335b6'),
             trigger: 'blur'
           }
         ]

@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="dispatch-log-list"
-      :empty-description="$t('i18n.8d1286cd2e')"
+      :empty-description="$t('i18n_8d1286cd2e')"
       size="middle"
       :data-source="list"
       :columns="columns"
@@ -24,7 +24,7 @@
           <a-select
             v-model:value="listQuery.nodeId"
             allow-clear
-            :placeholder="$t('i18n.f8a613d247')"
+            :placeholder="$t('i18n_f8a613d247')"
             class="search-input-item"
           >
             <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
@@ -32,7 +32,7 @@
           <a-select
             v-model:value="listQuery.outGivingId"
             allow-clear
-            :placeholder="$t('i18n.bc8752e529')"
+            :placeholder="$t('i18n_bc8752e529')"
             class="search-input-item"
           >
             <a-select-option v-for="dispatch in dispatchList" :key="dispatch.id">{{ dispatch.name }}</a-select-option>
@@ -40,7 +40,7 @@
           <a-select
             v-model:value="listQuery.status"
             allow-clear
-            :placeholder="$t('i18n.e1c965efff')"
+            :placeholder="$t('i18n_e1c965efff')"
             class="search-input-item"
           >
             <a-select-option v-for="(item, key) in dispatchStatusMap" :key="key" :value="key">{{
@@ -48,8 +48,8 @@
             }}</a-select-option>
           </a-select>
           <a-range-picker :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
-          <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button :loading="loading" type="primary" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
+          <a-tooltip :title="$t('i18n_4838a3bd20')">
+            <a-button :loading="loading" type="primary" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -84,7 +84,7 @@
         <template v-else-if="column.dataIndex === 'mode'">
           <a-tooltip
             placement="topLeft"
-            :title="`${dispatchMode[text] || ''}  ${$t('i18n.b04209e785')}${record.modeData || ''}`"
+            :title="`${dispatchMode[text] || ''}  ${$t('i18n_b04209e785')}${record.modeData || ''}`"
           >
             <span>{{ dispatchMode[text] || '' }}</span>
           </a-tooltip>
@@ -119,17 +119,17 @@
         </template>
         <template v-else-if="column.dataIndex === 'status'">
           <!-- {{ dispatchStatusMap[text] || "未知" }} -->
-          <a-tag v-if="text === 2" color="green">{{ dispatchStatusMap[text] || $t('i18n.1622dc9b6b') }}</a-tag>
+          <a-tag v-if="text === 2" color="green">{{ dispatchStatusMap[text] || $t('i18n_1622dc9b6b') }}</a-tag>
           <a-tag v-else-if="text === 1 || text === 0 || text === 5" color="orange">{{
-            dispatchStatusMap[text] || $t('i18n.1622dc9b6b')
+            dispatchStatusMap[text] || $t('i18n_1622dc9b6b')
           }}</a-tag>
           <a-tag v-else-if="text === 3 || text === 4 || text === 6" color="red">{{
-            dispatchStatusMap[text] || $t('i18n.1622dc9b6b')
+            dispatchStatusMap[text] || $t('i18n_1622dc9b6b')
           }}</a-tag>
-          <a-tag v-else>{{ dispatchStatusMap[text] || $t('i18n.1622dc9b6b') }}</a-tag>
+          <a-tag v-else>{{ dispatchStatusMap[text] || $t('i18n_1622dc9b6b') }}</a-tag>
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
-          <a-button type="primary" size="small" @click="handleDetail(record)">{{ $t('i18n.f26225bde6') }}</a-button>
+          <a-button type="primary" size="small" @click="handleDetail(record)">{{ $t('i18n_f26225bde6') }}</a-button>
         </template>
       </template>
     </CustomTable>
@@ -139,7 +139,7 @@
       v-model:open="detailVisible"
       destroy-on-close
       width="600px"
-      :title="$t('i18n.3032257aa3')"
+      :title="$t('i18n_3032257aa3')"
       :footer="null"
     >
       <a-list item-layout="horizontal" :data-source="detailData">
@@ -180,49 +180,49 @@ export default {
       detailData: [],
       columns: [
         {
-          title: this.$t('i18n.b714160f52'),
+          title: this.$t('i18n_b714160f52'),
           dataIndex: 'outGivingId',
           width: 100,
           ellipsis: true
         },
 
         {
-          title: this.$t('i18n.b1785ef01e'),
+          title: this.$t('i18n_b1785ef01e'),
           dataIndex: 'nodeName',
           ellipsis: true,
           width: 150
         },
         {
-          title: this.$t('i18n.4fdd2213b5'),
+          title: this.$t('i18n_4fdd2213b5'),
           dataIndex: 'projectId',
           ellipsis: true,
           width: 100
         },
         {
-          title: this.$t('i18n.174062da44'),
+          title: this.$t('i18n_174062da44'),
           dataIndex: 'mode',
           ellipsis: true,
           width: '100px'
         },
         {
-          title: this.$t('i18n.0ef396cbcc'),
+          title: this.$t('i18n_0ef396cbcc'),
           dataIndex: 'outGivingResultMsg',
           ellipsis: true,
           width: 200
         },
 
         {
-          title: this.$t('i18n.4cd49caae4'),
+          title: this.$t('i18n_4cd49caae4'),
           dataIndex: 'outGivingResultTime',
           width: '120px'
         },
         {
-          title: this.$t('i18n.396b7d3f91'),
+          title: this.$t('i18n_396b7d3f91'),
           dataIndex: 'outGivingResultSize',
           width: '100px'
         },
         {
-          title: this.$t('i18n.592c595891'),
+          title: this.$t('i18n_592c595891'),
           dataIndex: 'startTime',
           customRender: ({ text }) => {
             return parseTime(text)
@@ -231,7 +231,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('i18n.f782779e8b'),
+          title: this.$t('i18n_f782779e8b'),
           dataIndex: 'endTime',
           sorter: true,
           customRender: ({ text }) => {
@@ -240,27 +240,27 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('i18n.543de6ff04'),
+          title: this.$t('i18n_543de6ff04'),
           dataIndex: 'outGivingResultMsgData',
           ellipsis: true,
           width: 100
         },
         {
-          title: this.$t('i18n.f9ac4b2aa6'),
+          title: this.$t('i18n_f9ac4b2aa6'),
           dataIndex: 'modifyUser',
           ellipsis: true,
 
           width: 120
         },
         {
-          title: this.$t('i18n.3fea7ca76c'),
+          title: this.$t('i18n_3fea7ca76c'),
           dataIndex: 'status',
           width: 100,
           ellipsis: true,
           fixed: 'right'
         },
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
           align: 'center',
           width: '100px',
@@ -326,7 +326,7 @@ export default {
       this.detailVisible = true
       this.temp = Object.assign({}, record)
 
-      this.detailData.push({ title: this.$t('i18n.0ef396cbcc'), description: this.temp.result })
+      this.detailData.push({ title: this.$t('i18n_0ef396cbcc'), description: this.temp.result })
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {

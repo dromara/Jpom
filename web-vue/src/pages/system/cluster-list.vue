@@ -31,7 +31,7 @@
             </template>
           </div>
           <div v-if="groupList.filter((item) => !groupMap[item]).length">
-            {{ $t('i18n.7dde69267a') }}
+            {{ $t('i18n_7dde69267a') }}
             <template v-for="(item, index) in groupList">
               <a-tag v-if="!groupMap[item]" :key="index">{{ item }}</a-tag>
             </template>
@@ -39,35 +39,35 @@
           <a-space>
             <a-input
               v-model:value="listQuery['%name%']"
-              :placeholder="$t('i18n.c3f28b34bb')"
+              :placeholder="$t('i18n_c3f28b34bb')"
               allow-clear
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['%url%']"
-              :placeholder="$t('i18n.8a414f832f')"
+              :placeholder="$t('i18n_8a414f832f')"
               allow-clear
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['%localHostName%']"
-              :placeholder="$t('i18n.6707667676')"
+              :placeholder="$t('i18n_6707667676')"
               allow-clear
               class="search-input-item"
               @press-enter="loadData"
             />
-            <a-tooltip :title="$t('i18n.4838a3bd20')">
-              <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
+            <a-tooltip :title="$t('i18n_4838a3bd20')">
+              <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
             </a-tooltip>
 
             <a-tooltip>
               <template #title>
                 <ul>
-                  <li>{{ $t('i18n.5177c276a0') }}</li>
-                  <li>{{ $t('i18n.649d7fcb73') }}</li>
-                  <li>{{ $t('i18n.9c84cd926b') }}</li>
+                  <li>{{ $t('i18n_5177c276a0') }}</li>
+                  <li>{{ $t('i18n_649d7fcb73') }}</li>
+                  <li>{{ $t('i18n_9c84cd926b') }}</li>
                 </ul>
               </template>
               <QuestionCircleOutlined />
@@ -83,8 +83,8 @@
         </template>
         <template v-else-if="column.dataIndex === 'url'">
           <a-tooltip
-            :title="`${$t('i18n.f668c8c881')}${record.name || ''}/${$t('i18n.df3833270b')}${record.url || ''}/${$t(
-              'i18n.8d13037eb7'
+            :title="`${$t('i18n_f668c8c881')}${record.name || ''}/${$t('i18n_df3833270b')}${record.url || ''}/${$t(
+              'i18n_8d13037eb7'
             )}${record.statusMsg || ''}`"
           >
             <a-button v-if="record.url" type="link" size="small" @click="openUrl(record.url)">
@@ -96,9 +96,9 @@
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n.95b351c862') }}</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n_95b351c862') }}</a-button>
             <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-              $t('i18n.2f4aaddde3')
+              $t('i18n_2f4aaddde3')
             }}</a-button>
           </a-space>
         </template>
@@ -111,18 +111,18 @@
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$t('i18n.8d3d771ab6')"
+      :title="$t('i18n_8d3d771ab6')"
       :mask-closable="false"
       @ok="handleEditOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
-        <a-form-item :label="$t('i18n.d7ec2d3fea')" name="name">
-          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n.6a588459d0')" />
+        <a-form-item :label="$t('i18n_d7ec2d3fea')" name="name">
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n_6a588459d0')" />
         </a-form-item>
-        <a-form-item :label="$t('i18n.79c6b6cff7')" name="linkGroups">
+        <a-form-item :label="$t('i18n_79c6b6cff7')" name="linkGroups">
           <template #help>
-            {{ $t('i18n.4089cfb557') }}
-            <div style="color: red">{{ $t('i18n.f9898595a0') }}</div>
+            {{ $t('i18n_4089cfb557') }}
+            <div style="color: red">{{ $t('i18n_f9898595a0') }}</div>
           </template>
           <a-select
             v-model:value="temp.linkGroups"
@@ -139,14 +139,14 @@
               }
             "
             allow-clear
-            :placeholder="$t('i18n.79c6b6cff7')"
+            :placeholder="$t('i18n_79c6b6cff7')"
           >
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item :label="$t('i18n.8a414f832f')" name="url">
-          <template #help> {{ $t('i18n.fcca8452fe') }} </template>
-          <a-input v-model:value="temp.url" :placeholder="$t('i18n.8aebf966b2')" />
+        <a-form-item :label="$t('i18n_8a414f832f')" name="url">
+          <template #help> {{ $t('i18n_fcca8452fe') }} </template>
+          <a-input v-model:value="temp.url" :placeholder="$t('i18n_8aebf966b2')" />
         </a-form-item>
       </a-form>
     </CustomModal>
@@ -163,43 +163,43 @@ export default {
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       columns: [
         {
-          title: this.$t('i18n.ed8ea20fe6'),
+          title: this.$t('i18n_ed8ea20fe6'),
           dataIndex: 'id',
           ellipsis: true,
           width: '100px'
         },
         {
-          title: this.$t('i18n.7329a2637c'),
+          title: this.$t('i18n_7329a2637c'),
           dataIndex: 'clusterId',
           ellipsis: true,
           width: '100px'
         },
         {
-          title: this.$t('i18n.d7ec2d3fea'),
+          title: this.$t('i18n_d7ec2d3fea'),
           dataIndex: 'name',
           ellipsis: true,
           width: 200
         },
         {
-          title: this.$t('i18n.8a414f832f'),
+          title: this.$t('i18n_8a414f832f'),
           dataIndex: 'url',
           ellipsis: true,
           width: 200
         },
         {
-          title: this.$t('i18n.24d695c8e2'),
+          title: this.$t('i18n_24d695c8e2'),
           dataIndex: 'localHostName',
           ellipsis: true,
           width: '100px'
         },
         {
-          title: this.$t('i18n.d0b2958432'),
+          title: this.$t('i18n_d0b2958432'),
           dataIndex: 'jpomVersion',
           ellipsis: true,
           width: '100px'
         },
         {
-          title: this.$t('i18n.f68f9b1d1b'),
+          title: this.$t('i18n_f68f9b1d1b'),
           dataIndex: 'lastHeartbeat',
           sorter: true,
           ellipsis: true,
@@ -207,7 +207,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('i18n.9baca0054e'),
+          title: this.$t('i18n_9baca0054e'),
           dataIndex: 'modifyUser',
           ellipsis: true,
 
@@ -215,7 +215,7 @@ export default {
         },
 
         {
-          title: this.$t('i18n.eca37cb072'),
+          title: this.$t('i18n_eca37cb072'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -223,14 +223,14 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('i18n.1303e638b5'),
+          title: this.$t('i18n_1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           customRender: ({ text }) => parseTime(text),
           sorter: true,
           width: '170px'
         },
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
           fixed: 'right',
           align: 'center',
@@ -241,8 +241,8 @@ export default {
 
       // 表单校验规则
       rules: {
-        name: [{ required: true, message: this.$t('i18n.debdfce084'), trigger: 'blur' }],
-        linkGroups: [{ required: true, message: this.$t('i18n.3d3d3ed34c'), trigger: 'blur' }]
+        name: [{ required: true, message: this.$t('i18n_debdfce084'), trigger: 'blur' }],
+        linkGroups: [{ required: true, message: this.$t('i18n_3d3d3ed34c'), trigger: 'blur' }]
         // url: [{ required: true, message: "请输入集群访问地址", trigger: "blur" }],
       },
       editVisible: false,
@@ -279,11 +279,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.2e0094d663'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_2e0094d663'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return deleteCluster(record.id).then((res) => {
             if (res.code === 200) {
@@ -319,7 +319,7 @@ export default {
         const linkGroups = newData.linkGroups
         if (!linkGroups) {
           $notification.error({
-            message: this.$t('i18n.e0d6976b48')
+            message: this.$t('i18n_e0d6976b48')
           })
           return false
         }

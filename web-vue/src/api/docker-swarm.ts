@@ -204,19 +204,19 @@ export function dockerSwarmServicesDownloaLog(urlPrefix, id) {
             <a-select-option key="ORPHANED">已失联</a-select-option>
  */
 export const TASK_STATE = {
-  NEW: t('i18n.40da3fb58b'),
+  NEW: t('i18n_40da3fb58b'),
   // ALLOCATED: "已分配",
-  PENDING: t('i18n.047109def4'),
-  ASSIGNED: t('i18n.fbfa6c18bf'),
-  ACCEPTED: t('i18n.5d459d550a'),
-  PREPARING: t('i18n.f76540a92e'),
-  READY: t('i18n.424a2ad8f7'),
-  STARTING: t('i18n.a34c24719b'),
-  RUNNING: t('i18n.e9e9373c6f'),
-  COMPLETE: t('i18n.f56c1d014e'),
-  SHUTDOWN: t('i18n.095e938e2a'),
-  FAILED: t('i18n.1c83d79715'),
-  REJECTED: t('i18n.7173f80900'),
-  REMOVE: t('i18n.86048b4fea'),
-  ORPHANED: t('i18n.788a3afc90')
+  PENDING: t('i18n_047109def4'),
+  ASSIGNED: t('i18n_fbfa6c18bf'),
+  ACCEPTED: t('i18n_5d459d550a'),
+  PREPARING: t('i18n_f76540a92e'),
+  READY: t('i18n_424a2ad8f7'),
+  STARTING: t('i18n_a34c24719b'),
+  RUNNING: t('i18n_e9e9373c6f'),
+  COMPLETE: t('i18n_f56c1d014e'),
+  SHUTDOWN: t('i18n_095e938e2a'),
+  FAILED: t('i18n_1c83d79715'),
+  REJECTED: t('i18n_7173f80900'),
+  REMOVE: t('i18n_86048b4fea'),
+  ORPHANED: t('i18n_788a3afc90')
 }

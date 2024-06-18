@@ -6,7 +6,7 @@
       default-auto-refresh
       :auto-refresh-time="5"
       table-name="assets-docker-list"
-      :empty-description="$t('i18n.5fea80e369')"
+      :empty-description="$t('i18n_5fea80e369')"
       :active-page="activePage"
       size="middle"
       :data-source="list"
@@ -25,7 +25,7 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$t('i18n.d7ec2d3fea')"
+            :placeholder="$t('i18n_d7ec2d3fea')"
             class="search-input-item"
             @press-enter="loadData"
           />
@@ -37,7 +37,7 @@
           />
           <a-input
             v-model:value="listQuery['%swarmId%']"
-            :placeholder="$t('i18n.7329a2637c')"
+            :placeholder="$t('i18n_7329a2637c')"
             class="search-input-item"
             @press-enter="loadData"
           />
@@ -55,21 +55,21 @@
               }
             "
             allow-clear
-            :placeholder="$t('i18n.829abe5a8d')"
+            :placeholder="$t('i18n_829abe5a8d')"
             class="search-input-item"
           >
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
           </a-select>
-          <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
+          <a-tooltip :title="$t('i18n_4838a3bd20')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">{{ $t('i18n.66ab5e9f24') }}</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $t('i18n_66ab5e9f24') }}</a-button>
           <a-button :disabled="!tableSelections.length" type="primary" @click="syncToWorkspaceShow()">
-            {{ $t('i18n.82d2c66f47') }}</a-button
+            {{ $t('i18n_82d2c66f47') }}</a-button
           >
-          <a-tooltip :title="$t('i18n.bbd63a893c')">
+          <a-tooltip :title="$t('i18n_bbd63a893c')">
             <a-button type="dashed" @click="handleTryLocalDocker">
-              <QuestionCircleOutlined />{{ $t('i18n.91985e3574') }}
+              <QuestionCircleOutlined />{{ $t('i18n_91985e3574') }}
             </a-button>
           </a-tooltip>
         </a-space>
@@ -88,19 +88,19 @@
 
         <template v-else-if="column.dataIndex === 'swarmId'">
           <template v-if="text">
-            <a-tooltip v-if="record.swarmControlAvailable" :title="$t('i18n.a6269ede6c')">
+            <a-tooltip v-if="record.swarmControlAvailable" :title="$t('i18n_a6269ede6c')">
               <ClusterOutlined />
             </a-tooltip>
-            <a-tooltip v-else :title="$t('i18n.41e9f0c9c6')">
+            <a-tooltip v-else :title="$t('i18n_41e9f0c9c6')">
               <BlockOutlined />
             </a-tooltip>
-            <a-popover :title="$t('i18n.32e05f01f4')">
+            <a-popover :title="$t('i18n_32e05f01f4')">
               <template #content>
-                <p>{{ $t('i18n.2a24902516') }}{{ record.swarmId }}</p>
-                <p>{{ $t('i18n.c5e7257212') }}{{ record.swarmNodeId }}</p>
-                <p>{{ $t('i18n.ccea973fc7') }}{{ record.swarmNodeAddr }}</p>
-                <p>{{ $t('i18n.39e4138e30') }}{{ parseTime(record.swarmCreatedAt) }}</p>
-                <p>{{ $t('i18n.b4750210ef') }}{{ parseTime(record.swarmUpdatedAt) }}</p>
+                <p>{{ $t('i18n_2a24902516') }}{{ record.swarmId }}</p>
+                <p>{{ $t('i18n_c5e7257212') }}{{ record.swarmNodeId }}</p>
+                <p>{{ $t('i18n_ccea973fc7') }}{{ record.swarmNodeAddr }}</p>
+                <p>{{ $t('i18n_39e4138e30') }}{{ parseTime(record.swarmCreatedAt) }}</p>
+                <p>{{ $t('i18n_b4750210ef') }}{{ parseTime(record.swarmUpdatedAt) }}</p>
               </template>
               {{ text }}
             </a-popover>
@@ -110,7 +110,7 @@
         <template v-else-if="column.dataIndex === 'tlsVerify'">
           <a-tooltip
             placement="topLeft"
-            :title="record.tlsVerify ? $t('i18n.1058a0be42') + record.certInfo : $t('i18n.007f23e18f')"
+            :title="record.tlsVerify ? $t('i18n_1058a0be42') + record.certInfo : $t('i18n_007f23e18f')"
           >
             <template v-if="record.tlsVerify">
               <template v-if="record.certExist">
@@ -118,19 +118,19 @@
                   v-model:checked="record.tlsVerify"
                   size="small"
                   :disabled="true"
-                  :checked-children="$t('i18n.8493205602')"
-                  :un-checked-children="$t('i18n.d58a55bcee')"
+                  :checked-children="$t('i18n_8493205602')"
+                  :un-checked-children="$t('i18n_d58a55bcee')"
                 />
               </template>
-              <a-tag v-else color="red"> {{ $t('i18n.88b79928e7') }} </a-tag>
+              <a-tag v-else color="red"> {{ $t('i18n_88b79928e7') }} </a-tag>
             </template>
             <template v-else>
               <a-switch
                 v-model:checked="record.tlsVerify"
                 size="small"
                 :disabled="true"
-                :checked-children="$t('i18n.8493205602')"
-                :un-checked-children="$t('i18n.d58a55bcee')"
+                :checked-children="$t('i18n_8493205602')"
+                :un-checked-children="$t('i18n_d58a55bcee')"
               />
             </template>
           </a-tooltip>
@@ -139,30 +139,30 @@
         <template v-else-if="column.dataIndex === 'status'">
           <a-tooltip :title="record.failureMsg">
             <a-tag :color="statusMap[record.status].color">{{
-              statusMap[record.status].desc || $t('i18n.1622dc9b6b')
+              statusMap[record.status].desc || $t('i18n_1622dc9b6b')
             }}</a-tag>
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button size="small" type="primary" :disabled="record.status !== 1" @click="handleConsole(record)">{{
-              $t('i18n.b5c3770699')
+              $t('i18n_b5c3770699')
             }}</a-button>
             <template v-if="!record.swarmId && record.status === 1">
-              <a-popover :title="$t('i18n.9a4b872895')">
+              <a-popover :title="$t('i18n_9a4b872895')">
                 <template #content>
                   <p>
                     <a-button size="small" type="primary" @click="initSwarm(record)">{{
-                      $t('i18n.374cd1f7b7')
+                      $t('i18n_374cd1f7b7')
                     }}</a-button>
                   </p>
                   <p>
                     <a-button size="small" type="primary" @click="joinSwarm(record)">{{
-                      $t('i18n.55cf956586')
+                      $t('i18n_55cf956586')
                     }}</a-button>
                   </p>
                 </template>
-                <a-button size="small" type="primary"><EditOutlined />{{ $t('i18n.85fe5099f6') }}</a-button>
+                <a-button size="small" type="primary"><EditOutlined />{{ $t('i18n_85fe5099f6') }}</a-button>
               </a-popover>
             </template>
             <template v-else>
@@ -171,27 +171,27 @@
                 :disabled="parseInt(record.status) !== 1"
                 type="primary"
                 @click="handleSwarmConsole(record)"
-                ><SelectOutlined />{{ $t('i18n.85fe5099f6') }}</a-button
+                ><SelectOutlined />{{ $t('i18n_85fe5099f6') }}</a-button
               >
             </template>
             <a-button size="small" type="primary" @click="syncToWorkspaceShow(record)">{{
-              $t('i18n.e39de3376e')
+              $t('i18n_e39de3376e')
             }}</a-button>
             <a-button size="small" type="primary" @click="viewWorkspaceDataHander(record)">{{
-              $t('i18n.1c3cf7f5f0')
+              $t('i18n_1c3cf7f5f0')
             }}</a-button>
             <a-dropdown>
-              <a @click="(e) => e.preventDefault()"> {{ $t('i18n.0ec9eaf9c3') }} <DownOutlined /> </a>
+              <a @click="(e) => e.preventDefault()"> {{ $t('i18n_0ec9eaf9c3') }} <DownOutlined /> </a>
               <template #overlay>
                 <a-menu>
                   <a-menu-item>
                     <a-button size="small" type="primary" @click="handleEdit(record)">{{
-                      $t('i18n.95b351c862')
+                      $t('i18n_95b351c862')
                     }}</a-button>
                   </a-menu-item>
                   <a-menu-item>
                     <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-                      $t('i18n.2f4aaddde3')
+                      $t('i18n_2f4aaddde3')
                     }}</a-button>
                   </a-menu-item>
                   <a-menu-item>
@@ -201,7 +201,7 @@
                       type="primary"
                       danger
                       @click="handleLeaveForce(record)"
-                      >{{ $t('i18n.e54029e15b') }}</a-button
+                      >{{ $t('i18n_e54029e15b') }}</a-button
                     >
                   </a-menu-item>
                 </a-menu>
@@ -217,7 +217,7 @@
       v-model:open="editVisible"
       destroy-on-close
       width="50%"
-      :title="$t('i18n.657969aa0f')"
+      :title="$t('i18n_657969aa0f')"
       :confirm-loading="confirmLoading"
       :mask-closable="false"
       @ok="handleEditOk"
@@ -228,40 +228,40 @@
             <template #message>
               <template v-if="temp.enableSsh">
                 <ul>
-                  <li>SSH {{ $t('i18n.051fa113dd') }}</li>
+                  <li>SSH {{ $t('i18n_051fa113dd') }}</li>
                   <li>
-                    docker {{ $t('i18n.bb8d265c7e') }}.09
-                    {{ $t('i18n.1810e84971') }}
+                    docker {{ $t('i18n_bb8d265c7e') }}.09
+                    {{ $t('i18n_1810e84971') }}
                   </li>
-                  <li>{{ $t('i18n.6aa7403b18') }}</li>
+                  <li>{{ $t('i18n_6aa7403b18') }}</li>
                   <li>
-                    {{ $t('i18n.92c6aa6db9') }}>{{ $t('i18n.e049546ff3') }}
+                    {{ $t('i18n_92c6aa6db9') }}>{{ $t('i18n_e049546ff3') }}
                     <b>ssh/monitor-script.sh</b>
-                    {{ $t('i18n.f0eb685a84') }}
+                    {{ $t('i18n_f0eb685a84') }}
                   </li>
                 </ul>
               </template>
               <template v-else>
                 <ul>
                   <li>
-                    {{ $t('i18n.c46938460b') }}<b style="color: red">{{ $t('i18n.7010264d22') }}</b>
+                    {{ $t('i18n_c46938460b') }}<b style="color: red">{{ $t('i18n_7010264d22') }}</b>
                   </li>
                   <li>
-                    {{ $t('i18n.ba1f68b5dd') }}
-                    <b style="color: red">docker {{ $t('i18n.47768ed092') }}</b>
+                    {{ $t('i18n_ba1f68b5dd') }}
+                    <b style="color: red">docker {{ $t('i18n_47768ed092') }}</b>
                   </li>
                   <li>
-                    {{ $t('i18n.fdba50ca2d') }}<b style="color: red"> {{ $t('i18n.7e000409bb') }} </b>
+                    {{ $t('i18n_fdba50ca2d') }}<b style="color: red"> {{ $t('i18n_7e000409bb') }} </b>
                   </li>
                   <li>
-                    {{ $t('i18n.5bb5b33ae4') }}<b style="color: red">{{ $t('i18n.73ed447971') }}</b
-                    >（{{ $t('i18n.9c942ea972') }}
+                    {{ $t('i18n_5bb5b33ae4') }}<b style="color: red">{{ $t('i18n_73ed447971') }}</b
+                    >（{{ $t('i18n_9c942ea972') }}
                   </li>
                   <li>
-                    {{ $t('i18n.8b1512bf3a') }}<b style="color: red">{{ $t('i18n.8fd9daf8e9') }}</b>
+                    {{ $t('i18n_8b1512bf3a') }}<b style="color: red">{{ $t('i18n_8fd9daf8e9') }}</b>
                   </li>
                   <li>
-                    {{ $t('i18n.ba8d1dca4a') }}<b style="color: red">{{ $t('i18n.0e25ab3b51') }}</b>
+                    {{ $t('i18n_ba8d1dca4a') }}<b style="color: red">{{ $t('i18n_0e25ab3b51') }}</b>
                   </li>
                 </ul>
               </template>
@@ -269,35 +269,35 @@
           </a-alert>
           <div></div>
         </a-space>
-        <a-form-item :label="$t('i18n.a51cd0898f')" name="name">
-          <a-input v-model:value="temp.name" :placeholder="$t('i18n.a51cd0898f')" />
+        <a-form-item :label="$t('i18n_a51cd0898f')" name="name">
+          <a-input v-model:value="temp.name" :placeholder="$t('i18n_a51cd0898f')" />
         </a-form-item>
-        <a-form-item :label="$t('i18n.829abe5a8d')" name="groupName">
+        <a-form-item :label="$t('i18n_829abe5a8d')" name="groupName">
           <custom-select
             v-model:value="temp.groupName"
             :data="groupList"
-            :input-placeholder="$t('i18n.bd0362bed3')"
-            :select-placeholder="$t('i18n.9cac799f2f')"
+            :input-placeholder="$t('i18n_bd0362bed3')"
+            :select-placeholder="$t('i18n_9cac799f2f')"
           >
           </custom-select>
         </a-form-item>
-        <a-form-item :label="$t('i18n.0c7369bbee')" name="enableSsh">
+        <a-form-item :label="$t('i18n_0c7369bbee')" name="enableSsh">
           <a-switch
             v-model:checked="temp.enableSsh"
-            :checked-children="$t('i18n.8493205602')"
-            :un-checked-children="$t('i18n.d58a55bcee')"
+            :checked-children="$t('i18n_8493205602')"
+            :un-checked-children="$t('i18n_d58a55bcee')"
           />
           <template #help>
             <div v-if="temp.enableSsh">
-              {{ $t('i18n.b9c1616fd5') }}
+              {{ $t('i18n_b9c1616fd5') }}
             </div>
           </template>
         </a-form-item>
-        <a-form-item v-if="temp.enableSsh" :label="$t('i18n.a5617f0369')" name="enableSsh">
+        <a-form-item v-if="temp.enableSsh" :label="$t('i18n_a5617f0369')" name="enableSsh">
           <a-select
             v-model:value="temp.machineSshId"
             allow-clear
-            :placeholder="$t('i18n.a5617f0369')"
+            :placeholder="$t('i18n_a5617f0369')"
             class="search-input-item"
           >
             <a-select-option v-for="item in sshList" :key="item.id" :disabled="!item.dockerInfo" :value="item.id">
@@ -305,40 +305,40 @@
                 <template #title>
                   {{ item.name }}({{ item.host }})[{{
                     (item.dockerInfo && JSON.parse(item.dockerInfo) && JSON.parse(item.dockerInfo).version) ||
-                    $t('i18n.f3365fbf4d')
+                    $t('i18n_f3365fbf4d')
                   }}]
                 </template>
                 {{ item.name }}({{ item.host }}) [{{
                   (item.dockerInfo && JSON.parse(item.dockerInfo) && JSON.parse(item.dockerInfo).version) ||
-                  $t('i18n.f3365fbf4d')
+                  $t('i18n_f3365fbf4d')
                 }}]</a-tooltip
               >
             </a-select-option>
           </a-select>
-          <template #help>{{ $t('i18n.09d14694e7') }}</template>
+          <template #help>{{ $t('i18n_09d14694e7') }}</template>
         </a-form-item>
         <template v-if="!temp.enableSsh">
           <a-form-item label="host" name="host">
-            <a-input v-model:value="temp.host" :placeholder="`${$t('i18n.dc32f465da')}://127.0.0.1:2375`" />
+            <a-input v-model:value="temp.host" :placeholder="`${$t('i18n_dc32f465da')}://127.0.0.1:2375`" />
           </a-form-item>
 
-          <a-form-item :label="$t('i18n.2780a6a3cf')" name="tlsVerify">
+          <a-form-item :label="$t('i18n_2780a6a3cf')" name="tlsVerify">
             <a-switch
               v-model:checked="temp.tlsVerify"
-              :checked-children="$t('i18n.8493205602')"
-              :un-checked-children="$t('i18n.d58a55bcee')"
+              :checked-children="$t('i18n_8493205602')"
+              :un-checked-children="$t('i18n_d58a55bcee')"
             />
           </a-form-item>
           <a-form-item
             v-if="temp.tlsVerify"
-            :label="$t('i18n.cbce8e96cf')"
+            :label="$t('i18n_cbce8e96cf')"
             name="certInfo"
-            :help="$t('i18n.b515d55aab')"
+            :help="$t('i18n_b515d55aab')"
           >
             <a-input-search
               v-model:value="temp.certInfo"
-              :placeholder="$t('i18n.f1d8533c7f')"
-              :enter-button="$t('i18n.63b6b36c71')"
+              :placeholder="$t('i18n_f1d8533c7f')"
+              :enter-button="$t('i18n_63b6b36c71')"
               @search="
                 () => {
                   certificateVisible = true
@@ -349,25 +349,25 @@
         </template>
 
         <a-collapse>
-          <a-collapse-panel key="1" :header="$t('i18n.9ab433e930')">
-            <a-form-item :label="$t('i18n.56071a4fa6')" name="heartbeatTimeout">
+          <a-collapse-panel key="1" :header="$t('i18n_9ab433e930')">
+            <a-form-item :label="$t('i18n_56071a4fa6')" name="heartbeatTimeout">
               <a-input-number
                 v-model:value="temp.heartbeatTimeout"
                 style="width: 100%"
-                :placeholder="$t('i18n.b513f53eb4')"
+                :placeholder="$t('i18n_b513f53eb4')"
               />
             </a-form-item>
-            <a-form-item :label="$t('i18n.e4bea943de')" name="registryUrl">
-              <a-input v-model:value="temp.registryUrl" :placeholder="$t('i18n.e4bea943de')" />
+            <a-form-item :label="$t('i18n_e4bea943de')" name="registryUrl">
+              <a-input v-model:value="temp.registryUrl" :placeholder="$t('i18n_e4bea943de')" />
             </a-form-item>
-            <a-form-item :label="$t('i18n.b4c83b0b56')" name="registryUsername">
-              <a-input v-model:value="temp.registryUsername" :placeholder="$t('i18n.b4c83b0b56')" />
+            <a-form-item :label="$t('i18n_b4c83b0b56')" name="registryUsername">
+              <a-input v-model:value="temp.registryUsername" :placeholder="$t('i18n_b4c83b0b56')" />
             </a-form-item>
-            <a-form-item :label="$t('i18n.791870de48')" name="registryPassword">
-              <a-input-password v-model:value="temp.registryPassword" :placeholder="$t('i18n.791870de48')" />
+            <a-form-item :label="$t('i18n_791870de48')" name="registryPassword">
+              <a-input-password v-model:value="temp.registryPassword" :placeholder="$t('i18n_791870de48')" />
             </a-form-item>
-            <a-form-item :label="$t('i18n.feda0df7ef')" name="registryEmail">
-              <a-input v-model:value="temp.registryEmail" :placeholder="$t('i18n.feda0df7ef')" />
+            <a-form-item :label="$t('i18n_feda0df7ef')" name="registryEmail">
+              <a-input v-model:value="temp.registryEmail" :placeholder="$t('i18n_feda0df7ef')" />
             </a-form-item>
           </a-collapse-panel>
         </a-collapse>
@@ -378,14 +378,14 @@
       v-if="initSwarmVisible"
       v-model:open="initSwarmVisible"
       destroy-on-close
-      :title="$t('i18n.f2d05944ad')"
+      :title="$t('i18n_f2d05944ad')"
       :confirm-loading="confirmLoading"
       :mask-closable="false"
       @ok="handleSwarm"
     >
       <a-form ref="initForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-alert :message="$t('i18n.947d983961')" type="warning">
-          <template #description> {{ $t('i18n.9d5b1303e0') }} </template>
+        <a-alert :message="$t('i18n_947d983961')" type="warning">
+          <template #description> {{ $t('i18n_9d5b1303e0') }} </template>
         </a-alert>
       </a-form>
     </CustomModal>
@@ -394,13 +394,13 @@
       v-if="joinSwarmVisible"
       v-model:open="joinSwarmVisible"
       destroy-on-close
-      :title="$t('i18n.0006600738')"
+      :title="$t('i18n_0006600738')"
       :confirm-loading="confirmLoading"
       :mask-closable="false"
       @ok="handleSwarmJoin"
     >
       <a-form ref="joinForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$t('i18n.e4d0ebcd58')" name="managerId">
+        <a-form-item :label="$t('i18n_e4d0ebcd58')" name="managerId">
           <a-select
             v-model:value="temp.managerId"
             show-search
@@ -415,7 +415,7 @@
               }
             "
             allow-clear
-            :placeholder="$t('i18n.96c28c4f17')"
+            :placeholder="$t('i18n_96c28c4f17')"
             @change="
               (v) => {
                 tempList = swarmList.filter((item) => {
@@ -433,14 +433,14 @@
           </a-select>
         </a-form-item>
 
-        <a-form-item v-if="temp.remoteAddr" :label="$t('i18n.2e740698cf')" name="remoteAddr"
-          ><a-input v-model:value="temp.remoteAddr" :placeholder="$t('i18n.77017a3140')" />
+        <a-form-item v-if="temp.remoteAddr" :label="$t('i18n_2e740698cf')" name="remoteAddr"
+          ><a-input v-model:value="temp.remoteAddr" :placeholder="$t('i18n_77017a3140')" />
         </a-form-item>
 
-        <a-form-item :label="$t('i18n.464f3d4ea3')" name="role">
+        <a-form-item :label="$t('i18n_464f3d4ea3')" name="role">
           <a-radio-group v-model:value="temp.role" name="role">
-            <a-radio value="worker"> {{ $t('i18n.41e9f0c9c6') }}</a-radio>
-            <a-radio value="manager"> {{ $t('i18n.a6269ede6c') }} </a-radio>
+            <a-radio value="worker"> {{ $t('i18n_41e9f0c9c6') }}</a-radio>
+            <a-radio value="manager"> {{ $t('i18n_a6269ede6c') }} </a-radio>
           </a-radio-group>
         </a-form-item>
       </a-form>
@@ -472,21 +472,21 @@
       v-model:open="syncToWorkspaceVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$t('i18n.ef8525efce')"
+      :title="$t('i18n_ef8525efce')"
       :mask-closable="false"
       @ok="handleSyncToWorkspace"
     >
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
-        <a-form-item :label="$t('i18n.0128cdaaa3')" name="type">
+        <a-form-item :label="$t('i18n_0128cdaaa3')" name="type">
           <a-radio-group v-model:value="temp.type">
             <a-radio value="docker"> docker </a-radio>
             <a-radio value="swarm" :disabled="temp.swarmId === true ? false : true">
-              {{ $t('i18n.85fe5099f6') }}
+              {{ $t('i18n_85fe5099f6') }}
             </a-radio>
           </a-radio-group>
         </a-form-item>
-        <a-form-item :label="$t('i18n.b4a8c78284')" name="workspaceId">
+        <a-form-item :label="$t('i18n_b4a8c78284')" name="workspaceId">
           <a-select
             v-model:value="temp.workspaceId"
             show-search
@@ -500,7 +500,7 @@
                 )
               }
             "
-            :placeholder="$t('i18n.b3bda9bf9e')"
+            :placeholder="$t('i18n_b3bda9bf9e')"
           >
             <a-select-option v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
@@ -513,7 +513,7 @@
       v-model:open="viewWorkspaceDocker"
       destroy-on-close
       width="50%"
-      :title="$t('i18n.9086111cff')"
+      :title="$t('i18n_9086111cff')"
       :footer="null"
       :mask-closable="false"
     >
@@ -522,7 +522,7 @@
           v-if="
             workspaceDockerData && (workspaceDockerData.dockerList?.length || workspaceDockerData.swarmList?.length)
           "
-          :message="$t('i18n.1b03b0c1ff')"
+          :message="$t('i18n_1b03b0c1ff')"
           type="info"
           show-icon
         />
@@ -532,21 +532,21 @@
               <template #renderItem="{ item }">
                 <a-list-item style="display: block">
                   <a-row>
-                    <a-col :span="10">Docker {{ $t('i18n.5b47861521') }}{{ item.name }}</a-col>
-                    <a-col :span="10">{{ $t('i18n.2358e1ef49') }}{{ item.workspace && item.workspace.name }}</a-col>
+                    <a-col :span="10">Docker {{ $t('i18n_5b47861521') }}{{ item.name }}</a-col>
+                    <a-col :span="10">{{ $t('i18n_2358e1ef49') }}{{ item.workspace && item.workspace.name }}</a-col>
                     <a-col :span="4"> </a-col>
                   </a-row>
                 </a-list-item>
               </template>
             </a-list>
           </a-tab-pane>
-          <a-tab-pane key="2" :tab="$t('i18n.85fe5099f6')">
+          <a-tab-pane key="2" :tab="$t('i18n_85fe5099f6')">
             <a-list bordered :data-source="workspaceDockerData && workspaceDockerData.swarmList">
               <template #renderItem="{ item }">
                 <a-list-item style="display: block">
                   <a-row>
-                    <a-col :span="10">{{ $t('i18n.f668c8c881') }}{{ item.name }}</a-col>
-                    <a-col :span="10">{{ $t('i18n.2358e1ef49') }}{{ item.workspace && item.workspace.name }}</a-col>
+                    <a-col :span="10">{{ $t('i18n_f668c8c881') }}{{ item.name }}</a-col>
+                    <a-col :span="10">{{ $t('i18n_2358e1ef49') }}{{ item.workspace && item.workspace.name }}</a-col>
                     <a-col :span="4"> </a-col>
                   </a-row>
                 </a-list-item>
@@ -560,7 +560,7 @@
     <CustomDrawer
       v-if="certificateVisible"
       destroy-on-close
-      :title="`${$t('i18n.38a12e7196')}`"
+      :title="`${$t('i18n_38a12e7196')}`"
       placement="right"
       :open="certificateVisible"
       width="85vw"
@@ -596,7 +596,7 @@
               }
             "
           >
-            {{ $t('i18n.625fb26b4b') }}
+            {{ $t('i18n_625fb26b4b') }}
           </a-button>
           <a-button
             type="primary"
@@ -606,7 +606,7 @@
               }
             "
           >
-            {{ $t('i18n.e83a256e4f') }}
+            {{ $t('i18n_e83a256e4f') }}
           </a-button>
         </a-space>
       </template>
@@ -663,7 +663,7 @@ export default {
       sshList: [],
       columns: [
         {
-          title: this.$t('i18n.d7ec2d3fea'),
+          title: this.$t('i18n_d7ec2d3fea'),
           dataIndex: 'name',
           ellipsis: true,
 
@@ -678,7 +678,7 @@ export default {
           width: 150
         },
         {
-          title: `docker${this.$t('i18n.fe2df04a16')}`,
+          title: `docker${this.$t('i18n_fe2df04a16')}`,
           dataIndex: 'dockerVersion',
           ellipsis: true,
           width: '100px',
@@ -686,7 +686,7 @@ export default {
         },
 
         {
-          title: this.$t('i18n.3fea7ca76c'),
+          title: this.$t('i18n_3fea7ca76c'),
           dataIndex: 'status',
           ellipsis: true,
           align: 'center',
@@ -700,26 +700,26 @@ export default {
           ellipsis: true
         },
         {
-          title: this.$t('i18n.b37b786351'),
+          title: this.$t('i18n_b37b786351'),
           dataIndex: 'groupName',
           ellipsis: true,
           width: '100px',
           tooltip: true
         },
         {
-          title: this.$t('i18n.85fe5099f6'),
+          title: this.$t('i18n_85fe5099f6'),
           dataIndex: 'swarmId',
           ellipsis: true
         },
         // { title: "apiVersion", dataIndex: "apiVersion", width: 100, ellipsis: true, },
         {
-          title: this.$t('i18n.3bcc1c7a20'),
+          title: this.$t('i18n_3bcc1c7a20'),
           dataIndex: 'modifyUser',
           width: 120,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.eca37cb072'),
+          title: this.$t('i18n_eca37cb072'),
           dataIndex: 'createTimeMillis',
           ellipsis: true,
           sorter: true,
@@ -727,7 +727,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('i18n.1303e638b5'),
+          title: this.$t('i18n_1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -735,7 +735,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
 
           fixed: 'right',
@@ -746,24 +746,24 @@ export default {
 
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
-        name: [{ required: true, message: this.$t('i18n.f63870fdb0'), trigger: 'blur' }],
+        name: [{ required: true, message: this.$t('i18n_f63870fdb0'), trigger: 'blur' }],
         // host: [{ required: true, message: "请填写容器地址", trigger: "blur" }],
 
         managerId: [
           {
             required: true,
-            message: this.$t('i18n.f97a4d2591'),
+            message: this.$t('i18n_f97a4d2591'),
             trigger: 'blur'
           }
         ],
 
-        role: [{ required: true, message: this.$t('i18n.9d7d471b77'), trigger: 'blur' }],
+        role: [{ required: true, message: this.$t('i18n_9d7d471b77'), trigger: 'blur' }],
         remoteAddr: [
-          { required: true, message: this.$t('i18n.5d07edd921'), trigger: 'blur' },
+          { required: true, message: this.$t('i18n_5d07edd921'), trigger: 'blur' },
           {
             pattern:
               /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/,
-            message: this.$t('i18n.a8754e3e90')
+            message: this.$t('i18n_a8754e3e90')
           }
         ]
       },
@@ -908,12 +908,12 @@ export default {
         const temp = Object.assign({}, this.temp)
         if (temp.enableSsh) {
           if (!temp.machineSshId) {
-            $message.warning(this.$t('i18n.e257dd2607'))
+            $message.warning(this.$t('i18n_e257dd2607'))
             return false
           }
         } else {
           if (!temp.host) {
-            $message.warning(this.$t('i18n.90154854b6'))
+            $message.warning(this.$t('i18n_90154854b6'))
             return false
           }
         }
@@ -938,11 +938,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.3ae4ddf245'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_3ae4ddf245'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return deleteDcoker({
             id: record.id
@@ -960,21 +960,21 @@ export default {
     // 强制解绑
     handleLeaveForce(record) {
       const html = `
-      <h1 style='color:red;'>${this.$t('i18n.b87c9acca3')}</h1>
-      <h3 style='color:red;'>${this.$t('i18n.c163613a0d')}</h3>
+      <h1 style='color:red;'>${this.$t('i18n_b87c9acca3')}</h1>
+      <h3 style='color:red;'>${this.$t('i18n_c163613a0d')}</h3>
       <ul style='color:red;'>
-        <li>${this.$t('i18n.eb969648aa')}</li>
-        <li>${this.$t('i18n.eb969648aa')}</li>
-        <li style='font-weight: bold;'>${this.$t('i18n.5a8727305e')}</li>
-        <li>${this.$t('i18n.04412d2a22')}</li>
+        <li>${this.$t('i18n_eb969648aa')}</li>
+        <li>${this.$t('i18n_eb969648aa')}</li>
+        <li style='font-weight: bold;'>${this.$t('i18n_5a8727305e')}</li>
+        <li>${this.$t('i18n_04412d2a22')}</li>
       </ul>
       `
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return dcokerSwarmLeaveForce({
             id: record.id
@@ -1092,13 +1092,13 @@ export default {
     handleSyncToWorkspace() {
       if (!this.temp.type) {
         $notification.warn({
-          message: this.$t('i18n.dabdc368f5')
+          message: this.$t('i18n_dabdc368f5')
         })
         return false
       }
       if (!this.temp.workspaceId) {
         $notification.warn({
-          message: this.$t('i18n.b3bda9bf9e')
+          message: this.$t('i18n_b3bda9bf9e')
         })
         return false
       }

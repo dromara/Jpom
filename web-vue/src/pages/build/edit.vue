@@ -1,39 +1,39 @@
 <template>
   <div>
-    <a-spin :tip="$t('i18n.bebcd7388f')" :spinning="loading">
+    <a-spin :tip="$t('i18n_bebcd7388f')" :spinning="loading">
       <a-card>
         <template #title>
           <a-steps v-model:current="stepsCurrent" size="small" :items="stepsItems" @change="stepsChange"></a-steps>
         </template>
         <a-form ref="editBuildForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
           <div v-show="stepsCurrent === 0">
-            <a-alert :message="$t('i18n.514b320d25')" type="info" show-icon>
+            <a-alert :message="$t('i18n_514b320d25')" type="info" show-icon>
               <template #description>
                 <ul>
                   <li>
-                    {{ $t('i18n.85cfcdd88b') }}
+                    {{ $t('i18n_85cfcdd88b') }}
                     <ul>
-                      <li>{{ $t('i18n.7a5dd04619') }}</li>
-                      <li>{{ $t('i18n.a08cbeb238') }}</li>
-                      <li>{{ $t('i18n.8813ff5cf8') }}</li>
+                      <li>{{ $t('i18n_7a5dd04619') }}</li>
+                      <li>{{ $t('i18n_a08cbeb238') }}</li>
+                      <li>{{ $t('i18n_8813ff5cf8') }}</li>
                     </ul>
                   </li>
                   <li>
-                    {{ $t('i18n.92f0744426') }}
+                    {{ $t('i18n_92f0744426') }}
                     <ul>
-                      <li>{{ $t('i18n.1de9b781bd') }}</li>
+                      <li>{{ $t('i18n_1de9b781bd') }}</li>
                     </ul>
                   </li>
 
-                  <li>{{ $t('i18n.200707a186') }}</li>
+                  <li>{{ $t('i18n_200707a186') }}</li>
                   <li v-if="getExtendPlugins.indexOf('inDocker') > -1" style="color: red">
-                    {{ $t('i18n.f5f65044ea') }}
+                    {{ $t('i18n_f5f65044ea') }}
                   </li>
                 </ul>
               </template>
             </a-alert>
             <a-form-item :name="['buildMode']">
-              <template #label> {{ $t('i18n.17a74824de') }} </template>
+              <template #label> {{ $t('i18n_17a74824de') }} </template>
               <a-space>
                 <a-radio-group
                   v-model:value="temp.buildMode"
@@ -62,25 +62,25 @@
                       }
                     "
                   >
-                    {{ $t('i18n.e06497b0fb') }}
+                    {{ $t('i18n_e06497b0fb') }}
                   </a-button>
                 </template>
-                <template #label> {{ $t('i18n.b44479d4b8') }} </template>
-                <a-spin :tip="$t('i18n.73c980987a')" :spinning="dockerAllTagLoading">
+                <template #label> {{ $t('i18n_b44479d4b8') }} </template>
+                <a-spin :tip="$t('i18n_73c980987a')" :spinning="dockerAllTagLoading">
                   <a-space v-if="dockerAllTagList && dockerAllTagList.length">
                     <a-tag v-for="(item, index) in dockerAllTagList" :key="index">{{ item }}</a-tag>
                   </a-space>
-                  <span v-else style="color: red; font-weight: bold">{{ $t('i18n.28e0fcdf93') }}</span>
+                  <span v-else style="color: red; font-weight: bold">{{ $t('i18n_28e0fcdf93') }}</span>
                 </a-spin>
               </a-form-item>
-              <a-alert :message="$t('i18n.3174d1022d')" type="warning" show-icon>
+              <a-alert :message="$t('i18n_3174d1022d')" type="warning" show-icon>
                 <template #description>
                   <ul>
-                    <li>{{ $t('i18n.148484b985') }}</li>
-                    <li>{{ $t('i18n.21d81c6726') }}</li>
+                    <li>{{ $t('i18n_148484b985') }}</li>
+                    <li>{{ $t('i18n_21d81c6726') }}</li>
                     <li>
-                      {{ $t('i18n.caa9b5cd94') }} <b style="color: red">fromTag</b>
-                      {{ $t('i18n.9caecd931b') }}
+                      {{ $t('i18n_caa9b5cd94') }} <b style="color: red">fromTag</b>
+                      {{ $t('i18n_9caecd931b') }}
                     </li>
                   </ul>
                 </template>
@@ -88,12 +88,12 @@
             </template>
           </div>
           <div v-show="stepsCurrent === 1">
-            <a-form-item :label="$t('i18n.d7ec2d3fea')" name="name">
+            <a-form-item :label="$t('i18n_d7ec2d3fea')" name="name">
               <a-row>
                 <a-col :span="10">
-                  <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n.d7ec2d3fea')" />
+                  <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n_d7ec2d3fea')" />
                 </a-col>
-                <a-col :span="4" style="text-align: right">{{ $t('i18n.1b973fc4d1') }}</a-col>
+                <a-col :span="4" style="text-align: right">{{ $t('i18n_1b973fc4d1') }}</a-col>
 
                 <a-col :span="10">
                   <a-form-item-rest>
@@ -101,22 +101,22 @@
                       v-model:value="temp.group"
                       :max-length="50"
                       :data="groupList"
-                      :input-placeholder="$t('i18n.bd0362bed3')"
-                      :select-placeholder="$t('i18n.3e8c9c54ee')"
+                      :input-placeholder="$t('i18n_bd0362bed3')"
+                      :select-placeholder="$t('i18n_3e8c9c54ee')"
                     >
                     </custom-select>
                   </a-form-item-rest>
                 </a-col>
               </a-row>
             </a-form-item>
-            <a-form-item :label="$t('i18n.b3ef35a359')" name="repositoryId">
+            <a-form-item :label="$t('i18n_b3ef35a359')" name="repositoryId">
               <a-input-search
                 :value="`${
-                  tempRepository ? tempRepository.name + '[' + tempRepository.gitUrl + ']' : $t('i18n.ad311f3211')
+                  tempRepository ? tempRepository.name + '[' + tempRepository.gitUrl + ']' : $t('i18n_ad311f3211')
                 }`"
                 read-only
-                :placeholder="$t('i18n.ad311f3211')"
-                :enter-button="$t('i18n.f89fa9b6c6')"
+                :placeholder="$t('i18n_ad311f3211')"
+                :enter-button="$t('i18n_f89fa9b6c6')"
                 @search="
                   () => {
                     repositoryisible = true
@@ -125,7 +125,7 @@
               />
             </a-form-item>
             <template v-if="tempRepository && tempRepository.repoType === 0">
-              <a-form-item :label="$t('i18n.bfc04cfda7')" name="branchName">
+              <a-form-item :label="$t('i18n_bfc04cfda7')" name="branchName">
                 <a-row>
                   <a-col :span="10">
                     <custom-select
@@ -133,8 +133,8 @@
                       :disabled="temp.branchTagName ? true : false"
                       :data="branchList"
                       :can-reload="true"
-                      :input-placeholder="$t('i18n.c618659cea')"
-                      :select-placeholder="$t('i18n.c0a9e33e29')"
+                      :input-placeholder="$t('i18n_c618659cea')"
+                      :select-placeholder="$t('i18n_c0a9e33e29')"
                       @on-refresh-select="loadBranchList"
                       @change="
                         () => {
@@ -144,25 +144,25 @@
                     >
                       <template #inputTips>
                         <div>
-                          {{ $t('i18n.89f5ca6928') }}(AntPathMatcher)
+                          {{ $t('i18n_89f5ca6928') }}(AntPathMatcher)
                           <ul>
-                            <li>? {{ $t('i18n.9973159a4d') }}</li>
-                            <li>* {{ $t('i18n.32f882ae24') }}</li>
-                            <li>** {{ $t('i18n.45b88fc569') }}</li>
+                            <li>? {{ $t('i18n_9973159a4d') }}</li>
+                            <li>* {{ $t('i18n_32f882ae24') }}</li>
+                            <li>** {{ $t('i18n_45b88fc569') }}</li>
                           </ul>
                         </div>
                       </template>
                     </custom-select>
                   </a-col>
-                  <a-col :span="4" style="text-align: right"> {{ $t('i18n.14d342362f') }}(TAG)：</a-col>
+                  <a-col :span="4" style="text-align: right"> {{ $t('i18n_14d342362f') }}(TAG)：</a-col>
                   <a-col :span="10">
                     <a-form-item-rest>
                       <custom-select
                         v-model:value="temp.branchTagName"
                         :data="branchTagList"
                         :can-reload="true"
-                        :input-placeholder="$t('i18n.30e6f71a18')"
-                        :select-placeholder="$t('i18n.2d58b0e650')"
+                        :input-placeholder="$t('i18n_30e6f71a18')"
+                        :select-placeholder="$t('i18n_2d58b0e650')"
                         @on-refresh-select="loadBranchList"
                         @change="
                           () => {
@@ -172,11 +172,11 @@
                       >
                         <template #inputTips>
                           <div>
-                            {{ $t('i18n.89f5ca6928') }}(AntPathMatcher)
+                            {{ $t('i18n_89f5ca6928') }}(AntPathMatcher)
                             <ul>
-                              <li>? {{ $t('i18n.9973159a4d') }}</li>
-                              <li>* {{ $t('i18n.32f882ae24') }}</li>
-                              <li>** {{ $t('i18n.45b88fc569') }}</li>
+                              <li>? {{ $t('i18n_9973159a4d') }}</li>
+                              <li>* {{ $t('i18n_32f882ae24') }}</li>
+                              <li>** {{ $t('i18n_45b88fc569') }}</li>
                             </ul>
                           </div>
                         </template>
@@ -187,13 +187,13 @@
               </a-form-item>
               <a-form-item
                 v-if="getExtendPlugins.indexOf('system-git') > -1"
-                :label="$t('i18n.0253279fb8')"
+                :label="$t('i18n_0253279fb8')"
                 name="cloneDepth"
               >
                 <a-input-number
                   v-model:value="tempExtraData.cloneDepth"
                   style="width: 100%"
-                  :placeholder="$t('i18n.a59d075d85')"
+                  :placeholder="$t('i18n_a59d075d85')"
                 />
               </a-form-item>
             </template>
@@ -204,16 +204,16 @@
             <a-form-item v-if="temp.buildMode === 0" name="script">
               <template #label>
                 <a-tooltip>
-                  {{ $t('i18n.c2ee58c247') }}
+                  {{ $t('i18n_c2ee58c247') }}
                   <template #title>
-                    {{ $t('i18n.c7689f4c9a') }}<b>{{ $t('i18n.2b607a562a') }} </b>{{ $t('i18n.7e33f94952') }}
+                    {{ $t('i18n_c7689f4c9a') }}<b>{{ $t('i18n_2b607a562a') }} </b>{{ $t('i18n_7e33f94952') }}
                     <b>cd xxx && mvn clean package</b>
                   </template>
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
               </template>
               <template #help>
-                {{ $t('i18n.1ad696efdc') }}
+                {{ $t('i18n_1ad696efdc') }}
               </template>
 
               <!-- <a-textarea
@@ -234,7 +234,7 @@
                           }
                         "
                       >
-                        {{ $t('i18n.e3ead2bd0d') }}
+                        {{ $t('i18n_e3ead2bd0d') }}
                       </a-button>
                       <a-button
                         type="link"
@@ -244,7 +244,7 @@
                           }
                         "
                       >
-                        {{ $t('i18n.36d4046bd6') }}
+                        {{ $t('i18n_36d4046bd6') }}
                       </a-button>
                     </a-space>
                   </template>
@@ -254,27 +254,27 @@
             <a-form-item v-if="temp.buildMode === 1" name="script">
               <template #label>
                 <a-tooltip>
-                  DSL {{ $t('i18n.2d711b09bd') }}
+                  DSL {{ $t('i18n_2d711b09bd') }}
                   <template #title>
-                    <p>{{ $t('i18n.ba3a679655') }}</p>
+                    <p>{{ $t('i18n_ba3a679655') }}</p>
                     <ul>
-                      <li>{{ $t('i18n.55d4a79358') }}</li>
-                      <li>{{ $t('i18n.713c986135') }}</li>
-                      <li>{{ $t('i18n.db81a464ba') }}</li>
+                      <li>{{ $t('i18n_55d4a79358') }}</li>
+                      <li>{{ $t('i18n_713c986135') }}</li>
+                      <li>{{ $t('i18n_db81a464ba') }}</li>
                     </ul>
                     <div>
-                      {{ $t('i18n.590b9ce766') }}
+                      {{ $t('i18n_590b9ce766') }}
                       <ol>
                         <li>
-                          {{ $t('i18n.fdfd501269') }}
+                          {{ $t('i18n_fdfd501269') }}
                         </li>
-                        <li>{{ $t('i18n.0793aa7ba3') }}</li>
-                        <li>{{ $t('i18n.0bfcab4978') }}</li>
+                        <li>{{ $t('i18n_0793aa7ba3') }}</li>
+                        <li>{{ $t('i18n_0bfcab4978') }}</li>
                         <li>
-                          {{ $t('i18n.e5915f5dbb') }}
+                          {{ $t('i18n_e5915f5dbb') }}
                         </li>
                         <li>
-                          {{ $t('i18n.48fe457960') }}
+                          {{ $t('i18n_48fe457960') }}
                         </li>
                       </ol>
                     </div>
@@ -314,17 +314,17 @@
                   height="40vh"
                   :show-tool="true"
                   :options="{ mode: 'yaml', tabSize: 2 }"
-                  :placeholder="$t('i18n.af14cd6893')"
+                  :placeholder="$t('i18n_af14cd6893')"
                 >
                   <template #tool_before>
                     <a-segmented
                       v-model:value="dslEditTabKey"
                       :options="[
                         {
-                          label: `DSL ${$t('i18n.224e2ccda8')}`,
+                          label: `DSL ${$t('i18n_224e2ccda8')}`,
                           value: 'content'
                         },
-                        { label: $t('i18n.da79c2ec32'), value: 'demo' }
+                        { label: $t('i18n_da79c2ec32'), value: 'demo' }
                       ]"
                     />
                   </template>
@@ -341,10 +341,10 @@
                       v-model:value="dslEditTabKey"
                       :options="[
                         {
-                          label: `DSL ${$t('i18n.224e2ccda8')}`,
+                          label: `DSL ${$t('i18n_224e2ccda8')}`,
                           value: 'content'
                         },
-                        { label: $t('i18n.da79c2ec32'), value: 'demo' }
+                        { label: $t('i18n_da79c2ec32'), value: 'demo' }
                       ]"
                     />
                   </template> </code-editor
@@ -353,45 +353,45 @@
             <a-form-item v-if="temp.buildMode !== undefined" name="resultDirFile" class="jpom-target-dir">
               <template #label>
                 <a-tooltip>
-                  {{ $t('i18n.c972010694') }}
+                  {{ $t('i18n_c972010694') }}
                   <template #title>
                     <div>
-                      {{ $t('i18n.84592cd99c') }}
-                      <b>mvn clean package</b> {{ $t('i18n.1a55f76ace') }}
+                      {{ $t('i18n_84592cd99c') }}
+                      <b>mvn clean package</b> {{ $t('i18n_1a55f76ace') }}
                       <b> modules/server/target/server-2.4.2-release</b>
                     </div>
                     <div><br /></div>
                     <!-- 只有本地构建支持 模糊匹配 -->
                     <div v-if="temp.buildMode === 0">
-                      {{ $t('i18n.89f5ca6928') }}(AntPathMatcher){{ $t('i18n.35cb4b85a9') }}
+                      {{ $t('i18n_89f5ca6928') }}(AntPathMatcher){{ $t('i18n_35cb4b85a9') }}
                       <ul>
-                        <li>? {{ $t('i18n.9973159a4d') }}</li>
-                        <li>* {{ $t('i18n.32f882ae24') }}</li>
-                        <li>** {{ $t('i18n.45b88fc569') }}</li>
+                        <li>? {{ $t('i18n_9973159a4d') }}</li>
+                        <li>* {{ $t('i18n_32f882ae24') }}</li>
+                        <li>** {{ $t('i18n_45b88fc569') }}</li>
                       </ul>
                     </div>
                   </template>
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
               </template>
-              <a-input v-model:value="temp.resultDirFile" :max-length="200" :placeholder="$t('i18n.2cdbbdabf1')" />
+              <a-input v-model:value="temp.resultDirFile" :max-length="200" :placeholder="$t('i18n_2cdbbdabf1')" />
             </a-form-item>
 
-            <a-alert v-if="temp.buildMode === undefined" :message="$t('i18n.46032a715e')" banner />
+            <a-alert v-if="temp.buildMode === undefined" :message="$t('i18n_46032a715e')" banner />
             <template v-else>
-              <a-form-item :label="$t('i18n.3867e350eb')" name="buildEnvParameter">
+              <a-form-item :label="$t('i18n_3867e350eb')" name="buildEnvParameter">
                 <a-textarea
                   v-model:value="temp.buildEnvParameter"
-                  :placeholder="$t('i18n.b3913b9bb7')"
+                  :placeholder="$t('i18n_b3913b9bb7')"
                   :auto-size="{ minRows: 3, maxRows: 5 }"
                 />
               </a-form-item>
-              <a-form-item :label="$t('i18n.0227161b3e')" name="commandExecMode">
+              <a-form-item :label="$t('i18n_0227161b3e')" name="commandExecMode">
                 <a-radio-group v-model:value="tempExtraData.commandExecMode" button-style="solid">
-                  <a-radio-button value="default">{{ $t('i18n.18c63459a2') }}</a-radio-button>
-                  <a-radio-button value="apache_exec">{{ $t('i18n.c9daf4ad6b') }}</a-radio-button>
+                  <a-radio-button value="default">{{ $t('i18n_18c63459a2') }}</a-radio-button>
+                  <a-radio-button value="apache_exec">{{ $t('i18n_c9daf4ad6b') }}</a-radio-button>
                 </a-radio-group>
-                <template #help>{{ $t('i18n.75c63f427a') }}</template>
+                <template #help>{{ $t('i18n_75c63f427a') }}</template>
               </a-form-item>
             </template>
           </div>
@@ -400,20 +400,20 @@
             <a-form-item name="releaseMethod">
               <template #label>
                 <a-tooltip>
-                  {{ $t('i18n.3c91490844') }}
+                  {{ $t('i18n_3c91490844') }}
                   <template #title>
                     <ul>
-                      <li>{{ $t('i18n.2c635c80ec') }}</li>
-                      <li>{{ $t('i18n.df9d1fedc5') }}</li>
-                      <li>{{ $t('i18n.7e9f0d2606') }}</li>
+                      <li>{{ $t('i18n_2c635c80ec') }}</li>
+                      <li>{{ $t('i18n_df9d1fedc5') }}</li>
+                      <li>{{ $t('i18n_7e9f0d2606') }}</li>
                       <li>
-                        {{ $t('i18n.58cbd04f02') }}
+                        {{ $t('i18n_58cbd04f02') }}
                       </li>
-                      <li>{{ $t('i18n.cbee7333e4') }}</li>
+                      <li>{{ $t('i18n_cbee7333e4') }}</li>
                       <li>
-                        {{ $t('i18n.6f5b238dd2') }}
+                        {{ $t('i18n_6f5b238dd2') }}
                       </li>
-                      <li>{{ $t('i18n.5fbde027e3') }}</li>
+                      <li>{{ $t('i18n_5fbde027e3') }}</li>
                     </ul>
                   </template>
                   <QuestionCircleOutlined v-if="!temp.id" />
@@ -426,20 +426,20 @@
               </a-space>
             </a-form-item>
             <div v-if="!temp.releaseMethod" style="text-align: center">
-              {{ $t('i18n.29b48a76be') }}
+              {{ $t('i18n_29b48a76be') }}
             </div>
             <template v-else>
               <template v-if="temp.releaseMethod === 0">
-                {{ $t('i18n.52ef46c618') }},{{ $t('i18n.657f3883e3') }}
+                {{ $t('i18n_52ef46c618') }},{{ $t('i18n_657f3883e3') }}
               </template>
               <!-- 节点分发 -->
               <template v-if="temp.releaseMethod === 1">
-                <a-form-item :label="$t('i18n.bc8752e529')" name="releaseMethodDataId">
+                <a-form-item :label="$t('i18n_bc8752e529')" name="releaseMethodDataId">
                   <a-select
                     v-model:value="tempExtraData.releaseMethodDataId_1"
                     show-search
                     allow-clear
-                    :placeholder="$t('i18n.2560e962cf')"
+                    :placeholder="$t('i18n_2560e962cf')"
                   >
                     <a-select-option v-for="dispatch in dispatchList" :key="dispatch.id"
                       >{{ dispatch.name }}
@@ -449,54 +449,54 @@
                     </template>
                   </a-select>
                 </a-form-item>
-                <a-form-item name="projectSecondaryDirectory" :label="$t('i18n.871cc8602a')">
+                <a-form-item name="projectSecondaryDirectory" :label="$t('i18n_871cc8602a')">
                   <a-input
                     v-model:value="tempExtraData.projectSecondaryDirectory"
-                    :placeholder="$t('i18n.f9f061773e')"
+                    :placeholder="$t('i18n_f9f061773e')"
                   />
                 </a-form-item>
               </template>
 
               <!-- 项目 -->
               <template v-if="temp.releaseMethod === 2">
-                <a-form-item :label="$t('i18n.dbba7e107a')" name="releaseMethodDataIdList">
+                <a-form-item :label="$t('i18n_dbba7e107a')" name="releaseMethodDataIdList">
                   <a-cascader
                     v-model:value="temp.releaseMethodDataIdList"
                     :options="cascaderList"
-                    :placeholder="$t('i18n.35488f5ba8')"
+                    :placeholder="$t('i18n_35488f5ba8')"
                   >
                     <template #suffixIcon>
                       <ReloadOutlined @click="loadNodeProjectList" />
                     </template>
                   </a-cascader>
                 </a-form-item>
-                <a-form-item :label="$t('i18n.89050136f8')" name="afterOpt">
+                <a-form-item :label="$t('i18n_89050136f8')" name="afterOpt">
                   <a-select
                     v-model:value="tempExtraData.afterOpt"
                     show-search
                     allow-clear
-                    :placeholder="$t('i18n.3322338140')"
+                    :placeholder="$t('i18n_3322338140')"
                   >
                     <a-select-option v-for="opt in afterOptListSimple" :key="opt.value">{{
                       opt.title
                     }}</a-select-option>
                   </a-select>
                 </a-form-item>
-                <a-form-item name="projectSecondaryDirectory" :label="$t('i18n.871cc8602a')">
+                <a-form-item name="projectSecondaryDirectory" :label="$t('i18n_871cc8602a')">
                   <a-input
                     v-model:value="tempExtraData.projectSecondaryDirectory"
-                    :placeholder="$t('i18n.9c99e8bec9')"
+                    :placeholder="$t('i18n_9c99e8bec9')"
                   />
                 </a-form-item>
               </template>
               <!-- SSH -->
               <template v-if="temp.releaseMethod === 3">
-                <a-form-item name="releaseMethodDataId" :help="$t('i18n.7de5541032')">
+                <a-form-item name="releaseMethodDataId" :help="$t('i18n_7de5541032')">
                   <template #label>
                     <a-tooltip>
-                      {{ $t('i18n.b188393ea7') }}
+                      {{ $t('i18n_b188393ea7') }}
                       <template #title>
-                        {{ $t('i18n.7de5541032') }}
+                        {{ $t('i18n_7de5541032') }}
                       </template>
                       <QuestionCircleOutlined v-if="!temp.id" />
                     </a-tooltip>
@@ -517,7 +517,7 @@
                           }
                         "
                         mode="multiple"
-                        :placeholder="$t('i18n.260a3234f2')"
+                        :placeholder="$t('i18n_260a3234f2')"
                       >
                         <a-select-option v-for="ssh in sshList" :key="ssh.id" :disabled="!ssh.fileDirs">
                           <a-tooltip :title="ssh.name"> {{ ssh.name }}</a-tooltip>
@@ -529,10 +529,10 @@
                     </a-col>
                   </a-row>
                 </a-form-item>
-                <a-form-item name="releaseMethodDataId" :help="$t('i18n.abb6b7260b')">
+                <a-form-item name="releaseMethodDataId" :help="$t('i18n_abb6b7260b')">
                   <template #label>
-                    <a-tooltip :title="$t('i18n.abb6b7260b')">
-                      {{ $t('i18n.dbb2df00cf') }}
+                    <a-tooltip :title="$t('i18n_abb6b7260b')">
+                      {{ $t('i18n_dbb2df00cf') }}
                       <QuestionCircleOutlined v-if="!temp.id" />
                     </a-tooltip>
                   </template>
@@ -542,7 +542,7 @@
                       show-search
                       allow-clear
                       style="width: 30%"
-                      :placeholder="$t('i18n.260a3234f2')"
+                      :placeholder="$t('i18n_260a3234f2')"
                     >
                       <a-select-option v-for="item in selectSshDirs" :key="item">
                         <a-tooltip :title="item">{{ item }}</a-tooltip>
@@ -552,7 +552,7 @@
                       <a-input
                         v-model:value="tempExtraData.releasePath2"
                         style="width: 70%"
-                        :placeholder="$t('i18n.a75a5a9525')"
+                        :placeholder="$t('i18n_a75a5a9525')"
                       />
                     </a-form-item-rest>
                   </a-input-group>
@@ -563,19 +563,19 @@
                 <!-- sshCommand -->
                 <template #label>
                   <a-tooltip>
-                    {{ $t('i18n.e44f59f2d9') }}
+                    {{ $t('i18n_e44f59f2d9') }}
                     <template #title>
-                      {{ $t('i18n.b53dedd3e0') }}
+                      {{ $t('i18n_b53dedd3e0') }}
                       <ul>
-                        <li>{{ $t('i18n.9be8ff8367') }}</li>
-                        <li>{{ $t('i18n.5fbde027e3') }}</li>
+                        <li>{{ $t('i18n_9be8ff8367') }}</li>
+                        <li>{{ $t('i18n_5fbde027e3') }}</li>
                       </ul>
                     </template>
                     <QuestionCircleOutlined v-if="!temp.id" />
                   </a-tooltip>
                 </template>
                 <template #help>
-                  {{ $t('i18n.234e967afe') }}
+                  {{ $t('i18n_234e967afe') }}
                 </template>
                 <!-- <a-textarea
                   v-model:value="tempExtraData.releaseBeforeCommand"
@@ -592,7 +592,7 @@
                     :options="{ mode: 'shell' }"
                   >
                     <template #tool_before>
-                      <a-tag>{{ $t('i18n.eb5bab1c31') }}</a-tag></template
+                      <a-tag>{{ $t('i18n_eb5bab1c31') }}</a-tag></template
                     >
                   </code-editor>
                 </a-form-item-rest>
@@ -601,12 +601,12 @@
                 <!-- sshCommand LocalCommand -->
                 <template #label>
                   <a-tooltip>
-                    {{ $t('i18n.923f8d2688') }}
+                    {{ $t('i18n_923f8d2688') }}
                     <template #title>
-                      {{ $t('i18n.fb9d826b2f') }}
+                      {{ $t('i18n_fb9d826b2f') }}
                       <ul>
-                        <li>{{ $t('i18n.9be8ff8367') }}</li>
-                        <li>{{ $t('i18n.5fbde027e3') }}</li>
+                        <li>{{ $t('i18n_9be8ff8367') }}</li>
+                        <li>{{ $t('i18n_5fbde027e3') }}</li>
                       </ul>
                     </template>
 
@@ -614,7 +614,7 @@
                   </a-tooltip>
                 </template>
                 <template #help>
-                  {{ $t('i18n.9fb12a2d14') }}
+                  {{ $t('i18n_9fb12a2d14') }}
                 </template>
                 <a-form-item-rest>
                   <code-editor
@@ -624,7 +624,7 @@
                     :options="{ mode: 'shell' }"
                   >
                     <template #tool_before>
-                      <a-tag>{{ $t('i18n.537b39a8b5') }}</a-tag></template
+                      <a-tag>{{ $t('i18n_537b39a8b5') }}</a-tag></template
                     >
                   </code-editor>
                 </a-form-item-rest>
@@ -633,9 +633,9 @@
               <a-form-item v-if="temp.releaseMethod === 2 || temp.releaseMethod === 3" name="clearOld">
                 <template #label>
                   <a-tooltip>
-                    {{ $t('i18n.2223ff647d') }}
+                    {{ $t('i18n_2223ff647d') }}
                     <template #title>
-                      {{ $t('i18n.b343663a14') }}
+                      {{ $t('i18n_b343663a14') }}
                     </template>
                     <QuestionCircleOutlined v-if="!temp.id" />
                   </a-tooltip>
@@ -645,21 +645,21 @@
                     <a-col :span="4">
                       <a-switch
                         v-model:checked="tempExtraData.clearOld"
-                        :checked-children="$t('i18n.0a60ac8f02')"
-                        :un-checked-children="$t('i18n.c9744f45e7')"
+                        :checked-children="$t('i18n_0a60ac8f02')"
+                        :un-checked-children="$t('i18n_c9744f45e7')"
                       />
                     </a-col>
                     <template v-if="temp.releaseMethod === 2">
                       <a-col :span="4" style="text-align: right">
                         <a-tooltip>
-                          {{ $t('i18n.702afc34a0') }}
+                          {{ $t('i18n_702afc34a0') }}
                           <template #title>
-                            {{ $t('i18n.762e05a901') }}
+                            {{ $t('i18n_762e05a901') }}
                             <ul>
                               <li>
-                                {{ $t('i18n.19f974ef6a') }}
+                                {{ $t('i18n_19f974ef6a') }}
                               </li>
-                              <li>{{ $t('i18n.7764df7ccc') }}</li>
+                              <li>{{ $t('i18n_7764df7ccc') }}</li>
                             </ul>
                           </template>
                           <QuestionCircleOutlined v-if="!temp.id" />
@@ -668,15 +668,15 @@
                       <a-col :span="4">
                         <a-switch
                           v-model:checked="tempExtraData.diffSync"
-                          :checked-children="$t('i18n.0a60ac8f02')"
-                          :un-checked-children="$t('i18n.c9744f45e7')"
+                          :checked-children="$t('i18n_0a60ac8f02')"
+                          :un-checked-children="$t('i18n_c9744f45e7')"
                         />
                       </a-col>
                       <a-col :span="4" style="text-align: right">
                         <a-tooltip>
-                          {{ $t('i18n.7b2cbfada9') }}
+                          {{ $t('i18n_7b2cbfada9') }}
                           <template #title>
-                            {{ $t('i18n.300fbf3891') }}
+                            {{ $t('i18n_300fbf3891') }}
                           </template>
                           <QuestionCircleOutlined v-if="!temp.id" />
                         </a-tooltip>
@@ -684,8 +684,8 @@
                       <a-col :span="4">
                         <a-switch
                           v-model:checked="tempExtraData.projectUploadCloseFirst"
-                          :checked-children="$t('i18n.0a60ac8f02')"
-                          :un-checked-children="$t('i18n.c9744f45e7')"
+                          :checked-children="$t('i18n_0a60ac8f02')"
+                          :un-checked-children="$t('i18n_c9744f45e7')"
                         />
                       </a-col>
                     </template>
@@ -697,40 +697,40 @@
                 <a-form-item name="fromTag">
                   <template #label>
                     <a-tooltip>
-                      {{ $t('i18n.690a3d1a69') }}
+                      {{ $t('i18n_690a3d1a69') }}
                       <template #title>
-                        {{ $t('i18n.bd5d9b3e93') }}
+                        {{ $t('i18n_bd5d9b3e93') }}
                       </template>
                       <QuestionCircleOutlined v-if="!temp.id" />
                     </a-tooltip>
                   </template>
-                  <a-input v-model:value="tempExtraData.fromTag" :placeholder="$t('i18n.2be2175cd7')" />
+                  <a-input v-model:value="tempExtraData.fromTag" :placeholder="$t('i18n_2be2175cd7')" />
                 </a-form-item>
 
-                <a-tooltip :title="$t('i18n.61bfa4e925')">
+                <a-tooltip :title="$t('i18n_61bfa4e925')">
                   <a-form-item name="dockerfile" label="Dockerfile">
-                    <a-input v-model:value="tempExtraData.dockerfile" :placeholder="$t('i18n.ab9a0ee5bd')" />
+                    <a-input v-model:value="tempExtraData.dockerfile" :placeholder="$t('i18n_ab9a0ee5bd')" />
                   </a-form-item>
                 </a-tooltip>
-                <a-form-item name="dockerTag" :label="$t('i18n.9a77f3523e')">
-                  <a-tooltip :title="$t('i18n.fa57a7afad')">
-                    <a-input v-model:value="tempExtraData.dockerTag" :placeholder="$t('i18n.250a999bb2')" />
+                <a-form-item name="dockerTag" :label="$t('i18n_9a77f3523e')">
+                  <a-tooltip :title="$t('i18n_fa57a7afad')">
+                    <a-input v-model:value="tempExtraData.dockerTag" :placeholder="$t('i18n_250a999bb2')" />
                   </a-tooltip>
                 </a-form-item>
-                <a-form-item name="dockerBuildArgs" :label="$t('i18n.244d5a0ed8')">
+                <a-form-item name="dockerBuildArgs" :label="$t('i18n_244d5a0ed8')">
                   <a-row>
                     <a-col :span="10">
-                      <a-tooltip :title="$t('i18n.a34545bd16')">
-                        <a-input v-model:value="tempExtraData.dockerBuildArgs" :placeholder="$t('i18n.6e70d2fb91')" />
+                      <a-tooltip :title="$t('i18n_a34545bd16')">
+                        <a-input v-model:value="tempExtraData.dockerBuildArgs" :placeholder="$t('i18n_6e70d2fb91')" />
                       </a-tooltip>
                     </a-col>
-                    <a-col :span="4" style="text-align: right">{{ $t('i18n.3f016aa454') }}</a-col>
+                    <a-col :span="4" style="text-align: right">{{ $t('i18n_3f016aa454') }}</a-col>
                     <a-col :span="10">
                       <a-form-item-rest>
-                        <a-tooltip :title="$t('i18n.7a4ecc606c')">
+                        <a-tooltip :title="$t('i18n_7a4ecc606c')">
                           <a-input
                             v-model:value="tempExtraData.dockerImagesLabels"
-                            :placeholder="$t('i18n.b922323119')"
+                            :placeholder="$t('i18n_b922323119')"
                           /> </a-tooltip
                       ></a-form-item-rest>
                     </a-col>
@@ -739,9 +739,9 @@
                 <a-form-item name="swarmId">
                   <template #label>
                     <a-tooltip>
-                      {{ $t('i18n.5011e53403') }}
+                      {{ $t('i18n_5011e53403') }}
                       <template #title>
-                        {{ $t('i18n.639fd37242') }}
+                        {{ $t('i18n_639fd37242') }}
                       </template>
                       <QuestionCircleOutlined v-if="!temp.id" />
                     </a-tooltip>
@@ -750,10 +750,10 @@
                     v-model:value="tempExtraData.dockerSwarmId"
                     show-search
                     allow-clear
-                    :placeholder="$t('i18n.a5e9874a96')"
+                    :placeholder="$t('i18n_a5e9874a96')"
                     @change="selectSwarm()"
                   >
-                    <a-select-option value="">{{ $t('i18n.1e88a0cfaf') }}</a-select-option>
+                    <a-select-option value="">{{ $t('i18n_1e88a0cfaf') }}</a-select-option>
                     <a-select-option v-for="item1 in dockerSwarmList" :key="item1.id">{{ item1.name }}</a-select-option>
                     <template #suffixIcon>
                       <ReloadOutlined @click="loadDockerSwarmListAll" />
@@ -766,34 +766,34 @@
                       <a-col :span="6" style="text-align: right">
                         <a-space>
                           <a-tooltip>
-                            {{ $t('i18n.601426f8f2') }}
+                            {{ $t('i18n_601426f8f2') }}
                             <template #title>
-                              {{ $t('i18n.6d5f0fb74b') }}
+                              {{ $t('i18n_6d5f0fb74b') }}
                             </template>
                             <QuestionCircleOutlined v-if="!temp.id" />
                           </a-tooltip>
 
                           <a-switch
                             v-model:checked="tempExtraData.pushToRepository"
-                            :checked-children="$t('i18n.0a60ac8f02')"
-                            :un-checked-children="$t('i18n.c9744f45e7')"
+                            :checked-children="$t('i18n_0a60ac8f02')"
+                            :un-checked-children="$t('i18n_c9744f45e7')"
                           />
                         </a-space>
                       </a-col>
                       <a-col :span="6" style="text-align: right">
                         <a-space>
                           <a-tooltip>
-                            {{ $t('i18n.9fb61a9936') }}
+                            {{ $t('i18n_9fb61a9936') }}
                             <template #title>
-                              {{ $t('i18n.8c7ce1da57') }}
+                              {{ $t('i18n_8c7ce1da57') }}
                             </template>
                             <QuestionCircleOutlined v-if="!temp.id" />
                           </a-tooltip>
 
                           <a-switch
                             v-model:checked="tempExtraData.dockerTagIncrement"
-                            :checked-children="$t('i18n.0a60ac8f02')"
-                            :un-checked-children="$t('i18n.c9744f45e7')"
+                            :checked-children="$t('i18n_0a60ac8f02')"
+                            :un-checked-children="$t('i18n_c9744f45e7')"
                           />
                         </a-space>
                       </a-col>
@@ -801,29 +801,29 @@
                         <a-space>
                           <a-tooltip>
                             no-cache
-                            <template #title>{{ $t('i18n.28b69f9233') }} </template>
+                            <template #title>{{ $t('i18n_28b69f9233') }} </template>
                             <QuestionCircleOutlined v-if="!temp.id" />
                           </a-tooltip>
 
                           <a-switch
                             v-model:checked="tempExtraData.dockerNoCache"
-                            :checked-children="$t('i18n.0a60ac8f02')"
-                            :un-checked-children="$t('i18n.c9744f45e7')"
+                            :checked-children="$t('i18n_0a60ac8f02')"
+                            :un-checked-children="$t('i18n_c9744f45e7')"
                           />
                         </a-space>
                       </a-col>
                       <a-col :span="6" style="text-align: right">
                         <a-space>
                           <a-tooltip>
-                            {{ $t('i18n.159a3a8037') }}
-                            <template #title>{{ $t('i18n.ab968d842f') }} </template>
+                            {{ $t('i18n_159a3a8037') }}
+                            <template #title>{{ $t('i18n_ab968d842f') }} </template>
                             <QuestionCircleOutlined v-if="!temp.id" />
                           </a-tooltip>
 
                           <a-switch
                             v-model:checked="tempExtraData.dockerBuildPull"
-                            :checked-children="$t('i18n.0a60ac8f02')"
-                            :un-checked-children="$t('i18n.c9744f45e7')"
+                            :checked-children="$t('i18n_0a60ac8f02')"
+                            :un-checked-children="$t('i18n_c9744f45e7')"
                           />
                         </a-space>
                       </a-col>
@@ -834,9 +834,9 @@
                   <a-form-item-rest>
                     <template #label>
                       <a-tooltip>
-                        {{ $t('i18n.b5ce5efa6e') }}
+                        {{ $t('i18n_b5ce5efa6e') }}
                         <template #title>
-                          {{ $t('i18n.2f67a19f9d') }}
+                          {{ $t('i18n_2f67a19f9d') }}
                         </template>
                         <QuestionCircleOutlined v-if="!temp.id" />
                       </a-tooltip>
@@ -844,7 +844,7 @@
                     <a-select
                       v-model:value="tempExtraData.dockerSwarmServiceName"
                       allow-clear
-                      :placeholder="$t('i18n.2ad3428664')"
+                      :placeholder="$t('i18n_2ad3428664')"
                     >
                       <a-select-option v-for="item2 in swarmServiceListOptions" :key="item2.spec.name">{{
                         item2.spec.name
@@ -860,9 +860,9 @@
             <a-form-item name="cacheBuild">
               <template #label>
                 <a-tooltip>
-                  {{ $t('i18n.b6a828205d') }}
+                  {{ $t('i18n_b6a828205d') }}
                   <template #title>
-                    {{ $t('i18n.44473c1406') }}
+                    {{ $t('i18n_44473c1406') }}
                   </template>
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
@@ -870,26 +870,26 @@
               <a-form-item-rest>
                 <a-row>
                   <a-col :span="2">
-                    <a-tooltip :title="$t('i18n.12afa77947')">
+                    <a-tooltip :title="$t('i18n_12afa77947')">
                       <a-switch
                         v-model:checked="tempExtraData.cacheBuild"
-                        :checked-children="$t('i18n.0a60ac8f02')"
-                        :un-checked-children="$t('i18n.c9744f45e7')"
+                        :checked-children="$t('i18n_0a60ac8f02')"
+                        :un-checked-children="$t('i18n_c9744f45e7')"
                       />
                     </a-tooltip>
                   </a-col>
                   <a-col :span="6" style="text-align: right">
                     <a-space>
                       <a-tooltip>
-                        {{ $t('i18n.2499b03cc5') }}
-                        <template #title> {{ $t('i18n.e0ae638e73') }} </template>
+                        {{ $t('i18n_2499b03cc5') }}
+                        <template #title> {{ $t('i18n_e0ae638e73') }} </template>
 
                         <QuestionCircleOutlined v-if="!temp.id" />
                       </a-tooltip>
                       <a-switch
                         v-model:checked="tempExtraData.saveBuildFile"
-                        :checked-children="$t('i18n.0a60ac8f02')"
-                        :un-checked-children="$t('i18n.c9744f45e7')"
+                        :checked-children="$t('i18n_0a60ac8f02')"
+                        :un-checked-children="$t('i18n_c9744f45e7')"
                       />
                     </a-space>
                   </a-col>
@@ -897,33 +897,33 @@
                   <a-col :span="6" style="text-align: right">
                     <a-space>
                       <a-tooltip>
-                        {{ $t('i18n.36d00eaa3f') }}
+                        {{ $t('i18n_36d00eaa3f') }}
                         <template #title>
-                          {{ $t('i18n.4cbc5505c7') }}
+                          {{ $t('i18n_4cbc5505c7') }}
                         </template>
 
                         <QuestionCircleOutlined v-if="!temp.id" />
                       </a-tooltip>
                       <a-switch
                         v-model:checked="tempExtraData.checkRepositoryDiff"
-                        :checked-children="$t('i18n.0a60ac8f02')"
-                        :un-checked-children="$t('i18n.c9744f45e7')"
+                        :checked-children="$t('i18n_0a60ac8f02')"
+                        :un-checked-children="$t('i18n_c9744f45e7')"
                       />
                     </a-space>
                   </a-col>
                   <a-col :span="6" style="text-align: right">
                     <a-space>
                       <a-tooltip>
-                        {{ $t('i18n.a9c52ffd40') }}
+                        {{ $t('i18n_a9c52ffd40') }}
                         <template #title>
-                          {{ $t('i18n.07b6bb5e40') }}
+                          {{ $t('i18n_07b6bb5e40') }}
                         </template>
                         <QuestionCircleOutlined v-if="!temp.id" />
                       </a-tooltip>
                       <a-switch
                         v-model:checked="tempExtraData.strictlyEnforce"
-                        :checked-children="$t('i18n.0a60ac8f02')"
-                        :un-checked-children="$t('i18n.c9744f45e7')"
+                        :checked-children="$t('i18n_0a60ac8f02')"
+                        :un-checked-children="$t('i18n_c9744f45e7')"
                       />
                     </a-space>
                   </a-col>
@@ -936,21 +936,21 @@
                   WebHooks
                   <template #title>
                     <ul>
-                      <li>{{ $t('i18n.78b2da536d') }}</li>
-                      <li>{{ $t('i18n.9f6090c819') }}</li>
-                      <li>{{ $t('i18n.a805615d15') }}</li>
-                      <li>{{ $t('i18n.c96f47ec1b') }}</li>
+                      <li>{{ $t('i18n_78b2da536d') }}</li>
+                      <li>{{ $t('i18n_9f6090c819') }}</li>
+                      <li>{{ $t('i18n_a805615d15') }}</li>
+                      <li>{{ $t('i18n_c96f47ec1b') }}</li>
                     </ul>
                   </template>
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
               </template>
-              <a-input v-model:value="temp.webhook" :placeholder="$t('i18n.7561bc005e')" />
+              <a-input v-model:value="temp.webhook" :placeholder="$t('i18n_7561bc005e')" />
             </a-form-item>
-            <a-form-item :label="$t('i18n.db9296212a')" name="autoBuildCron">
+            <a-form-item :label="$t('i18n_db9296212a')" name="autoBuildCron">
               <a-auto-complete
                 v-model:value="temp.autoBuildCron"
-                :placeholder="$t('i18n.8ffded102f')"
+                :placeholder="$t('i18n_8ffded102f')"
                 :options="CRON_DATA_SOURCE"
               >
                 <template #option="item"> {{ item.title }} {{ item.value }} </template>
@@ -959,16 +959,16 @@
             <a-form-item name="noticeScriptId">
               <template #label>
                 <a-tooltip>
-                  {{ $t('i18n.192496786d') }}
+                  {{ $t('i18n_192496786d') }}
                   <template #title>
                     <ul>
-                      <li>{{ $t('i18n.6a49f994b1') }}</li>
+                      <li>{{ $t('i18n_6a49f994b1') }}</li>
                       <li>
-                        {{ $t('i18n.9ff5504901') }}
+                        {{ $t('i18n_9ff5504901') }}
                       </li>
-                      <li>{{ $t('i18n.27054fefec') }}</li>
+                      <li>{{ $t('i18n_27054fefec') }}</li>
                       <li>
-                        <b>{{ $t('i18n.edb881412a') }}</b>
+                        <b>{{ $t('i18n_edb881412a') }}</b>
                       </li>
                     </ul>
                   </template>
@@ -977,11 +977,11 @@
               </template>
               <a-input-search
                 :value="`${
-                  tempExtraData ? tempExtraData.noticeScriptId || $t('i18n.b9b176e37a') : $t('i18n.b9b176e37a')
+                  tempExtraData ? tempExtraData.noticeScriptId || $t('i18n_b9b176e37a') : $t('i18n_b9b176e37a')
                 }`"
                 read-only
-                :placeholder="$t('i18n.b9b176e37a')"
-                :enter-button="$t('i18n.a056d9c4b3')"
+                :placeholder="$t('i18n_b9b176e37a')"
+                :enter-button="$t('i18n_a056d9c4b3')"
                 @search="
                   () => {
                     chooseScriptVisible = 1
@@ -999,7 +999,7 @@
                       }
                     "
                   >
-                    {{ $t('i18n.54506fe138') }}
+                    {{ $t('i18n_54506fe138') }}
                   </span>
                 </template>
               </a-input-search>
@@ -1007,31 +1007,31 @@
             <a-form-item name="attachEnv">
               <template #label>
                 <a-tooltip>
-                  {{ $t('i18n.2351006eae') }}
+                  {{ $t('i18n_2351006eae') }}
                   <template #title>
                     <ul>
-                      <li>{{ $t('i18n.7ef30cfd31') }}</li>
-                      <li>{{ $t('i18n.2d7020be7d') }}</li>
-                      <li>{{ $t('i18n.4f4c28a1fb') }}</li>
-                      <li>{{ $t('i18n.b437a4d41d') }}</li>
+                      <li>{{ $t('i18n_7ef30cfd31') }}</li>
+                      <li>{{ $t('i18n_2d7020be7d') }}</li>
+                      <li>{{ $t('i18n_4f4c28a1fb') }}</li>
+                      <li>{{ $t('i18n_b437a4d41d') }}</li>
                       <li>
-                        {{ $t('i18n.6928f50eb3') }}<b>USE_TAR_GZ=1</b>
-                        {{ $t('i18n.d5269713c7') }}
-                        <b>tar.gz</b> {{ $t('i18n.045f89697e') }}
+                        {{ $t('i18n_6928f50eb3') }}<b>USE_TAR_GZ=1</b>
+                        {{ $t('i18n_d5269713c7') }}
+                        <b>tar.gz</b> {{ $t('i18n_045f89697e') }}
                       </li>
                     </ul>
                   </template>
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
               </template>
-              <a-input v-model:value="tempExtraData.attachEnv" :placeholder="$t('i18n.14dd5937e4')" />
+              <a-input v-model:value="tempExtraData.attachEnv" :placeholder="$t('i18n_14dd5937e4')" />
             </a-form-item>
             <a-form-item name="cacheBuild">
               <template #label>
                 <a-tooltip>
-                  {{ $t('i18n.0f5fc9f300') }}
+                  {{ $t('i18n_0f5fc9f300') }}
                   <template #title>
-                    {{ $t('i18n.1819d0cdda') }}
+                    {{ $t('i18n_1819d0cdda') }}
                   </template>
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
@@ -1040,23 +1040,23 @@
                 <a-col :span="4">
                   <a-switch
                     v-model:checked="tempExtraData.syncFileStorage"
-                    :checked-children="$t('i18n.6a620e3c07')"
-                    :un-checked-children="$t('i18n.db709d591b')"
+                    :checked-children="$t('i18n_6a620e3c07')"
+                    :un-checked-children="$t('i18n_db709d591b')"
                   />
                 </a-col>
                 <a-col :span="6" style="text-align: right">
                   <a-form-item-rest>
                     <a-space>
                       <a-tooltip>
-                        {{ $t('i18n.7f7ee903da') }}
-                        <template #title> {{ $t('i18n.ba619a0942') }},{{ $t('i18n.8a1767a0d2') }} </template>
+                        {{ $t('i18n_7f7ee903da') }}
+                        <template #title> {{ $t('i18n_ba619a0942') }},{{ $t('i18n_8a1767a0d2') }} </template>
 
                         <QuestionCircleOutlined v-if="!temp.id" />
                       </a-tooltip>
                       <a-switch
                         v-model:checked="tempExtraData.releaseHideFile"
-                        :checked-children="$t('i18n.0a60ac8f02')"
-                        :un-checked-children="$t('i18n.c9744f45e7')"
+                        :checked-children="$t('i18n_0a60ac8f02')"
+                        :un-checked-children="$t('i18n_c9744f45e7')"
                       />
                     </a-space>
                   </a-form-item-rest>
@@ -1066,9 +1066,9 @@
                   <a-form-item-rest>
                     <a-space>
                       <a-tooltip>
-                        {{ $t('i18n.824607be6b') }}
+                        {{ $t('i18n_824607be6b') }}
                         <template #title>
-                          {{ $t('i18n.50f975c08e') }}
+                          {{ $t('i18n_50f975c08e') }}
                         </template>
                         <QuestionCircleOutlined v-if="!temp.id" />
                       </a-tooltip>
@@ -1081,9 +1081,9 @@
                   <a-form-item-rest>
                     <a-space>
                       <a-tooltip>
-                        {{ $t('i18n.50411665d7') }}
+                        {{ $t('i18n_50411665d7') }}
                         <template #title>
-                          {{ $t('i18n.5dc78cb700') }}
+                          {{ $t('i18n_5dc78cb700') }}
                         </template>
                         <QuestionCircleOutlined v-if="!temp.id" />
                       </a-tooltip>
@@ -1093,13 +1093,13 @@
                 </a-col>
               </a-row>
             </a-form-item>
-            <a-form-item :label="$t('i18n.2f5e828ecd')" name="aliasCode" :help="$t('i18n.8c67370ee5')">
+            <a-form-item :label="$t('i18n_2f5e828ecd')" name="aliasCode" :help="$t('i18n_8c67370ee5')">
               <a-row>
                 <a-col :span="10">
                   <a-input-search
                     v-model:value="temp.aliasCode"
                     :max-length="50"
-                    :placeholder="$t('i18n.8fbcdbc785')"
+                    :placeholder="$t('i18n_8fbcdbc785')"
                     @search="
                       () => {
                         temp = { ...temp, aliasCode: randomStr(6) }
@@ -1108,7 +1108,7 @@
                   >
                     <template #enterButton>
                       <a-button type="primary">
-                        {{ $t('i18n.6709f4548f') }}
+                        {{ $t('i18n_6709f4548f') }}
                       </a-button>
                     </template>
                   </a-input-search>
@@ -1117,9 +1117,9 @@
                 <a-col :span="10">
                   <a-form-item-rest>
                     <a-tooltip>
-                      {{ $t('i18n.6f73c7cf47') }}
+                      {{ $t('i18n_6f73c7cf47') }}
                       <template #title>
-                        {{ $t('i18n.bb5aac6004') }}
+                        {{ $t('i18n_bb5aac6004') }}
                       </template>
                       <QuestionCircleOutlined v-if="!temp.id" />
                     </a-tooltip>
@@ -1131,16 +1131,16 @@
             <a-form-item name="excludeReleaseAnt">
               <template #label>
                 <a-tooltip>
-                  {{ $t('i18n.eb164b696d') }}
+                  {{ $t('i18n_eb164b696d') }}
                   <template #title>
                     <ul>
-                      <li>{{ $t('i18n.f86324a429') }}</li>
+                      <li>{{ $t('i18n_f86324a429') }}</li>
                     </ul>
                   </template>
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
               </template>
-              <a-input v-model:value="tempExtraData.excludeReleaseAnt" :placeholder="$t('i18n.1e5ca46c26')" />
+              <a-input v-model:value="tempExtraData.excludeReleaseAnt" :placeholder="$t('i18n_1e5ca46c26')" />
             </a-form-item>
           </div>
         </a-form>
@@ -1150,7 +1150,7 @@
     <CustomDrawer
       v-if="repositoryisible"
       destroy-on-close
-      :title="`${$t('i18n.f89fa9b6c6')}`"
+      :title="`${$t('i18n_f89fa9b6c6')}`"
       placement="right"
       :open="repositoryisible"
       width="85vw"
@@ -1194,7 +1194,7 @@
               }
             "
           >
-            {{ $t('i18n.625fb26b4b') }}
+            {{ $t('i18n_625fb26b4b') }}
           </a-button>
           <a-button
             type="primary"
@@ -1204,7 +1204,7 @@
               }
             "
           >
-            {{ $t('i18n.e83a256e4f') }}
+            {{ $t('i18n_e83a256e4f') }}
           </a-button>
         </a-space>
       </template>
@@ -1213,7 +1213,7 @@
     <CustomDrawer
       v-if="chooseScriptVisible != 0"
       destroy-on-close
-      :title="`${$t('i18n.a056d9c4b3')}`"
+      :title="`${$t('i18n_a056d9c4b3')}`"
       placement="right"
       :open="chooseScriptVisible != 0"
       width="70vw"
@@ -1232,8 +1232,8 @@
           chooseScriptVisible === 1
             ? tempExtraData.noticeScriptId
             : temp.script?.indexOf('$ref.script.') != -1
-            ? temp.script.replace('$ref.script.', '')
-            : ''
+              ? temp.script.replace('$ref.script.', '')
+              : ''
         "
         mode="choose"
         @confirm="
@@ -1261,7 +1261,7 @@
               }
             "
           >
-            {{ $t('i18n.625fb26b4b') }}
+            {{ $t('i18n_625fb26b4b') }}
           </a-button>
           <a-button
             type="primary"
@@ -1271,7 +1271,7 @@
               }
             "
           >
-            {{ $t('i18n.e83a256e4f') }}
+            {{ $t('i18n_e83a256e4f') }}
           </a-button>
         </a-space>
       </template>
@@ -1280,7 +1280,7 @@
     <CustomDrawer
       v-if="dockerListVisible != 0"
       destroy-on-close
-      :title="`${$t('i18n.998b7c48a8')}`"
+      :title="`${$t('i18n_998b7c48a8')}`"
       placement="right"
       :open="dockerListVisible != 0"
       width="70vw"
@@ -1299,7 +1299,7 @@
       v-model:open="viewScriptTemplVisible"
       destroy-on-close
       width="50vw"
-      :title="$t('i18n.f087eb347c')"
+      :title="$t('i18n_f087eb347c')"
       :footer="null"
       :mask-closable="false"
     >
@@ -1399,22 +1399,22 @@ export default {
       viewScriptTemplVisible: false,
       buildScipts: [
         {
-          title: this.$t('i18n.044b38221e'),
+          title: this.$t('i18n_044b38221e'),
           children: [
             {
-              title: this.$t('i18n.2b0f199da0'),
+              title: this.$t('i18n_2b0f199da0'),
               value: 'mvn clean package -Dmaven.test.skip=true'
             },
             {
-              title: this.$t('i18n.461fdd1576'),
+              title: this.$t('i18n_461fdd1576'),
               value: 'mvn clean package -Dmaven.test.skip=true -Pprod'
             },
             {
-              title: this.$t('i18n.2a1d1da97a'),
+              title: this.$t('i18n_2a1d1da97a'),
               value: 'mvn clean package -Dmaven.test.skip=true -Ptest'
             },
             {
-              title: this.$t('i18n.b36e87fe5b'),
+              title: this.$t('i18n_b36e87fe5b'),
               value: 'mvn clean package -DskipTests'
             },
             {
@@ -1422,36 +1422,36 @@ export default {
               value: 'mvn clean package'
             },
             {
-              title: this.$t('i18n.1ae2955867'),
+              title: this.$t('i18n_1ae2955867'),
               value: 'mvn -f xxx/pom.xml clean package'
             },
             {
-              title: this.$t('i18n.ad9a677940'),
+              title: this.$t('i18n_ad9a677940'),
               value: 'mvn -s xxx/settings.xml clean package'
             }
           ]
         },
         {
-          title: this.$t('i18n.2c921271d5'),
+          title: this.$t('i18n_2c921271d5'),
           children: [
             {
-              title: this.$t('i18n.b7f770d80b'),
+              title: this.$t('i18n_b7f770d80b'),
               value: 'npm i && npm run build'
             },
             {
-              title: this.$t('i18n.e0ea800e34'),
+              title: this.$t('i18n_e0ea800e34'),
               value: 'npm i && npm run build:prod'
             },
             {
-              title: this.$t('i18n.88b4b85562'),
+              title: this.$t('i18n_88b4b85562'),
               value: 'npm i && npm run build:stage'
             },
             {
-              title: this.$t('i18n.fcbf0d0a55'),
+              title: this.$t('i18n_fcbf0d0a55'),
               value: 'yarn && yarn run build'
             },
             {
-              title: this.$t('i18n.329e2e0b2e'),
+              title: this.$t('i18n_329e2e0b2e'),
               value: 'yarn && yarn --cwd xxx build'
             }
           ]
@@ -1470,17 +1470,17 @@ export default {
       groupList: [],
       temp: {},
       rules: {
-        name: [{ required: true, message: this.$t('i18n.fea996d31e'), trigger: 'blur' }],
-        buildMode: [{ required: true, message: this.$t('i18n.e3e85de50c'), trigger: 'blur' }],
-        releaseMethod: [{ required: true, message: this.$t('i18n.6d7f0f06be'), trigger: 'blur' }],
-        branchName: [{ required: true, message: this.$t('i18n.50951f5e74'), trigger: 'blur' }],
-        script: [{ required: true, message: this.$t('i18n.50951f5e74'), trigger: 'blur' }],
-        resultDirFile: [{ required: true, message: this.$t('i18n.cc92cf1e25'), trigger: 'blur' }],
+        name: [{ required: true, message: this.$t('i18n_fea996d31e'), trigger: 'blur' }],
+        buildMode: [{ required: true, message: this.$t('i18n_e3e85de50c'), trigger: 'blur' }],
+        releaseMethod: [{ required: true, message: this.$t('i18n_6d7f0f06be'), trigger: 'blur' }],
+        branchName: [{ required: true, message: this.$t('i18n_50951f5e74'), trigger: 'blur' }],
+        script: [{ required: true, message: this.$t('i18n_50951f5e74'), trigger: 'blur' }],
+        resultDirFile: [{ required: true, message: this.$t('i18n_cc92cf1e25'), trigger: 'blur' }],
         // releasePath: [{ required: true, message: '请填写发布目录', trigger: 'blur' }],
         repositoryId: [
           {
             required: true,
-            message: this.$t('i18n.03c1f7c142'),
+            message: this.$t('i18n_03c1f7c142'),
             trigger: 'blur'
           }
         ]
@@ -1502,39 +1502,39 @@ export default {
       stepsCurrent: 0,
       stepsItems: [
         {
-          title: this.$t('i18n.17a74824de')
+          title: this.$t('i18n_17a74824de')
         },
         {
-          title: this.$t('i18n.6ea1fe6baa')
+          title: this.$t('i18n_6ea1fe6baa')
 
           // status: 'process'
         },
         {
-          title: this.$t('i18n.a2ae15f8a7')
+          title: this.$t('i18n_a2ae15f8a7')
 
           // status: 'wait'
         },
         {
-          title: this.$t('i18n.3c91490844')
+          title: this.$t('i18n_3c91490844')
 
           // status: 'wait'
         },
         {
-          title: this.$t('i18n.9ab433e930')
+          title: this.$t('i18n_9ab433e930')
 
           // status: 'wait'
         }
       ],
 
       dslDefault:
-        this.$t('i18n.ee19907fad') +
+        this.$t('i18n_ee19907fad') +
         'runsOn: ubuntu-latest\n' +
-        this.$t('i18n.f1a2a46f52') +
+        this.$t('i18n_f1a2a46f52') +
         'fromTag: xxx\n' +
-        this.$t('i18n.36df970248') +
-        this.$t('i18n.30ff009ab3') +
-        this.$t('i18n.ed40308fe9') +
-        this.$t('i18n.df5f80946d') +
+        this.$t('i18n_36df970248') +
+        this.$t('i18n_30ff009ab3') +
+        this.$t('i18n_ed40308fe9') +
+        this.$t('i18n_df5f80946d') +
         'steps:\n' +
         '  - uses: java\n' +
         '    version: 8\n' +
@@ -1546,31 +1546,31 @@ export default {
         '#    version: 1.17.6\n' +
         '#  - uses: python3\n' +
         '#    version: 3.6.6\n' +
-        this.$t('i18n.23559b6453') +
+        this.$t('i18n_23559b6453') +
         '  - uses: cache\n' +
         '    path: /root/.m2\n' +
-        this.$t('i18n.1abf39bdb6') +
+        this.$t('i18n_1abf39bdb6') +
         '    type: global\n' +
-        this.$t('i18n.f63345630c') +
+        this.$t('i18n_f63345630c') +
         '  - uses: cache\n' +
         '    path: ${JPOM_WORKING_DIR}/web-vue/node_modules\n' +
-        this.$t('i18n.5457c2e99f') +
+        this.$t('i18n_5457c2e99f') +
         '    mode: copy\n' +
         '  - run: npm config set registry https://registry.npmmirror.com\n' +
-        this.$t('i18n.7bcc3f169c') +
+        this.$t('i18n_7bcc3f169c') +
         '  - run: cd  ${JPOM_WORKING_DIR}/web-vue && npm i && npm run build\n' +
         '  - run: cd ${JPOM_WORKING_DIR} && mvn package -s script/settings.xml\n' +
-        this.$t('i18n.ea89a319ec') +
+        this.$t('i18n_ea89a319ec') +
         '# binds:\n' +
         '#  - /Users/user/.m2/settings.xml:/root/.m2/\n' +
-        this.$t('i18n.8d90b15eaf') +
+        this.$t('i18n_8d90b15eaf') +
         '# dirChildrenOnly = true will create /var/data/titi and /var/data/tata dirChildrenOnly = false will create /var/data/root/titi and /var/data/root/tata\n' +
         '# copy:\n' +
         '#  - /Users/user/.m2/settings.xml:/root/.m2/:false\n' +
-        this.$t('i18n.2b94686a65') +
+        this.$t('i18n_2b94686a65') +
         'env:\n' +
         '  NODE_OPTIONS: --max-old-space-size=900\n' +
-        this.$t('i18n.993a5c7eee') +
+        this.$t('i18n_993a5c7eee') +
         '#hostConfig:\n' +
         '#  CpuShares: 1',
       loading: false,
@@ -1772,7 +1772,7 @@ export default {
               let findArra = res0.data.filter((res0Item) => {
                 return res0Item.id === item.value
               })
-              item.label = findArra.length ? findArra[0].name : this.$t('i18n.1622dc9b6b')
+              item.label = findArra.length ? findArra[0].name : this.$t('i18n_1622dc9b6b')
               item.children = item.children.map((item2) => {
                 return {
                   label: item2.name,
@@ -1821,7 +1821,7 @@ export default {
           if (this.temp.releaseMethod === 2) {
             if (this.temp.releaseMethodDataIdList.length < 2) {
               $notification.warn({
-                message: this.$t('i18n.8309cec640')
+                message: this.$t('i18n_8309cec640')
               })
               return false
             }

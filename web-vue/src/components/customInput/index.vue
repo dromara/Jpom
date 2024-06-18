@@ -10,20 +10,20 @@
         <template #addonBefore>
           <a-tooltip>
             <template #title
-              >{{ $t('i18n.e6551a2295') }}
+              >{{ $t('i18n_e6551a2295') }}
               <ul v-if="!envList.length">
                 {{
-                  $t('i18n.7afb02ed93')
+                  $t('i18n_7afb02ed93')
                 }}
               </ul>
             </template>
             <a-select
               v-model:value="selectData"
-              :placeholder="$t('i18n.3a1052ccfc')"
+              :placeholder="$t('i18n_3a1052ccfc')"
               style="width: 120px"
               @change="selectChange"
             >
-              <a-select-option value="">{{ $t('i18n.e76e6a13dd') }}</a-select-option>
+              <a-select-option value="">{{ $t('i18n_e76e6a13dd') }}</a-select-option>
               <a-select-option v-for="item in envList" :key="item.id" :value="item.name"
                 >{{ item.name }}
               </a-select-option>
@@ -37,20 +37,20 @@
         <template #addonBefore>
           <a-tooltip>
             <template #title
-              >{{ $t('i18n.e6551a2295') }}
+              >{{ $t('i18n_e6551a2295') }}
               <ul v-if="!envList.length">
                 {{
-                  $t('i18n.7afb02ed93')
+                  $t('i18n_7afb02ed93')
                 }}
               </ul>
             </template>
             <a-select
               v-model:value="selectData"
-              :placeholder="$t('i18n.3a1052ccfc')"
+              :placeholder="$t('i18n_3a1052ccfc')"
               style="width: 120px"
               @change="selectChange"
             >
-              <a-select-option value="">{{ $t('i18n.3a1052ccfc') }}</a-select-option>
+              <a-select-option value="">{{ $t('i18n_3a1052ccfc') }}</a-select-option>
               <a-select-option v-for="item in envList" :key="item.id" :value="item.name"
                 >{{ item.name }}
               </a-select-option>
@@ -77,7 +77,7 @@ export default {
     placeholder: {
       type: String,
       default: function () {
-        return t('i18n.101a86bc84')
+        return t('i18n_101a86bc84')
       }
     },
     type: {

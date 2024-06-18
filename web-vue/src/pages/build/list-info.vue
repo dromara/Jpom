@@ -19,7 +19,7 @@
       default-auto-refresh
       :auto-refresh-time="5"
       table-name="buildList"
-      :empty-description="$t('i18n.1c2e9d0c76')"
+      :empty-description="$t('i18n_1c2e9d0c76')"
       :active-page="activePage"
       :layout="layout"
       size="middle"
@@ -58,7 +58,7 @@
             v-model:value="listQuery['%name%']"
             allow-clear
             class="search-input-item"
-            :placeholder="$t('i18n.50a299c847')"
+            :placeholder="$t('i18n_50a299c847')"
             @press-enter="loadData"
           />
           <a-select
@@ -75,7 +75,7 @@
                 )
               }
             "
-            :placeholder="$t('i18n.3fea7ca76c')"
+            :placeholder="$t('i18n_3fea7ca76c')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
@@ -94,7 +94,7 @@
               }
             "
             allow-clear
-            :placeholder="$t('i18n.f98994f7ec')"
+            :placeholder="$t('i18n_f98994f7ec')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in releaseMethodMap" :key="key">{{ val }}</a-select-option>
@@ -113,7 +113,7 @@
               }
             "
             allow-clear
-            :placeholder="$t('i18n.829abe5a8d')"
+            :placeholder="$t('i18n_829abe5a8d')"
             class="search-input-item"
           >
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
@@ -122,29 +122,29 @@
             v-model:value="listQuery['%resultDirFile%']"
             allow-clear
             class="search-input-item"
-            :placeholder="$t('i18n.c972010694')"
+            :placeholder="$t('i18n_c972010694')"
             @press-enter="loadData"
           />
-          <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
+          <a-tooltip :title="$t('i18n_4838a3bd20')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">{{ $t('i18n.66ab5e9f24') }}</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $t('i18n_66ab5e9f24') }}</a-button>
           <template v-if="tableSelections && tableSelections.length">
             <a-dropdown>
               <template #overlay>
                 <a-menu>
-                  <a-menu-item key="1" @click="batchBuild"> {{ $t('i18n.67e3d3e09c') }} </a-menu-item>
-                  <a-menu-item key="2" @click="batchCancel"> {{ $t('i18n.32112950da') }} </a-menu-item>
+                  <a-menu-item key="1" @click="batchBuild"> {{ $t('i18n_67e3d3e09c') }} </a-menu-item>
+                  <a-menu-item key="2" @click="batchCancel"> {{ $t('i18n_32112950da') }} </a-menu-item>
                   <a-menu-item key="3" @click="handleBatchDelete">
-                    {{ $t('i18n.7fb62b3011') }}
+                    {{ $t('i18n_7fb62b3011') }}
                   </a-menu-item>
                 </a-menu>
               </template>
-              <a-button type="primary"> {{ $t('i18n.7f7c624a84') }}<DownOutlined /> </a-button>
+              <a-button type="primary"> {{ $t('i18n_7f7c624a84') }}<DownOutlined /> </a-button>
             </a-dropdown>
           </template>
-          <a-tooltip v-else :title="$t('i18n.98357846a2')">
-            <a-button :disabled="true" type="primary"> {{ $t('i18n.7f7c624a84') }} <DownOutlined /> </a-button>
+          <a-tooltip v-else :title="$t('i18n_98357846a2')">
+            <a-button :disabled="true" type="primary"> {{ $t('i18n_7f7c624a84') }} <DownOutlined /> </a-button>
           </a-tooltip>
 
           <!-- <a-button v-if="!layout" type="primary" @click="changeLayout">
@@ -176,12 +176,12 @@
               </a-col>
               <a-col :span="7" style="text-align: right" class="text-overflow-hidden">
                 <a-tooltip
-                  :title="`${$t('i18n.e703c7367c')}${statusMap[item.status]} ${
-                    item.statusMsg ? $t('i18n.8d13037eb7') + item.statusMsg : ''
+                  :title="`${$t('i18n_e703c7367c')}${statusMap[item.status]} ${
+                    item.statusMsg ? $t('i18n_8d13037eb7') + item.statusMsg : ''
                   }`"
                 >
                   <a-tag :color="statusColor[item.status]" style="margin-right: 0">
-                    {{ statusMap[item.status] || $t('i18n.903b25f64e') }}</a-tag
+                    {{ statusMap[item.status] || $t('i18n_903b25f64e') }}</a-tag
                   >
                 </a-tooltip>
               </a-col>
@@ -191,17 +191,17 @@
           <a-tooltip>
             <template #title>
               <div v-if="item.branchTagName">
-                <div>{{ $t('i18n.8086beecb3') }}{{ item.branchTagName }}</div>
-                <div>{{ $t('i18n.ca774ec5b4') }}{{ item.repositoryLastCommitId }}</div>
+                <div>{{ $t('i18n_8086beecb3') }}{{ item.branchTagName }}</div>
+                <div>{{ $t('i18n_ca774ec5b4') }}{{ item.repositoryLastCommitId }}</div>
               </div>
               <div v-else>
-                <div>{{ $t('i18n.f240f9d69c') }}{{ item.branchName }}</div>
-                <div>{{ $t('i18n.ca774ec5b4') }}{{ item.repositoryLastCommitId }}</div>
+                <div>{{ $t('i18n_f240f9d69c') }}{{ item.branchName }}</div>
+                <div>{{ $t('i18n_ca774ec5b4') }}{{ item.repositoryLastCommitId }}</div>
               </div>
             </template>
 
             <a-row class="item-info">
-              <a-col :span="6" class="title text-overflow-hidden">{{ $t('i18n.88ab27cfd0') }}</a-col>
+              <a-col :span="6" class="title text-overflow-hidden">{{ $t('i18n_88ab27cfd0') }}</a-col>
               <a-col :span="18" class="content text-overflow-hidden">
                 {{ item.branchName }} {{ item.branchTagName }}</a-col
               >
@@ -209,7 +209,7 @@
           </a-tooltip>
           <a-tooltip :title="item.resultDirFile">
             <a-row class="item-info">
-              <a-col :span="6" class="title text-overflow-hidden">{{ $t('i18n.cc637e17a0') }}</a-col>
+              <a-col :span="6" class="title text-overflow-hidden">{{ $t('i18n_cc637e17a0') }}</a-col>
               <a-col :span="18" class="content text-overflow-hidden">
                 {{ item.resultDirFile }}
               </a-col>
@@ -217,7 +217,7 @@
           </a-tooltip>
 
           <a-row class="item-info">
-            <a-col :span="6" class="title text-overflow-hidden">{{ $t('i18n.b5d0091ae3') }}:</a-col>
+            <a-col :span="6" class="title text-overflow-hidden">{{ $t('i18n_b5d0091ae3') }}:</a-col>
             <a-col :span="18" class="content text-overflow-hidden">
               <a-tag v-if="item.buildId <= 0">-</a-tag>
               <a-tag v-else color="#108ee9" @click="handleBuildLog(item)">#{{ item.buildId }}</a-tag>
@@ -225,20 +225,20 @@
           </a-row>
 
           <a-row class="item-info">
-            <a-col :span="6" class="title text-overflow-hidden">{{ $t('i18n.c530a094f9') }}</a-col>
+            <a-col :span="6" class="title text-overflow-hidden">{{ $t('i18n_c530a094f9') }}</a-col>
             <a-col :span="18" class="content text-overflow-hidden">
               <template v-if="item.buildMode === 1">
                 <CloudOutlined />
-                {{ $t('i18n.685e5de706') }}
+                {{ $t('i18n_685e5de706') }}
               </template>
               <template v-else>
                 <CodeOutlined />
-                {{ $t('i18n.69c3b873c1') }}
+                {{ $t('i18n_69c3b873c1') }}
               </template>
             </a-col>
           </a-row>
           <a-row class="item-info">
-            <a-col :span="6" class="title text-overflow-hidden">{{ $t('i18n.65894da683') }}</a-col>
+            <a-col :span="6" class="title text-overflow-hidden">{{ $t('i18n_65894da683') }}</a-col>
             <a-col :span="18" class="content text-overflow-hidden">
               {{ releaseMethodMap[item.releaseMethod] }}
             </a-col>
@@ -252,11 +252,11 @@
                 type="primary"
                 danger
                 @click="handleStopBuild(item)"
-                >{{ $t('i18n.095e938e2a') }}
+                >{{ $t('i18n_095e938e2a') }}
               </a-button>
               <a-dropdown v-else>
                 <a-button size="small" type="primary" @click="handleConfirmStartBuild(item)">
-                  {{ $t('i18n.fcba60e773') }}
+                  {{ $t('i18n_fcba60e773') }}
                   <DownOutlined />
                 </a-button>
                 <template #overlay>
@@ -266,7 +266,7 @@
                         size="small"
                         type="primary"
                         @click="reqStartBuild({ id: item.id, buildEnvParameter: item.buildEnvParameter }, true)"
-                        >{{ $t('i18n.16b5e7b472') }}
+                        >{{ $t('i18n_16b5e7b472') }}
                       </a-button>
                     </a-menu-item>
                     <a-menu-item key="2">
@@ -275,38 +275,38 @@
                         type="primary"
                         @click="reqStartBuild({ id: item.id, buildEnvParameter: item.buildEnvParameter }, false)"
                       >
-                        {{ $t('i18n.f1fdaffdf0') }}
+                        {{ $t('i18n_f1fdaffdf0') }}
                       </a-button>
                     </a-menu-item>
                   </a-menu>
                 </template>
               </a-dropdown>
               <a-dropdown>
-                <a-button size="small" type="primary" @click="handleEdit(item)">{{ $t('i18n.95b351c862') }}</a-button>
+                <a-button size="small" type="primary" @click="handleEdit(item)">{{ $t('i18n_95b351c862') }}</a-button>
                 <template #overlay>
                   <a-menu>
                     <a-menu-item @click="handleEdit(item, 0)">
-                      <a href="javascript:;">{{ $t('i18n.17a74824de') }}</a>
+                      <a href="javascript:;">{{ $t('i18n_17a74824de') }}</a>
                     </a-menu-item>
                     <a-menu-item @click="handleEdit(item, 1)">
-                      <a href="javascript:;">{{ $t('i18n.6ea1fe6baa') }}</a>
+                      <a href="javascript:;">{{ $t('i18n_6ea1fe6baa') }}</a>
                     </a-menu-item>
                     <a-menu-item @click="handleEdit(item, 2)">
-                      <a href="javascript:;">{{ $t('i18n.a2ae15f8a7') }}</a>
+                      <a href="javascript:;">{{ $t('i18n_a2ae15f8a7') }}</a>
                     </a-menu-item>
                     <a-menu-item @click="handleEdit(item, 3)">
-                      <a href="javascript:;">{{ $t('i18n.3c91490844') }}</a>
+                      <a href="javascript:;">{{ $t('i18n_3c91490844') }}</a>
                     </a-menu-item>
                     <a-menu-item @click="handleEdit(item, 4)">
-                      <a href="javascript:;">{{ $t('i18n.9ab433e930') }}</a>
+                      <a href="javascript:;">{{ $t('i18n_9ab433e930') }}</a>
                     </a-menu-item>
                   </a-menu>
                 </template>
               </a-dropdown>
-              <a-button size="small" @click="handleDelete(item)">{{ $t('i18n.2f4aaddde3') }}</a-button>
-              <a-tooltip placement="leftBottom" :title="$t('i18n.19675b9d36')">
+              <a-button size="small" @click="handleDelete(item)">{{ $t('i18n_2f4aaddde3') }}</a-button>
+              <a-tooltip placement="leftBottom" :title="$t('i18n_19675b9d36')">
                 <a-button size="small" :disabled="!item.sourceDirExist" @click="handleClear(item)"
-                  >{{ $t('i18n.c37ac7f024') }}
+                  >{{ $t('i18n_c37ac7f024') }}
                 </a-button>
               </a-tooltip>
             </a-button-group>
@@ -317,7 +317,7 @@
         <template v-if="column.dataIndex === 'name'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$t('i18n.d7ec2d3fea')}${text} ${$t('i18n.84632d372f')}`"
+            :title="`${$t('i18n_d7ec2d3fea')}${text} ${$t('i18n_84632d372f')}`"
             @click="handleDetails(record)"
           >
             <a-button type="link" style="padding: 0" size="small"> <FullscreenOutlined />{{ text }}</a-button>
@@ -327,12 +327,12 @@
           <a-tooltip placement="topLeft">
             <template #title>
               <div v-if="record.branchTagName">
-                <div>{{ $t('i18n.8086beecb3') }}{{ record.branchTagName }}</div>
-                <div>{{ $t('i18n.ca774ec5b4') }}{{ record.repositoryLastCommitId }}</div>
+                <div>{{ $t('i18n_8086beecb3') }}{{ record.branchTagName }}</div>
+                <div>{{ $t('i18n_ca774ec5b4') }}{{ record.repositoryLastCommitId }}</div>
               </div>
               <div v-else>
-                <div>{{ $t('i18n.f240f9d69c') }}{{ text }}</div>
-                <div>{{ $t('i18n.ca774ec5b4') }}{{ record.repositoryLastCommitId }}</div>
+                <div>{{ $t('i18n_f240f9d69c') }}{{ text }}</div>
+                <div>{{ $t('i18n_ca774ec5b4') }}{{ record.repositoryLastCommitId }}</div>
               </div>
             </template>
             <span v-if="record.branchTagName"><TagOutlined />{{ record.branchTagName }}</span>
@@ -341,7 +341,7 @@
         </template>
 
         <template v-else-if="column.dataIndex === 'buildMode'">
-          <a-tooltip placement="topLeft" :title="text === 1 ? $t('i18n.685e5de706') : $t('i18n.69c3b873c1')">
+          <a-tooltip placement="topLeft" :title="text === 1 ? $t('i18n_685e5de706') : $t('i18n_69c3b873c1')">
             <CloudOutlined v-if="text === 1" />
             <CodeOutlined v-else />
           </a-tooltip>
@@ -350,25 +350,25 @@
           <a-tooltip>
             <template #title>
               <ul>
-                <li>{{ $t('i18n.65894da683') }}{{ releaseMethodMap[text] }}</li>
-                <li>{{ $t('i18n.113576ce91') }}{{ record.resultDirFile }}</li>
-                <li v-if="record.buildMode !== 1">{{ $t('i18n.1160ab56fd') }}{{ record.script }}</li>
+                <li>{{ $t('i18n_65894da683') }}{{ releaseMethodMap[text] }}</li>
+                <li>{{ $t('i18n_113576ce91') }}{{ record.resultDirFile }}</li>
+                <li v-if="record.buildMode !== 1">{{ $t('i18n_1160ab56fd') }}{{ record.script }}</li>
               </ul>
             </template>
             <span>{{ releaseMethodMap[text] }}</span>
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'status'">
-          <a-tooltip :title="record.statusMsg || statusMap[text] || $t('i18n.1622dc9b6b')">
+          <a-tooltip :title="record.statusMsg || statusMap[text] || $t('i18n_1622dc9b6b')">
             <a-tag
               :color="statusColor[record.status]"
-              :title="record.statusMsg || statusMap[text] || $t('i18n.1622dc9b6b')"
-              >{{ statusMap[text] || $t('i18n.1622dc9b6b') }}</a-tag
+              :title="record.statusMsg || statusMap[text] || $t('i18n_1622dc9b6b')"
+              >{{ statusMap[text] || $t('i18n_1622dc9b6b') }}</a-tag
             >
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'buildId'">
-          <a-tooltip placement="topLeft" :title="text + ` ( ${$t('i18n.aac62bc255')} ) `">
+          <a-tooltip placement="topLeft" :title="text + ` ( ${$t('i18n_aac62bc255')} ) `">
             <span v-if="record.buildId <= 0"></span>
             <a-tag v-else color="#108ee9" @click="handleBuildLog(record)">#{{ text }}</a-tag>
           </a-tooltip>
@@ -386,11 +386,11 @@
               type="primary"
               danger
               @click="handleStopBuild(record)"
-              >{{ $t('i18n.095e938e2a') }}
+              >{{ $t('i18n_095e938e2a') }}
             </a-button>
             <a-dropdown v-else>
               <a-button size="small" type="primary" @click="handleConfirmStartBuild(record)"
-                >{{ $t('i18n.fcba60e773') }}<DownOutlined
+                >{{ $t('i18n_fcba60e773') }}<DownOutlined
               /></a-button>
               <template #overlay>
                 <a-menu>
@@ -399,7 +399,7 @@
                       size="small"
                       type="primary"
                       @click="reqStartBuild({ id: record.id, buildEnvParameter: record.buildEnvParameter }, true)"
-                      >{{ $t('i18n.16b5e7b472') }}</a-button
+                      >{{ $t('i18n_16b5e7b472') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item key="2">
@@ -407,7 +407,7 @@
                       size="small"
                       type="primary"
                       @click="reqStartBuild({ id: record.id, buildEnvParameter: record.buildEnvParameter }, false)"
-                      >{{ $t('i18n.f1fdaffdf0') }}</a-button
+                      >{{ $t('i18n_f1fdaffdf0') }}</a-button
                     >
                   </a-menu-item>
                 </a-menu>
@@ -415,38 +415,38 @@
             </a-dropdown>
             <a-dropdown>
               <a-button size="small" type="primary" @click="handleEdit(record, 1)">{{
-                $t('i18n.95b351c862')
+                $t('i18n_95b351c862')
               }}</a-button>
               <template #overlay>
                 <a-menu>
                   <a-menu-item @click="handleEdit(record, 0)">
-                    <a href="javascript:;">{{ $t('i18n.17a74824de') }}</a>
+                    <a href="javascript:;">{{ $t('i18n_17a74824de') }}</a>
                   </a-menu-item>
                   <a-menu-item @click="handleEdit(record, 1)">
-                    <a href="javascript:;">{{ $t('i18n.6ea1fe6baa') }}</a>
+                    <a href="javascript:;">{{ $t('i18n_6ea1fe6baa') }}</a>
                   </a-menu-item>
                   <a-menu-item @click="handleEdit(record, 2)">
-                    <a href="javascript:;">{{ $t('i18n.a2ae15f8a7') }}</a>
+                    <a href="javascript:;">{{ $t('i18n_a2ae15f8a7') }}</a>
                   </a-menu-item>
                   <a-menu-item @click="handleEdit(record, 3)">
-                    <a href="javascript:;">{{ $t('i18n.3c91490844') }}</a>
+                    <a href="javascript:;">{{ $t('i18n_3c91490844') }}</a>
                   </a-menu-item>
                   <a-menu-item @click="handleEdit(record, 4)">
-                    <a href="javascript:;">{{ $t('i18n.9ab433e930') }}</a>
+                    <a href="javascript:;">{{ $t('i18n_9ab433e930') }}</a>
                   </a-menu-item>
                 </a-menu>
               </template>
             </a-dropdown>
             <a-dropdown>
               <a class="ant-dropdown-link" @click="(e) => e.preventDefault()">
-                {{ $t('i18n.0ec9eaf9c3') }}
+                {{ $t('i18n_0ec9eaf9c3') }}
                 <DownOutlined />
               </a>
               <template #overlay>
                 <a-menu>
                   <a-menu-item>
                     <a-button size="small" type="primary" @click="copyItem(record)">{{
-                      $t('i18n.79d3abe929')
+                      $t('i18n_79d3abe929')
                     }}</a-button>
                   </a-menu-item>
                   <a-menu-item>
@@ -455,24 +455,24 @@
                       :disabled="!record.resultHasFile"
                       type="primary"
                       @click="handleDownloadFile(record)"
-                      >{{ $t('i18n.635391aa5d') }}</a-button
+                      >{{ $t('i18n_635391aa5d') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
                     <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-                      $t('i18n.2f4aaddde3')
+                      $t('i18n_2f4aaddde3')
                     }}</a-button>
                   </a-menu-item>
 
                   <a-menu-item>
-                    <a-tooltip placement="leftBottom" :title="$t('i18n.19675b9d36')">
+                    <a-tooltip placement="leftBottom" :title="$t('i18n_19675b9d36')">
                       <a-button
                         size="small"
                         type="primary"
                         danger
                         :disabled="!record.sourceDirExist"
                         @click="handleClear(record)"
-                        >{{ $t('i18n.c37ac7f024') }}
+                        >{{ $t('i18n_c37ac7f024') }}
                       </a-button>
                     </a-tooltip>
                   </a-menu-item>
@@ -483,7 +483,7 @@
                       type="primary"
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
                       @click="sortItemHander(record, index, 'top')"
-                      >{{ $t('i18n.3d43ff1199') }}</a-button
+                      >{{ $t('i18n_3d43ff1199') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
@@ -492,7 +492,7 @@
                       type="primary"
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
                       @click="sortItemHander(record, index, 'up')"
-                      >{{ $t('i18n.315eacd193') }}</a-button
+                      >{{ $t('i18n_315eacd193') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
@@ -502,7 +502,7 @@
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total"
                       @click="sortItemHander(record, index, 'down')"
                     >
-                      {{ $t('i18n.17acd250da') }}
+                      {{ $t('i18n_17acd250da') }}
                     </a-button>
                   </a-menu-item>
                 </a-menu>
@@ -584,31 +584,31 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="40vw"
-      :title="$t('i18n.0a1d18283e')"
+      :title="$t('i18n_0a1d18283e')"
       :mask-closable="false"
       @ok="handleStartBuild"
     >
       <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-item :label="$t('i18n.d7ec2d3fea')" name="name">
+        <a-form-item :label="$t('i18n_d7ec2d3fea')" name="name">
           <a-input v-model:value="temp.name" read-only disabled />
         </a-form-item>
-        <a-form-item :label="$t('i18n.bfc04cfda7')" name="branchName">
+        <a-form-item :label="$t('i18n_bfc04cfda7')" name="branchName">
           <custom-select
             v-model:value="temp.branchName"
             :data="branchList"
             :disabled="temp.branchTagName ? true : false"
             :can-reload="true"
-            :input-placeholder="$t('i18n.c618659cea')"
-            :select-placeholder="$t('i18n.121e76bb63')"
+            :input-placeholder="$t('i18n_c618659cea')"
+            :select-placeholder="$t('i18n_121e76bb63')"
             @on-refresh-select="loadBranchListById(temp.repositoryId)"
           >
             <template #inputTips>
               <div>
-                {{ $t('i18n.89f5ca6928') }}(AntPathMatcher)
+                {{ $t('i18n_89f5ca6928') }}(AntPathMatcher)
                 <ul>
-                  <li>? {{ $t('i18n.9973159a4d') }}</li>
-                  <li>* {{ $t('i18n.32f882ae24') }}</li>
-                  <li>** {{ $t('i18n.45b88fc569') }}</li>
+                  <li>? {{ $t('i18n_9973159a4d') }}</li>
+                  <li>* {{ $t('i18n_32f882ae24') }}</li>
+                  <li>** {{ $t('i18n_45b88fc569') }}</li>
                 </ul>
               </div>
             </template>
@@ -616,45 +616,45 @@
         </a-form-item>
         <a-form-item
           v-if="(branchTagList && branchTagList.length) || (temp.branchTagName && temp.branchTagName.length)"
-          :label="$t('i18n.977bfe8508')"
+          :label="$t('i18n_977bfe8508')"
           name="branchTagName"
         >
           <custom-select
             v-model:value="temp.branchTagName"
             :data="branchTagList"
             :can-reload="true"
-            :input-placeholder="$t('i18n.30e6f71a18')"
-            :select-placeholder="$t('i18n.2d58b0e650')"
+            :input-placeholder="$t('i18n_30e6f71a18')"
+            :select-placeholder="$t('i18n_2d58b0e650')"
             @on-refresh-select="loadBranchListById(temp.repositoryId)"
           >
             <template #inputTips>
               <div>
-                {{ $t('i18n.89f5ca6928') }}(AntPathMatcher)
+                {{ $t('i18n_89f5ca6928') }}(AntPathMatcher)
                 <ul>
-                  <li>? {{ $t('i18n.9973159a4d') }}</li>
-                  <li>* {{ $t('i18n.32f882ae24') }}</li>
-                  <li>** {{ $t('i18n.45b88fc569') }}</li>
+                  <li>? {{ $t('i18n_9973159a4d') }}</li>
+                  <li>* {{ $t('i18n_32f882ae24') }}</li>
+                  <li>** {{ $t('i18n_45b88fc569') }}</li>
                 </ul>
               </div>
             </template>
           </custom-select>
         </a-form-item>
-        <a-form-item name="resultDirFile" :label="$t('i18n.c972010694')">
-          <a-input v-model:value="temp.resultDirFile" :placeholder="$t('i18n.2bef5b58ab')" />
+        <a-form-item name="resultDirFile" :label="$t('i18n_c972010694')">
+          <a-input v-model:value="temp.resultDirFile" :placeholder="$t('i18n_2bef5b58ab')" />
         </a-form-item>
-        <a-form-item name="checkRepositoryDiff" :label="$t('i18n.0b23d2f584')" help="">
+        <a-form-item name="checkRepositoryDiff" :label="$t('i18n_0b23d2f584')" help="">
           <a-space>
             <a-switch
               v-model:checked="temp.checkRepositoryDiff"
-              :checked-children="$t('i18n.0a60ac8f02')"
-              :un-checked-children="$t('i18n.c9744f45e7')"
+              :checked-children="$t('i18n_0a60ac8f02')"
+              :un-checked-children="$t('i18n_c9744f45e7')"
             />
             <span>
               <a-tooltip>
-                <template #title> {{ $t('i18n.4cbc5505c7') }} </template>
+                <template #title> {{ $t('i18n_4cbc5505c7') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
-              {{ $t('i18n.1d263b7efb') }}
+              {{ $t('i18n_1d263b7efb') }}
             </span>
           </a-space>
         </a-form-item>
@@ -662,35 +662,35 @@
         <a-form-item
           v-if="temp.releaseMethod === 1 || temp.releaseMethod === 2"
           name="projectSecondaryDirectory"
-          :label="$t('i18n.871cc8602a')"
+          :label="$t('i18n_871cc8602a')"
         >
-          <a-input v-model:value="temp.projectSecondaryDirectory" :placeholder="$t('i18n.9c99e8bec9')" />
+          <a-input v-model:value="temp.projectSecondaryDirectory" :placeholder="$t('i18n_9c99e8bec9')" />
         </a-form-item>
-        <a-form-item :label="$t('i18n.3867e350eb')" name="buildEnvParameter" :help="$t('i18n.220650a1f5')">
+        <a-form-item :label="$t('i18n_3867e350eb')" name="buildEnvParameter" :help="$t('i18n_220650a1f5')">
           <a-textarea
             v-model:value="temp.buildEnvParameter"
-            :placeholder="$t('i18n.b3913b9bb7')"
+            :placeholder="$t('i18n_b3913b9bb7')"
             :auto-size="{ minRows: 3, maxRows: 5 }"
           />
         </a-form-item>
-        <a-form-item :label="$t('i18n.d1498d9dbf')" name="buildRemark" :help="$t('i18n.111e786daa')">
+        <a-form-item :label="$t('i18n_d1498d9dbf')" name="buildRemark" :help="$t('i18n_111e786daa')">
           <a-textarea
             v-model:value="temp.buildRemark"
             :max-length="240"
-            :placeholder="$t('i18n.7777a83497')"
+            :placeholder="$t('i18n_7777a83497')"
             :auto-size="{ minRows: 2, maxRows: 5 }"
           />
         </a-form-item>
         <a-form-item
           v-if="dispatchProjectList && dispatchProjectList.length"
           name="selectProject"
-          :label="$t('i18n.c4e0c6b6fe')"
-          :help="$t('i18n.25be899f66')"
+          :label="$t('i18n_c4e0c6b6fe')"
+          :help="$t('i18n_25be899f66')"
         >
           <a-select
             v-model:value="temp.dispatchSelectProjectArray"
             mode="multiple"
-            :placeholder="$t('i18n.b29fd18c93')"
+            :placeholder="$t('i18n_b29fd18c93')"
           >
             <a-select-option
               v-for="item in dispatchProjectList"
@@ -784,28 +784,28 @@ export default {
       buildConfirmVisible: false,
       columns: [
         {
-          title: this.$t('i18n.d7ec2d3fea'),
+          title: this.$t('i18n_d7ec2d3fea'),
           dataIndex: 'name',
           sorter: true,
           width: 200,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.829abe5a8d'),
+          title: this.$t('i18n_829abe5a8d'),
           dataIndex: 'group',
           width: 100,
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('i18n.f4bbbaf882'),
+          title: this.$t('i18n_f4bbbaf882'),
           dataIndex: 'branchName',
           ellipsis: true,
           width: 100
         },
 
         {
-          title: this.$t('i18n.7220e4d5f9'),
+          title: this.$t('i18n_7220e4d5f9'),
           dataIndex: 'buildMode',
           align: 'center',
           width: '80px',
@@ -813,14 +813,14 @@ export default {
           ellipsis: true
         },
         {
-          title: this.$t('i18n.3fea7ca76c'),
+          title: this.$t('i18n_3fea7ca76c'),
           dataIndex: 'status',
           align: 'center',
           width: '100px',
           ellipsis: true
         },
         {
-          title: this.$t('i18n.b5d0091ae3'),
+          title: this.$t('i18n_b5d0091ae3'),
           dataIndex: 'buildId',
           width: '90px',
           ellipsis: true,
@@ -828,27 +828,27 @@ export default {
         },
 
         {
-          title: this.$t('i18n.f98994f7ec'),
+          title: this.$t('i18n_f98994f7ec'),
           dataIndex: 'releaseMethod',
           width: '100px',
           ellipsis: true
         },
         {
-          title: this.$t('i18n.7dfcab648d'),
+          title: this.$t('i18n_7dfcab648d'),
           dataIndex: 'resultDirFile',
           width: 100,
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('i18n.db9296212a'),
+          title: this.$t('i18n_db9296212a'),
           dataIndex: 'autoBuildCron',
           width: 100,
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('i18n.9baca0054e'),
+          title: this.$t('i18n_9baca0054e'),
           dataIndex: 'modifyUser',
           width: '130px',
           ellipsis: true,
@@ -856,7 +856,7 @@ export default {
         },
 
         {
-          title: this.$t('i18n.eca37cb072'),
+          title: this.$t('i18n_eca37cb072'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -864,20 +864,20 @@ export default {
           width: '160px'
         },
         {
-          title: this.$t('i18n.1303e638b5'),
+          title: this.$t('i18n_1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           customRender: ({ text }) => parseTime(text),
           width: '160px'
         },
         {
-          title: this.$t('i18n.c35c1a1330'),
+          title: this.$t('i18n_c35c1a1330'),
           dataIndex: 'sortValue',
           sorter: true,
           width: '80px'
         },
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
           width: '200px',
 
@@ -986,7 +986,7 @@ export default {
       const temp = Object.assign({}, record)
       delete temp.id
       delete temp.triggerToken
-      temp.name = temp.name + this.$t('i18n.0428b36ab1')
+      temp.name = temp.name + this.$t('i18n_0428b36ab1')
       this.temp = temp
       this.editBuildVisible = 2
       this.editSteps = 1
@@ -1019,11 +1019,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.48281fd3f0'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_48281fd3f0'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           // 删除
           return deleteBuild(record.id).then((res) => {
@@ -1041,16 +1041,16 @@ export default {
     handleBatchDelete() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
         $notification.warning({
-          message: this.$t('i18n.5d817c403e')
+          message: this.$t('i18n_5d817c403e')
         })
         return
       }
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.79076b6882'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_79076b6882'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           // 删除
           return deleteatchBuild({ ids: this.tableSelections.join(',') }).then((res) => {
@@ -1067,11 +1067,11 @@ export default {
     // 清除构建
     handleClear(record) {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.e15f22df2d'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_e15f22df2d'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return clearBuid(record.id).then((res) => {
             if (res.code === 200) {
@@ -1166,12 +1166,12 @@ export default {
     // 停止构建
     handleStopBuild(record) {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
         // TODO 后续抽优化
-        content: this.$t('i18n.25f6a95de3') + record.name + this.$t('i18n.c16ab7c424'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_25f6a95de3') + record.name + this.$t('i18n_c16ab7c424'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           this.temp = Object.assign({}, record)
           return stopBuild(this.temp.id).then((res) => {
@@ -1201,22 +1201,22 @@ export default {
     // 排序
     sortItemHander(record, index, method) {
       const msgData = {
-        top: this.$t('i18n.0079d91f95'),
-        up: this.$t('i18n.b166a66d67'),
-        down: this.$t('i18n.7a7e25e9eb')
+        top: this.$t('i18n_0079d91f95'),
+        up: this.$t('i18n_b166a66d67'),
+        down: this.$t('i18n_7a7e25e9eb')
       }
-      let msg = msgData[method] || this.$t('i18n.49574eee58')
+      let msg = msgData[method] || this.$t('i18n_49574eee58')
       if (!record.sortValue) {
-        msg += this.$t('i18n.461e675921')
+        msg += this.$t('i18n_461e675921')
       }
       // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
       const compareId = this.list[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
         content: msg,
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return sortItem({
             id: record.id,
@@ -1242,16 +1242,16 @@ export default {
     batchBuild() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
         $notification.warning({
-          message: this.$t('i18n.5d817c403e')
+          message: this.$t('i18n_5d817c403e')
         })
         return
       }
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.9341881037'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_9341881037'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           this.tableSelections.forEach((item) => {
             startBuild({
@@ -1271,16 +1271,16 @@ export default {
     batchCancel() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
         $notification.warning({
-          message: this.$t('i18n.5d817c403e')
+          message: this.$t('i18n_5d817c403e')
         })
         return
       }
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.2d3fd578ce'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_2d3fd578ce'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           this.tableSelections.forEach((item) => {
             stopBuild(item).then((res) => {
@@ -1314,7 +1314,7 @@ export default {
     handerConfirm() {
       if (!this.tableSelections.length) {
         $notification.warning({
-          message: this.$t('i18n.2b4cf3d74e')
+          message: this.$t('i18n_2b4cf3d74e')
         })
         return
       }
@@ -1323,7 +1323,7 @@ export default {
       })
       if (!selectData.length) {
         $notification.warning({
-          message: this.$t('i18n.2b4cf3d74e')
+          message: this.$t('i18n_2b4cf3d74e')
         })
         return
       }

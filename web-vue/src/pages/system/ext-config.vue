@@ -4,10 +4,10 @@
       <a-col span="6" style="">
         <a-row>
           <a-space style="display: inline">
-            <a-input v-model:value="addName" :placeholder="$t('i18n.cfeea27648')" style="width: 100%">
+            <a-input v-model:value="addName" :placeholder="$t('i18n_cfeea27648')" style="width: 100%">
               <template #addonAfter>
                 <a-button type="primary" size="small" :disabled="!addName" @click="addItemHander"
-                  >{{ $t('i18n.e83a256e4f') }}
+                  >{{ $t('i18n_e83a256e4f') }}
                 </a-button>
               </template>
             </a-input>
@@ -32,7 +32,7 @@
           >
             <template #tool_before>
               <div v-show="temp.name">
-                {{ $t('i18n.5b47861521') }} <a-tag color="red">{{ temp.name }}</a-tag>
+                {{ $t('i18n_5b47861521') }} <a-tag color="red">{{ temp.name }}</a-tag>
               </div>
             </template>
           </code-editor>
@@ -40,10 +40,10 @@
           <a-row type="flex" justify="center">
             <a-space>
               <a-button type="primary" danger :disabled="!temp || !temp.name" @click="saveData">{{
-                $t('i18n.be5fbbe34c')
+                $t('i18n_be5fbbe34c')
               }}</a-button>
               <a-button v-if="temp.hasDefault" type="primary" :disabled="!temp || !temp.name" @click="readeDefault">
-                {{ $t('i18n.3306c2a7c7') }}
+                {{ $t('i18n_3306c2a7c7') }}
               </a-button>
             </a-space>
           </a-row>
@@ -115,17 +115,17 @@ export default {
       getDefaultItem({ name: this.temp.name }).then((res) => {
         if (res.code === 200) {
           this.temp = { ...this.temp, content: res.data }
-          $message.success({ content: this.$t('i18n.335258331a') })
+          $message.success({ content: this.$t('i18n_335258331a') })
         }
       })
     },
     addItemHander() {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.bd8b1dbc5a') + this.addName + this.$t('i18n.14b58d4b77'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_bd8b1dbc5a') + this.addName + this.$t('i18n_14b58d4b77'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return addItem({ name: this.addName }).then((res) => {
             if (res.code === 200) {

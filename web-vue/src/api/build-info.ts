@@ -292,16 +292,16 @@ export function sortItem(params) {
 }
 
 export const statusMap = {
-  1: t('i18n.32493aeef9'),
-  2: t('i18n.641796b655'),
-  3: t('i18n.41298f56a3'),
-  4: t('i18n.0baa0e3fc4'),
-  5: t('i18n.2fff079bc7'),
-  6: t('i18n.250688d7c9'),
-  7: t('i18n.b4fc1ac02c'),
-  8: t('i18n.979b7d10b0'),
-  9: t('i18n.81afd9e713'),
-  10: t('i18n.8160b4be4e')
+  1: t('i18n_32493aeef9'),
+  2: t('i18n_641796b655'),
+  3: t('i18n_41298f56a3'),
+  4: t('i18n_0baa0e3fc4'),
+  5: t('i18n_2fff079bc7'),
+  6: t('i18n_250688d7c9'),
+  7: t('i18n_b4fc1ac02c'),
+  8: t('i18n_979b7d10b0'),
+  9: t('i18n_81afd9e713'),
+  10: t('i18n_8160b4be4e')
 }
 export const statusColor = {
   1: 'orange',
@@ -317,22 +317,22 @@ export const statusColor = {
 }
 
 export const releaseMethodMap = {
-  0: t('i18n.a189314b9e'),
-  1: t('i18n.ae6838c0e6'),
-  2: t('i18n.31ecc0e65b'),
+  0: t('i18n_a189314b9e'),
+  1: t('i18n_ae6838c0e6'),
+  2: t('i18n_31ecc0e65b'),
   3: 'SSH',
-  4: t('i18n.b71a7e6aab'),
-  5: t('i18n.9136e1859a')
+  4: t('i18n_b71a7e6aab'),
+  5: t('i18n_9136e1859a')
 }
 
 export const triggerBuildTypeMap = {
-  0: t('i18n.2a3e7f5c38'),
-  1: t('i18n.4696724ed3'),
-  2: t('i18n.72ebfe28b0'),
-  3: t('i18n.31070fd376')
+  0: t('i18n_2a3e7f5c38'),
+  1: t('i18n_4696724ed3'),
+  2: t('i18n_72ebfe28b0'),
+  3: t('i18n_31070fd376')
 }
 
 export const buildModeMap = {
-  0: t('i18n.69c3b873c1'),
-  1: t('i18n.685e5de706')
+  0: t('i18n_69c3b873c1'),
+  1: t('i18n_685e5de706')
 }

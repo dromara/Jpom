@@ -1,10 +1,10 @@
 <template>
   <div>
     <template v-if="useSuggestions">
-      <a-result :title="$t('i18n.f9cea44f02')" :sub-title="$t('i18n.56469e09f7')">
+      <a-result :title="$t('i18n_f9cea44f02')" :sub-title="$t('i18n_56469e09f7')">
         <template #extra>
           <router-link to="/system/assets/docker-list">
-            <a-button key="console" type="primary">{{ $t('i18n.6dcf6175d8') }}</a-button></router-link
+            <a-button key="console" type="primary">{{ $t('i18n_6dcf6175d8') }}</a-button></router-link
           >
         </template>
       </a-result>
@@ -16,7 +16,7 @@
       default-auto-refresh
       :auto-refresh-time="5"
       table-name="docker-list"
-      :empty-description="$t('i18n.4188f4101c')"
+      :empty-description="$t('i18n_4188f4101c')"
       :active-page="activePage"
       size="middle"
       :data-source="list"
@@ -35,19 +35,19 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$t('i18n.d7ec2d3fea')"
+            :placeholder="$t('i18n_d7ec2d3fea')"
             class="search-input-item"
             @press-enter="loadData"
           />
 
-          <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
+          <a-tooltip :title="$t('i18n_4838a3bd20')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
           </a-tooltip>
           <a-button
             type="primary"
             :disabled="!tableSelections || !tableSelections.length"
             @click="syncToWorkspaceShow"
-            >{{ $t('i18n.398ce396cd') }}</a-button
+            >{{ $t('i18n_398ce396cd') }}</a-button
           >
         </a-space>
       </template>
@@ -60,14 +60,14 @@
 
         <template v-else-if="column.dataIndex instanceof Array && column.dataIndex.includes('status')">
           <template v-if="record.machineDocker">
-            <a-tag v-if="record.machineDocker.status === 1" color="green">{{ $t('i18n.fd6e80f1e0') }}</a-tag>
+            <a-tag v-if="record.machineDocker.status === 1" color="green">{{ $t('i18n_fd6e80f1e0') }}</a-tag>
             <a-tooltip v-else :title="record.machineDocker.failureMsg">
-              <a-tag color="red">{{ $t('i18n.757a730c9e') }}</a-tag>
+              <a-tag color="red">{{ $t('i18n_757a730c9e') }}</a-tag>
             </a-tooltip>
           </template>
 
-          <a-tooltip v-else :title="$t('i18n.33675a9bb3')">
-            <a-tag color="red">{{ $t('i18n.5169b9af9d') }}</a-tag>
+          <a-tooltip v-else :title="$t('i18n_33675a9bb3')">
+            <a-tag color="red">{{ $t('i18n_5169b9af9d') }}</a-tag>
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'tags'">
@@ -89,11 +89,11 @@
               type="primary"
               :disabled="!record.machineDocker || record.machineDocker.status !== 1"
               @click="handleConsole(record)"
-              >{{ $t('i18n.b5c3770699') }}</a-button
+              >{{ $t('i18n_b5c3770699') }}</a-button
             >
-            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n.95b351c862') }}</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n_95b351c862') }}</a-button>
             <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-              $t('i18n.2f4aaddde3')
+              $t('i18n_2f4aaddde3')
             }}</a-button>
           </a-space>
         </template>
@@ -105,19 +105,19 @@
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$t('i18n.657969aa0f')"
+      :title="$t('i18n_657969aa0f')"
       :mask-closable="false"
       @ok="handleEditOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$t('i18n.a51cd0898f')" name="name">
-          <a-input v-model:value="temp.name" :placeholder="$t('i18n.a51cd0898f')" />
+        <a-form-item :label="$t('i18n_a51cd0898f')" name="name">
+          <a-input v-model:value="temp.name" :placeholder="$t('i18n_a51cd0898f')" />
         </a-form-item>
 
         <a-form-item
-          :label="$t('i18n.14d342362f')"
+          :label="$t('i18n_14d342362f')"
           name="tagInput"
-          :help="$t('i18n.05b52ae2db', { slot1: $t('i18n.14d342362f') })"
+          :help="$t('i18n_05b52ae2db', { slot1: $t('i18n_14d342362f') })"
         >
           <a-space direction="vertical" style="width: 100%">
             <div>
@@ -142,7 +142,7 @@
               v-model:value="temp.tagInput"
               type="text"
               size="small"
-              :placeholder="$t('i18n.baef58c283')"
+              :placeholder="$t('i18n_baef58c283')"
               @blur="handleInputConfirm"
               @keyup.enter="handleInputConfirm"
             />
@@ -154,7 +154,7 @@
                 }"
                 @click="showInput"
               >
-                <PlusOutlined /> {{ $t('i18n.66ab5e9f24') }}
+                <PlusOutlined /> {{ $t('i18n_66ab5e9f24') }}
               </a-tag>
             </template>
           </a-space>
@@ -176,22 +176,22 @@
       v-model:open="syncToWorkspaceVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$t('i18n.1a44b9e2f7')"
+      :title="$t('i18n_1a44b9e2f7')"
       :mask-closable="false"
       @ok="handleSyncToWorkspace"
     >
-      <a-alert :message="$t('i18n.947d983961')" type="warning">
+      <a-alert :message="$t('i18n_947d983961')" type="warning">
         <template #description>
           <ul>
-            <li>{{ $t('i18n.af7c96d2b9') }}</li>
-            <li>{{ $t('i18n.4c7e4dfd33') }}</li>
-            <li>{{ $t('i18n.b7df1586a9') }}</li>
+            <li>{{ $t('i18n_af7c96d2b9') }}</li>
+            <li>{{ $t('i18n_4c7e4dfd33') }}</li>
+            <li>{{ $t('i18n_b7df1586a9') }}</li>
           </ul>
         </template>
       </a-alert>
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
-        <a-form-item :label="$t('i18n.b4a8c78284')" name="workspaceId">
+        <a-form-item :label="$t('i18n_b4a8c78284')" name="workspaceId">
           <a-select
             v-model:value="temp.workspaceId"
             show-search
@@ -205,7 +205,7 @@
                 )
               }
             "
-            :placeholder="$t('i18n.b3bda9bf9e')"
+            :placeholder="$t('i18n_b3bda9bf9e')"
           >
             <a-select-option v-for="item in workspaceList" :key="item.id" :disabled="getWorkspaceId() === item.id">{{
               item.name
@@ -245,7 +245,7 @@ export default {
 
       columns: [
         {
-          title: this.$t('i18n.d7ec2d3fea'),
+          title: this.$t('i18n_d7ec2d3fea'),
           dataIndex: 'name',
           ellipsis: true,
           width: 100
@@ -258,33 +258,33 @@ export default {
           tooltip: true
         },
         {
-          title: this.$t('i18n.3fea7ca76c'),
+          title: this.$t('i18n_3fea7ca76c'),
           dataIndex: ['machineDocker', 'status'],
           ellipsis: true,
           align: 'center',
           width: '100px'
         },
         {
-          title: `docker${this.$t('i18n.fe2df04a16')}`,
+          title: `docker${this.$t('i18n_fe2df04a16')}`,
           dataIndex: ['machineDocker', 'dockerVersion'],
           ellipsis: true,
           width: '120px',
           tooltip: true
         },
         {
-          title: this.$t('i18n.14d342362f'),
+          title: this.$t('i18n_14d342362f'),
           dataIndex: 'tags',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.3bcc1c7a20'),
+          title: this.$t('i18n_3bcc1c7a20'),
           dataIndex: 'modifyUser',
           width: '120px',
           ellipsis: true
         },
         {
-          title: this.$t('i18n.eca37cb072'),
+          title: this.$t('i18n_eca37cb072'),
           dataIndex: 'createTimeMillis',
           ellipsis: true,
           sorter: true,
@@ -292,7 +292,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('i18n.1303e638b5'),
+          title: this.$t('i18n_1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -300,7 +300,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
 
           fixed: 'right',
@@ -311,16 +311,16 @@ export default {
 
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
-        name: [{ required: true, message: this.$t('i18n.f63870fdb0'), trigger: 'blur' }],
-        host: [{ required: true, message: this.$t('i18n.3604566503'), trigger: 'blur' }],
+        name: [{ required: true, message: this.$t('i18n_f63870fdb0'), trigger: 'blur' }],
+        host: [{ required: true, message: this.$t('i18n_3604566503'), trigger: 'blur' }],
         tagInput: [
           // { required: true, message: "Please input ID", trigger: "blur" },
-          { pattern: /^\w{1,10}$/, message: this.$t('i18n.89944d6ccb') }
+          { pattern: /^\w{1,10}$/, message: this.$t('i18n_89944d6ccb') }
         ],
 
         tag: [
-          { required: true, message: this.$t('i18n.3b9418269c'), trigger: 'blur' },
-          { pattern: /^\w{1,10}$/, message: this.$t('i18n.89944d6ccb') }
+          { required: true, message: this.$t('i18n_3b9418269c'), trigger: 'blur' },
+          { pattern: /^\w{1,10}$/, message: this.$t('i18n_89944d6ccb') }
         ]
       },
       workspaceList: [],
@@ -462,11 +462,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.1593dc4920'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_1593dc4920'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return deleteDcoker({
             id: record.id
@@ -540,7 +540,7 @@ export default {
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
         $notification.warn({
-          message: this.$t('i18n.b3bda9bf9e')
+          message: this.$t('i18n_b3bda9bf9e')
         })
         return false
       }

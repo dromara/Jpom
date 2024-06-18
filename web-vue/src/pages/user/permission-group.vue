@@ -17,22 +17,22 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$t('i18n.d7ec2d3fea')"
+            :placeholder="$t('i18n_d7ec2d3fea')"
             class="search-input-item"
             @press-enter="loadData"
           />
-          <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
+          <a-tooltip :title="$t('i18n_4838a3bd20')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">{{ $t('i18n.66ab5e9f24') }}</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $t('i18n_66ab5e9f24') }}</a-button>
         </a-space>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n.95b351c862') }}</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n_95b351c862') }}</a-button>
             <a-button type="primary" danger size="small" @click="handleDelete(record)">{{
-              $t('i18n.2f4aaddde3')
+              $t('i18n_2f4aaddde3')
             }}</a-button>
           </a-space>
         </template>
@@ -45,19 +45,19 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="60vw"
-      :title="$t('i18n.95b351c862')"
+      :title="$t('i18n_95b351c862')"
       :mask-closable="false"
       @ok="handleEditUserOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$t('i18n.d7ec2d3fea')" name="name">
-          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n.d7ec2d3fea')" />
+        <a-form-item :label="$t('i18n_d7ec2d3fea')" name="name">
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n_d7ec2d3fea')" />
         </a-form-item>
         <a-form-item name="workspace">
           <template #label>
             <a-tooltip>
-              {{ $t('i18n.98d69f8b62') }}
-              <template #title> {{ $t('i18n.9a8eb63daf') }},{{ $t('i18n.85f347f9d0') }}</template>
+              {{ $t('i18n_98d69f8b62') }}
+              <template #title> {{ $t('i18n_9a8eb63daf') }},{{ $t('i18n_85f347f9d0') }}</template>
               <QuestionCircleOutlined v-if="!temp.id" />
             </a-tooltip>
           </template>
@@ -66,8 +66,8 @@
         <a-form-item name="prohibitExecute">
           <template #label>
             <a-tooltip>
-              {{ $t('i18n.2ae22500c7') }}
-              <template #title> {{ $t('i18n.b56585aa18') }}</template>
+              {{ $t('i18n_2ae22500c7') }}
+              <template #title> {{ $t('i18n_b56585aa18') }}</template>
               <QuestionCircleOutlined v-if="!temp.id" />
             </a-tooltip>
           </template>
@@ -100,11 +100,11 @@
                     :show-time="{ format: 'HH:mm:ss' }"
                     format="YYYY-MM-DD HH:mm:ss"
                     value-format="YYYY-MM-DD HH:mm:ss"
-                    :placeholder="[$t('i18n.592c595891'), $t('i18n.f782779e8b')]"
+                    :placeholder="[$t('i18n_592c595891'), $t('i18n_f782779e8b')]"
                   />
 
                   <div>
-                    <a-input v-model:value="item.reason" :placeholder="$t('i18n.1eba2d93fc')" allow-clear />
+                    <a-input v-model:value="item.reason" :placeholder="$t('i18n_1eba2d93fc')" allow-clear />
                   </div>
                 </a-space>
 
@@ -127,15 +127,15 @@
                   temp.prohibitExecuteArray.push({})
                 }
               "
-              >{{ $t('i18n.66ab5e9f24') }}
+              >{{ $t('i18n_66ab5e9f24') }}
             </a-button>
           </a-form-item-rest>
         </a-form-item>
         <a-form-item name="allowExecute">
           <template #label>
             <a-tooltip>
-              {{ $t('i18n.ef7e3377a0') }}
-              <template #title> {{ $t('i18n.21e4f10399') }},{{ $t('i18n.4c69102fe1') }} </template>
+              {{ $t('i18n_ef7e3377a0') }}
+              <template #title> {{ $t('i18n_21e4f10399') }},{{ $t('i18n_4c69102fe1') }} </template>
               <QuestionCircleOutlined v-if="!temp.id" />
             </a-tooltip>
           </template>
@@ -146,7 +146,7 @@
                   <div>
                     <a-select
                       v-model:value="item.week"
-                      :placeholder="$t('i18n.d5c2351c0e')"
+                      :placeholder="$t('i18n_d5c2351c0e')"
                       mode="multiple"
                       style="width: 100%"
                     >
@@ -170,12 +170,12 @@
                     <a-space>
                       <a-time-picker
                         v-model:value="item.startTime"
-                        :placeholder="$t('i18n.592c595891')"
+                        :placeholder="$t('i18n_592c595891')"
                         value-format="HH:mm:ss"
                       />
                       <a-time-picker
                         v-model:value="item.endTime"
-                        :placeholder="$t('i18n.f782779e8b')"
+                        :placeholder="$t('i18n_f782779e8b')"
                         value-format="HH:mm:ss"
                       />
                     </a-space>
@@ -200,17 +200,17 @@
                   temp.allowExecuteArray.push({})
                 }
               "
-              >{{ $t('i18n.66ab5e9f24') }}
+              >{{ $t('i18n_66ab5e9f24') }}
             </a-button>
           </a-form-item-rest>
         </a-form-item>
 
-        <a-form-item :label="$t('i18n.3bdd08adab')" name="description">
+        <a-form-item :label="$t('i18n_3bdd08adab')" name="description">
           <a-textarea
             v-model:value="temp.description"
             :max-length="200"
             :rows="5"
-            :placeholder="$t('i18n.3bdd08adab')"
+            :placeholder="$t('i18n_3bdd08adab')"
           />
         </a-form-item>
       </a-form>
@@ -239,30 +239,30 @@ export default {
       methodFeature: [],
       temp: {},
       weeks: [
-        { value: 1, name: this.$t('i18n.1603b069c2') },
-        { value: 2, name: this.$t('i18n.b5a6a07e48') },
-        { value: 3, name: this.$t('i18n.e60725e762') },
-        { value: 4, name: this.$t('i18n.170fc8e27c') },
-        { value: 5, name: this.$t('i18n.eb79cea638') },
-        { value: 6, name: this.$t('i18n.2457513054') },
-        { value: 7, name: this.$t('i18n.562d7476ab') }
+        { value: 1, name: this.$t('i18n_1603b069c2') },
+        { value: 2, name: this.$t('i18n_b5a6a07e48') },
+        { value: 3, name: this.$t('i18n_e60725e762') },
+        { value: 4, name: this.$t('i18n_170fc8e27c') },
+        { value: 5, name: this.$t('i18n_eb79cea638') },
+        { value: 6, name: this.$t('i18n_2457513054') },
+        { value: 7, name: this.$t('i18n_562d7476ab') }
       ],
 
       editVisible: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       columns: [
         { title: 'id', dataIndex: 'id', ellipsis: true },
-        { title: this.$t('i18n.d7ec2d3fea'), dataIndex: 'name', ellipsis: true },
-        { title: this.$t('i18n.3bdd08adab'), dataIndex: 'description', ellipsis: true },
+        { title: this.$t('i18n_d7ec2d3fea'), dataIndex: 'name', ellipsis: true },
+        { title: this.$t('i18n_3bdd08adab'), dataIndex: 'description', ellipsis: true },
 
         {
-          title: this.$t('i18n.9baca0054e'),
+          title: this.$t('i18n_9baca0054e'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           width: 150
         },
         {
-          title: this.$t('i18n.1303e638b5'),
+          title: this.$t('i18n_1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -272,7 +272,7 @@ export default {
           width: 170
         },
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           align: 'center',
           dataIndex: 'operation',
 
@@ -282,7 +282,7 @@ export default {
 
       // 表单校验规则
       rules: {
-        name: [{ required: true, message: this.$t('i18n.4482773688'), trigger: 'blur' }]
+        name: [{ required: true, message: this.$t('i18n_4482773688'), trigger: 'blur' }]
       },
       confirmLoading: false
     }
@@ -321,13 +321,13 @@ export default {
               const children = this.methodFeature.map((item) => {
                 return {
                   key: element.id + '-' + item.value,
-                  title: item.title + this.$t('i18n.ba6e91fa9e'),
+                  title: item.title + this.$t('i18n_ba6e91fa9e'),
                   parentId: element.id
                 }
               })
               children.push({
                 key: element.id + '-sshCommandNotLimited',
-                title: `SSH ${this.$t('i18n.9dd62c9fa8')}`,
+                title: `SSH ${this.$t('i18n_9dd62c9fa8')}`,
                 parentId: element.id
               })
               this.workspaceList.push({
@@ -416,7 +416,7 @@ export default {
         delete temp.allowExecuteArray
         if (!emitKeys || emitKeys.length <= 0) {
           $notification.error({
-            message: this.$t('i18n.b3bda9bf9e')
+            message: this.$t('i18n_b3bda9bf9e')
           })
           return false
         }
@@ -445,11 +445,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.a52aa984cd'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_a52aa984cd'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return deletePermissionGroup(record.id).then((res) => {
             if (res.code === 200) {
@@ -471,11 +471,11 @@ export default {
     checkTipUserName() {
       if (this.temp?.id === 'demo') {
         $confirm({
-          title: this.$t('i18n.c4535759ee'),
+          title: this.$t('i18n_c4535759ee'),
           zIndex: 1009,
-          content: `demo ${this.$t('i18n.a8f44c3188')},${this.$t('i18n.c5f9a96133')}`,
-          okText: this.$t('i18n.e83a256e4f'),
-          cancelText: this.$t('i18n.625fb26b4b'),
+          content: `demo ${this.$t('i18n_a8f44c3188')},${this.$t('i18n_c5f9a96133')}`,
+          okText: this.$t('i18n_e83a256e4f'),
+          cancelText: this.$t('i18n_625fb26b4b'),
 
           onCancel: () => {
             this.temp.id = ''

@@ -542,18 +542,18 @@ export function getProjectGroupAll() {
 export const runModeList = ['Dsl', 'ClassPath', 'Jar', 'JarWar', 'JavaExtDirsCp', 'File', 'Link']
 
 export const runModeArray = [
-  { name: 'Dsl', desc: t('i18n.386edb98a5') },
-  { name: 'ClassPath', desc: t('i18n.f9c9f95929') },
-  { name: 'Jar', desc: t('i18n.be24e5ffbe') },
-  { name: 'JavaExtDirsCp', desc: t('i18n.eef4dfe786') },
-  { name: 'File', desc: t('i18n.f282058f75') },
+  { name: 'Dsl', desc: t('i18n_386edb98a5') },
+  { name: 'ClassPath', desc: t('i18n_f9c9f95929') },
+  { name: 'Jar', desc: t('i18n_be24e5ffbe') },
+  { name: 'JavaExtDirsCp', desc: t('i18n_eef4dfe786') },
+  { name: 'File', desc: t('i18n_f282058f75') },
   {
     name: 'Link',
-    desc: t('i18n.c538b1db4a'),
+    desc: t('i18n_c538b1db4a'),
     // 仅有节点有此项目（节点分发不支持）
     onlyNode: true
   },
-  { name: 'JarWar', desc: t('i18n.d6eab4107a') }
+  { name: 'JarWar', desc: t('i18n_d6eab4107a') }
 ]
 
 /**
