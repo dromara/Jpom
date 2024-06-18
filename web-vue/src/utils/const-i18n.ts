@@ -1,15 +1,25 @@
 import { t } from '@/i18n'
 
+const mfa1 = '【推荐】微信小程序搜索 数盾OTP'
+const mfa2 = '【推荐】腾讯身份验证码'
+const mfa3 = '简单好用'
+const mfa4 = '功能丰富 专为两步验证码'
+const mfa5 = 'Chrome 扩展'
+const mfa6 = '简单易用，但不支持密钥导出备份'
+const mfa7 = '使用微软全家桶的推荐'
+const mfa8 = '强大安全的密码管理付费应用'
+
 /**
  * mfa app 应用举例
  */
+
 export const MFA_APP_TIP_ARRAY = [
-  t('i18n.01c75fe99e'),
-  t('i18n.0acd6920d0'),
-  t('i18n.746d21e9e2'),
-  t('i18n.a6772ad348'),
-  t('i18n.d6de7836f8'),
-  t('i18n.1643f8ab1b')
+  `<strong${mfa1}></strong$>`,
+  `<strong>${mfa2}</strong> ${mfa3} <a href="https://a.app.qq.com/o/simple.jsp?pkgname=com.tencent.authenticator">Android</a>`,
+  `<strong>Authy</strong> ${mfa4} <a href="https://authy.com/download/">iOS/Android/Windows/Mac/Linux</a> &nbsp; <a href="https://chrome.google.com/webstore/detail/authy/gaedmjdfmmahhbjefcbgaolhhanlaolb?hl=cn">${mfa5}</a>`,
+  `<strong>Google Authenticator</strong> ${mfa6}  <a href="https://apps.apple.com/us/app/google-authenticator/id388497605">iOS</a> <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&amp;hl=cn">Android</a>`,
+  `<strong>Microsoft Authenticator</strong> ${mfa7} <a href="https://www.microsoft.com/zh-cn/account/authenticator">iOS/Android</a>`,
+  `<strong>1Password</strong> ${mfa8}<a href="https://1password.com/zh-cn/downloads/">iOS/Android/Windows/Mac/Linux/ChromeOS</a>`
 ]
 
 /**
