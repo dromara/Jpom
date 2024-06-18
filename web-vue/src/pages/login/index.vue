@@ -7,11 +7,7 @@
         <template v-if="action === 'login'">
           <a-form :model="loginForm" :label-col="{ span: 0 }" :wrapper-col="{ span: 24 }" @finish="handleLogin">
             <a-form-item name="loginName" :rules="[{ required: true, message: $t('i18n.08b1fa1304') }]">
-              <a-input
-                v-model:value="loginForm.loginName"
-                autocomplete="true"
-                :placeholder="$t('i18n.819767ada1')"
-              />
+              <a-input v-model:value="loginForm.loginName" autocomplete="true" :placeholder="$t('i18n.819767ada1')" />
             </a-form-item>
             <a-form-item name="userPwd" :rules="[{ required: true, message: $t('i18n.e39ffe99e9') }]">
               <a-input-password
@@ -387,9 +383,7 @@ const checkHasLoginInfo = () => {
     const p = h(
       'p',
       {
-        innerHTML: `${$t('i18n.cfbb3341d5')}<b>${useUserStore.userInfo.name || ''}</b> ${$t(
-          'pages.login.index.6dee1b92'
-        )}`
+        innerHTML: `${$t('i18n.cfbb3341d5')}<b>${useUserStore.userInfo.name || ''}</b> ${$t('i18n.17006d4d51')}`
       },
       []
     )

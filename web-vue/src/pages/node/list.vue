@@ -60,11 +60,7 @@
       >
         <template #title>
           <a-space>
-            <a-input
-              v-model:value="listQuery['%name%']"
-              :placeholder="$t('i18n.b1785ef01e')"
-              @press-enter="loadData"
-            />
+            <a-input v-model:value="listQuery['%name%']" :placeholder="$t('i18n.b1785ef01e')" @press-enter="loadData" />
 
             <a-select
               v-model:value="listQuery.group"
@@ -86,9 +82,7 @@
               <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
             </a-select>
             <a-tooltip :title="$t('i18n.4838a3bd20')">
-              <a-button :loading="loading" type="primary" @click="loadData">{{
-                $t('i18n.e5f71fc31e')
-              }}</a-button>
+              <a-button :loading="loading" type="primary" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
             </a-tooltip>
             <a-button
               type="primary"
@@ -163,9 +157,7 @@
                   :color="record.machineNodeData && record.machineNodeData.status === 1 ? 'green' : 'pink'"
                   style="margin-right: 0"
                 >
-                  {{
-                    statusMap[record.machineNodeData && record.machineNodeData.status] || $t('i18n.1622dc9b6b')
-                  }}
+                  {{ statusMap[record.machineNodeData && record.machineNodeData.status] || $t('i18n.1622dc9b6b') }}
                 </a-tag>
               </template>
               <a-tag v-else>{{ $t('i18n.4637765b0a') }}</a-tag>
@@ -335,12 +327,10 @@
                   <a-tooltip>
                     <template #title>
                       <div>
-                        {{ $t('i18n.e703c7367c')
-                        }}{{ statusMap[item.machineNodeData && item.machineNodeData.status] }}
+                        {{ $t('i18n.e703c7367c') }}{{ statusMap[item.machineNodeData && item.machineNodeData.status] }}
                       </div>
                       <div>
-                        {{ $t('i18n.fb3a2241bb')
-                        }}{{ (item.machineNodeData && item.machineNodeData.statusMsg) || '' }}
+                        {{ $t('i18n.fb3a2241bb') }}{{ (item.machineNodeData && item.machineNodeData.statusMsg) || '' }}
                       </div>
                     </template>
                     <a-tag
@@ -1132,9 +1122,7 @@ export default {
       }
       let msg = msgData[method] || this.$t('i18n.49574eee58')
       if (!record.sortValue) {
-        msg += `${this.$t('i18n.57c0a41ec6')},${this.$t('i18n.066f903d75')},${this.$t(
-          'pages.node.list.d9c5971d'
-        )}`
+        msg += `${this.$t('i18n.57c0a41ec6')},${this.$t('i18n.066f903d75')},${this.$t('i18n.c4e2cd2266')}`
       }
       // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
       const compareId = this.list[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id

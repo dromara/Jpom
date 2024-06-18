@@ -99,9 +99,7 @@
           </a-select>
           <a-range-picker :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
           <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('i18n.e5f71fc31e')
-            }}</a-button>
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -136,18 +134,14 @@
         <template v-else-if="column.dataIndex === 'optStatus'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$t('i18n.be4b9241ec')},${$t('i18n.69056f4792')},${$t(
-              'pages.user.operation-log.abc9fa2f'
-            )}`"
+            :title="`${$t('i18n.be4b9241ec')},${$t('i18n.69056f4792')},${$t('i18n.27b36afd36')}`"
           >
             <span>{{ text }}</span>
           </a-tooltip>
         </template>
 
         <template v-else-if="column.dataIndex === 'operation'">
-          <a-button size="small" type="primary" @click="handleDetail(record)">{{
-            $t('i18n.f26225bde6')
-          }}</a-button>
+          <a-button size="small" type="primary" @click="handleDetail(record)">{{ $t('i18n.f26225bde6') }}</a-button>
         </template>
       </template>
     </CustomTable>

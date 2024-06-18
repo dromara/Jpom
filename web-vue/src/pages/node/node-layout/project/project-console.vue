@@ -31,12 +31,8 @@
                 <template #content>
                   <template v-if="project.lastReloadResult">
                     <p>
-                      <a-tag v-if="project.lastReloadResult.success" color="green">{{
-                        $t('i18n.330363dfc5')
-                      }}</a-tag>
-                      <a-tag v-else color="green">{{
-                        $t('i18n.330363dfc5')
-                      }}</a-tag>
+                      <a-tag v-if="project.lastReloadResult.success" color="green">{{ $t('i18n.330363dfc5') }}</a-tag>
+                      <a-tag v-else color="green">{{ $t('i18n.330363dfc5') }}</a-tag>
                     </p>
                     <p v-for="(item, index) in project.lastReloadResult.msgs" :key="index">
                       {{ item }}
@@ -55,9 +51,7 @@
               }}</a-button>
             </template>
           </template>
-          <a-button size="small" type="primary" @click="goFile">{{
-            $t('i18n.8780e6b3d1')
-          }}</a-button>
+          <a-button size="small" type="primary" @click="goFile">{{ $t('i18n.8780e6b3d1') }}</a-button>
           <a-dropdown v-if="project.dslProcessInfo">
             <template #overlay>
               <a-menu>
@@ -66,9 +60,7 @@
                     <a-tag>
                       {{ item.process }}
                     </a-tag>
-                    <template v-if="item.type === 'file'"
-                      >{{ $t('i18n.4df483b9c7') }}{{ item.scriptId }}
-                    </template>
+                    <template v-if="item.type === 'file'">{{ $t('i18n.4df483b9c7') }}{{ item.scriptId }} </template>
                     <template v-else-if="item.type === 'script'">
                       <a-button
                         type="link"
@@ -85,8 +77,7 @@
                     </template>
                     <template v-else-if="item.type === 'library'">
                       <a-button type="link" size="small" disabled=""
-                        >{{ $t('i18n.91a10b8776')
-                        }}{{ item.scriptId }}</a-button
+                        >{{ $t('i18n.91a10b8776') }}{{ item.scriptId }}</a-button
                       >
                     </template>
                   </template>
@@ -103,9 +94,7 @@
                 </a-menu-item>
               </a-menu>
             </template>
-            <a-button size="small" type="primary">
-              {{ $t('i18n.ce40cd6390') }} <DownOutlined />
-            </a-button>
+            <a-button size="small" type="primary"> {{ $t('i18n.ce40cd6390') }} <DownOutlined /> </a-button>
           </a-dropdown>
           <a-button
             size="small"
@@ -257,9 +246,7 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: `web socket ${this.$t('i18n.7030ff6470')},${this.$t(
-            'pages.node.node-layout.project.project-console.763330b'
-          )}`
+          message: `web socket ${this.$t('i18n.7030ff6470')},${this.$t('i18n.226a6f9cdd')}`
         })
         clearInterval(this.heart)
       }
@@ -307,14 +294,8 @@ export default {
                   this.$refs.logView.appendLine(element)
                 })
               }
-              res.data.ports &&
-                this.$refs.logView.appendLine(
-                  this.$t('i18n.b6c9619081') + res.data.ports
-                )
-              res.data.pids &&
-                this.$refs.logView.appendLine(
-                  this.$t('i18n.2b04210d33') + res.data.pids.join(',')
-                )
+              res.data.ports && this.$refs.logView.appendLine(this.$t('i18n.b6c9619081') + res.data.ports)
+              res.data.pids && this.$refs.logView.appendLine(this.$t('i18n.2b04210d33') + res.data.pids.join(','))
             }
             this.$refs.logView.appendLine(res.op + ' ' + res.msg)
             return

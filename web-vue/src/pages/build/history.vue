@@ -70,9 +70,7 @@
           </a-select>
           <a-range-picker :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
           <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('i18n.e5f71fc31e')
-            }}</a-button>
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
           </a-tooltip>
           <a-button
             type="primary"
@@ -109,9 +107,7 @@
         </template>
         <template v-else-if="column.dataIndex === 'status'">
           <a-tooltip :title="record.statusMsg || statusMap[text] || $t('i18n.1622dc9b6b')">
-            <a-tag :color="statusColor[record.status]">{{
-              statusMap[text] || $t('i18n.1622dc9b6b')
-            }}</a-tag>
+            <a-tag :color="statusColor[record.status]">{{ statusMap[text] || $t('i18n.1622dc9b6b') }}</a-tag>
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'releaseMethod'">
@@ -127,9 +123,7 @@
 
         <template v-else-if="column.dataIndex === 'resultFileSize'">
           <a-tooltip
-            :title="`${$t('i18n.16646e46b1')}${renderSize(record.resultFileSize)}， ${$t(
-              'pages.build.history.6919d16e'
-            )} ${renderSize(record.buildLogFileSize)}`"
+            :title="`${$t('i18n.16646e46b1')}${renderSize(record.resultFileSize)}， ${$t('i18n.77e501b44b')} ${renderSize(record.buildLogFileSize)}`"
           >
             <span v-if="record.resultFileSize">{{ renderSize(record.resultFileSize) }}</span>
             <span v-else-if="record.buildLogFileSize">{{ renderSize(record.buildLogFileSize) }}</span>

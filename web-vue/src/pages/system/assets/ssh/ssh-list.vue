@@ -58,14 +58,10 @@
               </a-select>
 
               <a-tooltip :title="$t('i18n.4838a3bd20')">
-                <a-button type="primary" :loading="loading" @click="loadData"
-                  >{{ $t('i18n.e5f71fc31e') }}
-                </a-button>
+                <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }} </a-button>
               </a-tooltip>
 
-              <a-button type="primary" @click="handleAdd">{{
-                $t('i18n.66ab5e9f24')
-              }}</a-button>
+              <a-button type="primary" @click="handleAdd">{{ $t('i18n.66ab5e9f24') }}</a-button>
               <a-button :disabled="!tableSelections.length" type="primary" @click="syncToWorkspaceShow()">
                 {{ $t('i18n.82d2c66f47') }}</a-button
               >
@@ -76,9 +72,7 @@
                 <template #overlay>
                   <a-menu>
                     <a-menu-item key="1">
-                      <a-button type="primary" @click="handlerImportTemplate()">{{
-                        $t('i18n.2e505d23f7')
-                      }}</a-button>
+                      <a-button type="primary" @click="handlerImportTemplate()">{{ $t('i18n.2e505d23f7') }}</a-button>
                     </a-menu-item>
                   </a-menu>
                 </template>
@@ -91,9 +85,7 @@
                   :multiple="false"
                   :before-upload="beforeUpload"
                 >
-                  <a-button type="primary"
-                    ><UploadOutlined /> {{ $t('i18n.8d9a071ee2') }}<DownOutlined />
-                  </a-button>
+                  <a-button type="primary"><UploadOutlined /> {{ $t('i18n.8d9a071ee2') }}<DownOutlined /> </a-button>
                 </a-upload>
               </a-dropdown>
             </a-space>
@@ -132,9 +124,7 @@
                   <p>{{ $t('i18n.f425f59044') }}{{ record.osVersion }}</p>
                   <p>CPU{{ $t('i18n.045cd62da3') }}{{ record.osCpuIdentifierName }}</p>
                   <p>{{ $t('i18n.07a0e44145') }}{{ record.hostName }}</p>
-                  <p>
-                    {{ $t('i18n.8a745296f4') }}{{ formatDuration(record.osSystemUptime) }}
-                  </p>
+                  <p>{{ $t('i18n.8a745296f4') }}{{ formatDuration(record.osSystemUptime) }}</p>
                 </template>
                 {{ text || $t('i18n.1622dc9b6b') }}
               </a-popover>
@@ -165,9 +155,7 @@
                 <a-popover v-if="record.dockerInfo" :title="$t('i18n.5a7ea53d18')">
                   <template #content>
                     <p>{{ $t('i18n.461ec75a5a') }}{{ JSON.parse(record.dockerInfo).path }}</p>
-                    <p>
-                      {{ $t('i18n.2684c4634d') }}{{ JSON.parse(record.dockerInfo).version }}
-                    </p>
+                    <p>{{ $t('i18n.2684c4634d') }}{{ JSON.parse(record.dockerInfo).version }}</p>
                   </template>
                   <a-tag color="green">{{ $t('i18n.df9497ea98') }}</a-tag>
                 </a-popover>
@@ -179,8 +167,7 @@
             <template v-else-if="column.dataIndex === 'status'">
               <a-tooltip :title="`${record.statusMsg || $t('i18n.77e100e462')}`">
                 <a-tag :color="statusMap[record.status] && statusMap[record.status].color">{{
-                  (statusMap[record.status] && statusMap[record.status].desc) ||
-                  $t('i18n.1622dc9b6b')
+                  (statusMap[record.status] && statusMap[record.status].desc) || $t('i18n.1622dc9b6b')
                 }}</a-tag>
               </a-tooltip>
             </template>
@@ -192,9 +179,7 @@
             <template v-else-if="column.dataIndex === 'osOccupyMemory'">
               <a-tooltip
                 placement="topLeft"
-                :title="`${$t('i18n.ca32cdfd59')}${formatPercent(record.osOccupyMemory)},${$t(
-                  'pages.system.assets.ssh.ssh-list.8b8cc8a1'
-                )}${renderSize(record.osMoneyTotal)}`"
+                :title="`${$t('i18n.ca32cdfd59')}${formatPercent(record.osOccupyMemory)},${$t('i18n.a0a3d583b9')}${renderSize(record.osMoneyTotal)}`"
               >
                 <span>{{ formatPercent(record.osOccupyMemory) }}/{{ renderSize(record.osMoneyTotal) }}</span>
               </a-tooltip>
@@ -204,9 +189,7 @@
               <a-popover :title="$t('i18n.a74b62f4bb')">
                 <template #content>
                   <p>{{ $t('i18n.7e359f4b71') }}{{ renderSize(record.osFileStoreTotal) }}</p>
-                  <p>
-                    {{ $t('i18n.de17fc0b78') }}{{ formatPercent(record.osMaxOccupyDisk) }}
-                  </p>
+                  <p>{{ $t('i18n.de17fc0b78') }}{{ formatPercent(record.osMaxOccupyDisk) }}</p>
                   <p>{{ $t('i18n.ba452d57f2') }}{{ record.osMaxOccupyDiskName }}</p>
                 </template>
                 <span>{{ formatPercent(record.osMaxOccupyDisk) }} / {{ renderSize(record.osFileStoreTotal) }}</span>
@@ -243,9 +226,7 @@
                 <a-button size="small" type="primary" @click="syncToWorkspaceShow(record)">{{
                   $t('i18n.e39de3376e')
                 }}</a-button>
-                <a-button size="small" type="primary" @click="handleFile(record)">{{
-                  $t('i18n.2a0c4740f1')
-                }}</a-button>
+                <a-button size="small" type="primary" @click="handleFile(record)">{{ $t('i18n.2a0c4740f1') }}</a-button>
                 <a-button size="small" type="primary" @click="handleViewWorkspaceSsh(record)">{{
                   $t('i18n.1c3cf7f5f0')
                 }}</a-button>
@@ -292,11 +273,7 @@
         >
           <a-form ref="editSshForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
             <a-form-item :label="$t('i18n.10f6fc171a')" name="name">
-              <a-input
-                v-model:value="temp.name"
-                :max-length="50"
-                :placeholder="$t('i18n.10f6fc171a')"
-              />
+              <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n.10f6fc171a')" />
             </a-form-item>
             <a-form-item :label="$t('i18n.1014b33d22')" name="group">
               <custom-select
@@ -309,11 +286,7 @@
             </a-form-item>
             <a-form-item label="Host" name="host">
               <a-input-group compact name="host">
-                <a-input
-                  v-model:value="temp.host"
-                  style="width: 70%"
-                  :placeholder="$t('i18n.3d83a07747')"
-                />
+                <a-input v-model:value="temp.host" style="width: 70%" :placeholder="$t('i18n.3d83a07747')" />
                 <a-form-item-rest>
                   <a-input-number
                     v-model:value="temp.port"
@@ -332,8 +305,7 @@
                 <a-tooltip>
                   {{ $t('i18n.819767ada1') }}
                   <template #title>
-                    {{ $t('i18n.f0a1428f65') }}<b>$ref.wEnv.xxxx</b> xxxx
-                    {{ $t('i18n.c1b72e7ded') }}</template
+                    {{ $t('i18n.f0a1428f65') }}<b>$ref.wEnv.xxxx</b> xxxx {{ $t('i18n.c1b72e7ded') }}</template
                   >
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
@@ -360,8 +332,7 @@
                 <a-tooltip>
                   {{ $t('i18n.a810520460') }}
                   <template #title>
-                    {{ $t('i18n.63dd96a28a') }}<b>$ref.wEnv.xxxx</b> xxxx
-                    {{ $t('i18n.c1b72e7ded') }}</template
+                    {{ $t('i18n.63dd96a28a') }}<b>$ref.wEnv.xxxx</b> xxxx {{ $t('i18n.c1b72e7ded') }}</template
                   >
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
@@ -370,11 +341,7 @@
               <custom-input
                 :input="temp.password"
                 :env-list="envVarList"
-                :placeholder="`${
-                  temp.type === 'add'
-                    ? $t('i18n.a810520460')
-                    : $t('i18n.6c08692a3a')
-                }`"
+                :placeholder="`${temp.type === 'add' ? $t('i18n.a810520460') : $t('i18n.6c08692a3a')}`"
                 @change="
                   (v) => {
                     temp = { ...temp, password: v }
@@ -411,8 +378,7 @@
             </a-form-item>
             <a-form-item :label="$t('i18n.649231bdee')" name="suffix">
               <template #help>
-                {{ $t('i18n.25cad97419') }},
-                {{ $t('i18n.c03fd7fda8')
+                {{ $t('i18n.25cad97419') }}, {{ $t('i18n.c03fd7fda8')
                 }}<span style="color: red">{{ $t('i18n.6adcbc6663') }}</span
                 >）{{ $t('i18n.81197c2d02') }}
               </template>
@@ -518,10 +484,7 @@
                 <a-list-item style="display: block">
                   <a-row>
                     <a-col :span="10">SSH{{ $t('i18n.5b47861521') }}{{ item.name }}</a-col>
-                    <a-col :span="10"
-                      >{{ $t('i18n.2358e1ef49')
-                      }}{{ item.workspace && item.workspace.name }}</a-col
-                    >
+                    <a-col :span="10">{{ $t('i18n.2358e1ef49') }}{{ item.workspace && item.workspace.name }}</a-col>
                     <a-col :span="4">
                       <a-button v-if="item.workspace" size="small" type="primary" @click="configWorkspaceSsh(item)"
                         >{{ $t('i18n.224e2ccda8') }}
@@ -656,9 +619,7 @@
           </a-space>
         </CustomModal>
       </a-tab-pane>
-      <a-tab-pane key="2" :tab="$t('i18n.d7c077c6f6')">
-        <OperationLog type="machinessh"></OperationLog
-      ></a-tab-pane>
+      <a-tab-pane key="2" :tab="$t('i18n.d7c077c6f6')"> <OperationLog type="machinessh"></OperationLog></a-tab-pane>
     </a-tabs>
   </div>
 </template>

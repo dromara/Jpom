@@ -12,9 +12,7 @@
           x: 'max-content'
         }"
       >
-        <template v-if="backupListData.path" #title>
-          {{ $t('i18n.1b38c0bc86') }}{{ backupListData.path }}
-        </template>
+        <template v-if="backupListData.path" #title> {{ $t('i18n.1b38c0bc86') }}{{ backupListData.path }} </template>
 
         <template #bodyCell="{ column, text, record }">
           <template v-if="column.dataIndex === 'filename'">
@@ -61,9 +59,7 @@
               "
               >{{ $t('i18n.adcd1dd701') }}
             </a-button>
-            <a-button size="small" type="primary" @click="loadData">{{
-              $t('i18n.90b5a467c1')
-            }}</a-button>
+            <a-button size="small" type="primary" @click="loadData">{{ $t('i18n.90b5a467c1') }}</a-button>
           </a-space>
         </div>
 
@@ -92,14 +88,8 @@
           <template #title>
             <a-popconfirm
               :title="`${
-                uploadPath
-                  ? $t('i18n.bdd4cddd22') +
-                    uploadPath +
-                    $t('i18n.dadd4907c2')
-                  : ''
-              } ${$t('i18n.aefd8f9f27')},${$t(
-                'pages.node.node-layout.project.project-file-backup.69fd8524'
-              )}`"
+                uploadPath ? $t('i18n.bdd4cddd22') + uploadPath + $t('i18n.dadd4907c2') : ''
+              } ${$t('i18n.aefd8f9f27')},${$t('i18n.500789168c')}`"
               :ok-text="$t('i18n.587a63264b')"
               :cancel-text="$t('i18n.b1a09cee8e')"
               :ok-button-props="{
@@ -112,15 +102,11 @@
                 <QuestionCircleOutlined style="color: red" />
               </template>
               <!-- @click="recoverPath(uploadPath)" -->
-              <a-button size="small" type="primary">{{
-                $t('i18n.69de8d7f40')
-              }}</a-button>
+              <a-button size="small" type="primary">{{ $t('i18n.69de8d7f40') }}</a-button>
             </a-popconfirm>
 
             <a-space>
-              <a-tag v-if="uploadPath" color="#2db7f5"
-                >{{ $t('i18n.2c8109fa0b') }}{{ uploadPath || '' }}</a-tag
-              >
+              <a-tag v-if="uploadPath" color="#2db7f5">{{ $t('i18n.2c8109fa0b') }}{{ uploadPath || '' }}</a-tag>
             </a-space>
           </template>
 
@@ -133,11 +119,7 @@
             </template>
             <template v-else-if="column.dataIndex === 'isDirectory'">
               <a-tooltip placement="topLeft" :title="text">
-                <span>{{
-                  text
-                    ? $t('i18n.767fa455bb')
-                    : $t('i18n.2a0c4740f1')
-                }}</span>
+                <span>{{ text ? $t('i18n.767fa455bb') : $t('i18n.2a0c4740f1') }}</span>
               </a-tooltip>
             </template>
             <template v-else-if="column.dataIndex === 'fileSizeLong'">
@@ -154,9 +136,7 @@
               <a-space>
                 <template v-if="record.isDirectory">
                   <a-tooltip :title="$t('i18n.6c14188ba0')">
-                    <a-button size="small" type="primary" :disabled="true">{{
-                      $t('i18n.f26ef91424')
-                    }}</a-button>
+                    <a-button size="small" type="primary" :disabled="true">{{ $t('i18n.f26ef91424') }}</a-button>
                   </a-tooltip>
                 </template>
                 <template v-else>
@@ -168,14 +148,8 @@
                   <!-- record.filename -->
                   <a-popconfirm
                     :title="`${
-                      record.filename
-                        ? $t('i18n.bdd4cddd22') +
-                          record.filename +
-                          $t('i18n.dadd4907c2')
-                        : ''
-                    } ${$t('i18n.aefd8f9f27')},${$t(
-                      'pages.node.node-layout.project.project-file-backup.69fd8524'
-                    )}`"
+                      record.filename ? $t('i18n.bdd4cddd22') + record.filename + $t('i18n.dadd4907c2') : ''
+                    } ${$t('i18n.aefd8f9f27')},${$t('i18n.500789168c')}`"
                     :ok-text="$t('i18n.587a63264b')"
                     :cancel-text="$t('i18n.b1a09cee8e')"
                     :ok-button-props="{
@@ -187,9 +161,7 @@
                     <template #icon>
                       <QuestionCircleOutlined style="color: red" />
                     </template>
-                    <a-button size="small" type="primary">{{
-                      $t('i18n.69de8d7f40')
-                    }}</a-button>
+                    <a-button size="small" type="primary">{{ $t('i18n.69de8d7f40') }}</a-button>
                   </a-popconfirm>
                 </template>
                 <template v-else>
@@ -482,12 +454,8 @@ export default {
     // 删除
     handleDelete(record) {
       const msg = record.isDirectory
-        ? this.$t('i18n.3cc09369ad') +
-          record.filename +
-          this.$t('i18n.52a8df6678')
-        : this.$t('i18n.3cc09369ad') +
-          record.filename +
-          this.$t('i18n.48e79b3340')
+        ? this.$t('i18n.3cc09369ad') + record.filename + this.$t('i18n.52a8df6678')
+        : this.$t('i18n.3cc09369ad') + record.filename + this.$t('i18n.48e79b3340')
       $confirm({
         title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
@@ -515,10 +483,7 @@ export default {
     },
     // 删除备份
     handlBackupeDelete(record) {
-      const msg =
-        this.$t('i18n.3cc09369ad') +
-        record.filename +
-        this.$t('i18n.115cd58b5d')
+      const msg = this.$t('i18n.3cc09369ad') + record.filename + this.$t('i18n.115cd58b5d')
       $confirm({
         title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
@@ -556,10 +521,7 @@ export default {
         $confirm({
           title: this.$t('i18n.c4535759ee'),
           zIndex: 1009,
-          content:
-            this.$t('i18n.d2cac1245d') +
-            record.filename +
-            this.$t('i18n.e039ffccc8'),
+          content: this.$t('i18n.d2cac1245d') + record.filename + this.$t('i18n.e039ffccc8'),
           okText: this.$t('i18n.e83a256e4f'),
           cancelText: this.$t('i18n.625fb26b4b'),
           onOk() {

@@ -51,10 +51,7 @@
           </a-tabs>
         </a-collapse-panel>
         <a-collapse-panel key="3" :header="$t('i18n.dab864ab72')">
-          <a-alert
-            type="info"
-            :message="`${$t('i18n.ccb91317c5')}(${$t('i18n.a8920fbfad')})`"
-          >
+          <a-alert type="info" :message="`${$t('i18n.ccb91317c5')}(${$t('i18n.a8920fbfad')})`">
             <template #description>
               <a-typography-paragraph :copyable="{ tooltip: false, text: fastInstallInfo.bindCommand }">
                 <span>{{ fastInstallInfo.bindCommand }} </span>
@@ -69,9 +66,7 @@
           <a-alert
             v-for="(item, index) in pullFastInstallResultData"
             :key="`${index}-${new Date().getTime()}`"
-            :message="`${$t('i18n.ac00774608')} ${index + 1} ${$t(
-              'pages.node.fast-install.d6f154c5'
-            )}`"
+            :message="`${$t('i18n.ac00774608')} ${index + 1} ${$t('i18n.dbc0b66ca4')}`"
             :type="`${item.type === 'success' ? 'success' : item.type === 'exists' ? 'error' : 'warning'}`"
             closable
             @close="clearPullFastInstallResult(item.id)"

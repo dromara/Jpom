@@ -344,9 +344,7 @@ export default {
         console.error(err)
         $notification.error({
           key: 'log-read-error',
-          message: `web socket ${this.$t('i18n.7030ff6470')},${this.$t(
-            'pages.dispatch.logReadView.763330b'
-          )}`
+          message: `web socket ${this.$t('i18n.7030ff6470')},${this.$t('i18n.226a6f9cdd')}`
         })
         clearInterval(this.socketCache[id].heart)
       }

@@ -9,11 +9,7 @@
           :show-tool="true"
         >
           <template #tool_before>
-            <a-alert
-              v-if="temp.file"
-              show-icon
-              :message="`${$t('i18n.37c1eb9b23')}:${temp.file}`"
-            />
+            <a-alert v-if="temp.file" show-icon :message="`${$t('i18n.37c1eb9b23')}:${temp.file}`" />
           </template>
         </code-editor>
       </a-form-item>
@@ -96,9 +92,7 @@ export default {
         spinning: true,
         tip:
           (msg || this.$t('i18n.85da2e5bb1')) +
-          `,${this.$t('i18n.809b12d6a0')},${this.$t(
-            'pages.node.node-layout.system.config-file.536e5313'
-          )}`
+          `,${this.$t('i18n.809b12d6a0')},${this.$t('i18n.af013dd9dc')}`
       })
       setTimeout(() => {
         //
