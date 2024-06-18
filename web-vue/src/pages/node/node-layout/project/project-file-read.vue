@@ -2,9 +2,7 @@
   <div>
     <log-view1 :ref="`logView`" height="calc(100vh - 140px)">
       <template #before>
-        <a-button type="primary" size="small" @click="goFile">{{
-          $t('i18n.8780e6b3d1')
-        }}</a-button></template
+        <a-button type="primary" size="small" @click="goFile">{{ $t('i18n.8780e6b3d1') }}</a-button></template
       >
     </log-view1>
   </div>
@@ -97,9 +95,7 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: `web socket ${this.$t('i18n.7030ff6470')},${this.$t(
-            'pages.node.node-layout.project.project-file-read.763330b'
-          )}`
+          message: `web socket ${this.$t('i18n.7030ff6470')},${this.$t('i18n.226a6f9cdd')}`
         })
         clearInterval(this.heart)
       }

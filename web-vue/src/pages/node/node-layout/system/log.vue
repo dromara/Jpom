@@ -11,9 +11,7 @@
       <log-view2 :ref="`logView`" height="calc(100vh - 160px - 30px)">
         <template #before>
           <a-space>
-            <a-button type="primary" size="small" @click="loadData">{{
-              $t('i18n.694fc5efa9')
-            }}</a-button>
+            <a-button type="primary" size="small" @click="loadData">{{ $t('i18n.694fc5efa9') }}</a-button>
             <a-button type="primary" danger size="small" :disabled="!temp.path" @click="deleteLog">{{
               $t('i18n.2f4aaddde3')
             }}</a-button>
@@ -151,9 +149,7 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: `web socket ${this.$t('i18n.7030ff6470')},${this.$t(
-            'pages.node.node-layout.system.log.763330b'
-          )}`
+          message: `web socket ${this.$t('i18n.7030ff6470')},${this.$t('i18n.226a6f9cdd')}`
         })
       }
       this.socket.onclose = (err) => {

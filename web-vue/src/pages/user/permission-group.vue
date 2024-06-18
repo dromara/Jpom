@@ -22,9 +22,7 @@
             @press-enter="loadData"
           />
           <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('i18n.e5f71fc31e')
-            }}</a-button>
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">{{ $t('i18n.66ab5e9f24') }}</a-button>
         </a-space>
@@ -32,9 +30,7 @@
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEdit(record)">{{
-              $t('i18n.95b351c862')
-            }}</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n.95b351c862') }}</a-button>
             <a-button type="primary" danger size="small" @click="handleDelete(record)">{{
               $t('i18n.2f4aaddde3')
             }}</a-button>
@@ -55,21 +51,13 @@
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item :label="$t('i18n.d7ec2d3fea')" name="name">
-          <a-input
-            v-model:value="temp.name"
-            :max-length="50"
-            :placeholder="$t('i18n.d7ec2d3fea')"
-          />
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n.d7ec2d3fea')" />
         </a-form-item>
         <a-form-item name="workspace">
           <template #label>
             <a-tooltip>
               {{ $t('i18n.98d69f8b62') }}
-              <template #title>
-                {{ $t('i18n.9a8eb63daf') }},{{
-                  $t('i18n.85f347f9d0')
-                }}</template
-              >
+              <template #title> {{ $t('i18n.9a8eb63daf') }},{{ $t('i18n.85f347f9d0') }}</template>
               <QuestionCircleOutlined v-if="!temp.id" />
             </a-tooltip>
           </template>
@@ -112,18 +100,11 @@
                     :show-time="{ format: 'HH:mm:ss' }"
                     format="YYYY-MM-DD HH:mm:ss"
                     value-format="YYYY-MM-DD HH:mm:ss"
-                    :placeholder="[
-                      $t('i18n.592c595891'),
-                      $t('i18n.f782779e8b')
-                    ]"
+                    :placeholder="[$t('i18n.592c595891'), $t('i18n.f782779e8b')]"
                   />
 
                   <div>
-                    <a-input
-                      v-model:value="item.reason"
-                      :placeholder="$t('i18n.1eba2d93fc')"
-                      allow-clear
-                    />
+                    <a-input v-model:value="item.reason" :placeholder="$t('i18n.1eba2d93fc')" allow-clear />
                   </div>
                 </a-space>
 
@@ -154,9 +135,7 @@
           <template #label>
             <a-tooltip>
               {{ $t('i18n.ef7e3377a0') }}
-              <template #title>
-                {{ $t('i18n.21e4f10399') }},{{ $t('i18n.4c69102fe1') }}
-              </template>
+              <template #title> {{ $t('i18n.21e4f10399') }},{{ $t('i18n.4c69102fe1') }} </template>
               <QuestionCircleOutlined v-if="!temp.id" />
             </a-tooltip>
           </template>
@@ -494,9 +473,7 @@ export default {
         $confirm({
           title: this.$t('i18n.c4535759ee'),
           zIndex: 1009,
-          content: `demo ${this.$t('i18n.a8f44c3188')},${this.$t(
-            'pages.user.permission-group.f382dae4'
-          )}`,
+          content: `demo ${this.$t('i18n.a8f44c3188')},${this.$t('i18n.c5f9a96133')}`,
           okText: this.$t('i18n.e83a256e4f'),
           cancelText: this.$t('i18n.625fb26b4b'),
 

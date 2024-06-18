@@ -97,9 +97,7 @@
             <template v-else-if="column.dataIndex === 'optStatus'">
               <a-tooltip
                 placement="topLeft"
-                :title="`${$t('i18n.be4b9241ec')},${$t('i18n.69056f4792')},${$t(
-                  'pages.layout.user-log.819da0e0'
-                )}`"
+                :title="`${$t('i18n.be4b9241ec')},${$t('i18n.69056f4792')},${$t('i18n.27b36afd36')}`"
               >
                 <span>{{ text }}</span>
               </a-tooltip>
@@ -162,19 +160,13 @@
           </template>
           <template #bodyCell="{ column, text }">
             <template v-if="column.dataIndex === 'success'">
-              <a-tooltip
-                placement="topLeft"
-                :title="text ? $t('i18n.330363dfc5') : $t('i18n.acd5cb847a')"
-              >
+              <a-tooltip placement="topLeft" :title="text ? $t('i18n.330363dfc5') : $t('i18n.acd5cb847a')">
                 <a-tag v-if="text" color="green">{{ $t('i18n.330363dfc5') }}</a-tag>
                 <a-tag v-else color="pink">{{ $t('i18n.acd5cb847a') }}</a-tag>
               </a-tooltip>
             </template>
             <template v-else-if="column.dataIndex === 'useMfa'">
-              <a-tooltip
-                placement="topLeft"
-                :title="text ? $t('i18n.ecff77a8d4') : $t('i18n.869ec83e33')"
-              >
+              <a-tooltip placement="topLeft" :title="text ? $t('i18n.ecff77a8d4') : $t('i18n.869ec83e33')">
                 <a-tag>{{ text ? $t('i18n.ecff77a8d4') : $t('i18n.869ec83e33') }}</a-tag>
               </a-tooltip>
             </template>

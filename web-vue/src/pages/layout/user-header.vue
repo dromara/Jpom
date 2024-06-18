@@ -5,11 +5,7 @@
       <a-button v-if="mode === 'normal'" type="dashed" class="workspace jpom-workspace btn-group-item">
         <div class="workspace-name">
           <a-tooltip
-            :title="`${$t('i18n.8f36f2ede7')}${selectWorkspace.name} ${$t(
-              'pages.layout.user-header.12d0e469'
-            )}${selectWorkspace.group || $t('i18n.71dc8feb59')}${$t(
-              'pages.layout.user-header.26e6628f'
-            )}`"
+            :title="`${$t('i18n.8f36f2ede7')}${selectWorkspace.name} ${$t('i18n.d7ec97aecd')}${selectWorkspace.group || $t('i18n.71dc8feb59')}${$t('i18n.5942e7ebd0')}`"
             placement="bottom"
           >
             <SwitcherOutlined />
@@ -33,10 +29,7 @@
       </a-button>
       <a-button v-if="mode === 'management'" type="dashed">
         <div class="workspace-name">
-          <a-tooltip
-            :title="`${$t('i18n.f668c8c881')}${selectCluster && selectCluster.name}`"
-            placement="bottom"
-          >
+          <a-tooltip :title="`${$t('i18n.f668c8c881')}${selectCluster && selectCluster.name}`" placement="bottom">
             <ClusterOutlined />
             {{ selectCluster && selectCluster.name }}
           </a-tooltip>
@@ -203,10 +196,7 @@
                 <a-input-password v-model:value="temp.newPwd" :placeholder="$t('i18n.abdd7ea830')" />
               </a-form-item>
               <a-form-item :label="$t('i18n.3fbdde139c')" name="confirmPwd">
-                <a-input-password
-                  v-model:value="temp.confirmPwd"
-                  :placeholder="$t('i18n.a7a9a2156a')"
-                />
+                <a-input-password v-model:value="temp.confirmPwd" :placeholder="$t('i18n.a7a9a2156a')" />
               </a-form-item>
               <a-form-item>
                 <a-row type="flex" justify="center">
@@ -272,39 +262,23 @@
                 </template>
                 <!-- 不能使用  template 包裹 否则验证不能正常启用 -->
                 <a-form-item v-if="temp.needVerify" :label="$t('i18n.983f59c9d4')" name="twoCode">
-                  <a-input
-                    ref="twoCode"
-                    v-model:value="temp.twoCode"
-                    :placeholder="$t('i18n.3f18d14961')"
-                  />
+                  <a-input ref="twoCode" v-model:value="temp.twoCode" :placeholder="$t('i18n.3f18d14961')" />
                 </a-form-item>
                 <a-form-item v-if="temp.needVerify">
                   <a-row type="flex" justify="center">
                     <a-col :span="2">
-                      <a-button type="primary" html-type="submit">{{
-                        $t('i18n.b7cfa07d78')
-                      }}</a-button>
+                      <a-button type="primary" html-type="submit">{{ $t('i18n.b7cfa07d78') }}</a-button>
                     </a-col>
                   </a-row>
                 </a-form-item>
                 <!-- 不能使用  template 包裹 否则验证不能正常启用 -->
-                <a-form-item
-                  v-if="!temp.needVerify && temp.status"
-                  :label="$t('i18n.983f59c9d4')"
-                  name="twoCode"
-                >
-                  <a-input
-                    ref="twoCode"
-                    v-model:value="temp.twoCode"
-                    :placeholder="$t('i18n.3f18d14961')"
-                  />
+                <a-form-item v-if="!temp.needVerify && temp.status" :label="$t('i18n.983f59c9d4')" name="twoCode">
+                  <a-input ref="twoCode" v-model:value="temp.twoCode" :placeholder="$t('i18n.3f18d14961')" />
                 </a-form-item>
                 <a-form-item v-if="!temp.needVerify && temp.status">
                   <a-row type="flex" justify="center">
                     <a-col :span="2">
-                      <a-button type="primary" html-type="submit">{{
-                        $t('i18n.e8e3bfbbfe')
-                      }}</a-button>
+                      <a-button type="primary" html-type="submit">{{ $t('i18n.e8e3bfbbfe') }}</a-button>
                     </a-col>
                   </a-row>
                 </a-form-item>
@@ -312,9 +286,7 @@
                 <a-form-item v-if="!temp.needVerify && !temp.status">
                   <a-row type="flex" justify="center">
                     <a-col :span="2">
-                      <a-button type="primary" @click="openMfaFn">{{
-                        $t('i18n.1b8fff7308')
-                      }}</a-button>
+                      <a-button type="primary" @click="openMfaFn">{{ $t('i18n.1b8fff7308') }}</a-button>
                     </a-col>
                   </a-row>
                 </a-form-item>
@@ -393,9 +365,7 @@
     >
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
         <a-alert banner>
-          <template #message>
-            {{ $t('i18n.bf93517805') }},{{ $t('i18n.52b526ab9e') }}
-          </template>
+          <template #message> {{ $t('i18n.bf93517805') }},{{ $t('i18n.52b526ab9e') }} </template>
         </a-alert>
         <!-- <a-form-item label="页面导航">
           <a-space>
@@ -503,12 +473,7 @@
       :keyboard="false"
     >
       <a-space direction="vertical">
-        <a-alert
-          :message="$t('i18n.84777ebf8b')"
-          :description="$t('i18n.4af980516d')"
-          type="error"
-          :closable="false"
-        />
+        <a-alert :message="$t('i18n.84777ebf8b')" :description="$t('i18n.4af980516d')" type="error" :closable="false" />
         <a-row align="middle" type="flex" justify="center">
           <a-button type="danger" @click="toBindMfa"> {{ $t('i18n.97a19328a8') }} </a-button>
         </a-row>
