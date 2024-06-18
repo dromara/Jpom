@@ -1,6 +1,6 @@
 <template>
   <a-config-provider
-    :locale="lang[nowLang]?.antd"
+    :locale="antdLang"
     :theme="{
       algorithm: themeAlgorithm
       // token: {
@@ -19,13 +19,18 @@
 import { theme } from 'ant-design-vue'
 import { onMounted, onUnmounted } from 'vue'
 import { SpinProps } from 'ant-design-vue/es/spin/Spin'
-import { lang } from './i18n'
+import { changeLang } from './i18n'
 import { useI18n } from 'vue-i18n'
+import { Locale } from 'ant-design-vue/es/locale'
 const routerActivation = ref(true)
 const useGuideStore = guideStore()
 const getGuideCache = useGuideStore.getGuideCache
 const i18nHook = useI18n()
 const t = i18nHook.t
+
+const antdLang = ref<Locale>({
+  locale: 'zh-cn'
+})
 
 const nowLang = computed(() => {
   return useGuideStore.getLocale()
@@ -40,9 +45,16 @@ const nowLang = computed(() => {
 const onMatchMediaChange = (e: MediaQueryListEvent) => {
   useGuideStore.setSystemIsDark(e.matches)
 }
+const changeI18n = async (lang: string) => {
+  changeLang(lang).then((antdLoadLang) => {
+    antdLang.value = antdLoadLang
+  })
+  i18nHook.locale.value = lang
+}
+
 onMounted(() => {
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', onMatchMediaChange)
-  i18nHook.locale.value = nowLang.value
+  changeI18n(nowLang.value)
 })
 
 onUnmounted(() => {
@@ -187,3 +199,4 @@ provide('globalLoading', globalLoading)
   flex: 1;
 }
 </style>
+./i18n
