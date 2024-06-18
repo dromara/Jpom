@@ -129,17 +129,11 @@
 
         <template #bodyCell="{ column, text, record }">
           <template v-if="column.dataIndex === 'name'">
-            <a-tooltip
-              placement="topLeft"
-              :title="
-                $t('i18n_8adf5dfeef', {
-                  slot1: $t('i18n_5b47861521'),
-                  text: text,
-                  slot2: $t('i18n_5b47861521'),
-                  slot3: record.longname
-                })
-              "
-            >
+            <a-tooltip placement="topLeft">
+              <template #title>
+                <div>{{ $t('i18n_551e46c0ea') }}{{ text }}</div>
+                <div>{{ $t('i18n_964d939a96') }}{{ record.longname }}</div>
+              </template>
               <a-dropdown :trigger="['contextmenu']">
                 <div>{{ text }}</div>
                 <template #overlay>

@@ -36,7 +36,7 @@
             v-model:value="temp.allowRemoteDownloadHost"
             :rows="5"
             style="resize: none"
-            placeholder="请输入远程下载安全HOST，回车支持输入多个路径，示例 https://www.test.com 等"
+            :placeholder="$t('i18n_c32e7adb20')"
           />
         </a-form-item>
         <a-form-item :wrapper-col="{ span: 14, offset: 6 }">
