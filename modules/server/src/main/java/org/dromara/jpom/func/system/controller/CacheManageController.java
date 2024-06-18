@@ -14,7 +14,6 @@ import cn.hutool.cache.impl.LFUCache;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.event.ICacheTask;
 import cn.keepbx.jpom.event.ISystemTask;

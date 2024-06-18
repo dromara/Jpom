@@ -62,7 +62,7 @@ public class SocketSessionUtil {
                     exception = null;
                     break;
                 } catch (IOException e) {
-                    log.error(I18nMessageUtil.get("i18n.send_message_failure_prefix.6f8c") + tryCount, e);
+                    log.error("{}{}", I18nMessageUtil.get("i18n.send_message_failure_prefix.6f8c"), tryCount, e);
                     exception = e;
                 }
             } while (tryCount <= ERROR_TRY_COUNT);

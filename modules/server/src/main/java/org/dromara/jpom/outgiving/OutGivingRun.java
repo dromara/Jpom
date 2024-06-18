@@ -240,7 +240,7 @@ public class OutGivingRun {
         allPrepare(userId, item, outGivingNodeProjects);
         // 异步执行
         Callable<OutGivingModel.Status> callable = createRunnable(syncFinisher, statusList, projectSize);
-        return ThreadUtil.execAsync(callable);
+        return I18nThreadUtil.execAsync(callable);
     }
 
     private Callable<OutGivingModel.Status> createRunnable(StrictSyncFinisher syncFinisher,

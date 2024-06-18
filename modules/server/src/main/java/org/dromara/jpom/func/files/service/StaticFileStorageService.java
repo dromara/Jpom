@@ -411,7 +411,7 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
         }
         WatchKey watchKey = watchMonitor1.getWatchKey(path);
         if (watchKey == null) {
-            log.warn(I18nMessageUtil.get("i18n.listener_key_not_found.6d3a") + path.getFileName());
+            log.warn("{}{}", I18nMessageUtil.get("i18n.listener_key_not_found.6d3a"), path.getFileName());
             return null;
         }
         return watchKey;
