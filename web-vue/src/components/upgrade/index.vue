@@ -21,9 +21,7 @@
             :disabled="true"
           />
           <template v-if="temp.joinBetaRelease">
-            <a-button type="link" @click="handleChangeBetaRelease(false)">{{
-              $t('i18n.8ef0f6c275')
-            }}</a-button>
+            <a-button type="link" @click="handleChangeBetaRelease(false)">{{ $t('i18n.8ef0f6c275') }}</a-button>
           </template>
           <template v-else>
             <a-tooltip>
@@ -50,9 +48,7 @@
         </a-space>
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote"
-          >{{ $t('i18n.b57ecea951') }}{{ formatDuration(temp.upTime) }}</span
-        >
+        <span class="layui-elem-quote">{{ $t('i18n.b57ecea951') }}{{ formatDuration(temp.upTime) }}</span>
       </a-timeline-item>
       <a-timeline-item>
         <span class="layui-elem-quote"
@@ -249,12 +245,21 @@ export default {
     },
     // 开始上传文件
     startUpload() {
-      const html =
-        this.$t('i18n.66860c7f3b') +
-        this.$t('i18n.0fbd484ced') +
-        this.$t('i18n.7dfb695d14') +
-        this.$t('i18n.e1bbafe8dc') +
-        ' </ul>'
+      const title = '确认要上传文件更新到最新版本吗？'
+      const alterB = '请注意备份数据防止数据丢失！！'
+      const liArray = [
+        '上传更新前请阅读更新日志里面的说明和注意事项并且',
+        '上传前请检查包是否完整,否则可能出现更新后无法正常启动的情况！！',
+        '如果升级失败需要手动恢复奥'
+      ]
+
+      const html = `${title}
+      <ul style="color:red;">
+        <li>${liArray[0]}<b>${alterB}</b></li>
+        <li>${liArray[1]}</li>
+        <li>${liArray[2]}</li>
+        </ul>
+      `
 
       $confirm({
         title: this.$t('i18n.c4535759ee'),
@@ -391,8 +396,7 @@ export default {
             } else {
               this.globalLoading({
                 spinning: true,
-                tip:
-                  (msg || this.$t('i18n.589060f38e')) + this.$t('i18n.9ba71275d3')
+                tip: (msg || this.$t('i18n.589060f38e')) + this.$t('i18n.9ba71275d3')
               })
             }
           })
@@ -440,11 +444,10 @@ export default {
           //
           const dUrl = data.downloadUrl || 'https://jpom.top'
           const htmlAref = `<a href='${dUrl}' target='_blank'>${dUrl}</a>`
-          const html =
-            this.$t('i18n.2314f99795') +
-            tagName +
-            htmlAref +
-            this.$t('i18n.ab3615a5ad')
+          const title = this.$t('i18n.2314f99795')
+          const tip = this.$t('i18n.ab3615a5ad')
+          const html = `${title} ${tagName} ${htmlAref} ${tip}`
+
           $notification.success({
             duration: 10,
             message: h('div', null, [h('p', { innerHTML: html }, null)])
@@ -476,9 +479,7 @@ export default {
         }
         if (tip) {
           $notification.success({
-            message: this.temp.upgrade
-              ? this.$t('i18n.2314f99795') + data.tagName
-              : this.$t('i18n.e6cde5a4bc')
+            message: this.temp.upgrade ? this.$t('i18n.2314f99795') + data.tagName : this.$t('i18n.e6cde5a4bc')
           })
         }
         resolve(data.upgrade)
@@ -486,13 +487,20 @@ export default {
     },
     // 升级
     upgrageVerion() {
-      // "components.upgrade.index.1cbe2507要升级到最新版本吗？,升级前请阅读更新日志里面的说明和注意事项并且请注意备份数据防止数据丢失！！"
-      const html =
-        this.$t('i18n.a99866bdc8') +
-        this.$t('i18n.b250411e23') +
-        this.$t('i18n.80b655c1e3') +
-        this.$t('i18n.e1bbafe8dc') +
-        ' </ul>'
+      const title = '确认要下载更新最新版本吗？'
+      const alterB = '请注意备份数据防止数据丢失！！'
+      const li = [
+        '载速度根据网速来确定,如果网络不佳下载会较慢',
+        '载前请阅读更新日志里面的说明和注意事项并且',
+        '如果升级失败需要手动恢复奥'
+      ]
+      const html = `${title}
+      <ul style="color:red;">
+        <li>${li[0]}</li>
+        <li>${li[1]}<b>${alterB}</b></li>
+        <li>${li[2]}</li>
+      </ul>
+      `
       $confirm({
         title: this.$t('i18n.c4535759ee'),
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
@@ -516,13 +524,24 @@ export default {
     },
     // components.upgrade.index.e17b386beta计划
     handleChangeBetaRelease(beta) {
-      const html = beta
-        ? this.$t('i18n.e10b5cfcb1') +
-          this.$t('i18n.d0c6dad2aa') +
-          this.$t('i18n.7acf8f7d90') +
-          this.$t('i18n.8fe6bf0803') +
-          ' </ul>'
-        : this.$t('i18n.87659a4953')
+      let html
+      if (beta) {
+        const title = '确认要加入 beta 计划吗？'
+        const li = [
+          '加入 beta 计划可以及时获取到最新的功能、一些优化功能、最快修复 bug 的版本，但是 beta 版也可能在部分新功能上存在不稳定的情况。',
+          '您需要根据您业务情况来评估是否可以加入 beta。',
+          '在使用 beta 版过程中遇到问题可以随时反馈给我们，我们会尽快为您解答。'
+        ]
+        html = `${title}
+        <ul <ul style="color:red;">
+          <li><b>${li[0]}</b></li>
+          <li><b>${li[1]}</b></li>
+          <li>${li[2]}</li>
+        </ul>
+        `
+      } else {
+        html = this.$t('i18n.87659a4953')
+      }
 
       $confirm({
         title: this.$t('i18n.c4535759ee'),
