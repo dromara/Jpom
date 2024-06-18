@@ -45,15 +45,8 @@
             <a-select-option key="manager">{{ $t('i18n.a6269ede6c') }}</a-select-option>
           </a-select>
 
-          <a-button type="primary" :loading="loading" @click="loadData">{{
-            $t('i18n.e5f71fc31e')
-          }}</a-button>
-          <a-statistic-countdown
-            format="s"
-            :title="$t('i18n.0f8403d07e')"
-            :value="countdownTime"
-            @finish="loadData"
-          >
+          <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
+          <a-statistic-countdown format="s" :title="$t('i18n.0f8403d07e')" :value="countdownTime" @finish="loadData">
             <template #suffix>
               <div style="font-size: 12px">{{ $t('i18n.ee6ce96abb') }}</div>
             </template>
@@ -101,9 +94,7 @@
         <template v-else-if="column.dataIndex === 'state'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$t('i18n.9b3e947cc9')}${record.status && record.status.state} ${$t(
-              'pages.docker.swarm.node.147fba6c'
-            )}${record.spec ? record.spec.availability || '' : ''}`"
+            :title="`${$t('i18n.9b3e947cc9')}${record.status && record.status.state} ${$t('i18n.fb91527ce5')}${record.spec ? record.spec.availability || '' : ''}`"
           >
             <a-tag
               :color="
@@ -156,9 +147,7 @@
         <template v-else-if="column.dataIndex === 'updatedAt'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$t('i18n.bf94b97d1a')}${text} ${$t('i18n.312f45014a')}${
-              record.createdAt
-            }`"
+            :title="`${$t('i18n.bf94b97d1a')}${text} ${$t('i18n.312f45014a')}${record.createdAt}`"
           >
             <span>
               {{ text }}
@@ -169,19 +158,13 @@
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <template v-if="record.managerStatus && record.managerStatus.leader">
-              <a-button size="small" type="primary" @click="handleEdit(record)">{{
-                $t('i18n.8347a927c0')
-              }}</a-button>
+              <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n.8347a927c0') }}</a-button>
               <a-tooltip :title="$t('i18n.28c1c35cd9')">
-                <a-button size="small" type="primary" danger :disabled="true">{{
-                  $t('i18n.b3b1f709d4')
-                }}</a-button>
+                <a-button size="small" type="primary" danger :disabled="true">{{ $t('i18n.b3b1f709d4') }}</a-button>
               </a-tooltip>
             </template>
             <template v-else>
-              <a-button size="small" type="primary" @click="handleEdit(record)">{{
-                $t('i18n.8347a927c0')
-              }}</a-button>
+              <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n.8347a927c0') }}</a-button>
               <a-button size="small" type="primary" danger @click="handleLeava(record)">{{
                 $t('i18n.b3b1f709d4')
               }}</a-button>

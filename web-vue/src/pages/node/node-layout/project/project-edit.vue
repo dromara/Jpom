@@ -292,9 +292,7 @@
           <a-textarea
             v-model:value="temp.args"
             :auto-size="{ minRows: 3, maxRows: 3 }"
-            :placeholder="`Main ${$t('i18n.6a9231c3ba')}. ${$t(
-              'pages.node.node-layout.project.project-edit.18629de'
-            )}.port=8080`"
+            :placeholder="`Main ${$t('i18n.6a9231c3ba')}. ${$t('i18n.848e4e21da')}.port=8080`"
           />
         </a-form-item>
         <a-form-item

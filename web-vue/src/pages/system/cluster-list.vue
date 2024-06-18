@@ -59,9 +59,7 @@
               @press-enter="loadData"
             />
             <a-tooltip :title="$t('i18n.4838a3bd20')">
-              <a-button type="primary" :loading="loading" @click="loadData">{{
-                $t('i18n.e5f71fc31e')
-              }}</a-button>
+              <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
             </a-tooltip>
 
             <a-tooltip>
@@ -85,9 +83,7 @@
         </template>
         <template v-else-if="column.dataIndex === 'url'">
           <a-tooltip
-            :title="`${$t('i18n.f668c8c881')}${record.name || ''}/${$t(
-              'pages.system.cluster-list.6a7417e0'
-            )}${record.url || ''}/${$t('i18n.8d13037eb7')}${record.statusMsg || ''}`"
+            :title="`${$t('i18n.f668c8c881')}${record.name || ''}/${$t('i18n.df3833270b')}${record.url || ''}/${$t('i18n.8d13037eb7')}${record.statusMsg || ''}`"
           >
             <a-button v-if="record.url" type="link" size="small" @click="openUrl(record.url)">
               {{ text }}
@@ -98,9 +94,7 @@
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEdit(record)">{{
-              $t('i18n.95b351c862')
-            }}</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n.95b351c862') }}</a-button>
             <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
               $t('i18n.2f4aaddde3')
             }}</a-button>

@@ -78,9 +78,7 @@
                 </a-tooltip>
               </template>
               <template v-else-if="column.dataIndex === 'outGivingStatus'">
-                <a-tag v-if="text === 2" color="green">{{
-                  dispatchStatusMap[text] || $t('i18n.1622dc9b6b')
-                }}</a-tag>
+                <a-tag v-if="text === 2" color="green">{{ dispatchStatusMap[text] || $t('i18n.1622dc9b6b') }}</a-tag>
                 <a-tag v-else-if="text === 1 || text === 0 || text === 5" color="orange">{{
                   dispatchStatusMap[text] || $t('i18n.1622dc9b6b')
                 }}</a-tag>
@@ -134,9 +132,7 @@
               <template v-else-if="column.dataIndex === 'projectPid'">
                 <a-tooltip
                   placement="topLeft"
-                  :title="`${$t('i18n.2b04210d33')}${record.projectPid || '-'} / ${$t(
-                    'pages.dispatch.status.284af1b3'
-                  )}${record.projectPort || '-'}`"
+                  :title="`${$t('i18n.2b04210d33')}${record.projectPid || '-'} / ${$t('i18n.4c096c51a3')}${record.projectPort || '-'}`"
                 >
                   <span>{{ record.projectPid || '-' }}/{{ record.projectPort || '-' }}</span>
                 </a-tooltip>

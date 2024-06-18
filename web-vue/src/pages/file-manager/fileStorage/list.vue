@@ -47,16 +47,10 @@
               @press-enter="loadData"
             />
             <a-tooltip :title="$t('i18n.4838a3bd20')">
-              <a-button type="primary" :loading="loading" @click="loadData">{{
-                $t('i18n.e5f71fc31e')
-              }}</a-button>
+              <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
             </a-tooltip>
-            <a-button type="primary" @click="handleUpload">{{
-              $t('i18n.a6fc9e3ae6')
-            }}</a-button>
-            <a-button type="primary" @click="handleRemoteDownload">{{
-              $t('i18n.bd7043cae3')
-            }}</a-button>
+            <a-button type="primary" @click="handleUpload">{{ $t('i18n.a6fc9e3ae6') }}</a-button>
+            <a-button type="primary" @click="handleRemoteDownload">{{ $t('i18n.bd7043cae3') }}</a-button>
             <a-button
               type="primary"
               danger
@@ -85,12 +79,9 @@
                 <p>{{ $t('i18n.b9c52d9a85') }}{{ text }}</p>
                 <p>{{ $t('i18n.46a04cdc9c') }}{{ record.description }}</p>
                 <p v-if="record.status !== undefined">
-                  {{ $t('i18n.53365c29c8')
-                  }}{{ statusMap[record.status] || $t('i18n.1622dc9b6b') }}
+                  {{ $t('i18n.53365c29c8') }}{{ statusMap[record.status] || $t('i18n.1622dc9b6b') }}
                 </p>
-                <p v-if="record.progressDesc">
-                  {{ $t('i18n.fb3a2241bb') }}{{ record.progressDesc }}
-                </p>
+                <p v-if="record.progressDesc">{{ $t('i18n.fb3a2241bb') }}{{ record.progressDesc }}</p>
               </template>
               <!-- {{ text }} -->
               <a-button type="link" style="padding: 0" size="small" @click="handleEdit(record)">{{ text }}</a-button>
@@ -103,10 +94,7 @@
             </a-tooltip>
           </template>
           <template v-else-if="column.dataIndex === 'source'">
-            <a-tooltip
-              placement="topLeft"
-              :title="sourceMap[text] || $t('i18n.1622dc9b6b')"
-            >
+            <a-tooltip placement="topLeft" :title="sourceMap[text] || $t('i18n.1622dc9b6b')">
               <span>{{ sourceMap[text] || $t('i18n.1622dc9b6b') }}</span>
             </a-tooltip>
           </template>
@@ -178,9 +166,7 @@
               "
             >
               <LoadingOutlined v-if="percentage" />
-              <a-button v-else type="primary"
-                ><UploadOutlined />{{ $t('i18n.fd7e0c997d') }}</a-button
-              >
+              <a-button v-else type="primary"><UploadOutlined />{{ $t('i18n.fd7e0c997d') }}</a-button>
             </a-upload>
           </a-form-item>
           <a-form-item :label="$t('i18n.824607be6b')" name="keepDay">
@@ -197,11 +183,7 @@
               <a-radio :value="false"> {{ $t('i18n.691b11e443') }} </a-radio>
             </a-radio-group>
           </a-form-item>
-          <a-form-item
-            :label="$t('i18n.2f5e828ecd')"
-            name="aliasCode"
-            :help="$t('i18n.41638b0a48')"
-          >
+          <a-form-item :label="$t('i18n.2f5e828ecd')" name="aliasCode" :help="$t('i18n.41638b0a48')">
             <a-input-search
               v-model:value="temp.aliasCode"
               :max-length="50"
@@ -218,10 +200,7 @@
             </a-input-search>
           </a-form-item>
           <a-form-item :label="$t('i18n.8d6f38b4b1')" name="description">
-            <a-textarea
-              v-model:value="temp.description"
-              :placeholder="$t('i18n.411672c954')"
-            />
+            <a-textarea v-model:value="temp.description" :placeholder="$t('i18n.411672c954')" />
           </a-form-item>
         </a-form>
       </CustomModal>
@@ -253,11 +232,7 @@
               <a-radio :value="false"> {{ $t('i18n.691b11e443') }} </a-radio>
             </a-radio-group>
           </a-form-item>
-          <a-form-item
-            :label="$t('i18n.2f5e828ecd')"
-            name="aliasCode"
-            :help="$t('i18n.41638b0a48')"
-          >
+          <a-form-item :label="$t('i18n.2f5e828ecd')" name="aliasCode" :help="$t('i18n.41638b0a48')">
             <a-input-search
               v-model:value="temp.aliasCode"
               :max-length="50"
@@ -274,10 +249,7 @@
             </a-input-search>
           </a-form-item>
           <a-form-item :label="$t('i18n.8d6f38b4b1')" name="description">
-            <a-textarea
-              v-model:value="temp.description"
-              :placeholder="$t('i18n.411672c954')"
-            />
+            <a-textarea v-model:value="temp.description" :placeholder="$t('i18n.411672c954')" />
           </a-form-item>
         </a-form>
       </CustomModal>
@@ -309,11 +281,7 @@
               <a-radio :value="false"> {{ $t('i18n.691b11e443') }} </a-radio>
             </a-radio-group>
           </a-form-item>
-          <a-form-item
-            :label="$t('i18n.2f5e828ecd')"
-            name="aliasCode"
-            :help="$t('i18n.41638b0a48')"
-          >
+          <a-form-item :label="$t('i18n.2f5e828ecd')" name="aliasCode" :help="$t('i18n.41638b0a48')">
             <a-input-search
               v-model:value="temp.aliasCode"
               :max-length="50"
@@ -330,10 +298,7 @@
             </a-input-search>
           </a-form-item>
           <a-form-item :label="$t('i18n.8d6f38b4b1')" name="description">
-            <a-textarea
-              v-model:value="temp.description"
-              :placeholder="$t('i18n.411672c954')"
-            />
+            <a-textarea v-model:value="temp.description" :placeholder="$t('i18n.411672c954')" />
           </a-form-item>
         </a-form>
       </CustomModal>
@@ -351,18 +316,14 @@
           <a-tabs default-active-key="1">
             <template #rightExtra>
               <a-tooltip :title="$t('i18n.84415a6bb1')">
-                <a-button type="primary" size="small" @click="resetTrigger">{{
-                  $t('i18n.4b9c3271dc')
-                }}</a-button>
+                <a-button type="primary" size="small" @click="resetTrigger">{{ $t('i18n.4b9c3271dc') }}</a-button>
               </a-tooltip>
             </template>
             <a-tab-pane key="1" :tab="$t('i18n.0b58866c3e')">
               <a-space direction="vertical" style="width: 100%">
                 <a-alert
                   type="info"
-                  :message="`${$t('i18n.d911cffcd5')}(${$t(
-                    'pages.file-manager.fileStorage.list.a5873c3e'
-                  )})`"
+                  :message="`${$t('i18n.d911cffcd5')}(${$t('i18n.00a070c696')})`"
                 >
                   <template #description>
                     <a-typography-paragraph :copyable="{ tooltip: false, text: temp.triggerDownloadUrl }">
@@ -372,9 +333,7 @@
                   </template>
                 </a-alert>
                 <a :href="temp.triggerDownloadUrl" target="_blank">
-                  <a-button size="small" type="primary"
-                    ><DownloadOutlined />{{ $t('i18n.2a813bc3eb') }}</a-button
-                  >
+                  <a-button size="small" type="primary"><DownloadOutlined />{{ $t('i18n.2a813bc3eb') }}</a-button>
                 </a>
               </a-space>
             </a-tab-pane>
@@ -395,9 +354,7 @@
                 </a-alert>
                 <a-alert
                   type="info"
-                  :message="`${$t('i18n.d911cffcd5')}(${$t(
-                    'pages.file-manager.fileStorage.list.a5873c3e'
-                  )})`"
+                  :message="`${$t('i18n.d911cffcd5')}(${$t('i18n.00a070c696')})`"
                 >
                   <template #description>
                     <a-typography-paragraph :copyable="{ tooltip: false, text: temp.triggerAliasDownloadUrl }">
@@ -407,9 +364,7 @@
                   </template>
                 </a-alert>
                 <a :href="temp.triggerAliasDownloadUrl" target="_blank">
-                  <a-button size="small" type="primary"
-                    ><DownloadOutlined />{{ $t('i18n.2a813bc3eb') }}</a-button
-                  >
+                  <a-button size="small" type="primary"><DownloadOutlined />{{ $t('i18n.2a813bc3eb') }}</a-button>
                 </a>
               </a-space>
             </a-tab-pane>
@@ -714,12 +669,8 @@ export default {
                   if (res.data) {
                     //
                     $notification.warning({
-                      message: `${this.$t('i18n.a17b5ab021')},${this.$t(
-                        'pages.file-manager.fileStorage.list.6a721706'
-                      )}${res.data.name} ,${this.$t('i18n.ee992d9744')}${
-                        res.data.workspaceId === 'GLOBAL'
-                          ? this.$t('i18n.0a60ac8f02')
-                          : this.$t('i18n.c9744f45e7')
+                      message: `${this.$t('i18n.a17b5ab021')},${this.$t('i18n.b9c52d9a85')}${res.data.name} ,${this.$t('i18n.ee992d9744')}${
+                        res.data.workspaceId === 'GLOBAL' ? this.$t('i18n.0a60ac8f02') : this.$t('i18n.c9744f45e7')
                       }`
                     })
                     //

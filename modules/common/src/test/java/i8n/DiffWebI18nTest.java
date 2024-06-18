@@ -35,7 +35,7 @@ public class DiffWebI18nTest {
         String rootPath = file.getAbsolutePath();
         File rootFile = new File(rootPath).getParentFile().getParentFile();
         rootFile = FileUtil.file(rootFile, "web-vue");
-        JSONObject zhCn = this.loadJson(rootFile, "zh_cn");
+        JSONObject zhCn = this.loadJson(rootFile, "zh_cn2");
         Map<String, String> cacheKey = new HashMap<>();
         this.generateWaitMap(zhCn, "", cacheKey);
         Collection<String> values = cacheKey.values();

@@ -44,9 +44,7 @@
             <a-form-item-rest>
               <code-editor v-model:content="temp.context" height="40vh" :show-tool="true" :options="{ mode: 'shell' }">
                 <template #tool_before>
-                  <a-button type="link" @click="scriptLibraryVisible = true">{{
-                    $t('i18n.f685377a22')
-                  }}</a-button>
+                  <a-button type="link" @click="scriptLibraryVisible = true">{{ $t('i18n.f685377a22') }}</a-button>
                 </template>
               </code-editor>
             </a-form-item-rest>
@@ -60,9 +58,7 @@
                     <a-input
                       v-model:value="item.desc"
                       :addon-before="$t('i18n.417fa2c2be', { index: index + 1 })"
-                      :placeholder="`${$t('i18n.55721d321c')},${$t(
-                        'pages.node.script-edit.b01bb0b5'
-                      )},${$t('i18n.72d4ade571')}`"
+                      :placeholder="`${$t('i18n.55721d321c')},${$t('i18n.2b1015e902')},${$t('i18n.72d4ade571')}`"
                     />
                     <a-input
                       v-model:value="item.value"
@@ -79,9 +75,7 @@
                   </a-row>
                 </a-col>
               </a-row>
-              <a-button type="primary" @click="() => commandParams.push({})">{{
-                $t('i18n.4c0eead6ff')
-              }}</a-button>
+              <a-button type="primary" @click="() => commandParams.push({})">{{ $t('i18n.4c0eead6ff') }}</a-button>
             </a-space>
           </a-form-item>
           <a-form-item :label="$t('i18n.fffd3ce745')" name="global">
@@ -265,8 +259,7 @@ export default {
           for (let i = 0; i < this.commandParams.length; i++) {
             if (!this.commandParams[i].desc) {
               $notification.error({
-                message:
-                  this.$t('i18n.8ae2b9915c') + (i + 1) + this.$t('i18n.c583b707ba')
+                message: this.$t('i18n.8ae2b9915c') + (i + 1) + this.$t('i18n.c583b707ba')
               })
               return false
             }
