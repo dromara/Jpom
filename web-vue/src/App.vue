@@ -199,4 +199,3 @@ provide('globalLoading', globalLoading)
   flex: 1;
 }
 </style>
-./i18n
