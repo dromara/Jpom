@@ -4,7 +4,9 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONWriter;
 import lombok.Lombok;
 import org.junit.Assert;
 import org.junit.Test;
@@ -14,14 +16,10 @@ import java.io.File;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.zip.CRC32;
 
 /**
  * @author bwcx_jzy
@@ -29,7 +27,7 @@ import java.util.zip.CRC32;
  */
 public class DiffWebI18nTest {
 
-    Pattern pattern = Pattern.compile("t\\('(.*?)'\\)");
+    Pattern pattern = Pattern.compile("t\\('(.*?)'.*?\\)");
 
     @Test
     public void test() throws Exception {
@@ -44,12 +42,10 @@ public class DiffWebI18nTest {
         HashSet<String> set = new HashSet<>(values);
         Map<String, String> chinese = new HashMap<>();
         for (String s : set) {
-            int frequency = 1;
+            int len = 8;
+            String md5 = SecureUtil.md5(s);
             while (true) {
-                CRC32 crc32 = new CRC32();
-                crc32.update((s + frequency).getBytes());
-                String crc32Value = Long.toHexString(crc32.getValue()).toUpperCase();
-                String newKey = StrUtil.format("i18n.{}.{}", crc32Value, frequency);
+                String newKey = StrUtil.format("i18n.{}", StrUtil.sub(md5, 0, len += 2));
                 String existsKey = chinese.get(s);
                 if (existsKey == null) {
                     chinese.put(s, newKey);
@@ -58,7 +54,7 @@ public class DiffWebI18nTest {
                 if (StrUtil.equals(newKey, existsKey)) {
                     break;
                 }
-                frequency++;
+                Assert.assertTrue("截取中文 md5 key 超范围：" + s, md5.length() >= len);
             }
         }
         //
@@ -74,30 +70,15 @@ public class DiffWebI18nTest {
                 throw Lombok.sneakyThrow(e);
             }
         });
+        //
+        Map<String, String> newMap = new TreeMap<>();
+        chinese.forEach((key, value) -> {
+            newMap.put(value, key);
+        });
+        File file1 = FileUtil.file(rootFile, "/src/i18n/locales/zh_cn.json");
+        FileUtil.writeString(JSONArray.toJSONString(newMap, JSONWriter.Feature.PrettyFormat), file1, CharsetUtil.UTF_8);
     }
 
-    /**
-     * 生成 key
-     *
-     * @param key        翻译后的key
-     * @param value      原始中文
-     * @param jsonObject 所以的key
-     * @return i18n.{}.{}
-     */
-    private String buildKey(String key, String value, JSONObject jsonObject) {
-        int md5IdLen = 4;
-        while (true) {
-            String md5 = SecureUtil.md5(value);
-            Assert.assertTrue("截取中文 md5 key 超范围：" + value, md5.length() >= md5IdLen);
-            md5 = md5.substring(0, md5IdLen);
-            String newKey = StrUtil.format("i18n.{}.{}", StrUtil.toUnderlineCase(key), md5);
-            if (jsonObject.containsKey(newKey)) {
-                md5IdLen += 2;
-                continue;
-            }
-            return newKey;
-        }
-    }
 
     private void generateWaitMap(JSONObject jsonObject, String rootPath, Map<String, String> cache) throws Exception {
         for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
@@ -153,26 +134,30 @@ public class DiffWebI18nTest {
             String line;
             while ((line = reader.readLine()) != null) {
                 Matcher matcher = pattern.matcher(line);
-                StringBuffer modifiedLine = new StringBuffer();
+                String newLine = line;
                 while (matcher.find()) {
                     String key = matcher.group(1);
                     int start = matcher.start(1);
                     String subPre = StrUtil.subPre(line, start);
-                    if (StrUtil.endWithAny(subPre, "split('", "import('", "$emit('", "onSubmit('")) {
+                    if (StrUtil.endWithAny(subPre, "split('", "import('", "emit('", "onSubmit('", "mount('", "reject('", "component('", "recoverNet('", "executionRequest('", "commit('")) {
                         // 特殊方法
                         continue;
                     }
+                    if (StrUtil.startWith(key, "i18n.")) {
+                        // 忽略 i18n.{}
+                        continue;
+                    }
                     String newKey = newKeyMap.get(key);
-                    // 正则关键词替换
-                    matcher.appendReplacement(modifiedLine, newKey);
+                    if (newKey == null) {
+                        throw new IllegalStateException("没有找到对应的 key：\n" + key + "\n" + line);
+                    }
+                    newLine = StrUtil.replace(line, String.format("'%s'", key), String.format("'%s'", newKey));
                     System.out.println(key + "  " + newKey);
                 }
-                matcher.appendTail(modifiedLine);
                 //
-                String lineString = modifiedLine.toString();
-                writer.write(lineString);
+                writer.write(newLine);
                 if (!modified) {
-                    modified = !StrUtil.equals(line, lineString);
+                    modified = !StrUtil.equals(line, newLine);
                 }
                 writer.write(FileUtil.getLineSeparator());
             }
@@ -180,6 +165,27 @@ public class DiffWebI18nTest {
         if (modified) {
             // 移动到原路径
             FileUtil.writeString(writer.toString(), file, charset);
+        }
+    }
+
+    //@Test
+    public void test2() {
+        String line = "<span>{{ text === 'GLOBAL' ? $t('i18n.8DBEBAAE.1') : $t('pages.system.workspace-env.919267cc') }}</span>";
+        Matcher matcher = pattern.matcher(line);
+        while (matcher.find()) {
+            String key = matcher.group(1);
+            System.out.println(key + "  ");
+            int start = matcher.start(1);
+            String subPre = StrUtil.subPre(line, start);
+            if (StrUtil.endWithAny(subPre, "split('", "import('", "emit('", "onSubmit('", "mount('", "reject('", "component('", "recoverNet('", "executionRequest('", "commit('")) {
+                // 特殊方法
+                continue;
+            }
+            if (StrUtil.startWith(key, "i18n.")) {
+                // 忽略 i18n.{}
+                continue;
+            }
+
         }
     }
 }
