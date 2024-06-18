@@ -6,7 +6,7 @@
       default-auto-refresh
       :auto-refresh-time="5"
       table-name="assets-docker-list"
-      :empty-description="$t('pages.system.assets.docker.list.7e22d7ff')"
+      :empty-description="$t('i18n.5fea80e369')"
       :active-page="activePage"
       size="middle"
       :data-source="list"
@@ -25,7 +25,7 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$t('pages.system.assets.docker.list.3e34ec28')"
+            :placeholder="$t('i18n.d7ec2d3fea')"
             class="search-input-item"
             @press-enter="loadData"
           />
@@ -37,7 +37,7 @@
           />
           <a-input
             v-model:value="listQuery['%swarmId%']"
-            :placeholder="$t('pages.system.assets.docker.list.29c6f407')"
+            :placeholder="$t('i18n.7329a2637c')"
             class="search-input-item"
             @press-enter="loadData"
           />
@@ -55,23 +55,23 @@
               }
             "
             allow-clear
-            :placeholder="$t('pages.system.assets.docker.list.b1765e98')"
+            :placeholder="$t('i18n.829abe5a8d')"
             class="search-input-item"
           >
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
           </a-select>
-          <a-tooltip :title="$t('pages.system.assets.docker.list.33064c22')">
+          <a-tooltip :title="$t('i18n.4838a3bd20')">
             <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('pages.system.assets.docker.list.53c2763c')
+              $t('i18n.e5f71fc31e')
             }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">{{ $t('pages.system.assets.docker.list.7d46652a') }}</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $t('i18n.66ab5e9f24') }}</a-button>
           <a-button :disabled="!tableSelections.length" type="primary" @click="syncToWorkspaceShow()">
-            {{ $t('pages.system.assets.docker.list.fd234860') }}</a-button
+            {{ $t('i18n.82d2c66f47') }}</a-button
           >
-          <a-tooltip :title="$t('pages.system.assets.docker.list.408e85c9')">
+          <a-tooltip :title="$t('i18n.bbd63a893c')">
             <a-button type="dashed" @click="handleTryLocalDocker">
-              <QuestionCircleOutlined />{{ $t('pages.system.assets.docker.list.5aa124eb') }}
+              <QuestionCircleOutlined />{{ $t('i18n.91985e3574') }}
             </a-button>
           </a-tooltip>
         </a-space>
@@ -90,19 +90,19 @@
 
         <template v-else-if="column.dataIndex === 'swarmId'">
           <template v-if="text">
-            <a-tooltip v-if="record.swarmControlAvailable" :title="$t('pages.system.assets.docker.list.37786c01')">
+            <a-tooltip v-if="record.swarmControlAvailable" :title="$t('i18n.a6269ede6c')">
               <ClusterOutlined />
             </a-tooltip>
-            <a-tooltip v-else :title="$t('pages.system.assets.docker.list.e4035840')">
+            <a-tooltip v-else :title="$t('i18n.41e9f0c9c6')">
               <BlockOutlined />
             </a-tooltip>
-            <a-popover :title="$t('pages.system.assets.docker.list.5775aec5')">
+            <a-popover :title="$t('i18n.32e05f01f4')">
               <template #content>
-                <p>{{ $t('pages.system.assets.docker.list.a5265715') }}{{ record.swarmId }}</p>
-                <p>{{ $t('pages.system.assets.docker.list.f8ec3bb8') }}{{ record.swarmNodeId }}</p>
-                <p>{{ $t('pages.system.assets.docker.list.a04b7d9c') }}{{ record.swarmNodeAddr }}</p>
-                <p>{{ $t('pages.system.assets.docker.list.a6076557') }}{{ parseTime(record.swarmCreatedAt) }}</p>
-                <p>{{ $t('pages.system.assets.docker.list.6eebbce0') }}{{ parseTime(record.swarmUpdatedAt) }}</p>
+                <p>{{ $t('i18n.2a24902516') }}{{ record.swarmId }}</p>
+                <p>{{ $t('i18n.c5e7257212') }}{{ record.swarmNodeId }}</p>
+                <p>{{ $t('i18n.ccea973fc7') }}{{ record.swarmNodeAddr }}</p>
+                <p>{{ $t('i18n.39e4138e30') }}{{ parseTime(record.swarmCreatedAt) }}</p>
+                <p>{{ $t('i18n.b4750210ef') }}{{ parseTime(record.swarmUpdatedAt) }}</p>
               </template>
               {{ text }}
             </a-popover>
@@ -114,8 +114,8 @@
             placement="topLeft"
             :title="
               record.tlsVerify
-                ? $t('pages.system.assets.docker.list.51e7a8c3') + record.certInfo
-                : $t('pages.system.assets.docker.list.f1cb89d8')
+                ? $t('i18n.1058a0be42') + record.certInfo
+                : $t('i18n.007f23e18f')
             "
           >
             <template v-if="record.tlsVerify">
@@ -124,19 +124,19 @@
                   v-model:checked="record.tlsVerify"
                   size="small"
                   :disabled="true"
-                  :checked-children="$t('pages.system.assets.docker.list.b1d6efbd')"
-                  :un-checked-children="$t('pages.system.assets.docker.list.b6bb836')"
+                  :checked-children="$t('i18n.8493205602')"
+                  :un-checked-children="$t('i18n.d58a55bcee')"
                 />
               </template>
-              <a-tag v-else color="red"> {{ $t('pages.system.assets.docker.list.53916e88') }} </a-tag>
+              <a-tag v-else color="red"> {{ $t('i18n.88b79928e7') }} </a-tag>
             </template>
             <template v-else>
               <a-switch
                 v-model:checked="record.tlsVerify"
                 size="small"
                 :disabled="true"
-                :checked-children="$t('pages.system.assets.docker.list.b1d6efbd')"
-                :un-checked-children="$t('pages.system.assets.docker.list.b6bb836')"
+                :checked-children="$t('i18n.8493205602')"
+                :un-checked-children="$t('i18n.d58a55bcee')"
               />
             </template>
           </a-tooltip>
@@ -145,31 +145,31 @@
         <template v-else-if="column.dataIndex === 'status'">
           <a-tooltip :title="record.failureMsg">
             <a-tag :color="statusMap[record.status].color">{{
-              statusMap[record.status].desc || $t('pages.system.assets.docker.list.ca1cdfa6')
+              statusMap[record.status].desc || $t('i18n.1622dc9b6b')
             }}</a-tag>
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button size="small" type="primary" :disabled="record.status !== 1" @click="handleConsole(record)">{{
-              $t('pages.system.assets.docker.list.5139b7d7')
+              $t('i18n.b5c3770699')
             }}</a-button>
             <template v-if="!record.swarmId && record.status === 1">
-              <a-popover :title="$t('pages.system.assets.docker.list.364e6c4d')">
+              <a-popover :title="$t('i18n.9a4b872895')">
                 <template #content>
                   <p>
                     <a-button size="small" type="primary" @click="initSwarm(record)">{{
-                      $t('pages.system.assets.docker.list.31cebbac')
+                      $t('i18n.374cd1f7b7')
                     }}</a-button>
                   </p>
                   <p>
                     <a-button size="small" type="primary" @click="joinSwarm(record)">{{
-                      $t('pages.system.assets.docker.list.54a2a9a1')
+                      $t('i18n.55cf956586')
                     }}</a-button>
                   </p>
                 </template>
                 <a-button size="small" type="primary"
-                  ><EditOutlined />{{ $t('pages.system.assets.docker.list.17b26f41') }}</a-button
+                  ><EditOutlined />{{ $t('i18n.85fe5099f6') }}</a-button
                 >
               </a-popover>
             </template>
@@ -179,29 +179,29 @@
                 :disabled="parseInt(record.status) !== 1"
                 type="primary"
                 @click="handleSwarmConsole(record)"
-                ><SelectOutlined />{{ $t('pages.system.assets.docker.list.17b26f41') }}</a-button
+                ><SelectOutlined />{{ $t('i18n.85fe5099f6') }}</a-button
               >
             </template>
             <a-button size="small" type="primary" @click="syncToWorkspaceShow(record)">{{
-              $t('pages.system.assets.docker.list.9510043a')
+              $t('i18n.e39de3376e')
             }}</a-button>
             <a-button size="small" type="primary" @click="viewWorkspaceDataHander(record)">{{
-              $t('pages.system.assets.docker.list.2ef699f7')
+              $t('i18n.1c3cf7f5f0')
             }}</a-button>
             <a-dropdown>
               <a @click="(e) => e.preventDefault()">
-                {{ $t('pages.system.assets.docker.list.6e071067') }} <DownOutlined />
+                {{ $t('i18n.0ec9eaf9c3') }} <DownOutlined />
               </a>
               <template #overlay>
                 <a-menu>
                   <a-menu-item>
                     <a-button size="small" type="primary" @click="handleEdit(record)">{{
-                      $t('pages.system.assets.docker.list.64603c01')
+                      $t('i18n.95b351c862')
                     }}</a-button>
                   </a-menu-item>
                   <a-menu-item>
                     <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-                      $t('pages.system.assets.docker.list.dd20d11c')
+                      $t('i18n.2f4aaddde3')
                     }}</a-button>
                   </a-menu-item>
                   <a-menu-item>
@@ -211,7 +211,7 @@
                       type="primary"
                       danger
                       @click="handleLeaveForce(record)"
-                      >{{ $t('pages.system.assets.docker.list.ef53ea15') }}</a-button
+                      >{{ $t('i18n.e54029e15b') }}</a-button
                     >
                   </a-menu-item>
                 </a-menu>
@@ -227,7 +227,7 @@
       v-model:open="editVisible"
       destroy-on-close
       width="50%"
-      :title="$t('pages.system.assets.docker.list.2e8ce846')"
+      :title="$t('i18n.657969aa0f')"
       :confirm-loading="confirmLoading"
       :mask-closable="false"
       @ok="handleEditOk"
@@ -238,47 +238,47 @@
             <template #message>
               <template v-if="temp.enableSsh">
                 <ul>
-                  <li>SSH {{ $t('pages.system.assets.docker.list.c6c093e5') }}</li>
+                  <li>SSH {{ $t('i18n.051fa113dd') }}</li>
                   <li>
-                    docker {{ $t('pages.system.assets.docker.list.8119bea8') }}.09
-                    {{ $t('pages.system.assets.docker.list.e20fe67d') }}
+                    docker {{ $t('i18n.bb8d265c7e') }}.09
+                    {{ $t('i18n.1810e84971') }}
                   </li>
-                  <li>{{ $t('pages.system.assets.docker.list.36361237') }}</li>
+                  <li>{{ $t('i18n.6aa7403b18') }}</li>
                   <li>
-                    {{ $t('pages.system.assets.docker.list.a1434b2') }}>{{
-                      $t('pages.system.assets.docker.list.6b0e27ae')
+                    {{ $t('i18n.92c6aa6db9') }}>{{
+                      $t('i18n.e049546ff3')
                     }}
                     <b>ssh/monitor-script.sh</b>
-                    {{ $t('pages.system.assets.docker.list.4a0c80d4') }}
+                    {{ $t('i18n.f0eb685a84') }}
                   </li>
                 </ul>
               </template>
               <template v-else>
                 <ul>
                   <li>
-                    {{ $t('pages.system.assets.docker.list.b831d501')
-                    }}<b style="color: red">{{ $t('pages.system.assets.docker.list.2ceaa4d9') }}</b>
+                    {{ $t('i18n.c46938460b')
+                    }}<b style="color: red">{{ $t('i18n.7010264d22') }}</b>
                   </li>
                   <li>
-                    {{ $t('pages.system.assets.docker.list.ca19c509') }}
-                    <b style="color: red">docker {{ $t('pages.system.assets.docker.list.292e1bdc') }}</b>
+                    {{ $t('i18n.ba1f68b5dd') }}
+                    <b style="color: red">docker {{ $t('i18n.47768ed092') }}</b>
                   </li>
                   <li>
-                    {{ $t('pages.system.assets.docker.list.95c6cf86')
-                    }}<b style="color: red"> {{ $t('pages.system.assets.docker.list.c82fb3de') }} </b>
+                    {{ $t('i18n.fdba50ca2d')
+                    }}<b style="color: red"> {{ $t('i18n.7e000409bb') }} </b>
                   </li>
                   <li>
-                    {{ $t('pages.system.assets.docker.list.32893d5c')
-                    }}<b style="color: red">{{ $t('pages.system.assets.docker.list.6f521cc7') }}</b
-                    >（{{ $t('pages.system.assets.docker.list.f3fb3cdb') }}
+                    {{ $t('i18n.5bb5b33ae4')
+                    }}<b style="color: red">{{ $t('i18n.73ed447971') }}</b
+                    >（{{ $t('i18n.9c942ea972') }}
                   </li>
                   <li>
-                    {{ $t('pages.system.assets.docker.list.f12e0a8b')
-                    }}<b style="color: red">{{ $t('pages.system.assets.docker.list.d0ebc18') }}</b>
+                    {{ $t('i18n.8b1512bf3a')
+                    }}<b style="color: red">{{ $t('i18n.8fd9daf8e9') }}</b>
                   </li>
                   <li>
-                    {{ $t('pages.system.assets.docker.list.2ae8180f')
-                    }}<b style="color: red">{{ $t('pages.system.assets.docker.list.f44ea303') }}</b>
+                    {{ $t('i18n.ba8d1dca4a')
+                    }}<b style="color: red">{{ $t('i18n.0e25ab3b51') }}</b>
                   </li>
                 </ul>
               </template>
@@ -286,35 +286,35 @@
           </a-alert>
           <div></div>
         </a-space>
-        <a-form-item :label="$t('pages.system.assets.docker.list.cddbe6bd')" name="name">
-          <a-input v-model:value="temp.name" :placeholder="$t('pages.system.assets.docker.list.cddbe6bd')" />
+        <a-form-item :label="$t('i18n.a51cd0898f')" name="name">
+          <a-input v-model:value="temp.name" :placeholder="$t('i18n.a51cd0898f')" />
         </a-form-item>
-        <a-form-item :label="$t('pages.system.assets.docker.list.b1765e98')" name="groupName">
+        <a-form-item :label="$t('i18n.829abe5a8d')" name="groupName">
           <custom-select
             v-model:value="temp.groupName"
             :data="groupList"
-            :input-placeholder="$t('pages.system.assets.docker.list.95c41d82')"
-            :select-placeholder="$t('pages.system.assets.docker.list.c385f859')"
+            :input-placeholder="$t('i18n.bd0362bed3')"
+            :select-placeholder="$t('i18n.9cac799f2f')"
           >
           </custom-select>
         </a-form-item>
-        <a-form-item :label="$t('pages.system.assets.docker.list.81809417')" name="enableSsh">
+        <a-form-item :label="$t('i18n.0c7369bbee')" name="enableSsh">
           <a-switch
             v-model:checked="temp.enableSsh"
-            :checked-children="$t('pages.system.assets.docker.list.b1d6efbd')"
-            :un-checked-children="$t('pages.system.assets.docker.list.b6bb836')"
+            :checked-children="$t('i18n.8493205602')"
+            :un-checked-children="$t('i18n.d58a55bcee')"
           />
           <template #help>
             <div v-if="temp.enableSsh">
-              {{ $t('pages.system.assets.docker.list.eb19be5d') }}
+              {{ $t('i18n.b9c1616fd5') }}
             </div>
           </template>
         </a-form-item>
-        <a-form-item v-if="temp.enableSsh" :label="$t('pages.system.assets.docker.list.3c5f6a8d')" name="enableSsh">
+        <a-form-item v-if="temp.enableSsh" :label="$t('i18n.a5617f0369')" name="enableSsh">
           <a-select
             v-model:value="temp.machineSshId"
             allow-clear
-            :placeholder="$t('pages.system.assets.docker.list.3c5f6a8d')"
+            :placeholder="$t('i18n.a5617f0369')"
             class="search-input-item"
           >
             <a-select-option v-for="item in sshList" :key="item.id" :disabled="!item.dockerInfo" :value="item.id">
@@ -322,43 +322,43 @@
                 <template #title>
                   {{ item.name }}({{ item.host }})[{{
                     (item.dockerInfo && JSON.parse(item.dockerInfo) && JSON.parse(item.dockerInfo).version) ||
-                    $t('pages.system.assets.docker.list.68116479')
+                    $t('i18n.f3365fbf4d')
                   }}]
                 </template>
                 {{ item.name }}({{ item.host }}) [{{
                   (item.dockerInfo && JSON.parse(item.dockerInfo) && JSON.parse(item.dockerInfo).version) ||
-                  $t('pages.system.assets.docker.list.68116479')
+                  $t('i18n.f3365fbf4d')
                 }}]</a-tooltip
               >
             </a-select-option>
           </a-select>
-          <template #help>{{ $t('pages.system.assets.docker.list.f624d3a5') }}</template>
+          <template #help>{{ $t('i18n.09d14694e7') }}</template>
         </a-form-item>
         <template v-if="!temp.enableSsh">
           <a-form-item label="host" name="host">
             <a-input
               v-model:value="temp.host"
-              :placeholder="`${$t('pages.system.assets.docker.list.aa3b5f80')}://127.0.0.1:2375`"
+              :placeholder="`${$t('i18n.dc32f465da')}://127.0.0.1:2375`"
             />
           </a-form-item>
 
-          <a-form-item :label="$t('pages.system.assets.docker.list.9a380d24')" name="tlsVerify">
+          <a-form-item :label="$t('i18n.2780a6a3cf')" name="tlsVerify">
             <a-switch
               v-model:checked="temp.tlsVerify"
-              :checked-children="$t('pages.system.assets.docker.list.b1d6efbd')"
-              :un-checked-children="$t('pages.system.assets.docker.list.b6bb836')"
+              :checked-children="$t('i18n.8493205602')"
+              :un-checked-children="$t('i18n.d58a55bcee')"
             />
           </a-form-item>
           <a-form-item
             v-if="temp.tlsVerify"
-            :label="$t('pages.system.assets.docker.list.c3a4f261')"
+            :label="$t('i18n.cbce8e96cf')"
             name="certInfo"
-            :help="$t('pages.system.assets.docker.list.de472e9b')"
+            :help="$t('i18n.b515d55aab')"
           >
             <a-input-search
               v-model:value="temp.certInfo"
-              :placeholder="$t('pages.system.assets.docker.list.b8cb1f76')"
-              :enter-button="$t('pages.system.assets.docker.list.c5dce2af')"
+              :placeholder="$t('i18n.f1d8533c7f')"
+              :enter-button="$t('i18n.63b6b36c71')"
               @search="
                 () => {
                   certificateVisible = true
@@ -369,33 +369,33 @@
         </template>
 
         <a-collapse>
-          <a-collapse-panel key="1" :header="$t('pages.system.assets.docker.list.5de4135b')">
-            <a-form-item :label="$t('pages.system.assets.docker.list.e67b0df3')" name="heartbeatTimeout">
+          <a-collapse-panel key="1" :header="$t('i18n.9ab433e930')">
+            <a-form-item :label="$t('i18n.56071a4fa6')" name="heartbeatTimeout">
               <a-input-number
                 v-model:value="temp.heartbeatTimeout"
                 style="width: 100%"
-                :placeholder="$t('pages.system.assets.docker.list.36526abf')"
+                :placeholder="$t('i18n.b513f53eb4')"
               />
             </a-form-item>
-            <a-form-item :label="$t('pages.system.assets.docker.list.7a3a2453')" name="registryUrl">
-              <a-input v-model:value="temp.registryUrl" :placeholder="$t('pages.system.assets.docker.list.7a3a2453')" />
+            <a-form-item :label="$t('i18n.e4bea943de')" name="registryUrl">
+              <a-input v-model:value="temp.registryUrl" :placeholder="$t('i18n.e4bea943de')" />
             </a-form-item>
-            <a-form-item :label="$t('pages.system.assets.docker.list.a421d76')" name="registryUsername">
+            <a-form-item :label="$t('i18n.b4c83b0b56')" name="registryUsername">
               <a-input
                 v-model:value="temp.registryUsername"
-                :placeholder="$t('pages.system.assets.docker.list.a421d76')"
+                :placeholder="$t('i18n.b4c83b0b56')"
               />
             </a-form-item>
-            <a-form-item :label="$t('pages.system.assets.docker.list.5d688166')" name="registryPassword">
+            <a-form-item :label="$t('i18n.791870de48')" name="registryPassword">
               <a-input-password
                 v-model:value="temp.registryPassword"
-                :placeholder="$t('pages.system.assets.docker.list.5d688166')"
+                :placeholder="$t('i18n.791870de48')"
               />
             </a-form-item>
-            <a-form-item :label="$t('pages.system.assets.docker.list.e4aff6de')" name="registryEmail">
+            <a-form-item :label="$t('i18n.feda0df7ef')" name="registryEmail">
               <a-input
                 v-model:value="temp.registryEmail"
-                :placeholder="$t('pages.system.assets.docker.list.e4aff6de')"
+                :placeholder="$t('i18n.feda0df7ef')"
               />
             </a-form-item>
           </a-collapse-panel>
@@ -407,14 +407,14 @@
       v-if="initSwarmVisible"
       v-model:open="initSwarmVisible"
       destroy-on-close
-      :title="$t('pages.system.assets.docker.list.72c164e9')"
+      :title="$t('i18n.f2d05944ad')"
       :confirm-loading="confirmLoading"
       :mask-closable="false"
       @ok="handleSwarm"
     >
       <a-form ref="initForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-alert :message="$t('pages.system.assets.docker.list.7ae524f6')" type="warning">
-          <template #description> {{ $t('pages.system.assets.docker.list.aaeec58d') }} </template>
+        <a-alert :message="$t('i18n.947d983961')" type="warning">
+          <template #description> {{ $t('i18n.9d5b1303e0') }} </template>
         </a-alert>
       </a-form>
     </CustomModal>
@@ -423,13 +423,13 @@
       v-if="joinSwarmVisible"
       v-model:open="joinSwarmVisible"
       destroy-on-close
-      :title="$t('pages.system.assets.docker.list.eb93f2a5')"
+      :title="$t('i18n.0006600738')"
       :confirm-loading="confirmLoading"
       :mask-closable="false"
       @ok="handleSwarmJoin"
     >
       <a-form ref="joinForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$t('pages.system.assets.docker.list.f75f99f7')" name="managerId">
+        <a-form-item :label="$t('i18n.e4d0ebcd58')" name="managerId">
           <a-select
             v-model:value="temp.managerId"
             show-search
@@ -444,7 +444,7 @@
               }
             "
             allow-clear
-            :placeholder="$t('pages.system.assets.docker.list.cccc0a77')"
+            :placeholder="$t('i18n.96c28c4f17')"
             @change="
               (v) => {
                 tempList = swarmList.filter((item) => {
@@ -462,14 +462,14 @@
           </a-select>
         </a-form-item>
 
-        <a-form-item v-if="temp.remoteAddr" :label="$t('pages.system.assets.docker.list.87200b2')" name="remoteAddr"
-          ><a-input v-model:value="temp.remoteAddr" :placeholder="$t('pages.system.assets.docker.list.9d684818')" />
+        <a-form-item v-if="temp.remoteAddr" :label="$t('i18n.2e740698cf')" name="remoteAddr"
+          ><a-input v-model:value="temp.remoteAddr" :placeholder="$t('i18n.77017a3140')" />
         </a-form-item>
 
-        <a-form-item :label="$t('pages.system.assets.docker.list.b23c6871')" name="role">
+        <a-form-item :label="$t('i18n.464f3d4ea3')" name="role">
           <a-radio-group v-model:value="temp.role" name="role">
-            <a-radio value="worker"> {{ $t('pages.system.assets.docker.list.e4035840') }}</a-radio>
-            <a-radio value="manager"> {{ $t('pages.system.assets.docker.list.37786c01') }} </a-radio>
+            <a-radio value="worker"> {{ $t('i18n.41e9f0c9c6') }}</a-radio>
+            <a-radio value="manager"> {{ $t('i18n.a6269ede6c') }} </a-radio>
           </a-radio-group>
         </a-form-item>
       </a-form>
@@ -501,21 +501,21 @@
       v-model:open="syncToWorkspaceVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$t('pages.system.assets.docker.list.7f2f69fe')"
+      :title="$t('i18n.ef8525efce')"
       :mask-closable="false"
       @ok="handleSyncToWorkspace"
     >
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
-        <a-form-item :label="$t('pages.system.assets.docker.list.3e34c732')" name="type">
+        <a-form-item :label="$t('i18n.0128cdaaa3')" name="type">
           <a-radio-group v-model:value="temp.type">
             <a-radio value="docker"> docker </a-radio>
             <a-radio value="swarm" :disabled="temp.swarmId === true ? false : true">
-              {{ $t('pages.system.assets.docker.list.17b26f41') }}
+              {{ $t('i18n.85fe5099f6') }}
             </a-radio>
           </a-radio-group>
         </a-form-item>
-        <a-form-item :label="$t('pages.system.assets.docker.list.7ef9d8fb')" name="workspaceId">
+        <a-form-item :label="$t('i18n.b4a8c78284')" name="workspaceId">
           <a-select
             v-model:value="temp.workspaceId"
             show-search
@@ -529,7 +529,7 @@
                 )
               }
             "
-            :placeholder="$t('pages.system.assets.docker.list.3a321a02')"
+            :placeholder="$t('i18n.b3bda9bf9e')"
           >
             <a-select-option v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
@@ -542,7 +542,7 @@
       v-model:open="viewWorkspaceDocker"
       destroy-on-close
       width="50%"
-      :title="$t('pages.system.assets.docker.list.8e816e93')"
+      :title="$t('i18n.9086111cff')"
       :footer="null"
       :mask-closable="false"
     >
@@ -551,7 +551,7 @@
           v-if="
             workspaceDockerData && (workspaceDockerData.dockerList?.length || workspaceDockerData.swarmList?.length)
           "
-          :message="$t('pages.system.assets.docker.list.5c18eb94')"
+          :message="$t('i18n.1b03b0c1ff')"
           type="info"
           show-icon
         />
@@ -561,9 +561,9 @@
               <template #renderItem="{ item }">
                 <a-list-item style="display: block">
                   <a-row>
-                    <a-col :span="10">Docker {{ $t('pages.system.assets.docker.list.bb769c1d') }}{{ item.name }}</a-col>
+                    <a-col :span="10">Docker {{ $t('i18n.5b47861521') }}{{ item.name }}</a-col>
                     <a-col :span="10"
-                      >{{ $t('pages.system.assets.docker.list.2a91c128')
+                      >{{ $t('i18n.2358e1ef49')
                       }}{{ item.workspace && item.workspace.name }}</a-col
                     >
                     <a-col :span="4"> </a-col>
@@ -572,14 +572,14 @@
               </template>
             </a-list>
           </a-tab-pane>
-          <a-tab-pane key="2" :tab="$t('pages.system.assets.docker.list.17b26f41')">
+          <a-tab-pane key="2" :tab="$t('i18n.85fe5099f6')">
             <a-list bordered :data-source="workspaceDockerData && workspaceDockerData.swarmList">
               <template #renderItem="{ item }">
                 <a-list-item style="display: block">
                   <a-row>
-                    <a-col :span="10">{{ $t('pages.system.assets.docker.list.c2dfe194') }}{{ item.name }}</a-col>
+                    <a-col :span="10">{{ $t('i18n.f668c8c881') }}{{ item.name }}</a-col>
                     <a-col :span="10"
-                      >{{ $t('pages.system.assets.docker.list.2a91c128')
+                      >{{ $t('i18n.2358e1ef49')
                       }}{{ item.workspace && item.workspace.name }}</a-col
                     >
                     <a-col :span="4"> </a-col>
@@ -595,7 +595,7 @@
     <CustomDrawer
       v-if="certificateVisible"
       destroy-on-close
-      :title="`${$t('pages.system.assets.docker.list.5540289f')}`"
+      :title="`${$t('i18n.38a12e7196')}`"
       placement="right"
       :open="certificateVisible"
       width="85vw"
@@ -631,7 +631,7 @@
               }
             "
           >
-            {{ $t('pages.system.assets.docker.list.43105e21') }}
+            {{ $t('i18n.625fb26b4b') }}
           </a-button>
           <a-button
             type="primary"
@@ -641,7 +641,7 @@
               }
             "
           >
-            {{ $t('pages.system.assets.docker.list.7da4a591') }}
+            {{ $t('i18n.e83a256e4f') }}
           </a-button>
         </a-space>
       </template>
@@ -698,7 +698,7 @@ export default {
       sshList: [],
       columns: [
         {
-          title: this.$t('pages.system.assets.docker.list.3e34ec28'),
+          title: this.$t('i18n.d7ec2d3fea'),
           dataIndex: 'name',
           ellipsis: true,
 
@@ -713,7 +713,7 @@ export default {
           width: 150
         },
         {
-          title: `docker${this.$t('pages.system.assets.docker.list.d826aba2')}`,
+          title: `docker${this.$t('i18n.fe2df04a16')}`,
           dataIndex: 'dockerVersion',
           ellipsis: true,
           width: '100px',
@@ -721,7 +721,7 @@ export default {
         },
 
         {
-          title: this.$t('pages.system.assets.docker.list.9c32c887'),
+          title: this.$t('i18n.3fea7ca76c'),
           dataIndex: 'status',
           ellipsis: true,
           align: 'center',
@@ -735,26 +735,26 @@ export default {
           ellipsis: true
         },
         {
-          title: this.$t('pages.system.assets.docker.list.12d0e469'),
+          title: this.$t('i18n.b37b786351'),
           dataIndex: 'groupName',
           ellipsis: true,
           width: '100px',
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.docker.list.17b26f41'),
+          title: this.$t('i18n.85fe5099f6'),
           dataIndex: 'swarmId',
           ellipsis: true
         },
         // { title: "apiVersion", dataIndex: "apiVersion", width: 100, ellipsis: true, },
         {
-          title: this.$t('pages.system.assets.docker.list.49942d36'),
+          title: this.$t('i18n.3bcc1c7a20'),
           dataIndex: 'modifyUser',
           width: 120,
           ellipsis: true
         },
         {
-          title: this.$t('pages.system.assets.docker.list.f5b90169'),
+          title: this.$t('i18n.eca37cb072'),
           dataIndex: 'createTimeMillis',
           ellipsis: true,
           sorter: true,
@@ -762,7 +762,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('pages.system.assets.docker.list.3d55d8de'),
+          title: this.$t('i18n.1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -770,7 +770,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('pages.system.assets.docker.list.3bb962bf'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
 
           fixed: 'right',
@@ -781,24 +781,24 @@ export default {
 
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
-        name: [{ required: true, message: this.$t('pages.system.assets.docker.list.98c4138b'), trigger: 'blur' }],
+        name: [{ required: true, message: this.$t('i18n.f63870fdb0'), trigger: 'blur' }],
         // host: [{ required: true, message: "请填写容器地址", trigger: "blur" }],
 
         managerId: [
           {
             required: true,
-            message: this.$t('pages.system.assets.docker.list.b0c35cac'),
+            message: this.$t('i18n.f97a4d2591'),
             trigger: 'blur'
           }
         ],
 
-        role: [{ required: true, message: this.$t('pages.system.assets.docker.list.f3c77563'), trigger: 'blur' }],
+        role: [{ required: true, message: this.$t('i18n.9d7d471b77'), trigger: 'blur' }],
         remoteAddr: [
-          { required: true, message: this.$t('pages.system.assets.docker.list.331c207a'), trigger: 'blur' },
+          { required: true, message: this.$t('i18n.5d07edd921'), trigger: 'blur' },
           {
             pattern:
               /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/,
-            message: this.$t('pages.system.assets.docker.list.cf0e57ee')
+            message: this.$t('i18n.a8754e3e90')
           }
         ]
       },
@@ -943,12 +943,12 @@ export default {
         const temp = Object.assign({}, this.temp)
         if (temp.enableSsh) {
           if (!temp.machineSshId) {
-            $message.warning(this.$t('pages.system.assets.docker.list.8c4bd72e'))
+            $message.warning(this.$t('i18n.e257dd2607'))
             return false
           }
         } else {
           if (!temp.host) {
-            $message.warning(this.$t('pages.system.assets.docker.list.b8b92e78'))
+            $message.warning(this.$t('i18n.90154854b6'))
             return false
           }
         }
@@ -973,11 +973,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$t('pages.system.assets.docker.list.d3367221'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.system.assets.docker.list.9b222154'),
-        okText: this.$t('pages.system.assets.docker.list.7da4a591'),
-        cancelText: this.$t('pages.system.assets.docker.list.43105e21'),
+        content: this.$t('i18n.3ae4ddf245'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return deleteDcoker({
             id: record.id
@@ -995,21 +995,21 @@ export default {
     // 强制解绑
     handleLeaveForce(record) {
       const html = `
-      <h1 style='color:red;'>${this.$t('pages.system.assets.docker.list.848a78c4')}</h1>
-      <h3 style='color:red;'>${this.$t('pages.system.assets.docker.list.732c87bc')}</h3>
+      <h1 style='color:red;'>${this.$t('i18n.b87c9acca3')}</h1>
+      <h3 style='color:red;'>${this.$t('i18n.c163613a0d')}</h3>
       <ul style='color:red;'>
-        <li>${this.$t('pages.system.assets.docker.list.3e4f81f9')}</li>
-        <li>${this.$t('pages.system.assets.docker.list.3e4f81f9')}</li>
-        <li style='font-weight: bold;'>${this.$t('pages.system.assets.docker.list.5d61d6da')}</li>
-        <li>${this.$t('pages.system.assets.docker.list.f698fdd9')}</li>
+        <li>${this.$t('i18n.eb969648aa')}</li>
+        <li>${this.$t('i18n.eb969648aa')}</li>
+        <li style='font-weight: bold;'>${this.$t('i18n.5a8727305e')}</li>
+        <li>${this.$t('i18n.04412d2a22')}</li>
       </ul>
       `
       $confirm({
-        title: this.$t('pages.system.assets.docker.list.d3367221'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
-        okText: this.$t('pages.system.assets.docker.list.7da4a591'),
-        cancelText: this.$t('pages.system.assets.docker.list.43105e21'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return dcokerSwarmLeaveForce({
             id: record.id
@@ -1127,13 +1127,13 @@ export default {
     handleSyncToWorkspace() {
       if (!this.temp.type) {
         $notification.warn({
-          message: this.$t('pages.system.assets.docker.list.a8707f4a')
+          message: this.$t('i18n.dabdc368f5')
         })
         return false
       }
       if (!this.temp.workspaceId) {
         $notification.warn({
-          message: this.$t('pages.system.assets.docker.list.3a321a02')
+          message: this.$t('i18n.b3bda9bf9e')
         })
         return false
       }

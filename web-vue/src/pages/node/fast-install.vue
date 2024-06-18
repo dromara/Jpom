@@ -2,44 +2,44 @@
   <div>
     <div v-if="fastInstallInfo">
       <a-collapse v-model:activeKey="fastInstallActiveKey">
-        <a-collapse-panel key="1" :header="$t('pages.node.fast-install.d5e02e8a')">
+        <a-collapse-panel key="1" :header="$t('i18n.947d983961')">
           <a-alert message="" type="warning" show-icon>
             <template #description>
               <ul>
                 <li>
-                  {{ $t('pages.node.fast-install.32fdd87c') }}<b>{{ $t('pages.node.fast-install.10b5da87') }}</b
-                  >,<b>{{ $t('pages.node.fast-install.c80b813d') }}</b
-                  >{{ $t('pages.node.fast-install.c390a968') }}
+                  {{ $t('i18n.e2be9bab6b') }}<b>{{ $t('i18n.0f59fe5338') }}</b
+                  >,<b>{{ $t('i18n.baafe06808') }}</b
+                  >{{ $t('i18n.c5c69827c5') }}
                 </li>
-                <li>{{ $t('pages.node.fast-install.72ca71a6') }}<b>2123</b></li>
+                <li>{{ $t('i18n.b4e2b132cf') }}<b>2123</b></li>
                 <li>
-                  {{ $t('pages.node.fast-install.39badef3') }}<b>{{ $t('pages.node.fast-install.d6480653') }}</b>
+                  {{ $t('i18n.e222f4b9ad') }}<b>{{ $t('i18n.57cadc4cf3') }}</b>
                 </li>
-                <li>{{ $t('pages.node.fast-install.3f82fca3') }}</li>
-                <li style="color: red">{{ $t('pages.node.fast-install.bea26ef8') }}</li>
+                <li>{{ $t('i18n.d19bae9fe0') }}</li>
+                <li style="color: red">{{ $t('i18n.282c8cda1f') }}</li>
                 <li>
-                  {{ $t('pages.node.fast-install.ba5049eb') }}<b>{{ $t('pages.node.fast-install.8716288a') }}</b
-                  >,{{ $t('pages.node.fast-install.4e2553dc') }}
-                </li>
-                <li>
-                  {{ $t('pages.node.fast-install.5056e934') }}<b>{{ $t('pages.node.fast-install.6703099') }}</b
-                  >,{{ $t('pages.node.fast-install.fa70b3c9') }}
+                  {{ $t('i18n.88c85a2506') }}<b>{{ $t('i18n.310c809904') }}</b
+                  >,{{ $t('i18n.f7596f3159') }}
                 </li>
                 <li>
-                  {{ $t('pages.node.fast-install.5b7c9ba') }}<b>networkName</b
+                  {{ $t('i18n.38da533413') }}<b>{{ $t('i18n.0bac3db71c') }}</b
+                  >,{{ $t('i18n.0e052223a4') }}
+                </li>
+                <li>
+                  {{ $t('i18n.a50fbc5a52') }}<b>networkName</b
                   >{{
-                    $t('pages.node.fast-install.32ef99d')
+                    $t('i18n.9971192b6a')
                   }}://192.168.31.175:2122/api/node/receive_push?token=xxx&workspaceId=xxx&networkName=en0
                 </li>
               </ul>
             </template>
           </a-alert>
         </a-collapse-panel>
-        <a-collapse-panel key="2" :header="$t('pages.node.fast-install.fa50cb40')">
+        <a-collapse-panel key="2" :header="$t('i18n.70b5b45591')">
           <a-tabs :default-active-key="0">
             <a-tab-pane v-for="(item, index) in fastInstallInfo.shUrls" :key="index" :tab="item.name">
               <div>
-                <a-alert type="info" :message="`${$t('pages.node.fast-install.f0d88095')}`">
+                <a-alert type="info" :message="`${$t('i18n.ccb91317c5')}`">
                   <template #description>
                     <a-typography-paragraph :copyable="{ tooltip: false, text: item.allText }">
                       <span>{{ item.allText }} </span>
@@ -50,10 +50,10 @@
             </a-tab-pane>
           </a-tabs>
         </a-collapse-panel>
-        <a-collapse-panel key="3" :header="$t('pages.node.fast-install.7e4f29f1')">
+        <a-collapse-panel key="3" :header="$t('i18n.dab864ab72')">
           <a-alert
             type="info"
-            :message="`${$t('pages.node.fast-install.f0d88095')}(${$t('pages.node.fast-install.bce891f2')})`"
+            :message="`${$t('i18n.ccb91317c5')}(${$t('i18n.a8920fbfad')})`"
           >
             <template #description>
               <a-typography-paragraph :copyable="{ tooltip: false, text: fastInstallInfo.bindCommand }">
@@ -62,14 +62,14 @@
             </template>
           </a-alert>
         </a-collapse-panel>
-        <a-collapse-panel key="4" :header="$t('pages.node.fast-install.89283f33')">
+        <a-collapse-panel key="4" :header="$t('i18n.adaf94c06b')">
           <div v-if="!pullFastInstallResultData || !pullFastInstallResultData.length">
-            {{ $t('pages.node.fast-install.b01ed3b7') }}
+            {{ $t('i18n.f4fb0cbecf') }}
           </div>
           <a-alert
             v-for="(item, index) in pullFastInstallResultData"
             :key="`${index}-${new Date().getTime()}`"
-            :message="`${$t('pages.node.fast-install.a3aba05c')} ${index + 1} ${$t(
+            :message="`${$t('i18n.ac00774608')} ${index + 1} ${$t(
               'pages.node.fast-install.d6f154c5'
             )}`"
             :type="`${item.type === 'success' ? 'success' : item.type === 'exists' ? 'error' : 'warning'}`"
@@ -79,23 +79,23 @@
             <template #description>
               <a-space direction="vertical" style="width: 100%">
                 <div v-if="item.type === 'canUseIpEmpty'">
-                  <a-tag color="orange">{{ $t('pages.node.fast-install.3d731c66') }}</a-tag>
+                  <a-tag color="orange">{{ $t('i18n.5d803afb8d') }}</a-tag>
                 </div>
                 <div v-if="item.type === 'multiIp'">
-                  <a-tag color="green">{{ $t('pages.node.fast-install.ece41c2a') }}</a-tag>
+                  <a-tag color="green">{{ $t('i18n.d9569a5d3b') }}</a-tag>
                 </div>
                 <div v-if="item.type === 'exists'">
-                  <a-tag color="orange">{{ $t('pages.node.fast-install.1d8067db') }}</a-tag>
+                  <a-tag color="orange">{{ $t('i18n.9bd451c4e9') }}</a-tag>
                 </div>
                 <div v-if="item.type === 'success'">
-                  <a-tag color="orange">{{ $t('pages.node.fast-install.9c1bff84') }}</a-tag>
+                  <a-tag color="orange">{{ $t('i18n.1974fe5349') }}</a-tag>
                 </div>
                 <div>
-                  {{ $t('pages.node.fast-install.2112ed0f')
+                  {{ $t('i18n.8cd628f495')
                   }}<a-tag v-for="(itemIp, indexIp) in item.allIp" :key="indexIp">{{ itemIp }}:{{ item.port }}</a-tag>
                 </div>
                 <div v-if="item.type === 'multiIp'">
-                  {{ $t('pages.node.fast-install.a38eb00c') }}({{ $t('pages.node.fast-install.a7e9d227') }}):
+                  {{ $t('i18n.78a4b837e3') }}({{ $t('i18n.c5de93f9c7') }}):
                   <a-tag
                     v-for="(itemIp, indexIp) in item.canUseIp"
                     :key="indexIp"
@@ -104,7 +104,7 @@
                   /></a-tag>
                 </div>
                 <div v-if="item.type === 'success' || item.type === 'exists'">
-                  {{ $t('pages.node.fast-install.f48a6e61') }}:
+                  {{ $t('i18n.69c743de70') }}:
                   <a-tag v-for="(itemIp, indexIp) in item.canUseIp" :key="indexIp">{{ itemIp }}:{{ item.port }}</a-tag>
                 </div>
               </a-space>

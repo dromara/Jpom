@@ -1,52 +1,46 @@
 <template>
   <div>
     <a-space direction="vertical" style="width: 100%">
-      <a-alert :message="$t('pages.dispatch.white-list.30376d6d')" type="info" show-icon>
+      <a-alert :message="$t('i18n.c8c6e37071')" type="info" show-icon>
         <template #description>
           <ul>
-            <li>{{ $t('pages.dispatch.white-list.82002fa4') }}</li>
-            <li>{{ $t('pages.dispatch.white-list.468a7b4d') }}</li>
+            <li>{{ $t('i18n.cf38e8f9fd') }}</li>
+            <li>{{ $t('i18n.a4f629041c') }}</li>
           </ul>
         </template>
       </a-alert>
       <!-- <a-alert message=",不支持软链" type="info" /> -->
 
       <a-form ref="editForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }" @finish="onSubmit">
-        <a-form-item :label="$t('pages.dispatch.white-list.87db3fab')" name="outGiving">
-          <template #help>{{ $t('pages.dispatch.white-list.ce6ec671') }}</template>
+        <a-form-item :label="$t('i18n.28e1eec677')" name="outGiving">
+          <template #help>{{ $t('i18n.5b1f0fd370') }}</template>
           <a-textarea
             v-model:value="temp.outGiving"
             :rows="5"
             style="resize: none"
-            :placeholder="$t('pages.dispatch.white-list.b3f9e000')"
+            :placeholder="$t('i18n.9b78491b25')"
           />
         </a-form-item>
-        <a-form-item :label="$t('pages.dispatch.white-list.b9e442da')" name="staticDir">
-          <template #help>{{ $t('pages.dispatch.white-list.e6655bef') }}</template>
+        <a-form-item :label="$t('i18n.6f7ee71e77')" name="staticDir">
+          <template #help>{{ $t('i18n.3f8cedd1d7') }}</template>
           <a-textarea
             v-model:value="temp.staticDir"
             :rows="5"
             style="resize: none"
-            :placeholder="$t('pages.dispatch.white-list.8190377f')"
+            :placeholder="$t('i18n.ec7ef29bdf')"
           />
         </a-form-item>
-        <a-form-item :label="$t('pages.dispatch.white-list.b850dd8a')" name="allowRemoteDownloadHost">
-          <template #help>{{ $t('pages.dispatch.white-list.cb53f096') }}</template>
+        <a-form-item :label="$t('i18n.95dbee0207')" name="allowRemoteDownloadHost">
+          <template #help>{{ $t('i18n.aadf9d7028') }}</template>
           <a-textarea
             v-model:value="temp.allowRemoteDownloadHost"
             :rows="5"
             style="resize: none"
-            :placeholder="
-              $t('pages.dispatch.white-list.99c74010', {
-                slot1: $t('pages.dispatch.white-list.a2b2c7e5')
-              })
-            "
+            :placeholder="$t('i18n.13323711cb', { slot1: $t('i18n.4142d4fd37') })"
           />
         </a-form-item>
         <a-form-item :wrapper-col="{ span: 14, offset: 6 }">
-          <a-button type="primary" html-type="submit" :disabled="submitAble">{{
-            $t('pages.dispatch.white-list.d8031ed8')
-          }}</a-button>
+          <a-button type="primary" html-type="submit" :disabled="submitAble">{{ $t('i18n.939d5345ad') }}</a-button>
         </a-form-item>
       </a-form>
     </a-space>

@@ -122,8 +122,8 @@ export function getTriggerUrl(data) {
 }
 
 export const triggerExecTypeMap = {
-  0: t('api.server-script.4139f3b5'),
-  1: t('api.server-script.dc8de4ff'),
-  2: t('api.server-script.44701ced'),
-  3: t('api.server-script.a1e86c58')
+  0: t('i18n.2a3e7f5c38'),
+  1: t('i18n.3aed2c11e9'),
+  2: t('i18n.4696724ed3'),
+  3: t('i18n.dba16b1b92')
 }

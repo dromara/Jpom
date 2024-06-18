@@ -5,9 +5,9 @@
       <a-button v-if="mode === 'normal'" type="dashed" class="workspace jpom-workspace btn-group-item">
         <div class="workspace-name">
           <a-tooltip
-            :title="`${$t('pages.layout.user-header.8d20cb3f')}${selectWorkspace.name} ${$t(
+            :title="`${$t('i18n.8f36f2ede7')}${selectWorkspace.name} ${$t(
               'pages.layout.user-header.12d0e469'
-            )}${selectWorkspace.group || $t('pages.layout.user-header.50acc5d6')}${$t(
+            )}${selectWorkspace.group || $t('i18n.71dc8feb59')}${$t(
               'pages.layout.user-header.26e6628f'
             )}`"
             placement="bottom"
@@ -34,7 +34,7 @@
       <a-button v-if="mode === 'management'" type="dashed">
         <div class="workspace-name">
           <a-tooltip
-            :title="`${$t('pages.layout.user-header.c2dfe194')}${selectCluster && selectCluster.name}`"
+            :title="`${$t('i18n.f668c8c881')}${selectCluster && selectCluster.name}`"
             placement="bottom"
           >
             <ClusterOutlined />
@@ -55,7 +55,7 @@
             <template v-if="mode === 'normal'">
               <a-sub-menu>
                 <template #title>
-                  <a-button type="link"><RetweetOutlined />{{ $t('pages.layout.user-header.4e2553dc') }}</a-button>
+                  <a-button type="link"><RetweetOutlined />{{ $t('i18n.ccb2fdd838') }}</a-button>
                 </template>
                 <template v-if="myWorkspaceList.length == 1">
                   <template v-for="(item, index) in myWorkspaceList[0].children">
@@ -66,9 +66,9 @@
                       @click="handleWorkspaceChange(item)"
                     >
                       <a-button type="link" :disabled="item.id === selectWorkspace.id">
-                        {{ item.name || $t('pages.layout.user-header.50acc5d6') }}
+                        {{ item.name || $t('i18n.71dc8feb59') }}
                         <template v-if="myClusterList.length > 1 && item.clusterInfoId">
-                          {{ $t('pages.layout.user-header.84fee7a4')
+                          {{ $t('i18n.0341329b1d')
                           }}{{
                             myClusterList.find((item2) => {
                               return item2.id === item.clusterInfoId
@@ -76,7 +76,7 @@
                             myClusterList.find((item2) => {
                               return item2.id === item.clusterInfoId
                             }).name
-                          }}{{ $t('pages.layout.user-header.26e6628f') }}
+                          }}{{ $t('i18n.5942e7ebd0') }}
                         </template>
                       </a-button>
                     </a-menu-item>
@@ -88,7 +88,7 @@
                     <a-sub-menu>
                       <template #title>
                         <a-button type="link">
-                          {{ item1.value || $t('pages.layout.user-header.50acc5d6') }}
+                          {{ item1.value || $t('i18n.71dc8feb59') }}
                         </a-button>
                       </template>
                       <template v-for="(item, index) in item1.children">
@@ -101,7 +101,7 @@
                           <a-button type="link" :disabled="item.id === selectWorkspace.id">
                             {{ item.name }}
                             <template v-if="myClusterList.length > 1 && item.clusterInfoId">
-                              {{ $t('pages.layout.user-header.84fee7a4')
+                              {{ $t('i18n.0341329b1d')
                               }}{{
                                 myClusterList.find((item2) => {
                                   return item2.id === item.clusterInfoId
@@ -109,7 +109,7 @@
                                 myClusterList.find((item2) => {
                                   return item2.id === item.clusterInfoId
                                 }).name
-                              }}{{ $t('pages.layout.user-header.26e6628f') }}
+                              }}{{ $t('i18n.5942e7ebd0') }}
                             </template>
                           </a-button>
                         </a-menu-item>
@@ -126,7 +126,7 @@
             <template v-if="mode === 'management'">
               <a-sub-menu>
                 <template #title>
-                  <a-button type="link"><RetweetOutlined />{{ $t('pages.layout.user-header.85538864') }}</a-button>
+                  <a-button type="link"><RetweetOutlined />{{ $t('i18n.d61b8fde35') }}</a-button>
                 </template>
                 <template v-for="(item, index) in myClusterList">
                   <a-menu-item
@@ -144,31 +144,31 @@
               </a-sub-menu>
             </template>
             <a-menu-item @click="handleUpdatePwd">
-              <a-button type="link"> <lock-outlined />{{ $t('pages.layout.user-header.3bab6668') }} </a-button>
+              <a-button type="link"> <lock-outlined />{{ $t('i18n.629a6ad325') }} </a-button>
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item @click="handleUpdateUser">
-              <a-button type="link"><profile-outlined /> {{ $t('pages.layout.user-header.fd8cec21') }} </a-button>
+              <a-button type="link"><profile-outlined /> {{ $t('i18n.d7cc44bc02') }} </a-button>
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item @click="handleUserlog">
-              <a-button type="link"><bars-outlined /> {{ $t('pages.layout.user-header.86d58c89') }} </a-button>
+              <a-button type="link"><bars-outlined /> {{ $t('i18n.cda84be2f6') }} </a-button>
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item @click="customize">
-              <a-button type="link"><skin-outlined /> {{ $t('pages.layout.user-header.dca6da91') }} </a-button>
+              <a-button type="link"><skin-outlined /> {{ $t('i18n.b4fd7afd31') }} </a-button>
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item @click="logOut">
-              <a-button type="link"> <logout-outlined />{{ $t('pages.layout.user-header.d2fe58b4') }} </a-button>
+              <a-button type="link"> <logout-outlined />{{ $t('i18n.44efd179aa') }} </a-button>
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item @click="logOutSwap">
-              <a-button type="link"> <SwapOutlined />{{ $t('pages.layout.user-header.1da0b754') }} </a-button>
+              <a-button type="link"> <SwapOutlined />{{ $t('i18n.86c1eb397d') }} </a-button>
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item @click="logOutAll">
-              <a-button type="link"><RestOutlined /> {{ $t('pages.layout.user-header.6892c9ac') }} </a-button>
+              <a-button type="link"><RestOutlined /> {{ $t('i18n.a795fa52cd') }} </a-button>
             </a-menu-item>
           </a-menu>
         </template>
@@ -181,12 +181,12 @@
       v-model:open="updateNameVisible"
       destroy-on-close
       :width="'60vw'"
-      :title="$t('pages.layout.user-header.3bab6668')"
+      :title="$t('i18n.629a6ad325')"
       :footer="null"
       :mask-closable="false"
     >
       <a-tabs v-model:active-key="temp.tabActiveKey" @change="tabChange">
-        <a-tab-pane :key="1" :tab="$t('pages.layout.user-header.cf2bc037')">
+        <a-tab-pane :key="1" :tab="$t('i18n.7fc88aeeda')">
           <a-spin tip="Loading..." :spinning="confirmLoading">
             <a-form
               ref="pwdForm"
@@ -196,23 +196,23 @@
               :wrapper-col="{ span: 14 }"
               @finish="handleUpdatePwdOk"
             >
-              <a-form-item :label="$t('pages.layout.user-header.1333b135')" name="oldPwd">
-                <a-input-password v-model:value="temp.oldPwd" :placeholder="$t('pages.layout.user-header.eda355b6')" />
+              <a-form-item :label="$t('i18n.01e94436d1')" name="oldPwd">
+                <a-input-password v-model:value="temp.oldPwd" :placeholder="$t('i18n.9c19a424dc')" />
               </a-form-item>
-              <a-form-item :label="$t('pages.layout.user-header.4cb8151c')" name="newPwd">
-                <a-input-password v-model:value="temp.newPwd" :placeholder="$t('pages.layout.user-header.4575df08')" />
+              <a-form-item :label="$t('i18n.bf7da0bf02')" name="newPwd">
+                <a-input-password v-model:value="temp.newPwd" :placeholder="$t('i18n.abdd7ea830')" />
               </a-form-item>
-              <a-form-item :label="$t('pages.layout.user-header.fd09d95a')" name="confirmPwd">
+              <a-form-item :label="$t('i18n.3fbdde139c')" name="confirmPwd">
                 <a-input-password
                   v-model:value="temp.confirmPwd"
-                  :placeholder="$t('pages.layout.user-header.b9c21ba3')"
+                  :placeholder="$t('i18n.a7a9a2156a')"
                 />
               </a-form-item>
               <a-form-item>
                 <a-row type="flex" justify="center">
                   <a-col :span="2">
                     <a-button type="primary" html-type="submit" :loading="confirmLoading">{{
-                      $t('pages.layout.user-header.59bc9c6e')
+                      $t('i18n.80cfc33cbe')
                     }}</a-button>
                   </a-col>
                 </a-row>
@@ -220,15 +220,15 @@
             </a-form>
           </a-spin>
         </a-tab-pane>
-        <a-tab-pane :key="2" :tab="$t('pages.layout.user-header.80647404')">
+        <a-tab-pane :key="2" :tab="$t('i18n.dbad1e89f7')">
           <a-row>
             <a-col :span="24">
               <a-alert v-if="temp.needVerify" type="warning">
-                <template #message> {{ $t('pages.layout.user-header.85ddc1a3') }} </template>
+                <template #message> {{ $t('i18n.02d9819dda') }} </template>
                 <template #description>
                   <ul style="color: red">
-                    <li>{{ $t('pages.layout.user-header.3aee366c') }}</li>
-                    <li>{{ $t('pages.layout.user-header.dc59d40') }}</li>
+                    <li>{{ $t('i18n.0ac9e3e675') }}</li>
+                    <li>{{ $t('i18n.8c24b5e19c') }}</li>
                   </ul>
                 </template>
               </a-alert>
@@ -242,16 +242,16 @@
                 :wrapper-col="{ span: 14 }"
                 @finish="handleBindMfa"
               >
-                <a-form-item :label="$t('pages.layout.user-header.8a8e4923')" name="status">
+                <a-form-item :label="$t('i18n.6bf1f392c0')" name="status">
                   <a-switch
                     v-model:checked="temp.status"
-                    :checked-children="$t('pages.layout.user-header.690faca2')"
+                    :checked-children="$t('i18n.4fb95949e5')"
                     disabled
-                    :un-checked-children="$t('pages.layout.user-header.327893d5')"
+                    :un-checked-children="$t('i18n.4f52df6e44')"
                   />
                 </a-form-item>
                 <template v-if="temp.needVerify">
-                  <a-form-item :label="$t('pages.layout.user-header.e3ff2149')">
+                  <a-form-item :label="$t('i18n.22b03c024d')">
                     <a-row>
                       <a-col :span="14">
                         <a-qrcode :value="temp.url" :status="temp.url ? 'active' : 'loading'" />
@@ -271,18 +271,18 @@
                   </a-form-item>
                 </template>
                 <!-- 不能使用  template 包裹 否则验证不能正常启用 -->
-                <a-form-item v-if="temp.needVerify" :label="$t('pages.layout.user-header.f8317f5c')" name="twoCode">
+                <a-form-item v-if="temp.needVerify" :label="$t('i18n.983f59c9d4')" name="twoCode">
                   <a-input
                     ref="twoCode"
                     v-model:value="temp.twoCode"
-                    :placeholder="$t('pages.layout.user-header.8a6e74c3')"
+                    :placeholder="$t('i18n.3f18d14961')"
                   />
                 </a-form-item>
                 <a-form-item v-if="temp.needVerify">
                   <a-row type="flex" justify="center">
                     <a-col :span="2">
                       <a-button type="primary" html-type="submit">{{
-                        $t('pages.layout.user-header.d1a3fb5f')
+                        $t('i18n.b7cfa07d78')
                       }}</a-button>
                     </a-col>
                   </a-row>
@@ -290,20 +290,20 @@
                 <!-- 不能使用  template 包裹 否则验证不能正常启用 -->
                 <a-form-item
                   v-if="!temp.needVerify && temp.status"
-                  :label="$t('pages.layout.user-header.f8317f5c')"
+                  :label="$t('i18n.983f59c9d4')"
                   name="twoCode"
                 >
                   <a-input
                     ref="twoCode"
                     v-model:value="temp.twoCode"
-                    :placeholder="$t('pages.layout.user-header.8a6e74c3')"
+                    :placeholder="$t('i18n.3f18d14961')"
                   />
                 </a-form-item>
                 <a-form-item v-if="!temp.needVerify && temp.status">
                   <a-row type="flex" justify="center">
                     <a-col :span="2">
                       <a-button type="primary" html-type="submit">{{
-                        $t('pages.layout.user-header.1a20a2e7')
+                        $t('i18n.e8e3bfbbfe')
                       }}</a-button>
                     </a-col>
                   </a-row>
@@ -313,7 +313,7 @@
                   <a-row type="flex" justify="center">
                     <a-col :span="2">
                       <a-button type="primary" @click="openMfaFn">{{
-                        $t('pages.layout.user-header.f0d95575')
+                        $t('i18n.1b8fff7308')
                       }}</a-button>
                     </a-col>
                   </a-row>
@@ -321,7 +321,7 @@
               </a-form>
             </a-col>
             <a-col :span="12">
-              <h3 :id="$t('pages.layout.user-header.d0d351d5')">{{ $t('pages.layout.user-header.d0d351d5') }}</h3>
+              <h3 :id="$t('i18n.ceffe5d643')">{{ $t('i18n.ceffe5d643') }}</h3>
               <p v-for="(html, index) in MFA_APP_TIP_ARRAY" :key="index" v-html="html" />
             </a-col>
           </a-row>
@@ -334,12 +334,12 @@
       v-model:open="updateUserVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$t('pages.layout.user-header.ef947269')"
+      :title="$t('i18n.ed367abd1a')"
       :mask-closable="false"
       @ok="handleUpdateUserOk"
     >
       <a-form ref="userForm" :rules="rules" :model="temp" :label-col="{ span: 8 }" :wrapper-col="{ span: 15 }">
-        <a-form-item :label="$t('pages.layout.user-header.135d4403')" name="token">
+        <a-form-item :label="$t('i18n.e0f937d57f')" name="token">
           <a-input v-model:value="temp.token" disabled placeholder="Token">
             <template #suffix>
               <a-typography-paragraph style="margin-bottom: 0" :copyable="{ tooltip: true, text: temp.token }">
@@ -347,7 +347,7 @@
             </template>
           </a-input>
         </a-form-item>
-        <a-form-item :label="$t('pages.layout.user-header.dd885a11')" name="md5Token">
+        <a-form-item :label="$t('i18n.e6bf31e8e6')" name="md5Token">
           <a-input v-model:value="temp.md5Token" disabled placeholder="Token">
             <template #suffix>
               <a-typography-paragraph style="margin-bottom: 0" :copyable="{ tooltip: true, text: temp.md5Token }">
@@ -355,29 +355,29 @@
             </template>
           </a-input>
         </a-form-item>
-        <a-form-item :label="$t('pages.layout.user-header.57c3af39')" name="name">
-          <a-input v-model:value="temp.name" :placeholder="$t('pages.layout.user-header.57c3af39')" />
+        <a-form-item :label="$t('i18n.23eb0e6024')" name="name">
+          <a-input v-model:value="temp.name" :placeholder="$t('i18n.23eb0e6024')" />
         </a-form-item>
-        <a-form-item :label="$t('pages.layout.user-header.55103071')" name="email">
-          <a-input v-model:value="temp.email" :placeholder="$t('pages.layout.user-header.55103071')" />
+        <a-form-item :label="$t('i18n.6ab78fa2c4')" name="email">
+          <a-input v-model:value="temp.email" :placeholder="$t('i18n.6ab78fa2c4')" />
         </a-form-item>
-        <a-form-item v-show="showCode" :label="$t('pages.layout.user-header.989c1e9a')" name="code">
+        <a-form-item v-show="showCode" :label="$t('i18n.e3cf0abd35')" name="code">
           <a-row :gutter="8">
             <a-col :span="15">
-              <a-input v-model:value="temp.code" :placeholder="$t('pages.layout.user-header.989c1e9a')" />
+              <a-input v-model:value="temp.code" :placeholder="$t('i18n.e3cf0abd35')" />
             </a-col>
             <a-col :span="4">
               <a-button type="primary" :disabled="!temp.email" @click="sendEmailCode">{{
-                $t('pages.layout.user-header.26b1dc93')
+                $t('i18n.c5c3583bfc')
               }}</a-button>
             </a-col>
           </a-row>
         </a-form-item>
-        <a-form-item :label="$t('pages.layout.user-header.dd43783d')" name="dingDing">
-          <a-input v-model:value="temp.dingDing" :placeholder="$t('pages.layout.user-header.dd43783d')" />
+        <a-form-item :label="$t('i18n.55e99f5106')" name="dingDing">
+          <a-input v-model:value="temp.dingDing" :placeholder="$t('i18n.55e99f5106')" />
         </a-form-item>
-        <a-form-item :label="$t('pages.layout.user-header.a3bfcd9e')" name="workWx">
-          <a-input v-model:value="temp.workWx" :placeholder="$t('pages.layout.user-header.a3bfcd9e')" />
+        <a-form-item :label="$t('i18n.2246d128cb')" name="workWx">
+          <a-input v-model:value="temp.workWx" :placeholder="$t('i18n.2246d128cb')" />
         </a-form-item>
       </a-form>
     </CustomModal>
@@ -386,7 +386,7 @@
       v-if="customizeVisible"
       v-model:open="customizeVisible"
       destroy-on-close
-      :title="$t('pages.layout.user-header.3d14e1fe')"
+      :title="$t('i18n.cb09b98416')"
       :footer="null"
       :mask-closable="false"
       width="50%"
@@ -394,7 +394,7 @@
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
         <a-alert banner>
           <template #message>
-            {{ $t('pages.layout.user-header.321ca5ab') }},{{ $t('pages.layout.user-header.681d0c4d') }}
+            {{ $t('i18n.bf93517805') }},{{ $t('i18n.52b526ab9e') }}
           </template>
         </a-alert>
         <!-- <a-form-item label="页面导航">
@@ -413,13 +413,13 @@
             </div>
           </a-space>
         </a-form-item> -->
-        <a-form-item :label="$t('pages.layout.user-header.a04d6e8d')">
-          <template #help>{{ $t('pages.layout.user-header.158342fd') }}</template>
+        <a-form-item :label="$t('i18n.156af3b3d1')">
+          <template #help>{{ $t('i18n.ecdf9093d0') }}</template>
 
           <a-switch
-            :checked-children="$t('pages.layout.user-header.f5bb2364')"
+            :checked-children="$t('i18n.0a60ac8f02')"
             :checked="menuMultipleFlag"
-            :un-checked-children="$t('pages.layout.user-header.5edb2e8a')"
+            :un-checked-children="$t('i18n.c9744f45e7')"
             @click="toggleMenuMultiple"
           />
         </a-form-item>
@@ -445,44 +445,44 @@
             />
           </a-space>
         </a-form-item> -->
-        <a-form-item :label="$t('pages.layout.user-header.a0f7ed4f')">
-          <template #help>{{ $t('pages.layout.user-header.378c8cf6') }}</template>
+        <a-form-item :label="$t('i18n.0113fc41fc')">
+          <template #help>{{ $t('i18n.b5fdd886b6') }}</template>
 
           <a-switch
-            :checked-children="$t('pages.layout.user-header.4fc84727')"
+            :checked-children="$t('i18n.185926bf98')"
             :checked="fullscreenViewLog"
-            :un-checked-children="$t('pages.layout.user-header.bcb85748')"
+            :un-checked-children="$t('i18n.c5a2c23d89')"
             @click="toggleFullscreenViewLog"
           />
         </a-form-item>
-        <a-form-item :label="$t('pages.layout.user-header.cf6a1e7a')">
+        <a-form-item :label="$t('i18n.5d9c139f38')">
           <a-radio-group v-model:value="themeView" button-style="solid">
             <a-radio-button v-for="item in getSupportThemes" :key="item.value" :value="item.value">
               {{ item.label }}
             </a-radio-button>
           </a-radio-group>
 
-          <template #help>{{ $t('pages.layout.user-header.ad301071') }}</template>
+          <template #help>{{ $t('i18n.2b4bb321d7') }}</template>
         </a-form-item>
-        <a-form-item :label="$t('pages.layout.user-header.e1e68c8b')">
+        <a-form-item :label="$t('i18n.593e04dfad')">
           <a-radio-group v-model:value="menuThemeView" button-style="solid">
-            <a-radio-button value="light">{{ $t('pages.layout.user-header.a9bad4a1') }}</a-radio-button>
-            <a-radio-button value="dark">{{ $t('pages.layout.user-header.67b903b1') }}</a-radio-button>
+            <a-radio-button value="light">{{ $t('i18n.48d0a09bdd') }}</a-radio-button>
+            <a-radio-button value="dark">{{ $t('i18n.41e8e8b993') }}</a-radio-button>
           </a-radio-group>
 
-          <template #help>{{ $t('pages.layout.user-header.1c0c4705') }}</template>
+          <template #help>{{ $t('i18n.fbfeb76b33') }}</template>
         </a-form-item>
 
-        <a-form-item :label="$t('pages.layout.user-header.15692164')">
+        <a-form-item :label="$t('i18n.4f50cd2a5e')">
           <a-switch
-            :checked-children="$t('pages.layout.user-header.e39a73de')"
+            :checked-children="$t('i18n.03e59bb33c')"
             :checked="compactView"
-            :un-checked-children="$t('pages.layout.user-header.96425f5')"
+            :un-checked-children="$t('i18n.43e534acf9')"
             @click="toggleCompactView"
           />
         </a-form-item>
-        <a-form-item :label="$t('pages.layout.user-header.ee091a03')">
-          <template #help>{{ $t('pages.layout.user-header.8263b5e7') }}</template>
+        <a-form-item :label="$t('i18n.295bb704f5')">
+          <template #help>{{ $t('i18n.9030cebe31') }}</template>
           <a-radio-group v-model:value="locale" button-style="solid">
             <a-radio-button v-for="item in supportLang" :key="item.value" :value="item.value">{{
               item.label
@@ -496,7 +496,7 @@
       v-if="bindMfaTip"
       v-model:open="bindMfaTip"
       destroy-on-close
-      :title="$t('pages.layout.user-header.49889c30')"
+      :title="$t('i18n.84777ebf8b')"
       :footer="null"
       :mask-closable="false"
       :closable="false"
@@ -504,13 +504,13 @@
     >
       <a-space direction="vertical">
         <a-alert
-          :message="$t('pages.layout.user-header.49889c30')"
-          :description="$t('pages.layout.user-header.e805efb')"
+          :message="$t('i18n.84777ebf8b')"
+          :description="$t('i18n.4af980516d')"
           type="error"
           :closable="false"
         />
         <a-row align="middle" type="flex" justify="center">
-          <a-button type="danger" @click="toBindMfa"> {{ $t('pages.layout.user-header.c8507450') }} </a-button>
+          <a-button type="danger" @click="toBindMfa"> {{ $t('i18n.97a19328a8') }} </a-button>
         </a-row>
       </a-space>
     </CustomModal>
@@ -520,7 +520,7 @@
       v-model:open="viewLogVisible"
       destroy-on-close
       :width="'90vw'"
-      :title="$t('pages.layout.user-header.86d58c89')"
+      :title="$t('i18n.cda84be2f6')"
       :footer="null"
       :mask-closable="false"
     >
@@ -580,35 +580,35 @@ export default {
       // 表单校验规则
       rules: {
         name: [
-          { required: true, message: this.$t('pages.layout.user-header.9b5a95d2'), trigger: 'blur' },
-          { max: 10, message: this.$t('pages.layout.user-header.dad8bc7b'), trigger: 'blur' },
-          { min: 2, message: this.$t('pages.layout.user-header.dad8bc7b'), trigger: 'blur' }
+          { required: true, message: this.$t('i18n.916ff9eddd'), trigger: 'blur' },
+          { max: 10, message: this.$t('i18n.6446b6c707'), trigger: 'blur' },
+          { min: 2, message: this.$t('i18n.6446b6c707'), trigger: 'blur' }
         ],
 
         oldPwd: [
-          { required: true, message: this.$t('pages.layout.user-header.eda355b6'), trigger: 'blur' },
-          { max: 20, message: this.$t('pages.layout.user-header.254a970b'), trigger: 'blur' },
-          { min: 6, message: this.$t('pages.layout.user-header.254a970b'), trigger: 'blur' }
+          { required: true, message: this.$t('i18n.9c19a424dc'), trigger: 'blur' },
+          { max: 20, message: this.$t('i18n.f4b7c18635'), trigger: 'blur' },
+          { min: 6, message: this.$t('i18n.f4b7c18635'), trigger: 'blur' }
         ],
 
         newPwd: [
-          { required: true, message: this.$t('pages.layout.user-header.4575df08'), trigger: 'blur' },
-          { max: 20, message: this.$t('pages.layout.user-header.254a970b'), trigger: 'blur' },
-          { min: 6, message: this.$t('pages.layout.user-header.254a970b'), trigger: 'blur' }
+          { required: true, message: this.$t('i18n.abdd7ea830'), trigger: 'blur' },
+          { max: 20, message: this.$t('i18n.f4b7c18635'), trigger: 'blur' },
+          { min: 6, message: this.$t('i18n.f4b7c18635'), trigger: 'blur' }
         ],
 
         confirmPwd: [
-          { required: true, message: this.$t('pages.layout.user-header.b9c21ba3'), trigger: 'blur' },
-          { max: 20, message: this.$t('pages.layout.user-header.254a970b'), trigger: 'blur' },
-          { min: 6, message: this.$t('pages.layout.user-header.254a970b'), trigger: 'blur' }
+          { required: true, message: this.$t('i18n.a7a9a2156a'), trigger: 'blur' },
+          { max: 20, message: this.$t('i18n.f4b7c18635'), trigger: 'blur' },
+          { min: 6, message: this.$t('i18n.f4b7c18635'), trigger: 'blur' }
         ],
 
         email: [
           // { required: true, message: "请输入邮箱", trigger: "blur" }
         ],
         twoCode: [
-          { required: true, message: this.$t('pages.layout.user-header.e794e5fe'), trigger: ['change', 'blur'] },
-          { pattern: /^\d{6}$/, message: this.$t('pages.layout.user-header.cf89eb17'), trigger: ['change', 'blur'] }
+          { required: true, message: this.$t('i18n.7e866fece6'), trigger: ['change', 'blur'] },
+          { pattern: /^\d{6}$/, message: this.$t('i18n.da1abf0865'), trigger: ['change', 'blur'] }
         ]
       },
       MFA_APP_TIP_ARRAY,
@@ -753,11 +753,11 @@ export default {
         .then((flag) => {
           if (flag) {
             $notification.success({
-              message: this.$t('pages.layout.user-header.e805511')
+              message: this.$t('i18n.fe231ff92f')
             })
           } else {
             $notification.success({
-              message: this.$t('pages.layout.user-header.8e6ecbdf')
+              message: this.$t('i18n.c75d0beca8')
             })
           }
         })
@@ -769,11 +769,11 @@ export default {
         .then((flag) => {
           if (flag) {
             $notification.success({
-              message: this.$t('pages.layout.user-header.8ef644a1')
+              message: this.$t('i18n.63c9d63eeb')
             })
           } else {
             $notification.success({
-              message: this.$t('pages.layout.user-header.38360e9e')
+              message: this.$t('i18n.1498557b2d')
             })
           }
         })
@@ -785,11 +785,11 @@ export default {
         .then((flag) => {
           if (flag) {
             $notification.success({
-              message: this.$t('pages.layout.user-header.cf4f7e81')
+              message: this.$t('i18n.ef28d3bff2')
             })
           } else {
             $notification.success({
-              message: this.$t('pages.layout.user-header.1f597ac0')
+              message: this.$t('i18n.ba6ea3d480')
             })
           }
         })
@@ -801,11 +801,11 @@ export default {
         .then((flag) => {
           if (flag) {
             $notification.success({
-              message: this.$t('pages.layout.user-header.c688eb3d')
+              message: this.$t('i18n.af51211a73')
             })
           } else {
             $notification.success({
-              message: this.$t('pages.layout.user-header.d0b833a')
+              message: this.$t('i18n.1afdb4a364')
             })
           }
         })
@@ -817,11 +817,11 @@ export default {
         .then((fullscreenViewLog) => {
           if (fullscreenViewLog) {
             $notification.success({
-              message: this.$t('pages.layout.user-header.401a5b70')
+              message: this.$t('i18n.82b89bd049')
             })
           } else {
             $notification.success({
-              message: this.$t('pages.layout.user-header.17b81d98')
+              message: this.$t('i18n.57978c11d1')
             })
           }
         })
@@ -832,11 +832,11 @@ export default {
         .then((compact) => {
           if (compact) {
             $notification.success({
-              message: this.$t('pages.layout.user-header.60dcf8ca')
+              message: this.$t('i18n.6e60d2fc75')
             })
           } else {
             $notification.success({
-              message: this.$t('pages.layout.user-header.c08b9c0c')
+              message: this.$t('i18n.702430b89d')
             })
           }
         })
@@ -846,24 +846,24 @@ export default {
         .restGuide()
         .then(() => {
           $notification.success({
-            message: this.$t('pages.layout.user-header.3ea6d68c')
+            message: this.$t('i18n.dddf944f5f')
           })
         })
     },
     // 彻底退出登录
     logOutAll() {
       $confirm({
-        title: this.$t('pages.layout.user-header.a8fe4c17'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.layout.user-header.f63ebe16'),
-        okText: this.$t('pages.layout.user-header.7da4a591'),
-        cancelText: this.$t('pages.layout.user-header.43105e21'),
+        content: this.$t('i18n.8e38d55231'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return useUserStore()
             .logOut()
             .then(() => {
               $notification.success({
-                message: this.$t('pages.layout.user-header.ba1c6d1f')
+                message: this.$t('i18n.499f058a0b')
               })
               localStorage.clear()
               this.$router.replace({
@@ -877,17 +877,17 @@ export default {
     // 切换账号登录
     logOutSwap() {
       $confirm({
-        title: this.$t('pages.layout.user-header.a8fe4c17'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.layout.user-header.ed166c40'),
-        okText: this.$t('pages.layout.user-header.7da4a591'),
-        cancelText: this.$t('pages.layout.user-header.43105e21'),
+        content: this.$t('i18n.ac783bca36'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return useUserStore()
             .logOut()
             .then(() => {
               $notification.success({
-                message: this.$t('pages.layout.user-header.ba1c6d1f')
+                message: this.$t('i18n.499f058a0b')
               })
               useAppStore().changeWorkspace('')
               this.$router.replace({
@@ -901,17 +901,17 @@ export default {
     // 退出登录
     logOut() {
       $confirm({
-        title: this.$t('pages.layout.user-header.a8fe4c17'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.layout.user-header.9f940811'),
-        okText: this.$t('pages.layout.user-header.7da4a591'),
-        cancelText: this.$t('pages.layout.user-header.43105e21'),
+        content: this.$t('i18n.70b9a2c450'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return useUserStore()
             .logOut()
             .then(() => {
               $notification.success({
-                message: this.$t('pages.layout.user-header.ba1c6d1f')
+                message: this.$t('i18n.499f058a0b')
               })
               const query = Object.assign({}, this.$route.query)
               this.$router.replace({
@@ -932,7 +932,7 @@ export default {
       // 判断两次新密码是否一致
       if (this.temp.newPwd !== this.temp.confirmPwd) {
         $notification.error({
-          message: this.$t('pages.layout.user-header.12d0b15b')
+          message: this.$t('i18n.6f15f0beea')
         })
         return
       }
@@ -979,7 +979,7 @@ export default {
     sendEmailCode() {
       if (!this.temp.email) {
         $notification.error({
-          message: this.$t('pages.layout.user-header.4fc329c6')
+          message: this.$t('i18n.2ba4c81587')
         })
         return
       }
@@ -1049,7 +1049,7 @@ export default {
         location.href = url
       } else {
         $notification.error({
-          message: this.$t('pages.layout.user-header.b29d1268')
+          message: this.$t('i18n.db2d99ed33')
         })
       }
     },
@@ -1088,7 +1088,7 @@ export default {
 
           $notification.info({
             // placement: "",
-            message: this.$t('pages.layout.user-header.ee23f800')
+            message: this.$t('i18n.d1b8eaaa9e')
           })
         }
       })
@@ -1109,11 +1109,11 @@ export default {
         })
       } else {
         $confirm({
-          title: this.$t('pages.layout.user-header.a8fe4c17'),
+          title: this.$t('i18n.c4535759ee'),
           zIndex: 1009,
-          content: this.$t('pages.layout.user-header.b34c9126'),
-          okText: this.$t('pages.layout.user-header.7da4a591'),
-          cancelText: this.$t('pages.layout.user-header.43105e21'),
+          content: this.$t('i18n.2b21998b7b'),
+          okText: this.$t('i18n.e83a256e4f'),
+          cancelText: this.$t('i18n.625fb26b4b'),
           onOk: () => {
             return closeMfa({
               code: this.temp.twoCode

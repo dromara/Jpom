@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="systemUserOperationLog"
-      :empty-description="$t('pages.user.operation-log.ced5c864')"
+      :empty-description="$t('i18n.c31ea1e3c4')"
       :data-source="list"
       :columns="columns"
       :pagination="pagination"
@@ -35,7 +35,7 @@
               }
             "
             allow-clear
-            :placeholder="$t('pages.user.operation-log.30f0d93')"
+            :placeholder="$t('i18n.512e1a7722')"
             class="search-input-item"
           >
             <a-select-option v-for="item in userList" :key="item.id">{{ item.name }}</a-select-option>
@@ -54,7 +54,7 @@
               }
             "
             allow-clear
-            :placeholder="$t('pages.user.operation-log.580e6c10')"
+            :placeholder="$t('i18n.f8a613d247')"
             class="search-input-item"
           >
             <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
@@ -73,7 +73,7 @@
               }
             "
             allow-clear
-            :placeholder="$t('pages.user.operation-log.cb132686')"
+            :placeholder="$t('i18n.8432a98819')"
             class="search-input-item"
           >
             <a-select-option v-for="item in classFeature" :key="item.value">{{ item.title }}</a-select-option>
@@ -92,15 +92,15 @@
               }
             "
             allow-clear
-            :placeholder="$t('pages.user.operation-log.19dfb1ba')"
+            :placeholder="$t('i18n.a9de52acb0')"
             class="search-input-item"
           >
             <a-select-option v-for="item in methodFeature" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
           <a-range-picker :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
-          <a-tooltip :title="$t('pages.user.operation-log.cb5a8131')">
+          <a-tooltip :title="$t('i18n.4838a3bd20')">
             <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('pages.user.operation-log.53c2763c')
+              $t('i18n.e5f71fc31e')
             }}</a-button>
           </a-tooltip>
         </a-space>
@@ -136,7 +136,7 @@
         <template v-else-if="column.dataIndex === 'optStatus'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$t('pages.user.operation-log.f8c26fc9')},${$t('pages.user.operation-log.33046d7b')},${$t(
+            :title="`${$t('i18n.be4b9241ec')},${$t('i18n.69056f4792')},${$t(
               'pages.user.operation-log.abc9fa2f'
             )}`"
           >
@@ -146,7 +146,7 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-button size="small" type="primary" @click="handleDetail(record)">{{
-            $t('pages.user.operation-log.151c73eb')
+            $t('i18n.f26225bde6')
           }}</a-button>
         </template>
       </template>
@@ -158,7 +158,7 @@
       detail-visible
       destroy-on-close
       width="600px"
-      :title="$t('pages.user.operation-log.7990de3b')"
+      :title="$t('i18n.3032257aa3')"
       :footer="null"
     >
       <a-list item-layout="horizontal" :data-source="detailData">
@@ -205,31 +205,31 @@ export default {
       detailData: [],
       columns: [
         {
-          title: this.$t('pages.user.operation-log.8384e057'),
+          title: this.$t('i18n.30acd20d6e'),
           dataIndex: 'userId',
           ellipsis: true
         },
         {
-          title: this.$t('pages.user.operation-log.7d2228ed'),
+          title: this.$t('i18n.9a56bb830e'),
           dataIndex: 'username',
           ellipsis: true
         },
         { title: 'IP', dataIndex: 'ip' /*width: 130*/ },
         {
-          title: this.$t('pages.user.operation-log.602a0a5e'),
+          title: this.$t('i18n.3bf3c0a8d6'),
           dataIndex: 'nodeId',
           width: 120,
           ellipsis: true
         },
         {
-          title: this.$t('pages.user.operation-log.cd2442c1'),
+          title: this.$t('i18n.5a1419b7a2'),
           dataIndex: 'dataName',
           /*width: 240,*/
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.user.operation-log.8d20cb3f'),
+          title: this.$t('i18n.4524ed750d'),
           dataIndex: 'workspaceName',
           /*width: 240,*/
           ellipsis: true,
@@ -237,24 +237,24 @@ export default {
         },
         // { title: "数据 ID", dataIndex: "dataId", /*width: 240,*/ ellipsis: true, },
         {
-          title: this.$t('pages.user.operation-log.cb132686'),
+          title: this.$t('i18n.8432a98819'),
           dataIndex: 'classFeature',
           /*width: 240,*/
           ellipsis: true
         },
         {
-          title: this.$t('pages.user.operation-log.19dfb1ba'),
+          title: this.$t('i18n.a9de52acb0'),
           dataIndex: 'methodFeature',
           /*width: 240,*/
           ellipsis: true
         },
         {
-          title: this.$t('pages.user.operation-log.2cdc5dc2'),
+          title: this.$t('i18n.771d897d9a'),
           dataIndex: 'optStatus',
           width: 90
         },
         {
-          title: this.$t('pages.user.operation-log.45e88a2c'),
+          title: this.$t('i18n.7e951d56d9'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text, record }) => {
@@ -263,7 +263,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('pages.user.operation-log.a0fe2109'),
+          title: this.$t('i18n.2b6bc0f293'),
           align: 'center',
           dataIndex: 'operation',
           fixed: 'right',
@@ -353,18 +353,18 @@ export default {
       } catch (e) {
         console.error(e)
       }
-      this.detailData.push({ title: this.$t('pages.user.operation-log.a7ebd858'), description: this.temp.dataId })
+      this.detailData.push({ title: this.$t('i18n.37189681ad'), description: this.temp.dataId })
       this.detailData.push({
-        title: this.$t('pages.user.operation-log.4ade0404'),
+        title: this.$t('i18n.d72471c540'),
         description: this.temp.userAgent
       })
       this.detailData.push({
-        title: this.$t('pages.user.operation-log.8749e9ed'),
+        title: this.$t('i18n.527466ff94'),
         json: true,
         value: this.temp.reqData
       })
       this.detailData.push({
-        title: this.$t('pages.user.operation-log.9585489'),
+        title: this.$t('i18n.15d5fffa6a'),
         json: true,
         value: this.temp.resultMsg
       })

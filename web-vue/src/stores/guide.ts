@@ -173,15 +173,15 @@ export const useGuideStore = defineStore('guide', {
     getSupportThemes: () => {
       return [
         {
-          label: t('stores.guide.78aea169'),
+          label: t('i18n.71bbc726ac'),
           value: 'auto'
         },
         {
-          label: t('stores.guide.1ba0e8eb'),
+          label: t('i18n.48d0a09bdd'),
           value: 'light'
         },
         {
-          label: t('stores.guide.1e29d47d'),
+          label: t('i18n.41e8e8b993'),
           value: 'dark'
         }
       ]

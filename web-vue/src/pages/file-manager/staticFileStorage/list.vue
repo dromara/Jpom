@@ -24,31 +24,31 @@
           <a-space>
             <a-input
               v-model:value="listQuery['%name%']"
-              :placeholder="$t('pages.file-manager.staticFileStorage.list.a6eb2ded')"
+              :placeholder="$t('i18n.d2e2560089')"
               class="search-input-item"
               @press-enter="loadData"
             />
 
             <a-input
               v-model:value="listQuery['extName']"
-              :placeholder="$t('pages.file-manager.staticFileStorage.list.4fd0f685')"
+              :placeholder="$t('i18n.ae809e0295')"
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['id']"
-              :placeholder="$t('pages.file-manager.staticFileStorage.list.8200285')"
+              :placeholder="$t('i18n.2168394b82')"
               class="search-input-item"
               @press-enter="loadData"
             />
-            <a-tooltip :title="$t('pages.file-manager.staticFileStorage.list.cb5a8131')">
+            <a-tooltip :title="$t('i18n.4838a3bd20')">
               <a-button type="primary" :loading="loading" @click="loadData">{{
-                $t('pages.file-manager.staticFileStorage.list.53c2763c')
+                $t('i18n.e5f71fc31e')
               }}</a-button>
             </a-tooltip>
             <!-- <a-button type="primary" @click="handleUpload">上传文件</a-button> -->
             <a-button type="primary" @click="reScanner">{{
-              $t('pages.file-manager.staticFileStorage.list.21e651b5')
+              $t('i18n.56525d62ac')
             }}</a-button>
 
             <a-button
@@ -57,7 +57,7 @@
               :disabled="!tableSelections || tableSelections.length <= 0"
               @click="handleBatchDelete"
             >
-              {{ $t('pages.file-manager.staticFileStorage.list.b5139d46') }}
+              {{ $t('i18n.7fb62b3011') }}
             </a-button>
             <a-button
               size="small"
@@ -68,7 +68,7 @@
                 }
               "
             >
-              <InfoCircleOutlined /> {{ $t('pages.file-manager.staticFileStorage.list.1ab4dc38') }}
+              <InfoCircleOutlined /> {{ $t('i18n.1e5533c401') }}
             </a-button>
           </a-space>
         </template>
@@ -85,11 +85,11 @@
             </a-tooltip>
           </template>
           <template v-else-if="column.dataIndex === 'name'">
-            <a-popover :title="$t('pages.file-manager.staticFileStorage.list.334162bc')">
+            <a-popover :title="$t('i18n.73485331c2')">
               <template #content>
-                <p>{{ $t('pages.file-manager.staticFileStorage.list.48f7e53e') }}{{ record.id }}</p>
-                <p>{{ $t('pages.file-manager.staticFileStorage.list.10902f4f') }}{{ text }}</p>
-                <p>{{ $t('pages.file-manager.staticFileStorage.list.fa56a3f7') }}{{ record.description }}</p>
+                <p>{{ $t('i18n.f37f8407ec') }}{{ record.id }}</p>
+                <p>{{ $t('i18n.b9c52d9a85') }}{{ text }}</p>
+                <p>{{ $t('i18n.46a04cdc9c') }}{{ record.description }}</p>
               </template>
               <!-- {{ text }} -->
               <a-button type="link" style="padding: 0" size="small" @click="handleEdit(record)">{{ text }}</a-button>
@@ -104,22 +104,22 @@
           <template v-else-if="column.dataIndex === 'source'">
             <a-tooltip
               placement="topLeft"
-              :title="`${sourceMap[text] || $t('pages.file-manager.staticFileStorage.list.da636096')}`"
+              :title="`${sourceMap[text] || $t('i18n.1622dc9b6b')}`"
             >
-              <span>{{ sourceMap[text] || $t('pages.file-manager.staticFileStorage.list.da636096') }}</span>
+              <span>{{ sourceMap[text] || $t('i18n.1622dc9b6b') }}</span>
             </a-tooltip>
           </template>
 
           <template v-else-if="column.dataIndex === 'status'">
             <a-tag v-if="text === 1" color="green">{{
-              $t('pages.file-manager.staticFileStorage.list.a78774e2')
+              $t('i18n.df9497ea98')
             }}</a-tag>
-            <a-tag v-else color="red">{{ $t('pages.file-manager.staticFileStorage.list.979a03b8') }}</a-tag>
+            <a-tag v-else color="red">{{ $t('i18n.162e219f6d') }}</a-tag>
           </template>
 
           <template v-else-if="column.dataIndex === 'type'">
-            <a-tag v-if="text === 1">{{ $t('pages.file-manager.staticFileStorage.list.69cad40b') }}</a-tag>
-            <a-tag v-else>{{ $t('pages.file-manager.staticFileStorage.list.b90a456') }}</a-tag>
+            <a-tag v-if="text === 1">{{ $t('i18n.2a0c4740f1') }}</a-tag>
+            <a-tag v-else>{{ $t('i18n.1f4c1042ed') }}</a-tag>
           </template>
 
           <template v-else-if="column.dataIndex === 'operation'">
@@ -131,17 +131,17 @@
                 type="primary"
                 @click="handleDownloadUrl(record)"
               >
-                {{ $t('pages.file-manager.staticFileStorage.list.42c8e9c6') }}</a-button
+                {{ $t('i18n.f26ef91424') }}</a-button
               >
               <a-button
                 size="small"
                 :disabled="!(record.status === 1 && record.type === 1)"
                 type="primary"
                 @click="handleReleaseFile(record)"
-                >{{ $t('pages.file-manager.staticFileStorage.list.dfaeb420') }}</a-button
+                >{{ $t('i18n.83611abd5f') }}</a-button
               >
               <a-button type="primary" danger size="small" @click="handleDelete(record)">{{
-                $t('pages.file-manager.staticFileStorage.list.d7cfa4c5')
+                $t('i18n.2f4aaddde3')
               }}</a-button>
             </a-space>
           </template>
@@ -153,24 +153,24 @@
         v-if="editVisible"
         v-model:open="editVisible"
         destroy-on-close
-        :title="`${$t('pages.file-manager.staticFileStorage.list.41bfad43')}`"
+        :title="`${$t('i18n.5c3b53e66c')}`"
         :confirm-loading="confirmLoading"
         :mask-closable="false"
         @ok="handleEditOk"
       >
         <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-          <a-form-item :label="$t('pages.file-manager.staticFileStorage.list.6a721706')" name="name">
+          <a-form-item :label="$t('i18n.29139c2a1a')" name="name">
             <a-input
               v-model:value="temp.name"
-              :placeholder="$t('pages.file-manager.staticFileStorage.list.6a721706')"
+              :placeholder="$t('i18n.29139c2a1a')"
               :disabled="true"
             />
           </a-form-item>
 
-          <a-form-item :label="$t('pages.file-manager.staticFileStorage.list.7cee55c0')" name="description">
+          <a-form-item :label="$t('i18n.8d6f38b4b1')" name="description">
             <a-textarea
               v-model:value="temp.description"
-              :placeholder="$t('pages.file-manager.staticFileStorage.list.3d17ed2c')"
+              :placeholder="$t('i18n.411672c954')"
             />
           </a-form-item>
         </a-form>
@@ -181,7 +181,7 @@
         v-if="triggerVisible"
         v-model:open="triggerVisible"
         destroy-on-close
-        :title="$t('pages.file-manager.staticFileStorage.list.b1634db3')"
+        :title="$t('i18n.e7e8d4c1fb')"
         width="50%"
         :footer="null"
         :mask-closable="false"
@@ -189,17 +189,17 @@
         <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
           <a-tabs default-active-key="1">
             <template #rightExtra>
-              <a-tooltip :title="$t('pages.file-manager.staticFileStorage.list.27e4eccc')">
+              <a-tooltip :title="$t('i18n.84415a6bb1')">
                 <a-button type="primary" size="small" @click="resetTrigger">{{
-                  $t('pages.file-manager.staticFileStorage.list.da1d2343')
+                  $t('i18n.4b9c3271dc')
                 }}</a-button>
               </a-tooltip>
             </template>
-            <a-tab-pane key="1" :tab="$t('pages.file-manager.staticFileStorage.list.f0649f07')">
+            <a-tab-pane key="1" :tab="$t('i18n.0b58866c3e')">
               <a-space direction="vertical" style="width: 100%">
                 <a-alert
                   type="info"
-                  :message="`${$t('pages.file-manager.staticFileStorage.list.f0c647b3')}(${$t(
+                  :message="`${$t('i18n.d911cffcd5')}(${$t(
                     'pages.file-manager.staticFileStorage.list.4c8d1a3b'
                   )})`"
                 >
@@ -212,32 +212,32 @@
                 </a-alert>
                 <a :href="temp.triggerDownloadUrl" target="_blank">
                   <a-button size="small" type="primary"
-                    ><DownloadOutlined />{{ $t('pages.file-manager.staticFileStorage.list.2fadc8ac') }}</a-button
+                    ><DownloadOutlined />{{ $t('i18n.2a813bc3eb') }}</a-button
                   >
                 </a>
               </a-space>
             </a-tab-pane>
             <a-tab-pane
               v-if="temp.triggerAliasDownloadUrl"
-              :tab="$t('pages.file-manager.staticFileStorage.list.81630ff')"
+              :tab="$t('i18n.d61af4e686')"
             >
               <a-space direction="vertical" style="width: 100%">
-                <a-alert :message="$t('pages.file-manager.staticFileStorage.list.46d9b29')" type="warning">
+                <a-alert :message="$t('i18n.947d983961')" type="warning">
                   <template #description>
                     <ul>
                       <li>
-                        {{ $t('pages.file-manager.staticFileStorage.list.9568db65') }}=createTimeMillis:desc
+                        {{ $t('i18n.ac762710a5') }}=createTimeMillis:desc
 
-                        <p>{{ $t('pages.file-manager.staticFileStorage.list.8c75e50e') }}</p>
+                        <p>{{ $t('i18n.35fbad84cb') }}</p>
                       </li>
-                      <li>{{ $t('pages.file-manager.staticFileStorage.list.ce130623') }}</li>
-                      <li>{{ $t('pages.file-manager.staticFileStorage.list.7d507a40') }}</li>
+                      <li>{{ $t('i18n.c83752739f') }}</li>
+                      <li>{{ $t('i18n.4055a1ee9c') }}</li>
                     </ul>
                   </template>
                 </a-alert>
                 <a-alert
                   type="info"
-                  :message="`${$t('pages.file-manager.staticFileStorage.list.f0c647b3')}(${$t(
+                  :message="`${$t('i18n.d911cffcd5')}(${$t(
                     'pages.file-manager.staticFileStorage.list.4c8d1a3b'
                   )})`"
                 >
@@ -250,7 +250,7 @@
                 </a-alert>
                 <a :href="temp.triggerAliasDownloadUrl" target="_blank">
                   <a-button size="small" type="primary"
-                    ><DownloadOutlined />{{ $t('pages.file-manager.staticFileStorage.list.2fadc8ac') }}</a-button
+                    ><DownloadOutlined />{{ $t('i18n.2a813bc3eb') }}</a-button
                   >
                 </a>
               </a-space>
@@ -263,7 +263,7 @@
         v-if="releaseFileVisible"
         v-model:open="releaseFileVisible"
         destroy-on-close
-        :title="$t('pages.file-manager.staticFileStorage.list.68203efe')"
+        :title="$t('i18n.7e930b95ef')"
         width="70%"
         :mask-closable="false"
         :confirm-loading="confirmLoading"
@@ -278,7 +278,7 @@
       v-if="configDir"
       v-model:open="configDir"
       destroy-on-close
-      :title="`${$t('pages.file-manager.staticFileStorage.list.4457e1f9')}`"
+      :title="`${$t('i18n.eee6510292')}`"
       :footer="null"
       width="50vw"
       :mask-closable="false"
@@ -336,27 +336,27 @@ export default {
       list: [],
       columns: [
         {
-          title: this.$t('pages.file-manager.staticFileStorage.list.bb769c1d'),
+          title: this.$t('i18n.d7ec2d3fea'),
           dataIndex: 'name',
           ellipsis: true,
           width: 150
         },
         {
-          title: this.$t('pages.file-manager.staticFileStorage.list.eee04e4f'),
+          title: this.$t('i18n.3bdd08adab'),
           dataIndex: 'description',
           ellipsis: true,
           width: 150,
           tooltip: true
         },
         {
-          title: this.$t('pages.file-manager.staticFileStorage.list.ee016914'),
+          title: this.$t('i18n.4f35e80da6'),
           dataIndex: 'absolutePath',
           ellipsis: true,
           width: 150,
           tooltip: true
         },
         {
-          title: this.$t('pages.file-manager.staticFileStorage.list.1295c671'),
+          title: this.$t('i18n.58f9666705'),
           dataIndex: 'size',
           sorter: true,
           ellipsis: true,
@@ -364,7 +364,7 @@ export default {
           width: '100px'
         },
         {
-          title: this.$t('pages.file-manager.staticFileStorage.list.52822a45'),
+          title: this.$t('i18n.242d641eab'),
           dataIndex: 'extName',
           ellipsis: true,
 
@@ -372,14 +372,14 @@ export default {
           width: '80px'
         },
         {
-          title: this.$t('pages.file-manager.staticFileStorage.list.698bb532'),
+          title: this.$t('i18n.226b091218'),
           dataIndex: 'type',
           ellipsis: true,
 
           width: '80px'
         },
         {
-          title: this.$t('pages.file-manager.staticFileStorage.list.34e8b7bd'),
+          title: this.$t('i18n.a3d0154996'),
           dataIndex: 'status',
           ellipsis: true,
 
@@ -387,7 +387,7 @@ export default {
         },
 
         {
-          title: this.$t('pages.file-manager.staticFileStorage.list.c15532f1'),
+          title: this.$t('i18n.e06caa0060'),
           dataIndex: 'lastModified',
           sorter: true,
           customRender: ({ text }) => parseTime(text),
@@ -395,7 +395,7 @@ export default {
         },
 
         {
-          title: this.$t('pages.file-manager.staticFileStorage.list.3bb962bf'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
           align: 'center',
           ellipsis: true,
@@ -407,11 +407,11 @@ export default {
 
       rules: {
         name: [
-          { required: true, message: this.$t('pages.file-manager.staticFileStorage.list.20c02197'), trigger: 'blur' }
+          { required: true, message: this.$t('i18n.7aa81d1573'), trigger: 'blur' }
         ],
 
         url: [
-          { required: true, message: this.$t('pages.file-manager.staticFileStorage.list.cc2bc679'), trigger: 'blur' }
+          { required: true, message: this.$t('i18n.f4dd45fca9'), trigger: 'blur' }
         ]
       },
 
@@ -500,11 +500,11 @@ export default {
     // 删除文件
     handleDelete(record) {
       $confirm({
-        title: this.$t('pages.file-manager.staticFileStorage.list.a8fe4c17'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.file-manager.staticFileStorage.list.639bed63') + record.name,
-        okText: this.$t('pages.file-manager.staticFileStorage.list.7da4a591'),
-        cancelText: this.$t('pages.file-manager.staticFileStorage.list.43105e21'),
+        content: this.$t('i18n.3787283bf4') + record.name,
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return delFile({
             id: record.id,
@@ -524,16 +524,16 @@ export default {
     handleBatchDelete() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
         $notification.warning({
-          message: this.$t('pages.file-manager.staticFileStorage.list.2ad67cae')
+          message: this.$t('i18n.5d817c403e')
         })
         return
       }
       $confirm({
-        title: this.$t('pages.file-manager.staticFileStorage.list.a8fe4c17'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.file-manager.staticFileStorage.list.cfd66404'),
-        okText: this.$t('pages.file-manager.staticFileStorage.list.7da4a591'),
-        cancelText: this.$t('pages.file-manager.staticFileStorage.list.43105e21'),
+        content: this.$t('i18n.52d24791ab'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return delFile({
             ids: this.tableSelections.join(','),
@@ -621,7 +621,7 @@ export default {
     handerConfirm() {
       if (!this.tableSelections.length) {
         $notification.warning({
-          message: this.$t('pages.file-manager.staticFileStorage.list.e1f69633')
+          message: this.$t('i18n.8d62b202d9')
         })
         return
       }
@@ -630,7 +630,7 @@ export default {
       })
       if (!selectData.length) {
         $notification.warning({
-          message: this.$t('pages.file-manager.staticFileStorage.list.e1f69633')
+          message: this.$t('i18n.8d62b202d9')
         })
         return
       }

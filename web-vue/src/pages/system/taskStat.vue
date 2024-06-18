@@ -6,7 +6,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="system-task-stat"
-      :empty-description="$t('pages.system.taskStat.6a7351f6')"
+      :empty-description="$t('i18n.4ef719810b')"
       size="middle"
       row-key="taskId"
       :columns="taskColumns"
@@ -55,7 +55,7 @@ export default {
 
       taskColumns: [
         {
-          title: this.$t('pages.system.taskStat.347d67ac'),
+          title: this.$t('i18n.3a3778f20c'),
           dataIndex: 'taskId',
 
           // sorter: (a, b) => (a && b ? a.localeCompare(b, "zh-CN") : 0),
@@ -64,19 +64,19 @@ export default {
           ellipsis: true,
           filters: [
             {
-              text: this.$t('pages.system.taskStat.37206ed5'),
+              text: this.$t('i18n.fcba60e773'),
               value: 'build'
             },
             {
-              text: this.$t('pages.system.taskStat.e0417750'),
+              text: this.$t('i18n.e0ba3b9145'),
               value: 'script'
             },
             {
-              text: this.$t('pages.system.taskStat.380d4731'),
+              text: this.$t('i18n.8c7c7f3cfa'),
               value: 'server_script'
             },
             {
-              text: `ssh ${this.$t('pages.system.taskStat.fbb32aa1')}`,
+              text: `ssh ${this.$t('i18n.ba311d8a6a')}`,
               value: 'ssh_command'
             }
           ],
@@ -96,28 +96,28 @@ export default {
         //   // sortDirections: ["descend", "ascend"],
         // },
         {
-          title: this.$t('pages.system.taskStat.7894d2e3'),
+          title: this.$t('i18n.d4aea8d7e6'),
           dataIndex: 'executeCount',
           sortDirections: ['descend', 'ascend'],
           width: 140,
           sorter: (a, b) => a.executeCount || 0 - b.executeCount || 0
         },
         {
-          title: this.$t('pages.system.taskStat.bbd4a51d'),
+          title: this.$t('i18n.e7d83a24ba'),
           dataIndex: 'succeedCount',
           sortDirections: ['descend', 'ascend'],
           width: 140,
           sorter: (a, b) => a.succeedCount || 0 - b.succeedCount || 0
         },
         {
-          title: this.$t('pages.system.taskStat.f6980cb9'),
+          title: this.$t('i18n.d3e480c8c0'),
           dataIndex: 'failedCount',
           sortDirections: ['descend', 'ascend'],
           width: 140,
           sorter: (a, b) => a.failedCount || 0 - b.failedCount || 0
         },
         {
-          title: this.$t('pages.system.taskStat.576eb19b'),
+          title: this.$t('i18n.17c06f6a8b'),
           dataIndex: 'lastExecuteTime',
           sortDirections: ['descend', 'ascend'],
           defaultSortOrder: 'descend',

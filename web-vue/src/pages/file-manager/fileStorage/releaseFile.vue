@@ -7,22 +7,22 @@
       :label-col="{ span: 4 }"
       :wrapper-col="{ span: 20 }"
     >
-      <a-form-item :label="$t('pages.file-manager.fileStorage.releaseFile.e62a5bf3')" name="name">
+      <a-form-item :label="$t('i18n.ce23a42b47')" name="name">
         <a-input
           v-model:value="temp.name"
-          :placeholder="$t('pages.file-manager.fileStorage.releaseFile.70cf48dc')"
+          :placeholder="$t('i18n.5f4c724e61')"
           :max-length="50"
         />
       </a-form-item>
 
-      <a-form-item :label="$t('pages.file-manager.fileStorage.releaseFile.73754f45')" name="taskType">
+      <a-form-item :label="$t('i18n.f98994f7ec')" name="taskType">
         <a-radio-group v-model:value="temp.taskType" @change="taskTypeChange">
           <a-radio :value="0"> SSH </a-radio>
-          <a-radio :value="1"> {{ $t('pages.file-manager.fileStorage.releaseFile.602a0a5e') }} </a-radio>
+          <a-radio :value="1"> {{ $t('i18n.3bf3c0a8d6') }} </a-radio>
         </a-radio-group>
         <template #help>
           <template v-if="temp.taskType === 0"
-            >{{ $t('pages.file-manager.fileStorage.releaseFile.469af1fa') }}
+            >{{ $t('i18n.28bf369f34') }}
           </template>
         </template>
       </a-form-item>
@@ -30,7 +30,7 @@
       <a-form-item
         v-if="temp.taskType === 0"
         name="taskDataIds"
-        :label="$t('pages.file-manager.fileStorage.releaseFile.6ed1da89')"
+        :label="$t('i18n.b188393ea7')"
       >
         <a-row>
           <a-col :span="22">
@@ -48,7 +48,7 @@
                 }
               "
               mode="multiple"
-              :placeholder="$t('pages.file-manager.fileStorage.releaseFile.f1f8e3bc')"
+              :placeholder="$t('i18n.260a3234f2')"
             >
               <a-select-option v-for="ssh in sshList" :key="ssh.id">
                 <a-tooltip :title="ssh.name"> {{ ssh.name }}</a-tooltip>
@@ -63,7 +63,7 @@
       <a-form-item
         v-else-if="temp.taskType === 1"
         name="taskDataIds"
-        :label="$t('pages.file-manager.fileStorage.releaseFile.61c0e0ab')"
+        :label="$t('i18n.473badc394')"
       >
         <a-row>
           <a-col :span="22">
@@ -81,7 +81,7 @@
                 }
               "
               mode="multiple"
-              :placeholder="$t('pages.file-manager.fileStorage.releaseFile.89a4deb8')"
+              :placeholder="$t('i18n.f8a613d247')"
             >
               <a-select-option v-for="ssh in nodeList" :key="ssh.id">
                 <a-tooltip :title="ssh.name"> {{ ssh.name }}</a-tooltip>
@@ -94,9 +94,9 @@
         </a-row>
       </a-form-item>
 
-      <a-form-item name="releasePathParent" :label="$t('pages.file-manager.fileStorage.releaseFile.b6c9f9c')">
+      <a-form-item name="releasePathParent" :label="$t('i18n.dbb2df00cf')">
         <template #help>
-          <a-tooltip :title="$t('pages.file-manager.fileStorage.releaseFile.61fec7a9')"
+          <a-tooltip :title="$t('i18n.bfe8fab5cd')"
             ><a-button
               size="small"
               type="link"
@@ -106,7 +106,7 @@
                 }
               "
             >
-              <InfoCircleOutlined />{{ $t('pages.file-manager.fileStorage.releaseFile.31f003d') }}
+              <InfoCircleOutlined />{{ $t('i18n.1e5533c401') }}
             </a-button>
           </a-tooltip>
         </template>
@@ -116,7 +116,7 @@
             show-search
             allow-clear
             style="width: 30%"
-            :placeholder="$t('pages.file-manager.fileStorage.releaseFile.fda0ef21')"
+            :placeholder="$t('i18n.edd716f524')"
           >
             <a-select-option v-for="item in accessList" :key="item">
               <a-tooltip :title="item">{{ item }}</a-tooltip>
@@ -129,7 +129,7 @@
             <a-input
               v-model:value="temp.releasePathSecondary"
               style="width: 70%"
-              :placeholder="$t('pages.file-manager.fileStorage.releaseFile.a6ba1641')"
+              :placeholder="$t('i18n.dc0d06f9c7')"
             />
           </a-form-item-rest>
         </a-input-group>
@@ -137,27 +137,27 @@
 
       <a-form-item name="releaseBeforeCommand">
         <template #label>
-          {{ $t('pages.file-manager.fileStorage.releaseFile.1cf6b640') }}
+          {{ $t('i18n.cfb00269fd') }}
           <a-tooltip>
             <template #title>
               <ul>
-                <li>{{ $t('pages.file-manager.fileStorage.releaseFile.9bab648c') }}</li>
-                <li>{{ $t('pages.file-manager.fileStorage.releaseFile.52373158') }}</li>
-                <li>{{ $t('pages.file-manager.fileStorage.releaseFile.6fcc2557') }}</li>
+                <li>{{ $t('i18n.799ac8bf40') }}</li>
+                <li>{{ $t('i18n.5fbde027e3') }}</li>
+                <li>{{ $t('i18n.a9c999e0bd') }}</li>
               </ul>
             </template>
             <QuestionCircleOutlined />
           </a-tooltip>
         </template>
         <template #help>
-          <div v-if="scriptTabKey === 'before'">{{ $t('pages.file-manager.fileStorage.releaseFile.5fcb4809') }}</div>
+          <div v-if="scriptTabKey === 'before'">{{ $t('i18n.00de0ae1da') }}</div>
           <div v-else-if="scriptTabKey === 'after'">
-            {{ $t('pages.file-manager.fileStorage.releaseFile.3fcb1a9a') }}
+            {{ $t('i18n.08ac1eace7') }}
           </div>
         </template>
         <a-form-item-rest>
           <a-tabs v-model:activeKey="scriptTabKey" tab-position="right" type="card">
-            <a-tab-pane key="before" :tab="$t('pages.file-manager.fileStorage.releaseFile.cb2367c')">
+            <a-tab-pane key="before" :tab="$t('i18n.d0c879f900')">
               <code-editor
                 v-model:content="temp.beforeScript"
                 height="40vh"
@@ -169,8 +169,8 @@
                 <template #tool_before>
                   <a-space>
                     <a-tag>
-                      <b>{{ $t('pages.file-manager.fileStorage.releaseFile.cb2367c') }}</b>
-                      {{ $t('pages.file-manager.fileStorage.releaseFile.985968bf') }}
+                      <b>{{ $t('i18n.d0c879f900') }}</b>
+                      {{ $t('i18n.1a6aa24e76') }}
                     </a-tag>
                     <a-button
                       type="link"
@@ -179,13 +179,13 @@
                           chooseScriptVisible = 1
                         }
                       "
-                      >{{ $t('pages.file-manager.fileStorage.releaseFile.d236a971') }}</a-button
+                      >{{ $t('i18n.54f271cd41') }}</a-button
                     >
                   </a-space>
                 </template>
               </code-editor>
             </a-tab-pane>
-            <a-tab-pane key="after" :tab="$t('pages.file-manager.fileStorage.releaseFile.e643b0a1')">
+            <a-tab-pane key="after" :tab="$t('i18n.9b1c5264a0')">
               <code-editor
                 v-model:content="temp.afterScript"
                 height="40vh"
@@ -196,7 +196,7 @@
               >
                 <template #tool_before>
                   <a-space>
-                    <a-tag>{{ $t('pages.file-manager.fileStorage.releaseFile.278fde90') }}</a-tag>
+                    <a-tag>{{ $t('i18n.e7ffc33d05') }}</a-tag>
                     <a-button
                       type="link"
                       @click="
@@ -204,7 +204,7 @@
                           chooseScriptVisible = 2
                         }
                       "
-                      >{{ $t('pages.file-manager.fileStorage.releaseFile.d236a971') }}</a-button
+                      >{{ $t('i18n.54f271cd41') }}</a-button
                     >
                   </a-space>
                 </template>
@@ -219,7 +219,7 @@
       v-if="configDir"
       v-model:open="configDir"
       destroy-on-close
-      :title="`${$t('pages.file-manager.fileStorage.releaseFile.6978ea2b')}`"
+      :title="`${$t('i18n.eee6510292')}`"
       :footer="null"
       :mask-closable="false"
       @cancel="
@@ -242,7 +242,7 @@
     <CustomDrawer
       v-if="chooseScriptVisible != 0"
       destroy-on-close
-      :title="$t('pages.file-manager.fileStorage.releaseFile.952117a8')"
+      :title="$t('i18n.a056d9c4b3')"
       placement="right"
       :open="chooseScriptVisible != 0"
       width="70vw"
@@ -291,7 +291,7 @@
                 chooseScriptVisible = false
               }
             "
-            >{{ $t('pages.file-manager.fileStorage.releaseFile.a0451c97') }}</a-button
+            >{{ $t('i18n.625fb26b4b') }}</a-button
           >
           <a-button
             type="primary"
@@ -300,7 +300,7 @@
                 $refs['scriptPage'].handerConfirm()
               }
             "
-            >{{ $t('pages.file-manager.fileStorage.releaseFile.1cbe2507') }}</a-button
+            >{{ $t('i18n.e83a256e4f') }}</a-button
           >
         </a-space>
       </template>
@@ -326,23 +326,23 @@ export default {
       temp: {},
       releaseFileRules: {
         name: [
-          { required: true, message: this.$t('pages.file-manager.fileStorage.releaseFile.378f28a1'), trigger: 'blur' }
+          { required: true, message: this.$t('i18n.89d18c88a3'), trigger: 'blur' }
         ],
 
         taskType: [
-          { required: true, message: this.$t('pages.file-manager.fileStorage.releaseFile.c33e3d16'), trigger: 'blur' }
+          { required: true, message: this.$t('i18n.29b48a76be'), trigger: 'blur' }
         ],
 
         releasePath: [
           {
             required: true,
-            message: this.$t('pages.file-manager.fileStorage.releaseFile.8092e55'),
+            message: this.$t('i18n.be28f10eb6'),
             trigger: 'blur'
           }
         ],
 
         taskDataIds: [
-          { required: true, message: this.$t('pages.file-manager.fileStorage.releaseFile.6a05f5c8'), trigger: 'blur' }
+          { required: true, message: this.$t('i18n.3e51d1bc9c'), trigger: 'blur' }
         ]
       },
       sshList: [],

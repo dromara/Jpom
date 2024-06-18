@@ -77,7 +77,7 @@ export function getCachePageLimit(): number {
  * @returns String
  */
 export function PAGE_DEFAULT_SHOW_TOTAL(total: number) {
-  return t('utils.const.4fcd2be0', { total: total })
+  return t('i18n.1f1030554f', { total: total })
 }
 
 export const PAGE_DEFAULT_LIST_QUERY: any = {
@@ -352,11 +352,11 @@ export function formatDuration(ms: any, seg: string = ',', levelCount: number = 
   levelCount = levelCount || 5
   if (msNum < 0) msNum = -msNum
   const time: { [key: string]: number } = {}
-  ;(time[t('utils.const.3509a9f8')] = Math.floor(msNum / 86400000)),
-    (time[t('utils.const.e3db239d')] = Math.floor(msNum / 3600000) % 24),
-    (time[t('utils.const.3b1bb444')] = Math.floor(msNum / 60000) % 60),
-    (time[t('utils.const.acabc771')] = Math.floor(msNum / 1000) % 60),
-    (time[t('utils.const.4a28d11c')] = Math.floor(msNum) % 1000)
+  ;(time[t('i18n.249aba7632')] = Math.floor(msNum / 86400000)),
+    (time[t('i18n.2de0d491d0')] = Math.floor(msNum / 3600000) % 24),
+    (time[t('i18n.3a17b7352e')] = Math.floor(msNum / 60000) % 60),
+    (time[t('i18n.0c1fec657f')] = Math.floor(msNum / 1000) % 60),
+    (time[t('i18n.21157cbff8')] = Math.floor(msNum) % 1000)
   return Object.entries(time)
     .filter((val) => val[1] !== 0)
     .map(([key, val]) => `${val}${key}`)

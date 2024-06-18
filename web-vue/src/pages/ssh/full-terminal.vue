@@ -16,7 +16,7 @@
               </div>
 
               <a-button size="small" type="primary" :disabled="!sshData.fileDirs" @click="handleFile()">{{
-                $t('pages.ssh.full-terminal.741604c2')
+                $t('i18n.2a0c4740f1')
               }}</a-button>
             </a-space>
           </template>
@@ -29,12 +29,12 @@
         <template v-else>
           <a-result
             status="404"
-            :title="$t('pages.ssh.full-terminal.7aa434b')"
-            :sub-title="$t('pages.ssh.full-terminal.8e8e12b6')"
+            :title="$t('i18n.bda44edeb5')"
+            :sub-title="$t('i18n.729eebb5ff')"
           >
             <template #extra>
               <router-link :to="{ path: '/ssh', query: {} }">
-                <a-button type="primary">{{ $t('pages.ssh.full-terminal.edcf77ad') }}</a-button>
+                <a-button type="primary">{{ $t('i18n.5a1367058c') }}</a-button>
               </router-link>
             </template>
           </a-result>
@@ -52,7 +52,7 @@
     >
       <template #title>
         {{ sshData.name }}<template v-if="sshData.host"> ({{ sshData.host }}) </template
-        >{{ $t('pages.ssh.full-terminal.502f94') }}
+        >{{ $t('i18n.8780e6b3d1') }}
       </template>
       <ssh-file v-if="drawerVisible" :ssh-id="sshData.id" />
     </CustomDrawer>

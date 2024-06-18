@@ -6,54 +6,54 @@
         <a-space>
           <template #split> <a-divider type="vertical" /> </template>
           <a href="https://jpom.top/pages/legal-risk/" target="_blank"
-            >{{ $t('pages.layout.about.6175e15d') }}<LinkOutlined />
+            >{{ $t('i18n.9f01272a10') }}<LinkOutlined />
           </a>
-          <a href="https://jpom.top" target="_blank">{{ $t('pages.layout.about.b31c18fd') }}<LinkOutlined /> </a>
+          <a href="https://jpom.top" target="_blank">{{ $t('i18n.19fa0be4d2') }}<LinkOutlined /> </a>
         </a-space>
       </template>
       <template #description>
         <ul>
           <li>
             <div>
-              <b style="color: red">{{ $t('pages.layout.about.bcb3c132') }}</b
-              >，{{ $t('pages.layout.about.eb71aee8') }} <b>logo{{ $t('pages.layout.about.6065956f') }}</b
-              >，{{ $t('pages.layout.about.c3cc824c') }}
-              <div>{{ $t('pages.layout.about.7ab34d72') }}</div>
+              <b style="color: red">{{ $t('i18n.f3947e6581') }}</b
+              >，{{ $t('i18n.f30f1859ba') }} <b>logo{{ $t('i18n.cbcc87b3d4') }}</b
+              >，{{ $t('i18n.2bb1967887') }}
+              <div>{{ $t('i18n.c12ba6ff43') }}</div>
             </div>
           </li>
           <li>
             <div>
-              <b style="color: red">{{ $t('pages.layout.about.a09aa05') }}</b
-              >，{{ $t('pages.layout.about.d88b276') }}
+              <b style="color: red">{{ $t('i18n.c26e6aaabb') }}</b
+              >，{{ $t('i18n.0b9d5ba772') }}
             </div>
           </li>
         </ul>
       </template>
     </a-alert>
     <a-tabs>
-      <a-tab-pane key="0" :tab="$t('pages.layout.about.2f2bcf9')">
-        <h2>Jpom {{ $t('pages.layout.about.8989ace2') }}</h2>
+      <a-tab-pane key="0" :tab="$t('i18n.6f6ee88ec4')">
+        <h2>Jpom {{ $t('i18n.a1c4a75c2d') }}</h2>
 
         <ul>
           <li>
-            Star {{ $t('pages.layout.about.72cb28ed') }}
+            Star {{ $t('i18n.80198317ff') }}
             <a href="https://gitee.com/dromara/Jpom" target="_blank">Gitee</a> /
             <a href="https://github.com/dromara/Jpom" target="_blank">Github</a>
           </li>
-          <li>{{ $t('pages.layout.about.37d4a17e') }}</li>
-          <li>{{ $t('pages.layout.about.322ed3e') }}</li>
+          <li>{{ $t('i18n.49a9d6c7e6') }}</li>
+          <li>{{ $t('i18n.de4cf8bdfa') }}</li>
           <li>
-            {{ $t('pages.layout.about.35cdb498')
+            {{ $t('i18n.7a93e0a6ae')
             }}<a href="https://jpom.top/pages/enterprise-service/" target="_blank">{{
-              $t('pages.layout.about.412de998')
+              $t('i18n.da89135649')
             }}</a>
           </li>
         </ul>
         <div></div>
         <a-card style="text-align: center">
-          <template #title> {{ $t('pages.layout.about.537239f8') }} </template>
+          <template #title> {{ $t('i18n.aeb44d34e6') }} </template>
           <template #extra>
-            <a href="https://jpom.top/pages/praise/" target="_blank">{{ $t('pages.layout.about.30cf73d6') }}</a>
+            <a href="https://jpom.top/pages/praise/" target="_blank">{{ $t('i18n.ef734bf850') }}</a>
           </template>
           <a-row :gutter="[16, 16]">
             <a-col :span="6" />
@@ -74,8 +74,8 @@
                   <edit-outlined key="edit" />
                   <ellipsis-outlined key="ellipsis" /> -->
                   <a-card-meta
-                    :title="$t('pages.layout.about.14728ef9')"
-                    :description="$t('pages.layout.about.255688b0')"
+                    :title="$t('i18n.55f01e138a')"
+                    :description="$t('i18n.0ee3ca5e88')"
                   >
                   </a-card-meta>
                 </template>
@@ -96,8 +96,8 @@
                 </template>
                 <template #actions>
                   <a-card-meta
-                    :title="$t('pages.layout.about.266cd308')"
-                    :description="$t('pages.layout.about.2d4c1548')"
+                    :title="$t('i18n.a1da57ab69')"
+                    :description="$t('i18n.2331a990aa')"
                   >
                   </a-card-meta>
 
@@ -111,19 +111,19 @@
           </a-row>
         </a-card>
       </a-tab-pane>
-      <a-tab-pane key="3" :tab="$t('pages.layout.about.33d7e86e')">
+      <a-tab-pane key="3" :tab="$t('i18n.0cbf83cc07')">
         <div>
-          <h2 style="display: inline">{{ $t('pages.layout.about.b9dcb92c') }}</h2>
-          {{ $t('pages.layout.about.6fb79158') }}<a-tag>{{ $t('pages.layout.about.527e7279') }}</a-tag
-          ><a-tag>{{ $t('pages.layout.about.8f01b872') }}</a-tag
-          ><a-tag>{{ $t('pages.layout.about.7f261d74') }}</a-tag
-          ><a-tag>{{ $t('pages.layout.about.3748fe06') }}</a-tag>
-          <a-tag>{{ $t('pages.layout.about.d8c2cd8b') }}</a-tag>
+          <h2 style="display: inline">{{ $t('i18n.a952ba273f') }}</h2>
+          {{ $t('i18n.f712d3d040') }}<a-tag>{{ $t('i18n.0ce54ecc25') }}</a-tag
+          ><a-tag>{{ $t('i18n.da89135649') }}</a-tag
+          ><a-tag>{{ $t('i18n.92dde4c02b') }}</a-tag
+          ><a-tag>{{ $t('i18n.712cdd7984') }}</a-tag>
+          <a-tag>{{ $t('i18n.73f798a129') }}</a-tag>
         </div>
 
         <ul>
           <li>
-            {{ $t('pages.layout.about.6d12e07a')
+            {{ $t('i18n.da4495b1b4')
             }}<a-typography-paragraph
               style="display: inline"
               :copyable="{ tooltip: false, text: 'bwcx_jzy@dromara.org' }"
@@ -132,14 +132,14 @@
             </a-typography-paragraph>
           </li>
           <li>
-            {{ $t('pages.layout.about.55dce4ca')
+            {{ $t('i18n.da671a4d16')
             }}<a-typography-paragraph style="display: inline" :copyable="{ tooltip: false, text: 'jpom66' }">
               <a href="https://jpom.top/pages/praise/join/" target="_blank"> jpom66</a>
             </a-typography-paragraph>
           </li>
         </ul>
 
-        <a-card :title="$t('pages.layout.about.a9721057')">
+        <a-card :title="$t('i18n.bdd87b63a6')">
           <div style="text-align: center">
             <a-image width="400px" :src="weixQrcodeJpom66" :preview="true"> </a-image>
           </div>
@@ -152,11 +152,11 @@
           /> -->
         </a-card>
       </a-tab-pane>
-      <a-tab-pane key="1" :tab="$t('pages.layout.about.d1403674')">
+      <a-tab-pane key="1" :tab="$t('i18n.21dd8f23b4')">
         <pre style="white-space: pre-wrap">{{ licenseText }}</pre>
       </a-tab-pane>
-      <a-tab-pane key="2" :tab="$t('pages.layout.about.9497520b')">
-        <h1>Jpom {{ $t('pages.layout.about.f5dd8a86') }}</h1>
+      <a-tab-pane key="2" :tab="$t('i18n.7fb5bdb690')">
+        <h1>Jpom {{ $t('i18n.4dc781596b') }}</h1>
         <a-list size="small" bordered :data-source="thankDependency">
           <template #renderItem="{ item }">
             <a-list-item>
@@ -178,10 +178,10 @@
             </a-list-item>
           </template>
           <template #header>
-            <div>{{ $t('pages.layout.about.f2e1f6d3') }}</div>
+            <div>{{ $t('i18n.791b6d0e62') }}</div>
           </template>
           <template #footer>
-            <div>{{ $t('pages.layout.about.77ac5b13') }}</div>
+            <div>{{ $t('i18n.ce1ecd8a5b') }}</div>
           </template>
         </a-list></a-tab-pane
       >

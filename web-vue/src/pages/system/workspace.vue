@@ -1,8 +1,8 @@
 <template>
   <div>
     <a-tabs default-active-key="1">
-      <a-tab-pane key="1" :tab="$t('pages.system.workspace.6d6660c9')"><workspaceList></workspaceList> </a-tab-pane>
-      <a-tab-pane key="2" :tab="$t('pages.system.workspace.300f7a4d')">
+      <a-tab-pane key="1" :tab="$t('i18n.ffa9fd37b5')"><workspaceList></workspaceList> </a-tab-pane>
+      <a-tab-pane key="2" :tab="$t('i18n.74ea72bbd6')">
         <clusterList></clusterList>
       </a-tab-pane>
     </a-tabs>

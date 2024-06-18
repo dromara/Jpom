@@ -12,15 +12,15 @@
             >
               <template #tool_before>
                 <a-tooltip>
-                  <template #title>{{ $t('pages.system.assets.machine.free-script.69ed9ab7') }}</template>
-                  {{ $t('pages.system.assets.machine.free-script.edd2beb7') }}
+                  <template #title>{{ $t('i18n.3a94281b91') }}</template>
+                  {{ $t('i18n.92e3a830ae') }}
                   <QuestionCircleOutlined />
                 </a-tooltip>
               </template>
             </code-editor>
           </a-form-item>
-          <a-form-item :label="$t('pages.system.assets.machine.free-script.243b7015')" name="path">
-            <a-input v-model:value="temp.path" :placeholder="$t('pages.system.assets.machine.free-script.8eec4f88')" />
+          <a-form-item :label="$t('i18n.938dd62952')" name="path">
+            <a-input v-model:value="temp.path" :placeholder="$t('i18n.622d00a119')" />
           </a-form-item>
         </a-form>
       </a-col>
@@ -29,12 +29,12 @@
           <template #before>
             <a-space>
               <a-button type="primary" size="small" :loading="loading" :disabled="!temp.content" @click="onSubmit()">{{
-                $t('pages.system.assets.machine.free-script.985968bf')
+                $t('i18n.1a6aa24e76')
               }}</a-button>
               <a-switch
                 v-model:checked="temp.appendTemplate"
-                :checked-children="$t('pages.system.assets.machine.free-script.f18e273b')"
-                :un-checked-children="$t('pages.system.assets.machine.free-script.d47b3f96')"
+                :checked-children="$t('i18n.87e2f5bf75')"
+                :un-checked-children="$t('i18n.e3ee3ca673')"
               />
             </a-space>
           </template>
@@ -90,7 +90,7 @@ const conentScript = () => {
     console.error(err)
     $notification.error({
       message: `web socket ${
-        ($t('pages.system.assets.machine.free-script.d75d207f'), $t('pages.system.assets.machine.free-script.763330b'))
+        ($t('i18n.7030ff6470'), $t('i18n.226a6f9cdd'))
       }`
     })
   }
@@ -98,7 +98,7 @@ const conentScript = () => {
     //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
     console.error(err)
     loading.value = false
-    $message.warning($t('pages.system.assets.machine.free-script.8a2aae09'))
+    $message.warning($t('i18n.a53d137403'))
     // clearInterval(this.heart);
   }
   socketRef.value = socket_

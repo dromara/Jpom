@@ -17,33 +17,33 @@
         <a-space>
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$t('pages.system.backup.bfc26f3e')"
+            :placeholder="$t('i18n.a1b745fba0')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%version%']"
-            :placeholder="$t('pages.system.backup.d826aba2')"
+            :placeholder="$t('i18n.0f4f503547')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-select
             v-model:value="listQuery.backupType"
             allow-clear
-            :placeholder="$t('pages.system.backup.4b3723a1')"
+            :placeholder="$t('i18n.43ebf364ed')"
             class="search-input-item"
           >
             <a-select-option v-for="backupTypeItem in backupTypeList" :key="backupTypeItem.key">
               {{ backupTypeItem.value }}
             </a-select-option>
           </a-select>
-          <a-tooltip :title="$t('pages.system.backup.cb5a8131')">
+          <a-tooltip :title="$t('i18n.4838a3bd20')">
             <a-button :loading="loading" type="primary" @click="loadData">{{
-              $t('pages.system.backup.53c2763c')
+              $t('i18n.e5f71fc31e')
             }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">{{ $t('pages.system.backup.8f120bcf') }}</a-button>
-          <a-button type="primary" @click="handleSqlUpload">{{ $t('pages.system.backup.56a8dc60') }}</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $t('i18n.a4006e5c1e') }}</a-button>
+          <a-button type="primary" @click="handleSqlUpload">{{ $t('i18n.90c0458a4c') }}</a-button>
         </a-space>
       </template>
       <template #bodyCell="{ column, text, record }">
@@ -63,14 +63,14 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'status'">
-          <a-tooltip v-if="record.fileExist" :title="`${backupStatusMap[text]} ${$t('pages.system.backup.11ffafba')}`">
+          <a-tooltip v-if="record.fileExist" :title="`${backupStatusMap[text]} ${$t('i18n.ae12edc5bf')}`">
             <div>
               <a-typography-paragraph :copyable="{ tooltip: false, text: record.filePath }" style="margin-bottom: 0">
                 {{ backupStatusMap[text] }}
               </a-typography-paragraph>
             </div>
           </a-tooltip>
-          <a-tooltip v-else :title="`${$t('pages.system.backup.dff92784')}:${record.filePath}`">
+          <a-tooltip v-else :title="`${$t('i18n.96283fc523')}:${record.filePath}`">
             <WarningOutlined />
           </a-tooltip>
         </template>
@@ -88,7 +88,7 @@
               type="primary"
               :disabled="!record.fileExist || record.status !== 1"
               @click="handleDownload(record)"
-              >{{ $t('pages.system.backup.42c8e9c6') }}</a-button
+              >{{ $t('i18n.f26ef91424') }}</a-button
             >
             <a-button
               size="small"
@@ -96,10 +96,10 @@
               danger
               :disabled="!record.fileExist || record.status !== 1"
               @click="handleRestore(record)"
-              >{{ $t('pages.system.backup.e0ed579e') }}</a-button
+              >{{ $t('i18n.69de8d7f40') }}</a-button
             >
             <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-              $t('pages.system.backup.dd20d11c')
+              $t('i18n.2f4aaddde3')
             }}</a-button>
           </a-space>
         </template>
@@ -111,13 +111,13 @@
       v-model:open="createBackupVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$t('pages.system.backup.4c3361ba')"
+      :title="$t('i18n.adbec9b14d')"
       width="600px"
       :mask-closable="false"
       @ok="handleCreateBackupOk"
     >
       <a-form ref="editBackupForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-item :label="$t('pages.system.backup.16b9791d')" name="backupType">
+        <a-form-item :label="$t('i18n.8c61c92b4b')" name="backupType">
           <a-radio-group v-model:value="temp.backupType" name="backupType">
             <a-radio v-for="item in backupTypeList" v-show="!item.disabled" :key="item.key" :value="item.key">{{
               item.value
@@ -127,7 +127,7 @@
         <!-- 部分备份 -->
         <a-form-item
           v-if="temp.backupType === 1"
-          :label="$t('pages.system.backup.22efc359')"
+          :label="$t('i18n.b8ac664d98')"
           name="tableNameList"
           class="feature jpom-role"
         >
@@ -152,12 +152,12 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="300px"
-      :title="$t('pages.system.backup.b2122be4')"
+      :title="$t('i18n.b5b51ff786')"
       :mask-closable="true"
       @ok="startSqlUpload"
     >
       <a-upload :file-list="uploadFileList" :before-upload="beforeSqlUpload" accept=".sql" @remove="handleSqlRemove">
-        <a-button><UploadOutlined />{{ $t('pages.system.backup.7b9ac589') }}</a-button>
+        <a-button><UploadOutlined />{{ $t('i18n.c8c452749e') }}</a-button>
       </a-upload>
       <!-- <br />
         <a-radio-group v-model="backupType" name="backupType">
@@ -205,37 +205,37 @@ export default {
 
       columns: [
         {
-          title: this.$t('pages.system.backup.43446e07'),
+          title: this.$t('i18n.77b9ecc8b1'),
           dataIndex: 'name',
           ellipsis: true
         },
         {
-          title: this.$t('pages.system.backup.ebe86638'),
+          title: this.$t('i18n.2c014aeeee'),
           width: 170,
           dataIndex: 'baleTimeStamp',
           // ellipsis: true,
           sorter: true
         },
         {
-          title: this.$t('pages.system.backup.2aca585b'),
+          title: this.$t('i18n.fe2df04a16'),
           dataIndex: 'version',
           width: 100
           // ellipsis: true,
         },
         {
-          title: this.$t('pages.system.backup.16b9791d'),
+          title: this.$t('i18n.8c61c92b4b'),
           dataIndex: 'backupType',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$t('pages.system.backup.f087781'),
+          title: this.$t('i18n.396b7d3f91'),
           dataIndex: 'fileSize',
           width: 100
           // ellipsis: true,
         },
         {
-          title: this.$t('pages.system.backup.9c32c887'),
+          title: this.$t('i18n.3fea7ca76c'),
           dataIndex: 'status',
           width: 120
         },
@@ -247,14 +247,14 @@ export default {
 
         // },
         {
-          title: this.$t('pages.system.backup.916db24b'),
+          title: this.$t('i18n.9baca0054e'),
           dataIndex: 'modifyUser',
           ellipsis: true,
 
           width: 120
         },
         {
-          title: this.$t('pages.system.backup.8e75897d'),
+          title: this.$t('i18n.ae0fd9b9d2'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text }) => {
@@ -263,7 +263,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('pages.system.backup.3bb962bf'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
           width: '180px',
 
@@ -371,11 +371,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$t('pages.system.backup.a8fe4c17'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.system.backup.2ae31fc1'),
-        okText: this.$t('pages.system.backup.7da4a591'),
-        cancelText: this.$t('pages.system.backup.43105e21'),
+        content: this.$t('i18n.814dd5fb7d'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return deleteBackup(record.id).then((res) => {
             if (res.code === 200) {
@@ -391,19 +391,19 @@ export default {
     // 还原备份
     handleRestore(record) {
       const html = `
-        ${this.$t('pages.system.backup.88bcb9f0')}
+        ${this.$t('i18n.4d18dcbd15')}
         <ul style='color:red;'>
-        <li>${this.$t('pages.system.backup.3cc7cd16')}</li>
-        <li>${this.$t('pages.system.backup.a21f3a79')}</li>
-        <li>${this.$t('pages.system.backup.5997693a')} <b> --rest:load_init_db </b> </li>
-      </ul>${this.$t('pages.system.backup.39ee47a1')}`
+        <li>${this.$t('i18n.6ac61b0e74')}</li>
+        <li>${this.$t('i18n.a9eed33cfb')}</li>
+        <li>${this.$t('i18n.5ed197a129')} <b> --rest:load_init_db </b> </li>
+      </ul>${this.$t('i18n.d0132b0170')}`
 
       $confirm({
-        title: this.$t('pages.system.backup.a8fe4c17'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
-        okText: this.$t('pages.system.backup.7da4a591'),
-        cancelText: this.$t('pages.system.backup.43105e21'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         width: 600,
         onOk: () => {
           return restoreBackup(record.id).then((res) => {
@@ -436,7 +436,7 @@ export default {
     startSqlUpload() {
       if (this.uploadFileList.length != 1) {
         $notification.warning({
-          message: this.$t('pages.system.backup.f3a630fe')
+          message: this.$t('i18n.1a704f73c2')
         })
         return
       }

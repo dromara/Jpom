@@ -146,6 +146,6 @@ export function dockerListWorkspace(params) {
 }
 
 export const statusMap = {
-  0: { desc: t('api.system.assets-docker.b26020d2'), color: 'red' },
-  1: { desc: t('api.system.assets-docker.591ff086'), color: 'green' }
+  0: { desc: t('i18n.757a730c9e'), color: 'red' },
+  1: { desc: t('i18n.0f0a5f6107'), color: 'green' }
 }

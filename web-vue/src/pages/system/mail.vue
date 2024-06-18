@@ -1,35 +1,35 @@
 <template>
   <div class="">
     <a-form ref="editForm" :model="temp" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
-      <a-form-item :label="$t('pages.system.mail.ab20d54d')" name="host">
+      <a-form-item :label="$t('i18n.1f130d11d1')" name="host">
         <a-auto-complete
           v-model:value="temp.host"
           :options="hostDataSource"
-          :placeholder="$t('pages.system.mail.4513ff80')"
+          :placeholder="$t('i18n.c6209653e4')"
         >
           <template #option="item"> {{ item.title }} {{ item.value }} </template>
         </a-auto-complete>
       </a-form-item>
-      <a-form-item :label="$t('pages.system.mail.998f5bd')" name="port">
+      <a-form-item :label="$t('i18n.fdcadf68a5')" name="port">
         <a-auto-complete
           v-model:value="temp.port"
-          :placeholder="$t('pages.system.mail.c9790920')"
+          :placeholder="$t('i18n.e074f6b6af')"
           :options="portDataSource"
         >
           <template #option="item"> {{ item.title }} {{ item.value }} </template>
         </a-auto-complete>
       </a-form-item>
-      <a-form-item :label="$t('pages.system.mail.34db7143')" name="user">
-        <a-input v-model:value="temp.user" type="text" :placeholder="$t('pages.system.mail.afcb4023')" />
+      <a-form-item :label="$t('i18n.819767ada1')" name="user">
+        <a-input v-model:value="temp.user" type="text" :placeholder="$t('i18n.b85b213579')" />
       </a-form-item>
-      <a-form-item :label="$t('pages.system.mail.bf730bf9')" :name="`${temp.type === 'add' ? 'pass' : 'pass-update'}`">
-        <a-input-password v-model:value="temp.pass" type="text" :placeholder="$t('pages.system.mail.a1fcca53')" />
+      <a-form-item :label="$t('i18n.a810520460')" :name="`${temp.type === 'add' ? 'pass' : 'pass-update'}`">
+        <a-input-password v-model:value="temp.pass" type="text" :placeholder="$t('i18n.fc5fb962da')" />
       </a-form-item>
-      <a-form-item :label="$t('pages.system.mail.a5b30280')" name="from">
+      <a-form-item :label="$t('i18n.5893fa2280')" name="from">
         <!-- <a-input v-model="temp.from" type="text" placeholder="发送方邮箱账号" /> -->
         <a-tooltip>
           <template #title
-            >{{ $t('pages.system.mail.e793cb27') }}
+            >{{ $t('i18n.6b4fd0ca47') }}
             <ul>
               <li>1. user@xxx.xx</li>
               <li>2. name &lt;user@xxx.xx&gt;</li>
@@ -38,7 +38,7 @@
           <a-auto-complete
             v-model:value="temp.from"
             :options="fromResult"
-            :placeholder="$t('pages.system.mail.62f7853a')"
+            :placeholder="$t('i18n.e9bd4484a7')"
             @search="handleFromSearch"
           >
             <template #option="{ value: val }">
@@ -48,54 +48,54 @@
           </a-auto-complete>
         </a-tooltip>
       </a-form-item>
-      <a-form-item :label="$t('pages.system.mail.2cfcf155')" name="sslEnable">
+      <a-form-item :label="$t('i18n.e95f9f6b6e')" name="sslEnable">
         <a-switch
           v-model:checked="temp.sslEnable"
-          :checked-children="$t('pages.system.mail.59a4a036')"
-          :un-checked-children="$t('pages.system.mail.49cbff90')"
+          :checked-children="$t('i18n.7854b52a88')"
+          :un-checked-children="$t('i18n.5c56a88945')"
         />
         <!-- <a-input v-show="temp.sslEnable" v-model="temp.socketFactoryPort" type="text" placeholder="SSL 端口" /> -->
       </a-form-item>
-      <a-form-item :label="$t('pages.system.mail.bf970307')" name="timeout">
+      <a-form-item :label="$t('i18n.56071a4fa6')" name="timeout">
         <a-input-number
           v-model:value="temp.timeout"
           style="width: 100%"
           :min="3"
           type="text"
-          :placeholder="$t('pages.system.mail.b9aa7fe4')"
+          :placeholder="$t('i18n.50f472ee4e')"
         />
       </a-form-item>
 
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
         <a-button type="primary" class="btn" :disabled="submitAble" @click="onSubmit">{{
-          $t('pages.system.mail.d0f0d36d')
+          $t('i18n.939d5345ad')
         }}</a-button>
       </a-form-item>
     </a-form>
     <a-alert
-      :message="$t('pages.system.mail.b07f7224')"
-      :description="$t('pages.system.mail.36924742')"
+      :message="$t('i18n.84597bf5bc')"
+      :description="$t('i18n.fdbac93380')"
       type="info"
       show-icon
     />
     <br />
     <a-alert
-      :message="$t('pages.system.mail.c4606860')"
+      :message="$t('i18n.8a49e2de39')"
       type="info"
-      :description="$t('pages.system.mail.ad258eaa')"
+      :description="$t('i18n.127de26370')"
       show-icon
     />
     <br />
     <a-alert
-      :message="$t('pages.system.mail.7980fa27')"
-      :description="$t('pages.system.mail.ff51a408')"
+      :message="$t('i18n.8be76af198')"
+      :description="$t('i18n.61c0f5345d')"
       type="info"
       show-icon
     />
     <br />
     <a-alert
-      :message="$t('pages.system.mail.d4257413')"
-      :description="$t('pages.system.mail.6983a03')"
+      :message="$t('i18n.0a54bd6883')"
+      :description="$t('i18n.197be96301')"
       type="info"
       show-icon
     />
@@ -113,16 +113,16 @@ export default {
         host: [
           {
             required: true,
-            message: this.$t('pages.system.mail.346e27f3'),
+            message: this.$t('i18n.4b0cb10d18'),
             trigger: 'blur'
           }
         ],
 
-        pass: [{ required: true, message: this.$t('pages.system.mail.dfc93456'), trigger: 'blur' }],
+        pass: [{ required: true, message: this.$t('i18n.e39ffe99e9'), trigger: 'blur' }],
         user: [
           {
             required: true,
-            message: this.$t('pages.system.mail.b3d780e9'),
+            message: this.$t('i18n.08b1fa1304'),
             trigger: 'blur'
           }
         ],
@@ -130,7 +130,7 @@ export default {
         from: [
           {
             required: true,
-            message: this.$t('pages.system.mail.770f5a72'),
+            message: this.$t('i18n.b39909964f'),
             trigger: 'blur'
           }
         ]
@@ -138,26 +138,26 @@ export default {
       fromResult: [],
       hostDataSource: [
         {
-          title: this.$t('pages.system.mail.78469e0c'),
+          title: this.$t('i18n.12dc402a82'),
           options: [
             {
-              title: this.$t('pages.system.mail.bc591b'),
+              title: this.$t('i18n.9b7419bc10'),
               value: 'smtp.qq.com'
             },
             {
-              title: this.$t('pages.system.mail.be33607a'),
+              title: this.$t('i18n.578ca5bcfd'),
               value: 'smtp.163.com'
             },
             {
-              title: this.$t('pages.system.mail.10672991'),
+              title: this.$t('i18n.3a536dcd7c'),
               value: 'smtp.126.com'
             },
             {
-              title: this.$t('pages.system.mail.615763f6'),
+              title: this.$t('i18n.fcb7a47b70'),
               value: 'smtp.mxhichina.com'
             },
             {
-              title: this.$t('pages.system.mail.7d77f35'),
+              title: this.$t('i18n.edb4275dcd'),
               value: 'smtp.gmail.com'
             }
           ]
@@ -166,45 +166,45 @@ export default {
 
       portDataSource: [
         {
-          title: this.$t('pages.system.mail.bc591b'),
+          title: this.$t('i18n.9b7419bc10'),
           options: [
             {
-              title: this.$t('pages.system.mail.bc591b'),
+              title: this.$t('i18n.9b7419bc10'),
               value: '587'
             },
             {
-              title: this.$t('pages.system.mail.c72b6b5d'),
+              title: this.$t('i18n.e6e5f26c69'),
               value: '465'
             }
           ]
         },
         {
-          title: this.$t('pages.system.mail.be33607a'),
+          title: this.$t('i18n.578ca5bcfd'),
           options: [
             {
-              title: this.$t('pages.system.mail.be33607a'),
+              title: this.$t('i18n.578ca5bcfd'),
               value: '25'
             },
             {
-              title: this.$t('pages.system.mail.99bb086c'),
+              title: this.$t('i18n.6b6d6937d7'),
               value: '465'
             }
           ]
         },
         {
-          title: this.$t('pages.system.mail.615763f6'),
+          title: this.$t('i18n.fcb7a47b70'),
           options: [
             {
-              title: this.$t('pages.system.mail.eb615a7b'),
+              title: this.$t('i18n.a7ddb00197'),
               value: '465'
             }
           ]
         },
         {
-          title: this.$t('pages.system.mail.86a4604f'),
+          title: this.$t('i18n.624f639f16'),
           options: [
             {
-              title: this.$t('pages.system.mail.3f0a8e8e'),
+              title: this.$t('i18n.c96b442dfb'),
               value: '465'
             }
           ]

@@ -204,19 +204,19 @@ export function dockerSwarmServicesDownloaLog(urlPrefix, id) {
             <a-select-option key="ORPHANED">已失联</a-select-option>
  */
 export const TASK_STATE = {
-  NEW: t('api.docker-swarm.d84cdb52'),
+  NEW: t('i18n.40da3fb58b'),
   // ALLOCATED: "已分配",
-  PENDING: t('api.docker-swarm.f7d829eb'),
-  ASSIGNED: t('api.docker-swarm.8192b104'),
-  ACCEPTED: t('api.docker-swarm.fc1391c9'),
-  PREPARING: t('api.docker-swarm.bda03d7d'),
-  READY: t('api.docker-swarm.2a21d3d2'),
-  STARTING: t('api.docker-swarm.7487690f'),
-  RUNNING: t('api.docker-swarm.942d3df3'),
-  COMPLETE: t('api.docker-swarm.c1d43085'),
-  SHUTDOWN: t('api.docker-swarm.24540de'),
-  FAILED: t('api.docker-swarm.d4ee19e9'),
-  REJECTED: t('api.docker-swarm.8582af3f'),
-  REMOVE: t('api.docker-swarm.65fcbd09'),
-  ORPHANED: t('api.docker-swarm.e99ab4ea')
+  PENDING: t('i18n.047109def4'),
+  ASSIGNED: t('i18n.fbfa6c18bf'),
+  ACCEPTED: t('i18n.5d459d550a'),
+  PREPARING: t('i18n.f76540a92e'),
+  READY: t('i18n.424a2ad8f7'),
+  STARTING: t('i18n.a34c24719b'),
+  RUNNING: t('i18n.e9e9373c6f'),
+  COMPLETE: t('i18n.f56c1d014e'),
+  SHUTDOWN: t('i18n.095e938e2a'),
+  FAILED: t('i18n.1c83d79715'),
+  REJECTED: t('i18n.7173f80900'),
+  REMOVE: t('i18n.86048b4fea'),
+  ORPHANED: t('i18n.788a3afc90')
 }

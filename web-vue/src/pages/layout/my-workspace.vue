@@ -2,7 +2,7 @@
   <div>
     <a-row type="flex" justify="center">
       <a-col :span="18">
-        <a-card :title="$t('pages.layout.my-workspace.8d20cb3f')" :bordered="true">
+        <a-card :title="$t('i18n.74bdccbb5d')" :bordered="true">
           <Container drag-handle-selector=".move" orientation="vertical" @drop="onDrop">
             <Draggable v-for="(element, index) in myWorkspaceList" :key="index">
               <a-row class="item-row">
@@ -10,13 +10,13 @@
                   <template v-if="element.edit">
                     <a-input-search
                       v-model:value="element.name"
-                      :placeholder="$t('pages.layout.my-workspace.1cbe4f2d')"
-                      :enter-button="$t('pages.layout.my-workspace.e8e9db25')"
+                      :placeholder="$t('i18n.6f32b1077d')"
+                      :enter-button="$t('i18n.38cf16f220')"
                       @search="editOk(element)"
                     />
                   </template>
                   <template v-else>
-                    <a-tooltip :title="`${$t('pages.layout.my-workspace.cf2692e4')}${element.originalName}`">
+                    <a-tooltip :title="`${$t('i18n.bd4e9d0ee2')}${element.originalName}`">
                       {{ element.name || element.originalName }}
                     </a-tooltip>
                   </template>
@@ -27,7 +27,7 @@
                     <a-button :disabled="element.edit" type="primary" size="small" @click="edit(element)">
                       <template #icon><EditOutlined /></template>
                     </a-button>
-                    <a-tooltip placement="left" :title="`${$t('pages.layout.my-workspace.a65a292c')}`" class="move">
+                    <a-tooltip placement="left" :title="`${$t('i18n.181e1ad17d')}`" class="move">
                       <MenuOutlined />
                     </a-tooltip>
                   </a-space>
@@ -37,9 +37,9 @@
           </Container>
           <a-col style="margin-top: 10px">
             <a-space>
-              <a-button type="primary" @click="save"> {{ $t('pages.layout.my-workspace.b033d8c5') }} </a-button>
+              <a-button type="primary" @click="save"> {{ $t('i18n.be5fbbe34c') }} </a-button>
               <a-button type="primary" @click="resetDefaultName">
-                {{ $t('pages.layout.my-workspace.d4d18984') }}
+                {{ $t('i18n.b650acd50b') }}
               </a-button>
             </a-space>
           </a-col>

@@ -89,14 +89,14 @@ export function triggerUrl(params) {
 }
 
 export const sourceMap = {
-  0: t('api.file-manager.file-storage.ae09d79d'),
-  1: t('api.file-manager.file-storage.fe7ede8b'),
-  2: t('api.file-manager.file-storage.65b21404'),
-  3: t('api.file-manager.file-storage.481e8a05')
+  0: t('i18n.d5a73b0c7f'),
+  1: t('i18n.fcba60e773'),
+  2: t('i18n.f26ef91424'),
+  3: t('i18n.d40b511510')
 }
 
 export const statusMap = {
-  0: t('api.file-manager.file-storage.d919f7c7'),
-  1: t('api.file-manager.file-storage.b46a531a'),
-  2: t('api.file-manager.file-storage.d43541fc')
+  0: t('i18n.2d455ce5cd'),
+  1: t('i18n.50940ed76f'),
+  2: t('i18n.af924a1a14')
 }

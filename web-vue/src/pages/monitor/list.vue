@@ -16,43 +16,43 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$t('pages.monitor.list.102669ac')"
+            :placeholder="$t('i18n.f976e8fcf4')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-select
             v-model:value="listQuery.status"
             allow-clear
-            :placeholder="$t('pages.monitor.list.ae501880')"
+            :placeholder="$t('i18n.a4f5cae8d2')"
             class="search-input-item"
           >
-            <a-select-option :value="1">{{ $t('pages.monitor.list.c467118a') }}</a-select-option>
-            <a-select-option :value="0">{{ $t('pages.monitor.list.cfb79b99') }}</a-select-option>
+            <a-select-option :value="1">{{ $t('i18n.cc42dd3170') }}</a-select-option>
+            <a-select-option :value="0">{{ $t('i18n.b15d91274e') }}</a-select-option>
           </a-select>
           <a-select
             v-model:value="listQuery.autoRestart"
             allow-clear
-            :placeholder="$t('pages.monitor.list.dddb1bfb')"
+            :placeholder="$t('i18n.75528c19c7')"
             class="search-input-item"
           >
-            <a-select-option :value="1">{{ $t('pages.monitor.list.d2fbce36') }}</a-select-option>
-            <a-select-option :value="0">{{ $t('pages.monitor.list.1c77d6fb') }}</a-select-option>
+            <a-select-option :value="1">{{ $t('i18n.0a60ac8f02') }}</a-select-option>
+            <a-select-option :value="0">{{ $t('i18n.c9744f45e7') }}</a-select-option>
           </a-select>
           <a-select
             v-model:value="listQuery.alarm"
             allow-clear
-            :placeholder="$t('pages.monitor.list.95aeba54')"
+            :placeholder="$t('i18n.db4470d98d')"
             class="search-input-item"
           >
-            <a-select-option :value="1">{{ $t('pages.monitor.list.25660a73') }}</a-select-option>
-            <a-select-option :value="0">{{ $t('pages.monitor.list.8d356eff') }}</a-select-option>
+            <a-select-option :value="1">{{ $t('i18n.11957d12e4') }}</a-select-option>
+            <a-select-option :value="0">{{ $t('i18n.bb667fdb2a') }}</a-select-option>
           </a-select>
-          <a-tooltip :title="$t('pages.monitor.list.2c53fa4f')">
+          <a-tooltip :title="$t('i18n.4838a3bd20')">
             <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('pages.monitor.list.53c2763c')
+              $t('i18n.e5f71fc31e')
             }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">{{ $t('pages.monitor.list.7d46652a') }}</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $t('i18n.66ab5e9f24') }}</a-button>
         </a-space>
       </template>
       <template #bodyCell="{ column, text, record }">
@@ -66,8 +66,8 @@
             size="small"
             :checked="text"
             disabled
-            :checked-children="$t('pages.monitor.list.c467118a')"
-            :un-checked-children="$t('pages.monitor.list.cfb79b99')"
+            :checked-children="$t('i18n.cc42dd3170')"
+            :un-checked-children="$t('i18n.b15d91274e')"
           />
         </template>
         <template v-else-if="column.dataIndex === 'autoRestart'">
@@ -75,8 +75,8 @@
             size="small"
             :checked="text"
             disabled
-            :checked-children="$t('pages.monitor.list.d2fbce36')"
-            :un-checked-children="$t('pages.monitor.list.1c77d6fb')"
+            :checked-children="$t('i18n.0a60ac8f02')"
+            :un-checked-children="$t('i18n.c9744f45e7')"
           />
         </template>
         <template v-else-if="column.dataIndex === 'alarm'">
@@ -84,18 +84,18 @@
             size="small"
             :checked="text"
             disabled
-            :checked-children="$t('pages.monitor.list.25660a73')"
-            :un-checked-children="$t('pages.monitor.list.8d356eff')"
+            :checked-children="$t('i18n.11957d12e4')"
+            :un-checked-children="$t('i18n.bb667fdb2a')"
           />
         </template>
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button type="primary" size="small" @click="handleEdit(record)">{{
-              $t('pages.monitor.list.64603c01')
+              $t('i18n.95b351c862')
             }}</a-button>
             <a-button type="primary" danger size="small" @click="handleDelete(record)">{{
-              $t('pages.monitor.list.dd20d11c')
+              $t('i18n.2f4aaddde3')
             }}</a-button>
           </a-space>
         </template>
@@ -108,29 +108,29 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="60%"
-      :title="$t('pages.monitor.list.d6117b62')"
+      :title="$t('i18n.ebc2a1956b')"
       :mask-closable="false"
       @ok="handleEditMonitorOk"
     >
       <a-form ref="editMonitorForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$t('pages.monitor.list.102669ac')" name="name">
-          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('pages.monitor.list.102669ac')" />
+        <a-form-item :label="$t('i18n.f976e8fcf4')" name="name">
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n.f976e8fcf4')" />
         </a-form-item>
 
-        <a-form-item :label="$t('pages.monitor.list.ae501880')" name="status">
+        <a-form-item :label="$t('i18n.a4f5cae8d2')" name="status">
           <a-space size="large">
             <a-switch
               v-model:checked="temp.status"
-              :checked-children="$t('pages.monitor.list.726bd72c')"
-              :un-checked-children="$t('pages.monitor.list.8ca0a6dc')"
+              :checked-children="$t('i18n.8493205602')"
+              :un-checked-children="$t('i18n.d58a55bcee')"
             />
             <div>
-              {{ $t('pages.monitor.list.dddb1bfb') }}:
+              {{ $t('i18n.75528c19c7') }}:
               <a-form-item-rest>
                 <a-switch
                   v-model:checked="temp.autoRestart"
-                  :checked-children="$t('pages.monitor.list.726bd72c')"
-                  :un-checked-children="$t('pages.monitor.list.8ca0a6dc')"
+                  :checked-children="$t('i18n.8493205602')"
+                  :un-checked-children="$t('i18n.d58a55bcee')"
                 />
               </a-form-item-rest>
             </div>
@@ -150,21 +150,21 @@
             </a-radio-group>
           </a-form-item> -->
 
-        <a-form-item :label="$t('pages.monitor.list.1283816f')" name="execCron">
+        <a-form-item :label="$t('i18n.67e7f9e541')" name="execCron">
           <a-auto-complete
             v-model:value="temp.execCron"
-            :placeholder="$t('pages.monitor.list.c2df5e27')"
+            :placeholder="$t('i18n.5dff0d31d0')"
             :options="CRON_DATA_SOURCE"
           >
             <template #option="item"> {{ item.title }} {{ item.value }} </template>
           </a-auto-complete>
         </a-form-item>
-        <a-form-item :label="$t('pages.monitor.list.58d3f8a0')" name="projects">
+        <a-form-item :label="$t('i18n.0e55a594fd')" name="projects">
           <a-select
             v-model:value="projectKeys"
             option-label-prop="label"
             mode="multiple"
-            :placeholder="$t('pages.monitor.list.93944349')"
+            :placeholder="$t('i18n.ac5f3bfa5b')"
             show-search
             :filter-option="
               (input, option) => {
@@ -188,7 +188,7 @@
                 :label="`${project.name} - ${project.runMode}`"
                 :disabled="!noFileModes.includes(project.runMode)"
               >
-                {{ $t('pages.monitor.list.3d3c5ee3') }}{{ project.nodeName }}{{ $t('pages.monitor.list.7ee15942')
+                {{ $t('i18n.0341329b1d') }}{{ project.nodeName }}{{ $t('i18n.5942e7ebd0')
                 }}{{ project.name }} -
                 {{ project.runMode }}
               </a-select-option>
@@ -198,15 +198,15 @@
         <a-form-item name="notifyUser" class="jpom-notify">
           <template #label>
             <a-tooltip>
-              {{ $t('pages.monitor.list.4c669a42') }}
-              <template #title> {{ $t('pages.monitor.list.e2db3920') }} </template>
+              {{ $t('i18n.52409da520') }}
+              <template #title> {{ $t('i18n.067eb0fa04') }} </template>
               <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
           <a-transfer
             :data-source="userList"
             :lazy="false"
-            :titles="[$t('pages.monitor.list.b3ef02d8'), $t('pages.monitor.list.a27bd430')]"
+            :titles="[$t('i18n.43d229617a'), $t('i18n.f08afd1f82')]"
             show-search
             :list-style="{
               width: '18vw'
@@ -217,7 +217,7 @@
           >
             <template #render="item">
               <template v-if="item.disabled">
-                <a-tooltip :title="$t('pages.monitor.list.1bb4f680')">
+                <a-tooltip :title="$t('i18n.44876fc0e7')">
                   <WarningTwoTone />
                   {{ item.name }}
                 </a-tooltip>
@@ -234,18 +234,18 @@
               WebHooks
               <template #title>
                 <ul>
-                  <li>{{ $t('pages.monitor.list.59adf155') }}</li>
-                  <li>{{ $t('pages.monitor.list.68ad1baf') }}</li>
+                  <li>{{ $t('i18n.74dd7594fc') }}</li>
+                  <li>{{ $t('i18n.d1f56b0a7e') }}</li>
                   <li>
-                    runStatus {{ $t('pages.monitor.list.481bf10e') }}({{ $t('pages.monitor.list.6af45b93') }}),false
-                    {{ $t('pages.monitor.list.926b691b') }}({{ $t('pages.monitor.list.cfdf8071') }})
+                    runStatus {{ $t('i18n.808c18d2bb') }}({{ $t('i18n.ad9788b17d') }}),false
+                    {{ $t('i18n.22e4da4998') }}({{ $t('i18n.2b52fa609c') }})
                   </li>
                 </ul>
               </template>
               <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
-          <a-input v-model:value="temp.webhook" :placeholder="$t('pages.monitor.list.76e16851')" />
+          <a-input v-model:value="temp.webhook" :placeholder="$t('i18n.77373db7d8')" />
         </a-form-item>
       </a-form>
     </CustomModal>
@@ -279,38 +279,38 @@ export default {
       editMonitorVisible: false,
       columns: [
         {
-          title: this.$t('pages.monitor.list.bb769c1d'),
+          title: this.$t('i18n.d7ec2d3fea'),
           dataIndex: 'name',
           ellipsis: true
         },
         {
-          title: this.$t('pages.monitor.list.1283816f'),
+          title: this.$t('i18n.67e7f9e541'),
           dataIndex: 'execCron',
           ellipsis: true
         },
         {
-          title: this.$t('pages.monitor.list.ae501880'),
+          title: this.$t('i18n.a4f5cae8d2'),
           dataIndex: 'status',
           ellipsis: true,
 
           width: 120
         },
         {
-          title: this.$t('pages.monitor.list.dddb1bfb'),
+          title: this.$t('i18n.75528c19c7'),
           dataIndex: 'autoRestart',
           ellipsis: true,
 
           width: 120
         },
         {
-          title: this.$t('pages.monitor.list.95aeba54'),
+          title: this.$t('i18n.db4470d98d'),
           dataIndex: 'alarm',
           ellipsis: true,
 
           width: 120
         },
         {
-          title: this.$t('pages.monitor.list.916db24b'),
+          title: this.$t('i18n.9baca0054e'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           align: 'center',
@@ -318,7 +318,7 @@ export default {
           width: 120
         },
         {
-          title: this.$t('pages.monitor.list.fd921623'),
+          title: this.$t('i18n.1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           customRender: ({ text }) => {
@@ -330,7 +330,7 @@ export default {
           width: 180
         },
         {
-          title: this.$t('pages.monitor.list.3bb962bf'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
           ellipsis: true,
           fixed: 'right',
@@ -342,7 +342,7 @@ export default {
         name: [
           {
             required: true,
-            message: this.$t('pages.monitor.list.4084f8f4'),
+            message: this.$t('i18n.c68dc88c51'),
             trigger: 'blur'
           }
         ]
@@ -400,7 +400,7 @@ export default {
 
             this.nodeProjectList = res.data.map((item) => {
               let nodeInfo = res1.data.filter((nodeItem) => nodeItem.id === item.nodeId)
-              item.nodeName = nodeInfo.length > 0 ? nodeInfo[0].name : this.$t('pages.monitor.list.ca1cdfa6')
+              item.nodeName = nodeInfo.length > 0 ? nodeInfo[0].name : this.$t('i18n.1622dc9b6b')
               return item
             })
             this.nodeProjectGroupList = itemGroupBy(this.nodeProjectList, 'nodeId', 'node', 'projects')
@@ -481,7 +481,7 @@ export default {
 
         if (targetKeysTemp.length <= 0 && !this.temp.webhook) {
           $notification.warn({
-            message: this.$t('pages.monitor.list.4f5685c5')
+            message: this.$t('i18n.6c24533675')
           })
           return false
         }
@@ -514,11 +514,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$t('pages.monitor.list.b22d55a0'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.monitor.list.6a11a0dd'),
-        okText: this.$t('pages.monitor.list.e8e9db25'),
-        cancelText: this.$t('pages.monitor.list.b12468e9'),
+        content: this.$t('i18n.20e0b90021'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return deleteMonitor(record.id).then((res) => {
             if (res.code === 200) {

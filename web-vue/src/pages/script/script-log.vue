@@ -17,7 +17,7 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%scriptName%']"
-            :placeholder="$t('pages.script.script-log.3e34ec28')"
+            :placeholder="$t('i18n.d7ec2d3fea')"
             allow-clear
             class="search-input-item"
             @press-enter="loadData"
@@ -36,7 +36,7 @@
               }
             "
             allow-clear
-            :placeholder="$t('pages.script.script-log.43766a5b')"
+            :placeholder="$t('i18n.ff9814bf6b')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
@@ -55,7 +55,7 @@
               }
             "
             allow-clear
-            :placeholder="$t('pages.script.script-log.6e06fe4f')"
+            :placeholder="$t('i18n.3fea7ca76c')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
@@ -64,7 +64,7 @@
             allow-clear
             input-read-only
             :show-time="{ format: 'HH:mm:ss' }"
-            :placeholder="[$t('pages.script.script-log.ac9ef5f5'), $t('pages.script.script-log.9376939d')]"
+            :placeholder="[$t('i18n.7fbc0f9aae'), $t('i18n.cbc44b5663')]"
             format="YYYY-MM-DD HH:mm:ss"
             value-format="YYYY-MM-DD HH:mm:ss"
             @change="
@@ -77,9 +77,9 @@
               }
             "
           />
-          <a-tooltip :title="$t('pages.script.script-log.983f7ae3')">
+          <a-tooltip :title="$t('i18n.4838a3bd20')">
             <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('pages.script.script-log.53c2763c')
+              $t('i18n.e5f71fc31e')
             }}</a-button>
           </a-tooltip>
         </a-space>
@@ -96,11 +96,11 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'triggerExecType'">
-          <span>{{ triggerExecTypeMap[text] || $t('pages.script.script-log.ca1cdfa6') }}</span>
+          <span>{{ triggerExecTypeMap[text] || $t('i18n.1622dc9b6b') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'workspaceId'">
-          <a-tag v-if="text === 'GLOBAL'">{{ $t('pages.script.script-log.f372618') }}</a-tag>
-          <a-tag v-else>{{ $t('pages.script.script-log.afacc4cb') }}</a-tag>
+          <a-tag v-if="text === 'GLOBAL'">{{ $t('i18n.2be75b1044') }}</a-tag>
+          <a-tag v-else>{{ $t('i18n.98d69f8b62') }}</a-tag>
         </template>
         <template v-else-if="column.dataIndex === 'createTimeMillis'">
           <a-tooltip :title="`${parseTime(record.createTimeMillis)}`">
@@ -108,7 +108,7 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'exitCode'">
-          <a-tag v-if="text == 0" color="green">{{ $t('pages.script.script-log.83aa7d3') }}</a-tag>
+          <a-tag v-if="text == 0" color="green">{{ $t('i18n.330363dfc5') }}</a-tag>
           <a-tag v-else color="orange">{{ text || '-' }}</a-tag>
         </template>
         <template v-else-if="column.dataIndex === 'status'">
@@ -117,11 +117,11 @@
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button type="primary" size="small" @click="viewLog(record)">{{
-              $t('pages.script.script-log.b51c8bb3')
+              $t('i18n.0ea78e4279')
             }}</a-button>
 
             <a-button type="primary" danger size="small" @click="handleDelete(record)">{{
-              $t('pages.script.script-log.dd20d11c')
+              $t('i18n.2f4aaddde3')
             }}</a-button>
           </a-space>
         </template>
@@ -168,51 +168,51 @@ export default {
       logVisible: 0,
       columns: [
         {
-          title: this.$t('pages.script.script-log.3e34ec28'),
+          title: this.$t('i18n.d7ec2d3fea'),
           dataIndex: 'scriptName',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$t('pages.script.script-log.40fb635f'),
+          title: this.$t('i18n.70b3635aa3'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           ellipsis: true,
           width: '160px'
         },
         {
-          title: this.$t('pages.script.script-log.43766a5b'),
+          title: this.$t('i18n.ff9814bf6b'),
           dataIndex: 'triggerExecType',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$t('pages.script.script-log.6e06fe4f'),
+          title: this.$t('i18n.3fea7ca76c'),
           dataIndex: 'status',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$t('pages.script.script-log.3debe02b'),
+          title: this.$t('i18n.2a0bea27c4'),
           dataIndex: 'workspaceId',
           ellipsis: true,
 
           width: '90px'
         },
         {
-          title: this.$t('pages.script.script-log.cdb6dc6b'),
+          title: this.$t('i18n.3fb63afb4e'),
           dataIndex: 'exitCode',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$t('pages.script.script-log.cda0e062'),
+          title: this.$t('i18n.a497562c8e'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           width: '100px'
         },
         {
-          title: this.$t('pages.script.script-log.a0fe2109'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
           align: 'center',
           fixed: 'right',
@@ -251,11 +251,11 @@ export default {
     },
     handleDelete(record) {
       $confirm({
-        title: this.$t('pages.script.script-log.e422d0eb'),
-        content: this.$t('pages.script.script-log.2c8deda8'),
+        title: this.$t('i18n.c4535759ee'),
+        content: this.$t('i18n.7b8e7d4abc'),
         zIndex: 1009,
-        okText: this.$t('pages.script.script-log.e8e9db25'),
-        cancelText: this.$t('pages.script.script-log.b12468e9'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return scriptDel({
             id: record.scriptId,

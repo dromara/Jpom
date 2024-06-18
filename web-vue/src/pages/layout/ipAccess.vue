@@ -4,9 +4,9 @@
       <a-card hoverable class="card">
         <a-card-meta>
           <template #description>
-            <a-result status="error" :title="$t('pages.layout.ipAccess.af7fa63c')">
+            <a-result status="error" :title="$t('i18n.2245cf01a3')">
               <template #extra>
-                <a-button> {{ $t('pages.layout.ipAccess.3676f786') }} </a-button>
+                <a-button> {{ $t('i18n.bb9ef827bf') }} </a-button>
               </template>
             </a-result>
           </template>

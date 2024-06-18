@@ -3,13 +3,13 @@
     <a-collapse v-model:activeKey="activeKey">
       <a-collapse-panel key="1">
         <template #header>
-          {{ $t('pages.tools.network.f772d2f4') }}
+          {{ $t('i18n.0e44ae17ae') }}
           <a-tooltip>
             <template #title>
               <ul>
-                <li>A{{ $t('pages.tools.network.54d58ede') }}.0.0.0-10.255.255.255</li>
-                <li>B{{ $t('pages.tools.network.34ab0297') }}.16.0.0-172.31.255.255</li>
-                <li>C{{ $t('pages.tools.network.aa282f19') }}.168.0.0-192.168.255.255</li>
+                <li>A{{ $t('i18n.8be868ba1b') }}.0.0.0-10.255.255.255</li>
+                <li>B{{ $t('i18n.a66644ff47') }}.16.0.0-172.31.255.255</li>
+                <li>C{{ $t('i18n.768e843a3e') }}.168.0.0-192.168.255.255</li>
               </ul>
             </template>
             <QuestionCircleOutlined />
@@ -27,15 +27,15 @@
               <template #header>
                 <div>
                   {{ item.name }} <a-tag>{{ item.displayName }}</a-tag>
-                  <a-tag v-if="item.virtual">{{ $t('pages.tools.network.578245d6') }}</a-tag>
-                  <a-tag v-if="item.loopback">{{ $t('pages.tools.network.e9b07e4c') }}</a-tag>
+                  <a-tag v-if="item.virtual">{{ $t('i18n.b60352bc4f') }}</a-tag>
+                  <a-tag v-if="item.loopback">{{ $t('i18n.4393b5e25b') }}</a-tag>
                 </div>
               </template>
             </a-list>
           </template>
         </a-space>
       </a-collapse-panel>
-      <a-collapse-panel key="ping" :header="$t('pages.tools.network.da1383cd')">
+      <a-collapse-panel key="ping" :header="$t('i18n.bc4b0fd88a')">
         <a-form
           ref="form"
           :model="pingData"
@@ -44,50 +44,50 @@
           :wrapper-col="{ span: 18 }"
           @finish="onPingSubmit"
         >
-          <a-form-item :label="$t('pages.tools.network.d193e148')" name="">
-            <a-alert :message="$t('pages.tools.network.2ae8180f')" banner />
+          <a-form-item :label="$t('i18n.02d9819dda')" name="">
+            <a-alert :message="$t('i18n.1dc9514548')" banner />
           </a-form-item>
           <a-form-item label="HOST" name="host">
             <a-input
               v-model:value="pingData.host"
-              :placeholder="$t('pages.tools.network.af3081d3')"
+              :placeholder="$t('i18n.49d569f255')"
               @change="
                 () => {
                   pingReulst = {}
                 }
               "
             />
-            <template #help>{{ $t('pages.tools.network.61d5175d') }} </template>
+            <template #help>{{ $t('i18n.d373338541') }} </template>
           </a-form-item>
-          <a-form-item :label="$t('pages.tools.network.bb9a46b6')" name="timeout">
+          <a-form-item :label="$t('i18n.84b28944b7')" name="timeout">
             <a-input-number
               v-model:value="pingData.timeout"
               :min="1"
-              :placeholder="$t('pages.tools.network.683170cf')"
+              :placeholder="$t('i18n.6be30eaad7')"
               style="width: 100%"
             />
           </a-form-item>
 
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
             <a-button type="primary" html-type="submit" :loading="pingLoading">
-              {{ $t('pages.tools.network.b868ec22') }}
+              {{ $t('i18n.db06c78d1e') }}
             </a-button>
           </a-form-item>
           <template v-if="Object.keys(pingReulst).length">
-            <a-form-item :label="$t('pages.tools.network.66c5a40')" name="result">
-              <a-tag v-if="pingReulst.ping" color="green">{{ $t('pages.tools.network.9d77d967') }}</a-tag>
-              <a-tag v-else color="red">{{ $t('pages.tools.network.d3ec0514') }}</a-tag>
+            <a-form-item :label="$t('i18n.5ad7f5a8b2')" name="result">
+              <a-tag v-if="pingReulst.ping" color="green">{{ $t('i18n.330363dfc5') }}</a-tag>
+              <a-tag v-else color="red">{{ $t('i18n.acd5cb847a') }}</a-tag>
             </a-form-item>
-            <a-form-item :label="$t('pages.tools.network.ecc9c507')" name="labels">
+            <a-form-item :label="$t('i18n.226b091218')" name="labels">
               <a-tag v-for="(item, index) in pingReulst.labels" :key="index">{{ item }}</a-tag>
             </a-form-item>
-            <a-form-item v-if="pingReulst.originalIP" :label="$t('pages.tools.network.35ef11ff')" name="originalIP">
+            <a-form-item v-if="pingReulst.originalIP" :label="$t('i18n.1b5266365f')" name="originalIP">
               {{ pingReulst.originalIP }}
             </a-form-item>
           </template>
         </a-form>
       </a-collapse-panel>
-      <a-collapse-panel key="telnet" :header="$t('pages.tools.network.c38573a0')">
+      <a-collapse-panel key="telnet" :header="$t('i18n.97d08b02e7')">
         <a-form
           ref="form"
           :model="telnetData"
@@ -99,16 +99,16 @@
           <a-form-item label="HOST" name="host">
             <a-input
               v-model:value="telnetData.host"
-              :placeholder="$t('pages.tools.network.af3081d3')"
+              :placeholder="$t('i18n.49d569f255')"
               @change="
                 () => {
                   telnetReulst = {}
                 }
               "
             />
-            <template #help>{{ $t('pages.tools.network.61d5175d') }} </template>
+            <template #help>{{ $t('i18n.d373338541') }} </template>
           </a-form-item>
-          <a-form-item :label="$t('pages.tools.network.a6c4bfd7')" name="port">
+          <a-form-item :label="$t('i18n.c76cfefe72')" name="port">
             <a-auto-complete
               v-model:value="telnetData.port"
               :options="UniversalPort"
@@ -122,36 +122,36 @@
                 v-model:value="telnetData.port"
                 :min="0"
                 :max="65535"
-                :placeholder="$t('pages.tools.network.ed675c79')"
+                :placeholder="$t('i18n.82416714a8')"
                 :controls="false"
               />
               <template #option="item"> {{ item.title }} {{ item.value }} </template>
               <template #clearIcon>1</template>
             </a-auto-complete>
           </a-form-item>
-          <a-form-item :label="$t('pages.tools.network.bb9a46b6')" name="timeout">
+          <a-form-item :label="$t('i18n.84b28944b7')" name="timeout">
             <a-input-number
               v-model:value="telnetData.timeout"
               :min="1"
-              :placeholder="$t('pages.tools.network.683170cf')"
+              :placeholder="$t('i18n.6be30eaad7')"
               style="width: 100%"
             />
           </a-form-item>
 
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
             <a-button type="primary" html-type="submit" :loading="telnetLoading">
-              {{ $t('pages.tools.network.b868ec22') }}
+              {{ $t('i18n.db06c78d1e') }}
             </a-button>
           </a-form-item>
           <template v-if="Object.keys(telnetReulst).length">
-            <a-form-item :label="$t('pages.tools.network.66c5a40')" name="result">
-              <a-tag v-if="telnetReulst.open" color="green">{{ $t('pages.tools.network.9d77d967') }}</a-tag>
-              <a-tag v-else color="red">{{ $t('pages.tools.network.d3ec0514') }}</a-tag>
+            <a-form-item :label="$t('i18n.5ad7f5a8b2')" name="result">
+              <a-tag v-if="telnetReulst.open" color="green">{{ $t('i18n.330363dfc5') }}</a-tag>
+              <a-tag v-else color="red">{{ $t('i18n.acd5cb847a') }}</a-tag>
             </a-form-item>
-            <a-form-item :label="$t('pages.tools.network.ecc9c507')" name="labels">
+            <a-form-item :label="$t('i18n.226b091218')" name="labels">
               <a-tag v-for="(item, index) in telnetReulst.labels" :key="index">{{ item }}</a-tag>
             </a-form-item>
-            <a-form-item v-if="telnetReulst.originalIP" :label="$t('pages.tools.network.35ef11ff')" name="originalIP">
+            <a-form-item v-if="telnetReulst.originalIP" :label="$t('i18n.1b5266365f')" name="originalIP">
               {{ telnetReulst.originalIP }}
             </a-form-item>
           </template>
@@ -170,15 +170,15 @@ const activeKey = ref(['ping', 'telnet'])
 
 const UniversalPort = ref([
   {
-    title: $t('pages.tools.network.a6d443ad'),
+    title: $t('i18n.6a922e0fb6'),
     value: '2123'
   },
   {
-    title: $t('pages.tools.network.f8fe6a6e'),
+    title: $t('i18n.9af372557e'),
     value: '2122'
   },
   {
-    title: `SSH${$t('pages.tools.network.b5a97ef7')}`,
+    title: `SSH${$t('i18n.4722bc0c56')}`,
     value: '22'
   },
   {
@@ -203,7 +203,7 @@ const pingRules = ref({
   host: [
     {
       required: true,
-      message: $t('pages.tools.network.af3081d3'),
+      message: $t('i18n.49d569f255'),
       trigger: 'blur'
     }
   ]
@@ -237,7 +237,7 @@ const telnetRules = ref({
   host: [
     {
       required: true,
-      message: $t('pages.tools.network.af3081d3'),
+      message: $t('i18n.49d569f255'),
       trigger: 'blur'
     }
   ],
@@ -245,7 +245,7 @@ const telnetRules = ref({
   port: [
     {
       required: true,
-      message: $t('pages.tools.network.88a272b2'),
+      message: $t('i18n.9302bc7838'),
       trigger: 'blur'
     }
   ]

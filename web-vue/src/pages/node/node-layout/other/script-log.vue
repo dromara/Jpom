@@ -17,7 +17,7 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$t('pages.node.node-layout.other.script-log.bb769c1d')"
+            :placeholder="$t('i18n.d7ec2d3fea')"
             allow-clear
             class="search-input-item"
           />
@@ -35,7 +35,7 @@
               }
             "
             allow-clear
-            :placeholder="$t('pages.node.node-layout.other.script-log.4abba04f')"
+            :placeholder="$t('i18n.ff9814bf6b')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
@@ -45,8 +45,8 @@
             input-read-only
             :show-time="{ format: 'HH:mm:ss' }"
             :placeholder="[
-              $t('pages.node.node-layout.other.script-log.ac9ef5f5'),
-              $t('pages.node.node-layout.other.script-log.9376939d')
+              $t('i18n.7fbc0f9aae'),
+              $t('i18n.cbc44b5663')
             ]"
             format="YYYY-MM-DD HH:mm:ss"
             value-format="YYYY-MM-DD HH:mm:ss"
@@ -60,17 +60,17 @@
               }
             "
           />
-          <a-tooltip :title="$t('pages.node.node-layout.other.script-log.c2e3463f')">
+          <a-tooltip :title="$t('i18n.4838a3bd20')">
             <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('pages.node.node-layout.other.script-log.53c2763c')
+              $t('i18n.e5f71fc31e')
             }}</a-button>
           </a-tooltip>
           <a-tooltip>
             <template #title>
-              <div>{{ $t('pages.node.node-layout.other.script-log.66889710') }}</div>
+              <div>{{ $t('i18n.52b6b488e2') }}</div>
               <div>
                 <ul>
-                  <li>{{ $t('pages.node.node-layout.other.script-log.b709d0b4') }}</li>
+                  <li>{{ $t('i18n.47bb635a5c') }}</li>
                 </ul>
               </div>
             </template>
@@ -91,11 +91,11 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'triggerExecType'">
-          <span>{{ triggerExecTypeMap[text] || $t('pages.node.node-layout.other.script-log.ca1cdfa6') }}</span>
+          <span>{{ triggerExecTypeMap[text] || $t('i18n.1622dc9b6b') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'workspaceId'">
-          <a-tag v-if="text === 'GLOBAL'">{{ $t('pages.node.node-layout.other.script-log.8a2fc9dd') }}</a-tag>
-          <a-tag v-else>{{ $t('pages.node.node-layout.other.script-log.afacc4cb') }}</a-tag>
+          <a-tag v-if="text === 'GLOBAL'">{{ $t('i18n.2be75b1044') }}</a-tag>
+          <a-tag v-else>{{ $t('i18n.98d69f8b62') }}</a-tag>
         </template>
         <template v-else-if="column.dataIndex === 'createTimeMillis'">
           <a-tooltip :title="`${parseTime(record.createTimeMillis)}`">
@@ -105,11 +105,11 @@
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button size="small" type="primary" @click="viewLog(record)">{{
-              $t('pages.node.node-layout.other.script-log.b51c8bb3')
+              $t('i18n.0ea78e4279')
             }}</a-button>
 
             <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-              $t('pages.node.node-layout.other.script-log.a58214f0')
+              $t('i18n.2f4aaddde3')
             }}</a-button>
           </a-space>
         </template>
@@ -164,38 +164,38 @@ export default {
       logVisible: 0,
       columns: [
         {
-          title: this.$t('pages.node.node-layout.other.script-log.bb769c1d'),
+          title: this.$t('i18n.d7ec2d3fea'),
           dataIndex: 'scriptName',
           ellipsis: true,
           width: 100
         },
         {
-          title: this.$t('pages.node.node-layout.other.script-log.40fb635f'),
+          title: this.$t('i18n.70b3635aa3'),
           dataIndex: 'createTimeMillis',
           ellipsis: true,
           width: '160px'
         },
         {
-          title: this.$t('pages.node.node-layout.other.script-log.4abba04f'),
+          title: this.$t('i18n.ff9814bf6b'),
           dataIndex: 'triggerExecType',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$t('pages.node.node-layout.other.script-log.3debe02b'),
+          title: this.$t('i18n.2a0bea27c4'),
           dataIndex: 'workspaceId',
           ellipsis: true,
 
           width: '90px'
         },
         {
-          title: this.$t('pages.node.node-layout.other.script-log.cda0e062'),
+          title: this.$t('i18n.a497562c8e'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           width: 100
         },
         {
-          title: this.$t('pages.node.node-layout.other.script-log.3bb962bf'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
           align: 'center',
 
@@ -236,11 +236,11 @@ export default {
     },
     handleDelete(record) {
       $confirm({
-        title: this.$t('pages.node.node-layout.other.script-log.b22d55a0'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.node.node-layout.other.script-log.2c8deda8'),
-        okText: this.$t('pages.node.node-layout.other.script-log.e8e9db25'),
-        cancelText: this.$t('pages.node.node-layout.other.script-log.b12468e9'),
+        content: this.$t('i18n.7b8e7d4abc'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return scriptDel({
             nodeId: this.nodeId,

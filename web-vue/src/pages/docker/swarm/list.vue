@@ -1,10 +1,10 @@
 <template>
   <div>
     <template v-if="useSuggestions">
-      <a-result :title="$t('pages.docker.swarm.list.67b40edb')" :sub-title="$t('pages.docker.swarm.list.b037a0fc')">
+      <a-result :title="$t('i18n.55e690333a')" :sub-title="$t('i18n.9878af9db5')">
         <template #extra>
           <router-link to="/system/assets/docker-list">
-            <a-button key="console" type="primary">{{ $t('pages.docker.swarm.list.356927eb') }}</a-button></router-link
+            <a-button key="console" type="primary">{{ $t('i18n.6dcf6175d8') }}</a-button></router-link
           >
         </template>
       </a-result>
@@ -15,7 +15,7 @@
       default-auto-refresh
       :auto-refresh-time="5"
       table-name="docker-swarm-list"
-      :empty-description="$t('pages.docker.swarm.list.e33acb4f')"
+      :empty-description="$t('i18n.ab9c827798')"
       :active-page="activePage"
       size="middle"
       :data-source="list"
@@ -32,19 +32,19 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$t('pages.docker.swarm.list.3e34ec28')"
+            :placeholder="$t('i18n.d7ec2d3fea')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%tag%']"
-            :placeholder="$t('pages.docker.swarm.list.a4954c1c')"
+            :placeholder="$t('i18n.14d342362f')"
             class="search-input-item"
             @press-enter="loadData"
           />
-          <a-tooltip :title="$t('pages.docker.swarm.list.1bfed54a')">
+          <a-tooltip :title="$t('i18n.4838a3bd20')">
             <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('pages.docker.swarm.list.53c2763c')
+              $t('i18n.e5f71fc31e')
             }}</a-button>
           </a-tooltip>
         </a-space>
@@ -59,15 +59,15 @@
         <template v-else-if="column.dataIndex instanceof Array && column.dataIndex.includes('status')">
           <template v-if="record.machineDocker">
             <a-tag v-if="record.machineDocker.status === 1" color="green">{{
-              $t('pages.docker.swarm.list.c6b7c57f')
+              $t('i18n.fd6e80f1e0')
             }}</a-tag>
             <a-tooltip v-else :title="record.machineDocker.failureMsg">
-              <a-tag color="red">{{ $t('pages.docker.swarm.list.921c8b81') }}</a-tag>
+              <a-tag color="red">{{ $t('i18n.757a730c9e') }}</a-tag>
             </a-tooltip>
           </template>
 
-          <a-tooltip v-else :title="$t('pages.docker.swarm.list.f27fdcf3')">
-            <a-tag color="red">{{ $t('pages.docker.swarm.list.6e514532') }}</a-tag>
+          <a-tooltip v-else :title="$t('i18n.33675a9bb3')">
+            <a-tag color="red">{{ $t('i18n.5169b9af9d') }}</a-tag>
           </a-tooltip>
         </template>
 
@@ -79,30 +79,30 @@
                 :disabled="record.machineDocker.status !== 1"
                 type="primary"
                 @click="handleConsole(record, 'server')"
-                >{{ $t('pages.docker.swarm.list.13ea9c07') }}</a-button
+                >{{ $t('i18n.47d68cd0f4') }}</a-button
               >
               <a-button
                 size="small"
                 :disabled="record.machineDocker.status !== 1"
                 type="primary"
                 @click="handleConsole(record, 'node')"
-                >{{ $t('pages.docker.swarm.list.e5687a6b') }}</a-button
+                >{{ $t('i18n.3bf3c0a8d6') }}</a-button
               >
             </template>
             <template v-else>
               <a-button size="small" :disabled="true" type="primary">{{
-                $t('pages.docker.swarm.list.13ea9c07')
+                $t('i18n.47d68cd0f4')
               }}</a-button>
               <a-button size="small" :disabled="true" type="primary">{{
-                $t('pages.docker.swarm.list.e5687a6b')
+                $t('i18n.3bf3c0a8d6')
               }}</a-button>
             </template>
 
             <a-button size="small" type="primary" @click="handleEdit(record)">{{
-              $t('pages.docker.swarm.list.64603c01')
+              $t('i18n.95b351c862')
             }}</a-button>
             <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-              $t('pages.docker.swarm.list.dd20d11c')
+              $t('i18n.2f4aaddde3')
             }}</a-button>
           </a-space>
         </template>
@@ -114,17 +114,17 @@
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$t('pages.docker.swarm.list.c34f0c3a')"
+      :title="$t('i18n.d8a36a8a25')"
       :mask-closable="false"
       @ok="handleEditOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$t('pages.docker.swarm.list.c2dfe194')" name="name">
-          <a-input v-model:value="temp.name" :placeholder="$t('pages.docker.swarm.list.98c4138b')" />
+        <a-form-item :label="$t('i18n.c3f28b34bb')" name="name">
+          <a-input v-model:value="temp.name" :placeholder="$t('i18n.a51cd0898f')" />
         </a-form-item>
 
-        <a-form-item :label="$t('pages.docker.swarm.list.a4954c1c')" name="tag"
-          ><a-input v-model:value="temp.tag" :placeholder="$t('pages.docker.swarm.list.e50751c6')" />
+        <a-form-item :label="$t('i18n.14d342362f')" name="tag"
+          ><a-input v-model:value="temp.tag" :placeholder="$t('i18n.77017a3140')" />
         </a-form-item>
       </a-form>
     </CustomModal>
@@ -179,40 +179,40 @@ export default {
       consoleVisible: false,
       columns: [
         {
-          title: this.$t('pages.docker.swarm.list.3e34ec28'),
+          title: this.$t('i18n.d7ec2d3fea'),
           dataIndex: 'name',
           ellipsis: true,
           tooltip: true
         },
 
         {
-          title: this.$t('pages.docker.swarm.list.12a8d4cf'),
+          title: this.$t('i18n.7329a2637c'),
           dataIndex: 'swarmId',
           ellipsis: true,
           align: 'center',
           tooltip: true
         },
         {
-          title: this.$t('pages.docker.swarm.list.e83d88b9'),
+          title: this.$t('i18n.a823cfa70c'),
           dataIndex: 'tag',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.docker.swarm.list.9c32c887'),
+          title: this.$t('i18n.3fea7ca76c'),
           dataIndex: ['machineDocker', 'status'],
           ellipsis: true,
           align: 'center',
           width: '100px'
         },
         {
-          title: this.$t('pages.docker.swarm.list.49942d36'),
+          title: this.$t('i18n.3bcc1c7a20'),
           dataIndex: 'modifyUser',
           width: 120,
           ellipsis: true
         },
         {
-          title: this.$t('pages.docker.swarm.list.61164914'),
+          title: this.$t('i18n.1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -220,7 +220,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('pages.docker.swarm.list.fb7465c4'),
+          title: this.$t('i18n.11724cd00b'),
           dataIndex: ['machineDocker', 'swarmCreatedAt'],
           sorter: true,
           ellipsis: true,
@@ -228,7 +228,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('pages.docker.swarm.list.a0835704'),
+          title: this.$t('i18n.fe87269484'),
           dataIndex: ['machineDocker', 'swarmUpdatedAt'],
           sorter: true,
           ellipsis: true,
@@ -236,7 +236,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('pages.docker.swarm.list.3bb962bf'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
           fixed: 'right',
           align: 'center',
@@ -246,11 +246,11 @@ export default {
 
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
-        name: [{ required: true, message: this.$t('pages.docker.swarm.list.b9de83e8'), trigger: 'blur' }],
+        name: [{ required: true, message: this.$t('i18n.5ca6c1b6c7'), trigger: 'blur' }],
 
         tag: [
-          { required: true, message: this.$t('pages.docker.swarm.list.226cdc3a'), trigger: 'blur' },
-          { pattern: /^\w{1,10}$/, message: this.$t('pages.docker.swarm.list.9976c029') }
+          { required: true, message: this.$t('i18n.3b9418269c'), trigger: 'blur' },
+          { pattern: /^\w{1,10}$/, message: this.$t('i18n.89944d6ccb') }
         ]
       },
       confirmLoading: false
@@ -341,11 +341,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$t('pages.docker.swarm.list.b22d55a0'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.docker.swarm.list.987c2cd6'),
-        okText: this.$t('pages.docker.swarm.list.e8e9db25'),
-        cancelText: this.$t('pages.docker.swarm.list.b12468e9'),
+        content: this.$t('i18n.1593dc4920'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return delSwarm({
             id: record.id

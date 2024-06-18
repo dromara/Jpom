@@ -25,7 +25,7 @@
           </template>
         </a-tree>
         <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE">
-          <template #description>{{ $t('components.compositionTransfer.composition-transfer.f8525cf2') }}</template>
+          <template #description>{{ $t('i18n.21efd88b67') }}</template>
         </a-empty>
       </template>
       <template v-else-if="direction === 'right'">
@@ -46,7 +46,7 @@
           </template>
         </a-tree>
         <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE">
-          <template #description>{{ $t('components.compositionTransfer.composition-transfer.f8525cf2') }}</template>
+          <template #description>{{ $t('i18n.21efd88b67') }}</template>
         </a-empty>
       </template>
     </template>

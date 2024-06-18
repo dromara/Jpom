@@ -17,14 +17,14 @@
         <a-space>
           <a-input
             v-model:value="listQuery['id']"
-            :placeholder="$t('pages.system.workspace-list.844d3ebe')"
+            :placeholder="$t('i18n.ab7f78ba4c')"
             allow-clear
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$t('pages.system.workspace-list.d83f3e09')"
+            :placeholder="$t('i18n.6a588459d0')"
             allow-clear
             class="search-input-item"
             @press-enter="loadData"
@@ -43,7 +43,7 @@
               }
             "
             allow-clear
-            :placeholder="$t('pages.system.workspace-list.b1765e98')"
+            :placeholder="$t('i18n.829abe5a8d')"
             class="search-input-item"
           >
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
@@ -62,22 +62,22 @@
               }
             "
             allow-clear
-            :placeholder="$t('pages.system.workspace-list.17b26f41')"
+            :placeholder="$t('i18n.85fe5099f6')"
             class="search-input-item"
           >
             <a-select-option v-for="item in clusterList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
-          <a-tooltip :title="$t('pages.system.workspace-list.cb5a8131')">
+          <a-tooltip :title="$t('i18n.4838a3bd20')">
             <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('pages.system.workspace-list.53c2763c')
+              $t('i18n.e5f71fc31e')
             }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">{{ $t('pages.system.workspace-list.7d46652a') }}</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $t('i18n.66ab5e9f24') }}</a-button>
           <a-tooltip>
             <template #title>
               <ul>
-                <li>{{ $t('pages.system.workspace-list.69594ec6') }}</li>
-                <li>{{ $t('pages.system.workspace-list.2604809e') }}</li>
+                <li>{{ $t('i18n.da509a213f') }}</li>
+                <li>{{ $t('i18n.97cb3c4b2e') }}</li>
               </ul>
             </template>
             <QuestionCircleOutlined />
@@ -122,25 +122,25 @@
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button size="small" type="primary" @click="handleEdit(record)">{{
-              $t('pages.system.workspace-list.64603c01')
+              $t('i18n.95b351c862')
             }}</a-button>
             <a-button size="small" type="primary" @click="configMeun(record)">{{
-              $t('pages.system.workspace-list.9850d888')
+              $t('i18n.4ccbdc5301')
             }}</a-button>
             <a-button size="small" type="primary" @click="configWhiteDir(record)">{{
-              $t('pages.system.workspace-list.fdc31c9f')
+              $t('i18n.3d48c9da09')
             }}</a-button>
             <a-button size="small" type="primary" @click="viewEnvVar(record)">{{
-              $t('pages.system.workspace-list.f69fec3b')
+              $t('i18n.ddc7d28b7b')
             }}</a-button>
 
-            <a-tooltip v-if="record.id === 'DEFAULT'" :title="$t('pages.system.workspace-list.517e0aa2')">
+            <a-tooltip v-if="record.id === 'DEFAULT'" :title="$t('i18n.0c0633c367')">
               <a-button size="small" type="primary" danger :disabled="true">{{
-                $t('pages.system.workspace-list.bf510d47')
+                $t('i18n.2f4aaddde3')
               }}</a-button>
             </a-tooltip>
             <a-button v-else size="small" type="primary" danger @click="handleDelete(record)">{{
-              $t('pages.system.workspace-list.bf510d47')
+              $t('i18n.2f4aaddde3')
             }}</a-button>
           </a-space>
         </template>
@@ -152,16 +152,16 @@
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$t('pages.system.workspace-list.d2afd162')"
+      :title="$t('i18n.fa8e673c50')"
       :mask-closable="false"
       @ok="handleEditOk"
     >
-      <a-alert :message="$t('pages.system.workspace-list.30376d6d')" type="info" show-icon>
+      <a-alert :message="$t('i18n.c8c6e37071')" type="info" show-icon>
         <template #description>
           <ul>
-            <li>{{ $t('pages.system.workspace-list.6472482b') }}</li>
-            <li>{{ $t('pages.system.workspace-list.cafa023a') }}</li>
-            <li>{{ $t('pages.system.workspace-list.8fa12a0f') }}</li>
+            <li>{{ $t('i18n.a89646d060') }}</li>
+            <li>{{ $t('i18n.207243d77a') }}</li>
+            <li>{{ $t('i18n.67aa2d01b9') }}</li>
           </ul>
         </template>
       </a-alert>
@@ -173,14 +173,14 @@
         :wrapper-col="{ span: 14 }"
         style="padding-top: 15px"
       >
-        <a-form-item :label="$t('pages.system.workspace-list.3e34ec28')" name="name">
+        <a-form-item :label="$t('i18n.d7ec2d3fea')" name="name">
           <a-input
             v-model:value="temp.name"
             :max-length="50"
-            :placeholder="$t('pages.system.workspace-list.d83f3e09')"
+            :placeholder="$t('i18n.6a588459d0')"
           />
         </a-form-item>
-        <a-form-item :label="$t('pages.system.workspace-list.1f1383b6')" name="clusterInfoId">
+        <a-form-item :label="$t('i18n.9b5f172ebe')" name="clusterInfoId">
           <a-select
             v-model:value="temp.clusterInfoId"
             show-search
@@ -195,27 +195,27 @@
               }
             "
             allow-clear
-            :placeholder="$t('pages.system.workspace-list.1f1383b6')"
+            :placeholder="$t('i18n.9b5f172ebe')"
           >
             <a-select-option v-for="item in clusterList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item :label="$t('pages.system.workspace-list.b1765e98')" name="group">
+        <a-form-item :label="$t('i18n.829abe5a8d')" name="group">
           <custom-select
             v-model:value="temp.group"
             :data="groupList"
-            :input-placeholder="$t('pages.system.workspace-list.c50ead9c')"
-            :select-placeholder="$t('pages.system.workspace-list.c385f859')"
+            :input-placeholder="$t('i18n.bd0362bed3')"
+            :select-placeholder="$t('i18n.9cac799f2f')"
           >
           </custom-select>
         </a-form-item>
 
-        <a-form-item :label="$t('pages.system.workspace-list.4b2e093e')" name="description">
+        <a-form-item :label="$t('i18n.3bdd08adab')" name="description">
           <a-textarea
             v-model:value="temp.description"
             :max-length="200"
             :rows="5"
-            :placeholder="$t('pages.system.workspace-list.d8b6196d')"
+            :placeholder="$t('i18n.4645575b77')"
           />
         </a-form-item>
       </a-form>
@@ -225,7 +225,7 @@
       v-if="envVarListVisible"
       v-model:open="envVarListVisible"
       destroy-on-close
-      :title="`${temp.name} ${$t('pages.system.workspace-list.58f9d869')}`"
+      :title="`${temp.name} ${$t('i18n.f7e8d887d6')}`"
       width="80vw"
       :footer="null"
       :mask-closable="false"
@@ -238,19 +238,19 @@
       v-model:open="configMenuVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="`${temp.name} ${$t('pages.system.workspace-list.2da38372')}`"
+      :title="`${temp.name} ${$t('i18n.25182fb439')}`"
       :mask-closable="false"
       @ok="onSubmitMenus"
     >
       <a-form ref="editWhiteForm" :model="menusConfigData">
         <a-row type="flex" justify="center">
           <a-alert
-            :message="`${$t('pages.system.workspace-list.a1f2ceff')}`"
+            :message="`${$t('i18n.6228294517')}`"
             style="margin-top: 10px; margin-bottom: 20px; width: 100%"
             banner
           />
           <a-col :span="20">
-            <a-card :title="$t('pages.system.workspace-list.4a16a53c')" :bordered="true">
+            <a-card :title="$t('i18n.a75f781415')" :bordered="true">
               <a-tree
                 v-if="menusConfigData.serverMenus"
                 v-model:checkedKeys="menusConfigData.serverMenuKeys"
@@ -273,7 +273,7 @@
       v-if="configDir"
       v-model:open="configDir"
       destroy-on-close
-      :title="`${$t('pages.system.workspace-list.fcce7810')}`"
+      :title="`${$t('i18n.eee6510292')}`"
       :footer="null"
       width="60vw"
       :mask-closable="false"
@@ -299,7 +299,7 @@
       v-model:open="preDeleteVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="`${$t('pages.system.workspace-list.1c5ce361')}`"
+      :title="`${$t('i18n.aec7b550e2')}`"
       :mask-closable="false"
       @ok="handleDeleteOk"
       @cancel="
@@ -308,9 +308,9 @@
         }
       "
     >
-      <a-alert :message="$t('pages.system.workspace-list.5bba45b7')" type="error" show-icon>
+      <a-alert :message="$t('i18n.a35740ae41')" type="error" show-icon>
         <template #description>
-          {{ $t('pages.system.workspace-list.8d0c613e') }},{{ $t('pages.system.workspace-list.a87846a2') }}</template
+          {{ $t('i18n.6b46e2bfae') }},{{ $t('i18n.86b7eb5e83') }}</template
         >
       </a-alert>
 
@@ -323,17 +323,17 @@
 
           <template v-if="dataRef.count > 0">
             <a-tag color="pink">
-              {{ $t('pages.system.workspace-list.194bc8b9') }} {{ dataRef.count }}
-              {{ $t('pages.system.workspace-list.804a144d') }}
+              {{ $t('i18n.df9497ea98') }} {{ dataRef.count }}
+              {{ $t('i18n.f932eff53e') }}
             </a-tag>
 
             <a-tag v-if="dataRef.workspaceBind === 2" color="cyan">{{
-              $t('pages.system.workspace-list.d6fc71ea')
+              $t('i18n.686a19db6a')
             }}</a-tag>
             <a-tag v-else-if="dataRef.workspaceBind === 3" color="blue">{{
-              $t('pages.system.workspace-list.9f7d21f6')
+              $t('i18n.9c3a3e1b03')
             }}</a-tag>
-            <a-tag v-else color="purple">{{ $t('pages.system.workspace-list.fcda4526') }}</a-tag>
+            <a-tag v-else color="purple">{{ $t('i18n.ab006f89e7') }}</a-tag>
           </template>
         </template>
       </a-tree>
@@ -384,39 +384,39 @@ export default {
       temp: {},
       columns: [
         {
-          title: this.$t('pages.system.workspace-list.3e34ec28'),
+          title: this.$t('i18n.d7ec2d3fea'),
           dataIndex: 'name',
           ellipsis: true,
           width: 200
         },
         {
-          title: this.$t('pages.system.workspace-list.4b2e093e'),
+          title: this.$t('i18n.3bdd08adab'),
           dataIndex: 'description',
           ellipsis: true,
           width: 200
         },
         {
-          title: this.$t('pages.system.workspace-list.12d0e469'),
+          title: this.$t('i18n.b37b786351'),
           dataIndex: 'group',
           ellipsis: true,
           width: '100px',
           tooltip: true
         },
         {
-          title: this.$t('pages.system.workspace-list.17b26f41'),
+          title: this.$t('i18n.85fe5099f6'),
           dataIndex: 'clusterInfoId',
           ellipsis: true,
           width: '100px'
         },
         {
-          title: this.$t('pages.system.workspace-list.916db24b'),
+          title: this.$t('i18n.9baca0054e'),
           dataIndex: 'modifyUser',
           ellipsis: true,
 
           width: 120
         },
         {
-          title: this.$t('pages.system.workspace-list.f5b90169'),
+          title: this.$t('i18n.eca37cb072'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -424,14 +424,14 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('pages.system.workspace-list.a2b40316'),
+          title: this.$t('i18n.1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           customRender: ({ text }) => parseTime(text),
           sorter: true,
           width: '170px'
         },
         {
-          title: this.$t('pages.system.workspace-list.3bb962bf'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
           fixed: 'right',
           align: 'center',
@@ -442,9 +442,9 @@ export default {
 
       // 表单校验规则
       rules: {
-        name: [{ required: true, message: this.$t('pages.system.workspace-list.afb740ab'), trigger: 'blur' }],
-        description: [{ required: true, message: this.$t('pages.system.workspace-list.fa2192f9'), trigger: 'blur' }],
-        clusterInfoId: [{ required: true, message: this.$t('pages.system.workspace-list.34b97d6a'), trigger: 'blur' }]
+        name: [{ required: true, message: this.$t('i18n.b153126fc2'), trigger: 'blur' }],
+        description: [{ required: true, message: this.$t('i18n.36b5d427e4'), trigger: 'blur' }],
+        clusterInfoId: [{ required: true, message: this.$t('i18n.aad7450231'), trigger: 'blur' }]
       },
       configMenuVisible: false,
       replaceFields: { children: 'childs', title: 'title', key: 'id' },

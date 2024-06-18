@@ -90,7 +90,7 @@ watch(pageLoadingStore, (newValue) => {
       pageloading.value = true
       globalLoading({
         spinning: true,
-        tip: t('App.a4e5a0a8')
+        tip: t('i18n.6ad02e7a1b')
       })
     }, 500)
   }
@@ -127,7 +127,7 @@ const reload = () => {
 
 const globalLoadingProps = ref<SpinProps>({
   spinning: false,
-  tip: t('App.ed2baf28'),
+  tip: t('i18n.26b5bd4947'),
   size: 'large',
   delay: 500,
   wrapperClassName: ''

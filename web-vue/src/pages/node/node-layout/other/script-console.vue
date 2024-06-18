@@ -9,10 +9,10 @@
         <template #before>
           <a-space>
             <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 0" type="primary" @click="start">{{
-              $t('pages.node.node-layout.other.script-console.985968bf')
+              $t('i18n.1a6aa24e76')
             }}</a-button>
             <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 1" type="primary" @click="stop">{{
-              $t('pages.node.node-layout.other.script-console.5c03f4ad')
+              $t('i18n.095e938e2a')
             }}</a-button>
           </a-space>
         </template>
@@ -25,24 +25,24 @@
       v-model:open="editArgs"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$t('pages.node.node-layout.other.script-console.b7d5eb0d')"
+      :title="$t('i18n.43886d7ac3')"
       :mask-closable="false"
       @ok="startExecution"
     >
       <a-form ref="ruleForm" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
         <a-form-item
-          :label="$t('pages.node.node-layout.other.script-console.af78e8cb')"
-          :help="`${commandParams.length ? $t('pages.node.node-layout.other.script-console.8fb2b0cc') : ''}`"
+          :label="$t('i18n.abba4775e1')"
+          :help="`${commandParams.length ? $t('i18n.916cde39c4') : ''}`"
         >
           <a-space direction="vertical" style="width: 100%">
             <a-row v-for="(item, index) in commandParams" :key="item.key">
               <a-col :span="22">
                 <a-input
                   v-model:value="item.value"
-                  :addon-before="`${$t('pages.node.node-layout.other.script-console.6e6cc3c2')}${index + 1}${$t(
+                  :addon-before="`${$t('i18n.3d0a2df9ec')}${index + 1}${$t(
                     'pages.node.node-layout.other.script-console.97f7c43a'
                   )}`"
-                  :placeholder="`${$t('pages.node.node-layout.other.script-console.6e6cc3c2')}${$t(
+                  :placeholder="`${$t('i18n.3d0a2df9ec')}${$t(
                     'pages.node.node-layout.other.script-console.97f7c43a'
                   )} ${item.desc ? ',' + item.desc : ''}`"
                 >
@@ -63,7 +63,7 @@
               </a-col>
             </a-row>
             <a-button type="primary" size="small" @click="() => commandParams.push({})">{{
-              $t('pages.node.node-layout.other.script-console.c8569157')
+              $t('i18n.4c0eead6ff')
             }}</a-button>
           </a-space>
         </a-form-item>
@@ -161,7 +161,7 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: `web socket ${this.$t('pages.node.node-layout.other.script-console.d75d207f')},${this.$t(
+          message: `web socket ${this.$t('i18n.7030ff6470')},${this.$t(
             'pages.node.node-layout.other.script-console.763330b'
           )}`
         })
@@ -173,7 +173,7 @@ export default {
         console.error(err)
         clearInterval(this.heart)
         this.btnLoading = true
-        $message.warning(this.$t('pages.node.node-layout.other.script-console.8a2aae09'))
+        $message.warning(this.$t('i18n.5fafcadc2d'))
       }
       this.socket.onmessage = (msg) => {
         if (msg.data.indexOf('JPOM_MSG') > -1 && msg.data.indexOf('op') > -1) {

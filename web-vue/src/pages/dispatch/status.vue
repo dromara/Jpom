@@ -2,7 +2,7 @@
   <div>
     <CustomDrawer
       destroy-on-close
-      :title="`${$t('pages.dispatch.status.1ba84995')} ${name} ${$t('pages.dispatch.status.6e06fe4f')}`"
+      :title="`${$t('i18n.607e7a4f37')} ${name} ${$t('i18n.3fea7ca76c')}`"
       placement="right"
       width="85vw"
       :open="true"
@@ -13,7 +13,7 @@
       "
     >
       <a-tabs v-model:activeKey="tabKey" tab-position="left">
-        <a-tab-pane key="1" :tab="$t('pages.dispatch.status.6e06fe4f')">
+        <a-tab-pane key="1" :tab="$t('i18n.3fea7ca76c')">
           <!-- 嵌套表格 -->
           <a-table
             :loading="childLoading"
@@ -30,30 +30,30 @@
             <template #title>
               <a-space>
                 <div>
-                  {{ $t('pages.dispatch.status.8a8e4923') }}
+                  {{ $t('i18n.e703c7367c') }}
                   <a-tag v-if="data.status === 2" color="green">{{
-                    statusMap[data.status] || $t('pages.dispatch.status.5f51a112')
+                    statusMap[data.status] || $t('i18n.1622dc9b6b')
                   }}</a-tag>
                   <a-tag v-else-if="data.status === 1 || data.status === 0" color="orange">{{
-                    statusMap[data.status] || $t('pages.dispatch.status.5f51a112')
+                    statusMap[data.status] || $t('i18n.1622dc9b6b')
                   }}</a-tag>
                   <a-tag v-else-if="data.status === 3 || data.status === 4" color="red">{{
-                    statusMap[data.status] || $t('pages.dispatch.status.5f51a112')
+                    statusMap[data.status] || $t('i18n.1622dc9b6b')
                   }}</a-tag>
-                  <a-tag v-else>{{ statusMap[data.status] || $t('pages.dispatch.status.5f51a112') }}</a-tag>
+                  <a-tag v-else>{{ statusMap[data.status] || $t('i18n.1622dc9b6b') }}</a-tag>
                 </div>
-                <div>{{ $t('pages.dispatch.status.a622e852') }}{{ data.statusMsg || '-' }}</div>
+                <div>{{ $t('i18n.fb3a2241bb') }}{{ data.statusMsg || '-' }}</div>
                 <a-button type="primary" size="small" :loading="childLoading" @click="loadData">{{
-                  $t('pages.dispatch.status.7bbd89a')
+                  $t('i18n.694fc5efa9')
                 }}</a-button>
                 <a-statistic-countdown
                   format="s"
-                  :title="$t('pages.dispatch.status.ae8f1e')"
+                  :title="$t('i18n.0f8403d07e')"
                   :value="countdownTime"
                   @finish="silenceLoadData"
                 >
                   <template #suffix>
-                    <div style="font-size: 12px">{{ $t('pages.dispatch.status.48ec7187') }}</div>
+                    <div style="font-size: 12px">{{ $t('i18n.ee6ce96abb') }}</div>
                   </template>
                 </a-statistic-countdown>
               </a-space>
@@ -70,7 +70,7 @@
               <template v-else-if="column.dataIndex === 'projectName'">
                 <a-tooltip placement="topLeft" :title="text">
                   <template v-if="record.disabled">
-                    <a-tooltip :title="$t('pages.dispatch.status.c668c2a4')">
+                    <a-tooltip :title="$t('i18n.f8b3165e0d')">
                       <EyeInvisibleOutlined />
                     </a-tooltip>
                   </template>
@@ -79,15 +79,15 @@
               </template>
               <template v-else-if="column.dataIndex === 'outGivingStatus'">
                 <a-tag v-if="text === 2" color="green">{{
-                  dispatchStatusMap[text] || $t('pages.dispatch.status.5f51a112')
+                  dispatchStatusMap[text] || $t('i18n.1622dc9b6b')
                 }}</a-tag>
                 <a-tag v-else-if="text === 1 || text === 0 || text === 5" color="orange">{{
-                  dispatchStatusMap[text] || $t('pages.dispatch.status.5f51a112')
+                  dispatchStatusMap[text] || $t('i18n.1622dc9b6b')
                 }}</a-tag>
                 <a-tag v-else-if="text === 3 || text === 4 || text === 6" color="red">{{
-                  dispatchStatusMap[text] || $t('pages.dispatch.status.5f51a112')
+                  dispatchStatusMap[text] || $t('i18n.1622dc9b6b')
                 }}</a-tag>
-                <a-tag v-else>{{ dispatchStatusMap[text] || $t('pages.dispatch.status.5f51a112') }}</a-tag>
+                <a-tag v-else>{{ dispatchStatusMap[text] || $t('i18n.1622dc9b6b') }}</a-tag>
               </template>
               <template v-else-if="column.dataIndex === 'outGivingResultMsg'">
                 <a-tooltip placement="topLeft" :title="readJsonStrField(record.outGivingResult, 'msg')">
@@ -126,15 +126,15 @@
                   :checked="text"
                   :disabled="true"
                   size="small"
-                  :checked-children="$t('pages.dispatch.status.481bf10e')"
-                  :un-checked-children="$t('pages.dispatch.status.926b691b')"
+                  :checked-children="$t('i18n.d679aea3aa')"
+                  :un-checked-children="$t('i18n.4f8a2f0b28')"
                 />
               </template>
 
               <template v-else-if="column.dataIndex === 'projectPid'">
                 <a-tooltip
                   placement="topLeft"
-                  :title="`${$t('pages.dispatch.status.3cf2b4f7')}${record.projectPid || '-'} / ${$t(
+                  :title="`${$t('i18n.2b04210d33')}${record.projectPid || '-'} / ${$t(
                     'pages.dispatch.status.284af1b3'
                   )}${record.projectPort || '-'}`"
                 >
@@ -145,21 +145,21 @@
               <template v-else-if="column.dataIndex === 'child-operation'">
                 <a-space>
                   <a-button size="small" :disabled="!record.projectName" type="primary" @click="handleFile(record)">{{
-                    $t('pages.dispatch.status.69cad40b')
+                    $t('i18n.2a0c4740f1')
                   }}</a-button>
                   <a-button
                     size="small"
                     :disabled="!record.projectName"
                     type="primary"
                     @click="handleConsole(record)"
-                    >{{ $t('pages.dispatch.status.c474c963') }}</a-button
+                    >{{ $t('i18n.b5c3770699') }}</a-button
                   >
                 </a-space>
               </template>
             </template>
           </a-table>
         </a-tab-pane>
-        <a-tab-pane key="2" :tab="$t('pages.dispatch.status.7de61746')">
+        <a-tab-pane key="2" :tab="$t('i18n.224e2ccda8')">
           <!-- 配置分发 -->
           <div style="width: 50vw">
             <!-- list -->
@@ -167,14 +167,14 @@
               <Draggable v-for="(element, index) in list" :key="index">
                 <a-row class="item-row">
                   <a-col :span="18">
-                    <span> {{ $t('pages.dispatch.status.fa8d810f') }} {{ element.nodeName }} </span>
-                    <span> {{ $t('pages.dispatch.status.e06912d') }} {{ element.cacheProjectName }} </span>
+                    <span> {{ $t('i18n.dc2961a26f') }} {{ element.nodeName }} </span>
+                    <span> {{ $t('i18n.26ffe89a7f') }} {{ element.cacheProjectName }} </span>
                   </a-col>
                   <a-col :span="6">
                     <a-space>
                       <a-switch
-                        :checked-children="$t('pages.dispatch.status.149265a9')"
-                        :un-checked-children="$t('pages.dispatch.status.287f3530')"
+                        :checked-children="$t('i18n.7854b52a88')"
+                        :un-checked-children="$t('i18n.710ad08b11')"
                         :checked="element.disabled ? false : true"
                         @change="
                           (checked) => {
@@ -195,9 +195,9 @@
                         :disabled="!list || list.length <= 1"
                         @click="handleRemoveProject(element)"
                       >
-                        {{ $t('pages.dispatch.status.4c957529') }}
+                        {{ $t('i18n.663393986e') }}
                       </a-button>
-                      <a-tooltip placement="left" :title="`${$t('pages.dispatch.status.686a2f77')}`" class="move">
+                      <a-tooltip placement="left" :title="`${$t('i18n.181e1ad17d')}`" class="move">
                         <MenuOutlined />
                       </a-tooltip>
                     </a-space>
@@ -208,7 +208,7 @@
             <a-col style="margin-top: 10px">
               <a-space>
                 <a-button type="primary" size="small" @click="viewDispatchManagerOk">{{
-                  $t('pages.dispatch.status.b033d8c5')
+                  $t('i18n.be5fbbe34c')
                 }}</a-button>
               </a-space>
             </a-col>
@@ -335,65 +335,65 @@ export default {
 
       childColumns: [
         {
-          title: this.$t('pages.dispatch.status.1f6db887'),
+          title: this.$t('i18n.b1785ef01e'),
           dataIndex: 'nodeId',
           width: 120,
           ellipsis: true
         },
         {
-          title: this.$t('pages.dispatch.status.69c543a4'),
+          title: this.$t('i18n.738a41f965'),
           dataIndex: 'projectName',
           width: 120,
           ellipsis: true
         },
         {
-          title: this.$t('pages.dispatch.status.42c1c984'),
+          title: this.$t('i18n.3b94c70734'),
           dataIndex: 'projectStatus',
           width: 120,
           ellipsis: true
         },
         {
-          title: this.$t('pages.dispatch.status.8aee2036'),
+          title: this.$t('i18n.30849b2e10'),
           dataIndex: 'projectPid',
           width: '120px',
           ellipsis: true
         },
         {
-          title: this.$t('pages.dispatch.status.f495ed7'),
+          title: this.$t('i18n.da99dbfe1f'),
           dataIndex: 'outGivingStatus',
           width: '120px'
         },
         {
-          title: this.$t('pages.dispatch.status.a774e80d'),
+          title: this.$t('i18n.0ef396cbcc'),
           dataIndex: 'outGivingResultMsg',
           ellipsis: true,
           width: 120
         },
         {
-          title: this.$t('pages.dispatch.status.70af3e3e'),
+          title: this.$t('i18n.543de6ff04'),
           dataIndex: 'outGivingResultMsgData',
           ellipsis: true,
           width: 120
         },
         {
-          title: this.$t('pages.dispatch.status.f5b107cb'),
+          title: this.$t('i18n.4cd49caae4'),
           dataIndex: 'outGivingResultTime',
           width: '120px'
         },
         {
-          title: this.$t('pages.dispatch.status.3c83339c'),
+          title: this.$t('i18n.396b7d3f91'),
           dataIndex: 'outGivingResultSize',
           width: '100px'
         },
         {
-          title: this.$t('pages.dispatch.status.9d4fa95c'),
+          title: this.$t('i18n.fbd7ba1d9b'),
           dataIndex: 'lastTime',
           width: '170px',
           ellipsis: true,
           customRender: ({ text }) => parseTime(text)
         },
         {
-          title: this.$t('pages.dispatch.status.3ae3f506'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'child-operation',
           fixed: 'right',
 
@@ -560,7 +560,7 @@ export default {
                       ...element,
                       projectStatus: false,
                       projectPid: '-',
-                      errorMsg: this.$t('pages.dispatch.status.b3fd6bb1')
+                      errorMsg: this.$t('i18n.44ed625b19')
                     }
                   }
                   return element
@@ -575,7 +575,7 @@ export default {
     // 文件管理
     handleFile(record) {
       this.temp = Object.assign({}, record)
-      this.drawerTitle = `${this.$t('pages.dispatch.status.502f94')}(${this.temp.projectId})`
+      this.drawerTitle = `${this.$t('i18n.8780e6b3d1')}(${this.temp.projectId})`
       this.drawerFileVisible = true
     },
     // 关闭文件管理对话框
@@ -585,7 +585,7 @@ export default {
     // 控制台
     handleConsole(record) {
       this.temp = Object.assign({}, record)
-      this.drawerTitle = `${this.$t('pages.dispatch.status.c474c963')}(${this.temp.projectId})`
+      this.drawerTitle = `${this.$t('i18n.b5c3770699')}(${this.temp.projectId})`
       this.drawerConsoleVisible = true
     },
     // 关闭控制台
@@ -610,7 +610,7 @@ export default {
       this.onFileClose()
       this.drawerReadFileVisible = true
       this.temp.readFilePath = (path + '/' + filename).replace(new RegExp('//', 'gm'), '/')
-      this.drawerTitle = `${this.$t('pages.dispatch.status.c7a1ee83')}(${filename})`
+      this.drawerTitle = `${this.$t('i18n.5854370b86')}(${filename})`
     },
     onReadFileClose() {
       this.drawerReadFileVisible = false
@@ -631,22 +631,22 @@ export default {
     handleRemoveProject(item) {
       const html = `
       <b style='font-size: 20px;'>
-        ${this.$t('pages.dispatch.status.218bed57')}
+        ${this.$t('i18n.0d44f4903a')}
       </b>
       <ul style='font-size: 20px;color:red;font-weight: bold;'>
-        <li>this.$t('pages.dispatch.status.3673e6eb')</b></li>
-        <li>this.$t('pages.dispatch.status.1c0a903b')</li>
-        <li>this.$t('pages.dispatch.status.779ded29')</li>
+        <li>this.$t('i18n.7cc3bb7068')</b></li>
+        <li>this.$t('i18n.5c93055d9c')</li>
+        <li>this.$t('i18n.27d0c8772c')</li>
       </ul>
       `
       $confirm({
-        title: this.$t('pages.dispatch.status.cd503941'),
+        title: this.$t('i18n.9362e6ddf8'),
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
         okButtonProps: { type: 'primary', size: 'small', danger: true },
         cancelButtonProps: { type: 'primary' },
-        okText: this.$t('pages.dispatch.status.e8e9db25'),
-        cancelText: this.$t('pages.dispatch.status.b12468e9'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return removeProject({
             nodeId: item.nodeId,

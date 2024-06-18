@@ -15,7 +15,7 @@
       }"
       @click="handleAdd"
     >
-      <PlusOutlined />{{ $t('components.parameterWidget.index.42cbc280') }}</a-tag
+      <PlusOutlined />{{ $t('i18n.7e1b283c57') }}</a-tag
     >
 
     <!-- 编辑区 -->
@@ -23,7 +23,7 @@
       v-if="editVisible"
       v-model:open="editVisible"
       destroy-on-close
-      :title="$t('components.parameterWidget.index.77ecbd27')"
+      :title="$t('i18n.71a2c432b0')"
       :mask-closable="false"
       @ok="handleEditOk"
     >
@@ -32,11 +32,11 @@
           <a-input
             v-model:value="temp.key"
             :disabled="!!temp.oldKey"
-            :placeholder="$t('components.parameterWidget.index.1bb65976')"
+            :placeholder="$t('i18n.c0d19bbfb3')"
           />
         </a-form-item>
         <a-form-item label="value" name="value">
-          <a-input v-model:value="temp.value" :placeholder="$t('components.parameterWidget.index.8485924b')" />
+          <a-input v-model:value="temp.value" :placeholder="$t('i18n.24384dab27')" />
         </a-form-item>
       </a-form>
     </CustomModal>
@@ -98,7 +98,7 @@ watch(
 )
 
 const rules = ref<Record<string, Rule[]>>({
-  key: [{ required: true, message: $t('components.parameterWidget.index.1bb65976') as string, trigger: 'blur' }]
+  key: [{ required: true, message: $t('i18n.c0d19bbfb3') as string, trigger: 'blur' }]
 })
 
 const editVisible = ref(false)

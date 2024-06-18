@@ -17,26 +17,26 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$t('pages.user.permission-group.3e34ec28')"
+            :placeholder="$t('i18n.d7ec2d3fea')"
             class="search-input-item"
             @press-enter="loadData"
           />
-          <a-tooltip :title="$t('pages.user.permission-group.554d1b95')">
+          <a-tooltip :title="$t('i18n.4838a3bd20')">
             <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('pages.user.permission-group.53c2763c')
+              $t('i18n.e5f71fc31e')
             }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">{{ $t('pages.user.permission-group.ccffbfda') }}</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $t('i18n.66ab5e9f24') }}</a-button>
         </a-space>
       </template>
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button size="small" type="primary" @click="handleEdit(record)">{{
-              $t('pages.user.permission-group.e1224c34')
+              $t('i18n.95b351c862')
             }}</a-button>
             <a-button type="primary" danger size="small" @click="handleDelete(record)">{{
-              $t('pages.user.permission-group.dd20d11c')
+              $t('i18n.2f4aaddde3')
             }}</a-button>
           </a-space>
         </template>
@@ -49,25 +49,25 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="60vw"
-      :title="$t('pages.user.permission-group.e1224c34')"
+      :title="$t('i18n.95b351c862')"
       :mask-closable="false"
       @ok="handleEditUserOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$t('pages.user.permission-group.3e34ec28')" name="name">
+        <a-form-item :label="$t('i18n.d7ec2d3fea')" name="name">
           <a-input
             v-model:value="temp.name"
             :max-length="50"
-            :placeholder="$t('pages.user.permission-group.3e34ec28')"
+            :placeholder="$t('i18n.d7ec2d3fea')"
           />
         </a-form-item>
         <a-form-item name="workspace">
           <template #label>
             <a-tooltip>
-              {{ $t('pages.user.permission-group.afacc4cb') }}
+              {{ $t('i18n.98d69f8b62') }}
               <template #title>
-                {{ $t('pages.user.permission-group.bd82e6b0') }},{{
-                  $t('pages.user.permission-group.751c9372')
+                {{ $t('i18n.9a8eb63daf') }},{{
+                  $t('i18n.85f347f9d0')
                 }}</template
               >
               <QuestionCircleOutlined v-if="!temp.id" />
@@ -78,8 +78,8 @@
         <a-form-item name="prohibitExecute">
           <template #label>
             <a-tooltip>
-              {{ $t('pages.user.permission-group.aaad8c31') }}
-              <template #title> {{ $t('pages.user.permission-group.c0b6d654') }}</template>
+              {{ $t('i18n.2ae22500c7') }}
+              <template #title> {{ $t('i18n.b56585aa18') }}</template>
               <QuestionCircleOutlined v-if="!temp.id" />
             </a-tooltip>
           </template>
@@ -113,15 +113,15 @@
                     format="YYYY-MM-DD HH:mm:ss"
                     value-format="YYYY-MM-DD HH:mm:ss"
                     :placeholder="[
-                      $t('pages.user.permission-group.9b8a573f'),
-                      $t('pages.user.permission-group.63bed29')
+                      $t('i18n.592c595891'),
+                      $t('i18n.f782779e8b')
                     ]"
                   />
 
                   <div>
                     <a-input
                       v-model:value="item.reason"
-                      :placeholder="$t('pages.user.permission-group.54ad1af3')"
+                      :placeholder="$t('i18n.1eba2d93fc')"
                       allow-clear
                     />
                   </div>
@@ -146,16 +146,16 @@
                   temp.prohibitExecuteArray.push({})
                 }
               "
-              >{{ $t('pages.user.permission-group.ccffbfda') }}
+              >{{ $t('i18n.66ab5e9f24') }}
             </a-button>
           </a-form-item-rest>
         </a-form-item>
         <a-form-item name="allowExecute">
           <template #label>
             <a-tooltip>
-              {{ $t('pages.user.permission-group.f7840bbf') }}
+              {{ $t('i18n.ef7e3377a0') }}
               <template #title>
-                {{ $t('pages.user.permission-group.cc634bca') }},{{ $t('pages.user.permission-group.54683eab') }}
+                {{ $t('i18n.21e4f10399') }},{{ $t('i18n.4c69102fe1') }}
               </template>
               <QuestionCircleOutlined v-if="!temp.id" />
             </a-tooltip>
@@ -167,7 +167,7 @@
                   <div>
                     <a-select
                       v-model:value="item.week"
-                      :placeholder="$t('pages.user.permission-group.2f160681')"
+                      :placeholder="$t('i18n.d5c2351c0e')"
                       mode="multiple"
                       style="width: 100%"
                     >
@@ -191,12 +191,12 @@
                     <a-space>
                       <a-time-picker
                         v-model:value="item.startTime"
-                        :placeholder="$t('pages.user.permission-group.9b8a573f')"
+                        :placeholder="$t('i18n.592c595891')"
                         value-format="HH:mm:ss"
                       />
                       <a-time-picker
                         v-model:value="item.endTime"
-                        :placeholder="$t('pages.user.permission-group.63bed29')"
+                        :placeholder="$t('i18n.f782779e8b')"
                         value-format="HH:mm:ss"
                       />
                     </a-space>
@@ -221,17 +221,17 @@
                   temp.allowExecuteArray.push({})
                 }
               "
-              >{{ $t('pages.user.permission-group.ccffbfda') }}
+              >{{ $t('i18n.66ab5e9f24') }}
             </a-button>
           </a-form-item-rest>
         </a-form-item>
 
-        <a-form-item :label="$t('pages.user.permission-group.4b2e093e')" name="description">
+        <a-form-item :label="$t('i18n.3bdd08adab')" name="description">
           <a-textarea
             v-model:value="temp.description"
             :max-length="200"
             :rows="5"
-            :placeholder="$t('pages.user.permission-group.4b2e093e')"
+            :placeholder="$t('i18n.3bdd08adab')"
           />
         </a-form-item>
       </a-form>
@@ -260,30 +260,30 @@ export default {
       methodFeature: [],
       temp: {},
       weeks: [
-        { value: 1, name: this.$t('pages.user.permission-group.38e08092') },
-        { value: 2, name: this.$t('pages.user.permission-group.8b27c898') },
-        { value: 3, name: this.$t('pages.user.permission-group.b746d1ae') },
-        { value: 4, name: this.$t('pages.user.permission-group.7425f91a') },
-        { value: 5, name: this.$t('pages.user.permission-group.57801bdb') },
-        { value: 6, name: this.$t('pages.user.permission-group.2ab8dd00') },
-        { value: 7, name: this.$t('pages.user.permission-group.2b6c6c5a') }
+        { value: 1, name: this.$t('i18n.1603b069c2') },
+        { value: 2, name: this.$t('i18n.b5a6a07e48') },
+        { value: 3, name: this.$t('i18n.e60725e762') },
+        { value: 4, name: this.$t('i18n.170fc8e27c') },
+        { value: 5, name: this.$t('i18n.eb79cea638') },
+        { value: 6, name: this.$t('i18n.2457513054') },
+        { value: 7, name: this.$t('i18n.562d7476ab') }
       ],
 
       editVisible: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       columns: [
         { title: 'id', dataIndex: 'id', ellipsis: true },
-        { title: this.$t('pages.user.permission-group.3e34ec28'), dataIndex: 'name', ellipsis: true },
-        { title: this.$t('pages.user.permission-group.4b2e093e'), dataIndex: 'description', ellipsis: true },
+        { title: this.$t('i18n.d7ec2d3fea'), dataIndex: 'name', ellipsis: true },
+        { title: this.$t('i18n.3bdd08adab'), dataIndex: 'description', ellipsis: true },
 
         {
-          title: this.$t('pages.user.permission-group.916db24b'),
+          title: this.$t('i18n.9baca0054e'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           width: 150
         },
         {
-          title: this.$t('pages.user.permission-group.a2b40316'),
+          title: this.$t('i18n.1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -293,7 +293,7 @@ export default {
           width: 170
         },
         {
-          title: this.$t('pages.user.permission-group.3bb962bf'),
+          title: this.$t('i18n.2b6bc0f293'),
           align: 'center',
           dataIndex: 'operation',
 
@@ -303,7 +303,7 @@ export default {
 
       // 表单校验规则
       rules: {
-        name: [{ required: true, message: this.$t('pages.user.permission-group.d9245f83'), trigger: 'blur' }]
+        name: [{ required: true, message: this.$t('i18n.4482773688'), trigger: 'blur' }]
       },
       confirmLoading: false
     }
@@ -342,13 +342,13 @@ export default {
               const children = this.methodFeature.map((item) => {
                 return {
                   key: element.id + '-' + item.value,
-                  title: item.title + this.$t('pages.user.permission-group.88b61996'),
+                  title: item.title + this.$t('i18n.ba6e91fa9e'),
                   parentId: element.id
                 }
               })
               children.push({
                 key: element.id + '-sshCommandNotLimited',
-                title: `SSH ${this.$t('pages.user.permission-group.8d1812cd')}`,
+                title: `SSH ${this.$t('i18n.9dd62c9fa8')}`,
                 parentId: element.id
               })
               this.workspaceList.push({
@@ -437,7 +437,7 @@ export default {
         delete temp.allowExecuteArray
         if (!emitKeys || emitKeys.length <= 0) {
           $notification.error({
-            message: this.$t('pages.user.permission-group.7ef9d8fb')
+            message: this.$t('i18n.b3bda9bf9e')
           })
           return false
         }
@@ -466,11 +466,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$t('pages.user.permission-group.d3367221'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.user.permission-group.987c2cd6'),
-        okText: this.$t('pages.user.permission-group.7da4a591'),
-        cancelText: this.$t('pages.user.permission-group.43105e21'),
+        content: this.$t('i18n.a52aa984cd'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return deletePermissionGroup(record.id).then((res) => {
             if (res.code === 200) {
@@ -492,13 +492,13 @@ export default {
     checkTipUserName() {
       if (this.temp?.id === 'demo') {
         $confirm({
-          title: this.$t('pages.user.permission-group.d3367221'),
+          title: this.$t('i18n.c4535759ee'),
           zIndex: 1009,
-          content: `demo ${this.$t('pages.user.permission-group.8424b740')},${this.$t(
+          content: `demo ${this.$t('i18n.a8f44c3188')},${this.$t(
             'pages.user.permission-group.f382dae4'
           )}`,
-          okText: this.$t('pages.user.permission-group.7da4a591'),
-          cancelText: this.$t('pages.user.permission-group.43105e21'),
+          okText: this.$t('i18n.e83a256e4f'),
+          cancelText: this.$t('i18n.625fb26b4b'),
 
           onCancel: () => {
             this.temp.id = ''

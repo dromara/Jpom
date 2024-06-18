@@ -3,20 +3,20 @@
     <template #content>
       <a-card v-if="canInstall" :style="`${setpCurrent === 1 ? 'width: 60vw' : 'width: 550px'}`" hoverable>
         <template #title>
-          {{ $t('pages.login.install.cd8e34c0') }}
-          <a href="https://jpom.top" target="_blank">{{ $t('pages.login.install.10496d2') }}</a>
+          {{ $t('i18n.c2f11fde3a') }}
+          <a href="https://jpom.top" target="_blank">{{ $t('i18n.620efec150') }}</a>
         </template>
         <a-steps :current="setpCurrent">
           <a-step
-            :title="$t('pages.login.install.9a866c70')"
+            :title="$t('i18n.b5c291805e')"
             status="process"
-            :description="$t('pages.login.install.ed09be07')"
+            :description="$t('i18n.3904bfe0db')"
           >
             <template #icon>
               <user-outlined />
             </template>
           </a-step>
-          <a-step :title="$t('pages.login.install.431078ce')" :description="$t('pages.login.install.496c5eb5')">
+          <a-step :title="$t('i18n.6f9193ac80')" :description="$t('i18n.f0db5d58cb')">
             <template #icon>
               <solution-outlined />
             </template>
@@ -24,14 +24,14 @@
         </a-steps>
         <a-row type="flex" justify="center">
           <a-col v-if="setpCurrent === 0" :span="16">
-            <a-card-meta :title="$t('pages.login.install.51094d43')">
+            <a-card-meta :title="$t('i18n.08ab230290')">
               <template #description>
                 <ol>
-                  <li>{{ $t('pages.login.install.cf24b73a') }}</li>
+                  <li>{{ $t('i18n.2953a9bb97') }}</li>
                   <li style="color: red">
-                    {{ $t('pages.login.install.56e34e7') }}
-                    <b>admin{{ $t('pages.login.install.dfd58d9d') }}</b
-                    >{{ $t('pages.login.install.70a1f38a') }}
+                    {{ $t('i18n.e09d0d8c41') }}
+                    <b>admin{{ $t('i18n.cb93a1f4a5') }}</b
+                    >{{ $t('i18n.2b788a077e') }}
                   </li>
                 </ol>
               </template>
@@ -48,26 +48,26 @@
               <a-form-item
                 class="init-user-name"
                 name="userName"
-                :rules="[{ required: true, message: $t('pages.login.install.fee12658') }]"
+                :rules="[{ required: true, message: $t('i18n.ea7fbabfa1') }]"
               >
-                <a-input v-model:value="loginForm.userName" :placeholder="$t('pages.login.install.dc861290')" />
+                <a-input v-model:value="loginForm.userName" :placeholder="$t('i18n.fec6151b49')" />
               </a-form-item>
               <a-form-item
                 class="init-user-password"
                 name="userPwd"
                 :rules="[
-                  { required: true, message: $t('pages.login.install.75eeeeaf') },
+                  { required: true, message: $t('i18n.e39ffe99e9') },
                   {
                     pattern: /^(?![\d]+$)(?![a-zA-Z]+$)(?![^\da-zA-Z]+$).{6,18}$/,
-                    message: $t('pages.login.install.5f2f73f9')
+                    message: $t('i18n.974be6600d')
                   }
                 ]"
               >
-                <a-input-password v-model:value="loginForm.userPwd" :placeholder="$t('pages.login.install.3562f10a')" />
+                <a-input-password v-model:value="loginForm.userPwd" :placeholder="$t('i18n.efafd0cbd4')" />
               </a-form-item>
               <a-form-item>
                 <a-button type="primary" html-type="submit" block :loading="loading">
-                  {{ $t('pages.login.install.a93d849c') }}
+                  {{ $t('i18n.94d4fcca1b') }}
                 </a-button>
               </a-form-item>
             </a-form>
@@ -76,9 +76,9 @@
             <a-alert banner>
               <template #message>
                 <ul class="maf-tips">
-                  <li>{{ $t('pages.login.install.73ca3cd9') }}</li>
-                  <li>{{ $t('pages.login.install.1dc0b420') }}</li>
-                  <li>{{ $t('pages.login.install.94e139a1') }}</li>
+                  <li>{{ $t('i18n.449fa9722b') }}</li>
+                  <li>{{ $t('i18n.0ac9e3e675') }}</li>
+                  <li>{{ $t('i18n.8c24b5e19c') }}</li>
                 </ul>
               </template>
             </a-alert>
@@ -86,7 +86,7 @@
             <a-row>
               <a-col :span="12">
                 <a-form-item>
-                  <h3 :id="$t('pages.login.install.f907f6d7')">{{ $t('pages.login.install.f907f6d7') }}</h3>
+                  <h3 :id="$t('i18n.ceffe5d643')">{{ $t('i18n.ceffe5d643') }}</h3>
                   <p v-for="(html, index) in MFA_APP_TIP_ARRAY" :key="index" v-html="html" />
                 </a-form-item>
               </a-col>
@@ -98,7 +98,7 @@
                   class="init-form"
                   @finish="handleMfaSure"
                 >
-                  <a-form-item :label="$t('pages.login.install.e3ff2149')">
+                  <a-form-item :label="$t('i18n.22b03c024d')">
                     <a-qrcode :value="qrCode.value" :status="qrCode.value ? 'active' : 'loading'" />
                   </a-form-item>
                   <a-form-item label="MFA key" name="mfa">
@@ -111,14 +111,14 @@
                   </a-form-item>
 
                   <a-form-item
-                    :label="$t('pages.login.install.3c14fe26')"
+                    :label="$t('i18n.983f59c9d4')"
                     name="twoCode"
                     :rules="[
-                      { required: true, message: $t('pages.login.install.e789cea') },
-                      { pattern: /^\d{6}$/, message: $t('pages.login.install.389e70c5') }
+                      { required: true, message: $t('i18n.7e866fece6') },
+                      { pattern: /^\d{6}$/, message: $t('i18n.da1abf0865') }
                     ]"
                   >
-                    <a-input v-model:value="mfaForm.twoCode" :placeholder="$t('pages.login.install.2cef177e')" />
+                    <a-input v-model:value="mfaForm.twoCode" :placeholder="$t('i18n.3f18d14961')" />
                   </a-form-item>
 
                   <a-form-item>
@@ -126,10 +126,10 @@
                       <a-col :span="10">
                         <a-space>
                           <a-button type="primary" html-type="submit" class="btn" :loading="loading">
-                            {{ $t('pages.login.install.4f983817') }}
+                            {{ $t('i18n.b7cfa07d78') }}
                           </a-button>
                           <a-button type="dashed" @click="handleIgnoreBindMfa">
-                            {{ $t('pages.login.install.674bd7aa') }}
+                            {{ $t('i18n.c0d5d68f5f') }}
                           </a-button>
                         </a-space>
                       </a-col>
@@ -144,11 +144,11 @@
       <div v-else>
         <a-result
           status="warning"
-          :title="$t('pages.login.install.56a72339')"
-          :sub-title="$t('pages.login.install.e16a0388')"
+          :title="$t('i18n.65cf4248a8')"
+          :sub-title="$t('i18n.70a6bc1e94')"
         >
           <template #extra>
-            <a-button type="primary" @click="goHome"> {{ $t('pages.login.install.97f5410c') }} </a-button>
+            <a-button type="primary" @click="goHome"> {{ $t('i18n.0bbc7458b4') }} </a-button>
           </template>
         </a-result>
       </div>
@@ -241,10 +241,10 @@ const handleMfaSure = () => {
 // 忽略 mfa
 const handleIgnoreBindMfa = () => {
   $confirm({
-    title: $t('pages.login.install.b22d55a0'),
-    content: $t('pages.login.install.250da8d7'),
-    okText: $t('pages.login.install.e5a2dcc3'),
-    cancelText: $t('pages.login.install.33a5532c'),
+    title: $t('i18n.c4535759ee'),
+    content: $t('i18n.dc39b183ea'),
+    okText: $t('i18n.e83a256e4f'),
+    cancelText: $t('i18n.625fb26b4b'),
     onOk: () => {
       router.push({ path: '/' })
     }

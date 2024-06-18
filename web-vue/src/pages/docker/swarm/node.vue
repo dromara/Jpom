@@ -20,7 +20,7 @@
           />
           <a-input
             v-model:value="listQuery['nodeName']"
-            :placeholder="$t('pages.docker.swarm.node.bb769c1d')"
+            :placeholder="$t('i18n.d7ec2d3fea')"
             class="search-input-item"
             @press-enter="loadData"
           />
@@ -38,24 +38,24 @@
               }
             "
             allow-clear
-            :placeholder="$t('pages.docker.swarm.node.377e1844')"
+            :placeholder="$t('i18n.464f3d4ea3')"
             class="search-input-item"
           >
-            <a-select-option key="worker">{{ $t('pages.docker.swarm.node.e4035840') }}</a-select-option>
-            <a-select-option key="manager">{{ $t('pages.docker.swarm.node.acf5e304') }}</a-select-option>
+            <a-select-option key="worker">{{ $t('i18n.41e9f0c9c6') }}</a-select-option>
+            <a-select-option key="manager">{{ $t('i18n.a6269ede6c') }}</a-select-option>
           </a-select>
 
           <a-button type="primary" :loading="loading" @click="loadData">{{
-            $t('pages.docker.swarm.node.53c2763c')
+            $t('i18n.e5f71fc31e')
           }}</a-button>
           <a-statistic-countdown
             format="s"
-            :title="$t('pages.docker.swarm.node.ae8f1e')"
+            :title="$t('i18n.0f8403d07e')"
             :value="countdownTime"
             @finish="loadData"
           >
             <template #suffix>
-              <div style="font-size: 12px">{{ $t('pages.docker.swarm.node.28cda8') }}</div>
+              <div style="font-size: 12px">{{ $t('i18n.ee6ce96abb') }}</div>
             </template>
           </a-statistic-countdown>
         </a-space>
@@ -70,11 +70,11 @@
         <template v-else-if="column.dataIndex === 'hostname'">
           <a-popover
             placement="topLeft"
-            :title="`${$t('pages.docker.swarm.node.7fb10499')}${record.description && record.description.hostname}`"
+            :title="`${$t('i18n.07a0e44145')}${record.description && record.description.hostname}`"
           >
             <template #content>
               <p>
-                {{ $t('pages.docker.swarm.node.ee50ba1c') }}: <a-tag>{{ record.id }}</a-tag>
+                {{ $t('i18n.a472019766') }}: <a-tag>{{ record.id }}</a-tag>
               </p>
               <template v-if="record.description && record.description.resources">
                 <p>
@@ -88,7 +88,7 @@
               </template>
               <template v-if="record.description && record.description.engine">
                 <p>
-                  {{ $t('pages.docker.swarm.node.d826aba2') }}:
+                  {{ $t('i18n.fe2df04a16') }}:
                   <a-tag>{{ record.description.engine.engineVersion }}</a-tag>
                 </p>
               </template>
@@ -101,7 +101,7 @@
         <template v-else-if="column.dataIndex === 'state'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$t('pages.docker.swarm.node.87c09576')}${record.status && record.status.state} ${$t(
+            :title="`${$t('i18n.9b3e947cc9')}${record.status && record.status.state} ${$t(
               'pages.docker.swarm.node.147fba6c'
             )}${record.spec ? record.spec.availability || '' : ''}`"
           >
@@ -123,9 +123,9 @@
         <template v-else-if="column.dataIndex === 'role'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$t('pages.docker.swarm.node.ec4b9b1')}${record.spec && record.spec.role} ${
+            :title="`${$t('i18n.20f32e1979')}${record.spec && record.spec.role} ${
               record.managerStatus && record.managerStatus.reachability === 'REACHABLE'
-                ? $t('pages.docker.swarm.node.c1956a20') + record.managerStatus.reachability
+                ? $t('i18n.88c5680d0d') + record.managerStatus.reachability
                 : ''
             }`"
           >
@@ -156,7 +156,7 @@
         <template v-else-if="column.dataIndex === 'updatedAt'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$t('pages.docker.swarm.node.a2b40316')}${text} ${$t('pages.docker.swarm.node.f5b90169')}${
+            :title="`${$t('i18n.bf94b97d1a')}${text} ${$t('i18n.312f45014a')}${
               record.createdAt
             }`"
           >
@@ -170,20 +170,20 @@
           <a-space>
             <template v-if="record.managerStatus && record.managerStatus.leader">
               <a-button size="small" type="primary" @click="handleEdit(record)">{{
-                $t('pages.docker.swarm.node.e2f053aa')
+                $t('i18n.8347a927c0')
               }}</a-button>
-              <a-tooltip :title="$t('pages.docker.swarm.node.55ade145')">
+              <a-tooltip :title="$t('i18n.28c1c35cd9')">
                 <a-button size="small" type="primary" danger :disabled="true">{{
-                  $t('pages.docker.swarm.node.7d868663')
+                  $t('i18n.b3b1f709d4')
                 }}</a-button>
               </a-tooltip>
             </template>
             <template v-else>
               <a-button size="small" type="primary" @click="handleEdit(record)">{{
-                $t('pages.docker.swarm.node.e2f053aa')
+                $t('i18n.8347a927c0')
               }}</a-button>
               <a-button size="small" type="primary" danger @click="handleLeava(record)">{{
-                $t('pages.docker.swarm.node.7d868663')
+                $t('i18n.b3b1f709d4')
               }}</a-button>
             </template>
           </a-space>
@@ -196,22 +196,22 @@
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$t('pages.docker.swarm.node.9fa2f20c')"
+      :title="$t('i18n.61e7fa1227')"
       :mask-closable="false"
       @ok="handleEditOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$t('pages.docker.swarm.node.377e1844')" name="role">
+        <a-form-item :label="$t('i18n.464f3d4ea3')" name="role">
           <a-radio-group v-model:value="temp.role" name="role" :disabled="temp.leader">
-            <a-radio value="WORKER"> {{ $t('pages.docker.swarm.node.e4035840') }}</a-radio>
-            <a-radio value="MANAGER"> {{ $t('pages.docker.swarm.node.acf5e304') }} </a-radio>
+            <a-radio value="WORKER"> {{ $t('i18n.41e9f0c9c6') }}</a-radio>
+            <a-radio value="MANAGER"> {{ $t('i18n.a6269ede6c') }} </a-radio>
           </a-radio-group>
         </a-form-item>
-        <a-form-item :label="$t('pages.docker.swarm.node.6e06fe4f')" name="availability">
+        <a-form-item :label="$t('i18n.3fea7ca76c')" name="availability">
           <a-radio-group v-model:value="temp.availability" name="availability">
-            <a-radio value="ACTIVE"> {{ $t('pages.docker.swarm.node.ac2c5199') }}</a-radio>
-            <a-radio value="PAUSE"> {{ $t('pages.docker.swarm.node.a183e300') }} </a-radio>
-            <a-radio value="DRAIN"> {{ $t('pages.docker.swarm.node.312559de') }} </a-radio>
+            <a-radio value="ACTIVE"> {{ $t('i18n.fe32def462') }}</a-radio>
+            <a-radio value="PAUSE"> {{ $t('i18n.8d63ef388e') }} </a-radio>
+            <a-radio value="DRAIN"> {{ $t('i18n.f113c10ade') }} </a-radio>
           </a-radio-group>
         </a-form-item>
       </a-form>
@@ -247,13 +247,13 @@ export default {
       editVisible: false,
       initSwarmVisible: false,
       rules: {
-        role: [{ required: true, message: this.$t('pages.docker.swarm.node.b559696f'), trigger: 'blur' }],
-        availability: [{ required: true, message: this.$t('pages.docker.swarm.node.3f74c0ab'), trigger: 'blur' }]
+        role: [{ required: true, message: this.$t('i18n.9d7d471b77'), trigger: 'blur' }],
+        availability: [{ required: true, message: this.$t('i18n.4c7c58b208'), trigger: 'blur' }]
       },
 
       columns: [
         {
-          title: this.$t('pages.docker.swarm.node.72cebb96'),
+          title: this.$t('i18n.faaadc447b'),
           width: 80,
           ellipsis: true,
           align: 'center',
@@ -261,31 +261,31 @@ export default {
         },
         // { title: "节点Id", dataIndex: "id", ellipsis: true, },
         {
-          title: this.$t('pages.docker.swarm.node.2a72f1e6'),
+          title: this.$t('i18n.6707667676'),
           dataIndex: 'hostname',
           ellipsis: true
         },
         {
-          title: this.$t('pages.docker.swarm.node.a0d52737'),
+          title: this.$t('i18n.c1786d9e11'),
           width: 150,
           dataIndex: 'address',
           ellipsis: true
         },
         {
-          title: this.$t('pages.docker.swarm.node.6e06fe4f'),
+          title: this.$t('i18n.3fea7ca76c'),
           width: 140,
           dataIndex: 'state',
           ellipsis: true
         },
         {
-          title: this.$t('pages.docker.swarm.node.377e1844'),
+          title: this.$t('i18n.464f3d4ea3'),
           width: 110,
           dataIndex: 'role',
           ellipsis: true
         },
 
         {
-          title: this.$t('pages.docker.swarm.node.c4c0c00a'),
+          title: this.$t('i18n.996dc32a98'),
           width: 140,
           align: 'center',
           dataIndex: 'os',
@@ -299,7 +299,7 @@ export default {
         //   width: 170,
         // },
         {
-          title: this.$t('pages.docker.swarm.node.61164914'),
+          title: this.$t('i18n.1303e638b5'),
           dataIndex: 'updatedAt',
 
           ellipsis: true,
@@ -307,7 +307,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('pages.docker.swarm.node.3bb962bf'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
           fixed: 'right',
           align: 'center',
@@ -373,11 +373,11 @@ export default {
     //
     handleLeava(record) {
       $confirm({
-        title: this.$t('pages.docker.swarm.node.b22d55a0'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.docker.swarm.node.b35e191c'),
-        okText: this.$t('pages.docker.swarm.node.e8e9db25'),
-        cancelText: this.$t('pages.docker.swarm.node.b12468e9'),
+        content: this.$t('i18n.f5399c620e'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return dockerSwarmNodeLeave({
             nodeId: record.id,

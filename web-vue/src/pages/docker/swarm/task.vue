@@ -15,25 +15,25 @@
           <a-input
             v-if="!serviceId"
             v-model:value="listQuery['serviceId']"
-            :placeholder="$t('pages.docker.swarm.task.ee51b4c9')"
+            :placeholder="$t('i18n.dbb166cf29')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['taskName']"
-            :placeholder="$t('pages.docker.swarm.task.e62a5bf3')"
+            :placeholder="$t('i18n.78caf7115c')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['taskId']"
-            :placeholder="$t('pages.docker.swarm.task.744d5016')"
+            :placeholder="$t('i18n.ac0158db83')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['taskNode']"
-            :placeholder="$t('pages.docker.swarm.task.a3c2349d')"
+            :placeholder="$t('i18n.c90a1f37ce')"
             class="search-input-item"
             @press-enter="loadData"
           />
@@ -53,24 +53,24 @@
                 }
               "
               allow-clear
-              :placeholder="$t('pages.docker.swarm.task.6e06fe4f')"
+              :placeholder="$t('i18n.3fea7ca76c')"
               class="search-input-item"
             >
               <a-select-option v-for="(item, key) in TASK_STATE" :key="key">{{ item }}- {{ key }}</a-select-option>
-              <a-select-option value="">{{ $t('pages.docker.swarm.task.6e06fe4f') }}</a-select-option>
+              <a-select-option value="">{{ $t('i18n.3fea7ca76c') }}</a-select-option>
             </a-select>
           </a-tooltip>
           <a-button type="primary" :loading="loading" @click="loadData">{{
-            $t('pages.docker.swarm.task.53c2763c')
+            $t('i18n.e5f71fc31e')
           }}</a-button>
           <a-statistic-countdown
             format="s"
-            :title="$t('pages.docker.swarm.task.ae8f1e')"
+            :title="$t('i18n.0f8403d07e')"
             :value="countdownTime"
             @finish="loadData"
           >
             <template #suffix>
-              <div style="font-size: 12px">{{ $t('pages.docker.swarm.task.48ec7187') }}</div>
+              <div style="font-size: 12px">{{ $t('i18n.ee6ce96abb') }}</div>
             </template>
           </a-statistic-countdown>
         </a-space>
@@ -91,23 +91,23 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'desiredState'">
-          <a-popover :title="`${$t('pages.docker.swarm.task.90405c0d')}${TASK_STATE[text]}`" placement="topLeft">
+          <a-popover :title="`${$t('i18n.ec989813ed')}${TASK_STATE[text]}`" placement="topLeft">
             <template #content>
               <p>
-                {{ $t('pages.docker.swarm.task.8a8e4923') }}<a-tag>{{ text }}-{{ TASK_STATE[text] }}</a-tag>
+                {{ $t('i18n.e703c7367c') }}<a-tag>{{ text }}-{{ TASK_STATE[text] }}</a-tag>
               </p>
               <p v-if="record.status && record.status.err">
-                {{ $t('pages.docker.swarm.task.9c95b60f') }}{{ record.status.err }}
+                {{ $t('i18n.f66335b5bf') }}{{ record.status.err }}
               </p>
               <p v-if="record.status && record.status.state">
-                {{ $t('pages.docker.swarm.task.29134ef5') }}<a-tag>{{ record.status.state }}</a-tag>
+                {{ $t('i18n.bec98b4d6a') }}<a-tag>{{ record.status.state }}</a-tag>
               </p>
 
               <p v-if="record.status && record.status.message">
-                {{ $t('pages.docker.swarm.task.2edcd34c') }}<a-tag>{{ record.status.message }} </a-tag>
+                {{ $t('i18n.a90cf0796b') }}<a-tag>{{ record.status.message }} </a-tag>
               </p>
               <p v-if="record.status && record.status.timestamp">
-                {{ $t('pages.docker.swarm.task.3d55d8de') }}<a-tag>{{ parseTime(record.status.timestamp) }} </a-tag>
+                {{ $t('i18n.780fb9f3d0') }}<a-tag>{{ parseTime(record.status.timestamp) }} </a-tag>
               </p>
             </template>
 
@@ -131,7 +131,7 @@
         <template v-else-if="column.dataIndex === 'updatedAt'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$t('pages.docker.swarm.task.a2b40316')}${text} ${$t('pages.docker.swarm.task.f5b90169')}${
+            :title="`${$t('i18n.bf94b97d1a')}${text} ${$t('i18n.312f45014a')}${
               record.createdAt
             }`"
           >
@@ -144,7 +144,7 @@
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button size="small" type="primary" @click="handleLog(record)">{{
-              $t('pages.docker.swarm.task.f637e08')
+              $t('i18n.456d29ef8b')
             }}</a-button>
           </a-space>
         </template>
@@ -206,37 +206,37 @@ export default {
       autoUpdateTime: null,
       logVisible: 0,
       rules: {
-        role: [{ required: true, message: this.$t('pages.docker.swarm.task.b559696f'), trigger: 'blur' }],
-        availability: [{ required: true, message: this.$t('pages.docker.swarm.task.3f74c0ab'), trigger: 'blur' }]
+        role: [{ required: true, message: this.$t('i18n.9d7d471b77'), trigger: 'blur' }],
+        availability: [{ required: true, message: this.$t('i18n.4c7c58b208'), trigger: 'blur' }]
       },
       columns: [
         {
-          title: this.$t('pages.docker.swarm.task.72cebb96'),
+          title: this.$t('i18n.faaadc447b'),
           width: '80px',
           ellipsis: true,
           align: 'center',
           customRender: ({ index }) => `${index + 1}`
         },
         {
-          title: this.$t('pages.docker.swarm.task.347d67ac'),
+          title: this.$t('i18n.6da242ea50'),
           dataIndex: 'id',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.docker.swarm.task.ee50ba1c'),
+          title: this.$t('i18n.a472019766'),
           dataIndex: 'nodeId',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.docker.swarm.task.ab51bb7a'),
+          title: this.$t('i18n.b7ec1d09c4'),
           dataIndex: 'serviceId',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.docker.swarm.task.4fbd9851'),
+          title: this.$t('i18n.3477228591'),
           dataIndex: ['spec', 'containerSpec', 'image'],
           ellipsis: true,
           width: 120,
@@ -246,13 +246,13 @@ export default {
         // { title: "端点", dataIndex: "spec.endpointSpec.mode", ellipsis: true, width: 100, },
         // { title: "节点地址", width: 150, dataIndex: "status.address", ellipsis: true,  },
         {
-          title: this.$t('pages.docker.swarm.task.6e06fe4f'),
+          title: this.$t('i18n.3fea7ca76c'),
           width: 140,
           dataIndex: 'desiredState',
           ellipsis: true
         },
         {
-          title: this.$t('pages.docker.swarm.task.77080c2d'),
+          title: this.$t('i18n.4604d50234'),
           width: 150,
           dataIndex: ['status', 'err'],
           ellipsis: true,
@@ -276,7 +276,7 @@ export default {
         //   width: 170,
         // },
         {
-          title: this.$t('pages.docker.swarm.task.d3b29478'),
+          title: this.$t('i18n.1303e638b5'),
           dataIndex: 'updatedAt',
           ellipsis: true,
 
@@ -286,7 +286,7 @@ export default {
           width: '180px'
         },
         {
-          title: this.$t('pages.docker.swarm.task.3bb962bf'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
           fixed: 'right',
           align: 'center',
