@@ -29,11 +29,7 @@
     >
       <a-form ref="editForm" :model="temp" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item label="key" name="key">
-          <a-input
-            v-model:value="temp.key"
-            :disabled="!!temp.oldKey"
-            :placeholder="$t('i18n.c0d19bbfb3')"
-          />
+          <a-input v-model:value="temp.key" :disabled="!!temp.oldKey" :placeholder="$t('i18n.c0d19bbfb3')" />
         </a-form-item>
         <a-form-item label="value" name="value">
           <a-input v-model:value="temp.value" :placeholder="$t('i18n.24384dab27')" />

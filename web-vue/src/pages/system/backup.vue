@@ -38,9 +38,7 @@
             </a-select-option>
           </a-select>
           <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button :loading="loading" type="primary" @click="loadData">{{
-              $t('i18n.e5f71fc31e')
-            }}</a-button>
+            <a-button :loading="loading" type="primary" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">{{ $t('i18n.a4006e5c1e') }}</a-button>
           <a-button type="primary" @click="handleSqlUpload">{{ $t('i18n.90c0458a4c') }}</a-button>

@@ -89,9 +89,7 @@ const conentScript = () => {
   socket_.onerror = (err) => {
     console.error(err)
     $notification.error({
-      message: `web socket ${
-        ($t('i18n.7030ff6470'), $t('i18n.226a6f9cdd'))
-      }`
+      message: `web socket ${($t('i18n.7030ff6470'), $t('i18n.226a6f9cdd'))}`
     })
   }
   socket_.onclose = (err) => {

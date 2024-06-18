@@ -83,7 +83,9 @@
         </template>
         <template v-else-if="column.dataIndex === 'url'">
           <a-tooltip
-            :title="`${$t('i18n.f668c8c881')}${record.name || ''}/${$t('i18n.df3833270b')}${record.url || ''}/${$t('i18n.8d13037eb7')}${record.statusMsg || ''}`"
+            :title="`${$t('i18n.f668c8c881')}${record.name || ''}/${$t('i18n.df3833270b')}${record.url || ''}/${$t(
+              'i18n.8d13037eb7'
+            )}${record.statusMsg || ''}`"
           >
             <a-button v-if="record.url" type="link" size="small" @click="openUrl(record.url)">
               {{ text }}

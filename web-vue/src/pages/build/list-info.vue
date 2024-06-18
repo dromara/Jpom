@@ -126,9 +126,7 @@
             @press-enter="loadData"
           />
           <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('i18n.e5f71fc31e')
-            }}</a-button>
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">{{ $t('i18n.66ab5e9f24') }}</a-button>
           <template v-if="tableSelections && tableSelections.length">
@@ -146,9 +144,7 @@
             </a-dropdown>
           </template>
           <a-tooltip v-else :title="$t('i18n.98357846a2')">
-            <a-button :disabled="true" type="primary">
-              {{ $t('i18n.7f7c624a84') }} <DownOutlined />
-            </a-button>
+            <a-button :disabled="true" type="primary"> {{ $t('i18n.7f7c624a84') }} <DownOutlined /> </a-button>
           </a-tooltip>
 
           <!-- <a-button v-if="!layout" type="primary" @click="changeLayout">
@@ -286,9 +282,7 @@
                 </template>
               </a-dropdown>
               <a-dropdown>
-                <a-button size="small" type="primary" @click="handleEdit(item)">{{
-                  $t('i18n.95b351c862')
-                }}</a-button>
+                <a-button size="small" type="primary" @click="handleEdit(item)">{{ $t('i18n.95b351c862') }}</a-button>
                 <template #overlay>
                   <a-menu>
                     <a-menu-item @click="handleEdit(item, 0)">
@@ -347,10 +341,7 @@
         </template>
 
         <template v-else-if="column.dataIndex === 'buildMode'">
-          <a-tooltip
-            placement="topLeft"
-            :title="text === 1 ? $t('i18n.685e5de706') : $t('i18n.69c3b873c1')"
-          >
+          <a-tooltip placement="topLeft" :title="text === 1 ? $t('i18n.685e5de706') : $t('i18n.69c3b873c1')">
             <CloudOutlined v-if="text === 1" />
             <CodeOutlined v-else />
           </a-tooltip>
@@ -675,22 +666,14 @@
         >
           <a-input v-model:value="temp.projectSecondaryDirectory" :placeholder="$t('i18n.9c99e8bec9')" />
         </a-form-item>
-        <a-form-item
-          :label="$t('i18n.3867e350eb')"
-          name="buildEnvParameter"
-          :help="$t('i18n.220650a1f5')"
-        >
+        <a-form-item :label="$t('i18n.3867e350eb')" name="buildEnvParameter" :help="$t('i18n.220650a1f5')">
           <a-textarea
             v-model:value="temp.buildEnvParameter"
             :placeholder="$t('i18n.b3913b9bb7')"
             :auto-size="{ minRows: 3, maxRows: 5 }"
           />
         </a-form-item>
-        <a-form-item
-          :label="$t('i18n.d1498d9dbf')"
-          name="buildRemark"
-          :help="$t('i18n.111e786daa')"
-        >
+        <a-form-item :label="$t('i18n.d1498d9dbf')" name="buildRemark" :help="$t('i18n.111e786daa')">
           <a-textarea
             v-model:value="temp.buildRemark"
             :max-length="240"

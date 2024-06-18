@@ -27,9 +27,7 @@
           />
         </div>
 
-        <a-button type="primary" :loading="loading" @click="loadData">{{
-          $t('i18n.e5f71fc31e')
-        }}</a-button>
+        <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
       </a-space>
     </template>
     <template #bodyCell="{ column, text, record }">

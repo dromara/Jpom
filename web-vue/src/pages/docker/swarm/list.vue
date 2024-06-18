@@ -43,9 +43,7 @@
             @press-enter="loadData"
           />
           <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('i18n.e5f71fc31e')
-            }}</a-button>
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -58,9 +56,7 @@
         </template>
         <template v-else-if="column.dataIndex instanceof Array && column.dataIndex.includes('status')">
           <template v-if="record.machineDocker">
-            <a-tag v-if="record.machineDocker.status === 1" color="green">{{
-              $t('i18n.fd6e80f1e0')
-            }}</a-tag>
+            <a-tag v-if="record.machineDocker.status === 1" color="green">{{ $t('i18n.fd6e80f1e0') }}</a-tag>
             <a-tooltip v-else :title="record.machineDocker.failureMsg">
               <a-tag color="red">{{ $t('i18n.757a730c9e') }}</a-tag>
             </a-tooltip>
@@ -90,17 +86,11 @@
               >
             </template>
             <template v-else>
-              <a-button size="small" :disabled="true" type="primary">{{
-                $t('i18n.47d68cd0f4')
-              }}</a-button>
-              <a-button size="small" :disabled="true" type="primary">{{
-                $t('i18n.3bf3c0a8d6')
-              }}</a-button>
+              <a-button size="small" :disabled="true" type="primary">{{ $t('i18n.47d68cd0f4') }}</a-button>
+              <a-button size="small" :disabled="true" type="primary">{{ $t('i18n.3bf3c0a8d6') }}</a-button>
             </template>
 
-            <a-button size="small" type="primary" @click="handleEdit(record)">{{
-              $t('i18n.95b351c862')
-            }}</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n.95b351c862') }}</a-button>
             <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
               $t('i18n.2f4aaddde3')
             }}</a-button>

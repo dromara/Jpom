@@ -87,8 +87,7 @@ export const uploadPieces = ({
     const batch = 1024 * 1024 * 2
     const asyncUpdate = function () {
       if (start < total) {
-        resolveFileProcess &&
-          resolveFileProcess(t('i18n.6a8402afcb') + ((start / total) * 100).toFixed(2) + '%')
+        resolveFileProcess && resolveFileProcess(t('i18n.6a8402afcb') + ((start / total) * 100).toFixed(2) + '%')
         const end = Math.min(start + batch, total)
         reader.readAsArrayBuffer(blobSlice.call(file, start, end))
         start = end

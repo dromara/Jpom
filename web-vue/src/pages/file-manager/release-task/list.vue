@@ -64,9 +64,7 @@
             <a-select-option v-for="(val, key) in taskTypeMap" :key="key">{{ val }}</a-select-option>
           </a-select>
           <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('i18n.e5f71fc31e')
-            }}</a-button>
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -86,18 +84,14 @@
         </template>
 
         <template v-else-if="column.dataIndex === 'status'">
-          <a-tag v-if="text === 2" color="green">{{
-            statusMap[text] || $t('i18n.1622dc9b6b')
-          }}</a-tag>
+          <a-tag v-if="text === 2" color="green">{{ statusMap[text] || $t('i18n.1622dc9b6b') }}</a-tag>
           <a-tag v-else-if="text === 0 || text === 1" color="orange">{{
             statusMap[text] || $t('i18n.1622dc9b6b')
           }}</a-tag>
           <a-tag v-else-if="text === 4" color="blue">
             {{ statusMap[text] || $t('i18n.1622dc9b6b') }}
           </a-tag>
-          <a-tag v-else-if="text === 3" color="red">{{
-            statusMap[text] || $t('i18n.1622dc9b6b')
-          }}</a-tag>
+          <a-tag v-else-if="text === 3" color="red">{{ statusMap[text] || $t('i18n.1622dc9b6b') }}</a-tag>
           <a-tag v-else>{{ statusMap[text] || $t('i18n.1622dc9b6b') }}</a-tag>
         </template>
         <template v-else-if="column.dataIndex === 'taskType'">
@@ -110,13 +104,9 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button type="primary" size="small" @click="handleView(record)">{{
-              $t('i18n.607e7a4f37')
-            }}</a-button>
+            <a-button type="primary" size="small" @click="handleView(record)">{{ $t('i18n.607e7a4f37') }}</a-button>
 
-            <a-button type="primary" size="small" @click="handleRetask(record)">{{
-              $t('i18n.9e09315960')
-            }}</a-button>
+            <a-button type="primary" size="small" @click="handleRetask(record)">{{ $t('i18n.9e09315960') }}</a-button>
             <a-button
               type="primary"
               danger
@@ -171,11 +161,7 @@
         :wrapper-col="{ span: 20 }"
       >
         <a-form-item :label="$t('i18n.ce23a42b47')" name="name">
-          <a-input
-            v-model:value="temp.name"
-            :placeholder="$t('i18n.5f4c724e61')"
-            :max-length="50"
-          />
+          <a-input v-model:value="temp.name" :placeholder="$t('i18n.5f4c724e61')" :max-length="50" />
         </a-form-item>
 
         <a-form-item :label="$t('i18n.f98994f7ec')" name="taskType">
@@ -185,11 +171,7 @@
           </a-radio-group>
         </a-form-item>
 
-        <a-form-item
-          v-if="temp.taskType === 0"
-          name="taskDataIds"
-          :label="$t('i18n.b188393ea7')"
-        >
+        <a-form-item v-if="temp.taskType === 0" name="taskDataIds" :label="$t('i18n.b188393ea7')">
           <a-row>
             <a-col :span="22">
               <a-select
@@ -218,11 +200,7 @@
             </a-col>
           </a-row>
         </a-form-item>
-        <a-form-item
-          v-else-if="temp.taskType === 1"
-          name="taskDataIds"
-          :label="$t('i18n.473badc394')"
-        >
+        <a-form-item v-else-if="temp.taskType === 1" name="taskDataIds" :label="$t('i18n.473badc394')">
           <a-row>
             <a-col :span="22">
               <a-select
@@ -253,11 +231,7 @@
         </a-form-item>
 
         <a-form-item name="releasePathParent" :label="$t('i18n.dbb2df00cf')">
-          <a-input
-            v-model:value="temp.releasePath"
-            :placeholder="$t('i18n.ee9a51488f')"
-            :disabled="true"
-          />
+          <a-input v-model:value="temp.releasePath" :placeholder="$t('i18n.ee9a51488f')" :disabled="true" />
         </a-form-item>
 
         <a-form-item name="releasePathParent" :label="$t('i18n.a91ce167c1')">
@@ -313,19 +287,11 @@
         <a-form-item :label="$t('i18n.396b7d3f91')" name="size">
           {{ renderSize(temp.size) }}
         </a-form-item>
-        <a-form-item
-          v-if="temp.validUntil"
-          :label="$t('i18n.1fa23f4daa')"
-          name="validUntil"
-        >
+        <a-form-item v-if="temp.validUntil" :label="$t('i18n.1fa23f4daa')" name="validUntil">
           {{ parseTime(temp.validUntil) }}
         </a-form-item>
         <a-form-item v-if="temp.workspaceId" :label="$t('i18n.3a6970ac26')" name="global">
-          {{
-            temp.workspaceId === 'GLOBAL'
-              ? $t('i18n.2be75b1044')
-              : $t('i18n.98d69f8b62')
-          }}
+          {{ temp.workspaceId === 'GLOBAL' ? $t('i18n.2be75b1044') : $t('i18n.98d69f8b62') }}
         </a-form-item>
         <a-form-item :label="$t('i18n.8d6f38b4b1')" name="description">
           {{ temp.description }}
@@ -452,9 +418,7 @@ export default {
       releaseFileRules: {
         name: [{ required: true, message: this.$t('i18n.89d18c88a3'), trigger: 'blur' }],
 
-        taskDataIds: [
-          { required: true, message: this.$t('i18n.3e51d1bc9c'), trigger: 'blur' }
-        ]
+        taskDataIds: [{ required: true, message: this.$t('i18n.3e51d1bc9c'), trigger: 'blur' }]
       },
       viewFileVisible: false
     }

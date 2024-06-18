@@ -2,11 +2,7 @@
   <div>
     <a-form :model="temp" :label-col="{ span: 2 }" :wrapper-col="{ span: 20 }">
       <a-form-item :label="$t('i18n.ce23a42b47')" name="name">
-        <a-input
-          :placeholder="$t('i18n.5f4c724e61')"
-          :disabled="true"
-          :value="temp.taskData && temp.taskData.name"
-        />
+        <a-input :placeholder="$t('i18n.5f4c724e61')" :disabled="true" :value="temp.taskData && temp.taskData.name" />
       </a-form-item>
 
       <a-form-item :label="$t('i18n.f98994f7ec')" name="taskType">
@@ -23,11 +19,7 @@
           :value="temp.taskData && temp.taskData.releasePath"
         />
       </a-form-item>
-      <a-form-item
-        name="releasePath"
-        :label="$t('i18n.3fea7ca76c')"
-        :help="temp.taskData && temp.taskData.statusMsg"
-      >
+      <a-form-item name="releasePath" :label="$t('i18n.3fea7ca76c')" :help="temp.taskData && temp.taskData.statusMsg">
         {{ statusMap[temp.taskData && temp.taskData.status] || $t('i18n.1622dc9b6b') }}
       </a-form-item>
 

@@ -50,9 +50,7 @@
             @press-enter="loadData"
           />
           <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button :loading="loading" type="primary" @click="loadData">{{
-              $t('i18n.e5f71fc31e')
-            }}</a-button>
+            <a-button :loading="loading" type="primary" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
           </a-tooltip>
           <a-button type="primary" @click="createScript">{{ $t('i18n.66ab5e9f24') }}</a-button>
           <a-button
@@ -103,15 +101,9 @@
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <template v-if="mode === 'manage'">
-              <a-button size="small" type="primary" @click="handleExec(record)">{{
-                $t('i18n.1a6aa24e76')
-              }}</a-button>
-              <a-button size="small" type="primary" @click="handleEdit(record)">{{
-                $t('i18n.95b351c862')
-              }}</a-button>
-              <a-button size="small" type="primary" @click="handleLog(record)">{{
-                $t('i18n.456d29ef8b')
-              }}</a-button>
+              <a-button size="small" type="primary" @click="handleExec(record)">{{ $t('i18n.1a6aa24e76') }}</a-button>
+              <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n.95b351c862') }}</a-button>
+              <a-button size="small" type="primary" @click="handleLog(record)">{{ $t('i18n.456d29ef8b') }}</a-button>
               <a-dropdown>
                 <a @click="(e) => e.preventDefault()">
                   {{ $t('i18n.0ec9eaf9c3') }}
@@ -145,9 +137,7 @@
               </a-dropdown>
             </template>
             <template v-else>
-              <a-button size="small" type="primary" @click="handleEdit(record)">{{
-                $t('i18n.95b351c862')
-              }}</a-button>
+              <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n.95b351c862') }}</a-button>
             </template>
           </a-space>
         </template>
@@ -180,9 +170,7 @@
               :options="{ mode: 'shell', tabSize: 2 }"
             >
               <template #tool_before>
-                <a-button type="link" @click="scriptLibraryVisible = true">{{
-                  $t('i18n.f685377a22')
-                }}</a-button>
+                <a-button type="link" @click="scriptLibraryVisible = true">{{ $t('i18n.f685377a22') }}</a-button>
               </template>
             </code-editor>
           </a-form-item-rest>
@@ -214,9 +202,7 @@
             <a-divider style="margin: 5px 0" />
           </a-space>
 
-          <a-button type="primary" @click="() => commandParams.push({})">{{
-            $t('i18n.4c0eead6ff')
-          }}</a-button>
+          <a-button type="primary" @click="() => commandParams.push({})">{{ $t('i18n.4c0eead6ff') }}</a-button>
         </a-form-item>
         <a-form-item :label="$t('i18n.6b2e348a2b')" name="autoExecCron">
           <a-auto-complete
@@ -245,8 +231,7 @@
         <a-form-item v-if="temp.prohibitSync" :label="$t('i18n.b499798ec5')">
           <template #help>{{ $t('i18n.06986031a7') }}</template>
           <a-tag v-for="(item, index) in temp.nodeList" :key="index"
-            >{{ $t('i18n.5d83794cfa') }}{{ item.nodeName }}
-            {{ $t('i18n.4d85c37f0d') }}{{ item.workspaceName }}</a-tag
+            >{{ $t('i18n.5d83794cfa') }}{{ item.nodeName }} {{ $t('i18n.4d85c37f0d') }}{{ item.workspaceName }}</a-tag
           >
         </a-form-item>
         <a-form-item v-else>
@@ -353,9 +338,7 @@
         <a-tabs default-active-key="1">
           <template #rightExtra>
             <a-tooltip :title="$t('i18n.01ad26f4a9')">
-              <a-button type="primary" size="small" @click="resetTrigger">{{
-                $t('i18n.4b9c3271dc')
-              }}</a-button>
+              <a-button type="primary" size="small" @click="resetTrigger">{{ $t('i18n.4b9c3271dc') }}</a-button>
             </a-tooltip>
           </template>
           <a-tab-pane key="1" :tab="$t('i18n.1a6aa24e76')">
@@ -370,20 +353,14 @@
                   </ul>
                 </template>
               </a-alert>
-              <a-alert
-                type="info"
-                :message="`${$t('i18n.de78b73dab')}(${$t('i18n.00a070c696')})`"
-              >
+              <a-alert type="info" :message="`${$t('i18n.de78b73dab')}(${$t('i18n.00a070c696')})`">
                 <template #description>
                   <a-typography-paragraph :copyable="{ text: temp.triggerUrl }">
                     <a-tag>GET</a-tag> <span>{{ temp.triggerUrl }} </span>
                   </a-typography-paragraph>
                 </template>
               </a-alert>
-              <a-alert
-                type="info"
-                :message="`${$t('i18n.8d202b890c')}(${$t('i18n.00a070c696')})`"
-              >
+              <a-alert type="info" :message="`${$t('i18n.8d202b890c')}(${$t('i18n.00a070c696')})`">
                 <template #description>
                   <a-typography-paragraph :copyable="{ text: temp.batchTriggerUrl }">
                     <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
@@ -769,8 +746,7 @@ export default {
           for (let i = 0; i < this.commandParams.length; i++) {
             if (!this.commandParams[i].desc) {
               $notification.error({
-                message:
-                  this.$t('i18n.8ae2b9915c') + (i + 1) + this.$t('i18n.c583b707ba')
+                message: this.$t('i18n.8ae2b9915c') + (i + 1) + this.$t('i18n.c583b707ba')
               })
               return false
             }

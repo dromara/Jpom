@@ -2,11 +2,7 @@
   <div class="">
     <a-tabs default-active-key="1" tab-position="left">
       <a-tab-pane key="1" :tab="$t('i18n.3c6248b364')">
-        <a-alert
-          :message="$t('i18n.5785f004ea')"
-          style="margin-top: 10px; margin-bottom: 40px"
-          banner
-        />
+        <a-alert :message="$t('i18n.5785f004ea')" style="margin-top: 10px; margin-bottom: 40px" banner />
         <a-timeline>
           <a-timeline-item v-if="temp.dateTime">
             <span class="layui-elem-quote">
@@ -15,15 +11,11 @@
             </span>
           </a-timeline-item>
           <a-timeline-item>
-            <span class="layui-elem-quote"
-              >{{ $t('i18n.37f1931729') }}{{ renderSize(temp.dataSize) }}</span
-            >
+            <span class="layui-elem-quote">{{ $t('i18n.37f1931729') }}{{ renderSize(temp.dataSize) }}</span>
           </a-timeline-item>
           <a-timeline-item v-if="temp.fileSize">
             <a-space>
-              <span class="layui-elem-quote"
-                >{{ $t('i18n.ea3c5c0d25') }}{{ renderSize(temp.fileSize) }}</span
-              >
+              <span class="layui-elem-quote">{{ $t('i18n.ea3c5c0d25') }}{{ renderSize(temp.fileSize) }}</span>
               <a-button size="small" type="primary" class="btn" @click="clear('fileSize')">{{
                 $t('i18n.288f0c404c')
               }}</a-button>
@@ -31,9 +23,7 @@
           </a-timeline-item>
           <a-timeline-item v-if="temp.oldJarsSize">
             <a-space>
-              <span class="layui-elem-quote"
-                >{{ $t('i18n.413d8ba722') }}{{ renderSize(temp.oldJarsSize) }}</span
-              >
+              <span class="layui-elem-quote">{{ $t('i18n.413d8ba722') }}{{ renderSize(temp.oldJarsSize) }}</span>
               <a-button size="small" type="primary" class="btn" @click="clear('oldJarsSize')">{{
                 $t('i18n.288f0c404c')
               }}</a-button>
@@ -42,28 +32,20 @@
 
           <a-timeline-item>
             <a-space>
-              <span class="layui-elem-quote"
-                >{{ $t('i18n.775fde44cf') }}{{ temp.pidPort }}</span
-              >
+              <span class="layui-elem-quote">{{ $t('i18n.775fde44cf') }}{{ temp.pidPort }}</span>
               <a-button v-if="temp.pidPort" size="small" type="primary" class="btn" @click="clear('pidPort')">{{
                 $t('i18n.288f0c404c')
               }}</a-button>
             </a-space>
           </a-timeline-item>
           <a-timeline-item>
-            <span class="layui-elem-quote"
-              >{{ $t('i18n.25f29ebbe6') }}{{ temp.scriptExecLogSize }}</span
-            >
+            <span class="layui-elem-quote">{{ $t('i18n.25f29ebbe6') }}{{ temp.scriptExecLogSize }}</span>
           </a-timeline-item>
           <a-timeline-item>
-            <span class="layui-elem-quote"
-              >{{ $t('i18n.9b9e426d16') }}{{ temp.readFileOnLineCount }}</span
-            >
+            <span class="layui-elem-quote">{{ $t('i18n.9b9e426d16') }}{{ temp.readFileOnLineCount }}</span>
           </a-timeline-item>
           <a-timeline-item>
-            <span class="layui-elem-quote"
-              >{{ $t('i18n.b6ee682dac') }}{{ temp.pluginSize || 0 }}</span
-            >
+            <span class="layui-elem-quote">{{ $t('i18n.b6ee682dac') }}{{ temp.pluginSize || 0 }}</span>
           </a-timeline-item>
           <a-timeline-item>
             <div class="layui-elem-quote">

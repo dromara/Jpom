@@ -68,9 +68,7 @@
             <a-select-option v-for="item in clusterList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
           <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('i18n.e5f71fc31e')
-            }}</a-button>
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">{{ $t('i18n.66ab5e9f24') }}</a-button>
           <a-tooltip>
@@ -121,23 +119,13 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEdit(record)">{{
-              $t('i18n.95b351c862')
-            }}</a-button>
-            <a-button size="small" type="primary" @click="configMeun(record)">{{
-              $t('i18n.4ccbdc5301')
-            }}</a-button>
-            <a-button size="small" type="primary" @click="configWhiteDir(record)">{{
-              $t('i18n.3d48c9da09')
-            }}</a-button>
-            <a-button size="small" type="primary" @click="viewEnvVar(record)">{{
-              $t('i18n.ddc7d28b7b')
-            }}</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n.95b351c862') }}</a-button>
+            <a-button size="small" type="primary" @click="configMeun(record)">{{ $t('i18n.4ccbdc5301') }}</a-button>
+            <a-button size="small" type="primary" @click="configWhiteDir(record)">{{ $t('i18n.3d48c9da09') }}</a-button>
+            <a-button size="small" type="primary" @click="viewEnvVar(record)">{{ $t('i18n.ddc7d28b7b') }}</a-button>
 
             <a-tooltip v-if="record.id === 'DEFAULT'" :title="$t('i18n.0c0633c367')">
-              <a-button size="small" type="primary" danger :disabled="true">{{
-                $t('i18n.2f4aaddde3')
-              }}</a-button>
+              <a-button size="small" type="primary" danger :disabled="true">{{ $t('i18n.2f4aaddde3') }}</a-button>
             </a-tooltip>
             <a-button v-else size="small" type="primary" danger @click="handleDelete(record)">{{
               $t('i18n.2f4aaddde3')
@@ -174,11 +162,7 @@
         style="padding-top: 15px"
       >
         <a-form-item :label="$t('i18n.d7ec2d3fea')" name="name">
-          <a-input
-            v-model:value="temp.name"
-            :max-length="50"
-            :placeholder="$t('i18n.6a588459d0')"
-          />
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n.6a588459d0')" />
         </a-form-item>
         <a-form-item :label="$t('i18n.9b5f172ebe')" name="clusterInfoId">
           <a-select
@@ -309,9 +293,7 @@
       "
     >
       <a-alert :message="$t('i18n.a35740ae41')" type="error" show-icon>
-        <template #description>
-          {{ $t('i18n.6b46e2bfae') }},{{ $t('i18n.86b7eb5e83') }}</template
-        >
+        <template #description> {{ $t('i18n.6b46e2bfae') }},{{ $t('i18n.86b7eb5e83') }}</template>
       </a-alert>
 
       <a-tree :tree-data="treeData" default-expand-all :field-names="preDeleteReplaceFields" :show-line="true">
@@ -327,12 +309,8 @@
               {{ $t('i18n.f932eff53e') }}
             </a-tag>
 
-            <a-tag v-if="dataRef.workspaceBind === 2" color="cyan">{{
-              $t('i18n.686a19db6a')
-            }}</a-tag>
-            <a-tag v-else-if="dataRef.workspaceBind === 3" color="blue">{{
-              $t('i18n.9c3a3e1b03')
-            }}</a-tag>
+            <a-tag v-if="dataRef.workspaceBind === 2" color="cyan">{{ $t('i18n.686a19db6a') }}</a-tag>
+            <a-tag v-else-if="dataRef.workspaceBind === 3" color="blue">{{ $t('i18n.9c3a3e1b03') }}</a-tag>
             <a-tag v-else color="purple">{{ $t('i18n.ab006f89e7') }}</a-tag>
           </template>
         </template>

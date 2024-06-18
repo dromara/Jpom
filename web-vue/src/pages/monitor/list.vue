@@ -48,9 +48,7 @@
             <a-select-option :value="0">{{ $t('i18n.bb667fdb2a') }}</a-select-option>
           </a-select>
           <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('i18n.e5f71fc31e')
-            }}</a-button>
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">{{ $t('i18n.66ab5e9f24') }}</a-button>
         </a-space>
@@ -91,9 +89,7 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button type="primary" size="small" @click="handleEdit(record)">{{
-              $t('i18n.95b351c862')
-            }}</a-button>
+            <a-button type="primary" size="small" @click="handleEdit(record)">{{ $t('i18n.95b351c862') }}</a-button>
             <a-button type="primary" danger size="small" @click="handleDelete(record)">{{
               $t('i18n.2f4aaddde3')
             }}</a-button>
@@ -188,8 +184,7 @@
                 :label="`${project.name} - ${project.runMode}`"
                 :disabled="!noFileModes.includes(project.runMode)"
               >
-                {{ $t('i18n.0341329b1d') }}{{ project.nodeName }}{{ $t('i18n.5942e7ebd0')
-                }}{{ project.name }} -
+                {{ $t('i18n.0341329b1d') }}{{ project.nodeName }}{{ $t('i18n.5942e7ebd0') }}{{ project.name }} -
                 {{ project.runMode }}
               </a-select-option>
             </a-select-opt-group>

@@ -8,11 +8,7 @@
       :wrapper-col="{ span: 20 }"
     >
       <a-form-item :label="$t('i18n.ce23a42b47')" name="name">
-        <a-input
-          v-model:value="temp.name"
-          :placeholder="$t('i18n.5f4c724e61')"
-          :max-length="50"
-        />
+        <a-input v-model:value="temp.name" :placeholder="$t('i18n.5f4c724e61')" :max-length="50" />
       </a-form-item>
 
       <a-form-item :label="$t('i18n.f98994f7ec')" name="taskType">
@@ -21,17 +17,11 @@
           <a-radio :value="1"> {{ $t('i18n.3bf3c0a8d6') }} </a-radio>
         </a-radio-group>
         <template #help>
-          <template v-if="temp.taskType === 0"
-            >{{ $t('i18n.28bf369f34') }}
-          </template>
+          <template v-if="temp.taskType === 0">{{ $t('i18n.28bf369f34') }} </template>
         </template>
       </a-form-item>
 
-      <a-form-item
-        v-if="temp.taskType === 0"
-        name="taskDataIds"
-        :label="$t('i18n.b188393ea7')"
-      >
+      <a-form-item v-if="temp.taskType === 0" name="taskDataIds" :label="$t('i18n.b188393ea7')">
         <a-row>
           <a-col :span="22">
             <a-select
@@ -60,11 +50,7 @@
           </a-col>
         </a-row>
       </a-form-item>
-      <a-form-item
-        v-else-if="temp.taskType === 1"
-        name="taskDataIds"
-        :label="$t('i18n.473badc394')"
-      >
+      <a-form-item v-else-if="temp.taskType === 1" name="taskDataIds" :label="$t('i18n.473badc394')">
         <a-row>
           <a-col :span="22">
             <a-select
@@ -325,13 +311,9 @@ export default {
     return {
       temp: {},
       releaseFileRules: {
-        name: [
-          { required: true, message: this.$t('i18n.89d18c88a3'), trigger: 'blur' }
-        ],
+        name: [{ required: true, message: this.$t('i18n.89d18c88a3'), trigger: 'blur' }],
 
-        taskType: [
-          { required: true, message: this.$t('i18n.29b48a76be'), trigger: 'blur' }
-        ],
+        taskType: [{ required: true, message: this.$t('i18n.29b48a76be'), trigger: 'blur' }],
 
         releasePath: [
           {
@@ -341,9 +323,7 @@ export default {
           }
         ],
 
-        taskDataIds: [
-          { required: true, message: this.$t('i18n.3e51d1bc9c'), trigger: 'blur' }
-        ]
+        taskDataIds: [{ required: true, message: this.$t('i18n.3e51d1bc9c'), trigger: 'blur' }]
       },
       sshList: [],
       accessList: [],

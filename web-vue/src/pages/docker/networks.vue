@@ -24,9 +24,7 @@
           @press-enter="loadData"
         />
 
-        <a-button type="primary" :loading="loading" @click="loadData">{{
-          $t('i18n.e5f71fc31e')
-        }}</a-button>
+        <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
       </a-space>
     </template>
     <template #bodyCell="{ column, text, record }">
@@ -43,11 +41,7 @@
             text.config &&
             text.config
               .map((item) => {
-                return (
-                  ($t('i18n.27ba6eb343') + item.gateway || '') +
-                  '#' +
-                  ($t('i18n.d1aa9c2da9') + item.subnet || '')
-                )
+                return ($t('i18n.27ba6eb343') + item.gateway || '') + '#' + ($t('i18n.d1aa9c2da9') + item.subnet || '')
               })
               .join(',')
           }`"

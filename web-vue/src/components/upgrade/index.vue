@@ -245,13 +245,9 @@ export default {
     },
     // 开始上传文件
     startUpload() {
-      const title = '确认要上传文件更新到最新版本吗？'
-      const alterB = '请注意备份数据防止数据丢失！！'
-      const liArray = [
-        '上传更新前请阅读更新日志里面的说明和注意事项并且',
-        '上传前请检查包是否完整,否则可能出现更新后无法正常启动的情况！！',
-        '如果升级失败需要手动恢复奥'
-      ]
+      const title = this.$t('i18n.458331a965')
+      const alterB = this.$t('i18n.ddf0c97bce')
+      const liArray = [this.$t('i18n.a38ed189a2'), this.$t('i18n.a5daa9be44'), this.$t('i18n.a52a10123f')]
 
       const html = `${title}
       <ul style="color:red;">
@@ -487,13 +483,10 @@ export default {
     },
     // 升级
     upgrageVerion() {
-      const title = '确认要下载更新最新版本吗？'
-      const alterB = '请注意备份数据防止数据丢失！！'
-      const li = [
-        '载速度根据网速来确定,如果网络不佳下载会较慢',
-        '载前请阅读更新日志里面的说明和注意事项并且',
-        '如果升级失败需要手动恢复奥'
-      ]
+      const title = this.$t('i18n.ec6e39a177')
+      const alterB = this.$t('i18n.ddf0c97bce')
+      const li = [this.$t('i18n.a94feac256'), this.$t('i18n.b55f286cba'), this.$t('i18n.a52a10123f')]
+
       const html = `${title}
       <ul style="color:red;">
         <li>${li[0]}</li>
@@ -526,12 +519,9 @@ export default {
     handleChangeBetaRelease(beta) {
       let html
       if (beta) {
-        const title = '确认要加入 beta 计划吗？'
-        const li = [
-          '加入 beta 计划可以及时获取到最新的功能、一些优化功能、最快修复 bug 的版本，但是 beta 版也可能在部分新功能上存在不稳定的情况。',
-          '您需要根据您业务情况来评估是否可以加入 beta。',
-          '在使用 beta 版过程中遇到问题可以随时反馈给我们，我们会尽快为您解答。'
-        ]
+        const title = this.$t('i18n.d64cf79bd4')
+        const li = [this.$t('i18n.d31d625029'), this.$t('i18n.d8db440b83'), this.$t('i18n.73b7e8e09e')]
+
         html = `${title}
         <ul <ul style="color:red;">
           <li><b>${li[0]}</b></li>

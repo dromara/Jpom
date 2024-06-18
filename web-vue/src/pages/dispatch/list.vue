@@ -854,9 +854,7 @@
                 <a-textarea
                   v-model:value="temp[`${nodeId}_jvm`]"
                   :auto-size="{ minRows: 3, maxRows: 3 }"
-                  :placeholder="
-                    $t('i18n.eef3653e9a', { slot1: $t('i18n.3d0a2df9ec'), slot2: $t('i18n.eb5bab1c31') })
-                  "
+                  :placeholder="$t('i18n.eef3653e9a', { slot1: $t('i18n.3d0a2df9ec'), slot2: $t('i18n.eb5bab1c31') })"
                 />
               </a-form-item>
               <a-form-item v-show="javaModes.includes(temp.runMode)" :label="$t('i18n.e5098786d3')" name="args">

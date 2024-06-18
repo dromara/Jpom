@@ -48,11 +48,7 @@
                 </a-form-item>
 
                 <a-form-item>
-                  <a-popover
-                    :title="$t('i18n.bdd9d38d7e')"
-                    trigger="click"
-                    placement="bottomRight"
-                  >
+                  <a-popover :title="$t('i18n.bdd9d38d7e')" trigger="click" placement="bottomRight">
                     <template #content>
                       <a-radio-group v-model:value="tableSize" class="custom-size-list">
                         <div v-for="item in tableSizeList" :key="item.value">
