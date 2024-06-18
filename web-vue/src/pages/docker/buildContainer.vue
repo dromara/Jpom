@@ -130,9 +130,7 @@
                   <a-input
                     v-model:value="item.host"
                     :addon-before="$t('pages.docker.buildContainer.2a72f1e6')"
-                    :placeholder="
-                      $t('pages.docker.buildContainer.f791ed7d', { slot1: $t('pages.docker.buildContainer.2a72f1e6') })
-                    "
+                    :placeholder="$t('pages.docker.buildContainer.f791ed7d')"
                   />
                 </a-col>
                 <a-col :span="10" :offset="1">
