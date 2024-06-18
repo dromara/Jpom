@@ -4,7 +4,7 @@
       <template #tab>
         <span>
           <SettingOutlined />
-          {{ $t('pages.system.config.16c8a2eb') }}
+          {{ $t('i18n.3181790b4b') }}
         </span>
       </template>
 
@@ -18,17 +18,17 @@
             height="calc(100vh - 200px)"
           >
             <template #tool_before>
-              <a-alert v-if="temp.file" show-icon :message="`${$t('pages.system.config.b6bc55e9')}:${temp.file}`" />
+              <a-alert v-if="temp.file" show-icon :message="`${$t('i18n.37c1eb9b23')}:${temp.file}`" />
             </template>
           </code-editor>
         </a-form-item>
         <a-form-item :wrapper-col="{ span: 14, offset: 2 }">
           <a-space>
             <a-button type="primary" class="btn" @click="onSubmit(false)">{{
-              $t('pages.system.config.3571a8f0')
+              $t('i18n.be5fbbe34c')
             }}</a-button>
             <a-button type="primary" danger class="btn" @click="onSubmit(true)">{{
-              $t('pages.system.config.fda40980')
+              $t('i18n.6aab88d6a3')
             }}</a-button>
           </a-space>
         </a-form-item>
@@ -38,12 +38,12 @@
       <template #tab>
         <span>
           <LockOutlined />
-          {{ $t('pages.system.config.12fec1a7') }}
+          {{ $t('i18n.decef97c7c') }}
         </span>
       </template>
-      <a-alert :message="`${$t('pages.system.config.280a47a7')}${ipTemp.ip}`" type="success" />
-      <a-alert :message="$t('pages.system.config.f86e70bd')" style="margin-top: 10px" banner />
-      <a-alert :message="$t('pages.system.config.f16607cf')" style="margin-top: 10px" banner />
+      <a-alert :message="`${$t('i18n.22cf31df5d')}${ipTemp.ip}`" type="success" />
+      <a-alert :message="$t('i18n.578adf7a12')" style="margin-top: 10px" banner />
+      <a-alert :message="$t('i18n.49645e398b')" style="margin-top: 10px" banner />
       <a-form
         ref="editIpConfigForm"
         style="margin-top: 10px"
@@ -55,9 +55,9 @@
           <template #label>
             <a-space align="center">
               <a-tooltip>
-                <template #title>{{ $t('pages.system.config.4e608c6f') }} </template>
+                <template #title>{{ $t('i18n.02db59c146') }} </template>
                 <StopFilled />
-                IP{{ $t('pages.system.config.170303f') }}
+                IP{{ $t('i18n.ff1fda9e47') }}
               </a-tooltip>
             </a-space>
           </template>
@@ -65,16 +65,16 @@
             v-model:value="ipTemp.prohibited"
             :rows="8"
             class="ip-list-config"
-            :placeholder="$t('pages.system.config.6c07b8a7')"
+            :placeholder="$t('i18n.5569a840c8')"
           />
         </a-form-item>
         <a-form-item name="allowed">
           <template #label>
             <a-space align="center">
               <a-tooltip>
-                <template #title> {{ $t('pages.system.config.c4b3b613') }} </template>
+                <template #title> {{ $t('i18n.8e331a52de') }} </template>
                 <CheckCircleFilled />
-                IP{{ $t('pages.system.config.e243dfef') }}
+                IP{{ $t('i18n.98a315c0fc') }}
               </a-tooltip>
             </a-space>
           </template>
@@ -82,12 +82,12 @@
             v-model:value="ipTemp.allowed"
             :rows="8"
             class="ip-list-config"
-            :placeholder="$t('pages.system.config.1f774cad')"
+            :placeholder="$t('i18n.847afa1ff2')"
           />
         </a-form-item>
 
         <a-form-item :wrapper-col="{ offset: 10 }" class="ip-config-button">
-          <a-button type="primary" class="btn" @click="onSubmitIp()">{{ $t('pages.system.config.3571a8f0') }}</a-button>
+          <a-button type="primary" class="btn" @click="onSubmitIp()">{{ $t('i18n.be5fbbe34c') }}</a-button>
         </a-form-item>
       </a-form>
     </a-tab-pane>
@@ -97,11 +97,11 @@
       <template #tab>
         <span>
           <ApiOutlined />
-          {{ $t('pages.system.config.c1c625c1') }}
+          {{ $t('i18n.a0d0ebc519') }}
         </span>
       </template>
       <a-alert
-        :message="`${$t('pages.system.config.2a338cec')}`"
+        :message="`${$t('i18n.c9b79a2b4f')}`"
         style="margin-top: 10px; margin-bottom: 20px"
         banner
       />
@@ -109,20 +109,20 @@
         <a-form ref="editProxyForm" :model="proxyConfigData">
           <a-row v-for="(item, index) in proxyConfigData.globalProxy" :key="index">
             <a-space>
-              <a-form-item :label="$t('pages.system.config.c39f7c03')" name="pattern">
+              <a-form-item :label="$t('i18n.3ac34faf6d')" name="pattern">
                 <a-input
                   v-model:value="item.pattern"
                   style="width: 30vw"
                   :max-length="200"
-                  :placeholder="$t('pages.system.config.62a3d2f9')"
+                  :placeholder="$t('i18n.0a9634edf2')"
                 >
                 </a-input>
               </a-form-item>
-              <a-form-item :label="$t('pages.system.config.f9f255b0')">
+              <a-form-item :label="$t('i18n.fc954d25ec')">
                 <a-input
                   v-model:value="item.proxyAddress"
                   style="width: 30vw"
-                  :placeholder="$t('pages.system.config.775fdae9')"
+                  :placeholder="$t('i18n.dcf14deb0e')"
                 >
                   <template #addonBefore>
                     <a-select v-model:value="item.proxyType" style="width: 100px">
@@ -145,7 +145,7 @@
                     }
                   "
                 >
-                  {{ $t('pages.system.config.dd20d11c') }}
+                  {{ $t('i18n.2f4aaddde3') }}
                 </a-button>
               </a-form-item>
             </a-space>
@@ -168,10 +168,10 @@
                     }
                   }
                 "
-                >{{ $t('pages.system.config.7d46652a') }}</a-button
+                >{{ $t('i18n.66ab5e9f24') }}</a-button
               >
               <a-button type="primary" @click="saveProxyConfigHannder">{{
-                $t('pages.system.config.3571a8f0')
+                $t('i18n.be5fbbe34c')
               }}</a-button>
             </a-space>
           </a-form-item>
@@ -246,11 +246,11 @@ export default {
     // submit
     onSubmit(restart) {
       $confirm({
-        title: this.$t('pages.system.config.a8fe4c17'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.system.config.b812712c'),
-        okText: this.$t('pages.system.config.7da4a591'),
-        cancelText: this.$t('pages.system.config.43105e21'),
+        content: this.$t('i18n.863a95c914'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           this.temp.restart = restart
           return editConfig(this.temp).then((res) => {
@@ -273,8 +273,8 @@ export default {
       this.globalLoading({
         spinning: true,
         tip:
-          (msg || this.$t('pages.system.config.9e8c0aa9')) +
-          `,${this.$t('pages.system.config.4098e2c9')},${this.$t('pages.system.config.c4521fd3')}`
+          (msg || this.$t('i18n.85da2e5bb1')) +
+          `,${this.$t('i18n.809b12d6a0')},${this.$t('i18n.af013dd9dc')}`
       })
       setTimeout(() => {
         //
@@ -287,7 +287,7 @@ export default {
                   spinning: false
                 })
                 $notification.success({
-                  message: this.$t('pages.system.config.a6229050')
+                  message: this.$t('i18n.906f6102a7')
                 })
 
                 setTimeout(() => {
@@ -296,7 +296,7 @@ export default {
               } else {
                 if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
                   $notification.warning({
-                    message: this.$t('pages.system.config.b0e4c704') + (res.msg || '')
+                    message: this.$t('i18n.953ec2172b') + (res.msg || '')
                   })
                   this.globalLoading({
                     spinning: false
@@ -312,7 +312,7 @@ export default {
                   spinning: false
                 })
                 $notification.error({
-                  message: this.$t('pages.system.config.48633a70')
+                  message: this.$t('i18n.0e502fed63')
                 })
                 clearInterval(this.timer)
               }
@@ -324,11 +324,11 @@ export default {
     // submit ip config
     onSubmitIp() {
       $confirm({
-        title: this.$t('pages.system.config.a8fe4c17'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.system.config.eed9d363'),
-        okText: this.$t('pages.system.config.7da4a591'),
-        cancelText: this.$t('pages.system.config.43105e21'),
+        content: this.$t('i18n.a2e62165dc'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return editIpConfig(this.ipTemp).then((res) => {
             if (res.code === 200) {

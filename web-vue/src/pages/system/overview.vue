@@ -2,26 +2,26 @@
   <div>
     <a-page-header :back-icon="false">
       <template #title>
-        {{ $t('pages.system.overview.af7fa63c') }}{{ getUserInfo.name
-        }}{{ $t('pages.system.overview.3676f786') }}</template
+        {{ $t('i18n.57d9738dfe') }}{{ getUserInfo.name
+        }}{{ $t('i18n.b4df22abfb') }}</template
       >
-      <template #subTitle>{{ $t('pages.system.overview.4171c710') }} </template>
+      <template #subTitle>{{ $t('i18n.0af5d9f8e8') }} </template>
       <template #tags>
         <a-tag color="blue">
-          <template v-if="getUserInfo.demoUser">{{ $t('pages.system.overview.df1552b3') }}</template>
-          <template v-else-if="getUserInfo.superSystemUser">{{ $t('pages.system.overview.a8126225') }}</template>
-          <template v-else-if="getUserInfo.systemUser">{{ $t('pages.system.overview.311b339f') }}</template>
-          <template v-else>{{ $t('pages.system.overview.461c0309') }}</template>
+          <template v-if="getUserInfo.demoUser">{{ $t('i18n.20c8dc0346') }}</template>
+          <template v-else-if="getUserInfo.superSystemUser">{{ $t('i18n.302ff00ddb') }}</template>
+          <template v-else-if="getUserInfo.systemUser">{{ $t('i18n.b1dae9bc5c') }}</template>
+          <template v-else>{{ $t('i18n.7527da8954') }}</template>
         </a-tag>
       </template>
       <template #extra>
-        <a-tooltip :title="$t('pages.system.overview.d6a31e98')">
+        <a-tooltip :title="$t('i18n.498519d1af')">
           <a-button :loading="loading" @click="init">
             <template #icon><ReloadOutlined /></template>
           </a-button>
         </a-tooltip>
         <!-- // 擅自修改或者删除版权信息有法律风险，请尊重开源协议，不要擅自修改版本信息，否则可能承担法律责任。 -->
-        <a-tooltip :title="$t('pages.system.overview.a1a42e0e')">
+        <a-tooltip :title="$t('i18n.e166aa424d')">
           <a-button @click="toAbout">
             <template #icon><ExclamationCircleOutlined /></template>
           </a-button>
@@ -29,11 +29,11 @@
       </template>
       <a-space>
         <span>
-          {{ $t('pages.system.overview.db1bdc00') }}
+          {{ $t('i18n.fbee13a873') }}
           <a-badge color="blue" :count="statData['workspaceCount'] || '0'" show-zero />
         </span>
         <span
-          >{{ $t('pages.system.overview.ac1cec96')
+          >{{ $t('i18n.5866b4bced')
           }}<a-badge color="cyan" :count="statData['clusterCount'] || '0'" show-zero
         /></span>
       </a-space>
@@ -43,12 +43,12 @@
     <a-row :gutter="[16, 16]">
       <a-col :span="6">
         <a-card size="small">
-          <template #title> {{ $t('pages.system.overview.3515bd2c') }} </template>
+          <template #title> {{ $t('i18n.a6bf763ede') }} </template>
 
           <a-list :data-source="['all', ...Object.keys(nodeStatusMap)]">
             <template #renderItem="{ item }">
               <a-list-item v-if="item === 'all'">
-                {{ $t('pages.system.overview.fda03bc')
+                {{ $t('i18n.ec1f13ff6d')
                 }}<a-badge
                   :color="item.color"
                   :count="
@@ -83,12 +83,12 @@
       </a-col>
       <a-col :span="6">
         <a-card size="small">
-          <template #title> {{ $t('pages.system.overview.42128dba') }} </template>
+          <template #title> {{ $t('i18n.4ad6e58ebc') }} </template>
 
           <a-list :data-source="['all', ...Object.keys(sshStatusMap)]">
             <template #renderItem="{ item }">
               <a-list-item v-if="item === 'all'">
-                {{ $t('pages.system.overview.fda03bc')
+                {{ $t('i18n.ec1f13ff6d')
                 }}<a-badge
                   :color="item.color"
                   :count="
@@ -123,12 +123,12 @@
       </a-col>
       <a-col :span="6">
         <a-card size="small">
-          <template #title> {{ $t('pages.system.overview.dc761819') }} </template>
+          <template #title> {{ $t('i18n.ea58a20cda') }} </template>
 
           <a-list :data-source="['all', ...Object.keys(dockerStatusMap)]">
             <template #renderItem="{ item }">
               <a-list-item v-if="item === 'all'">
-                {{ $t('pages.system.overview.fda03bc')
+                {{ $t('i18n.ec1f13ff6d')
                 }}<a-badge
                   :color="item.color"
                   :count="
@@ -163,14 +163,14 @@
       </a-col>
       <a-col :span="6">
         <a-card size="small">
-          <template #title> {{ $t('pages.system.overview.ab71288f') }} </template>
+          <template #title> {{ $t('i18n.0da9b12963') }} </template>
 
           <a-list
             :data-source="[
-              { name: $t('pages.system.overview.32787935'), field: 'userCount', color: 'red' },
-              { name: $t('pages.system.overview.457f49a3'), field: 'systemUserCount', color: 'pink' },
-              { name: $t('pages.system.overview.d5c05432'), field: 'openTwoFactorAuth', color: 'green' },
-              { name: $t('pages.system.overview.a2c764a4'), field: 'disableUserCount', color: 'yellow' }
+              { name: $t('i18n.1149274cbd'), field: 'userCount', color: 'red' },
+              { name: $t('i18n.a76b4f5000'), field: 'systemUserCount', color: 'pink' },
+              { name: $t('i18n.828efdf4e5'), field: 'openTwoFactorAuth', color: 'green' },
+              { name: $t('i18n.c03465ca03'), field: 'disableUserCount', color: 'yellow' }
             ]"
           >
             <template #renderItem="{ item }">

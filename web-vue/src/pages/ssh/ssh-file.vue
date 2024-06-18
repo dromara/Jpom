@@ -5,7 +5,7 @@
     <a-layout-sider theme="light" class="sider" width="25%">
       <a-row class="dir-container">
         <a-space>
-          <a-button size="small" type="primary" @click="loadData()">{{ $t('pages.ssh.ssh-file.92f6a62e') }}</a-button>
+          <a-button size="small" type="primary" @click="loadData()">{{ $t('i18n.694fc5efa9') }}</a-button>
           <a-dropdown>
             <template #overlay>
               <a-menu>
@@ -38,7 +38,7 @@
                 sortMethodList.find((item) => {
                   return item.key === sortMethod.key
                 }).name
-              }}{{ $t('pages.ssh.ssh-file.b4711039') }}
+              }}{{ $t('i18n.c360e994db') }}
               <SortAscendingOutlined v-if="sortMethod.asc" />
               <SortDescendingOutlined v-else />
             </a-button>
@@ -72,57 +72,57 @@
           <a-space>
             <a-dropdown :disabled="!tempNode.nextPath">
               <a-button size="small" type="primary" @click="(e) => e.preventDefault()">{{
-                $t('pages.ssh.ssh-file.c1668483')
+                $t('i18n.01198a1673')
               }}</a-button>
               <template #overlay>
                 <a-menu>
                   <a-menu-item @click="handleUpload">
-                    <a-space><FileAddOutlined />{{ $t('pages.ssh.ssh-file.487993f7') }}</a-space>
+                    <a-space><FileAddOutlined />{{ $t('i18n.a6fc9e3ae6') }}</a-space>
                   </a-menu-item>
                   <a-menu-item @click="handleUploadZip">
-                    <a-space><FileZipOutlined />{{ $t('pages.ssh.ssh-file.6d1f9442') }}</a-space>
+                    <a-space><FileZipOutlined />{{ $t('i18n.66b71b06c6') }}</a-space>
                   </a-menu-item>
                 </a-menu>
               </template>
             </a-dropdown>
             <a-dropdown :disabled="!tempNode.nextPath">
               <a-button size="small" type="primary" @click="(e) => e.preventDefault()">{{
-                $t('pages.ssh.ssh-file.f9c9dec4')
+                $t('i18n.26bb841878')
               }}</a-button>
               <template #overlay>
                 <a-menu>
                   <a-menu-item @click="handleAddFolder">
                     <a-space>
                       <FolderAddOutlined />
-                      <a-space>{{ $t('pages.ssh.ssh-file.592d629a') }}</a-space>
+                      <a-space>{{ $t('i18n.547ee197e5') }}</a-space>
                     </a-space>
                   </a-menu-item>
                   <a-menu-item @click="handleAddFile">
                     <a-space>
                       <FileAddOutlined />
-                      <a-space>{{ $t('pages.ssh.ssh-file.f0b9072d') }}</a-space>
+                      <a-space>{{ $t('i18n.497ddf508a') }}</a-space>
                     </a-space>
                   </a-menu-item>
                 </a-menu>
               </template>
             </a-dropdown>
             <a-button size="small" :disabled="!tempNode.nextPath" type="primary" @click="loadFileList()">{{
-              $t('pages.ssh.ssh-file.92f6a62e')
+              $t('i18n.694fc5efa9')
             }}</a-button>
             <a-button size="small" :disabled="!tempNode.nextPath" type="primary" danger @click="handleDeletePath()">{{
-              $t('pages.ssh.ssh-file.2f14e7d4')
+              $t('i18n.2f4aaddde3')
             }}</a-button>
             <div>
-              {{ $t('pages.ssh.ssh-file.b90a456') }}
+              {{ $t('i18n.4cbc136874') }}
               <a-switch
                 v-model:checked="listShowDir"
                 :disabled="!tempNode.nextPath"
-                :checked-children="$t('pages.ssh.ssh-file.d75b3b1a')"
-                :un-checked-children="$t('pages.ssh.ssh-file.41cc2930')"
+                :checked-children="$t('i18n.4d775d4cd7')"
+                :un-checked-children="$t('i18n.dce5379cb9')"
                 @change="changeListShowDir"
               />
             </div>
-            <span v-if="nowPath">{{ $t('pages.ssh.ssh-file.9e5ba275') }}{{ nowPath }}</span>
+            <span v-if="nowPath">{{ $t('i18n.4e33dde280') }}{{ nowPath }}</span>
             <!-- <span v-if="this.nowPath">{{ this.tempNode.parentDir }}</span> -->
           </a-space>
         </template>
@@ -132,10 +132,10 @@
             <a-tooltip
               placement="topLeft"
               :title="
-                $t('pages.ssh.ssh-file.f6609058', {
-                  slot1: $t('pages.ssh.ssh-file.bb769c1d'),
+                $t('i18n.8adf5dfeef', {
+                  slot1: $t('i18n.5b47861521'),
                   text: text,
-                  slot2: $t('pages.ssh.ssh-file.bb769c1d'),
+                  slot2: $t('i18n.5b47861521'),
                   slot3: record.longname
                 })
               "
@@ -146,7 +146,7 @@
                   <a-menu>
                     <a-menu-item key="2">
                       <a-button type="link" @click="handleRenameFile(record)"
-                        ><HighlightOutlined /> {{ $t('pages.ssh.ssh-file.cc9bcf1d') }}
+                        ><HighlightOutlined /> {{ $t('i18n.c8ce4b36cb') }}
                       </a-button>
                     </a-menu-item>
                   </a-menu>
@@ -159,20 +159,10 @@
           <template v-else-if="column.dataIndex === 'dir'">
             <a-tooltip
               placement="topLeft"
-              :title="`${
-                record.link
-                  ? $t('pages.ssh.ssh-file.56bb0bdf')
-                  : text
-                  ? $t('pages.ssh.ssh-file.535422c2')
-                  : $t('pages.ssh.ssh-file.ec88a43e')
-              }`"
+              :title="`${record.link ? $t('i18n.bfe68d5844') : text ? $t('i18n.767fa455bb') : $t('i18n.2a0c4740f1')}`"
             >
               <span>{{
-                record.link
-                  ? $t('pages.ssh.ssh-file.56bb0bdf')
-                  : text
-                  ? $t('pages.ssh.ssh-file.535422c2')
-                  : $t('pages.ssh.ssh-file.ec88a43e')
+                record.link ? $t('i18n.bfe68d5844') : text ? $t('i18n.767fa455bb') : $t('i18n.2a0c4740f1')
               }}</span>
             </a-tooltip>
           </template>
@@ -188,21 +178,21 @@
           </template>
           <template v-else-if="column.dataIndex === 'operation'">
             <a-space>
-              <a-tooltip :title="$t('pages.ssh.ssh-file.81fcf2df')">
+              <a-tooltip :title="$t('i18n.af0df2e295')">
                 <a-button size="small" type="primary" :disabled="!record.textFileEdit" @click="handleEdit(record)">{{
-                  $t('pages.ssh.ssh-file.64603c01')
+                  $t('i18n.95b351c862')
                 }}</a-button>
               </a-tooltip>
-              <a-tooltip :title="$t('pages.ssh.ssh-file.b25715a5')">
+              <a-tooltip :title="$t('i18n.5cc7e8e30a')">
                 <a-button size="small" type="primary" @click="handleFilePermission(record)">{{
-                  $t('pages.ssh.ssh-file.f330269a')
+                  $t('i18n.ba6e91fa9e')
                 }}</a-button>
               </a-tooltip>
               <a-button size="small" type="primary" :disabled="record.dir" @click="handleDownload(record)">{{
-                $t('pages.ssh.ssh-file.42c8e9c6')
+                $t('i18n.f26ef91424')
               }}</a-button>
               <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-                $t('pages.ssh.ssh-file.2f14e7d4')
+                $t('i18n.2f4aaddde3')
               }}</a-button>
             </a-space>
           </template>
@@ -214,7 +204,7 @@
         v-model:open="uploadFileVisible"
         destroy-on-close
         width="300px"
-        :title="$t('pages.ssh.ssh-file.487993f7')"
+        :title="$t('i18n.a6fc9e3ae6')"
         :confirm-loading="confirmLoading"
         :footer="null"
         :mask-closable="true"
@@ -229,8 +219,8 @@
         >
           <a-button>
             <UploadOutlined />
-            {{ $t('pages.ssh.ssh-file.51eeb245') }}
-            {{ uploadFileZip ? $t('pages.ssh.ssh-file.ba37d103') : '' }}
+            {{ $t('i18n.fd7e0c997d') }}
+            {{ uploadFileZip ? $t('i18n.c806d0fa38') : '' }}
           </a-button>
         </a-upload>
         <br />
@@ -239,7 +229,7 @@
           :disabled="uploadFileList.length === 0"
           :loading="confirmLoading"
           @click="startUpload"
-          >{{ $t('pages.ssh.ssh-file.c07b9648') }}</a-button
+          >{{ $t('i18n.020f1ecd62') }}</a-button
         >
       </CustomModal>
       <!--  新增文件 目录    -->
@@ -247,22 +237,22 @@
         v-if="addFileFolderVisible"
         v-model:open="addFileFolderVisible"
         width="300px"
-        :title="temp.addFileOrFolderType === 1 ? $t('pages.ssh.ssh-file.f4dc8e4b') : $t('pages.ssh.ssh-file.8cccdefa')"
+        :title="temp.addFileOrFolderType === 1 ? $t('i18n.2d9e932510') : $t('i18n.e48a715738')"
         :footer="null"
         :mask-closable="true"
       >
         <a-space direction="vertical" style="width: 100%">
-          <span v-if="nowPath">{{ $t('pages.ssh.ssh-file.9e5ba275') }}{{ nowPath }}</span>
+          <span v-if="nowPath">{{ $t('i18n.4e33dde280') }}{{ nowPath }}</span>
           <!-- <a-tag v-if="">目录创建成功后需要手动刷新右边树才能显示出来哟</a-tag> -->
-          <a-tooltip :title="temp.addFileOrFolderType === 1 ? $t('pages.ssh.ssh-file.3af90221') : ''">
-            <a-input v-model:value="temp.fileFolderName" :placeholder="$t('pages.ssh.ssh-file.396ae8d8')" />
+          <a-tooltip :title="temp.addFileOrFolderType === 1 ? $t('i18n.fe1b192913') : ''">
+            <a-input v-model:value="temp.fileFolderName" :placeholder="$t('i18n.55939c108f')" />
           </a-tooltip>
           <a-row type="flex" justify="center">
             <a-button
               type="primary"
               :disabled="!temp.fileFolderName || temp.fileFolderName.length === 0"
               @click="startAddFileFolder"
-              >{{ $t('pages.ssh.ssh-file.7da4a591') }}</a-button
+              >{{ $t('i18n.e83a256e4f') }}</a-button
             >
           </a-row>
         </a-space>
@@ -274,8 +264,8 @@
         destroy-on-close
         :confirm-loading="confirmLoading"
         width="80vw"
-        :title="$t('pages.ssh.ssh-file.96422c59')"
-        :cancel-text="$t('pages.ssh.ssh-file.99811dca')"
+        :title="$t('i18n.47ff744ef6')"
+        :cancel-text="$t('i18n.b15d91274e')"
         :mask-closable="true"
         @ok="updateFileData"
       >
@@ -299,12 +289,12 @@
         v-model:open="renameFileFolderVisible"
         destroy-on-close
         width="300px"
-        :title="`${$t('pages.ssh.ssh-file.cc9bcf1d')}`"
+        :title="`${$t('i18n.c8ce4b36cb')}`"
         :footer="null"
         :mask-closable="true"
       >
         <a-space direction="vertical" style="width: 100%">
-          <a-input v-model:value="temp.fileFolderName" :placeholder="$t('pages.ssh.ssh-file.1f96fe33')" />
+          <a-input v-model:value="temp.fileFolderName" :placeholder="$t('i18n.f139c5cf32')" />
 
           <a-row v-if="temp.fileFolderName" type="flex" justify="center">
             <a-button
@@ -312,7 +302,7 @@
               type="primary"
               :disabled="temp.fileFolderName.length === 0 || temp.fileFolderName === temp.oldFileFolderName"
               @click="renameFileFolder"
-              >{{ $t('pages.ssh.ssh-file.7da4a591') }}</a-button
+              >{{ $t('i18n.e83a256e4f') }}</a-button
             >
           </a-row>
         </a-space>
@@ -324,27 +314,27 @@
         v-model:open="editFilePermissionVisible"
         destroy-on-close
         width="400px"
-        :title="`${$t('pages.ssh.ssh-file.b25715a5')}`"
+        :title="`${$t('i18n.5cc7e8e30a')}`"
         :footer="null"
         :mask-closable="true"
       >
         <a-row>
           <a-col :span="6"
-            ><span class="title">{{ $t('pages.ssh.ssh-file.f330269a') }}</span></a-col
+            ><span class="title">{{ $t('i18n.ba6e91fa9e') }}</span></a-col
           >
           <a-col :span="6"
-            ><span class="title">{{ $t('pages.ssh.ssh-file.45e07a72') }}</span></a-col
+            ><span class="title">{{ $t('i18n.8306971039') }}</span></a-col
           >
           <a-col :span="6"
-            ><span class="title">{{ $t('pages.ssh.ssh-file.e740d8cb') }}</span></a-col
+            ><span class="title">{{ $t('i18n.e72a0ba45a') }}</span></a-col
           >
           <a-col :span="6"
-            ><span class="title">{{ $t('pages.ssh.ssh-file.c78b1a6d') }}</span></a-col
+            ><span class="title">{{ $t('i18n.0d98c74797') }}</span></a-col
           >
         </a-row>
         <a-row>
           <a-col :span="6">
-            <span>{{ $t('pages.ssh.ssh-file.7d02a37c') }}</span>
+            <span>{{ $t('i18n.75769d1ac8') }}</span>
           </a-col>
           <a-col :span="6">
             <a-checkbox v-model:checked="permissions.owner.read" />
@@ -358,7 +348,7 @@
         </a-row>
         <a-row>
           <a-col :span="6">
-            <span>{{ $t('pages.ssh.ssh-file.f7ebe651') }}</span>
+            <span>{{ $t('i18n.4d7dc6c5f8') }}</span>
           </a-col>
           <a-col :span="6">
             <a-checkbox v-model:checked="permissions.owner.write" />
@@ -372,7 +362,7 @@
         </a-row>
         <a-row>
           <a-col :span="6">
-            <span>{{ $t('pages.ssh.ssh-file.985968bf') }}</span>
+            <span>{{ $t('i18n.1a6aa24e76') }}</span>
           </a-col>
           <a-col :span="6">
             <a-checkbox v-model:checked="permissions.owner.execute" />
@@ -385,7 +375,7 @@
           </a-col>
         </a-row>
         <a-row type="flex" style="margin-top: 20px">
-          <a-button type="primary" @click="updateFilePermissions">{{ $t('pages.ssh.ssh-file.11a03875') }}</a-button>
+          <a-button type="primary" @click="updateFilePermissions">{{ $t('i18n.49e56c7b90') }}</a-button>
         </a-row>
         <!-- <a-row>
             <a-alert style="margin-top: 20px" :message="permissionTips" type="success" />
@@ -449,7 +439,7 @@ export default {
       },
       columns: [
         {
-          title: this.$t('pages.ssh.ssh-file.48d3b5c4'),
+          title: this.$t('i18n.d2e2560089'),
           dataIndex: 'name',
           width: 200,
           ellipsis: true,
@@ -457,13 +447,13 @@ export default {
           sorter: (a, b) => (a.name || '').localeCompare(b.name || '')
         },
         {
-          title: this.$t('pages.ssh.ssh-file.741604c2'),
+          title: this.$t('i18n.28b988ce6a'),
           dataIndex: 'dir',
           width: '100px',
           ellipsis: true
         },
         {
-          title: this.$t('pages.ssh.ssh-file.f087781'),
+          title: this.$t('i18n.396b7d3f91'),
           dataIndex: 'size',
           width: 120,
           ellipsis: true,
@@ -471,14 +461,14 @@ export default {
           sorter: (a, b) => Number(a.size) - new Number(b.size)
         },
         {
-          title: this.$t('pages.ssh.ssh-file.f330269a'),
+          title: this.$t('i18n.ba6e91fa9e'),
           dataIndex: 'permissions',
           width: 120,
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.ssh.ssh-file.d9323c1a'),
+          title: this.$t('i18n.1303e638b5'),
           dataIndex: 'modifyTime',
           width: '170px',
           ellipsis: true,
@@ -486,7 +476,7 @@ export default {
           sorter: (a, b) => Number(a.modifyTime) - new Number(b.modifyTime)
         },
         {
-          title: this.$t('pages.ssh.ssh-file.3bb962bf'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
           align: 'center',
           fixed: 'right',
@@ -506,11 +496,11 @@ export default {
       // permissionTips: "",
       sortMethodList: [
         {
-          name: this.$t('pages.ssh.ssh-file.a6eb2ded'),
+          name: this.$t('i18n.29139c2a1a'),
           key: 'name'
         },
         {
-          name: this.$t('pages.ssh.ssh-file.d9323c1a'),
+          name: this.$t('i18n.1303e638b5'),
           key: 'modifyTime'
         }
       ],
@@ -698,7 +688,7 @@ export default {
     loadFileList() {
       if (Object.keys(this.tempNode).length === 0) {
         $notification.warn({
-          message: this.$t('pages.ssh.ssh-file.c4732955')
+          message: this.$t('i18n.bcaf69a038')
         })
         return false
       }
@@ -738,7 +728,7 @@ export default {
     handleUpload() {
       if (Object.keys(this.tempNode).length === 0) {
         $notification.error({
-          message: this.$t('pages.ssh.ssh-file.c4732955')
+          message: this.$t('i18n.bcaf69a038')
         })
         return
       }
@@ -926,11 +916,11 @@ export default {
     // 删除文件夹
     handleDeletePath() {
       $confirm({
-        title: this.$t('pages.ssh.ssh-file.a8fe4c17'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.ssh.ssh-file.52580f9b'),
-        okText: this.$t('pages.ssh.ssh-file.7da4a591'),
-        cancelText: this.$t('pages.ssh.ssh-file.43105e21'),
+        content: this.$t('i18n.8756efb8f4'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: async () => {
           return deleteFile(this.baseUrl, {
             id: this.reqDataId,
@@ -962,11 +952,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$t('pages.ssh.ssh-file.a8fe4c17'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.ssh.ssh-file.f2275641'),
-        okText: this.$t('pages.ssh.ssh-file.7da4a591'),
-        cancelText: this.$t('pages.ssh.ssh-file.43105e21'),
+        content: this.$t('i18n.3a6bc88ce0'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return deleteFile(this.baseUrl, {
             id: this.reqDataId,

@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="systemUserList"
-      :empty-description="$t('pages.user.index.738924e5')"
+      :empty-description="$t('i18n.0f189dbaa4')"
       :loading="loading"
       :data-source="list"
       :columns="columns"
@@ -24,24 +24,24 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery.id"
-            :placeholder="$t('pages.user.index.8384e057')"
+            :placeholder="$t('i18n.1c9d3cb687')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$t('pages.user.index.c28c6dc1')"
+            :placeholder="$t('i18n.819767ada1')"
             class="search-input-item"
             @press-enter="loadData"
           />
-          <a-tooltip :title="$t('pages.user.index.c52a67d7')">
+          <a-tooltip :title="$t('i18n.4838a3bd20')">
             <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('pages.user.index.53c2763c')
+              $t('i18n.e5f71fc31e')
             }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">{{ $t('pages.user.index.7d46652a') }}</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $t('i18n.66ab5e9f24') }}</a-button>
           <a-button type="primary" @click="systemNotificationOpen = true">{{
-            $t('pages.user.index.862bf72d')
+            $t('i18n.7c223eb6e9')
           }}</a-button>
         </a-space>
       </template>
@@ -49,10 +49,10 @@
         <template v-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button size="small" type="primary" @click="handleEdit(record)">{{
-              $t('pages.user.index.64603c01')
+              $t('i18n.95b351c862')
             }}</a-button>
             <a-dropdown>
-              <a @click="(e) => e.preventDefault()"> {{ $t('pages.user.index.6e071067') }} <DownOutlined /> </a>
+              <a @click="(e) => e.preventDefault()"> {{ $t('i18n.0ec9eaf9c3') }} <DownOutlined /> </a>
               <template #overlay>
                 <a-menu>
                   <a-menu-item>
@@ -62,7 +62,7 @@
                       size="small"
                       :disabled="record.parent === 'sys'"
                       @click="handleDelete(record)"
-                      >{{ $t('pages.user.index.dd20d11c') }}</a-button
+                      >{{ $t('i18n.2f4aaddde3') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
@@ -72,7 +72,7 @@
                       size="small"
                       :disabled="record.pwdErrorCount === 0"
                       @click="handleUnlock(record)"
-                      >{{ $t('pages.user.index.8dd61d74') }}</a-button
+                      >{{ $t('i18n.fa7ffa2d21') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
@@ -82,7 +82,7 @@
                       size="small"
                       :disabled="record.parent === 'sys'"
                       @click="restUserPwdHander(record)"
-                      >{{ $t('pages.user.index.e9feb431') }}</a-button
+                      >{{ $t('i18n.0719aa2bb0') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
@@ -92,7 +92,7 @@
                       size="small"
                       :disabled="record.twoFactorAuthKey ? false : true"
                       @click="handleCloseMfa(record)"
-                      >{{ $t('pages.user.index.77fa96cb') }}</a-button
+                      >{{ $t('i18n.0703877167') }}</a-button
                     >
                   </a-menu-item>
                 </a-menu>
@@ -103,8 +103,8 @@
         <template v-else-if="column.dataIndex === 'systemUser'">
           <a-switch
             size="small"
-            :checked-children="$t('pages.user.index.c48393b5')"
-            :un-checked-children="$t('pages.user.index.3cae7889')"
+            :checked-children="$t('i18n.0a60ac8f02')"
+            :un-checked-children="$t('i18n.c9744f45e7')"
             disabled
             :checked="record.systemUser == 1"
           />
@@ -112,8 +112,8 @@
         <template v-else-if="column.dataIndex === 'status'">
           <a-switch
             size="small"
-            :checked-children="$t('pages.user.index.e6a65361')"
-            :un-checked-children="$t('pages.user.index.bd324b84')"
+            :checked-children="$t('i18n.7854b52a88')"
+            :un-checked-children="$t('i18n.710ad08b11')"
             disabled
             :checked="record.status != 0"
           />
@@ -122,8 +122,8 @@
         <template v-else-if="column.dataIndex === 'twoFactorAuthKey'">
           <a-switch
             size="small"
-            :checked-children="$t('pages.user.index.30c72f5d')"
-            :un-checked-children="$t('pages.user.index.abe04b8e')"
+            :checked-children="$t('i18n.8493205602')"
+            :un-checked-children="$t('i18n.d58a55bcee')"
             disabled
             :checked="record.twoFactorAuthKey ? true : false"
           />
@@ -149,49 +149,49 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="60vw"
-      :title="$t('pages.user.index.974ecc00')"
+      :title="$t('i18n.5a0346c4b1')"
       :mask-closable="false"
       @ok="handleEditUserOk"
     >
       <a-alert
         v-if="!permissionGroup || !permissionGroup.length"
-        :message="$t('pages.user.index.7e2364d6')"
+        :message="$t('i18n.4b027f3979')"
         type="warning"
         show-icon
         style="margin-bottom: 10px"
       >
-        <template #description>{{ $t('pages.user.index.9c3b3ac6') }}</template>
+        <template #description>{{ $t('i18n.d9531a5ac3') }}</template>
       </a-alert>
       <a-form ref="editUserForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$t('pages.user.index.ef10fb2a')" name="id">
+        <a-form-item :label="$t('i18n.878aebf9b2')" name="id">
           <a-input
             v-model:value="temp.id"
             :max-length="50"
-            :placeholder="$t('pages.user.index.afeb1567')"
+            :placeholder="$t('i18n.f175274df0')"
             :disabled="createOption == false"
             @change="checkTipUserName"
           />
         </a-form-item>
 
-        <a-form-item :label="$t('pages.user.index.57c3af39')" name="name">
-          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('pages.user.index.57c3af39')" />
+        <a-form-item :label="$t('i18n.23eb0e6024')" name="name">
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n.23eb0e6024')" />
         </a-form-item>
         <a-form-item name="systemUser">
           <template #label>
             <a-tooltip>
-              {{ $t('pages.user.index.54b8172b') }}
-              <template #title> {{ $t('pages.user.index.a967c24a') }} </template>
+              {{ $t('i18n.b1dae9bc5c') }}
+              <template #title> {{ $t('i18n.b328609814') }} </template>
               <QuestionCircleOutlined v-if="createOption" />
             </a-tooltip>
           </template>
           <a-row>
             <a-col :span="4">
-              <a-tooltip :title="$t('pages.user.index.a967c24a')">
+              <a-tooltip :title="$t('i18n.b328609814')">
                 <a-switch
                   :checked="temp.systemUser == 1"
                   :disabled="temp.parent === 'sys'"
-                  :checked-children="$t('pages.user.index.c48393b5')"
-                  :un-checked-children="$t('pages.user.index.3cae7889')"
+                  :checked-children="$t('i18n.0a60ac8f02')"
+                  :un-checked-children="$t('i18n.c9744f45e7')"
                   default-checked
                   @change="
                     (checked) => {
@@ -203,9 +203,9 @@
             </a-col>
             <a-col :span="4" style="text-align: right">
               <a-tooltip>
-                <template #title> {{ $t('pages.user.index.9c8c1216') }} </template>
+                <template #title> {{ $t('i18n.fa624c8420') }} </template>
                 <QuestionCircleOutlined v-if="createOption" />
-                {{ $t('pages.user.index.8542216f') }}
+                {{ $t('i18n.bec98b4d6a') }}
               </a-tooltip>
             </a-col>
             <a-col :span="4">
@@ -213,8 +213,8 @@
                 <a-switch
                   :checked="temp.status != 0"
                   :disabled="temp.parent === 'sys'"
-                  :checked-children="$t('pages.user.index.e6a65361')"
-                  :un-checked-children="$t('pages.user.index.bd324b84')"
+                  :checked-children="$t('i18n.7854b52a88')"
+                  :un-checked-children="$t('i18n.710ad08b11')"
                   default-checked
                   @change="
                     (checked) => {
@@ -226,7 +226,7 @@
             </a-col>
           </a-row>
         </a-form-item>
-        <a-form-item :label="$t('pages.user.index.eddf3185')" name="permissionGroup">
+        <a-form-item :label="$t('i18n.f49dfdace4')" name="permissionGroup">
           <a-select
             v-model:value="temp.permissionGroup"
             show-search
@@ -240,7 +240,7 @@
                 )
               }
             "
-            :placeholder="$t('pages.user.index.3c2dec3c')"
+            :placeholder="$t('i18n.72d14a3890')"
             mode="multiple"
           >
             <a-select-option v-for="item in permissionGroup" :key="item.id">
@@ -254,22 +254,22 @@
       v-if="showUserPwd"
       v-model:open="showUserPwd"
       destroy-on-close
-      :title="$t('pages.user.index.7c2c151')"
+      :title="$t('i18n.318ce9ea8b')"
       :mask-closable="false"
       :footer="null"
     >
       <a-result status="success" :title="temp.title">
         <template #subTitle>
           <div>
-            {{ $t('pages.user.index.4cb8151c') }}
+            {{ $t('i18n.5684fd7d3d') }}
             <a-typography-paragraph :copyable="{ tooltip: false, text: temp.randomPwd }">
               <b style="color: red; font-size: 20px">
                 {{ temp.randomPwd }}
               </b>
             </a-typography-paragraph>
-            {{ $t('pages.user.index.72f1baab') }}
+            {{ $t('i18n.12d2c0aead') }}
           </div>
-          <div style="color: red">{{ $t('pages.user.index.e3c8dd83') }}</div>
+          <div style="color: red">{{ $t('i18n.c7e0803a17') }}</div>
         </template>
       </a-result>
     </CustomModal>
@@ -278,7 +278,7 @@
       v-if="systemNotificationOpen"
       v-model:open="systemNotificationOpen"
       destroy-on-close
-      :title="$t('pages.user.index.712db580')"
+      :title="$t('i18n.6428be07e9')"
       :mask-closable="false"
       width="50vw"
       :footer="null"
@@ -313,23 +313,23 @@ export default {
           ellipsis: true,
           width: 100
         },
-        { title: this.$t('pages.user.index.57c3af39'), dataIndex: 'name', ellipsis: true, width: 100 },
+        { title: this.$t('i18n.23eb0e6024'), dataIndex: 'name', ellipsis: true, width: 100 },
         {
-          title: this.$t('pages.user.index.54b8172b'),
+          title: this.$t('i18n.b1dae9bc5c'),
           dataIndex: 'systemUser',
           align: 'center',
           ellipsis: true,
           width: 90
         },
         {
-          title: this.$t('pages.user.index.9c32c887'),
+          title: this.$t('i18n.3fea7ca76c'),
           dataIndex: 'status',
           align: 'center',
           ellipsis: true,
           width: 90
         },
         {
-          title: this.$t('pages.user.index.80647404'),
+          title: this.$t('i18n.dbad1e89f7'),
           dataIndex: 'twoFactorAuthKey',
           align: 'center',
           ellipsis: true,
@@ -337,27 +337,27 @@ export default {
         },
 
         {
-          title: this.$t('pages.user.index.6d12e07a'),
+          title: this.$t('i18n.3bc5e602b2'),
           dataIndex: 'email',
           ellipsis: true,
           width: 100
         },
         {
-          title: this.$t('pages.user.index.b8b8d2e8'),
+          title: this.$t('i18n.26ca20b161'),
           dataIndex: 'source',
           ellipsis: true,
           width: 90
         },
         {
-          title: this.$t('pages.user.index.3714ae65'),
+          title: this.$t('i18n.b6076a055f'),
           dataIndex: 'pwdErrorCount',
           ellipsis: true,
           width: 90
         },
-        { title: this.$t('pages.user.index.db3c9202'), dataIndex: 'parent', ellipsis: true, width: 150 },
+        { title: this.$t('i18n.95a43eaa59'), dataIndex: 'parent', ellipsis: true, width: 150 },
 
         {
-          title: this.$t('pages.user.index.a2b40316'),
+          title: this.$t('i18n.1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -367,7 +367,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('pages.user.index.f5b90169'),
+          title: this.$t('i18n.eca37cb072'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text, record }) => {
@@ -376,7 +376,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('pages.user.index.3bb962bf'),
+          title: this.$t('i18n.2b6bc0f293'),
           align: 'center',
           dataIndex: 'operation',
           fixed: 'right',
@@ -386,9 +386,9 @@ export default {
 
       // 表单校验规则
       rules: {
-        id: [{ required: true, message: this.$t('pages.user.index.c3e73623'), trigger: 'blur' }],
-        name: [{ required: true, message: this.$t('pages.user.index.d2ea3987'), trigger: 'blur' }],
-        permissionGroup: [{ required: true, message: this.$t('pages.user.index.aebe7c26'), trigger: 'blur' }]
+        id: [{ required: true, message: this.$t('i18n.693a06987c'), trigger: 'blur' }],
+        name: [{ required: true, message: this.$t('i18n.c00fb0217d'), trigger: 'blur' }],
+        permissionGroup: [{ required: true, message: this.$t('i18n.e8073b3843'), trigger: 'blur' }]
       },
       showUserPwd: false,
       confirmLoading: false,
@@ -440,7 +440,7 @@ export default {
         }
         if (!this.permissionGroup || this.permissionGroup.length <= 0)
           $notification.warn({
-            message: this.$t('pages.user.index.73725eb')
+            message: this.$t('i18n.d4744ce461')
           })
       })
     },
@@ -472,7 +472,7 @@ export default {
             if (res.code === 200) {
               if (paramsTemp.type === 'add') {
                 this.temp = {
-                  title: this.$t('pages.user.index.d25103f6'),
+                  title: this.$t('i18n.2d2238d216'),
                   randomPwd: res.data.randomPwd
                 }
 
@@ -495,11 +495,11 @@ export default {
     // 删除用户
     handleDelete(record) {
       $confirm({
-        title: this.$t('pages.user.index.d3367221'),
-        content: this.$t('pages.user.index.62970d3a'),
+        title: this.$t('i18n.c4535759ee'),
+        content: this.$t('i18n.45f8d5a21d'),
         zIndex: 1009,
-        okText: this.$t('pages.user.index.7da4a591'),
-        cancelText: this.$t('pages.user.index.43105e21'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return deleteUser(record.id).then((res) => {
             if (res.code === 200) {
@@ -515,11 +515,11 @@ export default {
     // 解锁
     handleUnlock(record) {
       $confirm({
-        title: this.$t('pages.user.index.d3367221'),
-        content: this.$t('pages.user.index.2d3daa3d'),
+        title: this.$t('i18n.c4535759ee'),
+        content: this.$t('i18n.bc2f1beb44'),
         zIndex: 1009,
-        okText: this.$t('pages.user.index.7da4a591'),
-        cancelText: this.$t('pages.user.index.43105e21'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return unlockUser(record.id).then((res) => {
             if (res.code === 200) {
@@ -535,11 +535,11 @@ export default {
     //
     handleCloseMfa(record) {
       $confirm({
-        title: this.$t('pages.user.index.d3367221'),
-        content: this.$t('pages.user.index.85e362f2'),
+        title: this.$t('i18n.c4535759ee'),
+        content: this.$t('i18n.b8915a4933'),
         zIndex: 1009,
-        okText: this.$t('pages.user.index.7da4a591'),
-        cancelText: this.$t('pages.user.index.43105e21'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return closeUserMfa(record.id).then((res) => {
             if (res.code === 200) {
@@ -561,11 +561,11 @@ export default {
     checkTipUserName() {
       if (this.temp?.id === 'demo') {
         $confirm({
-          title: this.$t('pages.user.index.d3367221'),
+          title: this.$t('i18n.c4535759ee'),
           zIndex: 1009,
-          content: `demo ${this.$t('pages.user.index.8424b740')},${this.$t('pages.user.index.439c765a')}`,
-          okText: this.$t('pages.user.index.7da4a591'),
-          cancelText: this.$t('pages.user.index.43105e21'),
+          content: `demo ${this.$t('i18n.a8f44c3188')},${this.$t('i18n.c5f9a96133')}`,
+          okText: this.$t('i18n.e83a256e4f'),
+          cancelText: this.$t('i18n.625fb26b4b'),
 
           onCancel: () => {
             this.temp.id = ''
@@ -576,16 +576,16 @@ export default {
     //
     restUserPwdHander(record) {
       $confirm({
-        title: this.$t('pages.user.index.d3367221'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.user.index.79b6f4f6'),
-        okText: this.$t('pages.user.index.7da4a591'),
-        cancelText: this.$t('pages.user.index.43105e21'),
+        content: this.$t('i18n.be2109e5b1'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return restUserPwd(record.id).then((res) => {
             if (res.code === 200) {
               this.temp = {
-                title: this.$t('pages.user.index.7e8456dd'),
+                title: this.$t('i18n.2c5b0e86e6'),
                 randomPwd: res.data.randomPwd
               }
               this.showUserPwd = true

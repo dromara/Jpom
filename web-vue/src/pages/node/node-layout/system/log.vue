@@ -12,13 +12,13 @@
         <template #before>
           <a-space>
             <a-button type="primary" size="small" @click="loadData">{{
-              $t('pages.node.node-layout.system.log.7bbd89a')
+              $t('i18n.694fc5efa9')
             }}</a-button>
             <a-button type="primary" danger size="small" :disabled="!temp.path" @click="deleteLog">{{
-              $t('pages.node.node-layout.system.log.dd20d11c')
+              $t('i18n.2f4aaddde3')
             }}</a-button>
             <a-button type="primary" size="small" :disabled="!temp.path" @click="downloadLog">{{
-              $t('pages.node.node-layout.system.log.42c8e9c6')
+              $t('i18n.f26ef91424')
             }}</a-button>
           </a-space>
         </template>
@@ -151,7 +151,7 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: `web socket ${this.$t('pages.node.node-layout.system.log.d75d207f')},${this.$t(
+          message: `web socket ${this.$t('i18n.7030ff6470')},${this.$t(
             'pages.node.node-layout.system.log.763330b'
           )}`
         })
@@ -159,7 +159,7 @@ export default {
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
-        $message.warning(this.$t('pages.node.node-layout.system.log.8a2aae09') + node.dataRef.path)
+        $message.warning(this.$t('i18n.1b5bcdf115') + node.dataRef.path)
         // clearInterval(this.heart);
       }
     },
@@ -182,11 +182,11 @@ export default {
     // 删除文件
     deleteLog() {
       $confirm({
-        title: this.$t('pages.node.node-layout.system.log.e422d0eb'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.node.node-layout.system.log.5ef43186'),
-        okText: this.$t('pages.node.node-layout.system.log.e8e9db25'),
-        cancelText: this.$t('pages.node.node-layout.system.log.b12468e9'),
+        content: this.$t('i18n.3c9eeee356'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return deleteLog({
             machineId: this.machineId,

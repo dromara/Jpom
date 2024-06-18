@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="build-history-list"
-      :empty-description="$t('pages.build.history.ddecb959')"
+      :empty-description="$t('i18n.2b36926bc1')"
       :data-source="list"
       size="middle"
       :columns="columns"
@@ -27,7 +27,7 @@
             v-model:value="listQuery['%buildName%']"
             allow-clear
             class="search-input-item"
-            :placeholder="$t('pages.build.history.b7ff5dde')"
+            :placeholder="$t('i18n.50a299c847')"
             @press-enter="loadData"
           />
           <a-select
@@ -44,7 +44,7 @@
               }
             "
             allow-clear
-            :placeholder="$t('pages.build.history.56195645')"
+            :placeholder="$t('i18n.e1c965efff')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
@@ -63,15 +63,15 @@
               }
             "
             allow-clear
-            :placeholder="$t('pages.build.history.81fc1ba6')"
+            :placeholder="$t('i18n.9057ac9664')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in triggerBuildTypeMap" :key="key">{{ val }}</a-select-option>
           </a-select>
           <a-range-picker :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
-          <a-tooltip :title="$t('pages.build.history.767472f6')">
+          <a-tooltip :title="$t('i18n.4838a3bd20')">
             <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('pages.build.history.53c2763c')
+              $t('i18n.e5f71fc31e')
             }}</a-button>
           </a-tooltip>
           <a-button
@@ -80,16 +80,16 @@
             :disabled="!tableSelections || tableSelections.length <= 0"
             @click="handleBatchDelete"
           >
-            {{ $t('pages.build.history.b5139d46') }}
+            {{ $t('i18n.7fb62b3011') }}
           </a-button>
         </a-space>
       </template>
       <template #tableHelp>
         <a-tooltip>
           <template #title>
-            <div>{{ $t('pages.build.history.37009c8e') }}</div>
-            <div>{{ $t('pages.build.history.39bcbda8') }}</div>
-            <div>{{ $t('pages.build.history.652264a8') }}</div>
+            <div>{{ $t('i18n.005de9a4eb') }}</div>
+            <div>{{ $t('i18n.9cd0554305') }}</div>
+            <div>{{ $t('i18n.952232ca52') }}</div>
           </template>
           <QuestionCircleOutlined />
         </a-tooltip>
@@ -101,16 +101,16 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'buildNumberId'">
-          <a-tooltip :title="text + `( ${$t('pages.build.history.b51c8bb3')} )`">
+          <a-tooltip :title="text + `( ${$t('i18n.aac62bc255')} )`">
             <a-tag color="#108ee9" @click="handleBuildLog(record)">
               #{{ text }}<template v-if="record.fromBuildNumberId">&lt;-{{ record.fromBuildNumberId }}</template>
             </a-tag>
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'status'">
-          <a-tooltip :title="record.statusMsg || statusMap[text] || $t('pages.build.history.5f51a112')">
+          <a-tooltip :title="record.statusMsg || statusMap[text] || $t('i18n.1622dc9b6b')">
             <a-tag :color="statusColor[record.status]">{{
-              statusMap[text] || $t('pages.build.history.5f51a112')
+              statusMap[text] || $t('i18n.1622dc9b6b')
             }}</a-tag>
           </a-tooltip>
         </template>
@@ -127,7 +127,7 @@
 
         <template v-else-if="column.dataIndex === 'resultFileSize'">
           <a-tooltip
-            :title="`${$t('pages.build.history.ea860618')}${renderSize(record.resultFileSize)}， ${$t(
+            :title="`${$t('i18n.16646e46b1')}${renderSize(record.resultFileSize)}， ${$t(
               'pages.build.history.6919d16e'
             )} ${renderSize(record.buildLogFileSize)}`"
           >
@@ -139,8 +139,8 @@
 
         <template v-else-if="column.dataIndex === 'endTime'">
           <a-tooltip
-            :title="`${$t('pages.build.history.ac9ef5f5')}${parseTime(record.startTime)}，${
-              record.endTime ? $t('pages.build.history.9376939d') + parseTime(record.endTime) : ''
+            :title="`${$t('i18n.61e84eb5bb')}${parseTime(record.startTime)}，${
+              record.endTime ? $t('i18n.590dbb68cf') + parseTime(record.endTime) : ''
             }`"
           >
             <span v-if="record.endTime">{{
@@ -152,22 +152,22 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-tooltip :title="$t('pages.build.history.3853c6b2')">
+            <a-tooltip :title="$t('i18n.b38d7db9b0')">
               <a-button size="small" type="primary" :disabled="!record.hasLog" @click="handleDownload(record)"
-                ><DownloadOutlined />{{ $t('pages.build.history.f637e08') }}</a-button
+                ><DownloadOutlined />{{ $t('i18n.456d29ef8b') }}</a-button
               >
             </a-tooltip>
 
-            <a-tooltip :title="$t('pages.build.history.44ea38fe')">
+            <a-tooltip :title="$t('i18n.02e35447d4')">
               <a-button size="small" type="primary" :disabled="!record.hasFile" @click="handleFile(record)"
                 ><DownloadOutlined />
-                {{ $t('pages.build.history.72370b9a') }}
+                {{ $t('i18n.7dfcab648d') }}
               </a-button>
             </a-tooltip>
 
             <a-dropdown>
               <a @click="(e) => e.preventDefault()">
-                {{ $t('pages.build.history.6e071067') }}
+                {{ $t('i18n.0ec9eaf9c3') }}
                 <DownOutlined />
               </a>
               <template #overlay>
@@ -180,20 +180,20 @@
                         type="primary"
                         danger
                         @click="handleRollback(record)"
-                        >{{ $t('pages.build.history.6f9c6f93') }}
+                        >{{ $t('i18n.d00b485b26') }}
                       </a-button>
                     </template>
                     <template v-else>
-                      <a-tooltip :title="$t('pages.build.history.b57dad8c')">
+                      <a-tooltip :title="$t('i18n.2d94b9cf0e')">
                         <a-button size="small" :disabled="true" type="primary" danger
-                          >{{ $t('pages.build.history.6f9c6f93') }}
+                          >{{ $t('i18n.d00b485b26') }}
                         </a-button>
                       </a-tooltip>
                     </template>
                   </a-menu-item>
                   <a-menu-item>
                     <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-                      $t('pages.build.history.dd20d11c')
+                      $t('i18n.2f4aaddde3')
                     }}</a-button>
                   </a-menu-item>
                 </a-menu>
@@ -298,21 +298,21 @@ export default {
       tableSelections: [],
       columns: [
         {
-          title: this.$t('pages.build.history.b7ff5dde'),
+          title: this.$t('i18n.50a299c847'),
           dataIndex: 'buildName',
           width: 120,
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.build.history.7cf809d7'),
+          title: this.$t('i18n.46e4265791'),
           dataIndex: 'buildNumberId',
           width: '90px',
           align: 'center',
           ellipsis: true
         },
         {
-          title: this.$t('pages.build.history.2ae8180f'),
+          title: this.$t('i18n.2432b57515'),
           dataIndex: 'buildRemark',
           width: 120,
           ellipsis: true,
@@ -320,62 +320,62 @@ export default {
         },
 
         {
-          title: this.$t('pages.build.history.9c32c887'),
+          title: this.$t('i18n.3fea7ca76c'),
           dataIndex: 'status',
           width: '100px',
           align: 'center',
           ellipsis: true
         },
         {
-          title: this.$t('pages.build.history.4abba04f'),
+          title: this.$t('i18n.ff9814bf6b'),
           dataIndex: 'triggerBuildType',
           align: 'center',
           width: '100px',
           ellipsis: true
         },
         {
-          title: this.$t('pages.build.history.c2a7a92f'),
+          title: this.$t('i18n.ad35f58fb3'),
           dataIndex: 'resultFileSize',
           width: '100px',
           sorter: true,
           ellipsis: true
         },
         {
-          title: this.$t('pages.build.history.7a013409'),
+          title: this.$t('i18n.592c595891'),
           dataIndex: 'startTime',
           sorter: true,
           customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
-          title: this.$t('pages.build.history.bc8deb76'),
+          title: this.$t('i18n.39f1374d36'),
           dataIndex: 'endTime',
           // sorter: true,
 
           width: '120px'
         },
         {
-          title: this.$t('pages.build.history.5f141679'),
+          title: this.$t('i18n.af427d2541'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
-          title: this.$t('pages.build.history.907f888f'),
+          title: this.$t('i18n.f98994f7ec'),
           dataIndex: 'releaseMethod',
           width: '100px',
           ellipsis: true
         },
         {
-          title: this.$t('pages.build.history.ed74cc37'),
+          title: this.$t('i18n.f9ac4b2aa6'),
           dataIndex: 'modifyUser',
           width: '130px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.build.history.3bb962bf'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
 
           width: '220px',
@@ -449,11 +449,11 @@ export default {
     // 回滚
     handleRollback(record) {
       $confirm({
-        title: this.$t('pages.build.history.1da61c06'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.build.history.511ca141'),
-        okText: this.$t('pages.build.history.7da4a591'),
-        cancelText: this.$t('pages.build.history.43105e21'),
+        content: this.$t('i18n.fb61d4d708'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           // 重新发布
           return rollback(record.id).then((res) => {
@@ -476,11 +476,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$t('pages.build.history.1da61c06'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.build.history.14ac7e60'),
-        okText: this.$t('pages.build.history.7da4a591'),
-        cancelText: this.$t('pages.build.history.43105e21'),
+        content: this.$t('i18n.ad8b626496'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return deleteBuildHistory(record.id).then((res) => {
             if (res.code === 200) {
@@ -497,16 +497,16 @@ export default {
     handleBatchDelete() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
         $notification.warning({
-          message: this.$t('pages.build.history.d1aa06b3')
+          message: this.$t('i18n.5d817c403e')
         })
         return
       }
       $confirm({
-        title: this.$t('pages.build.history.1da61c06'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.build.history.a938924a'),
-        okText: this.$t('pages.build.history.7da4a591'),
-        cancelText: this.$t('pages.build.history.43105e21'),
+        content: this.$t('i18n.02d46f7e6f'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           // 删除
           return deleteBuildHistory(this.tableSelections.join(',')).then((res) => {
@@ -541,7 +541,7 @@ export default {
     handerConfirm() {
       if (!this.tableSelections.length) {
         $notification.warning({
-          message: this.$t('pages.build.history.a67c2624')
+          message: this.$t('i18n.2b4cf3d74e')
         })
         return
       }
@@ -557,7 +557,7 @@ export default {
         })
       if (!selectData.length) {
         $notification.warning({
-          message: this.$t('pages.build.history.c53f077b')
+          message: this.$t('i18n.a637a42173')
         })
         return
       }

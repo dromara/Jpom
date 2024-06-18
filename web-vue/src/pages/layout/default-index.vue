@@ -7,7 +7,7 @@
             <template #title>
               {{ subTitle }}
               <div>&nbsp;</div>
-              <div>{{ $t('pages.layout.default-index.f29dfeb9') }}</div>
+              <div>{{ $t('i18n.7548ea6316') }}</div>
             </template>
             <div
               class="logo text-overflow-hidden"
@@ -144,7 +144,7 @@ watch(
 )
 
 const collapsed = ref(false)
-const subTitle = ref($t('pages.layout.default-index.cf628a26'))
+const subTitle = ref($t('i18n.03d9de2834'))
 const logoUrl = ref('')
 
 const _appStore = appStore()

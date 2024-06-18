@@ -10,7 +10,7 @@
       default-auto-refresh
       :auto-refresh-time="30"
       table-name="buildList"
-      :empty-description="$t('pages.system.assets.machine.machine-list.90ec9874')"
+      :empty-description="$t('i18n.de3394b14e')"
       :active-page="activePage"
       :columns="columns"
       :data-source="list"
@@ -39,19 +39,19 @@
           <a-input
             v-model:value="listQuery['%name%']"
             class="search-input-item"
-            :placeholder="$t('pages.system.assets.machine.machine-list.2c9fdbef')"
+            :placeholder="$t('i18n.e4013f8b81')"
             @press-enter="getMachineList"
           />
           <a-input
             v-model:value="listQuery['%jpomUrl%']"
             class="search-input-item"
-            :placeholder="$t('pages.system.assets.machine.machine-list.a918ed23')"
+            :placeholder="$t('i18n.c1786d9e11')"
             @press-enter="getMachineList"
           />
           <a-input
             v-model:value="listQuery['%jpomVersion%']"
             class="search-input-item"
-            :placeholder="$t('pages.system.assets.machine.machine-list.24fef8f1')"
+            :placeholder="$t('i18n.a912a83e6f')"
             @press-enter="getMachineList"
           />
           <a-select
@@ -68,7 +68,7 @@
               }
             "
             allow-clear
-            :placeholder="$t('pages.system.assets.machine.machine-list.e740d8cb')"
+            :placeholder="$t('i18n.829abe5a8d')"
             class="search-input-item"
           >
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
@@ -76,54 +76,54 @@
           <a-select
             v-model:value="listQuery['order_field']"
             allow-clear
-            :placeholder="$t('pages.system.assets.machine.machine-list.62d392df')"
+            :placeholder="$t('i18n.88f5c7ac4a')"
             class="search-input-item"
           >
             <a-select-option value="networkDelay">{{
-              $t('pages.system.assets.machine.machine-list.5cba575b')
+              $t('i18n.204222d167')
             }}</a-select-option>
             <a-select-option value="osOccupyCpu">cpu</a-select-option>
             <a-select-option value="osOccupyDisk">{{
-              $t('pages.system.assets.machine.machine-list.e9213f19')
+              $t('i18n.1d650a60a5')
             }}</a-select-option>
             <a-select-option value="osOccupyMemory">{{
-              $t('pages.system.assets.machine.machine-list.d5f99ae')
+              $t('i18n.9932551cd5')
             }}</a-select-option>
             <a-select-option value="modifyTimeMillis">{{
-              $t('pages.system.assets.machine.machine-list.3d55d8de')
+              $t('i18n.a001a226fd')
             }}</a-select-option>
             <a-select-option value="createTimeMillis">{{
-              $t('pages.system.assets.machine.machine-list.8e3f3e65')
+              $t('i18n.eca37cb072')
             }}</a-select-option>
           </a-select>
           <a-button :loading="loading" type="primary" @click="getMachineList">{{
-            $t('pages.system.assets.machine.machine-list.53c2763c')
+            $t('i18n.e5f71fc31e')
           }}</a-button>
           <a-button type="primary" @click="addMachine">{{
-            $t('pages.system.assets.machine.machine-list.7d46652a')
+            $t('i18n.66ab5e9f24')
           }}</a-button>
 
           <a-dropdown v-if="tableSelections && tableSelections.length">
             <template #overlay>
               <a-menu>
                 <a-menu-item key="1" @click="syncToWorkspaceShow()">
-                  {{ $t('pages.system.assets.machine.machine-list.777582f8') }}
+                  {{ $t('i18n.5c89a5353d') }}
                 </a-menu-item>
                 <a-menu-item key="2" @click="syncNodeWhiteConfig">
-                  {{ $t('pages.system.assets.machine.machine-list.911b1498') }}
+                  {{ $t('i18n.542a0e7db4') }}
                 </a-menu-item>
                 <a-menu-item key="3" @click="syncNodeConfig">
-                  {{ $t('pages.system.assets.machine.machine-list.dd3e77a3') }}
+                  {{ $t('i18n.51c92e6956') }}
                 </a-menu-item>
               </a-menu>
             </template>
             <a-button type="primary">
-              {{ $t('pages.system.assets.machine.machine-list.766122c2') }} <DownOutlined />
+              {{ $t('i18n.7f7c624a84') }} <DownOutlined />
             </a-button>
           </a-dropdown>
-          <a-tooltip v-else :title="$t('pages.system.assets.machine.machine-list.db24fc53')">
+          <a-tooltip v-else :title="$t('i18n.98cd2bdc03')">
             <a-button :disabled="true" type="primary">
-              {{ $t('pages.system.assets.machine.machine-list.766122c2') }}<DownOutlined
+              {{ $t('i18n.7f7c624a84') }}<DownOutlined
             /></a-button>
           </a-tooltip>
         </a-space>
@@ -132,9 +132,9 @@
         <a-tooltip>
           <template #title>
             <ul>
-              <li>{{ $t('pages.system.assets.machine.machine-list.1a699f77') }}</li>
-              <li>{{ $t('pages.system.assets.machine.machine-list.de2a9a7b') }}</li>
-              <li>{{ $t('pages.system.assets.machine.machine-list.11dc9ca6') }}</li>
+              <li>{{ $t('i18n.9b74c734e5') }}</li>
+              <li>{{ $t('i18n.e1fefde80f') }}</li>
+              <li>{{ $t('i18n.39b68185f0') }}</li>
             </ul>
           </template>
           <QuestionCircleOutlined />
@@ -155,10 +155,10 @@
         </template>
         <template v-else-if="column.dataIndex === 'status'">
           <a-tooltip
-            :title="`${$t('pages.system.assets.machine.machine-list.df91bc15')}${statusMap[record.status]} ${
+            :title="`${$t('i18n.e703c7367c')}${statusMap[record.status]} ${
               record.statusMsg
-                ? $t('pages.system.assets.machine.machine-list.b062018a') + record.statusMsg
-                : $t('pages.system.assets.machine.machine-list.2a5a5df2')
+                ? $t('i18n.8d13037eb7') + record.statusMsg
+                : $t('i18n.77e100e462')
             } `"
           >
             <a-tag :color="record.status === 1 ? 'green' : 'pink'" style="margin-right: 0">
@@ -185,13 +185,13 @@
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button type="primary" size="small" @click="handleEdit(record)">{{
-              $t('pages.system.assets.machine.machine-list.e1224c34')
+              $t('i18n.95b351c862')
             }}</a-button>
             <a-button type="primary" size="small" @click="syncToWorkspaceShow(record)">{{
-              $t('pages.system.assets.machine.machine-list.672432f2')
+              $t('i18n.e39de3376e')
             }}</a-button>
             <a-button type="primary" danger size="small" @click="deleteMachineInfo(record)">{{
-              $t('pages.system.assets.machine.machine-list.2f14e7d4')
+              $t('i18n.2f4aaddde3')
             }}</a-button>
           </a-space>
         </template>
@@ -204,8 +204,8 @@
               <a-col :span="17" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
                 <a-tooltip>
                   <template #title>
-                    <div>{{ $t('pages.system.assets.machine.machine-list.3614bbe4') }}{{ item.name }}</div>
-                    <div>{{ $t('pages.system.assets.machine.machine-list.a918ed23') }}：{{ item.jpomUrl }}</div>
+                    <div>{{ $t('i18n.5d83794cfa') }}{{ item.name }}</div>
+                    <div>{{ $t('i18n.c1786d9e11') }}：{{ item.jpomUrl }}</div>
                   </template>
                   <span style="cursor: pointer" @click="showMachineInfo(item)">
                     {{ item.name }}
@@ -214,10 +214,10 @@
               </a-col>
               <a-col :span="7" style="text-align: right" class="text-overflow-hidden">
                 <a-tooltip
-                  :title="`${$t('pages.system.assets.machine.machine-list.df91bc15')}${statusMap[item.status]} ${
+                  :title="`${$t('i18n.e703c7367c')}${statusMap[item.status]} ${
                     item.statusMsg
-                      ? $t('pages.system.assets.machine.machine-list.b062018a') + item.statusMsg
-                      : $t('pages.system.assets.machine.machine-list.2a5a5df2')
+                      ? $t('i18n.8d13037eb7') + item.statusMsg
+                      : $t('i18n.77e100e462')
                   } `"
                 >
                   <a-tag :color="item.status === 1 ? 'green' : 'pink'" style="margin-right: 0">
@@ -231,7 +231,7 @@
           <a-tooltip :title="item.osName">
             <a-row class="item-info">
               <a-col :span="6" class="title text-overflow-hidden">{{
-                $t('pages.system.assets.machine.machine-list.163de925')
+                $t('i18n.2027743b8d')
               }}</a-col>
               <a-col :span="18" class="content text-overflow-hidden">
                 <a-button
@@ -249,7 +249,7 @@
           <a-tooltip :title="item.osVersion">
             <a-row class="item-info">
               <a-col :span="6" class="title text-overflow-hidden">{{
-                $t('pages.system.assets.machine.machine-list.41180a8c')
+                $t('i18n.3006a3da65')
               }}</a-col>
               <a-col :span="18" class="content text-overflow-hidden">
                 {{ item.osVersion || '-' }}
@@ -259,7 +259,7 @@
           <a-tooltip :title="item.osLoadAverage">
             <a-row class="item-info">
               <a-col :span="6" class="title text-overflow-hidden">{{
-                $t('pages.system.assets.machine.machine-list.6d18733e')
+                $t('i18n.9e96d9c8d3')
               }}</a-col>
               <a-col :span="18" class="content text-overflow-hidden">
                 {{ item.osLoadAverage || '-' }}
@@ -269,7 +269,7 @@
           <a-tooltip :title="item.jpomVersion">
             <a-row class="item-info">
               <a-col :span="6" class="title text-overflow-hidden">{{
-                $t('pages.system.assets.machine.machine-list.e2009285')
+                $t('i18n.4a346aae15')
               }}</a-col>
               <a-col :span="18" class="content text-overflow-hidden">
                 <a-button
@@ -287,19 +287,19 @@
           <a-row type="flex" align="middle" justify="center" style="margin-top: 10px">
             <a-button-group>
               <a-button type="primary" size="small" @click="handleEdit(item)">
-                {{ $t('pages.system.assets.machine.machine-list.e1224c34') }}
+                {{ $t('i18n.95b351c862') }}
               </a-button>
               <a-button type="primary" size="small" @click="showMachineInfo(item)">{{
-                $t('pages.system.assets.machine.machine-list.151c73eb')
+                $t('i18n.f26225bde6')
               }}</a-button>
               <a-button type="primary" size="small" @click="syncToWorkspaceShow(item)">{{
-                $t('pages.system.assets.machine.machine-list.672432f2')
+                $t('i18n.e39de3376e')
               }}</a-button>
               <a-button type="primary" size="small" @click="viewMachineNode(item)">{{
-                $t('pages.system.assets.machine.machine-list.602a0a5e')
+                $t('i18n.3bf3c0a8d6')
               }}</a-button>
               <a-button size="small" @click="deleteMachineInfo(item)">{{
-                $t('pages.system.assets.machine.machine-list.2f14e7d4')
+                $t('i18n.2f4aaddde3')
               }}</a-button>
             </a-button-group>
           </a-row>
@@ -342,24 +342,24 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="50%"
-      :title="$t('pages.system.assets.machine.machine-list.22013d63')"
+      :title="$t('i18n.6eb39e706c')"
       :mask-closable="false"
       @ok="handleEditOk"
     >
       <a-form ref="editNodeForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 19 }">
-        <a-form-item :label="$t('pages.system.assets.machine.machine-list.2c9fdbef')" name="name">
+        <a-form-item :label="$t('i18n.e4013f8b81')" name="name">
           <a-input
             v-model:value="temp.name"
             :max-length="50"
-            :placeholder="$t('pages.system.assets.machine.machine-list.2c9fdbef')"
+            :placeholder="$t('i18n.e4013f8b81')"
           />
         </a-form-item>
-        <a-form-item :label="$t('pages.system.assets.machine.machine-list.aeb7bb0b')" name="groupName">
+        <a-form-item :label="$t('i18n.93e1df604a')" name="groupName">
           <custom-select
             v-model:value="temp.groupName"
             :data="groupList"
-            :input-placeholder="$t('pages.system.assets.machine.machine-list.c50ead9c')"
-            :select-placeholder="$t('pages.system.assets.machine.machine-list.c385f859')"
+            :input-placeholder="$t('i18n.bd0362bed3')"
+            :select-placeholder="$t('i18n.9cac799f2f')"
           >
           </custom-select>
         </a-form-item>
@@ -367,23 +367,23 @@
         <a-form-item name="jpomUrl">
           <template #label>
             <a-tooltip>
-              {{ $t('pages.system.assets.machine.machine-list.a918ed23') }}
+              {{ $t('i18n.c1786d9e11') }}
               <template #title
-                >{{ $t('pages.system.assets.machine.machine-list.2571644c') }}3
+                >{{ $t('i18n.899fe0c5dd') }}3
                 <ul>
-                  <li>{{ $t('pages.system.assets.machine.machine-list.e09a5dce') }}</li>
-                  <li>{{ $t('pages.system.assets.machine.machine-list.77cbe2a0') }}</li>
+                  <li>{{ $t('i18n.9c3c05d91b') }}</li>
+                  <li>{{ $t('i18n.1ece1616bf') }}</li>
                 </ul>
               </template>
               <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
-          <template #help>{{ $t('pages.system.assets.machine.machine-list.7b7aa723') }}</template>
-          <a-input v-model:value="temp.jpomUrl" :placeholder="$t('pages.system.assets.machine.machine-list.da42e57d')">
+          <template #help>{{ $t('i18n.6f8da7dcca') }}</template>
+          <a-input v-model:value="temp.jpomUrl" :placeholder="$t('i18n.1235b052ff')">
             <template #addonBefore>
               <a-select
                 v-model:value="temp.jpomProtocol"
-                :placeholder="$t('pages.system.assets.machine.machine-list.66b6ce82')"
+                :placeholder="$t('i18n.e825ec7800')"
                 style="width: 160px"
               >
                 <a-select-option value="Http"> Http:// </a-select-option>
@@ -393,62 +393,62 @@
           </a-input>
         </a-form-item>
 
-        <a-form-item :label="$t('pages.system.assets.machine.machine-list.d0ad1e12')" name="loginName">
+        <a-form-item :label="$t('i18n.86fb7b5421')" name="loginName">
           <a-input
             v-model:value="temp.jpomUsername"
-            :placeholder="$t('pages.system.assets.machine.machine-list.2dea28d3')"
+            :placeholder="$t('i18n.f8460626f0')"
           />
-          <template #help>{{ $t('pages.system.assets.machine.machine-list.2b392488') }}</template>
+          <template #help>{{ $t('i18n.eec342f34e') }}</template>
         </a-form-item>
         <a-form-item :name="`${temp.id ? 'loginPwd-update' : 'loginPwd'}`">
           <template #label>
             <a-tooltip>
-              {{ $t('pages.system.assets.machine.machine-list.176dcb24') }}
+              {{ $t('i18n.8bd3f73502') }}
               <template #title>
-                {{ $t('pages.system.assets.machine.machine-list.8657af17') }}_authorize.json
-                {{ $t('pages.system.assets.machine.machine-list.635f865') }}
+                {{ $t('i18n.1062619d5a') }}_authorize.json
+                {{ $t('i18n.ff3bdecc5e') }}
               </template>
               <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
           <a-input-password
             v-model:value="temp.jpomPassword"
-            :placeholder="$t('pages.system.assets.machine.machine-list.8a914f8c')"
+            :placeholder="$t('i18n.e5a63852fd')"
           />
         </a-form-item>
 
         <a-collapse>
-          <a-collapse-panel key="1" :header="$t('pages.system.assets.machine.machine-list.1eadb274')">
-            <a-form-item :label="$t('pages.system.assets.machine.machine-list.d50785bc')" name="templateNode" help="">
+          <a-collapse-panel key="1" :header="$t('i18n.9ab433e930')">
+            <a-form-item :label="$t('i18n.04edc35414')" name="templateNode" help="">
               <a-switch
                 v-model:checked="temp.templateNode"
-                :checked-children="$t('pages.system.assets.machine.machine-list.1998fedc')"
-                :un-checked-children="$t('pages.system.assets.machine.machine-list.90612f8a')"
+                :checked-children="$t('i18n.0a60ac8f02')"
+                :un-checked-children="$t('i18n.c9744f45e7')"
                 default-checked
               />
-              {{ $t('pages.system.assets.machine.machine-list.b19e63c8') }},{{
-                $t('pages.system.assets.machine.machine-list.d7d0c747')
+              {{ $t('i18n.8e34aa1a59') }},{{
+                $t('i18n.715ec3b393')
               }}
             </a-form-item>
 
-            <a-form-item :label="$t('pages.system.assets.machine.machine-list.e67b0df3')" name="timeOut">
+            <a-form-item :label="$t('i18n.67425c29a5')" name="timeOut">
               <a-input-number
                 v-model:value="temp.jpomTimeout"
                 :min="0"
-                :placeholder="$t('pages.system.assets.machine.machine-list.65206e07')"
+                :placeholder="$t('i18n.84d331a137')"
                 style="width: 100%"
               />
             </a-form-item>
 
-            <a-form-item :label="$t('pages.system.assets.machine.machine-list.f9f255b0')" name="jpomHttpProxy">
+            <a-form-item :label="$t('i18n.fc954d25ec')" name="jpomHttpProxy">
               <a-input
                 v-model:value="temp.jpomHttpProxy"
-                :placeholder="$t('pages.system.assets.machine.machine-list.775fdae9')"
+                :placeholder="$t('i18n.dcf14deb0e')"
               >
                 <template #addonBefore>
                   <a-select
                     v-model:value="temp.jpomHttpProxyType"
-                    :placeholder="$t('pages.system.assets.machine.machine-list.b9029351')"
+                    :placeholder="$t('i18n.b04070fe42')"
                     default-value="HTTP"
                     style="width: 100px"
                   >
@@ -460,15 +460,15 @@
               </a-input>
             </a-form-item>
 
-            <a-form-item :label="$t('pages.system.assets.machine.machine-list.529a92f9')" name="transportEncryption">
+            <a-form-item :label="$t('i18n.7156088c6e')" name="transportEncryption">
               <a-select
                 v-model:value="temp.transportEncryption"
                 show-search
                 default-value="0"
-                :placeholder="$t('pages.system.assets.machine.machine-list.bce1535d')"
+                :placeholder="$t('i18n.3c8eada338')"
               >
                 <a-select-option :value="0">{{
-                  $t('pages.system.assets.machine.machine-list.339ddd8c')
+                  $t('i18n.8a3e316cd7')
                 }}</a-select-option>
                 <a-select-option :value="1">BASE64</a-select-option>
                 <a-select-option :value="2">AES</a-select-option>
@@ -509,12 +509,12 @@
       v-model:open="syncToWorkspaceVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$t('pages.system.assets.machine.machine-list.1a45dd32')"
+      :title="$t('i18n.ef8525efce')"
       :mask-closable="false"
       @ok="handleSyncToWorkspace"
     >
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
-        <a-form-item :label="$t('pages.system.assets.machine.machine-list.7ef9d8fb')" name="workspaceId">
+        <a-form-item :label="$t('i18n.b4a8c78284')" name="workspaceId">
           <a-select
             v-model:value="temp.workspaceId"
             show-search
@@ -528,7 +528,7 @@
                 )
               }
             "
-            :placeholder="$t('pages.system.assets.machine.machine-list.3a321a02')"
+            :placeholder="$t('i18n.b3bda9bf9e')"
           >
             <a-select-option v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
@@ -542,14 +542,14 @@
       v-model:open="viewLinkNode"
       destroy-on-close
       width="50%"
-      :title="$t('pages.system.assets.machine.machine-list.2e8b9ada')"
+      :title="$t('i18n.222316382d')"
       :footer="null"
       :mask-closable="false"
     >
       <a-space direction="vertical" style="width: 100%">
         <a-alert
           v-if="nodeList && nodeList.length"
-          :message="$t('pages.system.assets.machine.machine-list.fcea55f5')"
+          :message="$t('i18n.566c67e764')"
           type="info"
           show-icon
         />
@@ -557,9 +557,9 @@
           <template #renderItem="{ item }">
             <a-list-item style="display: block">
               <a-row>
-                <a-col :span="10">{{ $t('pages.system.assets.machine.machine-list.3614bbe4') }}{{ item.name }}</a-col>
+                <a-col :span="10">{{ $t('i18n.5d83794cfa') }}{{ item.name }}</a-col>
                 <a-col :span="10"
-                  >{{ $t('pages.system.assets.machine.machine-list.76d6b646')
+                  >{{ $t('i18n.2358e1ef49')
                   }}{{ item.workspace && item.workspace.name }}</a-col
                 >
                 <a-col :span="4">
@@ -579,19 +579,19 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="50%"
-      :title="$t('pages.system.assets.machine.machine-list.8e66162a')"
+      :title="$t('i18n.e19cc5ed70')"
       :mask-closable="false"
       @ok="onSubmitWhitelist"
     >
       <a-alert
-        :message="`${$t('pages.system.assets.machine.machine-list.ccba8d7f')},${$t(
+        :message="`${$t('i18n.6fa1229ea9')},${$t(
           'pages.system.assets.machine.machine-list.d732193c'
-        )},${$t('pages.system.assets.machine.machine-list.f9c4e189')}`"
+        )},${$t('i18n.332ba869d9')}`"
         style="margin-top: 10px; margin-bottom: 20px"
         banner
       />
       <a-form ref="editWhiteForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
-        <a-form-item :label="$t('pages.system.assets.machine.machine-list.d50785bc')">
+        <a-form-item :label="$t('i18n.04edc35414')">
           <a-select
             v-model:value="temp.templateNodeId"
             show-search
@@ -605,7 +605,7 @@
                 )
               }
             "
-            :placeholder="$t('pages.system.assets.machine.machine-list.16c9816c')"
+            :placeholder="$t('i18n.8d92fb62a7')"
             @change="(id) => loadWhitelistData(id)"
           >
             <a-select-option v-for="item in templateNodeList" :key="item.id" :value="item.id">
@@ -613,21 +613,21 @@
             </a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item :label="$t('pages.system.assets.machine.machine-list.5b716424')" name="project">
+        <a-form-item :label="$t('i18n.aabdc3b7c0')" name="project">
           <a-textarea
             v-model:value="temp.project"
             :rows="5"
             style="resize: none"
-            :placeholder="$t('pages.system.assets.machine.machine-list.f2ff8439')"
+            :placeholder="$t('i18n.631d5b88ab')"
           />
         </a-form-item>
 
-        <a-form-item :label="$t('pages.system.assets.machine.machine-list.5ad2c7b8')" name="allowEditSuffix">
+        <a-form-item :label="$t('i18n.649231bdee')" name="allowEditSuffix">
           <a-textarea
             v-model:value="temp.allowEditSuffix"
             :rows="5"
             style="resize: none"
-            :placeholder="$t('pages.system.assets.machine.machine-list.70f03f24')"
+            :placeholder="$t('i18n.afa8980495')"
           />
         </a-form-item>
       </a-form>
@@ -639,28 +639,28 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="50%"
-      :title="$t('pages.system.assets.machine.machine-list.19334ef6')"
+      :title="$t('i18n.6f8907351b')"
       :mask-closable="false"
     >
       <template #footer>
         <a-space>
           <a-button type="primary" :disabled="!temp.content" @click="onNodeSubmit(false)">{{
-            $t('pages.system.assets.machine.machine-list.b033d8c5')
+            $t('i18n.be5fbbe34c')
           }}</a-button>
           <a-button type="primary" :disabled="!temp.content" @click="onNodeSubmit(true)">{{
-            $t('pages.system.assets.machine.machine-list.fda40980')
+            $t('i18n.6aab88d6a3')
           }}</a-button>
         </a-space>
       </template>
       <a-alert
-        :message="`${$t('pages.system.assets.machine.machine-list.666f85d5')},${$t(
+        :message="`${$t('i18n.10c385b47e')},${$t(
           'pages.system.assets.machine.machine-list.d732193c'
-        )},${$t('pages.system.assets.machine.machine-list.f9c4e189')}`"
+        )},${$t('i18n.332ba869d9')}`"
         style="margin-top: 10px; margin-bottom: 20px"
         banner
       />
       <a-form ref="editNodeConfigForm" :model="temp">
-        <a-form-item :label="$t('pages.system.assets.machine.machine-list.cfd49c0b')">
+        <a-form-item :label="$t('i18n.798f660048')">
           <a-select
             v-model:value="temp.templateNodeId"
             show-search
@@ -674,7 +674,7 @@
                 )
               }
             "
-            :placeholder="$t('pages.system.assets.machine.machine-list.43c9b591')"
+            :placeholder="$t('i18n.353c7f29da')"
             @change="(id) => loadNodeConfig(id)"
           >
             <a-select-option v-for="item in templateNodeList" :key="item.id" :value="item.id">
@@ -748,7 +748,7 @@ export default {
       temp: {},
       rules: {
         name: [
-          { required: true, message: this.$t('pages.system.assets.machine.machine-list.255211fb'), trigger: 'blur' }
+          { required: true, message: this.$t('i18n.cbdc4f58f6'), trigger: 'blur' }
         ]
       },
       drawerVisible: false,
@@ -759,27 +759,27 @@ export default {
       layoutType: null,
       columns: [
         {
-          title: this.$t('pages.system.assets.machine.machine-list.bb769c1d'),
+          title: this.$t('i18n.d7ec2d3fea'),
           dataIndex: 'name',
           width: 150,
           ellipsis: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-list.1c01cf58'),
+          title: this.$t('i18n.cdc478d90c'),
           dataIndex: 'osName',
           width: 150,
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-list.7fb10499'),
+          title: this.$t('i18n.6707667676'),
           dataIndex: 'hostName',
           width: 150,
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-list.a918ed23'),
+          title: this.$t('i18n.c1786d9e11'),
           dataIndex: 'jpomUrl',
           width: 150,
           sorter: true,
@@ -787,21 +787,21 @@ export default {
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-list.12d0e469'),
+          title: this.$t('i18n.b37b786351'),
           dataIndex: 'groupName',
           ellipsis: true,
           width: '100px',
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-list.9c32c887'),
+          title: this.$t('i18n.3fea7ca76c'),
           dataIndex: 'status',
           align: 'center',
           width: '100px',
           ellipsis: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-list.abd23cf2'),
+          title: this.$t('i18n.64eee9aafa'),
           sorter: true,
           dataIndex: 'osSystemUptime',
           width: 150,
@@ -809,7 +809,7 @@ export default {
           duration2: true
         },
         {
-          title: `CPU${this.$t('pages.system.assets.machine.machine-list.5a6bc27e')}`,
+          title: `CPU${this.$t('i18n.2f97ed65db')}`,
           sorter: true,
           align: 'center',
           dataIndex: 'osOccupyCpu',
@@ -818,7 +818,7 @@ export default {
           percent2Number: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-list.10917337'),
+          title: this.$t('i18n.883848dd37'),
           sorter: true,
           align: 'center',
           dataIndex: 'osOccupyMemory',
@@ -827,7 +827,7 @@ export default {
           percent2Number: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-list.62a10802'),
+          title: this.$t('i18n.ed145eba38'),
           sorter: true,
           align: 'center',
           dataIndex: 'osOccupyDisk',
@@ -836,26 +836,26 @@ export default {
           percent2Number: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-list.93e5dd72'),
+          title: this.$t('i18n.2482a598a3'),
           dataIndex: 'jpomVersion',
           width: '100px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-list.d50785bc'),
+          title: this.$t('i18n.04edc35414'),
           dataIndex: 'templateNode',
           width: '90px',
           align: 'center',
           ellipsis: true,
           customRender: ({ text }) => {
             return text
-              ? this.$t('pages.system.assets.machine.machine-list.1998fedc')
-              : this.$t('pages.system.assets.machine.machine-list.90612f8a')
+              ? this.$t('i18n.0a60ac8f02')
+              : this.$t('i18n.c9744f45e7')
           }
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-list.8e3f3e65'),
+          title: this.$t('i18n.eca37cb072'),
           dataIndex: 'createTimeMillis',
           ellipsis: true,
           sorter: true,
@@ -863,14 +863,14 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-list.a2b40316'),
+          title: this.$t('i18n.1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           customRender: ({ text }) => parseTime(text),
           sorter: true,
           width: '170px'
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-list.3bb962bf'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
           width: '120px',
           fixed: 'right',
@@ -981,11 +981,11 @@ export default {
     // 删除机器
     deleteMachineInfo(item) {
       $confirm({
-        title: this.$t('pages.system.assets.machine.machine-list.a8fe4c17'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.system.assets.machine.machine-list.2613d1af'),
-        okText: this.$t('pages.system.assets.machine.machine-list.7da4a591'),
-        cancelText: this.$t('pages.system.assets.machine.machine-list.43105e21'),
+        content: this.$t('i18n.9c66f7b345'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () =>
           machineDelete({
             id: item.id
@@ -1020,7 +1020,7 @@ export default {
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
         $notification.warn({
-          message: this.$t('pages.system.assets.machine.machine-list.3a321a02')
+          message: this.$t('i18n.b3bda9bf9e')
         })
         return false
       }
@@ -1079,7 +1079,7 @@ export default {
     syncNodeWhiteConfig() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
         $notification.warn({
-          message: this.$t('pages.system.assets.machine.machine-list.68a8edd4')
+          message: this.$t('i18n.d82b19148f')
         })
         return
       }
@@ -1096,7 +1096,7 @@ export default {
             this.loadWhitelistData(this.temp.templateNodeId)
           } else {
             $notification.warn({
-              message: this.$t('pages.system.assets.machine.machine-list.e1a176fb')
+              message: this.$t('i18n.d7ef19d05b')
             })
           }
         }
@@ -1137,7 +1137,7 @@ export default {
     syncNodeConfig() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
         $notification.warn({
-          message: this.$t('pages.system.assets.machine.machine-list.2ee12552')
+          message: this.$t('i18n.1e07b9f9ce')
         })
         return
       }
@@ -1154,7 +1154,7 @@ export default {
             this.loadNodeConfig(this.temp.templateNodeId)
           } else {
             $notification.warn({
-              message: this.$t('pages.system.assets.machine.machine-list.e1a176fb')
+              message: this.$t('i18n.d7ef19d05b')
             })
           }
         }
@@ -1172,13 +1172,13 @@ export default {
     // submit
     onNodeSubmit(restart) {
       $confirm({
-        title: this.$t('pages.system.assets.machine.machine-list.a8fe4c17'),
+        title: this.$t('i18n.c4535759ee'),
         content: restart
-          ? this.$t('pages.system.assets.machine.machine-list.b812712c')
-          : this.$t('pages.system.assets.machine.machine-list.85768a41'),
-        okText: this.$t('pages.system.assets.machine.machine-list.7da4a591'),
+          ? this.$t('i18n.0cf4f0ba82')
+          : this.$t('i18n.863a95c914'),
+        okText: this.$t('i18n.e83a256e4f'),
         zIndex: 1009,
-        cancelText: this.$t('pages.system.assets.machine.machine-list.43105e21'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           this.confirmLoading = true
           return saveNodeConfig({

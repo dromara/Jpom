@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="repository-list"
-      :empty-description="$t('pages.repository.repository-list.ee85cdd2')"
+      :empty-description="$t('i18n.e07cbb381c')"
       size="middle"
       :columns="columns"
       :data-source="list"
@@ -31,19 +31,19 @@
           <a-input
             v-model:value="listQuery['%name%']"
             class="search-input-item"
-            :placeholder="$t('pages.repository.repository-list.348e98c9')"
+            :placeholder="$t('i18n.f967131d9d')"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%gitUrl%']"
             class="search-input-item"
-            :placeholder="$t('pages.repository.repository-list.37fe35a9')"
+            :placeholder="$t('i18n.e4bea943de')"
             @press-enter="loadData"
           />
           <a-select
             v-model:value="listQuery.repoType"
             allow-clear
-            :placeholder="$t('pages.repository.repository-list.e673b1e6')"
+            :placeholder="$t('i18n.4ce606413e')"
             class="search-input-item"
           >
             <a-select-option :value="'0'">GIT</a-select-option>
@@ -63,36 +63,34 @@
               }
             "
             allow-clear
-            :placeholder="$t('pages.repository.repository-list.b1765e98')"
+            :placeholder="$t('i18n.829abe5a8d')"
             class="search-input-item"
           >
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
           </a-select>
 
-          <a-tooltip :title="$t('pages.repository.repository-list.554d1b95')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('pages.repository.repository-list.a1f640f4')
-            }}</a-button>
+          <a-tooltip :title="$t('i18n.4838a3bd20')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleAdd">{{ $t('pages.repository.repository-list.5a068878') }}</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $t('i18n.66ab5e9f24') }}</a-button>
           <a-tooltip>
-            <template #title> {{ $t('pages.repository.repository-list.1c49f0a3') }} </template>
+            <template #title> {{ $t('i18n.77c262950c') }} </template>
             <a-button type="primary" @click="handleAddGitee"
-              ><QuestionCircleOutlined />{{ $t('pages.repository.repository-list.9c03a0fa') }}</a-button
+              ><QuestionCircleOutlined />{{ $t('i18n.e354969500') }}</a-button
             >
           </a-tooltip>
         </a-space>
       </template>
       <template #toolPrefix>
         <a-button type="primary" size="small" @click="handlerExportData"
-          ><DownloadOutlined />{{ $t('pages.repository.repository-list.a5bebb0f') }}</a-button
+          ><DownloadOutlined />{{ $t('i18n.55405ea6ff') }}</a-button
         >
         <a-dropdown>
           <template #overlay>
             <a-menu>
               <a-menu-item key="1">
                 <a-button type="primary" size="small" @click="handlerImportTemplate()">{{
-                  $t('pages.repository.repository-list.9b6f4751')
+                  $t('i18n.2e505d23f7')
                 }}</a-button>
               </a-menu-item>
             </a-menu>
@@ -107,7 +105,7 @@
             :before-upload="beforeUpload"
           >
             <a-button type="primary" size="small"
-              ><UploadOutlined /> {{ $t('pages.repository.repository-list.bc386e1b') }} <DownOutlined />
+              ><UploadOutlined /> {{ $t('i18n.8d9a071ee2') }} <DownOutlined />
             </a-button>
           </a-upload>
         </a-dropdown>
@@ -122,7 +120,7 @@
         <template v-else-if="column.dataIndex === 'repoType'">
           <span v-if="text === 0">GIT</span>
           <span v-else-if="text === 1">SVN</span>
-          <span v-else>{{ $t('pages.repository.repository-list.ca1cdfa6') }}</span>
+          <span v-else>{{ $t('i18n.1622dc9b6b') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'protocol'">
           <span v-if="text === 0">HTTP(S)</span>
@@ -131,24 +129,22 @@
           <span v-else>{{ record.gitUrl.indexOf('http') > -1 ? 'HTTP(S)' : 'SSH' }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'workspaceId'">
-          <a-tag v-if="text === 'GLOBAL'">{{ $t('pages.repository.repository-list.fd0310d0') }}</a-tag>
-          <a-tag v-else>{{ $t('pages.repository.repository-list.afacc4cb') }}</a-tag>
+          <a-tag v-if="text === 'GLOBAL'">{{ $t('i18n.2be75b1044') }}</a-tag>
+          <a-tag v-else>{{ $t('i18n.98d69f8b62') }}</a-tag>
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button type="primary" size="small" @click="handleEdit(record)">{{
-              $t('pages.repository.repository-list.64603c01')
-            }}</a-button>
+            <a-button type="primary" size="small" @click="handleEdit(record)">{{ $t('i18n.95b351c862') }}</a-button>
             <a-button v-if="global" type="primary" size="small" @click="viewBuild(record)">{{
-              $t('pages.repository.repository-list.2ef699f7')
+              $t('i18n.1c3cf7f5f0')
             }}</a-button>
             <a-button type="primary" danger size="small" @click="handleDelete(record)">{{
-              $t('pages.repository.repository-list.dd20d11c')
+              $t('i18n.2f4aaddde3')
             }}</a-button>
 
             <a-dropdown>
               <a @click="(e) => e.preventDefault()">
-                {{ $t('pages.repository.repository-list.6e071067') }}
+                {{ $t('i18n.0ec9eaf9c3') }}
                 <DownOutlined />
               </a>
               <template #overlay>
@@ -159,7 +155,7 @@
                       type="primary"
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
                       @click="sortItemHander(record, index, 'top')"
-                      >{{ $t('pages.repository.repository-list.9e850907') }}</a-button
+                      >{{ $t('i18n.3d43ff1199') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
@@ -168,7 +164,7 @@
                       type="primary"
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
                       @click="sortItemHander(record, index, 'up')"
-                      >{{ $t('pages.repository.repository-list.7ae5e8e5') }}</a-button
+                      >{{ $t('i18n.315eacd193') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
@@ -178,7 +174,7 @@
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total"
                       @click="sortItemHander(record, index, 'down')"
                     >
-                      {{ $t('pages.repository.repository-list.f9aa7220') }}
+                      {{ $t('i18n.17acd250da') }}
                     </a-button>
                   </a-menu-item>
                 </a-menu>
@@ -194,36 +190,32 @@
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$t('pages.repository.repository-list.b3885a87')"
+      :title="$t('i18n.ed39deafd8')"
       :mask-closable="false"
       width="60%"
       @ok="handleEditOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-item :label="$t('pages.repository.repository-list.348e98c9')" name="name">
-          <a-input
-            v-model:value="temp.name"
-            :max-length="50"
-            :placeholder="$t('pages.repository.repository-list.348e98c9')"
-          />
+        <a-form-item :label="$t('i18n.f967131d9d')" name="name">
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n.f967131d9d')" />
         </a-form-item>
-        <a-form-item :label="$t('pages.repository.repository-list.b1765e98')" name="group">
+        <a-form-item :label="$t('i18n.829abe5a8d')" name="group">
           <custom-select
             v-model:value="temp.group"
             :data="groupList"
-            :input-placeholder="$t('pages.repository.repository-list.c50ead9c')"
-            :select-placeholder="$t('pages.repository.repository-list.c385f859')"
+            :input-placeholder="$t('i18n.bd0362bed3')"
+            :select-placeholder="$t('i18n.9cac799f2f')"
           >
           </custom-select>
         </a-form-item>
-        <a-form-item :label="$t('pages.repository.repository-list.37fe35a9')" name="gitUrl">
+        <a-form-item :label="$t('i18n.e4bea943de')" name="gitUrl">
           <a-input-group compact>
             <a-form-item-rest>
               <a-select
                 v-model:value="temp.repoType"
                 style="width: 20%"
                 name="repoType"
-                :placeholder="$t('pages.repository.repository-list.e673b1e6')"
+                :placeholder="$t('i18n.4ce606413e')"
               >
                 <a-select-option :value="0">GIT</a-select-option>
                 <a-select-option :value="1">SVN</a-select-option>
@@ -233,11 +225,11 @@
               v-model:value="temp.gitUrl"
               style="width: 80%"
               :max-length="250"
-              :placeholder="$t('pages.repository.repository-list.37fe35a9')"
+              :placeholder="$t('i18n.e4bea943de')"
             />
           </a-input-group>
         </a-form-item>
-        <a-form-item :label="$t('pages.repository.repository-list.3e8bed11')" name="protocol">
+        <a-form-item :label="$t('i18n.faa1ad5e5c')" name="protocol">
           <a-radio-group v-model:value="temp.protocol" name="protocol">
             <a-radio :value="0">HTTP(S)</a-radio>
             <a-radio :value="1">SSH</a-radio>
@@ -248,10 +240,9 @@
           <a-form-item name="userName">
             <template #label>
               <a-tooltip>
-                {{ $t('pages.repository.repository-list.8f415071') }}
+                {{ $t('i18n.7035c62fb0') }}
                 <template #title>
-                  {{ $t('pages.repository.repository-list.5713b65a') }}<b>$ref.wEnv.xxxx</b> xxxx
-                  {{ $t('pages.repository.repository-list.c1175f17') }}</template
+                  {{ $t('i18n.f0a1428f65') }}<b>$ref.wEnv.xxxx</b> xxxx {{ $t('i18n.c1b72e7ded') }}</template
                 >
                 <QuestionCircleOutlined v-if="!temp.id" />
               </a-tooltip>
@@ -261,7 +252,7 @@
               :input="temp.userName"
               :env-list="envVarList"
               type="text"
-              :placeholder="`${$t('pages.repository.repository-list.3ca05365')}`"
+              :placeholder="`${$t('i18n.fc4e2c6151')}`"
               @change="
                 (v) => {
                   temp = { ...temp, userName: v }
@@ -273,10 +264,9 @@
           <a-form-item name="password">
             <template #label>
               <a-tooltip>
-                {{ $t('pages.repository.repository-list.c3891788') }}
+                {{ $t('i18n.a810520460') }}
                 <template #title>
-                  {{ $t('pages.repository.repository-list.d5392ee') }}<b>$ref.wEnv.xxxx</b> xxxx
-                  {{ $t('pages.repository.repository-list.c1175f17') }}</template
+                  {{ $t('i18n.63dd96a28a') }}<b>$ref.wEnv.xxxx</b> xxxx {{ $t('i18n.c1b72e7ded') }}</template
                 >
                 <QuestionCircleOutlined v-if="!temp.id" />
               </a-tooltip>
@@ -285,11 +275,7 @@
             <custom-input
               :input="temp.password"
               :env-list="envVarList"
-              :placeholder="`${
-                !temp.id
-                  ? $t('pages.repository.repository-list.70d56912')
-                  : $t('pages.repository.repository-list.d6753d4f')
-              }`"
+              :placeholder="`${!temp.id ? $t('i18n.2646b813e8') : $t('i18n.b90a30dd20')}`"
               @change="
                 (v) => {
                   temp = { ...temp, password: v }
@@ -298,27 +284,23 @@
             >
             </custom-input>
             <template #help>
-              <a-tooltip v-if="temp.id" :title="$t('pages.repository.repository-list.b627ce03')">
+              <a-tooltip v-if="temp.id" :title="$t('i18n.b408105d69')">
                 <a-button style="margin: 5px" size="small" type="primary" danger @click="restHideField(temp)">{{
-                  $t('pages.repository.repository-list.3907eb5b')
+                  $t('i18n.4403fca0c0')
                 }}</a-button>
               </a-tooltip>
             </template>
           </a-form-item>
         </template>
-        <a-form-item
-          v-if="temp.repoType === 1 && temp.protocol === 1"
-          :label="$t('pages.repository.repository-list.8f415071')"
-          name="userName"
-        >
-          <a-input v-model:value="temp.userName" :placeholder="$t('pages.repository.repository-list.d04aec32')">
+        <a-form-item v-if="temp.repoType === 1 && temp.protocol === 1" :label="$t('i18n.7035c62fb0')" name="userName">
+          <a-input v-model:value="temp.userName" :placeholder="$t('i18n.f04a289502')">
             <template #prefix>
               <UserOutlined />
             </template>
             <template #suffix>
-              <a-tooltip v-if="temp.id" :title="$t('pages.repository.repository-list.b627ce03')">
+              <a-tooltip v-if="temp.id" :title="$t('i18n.b408105d69')">
                 <a-button size="small" type="primary" danger @click="restHideField(temp)">{{
-                  $t('pages.repository.repository-list.3907eb5b')
+                  $t('i18n.4403fca0c0')
                 }}</a-button>
               </a-tooltip>
             </template>
@@ -329,10 +311,9 @@
           <a-form-item name="password">
             <template #label>
               <a-tooltip>
-                {{ $t('pages.repository.repository-list.c3891788') }}
+                {{ $t('i18n.a810520460') }}
                 <template #title>
-                  {{ $t('pages.repository.repository-list.d5392ee') }}<b>$ref.wEnv.xxxx</b> xxxx
-                  {{ $t('pages.repository.repository-list.c1175f17') }}</template
+                  {{ $t('i18n.63dd96a28a') }}<b>$ref.wEnv.xxxx</b> xxxx {{ $t('i18n.c1b72e7ded') }}</template
                 >
                 <QuestionCircleOutlined v-if="!temp.id" />
               </a-tooltip>
@@ -340,7 +321,7 @@
             <custom-input
               :input="temp.password"
               :env-list="envVarList"
-              :placeholder="`${$t('pages.repository.repository-list.5d9a1b6c')}`"
+              :placeholder="`${$t('i18n.45028ad61d')}`"
               @change="
                 (v) => {
                   temp = { ...temp, password: v }
@@ -349,66 +330,58 @@
             >
             </custom-input>
           </a-form-item>
-          <a-form-item :label="$t('pages.repository.repository-list.6deb7a9a')" name="rsaPrv">
+          <a-form-item :label="$t('i18n.d0eddb45e2')" name="rsaPrv">
             <a-tooltip placement="topLeft">
               <template #title>
                 <div>
                   <p style="color: #faa">
-                    {{ $t('pages.repository.repository-list.f8172e2d') }} "{{
-                      $t('pages.repository.repository-list.3b246629')
-                    }}" {{ $t('pages.repository.repository-list.d13bd968') }} <br />{{
-                      $t('pages.repository.repository-list.483288d2')
+                    {{ $t('i18n.43c61e76e7') }} "{{ $t('i18n.3bc5e602b2') }}" {{ $t('i18n.9e560a4162') }} <br />{{
+                      $t('i18n.8c66392870')
                     }}
-                    "{{ $t('pages.repository.repository-list.3b246629') }}"
-                    {{ $t('pages.repository.repository-list.3f35b844') }}<br />
+                    "{{ $t('i18n.3bc5e602b2') }}" {{ $t('i18n.d0a864909b') }}<br />
                   </p>
-                  <p>{{ $t('pages.repository.repository-list.6a9d8eae') }}</p>
-                  <p>{{ $t('pages.repository.repository-list.68c11dde') }}</p>
+                  <p>{{ $t('i18n.8fb7785809') }}</p>
+                  <p>{{ $t('i18n.0af04cdc22') }}</p>
                   <p>
-                    1. {{ $t('pages.repository.repository-list.4631d7f0') }}: <br />-----BEGIN RSA PRIVATE KEY-----
+                    1. {{ $t('i18n.f5d0b69533') }}: <br />-----BEGIN RSA PRIVATE KEY-----
                     <br />
                     ..... <br />
                     -----END RSA PRIVATE KEY-----
                   </p>
                   <p>
-                    2. {{ $t('pages.repository.repository-list.db41aee5') }}:
-                    {{ $t('pages.repository.repository-list.daf3d0b9') }})
-                    {{ $t('pages.repository.repository-list.d6187cc6') }}: <br />file:/Users/Hotstrip/.ssh/id_rsa
+                    2. {{ $t('i18n.becc848a54') }}: {{ $t('i18n.4c9bb42608') }}) {{ $t('i18n.bcc4f9e5ca') }}:
+                    <br />file:/Users/Hotstrip/.ssh/id_rsa
                   </p>
                 </div>
               </template>
               <a-textarea
                 v-model:value="temp.rsaPrv"
                 :auto-size="{ minRows: 3, maxRows: 3 }"
-                :placeholder="$t('pages.repository.repository-list.67a8d7ec')"
+                :placeholder="$t('i18n.d7ee59f327')"
               ></a-textarea>
             </a-tooltip>
           </a-form-item>
           <!-- 公钥暂时没用到 -->
-          <a-form-item v-if="false" :label="$t('pages.repository.repository-list.4310673a')" name="rsaPub">
+          <a-form-item v-if="false" :label="$t('i18n.b939d47e23')" name="rsaPub">
             <a-textarea
               v-model:value="temp.rsaPub"
               :auto-size="{ minRows: 3, maxRows: 3 }"
-              :placeholder="$t('pages.repository.repository-list.bcda4adf')"
+              :placeholder="$t('i18n.db686f0328')"
             ></a-textarea>
           </a-form-item>
         </template>
-        <a-form-item
-          v-if="workspaceId !== 'GLOBAL'"
-          :label="$t('pages.repository.repository-list.33b08707')"
-          name="global"
-        >
+        <a-form-item v-if="workspaceId !== 'GLOBAL'" :label="$t('i18n.fffd3ce745')" name="global">
           <a-radio-group v-model:value="temp.global">
-            <a-radio :value="true"> {{ $t('pages.repository.repository-list.fd0310d0') }}</a-radio>
-            <a-radio :value="false"> {{ $t('pages.repository.repository-list.919267cc') }}</a-radio>
+            <a-radio :value="true"> {{ $t('i18n.2be75b1044') }}</a-radio>
+            <a-radio :value="false"> {{ $t('i18n.691b11e443') }}</a-radio>
           </a-radio-group>
         </a-form-item>
 
-        <a-form-item :label="$t('pages.repository.repository-list.e67b0df3')" name="timeout">
+        <a-form-item :label="$t('i18n.67425c29a5')" name="timeout">
           <a-input-number
             v-model:value="temp.timeout"
             :min="0"
-            :placeholder="$t('pages.repository.repository-list.c98219ce')"
+            :placeholder="$t('i18n.ea9f824647')"
             style="width: 100%"
           />
         </a-form-item>
@@ -418,7 +391,7 @@
       v-if="giteeImportVisible"
       v-model:open="giteeImportVisible"
       destroy-on-close
-      :title="$t('pages.repository.repository-list.3f4ed4fb')"
+      :title="$t('i18n.c8633b4b77')"
       width="80%"
       :footer="null"
       :mask-closable="false"
@@ -430,16 +403,10 @@
         :model="giteeImportForm"
         :wrapper-col="{ span: 20 }"
       >
-        <a-form-item
-          name="token"
-          :label="$t('pages.repository.repository-list.2add4b88')"
-          :help="$t('pages.repository.repository-list.91916119')"
-        >
+        <a-form-item name="token" :label="$t('i18n.8ba971a184')" :help="$t('i18n.e30a93415b')">
           <a-form-item-rest>
             <a-tooltip
-              :title="`${giteeImportForm.type} ${$t('pages.repository.repository-list.b4fde939')}${
-                importTypePlaceholder[giteeImportForm.type]
-              }`"
+              :title="`${giteeImportForm.type} ${$t('i18n.32d0576d85')}${importTypePlaceholder[giteeImportForm.type]}`"
             >
               <a-input-group compact>
                 <a-select v-model:value="giteeImportForm.type" style="width: 10%" @change="importChange">
@@ -460,26 +427,16 @@
             </a-tooltip>
           </a-form-item-rest>
         </a-form-item>
-        <a-form-item name="address" :label="$t('pages.repository.repository-list.6a7417e0')">
-          <a-input
-            v-model:value="giteeImportForm.address"
-            :placeholder="$t('pages.repository.repository-list.9c121b3c')"
-          />
+        <a-form-item name="address" :label="$t('i18n.7650487a87')">
+          <a-input v-model:value="giteeImportForm.address" :placeholder="$t('i18n.9412eb8f99')" />
         </a-form-item>
         <a-form-item
           v-if="providerData[giteeImportForm.type]?.query"
           name="condition"
-          :label="$t('pages.repository.repository-list.a1f640f4')"
-          :help="
-            $t('pages.repository.repository-list.1bb7d42e', {
-              slot1: $t('pages.repository.repository-list.a1f640f4')
-            })
-          "
+          :label="$t('i18n.e5f71fc31e')"
+          :help="$t('i18n.bf0e1e0c16', { slot1: $t('i18n.e5f71fc31e') })"
         >
-          <a-input
-            v-model:value="giteeImportForm.condition"
-            :placeholder="$t('pages.repository.repository-list.391c31b9')"
-          />
+          <a-input v-model:value="giteeImportForm.condition" :placeholder="$t('i18n.e72f2b8806')" />
         </a-form-item>
       </a-form>
       <a-table
@@ -519,9 +476,7 @@
 
           <template v-else-if="column.dataIndex === 'operation'">
             <a-button type="primary" size="small" :disabled="record.exists" @click="handleGiteeRepoAdd(record)">{{
-              record.exists
-                ? $t('pages.repository.repository-list.da759e3c')
-                : $t('pages.repository.repository-list.5a068878')
+              record.exists ? $t('i18n.cb951984f2') : $t('i18n.66ab5e9f24')
             }}</a-button>
           </template>
         </template>
@@ -562,7 +517,7 @@
       v-model:open="viewBuildVisible"
       destroy-on-close
       width="80vw"
-      :title="$t('pages.repository.repository-list.c3cf4269')"
+      :title="$t('i18n.1c13276448')"
       :mask-closable="false"
       :footer="null"
     >
@@ -638,7 +593,7 @@ export default {
 
       columns: [
         {
-          title: this.$t('pages.repository.repository-list.348e98c9'),
+          title: this.$t('i18n.f967131d9d'),
           dataIndex: 'name',
           width: 200,
           sorter: true,
@@ -646,14 +601,14 @@ export default {
           tooltip: true
         },
         {
-          title: this.$t('pages.repository.repository-list.12d0e469'),
+          title: this.$t('i18n.b37b786351'),
           dataIndex: 'group',
           ellipsis: true,
           width: '100px',
           tooltip: true
         },
         {
-          title: this.$t('pages.repository.repository-list.37fe35a9'),
+          title: this.$t('i18n.e4bea943de'),
           dataIndex: 'gitUrl',
           width: 300,
           sorter: true,
@@ -661,62 +616,62 @@ export default {
           tooltip: true
         },
         {
-          title: this.$t('pages.repository.repository-list.e673b1e6'),
+          title: this.$t('i18n.4ce606413e'),
           dataIndex: 'repoType',
           width: 100,
           sorter: true,
           ellipsis: true
         },
         {
-          title: this.$t('pages.repository.repository-list.3e8bed11'),
+          title: this.$t('i18n.faa1ad5e5c'),
           dataIndex: 'protocol',
           width: 100,
           sorter: true,
           ellipsis: true
         },
         {
-          title: this.$t('pages.repository.repository-list.33b08707'),
+          title: this.$t('i18n.fffd3ce745'),
           dataIndex: 'workspaceId',
           ellipsis: true,
 
           width: '90px'
         },
         {
-          title: this.$t('pages.repository.repository-list.db3c9202'),
+          title: this.$t('i18n.95a43eaa59'),
           dataIndex: 'createUser',
           ellipsis: true,
           tooltip: true,
           width: '120px'
         },
         {
-          title: this.$t('pages.repository.repository-list.916db24b'),
+          title: this.$t('i18n.9baca0054e'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           tooltip: true,
           width: '120px'
         },
         {
-          title: this.$t('pages.repository.repository-list.f5b90169'),
+          title: this.$t('i18n.eca37cb072'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
-          title: this.$t('pages.repository.repository-list.3d55d8de'),
+          title: this.$t('i18n.1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
-          title: this.$t('pages.repository.repository-list.f5049383'),
+          title: this.$t('i18n.c35c1a1330'),
           dataIndex: 'sortValue',
           sorter: true,
           width: '80px'
         },
         {
-          title: this.$t('pages.repository.repository-list.cadc075'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
           fixed: 'right',
           align: 'center',
@@ -726,12 +681,12 @@ export default {
 
       reposColumns: [
         {
-          title: this.$t('pages.repository.repository-list.348e98c9'),
+          title: this.$t('i18n.f967131d9d'),
           dataIndex: 'name',
           ellipsis: true
         },
         {
-          title: this.$t('pages.repository.repository-list.f2695700'),
+          title: this.$t('i18n.42b6bd1b2f'),
           dataIndex: 'full_name',
           ellipsis: true
         },
@@ -742,19 +697,19 @@ export default {
         },
 
         {
-          title: this.$t('pages.repository.repository-list.42e3c32a'),
+          title: this.$t('i18n.3bdd08adab'),
           dataIndex: 'description',
 
           ellipsis: true
         },
         {
-          title: this.$t('pages.repository.repository-list.96f956c3'),
+          title: this.$t('i18n.3dc5185d81'),
           dataIndex: 'private',
           width: 80,
           ellipsis: true
         },
         {
-          title: this.$t('pages.repository.repository-list.cadc075'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
           width: 100,
 
@@ -768,21 +723,21 @@ export default {
         address: 'https://gitee.com'
       }),
       giteeImportFormRules: {
-        token: [{ required: true, message: this.$t('pages.repository.repository-list.139f3d13'), trigger: 'blur' }]
+        token: [{ required: true, message: this.$t('i18n.76530bff27'), trigger: 'blur' }]
         // address: [{ required: true, message: "请填写平台地址", trigger: "blur" }],
       },
       rules: {
-        name: [{ required: true, message: this.$t('pages.repository.repository-list.a71ea209'), trigger: 'blur' }],
-        gitUrl: [{ required: true, message: this.$t('pages.repository.repository-list.73f7ee47'), trigger: 'blur' }]
+        name: [{ required: true, message: this.$t('i18n.9f0de3800b'), trigger: 'blur' }],
+        gitUrl: [{ required: true, message: this.$t('i18n.0cf81d77bb'), trigger: 'blur' }]
       },
       importTypePlaceholder: {
-        gitee: this.$t('pages.repository.repository-list.c50886a0'),
-        github: this.$t('pages.repository.repository-list.ecaff929'),
-        gitlab_v3: this.$t('pages.repository.repository-list.8454de8f'),
-        gitlab: this.$t('pages.repository.repository-list.8454de8f'),
-        gitea: this.$t('pages.repository.repository-list.1d5d8f35'),
-        gogs: this.$t('pages.repository.repository-list.1d5d8f35'),
-        other: this.$t('pages.repository.repository-list.139f3d13')
+        gitee: this.$t('i18n.233fb56ab2'),
+        github: this.$t('i18n.4b1835640f'),
+        gitlab_v3: this.$t('i18n.5bd1d267a9'),
+        gitlab: this.$t('i18n.5bd1d267a9'),
+        gitea: this.$t('i18n.cd1aedc667'),
+        gogs: this.$t('i18n.cd1aedc667'),
+        other: this.$t('i18n.76530bff27')
       },
       tableSelections: [],
       envVarList: [],
@@ -990,10 +945,10 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$t('pages.repository.repository-list.a8fe4c17'),
-        content: this.$t('pages.repository.repository-list.b358608c'),
-        okText: this.$t('pages.repository.repository-list.7da4a591'),
-        cancelText: this.$t('pages.repository.repository-list.43105e21'),
+        title: this.$t('i18n.c4535759ee'),
+        content: this.$t('i18n.7dfc7448ec'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         zIndex: 1009,
         onOk: () => {
           return deleteRepository({
@@ -1013,10 +968,10 @@ export default {
     // 清除隐藏字段
     restHideField(record) {
       $confirm({
-        title: this.$t('pages.repository.repository-list.a8fe4c17'),
-        content: this.$t('pages.repository.repository-list.fea10280'),
-        okText: this.$t('pages.repository.repository-list.7da4a591'),
-        cancelText: this.$t('pages.repository.repository-list.43105e21'),
+        title: this.$t('i18n.c4535759ee'),
+        content: this.$t('i18n.664c205cc3'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         zIndex: 1009,
         onOk: () => {
           return restHideField(record.id).then((res) => {
@@ -1034,23 +989,23 @@ export default {
     // 排序
     sortItemHander(record, index, method) {
       const msgData = {
-        top: this.$t('pages.repository.repository-list.5a6ab80c'),
-        up: this.$t('pages.repository.repository-list.877d13a4'),
-        down: this.$t('pages.repository.repository-list.3aa7da68')
+        top: this.$t('i18n.0079d91f95'),
+        up: this.$t('i18n.b166a66d67'),
+        down: this.$t('i18n.7a7e25e9eb')
       }
-      let msg = msgData[method] || this.$t('pages.repository.repository-list.644ef343')
+      let msg = msgData[method] || this.$t('i18n.49574eee58')
       if (!record.sortValue) {
-        msg += ` ${this.$t('pages.repository.repository-list.a7a197cd')},${this.$t(
+        msg += ` ${this.$t('i18n.57c0a41ec6')},${this.$t(
           'pages.repository.repository-list.616438fd'
-        )},${this.$t('pages.repository.repository-list.4deb73b2')}`
+        )},${this.$t('i18n.c4e2cd2266')}`
       }
       // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
       const compareId = this.list[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id
       $confirm({
-        title: this.$t('pages.repository.repository-list.a8fe4c17'),
+        title: this.$t('i18n.c4535759ee'),
         content: msg,
-        okText: this.$t('pages.repository.repository-list.7da4a591'),
-        cancelText: this.$t('pages.repository.repository-list.43105e21'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         zIndex: 1009,
         onOk: () => {
           return sortItem({
@@ -1074,7 +1029,7 @@ export default {
     handerConfirm() {
       if (!this.tableSelections.length) {
         $notification.warning({
-          message: this.$t('pages.repository.repository-list.812d3faa')
+          message: this.$t('i18n.be381ac957')
         })
         return
       }

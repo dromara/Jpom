@@ -1,14 +1,14 @@
 <template>
   <div>
     <a-tabs default-active-key="1">
-      <a-tab-pane key="1" :tab="$t('pages.system.assets.ssh.ssh-list.c34007d1')">
+      <a-tab-pane key="1" :tab="$t('i18n.08b55fea3c')">
         <!-- 数据表格 -->
         <CustomTable
           is-show-tools
           default-auto-refresh
           :auto-refresh-time="5"
           table-name="assets-ssh-list"
-          :empty-description="$t('pages.system.assets.ssh.ssh-list.ee8e7216')"
+          :empty-description="$t('i18n.13d10a9b78')"
           :active-page="activePage"
           :data-source="list"
           :columns="columns"
@@ -28,7 +28,7 @@
               <a-input
                 v-model:value="listQuery['%name%']"
                 class="search-input-item"
-                :placeholder="$t('pages.system.assets.ssh.ssh-list.dc77206e')"
+                :placeholder="$t('i18n.46ad87708f')"
                 @press-enter="loadData"
               />
               <a-input
@@ -51,33 +51,33 @@
                   }
                 "
                 allow-clear
-                :placeholder="$t('pages.system.assets.ssh.ssh-list.e740d8cb')"
+                :placeholder="$t('i18n.829abe5a8d')"
                 class="search-input-item"
               >
                 <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
               </a-select>
 
-              <a-tooltip :title="$t('pages.system.assets.ssh.ssh-list.1bfed54a')">
+              <a-tooltip :title="$t('i18n.4838a3bd20')">
                 <a-button type="primary" :loading="loading" @click="loadData"
-                  >{{ $t('pages.system.assets.ssh.ssh-list.53c2763c') }}
+                  >{{ $t('i18n.e5f71fc31e') }}
                 </a-button>
               </a-tooltip>
 
               <a-button type="primary" @click="handleAdd">{{
-                $t('pages.system.assets.ssh.ssh-list.7d46652a')
+                $t('i18n.66ab5e9f24')
               }}</a-button>
               <a-button :disabled="!tableSelections.length" type="primary" @click="syncToWorkspaceShow()">
-                {{ $t('pages.system.assets.ssh.ssh-list.fd234860') }}</a-button
+                {{ $t('i18n.82d2c66f47') }}</a-button
               >
               <a-button type="primary" @click="handlerExportData()"
-                ><DownloadOutlined />{{ $t('pages.system.assets.ssh.ssh-list.a5bebb0f') }}</a-button
+                ><DownloadOutlined />{{ $t('i18n.55405ea6ff') }}</a-button
               >
               <a-dropdown>
                 <template #overlay>
                   <a-menu>
                     <a-menu-item key="1">
                       <a-button type="primary" @click="handlerImportTemplate()">{{
-                        $t('pages.system.assets.ssh.ssh-list.9b6f4751')
+                        $t('i18n.2e505d23f7')
                       }}</a-button>
                     </a-menu-item>
                   </a-menu>
@@ -92,7 +92,7 @@
                   :before-upload="beforeUpload"
                 >
                   <a-button type="primary"
-                    ><UploadOutlined /> {{ $t('pages.system.assets.ssh.ssh-list.7a7c6386') }}<DownOutlined />
+                    ><UploadOutlined /> {{ $t('i18n.8d9a071ee2') }}<DownOutlined />
                   </a-button>
                 </a-upload>
               </a-dropdown>
@@ -103,9 +103,9 @@
               <template #title>
                 <div>
                   <ul>
-                    <li>{{ $t('pages.system.assets.ssh.ssh-list.87c09576') }}</li>
-                    <li>{{ $t('pages.system.assets.ssh.ssh-list.9a2579da') }}</li>
-                    <li>{{ $t('pages.system.assets.ssh.ssh-list.5c343a02') }}</li>
+                    <li>{{ $t('i18n.cc3a8457ea') }}</li>
+                    <li>{{ $t('i18n.c4b5d36ff0') }}</li>
+                    <li>{{ $t('i18n.1278df0cfc') }}</li>
                   </ul>
                 </div>
               </template>
@@ -126,32 +126,32 @@
             </template>
 
             <template v-else-if="column.dataIndex === 'osName'">
-              <a-popover :title="$t('pages.system.assets.ssh.ssh-list.8397a674')">
+              <a-popover :title="$t('i18n.b7ea5e506c')">
                 <template #content>
-                  <p>{{ $t('pages.system.assets.ssh.ssh-list.163de925') }}{{ record.osName }}</p>
-                  <p>{{ $t('pages.system.assets.ssh.ssh-list.41180a8c') }}{{ record.osVersion }}</p>
-                  <p>CPU{{ $t('pages.system.assets.ssh.ssh-list.5d15eed7') }}{{ record.osCpuIdentifierName }}</p>
-                  <p>{{ $t('pages.system.assets.ssh.ssh-list.df83aba7') }}{{ record.hostName }}</p>
+                  <p>{{ $t('i18n.c17aefeebf') }}{{ record.osName }}</p>
+                  <p>{{ $t('i18n.f425f59044') }}{{ record.osVersion }}</p>
+                  <p>CPU{{ $t('i18n.045cd62da3') }}{{ record.osCpuIdentifierName }}</p>
+                  <p>{{ $t('i18n.07a0e44145') }}{{ record.hostName }}</p>
                   <p>
-                    {{ $t('pages.system.assets.ssh.ssh-list.abd23cf2') }}{{ formatDuration(record.osSystemUptime) }}
+                    {{ $t('i18n.8a745296f4') }}{{ formatDuration(record.osSystemUptime) }}
                   </p>
                 </template>
-                {{ text || $t('pages.system.assets.ssh.ssh-list.5f51a112') }}
+                {{ text || $t('i18n.1622dc9b6b') }}
               </a-popover>
             </template>
             <template v-else-if="column.dataIndex === 'nodeId'">
               <template v-if="record.status !== 2">
                 <!-- 禁用监控不显示 -->
                 <div v-if="record.javaVersion">
-                  <a-popover v-if="record.jpomAgentPid > 0" :title="$t('pages.system.assets.ssh.ssh-list.ccbea9')">
+                  <a-popover v-if="record.jpomAgentPid > 0" :title="$t('i18n.caf335a345')">
                     <template #content>
-                      <p>{{ $t('pages.system.assets.ssh.ssh-list.5f0646f6') }}{{ record.jpomAgentPid }}</p>
-                      <p>java{{ $t('pages.system.assets.ssh.ssh-list.4d6bd516') }}{{ record.javaVersion }}</p>
+                      <p>{{ $t('i18n.b17299f3fb') }}{{ record.jpomAgentPid }}</p>
+                      <p>java{{ $t('i18n.2684c4634d') }}{{ record.javaVersion }}</p>
                     </template>
                     <a-tag color="green"> {{ record.jpomAgentPid }}</a-tag>
                   </a-popover>
                   <a-button v-else size="small" type="primary" @click="install(record)">{{
-                    $t('pages.system.assets.ssh.ssh-list.4b3f44bf')
+                    $t('i18n.334a1b5206')
                   }}</a-button>
                 </div>
 
@@ -162,25 +162,25 @@
             <template v-else-if="column.dataIndex === 'dockerInfo'">
               <template v-if="record.status !== 2">
                 <!-- 禁用监控不显示 -->
-                <a-popover v-if="record.dockerInfo" :title="$t('pages.system.assets.ssh.ssh-list.96a2da41')">
+                <a-popover v-if="record.dockerInfo" :title="$t('i18n.5a7ea53d18')">
                   <template #content>
-                    <p>{{ $t('pages.system.assets.ssh.ssh-list.ee016914') }}{{ JSON.parse(record.dockerInfo).path }}</p>
+                    <p>{{ $t('i18n.461ec75a5a') }}{{ JSON.parse(record.dockerInfo).path }}</p>
                     <p>
-                      {{ $t('pages.system.assets.ssh.ssh-list.4d6bd516') }}{{ JSON.parse(record.dockerInfo).version }}
+                      {{ $t('i18n.2684c4634d') }}{{ JSON.parse(record.dockerInfo).version }}
                     </p>
                   </template>
-                  <a-tag color="green">{{ $t('pages.system.assets.ssh.ssh-list.55adcb2b') }}</a-tag>
+                  <a-tag color="green">{{ $t('i18n.df9497ea98') }}</a-tag>
                 </a-popover>
 
-                <a-tag v-else>{{ $t('pages.system.assets.ssh.ssh-list.458d0e40') }}</a-tag>
+                <a-tag v-else>{{ $t('i18n.d7d11654a7') }}</a-tag>
               </template>
               <template v-else>-</template>
             </template>
             <template v-else-if="column.dataIndex === 'status'">
-              <a-tooltip :title="`${record.statusMsg || $t('pages.system.assets.ssh.ssh-list.5f479aec')}`">
+              <a-tooltip :title="`${record.statusMsg || $t('i18n.77e100e462')}`">
                 <a-tag :color="statusMap[record.status] && statusMap[record.status].color">{{
                   (statusMap[record.status] && statusMap[record.status].desc) ||
-                  $t('pages.system.assets.ssh.ssh-list.5f51a112')
+                  $t('i18n.1622dc9b6b')
                 }}</a-tag>
               </a-tooltip>
             </template>
@@ -192,7 +192,7 @@
             <template v-else-if="column.dataIndex === 'osOccupyMemory'">
               <a-tooltip
                 placement="topLeft"
-                :title="`${$t('pages.system.assets.ssh.ssh-list.cc3be96d')}${formatPercent(record.osOccupyMemory)},${$t(
+                :title="`${$t('i18n.ca32cdfd59')}${formatPercent(record.osOccupyMemory)},${$t(
                   'pages.system.assets.ssh.ssh-list.8b8cc8a1'
                 )}${renderSize(record.osMoneyTotal)}`"
               >
@@ -201,13 +201,13 @@
             </template>
 
             <template v-else-if="column.dataIndex === 'osMaxOccupyDisk'">
-              <a-popover :title="$t('pages.system.assets.ssh.ssh-list.3cd46bee')">
+              <a-popover :title="$t('i18n.a74b62f4bb')">
                 <template #content>
-                  <p>{{ $t('pages.system.assets.ssh.ssh-list.7065b72c') }}{{ renderSize(record.osFileStoreTotal) }}</p>
+                  <p>{{ $t('i18n.7e359f4b71') }}{{ renderSize(record.osFileStoreTotal) }}</p>
                   <p>
-                    {{ $t('pages.system.assets.ssh.ssh-list.94143668') }}{{ formatPercent(record.osMaxOccupyDisk) }}
+                    {{ $t('i18n.de17fc0b78') }}{{ formatPercent(record.osMaxOccupyDisk) }}
                   </p>
-                  <p>{{ $t('pages.system.assets.ssh.ssh-list.7a0b637a') }}{{ record.osMaxOccupyDiskName }}</p>
+                  <p>{{ $t('i18n.ba452d57f2') }}{{ record.osMaxOccupyDiskName }}</p>
                 </template>
                 <span>{{ formatPercent(record.osMaxOccupyDisk) }} / {{ renderSize(record.osFileStoreTotal) }}</span>
               </a-popover>
@@ -216,9 +216,9 @@
             <template v-else-if="column.dataIndex === 'osOccupyCpu'">
               <a-tooltip
                 placement="topLeft"
-                :title="`CPU${$t('pages.system.assets.ssh.ssh-list.5a6bc27e')}${formatPercent2Number(
+                :title="`CPU${$t('i18n.afb9fe400b')}${formatPercent2Number(
                   record.osOccupyCpu
-                )}%,CPU${$t('pages.system.assets.ssh.ssh-list.f59d86c')}${record.osCpuCores}`"
+                )}%,CPU${$t('i18n.40349f5514')}${record.osCpuCores}`"
               >
                 <span>{{ (formatPercent2Number(record.osOccupyCpu) || '-') + '%' }} / {{ record.osCpuCores }}</span>
               </a-tooltip>
@@ -228,48 +228,48 @@
               <a-space>
                 <a-dropdown>
                   <a-button size="small" type="primary" @click="handleTerminal(record, false)"
-                    >{{ $t('pages.system.assets.ssh.ssh-list.b5a97ef7') }}<DownOutlined
+                    >{{ $t('i18n.4722bc0c56') }}<DownOutlined
                   /></a-button>
                   <template #overlay>
                     <a-menu>
                       <a-menu-item key="1">
                         <a-button size="small" type="primary" @click="handleTerminal(record, true)">
-                          <FullscreenOutlined />{{ $t('pages.system.assets.ssh.ssh-list.230a04ee') }}
+                          <FullscreenOutlined />{{ $t('i18n.a3296ef4f6') }}
                         </a-button>
                       </a-menu-item>
                     </a-menu>
                   </template>
                 </a-dropdown>
                 <a-button size="small" type="primary" @click="syncToWorkspaceShow(record)">{{
-                  $t('pages.system.assets.ssh.ssh-list.9510043a')
+                  $t('i18n.e39de3376e')
                 }}</a-button>
                 <a-button size="small" type="primary" @click="handleFile(record)">{{
-                  $t('pages.system.assets.ssh.ssh-list.69cad40b')
+                  $t('i18n.2a0c4740f1')
                 }}</a-button>
                 <a-button size="small" type="primary" @click="handleViewWorkspaceSsh(record)">{{
-                  $t('pages.system.assets.ssh.ssh-list.2ef699f7')
+                  $t('i18n.1c3cf7f5f0')
                 }}</a-button>
 
                 <a-dropdown>
                   <a @click="(e) => e.preventDefault()">
-                    {{ $t('pages.system.assets.ssh.ssh-list.6e071067') }}
+                    {{ $t('i18n.0ec9eaf9c3') }}
                     <DownOutlined />
                   </a>
                   <template #overlay>
                     <a-menu>
                       <a-menu-item>
                         <a-button size="small" type="primary" @click="handleEdit(record)">{{
-                          $t('pages.system.assets.ssh.ssh-list.64603c01')
+                          $t('i18n.95b351c862')
                         }}</a-button>
                       </a-menu-item>
                       <a-menu-item>
                         <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-                          $t('pages.system.assets.ssh.ssh-list.2f14e7d4')
+                          $t('i18n.2f4aaddde3')
                         }}</a-button>
                       </a-menu-item>
                       <a-menu-item>
                         <a-button size="small" type="primary" @click="handleViewLog(record)">{{
-                          $t('pages.system.assets.ssh.ssh-list.194f04f1')
+                          $t('i18n.3ed3733078')
                         }}</a-button>
                       </a-menu-item>
                     </a-menu>
@@ -286,24 +286,24 @@
           destroy-on-close
           :confirm-loading="confirmLoading"
           width="600px"
-          :title="$t('pages.system.assets.ssh.ssh-list.e943f850')"
+          :title="$t('i18n.7a30792e2a')"
           :mask-closable="false"
           @ok="handleEditSshOk"
         >
           <a-form ref="editSshForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-            <a-form-item :label="$t('pages.system.assets.ssh.ssh-list.493a5eda')" name="name">
+            <a-form-item :label="$t('i18n.10f6fc171a')" name="name">
               <a-input
                 v-model:value="temp.name"
                 :max-length="50"
-                :placeholder="$t('pages.system.assets.ssh.ssh-list.493a5eda')"
+                :placeholder="$t('i18n.10f6fc171a')"
               />
             </a-form-item>
-            <a-form-item :label="$t('pages.system.assets.ssh.ssh-list.12d0e469')" name="group">
+            <a-form-item :label="$t('i18n.1014b33d22')" name="group">
               <custom-select
                 v-model:value="temp.groupName"
                 :data="groupList"
-                :input-placeholder="$t('pages.system.assets.ssh.ssh-list.95c41d82')"
-                :select-placeholder="$t('pages.system.assets.ssh.ssh-list.c385f859')"
+                :input-placeholder="$t('i18n.bd0362bed3')"
+                :select-placeholder="$t('i18n.9cac799f2f')"
               >
               </custom-select>
             </a-form-item>
@@ -312,37 +312,37 @@
                 <a-input
                   v-model:value="temp.host"
                   style="width: 70%"
-                  :placeholder="$t('pages.system.assets.ssh.ssh-list.2a72f1e6')"
+                  :placeholder="$t('i18n.3d83a07747')"
                 />
                 <a-form-item-rest>
                   <a-input-number
                     v-model:value="temp.port"
                     style="width: 30%"
                     :min="1"
-                    :placeholder="$t('pages.system.assets.ssh.ssh-list.a6c4bfd7')"
+                    :placeholder="$t('i18n.39c7644388')"
                   />
                 </a-form-item-rest>
               </a-input-group>
             </a-form-item>
-            <a-form-item :label="$t('pages.system.assets.ssh.ssh-list.c9b8bf26')" name="connectType">
+            <a-form-item :label="$t('i18n.b33c7279b3')" name="connectType">
               <a-radio-group v-model:value="temp.connectType" :options="options" />
             </a-form-item>
             <a-form-item name="user">
               <template #label>
                 <a-tooltip>
-                  {{ $t('pages.system.assets.ssh.ssh-list.e15572a') }}
+                  {{ $t('i18n.819767ada1') }}
                   <template #title>
-                    {{ $t('pages.system.assets.ssh.ssh-list.ddb0e0ec') }}<b>$ref.wEnv.xxxx</b> xxxx
-                    {{ $t('pages.system.assets.ssh.ssh-list.c1175f17') }}</template
+                    {{ $t('i18n.f0a1428f65') }}<b>$ref.wEnv.xxxx</b> xxxx
+                    {{ $t('i18n.c1b72e7ded') }}</template
                   >
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
               </template>
-              <a-input v-model:value="temp.user" :placeholder="$t('pages.system.assets.ssh.ssh-list.68c63452')">
+              <a-input v-model:value="temp.user" :placeholder="$t('i18n.1fd02a90c3')">
                 <template #suffix>
-                  <a-tooltip v-if="temp.id" :title="$t('pages.system.assets.ssh.ssh-list.acf4d7b4')">
+                  <a-tooltip v-if="temp.id" :title="$t('i18n.b408105d69')">
                     <a-button size="small" type="primary" danger @click="handerRestHideField(temp)">{{
-                      $t('pages.system.assets.ssh.ssh-list.6f316d08')
+                      $t('i18n.4403fca0c0')
                     }}</a-button>
                   </a-tooltip>
                 </template>
@@ -358,10 +358,10 @@
             >
               <template #label>
                 <a-tooltip>
-                  {{ $t('pages.system.assets.ssh.ssh-list.c3891788') }}
+                  {{ $t('i18n.a810520460') }}
                   <template #title>
-                    {{ $t('pages.system.assets.ssh.ssh-list.7cb49f83') }}<b>$ref.wEnv.xxxx</b> xxxx
-                    {{ $t('pages.system.assets.ssh.ssh-list.c1175f17') }}</template
+                    {{ $t('i18n.63dd96a28a') }}<b>$ref.wEnv.xxxx</b> xxxx
+                    {{ $t('i18n.c1b72e7ded') }}</template
                   >
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
@@ -372,8 +372,8 @@
                 :env-list="envVarList"
                 :placeholder="`${
                   temp.type === 'add'
-                    ? $t('pages.system.assets.ssh.ssh-list.c3891788')
-                    : $t('pages.system.assets.ssh.ssh-list.d6753d4f')
+                    ? $t('i18n.a810520460')
+                    : $t('i18n.6c08692a3a')
                 }`"
                 @change="
                   (v) => {
@@ -386,8 +386,8 @@
             <a-form-item v-if="temp.connectType === 'PUBKEY'" name="privateKey">
               <template #label>
                 <a-tooltip placement="topLeft">
-                  {{ $t('pages.system.assets.ssh.ssh-list.4631d7f0') }}
-                  <template #title>{{ $t('pages.system.assets.ssh.ssh-list.a341a6f7') }} </template>
+                  {{ $t('i18n.fcef976c7a') }}
+                  <template #title>{{ $t('i18n.a2a0f52afe') }} </template>
                   <QuestionCircleOutlined v-if="temp.type !== 'edit'" />
                 </a-tooltip>
               </template>
@@ -395,32 +395,32 @@
               <a-textarea
                 v-model:value="temp.privateKey"
                 :auto-size="{ minRows: 3, maxRows: 5 }"
-                :placeholder="$t('pages.system.assets.ssh.ssh-list.a72e7dc6')"
+                :placeholder="$t('i18n.22482533ff')"
               />
             </a-form-item>
-            <a-form-item :label="$t('pages.system.assets.ssh.ssh-list.9e03a812')" name="charset">
-              <a-input v-model:value="temp.charset" :placeholder="$t('pages.system.assets.ssh.ssh-list.9e03a812')" />
+            <a-form-item :label="$t('i18n.6143a714d0')" name="charset">
+              <a-input v-model:value="temp.charset" :placeholder="$t('i18n.6143a714d0')" />
             </a-form-item>
-            <a-form-item :label="$t('pages.system.assets.ssh.ssh-list.e67b0df3')" name="timeout">
+            <a-form-item :label="$t('i18n.67425c29a5')" name="timeout">
               <a-input-number
                 v-model:value="temp.timeout"
                 :min="1"
-                :placeholder="$t('pages.system.assets.ssh.ssh-list.65206e07')"
+                :placeholder="$t('i18n.cb156269db')"
                 style="width: 100%"
               />
             </a-form-item>
-            <a-form-item :label="$t('pages.system.assets.ssh.ssh-list.81de6a73')" name="suffix">
+            <a-form-item :label="$t('i18n.649231bdee')" name="suffix">
               <template #help>
-                {{ $t('pages.system.assets.ssh.ssh-list.624c02e3') }},
-                {{ $t('pages.system.assets.ssh.ssh-list.993dee9e')
-                }}<span style="color: red">{{ $t('pages.system.assets.ssh.ssh-list.423d017d') }}</span
-                >）{{ $t('pages.system.assets.ssh.ssh-list.6ca91945') }}
+                {{ $t('i18n.25cad97419') }},
+                {{ $t('i18n.c03fd7fda8')
+                }}<span style="color: red">{{ $t('i18n.6adcbc6663') }}</span
+                >）{{ $t('i18n.81197c2d02') }}
               </template>
               <a-textarea
                 v-model:value="temp.allowEditSuffix"
                 :rows="5"
                 style="resize: none"
-                :placeholder="$t('pages.system.assets.ssh.ssh-list.a4ad687c')"
+                :placeholder="$t('i18n.01081f7817')"
               />
             </a-form-item>
           </a-form>
@@ -431,7 +431,7 @@
           v-model:open="nodeVisible"
           destroy-on-close
           width="80%"
-          :title="$t('pages.system.assets.ssh.ssh-list.88bbfe77')"
+          :title="$t('i18n.f1b2828c75')"
           :footer="null"
           :mask-closable="false"
           @cancel="
@@ -447,7 +447,7 @@
         <CustomDrawer
           v-if="drawerVisible"
           destroy-on-close
-          :title="`${temp.name} ${$t('pages.system.assets.ssh.ssh-list.502f94')}`"
+          :title="`${temp.name} ${$t('i18n.8780e6b3d1')}`"
           placement="right"
           width="90vw"
           :open="drawerVisible"
@@ -489,7 +489,7 @@
           v-if="viewOperationLog"
           v-model:open="viewOperationLog"
           destroy-on-close
-          :title="$t('pages.system.assets.ssh.ssh-list.9c06953e')"
+          :title="$t('i18n.cda84be2f6')"
           width="80vw"
           :footer="null"
           :mask-closable="false"
@@ -502,14 +502,14 @@
           v-model:open="viewWorkspaceSsh"
           destroy-on-close
           width="50%"
-          :title="$t('pages.system.assets.ssh.ssh-list.ef4af3d6')"
+          :title="$t('i18n.0e5f01b9be')"
           :footer="null"
           :mask-closable="false"
         >
           <a-space direction="vertical" style="width: 100%">
             <a-alert
               v-if="workspaceSshList && workspaceSshList.length"
-              :message="$t('pages.system.assets.ssh.ssh-list.27af6349')"
+              :message="$t('i18n.1d0269cb77')"
               type="info"
               show-icon
             />
@@ -517,17 +517,17 @@
               <template #renderItem="{ item }">
                 <a-list-item style="display: block">
                   <a-row>
-                    <a-col :span="10">SSH{{ $t('pages.system.assets.ssh.ssh-list.bb769c1d') }}{{ item.name }}</a-col>
+                    <a-col :span="10">SSH{{ $t('i18n.5b47861521') }}{{ item.name }}</a-col>
                     <a-col :span="10"
-                      >{{ $t('pages.system.assets.ssh.ssh-list.c6a70442')
+                      >{{ $t('i18n.2358e1ef49')
                       }}{{ item.workspace && item.workspace.name }}</a-col
                     >
                     <a-col :span="4">
                       <a-button v-if="item.workspace" size="small" type="primary" @click="configWorkspaceSsh(item)"
-                        >{{ $t('pages.system.assets.ssh.ssh-list.7de61746') }}
+                        >{{ $t('i18n.224e2ccda8') }}
                       </a-button>
                       <a-button v-else size="small" type="primary" danger @click="handleDeleteWorkspaceItem(item)"
-                        >{{ $t('pages.system.assets.ssh.ssh-list.2f14e7d4') }}
+                        >{{ $t('i18n.2f4aaddde3') }}
                       </a-button>
                     </a-col>
                   </a-row>
@@ -542,7 +542,7 @@
           destroy-on-close
           :confirm-loading="confirmLoading"
           width="50%"
-          :title="$t('pages.system.assets.ssh.ssh-list.72ca2f8d')"
+          :title="$t('i18n.13627c5c46')"
           :mask-closable="false"
           @ok="handleConfigWorkspaceSshOk"
         >
@@ -554,57 +554,57 @@
             :wrapper-col="{ span: 18 }"
           >
             <a-form-item label="" :label-col="{ span: 0 }" :wrapper-col="{ span: 24 }">
-              <a-alert :message="$t('pages.system.assets.ssh.ssh-list.fa73eb9')" banner />
+              <a-alert :message="$t('i18n.ce7e6e0ea9')" banner />
             </a-form-item>
-            <a-form-item :label="$t('pages.system.assets.ssh.ssh-list.493a5eda')">
+            <a-form-item :label="$t('i18n.10f6fc171a')">
               <a-input
                 v-model:value="temp.name"
                 :disabled="true"
                 :max-length="50"
-                :placeholder="$t('pages.system.assets.ssh.ssh-list.493a5eda')"
+                :placeholder="$t('i18n.10f6fc171a')"
               />
             </a-form-item>
-            <a-form-item :label="$t('pages.system.assets.ssh.ssh-list.d83f3e09')">
+            <a-form-item :label="$t('i18n.6a588459d0')">
               <a-input
                 v-model:value="temp.workspaceName"
                 :disabled="true"
                 :max-length="50"
-                :placeholder="$t('pages.system.assets.ssh.ssh-list.d83f3e09')"
+                :placeholder="$t('i18n.6a588459d0')"
               />
             </a-form-item>
 
             <a-form-item name="fileDirs">
               <template #label>
                 <a-tooltip>
-                  {{ $t('pages.system.assets.ssh.ssh-list.831dbe15') }}
-                  <template #title> {{ $t('pages.system.assets.ssh.ssh-list.98ae50d0') }} </template>
+                  {{ $t('i18n.7a3c815b1e') }}
+                  <template #title> {{ $t('i18n.d0874922f0') }} </template>
                   <QuestionCircleOutlined />
                 </a-tooltip>
               </template>
               <a-textarea
                 v-model:value="temp.fileDirs"
                 :auto-size="{ minRows: 3, maxRows: 5 }"
-                :placeholder="$t('pages.system.assets.ssh.ssh-list.fc6eda86')"
+                :placeholder="$t('i18n.baefd3db91')"
               />
             </a-form-item>
 
-            <a-form-item :label="$t('pages.system.assets.ssh.ssh-list.81de6a73')" name="suffix">
+            <a-form-item :label="$t('i18n.649231bdee')" name="suffix">
               <a-textarea
                 v-model:value="temp.allowEditSuffix"
                 :rows="5"
                 style="resize: none"
-                :placeholder="$t('pages.system.assets.ssh.ssh-list.a4ad687c')"
+                :placeholder="$t('i18n.01081f7817')"
               />
             </a-form-item>
             <a-form-item name="notAllowedCommand">
               <template #label>
                 <a-tooltip>
-                  {{ $t('pages.system.assets.ssh.ssh-list.a184b188') }}
+                  {{ $t('i18n.a39340ec59') }}
                   <template #title>
-                    {{ $t('pages.system.assets.ssh.ssh-list.7dc091e8') }}
+                    {{ $t('i18n.6bb5ba7438') }}
                     <ul>
-                      <li>{{ $t('pages.system.assets.ssh.ssh-list.a0d0e02d') }}</li>
-                      <li>{{ $t('pages.system.assets.ssh.ssh-list.7ec9cba8') }}</li>
+                      <li>{{ $t('i18n.7114d41b1d') }}</li>
+                      <li>{{ $t('i18n.d8bf90b42b') }}</li>
                     </ul>
                   </template>
                   <QuestionCircleOutlined />
@@ -613,7 +613,7 @@
               <a-textarea
                 v-model:value="temp.notAllowedCommand"
                 :auto-size="{ minRows: 3, maxRows: 5 }"
-                :placeholder="$t('pages.system.assets.ssh.ssh-list.4c6fdb8f')"
+                :placeholder="$t('i18n.b6afcf9851')"
               />
             </a-form-item>
           </a-form>
@@ -624,16 +624,16 @@
           v-model:open="syncToWorkspaceVisible"
           destroy-on-close
           :confirm-loading="confirmLoading"
-          :title="$t('pages.system.assets.ssh.ssh-list.41743f79')"
+          :title="$t('i18n.ef8525efce')"
           :mask-closable="false"
           @ok="handleSyncToWorkspace"
         >
           <a-space direction="vertical" style="width: 100%">
-            <a-alert :message="$t('pages.system.assets.ssh.ssh-list.2ae8180f')" type="warning" show-icon>
-              <template #description>{{ $t('pages.system.assets.ssh.ssh-list.18510b30') }}</template>
+            <a-alert :message="$t('i18n.138a676635')" type="warning" show-icon>
+              <template #description>{{ $t('i18n.a63fe7b615') }}</template>
             </a-alert>
             <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
-              <a-form-item :label="$t('pages.system.assets.ssh.ssh-list.b86b400d')" name="workspaceId">
+              <a-form-item :label="$t('i18n.b4a8c78284')" name="workspaceId">
                 <a-select
                   v-model:value="temp.workspaceId"
                   show-search
@@ -647,7 +647,7 @@
                       )
                     }
                   "
-                  :placeholder="$t('pages.system.assets.ssh.ssh-list.3a321a02')"
+                  :placeholder="$t('i18n.b3bda9bf9e')"
                 >
                   <a-select-option v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
                 </a-select>
@@ -656,7 +656,7 @@
           </a-space>
         </CustomModal>
       </a-tab-pane>
-      <a-tab-pane key="2" :tab="$t('pages.system.assets.ssh.ssh-list.8a2d08b3')">
+      <a-tab-pane key="2" :tab="$t('i18n.d7c077c6f6')">
         <OperationLog type="machinessh"></OperationLog
       ></a-tab-pane>
     </a-tabs>
@@ -716,13 +716,13 @@ export default {
       statusMap,
       // tempPwd: '',
       options: [
-        { label: this.$t('pages.system.assets.ssh.ssh-list.c3891788'), value: 'PASS' },
-        { label: this.$t('pages.system.assets.ssh.ssh-list.e9b5946'), value: 'PUBKEY' }
+        { label: this.$t('i18n.a810520460'), value: 'PASS' },
+        { label: this.$t('i18n.d40b511510'), value: 'PUBKEY' }
       ],
 
       columns: [
         {
-          title: this.$t('pages.system.assets.ssh.ssh-list.2bf15b5b'),
+          title: this.$t('i18n.d7ec2d3fea'),
           dataIndex: 'name',
           width: 120,
           sorter: true,
@@ -738,7 +738,7 @@ export default {
         },
         // { title: "Port", dataIndex: "port", sorter: true, width: 80, ellipsis: true,},
         {
-          title: this.$t('pages.system.assets.ssh.ssh-list.e15572a'),
+          title: this.$t('i18n.819767ada1'),
           dataIndex: 'user',
           sorter: true,
           width: '80px',
@@ -746,7 +746,7 @@ export default {
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.ssh.ssh-list.1c01cf58'),
+          title: this.$t('i18n.cdc478d90c'),
           dataIndex: 'osName',
           width: 120,
           sorter: true,
@@ -760,14 +760,14 @@ export default {
           ellipsis: true
         },
         {
-          title: this.$t('pages.system.assets.ssh.ssh-list.d5f99ae'),
+          title: this.$t('i18n.9932551cd5'),
           dataIndex: 'osOccupyMemory',
           sorter: true,
           width: '100px',
           ellipsis: true
         },
         {
-          title: this.$t('pages.system.assets.ssh.ssh-list.e9213f19'),
+          title: this.$t('i18n.1d650a60a5'),
           dataIndex: 'osMaxOccupyDisk',
           sorter: true,
           width: '100px',
@@ -775,14 +775,14 @@ export default {
         },
         // { title: "编码格式", dataIndex: "charset", sorter: true, width: 120, ellipsis: true,},
         {
-          title: this.$t('pages.system.assets.ssh.ssh-list.1d119f3f'),
+          title: this.$t('i18n.7912615699'),
           dataIndex: 'status',
           ellipsis: true,
           align: 'center',
           width: '100px'
         },
         {
-          title: this.$t('pages.system.assets.ssh.ssh-list.d4246d25'),
+          title: this.$t('i18n.b86224e030'),
           dataIndex: 'nodeId',
 
           width: '80px',
@@ -796,7 +796,7 @@ export default {
           ellipsis: true
         },
         {
-          title: this.$t('pages.system.assets.ssh.ssh-list.f06e8846'),
+          title: this.$t('i18n.eca37cb072'),
           dataIndex: 'createTimeMillis',
           ellipsis: true,
           sorter: true,
@@ -804,7 +804,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('pages.system.assets.ssh.ssh-list.61164914'),
+          title: this.$t('i18n.1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -812,7 +812,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('pages.system.assets.ssh.ssh-list.3bb962bf'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
 
           width: '310px',
@@ -824,19 +824,19 @@ export default {
 
       // 表单校验规则
       rules: {
-        name: [{ required: true, message: this.$t('pages.system.assets.ssh.ssh-list.95105178'), trigger: 'blur' }],
-        host: [{ required: true, message: this.$t('pages.system.assets.ssh.ssh-list.12b7c7b1'), trigger: 'blur' }],
-        port: [{ required: true, message: this.$t('pages.system.assets.ssh.ssh-list.4d688005'), trigger: 'blur' }],
+        name: [{ required: true, message: this.$t('i18n.06e2f88f42'), trigger: 'blur' }],
+        host: [{ required: true, message: this.$t('i18n.81485b76d8'), trigger: 'blur' }],
+        port: [{ required: true, message: this.$t('i18n.8d0fa2ee2d'), trigger: 'blur' }],
         connectType: [
           {
             required: true,
-            message: this.$t('pages.system.assets.ssh.ssh-list.b3338613'),
+            message: this.$t('i18n.4ed1662cae'),
             trigger: 'blur'
           }
         ],
 
-        user: [{ required: true, message: this.$t('pages.system.assets.ssh.ssh-list.fee12658'), trigger: 'blur' }],
-        password: [{ required: true, message: this.$t('pages.system.assets.ssh.ssh-list.5242e286'), trigger: 'blur' }]
+        user: [{ required: true, message: this.$t('i18n.3103effdfd'), trigger: 'blur' }],
+        password: [{ required: true, message: this.$t('i18n.209f2b8e91'), trigger: 'blur' }]
       },
       nodeVisible: false,
 
@@ -978,11 +978,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$t('pages.system.assets.ssh.ssh-list.a8fe4c17'),
-        content: this.$t('pages.system.assets.ssh.ssh-list.1879255f'),
+        title: this.$t('i18n.c4535759ee'),
+        content: this.$t('i18n.0aa639865c'),
         zIndex: 1009,
-        okText: this.$t('pages.system.assets.ssh.ssh-list.7da4a591'),
-        cancelText: this.$t('pages.system.assets.ssh.ssh-list.43105e21'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return machineSshDelete({
             id: record.id
@@ -1060,11 +1060,11 @@ export default {
     // 删除工作空间的数据
     handleDeleteWorkspaceItem(record) {
       $confirm({
-        title: this.$t('pages.system.assets.ssh.ssh-list.a8fe4c17'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.system.assets.ssh.ssh-list.885b965f'),
-        okText: this.$t('pages.system.assets.ssh.ssh-list.7da4a591'),
-        cancelText: this.$t('pages.system.assets.ssh.ssh-list.43105e21'),
+        content: this.$t('i18n.2ff65378a4'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: async () => {
           const { code, msg } = await deleteForeSsh(record.id)
           if (code === 200) {
@@ -1108,7 +1108,7 @@ export default {
     handleSyncToWorkspace() {
       if (!this.temp.workspaceId) {
         $notification.warn({
-          message: this.$t('pages.system.assets.ssh.ssh-list.3a321a02')
+          message: this.$t('i18n.b3bda9bf9e')
         })
         return false
       }
@@ -1136,11 +1136,11 @@ export default {
     // 清除隐藏字段
     handerRestHideField(record) {
       $confirm({
-        title: this.$t('pages.system.assets.ssh.ssh-list.a8fe4c17'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.system.assets.ssh.ssh-list.8ad9d6d6'),
-        okText: this.$t('pages.system.assets.ssh.ssh-list.7da4a591'),
-        cancelText: this.$t('pages.system.assets.ssh.ssh-list.43105e21'),
+        content: this.$t('i18n.f7f340d946'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return restHideField(record.id).then((res) => {
             if (res.code === 200) {

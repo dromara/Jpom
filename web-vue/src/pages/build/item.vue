@@ -23,20 +23,20 @@
         <template v-if="id">
           <a-menu v-model:selectedKeys="menuKey" mode="horizontal" class="menu" @click="menuClick">
             <a-menu-item key="info">
-              <span><InfoOutlined /> {{ $t('pages.build.item.1541b045') }}</span>
+              <span><InfoOutlined /> {{ $t('i18n.224aef211c') }}</span>
             </a-menu-item>
             <a-menu-item key="edit">
-              <span> <EditOutlined /> {{ $t('pages.build.item.b2bad6f5') }}</span>
+              <span> <EditOutlined /> {{ $t('i18n.e54c5ecb54') }}</span>
             </a-menu-item>
             <a-menu-item key="trigger">
-              <span><ApiOutlined /> {{ $t('pages.build.item.7d51773c') }}</span>
+              <span><ApiOutlined /> {{ $t('i18n.4696724ed3') }}</span>
             </a-menu-item>
           </a-menu>
         </template>
         <template v-else>
           <a-menu v-model:selectedKeys="menuKey" mode="horizontal" class="menu" @click="menuClick">
             <a-menu-item key="edit">
-              <span> <EditOutlined /> {{ $t('pages.build.item.156e1b82') }}</span>
+              <span> <EditOutlined /> {{ $t('i18n.44a6891817') }}</span>
             </a-menu-item>
           </a-menu>
         </template>
@@ -74,10 +74,10 @@
               }
             "
           >
-            {{ $t('pages.build.item.b12468e9') }}
+            {{ $t('i18n.625fb26b4b') }}
           </a-button>
-          <a-tooltip v-if="id" :title="$t('pages.build.item.c0e613d6')">
-            <a-button @click="$refs.editBuild.refresh()"> {{ $t('pages.build.item.7bbd89a') }}</a-button>
+          <a-tooltip v-if="id" :title="$t('i18n.18c7e2556e')">
+            <a-button @click="$refs.editBuild.refresh()"> {{ $t('i18n.694fc5efa9') }}</a-button>
           </a-tooltip>
           <a-divider type="vertical" />
           <a-button
@@ -88,7 +88,7 @@
                 stepsCurrent = stepsCurrent - 1
               }
             "
-            >{{ $t('pages.build.item.d1379d85') }}</a-button
+            >{{ $t('i18n.eeb6908870') }}</a-button
           >
           <a-button
             type="primary"
@@ -98,15 +98,15 @@
                 stepsCurrent = stepsCurrent + 1
               }
             "
-            >{{ $t('pages.build.item.6af322a9') }}</a-button
+            >{{ $t('i18n.38ce27d846') }}</a-button
           >
           <a-divider type="vertical" />
 
           <a-button type="primary" @click="$refs.editBuild.handleEditBuildOk(false)">
-            {{ $t('pages.build.item.b033d8c5') }}
+            {{ $t('i18n.be5fbbe34c') }}
           </a-button>
           <a-button type="primary" @click="$refs.editBuild.handleEditBuildOk(true)">
-            {{ $t('pages.build.item.4af9344a') }}
+            {{ $t('i18n.a577822cdd') }}
           </a-button>
         </a-space>
       </template>

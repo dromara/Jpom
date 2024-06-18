@@ -3,7 +3,7 @@
     <log-view1 :ref="`logView`" height="calc(100vh - 140px)">
       <template #before>
         <a-button type="primary" size="small" @click="goFile">{{
-          $t('pages.node.node-layout.project.project-file-read.502f94')
+          $t('i18n.8780e6b3d1')
         }}</a-button></template
       >
     </log-view1>
@@ -97,7 +97,7 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: `web socket ${this.$t('pages.node.node-layout.project.project-file-read.d75d207f')},${this.$t(
+          message: `web socket ${this.$t('i18n.7030ff6470')},${this.$t(
             'pages.node.node-layout.project.project-file-read.763330b'
           )}`
         })
@@ -107,7 +107,7 @@ export default {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
         clearInterval(this.heart)
-        $message.warning(this.$t('pages.node.node-layout.project.project-file-read.8a2aae09'))
+        $message.warning(this.$t('i18n.9255f9c68f'))
       }
       this.socket.onmessage = (msg) => {
         this.$refs.logView?.appendLine(msg.data)

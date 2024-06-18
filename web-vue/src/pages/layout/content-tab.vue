@@ -14,7 +14,7 @@
                 "
               >
                 <a-button type="link" :disabled="tabList.length <= 1">{{
-                  $t('pages.layout.content-tab.a8318e00')
+                  $t('i18n.6816da19f3')
                 }}</a-button>
               </a-menu-item>
               <a-menu-item
@@ -26,7 +26,7 @@
                 "
               >
                 <a-button type="link" :disabled="tabList.length <= 1 || index === 0">{{
-                  $t('pages.layout.content-tab.7c10f4fd')
+                  $t('i18n.e9290eaaae')
                 }}</a-button>
               </a-menu-item>
               <a-menu-item
@@ -38,7 +38,7 @@
                 "
               >
                 <a-button type="link" :disabled="tabList.length <= 1 || index === tabList.length - 1"
-                  >{{ $t('pages.layout.content-tab.34a965cc') }}
+                  >{{ $t('i18n.649d90ab3c') }}
                 </a-button>
               </a-menu-item>
             </a-menu>
@@ -92,7 +92,7 @@ const onEdit = (key: string, action: 'remove') => {
   if (action === 'remove') {
     if (tabList.value.length === 1) {
       $notification.warn({
-        message: $t('pages.layout.content-tab.1bfc6f2e')
+        message: $t('i18n.b953d1a8f1')
       })
       return
     }
@@ -105,7 +105,7 @@ const onEdit = (key: string, action: 'remove') => {
 // 关闭 tabs
 const closeTabs = (data: any) => {
   $notification.success({
-    message: $t('pages.layout.content-tab.94162f3')
+    message: $t('i18n.33130f5c46')
   })
   menuStore.clearTabs(props.mode, data).then(() => {
     activeTab()

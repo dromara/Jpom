@@ -8,7 +8,7 @@
       :footer="uploading ? null : undefined"
       width="50%"
       :keyboard="false"
-      :title="$t('pages.dispatch.start.d935498a') + data.name"
+      :title="$t('i18n.a0a111cbbd') + data.name"
       :mask-closable="false"
       @ok="handleDispatchOk"
       @cancel="
@@ -18,39 +18,39 @@
       "
     >
       <a-form ref="dispatchForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-item :label="$t('pages.dispatch.start.b96b97fb')" name="type">
+        <a-form-item :label="$t('i18n.7220e4d5f9')" name="type">
           <a-radio-group v-model:value="temp.type" name="type" :disabled="!!percentage" @change="restForm">
-            <a-radio :value="'use-build'">{{ $t('pages.dispatch.start.7bcf90e5') }}</a-radio>
-            <a-radio :value="'file-storage'">{{ $t('pages.dispatch.start.f183985') }}</a-radio>
-            <a-radio :value="'static-file-storage'">{{ $t('pages.dispatch.start.c3a20e28') }}</a-radio>
-            <a-radio :value="'upload'">{{ $t('pages.dispatch.start.33ffacfb') }}</a-radio>
-            <a-radio :value="'download'">{{ $t('pages.dispatch.start.367f115c') }}</a-radio>
+            <a-radio :value="'use-build'">{{ $t('i18n.c1af35d001') }}</a-radio>
+            <a-radio :value="'file-storage'">{{ $t('i18n.26183c99bf') }}</a-radio>
+            <a-radio :value="'static-file-storage'">{{ $t('i18n.28f6e7a67b') }}</a-radio>
+            <a-radio :value="'upload'">{{ $t('i18n.a6fc9e3ae6') }}</a-radio>
+            <a-radio :value="'download'">{{ $t('i18n.bd7043cae3') }}</a-radio>
           </a-radio-group>
         </a-form-item>
         <!-- 手动上传 -->
-        <a-form-item v-if="temp.type === 'upload'" :label="$t('pages.dispatch.start.fc83ff3a')" name="clearOld">
+        <a-form-item v-if="temp.type === 'upload'" :label="$t('i18n.4cfca88db8')" name="clearOld">
           <a-progress v-if="percentage" :percent="percentage">
             <template #format="percent">
               {{ percent }}%
               <template v-if="percentageInfo.total"> ({{ renderSize(percentageInfo.total) }}) </template>
               <template v-if="percentageInfo.duration">
-                {{ $t('pages.dispatch.start.bca9469e') }}:{{ formatDuration(percentageInfo.duration) }}
+                {{ $t('i18n.e710da3487') }}:{{ formatDuration(percentageInfo.duration) }}
               </template>
             </template>
           </a-progress>
 
           <a-upload :file-list="fileList" :disabled="!!percentage" :before-upload="beforeUpload" @remove="handleRemove">
             <LoadingOutlined v-if="percentage" />
-            <a-button v-else type="primary"><UploadOutlined />{{ $t('pages.dispatch.start.2a688d49') }}</a-button>
+            <a-button v-else type="primary"><UploadOutlined />{{ $t('i18n.fd7e0c997d') }}</a-button>
           </a-upload>
         </a-form-item>
         <!-- 远程下载 -->
-        <a-form-item v-else-if="temp.type === 'download'" :label="$t('pages.dispatch.start.94149f7b')" name="url">
-          <a-input v-model:value="temp.url" :placeholder="$t('pages.dispatch.start.40ced483')" />
+        <a-form-item v-else-if="temp.type === 'download'" :label="$t('i18n.a66fff7541')" name="url">
+          <a-input v-model:value="temp.url" :placeholder="$t('i18n.7457228a61')" />
         </a-form-item>
         <!-- 在线构建 -->
         <template v-else-if="temp.type == 'use-build'">
-          <a-form-item :label="$t('pages.dispatch.start.afb1ec30')">
+          <a-form-item :label="$t('i18n.4f9e3db4b8')">
             <a-space>
               {{ chooseBuildInfo.name }}
               <a-button
@@ -61,11 +61,11 @@
                   }
                 "
               >
-                {{ $t('pages.dispatch.start.afb1ec30') }}
+                {{ $t('i18n.4f9e3db4b8') }}
               </a-button>
             </a-space>
           </a-form-item>
-          <a-form-item :label="$t('pages.dispatch.start.94cf01f8')">
+          <a-form-item :label="$t('i18n.cabdf0cd45')">
             <a-space>
               <a-tag v-if="chooseBuildInfo.buildNumberId">#{{ chooseBuildInfo.buildNumberId }}</a-tag>
               <a-button
@@ -77,14 +77,14 @@
                   }
                 "
               >
-                {{ $t('pages.dispatch.start.94cf01f8') }}
+                {{ $t('i18n.cabdf0cd45') }}
               </a-button>
             </a-space>
           </a-form-item>
         </template>
         <!-- 文件中心 -->
         <template v-else-if="temp.type === 'file-storage'">
-          <a-form-item :label="$t('pages.dispatch.start.2a688d49')">
+          <a-form-item :label="$t('i18n.fd7e0c997d')">
             <a-space>
               {{ chooseFileInfo.name }}
               <a-button
@@ -95,14 +95,14 @@
                   }
                 "
               >
-                {{ $t('pages.dispatch.start.2a688d49') }}
+                {{ $t('i18n.fd7e0c997d') }}
               </a-button>
             </a-space>
           </a-form-item>
         </template>
         <!-- 静态文件 -->
         <template v-else-if="temp.type === 'static-file-storage'">
-          <a-form-item :label="$t('pages.dispatch.start.2a688d49')">
+          <a-form-item :label="$t('i18n.fd7e0c997d')">
             <a-space>
               {{ chooseFileInfo.name }}
               <a-button
@@ -113,65 +113,65 @@
                   }
                 "
               >
-                {{ $t('pages.dispatch.start.2a688d49') }}
+                {{ $t('i18n.fd7e0c997d') }}
               </a-button>
             </a-space>
           </a-form-item>
         </template>
         <a-form-item name="clearOld">
           <template #label>
-            {{ $t('pages.dispatch.start.fa8d15d') }}
+            {{ $t('i18n.2223ff647d') }}
             <a-tooltip>
-              <template #title>{{ $t('pages.dispatch.start.81c6b18') }}</template>
+              <template #title>{{ $t('i18n.b343663a14') }}</template>
               <QuestionCircleOutlined />
             </a-tooltip>
           </template>
           <a-switch
             v-model:checked="temp.clearOld"
-            :checked-children="$t('pages.dispatch.start.d2fbce36')"
-            :un-checked-children="$t('pages.dispatch.start.1c77d6fb')"
+            :checked-children="$t('i18n.0a60ac8f02')"
+            :un-checked-children="$t('i18n.c9744f45e7')"
           />
         </a-form-item>
         <a-form-item v-if="temp.type !== 'use-build'" name="unzip">
           <template #label>
-            {{ $t('pages.dispatch.start.23788e28') }}
+            {{ $t('i18n.1baae8183c') }}
             <a-tooltip>
-              <template #title> {{ $t('pages.dispatch.start.240759e7') }}.bz2, tar.gz, tar, bz2, zip, gz </template>
+              <template #title> {{ $t('i18n.c4cfe11e54') }}.bz2, tar.gz, tar, bz2, zip, gz </template>
               <QuestionCircleOutlined />
             </a-tooltip>
           </template>
           <a-switch
             v-model:checked="temp.autoUnzip"
-            :checked-children="$t('pages.dispatch.start.d2fbce36')"
-            :un-checked-children="$t('pages.dispatch.start.1c77d6fb')"
+            :checked-children="$t('i18n.0a60ac8f02')"
+            :un-checked-children="$t('i18n.c9744f45e7')"
           />
         </a-form-item>
-        <a-form-item v-if="temp.autoUnzip" :label="$t('pages.dispatch.start.89d09852')">
+        <a-form-item v-if="temp.autoUnzip" :label="$t('i18n.5effe31353')">
           <a-input-number
             v-model:value="temp.stripComponents"
             style="width: 100%"
             :min="0"
-            :placeholder="$t('pages.dispatch.start.41a5bcc1')"
+            :placeholder="$t('i18n.3f8b64991f')"
           />
         </a-form-item>
 
-        <a-form-item :label="$t('pages.dispatch.start.3cb4eb3e')" name="afterOpt">
-          <a-select v-model:value="temp.afterOpt" :placeholder="$t('pages.dispatch.start.9c2b1069')">
+        <a-form-item :label="$t('i18n.dfcc9e3c45')" name="afterOpt">
+          <a-select v-model:value="temp.afterOpt" :placeholder="$t('i18n.3322338140')">
             <a-select-option v-for="item in afterOptList" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item name="secondaryDirectory" :label="$t('pages.dispatch.start.597f26e8')">
-          <a-input v-model:value="temp.secondaryDirectory" :placeholder="$t('pages.dispatch.start.51be1a6d')" />
+        <a-form-item name="secondaryDirectory" :label="$t('i18n.871cc8602a')">
+          <a-input v-model:value="temp.secondaryDirectory" :placeholder="$t('i18n.9c99e8bec9')" />
         </a-form-item>
         <a-form-item
           name="selectProject"
-          :label="$t('pages.dispatch.start.ec12e21e')"
-          :help="$t('pages.dispatch.start.72a6a7a9')"
+          :label="$t('i18n.c4e0c6b6fe')"
+          :help="$t('i18n.25be899f66')"
         >
           <a-select
             v-model:value="temp.selectProjectArray"
             mode="multiple"
-            :placeholder="$t('pages.dispatch.start.56724111')"
+            :placeholder="$t('i18n.b29fd18c93')"
           >
             <a-select-option v-for="item in itemProjectList" :key="item.id" :value="`${item.projectId}@${item.nodeId}`">
               {{ item.nodeName }}-{{ item.cacheProjectName || item.projectId }}
@@ -184,7 +184,7 @@
     <CustomDrawer
       v-if="chooseVisible === 1"
       destroy-on-close
-      :title="`${$t('pages.dispatch.start.afb1ec30')}`"
+      :title="`${$t('i18n.4f9e3db4b8')}`"
       placement="right"
       :open="chooseVisible === 1"
       width="80vw"
@@ -225,7 +225,7 @@
               }
             "
           >
-            {{ $t('pages.dispatch.start.43105e21') }}
+            {{ $t('i18n.625fb26b4b') }}
           </a-button>
           <a-button
             type="primary"
@@ -235,7 +235,7 @@
               }
             "
           >
-            {{ $t('pages.dispatch.start.7da4a591') }}
+            {{ $t('i18n.e83a256e4f') }}
           </a-button>
         </a-space>
       </template>
@@ -244,7 +244,7 @@
     <CustomDrawer
       v-if="chooseVisible === 2"
       destroy-on-close
-      :title="`${$t('pages.dispatch.start.a2d28d82')}`"
+      :title="`${$t('i18n.9ec961d8cb')}`"
       placement="right"
       :open="chooseVisible === 2"
       width="80vw"
@@ -286,7 +286,7 @@
               }
             "
           >
-            {{ $t('pages.dispatch.start.43105e21') }}
+            {{ $t('i18n.625fb26b4b') }}
           </a-button>
           <a-button
             type="primary"
@@ -296,7 +296,7 @@
               }
             "
           >
-            {{ $t('pages.dispatch.start.7da4a591') }}
+            {{ $t('i18n.e83a256e4f') }}
           </a-button>
         </a-space>
       </template>
@@ -305,7 +305,7 @@
     <CustomDrawer
       v-if="chooseVisible === 3"
       destroy-on-close
-      :title="`${$t('pages.dispatch.start.2a688d49')}`"
+      :title="`${$t('i18n.fd7e0c997d')}`"
       placement="right"
       :open="chooseVisible === 3"
       width="80vw"
@@ -343,7 +343,7 @@
               }
             "
           >
-            {{ $t('pages.dispatch.start.43105e21') }}
+            {{ $t('i18n.625fb26b4b') }}
           </a-button>
           <a-button
             type="primary"
@@ -353,7 +353,7 @@
               }
             "
           >
-            {{ $t('pages.dispatch.start.7da4a591') }}
+            {{ $t('i18n.e83a256e4f') }}
           </a-button>
         </a-space>
       </template>
@@ -362,7 +362,7 @@
     <CustomDrawer
       v-if="chooseVisible === 4"
       destroy-on-close
-      :title="`${$t('pages.dispatch.start.e5aa6b98')}`"
+      :title="`${$t('i18n.a51d8375b7')}`"
       placement="right"
       :open="chooseVisible === 4"
       width="80vw"
@@ -400,7 +400,7 @@
               }
             "
           >
-            {{ $t('pages.dispatch.start.43105e21') }}
+            {{ $t('i18n.625fb26b4b') }}
           </a-button>
           <a-button
             type="primary"
@@ -410,7 +410,7 @@
               }
             "
           >
-            {{ $t('pages.dispatch.start.7da4a591') }}
+            {{ $t('i18n.e83a256e4f') }}
           </a-button>
         </a-space>
       </template>
@@ -461,8 +461,8 @@ export default {
       itemProjectList: [],
       fileList: [],
       rules: {
-        afterOpt: [{ required: true, message: this.$t('pages.dispatch.start.9c2b1069'), trigger: 'blur' }],
-        url: [{ required: true, message: this.$t('pages.dispatch.start.b843270d'), trigger: 'blur' }]
+        afterOpt: [{ required: true, message: this.$t('i18n.3322338140'), trigger: 'blur' }],
+        url: [{ required: true, message: this.$t('i18n.f4dd45fca9'), trigger: 'blur' }]
       },
       temp: { type: 'upload' },
       chooseVisible: 0,
@@ -561,7 +561,7 @@ export default {
           // 判断文件
           if (this.fileList.length === 0) {
             $notification.error({
-              message: this.$t('pages.dispatch.start.25d31749')
+              message: this.$t('i18n.9febf31146')
             })
             return false
           }
@@ -648,7 +648,7 @@ export default {
         } else if (this.temp.type == 'download') {
           if (!this.temp.url) {
             $notification.error({
-              message: this.$t('pages.dispatch.start.95dc7228')
+              message: this.$t('i18n.8ccbbb95a4')
             })
             return false
           }
@@ -671,7 +671,7 @@ export default {
           // 构建
           if (!this.chooseBuildInfo || !this.chooseBuildInfo.id || !this.chooseBuildInfo.buildNumberId) {
             $notification.error({
-              message: this.$t('pages.dispatch.start.de346cfe')
+              message: this.$t('i18n.c704d971d6')
             })
             return false
           }
@@ -698,7 +698,7 @@ export default {
           // 文件中心
           if (!this.chooseFileInfo || !this.chooseFileInfo.id) {
             $notification.error({
-              message: this.$t('pages.dispatch.start.346e59ed')
+              message: this.$t('i18n.434d888f6f')
             })
             return false
           }
@@ -724,7 +724,7 @@ export default {
           // 文件中心
           if (!this.chooseFileInfo || !this.chooseFileInfo.id) {
             $notification.error({
-              message: this.$t('pages.dispatch.start.26b3a389')
+              message: this.$t('i18n.acb4ce3592')
             })
             return false
           }

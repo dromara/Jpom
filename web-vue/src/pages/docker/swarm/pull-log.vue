@@ -2,7 +2,7 @@
   <div>
     <log-view
       :ref="`logView`"
-      :title-name="$t('pages.docker.swarm.pull-log.3bbf92f2')"
+      :title-name="$t('i18n.6a658517f3')"
       :visible="visible"
       @close="
         () => {
@@ -14,29 +14,29 @@
         <a-space>
           <a-input-number
             v-model:value="tail"
-            :placeholder="$t('pages.docker.swarm.pull-log.2f7b59f')"
+            :placeholder="$t('i18n.5734b2db4e')"
             style="width: 150px"
           >
             <template #addonBefore>
-              <a-tooltip :title="$t('pages.docker.swarm.pull-log.7dcebde4')"
-                >{{ $t('pages.docker.swarm.pull-log.b0482c76') }}
+              <a-tooltip :title="$t('i18n.25b6c22d8a')"
+                >{{ $t('i18n.87eb55155a') }}
               </a-tooltip>
             </template>
           </a-input-number>
           <div>
-            {{ $t('pages.docker.swarm.pull-log.87ee22ec') }}
+            {{ $t('i18n.d731dc9325') }}
             <a-switch
               v-model:checked="timestamps"
-              :checked-children="$t('pages.docker.swarm.pull-log.d75b3b1a')"
-              :un-checked-children="$t('pages.docker.swarm.pull-log.41cc2930')"
+              :checked-children="$t('i18n.4d775d4cd7')"
+              :un-checked-children="$t('i18n.2064fc6808')"
             />
           </div>
           <a-button type="primary" size="small" @click="init"
-            ><ReloadOutlined /> {{ $t('pages.docker.swarm.pull-log.7bbd89a') }}
+            ><ReloadOutlined /> {{ $t('i18n.694fc5efa9') }}
           </a-button>
           |
           <a-button type="primary" :disabled="!logId" size="small" @click="download">
-            <DownloadOutlined /> {{ $t('pages.docker.swarm.pull-log.42c8e9c6') }}
+            <DownloadOutlined /> {{ $t('i18n.f26ef91424') }}
           </a-button>
           |
         </a-space>

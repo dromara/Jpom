@@ -3,33 +3,33 @@
     <a-timeline>
       <a-timeline-item>
         <span class="layui-elem-quote"
-          >{{ $t('components.upgrade.index.d2c7486a') }}{{ temp.timeStamp }}
+          >{{ $t('i18n.231f655e35') }}{{ temp.timeStamp }}
           <a-tag v-if="nodeId || machineId">agent</a-tag>
           <a-tag v-else>server</a-tag>
         </span>
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote">{{ $t('components.upgrade.index.56586b89') }}{{ temp.vueTimeStamp }}</span>
+        <span class="layui-elem-quote">{{ $t('i18n.e60389f6d6') }}{{ temp.vueTimeStamp }}</span>
       </a-timeline-item>
       <a-timeline-item v-if="!nodeId && !machineId">
-        <span class="layui-elem-quote">{{ $t('components.upgrade.index.54432619') }}</span>
+        <span class="layui-elem-quote">{{ $t('i18n.bdc1fdde6c') }}</span>
         <a-space>
           <a-switch
             v-model:checked="temp.joinBetaRelease"
-            :checked-children="$t('components.upgrade.index.e17b386')"
-            :un-checked-children="$t('components.upgrade.index.8b04d374')"
+            :checked-children="$t('i18n.c8a2447aa9')"
+            :un-checked-children="$t('i18n.ae17005c0c')"
             :disabled="true"
           />
           <template v-if="temp.joinBetaRelease">
             <a-button type="link" @click="handleChangeBetaRelease(false)">{{
-              $t('components.upgrade.index.75e06a52')
+              $t('i18n.8ef0f6c275')
             }}</a-button>
           </template>
           <template v-else>
             <a-tooltip>
-              <template #title>{{ $t('components.upgrade.index.543ffe88') }}</template>
+              <template #title>{{ $t('i18n.31bca0fc93') }}</template>
               <a-button type="link" @click="handleChangeBetaRelease(true)"
-                ><QuestionCircleOutlined />{{ $t('components.upgrade.index.434e69f1') }}</a-button
+                ><QuestionCircleOutlined />{{ $t('i18n.d17eac5b5e') }}</a-button
               >
             </a-tooltip>
           </template>
@@ -37,10 +37,10 @@
       </a-timeline-item>
       <a-timeline-item>
         <a-space>
-          <span class="layui-elem-quote">{{ $t('components.upgrade.index.463be5e9') }}{{ temp.version }} </span>
+          <span class="layui-elem-quote">{{ $t('i18n.07683555af') }}{{ temp.version }} </span>
           <template v-if="temp.upgrade !== undefined">
             <a-tag v-if="temp.upgrade" color="pink" @click="upgrageVerion"
-              >{{ $t('components.upgrade.index.e3b19e4f') }}{{ temp.newVersion }} {{ temp.newBeta ? '/beta' : '' }}
+              >{{ $t('i18n.ac2f4259f1') }}{{ temp.newVersion }} {{ temp.newBeta ? '/beta' : '' }}
               <DownloadOutlined />
             </a-tag>
             <a-tag v-else color="orange" @click="checkVersion">
@@ -51,27 +51,27 @@
       </a-timeline-item>
       <a-timeline-item>
         <span class="layui-elem-quote"
-          >{{ $t('components.upgrade.index.44a6a440') }}{{ formatDuration(temp.upTime) }}</span
+          >{{ $t('i18n.b57ecea951') }}{{ formatDuration(temp.upTime) }}</span
         >
       </a-timeline-item>
       <a-timeline-item>
         <span class="layui-elem-quote"
-          >{{ $t('components.upgrade.index.4ea00d5b') }}<a-tag>{{ temp.port }}</a-tag></span
+          >{{ $t('i18n.4c096c51a3') }}<a-tag>{{ temp.port }}</a-tag></span
         >
         <span class="layui-elem-quote">&nbsp;&nbsp;</span>
         <span class="layui-elem-quote"
-          >{{ $t('components.upgrade.index.62143313') }}<a-tag>{{ temp.pid }}</a-tag></span
+          >{{ $t('i18n.2b04210d33') }}<a-tag>{{ temp.pid }}</a-tag></span
         >
       </a-timeline-item>
       <a-timeline-item>
-        <a-alert :message="$t('components.upgrade.index.35d94d7e')" type="warning" show-icon />
+        <a-alert :message="$t('i18n.5785f004ea')" type="warning" show-icon />
       </a-timeline-item>
       <a-timeline-item>
         <span class="layui-elem-quote"
-          >{{ $t('components.upgrade.index.4593b845') }}<a-tag>{{ temp.dataPath }}</a-tag>
+          >{{ $t('i18n.a9add9b059') }}<a-tag>{{ temp.dataPath }}</a-tag>
         </span>
         <span v-if="temp.jarFile" class="layui-elem-quote"
-          >{{ $t('components.upgrade.index.3a69c395') }}<a-tag>{{ temp.jarFile }}</a-tag>
+          >{{ $t('i18n.9ce5d5202a') }}<a-tag>{{ temp.jarFile }}</a-tag>
         </span>
       </a-timeline-item>
     </a-timeline>
@@ -87,7 +87,7 @@
             @remove="handleRemove"
           >
             <LoadingOutlined v-if="percentage" />
-            <a-button v-else><UploadOutlined />{{ $t('components.upgrade.index.dc168b2') }}</a-button>
+            <a-button v-else><UploadOutlined />{{ $t('i18n.d615ea8e30') }}</a-button>
           </a-upload>
           <a-row v-if="percentage">
             <a-col span="20">
@@ -95,7 +95,7 @@
             </a-col>
           </a-row>
           <a-button type="primary" :disabled="fileList.length === 0 || !!percentage" @click="startUpload">{{
-            $t('components.upgrade.index.b6ecd3cc')
+            $t('i18n.3dd6c10ffd')
           }}</a-button>
         </a-space>
       </a-col>
@@ -189,7 +189,7 @@ export default {
     uploadPieces,
     formatDuration,
     renderMarkdown(markdown) {
-      return (this.markdownit && this.markdownit.render(markdown)) || this.$t('components.upgrade.index.50cfdf2b')
+      return (this.markdownit && this.markdownit.render(markdown)) || this.$t('i18n.aeade8e979')
     },
     // 加载数据
     loadData() {
@@ -250,18 +250,18 @@ export default {
     // 开始上传文件
     startUpload() {
       const html =
-        this.$t('components.upgrade.index.597788c9') +
-        this.$t('components.upgrade.index.5739dd8b') +
-        this.$t('components.upgrade.index.ccb42e58') +
-        this.$t('components.upgrade.index.50e3ae59') +
+        this.$t('i18n.66860c7f3b') +
+        this.$t('i18n.0fbd484ced') +
+        this.$t('i18n.7dfb695d14') +
+        this.$t('i18n.e1bbafe8dc') +
         ' </ul>'
 
       $confirm({
-        title: this.$t('components.upgrade.index.3875bf60'),
+        title: this.$t('i18n.c4535759ee'),
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
-        okText: this.$t('components.upgrade.index.1cbe2507'),
+        okText: this.$t('i18n.e83a256e4f'),
         zIndex: 1009,
-        cancelText: this.$t('components.upgrade.index.a0451c97'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           const file = this.fileList[0]
           this.percentage = 0
@@ -344,7 +344,7 @@ export default {
 
       this.globalLoading({
         spinning: true,
-        tip: (msg || this.$t('components.upgrade.index.351dd143')) + this.$t('components.upgrade.index.ad5617c0')
+        tip: (msg || this.$t('i18n.589060f38e')) + this.$t('i18n.9ba71275d3')
       })
       //
       this.timer = setInterval(() => {
@@ -360,7 +360,7 @@ export default {
               })
               clearInterval(this.timer)
               $notification.success({
-                message: this.$t('components.upgrade.index.7a1c1ded')
+                message: this.$t('i18n.e64d788d11')
               })
               this.temp = manifest
               setTimeout(() => {
@@ -369,7 +369,7 @@ export default {
             } else {
               if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
                 $notification.warning({
-                  message: this.$t('components.upgrade.index.3fa2ee24') + (res.msg || '')
+                  message: this.$t('i18n.2a38b6c0ae') + (res.msg || '')
                 })
                 this.globalLoading({
                   spinning: false
@@ -386,13 +386,13 @@ export default {
               })
               clearInterval(this.timer)
               $notification.error({
-                message: this.$t('components.upgrade.index.306c5167')
+                message: this.$t('i18n.2191afee6e')
               })
             } else {
               this.globalLoading({
                 spinning: true,
                 tip:
-                  (msg || this.$t('components.upgrade.index.351dd143')) + this.$t('components.upgrade.index.ad5617c0')
+                  (msg || this.$t('i18n.589060f38e')) + this.$t('i18n.9ba71275d3')
               })
             }
           })
@@ -441,10 +441,10 @@ export default {
           const dUrl = data.downloadUrl || 'https://jpom.top'
           const htmlAref = `<a href='${dUrl}' target='_blank'>${dUrl}</a>`
           const html =
-            this.$t('components.upgrade.index.c133eb37') +
+            this.$t('i18n.2314f99795') +
             tagName +
             htmlAref +
-            this.$t('components.upgrade.index.3f944483')
+            this.$t('i18n.ab3615a5ad')
           $notification.success({
             duration: 10,
             message: h('div', null, [h('p', { innerHTML: html }, null)])
@@ -458,7 +458,7 @@ export default {
           this.temp = { ...this.temp, upgrade: false }
           if (tip) {
             $notification.success({
-              message: this.$t('components.upgrade.index.4b9cc2c4')
+              message: this.$t('i18n.e6cde5a4bc')
             })
           }
           resolve(false)
@@ -477,8 +477,8 @@ export default {
         if (tip) {
           $notification.success({
             message: this.temp.upgrade
-              ? this.$t('components.upgrade.index.c133eb37') + data.tagName
-              : this.$t('components.upgrade.index.4b9cc2c4')
+              ? this.$t('i18n.2314f99795') + data.tagName
+              : this.$t('i18n.e6cde5a4bc')
           })
         }
         resolve(data.upgrade)
@@ -488,17 +488,17 @@ export default {
     upgrageVerion() {
       // "components.upgrade.index.1cbe2507要升级到最新版本吗？,升级前请阅读更新日志里面的说明和注意事项并且请注意备份数据防止数据丢失！！"
       const html =
-        this.$t('components.upgrade.index.444e366f') +
-        this.$t('components.upgrade.index.95b27c31') +
-        this.$t('components.upgrade.index.4e82a639') +
-        this.$t('components.upgrade.index.50e3ae59') +
+        this.$t('i18n.a99866bdc8') +
+        this.$t('i18n.b250411e23') +
+        this.$t('i18n.80b655c1e3') +
+        this.$t('i18n.e1bbafe8dc') +
         ' </ul>'
       $confirm({
-        title: this.$t('components.upgrade.index.3875bf60'),
+        title: this.$t('i18n.c4535759ee'),
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
-        okText: this.$t('components.upgrade.index.1cbe2507'),
+        okText: this.$t('i18n.e83a256e4f'),
         zIndex: 1009,
-        cancelText: this.$t('components.upgrade.index.a0451c97'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return remoteUpgrade({
             nodeId: this.nodeId,
@@ -517,19 +517,19 @@ export default {
     // components.upgrade.index.e17b386beta计划
     handleChangeBetaRelease(beta) {
       const html = beta
-        ? this.$t('components.upgrade.index.85c315ec') +
-          this.$t('components.upgrade.index.f35152df') +
-          this.$t('components.upgrade.index.c6733249') +
-          this.$t('components.upgrade.index.1365438c') +
+        ? this.$t('i18n.e10b5cfcb1') +
+          this.$t('i18n.d0c6dad2aa') +
+          this.$t('i18n.7acf8f7d90') +
+          this.$t('i18n.8fe6bf0803') +
           ' </ul>'
-        : this.$t('components.upgrade.index.dd255b35')
+        : this.$t('i18n.87659a4953')
 
       $confirm({
-        title: this.$t('components.upgrade.index.3875bf60'),
+        title: this.$t('i18n.c4535759ee'),
         content: h('div', {}, [h('p', { innerHTML: html })]),
-        okText: this.$t('components.upgrade.index.1cbe2507'),
+        okText: this.$t('i18n.e83a256e4f'),
         zIndex: 1009,
-        cancelText: this.$t('components.upgrade.index.a0451c97'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return changBetaRelease({
             beta: beta

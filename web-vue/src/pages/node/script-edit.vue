@@ -3,7 +3,7 @@
     <CustomModal
       destroy-on-close
       :open="true"
-      :title="$t('pages.node.script-edit.c05890d1')"
+      :title="$t('i18n.c446efd80d')"
       :confirm-loading="confirmLoading"
       :mask-closable="false"
       width="80vw"
@@ -16,58 +16,58 @@
     >
       <a-alert
         v-if="!nodeList || !nodeList.length"
-        :message="$t('pages.node.script-edit.7ae524f6')"
+        :message="$t('i18n.4b027f3979')"
         type="warning"
         show-icon
         style="margin-bottom: 10px"
       >
-        <template #description>{{ $t('pages.node.script-edit.a3a86f30') }}</template>
+        <template #description>{{ $t('i18n.50453eeb9e') }}</template>
       </a-alert>
       <a-form ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 19 }">
-        <a-alert v-if="temp.scriptType === 'server-sync'" :message="$t('pages.node.script-edit.250185dc')" banner />
-        <a-form-item :label="$t('pages.node.script-edit.580e6c10')">
+        <a-alert v-if="temp.scriptType === 'server-sync'" :message="$t('i18n.a33a2a4a90')" banner />
+        <a-form-item :label="$t('i18n.7e2b40fc86')">
           <a-select
             v-model:value="temp.nodeId"
             :disabled="!!temp.nodeId"
             allow-clear
-            :placeholder="$t('pages.node.script-edit.2c33c91c')"
+            :placeholder="$t('i18n.f8a613d247')"
           >
             <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
           </a-select>
         </a-form-item>
         <template v-if="temp.nodeId">
-          <a-form-item :label="$t('pages.node.script-edit.db9bba81')" name="name">
-            <a-input v-model:value="temp.name" :placeholder="$t('pages.node.script-edit.bb769c1d')" />
+          <a-form-item :label="$t('i18n.e747635151')" name="name">
+            <a-input v-model:value="temp.name" :placeholder="$t('i18n.d7ec2d3fea')" />
           </a-form-item>
-          <a-form-item :label="$t('pages.node.script-edit.709314dd')" name="context">
-            <template #help>{{ $t('pages.node.script-edit.2cc2c670') }}</template>
+          <a-form-item :label="$t('i18n.4d9c3a0ed0')" name="context">
+            <template #help>{{ $t('i18n.a77cc03013') }}</template>
             <a-form-item-rest>
               <code-editor v-model:content="temp.context" height="40vh" :show-tool="true" :options="{ mode: 'shell' }">
                 <template #tool_before>
                   <a-button type="link" @click="scriptLibraryVisible = true">{{
-                    $t('pages.node.script-edit.b52fd8d6')
+                    $t('i18n.f685377a22')
                   }}</a-button>
                 </template>
               </code-editor>
             </a-form-item-rest>
           </a-form-item>
 
-          <a-form-item :label="$t('pages.node.script-edit.337801c6')">
+          <a-form-item :label="$t('i18n.2171d1b07d')">
             <a-space style="width: 100%" direction="vertical">
               <a-row v-for="(item, index) in commandParams" :key="item.key">
                 <a-col :span="22">
                   <a-space style="width: 100%" direction="vertical">
                     <a-input
                       v-model:value="item.desc"
-                      :addon-before="$t('pages.node.script-edit.275d1e37', { index: index + 1 })"
-                      :placeholder="`${$t('pages.node.script-edit.b31dbb3')},${$t(
+                      :addon-before="$t('i18n.417fa2c2be', { index: index + 1 })"
+                      :placeholder="`${$t('i18n.55721d321c')},${$t(
                         'pages.node.script-edit.b01bb0b5'
-                      )},${$t('pages.node.script-edit.4b6049f2')}`"
+                      )},${$t('i18n.72d4ade571')}`"
                     />
                     <a-input
                       v-model:value="item.value"
-                      :addon-before="$t('pages.node.script-edit.9a17bb8e', { index: index + 1 })"
-                      :placeholder="`${$t('pages.node.script-edit.5b6ebe20')}${$t('pages.node.script-edit.969ca97b')}`"
+                      :addon-before="$t('i18n.620489518c', { index: index + 1 })"
+                      :placeholder="`${$t('i18n.bfed4943c5')}${$t('i18n.e9f2c62e54')}`"
                     />
                   </a-space>
                 </a-col>
@@ -80,31 +80,31 @@
                 </a-col>
               </a-row>
               <a-button type="primary" @click="() => commandParams.push({})">{{
-                $t('pages.node.script-edit.5cfe25ce')
+                $t('i18n.4c0eead6ff')
               }}</a-button>
             </a-space>
           </a-form-item>
-          <a-form-item :label="$t('pages.node.script-edit.c9bb9409')" name="global">
+          <a-form-item :label="$t('i18n.fffd3ce745')" name="global">
             <a-radio-group v-model:value="temp.global">
-              <a-radio :value="true"> {{ $t('pages.node.script-edit.b21bb9ac') }}</a-radio>
-              <a-radio :value="false"> {{ $t('pages.node.script-edit.919267cc') }}</a-radio>
+              <a-radio :value="true"> {{ $t('i18n.2be75b1044') }}</a-radio>
+              <a-radio :value="false"> {{ $t('i18n.691b11e443') }}</a-radio>
             </a-radio-group>
           </a-form-item>
-          <a-form-item :label="$t('pages.node.script-edit.cab13d5c')" name="autoExecCron">
+          <a-form-item :label="$t('i18n.6b2e348a2b')" name="autoExecCron">
             <a-auto-complete
               v-model:value="temp.autoExecCron"
-              :placeholder="$t('pages.node.script-edit.235e51dd')"
+              :placeholder="$t('i18n.5dff0d31d0')"
               :options="CRON_DATA_SOURCE"
             >
               <template #option="item"> {{ item.title }} {{ item.value }} </template>
             </a-auto-complete>
           </a-form-item>
-          <a-form-item :label="$t('pages.node.script-edit.42e3c32a')" name="description">
+          <a-form-item :label="$t('i18n.3bdd08adab')" name="description">
             <a-textarea
               v-model:value="temp.description"
               :rows="3"
               style="resize: none"
-              :placeholder="$t('pages.node.script-edit.419e634e')"
+              :placeholder="$t('i18n.ae653ec180')"
             />
           </a-form-item>
         </template>
@@ -114,7 +114,7 @@
     <CustomDrawer
       v-if="scriptLibraryVisible"
       destroy-on-close
-      :title="$t('pages.node.script-edit.a36f20d3')"
+      :title="$t('i18n.53bdd93fd6')"
       placement="right"
       :open="scriptLibraryVisible"
       width="85vw"
@@ -149,7 +149,7 @@
                 scriptLibraryVisible = false
               }
             "
-            >{{ $t('pages.node.script-edit.a0451c97') }}</a-button
+            >{{ $t('i18n.625fb26b4b') }}</a-button
           >
           <a-button
             type="primary"
@@ -158,7 +158,7 @@
                 $refs['scriptLibraryRef'].handerScriptConfirm()
               }
             "
-            >{{ $t('pages.node.script-edit.703db0bd') }}</a-button
+            >{{ $t('i18n.f71316d0dd') }}</a-button
           >
           <a-button
             type="primary"
@@ -167,7 +167,7 @@
                 $refs['scriptLibraryRef'].handerTagConfirm()
               }
             "
-            >{{ $t('pages.node.script-edit.4f288de9') }}</a-button
+            >{{ $t('i18n.9300692fac') }}</a-button
           >
         </a-space>
       </template>
@@ -203,8 +203,8 @@ export default {
       commandParams: [],
       nodeList: [],
       rules: {
-        name: [{ required: true, message: this.$t('pages.node.script-edit.661c0530'), trigger: 'blur' }],
-        context: [{ required: true, message: this.$t('pages.node.script-edit.a48e24b3'), trigger: 'blur' }]
+        name: [{ required: true, message: this.$t('i18n.fb7b9876a6'), trigger: 'blur' }],
+        context: [{ required: true, message: this.$t('i18n.da1cb76e87'), trigger: 'blur' }]
       },
       confirmLoading: false,
       scriptLibraryVisible: false
@@ -249,13 +249,13 @@ export default {
     handleEditScriptOk() {
       if (this.temp.scriptType === 'server-sync') {
         $notification.warning({
-          message: this.$t('pages.node.script-edit.250185dc')
+          message: this.$t('i18n.a33a2a4a90')
         })
         return
       }
       if (!this.temp.nodeId) {
         $notification.warning({
-          message: this.$t('pages.node.script-edit.dbed11aa')
+          message: this.$t('i18n.d1f0fac71d')
         })
         return
       }
@@ -266,7 +266,7 @@ export default {
             if (!this.commandParams[i].desc) {
               $notification.error({
                 message:
-                  this.$t('pages.node.script-edit.4149d069') + (i + 1) + this.$t('pages.node.script-edit.94a5dd5e')
+                  this.$t('i18n.8ae2b9915c') + (i + 1) + this.$t('i18n.c583b707ba')
               })
               return false
             }

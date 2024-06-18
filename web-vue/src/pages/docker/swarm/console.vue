@@ -16,13 +16,13 @@
       <!-- 集群控制台 -->
       <a-menu v-model:selectedKeys="menuKeyArray" mode="horizontal" class="docker-menu" @click="menuClick">
         <a-menu-item key="node">
-          <span class="nav-text">{{ $t('pages.docker.swarm.console.198377d7') }}</span>
+          <span class="nav-text">{{ $t('i18n.957c1b1c50') }}</span>
         </a-menu-item>
         <a-menu-item key="server">
-          <span class="nav-text">{{ $t('pages.docker.swarm.console.5dd8de32') }}</span>
+          <span class="nav-text">{{ $t('i18n.b5ce5efa6e') }}</span>
         </a-menu-item>
         <a-menu-item key="task">
-          <span class="nav-text">{{ $t('pages.docker.swarm.console.ce8244b7') }}</span>
+          <span class="nav-text">{{ $t('i18n.8de2137776') }}</span>
         </a-menu-item>
       </a-menu>
     </template>

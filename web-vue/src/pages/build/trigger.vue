@@ -4,43 +4,43 @@
       <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1" type="card">
           <template #rightExtra>
-            <a-tooltip :title="$t('pages.build.trigger.c70e60e6')">
+            <a-tooltip :title="$t('i18n.01ad26f4a9')">
               <a-button type="primary" size="small" @click="resetTrigger">{{
-                $t('pages.build.trigger.da1d2343')
+                $t('i18n.4b9c3271dc')
               }}</a-button>
             </a-tooltip>
           </template>
-          <a-tab-pane key="1" :tab="$t('pages.build.trigger.ca9188db')">
+          <a-tab-pane key="1" :tab="$t('i18n.3d3b918f49')">
             <a-space direction="vertical" style="width: 100%">
-              <a-alert :message="$t('pages.build.trigger.7feba425')" type="warning" show-icon>
+              <a-alert :message="$t('i18n.947d983961')" type="warning" show-icon>
                 <template #description>
                   <ul>
-                    <li>{{ $t('pages.build.trigger.c16a1a40') }}</li>
+                    <li>{{ $t('i18n.314f5aca4e') }}</li>
                     <li>
-                      {{ $t('pages.build.trigger.58634bfa') }}
+                      {{ $t('i18n.e319a2a526') }}
                     </li>
                     <li>
-                      {{ $t('pages.build.trigger.2f647b6c') }} BODY json： [ { "id":"1", "token":"a", "delay":"0" } ]
+                      {{ $t('i18n.3a3c5e739b') }} BODY json： [ { "id":"1", "token":"a", "delay":"0" } ]
                     </li>
                     <li>
-                      {{ $t('pages.build.trigger.b100eecf') }}
+                      {{ $t('i18n.3baa9f3d72') }}
                     </li>
                     <li>
-                      {{ $t('pages.build.trigger.c607de59') }} BODY json： [ { "id":"1", "token":"a",
+                      {{ $t('i18n.dcc846e420') }} BODY json： [ { "id":"1", "token":"a",
                       "delay":"0","branchName":"test","branchTagName":"1.*","script":"mvn clean
                       package","resultDirFile":"/target/","webhook":"http://test.com/webhook" } ]
                     </li>
                     <li>
-                      {{ $t('pages.build.trigger.5f0e8fe3') }} useQueue=true
-                      {{ $t('pages.build.trigger.2809bf75') }}
+                      {{ $t('i18n.2adbfb41e9') }} useQueue=true
+                      {{ $t('i18n.0c1e9a72b7') }}
                     </li>
-                    <li>{{ $t('pages.build.trigger.b8b6a2e4') }}</li>
+                    <li>{{ $t('i18n.68a1faf6e2') }}</li>
                   </ul>
                 </template>
               </a-alert>
               <a-alert
                 type="info"
-                :message="`${$t('pages.build.trigger.2cd9ba62')}(${$t('pages.build.trigger.a5873c3e')})`"
+                :message="`${$t('i18n.de78b73dab')}(${$t('i18n.00a070c696')})`"
               >
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.triggerBuildUrl }">
@@ -50,7 +50,7 @@
               </a-alert>
               <a-alert
                 type="info"
-                :message="`${$t('pages.build.trigger.4bd083f4')}(${$t('pages.build.trigger.a5873c3e')})`"
+                :message="`${$t('i18n.8d202b890c')}(${$t('i18n.00a070c696')})`"
               >
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchTriggerBuildUrl }">
@@ -61,29 +61,29 @@
               </a-alert>
             </a-space>
           </a-tab-pane>
-          <a-tab-pane key="2" :tab="$t('pages.build.trigger.d18c2cea')">
+          <a-tab-pane key="2" :tab="$t('i18n.251a89efa9')">
             <a-space direction="vertical" style="width: 100%">
-              <a-alert :message="$t('pages.build.trigger.7feba425')" type="warning" show-icon>
+              <a-alert :message="$t('i18n.947d983961')" type="warning" show-icon>
                 <template #description>
                   <ul>
-                    <li>{{ $t('pages.build.trigger.b2f32fef') }}</li>
-                    <li>{{ $t('pages.build.trigger.a96b1198') }}</li>
+                    <li>{{ $t('i18n.3c48d9b970') }}</li>
+                    <li>{{ $t('i18n.c34f1dc2b9') }}</li>
                     <li>
-                      <a-tag>No(0, "{{ $t('pages.build.trigger.d0284f2b') }}")</a-tag>,
-                      <a-tag>Ing(1, "{{ $t('pages.build.trigger.dbbd0a62') }}")</a-tag>,
-                      <a-tag>Success(2, "{{ $t('pages.build.trigger.a2e56f86') }}")</a-tag>,
-                      <a-tag>Error(3, "{{ $t('pages.build.trigger.7cc0beda') }}")</a-tag>,
-                      <a-tag>PubIng(4, "{{ $t('pages.build.trigger.19653803') }}")</a-tag>,
-                      <a-tag>PubSuccess(5, "{{ $t('pages.build.trigger.5f7b06e9') }}")</a-tag>,
-                      <a-tag>PubError(6, "{{ $t('pages.build.trigger.50ad1198') }}")</a-tag>,
-                      <a-tag>Cancel(7, "{{ $t('pages.build.trigger.65add658') }}")</a-tag>,
+                      <a-tag>No(0, "{{ $t('i18n.d30b8b0e43') }}")</a-tag>,
+                      <a-tag>Ing(1, "{{ $t('i18n.32493aeef9') }}")</a-tag>,
+                      <a-tag>Success(2, "{{ $t('i18n.7f3809d36b') }}")</a-tag>,
+                      <a-tag>Error(3, "{{ $t('i18n.41298f56a3') }}")</a-tag>,
+                      <a-tag>PubIng(4, "{{ $t('i18n.0baa0e3fc4') }}")</a-tag>,
+                      <a-tag>PubSuccess(5, "{{ $t('i18n.2fff079bc7') }}")</a-tag>,
+                      <a-tag>PubError(6, "{{ $t('i18n.250688d7c9') }}")</a-tag>,
+                      <a-tag>Cancel(7, "{{ $t('i18n.b4fc1ac02c') }}")</a-tag>,
                     </li>
                   </ul>
                 </template>
               </a-alert>
               <a-alert
                 type="info"
-                :message="`${$t('pages.build.trigger.2547e040')}(${$t('pages.build.trigger.a5873c3e')})`"
+                :message="`${$t('i18n.dcd72e6014')}(${$t('i18n.00a070c696')})`"
               >
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchBuildStatusUrl2 }">
@@ -94,7 +94,7 @@
               </a-alert>
               <a-alert
                 type="info"
-                :message="`${$t('pages.build.trigger.dd421d7f')}(${$t('pages.build.trigger.a5873c3e')})`"
+                :message="`${$t('i18n.cac6ff1d82')}(${$t('i18n.00a070c696')})`"
               >
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchBuildStatusUrl }">
@@ -105,19 +105,19 @@
               </a-alert>
             </a-space>
           </a-tab-pane>
-          <a-tab-pane key="3" :tab="$t('pages.build.trigger.6b0809e7')">
+          <a-tab-pane key="3" :tab="$t('i18n.d3ded43cee')">
             <a-space direction="vertical" style="width: 100%">
-              <a-alert :message="$t('pages.build.trigger.7feba425')" type="warning" show-icon>
+              <a-alert :message="$t('i18n.947d983961')" type="warning" show-icon>
                 <template #description>
                   <ul>
-                    <li>{{ $t('pages.build.trigger.5c5f1276') }}</li>
-                    <li>{{ $t('pages.build.trigger.b8b189ad') }}</li>
+                    <li>{{ $t('i18n.178ad7e9bc') }}</li>
+                    <li>{{ $t('i18n.0215b91d97') }}</li>
                   </ul>
                 </template>
               </a-alert>
               <a-alert
                 type="info"
-                :message="`${$t('pages.build.trigger.fee7ed9b')}(${$t('pages.build.trigger.a5873c3e')})`"
+                :message="`${$t('i18n.2f5e885bc6')}(${$t('i18n.00a070c696')})`"
               >
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.buildLogUrl }">
@@ -131,10 +131,10 @@
       </a-form>
     </div>
     <template v-else>
-      <a-result :title="$t('pages.build.trigger.2dfb8e28')">
+      <a-result :title="$t('i18n.475a349f32')">
         <template #extra>
           <a-button key="console" type="primary" @click="handleTrigger">
-            {{ $t('pages.build.trigger.e8fee578') }}
+            {{ $t('i18n.a1a3a7d853') }}
           </a-button>
         </template>
       </a-result>

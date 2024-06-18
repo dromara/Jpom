@@ -2,13 +2,13 @@
   <div>
     <a-form ref="ruleForm" :model="pruneForm" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }" :rules="rules">
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-        <a-alert :message="$t('pages.docker.prune.17b5ea77')" banner />
+        <a-alert :message="$t('i18n.bc2c23b5d2')" banner />
       </a-form-item>
       <a-form-item
-        :label="$t('pages.docker.prune.4fec20d2')"
+        :label="$t('i18n.629f3211ca')"
         :help="pruneTypes[pruneForm.pruneType] && pruneTypes[pruneForm.pruneType].help"
       >
-        <a-select v-model:value="pruneForm.pruneType" :placeholder="$t('pages.docker.prune.a197e176')">
+        <a-select v-model:value="pruneForm.pruneType" :placeholder="$t('i18n.ad209825b5')">
           <a-select-option v-for="(item, key) in pruneTypes" :key="key">
             {{ item.name }}
           </a-select-option>
@@ -16,42 +16,42 @@
       </a-form-item>
       <a-form-item
         v-if="pruneTypes[pruneForm.pruneType] && pruneTypes[pruneForm.pruneType].filters.includes('dangling')"
-        :label="$t('pages.docker.prune.a669feea')"
+        :label="$t('i18n.81e4018e9d')"
       >
         <a-switch
           v-model:checked="pruneForm.dangling"
-          :checked-children="$t('pages.docker.prune.d361adb6')"
-          :un-checked-children="$t('pages.docker.prune.8788f12a')"
+          :checked-children="$t('i18n.a09375d96c')"
+          :un-checked-children="$t('i18n.643f39d45f')"
         />
       </a-form-item>
       <a-form-item
         v-if="pruneTypes[pruneForm.pruneType] && pruneTypes[pruneForm.pruneType].filters.includes('until')"
-        :label="$t('pages.docker.prune.937a97fd')"
+        :label="$t('i18n.44d13f7017')"
       >
         <template #help
-          ><a-tag color="#f50"> {{ $t('pages.docker.prune.cb38bb6a') }},{{ $t('pages.docker.prune.a3e34a37') }}</a-tag>
+          ><a-tag color="#f50"> {{ $t('i18n.1775ff0f26') }},{{ $t('i18n.143d8d3de5') }}</a-tag>
         </template>
-        <a-tooltip :title="$t('pages.docker.prune.7ea3f135')">
-          <a-input v-model:value="pruneForm.until" :placeholder="`${$t('pages.docker.prune.dbf26257')}`" />
+        <a-tooltip :title="$t('i18n.a37c573d7b')">
+          <a-input v-model:value="pruneForm.until" :placeholder="`${$t('i18n.f8f20c1d1e')}`" />
         </a-tooltip>
       </a-form-item>
 
       <a-form-item
         v-if="pruneTypes[pruneForm.pruneType] && pruneTypes[pruneForm.pruneType].filters.includes('labels')"
-        :label="$t('pages.docker.prune.8dd61567')"
+        :label="$t('i18n.3d61e4aaf1')"
       >
-        <a-tooltip :title="$t('pages.docker.prune.b6d13d99')">
-          <a-input v-model:value="pruneForm.labels" :placeholder="$t('pages.docker.prune.d3cece44')" />
+        <a-tooltip :title="$t('i18n.1c10461124')">
+          <a-input v-model:value="pruneForm.labels" :placeholder="$t('i18n.9a436e2a53')" />
         </a-tooltip>
       </a-form-item>
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }"
-        >{{ $t('pages.docker.prune.e0d922b4')
+        >{{ $t('i18n.4d49b2a15f')
         }}{{ pruneTypes[pruneForm.pruneType] && pruneTypes[pruneForm.pruneType].command }}
         prune xxxxx
       </a-form-item>
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
         <a-button type="primary" :loading="loading" @click="onPruneSubmit">
-          {{ $t('pages.docker.prune.e8e9db25') }}
+          {{ $t('i18n.38cf16f220') }}
         </a-button>
       </a-form-item>
     </a-form>
@@ -85,32 +85,32 @@ export default {
       pruneTypes: {
         IMAGES: {
           value: 'IMAGES',
-          name: this.$t('pages.docker.prune.4fbd9851'),
+          name: this.$t('i18n.3477228591'),
           command: 'image',
-          help: this.$t('pages.docker.prune.2ac80e6a'),
+          help: this.$t('i18n.b96b07e2bb'),
           filters: ['until', 'dangling']
         },
         CONTAINERS: {
           value: 'CONTAINERS',
-          name: this.$t('pages.docker.prune.e59a28c9'),
+          name: this.$t('i18n.22c799040a'),
           command: 'container',
           filters: ['until', 'labels']
         },
         NETWORKS: {
           value: 'NETWORKS',
-          name: this.$t('pages.docker.prune.7beffdd'),
+          name: this.$t('i18n.7ddbe15c84'),
           command: 'network',
           filters: ['until']
         },
         VOLUMES: {
           value: 'VOLUMES',
-          name: this.$t('pages.docker.prune.5ea86045'),
+          name: this.$t('i18n.7088e18ac9'),
           command: 'volume',
           filters: ['labels']
         },
         BUILD: {
           value: 'BUILD',
-          name: this.$t('pages.docker.prune.37206ed5'),
+          name: this.$t('i18n.fcba60e773'),
           command: 'builder',
           filters: ['until']
         }
@@ -136,11 +136,11 @@ export default {
         //
         const that = this
         $confirm({
-          title: this.$t('pages.docker.prune.b22d55a0'),
+          title: this.$t('i18n.c4535759ee'),
           zIndex: 1009,
-          content: this.$t('pages.docker.prune.faa2b295'),
-          okText: this.$t('pages.docker.prune.e5a2dcc3'),
-          cancelText: this.$t('pages.docker.prune.b12468e9'),
+          content: this.$t('i18n.8e8bcfbb4f'),
+          okText: this.$t('i18n.e83a256e4f'),
+          cancelText: this.$t('i18n.625fb26b4b'),
           async onOk() {
             return await new Promise((resolve, reject) => {
               // 组装参数

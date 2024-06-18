@@ -20,23 +20,16 @@
           />
           <a-input
             v-model:value="listQuery['serviceName']"
-            :placeholder="$t('pages.docker.swarm.service.3e34ec28')"
+            :placeholder="$t('i18n.d7ec2d3fea')"
             class="search-input-item"
             @press-enter="loadData"
           />
 
-          <a-button type="primary" :loading="loading" @click="loadData">{{
-            $t('pages.docker.swarm.service.53c2763c')
-          }}</a-button>
-          <a-button type="primary" @click="handleAdd">{{ $t('pages.docker.swarm.service.68e44d60') }}</a-button>
-          <a-statistic-countdown
-            format="s"
-            :title="$t('pages.docker.swarm.service.ae8f1e')"
-            :value="countdownTime"
-            @finish="loadData"
-          >
+          <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $t('i18n.d9ac9228e8') }}</a-button>
+          <a-statistic-countdown format="s" :title="$t('i18n.0f8403d07e')" :value="countdownTime" @finish="loadData">
             <template #suffix>
-              <div style="font-size: 12px">{{ $t('pages.docker.swarm.service.48ec7187') }}</div>
+              <div style="font-size: 12px">{{ $t('i18n.ee6ce96abb') }}</div>
             </template>
           </a-statistic-countdown>
         </a-space>
@@ -58,7 +51,7 @@
         <template v-else-if="column.dataIndex === 'status'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$t('pages.docker.swarm.service.87c09576')}${text} ${$t('pages.docker.swarm.service.147fba6c')}${
+            :title="`${$t('i18n.9b3e947cc9')}${text} ${$t('i18n.fb91527ce5')}${
               record.spec ? record.spec.availability || '' : ''
             }`"
           >
@@ -72,9 +65,9 @@
         <template v-else-if="column.dataIndex === 'role'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$t('pages.docker.swarm.service.b23c6871')}${text} ${
+            :title="`${$t('i18n.20f32e1979')}${text} ${
               record.managerStatus && record.managerStatus.reachability === 'REACHABLE'
-                ? $t('pages.docker.swarm.service.c1956a20') + record.managerStatus.reachability
+                ? $t('i18n.88c5680d0d') + record.managerStatus.reachability
                 : ''
             }`"
           >
@@ -107,19 +100,14 @@
         <template v-else-if="column.dataIndex === 'updatedAt'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$t('pages.docker.swarm.service.fd921623')}${text} ${$t('pages.docker.swarm.service.f06e8846')}${
-              record.createdAt
-            }`"
+            :title="`${$t('i18n.bf94b97d1a')}${text} ${$t('i18n.312f45014a')}${record.createdAt}`"
           >
             {{ text }}
           </a-tooltip>
         </template>
 
         <template v-else-if="column.replicas">
-          <a-tooltip
-            placement="topLeft"
-            :title="`${$t('pages.docker.swarm.service.e46bd813')},${$t('pages.docker.swarm.service.b002f60b')}`"
-          >
+          <a-tooltip placement="topLeft" :title="`${$t('i18n.ce07501354')},${$t('i18n.c0e498a259')}`">
             <a-tag @click="handleTask(record, 'RUNNING')">{{ text }}</a-tag>
 
             <ReadOutlined @click="handleTask(record)" />
@@ -128,11 +116,9 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEdit(record)">{{
-              $t('pages.docker.swarm.service.10c46562')
-            }}</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n.8347a927c0') }}</a-button>
             <a-button size="small" type="primary" danger @click="handleDel(record)">{{
-              $t('pages.docker.swarm.service.dd20d11c')
+              $t('i18n.2f4aaddde3')
             }}</a-button>
           </a-space>
         </template>
@@ -144,48 +130,48 @@
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$t('pages.docker.swarm.service.d6997835')"
+      :title="$t('i18n.cc51f34aa4')"
       width="70vw"
       :mask-closable="false"
       @ok="handleEditOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$t('pages.docker.swarm.service.b7e0f2ad')" name="name">
+        <a-form-item :label="$t('i18n.8f3747c057')" name="name">
           <template #help
-            ><span v-if="!temp.serviceId">{{ $t('pages.docker.swarm.service.5a97fa84') }}</span></template
+            ><span v-if="!temp.serviceId">{{ $t('i18n.9ee9d48699') }}</span></template
           >
           <a-input
             v-model:value="temp.name"
             :disabled="temp.serviceId ? true : false"
-            :placeholder="$t('pages.docker.swarm.service.b7e0f2ad')"
+            :placeholder="$t('i18n.8f3747c057')"
           />
         </a-form-item>
-        <a-form-item :label="$t('pages.docker.swarm.service.7fbd7a7e')" name="mode">
+        <a-form-item :label="$t('i18n.44c4aaa1d9')" name="mode">
           <template #help
-            ><span v-if="!temp.serviceId">{{ $t('pages.docker.swarm.service.5a97fa84') }}</span></template
+            ><span v-if="!temp.serviceId">{{ $t('i18n.9ee9d48699') }}</span></template
           >
           <a-radio-group v-model:value="temp.mode" name="mode" :disabled="temp.serviceId ? true : false">
-            <a-radio value="REPLICATED">{{ $t('pages.docker.swarm.service.86be616d') }}</a-radio>
-            <a-radio value="GLOBAL">{{ $t('pages.docker.swarm.service.3f66dc7c') }} </a-radio>
+            <a-radio value="REPLICATED">{{ $t('i18n.0428b36ab1') }}</a-radio>
+            <a-radio value="GLOBAL">{{ $t('i18n.0c1de8295a') }} </a-radio>
           </a-radio-group>
           <a-form-item-rest>
             <template v-if="temp.mode === 'REPLICATED'">
-              {{ $t('pages.docker.swarm.service.f91beb25') }}:
+              {{ $t('i18n.532495b65b') }}:
               <a-input-number v-model:value="temp.replicas" :min="1" />
             </template>
           </a-form-item-rest>
         </a-form-item>
-        <a-form-item :label="$t('pages.docker.swarm.service.febc7e89')" name="image">
-          <a-input v-model:value="temp.image" :placeholder="$t('pages.docker.swarm.service.febc7e89')" />
+        <a-form-item :label="$t('i18n.bbf2775521')" name="image">
+          <a-input v-model:value="temp.image" :placeholder="$t('i18n.bbf2775521')" />
         </a-form-item>
         <a-form-item label="hostname" name="hostname">
-          <a-input v-model:value="temp.hostname" :placeholder="$t('pages.docker.swarm.service.df83aba7')" />
+          <a-input v-model:value="temp.hostname" :placeholder="$t('i18n.f9361945f3')" />
         </a-form-item>
-        <a-form-item :label="$t('pages.docker.swarm.service.e555c583')" name="">
+        <a-form-item :label="$t('i18n.38aa9dc2a0')" name="">
           <a-form-item-rest>
             <a-tabs>
-              <a-tab-pane key="port" :tab="$t('pages.docker.swarm.service.2386cfe2')">
-                <a-form-item :label="$t('pages.docker.swarm.service.9f66cc86')" name="endpointResolutionMode">
+              <a-tab-pane key="port" :tab="$t('i18n.c76cfefe72')">
+                <a-form-item :label="$t('i18n.d9435aa802')" name="endpointResolutionMode">
                   <a-radio-group
                     v-model:value="temp.endpointResolutionMode"
                     name="endpointResolutionMode"
@@ -212,34 +198,27 @@
                           <a-col :span="7">
                             <a-radio-group v-model:value="item.publishMode" name="publishMode">
                               <a-radio value="ingress" :disabled="temp.endpointResolutionMode === 'DNSRR'">{{
-                                $t('pages.docker.swarm.service.c2c2c19b')
+                                $t('i18n.75fc7de737')
                               }}</a-radio>
-                              <a-radio value="host">{{ $t('pages.docker.swarm.service.2a72f1e6') }}</a-radio>
+                              <a-radio value="host">{{ $t('i18n.652273694e') }}</a-radio>
                             </a-radio-group>
                           </a-col>
                           <a-col :span="7">
                             <a-input
                               v-model:value="item.publishedPort"
-                              :addon-before="$t('pages.docker.swarm.service.2386cfe2')"
-                              :placeholder="$t('pages.docker.swarm.service.2386cfe2')"
+                              :addon-before="$t('i18n.c76cfefe72')"
+                              :placeholder="$t('i18n.c76cfefe72')"
                             >
                             </a-input>
                           </a-col>
                           <a-col :span="8" :offset="1">
                             <a-input
                               v-model:value="item.targetPort"
-                              :addon-before="$t('pages.docker.swarm.service.d28e8a03')"
-                              :placeholder="
-                                $t('pages.docker.swarm.service.577b1501', {
-                                  slot1: $t('pages.docker.swarm.service.d28e8a03')
-                                })
-                              "
+                              :addon-before="$t('i18n.22c799040a')"
+                              :placeholder="$t('i18n.31691a647c', { slot1: $t('i18n.22c799040a') })"
                             >
                               <template #addonAfter>
-                                <a-select
-                                  v-model:value="item.protocol"
-                                  :placeholder="$t('pages.docker.swarm.service.9e4da8c2')"
-                                >
+                                <a-select v-model:value="item.protocol" :placeholder="$t('i18n.0739b9551d')">
                                   <a-select-option value="TCP">TCP</a-select-option>
                                   <a-select-option value="UDP">UDP</a-select-option>
                                   <a-select-option value="SCTP">SCTP</a-select-option>
@@ -277,7 +256,7 @@
                 </a-form-item>
               </a-tab-pane>
 
-              <a-tab-pane key="volumes" :tab="$t('pages.docker.swarm.service.6f7e66db')">
+              <a-tab-pane key="volumes" :tab="$t('i18n.640374b7ae')">
                 <a-form-item>
                   <a-row v-for="(item, index) in temp.volumes" :key="index">
                     <a-col :span="21">
@@ -292,23 +271,15 @@
                           <a-col :span="7">
                             <a-input
                               v-model:value="item.source"
-                              :addon-before="$t('pages.docker.swarm.service.289b437c')"
-                              :placeholder="
-                                $t('pages.docker.swarm.service.f791ed7d', {
-                                  slot1: $t('pages.docker.swarm.service.289b437c')
-                                })
-                              "
+                              :addon-before="$t('i18n.ad4b4a5b3b')"
+                              :placeholder="$t('i18n.ec537c957a', { slot1: $t('i18n.ad4b4a5b3b') })"
                             />
                           </a-col>
                           <a-col :span="8" :offset="1">
                             <a-input
                               v-model:value="item.target"
-                              :addon-before="$t('pages.docker.swarm.service.d28e8a03')"
-                              :placeholder="
-                                $t('pages.docker.swarm.service.6c2c0b0a', {
-                                  slot1: $t('pages.docker.swarm.service.d28e8a03')
-                                })
-                              "
+                              :addon-before="$t('i18n.22c799040a')"
+                              :placeholder="$t('i18n.368ffad051', { slot1: $t('i18n.22c799040a') })"
                             />
                           </a-col>
                         </a-row>
@@ -338,14 +309,14 @@
                 </a-form-item>
               </a-tab-pane>
 
-              <a-tab-pane key="args" :tab="$t('pages.docker.swarm.service.6e6cc3c2')">
+              <a-tab-pane key="args" :tab="$t('i18n.3d0a2df9ec')">
                 <a-form-item>
                   <a-row v-for="(item, index) in temp.args" :key="index">
                     <a-col :span="20">
                       <a-input
                         v-model:value="item.value"
-                        :addon-before="$t('pages.docker.swarm.service.a94da34e')"
-                        :placeholder="$t('pages.docker.swarm.service.4dba58d9')"
+                        :addon-before="$t('i18n.bfed4943c5')"
+                        :placeholder="$t('i18n.d65d977f1d')"
                       />
                     </a-col>
 
@@ -372,14 +343,14 @@
                   </a-row>
                 </a-form-item>
               </a-tab-pane>
-              <a-tab-pane key="command" :tab="$t('pages.docker.swarm.service.e9f092b5')">
+              <a-tab-pane key="command" :tab="$t('i18n.ddf7d2a5ce')">
                 <a-form-item>
                   <a-row v-for="(item, index) in temp.commands" :key="index">
                     <a-col :span="20">
                       <a-input
                         v-model:value="item.value"
-                        :addon-before="$t('pages.docker.swarm.service.29a0e20e')"
-                        :placeholder="$t('pages.docker.swarm.service.dbba7ee')"
+                        :addon-before="$t('i18n.579a6d0d92')"
+                        :placeholder="$t('i18n.2a6a516f9d')"
                       />
                     </a-col>
 
@@ -405,21 +376,21 @@
                   </a-row>
                 </a-form-item>
               </a-tab-pane>
-              <a-tab-pane key="env" :tab="$t('pages.docker.swarm.service.c81b2c2e')">
+              <a-tab-pane key="env" :tab="$t('i18n.3867e350eb')">
                 <a-form-item>
                   <a-row v-for="(item, index) in temp.envs" :key="index">
                     <a-col :span="10">
                       <a-input
                         v-model:value="item.name"
-                        :addon-before="$t('pages.docker.swarm.service.3e34ec28')"
-                        :placeholder="$t('pages.docker.swarm.service.dbc446a0')"
+                        :addon-before="$t('i18n.d7ec2d3fea')"
+                        :placeholder="$t('i18n.7cb8d163bb')"
                       />
                     </a-col>
                     <a-col :span="10" :offset="1">
                       <a-input
                         v-model:value="item.value"
-                        :addon-before="$t('pages.docker.swarm.service.77584ce7')"
-                        :placeholder="$t('pages.docker.swarm.service.77584ce7')"
+                        :addon-before="$t('i18n.9a2ee7044f')"
+                        :placeholder="$t('i18n.9a2ee7044f')"
                       />
                     </a-col>
                     <a-col :span="2" :offset="1">
@@ -445,143 +416,139 @@
                   </a-row>
                 </a-form-item>
               </a-tab-pane>
-              <a-tab-pane v-if="temp.update" :tab="$t('pages.docker.swarm.service.291377dc')">
-                <a-form-item :label="$t('pages.docker.swarm.service.2c4b1076')" name="parallelism">
+              <a-tab-pane v-if="temp.update" :tab="$t('i18n.a84a45b352')">
+                <a-form-item :label="$t('i18n.07a828310b')" name="parallelism">
                   <a-input-number
                     v-model:value="temp.update.parallelism"
                     style="width: 80%"
                     :min="0"
-                    :placeholder="$t('pages.docker.swarm.service.e9736343')"
+                    :placeholder="$t('i18n.31eb055c9c')"
                   />
                 </a-form-item>
-                <a-form-item :label="$t('pages.docker.swarm.service.6e2c9ac6')" name="delay">
+                <a-form-item :label="$t('i18n.db732ecb48')" name="delay">
                   <template #help>
-                    <span style="padding-left: 20%">{{ $t('pages.docker.swarm.service.4c100860') }}</span>
+                    <span style="padding-left: 20%">{{ $t('i18n.e2adcc679a') }}</span>
                   </template>
                   <a-input-number
                     v-model:value="temp.update.delay"
                     style="width: 80%"
                     :min="1"
-                    :placeholder="$t('pages.docker.swarm.service.2493ddfa')"
+                    :placeholder="$t('i18n.85ec12ccd3')"
                   />
                 </a-form-item>
-                <a-form-item :label="$t('pages.docker.swarm.service.4b7fadaa')" name="maxFailureRatio">
+                <a-form-item :label="$t('i18n.b3fe677b5f')" name="maxFailureRatio">
                   <a-input-number
                     v-model:value="temp.update.maxFailureRatio"
                     style="width: 80%"
                     :min="0"
-                    :placeholder="`${$t('pages.docker.swarm.service.4b7fadaa')}${$t(
-                      'pages.docker.swarm.service.5609c1e1'
-                    )}`"
+                    :placeholder="`${$t('i18n.b3fe677b5f')}${$t('i18n.c7c4e4632f')}`"
                   />
                 </a-form-item>
-                <a-form-item :label="$t('pages.docker.swarm.service.e82ae9bd')" name="failureAction">
+                <a-form-item :label="$t('i18n.fa2f7a8927')" name="failureAction">
                   <a-radio-group v-model:value="temp.update.failureAction" name="failureAction">
-                    <a-radio value="PAUSE">{{ $t('pages.docker.swarm.service.b2c88b0') }}</a-radio>
-                    <a-radio value="CONTINUE">{{ $t('pages.docker.swarm.service.75c74bf3') }}</a-radio>
-                    <a-radio value="ROLLBACK">{{ $t('pages.docker.swarm.service.6f9c6f93') }}</a-radio>
+                    <a-radio value="PAUSE">{{ $t('i18n.8d63ef388e') }}</a-radio>
+                    <a-radio value="CONTINUE">{{ $t('i18n.27ca568be2') }}</a-radio>
+                    <a-radio value="ROLLBACK">{{ $t('i18n.d00b485b26') }}</a-radio>
                   </a-radio-group>
                 </a-form-item>
-                <a-form-item :label="$t('pages.docker.swarm.service.c78b8f75')" name="order">
+                <a-form-item :label="$t('i18n.d5c68a926e')" name="order">
                   <a-radio-group v-model:value="temp.update.order" name="order">
-                    <a-radio value="STOP_FIRST">{{ $t('pages.docker.swarm.service.f15f154f') }}</a-radio>
-                    <a-radio value="START_FIRST">{{ $t('pages.docker.swarm.service.225568ba') }}</a-radio>
+                    <a-radio value="STOP_FIRST">{{ $t('i18n.0647b5fc26') }}</a-radio>
+                    <a-radio value="START_FIRST">{{ $t('i18n.42fd64c157') }}</a-radio>
                   </a-radio-group>
                 </a-form-item>
-                <a-form-item :label="$t('pages.docker.swarm.service.a936236d')" name="monitor">
+                <a-form-item :label="$t('i18n.9aff624153')" name="monitor">
                   <a-input-number
                     v-model:value="temp.update.monitor"
                     style="width: 80%"
                     :min="1"
-                    :placeholder="$t('pages.docker.swarm.service.c29d2732')"
+                    :placeholder="$t('i18n.f6d6ab219d')"
                   />
                 </a-form-item>
               </a-tab-pane>
-              <a-tab-pane v-if="temp.rollback" :tab="$t('pages.docker.swarm.service.84221f7b')">
-                <a-form-item :label="$t('pages.docker.swarm.service.2c4b1076')" name="parallelism">
+              <a-tab-pane v-if="temp.rollback" :tab="$t('i18n.ad780debbc')">
+                <a-form-item :label="$t('i18n.07a828310b')" name="parallelism">
                   <a-input-number
                     v-model:value="temp.rollback.parallelism"
                     style="width: 80%"
                     :min="0"
-                    :placeholder="$t('pages.docker.swarm.service.e9736343')"
+                    :placeholder="$t('i18n.31eb055c9c')"
                   />
                 </a-form-item>
-                <a-form-item :label="$t('pages.docker.swarm.service.6e2c9ac6')" name="delay">
+                <a-form-item :label="$t('i18n.db732ecb48')" name="delay">
                   <template #help>
-                    <span style="padding-left: 20%">{{ $t('pages.docker.swarm.service.4c100860') }}</span>
+                    <span style="padding-left: 20%">{{ $t('i18n.e2adcc679a') }}</span>
                   </template>
                   <a-input-number
                     v-model:value="temp.rollback.delay"
                     style="width: 80%"
                     :min="1"
-                    :placeholder="$t('pages.docker.swarm.service.89a2b55d')"
+                    :placeholder="$t('i18n.6a66d4cdf3')"
                   />
                 </a-form-item>
-                <a-form-item :label="$t('pages.docker.swarm.service.4b7fadaa')" name="maxFailureRatio">
+                <a-form-item :label="$t('i18n.b3fe677b5f')" name="maxFailureRatio">
                   <a-input-number
                     v-model:value="temp.rollback.maxFailureRatio"
                     style="width: 80%"
                     :min="0"
-                    :placeholder="`${$t('pages.docker.swarm.service.4b7fadaa')}${$t(
-                      'pages.docker.swarm.service.5609c1e1'
-                    )}`"
+                    :placeholder="`${$t('i18n.b3fe677b5f')}${$t('i18n.c7c4e4632f')}`"
                   />
                 </a-form-item>
-                <a-form-item :label="$t('pages.docker.swarm.service.e82ae9bd')" name="failureAction">
+                <a-form-item :label="$t('i18n.fa2f7a8927')" name="failureAction">
                   <a-radio-group v-model:value="temp.rollback.failureAction" name="failureAction">
-                    <a-radio value="PAUSE">{{ $t('pages.docker.swarm.service.b2c88b0') }}</a-radio>
-                    <a-radio value="CONTINUE">{{ $t('pages.docker.swarm.service.75c74bf3') }}</a-radio>
-                    <a-radio value="ROLLBACK">{{ $t('pages.docker.swarm.service.6f9c6f93') }}</a-radio>
+                    <a-radio value="PAUSE">{{ $t('i18n.8d63ef388e') }}</a-radio>
+                    <a-radio value="CONTINUE">{{ $t('i18n.27ca568be2') }}</a-radio>
+                    <a-radio value="ROLLBACK">{{ $t('i18n.d00b485b26') }}</a-radio>
                   </a-radio-group>
                 </a-form-item>
-                <a-form-item :label="$t('pages.docker.swarm.service.c78b8f75')" name="order">
+                <a-form-item :label="$t('i18n.d5c68a926e')" name="order">
                   <a-radio-group v-model:value="temp.rollback.order" name="order">
-                    <a-radio value="STOP_FIRST">{{ $t('pages.docker.swarm.service.f15f154f') }}</a-radio>
-                    <a-radio value="START_FIRST">{{ $t('pages.docker.swarm.service.225568ba') }}</a-radio>
+                    <a-radio value="STOP_FIRST">{{ $t('i18n.0647b5fc26') }}</a-radio>
+                    <a-radio value="START_FIRST">{{ $t('i18n.42fd64c157') }}</a-radio>
                   </a-radio-group>
                 </a-form-item>
-                <a-form-item :label="$t('pages.docker.swarm.service.a936236d')" name="monitor">
+                <a-form-item :label="$t('i18n.9aff624153')" name="monitor">
                   <a-input-number
                     v-model:value="temp.rollback.monitor"
                     style="width: 80%"
                     :min="1"
-                    :placeholder="$t('pages.docker.swarm.service.c29d2732')"
+                    :placeholder="$t('i18n.f6d6ab219d')"
                   />
                 </a-form-item>
               </a-tab-pane>
-              <a-tab-pane v-if="temp.resources" :tab="$t('pages.docker.swarm.service.cd5e2f7c')">
-                <a-form-item :label="$t('pages.docker.swarm.service.699fe73')">
+              <a-tab-pane v-if="temp.resources" :tab="$t('i18n.eee83a9211')">
+                <a-form-item :label="$t('i18n.3711cbf638')">
                   <a-row>
                     <a-col :span="8">
                       <a-input
                         v-model:value="temp.resources.reservations.nanoCPUs"
                         addon-before="CPUs"
-                        :placeholder="$t('pages.docker.swarm.service.b988a5ae')"
+                        :placeholder="$t('i18n.9e6b699597')"
                       />
                     </a-col>
                     <a-col :span="8" :offset="1">
                       <a-input
                         v-model:value="temp.resources.reservations.memoryBytes"
                         addon-before="memory"
-                        :placeholder="$t('pages.docker.swarm.service.ff6baf66')"
+                        :placeholder="$t('i18n.18eb76c8a0')"
                       />
                     </a-col>
                   </a-row>
                 </a-form-item>
-                <a-form-item :label="$t('pages.docker.swarm.service.907d8d0f')">
+                <a-form-item :label="$t('i18n.87db69bd44')">
                   <a-row>
                     <a-col :span="8">
                       <a-input
                         v-model:value="temp.resources.limits.nanoCPUs"
                         addon-before="CPUs"
-                        :placeholder="$t('pages.docker.swarm.service.b988a5ae')"
+                        :placeholder="$t('i18n.9e6b699597')"
                       />
                     </a-col>
                     <a-col :span="8" :offset="1">
                       <a-input
                         v-model:value="temp.resources.limits.memoryBytes"
                         addon-before="memory"
-                        :placeholder="$t('pages.docker.swarm.service.ff6baf66')"
+                        :placeholder="$t('i18n.18eb76c8a0')"
                       />
                     </a-col>
                   </a-row>
@@ -597,7 +564,7 @@
       v-if="taskVisible"
       v-model:open="taskVisible"
       destroy-on-close
-      :title="$t('pages.docker.swarm.service.103e3206')"
+      :title="$t('i18n.13f931c5d9')"
       width="80vw"
       :footer="null"
       :mask-closable="false"
@@ -665,32 +632,32 @@ export default {
       logVisible: 0,
       confirmLoading: false,
       rules: {
-        name: [{ required: true, message: this.$t('pages.docker.swarm.service.5f1d417b'), trigger: 'blur' }],
-        mode: [{ required: true, message: this.$t('pages.docker.swarm.service.74477dc8'), trigger: 'blur' }],
-        image: [{ required: true, message: this.$t('pages.docker.swarm.service.c3d67249'), trigger: 'blur' }]
+        name: [{ required: true, message: this.$t('i18n.4e7e04b15d'), trigger: 'blur' }],
+        mode: [{ required: true, message: this.$t('i18n.922b76febd'), trigger: 'blur' }],
+        image: [{ required: true, message: this.$t('i18n.b9af769752'), trigger: 'blur' }]
       },
       columns: [
         {
-          title: this.$t('pages.docker.swarm.service.72cebb96'),
+          title: this.$t('i18n.faaadc447b'),
           width: 80,
           ellipsis: true,
           align: 'center',
           customRender: ({ index }) => `${index + 1}`
         },
         {
-          title: this.$t('pages.docker.swarm.service.ab51bb7a'),
+          title: this.$t('i18n.a75b96584d'),
           dataIndex: 'id',
           ellipsis: true
         },
         {
-          title: this.$t('pages.docker.swarm.service.3e34ec28'),
+          title: this.$t('i18n.d7ec2d3fea'),
           dataIndex: ['spec', 'name'],
           ellipsis: true,
 
           tooltip: true
         },
         {
-          title: this.$t('pages.docker.swarm.service.7fbd7a7e'),
+          title: this.$t('i18n.44c4aaa1d9'),
           dataIndex: ['spec', 'mode', 'mode'],
           ellipsis: true,
           width: 120,
@@ -698,7 +665,7 @@ export default {
         },
         // { title: "网络模式", dataIndex: "spec.endpointSpec.mode", ellipsis: true, width: 120, },
         {
-          title: this.$t('pages.docker.swarm.service.f91beb25'),
+          title: this.$t('i18n.532495b65b'),
           dataIndex: ['spec', 'mode', 'replicated', 'replicas'],
           align: 'center',
           width: 90,
@@ -706,7 +673,7 @@ export default {
           replicas: true
         },
         {
-          title: this.$t('pages.docker.swarm.service.9f66cc86'),
+          title: this.$t('i18n.d9435aa802'),
           dataIndex: ['spec', 'endpointSpec', 'mode'],
           ellipsis: true,
           width: 100,
@@ -714,7 +681,7 @@ export default {
         },
 
         {
-          title: this.$t('pages.docker.swarm.service.61164914'),
+          title: this.$t('i18n.1303e638b5'),
           dataIndex: 'updatedAt',
 
           ellipsis: true,
@@ -722,7 +689,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('pages.docker.swarm.service.3bb962bf'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
           fixed: 'right',
           align: 'center',
@@ -802,7 +769,7 @@ export default {
       const spec = record.spec
       if (!spec) {
         $notification.error({
-          message: this.$t('pages.docker.swarm.service.262ca705')
+          message: this.$t('i18n.534115e981')
         })
         return
       }
@@ -931,11 +898,11 @@ export default {
     // 删除
     handleDel(record) {
       $confirm({
-        title: this.$t('pages.docker.swarm.service.b22d55a0'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.docker.swarm.service.bd1a6f5b'),
-        okText: this.$t('pages.docker.swarm.service.e8e9db25'),
-        cancelText: this.$t('pages.docker.swarm.service.b12468e9'),
+        content: this.$t('i18n.a4266aea79'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return dockerSwarmServicesDel(this.urlPrefix, {
             serviceId: record.id,

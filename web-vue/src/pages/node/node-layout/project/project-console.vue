@@ -5,7 +5,7 @@
       <template #before>
         <a-space>
           <a-button size="small" :disabled="project.status" :loading="optButtonLoading" type="primary" @click="start">{{
-            $t('pages.node.node-layout.project.project-console.15f9c981')
+            $t('i18n.8e54ddfe24')
           }}</a-button>
           <a-button
             size="small"
@@ -14,7 +14,7 @@
             type="primary"
             danger
             @click="restart"
-            >{{ $t('pages.node.node-layout.project.project-console.80c35a66') }}</a-button
+            >{{ $t('i18n.01b4e06f39') }}</a-button
           >
           <a-button
             size="small"
@@ -23,40 +23,40 @@
             type="primary"
             danger
             @click="stop"
-            >{{ $t('pages.node.node-layout.project.project-console.5c03f4ad') }}</a-button
+            >{{ $t('i18n.095e938e2a') }}</a-button
           >
           <template v-if="project.runMode === 'Dsl'">
             <template v-if="canReload">
-              <a-popover :title="$t('pages.node.node-layout.project.project-console.376f2896')">
+              <a-popover :title="$t('i18n.8b2e274414')">
                 <template #content>
                   <template v-if="project.lastReloadResult">
                     <p>
                       <a-tag v-if="project.lastReloadResult.success" color="green">{{
-                        $t('pages.node.node-layout.project.project-console.6e06fe4f')
+                        $t('i18n.330363dfc5')
                       }}</a-tag>
                       <a-tag v-else color="green">{{
-                        $t('pages.node.node-layout.project.project-console.6e06fe4f')
+                        $t('i18n.330363dfc5')
                       }}</a-tag>
                     </p>
                     <p v-for="(item, index) in project.lastReloadResult.msgs" :key="index">
                       {{ item }}
                     </p>
                   </template>
-                  <template v-else>{{ $t('pages.node.node-layout.project.project-console.fdc695b2') }}</template>
+                  <template v-else>{{ $t('i18n.14dcfcc4fa') }}</template>
                 </template>
                 <a-button size="small" :loading="optButtonLoading" type="primary" @click="reload">{{
-                  $t('pages.node.node-layout.project.project-console.b7be5506')
+                  $t('i18n.aaeb54633e')
                 }}</a-button>
               </a-popover>
             </template>
             <template v-else>
               <a-button size="small" :disabled="true" :loading="optButtonLoading" type="primary">{{
-                $t('pages.node.node-layout.project.project-console.b7be5506')
+                $t('i18n.aaeb54633e')
               }}</a-button>
             </template>
           </template>
           <a-button size="small" type="primary" @click="goFile">{{
-            $t('pages.node.node-layout.project.project-console.502f94')
+            $t('i18n.8780e6b3d1')
           }}</a-button>
           <a-dropdown v-if="project.dslProcessInfo">
             <template #overlay>
@@ -67,7 +67,7 @@
                       {{ item.process }}
                     </a-tag>
                     <template v-if="item.type === 'file'"
-                      >{{ $t('pages.node.node-layout.project.project-console.dcbad93b') }}{{ item.scriptId }}
+                      >{{ $t('i18n.4df483b9c7') }}{{ item.scriptId }}
                     </template>
                     <template v-else-if="item.type === 'script'">
                       <a-button
@@ -80,12 +80,12 @@
                           }
                         "
                       >
-                        <EditOutlined /> {{ $t('pages.node.node-layout.project.project-console.e0417750') }}
+                        <EditOutlined /> {{ $t('i18n.e0ba3b9145') }}
                       </a-button>
                     </template>
                     <template v-else-if="item.type === 'library'">
                       <a-button type="link" size="small" disabled=""
-                        >{{ $t('pages.node.node-layout.project.project-console.bbbe8e9b')
+                        >{{ $t('i18n.91a10b8776')
                         }}{{ item.scriptId }}</a-button
                       >
                     </template>
@@ -104,7 +104,7 @@
               </a-menu>
             </template>
             <a-button size="small" type="primary">
-              {{ $t('pages.node.node-layout.project.project-console.5453aa0b') }} <DownOutlined />
+              {{ $t('i18n.ce40cd6390') }} <DownOutlined />
             </a-button>
           </a-dropdown>
           <a-button
@@ -117,7 +117,7 @@
             "
           >
             <!-- <a-tag> -->
-            {{ $t('pages.node.node-layout.project.project-console.1246c314') }}: {{ project.logSize || '-' }}
+            {{ $t('i18n.76aebf3cc6') }}: {{ project.logSize || '-' }}
             <!-- 更多 -->
             <FullscreenOutlined />
             <!-- </a-tag> -->
@@ -132,7 +132,7 @@
       v-if="lobbackVisible"
       v-model:open="lobbackVisible"
       destroy-on-close
-      :title="$t('pages.node.node-layout.project.project-console.111eece')"
+      :title="$t('i18n.15f01c43e8')"
       width="850px"
       :footer="null"
       :mask-closable="false"
@@ -257,7 +257,7 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: `web socket ${this.$t('pages.node.node-layout.project.project-console.d75d207f')},${this.$t(
+          message: `web socket ${this.$t('i18n.7030ff6470')},${this.$t(
             'pages.node.node-layout.project.project-console.763330b'
           )}`
         })
@@ -266,7 +266,7 @@ export default {
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
-        $message.warning(this.$t('pages.node.node-layout.project.project-console.8a2aae09'))
+        $message.warning(this.$t('i18n.d6cdafe552'))
         clearInterval(this.heart)
       }
       this.socket.onmessage = (msg) => {
@@ -309,11 +309,11 @@ export default {
               }
               res.data.ports &&
                 this.$refs.logView.appendLine(
-                  this.$t('pages.node.node-layout.project.project-console.a6c4bfd7') + res.data.ports
+                  this.$t('i18n.b6c9619081') + res.data.ports
                 )
               res.data.pids &&
                 this.$refs.logView.appendLine(
-                  this.$t('pages.node.node-layout.project.project-console.3cf2b4f7') + res.data.pids.join(',')
+                  this.$t('i18n.2b04210d33') + res.data.pids.join(',')
                 )
             }
             this.$refs.logView.appendLine(res.op + ' ' + res.msg)
@@ -369,11 +369,11 @@ export default {
     // 重启
     restart() {
       $confirm({
-        title: this.$t('pages.node.node-layout.project.project-console.1da61c06'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.node.node-layout.project.project-console.fb372d35'),
-        okText: this.$t('pages.node.node-layout.project.project-console.7da4a591'),
-        cancelText: this.$t('pages.node.node-layout.project.project-console.43105e21'),
+        content: this.$t('i18n.989f1f2b61'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           this.sendMsg('restart')
         }
@@ -382,11 +382,11 @@ export default {
     // 停止
     stop() {
       $confirm({
-        title: this.$t('pages.node.node-layout.project.project-console.1da61c06'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.node.node-layout.project.project-console.2e391eba'),
-        okText: this.$t('pages.node.node-layout.project.project-console.7da4a591'),
-        cancelText: this.$t('pages.node.node-layout.project.project-console.43105e21'),
+        content: this.$t('i18n.010865ca50'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           this.sendMsg('stop')
         }

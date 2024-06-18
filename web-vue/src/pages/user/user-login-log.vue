@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="systemUserLoginLog"
-      :empty-description="$t('pages.user.user-login-log.61b2c18c')"
+      :empty-description="$t('i18n.ede2c450d1')"
       :loading="loading"
       :data-source="list"
       :columns="columns"
@@ -24,19 +24,19 @@
         <a-space>
           <a-input
             v-model:value="listQuery['%modifyUser%']"
-            :placeholder="$t('pages.user.user-login-log.c28c6dc1')"
+            :placeholder="$t('i18n.819767ada1')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%username%']"
-            :placeholder="$t('pages.user.user-login-log.9b5a95d2')"
+            :placeholder="$t('i18n.9a56bb830e')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%ip%']"
-            :placeholder="$t('pages.user.user-login-log.11294c8f')"
+            :placeholder="$t('i18n.b38d6077d6')"
             class="search-input-item"
             @press-enter="loadData"
           />
@@ -47,9 +47,9 @@
             format="YYYY-MM-DD HH:mm:ss"
             @change="onChangeTime"
           />
-          <a-tooltip :title="$t('pages.user.user-login-log.1bfed54a')">
+          <a-tooltip :title="$t('i18n.4838a3bd20')">
             <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('pages.user.user-login-log.53c2763c')
+              $t('i18n.e5f71fc31e')
             }}</a-button>
           </a-tooltip>
         </a-space>
@@ -60,18 +60,18 @@
         </template>
 
         <template v-if="column.dataIndex === 'success'">
-          <a-tag v-if="text" color="green">{{ $t('pages.user.user-login-log.83aa7d3') }}</a-tag>
-          <a-tag v-else color="pink">{{ $t('pages.user.user-login-log.46a17ba0') }}</a-tag>
+          <a-tag v-if="text" color="green">{{ $t('i18n.330363dfc5') }}</a-tag>
+          <a-tag v-else color="pink">{{ $t('i18n.acd5cb847a') }}</a-tag>
         </template>
 
         <template v-if="column.dataIndex === 'useMfa'">
           <a-tag>{{
-            text ? $t('pages.user.user-login-log.9c128103') : $t('pages.user.user-login-log.731ee562')
+            text ? $t('i18n.ecff77a8d4') : $t('i18n.869ec83e33')
           }}</a-tag>
         </template>
 
         <template v-if="column.dataIndex === 'operateCode'">
-          {{ operateCodeMap[text] || $t('pages.user.user-login-log.ca1cdfa6') }}
+          {{ operateCodeMap[text] || $t('i18n.1622dc9b6b') }}
         </template>
       </template>
     </CustomTable>
@@ -98,36 +98,36 @@ const activePage = computed(() => {
 })
 
 const columns = ref<CustomColumnType[]>([
-  { title: $t('pages.user.user-login-log.8384e057'), dataIndex: 'modifyUser', width: 100 },
-  { title: $t('pages.user.user-login-log.9b5a95d2'), dataIndex: 'username', width: 120 },
+  { title: $t('i18n.30acd20d6e'), dataIndex: 'modifyUser', width: 100 },
+  { title: $t('i18n.9a56bb830e'), dataIndex: 'username', width: 120 },
   { title: 'IP', dataIndex: 'ip', width: 120 },
 
   {
-    title: $t('pages.user.user-login-log.2bff48a0'),
+    title: $t('i18n.5e9f2dedca'),
     dataIndex: 'success',
     width: 90,
     align: 'center'
   },
   {
-    title: $t('pages.user.user-login-log.b13cc4c9'),
+    title: $t('i18n.ae0d608495'),
     dataIndex: 'useMfa',
     align: 'center',
     width: 110
   },
   {
-    title: $t('pages.user.user-login-log.5f2a060b'),
+    title: $t('i18n.64c083c0a9'),
     dataIndex: 'operateCode',
     ellipsis: true,
     width: 180
   },
   {
-    title: $t('pages.user.user-login-log.dea71d69'),
+    title: $t('i18n.9fca7c455f'),
     dataIndex: 'createTimeMillis',
     sorter: true,
     customRender: ({ text, record }) => parseTime(text || record.optTime),
     width: '170px'
   },
-  { title: $t('pages.user.user-login-log.bd29775b'), dataIndex: 'userAgent', ellipsis: true, width: 100 }
+  { title: $t('i18n.912302cb02'), dataIndex: 'userAgent', ellipsis: true, width: 100 }
 ])
 
 const pagination = computed(() => {

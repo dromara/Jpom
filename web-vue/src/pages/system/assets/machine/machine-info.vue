@@ -5,13 +5,13 @@
         <a-space>
           <a-statistic-countdown format="s" title="" :value="countdownTime" @finish="pullNodeData">
             <template #suffix>
-              <div style="font-size: 12px">{{ $t('pages.system.assets.machine.machine-info.335587ef') }}</div>
+              <div style="font-size: 12px">{{ $t('i18n.ff80d2671c') }}</div>
             </template>
           </a-statistic-countdown>
           <!-- <a-statistic-countdown title="" :value="countdownTime" @finish="pullNodeData" /> -->
         </a-space>
       </template>
-      <a-tab-pane key="info" :tab="$t('pages.system.assets.machine.machine-info.bafda884')">
+      <a-tab-pane key="info" :tab="$t('i18n.6ea1fe6baa')">
         <a-card size="small">
           <template #title>
             {{ machineInfo && machineInfo.name }}
@@ -23,14 +23,14 @@
               style="margin-right: 0"
             >
               {{
-                statusMap[machineInfo && machineInfo.status] || $t('pages.system.assets.machine.machine-info.ca1cdfa6')
+                statusMap[machineInfo && machineInfo.status] || $t('i18n.1622dc9b6b')
               }}
             </a-tag>
           </template>
           <a-space direction="vertical" style="display: block">
             <a-alert
               v-if="machineInfo && machineInfo.status !== 1"
-              :message="$t('pages.system.assets.machine.machine-info.a622e852')"
+              :message="$t('i18n.920f05031b')"
               :description="(machineInfo && machineInfo.statusMsg) || ''"
               type="warning"
               show-icon
@@ -38,25 +38,25 @@
             <a-descriptions :column="4" :bordered="true">
               <template #title> </template>
 
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.163de925')" :span="2">{{
+              <a-descriptions-item :label="$t('i18n.cdc478d90c')" :span="2">{{
                 machineInfo && machineInfo.osName
               }}</a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.41180a8c')" :span="2">{{
+              <a-descriptions-item :label="$t('i18n.1857e7024c')" :span="2">{{
                 machineInfo && machineInfo.osVersion
               }}</a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.e8e8919e')" :span="2">
+              <a-descriptions-item :label="$t('i18n.375f853ad6')" :span="2">
                 {{ machineInfo && machineInfo.osHardwareVersion }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.6665f51e')" :span="2">
+              <a-descriptions-item :label="$t('i18n.899dbd7b9a')" :span="2">
                 {{ machineInfo && machineInfo.osCpuIdentifierName }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.7fb10499')" :span="2">
+              <a-descriptions-item :label="$t('i18n.6707667676')" :span="2">
                 {{ machineInfo && machineInfo.hostName }}
               </a-descriptions-item>
               <a-descriptions-item label="IPV4" :span="2">
                 <template v-if="machineInfo && machineInfo.ipv4List && machineInfo.ipv4List.length">
                   {{ machineInfo && machineInfo.ipv4List[0] }}
-                  <a-popover :title="$t('pages.system.assets.machine.machine-info.3058a7c4')">
+                  <a-popover :title="$t('i18n.b5c5078a5d')">
                     <template #content>
                       <p v-for="item in machineInfo && machineInfo.ipv4List" :key="item">
                         {{ item }}
@@ -70,58 +70,58 @@
                   </a-popover>
                 </template>
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.3429c3a5')"
+              <a-descriptions-item :label="$t('i18n.067638bede')"
                 >{{ machineInfo && machineInfo.osCpuCores }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.d5f99ae')"
+              <a-descriptions-item :label="$t('i18n.9932551cd5')"
                 >{{ renderSize(machineInfo && machineInfo.osMoneyTotal) }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.c209aabb')"
+              <a-descriptions-item :label="$t('i18n.844296754e')"
                 >{{ renderSize(machineInfo && machineInfo.osVirtualMax) }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.aee39363')"
+              <a-descriptions-item :label="$t('i18n.5a879a657b')"
                 >{{ renderSize(machineInfo && machineInfo.osSwapTotal) }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.d66598e7')"
+              <a-descriptions-item :label="$t('i18n.1d650a60a5')"
                 >{{ renderSize(machineInfo && machineInfo.osFileStoreTotal) }}
               </a-descriptions-item>
 
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.c0530606')"
+              <a-descriptions-item :label="$t('i18n.4956eb6aaa')"
                 >{{ machineInfo && machineInfo.osLoadAverage }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.8deda3df')"
+              <a-descriptions-item :label="$t('i18n.efb88b3927')"
                 >{{ formatDuration(((machineInfo && machineInfo.osSystemUptime) || 0) * 1000, '', 3) }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.24fef8f1')"
+              <a-descriptions-item :label="$t('i18n.a912a83e6f')"
                 >{{ machineInfo && machineInfo.jpomVersion }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.e69a12')"
+              <a-descriptions-item :label="$t('i18n.04a8742dd7')"
                 >{{ formatDuration(machineInfo && machineInfo.jpomUptime, '', 3) }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.d2a8eb56')"
+              <a-descriptions-item :label="$t('i18n.efd32e870d')"
                 >{{ machineInfo && machineInfo.jpomBuildTime }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.2c732e97')"
+              <a-descriptions-item :label="$t('i18n.6106de3d87')"
                 >{{ machineInfo && machineInfo.javaVersion }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.edfd303c')"
+              <a-descriptions-item :label="$t('i18n.1818e9c264')"
                 >{{ renderSize(machineInfo && machineInfo.jvmTotalMemory) }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.e39c76c9')"
+              <a-descriptions-item :label="$t('i18n.5bb162ecbb')"
                 >{{ renderSize(machineInfo && machineInfo.jvmFreeMemory) }}
               </a-descriptions-item>
 
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.293598cd')"
+              <a-descriptions-item :label="$t('i18n.607558dbd4')"
                 >{{ machineInfo && machineInfo.jpomProjectCount }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.f680ea25')"
+              <a-descriptions-item :label="$t('i18n.e39f4a69f4')"
                 >{{ machineInfo && machineInfo.jpomScriptCount }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.e4750de1')"
+              <a-descriptions-item :label="$t('i18n.204222d167')"
                 >{{ formatDuration(machineInfo && machineInfo.networkDelay) }}
               </a-descriptions-item>
 
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.6a54c8a2')" :span="4">
+              <a-descriptions-item :label="$t('i18n.ed145eba38')" :span="4">
                 <a-progress
                   :stroke-color="{
                     '0%': '#87d068',
@@ -130,7 +130,7 @@
                   :percent="formatPercent2Number((machineInfo && machineInfo.osOccupyDisk) || 0)"
                 />
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.10917337')" :span="4">
+              <a-descriptions-item :label="$t('i18n.883848dd37')" :span="4">
                 <a-progress
                   :stroke-color="{
                     '0%': '#87d068',
@@ -139,7 +139,7 @@
                   :percent="formatPercent2Number((machineInfo && machineInfo.osOccupyMemory) || 0)"
                 />
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.611bd9b7')" :span="4">
+              <a-descriptions-item :label="$t('i18n.80669da961')" :span="4">
                 <a-progress
                   :stroke-color="{
                     '0%': '#87d068',
@@ -152,12 +152,12 @@
           </a-space>
         </a-card>
       </a-tab-pane>
-      <a-tab-pane key="stat" :tab="$t('pages.system.assets.machine.machine-info.1ad1fa04')">
+      <a-tab-pane key="stat" :tab="$t('i18n.aa9236568f')">
         <a-space v-if="nodeMonitorLoadStatus === 1" direction="vertical" style="width: 100%">
-          <a-card size="small" :title="$t('pages.system.assets.machine.machine-info.bafda884')">
+          <a-card size="small" :title="$t('i18n.6ea1fe6baa')">
             <template #extra>
               <a-button v-if="historyChart" size="small" type="primary" @click="handleHistory('')">
-                <AreaChartOutlined />{{ $t('pages.system.assets.machine.machine-info.61cd5756') }}
+                <AreaChartOutlined />{{ $t('i18n.5068552b18') }}
               </a-button>
             </template>
             <!-- top 图表 -->
@@ -169,10 +169,10 @@
                 <template #split>
                   <a-divider type="vertical" />
                 </template>
-                {{ $t('pages.system.assets.machine.machine-info.f0df7d2f') }}
+                {{ $t('i18n.102e8ec6d5') }}
                 <template v-if="monitorConfig?.network?.statExcludeNames">
                   <span>
-                    {{ $t('pages.system.assets.machine.machine-info.5b89f18') }}
+                    {{ $t('i18n.503660aa89') }}
                     <a-tag v-for="item in monitorConfig?.network?.statExcludeNames?.split(',')">
                       {{ item }}
                     </a-tag>
@@ -180,18 +180,18 @@
                 </template>
                 <template v-if="monitorConfig?.network?.statContainsOnlyNames">
                   <span>
-                    {{ $t('pages.system.assets.machine.machine-info.9e049eed') }}
+                    {{ $t('i18n.bb7eeae618') }}
                     <a-tag v-for="item in monitorConfig?.network?.statContainsOnlyNames?.split(',')">
                       {{ item }}
                     </a-tag>
                   </span>
                 </template>
                 <a-popover>
-                  <template #title>{{ $t('pages.system.assets.machine.machine-info.b1c6c899') }} </template>
+                  <template #title>{{ $t('i18n.fb8fb9cc46') }} </template>
                   <template #content>
-                    <b>{{ $t('pages.system.assets.machine.machine-info.5e323215') }}</b>
+                    <b>{{ $t('i18n.13f7bb78ef') }}</b>
                     <div>
-                      {{ $t('pages.system.assets.machine.machine-info.b8794800') }}
+                      {{ $t('i18n.475cd76aec') }}
                       <a-tag v-for="item in JSON.parse(machineInfo?.extendInfo || '{}')?.monitorIfsNames?.split(',')">
                         {{ item }}
                       </a-tag>
@@ -204,16 +204,16 @@
             <template #extra>
               <a-button v-if="netHistoryChart" size="small" type="primary" @click="handleHistory('network-stat')">
                 <AreaChartOutlined />
-                {{ $t('pages.system.assets.machine.machine-info.61cd5756') }}
+                {{ $t('i18n.5068552b18') }}
               </a-button>
             </template>
             <!-- 网络流量图表 -->
             <div id="net-chart" class="chart">loading...</div>
           </a-card>
-          <a-card size="small" :title="$t('pages.system.assets.machine.machine-info.4f43a5c2')">
+          <a-card size="small" :title="$t('i18n.bbbaeb32fc')">
             <template #extra>
               <a-button v-if="networkDelayChart" size="small" type="primary" @click="handleHistory('networkDelay')">
-                <AreaChartOutlined />{{ $t('pages.system.assets.machine.machine-info.61cd5756') }}
+                <AreaChartOutlined />{{ $t('i18n.5068552b18') }}
               </a-button>
             </template>
             <!-- 机器延迟 图表 -->
@@ -223,12 +223,12 @@
         <a-empty
           v-else-if="nodeMonitorLoadStatus === -1"
           :image="Empty.PRESENTED_IMAGE_SIMPLE"
-          :description="$t('pages.system.assets.machine.machine-info.89f05c59')"
+          :description="$t('i18n.536206b587')"
         >
         </a-empty>
         <a-skeleton v-else />
       </a-tab-pane>
-      <a-tab-pane key="process" :tab="$t('pages.system.assets.machine.machine-info.2cc659f2')">
+      <a-tab-pane key="process" :tab="$t('i18n.d6a5b67779')">
         <a-card size="small">
           <template #title>
             <a-row>
@@ -240,17 +240,17 @@
                     sel-style="width: 200px !important"
                     :data="processNames"
                     :popup-container-parent="false"
-                    :input-placeholder="$t('pages.system.assets.machine.machine-info.a82f8ef6')"
-                    :select-placeholder="$t('pages.system.assets.machine.machine-info.ed2a8180')"
+                    :input-placeholder="$t('i18n.2493ff1a29')"
+                    :select-placeholder="$t('i18n.bab17dc6b1')"
                     @change="loadNodeProcess"
                     @add-option="addNodeProcess"
                   >
                     <template #suffixIcon> <DownOutlined /></template>
                   </custom-select>
-                  <a-tooltip :title="$t('pages.system.assets.machine.machine-info.2386565f')">
+                  <a-tooltip :title="$t('i18n.5dc7b04caa')">
                     <a-input-number v-model:value="processSearch.processCount" :min="1" @change="loadNodeProcess" />
                   </a-tooltip>
-                  <a-tooltip :title="$t('pages.system.assets.machine.machine-info.853b4426')">
+                  <a-tooltip :title="$t('i18n.8400529cfb')">
                     <RestOutlined @click="restProcessNames" />
                   </a-tooltip>
                 </a-space>
@@ -304,7 +304,7 @@
           </a-table>
         </a-card>
       </a-tab-pane>
-      <a-tab-pane key="disk" :tab="$t('pages.system.assets.machine.machine-info.86a5c32a')">
+      <a-tab-pane key="disk" :tab="$t('i18n.8dc8bbbc20')">
         <a-table
           size="middle"
           :loading="diskLoading"
@@ -340,37 +340,37 @@
           </template>
         </a-table>
       </a-tab-pane>
-      <a-tab-pane key="hw-disk" :tab="$t('pages.system.assets.machine.machine-info.1797c14e')">
+      <a-tab-pane key="hw-disk" :tab="$t('i18n.dacc2e0e62')">
         <a-collapse>
           <a-collapse-panel v-for="item in hwDiskList" :key="item.uuid">
             <template #header>
               <a-page-header :title="item.name" :back-icon="false">
                 <template #subTitle> {{ item.model }} </template>
                 <a-descriptions size="small" :column="4">
-                  <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.72cebb96')">{{
+                  <a-descriptions-item :label="$t('i18n.faaadc447b')">{{
                     item.serial
                   }}</a-descriptions-item>
-                  <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.97d7b644')">{{
+                  <a-descriptions-item :label="$t('i18n.58f9666705')">{{
                     renderSize(item.size)
                   }}</a-descriptions-item>
-                  <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.43839183')">{{
+                  <a-descriptions-item :label="$t('i18n.9f70e40e04')">{{
                     formatDuration(item.transferTime)
                   }}</a-descriptions-item>
-                  <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.d492d8b7')">
+                  <a-descriptions-item :label="$t('i18n.e63fb95deb')">
                     {{ item.currentQueueLength }}
                   </a-descriptions-item>
                 </a-descriptions>
                 <a-descriptions size="small" :column="4">
-                  <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.177f0219')">
+                  <a-descriptions-item :label="$t('i18n.8900539e06')">
                     {{ renderSize(item.writeBytes) }}
                   </a-descriptions-item>
-                  <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.4c35dbc2')">{{
+                  <a-descriptions-item :label="$t('i18n.8fda053c83')">{{
                     item.writes
                   }}</a-descriptions-item>
-                  <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.b1a7184a')">
+                  <a-descriptions-item :label="$t('i18n.86f3ec932c')">
                     {{ renderSize(item.readBytes) }}
                   </a-descriptions-item>
-                  <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.bef10396')">{{
+                  <a-descriptions-item :label="$t('i18n.3b14c524f6')">{{
                     item.reads
                   }}</a-descriptions-item>
                 </a-descriptions>
@@ -399,7 +399,7 @@
           </a-collapse-panel>
         </a-collapse>
       </a-tab-pane>
-      <a-tab-pane key="networkInterfaces" :tab="$t('pages.system.assets.machine.machine-info.1298e6ec')">
+      <a-tab-pane key="networkInterfaces" :tab="$t('i18n.0ac4999a4c')">
         <a-collapse v-if="networkInterfaces && networkInterfaces.length">
           <a-collapse-panel v-for="(item, index) in networkInterfaces" :key="index">
             <template #header>
@@ -465,14 +465,14 @@
               <a-descriptions-item label="MTU">
                 {{ item.mtu }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.85a662f8')"
+              <a-descriptions-item :label="$t('i18n.03f38597a6')"
                 >{{ renderBpsSize(item.speed) }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.28e2bd1c')"
+              <a-descriptions-item :label="$t('i18n.2a3b06a91a')"
                 >{{
                   item.knownVmMacAddr
-                    ? $t('pages.system.assets.machine.machine-info.f5bb2364')
-                    : $t('pages.system.assets.machine.machine-info.5edb2e8a')
+                    ? $t('i18n.0a60ac8f02')
+                    : $t('i18n.c9744f45e7')
                 }}
               </a-descriptions-item>
 
@@ -482,34 +482,34 @@
               <a-descriptions-item label="IPV6" :span="4">
                 <a-tag v-for="ipItem in item.ipv6addr || []" :key="ipItem">{{ ipItem }}</a-tag>
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.b39a7f49')"
+              <a-descriptions-item :label="$t('i18n.7bcbf81120')"
                 >{{ item.packetsRecv }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.b5bb96e3')"
+              <a-descriptions-item :label="$t('i18n.c6a3ebf3c4')"
                 >{{ renderSize(item.bytesRecv) }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.8a9f22eb')"
+              <a-descriptions-item :label="$t('i18n.05cfc9af9d')"
                 >{{ item.inErrors }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.17c1848a')"
+              <a-descriptions-item :label="$t('i18n.5ef040a79d')"
                 >{{ item.tnDrops }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.b6bed112')"
+              <a-descriptions-item :label="$t('i18n.00b04e1bf0')"
                 >{{ item.packetsSent }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.ecbb3d83')"
+              <a-descriptions-item :label="$t('i18n.020d17aac6')"
                 >{{ renderSize(item.bytesSent) }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.b05834cd')"
+              <a-descriptions-item :label="$t('i18n.235f0b52a1')"
                 >{{ item.outErrors }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('pages.system.assets.machine.machine-info.5f73179f')"
+              <a-descriptions-item :label="$t('i18n.3f719b3e32')"
                 >{{ item.collisions }}
               </a-descriptions-item>
             </a-descriptions>
           </a-collapse-panel>
         </a-collapse>
-        <a-empty v-else :description="$t('pages.system.assets.machine.machine-info.9a0e95c2')" />
+        <a-empty v-else :description="$t('i18n.aa53a4b93a')" />
       </a-tab-pane>
     </a-tabs>
 
@@ -519,7 +519,7 @@
       v-model:open="monitorVisible.visible"
       destroy-on-close
       width="75%"
-      :title="$t('pages.system.assets.machine.machine-info.61cd5756')"
+      :title="$t('i18n.5068552b18')"
       :footer="null"
       :mask-closable="false"
     >
@@ -603,21 +603,21 @@ export default {
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.3e34ec28'),
+          title: this.$t('i18n.d7ec2d3fea'),
           dataIndex: 'name',
           width: '80px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.a6c4bfd7'),
+          title: this.$t('i18n.c76cfefe72'),
           dataIndex: 'port',
           width: '100px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.45e07a72'),
+          title: this.$t('i18n.b05345caad'),
           dataIndex: 'user',
           width: '100px',
           ellipsis: true,
@@ -625,14 +625,14 @@ export default {
         },
 
         {
-          title: this.$t('pages.system.assets.machine.machine-info.9c32c887'),
+          title: this.$t('i18n.3fea7ca76c'),
           dataIndex: 'state',
           width: '80px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.c209aabb'),
+          title: this.$t('i18n.844296754e'),
           dataIndex: 'virtualSize',
           width: '100px',
           ellipsis: true,
@@ -646,56 +646,56 @@ export default {
           percentTooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.e5767952'),
+          title: this.$t('i18n.4b5e6872ea'),
           dataIndex: 'residentSetSize',
           width: '100px',
           ellipsis: true,
           sizeTooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.5874b791'),
+          title: this.$t('i18n.ee8ecb9ee0'),
           dataIndex: 'priority',
           width: '80px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.ac9ef5f5'),
+          title: this.$t('i18n.86cd8dcead'),
           dataIndex: 'startTime',
           width: '180px',
           ellipsis: true,
           timeTooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.43839183'),
+          title: this.$t('i18n.9f70e40e04'),
           dataIndex: 'upTime',
           width: '100px',
           ellipsis: true,
           durationTooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.530924bc'),
+          title: this.$t('i18n.a1e24fe1f6'),
           dataIndex: 'userTime',
           width: '100px',
           ellipsis: true,
           durationTooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.ee016914'),
+          title: this.$t('i18n.4f35e80da6'),
           dataIndex: 'path',
           width: '180px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.7b12e8f3'),
+          title: this.$t('i18n.c99a2f7ed8'),
           dataIndex: 'commandLine',
           width: '180px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.3bb962bf'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
 
           align: 'center',
@@ -712,61 +712,61 @@ export default {
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.3e34ec28'),
+          title: this.$t('i18n.d7ec2d3fea'),
           dataIndex: 'name',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.5ea86045'),
+          title: this.$t('i18n.7088e18ac9'),
           dataIndex: 'mount',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.741604c2'),
+          title: this.$t('i18n.73a87230e0'),
           dataIndex: 'type',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.42e3c32a'),
+          title: this.$t('i18n.3bdd08adab'),
           dataIndex: 'description',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.32724766'),
+          title: this.$t('i18n.48735a5187'),
           dataIndex: 'freeSpace',
           ellipsis: true,
           sizeTooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.aa1b5a37'),
+          title: this.$t('i18n.d88651584f'),
           dataIndex: 'usableSpace',
           ellipsis: true,
           sizeTooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.a37186e4'),
+          title: this.$t('i18n.627c952b5e'),
           dataIndex: 'totalSpace',
           ellipsis: true,
           sizeTooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.3b1418f6'),
+          title: this.$t('i18n.ba52103711'),
           dataIndex: 'freeInodes',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.24c7f144'),
+          title: this.$t('i18n.7293bbb0ff'),
           dataIndex: 'totalInodes',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.b70f82e6'),
+          title: this.$t('i18n.ea15ae2b7f'),
           dataIndex: 'options',
           ellipsis: true,
           tooltip: true
@@ -775,43 +775,43 @@ export default {
 
       hwDiskPartitionColumns: [
         {
-          title: this.$t('pages.system.assets.machine.machine-info.221f78cb'),
+          title: this.$t('i18n.7b36b18865'),
           dataIndex: 'identification',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.5912711d'),
+          title: this.$t('i18n.42f766b273'),
           dataIndex: 'mountPoint',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.3e34ec28'),
+          title: this.$t('i18n.d7ec2d3fea'),
           dataIndex: 'name',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.698bb532'),
+          title: this.$t('i18n.226b091218'),
           dataIndex: 'type',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.97d7b644'),
+          title: this.$t('i18n.58f9666705'),
           dataIndex: 'size',
           ellipsis: true,
           sizeTooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.5f49334f'),
+          title: this.$t('i18n.5d14e91b01'),
           dataIndex: 'major',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.machine.machine-info.469a17e2'),
+          title: this.$t('i18n.e9c2cb1326'),
           dataIndex: 'minor',
           ellipsis: true,
           tooltip: true
@@ -989,11 +989,11 @@ export default {
     // kill pid
     kill(record) {
       $confirm({
-        title: this.$t('pages.system.assets.machine.machine-info.b22d55a0'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.system.assets.machine.machine-info.cc596782'),
-        okText: this.$t('pages.system.assets.machine.machine-info.e8e9db25'),
-        cancelText: this.$t('pages.system.assets.machine.machine-info.b12468e9'),
+        content: this.$t('i18n.1eb378860a'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return killPid({
             ...this.idInfo,

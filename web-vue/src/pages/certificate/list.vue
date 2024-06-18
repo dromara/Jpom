@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="certificate-list"
-      :empty-description="$t('pages.certificate.list.f2b0d2c7')"
+      :empty-description="$t('i18n.8c2da7cce9')"
       :data-source="list"
       size="middle"
       :loading="loading"
@@ -34,22 +34,22 @@
               v-model:value="listQuery['%issuerDnName%']"
               allow-clear
               class="search-input-item"
-              :placeholder="$t('pages.certificate.list.ce1b3963')"
+              :placeholder="$t('i18n.f0aba63ae7')"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['%subjectDnName%']"
               allow-clear
               class="search-input-item"
-              :placeholder="$t('pages.certificate.list.9b938af')"
+              :placeholder="$t('i18n.9970ad0746')"
               @press-enter="loadData"
             />
-            <a-tooltip :title="$t('pages.certificate.list.554d1b95')">
+            <a-tooltip :title="$t('i18n.4838a3bd20')">
               <a-button type="primary" :loading="loading" @click="loadData">{{
-                $t('pages.certificate.list.53c2763c')
+                $t('i18n.e5f71fc31e')
               }}</a-button>
             </a-tooltip>
-            <a-button type="primary" @click="handleAdd">{{ $t('pages.certificate.list.66e7821f') }}</a-button>
+            <a-button type="primary" @click="handleAdd">{{ $t('i18n.c1690fcca5') }}</a-button>
           </a-space>
         </a-space>
       </template>
@@ -60,32 +60,32 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'serialNumberStr'">
-          <a-popover :title="$t('pages.certificate.list.d4f87c9d')">
+          <a-popover :title="$t('i18n.5dc1f36a27')">
             <template #content>
-              <p>{{ $t('pages.certificate.list.eee04e4f') }}{{ record.description }}</p>
+              <p>{{ $t('i18n.4a4e3b5ae4') }}{{ record.description }}</p>
             </template>
             <!-- {{ text }} -->
             <a-button type="link" style="padding: 0" size="small" @click="handleEdit(record)">{{ text }}</a-button>
           </a-popover>
         </template>
         <template v-else-if="column.dataIndex === 'fileExists'">
-          <a-tag v-if="text" color="green">{{ $t('pages.certificate.list.a78774e2') }}</a-tag>
-          <a-tag v-else color="red">{{ $t('pages.certificate.list.a51066b1') }}</a-tag>
+          <a-tag v-if="text" color="green">{{ $t('i18n.df9497ea98') }}</a-tag>
+          <a-tag v-else color="red">{{ $t('i18n.162e219f6d') }}</a-tag>
         </template>
         <template v-else-if="column.dataIndex === 'workspaceId'">
-          <a-tag v-if="text === 'GLOBAL'">{{ $t('pages.certificate.list.fd0310d0') }}</a-tag>
-          <a-tag v-else>{{ $t('pages.certificate.list.afacc4cb') }}</a-tag>
+          <a-tag v-if="text === 'GLOBAL'">{{ $t('i18n.2be75b1044') }}</a-tag>
+          <a-tag v-else>{{ $t('i18n.98d69f8b62') }}</a-tag>
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button size="small" type="primary" @click="handleDeployFile(record)">{{
-              $t('pages.certificate.list.75099561')
+              $t('i18n.a9f94dcd57')
             }}</a-button>
             <a-button size="small" type="primary" @click="handleDownload(record)">{{
-              $t('pages.certificate.list.a5bebb0f')
+              $t('i18n.55405ea6ff')
             }}</a-button>
             <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-              $t('pages.certificate.list.dd20d11c')
+              $t('i18n.2f4aaddde3')
             }}</a-button>
           </a-space>
         </template>
@@ -98,12 +98,12 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="700px"
-      :title="$t('pages.certificate.list.66e7821f')"
+      :title="$t('i18n.c1690fcca5')"
       :mask-closable="false"
       @ok="handleEditCertOk"
     >
       <a-form ref="importCertForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$t('pages.certificate.list.539387e0')" name="type">
+        <a-form-item :label="$t('i18n.929e857766')" name="type">
           <a-radio-group v-model:value="temp.type">
             <a-radio value="pkcs12"> pkcs12(pfx) </a-radio>
             <a-radio value="JKS"> JKS </a-radio>
@@ -111,7 +111,7 @@
           </a-radio-group>
         </a-form-item>
 
-        <a-form-item :label="$t('pages.certificate.list.9f4bdc32')" name="file">
+        <a-form-item :label="$t('i18n.94aa195397')" name="file">
           <a-upload
             v-if="temp.type"
             :file-list="uploadFileList"
@@ -129,17 +129,17 @@
               }
             "
           >
-            <a-button><UploadOutlined />{{ $t('pages.certificate.list.51eeb245') }}</a-button>
+            <a-button><UploadOutlined />{{ $t('i18n.fd7e0c997d') }}</a-button>
           </a-upload>
-          <template v-else>{{ $t('pages.certificate.list.51afd37c') }}</template>
+          <template v-else>{{ $t('i18n.c3512a3d09') }}</template>
         </a-form-item>
         <a-form-item
           v-if="temp.type && temp.type !== 'X.509'"
-          :label="$t('pages.certificate.list.ac2ef19e')"
+          :label="$t('i18n.45028ad61d')"
           name="password"
-          :help="$t('pages.certificate.list.f13a934d')"
+          :help="$t('i18n.e8f07c2186')"
         >
-          <a-input v-model:value="temp.password" :placeholder="$t('pages.certificate.list.ac2ef19e')" />
+          <a-input v-model:value="temp.password" :placeholder="$t('i18n.45028ad61d')" />
         </a-form-item>
       </a-form>
     </CustomModal>
@@ -149,19 +149,19 @@
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$t('pages.certificate.list.16773a22')"
+      :title="$t('i18n.d47ea92b3a')"
       :mask-closable="false"
       @ok="handleEditOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-item :label="$t('pages.certificate.list.3a750854')" name="global">
+        <a-form-item :label="$t('i18n.e475e0c655')" name="global">
           <a-radio-group v-model:value="temp.global">
-            <a-radio :value="true"> {{ $t('pages.certificate.list.fd0310d0') }} </a-radio>
-            <a-radio :value="false"> {{ $t('pages.certificate.list.919267cc') }} </a-radio>
+            <a-radio :value="true"> {{ $t('i18n.2be75b1044') }} </a-radio>
+            <a-radio :value="false"> {{ $t('i18n.691b11e443') }} </a-radio>
           </a-radio-group>
         </a-form-item>
-        <a-form-item :label="$t('pages.certificate.list.d4f87c9d')" name="description">
-          <a-textarea v-model:value="temp.description" :placeholder="$t('pages.certificate.list.5e6ba316')" />
+        <a-form-item :label="$t('i18n.5dc1f36a27')" name="description">
+          <a-textarea v-model:value="temp.description" :placeholder="$t('i18n.066431a665')" />
         </a-form-item>
       </a-form>
     </CustomModal>
@@ -171,12 +171,12 @@
       v-model:open="releaseFileVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$t('pages.certificate.list.25775bd2')"
+      :title="$t('i18n.9ae40638d2')"
       width="70%"
       :mask-closable="false"
       @ok="releaseFileOk()"
     >
-      <a-alert :message="$t('pages.certificate.list.f2e66875')" type="info" show-icon style="margin-bottom: 10px" />
+      <a-alert :message="$t('i18n.a62fa322b4')" type="info" show-icon style="margin-bottom: 10px" />
       <releaseFile v-if="releaseFileVisible" ref="releaseFile" @commit="handleCommitTask"></releaseFile>
     </CustomModal>
   </div>
@@ -221,55 +221,55 @@ export default {
 
       columns: [
         {
-          title: this.$t('pages.certificate.list.72cebb96'),
+          title: this.$t('i18n.30aaa13963'),
           dataIndex: 'serialNumberStr',
           ellipsis: true,
           width: 150
         },
         {
-          title: this.$t('pages.certificate.list.539387e0'),
+          title: this.$t('i18n.929e857766'),
           dataIndex: 'keyType',
           ellipsis: true,
           width: '80px',
           tooltip: true
         },
         {
-          title: this.$t('pages.certificate.list.34e8b7bd'),
+          title: this.$t('i18n.a3d0154996'),
           dataIndex: 'fileExists',
           ellipsis: true,
 
           width: '80px'
         },
         {
-          title: this.$t('pages.certificate.list.65860154'),
+          title: this.$t('i18n.fffd3ce745'),
           dataIndex: 'workspaceId',
           ellipsis: true,
 
           width: '90px'
         },
         {
-          title: this.$t('pages.certificate.list.ce1b3963'),
+          title: this.$t('i18n.f0aba63ae7'),
           dataIndex: 'issuerDnName',
           ellipsis: true,
           width: 200,
           tooltip: true
         },
         {
-          title: this.$t('pages.certificate.list.9b938af'),
+          title: this.$t('i18n.9970ad0746'),
           dataIndex: 'subjectDnName',
           ellipsis: true,
           width: 150,
           tooltip: true
         },
         {
-          title: this.$t('pages.certificate.list.4ac82fe2'),
+          title: this.$t('i18n.3a6c2962e1'),
           dataIndex: 'sigAlgName',
           ellipsis: true,
           width: 150,
           tooltip: true
         },
         {
-          title: this.$t('pages.certificate.list.65d0dc35'),
+          title: this.$t('i18n.4f08d1ad9f'),
           dataIndex: 'sigAlgOid',
           ellipsis: true,
           width: 150,
@@ -277,42 +277,42 @@ export default {
         },
 
         {
-          title: this.$t('pages.certificate.list.bdfd1242'),
+          title: this.$t('i18n.fc92e93523'),
           dataIndex: 'effectiveTime',
           customRender: ({ text }) => parseTime(text),
           sorter: true,
           width: '170px'
         },
         {
-          title: this.$t('pages.certificate.list.19741306'),
+          title: this.$t('i18n.22e888c2df'),
           dataIndex: 'expirationTime',
           sorter: true,
           customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
-          title: this.$t('pages.certificate.list.d826aba2'),
+          title: this.$t('i18n.d0b2958432'),
           dataIndex: 'certVersion',
           ellipsis: true,
           width: '80px',
           tooltip: true
         },
         {
-          title: this.$t('pages.certificate.list.db3c9202'),
+          title: this.$t('i18n.95a43eaa59'),
           dataIndex: 'createUser',
           ellipsis: true,
 
           width: '120px'
         },
         {
-          title: this.$t('pages.certificate.list.916db24b'),
+          title: this.$t('i18n.9baca0054e'),
           dataIndex: 'modifyUser',
           ellipsis: true,
 
           width: '120px'
         },
         {
-          title: this.$t('pages.certificate.list.f5b90169'),
+          title: this.$t('i18n.eca37cb072'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -320,7 +320,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('pages.certificate.list.3bb962bf'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
           align: 'center',
           fixed: 'right',
@@ -333,7 +333,7 @@ export default {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
         // name: [{ required: true, message: "Please input name", trigger: "blur" }],
         // path: [{ required: true, message: "Please select path", trigger: "blur" }],
-        type: [{ required: true, message: this.$t('pages.certificate.list.71717caf'), trigger: 'blur' }]
+        type: [{ required: true, message: this.$t('i18n.ac408e4b03'), trigger: 'blur' }]
       },
       releaseFileVisible: false,
       editVisible: false,
@@ -399,7 +399,7 @@ export default {
       this.$refs['importCertForm'].validate().then(() => {
         if (this.uploadFileList.length === 0) {
           $notification.error({
-            message: this.$t('pages.certificate.list.71301d96')
+            message: this.$t('i18n.4244830033')
           })
           return false
         }
@@ -430,11 +430,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$t('pages.certificate.list.b22d55a0'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.certificate.list.987c2cd6'),
-        okText: this.$t('pages.certificate.list.e8e9db25'),
-        cancelText: this.$t('pages.certificate.list.b12468e9'),
+        content: this.$t('i18n.efe9d26148'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk() {
           return deleteCert({
             id: record.id
@@ -519,7 +519,7 @@ export default {
     handerConfirm() {
       if (!this.tableSelections.length) {
         $notification.error({
-          message: this.$t('pages.certificate.list.d1dba43e')
+          message: this.$t('i18n.94ca71ae7b')
         })
         return
       }

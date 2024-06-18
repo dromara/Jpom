@@ -2,31 +2,31 @@
   <div>
     <a-alert
       style="margin-bottom: 20px"
-      :message="$t('pages.node.node-layout.system.white-list.ef5f6164')"
+      :message="$t('i18n.020f31f535')"
       type="info"
     />
 
     <a-form ref="editForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
-      <a-form-item :label="$t('pages.node.node-layout.system.white-list.5b716424')" name="project">
+      <a-form-item :label="$t('i18n.aabdc3b7c0')" name="project">
         <a-textarea
           v-model:value="temp.project"
           :rows="5"
           style="resize: none"
-          :placeholder="$t('pages.node.node-layout.system.white-list.e0f3b8cd')"
+          :placeholder="$t('i18n.631d5b88ab')"
         />
       </a-form-item>
 
-      <a-form-item :label="$t('pages.node.node-layout.system.white-list.5ad2c7b8')" name="allowEditSuffix">
+      <a-form-item :label="$t('i18n.649231bdee')" name="allowEditSuffix">
         <a-textarea
           v-model:value="temp.allowEditSuffix"
           :rows="5"
           style="resize: none"
-          :placeholder="$t('pages.node.node-layout.system.white-list.3d39570')"
+          :placeholder="$t('i18n.afa8980495')"
         />
       </a-form-item>
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
         <a-button type="primary" :disabled="submitAble" @click="onSubmit">{{
-          $t('pages.node.node-layout.system.white-list.d8031ed8')
+          $t('i18n.939d5345ad')
         }}</a-button>
       </a-form-item>
     </a-form>

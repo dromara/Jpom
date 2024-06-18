@@ -12,7 +12,7 @@
             <a-alert
               v-if="temp.file"
               show-icon
-              :message="`${$t('pages.node.node-layout.system.config-file.ee016914')}:${temp.file}`"
+              :message="`${$t('i18n.37c1eb9b23')}:${temp.file}`"
             />
           </template>
         </code-editor>
@@ -20,10 +20,10 @@
       <a-form-item :wrapper-col="{ span: 14, offset: 2 }">
         <a-space>
           <a-button type="primary" :disabled="submitAble" @click="onSubmit(false)">{{
-            $t('pages.node.node-layout.system.config-file.b033d8c5')
+            $t('i18n.be5fbbe34c')
           }}</a-button>
           <a-button type="primary" danger :disabled="submitAble" @click="onSubmit(true)">{{
-            $t('pages.node.node-layout.system.config-file.fda40980')
+            $t('i18n.6aab88d6a3')
           }}</a-button>
         </a-space>
       </a-form-item>
@@ -95,8 +95,8 @@ export default {
       this.globalLoading({
         spinning: true,
         tip:
-          (msg || this.$t('pages.node.node-layout.system.config-file.9e8c0aa9')) +
-          `,${this.$t('pages.node.node-layout.system.config-file.ba8fd88b')},${this.$t(
+          (msg || this.$t('i18n.85da2e5bb1')) +
+          `,${this.$t('i18n.809b12d6a0')},${this.$t(
             'pages.node.node-layout.system.config-file.536e5313'
           )}`
       })
@@ -109,7 +109,7 @@ export default {
                 clearInterval(this.timer)
                 this.globalLoading(false)
                 $notification.success({
-                  message: this.$t('pages.node.node-layout.system.config-file.a6229050')
+                  message: this.$t('i18n.906f6102a7')
                 })
 
                 setTimeout(() => {
@@ -118,7 +118,7 @@ export default {
               } else {
                 if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
                   $notification.warning({
-                    message: this.$t('pages.node.node-layout.system.config-file.b0e4c704') + (res.msg || '')
+                    message: this.$t('i18n.953ec2172b') + (res.msg || '')
                   })
                   this.globalLoading(false)
                   clearInterval(this.timer)
@@ -130,7 +130,7 @@ export default {
               if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
                 this.globalLoading(false)
                 $notification.error({
-                  message: this.$t('pages.node.node-layout.system.config-file.48633a70')
+                  message: this.$t('i18n.0e502fed63')
                 })
                 clearInterval(this.timer)
               }

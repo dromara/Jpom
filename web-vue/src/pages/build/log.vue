@@ -1,7 +1,7 @@
 <template>
   <log-view
     :ref="`logView`"
-    :title-name="$t('pages.build.log.fc20bf28')"
+    :title-name="$t('i18n.7c0ee78130')"
     :visible="visible"
     @close="
       () => {
@@ -12,24 +12,24 @@
     <template #before>
       <a-space>
         <span v-if="status">
-          {{ $t('pages.build.log.df91bc15') }}
+          {{ $t('i18n.e703c7367c') }}
           <a-tooltip
-            :title="`${$t('pages.build.log.df91bc15')} ${statusMap[status]} ${
-              statusMsg ? $t('pages.build.log.7f491810') + statusMsg : ''
+            :title="`${$t('i18n.e703c7367c')} ${statusMap[status]} ${
+              statusMsg ? $t('i18n.8d13037eb7') + statusMsg : ''
             }`"
           >
             <a-tag :color="statusColor[status]" style="margin-right: 0">
-              {{ statusMap[status] || $t('pages.build.log.3ebb81e0') }}
+              {{ statusMap[status] || $t('i18n.903b25f64e') }}
             </a-tag>
           </a-tooltip>
         </span>
         <span>
-          {{ $t('pages.build.log.7cf809d7') }}
+          {{ $t('i18n.31aaaaa6ec') }}
           <a-tag>{{ temp && temp.buildId }}</a-tag>
         </span>
         <a-button type="primary" :disabled="!logId" size="small" @click="handleDownload"
           ><DownloadOutlined />
-          {{ $t('pages.build.log.42c8e9c6') }}
+          {{ $t('i18n.f26ef91424') }}
         </a-button>
         |
       </a-space>

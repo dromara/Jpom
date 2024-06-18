@@ -1,41 +1,41 @@
 <template>
   <div class="">
     <a-tabs default-active-key="1" tab-position="left">
-      <a-tab-pane key="1" :tab="$t('pages.node.node-layout.system.cache.f84aaf3f')">
+      <a-tab-pane key="1" :tab="$t('i18n.3c6248b364')">
         <a-alert
-          :message="$t('pages.node.node-layout.system.cache.74dc9002')"
+          :message="$t('i18n.5785f004ea')"
           style="margin-top: 10px; margin-bottom: 40px"
           banner
         />
         <a-timeline>
           <a-timeline-item v-if="temp.dateTime">
             <span class="layui-elem-quote">
-              {{ $t('pages.node.node-layout.system.cache.8ad18624') }}{{ temp.dateTime }}
+              {{ $t('i18n.9ddaa182bd') }}{{ temp.dateTime }}
               <a-tag>{{ temp.timeZoneId }}</a-tag>
             </span>
           </a-timeline-item>
           <a-timeline-item>
             <span class="layui-elem-quote"
-              >{{ $t('pages.node.node-layout.system.cache.45c2d461') }}{{ renderSize(temp.dataSize) }}</span
+              >{{ $t('i18n.37f1931729') }}{{ renderSize(temp.dataSize) }}</span
             >
           </a-timeline-item>
           <a-timeline-item v-if="temp.fileSize">
             <a-space>
               <span class="layui-elem-quote"
-                >{{ $t('pages.node.node-layout.system.cache.2857c7f8') }}{{ renderSize(temp.fileSize) }}</span
+                >{{ $t('i18n.ea3c5c0d25') }}{{ renderSize(temp.fileSize) }}</span
               >
               <a-button size="small" type="primary" class="btn" @click="clear('fileSize')">{{
-                $t('pages.node.node-layout.system.cache.3907eb5b')
+                $t('i18n.288f0c404c')
               }}</a-button>
             </a-space>
           </a-timeline-item>
           <a-timeline-item v-if="temp.oldJarsSize">
             <a-space>
               <span class="layui-elem-quote"
-                >{{ $t('pages.node.node-layout.system.cache.890d7cd0') }}{{ renderSize(temp.oldJarsSize) }}</span
+                >{{ $t('i18n.413d8ba722') }}{{ renderSize(temp.oldJarsSize) }}</span
               >
               <a-button size="small" type="primary" class="btn" @click="clear('oldJarsSize')">{{
-                $t('pages.node.node-layout.system.cache.3907eb5b')
+                $t('i18n.288f0c404c')
               }}</a-button>
             </a-space>
           </a-timeline-item>
@@ -43,34 +43,34 @@
           <a-timeline-item>
             <a-space>
               <span class="layui-elem-quote"
-                >{{ $t('pages.node.node-layout.system.cache.c50e1b39') }}{{ temp.pidPort }}</span
+                >{{ $t('i18n.775fde44cf') }}{{ temp.pidPort }}</span
               >
               <a-button v-if="temp.pidPort" size="small" type="primary" class="btn" @click="clear('pidPort')">{{
-                $t('pages.node.node-layout.system.cache.3907eb5b')
+                $t('i18n.288f0c404c')
               }}</a-button>
             </a-space>
           </a-timeline-item>
           <a-timeline-item>
             <span class="layui-elem-quote"
-              >{{ $t('pages.node.node-layout.system.cache.5fb51609') }}{{ temp.scriptExecLogSize }}</span
+              >{{ $t('i18n.25f29ebbe6') }}{{ temp.scriptExecLogSize }}</span
             >
           </a-timeline-item>
           <a-timeline-item>
             <span class="layui-elem-quote"
-              >{{ $t('pages.node.node-layout.system.cache.4d78c1a4') }}{{ temp.readFileOnLineCount }}</span
+              >{{ $t('i18n.9b9e426d16') }}{{ temp.readFileOnLineCount }}</span
             >
           </a-timeline-item>
           <a-timeline-item>
             <span class="layui-elem-quote"
-              >{{ $t('pages.node.node-layout.system.cache.bf8950b2') }}{{ temp.pluginSize || 0 }}</span
+              >{{ $t('i18n.b6ee682dac') }}{{ temp.pluginSize || 0 }}</span
             >
           </a-timeline-item>
           <a-timeline-item>
             <div class="layui-elem-quote">
-              {{ $t('pages.node.node-layout.system.cache.c317de67') }}
+              {{ $t('i18n.4ab578f3df') }}
               <template v-if="temp.envVarKeys?.length">
                 <a-tag v-for="(item, index) in temp.envVarKeys" :key="index">
-                  <a-tooltip :title="`${$t('pages.node.node-layout.system.cache.632d5d79')}:${item}`">
+                  <a-tooltip :title="`${$t('i18n.6835ed12b9')}:${item}`">
                     {{ item }}
                   </a-tooltip>
                 </a-tag>
@@ -80,10 +80,10 @@
           </a-timeline-item>
           <a-timeline-item>
             <div class="layui-elem-quote">
-              {{ $t('pages.node.node-layout.system.cache.dcead53c')
+              {{ $t('i18n.eb7f9ceb71')
               }}<template v-if="temp.scriptLibraryTagMap && Object.keys(temp.scriptLibraryTagMap).length">
                 <a-tag v-for="(item, key) in temp.scriptLibraryTagMap" :key="key">
-                  <a-tooltip :title="$t('pages.node.node-layout.system.cache.a0b29171', { item: item })">
+                  <a-tooltip :title="$t('i18n.3a57a51660', { item: item })">
                     {{ key }}
                   </a-tooltip>
                 </a-tag>
@@ -93,19 +93,19 @@
           </a-timeline-item>
         </a-timeline>
       </a-tab-pane>
-      <a-tab-pane key="2" :tab="$t('pages.node.node-layout.system.cache.1cf16f46')">
+      <a-tab-pane key="2" :tab="$t('i18n.a1bd9760fc')">
         <task-stat :task-list="taskList" @refresh="loadData"
       /></a-tab-pane>
-      <a-tab-pane key="3" :tab="$t('pages.node.node-layout.system.cache.78ea56d4')">
+      <a-tab-pane key="3" :tab="$t('i18n.f06f95f8e6')">
         <a-space direction="vertical" style="width: 100%">
-          <a-alert :message="$t('pages.node.node-layout.system.cache.90cf9dce')" type="warning" show-icon>
+          <a-alert :message="$t('i18n.406a2b3538')" type="warning" show-icon>
             <template #description>
               <ul>
-                <li>{{ $t('pages.node.node-layout.system.cache.f4768643') }}</li>
-                <li>{{ $t('pages.node.node-layout.system.cache.e09b7fd4') }}</li>
-                <li>{{ $t('pages.node.node-layout.system.cache.6c106822') }}</li>
-                <li>{{ $t('pages.node.node-layout.system.cache.857b8a0d') }}</li>
-                <li>{{ $t('pages.node.node-layout.system.cache.714a17c') }}</li>
+                <li>{{ $t('i18n.17a101c23e') }}</li>
+                <li>{{ $t('i18n.3929e500e0') }}</li>
+                <li>{{ $t('i18n.0a47f12ef2') }}</li>
+                <li>{{ $t('i18n.7785d9e038') }}</li>
+                <li>{{ $t('i18n.083b8a2ec9') }}</li>
               </ul>
             </template>
           </a-alert>
@@ -113,36 +113,36 @@
             <template #renderItem="{ item }">
               <a-list-item>
                 <a-space>
-                  <span>{{ $t('pages.node.node-layout.system.cache.e06912d') }}{{ item.name }}</span>
-                  <span>{{ $t('pages.node.node-layout.system.cache.4eaba425') }}{{ item.id }}</span>
-                  <span>{{ $t('pages.node.node-layout.system.cache.97772e66') }}{{ item.workspaceId }}</span>
-                  <span>{{ $t('pages.node.node-layout.system.cache.1c648cd4') }}{{ item.nodeId }}</span>
+                  <span>{{ $t('i18n.fa7f6fccfd') }}{{ item.name }}</span>
+                  <span>{{ $t('i18n.116d22f2ab') }}{{ item.id }}</span>
+                  <span>{{ $t('i18n.e0fcbca309') }}{{ item.workspaceId }}</span>
+                  <span>{{ $t('i18n.2256690a28') }}{{ item.nodeId }}</span>
                   <a-button type="primary" size="small" danger @click="openCorrectLonely(item, 'project')">{{
-                    $t('pages.node.node-layout.system.cache.b1e41588')
+                    $t('i18n.23231543a4')
                   }}</a-button>
                 </a-space>
               </a-list-item>
             </template>
             <template #header>
-              <div>{{ $t('pages.node.node-layout.system.cache.2caa09af') }}</div>
+              <div>{{ $t('i18n.45fbb7e96a') }}</div>
             </template>
           </a-list>
           <a-list size="small" bordered :data-source="machineLonelyData.scripts">
             <template #renderItem="{ item }">
               <a-list-item
                 ><a-space>
-                  <span>{{ $t('pages.node.node-layout.system.cache.db9bba81') }}{{ item.name }}</span>
-                  <span>{{ $t('pages.node.node-layout.system.cache.461afc3f') }}{{ item.id }}</span>
-                  <span>{{ $t('pages.node.node-layout.system.cache.97772e66') }}{{ item.workspaceId }}</span>
-                  <span>{{ $t('pages.node.node-layout.system.cache.1c648cd4') }}{{ item.nodeId }}</span>
+                  <span>{{ $t('i18n.b61a7e3ace') }}{{ item.name }}</span>
+                  <span>{{ $t('i18n.d0f53484dc') }}{{ item.id }}</span>
+                  <span>{{ $t('i18n.e0fcbca309') }}{{ item.workspaceId }}</span>
+                  <span>{{ $t('i18n.2256690a28') }}{{ item.nodeId }}</span>
                   <a-button type="primary" size="small" danger @click="openCorrectLonely(item, 'script')">{{
-                    $t('pages.node.node-layout.system.cache.b1e41588')
+                    $t('i18n.23231543a4')
                   }}</a-button>
                 </a-space>
               </a-list-item>
             </template>
             <template #header>
-              <div>{{ $t('pages.node.node-layout.system.cache.300d088d') }}</div>
+              <div>{{ $t('i18n.c2b2f87aca') }}</div>
             </template>
           </a-list></a-space
         >
@@ -154,21 +154,21 @@
       v-model:open="correctLonelyOpen"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$t('pages.node.node-layout.system.cache.6a8b7888')"
+      :title="$t('i18n.46097a1225')"
       :mask-closable="false"
       @ok="handleCorrectLonely"
     >
       <a-space direction="vertical" style="width: 100%">
-        <a-alert :message="$t('pages.node.node-layout.system.cache.2774e4a7')" type="warning">
+        <a-alert :message="$t('i18n.947d983961')" type="warning">
           <template #description>
             <ul>
-              <li>{{ $t('pages.node.node-layout.system.cache.b28bd9b1') }}</li>
-              <li>{{ $t('pages.node.node-layout.system.cache.478331d8') }}</li>
+              <li>{{ $t('i18n.a3f1390bf1') }}</li>
+              <li>{{ $t('i18n.2e51ca19eb') }}</li>
             </ul>
           </template>
         </a-alert>
         <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
-          <a-form-item :label="$t('pages.node.node-layout.system.cache.580e6c10')" name="nodeId">
+          <a-form-item :label="$t('i18n.7e2b40fc86')" name="nodeId">
             <a-select
               v-model:value="temp.toNodeId"
               show-search
@@ -183,7 +183,7 @@
                 }
               "
               :disabled="temp.toNodeId && temp.recommend"
-              :placeholder="$t('pages.node.node-layout.system.cache.2388531c')"
+              :placeholder="$t('i18n.f8a613d247')"
             >
               <a-select-option v-for="item in nodeList" :key="item.id">
                 【{{ item.workspace && item.workspace.name }}】{{ item.name }}
@@ -298,7 +298,7 @@ export default {
     handleCorrectLonely() {
       if (!this.temp.toNodeId) {
         $notification.warn({
-          message: this.$t('pages.node.node-layout.system.cache.2388531c')
+          message: this.$t('i18n.f8a613d247')
         })
         return false
       }

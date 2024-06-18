@@ -52,14 +52,14 @@
           <!-- // tx_bytes 网卡输出流量 -->
           <a-descriptions-item label="NET I/O rx">
             <div v-for="(item, index) in Object.keys(statsData.networks || {})" :key="index">
-              <a-tooltip :title="`${item} ${$t('pages.docker.editContainer.8494950')}`">
+              <a-tooltip :title="`${item} ${$t('i18n.3e54c81ca2')}`">
                 {{ renderSize(statsData.networks[item] && statsData.networks[item].rxBytes) || 0 }}
               </a-tooltip>
             </div>
           </a-descriptions-item>
           <a-descriptions-item label="NET I/O tx">
             <div v-for="(item, index) in Object.keys(statsData.networks || {})" :key="index">
-              <a-tooltip :title="`${item} ${$t('pages.docker.editContainer.3365cdae')}`">
+              <a-tooltip :title="`${item} ${$t('i18n.97ecc1bbe9')}`">
                 {{ renderSize(statsData.networks[item] && statsData.networks[item].txBytes) || 0 }}
               </a-tooltip>
             </div>
@@ -114,46 +114,46 @@
         <a-form ref="editForm" :model="temp" :label-col="{ span: 7 }" :wrapper-col="{ span: 17 }">
           <a-form-item name="blkioWeight">
             <template #label>
-              Block IO {{ $t('pages.docker.editContainer.12cbce12') }}
+              Block IO {{ $t('i18n.4aac559105') }}
               <a-tooltip>
-                <template #title> Block IO {{ $t('pages.docker.editContainer.e0fff8da') }} </template>
+                <template #title> Block IO {{ $t('i18n.eaf987eea0') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
             <a-input-number
               v-model:value="temp.blkioWeight"
               style="width: 100%"
-              :placeholder="$t('pages.docker.editContainer.867f55f9')"
+              :placeholder="$t('i18n.41d0ecbabd')"
               :min="0"
               :max="1000"
             />
           </a-form-item>
           <a-form-item name="cpuShares">
             <template #label>
-              CPU {{ $t('pages.docker.editContainer.12cbce12') }}
+              CPU {{ $t('i18n.4aac559105') }}
               <a-tooltip>
-                <template #title> {{ $t('pages.docker.editContainer.f71d1b90') }} </template>
+                <template #title> {{ $t('i18n.9ac4765895') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
             <a-input-number
               v-model:value="temp.cpuShares"
               style="width: 100%"
-              :placeholder="$t('pages.docker.editContainer.f71d1b90')"
+              :placeholder="$t('i18n.9ac4765895')"
             />
           </a-form-item>
           <a-form-item name="cpusetCpus">
             <template #label>
-              {{ $t('pages.docker.editContainer.83d7b20') }}
+              {{ $t('i18n.2ef1c35be8') }}
               <a-tooltip>
-                <template #title> {{ $t('pages.docker.editContainer.1cee12b3') }},1）。 </template>
+                <template #title> {{ $t('i18n.0b76afbf5d') }},1）。 </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
             <a-input
               v-model:value="temp.cpusetCpus"
               style="width: 100%"
-              :placeholder="$t('pages.docker.editContainer.80a60c2e')"
+              :placeholder="$t('i18n.9c55e8e0f3')"
             />
           </a-form-item>
           <a-form-item name="cpusetMems">
@@ -161,8 +161,8 @@
               CpusetMems
               <a-tooltip>
                 <template #title>
-                  {{ $t('pages.docker.editContainer.7014f5d1')
-                  }}{{ $t('pages.docker.editContainer.937d5c60') }}</template
+                  {{ $t('i18n.470e9baf32')
+                  }}{{ $t('i18n.b28c17d2a6') }}</template
                 >
                 <QuestionCircleOutlined />
               </a-tooltip>
@@ -170,78 +170,78 @@
             <a-input
               v-model:value="temp.cpusetMems"
               style="width: 100%"
-              :placeholder="$t('pages.docker.editContainer.4b2e0fa0')"
+              :placeholder="$t('i18n.8c7d19b32a')"
             />
           </a-form-item>
           <a-form-item name="cpuPeriod">
             <template #label>
-              CPU {{ $t('pages.docker.editContainer.228ab355') }}
+              CPU {{ $t('i18n.2d842318fb') }}
               <a-tooltip>
-                <template #title> CPU {{ $t('pages.docker.editContainer.68d6d779') }} </template>
+                <template #title> CPU {{ $t('i18n.6e02ee7aad') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
             <a-input-number
               v-model:value="temp.cpuPeriod"
               style="width: 100%"
-              :placeholder="$t('pages.docker.editContainer.63880a25')"
+              :placeholder="$t('i18n.c325ddecb1')"
             />
           </a-form-item>
           <a-form-item name="cpuQuota">
             <template #label>
-              CPU {{ $t('pages.docker.editContainer.e69c93e3') }}
+              CPU {{ $t('i18n.19fcb9eb25') }}
               <a-tooltip>
-                <template #title> {{ $t('pages.docker.editContainer.1175b2c1') }} </template>
+                <template #title> {{ $t('i18n.df1da2dc59') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
             <a-input-number
               v-model:value="temp.cpuQuota"
               style="width: 100%"
-              :placeholder="$t('pages.docker.editContainer.1175b2c1')"
+              :placeholder="$t('i18n.df1da2dc59')"
             />
           </a-form-item>
 
           <a-form-item name="memory">
             <template #label>
-              {{ $t('pages.docker.editContainer.63465f7d') }}
+              {{ $t('i18n.9932551cd5') }}
               <a-tooltip>
-                <template #title> {{ $t('pages.docker.editContainer.ff6baf66') }} </template>
+                <template #title> {{ $t('i18n.0b3edfaf28') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
             <a-input
               v-model:value="temp.memory"
               style="width: 100%"
-              :placeholder="$t('pages.docker.editContainer.ff6baf66')"
+              :placeholder="$t('i18n.0b3edfaf28')"
             />
           </a-form-item>
           <a-form-item name="memorySwap">
             <template #label>
-              {{ $t('pages.docker.editContainer.deff5643') }}
+              {{ $t('i18n.c983743f56') }}
               <a-tooltip>
-                <template #title> {{ $t('pages.docker.editContainer.e2c3c53c') }} </template>
+                <template #title> {{ $t('i18n.ebc96f0a5d') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
             <a-input
               v-model:value="temp.memorySwap"
               style="width: 100%"
-              :placeholder="$t('pages.docker.editContainer.e2c3c53c')"
+              :placeholder="$t('i18n.ebc96f0a5d')"
             />
           </a-form-item>
           <a-form-item name="memoryReservation">
             <template #label>
-              {{ $t('pages.docker.editContainer.d117a15f') }}
+              {{ $t('i18n.c0d38f475f') }}
               <a-tooltip>
-                <template #title> {{ $t('pages.docker.editContainer.95dc63a6') }} </template>
+                <template #title> {{ $t('i18n.0a63bf5b41') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
             <a-input
               v-model:value="temp.memoryReservation"
               style="width: 100%"
-              :placeholder="$t('pages.docker.editContainer.95dc63a6')"
+              :placeholder="$t('i18n.0a63bf5b41')"
             />
           </a-form-item>
         </a-form>

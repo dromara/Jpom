@@ -31,7 +31,7 @@
       >
         <template #rightExtra>
           <a-button type="primary" :disabled="!activeKey" @click="changeFileVisible(activeKey, true)">
-            {{ $t('pages.ssh.ssh-tabs.cfbfa5f8') }}
+            {{ $t('i18n.8780e6b3d1') }}
           </a-button>
         </template>
         <a-tab-pane
@@ -45,16 +45,16 @@
             <div v-if="pane.open" :style="{ height: `calc(100vh - 70px) ` }">
               <terminal1 :ssh-id="pane.id" />
             </div>
-            <a-result v-else status="warning" :title="$t('pages.ssh.ssh-tabs.c7afc01b')">
+            <a-result v-else status="warning" :title="$t('i18n.3a71e860a7')">
               <template #extra>
-                <a-button type="primary" @click="open(pane.id)"> {{ $t('pages.ssh.ssh-tabs.66e81131') }} </a-button>
+                <a-button type="primary" @click="open(pane.id)"> {{ $t('i18n.81301b6813') }} </a-button>
               </template>
             </a-result>
             <!-- 文件管理 -->
             <CustomDrawer
               v-if="pane.openFile"
               :get-container="`#paneDom${pane.id}`"
-              :title="`${pane.name}${$t('pages.ssh.ssh-tabs.cfbfa5f8')}`"
+              :title="`${pane.name}${$t('i18n.8780e6b3d1')}`"
               placement="right"
               width="90vw"
               :open="pane.fileVisible"
@@ -65,7 +65,7 @@
           </div>
         </a-tab-pane>
       </a-tabs>
-      <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="$t('pages.ssh.ssh-tabs.e465bff1')"></a-empty>
+      <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="$t('i18n.c23fbf156b')"></a-empty>
     </a-layout-content>
   </a-layout>
 </template>

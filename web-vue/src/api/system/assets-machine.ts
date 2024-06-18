@@ -56,11 +56,11 @@ export function machineDistribute(params) {
 }
 
 export const statusMap = {
-  0: t('api.system.assets-machine.b26020d2'),
-  1: t('api.system.assets-machine.e039b9b5'),
-  2: t('api.system.assets-machine.2eff6016'),
-  3: t('api.system.assets-machine.8ae7a8a'),
-  4: t('api.system.assets-machine.f1e810b2')
+  0: t('i18n.757a730c9e'),
+  1: t('i18n.fd6e80f1e0'),
+  2: t('i18n.c18455fbe3'),
+  3: t('i18n.c5bbaed670'),
+  4: t('i18n.a14da34559')
 }
 
 // 查看机器关联节点

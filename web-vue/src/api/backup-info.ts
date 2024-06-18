@@ -113,10 +113,10 @@ export function uploadBackupFile(formData) {
 }
 
 export const backupTypeArray = [
-  { key: 0, value: t('api.backup-info.945bddc'), disabled: false },
-  { key: 1, value: t('api.backup-info.4e769e75'), disabled: false },
-  { key: 2, value: t('api.backup-info.8cefd9a6'), disabled: true },
-  { key: 3, value: t('api.backup-info.bc583419'), disabled: true }
+  { key: 0, value: t('i18n.6d68bd5458'), disabled: false },
+  { key: 1, value: t('i18n.67b667bf98'), disabled: false },
+  { key: 2, value: t('i18n.90c0458a4c'), disabled: true },
+  { key: 3, value: t('i18n.590e5b46a0'), disabled: true }
 ]
 
 export const arrayToMap = (arra) => {
@@ -130,7 +130,7 @@ export const arrayToMap = (arra) => {
 export const backupTypeMap = arrayToMap(backupTypeArray)
 
 export const backupStatusMap = {
-  0: t('api.backup-info.fc1391c9'),
-  1: t('api.backup-info.6d865b0a'),
-  2: t('api.backup-info.78bc7266')
+  0: t('i18n.5d459d550a'),
+  1: t('i18n.3ba621d736'),
+  2: t('i18n.1012e09849')
 }

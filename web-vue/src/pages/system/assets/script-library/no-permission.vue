@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="script-library-no-permission"
-      :empty-description="$t('pages.system.assets.script-library.no-permission.67b6615f')"
+      :empty-description="$t('i18n.824914133f')"
       :data-source="list"
       size="middle"
       :columns="columns"
@@ -25,28 +25,28 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%tag%']"
-            :placeholder="$t('pages.system.assets.script-library.no-permission.95547f9')"
+            :placeholder="$t('i18n.e17a6882b6')"
             allow-clear
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%version%']"
-            :placeholder="$t('pages.system.assets.script-library.no-permission.81634069')"
+            :placeholder="$t('i18n.fe2df04a16')"
             allow-clear
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%description%']"
-            :placeholder="$t('pages.system.assets.script-library.no-permission.f89e58f1')"
+            :placeholder="$t('i18n.3bdd08adab')"
             class="search-input-item"
             @press-enter="loadData"
           />
 
-          <a-tooltip :title="$t('pages.system.assets.script-library.no-permission.986e8dc2')">
+          <a-tooltip :title="$t('i18n.4838a3bd20')">
             <a-button :loading="loading" type="primary" @click="loadData">{{
-              $t('pages.system.assets.script-library.no-permission.43934f6d')
+              $t('i18n.e5f71fc31e')
             }}</a-button>
           </a-tooltip>
         </a-space>
@@ -67,7 +67,7 @@
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button size="small" type="primary" @click="handleEdit(record)">{{
-              $t('pages.system.assets.script-library.no-permission.b01c1e10')
+              $t('i18n.a156349591')
             }}</a-button>
           </a-space>
         </template>
@@ -78,19 +78,19 @@
       v-if="editScriptVisible"
       v-model:open="editScriptVisible"
       destroy-on-close
-      :title="$t('pages.system.assets.script-library.no-permission.b6fd5f4e')"
+      :title="$t('i18n.dd1d14efd6')"
       :mask-closable="false"
       width="80vw"
       :footer="false"
     >
       <a-form ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 19 }">
-        <a-form-item :label="$t('pages.system.assets.script-library.no-permission.81634069')" name="id">
+        <a-form-item :label="$t('i18n.fe2df04a16')" name="id">
           <a-input v-model:value="temp.version" disabled read-only />
         </a-form-item>
-        <a-form-item :label="$t('pages.system.assets.script-library.no-permission.2d62ebdb')" name="tag">
+        <a-form-item :label="$t('i18n.deea5221aa')" name="tag">
           <a-input v-model:value="temp.tag" :max-length="50" disabled />
         </a-form-item>
-        <a-form-item :label="$t('pages.system.assets.script-library.no-permission.3e7aa0ad')" name="script">
+        <a-form-item :label="$t('i18n.2d711b09bd')" name="script">
           <a-form-item-rest>
             <code-editor
               v-model:content="temp.script"
@@ -102,7 +102,7 @@
           </a-form-item-rest>
         </a-form-item>
 
-        <a-form-item :label="$t('pages.system.assets.script-library.no-permission.f89e58f1')" name="description">
+        <a-form-item :label="$t('i18n.3bdd08adab')" name="description">
           <a-textarea v-model:value="temp.description" :max-length="200" :rows="3" style="resize: none" disabled />
         </a-form-item>
       </a-form>
@@ -139,14 +139,14 @@ export default {
       drawerConsoleVisible: false,
       columns: [
         {
-          title: this.$t('pages.system.assets.script-library.no-permission.2d62ebdb'),
+          title: this.$t('i18n.deea5221aa'),
           dataIndex: 'tag',
           ellipsis: true,
           sorter: true,
           width: 150
         },
         {
-          title: this.$t('pages.system.assets.script-library.no-permission.81634069'),
+          title: this.$t('i18n.fe2df04a16'),
           dataIndex: 'version',
           ellipsis: true,
           sorter: true,
@@ -154,14 +154,14 @@ export default {
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.script-library.no-permission.f89e58f1'),
+          title: this.$t('i18n.3bdd08adab'),
           dataIndex: 'description',
           ellipsis: true,
           width: 200,
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.script-library.no-permission.d3b29478'),
+          title: this.$t('i18n.1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           width: '170px',
@@ -169,7 +169,7 @@ export default {
           customRender: ({ text }) => parseTime(text)
         },
         {
-          title: this.$t('pages.system.assets.script-library.no-permission.efaf9956'),
+          title: this.$t('i18n.eca37cb072'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           width: '170px',
@@ -177,14 +177,14 @@ export default {
           customRender: ({ text }) => parseTime(text)
         },
         {
-          title: this.$t('pages.system.assets.script-library.no-permission.339d15b5'),
+          title: this.$t('i18n.95a43eaa59'),
           dataIndex: 'createUser',
           ellipsis: true,
           tooltip: true,
           width: '120px'
         },
         {
-          title: this.$t('pages.system.assets.script-library.no-permission.8605b4f2'),
+          title: this.$t('i18n.9baca0054e'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           tooltip: true,
@@ -192,7 +192,7 @@ export default {
         },
 
         {
-          title: this.$t('pages.system.assets.script-library.no-permission.fe731dfc'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
           align: 'center',
 
@@ -256,7 +256,7 @@ export default {
     handerScriptConfirm() {
       if (!this.tableSelections.length) {
         $notification.warning({
-          message: this.$t('pages.system.assets.script-library.no-permission.286031ba')
+          message: this.$t('i18n.364bea440e')
         })
         return
       }
@@ -268,7 +268,7 @@ export default {
     handerTagConfirm() {
       if (!this.tableSelections.length) {
         $notification.warning({
-          message: this.$t('pages.system.assets.script-library.no-permission.286031ba')
+          message: this.$t('i18n.364bea440e')
         })
         return
       }

@@ -12,25 +12,25 @@ import { t } from '@/i18n'
 export const tableSizeList = [
   {
     value: 'large',
-    label: t('components.customTable.dict.index.2325de1c')
+    label: t('i18n.949934d97c')
   },
   {
     value: 'middle',
-    label: t('components.customTable.dict.index.80c1453f')
+    label: t('i18n.eadd05ba6a')
   },
   {
     value: 'small',
-    label: t('components.customTable.dict.index.d39bbae4')
+    label: t('i18n.03e59bb33c')
   }
 ]
 
 export const tableLayoutList = [
   {
     value: 'table',
-    label: t('components.customTable.dict.index.4ff250dc')
+    label: t('i18n.b339aa8710')
   },
   {
     value: 'card',
-    label: t('components.customTable.dict.index.7edad275')
+    label: t('i18n.d87f215d9a')
   }
 ]

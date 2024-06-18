@@ -4,7 +4,7 @@
       destroy-on-close
       :open="true"
       width="80vw"
-      :title="$t('pages.docker.buildContainer.b680f412')"
+      :title="$t('i18n.585ae8592f')"
       :mask-closable="false"
       :footer-style="{ textAlign: 'right' }"
       @close="
@@ -16,37 +16,37 @@
       <a-alert
         v-if="containerData && Object.keys(containerData).length"
         style="margin-bottom: 10px"
-        :message="$t('pages.docker.buildContainer.2569e7e2')"
+        :message="$t('i18n.a35740ae41')"
         type="warning"
         show-icon
       >
         <template #description>
-          {{ $t('pages.docker.buildContainer.7f325573') }}
+          {{ $t('i18n.77688e95af') }}
           <div>
-            <b style="color: red">{{ $t('pages.docker.buildContainer.d6663850') }}</b
-            >,{{ $t('pages.docker.buildContainer.6321caa0') }}
+            <b style="color: red">{{ $t('i18n.c3490e81bf') }}</b
+            >,{{ $t('i18n.765592aa05') }}
           </div>
           <div>
-            <b>{{ $t('pages.docker.buildContainer.f3335d9') }}</b>
+            <b>{{ $t('i18n.706333387b') }}</b>
           </div>
         </template>
       </a-alert>
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 20 }">
-        <a-form-item :label="$t('pages.docker.buildContainer.ed825162')" name="name">
+        <a-form-item :label="$t('i18n.42a93314b4')" name="name">
           <a-row>
             <a-col :span="10">
               <a-input v-model:value="temp.image" disabled placeholder="" />
             </a-col>
-            <a-col :span="4" style="text-align: right">{{ $t('pages.docker.buildContainer.98c4138b') }}</a-col>
+            <a-col :span="4" style="text-align: right">{{ $t('i18n.0c256f73b8') }}</a-col>
             <a-col :span="10">
               <a-form-item-rest>
-                <a-input v-model:value="temp.name" :placeholder="$t('pages.docker.buildContainer.4017e91d')" />
+                <a-input v-model:value="temp.name" :placeholder="$t('i18n.a51cd0898f')" />
               </a-form-item-rest>
             </a-col>
           </a-row>
         </a-form-item>
 
-        <a-form-item :label="$t('pages.docker.buildContainer.a6c4bfd7')">
+        <a-form-item :label="$t('i18n.c76cfefe72')">
           <a-form-item-rest>
             <a-space direction="vertical" style="width: 100%">
               <a-row v-for="(item, index) in temp.exposedPorts" :key="index">
@@ -58,30 +58,30 @@
                           <a-input
                             v-model:value="item.ip"
                             addon-before="IP"
-                            :placeholder="$t('pages.docker.buildContainer.f2f92b1d')"
+                            :placeholder="$t('i18n.8e89763d95')"
                           >
                           </a-input>
                         </a-col>
                         <a-col :span="6" :offset="1">
                           <a-input
                             v-model:value="item.publicPort"
-                            :addon-before="$t('pages.docker.buildContainer.a6c4bfd7')"
-                            :placeholder="$t('pages.docker.buildContainer.a6c4bfd7')"
+                            :addon-before="$t('i18n.c76cfefe72')"
+                            :placeholder="$t('i18n.c76cfefe72')"
                           >
                           </a-input>
                         </a-col>
                         <a-col :span="8" :offset="1">
                           <a-input
                             v-model:value="item.port"
-                            :addon-before="$t('pages.docker.buildContainer.e59a28c9')"
+                            :addon-before="$t('i18n.22c799040a')"
                             :disabled="item.disabled"
-                            :placeholder="$t('pages.docker.buildContainer.85763041')"
+                            :placeholder="$t('i18n.ceee1db95a')"
                           >
                             <template #addonAfter>
                               <a-select
                                 v-model:value="item.scheme"
                                 :disabled="item.disabled"
-                                :placeholder="$t('pages.docker.buildContainer.9e4da8c2')"
+                                :placeholder="$t('i18n.0739b9551d')"
                               >
                                 <a-select-option value="tcp">tcp</a-select-option>
                                 <a-select-option value="udp">udp</a-select-option>
@@ -122,23 +122,23 @@
           </a-form-item-rest>
         </a-form-item>
 
-        <a-form-item :label="$t('pages.docker.buildContainer.c17b4a83')">
+        <a-form-item :label="$t('i18n.640374b7ae')">
           <a-form-item-rest>
             <a-space direction="vertical" style="width: 100%">
               <a-row v-for="(item, index) in temp.volumes" :key="index">
                 <a-col :span="10">
                   <a-input
                     v-model:value="item.host"
-                    :addon-before="$t('pages.docker.buildContainer.2a72f1e6')"
-                    :placeholder="$t('pages.docker.buildContainer.f791ed7d')"
+                    :addon-before="$t('i18n.ad4b4a5b3b')"
+                    :placeholder="$t('i18n.90eac06e61')"
                   />
                 </a-col>
                 <a-col :span="10" :offset="1">
                   <a-input
                     v-model:value="item.container"
-                    :addon-before="$t('pages.docker.buildContainer.e59a28c9')"
+                    :addon-before="$t('i18n.22c799040a')"
                     :disabled="item.disabled"
-                    :placeholder="$t('pages.docker.buildContainer.f74fa9ca')"
+                    :placeholder="$t('i18n.b3401c3657')"
                   />
                 </a-col>
                 <a-col :span="2" :offset="1">
@@ -165,15 +165,15 @@
             </a-space>
           </a-form-item-rest>
         </a-form-item>
-        <a-form-item :label="$t('pages.docker.buildContainer.c81b2c2e')">
+        <a-form-item :label="$t('i18n.3867e350eb')">
           <a-form-item-rest>
             <a-space direction="vertical" style="width: 100%">
               <a-row v-for="(item, index) in temp.env" :key="index">
                 <a-col :span="10">
-                  <a-input v-model:value="item.key" :placeholder="$t('pages.docker.buildContainer.dbc446a0')" />
+                  <a-input v-model:value="item.key" :placeholder="$t('i18n.a25657422b')" />
                 </a-col>
                 <a-col :span="10" :offset="1">
-                  <a-input v-model:value="item.value" :placeholder="$t('pages.docker.buildContainer.2247b9d1')" />
+                  <a-input v-model:value="item.value" :placeholder="$t('i18n.9a2ee7044f')" />
                 </a-col>
                 <a-col :span="2" :offset="1">
                   <a-space>
@@ -199,15 +199,15 @@
             </a-space>
           </a-form-item-rest>
         </a-form-item>
-        <a-form-item :label="$t('pages.docker.buildContainer.e9f092b5')">
+        <a-form-item :label="$t('i18n.ddf7d2a5ce')">
           <a-form-item-rest>
             <a-space direction="vertical" style="width: 100%">
               <a-row v-for="(item, index) in temp.commands" :key="index">
                 <a-col :span="20">
                   <a-input
                     v-model:value="item.value"
-                    :addon-before="$t('pages.docker.buildContainer.29a0e20e')"
-                    :placeholder="$t('pages.docker.buildContainer.dbba7ee')"
+                    :addon-before="$t('i18n.579a6d0d92')"
+                    :placeholder="$t('i18n.2a6a516f9d')"
                   />
                 </a-col>
 
@@ -235,27 +235,27 @@
           </a-form-item-rest>
         </a-form-item>
         <a-form-item label="hostname" name="hostname">
-          <a-input v-model:value="temp.hostname" :placeholder="$t('pages.docker.buildContainer.df83aba7')" />
+          <a-input v-model:value="temp.hostname" :placeholder="$t('i18n.f9361945f3')" />
         </a-form-item>
-        <a-form-item :label="$t('pages.docker.buildContainer.7beffdd')">
+        <a-form-item :label="$t('i18n.7ddbe15c84')">
           <a-auto-complete
             v-model:value="temp.networkMode"
-            :placeholder="$t('pages.docker.buildContainer.b97caba9')"
+            :placeholder="$t('i18n.abd9ee868a')"
             :options="[
               {
-                title: $t('pages.docker.buildContainer.521c8aad'),
+                title: $t('i18n.c36ab9a223'),
                 value: 'bridge'
               },
               {
-                title: $t('pages.docker.buildContainer.f80170c1'),
+                title: $t('i18n.3d6acaa5ca'),
                 value: 'none'
               },
               {
-                title: $t('pages.docker.buildContainer.6236d34b'),
+                title: $t('i18n.fcaef5b17a'),
                 value: 'container:<name|id>'
               },
               {
-                title: $t('pages.docker.buildContainer.ea41efd4'),
+                title: $t('i18n.ff39c45fbc'),
                 value: 'host'
               }
             ]"
@@ -265,25 +265,25 @@
             </template>
           </a-auto-complete>
         </a-form-item>
-        <a-form-item :label="$t('pages.docker.buildContainer.de126165')">
+        <a-form-item :label="$t('i18n.5805998e42')">
           <a-auto-complete
             v-model:value="temp.restartPolicy"
-            :placeholder="$t('pages.docker.buildContainer.d90576ee')"
+            :placeholder="$t('i18n.32dcc6f36e')"
             :options="[
               {
-                title: $t('pages.docker.buildContainer.6fa9bd5c'),
+                title: $t('i18n.0c1f1cd79b'),
                 value: 'no'
               },
               {
-                title: $t('pages.docker.buildContainer.b86d967'),
+                title: $t('i18n.7006410585'),
                 value: 'always'
               },
               {
-                title: $t('pages.docker.buildContainer.59d3093c'),
+                title: $t('i18n.2456d2c0f8'),
                 value: 'on-failure:1'
               },
               {
-                title: $t('pages.docker.buildContainer.e2085ce'),
+                title: $t('i18n.c97e6e823a'),
                 value: 'unless-stopped'
               }
             ]"
@@ -293,14 +293,14 @@
             </template>
           </a-auto-complete>
         </a-form-item>
-        <a-form-item :label="$t('pages.docker.buildContainer.b8b60236')">
+        <a-form-item :label="$t('i18n.3c586b2cc0')">
           <a-form-item-rest>
             <a-space direction="vertical" style="width: 100%">
               <a-row v-for="(item, index) in temp.extraHosts" :key="index">
                 <a-col :span="20">
                   <a-input
                     v-model:value="temp.extraHosts[index]"
-                    :placeholder="$t('pages.docker.buildContainer.b1033d65')"
+                    :placeholder="$t('i18n.5bca8cf7ee')"
                   />
                 </a-col>
 
@@ -327,15 +327,15 @@
             </a-space>
           </a-form-item-rest>
         </a-form-item>
-        <a-form-item :label="$t('pages.docker.buildContainer.5a6877f9')">
+        <a-form-item :label="$t('i18n.64933b1012')">
           <a-form-item-rest>
             <a-space direction="vertical" style="width: 100%">
               <a-row v-for="(item, index) in temp.storageOpt" :key="index">
                 <a-col :span="10">
-                  <a-input v-model:value="item.key" :placeholder="$t('pages.docker.buildContainer.c4c422f1')" />
+                  <a-input v-model:value="item.key" :placeholder="$t('i18n.930fdcdf90')" />
                 </a-col>
                 <a-col :span="10" :offset="1">
-                  <a-input v-model:value="item.value" :placeholder="$t('pages.docker.buildContainer.3e34d8d7')" />
+                  <a-input v-model:value="item.value" :placeholder="$t('i18n.e84b981eb4')" />
                 </a-col>
                 <a-col :span="2" :offset="1">
                   <a-space>
@@ -362,20 +362,20 @@
           </a-form-item-rest>
         </a-form-item>
         <a-form-item label="runtime">
-          <a-input v-model:value="temp.runtime" :placeholder="$t('pages.docker.buildContainer.d276e65f')" />
+          <a-input v-model:value="temp.runtime" :placeholder="$t('i18n.96e6f43118')" />
         </a-form-item>
-        <a-form-item :label="$t('pages.docker.buildContainer.8ff3f15')">
+        <a-form-item :label="$t('i18n.a823cfa70c')">
           <parameter-widget v-model:value="temp.labels"></parameter-widget>
-          <!-- <a-input v-model:value="temp.labels" :placeholder="$t('pages.docker.buildContainer.f003fd5e')" /> -->
+          <!-- <a-input v-model:value="temp.labels" :placeholder="$t('i18n.4b404646f4')" /> -->
         </a-form-item>
-        <a-form-item :label="$t('pages.docker.buildContainer.12861e4e')">
+        <a-form-item :label="$t('i18n.7307ca1021')">
           <a-form-item-rest>
             <a-row>
               <a-col :span="4"
                 ><a-switch
                   v-model:checked="temp.autorun"
-                  :checked-children="$t('pages.docker.buildContainer.15f9c981')"
-                  :un-checked-children="$t('pages.docker.buildContainer.40e7a0be')"
+                  :checked-children="$t('i18n.8e54ddfe24')"
+                  :un-checked-children="$t('i18n.f4baf7c6c0')"
               /></a-col>
               <a-col :span="4" style="text-align: right">
                 <a-tooltip>
@@ -384,23 +384,23 @@
                     <ul>
                       privileged=true|false
                       {{
-                        $t('pages.docker.buildContainer.fc991f8c')
+                        $t('i18n.61a3ec6656')
                       }}
-                      <li>true container{{ $t('pages.docker.buildContainer.8d868a21') }}</li>
-                      <li>false container{{ $t('pages.docker.buildContainer.f4be8553') }}</li>
-                      <li>privileged{{ $t('pages.docker.buildContainer.443683ba') }}</li>
+                      <li>true container{{ $t('i18n.9c2f1d3f39') }}</li>
+                      <li>false container{{ $t('i18n.211354a780') }}</li>
+                      <li>privileged{{ $t('i18n.ffaf95f0ef') }}</li>
                     </ul>
                   </template>
 
                   <QuestionCircleOutlined v-if="!temp.id" />
-                  {{ $t('pages.docker.buildContainer.a5185e55') }}
+                  {{ $t('i18n.059ac641c0') }}
                 </a-tooltip>
               </a-col>
               <a-col :span="4">
                 <a-switch
                   v-model:checked="temp.privileged"
-                  :checked-children="$t('pages.docker.buildContainer.f5bb2364')"
-                  :un-checked-children="$t('pages.docker.buildContainer.5edb2e8a')"
+                  :checked-children="$t('i18n.0a60ac8f02')"
+                  :un-checked-children="$t('i18n.c9744f45e7')"
                 />
               </a-col>
             </a-row>
@@ -429,10 +429,10 @@
               }
             "
           >
-            {{ $t('pages.docker.buildContainer.b12468e9') }}
+            {{ $t('i18n.625fb26b4b') }}
           </a-button>
           <a-button type="primary" :loading="loading" @click="handleBuildOk">
-            {{ $t('pages.docker.buildContainer.e8e9db25') }}
+            {{ $t('i18n.e83a256e4f') }}
           </a-button>
         </a-space>
         <!-- </div> -->
@@ -480,10 +480,10 @@ export default {
       temp: {},
       rules: {
         name: [
-          { required: true, message: this.$t('pages.docker.buildContainer.9da75eee'), trigger: 'blur' },
+          { required: true, message: this.$t('i18n.5c502af799'), trigger: 'blur' },
           {
             pattern: /[a-zA-Z0-9][a-zA-Z0-9_.-]$/,
-            message: this.$t('pages.docker.buildContainer.7bfb5be2'),
+            message: this.$t('i18n.8d5c1335b6'),
             trigger: 'blur'
           }
         ]

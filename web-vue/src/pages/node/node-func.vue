@@ -29,17 +29,17 @@
             <a-tab-pane
               v-if="tabs.includes('project')"
               key="project"
-              :tab="$t('pages.node.node-func.37f14108')"
+              :tab="$t('i18n.436367b066')"
             ></a-tab-pane>
             <a-tab-pane
               v-if="tabs.includes('scripct')"
               key="scripct"
-              :tab="$t('pages.node.node-func.2b56402a')"
+              :tab="$t('i18n.a1fb7f1606')"
             ></a-tab-pane>
             <a-tab-pane
               v-if="tabs.includes('scripct-log')"
               key="scripct-log"
-              :tab="$t('pages.node.node-func.52cb3797')"
+              :tab="$t('i18n.7370bdf0d2')"
             ></a-tab-pane>
           </a-tabs>
         </div>

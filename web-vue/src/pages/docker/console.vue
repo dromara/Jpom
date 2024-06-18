@@ -17,25 +17,25 @@
       <template #title>
         <a-menu v-model:selectedKeys="menuKeyArray" mode="horizontal" class="docker-menu" @click="menuClick">
           <a-menu-item key="containers">
-            <span class="nav-text">{{ $t('pages.docker.console.8d118d98') }}</span>
+            <span class="nav-text">{{ $t('i18n.2b0623dab9') }}</span>
           </a-menu-item>
           <a-menu-item key="docker-compose">
             <span class="nav-text">docker-compose</span>
           </a-menu-item>
           <a-menu-item key="images">
-            <span class="nav-text">{{ $t('pages.docker.console.4fbd9851') }}</span>
+            <span class="nav-text">{{ $t('i18n.3477228591') }}</span>
           </a-menu-item>
           <a-menu-item key="volumes">
-            <span class="nav-text">{{ $t('pages.docker.console.5ea86045') }}</span>
+            <span class="nav-text">{{ $t('i18n.7088e18ac9') }}</span>
           </a-menu-item>
           <a-menu-item key="networks">
-            <span class="nav-text">{{ $t('pages.docker.console.7beffdd') }}</span>
+            <span class="nav-text">{{ $t('i18n.7ddbe15c84') }}</span>
           </a-menu-item>
           <a-menu-item key="info">
-            <span class="nav-text">{{ $t('pages.docker.console.67e9b8f') }}</span>
+            <span class="nav-text">{{ $t('i18n.d8c7e04c8e') }}</span>
           </a-menu-item>
           <a-menu-item key="prune">
-            <span class="nav-text">{{ $t('pages.docker.console.897df80') }}</span>
+            <span class="nav-text">{{ $t('i18n.293cafbbd3') }}</span>
           </a-menu-item>
         </a-menu>
       </template>

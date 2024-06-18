@@ -1,77 +1,77 @@
 <template>
   <div>
     <a-tabs default-active-key="1">
-      <a-tab-pane key="1" :tab="$t('pages.system.cache.f84aaf3f')">
+      <a-tab-pane key="1" :tab="$t('i18n.3c6248b364')">
         <a-descriptions bordered title="" layout="vertical" size="middle">
           <a-descriptions-item :span="3">
             <template #label>
               <a-row>
-                <a-col :span="12"> {{ $t('pages.system.cache.c8dfae81') }} </a-col>
+                <a-col :span="12"> {{ $t('i18n.02d9819dda') }} </a-col>
                 <a-col :span="12" style="text-align: right">
                   <a-button size="small" type="link" @click="refreshCache"
-                    >{{ $t('pages.system.cache.39a91e50') }}<ReloadOutlined
+                    >{{ $t('i18n.96d46bd22e') }}<ReloadOutlined
                   /></a-button>
                 </a-col>
               </a-row>
             </template>
             <div style="color: red; font-weight: bold; font-size: 16px">
-              <p>{{ $t('pages.system.cache.3d1252d1') }}</p>
-              <p>{{ $t('pages.system.cache.404fcd19') }}</p>
+              <p>{{ $t('i18n.96b78bfb6a') }}</p>
+              <p>{{ $t('i18n.7aaee3201a') }}</p>
             </div>
-            <a-tag color="orange">{{ $t('pages.system.cache.29c6f407') }}{{ temp.clusterId }}</a-tag>
-            <a-tag color="blue">{{ $t('pages.system.cache.43a8a564') }}{{ temp.installId }}</a-tag>
+            <a-tag color="orange">{{ $t('i18n.8b3db55fa4') }}{{ temp.clusterId }}</a-tag>
+            <a-tag color="blue">{{ $t('i18n.63e975aa63') }}{{ temp.installId }}</a-tag>
           </a-descriptions-item>
-          <a-descriptions-item :label="$t('pages.system.cache.a77a5385')" :span="1">
-            {{ renderSize(temp.dataSize) }} ({{ $t('pages.system.cache.e597af7') }})
+          <a-descriptions-item :label="$t('i18n.f71a30c1b9')" :span="1">
+            {{ renderSize(temp.dataSize) }} ({{ $t('i18n.c996a472f7') }})
             <a-tooltip>
               <template #title>
                 <ul>
-                  <li>{{ $t('pages.system.cache.3a18b93') }}</li>
-                  <li>{{ $t('pages.system.cache.3754c87e') }}</li>
+                  <li>{{ $t('i18n.73578c680e') }}</li>
+                  <li>{{ $t('i18n.a0f1bfad78') }}</li>
                 </ul>
               </template>
               <QuestionCircleOutlined />
             </a-tooltip>
           </a-descriptions-item>
-          <a-descriptions-item :label="$t('pages.system.cache.3ea7d5bd')" :span="1">
+          <a-descriptions-item :label="$t('i18n.c89e9681c7')" :span="1">
             <a-space>
-              <span>{{ renderSize(temp.cacheFileSize) }} (10{{ $t('pages.system.cache.4f15720') }})</span>
+              <span>{{ renderSize(temp.cacheFileSize) }} (10{{ $t('i18n.6af7686e31') }})</span>
               <a-button
                 v-if="temp.cacheFileSize !== '0'"
                 size="small"
                 type="primary"
                 class="btn"
                 @click="clear('serviceCacheFileSize')"
-                >{{ $t('pages.system.cache.3907eb5b') }}</a-button
+                >{{ $t('i18n.288f0c404c') }}</a-button
               >
             </a-space>
           </a-descriptions-item>
-          <a-descriptions-item :label="$t('pages.system.cache.da1578f3')">
-            {{ renderSize(temp.cacheBuildFileSize) }} ({{ $t('pages.system.cache.e597af7') }})
+          <a-descriptions-item :label="$t('i18n.ed19a6eb6f')">
+            {{ renderSize(temp.cacheBuildFileSize) }} ({{ $t('i18n.c996a472f7') }})
             <a-tooltip>
               <template #title>
                 <ul>
-                  <li>{{ $t('pages.system.cache.85e8a976') }}</li>
+                  <li>{{ $t('i18n.d83aae15b5') }}</li>
                 </ul>
               </template>
               <QuestionCircleOutlined />
             </a-tooltip>
           </a-descriptions-item>
 
-          <a-descriptions-item :label="$t('pages.system.cache.bd29cd92')" :span="1">
+          <a-descriptions-item :label="$t('i18n.0d50838436')" :span="1">
             {{ temp.dataPath }}
           </a-descriptions-item>
-          <a-descriptions-item :label="$t('pages.system.cache.aa466cbc')" :span="1">
+          <a-descriptions-item :label="$t('i18n.40f8c95345')" :span="1">
             {{ temp.tempPath }}
           </a-descriptions-item>
-          <a-descriptions-item :label="$t('pages.system.cache.6cdb35d0')">
+          <a-descriptions-item :label="$t('i18n.51d6b830d4')">
             {{ temp.buildPath }}
           </a-descriptions-item>
 
-          <a-descriptions-item :label="$t('pages.system.cache.d4fbafe7')" :span="1">
+          <a-descriptions-item :label="$t('i18n.7d23ca925c')" :span="1">
             {{ temp.dateTime }} <a-tag>{{ temp.timeZoneId }}</a-tag>
           </a-descriptions-item>
-          <a-descriptions-item :label="$t('pages.system.cache.890d7cd0')">
+          <a-descriptions-item :label="$t('i18n.815492fd8d')">
             <a-space>
               <span>{{ renderSize(temp.oldJarsSize) }}</span>
               <a-button
@@ -80,19 +80,19 @@
                 type="primary"
                 class="btn"
                 @click="clear('serviceOldJarsSize')"
-                >{{ $t('pages.system.cache.3907eb5b') }}</a-button
+                >{{ $t('i18n.288f0c404c') }}</a-button
               >
             </a-space>
           </a-descriptions-item>
-          <a-descriptions-item :label="$t('pages.system.cache.30a7724e')">
+          <a-descriptions-item :label="$t('i18n.4d351f3c91')">
             <a-space>
-              <a-popover :title="$t('pages.system.cache.30a7724e')">
+              <a-popover :title="$t('i18n.4d351f3c91')">
                 <template #content
                   ><a-list size="small" bordered :data-source="temp.errorIp">
                     <template #renderItem="{ item }">
                       <a-list-item>
-                        {{ item.key }} <a-tag>{{ item.obj }}{{ $t('pages.system.cache.97577282') }}</a-tag>
-                        <a-tag>{{ $t('pages.system.cache.19741306') }}{{ formatDuration(item.ttl, '') }}</a-tag>
+                        {{ item.key }} <a-tag>{{ item.obj }}{{ $t('i18n.7229ecc631') }}</a-tag>
+                        <a-tag>{{ $t('i18n.8f40b41e89') }}{{ formatDuration(item.ttl, '') }}</a-tag>
                       </a-list-item>
                     </template>
                   </a-list>
@@ -106,21 +106,21 @@
                 type="primary"
                 class="btn"
                 @click="clear('serviceIpSize')"
-                >{{ $t('pages.system.cache.3907eb5b') }}</a-button
+                >{{ $t('i18n.288f0c404c') }}</a-button
               >
             </a-space>
           </a-descriptions-item>
-          <a-descriptions-item :label="$t('pages.system.cache.523292ce')">
+          <a-descriptions-item :label="$t('i18n.8f0bab9a5a')">
             {{ temp.readFileOnLineCount }}
           </a-descriptions-item>
-          <a-descriptions-item :label="$t('pages.system.cache.3f0bc541')">
+          <a-descriptions-item :label="$t('i18n.c5099cadcd')">
             {{ temp.pluginSize || 0 }}
           </a-descriptions-item>
-          <a-descriptions-item :label="$t('pages.system.cache.d3fa4a5a')">
+          <a-descriptions-item :label="$t('i18n.1cc82866a4')">
             {{ temp.shardingSize }}
           </a-descriptions-item>
-          <a-descriptions-item :label="$t('pages.system.cache.671ddeb8')">
-            <a-popover :title="$t('pages.system.cache.1292ef0b')">
+          <a-descriptions-item :label="$t('i18n.9adf43e181')">
+            <a-popover :title="$t('i18n.853d8ab485')">
               <template #content>
                 <p v-for="item in temp.buildKeys || []" :key="item">{{ item }}</p>
               </template>
@@ -130,8 +130,8 @@
               </a-space>
             </a-popover>
           </a-descriptions-item>
-          <a-descriptions-item :label="$t('pages.system.cache.a9e6f116')">
-            <a-popover :title="$t('pages.system.cache.1a77cfa7')">
+          <a-descriptions-item :label="$t('i18n.31ac8d3a5d')">
+            <a-popover :title="$t('i18n.3a6000f345')">
               <template #content>
                 <p v-for="item in temp.syncFinisKeys || []" :key="item">{{ item }}</p>
               </template>
@@ -141,8 +141,8 @@
               </a-space>
             </a-popover>
           </a-descriptions-item>
-          <a-descriptions-item :label="$t('pages.system.cache.d1b72f8b')">
-            <a-popover :title="$t('pages.system.cache.d1b72f8b')">
+          <a-descriptions-item :label="$t('i18n.87dec8f11e')">
+            <a-popover :title="$t('i18n.87dec8f11e')">
               <template #content>
                 <a-collapse>
                   <a-collapse-panel v-for="(item, key) in temp.errorWorkspace" :key="key" :header="key">
@@ -171,10 +171,10 @@
           <a-timeline-item> </a-timeline-item>
         </a-timeline> -->
       </a-tab-pane>
-      <a-tab-pane key="2" :tab="$t('pages.system.cache.38a00cac')" force-render>
+      <a-tab-pane key="2" :tab="$t('i18n.98e115d868')" force-render>
         <task-stat :task-list="taskList" @refresh="loadData" />
       </a-tab-pane>
-      <a-tab-pane key="3" :tab="$t('pages.system.cache.b62d1886')">
+      <a-tab-pane key="3" :tab="$t('i18n.43250dc692')">
         <TriggerToken />
       </a-tab-pane>
     </a-tabs>
@@ -242,11 +242,11 @@ export default {
       // If you don't want click extra trigger collapse, you can prevent this:
       event.stopPropagation()
       $confirm({
-        title: this.$t('pages.system.cache.e422d0eb'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.system.cache.987c2cd6') + tableName + this.$t('pages.system.cache.7d2dcb27'),
-        okText: this.$t('pages.system.cache.e8e9db25'),
-        cancelText: this.$t('pages.system.cache.b12468e9'),
+        content: this.$t('i18n.c9b0f8e8c8') + tableName + this.$t('i18n.bbcaac136c'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return clearErrorWorkspace({ tableName }).then((res) => {
             if (res.code === 200) {

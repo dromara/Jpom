@@ -24,38 +24,38 @@
           <a-space>
             <a-input
               v-model:value="listQuery['%name%']"
-              :placeholder="$t('pages.file-manager.fileStorage.list.a6eb2ded')"
+              :placeholder="$t('i18n.d2e2560089')"
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['%aliasCode%']"
-              :placeholder="$t('pages.file-manager.fileStorage.list.aaee5dc9')"
+              :placeholder="$t('i18n.2f5e828ecd')"
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['extName']"
-              :placeholder="$t('pages.file-manager.fileStorage.list.52822a45')"
+              :placeholder="$t('i18n.ae809e0295')"
               class="search-input-item"
               @press-enter="loadData"
             />
             <a-input
               v-model:value="listQuery['id']"
-              :placeholder="$t('pages.file-manager.fileStorage.list.48f7e53e')"
+              :placeholder="$t('i18n.2168394b82')"
               class="search-input-item"
               @press-enter="loadData"
             />
-            <a-tooltip :title="$t('pages.file-manager.fileStorage.list.cb5a8131')">
+            <a-tooltip :title="$t('i18n.4838a3bd20')">
               <a-button type="primary" :loading="loading" @click="loadData">{{
-                $t('pages.file-manager.fileStorage.list.53c2763c')
+                $t('i18n.e5f71fc31e')
               }}</a-button>
             </a-tooltip>
             <a-button type="primary" @click="handleUpload">{{
-              $t('pages.file-manager.fileStorage.list.487993f7')
+              $t('i18n.a6fc9e3ae6')
             }}</a-button>
             <a-button type="primary" @click="handleRemoteDownload">{{
-              $t('pages.file-manager.fileStorage.list.367f115c')
+              $t('i18n.bd7043cae3')
             }}</a-button>
             <a-button
               type="primary"
@@ -63,7 +63,7 @@
               :disabled="!tableSelections || tableSelections.length <= 0"
               @click="handleBatchDelete"
             >
-              {{ $t('pages.file-manager.fileStorage.list.b5139d46') }}
+              {{ $t('i18n.7fb62b3011') }}
             </a-button>
           </a-space>
         </template>
@@ -80,16 +80,16 @@
             </a-tooltip>
           </template>
           <template v-else-if="column.dataIndex === 'name'">
-            <a-popover :title="$t('pages.file-manager.fileStorage.list.334162bc')">
+            <a-popover :title="$t('i18n.73485331c2')">
               <template #content>
-                <p>{{ $t('pages.file-manager.fileStorage.list.6a721706') }}{{ text }}</p>
-                <p>{{ $t('pages.file-manager.fileStorage.list.7cee55c0') }}{{ record.description }}</p>
+                <p>{{ $t('i18n.b9c52d9a85') }}{{ text }}</p>
+                <p>{{ $t('i18n.46a04cdc9c') }}{{ record.description }}</p>
                 <p v-if="record.status !== undefined">
-                  {{ $t('pages.file-manager.fileStorage.list.5e3ea76a')
-                  }}{{ statusMap[record.status] || $t('pages.file-manager.fileStorage.list.5f51a112') }}
+                  {{ $t('i18n.53365c29c8')
+                  }}{{ statusMap[record.status] || $t('i18n.1622dc9b6b') }}
                 </p>
                 <p v-if="record.progressDesc">
-                  {{ $t('pages.file-manager.fileStorage.list.a622e852') }}{{ record.progressDesc }}
+                  {{ $t('i18n.fb3a2241bb') }}{{ record.progressDesc }}
                 </p>
               </template>
               <!-- {{ text }} -->
@@ -105,31 +105,31 @@
           <template v-else-if="column.dataIndex === 'source'">
             <a-tooltip
               placement="topLeft"
-              :title="sourceMap[text] || $t('pages.file-manager.fileStorage.list.5f51a112')"
+              :title="sourceMap[text] || $t('i18n.1622dc9b6b')"
             >
-              <span>{{ sourceMap[text] || $t('pages.file-manager.fileStorage.list.5f51a112') }}</span>
+              <span>{{ sourceMap[text] || $t('i18n.1622dc9b6b') }}</span>
             </a-tooltip>
           </template>
 
           <template v-else-if="column.dataIndex === 'exists'">
-            <a-tag v-if="text" color="green">{{ $t('pages.file-manager.fileStorage.list.a78774e2') }}</a-tag>
-            <a-tag v-else color="red">{{ $t('pages.file-manager.fileStorage.list.a51066b1') }}</a-tag>
+            <a-tag v-if="text" color="green">{{ $t('i18n.df9497ea98') }}</a-tag>
+            <a-tag v-else color="red">{{ $t('i18n.162e219f6d') }}</a-tag>
           </template>
           <template v-else-if="column.dataIndex === 'workspaceId'">
-            <a-tag v-if="text === 'GLOBAL'">{{ $t('pages.file-manager.fileStorage.list.fd0310d0') }}</a-tag>
-            <a-tag v-else>{{ $t('pages.file-manager.fileStorage.list.afacc4cb') }}</a-tag>
+            <a-tag v-if="text === 'GLOBAL'">{{ $t('i18n.2be75b1044') }}</a-tag>
+            <a-tag v-else>{{ $t('i18n.98d69f8b62') }}</a-tag>
           </template>
           <template v-else-if="column.dataIndex === 'operation'">
             <a-space>
               <!-- <a-button type="primary" size="small" @click="handleEdit(record)">编辑</a-button> -->
               <a-button size="small" :disabled="!record.exists" type="primary" @click="handleDownloadUrl(record)">{{
-                $t('pages.file-manager.fileStorage.list.42c8e9c6')
+                $t('i18n.f26ef91424')
               }}</a-button>
               <a-button size="small" :disabled="!record.exists" type="primary" @click="handleReleaseFile(record)">{{
-                $t('pages.file-manager.fileStorage.list.f97d7b7c')
+                $t('i18n.83611abd5f')
               }}</a-button>
               <a-button type="primary" danger size="small" @click="handleDelete(record)">{{
-                $t('pages.file-manager.fileStorage.list.dd20d11c')
+                $t('i18n.2f4aaddde3')
               }}</a-button>
             </a-space>
           </template>
@@ -144,18 +144,18 @@
         :closable="!uploading"
         :footer="uploading ? null : undefined"
         :keyboard="false"
-        :title="`${$t('pages.file-manager.fileStorage.list.487993f7')}`"
+        :title="`${$t('i18n.a6fc9e3ae6')}`"
         :mask-closable="false"
         @ok="handleUploadOk"
       >
         <a-form ref="form" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-          <a-form-item :label="$t('pages.file-manager.fileStorage.list.2a688d49')" name="file">
+          <a-form-item :label="$t('i18n.fd7e0c997d')" name="file">
             <a-progress v-if="percentage" :percent="percentage">
               <template #format="percent">
                 {{ percent }}%
                 <template v-if="percentageInfo.total"> ({{ renderSize(percentageInfo.total) }}) </template>
                 <template v-if="percentageInfo.duration">
-                  {{ $t('pages.file-manager.fileStorage.list.dbdaa87c') }}:{{ formatDuration(percentageInfo.duration) }}
+                  {{ $t('i18n.e710da3487') }}:{{ formatDuration(percentageInfo.duration) }}
                 </template>
               </template>
             </a-progress>
@@ -179,33 +179,33 @@
             >
               <LoadingOutlined v-if="percentage" />
               <a-button v-else type="primary"
-                ><UploadOutlined />{{ $t('pages.file-manager.fileStorage.list.2a688d49') }}</a-button
+                ><UploadOutlined />{{ $t('i18n.fd7e0c997d') }}</a-button
               >
             </a-upload>
           </a-form-item>
-          <a-form-item :label="$t('pages.file-manager.fileStorage.list.86a4093a')" name="keepDay">
+          <a-form-item :label="$t('i18n.824607be6b')" name="keepDay">
             <a-input-number
               v-model:value="temp.keepDay"
               :min="1"
               style="width: 100%"
-              :placeholder="$t('pages.file-manager.fileStorage.list.4915fce1')"
+              :placeholder="$t('i18n.e9ea1e7c02')"
             />
           </a-form-item>
-          <a-form-item :label="$t('pages.file-manager.fileStorage.list.ef32cc33')" name="global">
+          <a-form-item :label="$t('i18n.3a6970ac26')" name="global">
             <a-radio-group v-model:value="temp.global">
-              <a-radio :value="true"> {{ $t('pages.file-manager.fileStorage.list.fd0310d0') }} </a-radio>
-              <a-radio :value="false"> {{ $t('pages.file-manager.fileStorage.list.55b7e6b6') }} </a-radio>
+              <a-radio :value="true"> {{ $t('i18n.2be75b1044') }} </a-radio>
+              <a-radio :value="false"> {{ $t('i18n.691b11e443') }} </a-radio>
             </a-radio-group>
           </a-form-item>
           <a-form-item
-            :label="$t('pages.file-manager.fileStorage.list.aaee5dc9')"
+            :label="$t('i18n.2f5e828ecd')"
             name="aliasCode"
-            :help="$t('pages.file-manager.fileStorage.list.b88f3e29')"
+            :help="$t('i18n.41638b0a48')"
           >
             <a-input-search
               v-model:value="temp.aliasCode"
               :max-length="50"
-              :placeholder="$t('pages.file-manager.fileStorage.list.4aa61be9')"
+              :placeholder="$t('i18n.8fbcdbc785')"
               @search="
                 () => {
                   temp = { ...temp, aliasCode: randomStr(6) }
@@ -213,14 +213,14 @@
               "
             >
               <template #enterButton>
-                <a-button type="primary"> {{ $t('pages.file-manager.fileStorage.list.8a1c9dde') }} </a-button>
+                <a-button type="primary"> {{ $t('i18n.6709f4548f') }} </a-button>
               </template>
             </a-input-search>
           </a-form-item>
-          <a-form-item :label="$t('pages.file-manager.fileStorage.list.38259739')" name="description">
+          <a-form-item :label="$t('i18n.8d6f38b4b1')" name="description">
             <a-textarea
               v-model:value="temp.description"
-              :placeholder="$t('pages.file-manager.fileStorage.list.1f789f94')"
+              :placeholder="$t('i18n.411672c954')"
             />
           </a-form-item>
         </a-form>
@@ -231,37 +231,37 @@
         v-model:open="editVisible"
         destroy-on-close
         :confirm-loading="confirmLoading"
-        :title="`${$t('pages.file-manager.fileStorage.list.41bfad43')}`"
+        :title="`${$t('i18n.5c3b53e66c')}`"
         :mask-closable="false"
         @ok="handleEditOk"
       >
         <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-          <a-form-item :label="$t('pages.file-manager.fileStorage.list.94c193de')" name="name">
-            <a-input v-model:value="temp.name" :placeholder="$t('pages.file-manager.fileStorage.list.94c193de')" />
+          <a-form-item :label="$t('i18n.29139c2a1a')" name="name">
+            <a-input v-model:value="temp.name" :placeholder="$t('i18n.29139c2a1a')" />
           </a-form-item>
-          <a-form-item :label="$t('pages.file-manager.fileStorage.list.86a4093a')" name="keepDay">
+          <a-form-item :label="$t('i18n.824607be6b')" name="keepDay">
             <a-input-number
               v-model:value="temp.keepDay"
               :min="1"
               style="width: 100%"
-              :placeholder="$t('pages.file-manager.fileStorage.list.4915fce1')"
+              :placeholder="$t('i18n.e9ea1e7c02')"
             />
           </a-form-item>
-          <a-form-item :label="$t('pages.file-manager.fileStorage.list.ef32cc33')" name="global">
+          <a-form-item :label="$t('i18n.3a6970ac26')" name="global">
             <a-radio-group v-model:value="temp.global">
-              <a-radio :value="true"> {{ $t('pages.file-manager.fileStorage.list.fd0310d0') }} </a-radio>
-              <a-radio :value="false"> {{ $t('pages.file-manager.fileStorage.list.55b7e6b6') }} </a-radio>
+              <a-radio :value="true"> {{ $t('i18n.2be75b1044') }} </a-radio>
+              <a-radio :value="false"> {{ $t('i18n.691b11e443') }} </a-radio>
             </a-radio-group>
           </a-form-item>
           <a-form-item
-            :label="$t('pages.file-manager.fileStorage.list.aaee5dc9')"
+            :label="$t('i18n.2f5e828ecd')"
             name="aliasCode"
-            :help="$t('pages.file-manager.fileStorage.list.b88f3e29')"
+            :help="$t('i18n.41638b0a48')"
           >
             <a-input-search
               v-model:value="temp.aliasCode"
               :max-length="50"
-              :placeholder="$t('pages.file-manager.fileStorage.list.4aa61be9')"
+              :placeholder="$t('i18n.8fbcdbc785')"
               @search="
                 () => {
                   temp = { ...temp, aliasCode: randomStr(6) }
@@ -269,14 +269,14 @@
               "
             >
               <template #enterButton>
-                <a-button type="primary"> {{ $t('pages.file-manager.fileStorage.list.8a1c9dde') }} </a-button>
+                <a-button type="primary"> {{ $t('i18n.6709f4548f') }} </a-button>
               </template>
             </a-input-search>
           </a-form-item>
-          <a-form-item :label="$t('pages.file-manager.fileStorage.list.38259739')" name="description">
+          <a-form-item :label="$t('i18n.8d6f38b4b1')" name="description">
             <a-textarea
               v-model:value="temp.description"
-              :placeholder="$t('pages.file-manager.fileStorage.list.1f789f94')"
+              :placeholder="$t('i18n.411672c954')"
             />
           </a-form-item>
         </a-form>
@@ -286,38 +286,38 @@
         v-if="uploadRemoteFileVisible"
         v-model:open="uploadRemoteFileVisible"
         destroy-on-close
-        :title="$t('pages.file-manager.fileStorage.list.d78f10d3')"
+        :title="$t('i18n.5d488af335')"
         :mask-closable="false"
         :confirm-loading="confirmLoading"
         @ok="handleRemoteUpload"
       >
         <a-form ref="remoteForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }" :rules="rules">
-          <a-form-item :label="$t('pages.file-manager.fileStorage.list.3afe9b11')" name="url">
-            <a-input v-model:value="temp.url" :placeholder="$t('pages.file-manager.fileStorage.list.40ced483')" />
+          <a-form-item :label="$t('i18n.a66fff7541')" name="url">
+            <a-input v-model:value="temp.url" :placeholder="$t('i18n.7457228a61')" />
           </a-form-item>
-          <a-form-item :label="$t('pages.file-manager.fileStorage.list.86a4093a')" name="keepDay">
+          <a-form-item :label="$t('i18n.824607be6b')" name="keepDay">
             <a-input-number
               v-model:value="temp.keepDay"
               :min="1"
               style="width: 100%"
-              :placeholder="$t('pages.file-manager.fileStorage.list.4915fce1')"
+              :placeholder="$t('i18n.e9ea1e7c02')"
             />
           </a-form-item>
-          <a-form-item :label="$t('pages.file-manager.fileStorage.list.ef32cc33')" name="global">
+          <a-form-item :label="$t('i18n.3a6970ac26')" name="global">
             <a-radio-group v-model:value="temp.global">
-              <a-radio :value="true"> {{ $t('pages.file-manager.fileStorage.list.fd0310d0') }} </a-radio>
-              <a-radio :value="false"> {{ $t('pages.file-manager.fileStorage.list.55b7e6b6') }} </a-radio>
+              <a-radio :value="true"> {{ $t('i18n.2be75b1044') }} </a-radio>
+              <a-radio :value="false"> {{ $t('i18n.691b11e443') }} </a-radio>
             </a-radio-group>
           </a-form-item>
           <a-form-item
-            :label="$t('pages.file-manager.fileStorage.list.aaee5dc9')"
+            :label="$t('i18n.2f5e828ecd')"
             name="aliasCode"
-            :help="$t('pages.file-manager.fileStorage.list.b88f3e29')"
+            :help="$t('i18n.41638b0a48')"
           >
             <a-input-search
               v-model:value="temp.aliasCode"
               :max-length="50"
-              :placeholder="$t('pages.file-manager.fileStorage.list.4aa61be9')"
+              :placeholder="$t('i18n.8fbcdbc785')"
               @search="
                 () => {
                   temp = { ...temp, aliasCode: randomStr(6) }
@@ -325,14 +325,14 @@
               "
             >
               <template #enterButton>
-                <a-button type="primary"> {{ $t('pages.file-manager.fileStorage.list.8a1c9dde') }} </a-button>
+                <a-button type="primary"> {{ $t('i18n.6709f4548f') }} </a-button>
               </template>
             </a-input-search>
           </a-form-item>
-          <a-form-item :label="$t('pages.file-manager.fileStorage.list.38259739')" name="description">
+          <a-form-item :label="$t('i18n.8d6f38b4b1')" name="description">
             <a-textarea
               v-model:value="temp.description"
-              :placeholder="$t('pages.file-manager.fileStorage.list.1f789f94')"
+              :placeholder="$t('i18n.411672c954')"
             />
           </a-form-item>
         </a-form>
@@ -342,7 +342,7 @@
         v-if="triggerVisible"
         v-model:open="triggerVisible"
         destroy-on-close
-        :title="$t('pages.file-manager.fileStorage.list.a7210bdc')"
+        :title="$t('i18n.e7e8d4c1fb')"
         width="50%"
         :footer="null"
         :mask-closable="false"
@@ -350,17 +350,17 @@
         <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
           <a-tabs default-active-key="1">
             <template #rightExtra>
-              <a-tooltip :title="$t('pages.file-manager.fileStorage.list.27e4eccc')">
+              <a-tooltip :title="$t('i18n.84415a6bb1')">
                 <a-button type="primary" size="small" @click="resetTrigger">{{
-                  $t('pages.file-manager.fileStorage.list.da1d2343')
+                  $t('i18n.4b9c3271dc')
                 }}</a-button>
               </a-tooltip>
             </template>
-            <a-tab-pane key="1" :tab="$t('pages.file-manager.fileStorage.list.12b6d613')">
+            <a-tab-pane key="1" :tab="$t('i18n.0b58866c3e')">
               <a-space direction="vertical" style="width: 100%">
                 <a-alert
                   type="info"
-                  :message="`${$t('pages.file-manager.fileStorage.list.f0c647b3')}(${$t(
+                  :message="`${$t('i18n.d911cffcd5')}(${$t(
                     'pages.file-manager.fileStorage.list.a5873c3e'
                   )})`"
                 >
@@ -373,29 +373,29 @@
                 </a-alert>
                 <a :href="temp.triggerDownloadUrl" target="_blank">
                   <a-button size="small" type="primary"
-                    ><DownloadOutlined />{{ $t('pages.file-manager.fileStorage.list.255cc40a') }}</a-button
+                    ><DownloadOutlined />{{ $t('i18n.2a813bc3eb') }}</a-button
                   >
                 </a>
               </a-space>
             </a-tab-pane>
-            <a-tab-pane v-if="temp.triggerAliasDownloadUrl" :tab="$t('pages.file-manager.fileStorage.list.c28d3bfb')">
+            <a-tab-pane v-if="temp.triggerAliasDownloadUrl" :tab="$t('i18n.d61af4e686')">
               <a-space direction="vertical" style="width: 100%">
-                <a-alert :message="$t('pages.file-manager.fileStorage.list.46d9b29')" type="warning">
+                <a-alert :message="$t('i18n.947d983961')" type="warning">
                   <template #description>
                     <ul>
                       <li>
-                        {{ $t('pages.file-manager.fileStorage.list.9568db65') }}=createTimeMillis:desc
+                        {{ $t('i18n.ac762710a5') }}=createTimeMillis:desc
 
-                        <p>{{ $t('pages.file-manager.fileStorage.list.c0aa2813') }}</p>
+                        <p>{{ $t('i18n.35fbad84cb') }}</p>
                       </li>
-                      <li>{{ $t('pages.file-manager.fileStorage.list.ce130623') }}</li>
-                      <li>{{ $t('pages.file-manager.fileStorage.list.7d507a40') }}</li>
+                      <li>{{ $t('i18n.c83752739f') }}</li>
+                      <li>{{ $t('i18n.4055a1ee9c') }}</li>
                     </ul>
                   </template>
                 </a-alert>
                 <a-alert
                   type="info"
-                  :message="`${$t('pages.file-manager.fileStorage.list.f0c647b3')}(${$t(
+                  :message="`${$t('i18n.d911cffcd5')}(${$t(
                     'pages.file-manager.fileStorage.list.a5873c3e'
                   )})`"
                 >
@@ -408,7 +408,7 @@
                 </a-alert>
                 <a :href="temp.triggerAliasDownloadUrl" target="_blank">
                   <a-button size="small" type="primary"
-                    ><DownloadOutlined />{{ $t('pages.file-manager.fileStorage.list.255cc40a') }}</a-button
+                    ><DownloadOutlined />{{ $t('i18n.2a813bc3eb') }}</a-button
                   >
                 </a>
               </a-space>
@@ -422,7 +422,7 @@
         v-model:open="releaseFileVisible"
         destroy-on-close
         :confirm-loading="confirmLoading"
-        :title="$t('pages.file-manager.fileStorage.list.b104cb8')"
+        :title="$t('i18n.7e930b95ef')"
         width="70%"
         :mask-closable="false"
         @ok="releaseFileOk()"
@@ -453,10 +453,10 @@
               }
             "
           >
-            {{ $t('pages.file-manager.fileStorage.list.43105e21') }}
+            {{ $t('i18n.625fb26b4b') }}
           </a-button>
           <a-button type="primary" @click="handerConfirm">
-            {{ $t('pages.file-manager.fileStorage.list.e8e9db25') }}
+            {{ $t('i18n.38cf16f220') }}
           </a-button>
         </a-space>
       </div>
@@ -510,26 +510,26 @@ export default {
       list: [],
       columns: [
         {
-          title: this.$t('pages.file-manager.fileStorage.list.d7154d9e'),
+          title: this.$t('i18n.c11eb9deff'),
           dataIndex: 'id',
           ellipsis: true,
           width: 100
         },
         {
-          title: this.$t('pages.file-manager.fileStorage.list.bb769c1d'),
+          title: this.$t('i18n.d7ec2d3fea'),
           dataIndex: 'name',
           ellipsis: true,
           width: 150
         },
         {
-          title: this.$t('pages.file-manager.fileStorage.list.aaee5dc9'),
+          title: this.$t('i18n.2f5e828ecd'),
           dataIndex: 'aliasCode',
           ellipsis: true,
           width: 100,
           tooltip: true
         },
         {
-          title: this.$t('pages.file-manager.fileStorage.list.1295c671'),
+          title: this.$t('i18n.58f9666705'),
           dataIndex: 'size',
           sorter: true,
           ellipsis: true,
@@ -537,28 +537,28 @@ export default {
           width: '100px'
         },
         {
-          title: this.$t('pages.file-manager.fileStorage.list.be38837'),
+          title: this.$t('i18n.242d641eab'),
           dataIndex: 'extName',
           ellipsis: true,
           tooltip: true,
           width: '80px'
         },
         {
-          title: this.$t('pages.file-manager.fileStorage.list.f4be5920'),
+          title: this.$t('i18n.fffd3ce745'),
           dataIndex: 'workspaceId',
           ellipsis: true,
 
           width: '90px'
         },
         {
-          title: this.$t('pages.file-manager.fileStorage.list.b8b8d2e8'),
+          title: this.$t('i18n.26ca20b161'),
           dataIndex: 'source',
           ellipsis: true,
 
           width: '80px'
         },
         {
-          title: this.$t('pages.file-manager.fileStorage.list.38140da6'),
+          title: this.$t('i18n.eaa5d7cb9b'),
           dataIndex: 'validUntil',
           sorter: true,
           customRender: ({ text }) => {
@@ -570,42 +570,42 @@ export default {
           width: '100px'
         },
         {
-          title: this.$t('pages.file-manager.fileStorage.list.34e8b7bd'),
+          title: this.$t('i18n.a3d0154996'),
           dataIndex: 'exists',
           ellipsis: true,
 
           width: '80px'
         },
         {
-          title: this.$t('pages.file-manager.fileStorage.list.db3c9202'),
+          title: this.$t('i18n.95a43eaa59'),
           dataIndex: 'createUser',
           ellipsis: true,
           tooltip: true,
           width: '120px'
         },
         {
-          title: this.$t('pages.file-manager.fileStorage.list.916db24b'),
+          title: this.$t('i18n.9baca0054e'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           tooltip: true,
           width: '120px'
         },
         {
-          title: this.$t('pages.file-manager.fileStorage.list.f06e8846'),
+          title: this.$t('i18n.eca37cb072'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
-          title: this.$t('pages.file-manager.fileStorage.list.61164914'),
+          title: this.$t('i18n.1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
-          title: this.$t('pages.file-manager.fileStorage.list.3bb962bf'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
           align: 'center',
           ellipsis: true,
@@ -616,8 +616,8 @@ export default {
       ],
 
       rules: {
-        name: [{ required: true, message: this.$t('pages.file-manager.fileStorage.list.20c02197'), trigger: 'blur' }],
-        url: [{ required: true, message: this.$t('pages.file-manager.fileStorage.list.cc2bc679'), trigger: 'blur' }]
+        name: [{ required: true, message: this.$t('i18n.7aa81d1573'), trigger: 'blur' }],
+        url: [{ required: true, message: this.$t('i18n.f4dd45fca9'), trigger: 'blur' }]
       },
 
       temp: {},
@@ -686,7 +686,7 @@ export default {
         // 判断文件
         if (this.fileList.length === 0) {
           $notification.success({
-            message: this.$t('pages.file-manager.fileStorage.list.25d31749')
+            message: this.$t('i18n.9febf31146')
           })
           return false
         }
@@ -714,12 +714,12 @@ export default {
                   if (res.data) {
                     //
                     $notification.warning({
-                      message: `${this.$t('pages.file-manager.fileStorage.list.67888d26')},${this.$t(
+                      message: `${this.$t('i18n.a17b5ab021')},${this.$t(
                         'pages.file-manager.fileStorage.list.6a721706'
-                      )}${res.data.name} ,${this.$t('pages.file-manager.fileStorage.list.e83695d7')}${
+                      )}${res.data.name} ,${this.$t('i18n.ee992d9744')}${
                         res.data.workspaceId === 'GLOBAL'
-                          ? this.$t('pages.file-manager.fileStorage.list.f5bb2364')
-                          : this.$t('pages.file-manager.fileStorage.list.5edb2e8a')
+                          ? this.$t('i18n.0a60ac8f02')
+                          : this.$t('i18n.c9744f45e7')
                       }`
                     })
                     //
@@ -824,11 +824,11 @@ export default {
     // 删除文件
     handleDelete(record) {
       $confirm({
-        title: this.$t('pages.file-manager.fileStorage.list.a8fe4c17'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.file-manager.fileStorage.list.533f191c') + record.name,
-        okText: this.$t('pages.file-manager.fileStorage.list.7da4a591'),
-        cancelText: this.$t('pages.file-manager.fileStorage.list.43105e21'),
+        content: this.$t('i18n.3787283bf4') + record.name,
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return delFile({
             id: record.id
@@ -847,16 +847,16 @@ export default {
     handleBatchDelete() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
         $notification.error({
-          message: this.$t('pages.file-manager.fileStorage.list.2ad67cae')
+          message: this.$t('i18n.5d817c403e')
         })
         return
       }
       $confirm({
-        title: this.$t('pages.file-manager.fileStorage.list.a8fe4c17'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.file-manager.fileStorage.list.8cb13ac8'),
-        okText: this.$t('pages.file-manager.fileStorage.list.7da4a591'),
-        cancelText: this.$t('pages.file-manager.fileStorage.list.43105e21'),
+        content: this.$t('i18n.52d24791ab'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return delFile({ ids: this.tableSelections.join(',') }).then((res) => {
             if (res.code === 200) {
@@ -970,7 +970,7 @@ export default {
     handerConfirm() {
       if (!this.tableSelections.length) {
         $notification.warning({
-          message: this.$t('pages.file-manager.fileStorage.list.e1f69633')
+          message: this.$t('i18n.8d62b202d9')
         })
         return
       }
@@ -979,7 +979,7 @@ export default {
       })
       if (!selectData.length) {
         $notification.warning({
-          message: this.$t('pages.file-manager.fileStorage.list.e1f69633')
+          message: this.$t('i18n.8d62b202d9')
         })
         return
       }

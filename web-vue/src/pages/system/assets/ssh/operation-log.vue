@@ -18,19 +18,19 @@
           <a-input
             v-model:value="viewOperationLogListQuery['modifyUser']"
             class="search-input-item"
-            :placeholder="$t('pages.system.assets.ssh.operation-log.ed74cc37')"
+            :placeholder="$t('i18n.f9ac4b2aa6')"
             @press-enter="handleListLog"
           />
           <a-input
             v-model:value="viewOperationLogListQuery['%sshName%']"
             class="search-input-item"
-            :placeholder="$t('pages.system.assets.ssh.operation-log.dc77206e')"
+            :placeholder="$t('i18n.28e1c746f7')"
             @press-enter="handleListLog"
           />
           <a-input
             v-model:value="viewOperationLogListQuery['%machineSshName%']"
             class="search-input-item"
-            :placeholder="$t('pages.system.assets.ssh.operation-log.c3368e35')"
+            :placeholder="$t('i18n.bb4409015b')"
             @press-enter="handleListLog"
           />
           <a-input
@@ -42,7 +42,7 @@
           <a-input
             v-model:value="viewOperationLogListQuery['%commands%']"
             class="search-input-item"
-            :placeholder="$t('pages.system.assets.ssh.operation-log.3e1a05c7')"
+            :placeholder="$t('i18n.24cc0de832')"
             @press-enter="handleListLog"
           />
           <a-range-picker
@@ -51,7 +51,7 @@
             @change="onchangeListLogTime"
           />
           <a-button type="primary" @click="handleListLog">{{
-            $t('pages.system.assets.ssh.operation-log.53c2763c')
+            $t('i18n.e5f71fc31e')
           }}</a-button>
         </a-space>
       </template>
@@ -81,8 +81,8 @@
         <template v-else-if="column.dataIndex === 'refuse'">
           <span>{{
             text
-              ? $t('pages.system.assets.ssh.operation-log.83aa7d3')
-              : $t('pages.system.assets.ssh.operation-log.5aedf375')
+              ? $t('i18n.330363dfc5')
+              : $t('i18n.7173f80900')
           }}</span>
         </template>
       </template>
@@ -120,27 +120,27 @@ export default {
       ),
       viewOperationLogColumns: [
         {
-          title: this.$t('pages.system.assets.ssh.operation-log.9eb05c33'),
+          title: this.$t('i18n.6b0bc6432d'),
           dataIndex: 'modifyUser',
           width: 100
         },
         { title: 'IP', dataIndex: 'ip', width: '130px' },
         {
-          title: `ssh${this.$t('pages.system.assets.ssh.operation-log.bb769c1d')}`,
+          title: `ssh${this.$t('i18n.4f8ca95e7b')}`,
           dataIndex: 'sshName',
           width: '200px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.ssh.operation-log.4ca54ca0'),
+          title: this.$t('i18n.18b0ab4dd2'),
           dataIndex: 'machineSshName',
           width: '200px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.system.assets.ssh.operation-log.3e1a05c7'),
+          title: this.$t('i18n.24cc0de832'),
           dataIndex: 'commands',
           width: 200,
           ellipsis: true
@@ -153,7 +153,7 @@ export default {
         },
 
         {
-          title: this.$t('pages.system.assets.ssh.operation-log.45e88a2c'),
+          title: this.$t('i18n.7e951d56d9'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text }) => {
@@ -162,7 +162,7 @@ export default {
           width: '180px'
         },
         {
-          title: this.$t('pages.system.assets.ssh.operation-log.2bff48a0'),
+          title: this.$t('i18n.5e9f2dedca'),
           dataIndex: 'refuse',
           width: '100px',
           ellipsis: true,

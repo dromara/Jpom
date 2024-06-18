@@ -3,7 +3,7 @@
   <div>
     <log-view2
       ref="logView"
-      :title-name="$t('pages.docker.log-view.648b57ff')"
+      :title-name="$t('i18n.cac26240b5')"
       :visible="visible"
       @close="
         () => {
@@ -16,30 +16,30 @@
           <div>
             <a-input-number
               v-model:value="tail"
-              :placeholder="$t('pages.docker.log-view.5af47e85')"
+              :placeholder="$t('i18n.5734b2db4e')"
               style="width: 150px"
             >
               <template #addonBefore>
-                <a-tooltip :title="$t('pages.docker.log-view.d35b24b2')"
-                  >{{ $t('pages.docker.log-view.5866bf3c') }}
+                <a-tooltip :title="$t('i18n.25b6c22d8a')"
+                  >{{ $t('i18n.87eb55155a') }}
                 </a-tooltip>
               </template>
             </a-input-number>
           </div>
           <div>
-            {{ $t('pages.docker.log-view.87ee22ec') }}
+            {{ $t('i18n.d731dc9325') }}
             <a-switch
               v-model:checked="timestamps"
-              :checked-children="$t('pages.docker.log-view.d75b3b1a')"
-              :un-checked-children="$t('pages.docker.log-view.41cc2930')"
+              :checked-children="$t('i18n.4d775d4cd7')"
+              :un-checked-children="$t('i18n.2064fc6808')"
             />
           </div>
           <a-button type="primary" size="small" @click="initWebSocket"
-            ><ReloadOutlined /> {{ $t('pages.docker.log-view.7bbd89a') }}
+            ><ReloadOutlined /> {{ $t('i18n.694fc5efa9') }}
           </a-button>
           |
           <a-button type="primary" :disabled="!logId" size="small" @click="download">
-            <DownloadOutlined /> {{ $t('pages.docker.log-view.42c8e9c6') }}
+            <DownloadOutlined /> {{ $t('i18n.f26ef91424') }}
           </a-button>
           |
         </a-space>
@@ -131,7 +131,7 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: `web socket ${this.$t('pages.docker.log-view.d75d207f')},${this.$t('pages.docker.log-view.763330b')}`
+          message: `web socket ${this.$t('i18n.7030ff6470')},${this.$t('i18n.226a6f9cdd')}`
         })
         clearInterval(this.heart)
       }
@@ -139,7 +139,7 @@ export default {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
         clearInterval(this.heart)
-        $message.warning(this.$t('pages.docker.log-view.8a2aae09'))
+        $message.warning(this.$t('i18n.948171025e'))
       }
       this.socket.onmessage = (msg) => {
         if (msg.data.indexOf('code') > -1 && msg.data.indexOf('msg') > -1) {

@@ -1,23 +1,23 @@
 <template>
   <div>
     <!-- 编辑区 -->
-    <a-spin :tip="$t('pages.node.node-layout.project.project-edit.a5c1d44')" :spinning="loading">
+    <a-spin :tip="$t('i18n.2770db3a99')" :spinning="loading">
       <a-form ref="editProjectForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$t('pages.node.node-layout.project.project-edit.4eaba425')" name="id">
-          <template #help>{{ $t('pages.node.node-layout.project.project-edit.49427983') }}</template>
+        <a-form-item :label="$t('i18n.4fdd2213b5')" name="id">
+          <template #help>{{ $t('i18n.e2b0f27424') }}</template>
 
           <a-input
             v-if="temp.type === 'edit'"
             v-model:value="temp.id"
             :max-length="50"
             :disabled="temp.type === 'edit'"
-            :placeholder="$t('pages.node.node-layout.project.project-edit.92ebd5f0')"
+            :placeholder="$t('i18n.7ce511154f')"
           />
           <template v-else>
             <a-input-search
               v-model:value="temp.id"
               :max-length="50"
-              :placeholder="$t('pages.node.node-layout.project.project-edit.92ebd5f0')"
+              :placeholder="$t('i18n.7ce511154f')"
               @search="
                 () => {
                   temp = { ...temp, id: randomStr(6) }
@@ -25,32 +25,26 @@
               "
             >
               <template #enterButton>
-                <a-button type="primary"> {{ $t('pages.node.node-layout.project.project-edit.45f317b2') }} </a-button>
+                <a-button type="primary"> {{ $t('i18n.6709f4548f') }} </a-button>
               </template>
             </a-input-search>
           </template>
         </a-form-item>
 
-        <a-form-item :label="$t('pages.node.node-layout.project.project-edit.7cb5b39')" name="name">
+        <a-form-item :label="$t('i18n.738a41f965')" name="name">
           <a-row>
             <a-col :span="10">
-              <a-input
-                v-model:value="temp.name"
-                :max-length="50"
-                :placeholder="$t('pages.node.node-layout.project.project-edit.7cb5b39')"
-              />
+              <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n.738a41f965')" />
             </a-col>
-            <a-col :span="4" style="text-align: right">{{
-              $t('pages.node.node-layout.project.project-edit.12d0e469')
-            }}</a-col>
+            <a-col :span="4" style="text-align: right">{{ $t('i18n.1b973fc4d1') }}</a-col>
             <a-col :span="10">
               <a-form-item-rest>
                 <custom-select
                   v-model:value="temp.group"
                   :max-length="50"
                   :data="groupList"
-                  :input-placeholder="$t('pages.node.node-layout.project.project-edit.95c41d82')"
-                  :select-placeholder="$t('pages.node.node-layout.project.project-edit.761c903a')"
+                  :input-placeholder="$t('i18n.bd0362bed3')"
+                  :select-placeholder="$t('i18n.3e8c9c54ee')"
                 >
                 </custom-select>
               </a-form-item-rest>
@@ -60,39 +54,29 @@
         <a-form-item name="runMode">
           <template #label>
             <a-tooltip>
-              {{ $t('pages.node.node-layout.project.project-edit.eaf004ca') }}
+              {{ $t('i18n.17d444b642') }}
               <template #title>
                 <ul>
-                  <li><b>Dsl</b> {{ $t('pages.node.node-layout.project.project-edit.64759ad3') }}</li>
-                  <li>
-                    <b>ClassPath</b> java -classpath xxx {{ $t('pages.node.node-layout.project.project-edit.788bfc') }}
-                  </li>
-                  <li><b>Jar</b> java -jar xxx {{ $t('pages.node.node-layout.project.project-edit.788bfc') }}</li>
+                  <li><b>Dsl</b> {{ $t('i18n.2356fe4af2') }}</li>
+                  <li><b>ClassPath</b> java -classpath xxx {{ $t('i18n.fa4aa1b93b') }}</li>
+                  <li><b>Jar</b> java -jar xxx {{ $t('i18n.fa4aa1b93b') }}</li>
                   <li>
                     <b>JarWar</b> java -jar Springboot war
-                    {{ $t('pages.node.node-layout.project.project-edit.788bfc') }}
+                    {{ $t('i18n.fa4aa1b93b') }}
                   </li>
                   <li>
                     <b>JavaExtDirsCp</b> java -Djava.ext.dirs=lib -cp conf:run.jar $MAIN_CLASS
-                    {{ $t('pages.node.node-layout.project.project-edit.788bfc') }}
+                    {{ $t('i18n.fa4aa1b93b') }}
                   </li>
-                  <li>
-                    <b>File</b> {{ $t('pages.node.node-layout.project.project-edit.d33f4295') }},{{
-                      $t('pages.node.node-layout.project.project-edit.35f7833f')
-                    }}
-                  </li>
+                  <li><b>File</b> {{ $t('i18n.5d6f47d670') }},{{ $t('i18n.61955b0e4b') }}</li>
                 </ul>
               </template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
           </template>
-          <a-select
-            v-model:value="temp.runMode"
-            :placeholder="$t('pages.node.node-layout.project.project-edit.9f508cc8')"
-            @change="changeRunMode"
-          >
+          <a-select v-model:value="temp.runMode" :placeholder="$t('i18n.26a3378645')" @change="changeRunMode">
             <a-select-option v-for="item in runModeArray" :key="item.name">
-              <template v-if="item.desc.indexOf($t('pages.node.node-layout.project.project-edit.ad7005ba')) > -1">
+              <template v-if="item.desc.indexOf($t('i18n.888df7a89e')) > -1">
                 <s>
                   <b>[{{ item.name }}]</b> {{ item.desc }}
                 </s>
@@ -104,12 +88,8 @@
           </a-select>
         </a-form-item>
         <template v-if="temp.runMode === 'Link'">
-          <a-form-item :label="$t('pages.node.node-layout.project.project-edit.4b36f25f')" name="linkId">
-            <a-select
-              v-model:value="temp.linkId"
-              :placeholder="$t('pages.node.node-layout.project.project-edit.9ac42fe6')"
-              @change="changeLinkId"
-            >
+          <a-form-item :label="$t('i18n.be166de983')" name="linkId">
+            <a-select v-model:value="temp.linkId" :placeholder="$t('i18n.1ba141c9ac')" @change="changeLinkId">
               <a-select-option
                 v-for="item in projectList"
                 :key="item.projectId"
@@ -124,16 +104,14 @@
           <a-form-item name="whitelistDirectory">
             <template #label>
               <a-tooltip>
-                {{ $t('pages.node.node-layout.project.project-edit.5b716424') }}
+                {{ $t('i18n.aabdc3b7c0') }}
                 <template #title>
                   <ul>
-                    <li>{{ $t('pages.node.node-layout.project.project-edit.9d024ef5') }}</li>
-                    <li>{{ $t('pages.node.node-layout.project.project-edit.80b551d6') }}</li>
-                    <li>{{ $t('pages.node.node-layout.project.project-edit.28952768') }}</li>
+                    <li>{{ $t('i18n.f89cc4807e') }}</li>
+                    <li>{{ $t('i18n.94763baf5f') }}</li>
+                    <li>{{ $t('i18n.fe828cefd9') }}</li>
                     <li>
-                      {{ $t('pages.node.node-layout.project.project-edit.528d80cb') }} <br />&nbsp;&nbsp;<b>{{
-                        $t('pages.node.node-layout.project.project-edit.5ef24c2f')
-                      }}</b>
+                      {{ $t('i18n.556499017a') }} <br />&nbsp;&nbsp;<b>{{ $t('i18n.67141abed6') }}</b>
                     </li>
                   </ul>
                 </template>
@@ -142,7 +120,7 @@
             </template>
             <template #help>
               <div>
-                {{ $t('pages.node.node-layout.project.project-edit.20f66fff') }}
+                {{ $t('i18n.fde1b6fb37') }}
                 <a-button
                   type="link"
                   size="small"
@@ -152,26 +130,18 @@
                     }
                   "
                 >
-                  <InfoCircleOutlined /> {{ $t('pages.node.node-layout.project.project-edit.2ebdf25e') }}
+                  <InfoCircleOutlined /> {{ $t('i18n.23b444d24c') }}
                 </a-button>
               </div>
             </template>
             <a-input-group compact>
-              <a-select
-                v-model:value="temp.whitelistDirectory"
-                style="width: 50%"
-                :placeholder="$t('pages.node.node-layout.project.project-edit.6fa628c8')"
-              >
+              <a-select v-model:value="temp.whitelistDirectory" style="width: 50%" :placeholder="$t('i18n.1d38b2b2bc')">
                 <a-select-option v-for="access in accessList" :key="access">
                   <a-tooltip :title="access">{{ access }}</a-tooltip>
                 </a-select-option>
               </a-select>
               <a-form-item-rest>
-                <a-input
-                  v-model:value="temp.lib"
-                  style="width: 50%"
-                  :placeholder="$t('pages.node.node-layout.project.project-edit.d4e69bd6')"
-                />
+                <a-input v-model:value="temp.lib" style="width: 50%" :placeholder="$t('i18n.1dc518bddb')" />
               </a-form-item-rest>
             </a-input-group>
             <template #extra>
@@ -179,24 +149,23 @@
             </template>
           </a-form-item>
 
-          <a-form-item v-show="filePath !== ''" :label="$t('pages.node.node-layout.project.project-edit.2f9f87a5')">
+          <a-form-item v-show="filePath !== ''" :label="$t('i18n.8283f063d7')">
             <a-alert :message="filePath" type="success" />
           </a-form-item>
         </template>
         <a-form-item v-show="temp.runMode === 'Dsl'" name="dslContent">
           <template #label>
             <a-tooltip>
-              DSL {{ $t('pages.node.node-layout.project.project-edit.99ff48c8') }}
+              DSL {{ $t('i18n.2d711b09bd') }}
               <template #title>
-                <p>{{ $t('pages.node.node-layout.project.project-edit.e79a829d') }}</p>
-                <p>{{ $t('pages.node.node-layout.project.project-edit.56b96c89') }}</p>
+                <p>{{ $t('i18n.73d8160821') }}</p>
+                <p>{{ $t('i18n.3517aa30c2') }}</p>
                 <p>
                   <b>status</b>
-                  {{ $t('pages.node.node-layout.project.project-edit.3cbddbbe') }}:$pid
-                  <b>$pid {{ $t('pages.node.node-layout.project.project-edit.3cf2b4f7') }}</b
-                  >{{ $t('pages.node.node-layout.project.project-edit.b76bdd94') }}
+                  {{ $t('i18n.ca69dad8fc') }}:$pid <b>$pid {{ $t('i18n.07a8af8c03') }}</b
+                  >{{ $t('i18n.d2f484ff7e') }}
                 </p>
-                <p>{{ $t('pages.node.node-layout.project.project-edit.f26fd1f1') }}</p>
+                <p>{{ $t('i18n.9f52492fbc') }}</p>
               </template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
@@ -207,7 +176,7 @@
                 <a-divider type="vertical" />
               </template> -->
             <div>
-              scriptId{{ $t('pages.node.node-layout.project.project-edit.2695c530') }}
+              scriptId{{ $t('i18n.21da885538') }}
               <a-button
                 type="link"
                 size="small"
@@ -217,10 +186,10 @@
                   }
                 "
               >
-                {{ $t('pages.node.node-layout.project.project-edit.41ceb72c') }}
+                {{ $t('i18n.35134b6f94') }}
               </a-button>
             </div>
-            <div>{{ $t('pages.node.node-layout.project.project-edit.f6a317f0') }}</div>
+            <div>{{ $t('i18n.6a359e2ab3') }}</div>
             <!-- </a-space> -->
           </template>
           <a-form-item-rest>
@@ -230,14 +199,14 @@
               height="40vh"
               :show-tool="true"
               :options="{ mode: 'yaml', tabSize: 2 }"
-              :placeholder="$t('pages.node.node-layout.project.project-edit.89967495')"
+              :placeholder="$t('i18n.1c8190b0eb')"
             >
               <template #tool_before>
                 <a-segmented
                   v-model:value="dslEditTabKey"
                   :options="[
-                    { label: `DSL ${$t('pages.node.node-layout.project.project-edit.28f9e270')}`, value: 'content' },
-                    { label: $t('pages.node.node-layout.project.project-edit.a3186ee5'), value: 'demo' }
+                    { label: `DSL ${$t('i18n.224e2ccda8')}`, value: 'content' },
+                    { label: $t('i18n.da79c2ec32'), value: 'demo' }
                   ]"
                 />
               </template>
@@ -253,8 +222,8 @@
                 <a-segmented
                   v-model:value="dslEditTabKey"
                   :options="[
-                    { label: `DSL ${$t('pages.node.node-layout.project.project-edit.28f9e270')}`, value: 'content' },
-                    { label: $t('pages.node.node-layout.project.project-edit.a3186ee5'), value: 'demo' }
+                    { label: `DSL ${$t('i18n.224e2ccda8')}`, value: 'content' },
+                    { label: $t('i18n.da79c2ec32'), value: 'demo' }
                   ]"
                 />
               </template>
@@ -264,24 +233,19 @@
         <a-form-item v-show="noFileModes.includes(temp.runMode) && temp.runMode !== 'Link'">
           <template #label>
             <a-tooltip>
-              {{ $t('pages.node.node-layout.project.project-edit.e9f209dd') }}
+              {{ $t('i18n.2ce44aba57') }}
               <template #title>
                 <ul>
-                  <li>{{ $t('pages.node.node-layout.project.project-edit.8f348042') }}</li>
-                  <li>{{ $t('pages.node.node-layout.project.project-edit.1008ec50') }}</li>
-                  <li>{{ $t('pages.node.node-layout.project.project-edit.a3cf55e2') }}</li>
+                  <li>{{ $t('i18n.12934d1828') }}</li>
+                  <li>{{ $t('i18n.138776a1dc') }}</li>
+                  <li>{{ $t('i18n.95c5c939e4') }}</li>
                 </ul>
               </template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
           </template>
-          <a-select
-            v-model:value="temp.logPath"
-            :placeholder="$t('pages.node.node-layout.project.project-edit.6fa628c8')"
-          >
-            <a-select-option key="" value="">{{
-              $t('pages.node.node-layout.project.project-edit.1008ec50')
-            }}</a-select-option>
+          <a-select v-model:value="temp.logPath" :placeholder="$t('i18n.1d38b2b2bc')">
+            <a-select-option key="" value="">{{ $t('i18n.138776a1dc') }}</a-select-option>
             <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
           </a-select>
         </a-form-item>
@@ -294,10 +258,7 @@
           label="Main Class"
           name="mainClass"
         >
-          <a-input
-            v-model:value="temp.mainClass"
-            :placeholder="$t('pages.node.node-layout.project.project-edit.b324b030')"
-          />
+          <a-input v-model:value="temp.mainClass" :placeholder="$t('i18n.ef800ed466')" />
         </a-form-item>
         <a-form-item
           v-show="
@@ -309,34 +270,29 @@
         >
           <a-input
             v-model:value="temp.javaExtDirsCp"
-            :placeholder="`-Dext.dirs=xxx: -cp xx  ${$t('pages.node.node-layout.project.project-edit.4241b582')}:xx】`"
+            :placeholder="`-Dext.dirs=xxx: -cp xx  ${$t('i18n.c53021f06d')}:xx】`"
           />
         </a-form-item>
         <a-form-item
           v-show="javaModes.includes(temp.runMode) || javaModes.includes(linkProjectData.runMode)"
-          :label="$t('pages.node.node-layout.project.project-edit.19af9418')"
+          :label="$t('i18n.497bc3532b')"
           name="jvm"
         >
           <a-textarea
             v-model:value="temp.jvm"
             :auto-size="{ minRows: 3, maxRows: 3 }"
-            :placeholder="
-              $t('pages.node.node-layout.project.project-edit.17924912', {
-                slot1: $t('pages.node.node-layout.project.project-edit.6e6cc3c2'),
-                slot2: $t('pages.node.node-layout.project.project-edit.a72cfae2')
-              })
-            "
+            :placeholder="$t('i18n.eef3653e9a', { slot1: $t('i18n.3d0a2df9ec'), slot2: $t('i18n.eb5bab1c31') })"
           />
         </a-form-item>
         <a-form-item
           v-show="javaModes.includes(temp.runMode) || javaModes.includes(linkProjectData.runMode)"
-          :label="$t('pages.node.node-layout.project.project-edit.c5feb1a')"
+          :label="$t('i18n.e5098786d3')"
           name="args"
         >
           <a-textarea
             v-model:value="temp.args"
             :auto-size="{ minRows: 3, maxRows: 3 }"
-            :placeholder="`Main ${$t('pages.node.node-layout.project.project-edit.ee6f8f43')}. ${$t(
+            :placeholder="`Main ${$t('i18n.6a9231c3ba')}. ${$t(
               'pages.node.node-layout.project.project-edit.18629de'
             )}.port=8080`"
           />
@@ -344,11 +300,11 @@
         <a-form-item
           v-if="temp.runMode === 'Dsl' || linkProjectData.runMode === 'Dsl'"
           name="dslEnv"
-          :label="$t('pages.node.node-layout.project.project-edit.ede504be')"
+          :label="$t('i18n.fba5f4f19a')"
         >
           <!-- <a-input
             v-model:value="temp.dslEnv"
-            placeholder="DSL{{$t('pages.node.node-layout.project.project-edit.c81b2c2e')}},{{$t('pages.node.node-layout.project.project-edit.7e189322')}}=values1&keyvalue2"
+            placeholder="DSL{{$t('i18n.3867e350eb')}},{{$t('i18n.9324290bfe')}}=values1&keyvalue2"
           /> -->
           <parameter-widget v-model:value="temp.dslEnv"></parameter-widget>
         </a-form-item>
@@ -356,40 +312,39 @@
         <a-form-item v-show="noFileModes.includes(temp.runMode)" name="autoStart">
           <template #label>
             <a-tooltip>
-              {{ $t('pages.node.node-layout.project.project-edit.12861e4e') }}
-              <template #title>{{ $t('pages.node.node-layout.project.project-edit.be7082a2') }}</template>
+              {{ $t('i18n.8388c637f6') }}
+              <template #title>{{ $t('i18n.d4e03f60a9') }}</template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
           </template>
           <template #help>
             <div>
-              {{ $t('pages.node.node-layout.project.project-edit.b35cbffb')
-              }}<b>{{ $t('pages.node.node-layout.project.project-edit.297af6c7') }}</b
-              >{{ $t('pages.node.node-layout.project.project-edit.53c6c542') }}
+              {{ $t('i18n.71584de972') }}<b>{{ $t('i18n.1e4a59829d') }}</b
+              >{{ $t('i18n.0360fffb40') }}
             </div>
           </template>
           <div>
             <a-switch
               v-model:checked="temp.autoStart"
-              :checked-children="$t('pages.node.node-layout.project.project-edit.c5f50974')"
-              :un-checked-children="$t('pages.node.node-layout.project.project-edit.e9a7e1c4')"
+              :checked-children="$t('i18n.8493205602')"
+              :un-checked-children="$t('i18n.d58a55bcee')"
             />
-            {{ $t('pages.node.node-layout.project.project-edit.f32199a3') }}
+            {{ $t('i18n.1022c545d1') }}
           </div>
         </a-form-item>
 
         <a-form-item name="disableScanDir">
           <template #label>
-            <a-tooltip> {{ $t('pages.node.node-layout.project.project-edit.217ba8f3') }} </a-tooltip>
+            <a-tooltip> {{ $t('i18n.df59a2804d') }} </a-tooltip>
           </template>
           <template #help>
-            <div>{{ $t('pages.node.node-layout.project.project-edit.3342e1c4') }}</div>
+            <div>{{ $t('i18n.b7c139ed75') }}</div>
           </template>
           <div>
             <a-switch
               v-model:checked="temp.disableScanDir"
-              :checked-children="$t('pages.node.node-layout.project.project-edit.f78bec3f')"
-              :un-checked-children="$t('pages.node.node-layout.project.project-edit.fc6ab345')"
+              :checked-children="$t('i18n.ced3d28cd1')"
+              :un-checked-children="$t('i18n.56525d62ac')"
             />
           </div>
         </a-form-item>
@@ -400,31 +355,25 @@
               WebHooks
               <template #title>
                 <ul>
-                  <li>{{ $t('pages.node.node-layout.project.project-edit.5db82550') }}</li>
-                  <li>{{ $t('pages.node.node-layout.project.project-edit.316f78d0') }}</li>
-                  <li>type {{ $t('pages.node.node-layout.project.project-edit.84063ac5') }}</li>
-                  <li>DSL {{ $t('pages.node.node-layout.project.project-edit.d4d5dc62') }}</li>
+                  <li>{{ $t('i18n.a24d80c8fa') }}</li>
+                  <li>{{ $t('i18n.b91961bf0b') }}</li>
+                  <li>type {{ $t('i18n.5a63277941') }}</li>
+                  <li>DSL {{ $t('i18n.f8f456eb9a') }}</li>
                 </ul>
               </template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
           </template>
-          <a-input
-            v-model:value="temp.token"
-            :placeholder="$t('pages.node.node-layout.project.project-edit.8b1eb070')"
-          />
+          <a-input v-model:value="temp.token" :placeholder="$t('i18n.6c776e9d91')" />
         </a-form-item>
 
         <a-form-item
           v-if="temp.runCommand"
           v-show="temp.type === 'edit' && javaModes.includes(temp.runMode)"
-          :label="$t('pages.node.node-layout.project.project-edit.da878eca')"
+          :label="$t('i18n.ce559ba296')"
           name="runCommand"
         >
-          <a-alert
-            :message="temp.runCommand || $t('pages.node.node-layout.project.project-edit.9ac5e2d4')"
-            type="success"
-          />
+          <a-alert :message="temp.runCommand || $t('i18n.d81bb206a8')" type="success" />
         </a-form-item>
       </a-form>
     </a-spin>
@@ -433,7 +382,7 @@
       v-if="configDir"
       v-model:open="configDir"
       destroy-on-close
-      :title="`${$t('pages.node.node-layout.project.project-edit.277cb48f')}`"
+      :title="`${$t('i18n.eee6510292')}`"
       :footer="null"
       :mask-closable="false"
       @cancel="
@@ -457,7 +406,7 @@
     <NodeFunc
       v-if="drawerVisible"
       :id="nodeId"
-      :name="$t('pages.node.node-layout.project.project-edit.41ceb72c')"
+      :name="$t('i18n.35134b6f94')"
       :tabs="['scripct']"
       @close="
         () => {
@@ -518,25 +467,15 @@ export default {
       temp: {},
       drawerVisible: false,
       rules: {
-        id: [
-          { required: true, message: this.$t('pages.node.node-layout.project.project-edit.6916e3ff'), trigger: 'blur' }
-        ],
+        id: [{ required: true, message: this.$t('i18n.646a518953'), trigger: 'blur' }],
 
-        name: [
-          { required: true, message: this.$t('pages.node.node-layout.project.project-edit.bf4a219b'), trigger: 'blur' }
-        ],
+        name: [{ required: true, message: this.$t('i18n.4371e2b426'), trigger: 'blur' }],
 
-        runMode: [
-          { required: true, message: this.$t('pages.node.node-layout.project.project-edit.4551702c'), trigger: 'blur' }
-        ],
+        runMode: [{ required: true, message: this.$t('i18n.4310e9ed7d'), trigger: 'blur' }],
 
-        whitelistDirectory: [
-          { required: true, message: this.$t('pages.node.node-layout.project.project-edit.6fa628c8'), trigger: 'blur' }
-        ],
+        whitelistDirectory: [{ required: true, message: this.$t('i18n.1d38b2b2bc'), trigger: 'blur' }],
 
-        lib: [
-          { required: true, message: this.$t('pages.node.node-layout.project.project-edit.b5d7203a'), trigger: 'blur' }
-        ]
+        lib: [{ required: true, message: this.$t('i18n.d9657e2b5f'), trigger: 'blur' }]
       },
       linkProjectData: {},
       loading: true,
@@ -650,7 +589,7 @@ export default {
       return new Promise((resolve, reject) => {
         if (this.temp.outGivingProject) {
           $notification.warning({
-            message: this.$t('pages.node.node-layout.project.project-edit.d074a68')
+            message: this.$t('i18n.869b506d66')
           })
           reject(false)
           return

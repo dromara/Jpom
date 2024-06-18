@@ -21,7 +21,7 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$t('pages.file-manager.release-task.list.2ab36118')"
+            :placeholder="$t('i18n.ce23a42b47')"
             class="search-input-item"
             @press-enter="loadData"
           />
@@ -39,7 +39,7 @@
               }
             "
             allow-clear
-            :placeholder="$t('pages.file-manager.release-task.list.6e06fe4f')"
+            :placeholder="$t('i18n.3fea7ca76c')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
@@ -58,14 +58,14 @@
               }
             "
             allow-clear
-            :placeholder="$t('pages.file-manager.release-task.list.68615fc7')"
+            :placeholder="$t('i18n.8aa25f5fbe')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in taskTypeMap" :key="key">{{ val }}</a-select-option>
           </a-select>
-          <a-tooltip :title="$t('pages.file-manager.release-task.list.249b5548')">
+          <a-tooltip :title="$t('i18n.4838a3bd20')">
             <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('pages.file-manager.release-task.list.53c2763c')
+              $t('i18n.e5f71fc31e')
             }}</a-button>
           </a-tooltip>
         </a-space>
@@ -87,35 +87,35 @@
 
         <template v-else-if="column.dataIndex === 'status'">
           <a-tag v-if="text === 2" color="green">{{
-            statusMap[text] || $t('pages.file-manager.release-task.list.5f51a112')
+            statusMap[text] || $t('i18n.1622dc9b6b')
           }}</a-tag>
           <a-tag v-else-if="text === 0 || text === 1" color="orange">{{
-            statusMap[text] || $t('pages.file-manager.release-task.list.5f51a112')
+            statusMap[text] || $t('i18n.1622dc9b6b')
           }}</a-tag>
           <a-tag v-else-if="text === 4" color="blue">
-            {{ statusMap[text] || $t('pages.file-manager.release-task.list.5f51a112') }}
+            {{ statusMap[text] || $t('i18n.1622dc9b6b') }}
           </a-tag>
           <a-tag v-else-if="text === 3" color="red">{{
-            statusMap[text] || $t('pages.file-manager.release-task.list.5f51a112')
+            statusMap[text] || $t('i18n.1622dc9b6b')
           }}</a-tag>
-          <a-tag v-else>{{ statusMap[text] || $t('pages.file-manager.release-task.list.5f51a112') }}</a-tag>
+          <a-tag v-else>{{ statusMap[text] || $t('i18n.1622dc9b6b') }}</a-tag>
         </template>
         <template v-else-if="column.dataIndex === 'taskType'">
-          <span>{{ taskTypeMap[text] || $t('pages.file-manager.release-task.list.5f51a112') }}</span>
+          <span>{{ taskTypeMap[text] || $t('i18n.1622dc9b6b') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'fileType'">
-          <span v-if="text == 2">{{ $t('pages.file-manager.release-task.list.c3a20e28') }}</span>
-          <span v-else>{{ $t('pages.file-manager.release-task.list.f183985') }}</span>
+          <span v-if="text == 2">{{ $t('i18n.28f6e7a67b') }}</span>
+          <span v-else>{{ $t('i18n.26183c99bf') }}</span>
         </template>
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button type="primary" size="small" @click="handleView(record)">{{
-              $t('pages.file-manager.release-task.list.1ba84995')
+              $t('i18n.607e7a4f37')
             }}</a-button>
 
             <a-button type="primary" size="small" @click="handleRetask(record)">{{
-              $t('pages.file-manager.release-task.list.a21afd32')
+              $t('i18n.9e09315960')
             }}</a-button>
             <a-button
               type="primary"
@@ -123,7 +123,7 @@
               size="small"
               :disabled="!(record.status === 0 || record.status === 1)"
               @click="handleCancelTask(record)"
-              >{{ $t('pages.file-manager.release-task.list.43105e21') }}</a-button
+              >{{ $t('i18n.625fb26b4b') }}</a-button
             >
             <a-button
               type="primary"
@@ -131,7 +131,7 @@
               size="small"
               :disabled="record.status === 0 || record.status === 1"
               @click="handleDelete(record)"
-              >{{ $t('pages.file-manager.release-task.list.dd20d11c') }}</a-button
+              >{{ $t('i18n.2f4aaddde3') }}</a-button
             >
           </a-space>
         </template>
@@ -140,7 +140,7 @@
     <!-- 任务详情 -->
     <CustomDrawer
       v-if="detailsVisible"
-      :title="$t('pages.file-manager.release-task.list.cc90625')"
+      :title="$t('i18n.4a98bf0c68')"
       placement="right"
       :width="'80vw'"
       :open="detailsVisible"
@@ -158,7 +158,7 @@
       v-model:open="releaseFileVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$t('pages.file-manager.release-task.list.68203efe')"
+      :title="$t('i18n.7e930b95ef')"
       width="70%"
       :mask-closable="false"
       @ok="handleReCrateTask"
@@ -170,25 +170,25 @@
         :label-col="{ span: 4 }"
         :wrapper-col="{ span: 20 }"
       >
-        <a-form-item :label="$t('pages.file-manager.release-task.list.2ab36118')" name="name">
+        <a-form-item :label="$t('i18n.ce23a42b47')" name="name">
           <a-input
             v-model:value="temp.name"
-            :placeholder="$t('pages.file-manager.release-task.list.1ed66592')"
+            :placeholder="$t('i18n.5f4c724e61')"
             :max-length="50"
           />
         </a-form-item>
 
-        <a-form-item :label="$t('pages.file-manager.release-task.list.4a07d135')" name="taskType">
+        <a-form-item :label="$t('i18n.f98994f7ec')" name="taskType">
           <a-radio-group v-model:value="temp.taskType" :disabled="true">
             <a-radio :value="0"> SSH </a-radio>
-            <a-radio :value="1"> {{ $t('pages.file-manager.release-task.list.602a0a5e') }} </a-radio>
+            <a-radio :value="1"> {{ $t('i18n.3bf3c0a8d6') }} </a-radio>
           </a-radio-group>
         </a-form-item>
 
         <a-form-item
           v-if="temp.taskType === 0"
           name="taskDataIds"
-          :label="$t('pages.file-manager.release-task.list.5f4a29c8')"
+          :label="$t('i18n.b188393ea7')"
         >
           <a-row>
             <a-col :span="22">
@@ -206,7 +206,7 @@
                   }
                 "
                 mode="multiple"
-                :placeholder="$t('pages.file-manager.release-task.list.1e02c6a8')"
+                :placeholder="$t('i18n.260a3234f2')"
               >
                 <a-select-option v-for="ssh in sshList" :key="ssh.id">
                   <a-tooltip :title="ssh.name"> {{ ssh.name }}</a-tooltip>
@@ -221,7 +221,7 @@
         <a-form-item
           v-else-if="temp.taskType === 1"
           name="taskDataIds"
-          :label="$t('pages.file-manager.release-task.list.61c0e0ab')"
+          :label="$t('i18n.473badc394')"
         >
           <a-row>
             <a-col :span="22">
@@ -239,7 +239,7 @@
                   }
                 "
                 mode="multiple"
-                :placeholder="$t('pages.file-manager.release-task.list.2c33c91c')"
+                :placeholder="$t('i18n.f8a613d247')"
               >
                 <a-select-option v-for="ssh in nodeList" :key="ssh.id">
                   <a-tooltip :title="ssh.name"> {{ ssh.name }}</a-tooltip>
@@ -252,22 +252,22 @@
           </a-row>
         </a-form-item>
 
-        <a-form-item name="releasePathParent" :label="$t('pages.file-manager.release-task.list.70eaa090')">
+        <a-form-item name="releasePathParent" :label="$t('i18n.dbb2df00cf')">
           <a-input
             v-model:value="temp.releasePath"
-            :placeholder="$t('pages.file-manager.release-task.list.b6eb202d')"
+            :placeholder="$t('i18n.ee9a51488f')"
             :disabled="true"
           />
         </a-form-item>
 
-        <a-form-item name="releasePathParent" :label="$t('pages.file-manager.release-task.list.6e720a66')">
-          <a-input v-model:value="temp.fileId" :placeholder="$t('pages.file-manager.release-task.list.b5feca24')" />
+        <a-form-item name="releasePathParent" :label="$t('i18n.a91ce167c1')">
+          <a-input v-model:value="temp.fileId" :placeholder="$t('i18n.ea8a79546f')" />
         </a-form-item>
 
-        <a-form-item :label="$t('pages.file-manager.release-task.list.1cf6b640')" name="releaseBeforeCommand">
+        <a-form-item :label="$t('i18n.cfb00269fd')" name="releaseBeforeCommand">
           <a-form-item-rest>
             <a-tabs tab-position="right">
-              <a-tab-pane key="before" :tab="$t('pages.file-manager.release-task.list.5eadc84d')">
+              <a-tab-pane key="before" :tab="$t('i18n.d0c879f900')">
                 <code-editor
                   v-model:content="temp.beforeScript"
                   height="40vh"
@@ -276,9 +276,9 @@
                   }"
                 ></code-editor>
 
-                <div style="margin-top: 10px">{{ $t('pages.file-manager.release-task.list.a8adfac6') }}</div>
+                <div style="margin-top: 10px">{{ $t('i18n.00de0ae1da') }}</div>
               </a-tab-pane>
-              <a-tab-pane key="after" :tab="$t('pages.file-manager.release-task.list.e643b0a1')">
+              <a-tab-pane key="after" :tab="$t('i18n.9b1c5264a0')">
                 <code-editor
                   v-model:content="temp.afterScript"
                   height="40vh"
@@ -287,7 +287,7 @@
                   }"
                 ></code-editor>
 
-                <div style="margin-top: 10px">{{ $t('pages.file-manager.release-task.list.fd641392') }}</div>
+                <div style="margin-top: 10px">{{ $t('i18n.08ac1eace7') }}</div>
               </a-tab-pane>
             </a-tabs>
           </a-form-item-rest>
@@ -299,35 +299,35 @@
       v-if="viewFileVisible"
       v-model:open="viewFileVisible"
       destroy-on-close
-      :title="`${$t('pages.file-manager.release-task.list.35c3c1fa')}`"
+      :title="`${$t('i18n.9de72a79fe')}`"
       :footer="null"
       :mask-closable="false"
     >
       <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-item :label="$t('pages.file-manager.release-task.list.a6eb2ded')" name="name">
+        <a-form-item :label="$t('i18n.29139c2a1a')" name="name">
           {{ temp.name }}
         </a-form-item>
-        <a-form-item :label="$t('pages.file-manager.release-task.list.bac3d3f6')" name="name">
+        <a-form-item :label="$t('i18n.0ff425e276')" name="name">
           {{ temp.id }}
         </a-form-item>
-        <a-form-item :label="$t('pages.file-manager.release-task.list.f087781')" name="size">
+        <a-form-item :label="$t('i18n.396b7d3f91')" name="size">
           {{ renderSize(temp.size) }}
         </a-form-item>
         <a-form-item
           v-if="temp.validUntil"
-          :label="$t('pages.file-manager.release-task.list.bc646985')"
+          :label="$t('i18n.1fa23f4daa')"
           name="validUntil"
         >
           {{ parseTime(temp.validUntil) }}
         </a-form-item>
-        <a-form-item v-if="temp.workspaceId" :label="$t('pages.file-manager.release-task.list.d8266ef9')" name="global">
+        <a-form-item v-if="temp.workspaceId" :label="$t('i18n.3a6970ac26')" name="global">
           {{
             temp.workspaceId === 'GLOBAL'
-              ? $t('pages.file-manager.release-task.list.f372618')
-              : $t('pages.file-manager.release-task.list.afacc4cb')
+              ? $t('i18n.2be75b1044')
+              : $t('i18n.98d69f8b62')
           }}
         </a-form-item>
-        <a-form-item :label="$t('pages.file-manager.release-task.list.7cee55c0')" name="description">
+        <a-form-item :label="$t('i18n.8d6f38b4b1')" name="description">
           {{ temp.description }}
         </a-form-item>
       </a-form>
@@ -368,59 +368,59 @@ export default {
       confirmLoading: false,
       columns: [
         {
-          title: this.$t('pages.file-manager.release-task.list.e62a5bf3'),
+          title: this.$t('i18n.78caf7115c'),
           dataIndex: 'name',
           ellipsis: true,
           width: 150,
           tooltip: true
         },
         {
-          title: this.$t('pages.file-manager.release-task.list.b578d6a7'),
+          title: this.$t('i18n.9e2e02ef08'),
           dataIndex: 'taskType',
           width: '100px',
           ellipsis: true
         },
         {
-          title: this.$t('pages.file-manager.release-task.list.1062add2'),
+          title: this.$t('i18n.9d577fe51b'),
           dataIndex: 'fileType',
           width: '100px',
           ellipsis: true
         },
         {
-          title: this.$t('pages.file-manager.release-task.list.6e06fe4f'),
+          title: this.$t('i18n.3fea7ca76c'),
           dataIndex: 'status',
           width: '100px',
           ellipsis: true
         },
 
         {
-          title: this.$t('pages.file-manager.release-task.list.a622e852'),
+          title: this.$t('i18n.920f05031b'),
           dataIndex: 'statusMsg',
           ellipsis: true,
           width: 200,
           tooltip: true
         },
         {
-          title: this.$t('pages.file-manager.release-task.list.bac3d3f6'),
+          title: this.$t('i18n.0ff425e276'),
           dataIndex: 'fileId',
           ellipsis: true,
           width: 150
         },
         {
-          title: this.$t('pages.file-manager.release-task.list.70eaa090'),
+          title: this.$t('i18n.dbb2df00cf'),
           dataIndex: 'releasePath',
           width: '100px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.file-manager.release-task.list.cda0e062'),
+          title: this.$t('i18n.a497562c8e'),
           dataIndex: 'modifyUser',
           width: '120px',
           ellipsis: true
         },
         {
-          title: this.$t('pages.file-manager.release-task.list.d79dbdb0'),
+          title: this.$t('i18n.b341f9a861'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -428,7 +428,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('pages.file-manager.release-task.list.af919b1e'),
+          title: this.$t('i18n.4871f7722d'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -437,7 +437,7 @@ export default {
         },
 
         {
-          title: this.$t('pages.file-manager.release-task.list.3bb962bf'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
           align: 'center',
 
@@ -450,10 +450,10 @@ export default {
       nodeList: [],
       releaseFileVisible: false,
       releaseFileRules: {
-        name: [{ required: true, message: this.$t('pages.file-manager.release-task.list.a539cd9e'), trigger: 'blur' }],
+        name: [{ required: true, message: this.$t('i18n.89d18c88a3'), trigger: 'blur' }],
 
         taskDataIds: [
-          { required: true, message: this.$t('pages.file-manager.release-task.list.e7fe7c15'), trigger: 'blur' }
+          { required: true, message: this.$t('i18n.3e51d1bc9c'), trigger: 'blur' }
         ]
       },
       viewFileVisible: false
@@ -492,11 +492,11 @@ export default {
     //  删除命令
     handleDelete(row) {
       $confirm({
-        title: this.$t('pages.file-manager.release-task.list.a8fe4c17'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.file-manager.release-task.list.21b52dcb'),
-        okText: this.$t('pages.file-manager.release-task.list.7da4a591'),
-        cancelText: this.$t('pages.file-manager.release-task.list.43105e21'),
+        content: this.$t('i18n.50fe3400c7'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return deleteReleaseTask({
             id: row.id
@@ -585,11 +585,11 @@ export default {
     // 取消
     handleCancelTask(record) {
       $confirm({
-        title: this.$t('pages.file-manager.release-task.list.a8fe4c17'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.file-manager.release-task.list.537ede69'),
-        okText: this.$t('pages.file-manager.release-task.list.7da4a591'),
-        cancelText: this.$t('pages.file-manager.release-task.list.43105e21'),
+        content: this.$t('i18n.7824ed010c'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         oonOk: () => {
           return cancelReleaseTask({ id: record.id }).then((res) => {
             if (res.code === 200) {
@@ -615,7 +615,7 @@ export default {
               this.viewFileVisible = true
             } else {
               $notification.warning({
-                message: this.$t('pages.file-manager.release-task.list.a2f846c1')
+                message: this.$t('i18n.3e445d03aa')
               })
             }
           }
@@ -630,7 +630,7 @@ export default {
               this.viewFileVisible = true
             } else {
               $notification.warning({
-                message: this.$t('pages.file-manager.release-task.list.a2f846c1')
+                message: this.$t('i18n.3e445d03aa')
               })
             }
           }

@@ -28,19 +28,19 @@
           <a-input
             v-model:value="listQuery['%id%']"
             class="search-input-item"
-            :placeholder="$t('pages.dispatch.list.c266c17')"
+            :placeholder="$t('i18n.83aa7f3123')"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%name%']"
             class="search-input-item"
-            :placeholder="$t('pages.dispatch.list.bb769c1d')"
+            :placeholder="$t('i18n.d7ec2d3fea')"
             @press-enter="loadData"
           />
           <a-select
             v-model:value="listQuery.group"
             allow-clear
-            :placeholder="$t('pages.dispatch.list.dc532d0a')"
+            :placeholder="$t('i18n.ec22193ed1')"
             class="search-input-item"
             @change="loadData"
           >
@@ -49,27 +49,25 @@
           <a-select
             v-model:value="listQuery.outGivingProject"
             allow-clear
-            :placeholder="$t('pages.dispatch.list.585c23e6')"
+            :placeholder="$t('i18n.9e2e02ef08')"
             class="search-input-item"
           >
-            <a-select-option :value="1">{{ $t('pages.dispatch.list.f4630780') }}</a-select-option>
-            <a-select-option :value="0">{{ $t('pages.dispatch.list.92207645') }}</a-select-option>
+            <a-select-option :value="1">{{ $t('i18n.0c1de8295a') }}</a-select-option>
+            <a-select-option :value="0">{{ $t('i18n.1c3cf7f5f0') }}</a-select-option>
           </a-select>
           <a-select
             v-model:value="listQuery.status"
             allow-clear
-            :placeholder="$t('pages.dispatch.list.56195645')"
+            :placeholder="$t('i18n.e1c965efff')"
             class="search-input-item"
           >
             <a-select-option v-for="(name, key) in statusMap" :key="key">{{ name }}</a-select-option>
           </a-select>
-          <a-tooltip :title="$t('pages.dispatch.list.cb5a8131')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('pages.dispatch.list.53c2763c')
-            }}</a-button>
+          <a-tooltip :title="$t('i18n.4838a3bd20')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleLink">{{ $t('pages.dispatch.list.d2f8649f') }}</a-button>
-          <a-button type="primary" @click="handleAdd">{{ $t('pages.dispatch.list.fdb4b6ff') }}</a-button>
+          <a-button type="primary" @click="handleLink">{{ $t('i18n.30d9d4f5c9') }}</a-button>
+          <a-button type="primary" @click="handleAdd">{{ $t('i18n.47e4123886') }}</a-button>
 
           <!-- <a-statistic-countdown format=" s 秒" title="刷新倒计时" :value="countdownTime" @finish="silenceLoadData" /> -->
         </a-space>
@@ -77,12 +75,12 @@
       <template #tableHelp>
         <a-tooltip>
           <template #title>
-            <div>{{ $t('pages.dispatch.list.99b26470') }}</div>
+            <div>{{ $t('i18n.3aa69a563b') }}</div>
 
             <div>
               <ul>
-                <li>{{ $t('pages.dispatch.list.2399f601') }}</li>
-                <li>{{ $t('pages.dispatch.list.2b3dba3c') }}</li>
+                <li>{{ $t('i18n.5f5cd1bb1e') }}</li>
+                <li>{{ $t('i18n.9bf4e3c9de') }}</li>
               </ul>
             </div>
           </template>
@@ -120,14 +118,12 @@
 
         <template v-else-if="column.dataIndex === 'status'">
           <a-tooltip placement="topLeft" :title="`${record.statusMsg || ''}`">
-            <a-tag v-if="text === 2" color="green">{{ statusMap[text] || $t('pages.dispatch.list.5f51a112') }}</a-tag>
-            <a-tag v-else-if="text === 1" color="orange">{{
-              statusMap[text] || $t('pages.dispatch.list.5f51a112')
-            }}</a-tag>
+            <a-tag v-if="text === 2" color="green">{{ statusMap[text] || $t('i18n.1622dc9b6b') }}</a-tag>
+            <a-tag v-else-if="text === 1" color="orange">{{ statusMap[text] || $t('i18n.1622dc9b6b') }}</a-tag>
             <a-tag v-else-if="text === 3 || text === 4" color="red">{{
-              statusMap[text] || $t('pages.dispatch.list.5f51a112')
+              statusMap[text] || $t('i18n.1622dc9b6b')
             }}</a-tag>
-            <a-tag v-else>{{ statusMap[text] || $t('pages.dispatch.list.5f51a112') }}</a-tag>
+            <a-tag v-else>{{ statusMap[text] || $t('i18n.1622dc9b6b') }}</a-tag>
           </a-tooltip>
         </template>
 
@@ -135,8 +131,8 @@
           <a-tooltip>
             <a-switch
               size="small"
-              :checked-children="$t('pages.dispatch.list.d2fbce36')"
-              :un-checked-children="$t('pages.dispatch.list.1c77d6fb')"
+              :checked-children="$t('i18n.0a60ac8f02')"
+              :un-checked-children="$t('i18n.c9744f45e7')"
               disabled
               :checked="text"
           /></a-tooltip>
@@ -165,13 +161,13 @@
         </template>
 
         <template v-else-if="column.dataIndex === 'outGivingProject'">
-          <span v-if="text">{{ $t('pages.dispatch.list.f4630780') }}</span>
-          <span v-else>{{ $t('pages.dispatch.list.92207645') }}</span>
+          <span v-if="text">{{ $t('i18n.0c1de8295a') }}</span>
+          <span v-else>{{ $t('i18n.1c3cf7f5f0') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button size="small" type="primary" @click="handleDispatch(record)">
-              {{ $t('pages.dispatch.list.bd2ea0af') }}
+              {{ $t('i18n.59c316e560') }}
             </a-button>
 
             <a-button
@@ -179,15 +175,15 @@
               size="small"
               type="primary"
               @click="handleEditDispatchProject(record)"
-              >{{ $t('pages.dispatch.list.e1224c34') }}</a-button
+              >{{ $t('i18n.95b351c862') }}</a-button
             >
             <a-button v-else size="small" type="primary" @click="handleEditDispatch(record)">
-              {{ $t('pages.dispatch.list.e1224c34') }}
+              {{ $t('i18n.95b351c862') }}
             </a-button>
 
             <a-dropdown>
               <a @click="(e) => e.preventDefault()">
-                {{ $t('pages.dispatch.list.6e071067') }}
+                {{ $t('i18n.0ec9eaf9c3') }}
                 <DownOutlined />
               </a>
               <template #overlay>
@@ -200,26 +196,22 @@
                       :disabled="record.status !== 1"
                       @click="handleCancel(record)"
                     >
-                      {{ $t('pages.dispatch.list.9afbd509') }}
+                      {{ $t('i18n.30e855a053') }}
                     </a-button>
                   </a-menu-item>
                   <a-menu-item>
                     <a-button type="primary" danger size="small" @click="handleDelete(record, '')">
-                      {{
-                        record.outGivingProject
-                          ? $t('pages.dispatch.list.dd20d11c')
-                          : $t('pages.dispatch.list.f97d7b7c')
-                      }}
+                      {{ record.outGivingProject ? $t('i18n.2f4aaddde3') : $t('i18n.cbdcabad50') }}
                     </a-button>
                   </a-menu-item>
                   <a-menu-item v-if="record.outGivingProject">
                     <a-button type="primary" danger size="small" @click="handleDelete(record, 'thorough')">
-                      {{ $t('pages.dispatch.list.dbe32f01') }}
+                      {{ $t('i18n.7327966572') }}
                     </a-button>
                   </a-menu-item>
                   <a-menu-item>
                     <a-button type="primary" danger size="small" @click="handleUnbind(record)">
-                      {{ $t('pages.dispatch.list.4c957529') }}
+                      {{ $t('i18n.663393986e') }}
                     </a-button>
                   </a-menu-item>
                 </a-menu>
@@ -236,7 +228,7 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="900px"
-      :title="temp.type === 'edit' ? $t('pages.dispatch.list.b006329f') : $t('pages.dispatch.list.9ef2c865')"
+      :title="temp.type === 'edit' ? $t('i18n.5afe5e7ed4') : $t('i18n.c889b9f67d')"
       :mask-closable="false"
       @ok="handleLinkDispatchOk"
       @cancel="clearDispatchList"
@@ -245,8 +237,8 @@
         <a-form-item name="id">
           <template #label>
             <a-tooltip>
-              {{ $t('pages.dispatch.list.c3c9e67b') }}
-              <template #title>{{ $t('pages.dispatch.list.abda741f') }}</template>
+              {{ $t('i18n.f6dee0f3ff') }}
+              <template #title>{{ $t('i18n.b28836fe97') }}</template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
           </template>
@@ -255,13 +247,13 @@
             v-model:value="temp.id"
             :max-length="50"
             :disabled="temp.type === 'edit'"
-            :placeholder="$t('pages.dispatch.list.9878fcc3')"
+            :placeholder="$t('i18n.7ce511154f')"
           />
           <template v-else>
             <a-input-search
               v-model:value="temp.id"
               :max-length="50"
-              :placeholder="$t('pages.dispatch.list.9878fcc3')"
+              :placeholder="$t('i18n.7ce511154f')"
               @search="
                 () => {
                   temp = { ...temp, id: randomStr(6) }
@@ -270,7 +262,7 @@
             >
               <template #enterButton>
                 <a-button type="primary">
-                  {{ $t('pages.dispatch.list.24a518c3') }}
+                  {{ $t('i18n.6709f4548f') }}
                 </a-button>
               </template>
             </a-input-search>
@@ -278,20 +270,20 @@
           <!-- <a-input v-model="temp.id" :maxLength="50" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改" /> -->
         </a-form-item>
 
-        <a-form-item :label="$t('pages.dispatch.list.8aa10ac9')" name="name">
+        <a-form-item :label="$t('i18n.9d89cbf245')" name="name">
           <a-row>
             <a-col :span="10">
-              <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('pages.dispatch.list.8aa10ac9')" />
+              <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n.9d89cbf245')" />
             </a-col>
-            <a-col :span="4" style="text-align: right">{{ $t('pages.dispatch.list.7c047057') }}</a-col>
+            <a-col :span="4" style="text-align: right">{{ $t('i18n.1b973fc4d1') }}</a-col>
             <a-col :span="10">
               <a-form-item-rest>
                 <custom-select
                   v-model:value="temp.group"
                   :max-length="50"
                   :data="groupList"
-                  :input-placeholder="$t('pages.dispatch.list.ded4b4cd')"
-                  :select-placeholder="$t('pages.dispatch.list.13bca766')"
+                  :input-placeholder="$t('i18n.bd0362bed3')"
+                  :select-placeholder="$t('i18n.3e8c9c54ee')"
                 >
                 </custom-select>
               </a-form-item-rest>
@@ -299,12 +291,12 @@
           </a-row>
         </a-form-item>
 
-        <a-form-item :label="$t('pages.dispatch.list.51fd9c8a')" required>
+        <a-form-item :label="$t('i18n.6a6c857285')" required>
           <a-list
             item-layout="horizontal"
             :data-source="dispatchList"
             :locale="{
-              emptyText: $t('pages.dispatch.list.53e901cf')
+              emptyText: $t('i18n.cfd482e5ef')
             }"
             :row-key="
               (item) => {
@@ -315,10 +307,10 @@
             <template #renderItem="{ item, index }">
               <a-list-item>
                 <a-space>
-                  <div>{{ $t('pages.dispatch.list.602a0a5e') }}</div>
+                  <div>{{ $t('i18n.9b280a6d2d') }}</div>
                   <a-select
-                    :placeholder="$t('pages.dispatch.list.580e6c10')"
-                    :not-found-content="$t('pages.dispatch.list.e20812b')"
+                    :placeholder="$t('i18n.f8a613d247')"
+                    :not-found-content="$t('i18n.8f8f88654f')"
                     style="width: 140px"
                     :value="item.nodeId ? item.nodeId : undefined"
                     :disabled="
@@ -334,12 +326,12 @@
                       {{ nodeNameMap[nodeItemList.id] }}
                     </a-select-option>
                   </a-select>
-                  <span>{{ $t('pages.dispatch.list.4889a88f') }} </span>
+                  <span>{{ $t('i18n.8198e4461a') }} </span>
                   <a-select
                     style="width: 300px"
                     :placeholder="item.placeholder"
                     :default-value="item.projectId ? item.projectId : undefined"
-                    :not-found-content="$t('pages.dispatch.list.e6af4e4c')"
+                    :not-found-content="$t('i18n.1d843d7b45')"
                     :disabled="dispatchList[index].disabled"
                     @change="(projectId) => handleProjectChange(projectId, index)"
                   >
@@ -357,10 +349,8 @@
                         }).length > 0
                       "
                     >
-                      <a-tooltip
-                        :title="`${project.outGivingProject ? $t('pages.dispatch.list.44fbbff') : ''} ${project.name}`"
-                      >
-                        {{ project.outGivingProject ? $t('pages.dispatch.list.44fbbff') : '' }}
+                      <a-tooltip :title="`${project.outGivingProject ? $t('i18n.8e2ed8ae0d') : ''} ${project.name}`">
+                        {{ project.outGivingProject ? $t('i18n.8e2ed8ae0d') : '' }}
                         {{ project.name }}
                       </a-tooltip>
                     </a-select-option>
@@ -372,24 +362,20 @@
               </a-list-item>
             </template>
           </a-list>
-          <a-button type="primary" size="small" @click="addDispachList">{{
-            $t('pages.dispatch.list.7d46652a')
-          }}</a-button>
+          <a-button type="primary" size="small" @click="addDispachList">{{ $t('i18n.66ab5e9f24') }}</a-button>
         </a-form-item>
-        <a-form-item :label="$t('pages.dispatch.list.50b92ecb')" name="afterOpt">
-          <a-select v-model:value="temp.afterOpt" :placeholder="$t('pages.dispatch.list.9a15b54b')">
+        <a-form-item :label="$t('i18n.dfcc9e3c45')" name="afterOpt">
+          <a-select v-model:value="temp.afterOpt" :placeholder="$t('i18n.3322338140')">
             <a-select-option v-for="item in afterOptList" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
         </a-form-item>
         <a-form-item v-if="temp.afterOpt === 2 || temp.afterOpt === 3" name="intervalTime">
           <template #label>
             <a-tooltip>
-              {{ $t('pages.dispatch.list.26d543f6') }}
+              {{ $t('i18n.a5d550f258') }}
               <template #title>
-                {{ $t('pages.dispatch.list.2c7f38ee') }}, {{ $t('pages.dispatch.list.e68260b4') }},{{
-                  $t('pages.dispatch.list.5d1f2d8e')
-                }}
-                <li>{{ $t('pages.dispatch.list.bd011884') }}</li>
+                {{ $t('i18n.55b2d0904f') }}, {{ $t('i18n.e9ec2b0bee') }},{{ $t('i18n.c8c45e8467') }}
+                <li>{{ $t('i18n.a0e31d89ff') }}</li>
               </template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
@@ -397,19 +383,19 @@
           <a-input-number
             v-model:value="temp.intervalTime"
             :min="0"
-            :placeholder="$t('pages.dispatch.list.c7ed6684')"
+            :placeholder="$t('i18n.d7ac764d3a')"
             style="width: 100%"
           />
         </a-form-item>
-        <a-form-item name="secondaryDirectory" :label="$t('pages.dispatch.list.2b72d6ca')">
-          <a-input v-model:value="temp.secondaryDirectory" :placeholder="$t('pages.dispatch.list.3a664c1f')" />
+        <a-form-item name="secondaryDirectory" :label="$t('i18n.871cc8602a')">
+          <a-input v-model:value="temp.secondaryDirectory" :placeholder="$t('i18n.9c99e8bec9')" />
         </a-form-item>
         <a-form-item name="clearOld">
           <template #label>
             <a-tooltip>
-              {{ $t('pages.dispatch.list.157bc8ea') }}
+              {{ $t('i18n.2223ff647d') }}
               <template #title>
-                {{ $t('pages.dispatch.list.32718c0') }}
+                {{ $t('i18n.b343663a14') }}
               </template>
               <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
             </a-tooltip>
@@ -418,24 +404,24 @@
             <a-col :span="4">
               <a-switch
                 v-model:checked="temp.clearOld"
-                :checked-children="$t('pages.dispatch.list.d2fbce36')"
-                :un-checked-children="$t('pages.dispatch.list.1c77d6fb')"
+                :checked-children="$t('i18n.0a60ac8f02')"
+                :un-checked-children="$t('i18n.c9744f45e7')"
               />
             </a-col>
 
             <a-col :span="4" style="text-align: right">
               <a-tooltip v-if="temp.type !== 'edit'">
-                <template #title> {{ $t('pages.dispatch.list.9f9df513') }} </template>
+                <template #title> {{ $t('i18n.300fbf3891') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
-              {{ $t('pages.dispatch.list.267c8d13') }}
+              {{ $t('i18n.7b2cbfada9') }}
             </a-col>
             <a-col :span="4">
               <a-form-item-rest>
                 <a-switch
                   v-model:checked="temp.uploadCloseFirst"
-                  :checked-children="$t('pages.dispatch.list.d2fbce36')"
-                  :un-checked-children="$t('pages.dispatch.list.1c77d6fb')"
+                  :checked-children="$t('i18n.0a60ac8f02')"
+                  :un-checked-children="$t('i18n.c9744f45e7')"
               /></a-form-item-rest>
             </a-col>
           </a-row>
@@ -445,17 +431,17 @@
             <a-tooltip>
               <template #title>
                 <ul>
-                  <li>{{ $t('pages.dispatch.list.1af01061') }}</li>
-                  <li>{{ $t('pages.dispatch.list.d20429d4') }}</li>
-                  <li>status {{ $t('pages.dispatch.list.5323a6a3') }}:{{ $t('pages.dispatch.list.be2dccc9') }}</li>
-                  <li>{{ $t('pages.dispatch.list.663c4985') }}</li>
+                  <li>{{ $t('i18n.b186c667dc') }}</li>
+                  <li>{{ $t('i18n.0bc45241af') }}</li>
+                  <li>status {{ $t('i18n.5d5fd4170f') }}:{{ $t('i18n.be3a4d368e') }}</li>
+                  <li>{{ $t('i18n.c96f47ec1b') }}</li>
                 </ul>
               </template>
               WebHooks
               <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
-          <a-input v-model:value="temp.webhook" :placeholder="$t('pages.dispatch.list.ad9cad23')" />
+          <a-input v-model:value="temp.webhook" :placeholder="$t('i18n.89a40a1a8b')" />
         </a-form-item>
       </a-form>
     </CustomModal>
@@ -466,11 +452,11 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="60vw"
-      :title="temp.type === 'edit' ? $t('pages.dispatch.list.7d755f9b') : $t('pages.dispatch.list.898758b9')"
+      :title="temp.type === 'edit' ? $t('i18n.6c72e9d9de') : $t('i18n.934156d92c')"
       :mask-closable="false"
       @ok="handleEditDispatchOk"
     >
-      <a-spin :tip="$t('pages.dispatch.list.a5c1d44')" :spinning="editDispatchLoading">
+      <a-spin :tip="$t('i18n.4360e5056b')" :spinning="editDispatchLoading">
         <a-form
           ref="editDispatchForm"
           :rules="rules"
@@ -480,18 +466,18 @@
         >
           <a-alert
             v-if="!nodeList || !nodeList.length"
-            :message="$t('pages.dispatch.list.7e2364d6')"
+            :message="$t('i18n.4b027f3979')"
             type="warning"
             show-icon
             style="margin-bottom: 10px"
           >
-            <template #description>{{ $t('pages.dispatch.list.5386da00') }}</template>
+            <template #description>{{ $t('i18n.c3aeddb10d') }}</template>
           </a-alert>
           <a-form-item name="id">
             <template #label>
               <a-tooltip>
-                {{ $t('pages.dispatch.list.c3c9e67b') }}
-                <template #title>{{ $t('pages.dispatch.list.abda741f') }}</template>
+                {{ $t('i18n.f6dee0f3ff') }}
+                <template #title>{{ $t('i18n.b28836fe97') }}</template>
                 <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
               </a-tooltip>
             </template>
@@ -500,13 +486,13 @@
               v-model:value="temp.id"
               :max-length="50"
               :disabled="temp.type === 'edit'"
-              :placeholder="$t('pages.dispatch.list.786953be')"
+              :placeholder="$t('i18n.ef651d15b0')"
             />
             <template v-else>
               <a-input-search
                 v-model:value="temp.id"
                 :max-length="50"
-                :placeholder="$t('pages.dispatch.list.786953be')"
+                :placeholder="$t('i18n.ef651d15b0')"
                 @search="
                   () => {
                     temp = { ...temp, id: randomStr(6) }
@@ -515,27 +501,27 @@
               >
                 <template #enterButton>
                   <a-button type="primary">
-                    {{ $t('pages.dispatch.list.24a518c3') }}
+                    {{ $t('i18n.6709f4548f') }}
                   </a-button>
                 </template>
               </a-input-search>
             </template>
             <!-- <a-input v-model="temp.id" :maxLength="50" :disabled="temp.type === 'edit'" placeholder="创建之后不能修改,分发 ID 等同于项目 ID" /> -->
           </a-form-item>
-          <a-form-item :label="$t('pages.dispatch.list.8aa10ac9')" name="name">
+          <a-form-item :label="$t('i18n.9d89cbf245')" name="name">
             <a-row>
               <a-col :span="10">
-                <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('pages.dispatch.list.4e848bb3')" />
+                <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n.1ed46c4a59')" />
               </a-col>
-              <a-col :span="4" style="text-align: right">{{ $t('pages.dispatch.list.7c047057') }}</a-col>
+              <a-col :span="4" style="text-align: right">{{ $t('i18n.1b973fc4d1') }}</a-col>
               <a-col :span="10">
                 <a-form-item-rest>
                   <custom-select
                     v-model:value="temp.group"
                     :max-length="50"
                     :data="groupList"
-                    :input-placeholder="$t('pages.dispatch.list.ded4b4cd')"
-                    :select-placeholder="$t('pages.dispatch.list.13bca766')"
+                    :input-placeholder="$t('i18n.bd0362bed3')"
+                    :select-placeholder="$t('i18n.3e8c9c54ee')"
                   >
                   </custom-select>
                 </a-form-item-rest>
@@ -546,35 +532,33 @@
           <a-form-item name="runMode">
             <template #label>
               <a-tooltip>
-                {{ $t('pages.dispatch.list.b2108479') }}
+                {{ $t('i18n.17d444b642') }}
                 <template #title>
                   <ul>
-                    <li><b>Dsl</b> {{ $t('pages.dispatch.list.c086fc82') }}</li>
+                    <li><b>Dsl</b> {{ $t('i18n.2356fe4af2') }}</li>
                     <li>
                       <b>ClassPath</b> java -classpath xxx
-                      {{ $t('pages.dispatch.list.788bfc') }}
+                      {{ $t('i18n.fa4aa1b93b') }}
                     </li>
-                    <li><b>Jar</b> java -jar xxx {{ $t('pages.dispatch.list.788bfc') }}</li>
+                    <li><b>Jar</b> java -jar xxx {{ $t('i18n.fa4aa1b93b') }}</li>
                     <li>
                       <b>JarWar</b> java -jar Springboot war
-                      {{ $t('pages.dispatch.list.788bfc') }}
+                      {{ $t('i18n.fa4aa1b93b') }}
                     </li>
                     <li>
                       <b>JavaExtDirsCp</b> java -Djava.ext.dirs=lib -cp conf:run.jar $MAIN_CLASS
-                      {{ $t('pages.dispatch.list.788bfc') }}
+                      {{ $t('i18n.fa4aa1b93b') }}
                     </li>
-                    <li>
-                      <b>File</b> {{ $t('pages.dispatch.list.d33f4295') }},{{ $t('pages.dispatch.list.b6295c0e') }}
-                    </li>
+                    <li><b>File</b> {{ $t('i18n.5d6f47d670') }},{{ $t('i18n.61955b0e4b') }}</li>
                   </ul>
                 </template>
                 <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
               </a-tooltip>
             </template>
 
-            <a-select v-model:value="temp.runMode" :placeholder="$t('pages.dispatch.list.79573f90')">
+            <a-select v-model:value="temp.runMode" :placeholder="$t('i18n.26a3378645')">
               <a-select-option v-for="item in runModeArray.filter((item) => item.onlyNode !== true)" :key="item.name">
-                <template v-if="item.desc.indexOf($t('pages.dispatch.list.ad7005ba')) > -1">
+                <template v-if="item.desc.indexOf($t('i18n.888df7a89e')) > -1">
                   <s>
                     <b>[{{ item.name }}]</b> {{ item.desc }}
                   </s>
@@ -589,16 +573,14 @@
           <a-form-item name="whitelistDirectory" class="jpom-project-whitelist">
             <template #label>
               <a-tooltip>
-                {{ $t('pages.dispatch.list.5b716424') }}
+                {{ $t('i18n.aabdc3b7c0') }}
                 <template #title>
                   <ul>
-                    <li>{{ $t('pages.dispatch.list.87db3fab') }}</li>
-                    <li>{{ $t('pages.dispatch.list.2a4034e5') }}</li>
-                    <li>{{ $t('pages.dispatch.list.aa675b68') }}</li>
+                    <li>{{ $t('i18n.f89cc4807e') }}</li>
+                    <li>{{ $t('i18n.353707f491') }}</li>
+                    <li>{{ $t('i18n.fe828cefd9') }}</li>
                     <li>
-                      {{ $t('pages.dispatch.list.961e28d') }} <br />&nbsp;&nbsp;<b>{{
-                        $t('pages.dispatch.list.7bdaa7bf')
-                      }}</b>
+                      {{ $t('i18n.556499017a') }} <br />&nbsp;&nbsp;<b>{{ $t('i18n.67141abed6') }}</b>
                     </li>
                   </ul>
                 </template>
@@ -606,11 +588,7 @@
               </a-tooltip>
             </template>
             <a-input-group compact>
-              <a-select
-                v-model:value="temp.whitelistDirectory"
-                style="width: 50%"
-                :placeholder="$t('pages.dispatch.list.fea56c3')"
-              >
+              <a-select v-model:value="temp.whitelistDirectory" style="width: 50%" :placeholder="$t('i18n.1d38b2b2bc')">
                 <a-select-option v-for="access in accessList" :key="access">
                   <a-tooltip :title="access">
                     {{ access }}
@@ -618,12 +596,12 @@
                 </a-select-option>
               </a-select>
               <a-form-item-rest>
-                <a-input v-model:value="temp.lib" style="width: 50%" :placeholder="$t('pages.dispatch.list.30061739')"
+                <a-input v-model:value="temp.lib" style="width: 50%" :placeholder="$t('i18n.d6937acda5')"
               /></a-form-item-rest>
             </a-input-group>
             <template #help>
               <div>
-                {{ $t('pages.dispatch.list.a5df5146') }}
+                {{ $t('i18n.8e9bd127fb') }}
 
                 <a-button
                   size="small"
@@ -634,35 +612,35 @@
                     }
                   "
                 >
-                  <InfoCircleOutlined /> {{ $t('pages.dispatch.list.ed2197b9') }}
+                  <InfoCircleOutlined /> {{ $t('i18n.1e5533c401') }}
                 </a-button>
               </div>
             </template>
           </a-form-item>
 
-          <a-form-item v-show="filePath !== ''" :label="$t('pages.dispatch.list.6541b24c')">
+          <a-form-item v-show="filePath !== ''" :label="$t('i18n.8283f063d7')">
             <a-alert :message="filePath" type="success" />
           </a-form-item>
           <a-form-item v-show="temp.runMode === 'Dsl'" name="dslContent">
             <template #label>
               <a-tooltip>
-                DSL {{ $t('pages.dispatch.list.99ff48c8') }}
+                DSL {{ $t('i18n.2d711b09bd') }}
                 <template #title>
-                  <p>{{ $t('pages.dispatch.list.af2dc0ed') }}</p>
-                  <p>{{ $t('pages.dispatch.list.cac3b49f') }}</p>
+                  <p>{{ $t('i18n.8d5956ca2a') }}</p>
+                  <p>{{ $t('i18n.3517aa30c2') }}</p>
                   <p>
                     <b>status</b>
-                    {{ $t('pages.dispatch.list.24159903') }}:$pid <b>$pid {{ $t('pages.dispatch.list.79c943f') }}</b
-                    >{{ $t('pages.dispatch.list.44857232') }}
+                    {{ $t('i18n.ca69dad8fc') }}:$pid <b>$pid {{ $t('i18n.07a8af8c03') }}</b
+                    >{{ $t('i18n.d2f484ff7e') }}
                   </p>
-                  <p>{{ $t('pages.dispatch.list.2d9d9e69') }}</p>
+                  <p>{{ $t('i18n.9f52492fbc') }}</p>
                 </template>
                 <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
               </a-tooltip>
             </template>
             <template #help>
               <div>
-                scriptId{{ $t('pages.dispatch.list.14102976') }}
+                scriptId{{ $t('i18n.3241c7c05f') }}
                 <a-button
                   type="link"
                   size="small"
@@ -672,7 +650,7 @@
                     }
                   "
                 >
-                  {{ $t('pages.dispatch.list.e4c6938e') }}
+                  {{ $t('i18n.6de1ecc549') }}
                 </a-button>
               </div>
             </template>
@@ -703,14 +681,14 @@
                 height="40vh"
                 :show-tool="true"
                 :options="{ mode: 'yaml', tabSize: 2 }"
-                :placeholder="$t('pages.dispatch.list.b3b45f16')"
+                :placeholder="$t('i18n.1c8190b0eb')"
               >
                 <template #tool_before>
                   <a-segmented
                     v-model:value="dslEditTabKey"
                     :options="[
-                      { label: `DSL ${$t('pages.dispatch.list.28f9e270')}`, value: 'content' },
-                      { label: $t('pages.dispatch.list.36177d5c'), value: 'demo' }
+                      { label: `DSL ${$t('i18n.224e2ccda8')}`, value: 'content' },
+                      { label: $t('i18n.da79c2ec32'), value: 'demo' }
                     ]"
                   />
                 </template>
@@ -726,8 +704,8 @@
                   <a-segmented
                     v-model:value="dslEditTabKey"
                     :options="[
-                      { label: `DSL ${$t('pages.dispatch.list.28f9e270')}`, value: 'content' },
-                      { label: $t('pages.dispatch.list.36177d5c'), value: 'demo' }
+                      { label: `DSL ${$t('i18n.224e2ccda8')}`, value: 'content' },
+                      { label: $t('i18n.da79c2ec32'), value: 'demo' }
                     ]"
                   />
                 </template>
@@ -737,19 +715,19 @@
           <a-form-item v-show="noFileModes.includes(temp.runMode)">
             <template #label>
               <a-tooltip>
-                {{ $t('pages.dispatch.list.8d83036e') }}
+                {{ $t('i18n.2ce44aba57') }}
                 <template #title>
                   <ul>
-                    <li>{{ $t('pages.dispatch.list.15aa24c8') }}</li>
-                    <li>{{ $t('pages.dispatch.list.965acf34') }}</li>
-                    <li>{{ $t('pages.dispatch.list.c6fe24a4') }}</li>
+                    <li>{{ $t('i18n.12934d1828') }}</li>
+                    <li>{{ $t('i18n.138776a1dc') }}</li>
+                    <li>{{ $t('i18n.95c5c939e4') }}</li>
                   </ul>
                 </template>
                 <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
               </a-tooltip>
             </template>
-            <a-select v-model:value="temp.logPath" :placeholder="$t('pages.dispatch.list.549e1e09')">
-              <a-select-option key="" value="">{{ $t('pages.dispatch.list.965acf34') }}</a-select-option>
+            <a-select v-model:value="temp.logPath" :placeholder="$t('i18n.99f0996c0a')">
+              <a-select-option key="" value="">{{ $t('i18n.138776a1dc') }}</a-select-option>
               <a-select-option v-for="access in accessList" :key="access">{{ access }}</a-select-option>
             </a-select>
           </a-form-item>
@@ -758,7 +736,7 @@
             label="Main Class"
             name="mainClass"
           >
-            <a-input v-model:value="temp.mainClass" :placeholder="$t('pages.dispatch.list.b324b030')" />
+            <a-input v-model:value="temp.mainClass" :placeholder="$t('i18n.ef800ed466')" />
           </a-form-item>
           <a-form-item
             v-show="javaModes.includes(temp.runMode) && temp.runMode === 'JavaExtDirsCp'"
@@ -767,23 +745,21 @@
           >
             <a-input
               v-model:value="temp.javaExtDirsCp"
-              :placeholder="`-Dext.dirs=xxx: -cp xx  ${$t('pages.dispatch.list.fe24b714')}:xx】`"
+              :placeholder="`-Dext.dirs=xxx: -cp xx  ${$t('i18n.c53021f06d')}:xx】`"
             />
           </a-form-item>
-          <a-form-item :label="$t('pages.dispatch.list.50b92ecb')" name="afterOpt">
-            <a-select v-model:value="temp.afterOpt" :placeholder="$t('pages.dispatch.list.9a15b54b')">
+          <a-form-item :label="$t('i18n.dfcc9e3c45')" name="afterOpt">
+            <a-select v-model:value="temp.afterOpt" :placeholder="$t('i18n.3322338140')">
               <a-select-option v-for="item in afterOptList" :key="item.value">{{ item.title }}</a-select-option>
             </a-select>
           </a-form-item>
           <a-form-item v-if="temp.afterOpt === 2 || temp.afterOpt === 3" name="intervalTime">
             <template #label>
               <a-tooltip>
-                {{ $t('pages.dispatch.list.26d543f6') }}
+                {{ $t('i18n.a5d550f258') }}
                 <template #title>
-                  {{ $t('pages.dispatch.list.2c7f38ee') }},{{ $t('pages.dispatch.list.e68260b4') }},{{
-                    $t('pages.dispatch.list.5d1f2d8e')
-                  }}
-                  <li>{{ $t('pages.dispatch.list.bd011884') }}</li>
+                  {{ $t('i18n.55b2d0904f') }},{{ $t('i18n.e9ec2b0bee') }},{{ $t('i18n.c8c45e8467') }}
+                  <li>{{ $t('i18n.a0e31d89ff') }}</li>
                 </template>
                 <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
               </a-tooltip>
@@ -791,19 +767,19 @@
             <a-input-number
               v-model:value="temp.intervalTime"
               :min="0"
-              :placeholder="$t('pages.dispatch.list.c7ed6684')"
+              :placeholder="$t('i18n.d7ac764d3a')"
               style="width: 100%"
             />
           </a-form-item>
-          <a-form-item name="secondaryDirectory" :label="$t('pages.dispatch.list.2b72d6ca')">
-            <a-input v-model:value="temp.secondaryDirectory" :placeholder="$t('pages.dispatch.list.3a664c1f')" />
+          <a-form-item name="secondaryDirectory" :label="$t('i18n.871cc8602a')">
+            <a-input v-model:value="temp.secondaryDirectory" :placeholder="$t('i18n.9c99e8bec9')" />
           </a-form-item>
           <a-form-item name="clearOld">
             <template #label>
               <a-tooltip>
-                {{ $t('pages.dispatch.list.157bc8ea') }}
+                {{ $t('i18n.2223ff647d') }}
                 <template #title>
-                  {{ $t('pages.dispatch.list.32718c0') }}
+                  {{ $t('i18n.b343663a14') }}
                 </template>
                 <QuestionCircleOutlined v-if="temp.type !== 'edit'" />
               </a-tooltip>
@@ -812,23 +788,23 @@
               <a-col :span="4">
                 <a-switch
                   v-model:checked="temp.clearOld"
-                  :checked-children="$t('pages.dispatch.list.d2fbce36')"
-                  :un-checked-children="$t('pages.dispatch.list.1c77d6fb')"
+                  :checked-children="$t('i18n.0a60ac8f02')"
+                  :un-checked-children="$t('i18n.c9744f45e7')"
                 />
               </a-col>
               <a-col :span="4" style="text-align: right">
                 <a-tooltip v-if="temp.type !== 'edit'">
-                  <template #title> {{ $t('pages.dispatch.list.9f9df513') }} </template>
+                  <template #title> {{ $t('i18n.300fbf3891') }} </template>
                   <QuestionCircleOutlined />
                 </a-tooltip>
-                {{ $t('pages.dispatch.list.267c8d13') }}
+                {{ $t('i18n.7b2cbfada9') }}
               </a-col>
               <a-col :span="4">
                 <a-form-item-rest>
                   <a-switch
                     v-model:checked="temp.uploadCloseFirst"
-                    :checked-children="$t('pages.dispatch.list.d2fbce36')"
-                    :un-checked-children="$t('pages.dispatch.list.1c77d6fb')"
+                    :checked-children="$t('i18n.0a60ac8f02')"
+                    :un-checked-children="$t('i18n.c9744f45e7')"
                   />
                 </a-form-item-rest>
               </a-col>
@@ -840,19 +816,19 @@
                 WebHooks
                 <template #title>
                   <ul>
-                    <li>{{ $t('pages.dispatch.list.1af01061') }}</li>
-                    <li>{{ $t('pages.dispatch.list.d20429d4') }}</li>
-                    <li>status {{ $t('pages.dispatch.list.5323a6a3') }}:{{ $t('pages.dispatch.list.be2dccc9') }}</li>
-                    <li>{{ $t('pages.dispatch.list.663c4985') }}</li>
+                    <li>{{ $t('i18n.b186c667dc') }}</li>
+                    <li>{{ $t('i18n.0bc45241af') }}</li>
+                    <li>status {{ $t('i18n.5d5fd4170f') }}:{{ $t('i18n.be3a4d368e') }}</li>
+                    <li>{{ $t('i18n.c96f47ec1b') }}</li>
                   </ul>
                 </template>
                 <QuestionCircleOutlined v-show="!temp.id" />
               </a-tooltip>
             </template>
-            <a-input v-model:value="temp.webhook" :placeholder="$t('pages.dispatch.list.ad9cad23')" />
+            <a-input v-model:value="temp.webhook" :placeholder="$t('i18n.89a40a1a8b')" />
           </a-form-item>
           <!-- 节点 -->
-          <a-form-item :label="$t('pages.dispatch.list.51fd9c8a')" name="nodeId">
+          <a-form-item :label="$t('i18n.6a6c857285')" name="nodeId">
             <a-select
               v-model:value="temp.nodeIdList"
               show-search
@@ -867,82 +843,69 @@
                 }
               "
               mode="multiple"
-              :placeholder="$t('pages.dispatch.list.27b4e405')"
+              :placeholder="$t('i18n.b07a33c3a8')"
             >
               <a-select-option v-for="node in nodeList" :key="node.id">{{ `${node.name}` }}</a-select-option>
             </a-select>
           </a-form-item>
           <a-collapse>
             <a-collapse-panel v-for="nodeId in temp.nodeIdList" :key="nodeId" :header="nodeNameMap[nodeId] || nodeId">
-              <a-form-item
-                v-show="javaModes.includes(temp.runMode)"
-                :label="$t('pages.dispatch.list.b482c412')"
-                name="jvm"
-              >
+              <a-form-item v-show="javaModes.includes(temp.runMode)" :label="$t('i18n.497bc3532b')" name="jvm">
                 <a-textarea
                   v-model:value="temp[`${nodeId}_jvm`]"
                   :auto-size="{ minRows: 3, maxRows: 3 }"
                   :placeholder="
-                    $t('pages.dispatch.list.17924912', {
-                      slot1: $t('pages.dispatch.list.68fca368'),
-                      slot2: $t('pages.dispatch.list.f3096daa')
-                    })
+                    $t('i18n.eef3653e9a', { slot1: $t('i18n.3d0a2df9ec'), slot2: $t('i18n.eb5bab1c31') })
                   "
                 />
               </a-form-item>
-              <a-form-item
-                v-show="javaModes.includes(temp.runMode)"
-                :label="$t('pages.dispatch.list.550bae25')"
-                name="args"
-              >
+              <a-form-item v-show="javaModes.includes(temp.runMode)" :label="$t('i18n.e5098786d3')" name="args">
                 <a-textarea
                   v-model:value="temp[`${nodeId}_args`]"
                   :auto-size="{ minRows: 3, maxRows: 3 }"
-                  :placeholder="`Main ${$t('pages.dispatch.list.f2214ebb')}. ${$t(
-                    'pages.dispatch.list.94c10a27'
-                  )}.port=8080`"
+                  :placeholder="`Main ${$t('i18n.6a9231c3ba')}. ${$t('i18n.848e4e21da')}.port=8080`"
                 />
               </a-form-item>
               <a-form-item v-show="noFileModes.includes(temp.runMode)" name="autoStart">
                 <template #label>
                   <a-tooltip>
-                    {{ $t('pages.dispatch.list.12861e4e') }}
-                    <template #title>{{ $t('pages.dispatch.list.6023ee05') }}</template>
+                    {{ $t('i18n.8388c637f6') }}
+                    <template #title>{{ $t('i18n.d4e03f60a9') }}</template>
                     <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
                   </a-tooltip>
                 </template>
                 <template #help>
                   <div>
-                    {{ $t('pages.dispatch.list.2190c483') }}<b>{{ $t('pages.dispatch.list.7172ec4f') }}</b
-                    >{{ $t('pages.dispatch.list.bd19335d') }}
+                    {{ $t('i18n.71584de972') }}<b>{{ $t('i18n.1e4a59829d') }}</b
+                    >{{ $t('i18n.0360fffb40') }}
                   </div>
                 </template>
                 <a-switch
                   v-model:checked="temp[`${nodeId}_autoStart`]"
-                  :checked-children="$t('pages.dispatch.list.30c72f5d')"
-                  :un-checked-children="$t('pages.dispatch.list.abe04b8e')"
+                  :checked-children="$t('i18n.8493205602')"
+                  :un-checked-children="$t('i18n.d58a55bcee')"
                 />
-                {{ $t('pages.dispatch.list.78de10a4') }}
+                {{ $t('i18n.1022c545d1') }}
               </a-form-item>
               <a-form-item name="disableScanDir">
                 <template #label>
-                  <a-tooltip> {{ $t('pages.dispatch.list.e1eda90c') }} </a-tooltip>
+                  <a-tooltip> {{ $t('i18n.df59a2804d') }} </a-tooltip>
                 </template>
                 <template #help>
-                  <div>{{ $t('pages.dispatch.list.d8aa9e4c') }}</div>
+                  <div>{{ $t('i18n.b7c139ed75') }}</div>
                 </template>
                 <div>
                   <a-switch
                     v-model:checked="temp[`${nodeId}_disableScanDir`]"
-                    :checked-children="$t('pages.dispatch.list.c85f6b97')"
-                    :un-checked-children="$t('pages.dispatch.list.968ca34a')"
+                    :checked-children="$t('i18n.ced3d28cd1')"
+                    :un-checked-children="$t('i18n.56525d62ac')"
                   />
                 </div>
               </a-form-item>
-              <a-form-item v-if="temp.runMode === 'Dsl'" name="dslEnv" :label="$t('pages.dispatch.list.72ddf462')">
+              <a-form-item v-if="temp.runMode === 'Dsl'" name="dslEnv" :label="$t('i18n.fba5f4f19a')">
                 <!-- <a-input
                   v-model:checked="temp[`${nodeId}_dslEnv`]"
-                  placeholder="DSL{{$t('pages.dispatch.list.c81b2c2e')}},{{$t('pages.dispatch.list.24e5c26a')}}=values1&keyvalue2"
+                  placeholder="DSL{{$t('i18n.3867e350eb')}},{{$t('i18n.9324290bfe')}}=values1&keyvalue2"
                 /> -->
                 <parameter-widget v-model:value="temp[`${nodeId}_dslEnv`]"></parameter-widget>
               </a-form-item>
@@ -951,16 +914,16 @@
                   <a-tooltip>
                     <template #title>
                       <ul>
-                        <li>{{ $t('pages.dispatch.list.3e549c2f') }}</li>
-                        <li>{{ $t('pages.dispatch.list.4bebe9d') }}</li>
-                        <li>type {{ $t('pages.dispatch.list.bbb000cc') }}</li>
+                        <li>{{ $t('i18n.f7b9764f0f') }}</li>
+                        <li>{{ $t('i18n.b91961bf0b') }}</li>
+                        <li>type {{ $t('i18n.b10b082c25') }}</li>
                       </ul>
                     </template>
                     WebHooks
                     <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
                   </a-tooltip>
                 </template>
-                <a-input v-model:value="temp[`${nodeId}_token`]" :placeholder="$t('pages.dispatch.list.187760d7')" />
+                <a-input v-model:value="temp[`${nodeId}_token`]" :placeholder="$t('i18n.6c776e9d91')" />
               </a-form-item>
             </a-collapse-panel>
           </a-collapse>
@@ -995,7 +958,7 @@
       v-if="configDir"
       v-model:open="configDir"
       destroy-on-close
-      :title="`${$t('pages.dispatch.list.1cc6d443')}`"
+      :title="`${$t('i18n.eee6510292')}`"
       :footer="null"
       width="50vw"
       :mask-closable="false"
@@ -1019,7 +982,7 @@
     <CustomDrawer
       v-if="viewScriptVisible"
       destroy-on-close
-      :title="`${$t('pages.dispatch.list.9bc942bf')}`"
+      :title="`${$t('i18n.dd1d14efd6')}`"
       placement="right"
       :open="viewScriptVisible"
       width="70vw"
@@ -1115,19 +1078,19 @@ export default {
       totalProjectNum: 0,
       columns: [
         {
-          title: this.$t('pages.dispatch.list.c3c9e67b'),
+          title: this.$t('i18n.f6dee0f3ff'),
           dataIndex: 'id',
           ellipsis: true,
           width: 110
         },
         {
-          title: this.$t('pages.dispatch.list.8aa10ac9'),
+          title: this.$t('i18n.9d89cbf245'),
           dataIndex: 'name',
           ellipsis: true,
           width: 200
         },
         {
-          title: this.$t('pages.dispatch.list.5eefb9a9'),
+          title: this.$t('i18n.d438e83c16'),
           dataIndex: 'group',
           sorter: true,
           width: '100px',
@@ -1135,46 +1098,46 @@ export default {
           tooltip: true
         },
         {
-          title: this.$t('pages.dispatch.list.585c23e6'),
+          title: this.$t('i18n.9e2e02ef08'),
           dataIndex: 'outGivingProject',
           width: '90px',
           ellipsis: true
         },
         {
-          title: this.$t('pages.dispatch.list.2f6529d5'),
+          title: this.$t('i18n.c71a67ab03'),
           dataIndex: 'afterOpt',
           ellipsis: true,
           width: '150px'
         },
         {
-          title: this.$t('pages.dispatch.list.157bc8ea'),
+          title: this.$t('i18n.2223ff647d'),
           dataIndex: 'clearOld',
           align: 'center',
           ellipsis: true,
           width: '100px'
         },
         {
-          title: this.$t('pages.dispatch.list.26d543f6'),
+          title: this.$t('i18n.a5d550f258'),
           dataIndex: 'intervalTime',
           width: 90,
           ellipsis: true
         },
 
         {
-          title: this.$t('pages.dispatch.list.9c32c887'),
+          title: this.$t('i18n.3fea7ca76c'),
           dataIndex: 'status',
           ellipsis: true,
           width: 110
         },
         {
-          title: this.$t('pages.dispatch.list.2b72d6ca'),
+          title: this.$t('i18n.871cc8602a'),
           dataIndex: 'secondaryDirectory',
           ellipsis: true,
           width: 110,
           tooltip: true
         },
         {
-          title: this.$t('pages.dispatch.list.f06e8846'),
+          title: this.$t('i18n.eca37cb072'),
           dataIndex: 'createTimeMillis',
           ellipsis: true,
           sorter: true,
@@ -1182,7 +1145,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('pages.dispatch.list.61164914'),
+          title: this.$t('i18n.1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           ellipsis: true,
           sorter: true,
@@ -1190,14 +1153,14 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('pages.dispatch.list.8406fc21'),
+          title: this.$t('i18n.9baca0054e'),
           dataIndex: 'modifyUser',
           width: '130px',
           ellipsis: true,
           sorter: true
         },
         {
-          title: this.$t('pages.dispatch.list.40ebd874'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
 
           fixed: 'right',
@@ -1207,13 +1170,13 @@ export default {
       ],
 
       rules: {
-        id: [{ required: true, message: this.$t('pages.dispatch.list.6d76ea6b'), trigger: 'blur' }],
-        name: [{ required: true, message: this.$t('pages.dispatch.list.c9d5fa0c'), trigger: 'blur' }],
-        projectId: [{ required: true, message: this.$t('pages.dispatch.list.6836d5bb'), trigger: 'blur' }],
-        runMode: [{ required: true, message: this.$t('pages.dispatch.list.d83981be'), trigger: 'blur' }],
-        whitelistDirectory: [{ required: true, message: this.$t('pages.dispatch.list.fea56c3'), trigger: 'blur' }],
-        lib: [{ required: true, message: this.$t('pages.dispatch.list.fc983188'), trigger: 'blur' }],
-        afterOpt: [{ required: true, message: this.$t('pages.dispatch.list.9a15b54b'), trigger: 'blur' }]
+        id: [{ required: true, message: this.$t('i18n.646a518953'), trigger: 'blur' }],
+        name: [{ required: true, message: this.$t('i18n.4371e2b426'), trigger: 'blur' }],
+        projectId: [{ required: true, message: this.$t('i18n.9fc2e26bfa'), trigger: 'blur' }],
+        runMode: [{ required: true, message: this.$t('i18n.4310e9ed7d'), trigger: 'blur' }],
+        whitelistDirectory: [{ required: true, message: this.$t('i18n.1d38b2b2bc'), trigger: 'blur' }],
+        lib: [{ required: true, message: this.$t('i18n.d9657e2b5f'), trigger: 'blur' }],
+        afterOpt: [{ required: true, message: this.$t('i18n.3322338140'), trigger: 'blur' }]
       },
       // countdownTime: Date.now(),
       // refreshInterval: 5,
@@ -1380,7 +1343,7 @@ export default {
       this.$refs['linkDispatchForm'].validate().then(() => {
         // 校验分发节点数据
         if (this.dispatchList.length < 1) {
-          $notification.error({ message: this.$t('pages.dispatch.list.9548a044') })
+          $notification.error({ message: this.$t('i18n.637c9a8819') })
           return false
         }
         this.dispatchList.forEach((item, index) => {
@@ -1505,7 +1468,7 @@ export default {
         // 检查
         if (tempData.nodeIdList.length < 1) {
           $notification.warn({
-            message: this.$t('pages.dispatch.list.6ad32a91')
+            message: this.$t('i18n.b8545de30e')
           })
           return false
         }
@@ -1544,11 +1507,11 @@ export default {
     handleDelete(record, thorough) {
       if (record.outGivingProject) {
         $confirm({
-          title: this.$t('pages.dispatch.list.a8fe4c17'),
+          title: this.$t('i18n.c4535759ee'),
           zIndex: 1009,
-          content: thorough ? this.$t('pages.dispatch.list.638fc0de') : this.$t('pages.dispatch.list.f85d7ea4'),
-          okText: this.$t('pages.dispatch.list.7da4a591'),
-          cancelText: this.$t('pages.dispatch.list.43105e21'),
+          content: thorough ? this.$t('i18n.78ba02f56b') : this.$t('i18n.1125c4a50b'),
+          okText: this.$t('i18n.e83a256e4f'),
+          cancelText: this.$t('i18n.625fb26b4b'),
           onOk: () => {
             return delDisPatchProject({ id: record.id, thorough: thorough }).then((res) => {
               if (res.code === 200) {
@@ -1563,11 +1526,11 @@ export default {
         return
       }
       $confirm({
-        title: this.$t('pages.dispatch.list.a8fe4c17'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.dispatch.list.ab7b03bc'),
-        okText: this.$t('pages.dispatch.list.7da4a591'),
-        cancelText: this.$t('pages.dispatch.list.43105e21'),
+        content: this.$t('i18n.2f8dc4fb66'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return releaseDelDisPatch(record.id).then((res) => {
             if (res.code === 200) {
@@ -1584,22 +1547,22 @@ export default {
     handleUnbind(record) {
       const html = `
       <b style='font-size: 20px;'>
-        ${this.$t('pages.dispatch.list.c5bfcffb')}
+        ${this.$t('i18n.efe71e9bec')}
       </b>
       <ul style='font-size: 20px;color:red;font-weight: bold;'>
-          <li>${this.$t('pages.dispatch.list.3764ec84')}</b></li>
-          <li>${this.$t('pages.dispatch.list.cbd05868')}</li>
-          <li>${this.$t('pages.dispatch.list.b65e38f0')}</li>
+          <li>${this.$t('i18n.46aca09f01')}</b></li>
+          <li>${this.$t('i18n.5c93055d9c')}</li>
+          <li>${this.$t('i18n.27d0c8772c')}</li>
       </ul>`
 
       $confirm({
-        title: this.$t('pages.dispatch.list.cd503941'),
+        title: this.$t('i18n.9362e6ddf8'),
         zIndex: 1009,
         content: h('div', null, [h('p', { innerHTML: html }, null)]),
         okButtonProps: { type: 'primary', size: 'small', danger: true },
         cancelButtonProps: { type: 'primary' },
-        okText: this.$t('pages.dispatch.list.7da4a591'),
-        cancelText: this.$t('pages.dispatch.list.43105e21'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return unbindOutgiving(record.id).then((res) => {
             if (res.code === 200) {
@@ -1642,10 +1605,10 @@ export default {
     handleNodeListChange(nodeId, index) {
       const nodeData = this.nodeProjectsList.filter((item) => item.id === nodeId)[0]
       if (nodeData.projects.length === 0) {
-        this.dispatchList[index].placeholder = this.$t('pages.dispatch.list.e6af4e4c')
+        this.dispatchList[index].placeholder = this.$t('i18n.1d843d7b45')
         this.dispatchList[index].disabled = true
       } else {
-        this.dispatchList[index].placeholder = this.$t('pages.dispatch.list.6836d5bb')
+        this.dispatchList[index].placeholder = this.$t('i18n.9fc2e26bfa')
         this.dispatchList[index].disabled = false
       }
       this.dispatchList[index].nodeId = nodeId
@@ -1658,13 +1621,13 @@ export default {
     addDispachList() {
       if (this.dispatchList.length >= this.totalProjectNum) {
         $notification.error({
-          message: this.$t('pages.dispatch.list.4715a27')
+          message: this.$t('i18n.d35a9990f4')
         })
         return false
       }
       this.dispatchList.push({
         index: this.dispatchList.length,
-        placeholder: this.$t('pages.dispatch.list.3a5ce43c'),
+        placeholder: this.$t('i18n.3ee7756087'),
         disabled: true
       })
     },
@@ -1680,11 +1643,11 @@ export default {
     // 取消
     handleCancel(record) {
       $confirm({
-        title: this.$t('pages.dispatch.list.a8fe4c17'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.dispatch.list.a5cbc9d2'),
-        okText: this.$t('pages.dispatch.list.7da4a591'),
-        cancelText: this.$t('pages.dispatch.list.43105e21'),
+        content: this.$t('i18n.b1192f8f8e'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return cancelOutgiving({ id: record.id }).then((res) => {
             if (res.code === 200) {

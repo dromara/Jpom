@@ -18,19 +18,19 @@
           <a-input
             v-model:value="viewOperationLogListQuery['userId']"
             class="search-input-item"
-            :placeholder="$t('pages.system.trigger-token.46cac1')"
+            :placeholder="$t('i18n.638cddf480')"
             @press-enter="handleListLog"
           />
           <a-input
             v-model:value="viewOperationLogListQuery['triggerToken']"
             class="search-input-item"
-            :placeholder="$t('pages.system.trigger-token.ef1afc6c')"
+            :placeholder="$t('i18n.ae35be7986')"
             @press-enter="handleListLog"
           />
           <a-select
             v-model:value="viewOperationLogListQuery.type"
             allow-clear
-            :placeholder="$t('pages.system.trigger-token.698bb532')"
+            :placeholder="$t('i18n.226b091218')"
             class="search-input-item"
           >
             <a-select-option v-for="item in allTypeList" :key="item.name">{{ item.desc }}</a-select-option>
@@ -40,7 +40,7 @@
             format="YYYY-MM-DD HH:mm:ss"
             @change="onchangeListLogTime"
           />
-          <a-button type="primary" @click="handleListLog">{{ $t('pages.system.trigger-token.53c2763c') }}</a-button>
+          <a-button type="primary" @click="handleListLog">{{ $t('i18n.e5f71fc31e') }}</a-button>
         </a-space>
       </template>
       <template #bodyCell="{ column, text, record }">
@@ -64,7 +64,7 @@
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-              $t('pages.system.trigger-token.dd20d11c')
+              $t('i18n.2f4aaddde3')
             }}</a-button>
           </a-space>
         </template>
@@ -89,7 +89,7 @@ export default {
       ),
       viewOperationLogColumns: [
         {
-          title: this.$t('pages.system.trigger-token.db3c9202'),
+          title: this.$t('i18n.95a43eaa59'),
           dataIndex: 'userId',
           width: 100
         },
@@ -100,24 +100,24 @@ export default {
         },
 
         {
-          title: this.$t('pages.system.trigger-token.8e4d106'),
+          title: this.$t('i18n.d159466d0a'),
           dataIndex: 'dataName'
           // width: 100
         },
         {
-          title: this.$t('pages.system.trigger-token.948a121d'),
+          title: this.$t('i18n.00d5bdf1c3'),
           dataIndex: 'triggerCount',
           width: 100,
           sorter: true
         },
         {
-          title: this.$t('pages.system.trigger-token.733ffc6e'),
+          title: this.$t('i18n.45a4922d3f'),
           dataIndex: 'dataId',
           width: 100
         },
 
         {
-          title: this.$t('pages.system.trigger-token.f5b90169'),
+          title: this.$t('i18n.eca37cb072'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text }) => {
@@ -126,7 +126,7 @@ export default {
           width: '180px'
         },
         {
-          title: this.$t('pages.system.trigger-token.3bb962bf'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
           width: '80px',
 
@@ -179,11 +179,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$t('pages.system.trigger-token.b22d55a0'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.system.trigger-token.e51646aa'),
-        okText: this.$t('pages.system.trigger-token.e8e9db25'),
-        cancelText: this.$t('pages.system.trigger-token.b12468e9'),
+        content: this.$t('i18n.bba360b084'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return triggerTokenDelete({
             id: record.id

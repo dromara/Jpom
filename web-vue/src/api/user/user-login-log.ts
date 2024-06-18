@@ -20,11 +20,11 @@ export function userLoginLgin(params) {
 }
 
 export const operateCodeMap = {
-  0: t('api.user.user-login-log.a1d02c3e'),
-  1: t('api.user.user-login-log.e5849544'),
-  2: t('api.user.user-login-log.2d6b6d8f'),
-  3: t('api.user.user-login-log.d08efdf4'),
-  4: t('api.user.user-login-log.227abc8e'),
-  5: t('api.user.user-login-log.521c4ec2'),
+  0: t('i18n.dd95bf2d45'),
+  1: t('i18n.5a5368cf9b'),
+  2: t('i18n.18d49918f5'),
+  3: t('i18n.a093ae6a6e'),
+  4: t('i18n.8b63640eee'),
+  5: t('i18n.bb9a581f48'),
   6: 'oauth2'
 }

@@ -13,22 +13,22 @@
       <a-space>
         <a-input
           v-model:value="listQuery['name']"
-          :placeholder="$t('pages.docker.volumes.3e34ec28')"
+          :placeholder="$t('i18n.d7ec2d3fea')"
           class="search-input-item"
           @press-enter="loadData"
         />
 
         <div>
-          {{ $t('pages.docker.volumes.a8ad56bd') }}
+          {{ $t('i18n.a09375d96c') }}
           <a-switch
             v-model:checked="listQuery['dangling']"
-            :checked-children="$t('pages.docker.volumes.f5bb2364')"
-            :un-checked-children="$t('pages.docker.volumes.5edb2e8a')"
+            :checked-children="$t('i18n.0a60ac8f02')"
+            :un-checked-children="$t('i18n.c9744f45e7')"
           />
         </div>
 
         <a-button type="primary" :loading="loading" @click="loadData">{{
-          $t('pages.docker.volumes.53c2763c')
+          $t('i18n.e5f71fc31e')
         }}</a-button>
       </a-space>
     </template>
@@ -40,7 +40,7 @@
       </template>
 
       <template v-else-if="column.dataIndex === 'name'">
-        <a-popover v-if="record.labels" :title="$t('pages.docker.volumes.970023d4')">
+        <a-popover v-if="record.labels" :title="$t('i18n.3a3ff2c936')">
           <template #content>
             <p v-for="(value, key) in record.labels" :key="key">{{ key }}<ArrowRightOutlined />{{ value }}</p>
           </template>
@@ -65,7 +65,7 @@
       </template>
       <template v-else-if="column.dataIndex === 'operation'">
         <a-space>
-          <a-tooltip :title="$t('pages.docker.volumes.dd20d11c')">
+          <a-tooltip :title="$t('i18n.2f4aaddde3')">
             <a-button size="small" type="link" @click="doAction(record, 'remove')"><DeleteOutlined /></a-button>
           </a-tooltip>
         </a-space>
@@ -101,32 +101,32 @@ export default {
       renderSize,
       columns: [
         {
-          title: this.$t('pages.docker.volumes.72cebb96'),
+          title: this.$t('i18n.faaadc447b'),
           width: 80,
           ellipsis: true,
           align: 'center',
           customRender: ({ index }) => `${index + 1}`
         },
         {
-          title: this.$t('pages.docker.volumes.3e34ec28'),
+          title: this.$t('i18n.d7ec2d3fea'),
           dataIndex: 'name',
           ellipsis: true
         },
         {
-          title: this.$t('pages.docker.volumes.337aee59'),
+          title: this.$t('i18n.1c61dfb86f'),
           dataIndex: 'mountpoint',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.docker.volumes.698bb532'),
+          title: this.$t('i18n.226b091218'),
           dataIndex: 'driver',
           ellipsis: true,
           width: 80,
           tooltip: true
         },
         {
-          title: this.$t('pages.docker.volumes.f06e8846'),
+          title: this.$t('i18n.eca37cb072'),
           dataIndex: 'CreatedAt',
           ellipsis: true,
           width: 180,
@@ -135,7 +135,7 @@ export default {
           defaultSortOrder: 'descend'
         },
         {
-          title: this.$t('pages.docker.volumes.3bb962bf'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
           fixed: 'right',
           width: '80px'
@@ -144,7 +144,7 @@ export default {
 
       action: {
         remove: {
-          msg: this.$t('pages.docker.volumes.9e6ac7fa'),
+          msg: this.$t('i18n.022b6ea624'),
           api: dockerVolumesRemove
         }
       }
@@ -178,11 +178,11 @@ export default {
         return
       }
       $confirm({
-        title: this.$t('pages.docker.volumes.b22d55a0'),
+        title: this.$t('i18n.c4535759ee'),
         content: action.msg,
         zIndex: 1009,
-        okText: this.$t('pages.docker.volumes.e8e9db25'),
-        cancelText: this.$t('pages.docker.volumes.b12468e9'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return action
             .api(this.urlPrefix, {

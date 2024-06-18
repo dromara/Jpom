@@ -17,7 +17,7 @@
           <a-select
             v-model:value="listQuery.nodeId"
             allow-clear
-            :placeholder="$t('pages.monitor.log.2c33c91c')"
+            :placeholder="$t('i18n.f8a613d247')"
             class="search-input-item"
           >
             <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
@@ -25,25 +25,25 @@
           <a-select
             v-model:value="listQuery.status"
             allow-clear
-            :placeholder="$t('pages.monitor.log.95aeba54')"
+            :placeholder="$t('i18n.db4470d98d')"
             class="search-input-item"
           >
-            <a-select-option :value="1">{{ $t('pages.monitor.log.3483f3b7') }}</a-select-option>
-            <a-select-option :value="0">{{ $t('pages.monitor.log.346ba9a') }}</a-select-option>
+            <a-select-option :value="1">{{ $t('i18n.fd6e80f1e0') }}</a-select-option>
+            <a-select-option :value="0">{{ $t('i18n.c195df6308') }}</a-select-option>
           </a-select>
           <a-select
             v-model:value="listQuery.notifyStatus"
             allow-clear
-            :placeholder="$t('pages.monitor.log.6abae0da')"
+            :placeholder="$t('i18n.8023baf064')"
             class="search-input-item"
           >
-            <a-select-option :value="1">{{ $t('pages.monitor.log.9d77d967') }}</a-select-option>
-            <a-select-option :value="0">{{ $t('pages.monitor.log.d3ec0514') }}</a-select-option>
+            <a-select-option :value="1">{{ $t('i18n.330363dfc5') }}</a-select-option>
+            <a-select-option :value="0">{{ $t('i18n.acd5cb847a') }}</a-select-option>
           </a-select>
           <a-range-picker :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
-          <a-tooltip :title="$t('pages.monitor.log.767472f6')">
+          <a-tooltip :title="$t('i18n.4838a3bd20')">
             <a-button :loading="loading" type="primary" @click="loadData">{{
-              $t('pages.monitor.log.53c2763c')
+              $t('i18n.e5f71fc31e')
             }}</a-button>
           </a-tooltip>
         </a-space>
@@ -60,17 +60,17 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'status'">
-          <span>{{ text ? $t('pages.monitor.log.3483f3b7') : $t('pages.monitor.log.346ba9a') }}</span>
+          <span>{{ text ? $t('i18n.fd6e80f1e0') : $t('i18n.c195df6308') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'notifyStyle'">
-          {{ notifyStyle[text] || $t('pages.monitor.log.ca1cdfa6') }}
+          {{ notifyStyle[text] || $t('i18n.1622dc9b6b') }}
         </template>
         <template v-else-if="column.dataIndex === 'notifyStatus'">
-          <span>{{ text ? $t('pages.monitor.log.9d77d967') : $t('pages.monitor.log.d3ec0514') }}</span>
+          <span>{{ text ? $t('i18n.330363dfc5') : $t('i18n.acd5cb847a') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-button size="small" type="primary" @click="handleDetail(record)">{{
-            $t('pages.monitor.log.151c73eb')
+            $t('i18n.f26225bde6')
           }}</a-button>
         </template>
       </template>
@@ -81,7 +81,7 @@
       v-model:open="detailVisible"
       destroy-on-close
       width="600px"
-      :title="$t('pages.monitor.log.7990de3b')"
+      :title="$t('i18n.3032257aa3')"
       :footer="null"
     >
       <a-list item-layout="horizontal" :data-source="detailData">
@@ -116,40 +116,40 @@ export default {
       detailData: [],
       columns: [
         {
-          title: this.$t('pages.monitor.log.f00e2365'),
+          title: this.$t('i18n.36b3f3a2f6'),
           dataIndex: 'title',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.monitor.log.fa8d810f'),
+          title: this.$t('i18n.b1785ef01e'),
           dataIndex: 'nodeId',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$t('pages.monitor.log.4eaba425'),
+          title: this.$t('i18n.4fdd2213b5'),
           dataIndex: 'projectId',
           width: 100,
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('pages.monitor.log.95aeba54'),
+          title: this.$t('i18n.db4470d98d'),
           dataIndex: 'status',
           width: 100,
           align: 'center',
           ellipsis: true
         },
         {
-          title: this.$t('pages.monitor.log.b93a2f3c'),
+          title: this.$t('i18n.52eedb4a12'),
           dataIndex: 'notifyStyle',
           width: 100,
           align: 'center',
           ellipsis: true
         },
         {
-          title: this.$t('pages.monitor.log.ec06406f'),
+          title: this.$t('i18n.4741e596ac'),
           dataIndex: 'createTime',
           customRender: ({ text }) => {
             return parseTime(text)
@@ -157,13 +157,13 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('pages.monitor.log.6abae0da'),
+          title: this.$t('i18n.8023baf064'),
           dataIndex: 'notifyStatus',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$t('pages.monitor.log.3bb962bf'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
           align: 'center',
           fixed: 'right',
@@ -227,15 +227,15 @@ export default {
       this.detailData = []
       this.detailVisible = true
       this.temp = Object.assign({}, record)
-      this.detailData.push({ title: this.$t('pages.monitor.log.a1b6e465'), description: this.temp.title })
-      this.detailData.push({ title: this.$t('pages.monitor.log.99ff48c8'), description: this.temp.content })
+      this.detailData.push({ title: this.$t('i18n.32c65d8d74'), description: this.temp.title })
+      this.detailData.push({ title: this.$t('i18n.2d711b09bd'), description: this.temp.content })
       this.detailData.push({
-        title: this.$t('pages.monitor.log.18ba4cd5'),
+        title: this.$t('i18n.59c75681b4'),
         description: this.temp.notifyObject
       })
       if (!this.temp.notifyStatus) {
         this.detailData.push({
-          title: this.$t('pages.monitor.log.65f01a1b'),
+          title: this.$t('i18n.fcb4c2610a'),
           description: this.temp.notifyError
         })
       }

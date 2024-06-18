@@ -2,22 +2,22 @@
   <div>
     <a-space direction="vertical" style="width: 100%">
       <a-tag style="display: inline-grid">
-        {{ $t('pages.node.node-layout.project.project-log.6424a544') }}
+        {{ $t('i18n.a17bc8d947') }}
         <b>jpom.project.log.auto-backup-to-file: false</b>
       </a-tag>
 
       <a-tag v-if="project.logPath" color="orange">
-        {{ $t('pages.node.node-layout.project.project-log.f07e81ba') }}: {{ project.logPath }}
+        {{ $t('i18n.32a19ce88b') }}: {{ project.logPath }}
         <template v-if="project.logSize">
-          {{ $t('pages.node.node-layout.project.project-log.afb07e2c') }}{{ project.logSize }}
+          {{ $t('i18n.3402926291') }}{{ project.logSize }}
           <a-button type="link" size="small" @click="handleDownload">
-            <DownloadOutlined />{{ $t('pages.node.node-layout.project.project-log.a5bebb0f') }}
+            <DownloadOutlined />{{ $t('i18n.55405ea6ff') }}
           </a-button>
         </template>
       </a-tag>
 
       <a-tag v-if="project.logBackPath" color="orange"
-        >{{ $t('pages.node.node-layout.project.project-log.f4e35807') }}{{ project.logBackPath }}</a-tag
+        >{{ $t('i18n.c34175dbef') }}{{ project.logBackPath }}</a-tag
       >
 
       <!-- 数据表格 -->
@@ -50,10 +50,10 @@
           <template v-else-if="column.dataIndex === 'operation'">
             <a-space>
               <a-button type="primary" @click="handleDownloadLogback(record)">{{
-                $t('pages.node.node-layout.project.project-log.42c8e9c6')
+                $t('i18n.f26ef91424')
               }}</a-button>
               <a-button type="primary" danger @click="handleDelete(record)">{{
-                $t('pages.node.node-layout.project.project-log.dd20d11c')
+                $t('i18n.2f4aaddde3')
               }}</a-button>
             </a-space>
           </template>
@@ -89,25 +89,25 @@ export default {
       logBackList: [],
       columns: [
         {
-          title: this.$t('pages.node.node-layout.project.project-log.a6eb2ded'),
+          title: this.$t('i18n.d2e2560089'),
           dataIndex: 'filename',
           width: 150,
           ellipsis: true
         },
         {
-          title: this.$t('pages.node.node-layout.project.project-log.a2b40316'),
+          title: this.$t('i18n.1303e638b5'),
           dataIndex: 'modifyTimeLong',
           width: 150,
           ellipsis: true
         },
         {
-          title: this.$t('pages.node.node-layout.project.project-log.f087781'),
+          title: this.$t('i18n.396b7d3f91'),
           dataIndex: 'fileSizeLong',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$t('pages.node.node-layout.project.project-log.3bb962bf'),
+          title: this.$t('i18n.2b6bc0f293'),
           dataIndex: 'operation',
           align: 'center',
           fixed: 'right',
@@ -178,11 +178,11 @@ export default {
     // 删除日志备份文件
     handleDelete(record) {
       $confirm({
-        title: this.$t('pages.node.node-layout.project.project-log.b22d55a0'),
+        title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content: this.$t('pages.node.node-layout.project.project-log.987c2cd6'),
-        okText: this.$t('pages.node.node-layout.project.project-log.e8e9db25'),
-        cancelText: this.$t('pages.node.node-layout.project.project-log.b12468e9'),
+        content: this.$t('i18n.3a6bc88ce0'),
+        okText: this.$t('i18n.e83a256e4f'),
+        cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
           return deleteProjectLogBackFile({
             nodeId: this.nodeId,
