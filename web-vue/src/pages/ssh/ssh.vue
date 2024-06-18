@@ -117,13 +117,10 @@
             <template #content>
               <p>{{ $t('i18n.c17aefeebf') }}{{ record.machineSsh && record.machineSsh.osName }}</p>
               <p>{{ $t('i18n.f425f59044') }}{{ record.machineSsh && record.machineSsh.osVersion }}</p>
-              <p>
-                CPU{{ $t('i18n.045cd62da3') }}{{ record.machineSsh && record.machineSsh.osCpuIdentifierName }}
-              </p>
+              <p>CPU{{ $t('i18n.045cd62da3') }}{{ record.machineSsh && record.machineSsh.osCpuIdentifierName }}</p>
               <p>{{ $t('i18n.07a0e44145') }}{{ record.machineSsh && record.machineSsh.hostName }}</p>
               <p>
-                {{ $t('i18n.8a745296f4')
-                }}{{ formatDuration(record.machineSsh && record.machineSsh.osSystemUptime) }}
+                {{ $t('i18n.8a745296f4') }}{{ formatDuration(record.machineSsh && record.machineSsh.osSystemUptime) }}
               </p>
             </template>
             {{ text || $t('i18n.1622dc9b6b') }}
@@ -162,12 +159,10 @@
           <a-popover :title="$t('i18n.a74b62f4bb')">
             <template #content>
               <p>
-                {{ $t('i18n.7e359f4b71')
-                }}{{ renderSize(record.machineSsh && record.machineSsh.osFileStoreTotal) }}
+                {{ $t('i18n.7e359f4b71') }}{{ renderSize(record.machineSsh && record.machineSsh.osFileStoreTotal) }}
               </p>
               <p>
-                {{ $t('i18n.de17fc0b78')
-                }}{{ formatPercent(record.machineSsh && record.machineSsh.osMaxOccupyDisk) }}
+                {{ $t('i18n.de17fc0b78') }}{{ formatPercent(record.machineSsh && record.machineSsh.osMaxOccupyDisk) }}
               </p>
               <p>{{ $t('i18n.ba452d57f2') }}{{ record.machineSsh && record.machineSsh.osMaxOccupyDiskName }}</p>
             </template>
@@ -224,9 +219,7 @@
               </template>
             </a-dropdown>
             <template v-if="record.fileDirs">
-              <a-button size="small" type="primary" @click="handleFile(record)">{{
-                $t('i18n.2a0c4740f1')
-              }}</a-button>
+              <a-button size="small" type="primary" @click="handleFile(record)">{{ $t('i18n.2a0c4740f1') }}</a-button>
             </template>
             <template v-else>
               <a-tooltip placement="topLeft" :title="$t('i18n.46c8ba7b7f')">

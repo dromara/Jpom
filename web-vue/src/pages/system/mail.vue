@@ -2,20 +2,12 @@
   <div class="">
     <a-form ref="editForm" :model="temp" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
       <a-form-item :label="$t('i18n.1f130d11d1')" name="host">
-        <a-auto-complete
-          v-model:value="temp.host"
-          :options="hostDataSource"
-          :placeholder="$t('i18n.c6209653e4')"
-        >
+        <a-auto-complete v-model:value="temp.host" :options="hostDataSource" :placeholder="$t('i18n.c6209653e4')">
           <template #option="item"> {{ item.title }} {{ item.value }} </template>
         </a-auto-complete>
       </a-form-item>
       <a-form-item :label="$t('i18n.fdcadf68a5')" name="port">
-        <a-auto-complete
-          v-model:value="temp.port"
-          :placeholder="$t('i18n.e074f6b6af')"
-          :options="portDataSource"
-        >
+        <a-auto-complete v-model:value="temp.port" :placeholder="$t('i18n.e074f6b6af')" :options="portDataSource">
           <template #option="item"> {{ item.title }} {{ item.value }} </template>
         </a-auto-complete>
       </a-form-item>
@@ -72,33 +64,13 @@
         }}</a-button>
       </a-form-item>
     </a-form>
-    <a-alert
-      :message="$t('i18n.84597bf5bc')"
-      :description="$t('i18n.fdbac93380')"
-      type="info"
-      show-icon
-    />
+    <a-alert :message="$t('i18n.84597bf5bc')" :description="$t('i18n.fdbac93380')" type="info" show-icon />
     <br />
-    <a-alert
-      :message="$t('i18n.8a49e2de39')"
-      type="info"
-      :description="$t('i18n.127de26370')"
-      show-icon
-    />
+    <a-alert :message="$t('i18n.8a49e2de39')" type="info" :description="$t('i18n.127de26370')" show-icon />
     <br />
-    <a-alert
-      :message="$t('i18n.8be76af198')"
-      :description="$t('i18n.61c0f5345d')"
-      type="info"
-      show-icon
-    />
+    <a-alert :message="$t('i18n.8be76af198')" :description="$t('i18n.61c0f5345d')" type="info" show-icon />
     <br />
-    <a-alert
-      :message="$t('i18n.0a54bd6883')"
-      :description="$t('i18n.197be96301')"
-      type="info"
-      show-icon
-    />
+    <a-alert :message="$t('i18n.0a54bd6883')" :description="$t('i18n.197be96301')" type="info" show-icon />
   </div>
 </template>
 <script>

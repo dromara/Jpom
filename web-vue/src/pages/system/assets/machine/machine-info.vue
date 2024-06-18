@@ -22,9 +22,7 @@
               :color="machineInfo && machineInfo.status === 1 ? 'green' : 'pink'"
               style="margin-right: 0"
             >
-              {{
-                statusMap[machineInfo && machineInfo.status] || $t('i18n.1622dc9b6b')
-              }}
+              {{ statusMap[machineInfo && machineInfo.status] || $t('i18n.1622dc9b6b') }}
             </a-tag>
           </template>
           <a-space direction="vertical" style="display: block">
@@ -347,12 +345,8 @@
               <a-page-header :title="item.name" :back-icon="false">
                 <template #subTitle> {{ item.model }} </template>
                 <a-descriptions size="small" :column="4">
-                  <a-descriptions-item :label="$t('i18n.faaadc447b')">{{
-                    item.serial
-                  }}</a-descriptions-item>
-                  <a-descriptions-item :label="$t('i18n.58f9666705')">{{
-                    renderSize(item.size)
-                  }}</a-descriptions-item>
+                  <a-descriptions-item :label="$t('i18n.faaadc447b')">{{ item.serial }}</a-descriptions-item>
+                  <a-descriptions-item :label="$t('i18n.58f9666705')">{{ renderSize(item.size) }}</a-descriptions-item>
                   <a-descriptions-item :label="$t('i18n.9f70e40e04')">{{
                     formatDuration(item.transferTime)
                   }}</a-descriptions-item>
@@ -364,15 +358,11 @@
                   <a-descriptions-item :label="$t('i18n.8900539e06')">
                     {{ renderSize(item.writeBytes) }}
                   </a-descriptions-item>
-                  <a-descriptions-item :label="$t('i18n.8fda053c83')">{{
-                    item.writes
-                  }}</a-descriptions-item>
+                  <a-descriptions-item :label="$t('i18n.8fda053c83')">{{ item.writes }}</a-descriptions-item>
                   <a-descriptions-item :label="$t('i18n.86f3ec932c')">
                     {{ renderSize(item.readBytes) }}
                   </a-descriptions-item>
-                  <a-descriptions-item :label="$t('i18n.3b14c524f6')">{{
-                    item.reads
-                  }}</a-descriptions-item>
+                  <a-descriptions-item :label="$t('i18n.3b14c524f6')">{{ item.reads }}</a-descriptions-item>
                 </a-descriptions>
               </a-page-header>
             </template>
@@ -465,15 +455,9 @@
               <a-descriptions-item label="MTU">
                 {{ item.mtu }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('i18n.03f38597a6')"
-                >{{ renderBpsSize(item.speed) }}
-              </a-descriptions-item>
+              <a-descriptions-item :label="$t('i18n.03f38597a6')">{{ renderBpsSize(item.speed) }} </a-descriptions-item>
               <a-descriptions-item :label="$t('i18n.2a3b06a91a')"
-                >{{
-                  item.knownVmMacAddr
-                    ? $t('i18n.0a60ac8f02')
-                    : $t('i18n.c9744f45e7')
-                }}
+                >{{ item.knownVmMacAddr ? $t('i18n.0a60ac8f02') : $t('i18n.c9744f45e7') }}
               </a-descriptions-item>
 
               <a-descriptions-item label="IPV4" :span="4">
@@ -482,30 +466,18 @@
               <a-descriptions-item label="IPV6" :span="4">
                 <a-tag v-for="ipItem in item.ipv6addr || []" :key="ipItem">{{ ipItem }}</a-tag>
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('i18n.7bcbf81120')"
-                >{{ item.packetsRecv }}
-              </a-descriptions-item>
+              <a-descriptions-item :label="$t('i18n.7bcbf81120')">{{ item.packetsRecv }} </a-descriptions-item>
               <a-descriptions-item :label="$t('i18n.c6a3ebf3c4')"
                 >{{ renderSize(item.bytesRecv) }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('i18n.05cfc9af9d')"
-                >{{ item.inErrors }}
-              </a-descriptions-item>
-              <a-descriptions-item :label="$t('i18n.5ef040a79d')"
-                >{{ item.tnDrops }}
-              </a-descriptions-item>
-              <a-descriptions-item :label="$t('i18n.00b04e1bf0')"
-                >{{ item.packetsSent }}
-              </a-descriptions-item>
+              <a-descriptions-item :label="$t('i18n.05cfc9af9d')">{{ item.inErrors }} </a-descriptions-item>
+              <a-descriptions-item :label="$t('i18n.5ef040a79d')">{{ item.tnDrops }} </a-descriptions-item>
+              <a-descriptions-item :label="$t('i18n.00b04e1bf0')">{{ item.packetsSent }} </a-descriptions-item>
               <a-descriptions-item :label="$t('i18n.020d17aac6')"
                 >{{ renderSize(item.bytesSent) }}
               </a-descriptions-item>
-              <a-descriptions-item :label="$t('i18n.235f0b52a1')"
-                >{{ item.outErrors }}
-              </a-descriptions-item>
-              <a-descriptions-item :label="$t('i18n.3f719b3e32')"
-                >{{ item.collisions }}
-              </a-descriptions-item>
+              <a-descriptions-item :label="$t('i18n.235f0b52a1')">{{ item.outErrors }} </a-descriptions-item>
+              <a-descriptions-item :label="$t('i18n.3f719b3e32')">{{ item.collisions }} </a-descriptions-item>
             </a-descriptions>
           </a-collapse-panel>
         </a-collapse>

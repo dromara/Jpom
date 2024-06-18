@@ -16,9 +16,7 @@
         </template>
       </a-tag>
 
-      <a-tag v-if="project.logBackPath" color="orange"
-        >{{ $t('i18n.c34175dbef') }}{{ project.logBackPath }}</a-tag
-      >
+      <a-tag v-if="project.logBackPath" color="orange">{{ $t('i18n.c34175dbef') }}{{ project.logBackPath }}</a-tag>
 
       <!-- 数据表格 -->
       <a-table
@@ -49,12 +47,8 @@
           </template>
           <template v-else-if="column.dataIndex === 'operation'">
             <a-space>
-              <a-button type="primary" @click="handleDownloadLogback(record)">{{
-                $t('i18n.f26ef91424')
-              }}</a-button>
-              <a-button type="primary" danger @click="handleDelete(record)">{{
-                $t('i18n.2f4aaddde3')
-              }}</a-button>
+              <a-button type="primary" @click="handleDownloadLogback(record)">{{ $t('i18n.f26ef91424') }}</a-button>
+              <a-button type="primary" danger @click="handleDelete(record)">{{ $t('i18n.2f4aaddde3') }}</a-button>
             </a-space>
           </template>
         </template>

@@ -45,9 +45,7 @@
           />
 
           <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button :loading="loading" type="primary" @click="loadData">{{
-              $t('i18n.e5f71fc31e')
-            }}</a-button>
+            <a-button :loading="loading" type="primary" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -66,9 +64,7 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEdit(record)">{{
-              $t('i18n.a156349591')
-            }}</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n.a156349591') }}</a-button>
           </a-space>
         </template>
       </template>

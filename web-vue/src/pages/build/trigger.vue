@@ -5,9 +5,7 @@
         <a-tabs default-active-key="1" type="card">
           <template #rightExtra>
             <a-tooltip :title="$t('i18n.01ad26f4a9')">
-              <a-button type="primary" size="small" @click="resetTrigger">{{
-                $t('i18n.4b9c3271dc')
-              }}</a-button>
+              <a-button type="primary" size="small" @click="resetTrigger">{{ $t('i18n.4b9c3271dc') }}</a-button>
             </a-tooltip>
           </template>
           <a-tab-pane key="1" :tab="$t('i18n.3d3b918f49')">
@@ -19,9 +17,7 @@
                     <li>
                       {{ $t('i18n.e319a2a526') }}
                     </li>
-                    <li>
-                      {{ $t('i18n.3a3c5e739b') }} BODY json： [ { "id":"1", "token":"a", "delay":"0" } ]
-                    </li>
+                    <li>{{ $t('i18n.3a3c5e739b') }} BODY json： [ { "id":"1", "token":"a", "delay":"0" } ]</li>
                     <li>
                       {{ $t('i18n.3baa9f3d72') }}
                     </li>
@@ -38,20 +34,14 @@
                   </ul>
                 </template>
               </a-alert>
-              <a-alert
-                type="info"
-                :message="`${$t('i18n.de78b73dab')}(${$t('i18n.00a070c696')})`"
-              >
+              <a-alert type="info" :message="`${$t('i18n.de78b73dab')}(${$t('i18n.00a070c696')})`">
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.triggerBuildUrl }">
                     <a-tag>GET</a-tag> <span>{{ temp.triggerBuildUrl }} </span>
                   </a-typography-paragraph>
                 </template>
               </a-alert>
-              <a-alert
-                type="info"
-                :message="`${$t('i18n.8d202b890c')}(${$t('i18n.00a070c696')})`"
-              >
+              <a-alert type="info" :message="`${$t('i18n.8d202b890c')}(${$t('i18n.00a070c696')})`">
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchTriggerBuildUrl }">
                     <a-tag>POST</a-tag>
@@ -81,10 +71,7 @@
                   </ul>
                 </template>
               </a-alert>
-              <a-alert
-                type="info"
-                :message="`${$t('i18n.dcd72e6014')}(${$t('i18n.00a070c696')})`"
-              >
+              <a-alert type="info" :message="`${$t('i18n.dcd72e6014')}(${$t('i18n.00a070c696')})`">
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchBuildStatusUrl2 }">
                     <a-tag>GET</a-tag>
@@ -92,10 +79,7 @@
                   </a-typography-paragraph>
                 </template>
               </a-alert>
-              <a-alert
-                type="info"
-                :message="`${$t('i18n.cac6ff1d82')}(${$t('i18n.00a070c696')})`"
-              >
+              <a-alert type="info" :message="`${$t('i18n.cac6ff1d82')}(${$t('i18n.00a070c696')})`">
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchBuildStatusUrl }">
                     <a-tag>POST</a-tag>
@@ -115,10 +99,7 @@
                   </ul>
                 </template>
               </a-alert>
-              <a-alert
-                type="info"
-                :message="`${$t('i18n.2f5e885bc6')}(${$t('i18n.00a070c696')})`"
-              >
+              <a-alert type="info" :message="`${$t('i18n.2f5e885bc6')}(${$t('i18n.00a070c696')})`">
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.buildLogUrl }">
                     <a-tag>GET</a-tag> <span>{{ temp.buildLogUrl }} </span>

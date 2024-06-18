@@ -30,9 +30,7 @@
             <a-select-option :value="0">{{ $t('i18n.b15d91274e') }}</a-select-option>
           </a-select>
           <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('i18n.e5f71fc31e')
-            }}</a-button>
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">{{ $t('i18n.66ab5e9f24') }}</a-button>
         </a-space>
@@ -54,9 +52,7 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEdit(record)">{{
-              $t('i18n.95b351c862')
-            }}</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n.95b351c862') }}</a-button>
             <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
               $t('i18n.2f4aaddde3')
             }}</a-button>

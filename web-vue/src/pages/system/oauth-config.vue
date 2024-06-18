@@ -20,26 +20,15 @@
             />
           </a-form-item>
           <a-form-item :label="$t('i18n.99593f7623')" name="clientId">
-            <a-input
-              v-model:value="dingtalk.clientId"
-              type="text"
-              :placeholder="$t('i18n.a0b9b4e048')"
-            />
+            <a-input v-model:value="dingtalk.clientId" type="text" :placeholder="$t('i18n.a0b9b4e048')" />
           </a-form-item>
           <a-form-item :label="$t('i18n.e0ec07be7d')" name="clientSecret">
-            <a-input-password
-              v-model:value="dingtalk.clientSecret"
-              :placeholder="$t('i18n.52c6af8174')"
-            />
+            <a-input-password v-model:value="dingtalk.clientSecret" :placeholder="$t('i18n.52c6af8174')" />
           </a-form-item>
 
           <a-form-item :label="$t('i18n.51d47ddc69')" name="redirectUri">
             <template #help>{{ $t('i18n.d27cf91998') }}{{ `${host}/oauth2-dingtalk` }}</template>
-            <a-input
-              v-model:value="dingtalk.redirectUri"
-              type="text"
-              :placeholder="$t('i18n.8363193305')"
-            />
+            <a-input v-model:value="dingtalk.redirectUri" type="text" :placeholder="$t('i18n.8363193305')" />
           </a-form-item>
 
           <a-form-item :label="$t('i18n.953357d914')" name="ignoreCheckState">
@@ -56,11 +45,7 @@
               :un-checked-children="$t('i18n.5c56a88945')"
             />
           </a-form-item>
-          <a-form-item
-            v-if="dingtalk.autoCreteUser"
-            :label="$t('i18n.f49dfdace4')"
-            name="permissionGroup"
-          >
+          <a-form-item v-if="dingtalk.autoCreteUser" :label="$t('i18n.f49dfdace4')" name="permissionGroup">
             <template #help>{{ $t('i18n.434d9bd852') }}</template>
             <a-select
               v-model:value="dingtalk.permissionGroup"
@@ -84,9 +69,7 @@
             </a-select>
           </a-form-item>
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-            <a-button type="primary" class="btn" @click="onSubmit('dingtalk')">{{
-              $t('i18n.939d5345ad')
-            }}</a-button>
+            <a-button type="primary" class="btn" @click="onSubmit('dingtalk')">{{ $t('i18n.939d5345ad') }}</a-button>
           </a-form-item>
         </a-form>
       </a-tab-pane>
@@ -100,26 +83,15 @@
             />
           </a-form-item>
           <a-form-item :label="$t('i18n.99593f7623')" name="clientId">
-            <a-input
-              v-model:value="feishu.clientId"
-              type="text"
-              :placeholder="$t('i18n.a0b9b4e048')"
-            />
+            <a-input v-model:value="feishu.clientId" type="text" :placeholder="$t('i18n.a0b9b4e048')" />
           </a-form-item>
           <a-form-item :label="$t('i18n.e0ec07be7d')" name="clientSecret">
-            <a-input-password
-              v-model:value="feishu.clientSecret"
-              :placeholder="$t('i18n.52c6af8174')"
-            />
+            <a-input-password v-model:value="feishu.clientSecret" :placeholder="$t('i18n.52c6af8174')" />
           </a-form-item>
 
           <a-form-item :label="$t('i18n.51d47ddc69')" name="redirectUri">
             <template #help>{{ $t('i18n.d27cf91998') }}{{ `${host}/oauth2-feishu` }}</template>
-            <a-input
-              v-model:value="feishu.redirectUri"
-              type="text"
-              :placeholder="$t('i18n.8363193305')"
-            />
+            <a-input v-model:value="feishu.redirectUri" type="text" :placeholder="$t('i18n.8363193305')" />
           </a-form-item>
 
           <a-form-item :label="$t('i18n.953357d914')" name="ignoreCheckState">
@@ -136,11 +108,7 @@
               :un-checked-children="$t('i18n.5c56a88945')"
             />
           </a-form-item>
-          <a-form-item
-            v-if="feishu.autoCreteUser"
-            :label="$t('i18n.f49dfdace4')"
-            name="permissionGroup"
-          >
+          <a-form-item v-if="feishu.autoCreteUser" :label="$t('i18n.f49dfdace4')" name="permissionGroup">
             <template #help>{{ $t('i18n.434d9bd852') }}</template>
             <a-select
               v-model:value="feishu.permissionGroup"
@@ -164,9 +132,7 @@
             </a-select>
           </a-form-item>
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-            <a-button type="primary" class="btn" @click="onSubmit('feishu')">{{
-              $t('i18n.939d5345ad')
-            }}</a-button>
+            <a-button type="primary" class="btn" @click="onSubmit('feishu')">{{ $t('i18n.939d5345ad') }}</a-button>
           </a-form-item>
         </a-form>
       </a-tab-pane>
@@ -186,35 +152,18 @@
             />
           </a-form-item>
           <a-form-item :label="$t('i18n.f66847edb4')" name="agentId">
-            <a-input
-              v-model:value="wechat_enterprise.agentId"
-              type="text"
-              :placeholder="$t('i18n.68c55772ca')"
-            />
+            <a-input v-model:value="wechat_enterprise.agentId" type="text" :placeholder="$t('i18n.68c55772ca')" />
           </a-form-item>
           <a-form-item :label="$t('i18n.99593f7623')" name="clientId">
-            <a-input
-              v-model:value="wechat_enterprise.clientId"
-              type="text"
-              :placeholder="$t('i18n.a0b9b4e048')"
-            />
+            <a-input v-model:value="wechat_enterprise.clientId" type="text" :placeholder="$t('i18n.a0b9b4e048')" />
           </a-form-item>
           <a-form-item :label="$t('i18n.e0ec07be7d')" name="clientSecret">
-            <a-input-password
-              v-model:value="wechat_enterprise.clientSecret"
-              :placeholder="$t('i18n.52c6af8174')"
-            />
+            <a-input-password v-model:value="wechat_enterprise.clientSecret" :placeholder="$t('i18n.52c6af8174')" />
           </a-form-item>
 
           <a-form-item :label="$t('i18n.51d47ddc69')" name="redirectUri">
-            <template #help
-              >{{ $t('i18n.d27cf91998') }}{{ `${host}/oauth2-wechat_enterprise` }}</template
-            >
-            <a-input
-              v-model:value="wechat_enterprise.redirectUri"
-              type="text"
-              :placeholder="$t('i18n.8363193305')"
-            />
+            <template #help>{{ $t('i18n.d27cf91998') }}{{ `${host}/oauth2-wechat_enterprise` }}</template>
+            <a-input v-model:value="wechat_enterprise.redirectUri" type="text" :placeholder="$t('i18n.8363193305')" />
           </a-form-item>
 
           <a-form-item :label="$t('i18n.953357d914')" name="ignoreCheckState">
@@ -231,11 +180,7 @@
               :un-checked-children="$t('i18n.5c56a88945')"
             />
           </a-form-item>
-          <a-form-item
-            v-if="wechat_enterprise.autoCreteUser"
-            :label="$t('i18n.f49dfdace4')"
-            name="permissionGroup"
-          >
+          <a-form-item v-if="wechat_enterprise.autoCreteUser" :label="$t('i18n.f49dfdace4')" name="permissionGroup">
             <template #help>{{ $t('i18n.434d9bd852') }}</template>
             <a-select
               v-model:value="wechat_enterprise.permissionGroup"
@@ -275,46 +220,23 @@
             />
           </a-form-item>
           <a-form-item :label="$t('i18n.99593f7623')" name="clientId">
-            <a-input
-              v-model:value="maxkey.clientId"
-              type="text"
-              :placeholder="$t('i18n.a0b9b4e048')"
-            />
+            <a-input v-model:value="maxkey.clientId" type="text" :placeholder="$t('i18n.a0b9b4e048')" />
           </a-form-item>
           <a-form-item :label="$t('i18n.e0ec07be7d')" name="clientSecret">
-            <a-input-password
-              v-model:value="maxkey.clientSecret"
-              :placeholder="$t('i18n.52c6af8174')"
-            />
+            <a-input-password v-model:value="maxkey.clientSecret" :placeholder="$t('i18n.52c6af8174')" />
           </a-form-item>
           <a-form-item :label="$t('i18n.bcf48bf7a8')" name="authorizationUri">
-            <a-input
-              v-model:value="maxkey.authorizationUri"
-              type="text"
-              :placeholder="$t('i18n.543296e005')"
-            />
+            <a-input v-model:value="maxkey.authorizationUri" type="text" :placeholder="$t('i18n.543296e005')" />
           </a-form-item>
           <a-form-item :label="$t('i18n.79a7072ee1')" name="accessTokenUri">
-            <a-input
-              v-model:value="maxkey.accessTokenUri"
-              type="text"
-              :placeholder="$t('i18n.8704e7bdb7')"
-            />
+            <a-input v-model:value="maxkey.accessTokenUri" type="text" :placeholder="$t('i18n.8704e7bdb7')" />
           </a-form-item>
           <a-form-item :label="$t('i18n.2527efedcd')" name="userInfoUri">
-            <a-input
-              v-model:value="maxkey.userInfoUri"
-              type="text"
-              :placeholder="$t('i18n.ce84c416f9')"
-            />
+            <a-input v-model:value="maxkey.userInfoUri" type="text" :placeholder="$t('i18n.ce84c416f9')" />
           </a-form-item>
           <a-form-item :label="$t('i18n.51d47ddc69')" name="redirectUri">
             <template #help>{{ $t('i18n.d27cf91998') }}{{ `${host}/oauth2-maxkey` }}</template>
-            <a-input
-              v-model:value="maxkey.redirectUri"
-              type="text"
-              :placeholder="$t('i18n.8363193305')"
-            />
+            <a-input v-model:value="maxkey.redirectUri" type="text" :placeholder="$t('i18n.8363193305')" />
           </a-form-item>
 
           <a-form-item :label="$t('i18n.953357d914')" name="ignoreCheckState">
@@ -332,11 +254,7 @@
               :un-checked-children="$t('i18n.5c56a88945')"
             />
           </a-form-item>
-          <a-form-item
-            v-if="maxkey.autoCreteUser"
-            :label="$t('i18n.f49dfdace4')"
-            name="permissionGroup"
-          >
+          <a-form-item v-if="maxkey.autoCreteUser" :label="$t('i18n.f49dfdace4')" name="permissionGroup">
             <template #help>{{ $t('i18n.434d9bd852') }}</template>
             <a-select
               v-model:value="maxkey.permissionGroup"
@@ -361,9 +279,7 @@
           </a-form-item>
 
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-            <a-button type="primary" class="btn" @click="onSubmit('maxkey')">{{
-              $t('i18n.939d5345ad')
-            }}</a-button>
+            <a-button type="primary" class="btn" @click="onSubmit('maxkey')">{{ $t('i18n.939d5345ad') }}</a-button>
           </a-form-item>
         </a-form>
       </a-tab-pane>
@@ -377,25 +293,14 @@
             />
           </a-form-item>
           <a-form-item :label="$t('i18n.99593f7623')" name="clientId">
-            <a-input
-              v-model:value="gitee.clientId"
-              type="text"
-              :placeholder="$t('i18n.a0b9b4e048')"
-            />
+            <a-input v-model:value="gitee.clientId" type="text" :placeholder="$t('i18n.a0b9b4e048')" />
           </a-form-item>
           <a-form-item :label="$t('i18n.e0ec07be7d')" name="clientSecret">
-            <a-input-password
-              v-model:value="gitee.clientSecret"
-              :placeholder="$t('i18n.52c6af8174')"
-            />
+            <a-input-password v-model:value="gitee.clientSecret" :placeholder="$t('i18n.52c6af8174')" />
           </a-form-item>
           <a-form-item :label="$t('i18n.51d47ddc69')" name="redirectUri">
             <template #help>{{ $t('i18n.d27cf91998') }}{{ `${host}/oauth2-gitee` }}</template>
-            <a-input
-              v-model:value="gitee.redirectUri"
-              type="text"
-              :placeholder="$t('i18n.8363193305')"
-            />
+            <a-input v-model:value="gitee.redirectUri" type="text" :placeholder="$t('i18n.8363193305')" />
           </a-form-item>
 
           <a-form-item :label="$t('i18n.953357d914')" name="ignoreCheckState">
@@ -413,11 +318,7 @@
               :un-checked-children="$t('i18n.5c56a88945')"
             />
           </a-form-item>
-          <a-form-item
-            v-if="gitee.autoCreteUser"
-            :label="$t('i18n.f49dfdace4')"
-            name="permissionGroup"
-          >
+          <a-form-item v-if="gitee.autoCreteUser" :label="$t('i18n.f49dfdace4')" name="permissionGroup">
             <template #help>{{ $t('i18n.434d9bd852') }}</template>
             <a-select
               v-model:value="gitee.permissionGroup"
@@ -442,9 +343,7 @@
           </a-form-item>
 
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-            <a-button type="primary" class="btn" @click="onSubmit('gitee')">{{
-              $t('i18n.939d5345ad')
-            }}</a-button>
+            <a-button type="primary" class="btn" @click="onSubmit('gitee')">{{ $t('i18n.939d5345ad') }}</a-button>
           </a-form-item>
         </a-form>
       </a-tab-pane>
@@ -462,26 +361,15 @@
             <a-input v-model:value="mygitlab.host" type="text" :placeholder="$t('i18n.0d48f8e881')" />
           </a-form-item>
           <a-form-item :label="$t('i18n.99593f7623')" name="clientId">
-            <a-input
-              v-model:value="mygitlab.clientId"
-              type="text"
-              :placeholder="$t('i18n.a0b9b4e048')"
-            />
+            <a-input v-model:value="mygitlab.clientId" type="text" :placeholder="$t('i18n.a0b9b4e048')" />
           </a-form-item>
           <a-form-item :label="$t('i18n.e0ec07be7d')" name="clientSecret">
-            <a-input-password
-              v-model:value="mygitlab.clientSecret"
-              :placeholder="$t('i18n.52c6af8174')"
-            />
+            <a-input-password v-model:value="mygitlab.clientSecret" :placeholder="$t('i18n.52c6af8174')" />
           </a-form-item>
 
           <a-form-item :label="$t('i18n.51d47ddc69')" name="redirectUri">
             <template #help>{{ $t('i18n.d27cf91998') }}{{ `${host}/oauth2-mygitlab` }}</template>
-            <a-input
-              v-model:value="mygitlab.redirectUri"
-              type="text"
-              :placeholder="$t('i18n.8363193305')"
-            />
+            <a-input v-model:value="mygitlab.redirectUri" type="text" :placeholder="$t('i18n.8363193305')" />
           </a-form-item>
 
           <a-form-item :label="$t('i18n.953357d914')" name="ignoreCheckState">
@@ -499,11 +387,7 @@
               :un-checked-children="$t('i18n.5c56a88945')"
             />
           </a-form-item>
-          <a-form-item
-            v-if="mygitlab.autoCreteUser"
-            :label="$t('i18n.f49dfdace4')"
-            name="permissionGroup"
-          >
+          <a-form-item v-if="mygitlab.autoCreteUser" :label="$t('i18n.f49dfdace4')" name="permissionGroup">
             <template #help>{{ $t('i18n.434d9bd852') }}</template>
             <a-select
               v-model:value="mygitlab.permissionGroup"
@@ -528,9 +412,7 @@
           </a-form-item>
 
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-            <a-button type="primary" class="btn" @click="onSubmit('mygitlab')">{{
-              $t('i18n.939d5345ad')
-            }}</a-button>
+            <a-button type="primary" class="btn" @click="onSubmit('mygitlab')">{{ $t('i18n.939d5345ad') }}</a-button>
           </a-form-item>
         </a-form>
       </a-tab-pane>
@@ -545,26 +427,15 @@
             />
           </a-form-item>
           <a-form-item :label="$t('i18n.99593f7623')" name="clientId">
-            <a-input
-              v-model:value="github.clientId"
-              type="text"
-              :placeholder="$t('i18n.a0b9b4e048')"
-            />
+            <a-input v-model:value="github.clientId" type="text" :placeholder="$t('i18n.a0b9b4e048')" />
           </a-form-item>
           <a-form-item :label="$t('i18n.e0ec07be7d')" name="clientSecret">
-            <a-input-password
-              v-model:value="github.clientSecret"
-              :placeholder="$t('i18n.52c6af8174')"
-            />
+            <a-input-password v-model:value="github.clientSecret" :placeholder="$t('i18n.52c6af8174')" />
           </a-form-item>
 
           <a-form-item :label="$t('i18n.51d47ddc69')" name="redirectUri">
             <template #help>{{ $t('i18n.d27cf91998') }}{{ `${host}/oauth2-github` }}</template>
-            <a-input
-              v-model:value="github.redirectUri"
-              type="text"
-              :placeholder="$t('i18n.8363193305')"
-            />
+            <a-input v-model:value="github.redirectUri" type="text" :placeholder="$t('i18n.8363193305')" />
           </a-form-item>
 
           <a-form-item :label="$t('i18n.953357d914')" name="ignoreCheckState">
@@ -582,11 +453,7 @@
               :un-checked-children="$t('i18n.5c56a88945')"
             />
           </a-form-item>
-          <a-form-item
-            v-if="github.autoCreteUser"
-            :label="$t('i18n.f49dfdace4')"
-            name="permissionGroup"
-          >
+          <a-form-item v-if="github.autoCreteUser" :label="$t('i18n.f49dfdace4')" name="permissionGroup">
             <template #help>{{ $t('i18n.434d9bd852') }}</template>
             <a-select
               v-model:value="github.permissionGroup"
@@ -611,9 +478,7 @@
           </a-form-item>
 
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-            <a-button type="primary" class="btn" @click="onSubmit('github')">{{
-              $t('i18n.939d5345ad')
-            }}</a-button>
+            <a-button type="primary" class="btn" @click="onSubmit('github')">{{ $t('i18n.939d5345ad') }}</a-button>
           </a-form-item>
         </a-form>
       </a-tab-pane>

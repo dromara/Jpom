@@ -55,11 +55,7 @@
                     <a-input-group>
                       <a-row>
                         <a-col :span="8">
-                          <a-input
-                            v-model:value="item.ip"
-                            addon-before="IP"
-                            :placeholder="$t('i18n.8e89763d95')"
-                          >
+                          <a-input v-model:value="item.ip" addon-before="IP" :placeholder="$t('i18n.8e89763d95')">
                           </a-input>
                         </a-col>
                         <a-col :span="6" :offset="1">
@@ -298,10 +294,7 @@
             <a-space direction="vertical" style="width: 100%">
               <a-row v-for="(item, index) in temp.extraHosts" :key="index">
                 <a-col :span="20">
-                  <a-input
-                    v-model:value="temp.extraHosts[index]"
-                    :placeholder="$t('i18n.5bca8cf7ee')"
-                  />
+                  <a-input v-model:value="temp.extraHosts[index]" :placeholder="$t('i18n.5bca8cf7ee')" />
                 </a-col>
 
                 <a-col :span="2" :offset="1">

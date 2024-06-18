@@ -49,9 +49,7 @@
           </a-select>
           <a-range-picker :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
           <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button :loading="loading" type="primary" @click="loadData">{{
-              $t('i18n.e5f71fc31e')
-            }}</a-button>
+            <a-button :loading="loading" type="primary" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -121,9 +119,7 @@
         </template>
         <template v-else-if="column.dataIndex === 'status'">
           <!-- {{ dispatchStatusMap[text] || "未知" }} -->
-          <a-tag v-if="text === 2" color="green">{{
-            dispatchStatusMap[text] || $t('i18n.1622dc9b6b')
-          }}</a-tag>
+          <a-tag v-if="text === 2" color="green">{{ dispatchStatusMap[text] || $t('i18n.1622dc9b6b') }}</a-tag>
           <a-tag v-else-if="text === 1 || text === 0 || text === 5" color="orange">{{
             dispatchStatusMap[text] || $t('i18n.1622dc9b6b')
           }}</a-tag>
@@ -133,9 +129,7 @@
           <a-tag v-else>{{ dispatchStatusMap[text] || $t('i18n.1622dc9b6b') }}</a-tag>
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
-          <a-button type="primary" size="small" @click="handleDetail(record)">{{
-            $t('i18n.f26225bde6')
-          }}</a-button>
+          <a-button type="primary" size="small" @click="handleDetail(record)">{{ $t('i18n.f26225bde6') }}</a-button>
         </template>
       </template>
     </CustomTable>

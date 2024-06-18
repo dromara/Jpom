@@ -123,8 +123,7 @@ export default {
       $confirm({
         title: this.$t('i18n.c4535759ee'),
         zIndex: 1009,
-        content:
-          this.$t('i18n.bd8b1dbc5a') + this.addName + this.$t('i18n.14b58d4b77'),
+        content: this.$t('i18n.bd8b1dbc5a') + this.addName + this.$t('i18n.14b58d4b77'),
         okText: this.$t('i18n.e83a256e4f'),
         cancelText: this.$t('i18n.625fb26b4b'),
         onOk: () => {
