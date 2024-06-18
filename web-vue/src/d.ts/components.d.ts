@@ -106,7 +106,6 @@ declare module 'vue' {
     ColumnHeightOutlined: typeof import('@ant-design/icons-vue')['ColumnHeightOutlined']
     CompositionTransfer: typeof import('./../components/compositionTransfer/composition-transfer.vue')['default']
     CompressOutlined: typeof import('@ant-design/icons-vue')['CompressOutlined']
-    copy: typeof import('./../components/customModal copy/index.vue')['default']
     CopyOutlined: typeof import('@ant-design/icons-vue')['CopyOutlined']
     CustomDrawer: typeof import('./../components/customDrawer/index.vue')['default']
     CustomInput: typeof import('./../components/customInput/index.vue')['default']
