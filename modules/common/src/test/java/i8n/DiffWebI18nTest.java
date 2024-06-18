@@ -95,7 +95,7 @@ public class DiffWebI18nTest {
         }
     }
 
-    private JSONObject loadJson(File rootFile, String tag) {
+    public static JSONObject loadJson(File rootFile, String tag) {
         File file1 = FileUtil.file(rootFile, "/src/i18n/locales/" + tag + ".json");
         if (!file1.exists()) {
             return new JSONObject();
