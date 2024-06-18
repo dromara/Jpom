@@ -12,7 +12,6 @@ package org.dromara.jpom.service.dblog;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.*;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.db.Entity;
 import cn.hutool.db.sql.Direction;
@@ -24,6 +23,7 @@ import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.db.DbExtConfig;
 import org.dromara.jpom.db.StorageServiceFactory;
 import org.dromara.jpom.model.data.BackupInfoModel;
@@ -182,22 +182,22 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> implements
         backupInfoModel.setFilePath(backupSqlPath);
         this.insert(backupInfoModel);
         // 开启一个子线程去执行任务，任务完成之后修改对应的数据库备份信息
-        return ThreadUtil.execAsync(() -> {
+        return I18nThreadUtil.execAsync(() -> {
             // 修改用的实体类
             BackupInfoModel backupInfo = new BackupInfoModel();
             backupInfo.setId(backupInfoModel.getId());
             try {
-                log.debug("start a new Thread to execute H2 Database backup...start");
+                log.debug("启动一个新线程来执行 H2 数据库备份...启动");
                 StorageServiceFactory.get().backupSql(url, user, pass, backupSqlPath, tableNameList);
                 // 修改备份任务执行完成
                 backupInfo.setFileSize(FileUtil.size(file));
                 backupInfo.setSha1Sum(SecureUtil.sha1(file));
                 backupInfo.setStatus(BackupStatusEnum.SUCCESS.getCode());
                 this.updateById(backupInfo);
-                log.debug("start a new Thread to execute H2 Database backup...success");
+                log.debug("启动一个新线程来执行 H2 数据库备份...成功");
             } catch (Exception e) {
                 // 记录错误日志信息，修改备份任务执行失败
-                log.error("start a new Thread to execute H2 Database backup...catch exception...", e);
+                log.error("备份 h2 数据库异常", e);
                 backupInfo.setStatus(BackupStatusEnum.FAILED.getCode());
                 this.updateById(backupInfo);
             }

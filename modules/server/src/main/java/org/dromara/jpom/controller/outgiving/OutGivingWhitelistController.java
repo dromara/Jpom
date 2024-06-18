@@ -11,7 +11,6 @@ package org.dromara.jpom.controller.outgiving;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.RegexPool;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.keepbx.jpom.IJsonMessage;

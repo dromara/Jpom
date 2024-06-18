@@ -12,7 +12,6 @@ package org.dromara.jpom.service.dblog;
 import cn.hutool.core.bean.BeanPath;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
