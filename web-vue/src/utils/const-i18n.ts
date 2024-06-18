@@ -1,13 +1,13 @@
 import { t } from '@/i18n'
 
-const mfa1 = '【推荐】微信小程序搜索 数盾OTP'
-const mfa2 = '【推荐】腾讯身份验证码'
-const mfa3 = '简单好用'
-const mfa4 = '功能丰富 专为两步验证码'
-const mfa5 = 'Chrome 扩展'
-const mfa6 = '简单易用，但不支持密钥导出备份'
-const mfa7 = '使用微软全家桶的推荐'
-const mfa8 = '强大安全的密码管理付费应用'
+const mfa1 = t('i18n_252706a112')
+const mfa2 = t('i18n_1b963fd303')
+const mfa3 = t('i18n_4a00d980d5')
+const mfa4 = t('i18n_2cdcfcee15')
+const mfa5 = t('i18n_bef1065085')
+const mfa6 = t('i18n_8b73b025c0')
+const mfa7 = t('i18n_a98233b321')
+const mfa8 = t('i18n_b399058f25')
 
 /**
  * mfa app 应用举例
