@@ -179,10 +179,7 @@
             </template>
             <a-tab-pane key="1" :tab="$t('i18n.0b58866c3e')">
               <a-space direction="vertical" style="width: 100%">
-                <a-alert
-                  type="info"
-                  :message="`${$t('i18n.d911cffcd5')}(${$t('i18n.00a070c696')})`"
-                >
+                <a-alert type="info" :message="`${$t('i18n.d911cffcd5')}(${$t('i18n.00a070c696')})`">
                   <template #description>
                     <a-typography-paragraph :copyable="{ text: temp.triggerDownloadUrl }">
                       <a-tag>GET</a-tag>
@@ -210,10 +207,7 @@
                     </ul>
                   </template>
                 </a-alert>
-                <a-alert
-                  type="info"
-                  :message="`${$t('i18n.d911cffcd5')}(${$t('i18n.00a070c696')})`"
-                >
+                <a-alert type="info" :message="`${$t('i18n.d911cffcd5')}(${$t('i18n.00a070c696')})`">
                   <template #description>
                     <a-typography-paragraph :copyable="{ text: temp.triggerAliasDownloadUrl }">
                       <a-tag>GET</a-tag>

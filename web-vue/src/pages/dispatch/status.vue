@@ -132,7 +132,9 @@
               <template v-else-if="column.dataIndex === 'projectPid'">
                 <a-tooltip
                   placement="topLeft"
-                  :title="`${$t('i18n.2b04210d33')}${record.projectPid || '-'} / ${$t('i18n.4c096c51a3')}${record.projectPort || '-'}`"
+                  :title="`${$t('i18n.2b04210d33')}${record.projectPid || '-'} / ${$t('i18n.4c096c51a3')}${
+                    record.projectPort || '-'
+                  }`"
                 >
                   <span>{{ record.projectPid || '-' }}/{{ record.projectPort || '-' }}</span>
                 </a-tooltip>

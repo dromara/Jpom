@@ -50,9 +50,7 @@
             format="YYYY-MM-DD HH:mm:ss"
             @change="onchangeListLogTime"
           />
-          <a-button type="primary" @click="handleListLog">{{
-            $t('i18n.e5f71fc31e')
-          }}</a-button>
+          <a-button type="primary" @click="handleListLog">{{ $t('i18n.e5f71fc31e') }}</a-button>
         </a-space>
       </template>
       <template #bodyCell="{ column, text, record }">
@@ -79,11 +77,7 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'refuse'">
-          <span>{{
-            text
-              ? $t('i18n.330363dfc5')
-              : $t('i18n.7173f80900')
-          }}</span>
+          <span>{{ text ? $t('i18n.330363dfc5') : $t('i18n.7173f80900') }}</span>
         </template>
       </template>
     </a-table>

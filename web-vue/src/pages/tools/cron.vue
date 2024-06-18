@@ -15,22 +15,18 @@
                   <strong>{{ $t('i18n.609b5f0a08') }}</strong> ：{{ $t('i18n.3444bf320c') }}~23
                 </li>
                 <li>
-                  <strong>{{ $t('i18n.3edddd85ac') }}</strong> ：{{
-                    $t('i18n.0b35ccf5df')
-                  }}~31，<strong>"L"</strong>
+                  <strong>{{ $t('i18n.3edddd85ac') }}</strong> ：{{ $t('i18n.0b35ccf5df') }}~31，<strong>"L"</strong>
                   {{ $t('i18n.7b961e05d0') }}
                 </li>
                 <li>
                   <strong>{{ $t('i18n.e42b99d599') }}</strong>
-                  ：{{ $t('i18n.0b35ccf5df') }}~12，{{ $t('i18n.41cb3d959a') }}"jan","feb", "mar",
-                  "apr", "may","jun", "jul", "aug","sep","oct", "nov", "dec"
+                  ：{{ $t('i18n.0b35ccf5df') }}~12，{{ $t('i18n.41cb3d959a') }}"jan","feb", "mar", "apr", "may","jun",
+                  "jul", "aug","sep","oct", "nov", "dec"
                 </li>
                 <li>
-                  <strong>{{ $t('i18n.a657f46f5b') }}</strong> ：{{
-                    $t('i18n.3444bf320c')
-                  }}
-                  (Sunday)~6(Saturday)，7{{ $t('i18n.6d4ca2c602') }}"sun","mon", "tue", "wed", "thu","fri",
-                  "sat"，<strong>"L"</strong>
+                  <strong>{{ $t('i18n.a657f46f5b') }}</strong> ：{{ $t('i18n.3444bf320c') }} (Sunday)~6(Saturday)，7{{
+                    $t('i18n.6d4ca2c602')
+                  }}"sun","mon", "tue", "wed", "thu","fri", "sat"，<strong>"L"</strong>
                   {{ $t('i18n.207d9580c1') }}
                 </li>
               </ol>
@@ -71,15 +67,13 @@
               {{ $t('i18n.932b4b7f79') }}
 
               <pre>
-    {{ $t('i18n.66aff87835') }} &gt; {{ $t('i18n.f0f0cf0143') }} &gt; {{
-                  $t('i18n.d2fbc22d41')
-                }},）
+    {{ $t('i18n.66aff87835') }} &gt; {{ $t('i18n.f0f0cf0143') }} &gt; {{ $t('i18n.d2fbc22d41') }},）
     </pre
               >
               <p>
-                {{ $t('i18n.b2c5b372f0') }},3,6/3{{ $t('i18n.e924fb42bc') }}“/”{{
-                  $t('i18n.a138d343fb')
-                }},3,(6/3)，{{ $t('i18n.d814a262ef') }},3,6{{ $t('i18n.755ac8eaae') }}<br />
+                {{ $t('i18n.b2c5b372f0') }},3,6/3{{ $t('i18n.e924fb42bc') }}“/”{{ $t('i18n.a138d343fb') }},3,(6/3)，{{
+                  $t('i18n.d814a262ef')
+                }},3,6{{ $t('i18n.755ac8eaae') }}<br />
                 <br />
               </p>
 
@@ -90,11 +84,7 @@
                 <li><strong>* * * * *</strong> ：{{ $t('i18n.5114ebf444') }}</li>
                 <li><strong>*&#47;2 * * * *</strong> ：{{ $t('i18n.a22fa8941a') }}</li>
                 <li><strong>* 12 * * *</strong> ：12{{ $t('i18n.c1fc70650e') }}</li>
-                <li>
-                  <strong>59 11 * * 1,2</strong> ：{{ $t('i18n.11103e19bd') }}:59{{
-                    $t('i18n.1a6aa24e76')
-                  }}
-                </li>
+                <li><strong>59 11 * * 1,2</strong> ：{{ $t('i18n.11103e19bd') }}:59{{ $t('i18n.1a6aa24e76') }}</li>
                 <li>
                   <strong>3-18&#47;5 * * * *</strong>
                   ：3~18{{ $t('i18n.71a312821c') }}:03, 0:08, 0:13, 0:18, 1:03, 1:08……

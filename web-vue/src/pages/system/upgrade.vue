@@ -65,15 +65,9 @@
               >
                 <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
               </a-select>
-              <a-button :loading="loading" type="primary" @click="getNodeList">{{
-                $t('i18n.e5f71fc31e')
-              }}</a-button>
+              <a-button :loading="loading" type="primary" @click="getNodeList">{{ $t('i18n.e5f71fc31e') }}</a-button>
 
-              <a-select
-                v-model:value="temp.protocol"
-                :placeholder="$t('i18n.0836332bf6')"
-                class="search-input-item"
-              >
+              <a-select v-model:value="temp.protocol" :placeholder="$t('i18n.0836332bf6')" class="search-input-item">
                 <a-select-option value="WebSocket">WebSocket</a-select-option>
                 <a-select-option value="Http">Http</a-select-option>
               </a-select>
@@ -96,9 +90,7 @@
             </a-space>
           </template>
           <template #toolPrefix>
-            <a-tooltip
-              :title="`${$t('i18n.3f78f88499')}${agentTimeStamp || $t('i18n.1622dc9b6b')}`"
-            >
+            <a-tooltip :title="`${$t('i18n.3f78f88499')}${agentTimeStamp || $t('i18n.1622dc9b6b')}`">
               Agent{{ $t('i18n.2684c4634d') }}{{ version_filter(agentVersion) }}
               <a-tag v-if="temp.upgrade" color="pink" @click="downloadRemoteEvent">
                 {{ $t('i18n.ac2f4259f1') }}{{ temp.newVersion }} <DownloadOutlined />

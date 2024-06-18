@@ -36,8 +36,7 @@
             <div style="padding-left: 10px">
               <a-space direction="vertical" style="width: 100%">
                 <div>
-                  {{ $t('i18n.1862c48f72')
-                  }}<a-tag v-if="temp.swarm.nodeAddr">{{ temp.swarm.nodeAddr }}</a-tag>
+                  {{ $t('i18n.1862c48f72') }}<a-tag v-if="temp.swarm.nodeAddr">{{ temp.swarm.nodeAddr }}</a-tag>
                   <a-tag>{{ temp.swarm.localNodeState }}</a-tag>
                 </div>
                 <div v-if="temp.swarm.remoteManagers">
@@ -46,9 +45,7 @@
                 </div>
                 <div>
                   {{ $t('i18n.47072e451e')
-                  }}{{
-                    temp.swarm.controlAvailable ? $t('i18n.0a60ac8f02') : $t('i18n.c9744f45e7')
-                  }}
+                  }}{{ temp.swarm.controlAvailable ? $t('i18n.0a60ac8f02') : $t('i18n.c9744f45e7') }}
                 </div>
               </a-space>
             </div>

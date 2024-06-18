@@ -90,9 +90,7 @@ export default {
       this.checkCount = 0
       this.globalLoading({
         spinning: true,
-        tip:
-          (msg || this.$t('i18n.85da2e5bb1')) +
-          `,${this.$t('i18n.809b12d6a0')},${this.$t('i18n.af013dd9dc')}`
+        tip: (msg || this.$t('i18n.85da2e5bb1')) + `,${this.$t('i18n.809b12d6a0')},${this.$t('i18n.af013dd9dc')}`
       })
       setTimeout(() => {
         //

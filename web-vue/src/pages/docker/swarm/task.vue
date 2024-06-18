@@ -60,15 +60,8 @@
               <a-select-option value="">{{ $t('i18n.3fea7ca76c') }}</a-select-option>
             </a-select>
           </a-tooltip>
-          <a-button type="primary" :loading="loading" @click="loadData">{{
-            $t('i18n.e5f71fc31e')
-          }}</a-button>
-          <a-statistic-countdown
-            format="s"
-            :title="$t('i18n.0f8403d07e')"
-            :value="countdownTime"
-            @finish="loadData"
-          >
+          <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
+          <a-statistic-countdown format="s" :title="$t('i18n.0f8403d07e')" :value="countdownTime" @finish="loadData">
             <template #suffix>
               <div style="font-size: 12px">{{ $t('i18n.ee6ce96abb') }}</div>
             </template>
@@ -96,9 +89,7 @@
               <p>
                 {{ $t('i18n.e703c7367c') }}<a-tag>{{ text }}-{{ TASK_STATE[text] }}</a-tag>
               </p>
-              <p v-if="record.status && record.status.err">
-                {{ $t('i18n.f66335b5bf') }}{{ record.status.err }}
-              </p>
+              <p v-if="record.status && record.status.err">{{ $t('i18n.f66335b5bf') }}{{ record.status.err }}</p>
               <p v-if="record.status && record.status.state">
                 {{ $t('i18n.bec98b4d6a') }}<a-tag>{{ record.status.state }}</a-tag>
               </p>
@@ -131,9 +122,7 @@
         <template v-else-if="column.dataIndex === 'updatedAt'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$t('i18n.bf94b97d1a')}${text} ${$t('i18n.312f45014a')}${
-              record.createdAt
-            }`"
+            :title="`${$t('i18n.bf94b97d1a')}${text} ${$t('i18n.312f45014a')}${record.createdAt}`"
           >
             <span>
               {{ parseTime(text) }}
@@ -143,9 +132,7 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleLog(record)">{{
-              $t('i18n.456d29ef8b')
-            }}</a-button>
+            <a-button size="small" type="primary" @click="handleLog(record)">{{ $t('i18n.456d29ef8b') }}</a-button>
           </a-space>
         </template>
       </template>

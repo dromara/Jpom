@@ -148,9 +148,9 @@
           <template v-else-if="column.dataIndex === 'status'">
             <a-tooltip
               placement="topLeft"
-              :title="`${
-                statusMap[record.machineNodeData && record.machineNodeData.status] || $t('i18n.1622dc9b6b')
-              } ${record.machineNodeData && record.machineNodeData.statusMsg}`"
+              :title="`${statusMap[record.machineNodeData && record.machineNodeData.status] || $t('i18n.1622dc9b6b')} ${
+                record.machineNodeData && record.machineNodeData.statusMsg
+              }`"
             >
               <template v-if="record.openStatus === 1">
                 <a-tag

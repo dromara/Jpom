@@ -94,7 +94,9 @@
         <template v-else-if="column.dataIndex === 'state'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$t('i18n.9b3e947cc9')}${record.status && record.status.state} ${$t('i18n.fb91527ce5')}${record.spec ? record.spec.availability || '' : ''}`"
+            :title="`${$t('i18n.9b3e947cc9')}${record.status && record.status.state} ${$t('i18n.fb91527ce5')}${
+              record.spec ? record.spec.availability || '' : ''
+            }`"
           >
             <a-tag
               :color="

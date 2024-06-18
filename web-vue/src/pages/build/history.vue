@@ -123,7 +123,9 @@
 
         <template v-else-if="column.dataIndex === 'resultFileSize'">
           <a-tooltip
-            :title="`${$t('i18n.16646e46b1')}${renderSize(record.resultFileSize)}， ${$t('i18n.77e501b44b')} ${renderSize(record.buildLogFileSize)}`"
+            :title="`${$t('i18n.16646e46b1')}${renderSize(record.resultFileSize)}， ${$t(
+              'i18n.77e501b44b'
+            )} ${renderSize(record.buildLogFileSize)}`"
           >
             <span v-if="record.resultFileSize">{{ renderSize(record.resultFileSize) }}</span>
             <span v-else-if="record.buildLogFileSize">{{ renderSize(record.buildLogFileSize) }}</span>

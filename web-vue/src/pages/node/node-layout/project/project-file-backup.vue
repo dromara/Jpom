@@ -87,9 +87,9 @@
         >
           <template #title>
             <a-popconfirm
-              :title="`${
-                uploadPath ? $t('i18n.bdd4cddd22') + uploadPath + $t('i18n.dadd4907c2') : ''
-              } ${$t('i18n.aefd8f9f27')},${$t('i18n.500789168c')}`"
+              :title="`${uploadPath ? $t('i18n.bdd4cddd22') + uploadPath + $t('i18n.dadd4907c2') : ''} ${$t(
+                'i18n.aefd8f9f27'
+              )},${$t('i18n.500789168c')}`"
               :ok-text="$t('i18n.587a63264b')"
               :cancel-text="$t('i18n.b1a09cee8e')"
               :ok-button-props="{

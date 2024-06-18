@@ -179,7 +179,9 @@
             <template v-else-if="column.dataIndex === 'osOccupyMemory'">
               <a-tooltip
                 placement="topLeft"
-                :title="`${$t('i18n.ca32cdfd59')}${formatPercent(record.osOccupyMemory)},${$t('i18n.a0a3d583b9')}${renderSize(record.osMoneyTotal)}`"
+                :title="`${$t('i18n.ca32cdfd59')}${formatPercent(record.osOccupyMemory)},${$t(
+                  'i18n.a0a3d583b9'
+                )}${renderSize(record.osMoneyTotal)}`"
               >
                 <span>{{ formatPercent(record.osOccupyMemory) }}/{{ renderSize(record.osMoneyTotal) }}</span>
               </a-tooltip>
@@ -199,9 +201,9 @@
             <template v-else-if="column.dataIndex === 'osOccupyCpu'">
               <a-tooltip
                 placement="topLeft"
-                :title="`CPU${$t('i18n.afb9fe400b')}${formatPercent2Number(
-                  record.osOccupyCpu
-                )}%,CPU${$t('i18n.40349f5514')}${record.osCpuCores}`"
+                :title="`CPU${$t('i18n.afb9fe400b')}${formatPercent2Number(record.osOccupyCpu)}%,CPU${$t(
+                  'i18n.40349f5514'
+                )}${record.osCpuCores}`"
               >
                 <span>{{ (formatPercent2Number(record.osOccupyCpu) || '-') + '%' }} / {{ record.osCpuCores }}</span>
               </a-tooltip>

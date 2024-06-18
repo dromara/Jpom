@@ -44,13 +44,9 @@
           />
 
           <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button :loading="loading" type="primary" @click="loadData">{{
-              $t('i18n.e5f71fc31e')
-            }}</a-button>
+            <a-button :loading="loading" type="primary" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="createScript">{{
-            $t('i18n.d9ac9228e8')
-          }}</a-button>
+          <a-button type="primary" @click="createScript">{{ $t('i18n.d9ac9228e8') }}</a-button>
         </a-space>
       </template>
       <template #tableHelp>
@@ -87,9 +83,7 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEdit(record)">{{
-              $t('i18n.95b351c862')
-            }}</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n.95b351c862') }}</a-button>
             <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
               $t('i18n.2f4aaddde3')
             }}</a-button>
@@ -145,8 +139,7 @@
         <a-form-item>
           <template #label>
             <a-tooltip
-              >{{ $t('i18n.2606b9d0d2')
-              }}<template #title>{{ $t('i18n.73b7b05e6e') }}</template>
+              >{{ $t('i18n.2606b9d0d2') }}<template #title>{{ $t('i18n.73b7b05e6e') }}</template>
               <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
