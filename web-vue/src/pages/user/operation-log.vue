@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="systemUserOperationLog"
-      :empty-description="$t('i18n.c31ea1e3c4')"
+      :empty-description="$t('i18n_c31ea1e3c4')"
       :data-source="list"
       :columns="columns"
       :pagination="pagination"
@@ -35,7 +35,7 @@
               }
             "
             allow-clear
-            :placeholder="$t('i18n.512e1a7722')"
+            :placeholder="$t('i18n_512e1a7722')"
             class="search-input-item"
           >
             <a-select-option v-for="item in userList" :key="item.id">{{ item.name }}</a-select-option>
@@ -54,7 +54,7 @@
               }
             "
             allow-clear
-            :placeholder="$t('i18n.f8a613d247')"
+            :placeholder="$t('i18n_f8a613d247')"
             class="search-input-item"
           >
             <a-select-option v-for="node in nodeList" :key="node.id">{{ node.name }}</a-select-option>
@@ -73,7 +73,7 @@
               }
             "
             allow-clear
-            :placeholder="$t('i18n.8432a98819')"
+            :placeholder="$t('i18n_8432a98819')"
             class="search-input-item"
           >
             <a-select-option v-for="item in classFeature" :key="item.value">{{ item.title }}</a-select-option>
@@ -92,14 +92,14 @@
               }
             "
             allow-clear
-            :placeholder="$t('i18n.a9de52acb0')"
+            :placeholder="$t('i18n_a9de52acb0')"
             class="search-input-item"
           >
             <a-select-option v-for="item in methodFeature" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
           <a-range-picker :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
-          <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
+          <a-tooltip :title="$t('i18n_4838a3bd20')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -134,14 +134,14 @@
         <template v-else-if="column.dataIndex === 'optStatus'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$t('i18n.be4b9241ec')},${$t('i18n.69056f4792')},${$t('i18n.27b36afd36')}`"
+            :title="`${$t('i18n_be4b9241ec')},${$t('i18n_69056f4792')},${$t('i18n_27b36afd36')}`"
           >
             <span>{{ text }}</span>
           </a-tooltip>
         </template>
 
         <template v-else-if="column.dataIndex === 'operation'">
-          <a-button size="small" type="primary" @click="handleDetail(record)">{{ $t('i18n.f26225bde6') }}</a-button>
+          <a-button size="small" type="primary" @click="handleDetail(record)">{{ $t('i18n_f26225bde6') }}</a-button>
         </template>
       </template>
     </CustomTable>
@@ -152,7 +152,7 @@
       detail-visible
       destroy-on-close
       width="600px"
-      :title="$t('i18n.3032257aa3')"
+      :title="$t('i18n_3032257aa3')"
       :footer="null"
     >
       <a-list item-layout="horizontal" :data-source="detailData">
@@ -199,31 +199,31 @@ export default {
       detailData: [],
       columns: [
         {
-          title: this.$t('i18n.30acd20d6e'),
+          title: this.$t('i18n_30acd20d6e'),
           dataIndex: 'userId',
           ellipsis: true
         },
         {
-          title: this.$t('i18n.9a56bb830e'),
+          title: this.$t('i18n_9a56bb830e'),
           dataIndex: 'username',
           ellipsis: true
         },
         { title: 'IP', dataIndex: 'ip' /*width: 130*/ },
         {
-          title: this.$t('i18n.3bf3c0a8d6'),
+          title: this.$t('i18n_3bf3c0a8d6'),
           dataIndex: 'nodeId',
           width: 120,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.5a1419b7a2'),
+          title: this.$t('i18n_5a1419b7a2'),
           dataIndex: 'dataName',
           /*width: 240,*/
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('i18n.4524ed750d'),
+          title: this.$t('i18n_4524ed750d'),
           dataIndex: 'workspaceName',
           /*width: 240,*/
           ellipsis: true,
@@ -231,24 +231,24 @@ export default {
         },
         // { title: "数据 ID", dataIndex: "dataId", /*width: 240,*/ ellipsis: true, },
         {
-          title: this.$t('i18n.8432a98819'),
+          title: this.$t('i18n_8432a98819'),
           dataIndex: 'classFeature',
           /*width: 240,*/
           ellipsis: true
         },
         {
-          title: this.$t('i18n.a9de52acb0'),
+          title: this.$t('i18n_a9de52acb0'),
           dataIndex: 'methodFeature',
           /*width: 240,*/
           ellipsis: true
         },
         {
-          title: this.$t('i18n.771d897d9a'),
+          title: this.$t('i18n_771d897d9a'),
           dataIndex: 'optStatus',
           width: 90
         },
         {
-          title: this.$t('i18n.7e951d56d9'),
+          title: this.$t('i18n_7e951d56d9'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           customRender: ({ text, record }) => {
@@ -257,7 +257,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           align: 'center',
           dataIndex: 'operation',
           fixed: 'right',
@@ -347,18 +347,18 @@ export default {
       } catch (e) {
         console.error(e)
       }
-      this.detailData.push({ title: this.$t('i18n.37189681ad'), description: this.temp.dataId })
+      this.detailData.push({ title: this.$t('i18n_37189681ad'), description: this.temp.dataId })
       this.detailData.push({
-        title: this.$t('i18n.d72471c540'),
+        title: this.$t('i18n_d72471c540'),
         description: this.temp.userAgent
       })
       this.detailData.push({
-        title: this.$t('i18n.527466ff94'),
+        title: this.$t('i18n_527466ff94'),
         json: true,
         value: this.temp.reqData
       })
       this.detailData.push({
-        title: this.$t('i18n.15d5fffa6a'),
+        title: this.$t('i18n_15d5fffa6a'),
         json: true,
         value: this.temp.resultMsg
       })

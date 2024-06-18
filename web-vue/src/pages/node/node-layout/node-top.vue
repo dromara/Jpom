@@ -5,9 +5,9 @@
         <a-range-picker
           v-model:value="timeRange"
           :presets="[
-            { label: $t('i18n.800dfdd902'), value: [dayjs().startOf('day'), dayjs()] },
+            { label: $t('i18n_800dfdd902'), value: [dayjs().startOf('day'), dayjs()] },
             {
-              label: $t('i18n.2f8d6f1584'),
+              label: $t('i18n_2f8d6f1584'),
               value: [dayjs().add(-1, 'days').startOf('day'), dayjs().add(-1, 'days').endOf('day')]
             }
           ]"
@@ -21,15 +21,15 @@
           format="YYYY-MM-DD HH:mm:ss"
           value-format="YYYY-MM-DD HH:mm:ss"
         />
-        <a-button type="primary" @click="handleFilter">{{ $t('i18n.e5f71fc31e') }}</a-button>
+        <a-button type="primary" @click="handleFilter">{{ $t('i18n_e5f71fc31e') }}</a-button>
         <a-tooltip>
           <template #title>
             <div>
               <ul>
-                <li>{{ $t('i18n.b11b0c93fa') }}</li>
-                <li>{{ $t('i18n.413f20d47f') }}</li>
-                <li>{{ $t('i18n.7617455241') }}</li>
-                <li>{{ $t('i18n.c8b2aabc07') }}</li>
+                <li>{{ $t('i18n_b11b0c93fa') }}</li>
+                <li>{{ $t('i18n_413f20d47f') }}</li>
+                <li>{{ $t('i18n_7617455241') }}</li>
+                <li>{{ $t('i18n_c8b2aabc07') }}</li>
               </ul>
             </div>
           </template>
@@ -41,7 +41,7 @@
     <a-empty
       v-else-if="nodeMonitorLoadStatus == -1"
       :image="Empty.PRESENTED_IMAGE_SIMPLE"
-      :description="$t('i18n.85be08c99a')"
+      :description="$t('i18n_85be08c99a')"
     >
     </a-empty>
     <a-skeleton v-else />

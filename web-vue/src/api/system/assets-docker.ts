@@ -146,6 +146,6 @@ export function dockerListWorkspace(params) {
 }
 
 export const statusMap = {
-  0: { desc: t('i18n.757a730c9e'), color: 'red' },
-  1: { desc: t('i18n.0f0a5f6107'), color: 'green' }
+  0: { desc: t('i18n_757a730c9e'), color: 'red' },
+  1: { desc: t('i18n_0f0a5f6107'), color: 'green' }
 }

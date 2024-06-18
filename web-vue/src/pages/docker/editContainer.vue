@@ -52,14 +52,14 @@
           <!-- // tx_bytes 网卡输出流量 -->
           <a-descriptions-item label="NET I/O rx">
             <div v-for="(item, index) in Object.keys(statsData.networks || {})" :key="index">
-              <a-tooltip :title="`${item} ${$t('i18n.3e54c81ca2')}`">
+              <a-tooltip :title="`${item} ${$t('i18n_3e54c81ca2')}`">
                 {{ renderSize(statsData.networks[item] && statsData.networks[item].rxBytes) || 0 }}
               </a-tooltip>
             </div>
           </a-descriptions-item>
           <a-descriptions-item label="NET I/O tx">
             <div v-for="(item, index) in Object.keys(statsData.networks || {})" :key="index">
-              <a-tooltip :title="`${item} ${$t('i18n.97ecc1bbe9')}`">
+              <a-tooltip :title="`${item} ${$t('i18n_97ecc1bbe9')}`">
                 {{ renderSize(statsData.networks[item] && statsData.networks[item].txBytes) || 0 }}
               </a-tooltip>
             </div>
@@ -114,100 +114,100 @@
         <a-form ref="editForm" :model="temp" :label-col="{ span: 7 }" :wrapper-col="{ span: 17 }">
           <a-form-item name="blkioWeight">
             <template #label>
-              Block IO {{ $t('i18n.4aac559105') }}
+              Block IO {{ $t('i18n_4aac559105') }}
               <a-tooltip>
-                <template #title> Block IO {{ $t('i18n.eaf987eea0') }} </template>
+                <template #title> Block IO {{ $t('i18n_eaf987eea0') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
             <a-input-number
               v-model:value="temp.blkioWeight"
               style="width: 100%"
-              :placeholder="$t('i18n.41d0ecbabd')"
+              :placeholder="$t('i18n_41d0ecbabd')"
               :min="0"
               :max="1000"
             />
           </a-form-item>
           <a-form-item name="cpuShares">
             <template #label>
-              CPU {{ $t('i18n.4aac559105') }}
+              CPU {{ $t('i18n_4aac559105') }}
               <a-tooltip>
-                <template #title> {{ $t('i18n.9ac4765895') }} </template>
+                <template #title> {{ $t('i18n_9ac4765895') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
-            <a-input-number v-model:value="temp.cpuShares" style="width: 100%" :placeholder="$t('i18n.9ac4765895')" />
+            <a-input-number v-model:value="temp.cpuShares" style="width: 100%" :placeholder="$t('i18n_9ac4765895')" />
           </a-form-item>
           <a-form-item name="cpusetCpus">
             <template #label>
-              {{ $t('i18n.2ef1c35be8') }}
+              {{ $t('i18n_2ef1c35be8') }}
               <a-tooltip>
-                <template #title> {{ $t('i18n.0b76afbf5d') }},1）。 </template>
+                <template #title> {{ $t('i18n_0b76afbf5d') }},1）。 </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
-            <a-input v-model:value="temp.cpusetCpus" style="width: 100%" :placeholder="$t('i18n.9c55e8e0f3')" />
+            <a-input v-model:value="temp.cpusetCpus" style="width: 100%" :placeholder="$t('i18n_9c55e8e0f3')" />
           </a-form-item>
           <a-form-item name="cpusetMems">
             <template #label>
               CpusetMems
               <a-tooltip>
-                <template #title> {{ $t('i18n.470e9baf32') }}{{ $t('i18n.b28c17d2a6') }}</template>
+                <template #title> {{ $t('i18n_470e9baf32') }}{{ $t('i18n_b28c17d2a6') }}</template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
-            <a-input v-model:value="temp.cpusetMems" style="width: 100%" :placeholder="$t('i18n.8c7d19b32a')" />
+            <a-input v-model:value="temp.cpusetMems" style="width: 100%" :placeholder="$t('i18n_8c7d19b32a')" />
           </a-form-item>
           <a-form-item name="cpuPeriod">
             <template #label>
-              CPU {{ $t('i18n.2d842318fb') }}
+              CPU {{ $t('i18n_2d842318fb') }}
               <a-tooltip>
-                <template #title> CPU {{ $t('i18n.6e02ee7aad') }} </template>
+                <template #title> CPU {{ $t('i18n_6e02ee7aad') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
-            <a-input-number v-model:value="temp.cpuPeriod" style="width: 100%" :placeholder="$t('i18n.c325ddecb1')" />
+            <a-input-number v-model:value="temp.cpuPeriod" style="width: 100%" :placeholder="$t('i18n_c325ddecb1')" />
           </a-form-item>
           <a-form-item name="cpuQuota">
             <template #label>
-              CPU {{ $t('i18n.19fcb9eb25') }}
+              CPU {{ $t('i18n_19fcb9eb25') }}
               <a-tooltip>
-                <template #title> {{ $t('i18n.df1da2dc59') }} </template>
+                <template #title> {{ $t('i18n_df1da2dc59') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
-            <a-input-number v-model:value="temp.cpuQuota" style="width: 100%" :placeholder="$t('i18n.df1da2dc59')" />
+            <a-input-number v-model:value="temp.cpuQuota" style="width: 100%" :placeholder="$t('i18n_df1da2dc59')" />
           </a-form-item>
 
           <a-form-item name="memory">
             <template #label>
-              {{ $t('i18n.9932551cd5') }}
+              {{ $t('i18n_9932551cd5') }}
               <a-tooltip>
-                <template #title> {{ $t('i18n.0b3edfaf28') }} </template>
+                <template #title> {{ $t('i18n_0b3edfaf28') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
-            <a-input v-model:value="temp.memory" style="width: 100%" :placeholder="$t('i18n.0b3edfaf28')" />
+            <a-input v-model:value="temp.memory" style="width: 100%" :placeholder="$t('i18n_0b3edfaf28')" />
           </a-form-item>
           <a-form-item name="memorySwap">
             <template #label>
-              {{ $t('i18n.c983743f56') }}
+              {{ $t('i18n_c983743f56') }}
               <a-tooltip>
-                <template #title> {{ $t('i18n.ebc96f0a5d') }} </template>
+                <template #title> {{ $t('i18n_ebc96f0a5d') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
-            <a-input v-model:value="temp.memorySwap" style="width: 100%" :placeholder="$t('i18n.ebc96f0a5d')" />
+            <a-input v-model:value="temp.memorySwap" style="width: 100%" :placeholder="$t('i18n_ebc96f0a5d')" />
           </a-form-item>
           <a-form-item name="memoryReservation">
             <template #label>
-              {{ $t('i18n.c0d38f475f') }}
+              {{ $t('i18n_c0d38f475f') }}
               <a-tooltip>
-                <template #title> {{ $t('i18n.0a63bf5b41') }} </template>
+                <template #title> {{ $t('i18n_0a63bf5b41') }} </template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
-            <a-input v-model:value="temp.memoryReservation" style="width: 100%" :placeholder="$t('i18n.0a63bf5b41')" />
+            <a-input v-model:value="temp.memoryReservation" style="width: 100%" :placeholder="$t('i18n_0a63bf5b41')" />
           </a-form-item>
         </a-form>
       </a-col>

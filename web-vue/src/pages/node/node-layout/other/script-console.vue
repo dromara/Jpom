@@ -9,10 +9,10 @@
         <template #before>
           <a-space>
             <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 0" type="primary" @click="start">{{
-              $t('i18n.1a6aa24e76')
+              $t('i18n_1a6aa24e76')
             }}</a-button>
             <a-button size="small" :loading="btnLoading" :disabled="scriptStatus !== 1" type="primary" @click="stop">{{
-              $t('i18n.095e938e2a')
+              $t('i18n_095e938e2a')
             }}</a-button>
           </a-space>
         </template>
@@ -25,19 +25,19 @@
       v-model:open="editArgs"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$t('i18n.43886d7ac3')"
+      :title="$t('i18n_43886d7ac3')"
       :mask-closable="false"
       @ok="startExecution"
     >
       <a-form ref="ruleForm" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-item :label="$t('i18n.abba4775e1')" :help="`${commandParams.length ? $t('i18n.916cde39c4') : ''}`">
+        <a-form-item :label="$t('i18n_abba4775e1')" :help="`${commandParams.length ? $t('i18n_916cde39c4') : ''}`">
           <a-space direction="vertical" style="width: 100%">
             <a-row v-for="(item, index) in commandParams" :key="item.key">
               <a-col :span="22">
                 <a-input
                   v-model:value="item.value"
-                  :addon-before="`${$t('i18n.3d0a2df9ec')}${index + 1}${$t('i18n.fe7509e0ed')}`"
-                  :placeholder="`${$t('i18n.3d0a2df9ec')}${$t('i18n.fe7509e0ed')} ${item.desc ? ',' + item.desc : ''}`"
+                  :addon-before="`${$t('i18n_3d0a2df9ec')}${index + 1}${$t('i18n_fe7509e0ed')}`"
+                  :placeholder="`${$t('i18n_3d0a2df9ec')}${$t('i18n_fe7509e0ed')} ${item.desc ? ',' + item.desc : ''}`"
                 >
                   <template #suffix>
                     <a-tooltip v-if="item.desc" :title="item.desc">
@@ -56,7 +56,7 @@
               </a-col>
             </a-row>
             <a-button type="primary" size="small" @click="() => commandParams.push({})">{{
-              $t('i18n.4c0eead6ff')
+              $t('i18n_4c0eead6ff')
             }}</a-button>
           </a-space>
         </a-form-item>
@@ -154,7 +154,7 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: `web socket ${this.$t('i18n.7030ff6470')},${this.$t('i18n.226a6f9cdd')}`
+          message: `web socket ${this.$t('i18n_7030ff6470')},${this.$t('i18n_226a6f9cdd')}`
         })
         clearInterval(this.heart)
         this.btnLoading = true
@@ -164,7 +164,7 @@ export default {
         console.error(err)
         clearInterval(this.heart)
         this.btnLoading = true
-        $message.warning(this.$t('i18n.5fafcadc2d'))
+        $message.warning(this.$t('i18n_5fafcadc2d'))
       }
       this.socket.onmessage = (msg) => {
         if (msg.data.indexOf('JPOM_MSG') > -1 && msg.data.indexOf('op') > -1) {

@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="script-library"
-      :empty-description="$t('i18n.ef9c90d393')"
+      :empty-description="$t('i18n_ef9c90d393')"
       :data-source="list"
       size="middle"
       :columns="columns"
@@ -24,44 +24,44 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%tag%']"
-            :placeholder="$t('i18n.e17a6882b6')"
+            :placeholder="$t('i18n_e17a6882b6')"
             allow-clear
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%version%']"
-            :placeholder="$t('i18n.fe2df04a16')"
+            :placeholder="$t('i18n_fe2df04a16')"
             allow-clear
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%description%']"
-            :placeholder="$t('i18n.3bdd08adab')"
+            :placeholder="$t('i18n_3bdd08adab')"
             class="search-input-item"
             @press-enter="loadData"
           />
 
-          <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button :loading="loading" type="primary" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
+          <a-tooltip :title="$t('i18n_4838a3bd20')">
+            <a-button :loading="loading" type="primary" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="createScript">{{ $t('i18n.d9ac9228e8') }}</a-button>
+          <a-button type="primary" @click="createScript">{{ $t('i18n_d9ac9228e8') }}</a-button>
         </a-space>
       </template>
       <template #tableHelp>
         <a-tooltip>
           <template #title>
-            <div>{{ $t('i18n.5936ed11ab') }}</div>
+            <div>{{ $t('i18n_5936ed11ab') }}</div>
 
             <div>
               <ul>
-                <li>{{ $t('i18n.fd93f7f3d7') }}</li>
+                <li>{{ $t('i18n_fd93f7f3d7') }}</li>
                 <li>
-                  {{ $t('i18n.beafc90157') }}
+                  {{ $t('i18n_beafc90157') }}
                 </li>
                 <li>
-                  {{ $t('i18n.3f1d478da4') }}
+                  {{ $t('i18n_3f1d478da4') }}
                 </li>
               </ul>
             </div>
@@ -83,9 +83,9 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n.95b351c862') }}</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n_95b351c862') }}</a-button>
             <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-              $t('i18n.2f4aaddde3')
+              $t('i18n_2f4aaddde3')
             }}</a-button>
           </a-space>
         </template>
@@ -96,25 +96,25 @@
       v-if="editScriptVisible"
       v-model:open="editScriptVisible"
       destroy-on-close
-      :title="$t('i18n.f038f48ce5')"
+      :title="$t('i18n_f038f48ce5')"
       :mask-closable="false"
       width="80vw"
       :confirm-loading="confirmLoading"
       @ok="handleEditScriptOk"
     >
       <a-form ref="editScriptForm" :rules="rules" :model="temp" :label-col="{ span: 3 }" :wrapper-col="{ span: 19 }">
-        <a-form-item v-if="temp.id" :label="$t('i18n.fe2df04a16')" name="id">
+        <a-form-item v-if="temp.id" :label="$t('i18n_fe2df04a16')" name="id">
           <a-input v-model:value="temp.version" disabled read-only />
         </a-form-item>
-        <a-form-item :label="$t('i18n.deea5221aa')" name="tag">
+        <a-form-item :label="$t('i18n_deea5221aa')" name="tag">
           <a-input
             v-model:value="temp.tag"
             :max-length="50"
-            :placeholder="$t('i18n.8c4db236e1')"
+            :placeholder="$t('i18n_8c4db236e1')"
             :disabled="!!temp.id"
           />
         </a-form-item>
-        <a-form-item :label="$t('i18n.2d711b09bd')" name="script">
+        <a-form-item :label="$t('i18n_2d711b09bd')" name="script">
           <a-form-item-rest>
             <code-editor
               v-model:content="temp.script"
@@ -126,29 +126,29 @@
           </a-form-item-rest>
         </a-form-item>
 
-        <a-form-item :label="$t('i18n.3bdd08adab')" name="description">
+        <a-form-item :label="$t('i18n_3bdd08adab')" name="description">
           <a-textarea
             v-model:value="temp.description"
             :max-length="200"
             :rows="3"
             style="resize: none"
-            :placeholder="$t('i18n.bd6c436195')"
+            :placeholder="$t('i18n_bd6c436195')"
           />
         </a-form-item>
 
         <a-form-item>
           <template #label>
             <a-tooltip
-              >{{ $t('i18n.2606b9d0d2') }}<template #title>{{ $t('i18n.73b7b05e6e') }}</template>
+              >{{ $t('i18n_2606b9d0d2') }}<template #title>{{ $t('i18n_73b7b05e6e') }}</template>
               <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
-          <template #help>{{ $t('i18n.0c2487d394') }}</template>
+          <template #help>{{ $t('i18n_0c2487d394') }}</template>
           <a-select
             v-model:value="temp.chooseNode"
             show-search
             :filter-option="false"
-            :placeholder="$t('i18n.8e6a77838a')"
+            :placeholder="$t('i18n_8e6a77838a')"
             mode="multiple"
             @search="searchMachineList"
           >
@@ -190,14 +190,14 @@ export default {
       drawerConsoleVisible: false,
       columns: [
         {
-          title: this.$t('i18n.deea5221aa'),
+          title: this.$t('i18n_deea5221aa'),
           dataIndex: 'tag',
           ellipsis: true,
           sorter: true,
           width: 150
         },
         {
-          title: this.$t('i18n.fe2df04a16'),
+          title: this.$t('i18n_fe2df04a16'),
           dataIndex: 'version',
           ellipsis: true,
           sorter: true,
@@ -205,14 +205,14 @@ export default {
           tooltip: true
         },
         {
-          title: this.$t('i18n.3bdd08adab'),
+          title: this.$t('i18n_3bdd08adab'),
           dataIndex: 'description',
           ellipsis: true,
           width: 200,
           tooltip: true
         },
         {
-          title: this.$t('i18n.1303e638b5'),
+          title: this.$t('i18n_1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           width: '170px',
@@ -220,7 +220,7 @@ export default {
           customRender: ({ text }) => parseTime(text)
         },
         {
-          title: this.$t('i18n.eca37cb072'),
+          title: this.$t('i18n_eca37cb072'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           width: '170px',
@@ -228,14 +228,14 @@ export default {
           customRender: ({ text }) => parseTime(text)
         },
         {
-          title: this.$t('i18n.95a43eaa59'),
+          title: this.$t('i18n_95a43eaa59'),
           dataIndex: 'createUser',
           ellipsis: true,
           tooltip: true,
           width: '120px'
         },
         {
-          title: this.$t('i18n.9baca0054e'),
+          title: this.$t('i18n_9baca0054e'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           tooltip: true,
@@ -243,7 +243,7 @@ export default {
         },
 
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
           align: 'center',
 
@@ -355,11 +355,11 @@ export default {
     },
     handleDelete(record) {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
-        content: this.$t('i18n.a9886f95b6'),
+        title: this.$t('i18n_c4535759ee'),
+        content: this.$t('i18n_a9886f95b6'),
         zIndex: 1009,
-        okText: this.$t('i18n.38cf16f220'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        okText: this.$t('i18n_38cf16f220'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return delScriptLibrary({
             id: record.id

@@ -63,7 +63,7 @@ export const customTableProps = initDefaultProps(
     // 空数据时现在内容
     emptyDescription: {
       type: String,
-      deafult: t('i18n.807ed6f5a6')
+      deafult: t('i18n_807ed6f5a6')
     }
   },
   {
@@ -73,6 +73,6 @@ export const customTableProps = initDefaultProps(
     isHideRefresh: false,
     autoRefreshTime: 10,
     activePage: false,
-    emptyDescription: t('i18n.807ed6f5a6')
+    emptyDescription: t('i18n_807ed6f5a6')
   }
 )

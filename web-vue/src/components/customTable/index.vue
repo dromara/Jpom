@@ -16,13 +16,13 @@
                 </template>
                 <a-form-item>
                   <template #label>
-                    <span style="font-weight: normal">{{ $t('i18n.891db2373b') }}</span>
+                    <span style="font-weight: normal">{{ $t('i18n_891db2373b') }}</span>
                   </template>
                   <a-space v-if="!props.isHideAutoRefresh">
                     <a-switch
                       v-model:checked="countdownSwitch"
-                      :checked-children="$t('i18n.8493205602')"
-                      :un-checked-children="$t('i18n.d58a55bcee')"
+                      :checked-children="$t('i18n_8493205602')"
+                      :un-checked-children="$t('i18n_d58a55bcee')"
                       @change="countDownChange"
                     />
                     <a-divider v-if="countdownSwitch" type="vertical" />
@@ -30,25 +30,25 @@
                       <a-statistic-countdown
                         v-if="countdownSwitch"
                         format="&nbsp;s"
-                        :title="$t('i18n.14feaa5b3a')"
+                        :title="$t('i18n_14feaa5b3a')"
                         :value="countdownNumber"
                         @finish="countDownFinish"
                       >
                         <template #suffix>
-                          <div style="font-size: 12px">{{ $t('i18n.ee6ce96abb') }}</div>
+                          <div style="font-size: 12px">{{ $t('i18n_ee6ce96abb') }}</div>
                         </template>
                       </a-statistic-countdown>
                     </div>
                   </a-space>
                 </a-form-item>
                 <a-form-item>
-                  <a-tooltip v-if="!props.isHideRefresh" :title="$t('i18n.694fc5efa9')">
+                  <a-tooltip v-if="!props.isHideRefresh" :title="$t('i18n_694fc5efa9')">
                     <ReloadOutlined class="table-action__icon" @click="refreshClick" />
                   </a-tooltip>
                 </a-form-item>
 
                 <a-form-item>
-                  <a-popover :title="$t('i18n.bdd9d38d7e')" trigger="click" placement="bottomRight">
+                  <a-popover :title="$t('i18n_bdd9d38d7e')" trigger="click" placement="bottomRight">
                     <template #content>
                       <a-radio-group v-model:value="tableSize" class="custom-size-list">
                         <div v-for="item in tableSizeList" :key="item.value">
@@ -56,7 +56,7 @@
                         </div>
                       </a-radio-group>
                     </template>
-                    <a-tooltip :title="$t('i18n.bdd9d38d7e')">
+                    <a-tooltip :title="$t('i18n_bdd9d38d7e')">
                       <ColumnHeightOutlined class="table-action__icon" />
                     </a-tooltip>
                   </a-popover>
@@ -66,9 +66,9 @@
                   <a-popover v-if="props.tableName" trigger="click" placement="bottomRight">
                     <template #title>
                       <div class="custom-column-list__title">
-                        <div>{{ $t('i18n.949a8b7bd2') }}</div>
+                        <div>{{ $t('i18n_949a8b7bd2') }}</div>
                         <a-button type="link" size="small" @click="resetCustomColumn">{{
-                          $t('i18n.4b9c3271dc')
+                          $t('i18n_4b9c3271dc')
                         }}</a-button>
                       </div>
                     </template>
@@ -99,14 +99,14 @@
                         </Container>
                       </a-checkbox-group>
                     </template>
-                    <a-tooltip :title="$t('i18n.949a8b7bd2')">
+                    <a-tooltip :title="$t('i18n_949a8b7bd2')">
                       <SettingOutlined />
                     </a-tooltip>
                   </a-popover>
                 </a-form-item>
 
                 <a-form-item v-if="canChangeLayout">
-                  <a-tooltip :title="$t('i18n.03816381ec')">
+                  <a-tooltip :title="$t('i18n_03816381ec')">
                     <!-- <ReloadOutlined   /> -->
                     <TableOutlined v-if="tableLayout === 'card'" class="table-action__icon" @click="tableLayoutClick" />
                     <LayoutOutlined v-else class="table-action__icon" @click="tableLayoutClick" />
@@ -154,7 +154,7 @@
             </a-space>
             <!-- <slot name="cardPageTool"></slot> -->
           </template>
-          <template v-else>{{ $t('i18n.f4edba3c9d') }}</template>
+          <template v-else>{{ $t('i18n_f4edba3c9d') }}</template>
         </a-card>
       </a-card>
     </div>

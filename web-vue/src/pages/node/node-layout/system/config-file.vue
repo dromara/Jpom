@@ -9,17 +9,17 @@
           :show-tool="true"
         >
           <template #tool_before>
-            <a-alert v-if="temp.file" show-icon :message="`${$t('i18n.37c1eb9b23')}:${temp.file}`" />
+            <a-alert v-if="temp.file" show-icon :message="`${$t('i18n_37c1eb9b23')}:${temp.file}`" />
           </template>
         </code-editor>
       </a-form-item>
       <a-form-item :wrapper-col="{ span: 14, offset: 2 }">
         <a-space>
           <a-button type="primary" :disabled="submitAble" @click="onSubmit(false)">{{
-            $t('i18n.be5fbbe34c')
+            $t('i18n_be5fbbe34c')
           }}</a-button>
           <a-button type="primary" danger :disabled="submitAble" @click="onSubmit(true)">{{
-            $t('i18n.6aab88d6a3')
+            $t('i18n_6aab88d6a3')
           }}</a-button>
         </a-space>
       </a-form-item>
@@ -90,7 +90,7 @@ export default {
       this.checkCount = 0
       this.globalLoading({
         spinning: true,
-        tip: (msg || this.$t('i18n.85da2e5bb1')) + `,${this.$t('i18n.809b12d6a0')},${this.$t('i18n.af013dd9dc')}`
+        tip: (msg || this.$t('i18n_85da2e5bb1')) + `,${this.$t('i18n_809b12d6a0')},${this.$t('i18n_af013dd9dc')}`
       })
       setTimeout(() => {
         //
@@ -101,7 +101,7 @@ export default {
                 clearInterval(this.timer)
                 this.globalLoading(false)
                 $notification.success({
-                  message: this.$t('i18n.906f6102a7')
+                  message: this.$t('i18n_906f6102a7')
                 })
 
                 setTimeout(() => {
@@ -110,7 +110,7 @@ export default {
               } else {
                 if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
                   $notification.warning({
-                    message: this.$t('i18n.953ec2172b') + (res.msg || '')
+                    message: this.$t('i18n_953ec2172b') + (res.msg || '')
                   })
                   this.globalLoading(false)
                   clearInterval(this.timer)
@@ -122,7 +122,7 @@ export default {
               if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
                 this.globalLoading(false)
                 $notification.error({
-                  message: this.$t('i18n.0e502fed63')
+                  message: this.$t('i18n_0e502fed63')
                 })
                 clearInterval(this.timer)
               }

@@ -17,32 +17,32 @@
         <a-space>
           <a-input
             v-model:value="envVarListQuery['%name%']"
-            :placeholder="$t('i18n.d7ec2d3fea')"
+            :placeholder="$t('i18n_d7ec2d3fea')"
             allow-clear
             class="search-input-item"
             @press-enter="loadDataEnvVar"
           />
           <a-input
             v-model:value="envVarListQuery['%value%']"
-            :placeholder="$t('i18n.fe7509e0ed')"
+            :placeholder="$t('i18n_fe7509e0ed')"
             allow-clear
             class="search-input-item"
             @press-enter="loadDataEnvVar"
           />
           <a-input
             v-model:value="envVarListQuery['%description%']"
-            :placeholder="$t('i18n.3bdd08adab')"
+            :placeholder="$t('i18n_3bdd08adab')"
             allow-clear
             class="search-input-item"
             @press-enter="loadDataEnvVar"
           />
-          <a-button type="primary" @click="loadDataEnvVar">{{ $t('i18n.e5f71fc31e') }}</a-button>
-          <a-button type="primary" @click="addEnvVar">{{ $t('i18n.66ab5e9f24') }}</a-button>
+          <a-button type="primary" @click="loadDataEnvVar">{{ $t('i18n_e5f71fc31e') }}</a-button>
+          <a-button type="primary" @click="addEnvVar">{{ $t('i18n_66ab5e9f24') }}</a-button>
           <a-tooltip>
             <template #title>
-              <div>{{ $t('i18n.969098605e') }}</div>
-              <div>{{ $t('i18n.a34b91cdd7') }}</div>
-              <div>{{ $t('i18n.102dbe1e39') }}</div>
+              <div>{{ $t('i18n_969098605e') }}</div>
+              <div>{{ $t('i18n_a34b91cdd7') }}</div>
+              <div>{{ $t('i18n_102dbe1e39') }}</div>
             </template>
             <QuestionCircleOutlined />
           </a-tooltip>
@@ -50,7 +50,7 @@
       </template>
       <template #bodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'value'">
-          <a-tooltip placement="topLeft" :title="record.privacy === 1 ? $t('i18n.b12d003367') : text">
+          <a-tooltip placement="topLeft" :title="record.privacy === 1 ? $t('i18n_b12d003367') : text">
             <EyeInvisibleOutlined v-if="record.privacy === 1" />
             <span v-else>{{ text }}</span>
           </a-tooltip>
@@ -62,17 +62,17 @@
         </template>
 
         <template v-else-if="column.dataIndex === 'workspaceId'">
-          <span>{{ text === 'GLOBAL' ? $t('i18n.2be75b1044') : $t('i18n.691b11e443') }}</span>
+          <span>{{ text === 'GLOBAL' ? $t('i18n_2be75b1044') : $t('i18n_691b11e443') }}</span>
         </template>
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEnvEdit(record)">{{ $t('i18n.95b351c862') }}</a-button>
+            <a-button size="small" type="primary" @click="handleEnvEdit(record)">{{ $t('i18n_95b351c862') }}</a-button>
             <a-button size="small" type="primary" :disabled="record.privacy === 1" @click="handleTrigger(record)">{{
-              $t('i18n.4696724ed3')
+              $t('i18n_4696724ed3')
             }}</a-button>
             <a-button size="small" type="primary" danger @click="handleEnvDelete(record)">{{
-              $t('i18n.2f4aaddde3')
+              $t('i18n_2f4aaddde3')
             }}</a-button>
           </a-space>
         </template>
@@ -84,39 +84,39 @@
       v-if="editEnvVisible"
       v-model:open="editEnvVisible"
       :confirm-loading="confirmLoading"
-      :title="$t('i18n.a421ec6187')"
+      :title="$t('i18n_a421ec6187')"
       width="50vw"
       :mask-closable="false"
       @ok="handleEnvEditOk"
     >
       <a-form ref="editEnvForm" :rules="rulesEnv" :model="envTemp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$t('i18n.d7ec2d3fea')" name="name">
-          <a-input v-model:value="envTemp.name" :max-length="50" :placeholder="$t('i18n.7cb8d163bb')" />
+        <a-form-item :label="$t('i18n_d7ec2d3fea')" name="name">
+          <a-input v-model:value="envTemp.name" :max-length="50" :placeholder="$t('i18n_7cb8d163bb')" />
         </a-form-item>
-        <a-form-item :label="$t('i18n.fe7509e0ed')" :prop="`${envTemp.privacy === 1 ? '' : 'value'}`">
-          <a-textarea v-model:value="envTemp.value" :rows="5" :placeholder="$t('i18n.9a2ee7044f')" />
+        <a-form-item :label="$t('i18n_fe7509e0ed')" :prop="`${envTemp.privacy === 1 ? '' : 'value'}`">
+          <a-textarea v-model:value="envTemp.value" :rows="5" :placeholder="$t('i18n_9a2ee7044f')" />
         </a-form-item>
-        <a-form-item :label="$t('i18n.3bdd08adab')" name="description">
+        <a-form-item :label="$t('i18n_3bdd08adab')" name="description">
           <a-textarea
             v-model:value="envTemp.description"
             :max-length="200"
             :rows="5"
-            :placeholder="$t('i18n.bcf83722c4')"
+            :placeholder="$t('i18n_bcf83722c4')"
           />
         </a-form-item>
         <a-form-item name="privacy">
           <template #label>
             <a-tooltip>
-              {{ $t('i18n.03dcdf92f5') }}
-              <template #title> {{ $t('i18n.cc617428f7') }} </template>
+              {{ $t('i18n_03dcdf92f5') }}
+              <template #title> {{ $t('i18n_cc617428f7') }} </template>
               <QuestionCircleOutlined v-show="!envTemp.id" />
             </a-tooltip>
           </template>
           <a-switch
             :checked="envTemp.privacy === 1"
             :disabled="envTemp.id !== undefined"
-            :checked-children="$t('i18n.6d802636ab')"
-            :un-checked-children="$t('i18n.a5f84fd99c')"
+            :checked-children="$t('i18n_6d802636ab')"
+            :un-checked-children="$t('i18n_a5f84fd99c')"
             @change="
               (checked) => {
                 envTemp = { ...envTemp, privacy: checked ? 1 : 0 }
@@ -127,12 +127,12 @@
         <a-form-item>
           <template #label>
             <a-tooltip>
-              {{ $t('i18n.6a6c857285') }}
-              <template #title> {{ $t('i18n.6ffa21d235') }}</template>
+              {{ $t('i18n_6a6c857285') }}
+              <template #title> {{ $t('i18n_6ffa21d235') }}</template>
               <QuestionCircleOutlined v-show="!envTemp.id" />
             </a-tooltip>
           </template>
-          <template #help>{{ $t('i18n.267bf4bf76') }}</template>
+          <template #help>{{ $t('i18n_267bf4bf76') }}</template>
           <a-select
             v-model:value="envTemp.chooseNode"
             show-search
@@ -146,7 +146,7 @@
                 )
               }
             "
-            :placeholder="$t('i18n.a03ea1e864')"
+            :placeholder="$t('i18n_a03ea1e864')"
             mode="multiple"
           >
             <a-select-option v-for="item in nodeList" :key="item.id" :value="item.id">
@@ -161,7 +161,7 @@
       v-if="triggerVisible"
       v-model:open="triggerVisible"
       destroy-on-close
-      :title="$t('i18n.4696724ed3')"
+      :title="$t('i18n_4696724ed3')"
       width="50%"
       :footer="null"
       :mask-closable="false"
@@ -169,19 +169,19 @@
       <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
           <template #rightExtra>
-            <a-tooltip :title="$t('i18n.01ad26f4a9')">
-              <a-button type="primary" size="small" @click="resetTrigger">{{ $t('i18n.4b9c3271dc') }}</a-button>
+            <a-tooltip :title="$t('i18n_01ad26f4a9')">
+              <a-button type="primary" size="small" @click="resetTrigger">{{ $t('i18n_4b9c3271dc') }}</a-button>
             </a-tooltip>
           </template>
-          <a-tab-pane key="1" :tab="$t('i18n.8dc09ebe97')">
+          <a-tab-pane key="1" :tab="$t('i18n_8dc09ebe97')">
             <a-space direction="vertical" style="width: 100%">
-              <a-alert :message="$t('i18n.947d983961')" type="warning">
+              <a-alert :message="$t('i18n_947d983961')" type="warning">
                 <template #description>
                   <ul>
-                    <li>{{ $t('i18n.4ee2a8951d') }}</li>
-                    <li>{{ $t('i18n.74c5c188ae') }}</li>
-                    <li>{{ $t('i18n.15c46f7681') }}</li>
-                    <li>PUT {{ $t('i18n.901de97cdb') }}</li>
+                    <li>{{ $t('i18n_4ee2a8951d') }}</li>
+                    <li>{{ $t('i18n_74c5c188ae') }}</li>
+                    <li>{{ $t('i18n_15c46f7681') }}</li>
+                    <li>PUT {{ $t('i18n_901de97cdb') }}</li>
                   </ul>
                 </template>
               </a-alert>
@@ -189,7 +189,7 @@
               <a-alert type="info">
                 <template #message>
                   <a-typography-paragraph :copyable="{ text: temp.triggerUrl }"
-                    >{{ $t('i18n.4b386a7209') }}
+                    >{{ $t('i18n_4b386a7209') }}
                   </a-typography-paragraph>
                 </template>
                 <template #description>
@@ -200,7 +200,7 @@
               <a-alert type="info">
                 <template #message>
                   <a-typography-paragraph :copyable="{ text: temp.triggerUrlPost }">
-                    {{ $t('i18n.db094db837') }}
+                    {{ $t('i18n_db094db837') }}
                   </a-typography-paragraph>
                 </template>
                 <template #description>
@@ -210,7 +210,7 @@
               <a-alert type="info">
                 <template #message>
                   <a-typography-paragraph :copyable="{ text: temp.triggerUrl }">
-                    {{ $t('i18n.db094db837') }}
+                    {{ $t('i18n_db094db837') }}
                   </a-typography-paragraph>
                 </template>
                 <template #description>
@@ -251,39 +251,39 @@ export default {
       temp: {},
       envVarColumns: [
         {
-          title: this.$t('i18n.d7ec2d3fea'),
+          title: this.$t('i18n_d7ec2d3fea'),
           dataIndex: 'name',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('i18n.fe7509e0ed'),
+          title: this.$t('i18n_fe7509e0ed'),
           dataIndex: 'value',
           ellipsis: true
         },
 
         {
-          title: this.$t('i18n.3bdd08adab'),
+          title: this.$t('i18n_3bdd08adab'),
           dataIndex: 'description',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('i18n.9baca0054e'),
+          title: this.$t('i18n_9baca0054e'),
           dataIndex: 'modifyUser',
           ellipsis: true,
           tooltip: true,
           width: 120
         },
         {
-          title: this.$t('i18n.4705b88497'),
+          title: this.$t('i18n_4705b88497'),
           dataIndex: 'workspaceId',
           ellipsis: true,
 
           width: '120px'
         },
         {
-          title: this.$t('i18n.1303e638b5'),
+          title: this.$t('i18n_1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           customRender: ({ text }) => {
             return parseTime(text)
@@ -292,7 +292,7 @@ export default {
           width: '180px'
         },
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
           align: 'center',
 
@@ -302,9 +302,9 @@ export default {
 
       // 表单校验规则
       rulesEnv: {
-        name: [{ required: true, message: this.$t('i18n.e6e453d730'), trigger: 'blur' }],
-        description: [{ required: true, message: this.$t('i18n.884ea031d3'), trigger: 'blur' }],
-        value: [{ required: true, message: this.$t('i18n.85451d2eb5'), trigger: 'blur' }]
+        name: [{ required: true, message: this.$t('i18n_e6e453d730'), trigger: 'blur' }],
+        description: [{ required: true, message: this.$t('i18n_884ea031d3'), trigger: 'blur' }],
+        value: [{ required: true, message: this.$t('i18n_85451d2eb5'), trigger: 'blur' }]
       },
       triggerVisible: false,
       confirmLoading: false
@@ -375,11 +375,11 @@ export default {
     //
     handleEnvDelete(record) {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.543a5aebc8'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_543a5aebc8'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return deleteWorkspaceEnv({
             id: record.id,

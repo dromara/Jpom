@@ -8,7 +8,7 @@
       :footer="uploading ? null : undefined"
       width="50%"
       :keyboard="false"
-      :title="$t('i18n.a0a111cbbd') + data.name"
+      :title="$t('i18n_a0a111cbbd') + data.name"
       :mask-closable="false"
       @ok="handleDispatchOk"
       @cancel="
@@ -18,39 +18,39 @@
       "
     >
       <a-form ref="dispatchForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-item :label="$t('i18n.7220e4d5f9')" name="type">
+        <a-form-item :label="$t('i18n_7220e4d5f9')" name="type">
           <a-radio-group v-model:value="temp.type" name="type" :disabled="!!percentage" @change="restForm">
-            <a-radio :value="'use-build'">{{ $t('i18n.c1af35d001') }}</a-radio>
-            <a-radio :value="'file-storage'">{{ $t('i18n.26183c99bf') }}</a-radio>
-            <a-radio :value="'static-file-storage'">{{ $t('i18n.28f6e7a67b') }}</a-radio>
-            <a-radio :value="'upload'">{{ $t('i18n.a6fc9e3ae6') }}</a-radio>
-            <a-radio :value="'download'">{{ $t('i18n.bd7043cae3') }}</a-radio>
+            <a-radio :value="'use-build'">{{ $t('i18n_c1af35d001') }}</a-radio>
+            <a-radio :value="'file-storage'">{{ $t('i18n_26183c99bf') }}</a-radio>
+            <a-radio :value="'static-file-storage'">{{ $t('i18n_28f6e7a67b') }}</a-radio>
+            <a-radio :value="'upload'">{{ $t('i18n_a6fc9e3ae6') }}</a-radio>
+            <a-radio :value="'download'">{{ $t('i18n_bd7043cae3') }}</a-radio>
           </a-radio-group>
         </a-form-item>
         <!-- 手动上传 -->
-        <a-form-item v-if="temp.type === 'upload'" :label="$t('i18n.4cfca88db8')" name="clearOld">
+        <a-form-item v-if="temp.type === 'upload'" :label="$t('i18n_4cfca88db8')" name="clearOld">
           <a-progress v-if="percentage" :percent="percentage">
             <template #format="percent">
               {{ percent }}%
               <template v-if="percentageInfo.total"> ({{ renderSize(percentageInfo.total) }}) </template>
               <template v-if="percentageInfo.duration">
-                {{ $t('i18n.e710da3487') }}:{{ formatDuration(percentageInfo.duration) }}
+                {{ $t('i18n_e710da3487') }}:{{ formatDuration(percentageInfo.duration) }}
               </template>
             </template>
           </a-progress>
 
           <a-upload :file-list="fileList" :disabled="!!percentage" :before-upload="beforeUpload" @remove="handleRemove">
             <LoadingOutlined v-if="percentage" />
-            <a-button v-else type="primary"><UploadOutlined />{{ $t('i18n.fd7e0c997d') }}</a-button>
+            <a-button v-else type="primary"><UploadOutlined />{{ $t('i18n_fd7e0c997d') }}</a-button>
           </a-upload>
         </a-form-item>
         <!-- 远程下载 -->
-        <a-form-item v-else-if="temp.type === 'download'" :label="$t('i18n.a66fff7541')" name="url">
-          <a-input v-model:value="temp.url" :placeholder="$t('i18n.7457228a61')" />
+        <a-form-item v-else-if="temp.type === 'download'" :label="$t('i18n_a66fff7541')" name="url">
+          <a-input v-model:value="temp.url" :placeholder="$t('i18n_7457228a61')" />
         </a-form-item>
         <!-- 在线构建 -->
         <template v-else-if="temp.type == 'use-build'">
-          <a-form-item :label="$t('i18n.4f9e3db4b8')">
+          <a-form-item :label="$t('i18n_4f9e3db4b8')">
             <a-space>
               {{ chooseBuildInfo.name }}
               <a-button
@@ -61,11 +61,11 @@
                   }
                 "
               >
-                {{ $t('i18n.4f9e3db4b8') }}
+                {{ $t('i18n_4f9e3db4b8') }}
               </a-button>
             </a-space>
           </a-form-item>
-          <a-form-item :label="$t('i18n.cabdf0cd45')">
+          <a-form-item :label="$t('i18n_cabdf0cd45')">
             <a-space>
               <a-tag v-if="chooseBuildInfo.buildNumberId">#{{ chooseBuildInfo.buildNumberId }}</a-tag>
               <a-button
@@ -77,14 +77,14 @@
                   }
                 "
               >
-                {{ $t('i18n.cabdf0cd45') }}
+                {{ $t('i18n_cabdf0cd45') }}
               </a-button>
             </a-space>
           </a-form-item>
         </template>
         <!-- 文件中心 -->
         <template v-else-if="temp.type === 'file-storage'">
-          <a-form-item :label="$t('i18n.fd7e0c997d')">
+          <a-form-item :label="$t('i18n_fd7e0c997d')">
             <a-space>
               {{ chooseFileInfo.name }}
               <a-button
@@ -95,14 +95,14 @@
                   }
                 "
               >
-                {{ $t('i18n.fd7e0c997d') }}
+                {{ $t('i18n_fd7e0c997d') }}
               </a-button>
             </a-space>
           </a-form-item>
         </template>
         <!-- 静态文件 -->
         <template v-else-if="temp.type === 'static-file-storage'">
-          <a-form-item :label="$t('i18n.fd7e0c997d')">
+          <a-form-item :label="$t('i18n_fd7e0c997d')">
             <a-space>
               {{ chooseFileInfo.name }}
               <a-button
@@ -113,58 +113,58 @@
                   }
                 "
               >
-                {{ $t('i18n.fd7e0c997d') }}
+                {{ $t('i18n_fd7e0c997d') }}
               </a-button>
             </a-space>
           </a-form-item>
         </template>
         <a-form-item name="clearOld">
           <template #label>
-            {{ $t('i18n.2223ff647d') }}
+            {{ $t('i18n_2223ff647d') }}
             <a-tooltip>
-              <template #title>{{ $t('i18n.b343663a14') }}</template>
+              <template #title>{{ $t('i18n_b343663a14') }}</template>
               <QuestionCircleOutlined />
             </a-tooltip>
           </template>
           <a-switch
             v-model:checked="temp.clearOld"
-            :checked-children="$t('i18n.0a60ac8f02')"
-            :un-checked-children="$t('i18n.c9744f45e7')"
+            :checked-children="$t('i18n_0a60ac8f02')"
+            :un-checked-children="$t('i18n_c9744f45e7')"
           />
         </a-form-item>
         <a-form-item v-if="temp.type !== 'use-build'" name="unzip">
           <template #label>
-            {{ $t('i18n.1baae8183c') }}
+            {{ $t('i18n_1baae8183c') }}
             <a-tooltip>
-              <template #title> {{ $t('i18n.c4cfe11e54') }}.bz2, tar.gz, tar, bz2, zip, gz </template>
+              <template #title> {{ $t('i18n_c4cfe11e54') }}.bz2, tar.gz, tar, bz2, zip, gz </template>
               <QuestionCircleOutlined />
             </a-tooltip>
           </template>
           <a-switch
             v-model:checked="temp.autoUnzip"
-            :checked-children="$t('i18n.0a60ac8f02')"
-            :un-checked-children="$t('i18n.c9744f45e7')"
+            :checked-children="$t('i18n_0a60ac8f02')"
+            :un-checked-children="$t('i18n_c9744f45e7')"
           />
         </a-form-item>
-        <a-form-item v-if="temp.autoUnzip" :label="$t('i18n.5effe31353')">
+        <a-form-item v-if="temp.autoUnzip" :label="$t('i18n_5effe31353')">
           <a-input-number
             v-model:value="temp.stripComponents"
             style="width: 100%"
             :min="0"
-            :placeholder="$t('i18n.3f8b64991f')"
+            :placeholder="$t('i18n_3f8b64991f')"
           />
         </a-form-item>
 
-        <a-form-item :label="$t('i18n.dfcc9e3c45')" name="afterOpt">
-          <a-select v-model:value="temp.afterOpt" :placeholder="$t('i18n.3322338140')">
+        <a-form-item :label="$t('i18n_dfcc9e3c45')" name="afterOpt">
+          <a-select v-model:value="temp.afterOpt" :placeholder="$t('i18n_3322338140')">
             <a-select-option v-for="item in afterOptList" :key="item.value">{{ item.title }}</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item name="secondaryDirectory" :label="$t('i18n.871cc8602a')">
-          <a-input v-model:value="temp.secondaryDirectory" :placeholder="$t('i18n.9c99e8bec9')" />
+        <a-form-item name="secondaryDirectory" :label="$t('i18n_871cc8602a')">
+          <a-input v-model:value="temp.secondaryDirectory" :placeholder="$t('i18n_9c99e8bec9')" />
         </a-form-item>
-        <a-form-item name="selectProject" :label="$t('i18n.c4e0c6b6fe')" :help="$t('i18n.25be899f66')">
-          <a-select v-model:value="temp.selectProjectArray" mode="multiple" :placeholder="$t('i18n.b29fd18c93')">
+        <a-form-item name="selectProject" :label="$t('i18n_c4e0c6b6fe')" :help="$t('i18n_25be899f66')">
+          <a-select v-model:value="temp.selectProjectArray" mode="multiple" :placeholder="$t('i18n_b29fd18c93')">
             <a-select-option v-for="item in itemProjectList" :key="item.id" :value="`${item.projectId}@${item.nodeId}`">
               {{ item.nodeName }}-{{ item.cacheProjectName || item.projectId }}
             </a-select-option>
@@ -176,7 +176,7 @@
     <CustomDrawer
       v-if="chooseVisible === 1"
       destroy-on-close
-      :title="`${$t('i18n.4f9e3db4b8')}`"
+      :title="`${$t('i18n_4f9e3db4b8')}`"
       placement="right"
       :open="chooseVisible === 1"
       width="80vw"
@@ -217,7 +217,7 @@
               }
             "
           >
-            {{ $t('i18n.625fb26b4b') }}
+            {{ $t('i18n_625fb26b4b') }}
           </a-button>
           <a-button
             type="primary"
@@ -227,7 +227,7 @@
               }
             "
           >
-            {{ $t('i18n.e83a256e4f') }}
+            {{ $t('i18n_e83a256e4f') }}
           </a-button>
         </a-space>
       </template>
@@ -236,7 +236,7 @@
     <CustomDrawer
       v-if="chooseVisible === 2"
       destroy-on-close
-      :title="`${$t('i18n.9ec961d8cb')}`"
+      :title="`${$t('i18n_9ec961d8cb')}`"
       placement="right"
       :open="chooseVisible === 2"
       width="80vw"
@@ -278,7 +278,7 @@
               }
             "
           >
-            {{ $t('i18n.625fb26b4b') }}
+            {{ $t('i18n_625fb26b4b') }}
           </a-button>
           <a-button
             type="primary"
@@ -288,7 +288,7 @@
               }
             "
           >
-            {{ $t('i18n.e83a256e4f') }}
+            {{ $t('i18n_e83a256e4f') }}
           </a-button>
         </a-space>
       </template>
@@ -297,7 +297,7 @@
     <CustomDrawer
       v-if="chooseVisible === 3"
       destroy-on-close
-      :title="`${$t('i18n.fd7e0c997d')}`"
+      :title="`${$t('i18n_fd7e0c997d')}`"
       placement="right"
       :open="chooseVisible === 3"
       width="80vw"
@@ -335,7 +335,7 @@
               }
             "
           >
-            {{ $t('i18n.625fb26b4b') }}
+            {{ $t('i18n_625fb26b4b') }}
           </a-button>
           <a-button
             type="primary"
@@ -345,7 +345,7 @@
               }
             "
           >
-            {{ $t('i18n.e83a256e4f') }}
+            {{ $t('i18n_e83a256e4f') }}
           </a-button>
         </a-space>
       </template>
@@ -354,7 +354,7 @@
     <CustomDrawer
       v-if="chooseVisible === 4"
       destroy-on-close
-      :title="`${$t('i18n.a51d8375b7')}`"
+      :title="`${$t('i18n_a51d8375b7')}`"
       placement="right"
       :open="chooseVisible === 4"
       width="80vw"
@@ -392,7 +392,7 @@
               }
             "
           >
-            {{ $t('i18n.625fb26b4b') }}
+            {{ $t('i18n_625fb26b4b') }}
           </a-button>
           <a-button
             type="primary"
@@ -402,7 +402,7 @@
               }
             "
           >
-            {{ $t('i18n.e83a256e4f') }}
+            {{ $t('i18n_e83a256e4f') }}
           </a-button>
         </a-space>
       </template>
@@ -453,8 +453,8 @@ export default {
       itemProjectList: [],
       fileList: [],
       rules: {
-        afterOpt: [{ required: true, message: this.$t('i18n.3322338140'), trigger: 'blur' }],
-        url: [{ required: true, message: this.$t('i18n.f4dd45fca9'), trigger: 'blur' }]
+        afterOpt: [{ required: true, message: this.$t('i18n_3322338140'), trigger: 'blur' }],
+        url: [{ required: true, message: this.$t('i18n_f4dd45fca9'), trigger: 'blur' }]
       },
       temp: { type: 'upload' },
       chooseVisible: 0,
@@ -553,7 +553,7 @@ export default {
           // 判断文件
           if (this.fileList.length === 0) {
             $notification.error({
-              message: this.$t('i18n.9febf31146')
+              message: this.$t('i18n_9febf31146')
             })
             return false
           }
@@ -640,7 +640,7 @@ export default {
         } else if (this.temp.type == 'download') {
           if (!this.temp.url) {
             $notification.error({
-              message: this.$t('i18n.8ccbbb95a4')
+              message: this.$t('i18n_8ccbbb95a4')
             })
             return false
           }
@@ -663,7 +663,7 @@ export default {
           // 构建
           if (!this.chooseBuildInfo || !this.chooseBuildInfo.id || !this.chooseBuildInfo.buildNumberId) {
             $notification.error({
-              message: this.$t('i18n.c704d971d6')
+              message: this.$t('i18n_c704d971d6')
             })
             return false
           }
@@ -690,7 +690,7 @@ export default {
           // 文件中心
           if (!this.chooseFileInfo || !this.chooseFileInfo.id) {
             $notification.error({
-              message: this.$t('i18n.434d888f6f')
+              message: this.$t('i18n_434d888f6f')
             })
             return false
           }
@@ -716,7 +716,7 @@ export default {
           // 文件中心
           if (!this.chooseFileInfo || !this.chooseFileInfo.id) {
             $notification.error({
-              message: this.$t('i18n.acb4ce3592')
+              message: this.$t('i18n_acb4ce3592')
             })
             return false
           }

@@ -12,25 +12,25 @@ import { t } from '@/i18n'
 export const tableSizeList = [
   {
     value: 'large',
-    label: t('i18n.949934d97c')
+    label: t('i18n_949934d97c')
   },
   {
     value: 'middle',
-    label: t('i18n.eadd05ba6a')
+    label: t('i18n_eadd05ba6a')
   },
   {
     value: 'small',
-    label: t('i18n.03e59bb33c')
+    label: t('i18n_03e59bb33c')
   }
 ]
 
 export const tableLayoutList = [
   {
     value: 'table',
-    label: t('i18n.b339aa8710')
+    label: t('i18n_b339aa8710')
   },
   {
     value: 'card',
-    label: t('i18n.d87f215d9a')
+    label: t('i18n_d87f215d9a')
   }
 ]

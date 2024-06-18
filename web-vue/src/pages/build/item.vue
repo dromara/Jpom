@@ -23,20 +23,20 @@
         <template v-if="id">
           <a-menu v-model:selectedKeys="menuKey" mode="horizontal" class="menu" @click="menuClick">
             <a-menu-item key="info">
-              <span><InfoOutlined /> {{ $t('i18n.224aef211c') }}</span>
+              <span><InfoOutlined /> {{ $t('i18n_224aef211c') }}</span>
             </a-menu-item>
             <a-menu-item key="edit">
-              <span> <EditOutlined /> {{ $t('i18n.e54c5ecb54') }}</span>
+              <span> <EditOutlined /> {{ $t('i18n_e54c5ecb54') }}</span>
             </a-menu-item>
             <a-menu-item key="trigger">
-              <span><ApiOutlined /> {{ $t('i18n.4696724ed3') }}</span>
+              <span><ApiOutlined /> {{ $t('i18n_4696724ed3') }}</span>
             </a-menu-item>
           </a-menu>
         </template>
         <template v-else>
           <a-menu v-model:selectedKeys="menuKey" mode="horizontal" class="menu" @click="menuClick">
             <a-menu-item key="edit">
-              <span> <EditOutlined /> {{ $t('i18n.44a6891817') }}</span>
+              <span> <EditOutlined /> {{ $t('i18n_44a6891817') }}</span>
             </a-menu-item>
           </a-menu>
         </template>
@@ -74,10 +74,10 @@
               }
             "
           >
-            {{ $t('i18n.625fb26b4b') }}
+            {{ $t('i18n_625fb26b4b') }}
           </a-button>
-          <a-tooltip v-if="id" :title="$t('i18n.18c7e2556e')">
-            <a-button @click="$refs.editBuild.refresh()"> {{ $t('i18n.694fc5efa9') }}</a-button>
+          <a-tooltip v-if="id" :title="$t('i18n_18c7e2556e')">
+            <a-button @click="$refs.editBuild.refresh()"> {{ $t('i18n_694fc5efa9') }}</a-button>
           </a-tooltip>
           <a-divider type="vertical" />
           <a-button
@@ -88,7 +88,7 @@
                 stepsCurrent = stepsCurrent - 1
               }
             "
-            >{{ $t('i18n.eeb6908870') }}</a-button
+            >{{ $t('i18n_eeb6908870') }}</a-button
           >
           <a-button
             type="primary"
@@ -98,15 +98,15 @@
                 stepsCurrent = stepsCurrent + 1
               }
             "
-            >{{ $t('i18n.38ce27d846') }}</a-button
+            >{{ $t('i18n_38ce27d846') }}</a-button
           >
           <a-divider type="vertical" />
 
           <a-button type="primary" @click="$refs.editBuild.handleEditBuildOk(false)">
-            {{ $t('i18n.be5fbbe34c') }}
+            {{ $t('i18n_be5fbbe34c') }}
           </a-button>
           <a-button type="primary" @click="$refs.editBuild.handleEditBuildOk(true)">
-            {{ $t('i18n.a577822cdd') }}
+            {{ $t('i18n_a577822cdd') }}
           </a-button>
         </a-space>
       </template>

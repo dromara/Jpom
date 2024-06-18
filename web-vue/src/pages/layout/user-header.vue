@@ -5,9 +5,9 @@
       <a-button v-if="mode === 'normal'" type="dashed" class="workspace jpom-workspace btn-group-item">
         <div class="workspace-name">
           <a-tooltip
-            :title="`${$t('i18n.8f36f2ede7')}${selectWorkspace.name} ${$t('i18n.d7ec97aecd')}${
-              selectWorkspace.group || $t('i18n.71dc8feb59')
-            }${$t('i18n.5942e7ebd0')}`"
+            :title="`${$t('i18n_8f36f2ede7')}${selectWorkspace.name} ${$t('i18n_d7ec97aecd')}${
+              selectWorkspace.group || $t('i18n_71dc8feb59')
+            }${$t('i18n_5942e7ebd0')}`"
             placement="bottom"
           >
             <SwitcherOutlined />
@@ -31,7 +31,7 @@
       </a-button>
       <a-button v-if="mode === 'management'" type="dashed">
         <div class="workspace-name">
-          <a-tooltip :title="`${$t('i18n.f668c8c881')}${selectCluster && selectCluster.name}`" placement="bottom">
+          <a-tooltip :title="`${$t('i18n_f668c8c881')}${selectCluster && selectCluster.name}`" placement="bottom">
             <ClusterOutlined />
             {{ selectCluster && selectCluster.name }}
           </a-tooltip>
@@ -50,7 +50,7 @@
             <template v-if="mode === 'normal'">
               <a-sub-menu>
                 <template #title>
-                  <a-button type="link"><RetweetOutlined />{{ $t('i18n.ccb2fdd838') }}</a-button>
+                  <a-button type="link"><RetweetOutlined />{{ $t('i18n_ccb2fdd838') }}</a-button>
                 </template>
                 <template v-if="myWorkspaceList.length == 1">
                   <template v-for="(item, index) in myWorkspaceList[0].children">
@@ -61,9 +61,9 @@
                       @click="handleWorkspaceChange(item)"
                     >
                       <a-button type="link" :disabled="item.id === selectWorkspace.id">
-                        {{ item.name || $t('i18n.71dc8feb59') }}
+                        {{ item.name || $t('i18n_71dc8feb59') }}
                         <template v-if="myClusterList.length > 1 && item.clusterInfoId">
-                          {{ $t('i18n.0341329b1d')
+                          {{ $t('i18n_0341329b1d')
                           }}{{
                             myClusterList.find((item2) => {
                               return item2.id === item.clusterInfoId
@@ -71,7 +71,7 @@
                             myClusterList.find((item2) => {
                               return item2.id === item.clusterInfoId
                             }).name
-                          }}{{ $t('i18n.5942e7ebd0') }}
+                          }}{{ $t('i18n_5942e7ebd0') }}
                         </template>
                       </a-button>
                     </a-menu-item>
@@ -83,7 +83,7 @@
                     <a-sub-menu>
                       <template #title>
                         <a-button type="link">
-                          {{ item1.value || $t('i18n.71dc8feb59') }}
+                          {{ item1.value || $t('i18n_71dc8feb59') }}
                         </a-button>
                       </template>
                       <template v-for="(item, index) in item1.children">
@@ -96,7 +96,7 @@
                           <a-button type="link" :disabled="item.id === selectWorkspace.id">
                             {{ item.name }}
                             <template v-if="myClusterList.length > 1 && item.clusterInfoId">
-                              {{ $t('i18n.0341329b1d')
+                              {{ $t('i18n_0341329b1d')
                               }}{{
                                 myClusterList.find((item2) => {
                                   return item2.id === item.clusterInfoId
@@ -104,7 +104,7 @@
                                 myClusterList.find((item2) => {
                                   return item2.id === item.clusterInfoId
                                 }).name
-                              }}{{ $t('i18n.5942e7ebd0') }}
+                              }}{{ $t('i18n_5942e7ebd0') }}
                             </template>
                           </a-button>
                         </a-menu-item>
@@ -121,7 +121,7 @@
             <template v-if="mode === 'management'">
               <a-sub-menu>
                 <template #title>
-                  <a-button type="link"><RetweetOutlined />{{ $t('i18n.d61b8fde35') }}</a-button>
+                  <a-button type="link"><RetweetOutlined />{{ $t('i18n_d61b8fde35') }}</a-button>
                 </template>
                 <template v-for="(item, index) in myClusterList">
                   <a-menu-item
@@ -139,31 +139,31 @@
               </a-sub-menu>
             </template>
             <a-menu-item @click="handleUpdatePwd">
-              <a-button type="link"> <lock-outlined />{{ $t('i18n.629a6ad325') }} </a-button>
+              <a-button type="link"> <lock-outlined />{{ $t('i18n_629a6ad325') }} </a-button>
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item @click="handleUpdateUser">
-              <a-button type="link"><profile-outlined /> {{ $t('i18n.d7cc44bc02') }} </a-button>
+              <a-button type="link"><profile-outlined /> {{ $t('i18n_d7cc44bc02') }} </a-button>
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item @click="handleUserlog">
-              <a-button type="link"><bars-outlined /> {{ $t('i18n.cda84be2f6') }} </a-button>
+              <a-button type="link"><bars-outlined /> {{ $t('i18n_cda84be2f6') }} </a-button>
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item @click="customize">
-              <a-button type="link"><skin-outlined /> {{ $t('i18n.b4fd7afd31') }} </a-button>
+              <a-button type="link"><skin-outlined /> {{ $t('i18n_b4fd7afd31') }} </a-button>
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item @click="logOut">
-              <a-button type="link"> <logout-outlined />{{ $t('i18n.44efd179aa') }} </a-button>
+              <a-button type="link"> <logout-outlined />{{ $t('i18n_44efd179aa') }} </a-button>
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item @click="logOutSwap">
-              <a-button type="link"> <SwapOutlined />{{ $t('i18n.86c1eb397d') }} </a-button>
+              <a-button type="link"> <SwapOutlined />{{ $t('i18n_86c1eb397d') }} </a-button>
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item @click="logOutAll">
-              <a-button type="link"><RestOutlined /> {{ $t('i18n.a795fa52cd') }} </a-button>
+              <a-button type="link"><RestOutlined /> {{ $t('i18n_a795fa52cd') }} </a-button>
             </a-menu-item>
           </a-menu>
         </template>
@@ -176,12 +176,12 @@
       v-model:open="updateNameVisible"
       destroy-on-close
       :width="'60vw'"
-      :title="$t('i18n.629a6ad325')"
+      :title="$t('i18n_629a6ad325')"
       :footer="null"
       :mask-closable="false"
     >
       <a-tabs v-model:active-key="temp.tabActiveKey" @change="tabChange">
-        <a-tab-pane :key="1" :tab="$t('i18n.7fc88aeeda')">
+        <a-tab-pane :key="1" :tab="$t('i18n_7fc88aeeda')">
           <a-spin tip="Loading..." :spinning="confirmLoading">
             <a-form
               ref="pwdForm"
@@ -191,20 +191,20 @@
               :wrapper-col="{ span: 14 }"
               @finish="handleUpdatePwdOk"
             >
-              <a-form-item :label="$t('i18n.01e94436d1')" name="oldPwd">
-                <a-input-password v-model:value="temp.oldPwd" :placeholder="$t('i18n.9c19a424dc')" />
+              <a-form-item :label="$t('i18n_01e94436d1')" name="oldPwd">
+                <a-input-password v-model:value="temp.oldPwd" :placeholder="$t('i18n_9c19a424dc')" />
               </a-form-item>
-              <a-form-item :label="$t('i18n.bf7da0bf02')" name="newPwd">
-                <a-input-password v-model:value="temp.newPwd" :placeholder="$t('i18n.abdd7ea830')" />
+              <a-form-item :label="$t('i18n_bf7da0bf02')" name="newPwd">
+                <a-input-password v-model:value="temp.newPwd" :placeholder="$t('i18n_abdd7ea830')" />
               </a-form-item>
-              <a-form-item :label="$t('i18n.3fbdde139c')" name="confirmPwd">
-                <a-input-password v-model:value="temp.confirmPwd" :placeholder="$t('i18n.a7a9a2156a')" />
+              <a-form-item :label="$t('i18n_3fbdde139c')" name="confirmPwd">
+                <a-input-password v-model:value="temp.confirmPwd" :placeholder="$t('i18n_a7a9a2156a')" />
               </a-form-item>
               <a-form-item>
                 <a-row type="flex" justify="center">
                   <a-col :span="2">
                     <a-button type="primary" html-type="submit" :loading="confirmLoading">{{
-                      $t('i18n.80cfc33cbe')
+                      $t('i18n_80cfc33cbe')
                     }}</a-button>
                   </a-col>
                 </a-row>
@@ -212,15 +212,15 @@
             </a-form>
           </a-spin>
         </a-tab-pane>
-        <a-tab-pane :key="2" :tab="$t('i18n.dbad1e89f7')">
+        <a-tab-pane :key="2" :tab="$t('i18n_dbad1e89f7')">
           <a-row>
             <a-col :span="24">
               <a-alert v-if="temp.needVerify" type="warning">
-                <template #message> {{ $t('i18n.02d9819dda') }} </template>
+                <template #message> {{ $t('i18n_02d9819dda') }} </template>
                 <template #description>
                   <ul style="color: red">
-                    <li>{{ $t('i18n.0ac9e3e675') }}</li>
-                    <li>{{ $t('i18n.8c24b5e19c') }}</li>
+                    <li>{{ $t('i18n_0ac9e3e675') }}</li>
+                    <li>{{ $t('i18n_8c24b5e19c') }}</li>
                   </ul>
                 </template>
               </a-alert>
@@ -234,16 +234,16 @@
                 :wrapper-col="{ span: 14 }"
                 @finish="handleBindMfa"
               >
-                <a-form-item :label="$t('i18n.6bf1f392c0')" name="status">
+                <a-form-item :label="$t('i18n_6bf1f392c0')" name="status">
                   <a-switch
                     v-model:checked="temp.status"
-                    :checked-children="$t('i18n.4fb95949e5')"
+                    :checked-children="$t('i18n_4fb95949e5')"
                     disabled
-                    :un-checked-children="$t('i18n.4f52df6e44')"
+                    :un-checked-children="$t('i18n_4f52df6e44')"
                   />
                 </a-form-item>
                 <template v-if="temp.needVerify">
-                  <a-form-item :label="$t('i18n.22b03c024d')">
+                  <a-form-item :label="$t('i18n_22b03c024d')">
                     <a-row>
                       <a-col :span="14">
                         <a-qrcode :value="temp.url" :status="temp.url ? 'active' : 'loading'" />
@@ -263,24 +263,24 @@
                   </a-form-item>
                 </template>
                 <!-- 不能使用  template 包裹 否则验证不能正常启用 -->
-                <a-form-item v-if="temp.needVerify" :label="$t('i18n.983f59c9d4')" name="twoCode">
-                  <a-input ref="twoCode" v-model:value="temp.twoCode" :placeholder="$t('i18n.3f18d14961')" />
+                <a-form-item v-if="temp.needVerify" :label="$t('i18n_983f59c9d4')" name="twoCode">
+                  <a-input ref="twoCode" v-model:value="temp.twoCode" :placeholder="$t('i18n_3f18d14961')" />
                 </a-form-item>
                 <a-form-item v-if="temp.needVerify">
                   <a-row type="flex" justify="center">
                     <a-col :span="2">
-                      <a-button type="primary" html-type="submit">{{ $t('i18n.b7cfa07d78') }}</a-button>
+                      <a-button type="primary" html-type="submit">{{ $t('i18n_b7cfa07d78') }}</a-button>
                     </a-col>
                   </a-row>
                 </a-form-item>
                 <!-- 不能使用  template 包裹 否则验证不能正常启用 -->
-                <a-form-item v-if="!temp.needVerify && temp.status" :label="$t('i18n.983f59c9d4')" name="twoCode">
-                  <a-input ref="twoCode" v-model:value="temp.twoCode" :placeholder="$t('i18n.3f18d14961')" />
+                <a-form-item v-if="!temp.needVerify && temp.status" :label="$t('i18n_983f59c9d4')" name="twoCode">
+                  <a-input ref="twoCode" v-model:value="temp.twoCode" :placeholder="$t('i18n_3f18d14961')" />
                 </a-form-item>
                 <a-form-item v-if="!temp.needVerify && temp.status">
                   <a-row type="flex" justify="center">
                     <a-col :span="2">
-                      <a-button type="primary" html-type="submit">{{ $t('i18n.e8e3bfbbfe') }}</a-button>
+                      <a-button type="primary" html-type="submit">{{ $t('i18n_e8e3bfbbfe') }}</a-button>
                     </a-col>
                   </a-row>
                 </a-form-item>
@@ -288,14 +288,14 @@
                 <a-form-item v-if="!temp.needVerify && !temp.status">
                   <a-row type="flex" justify="center">
                     <a-col :span="2">
-                      <a-button type="primary" @click="openMfaFn">{{ $t('i18n.1b8fff7308') }}</a-button>
+                      <a-button type="primary" @click="openMfaFn">{{ $t('i18n_1b8fff7308') }}</a-button>
                     </a-col>
                   </a-row>
                 </a-form-item>
               </a-form>
             </a-col>
             <a-col :span="12">
-              <h3 :id="$t('i18n.ceffe5d643')">{{ $t('i18n.ceffe5d643') }}</h3>
+              <h3 :id="$t('i18n_ceffe5d643')">{{ $t('i18n_ceffe5d643') }}</h3>
               <p v-for="(html, index) in MFA_APP_TIP_ARRAY" :key="index" v-html="html" />
             </a-col>
           </a-row>
@@ -308,12 +308,12 @@
       v-model:open="updateUserVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$t('i18n.ed367abd1a')"
+      :title="$t('i18n_ed367abd1a')"
       :mask-closable="false"
       @ok="handleUpdateUserOk"
     >
       <a-form ref="userForm" :rules="rules" :model="temp" :label-col="{ span: 8 }" :wrapper-col="{ span: 15 }">
-        <a-form-item :label="$t('i18n.e0f937d57f')" name="token">
+        <a-form-item :label="$t('i18n_e0f937d57f')" name="token">
           <a-input v-model:value="temp.token" disabled placeholder="Token">
             <template #suffix>
               <a-typography-paragraph style="margin-bottom: 0" :copyable="{ tooltip: true, text: temp.token }">
@@ -321,7 +321,7 @@
             </template>
           </a-input>
         </a-form-item>
-        <a-form-item :label="$t('i18n.e6bf31e8e6')" name="md5Token">
+        <a-form-item :label="$t('i18n_e6bf31e8e6')" name="md5Token">
           <a-input v-model:value="temp.md5Token" disabled placeholder="Token">
             <template #suffix>
               <a-typography-paragraph style="margin-bottom: 0" :copyable="{ tooltip: true, text: temp.md5Token }">
@@ -329,29 +329,29 @@
             </template>
           </a-input>
         </a-form-item>
-        <a-form-item :label="$t('i18n.23eb0e6024')" name="name">
-          <a-input v-model:value="temp.name" :placeholder="$t('i18n.23eb0e6024')" />
+        <a-form-item :label="$t('i18n_23eb0e6024')" name="name">
+          <a-input v-model:value="temp.name" :placeholder="$t('i18n_23eb0e6024')" />
         </a-form-item>
-        <a-form-item :label="$t('i18n.6ab78fa2c4')" name="email">
-          <a-input v-model:value="temp.email" :placeholder="$t('i18n.6ab78fa2c4')" />
+        <a-form-item :label="$t('i18n_6ab78fa2c4')" name="email">
+          <a-input v-model:value="temp.email" :placeholder="$t('i18n_6ab78fa2c4')" />
         </a-form-item>
-        <a-form-item v-show="showCode" :label="$t('i18n.e3cf0abd35')" name="code">
+        <a-form-item v-show="showCode" :label="$t('i18n_e3cf0abd35')" name="code">
           <a-row :gutter="8">
             <a-col :span="15">
-              <a-input v-model:value="temp.code" :placeholder="$t('i18n.e3cf0abd35')" />
+              <a-input v-model:value="temp.code" :placeholder="$t('i18n_e3cf0abd35')" />
             </a-col>
             <a-col :span="4">
               <a-button type="primary" :disabled="!temp.email" @click="sendEmailCode">{{
-                $t('i18n.c5c3583bfc')
+                $t('i18n_c5c3583bfc')
               }}</a-button>
             </a-col>
           </a-row>
         </a-form-item>
-        <a-form-item :label="$t('i18n.55e99f5106')" name="dingDing">
-          <a-input v-model:value="temp.dingDing" :placeholder="$t('i18n.55e99f5106')" />
+        <a-form-item :label="$t('i18n_55e99f5106')" name="dingDing">
+          <a-input v-model:value="temp.dingDing" :placeholder="$t('i18n_55e99f5106')" />
         </a-form-item>
-        <a-form-item :label="$t('i18n.2246d128cb')" name="workWx">
-          <a-input v-model:value="temp.workWx" :placeholder="$t('i18n.2246d128cb')" />
+        <a-form-item :label="$t('i18n_2246d128cb')" name="workWx">
+          <a-input v-model:value="temp.workWx" :placeholder="$t('i18n_2246d128cb')" />
         </a-form-item>
       </a-form>
     </CustomModal>
@@ -360,14 +360,14 @@
       v-if="customizeVisible"
       v-model:open="customizeVisible"
       destroy-on-close
-      :title="$t('i18n.cb09b98416')"
+      :title="$t('i18n_cb09b98416')"
       :footer="null"
       :mask-closable="false"
       width="50%"
     >
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
         <a-alert banner>
-          <template #message> {{ $t('i18n.bf93517805') }},{{ $t('i18n.52b526ab9e') }} </template>
+          <template #message> {{ $t('i18n_bf93517805') }},{{ $t('i18n_52b526ab9e') }} </template>
         </a-alert>
         <!-- <a-form-item label="页面导航">
           <a-space>
@@ -385,13 +385,13 @@
             </div>
           </a-space>
         </a-form-item> -->
-        <a-form-item :label="$t('i18n.156af3b3d1')">
-          <template #help>{{ $t('i18n.ecdf9093d0') }}</template>
+        <a-form-item :label="$t('i18n_156af3b3d1')">
+          <template #help>{{ $t('i18n_ecdf9093d0') }}</template>
 
           <a-switch
-            :checked-children="$t('i18n.0a60ac8f02')"
+            :checked-children="$t('i18n_0a60ac8f02')"
             :checked="menuMultipleFlag"
-            :un-checked-children="$t('i18n.c9744f45e7')"
+            :un-checked-children="$t('i18n_c9744f45e7')"
             @click="toggleMenuMultiple"
           />
         </a-form-item>
@@ -417,44 +417,44 @@
             />
           </a-space>
         </a-form-item> -->
-        <a-form-item :label="$t('i18n.0113fc41fc')">
-          <template #help>{{ $t('i18n.b5fdd886b6') }}</template>
+        <a-form-item :label="$t('i18n_0113fc41fc')">
+          <template #help>{{ $t('i18n_b5fdd886b6') }}</template>
 
           <a-switch
-            :checked-children="$t('i18n.185926bf98')"
+            :checked-children="$t('i18n_185926bf98')"
             :checked="fullscreenViewLog"
-            :un-checked-children="$t('i18n.c5a2c23d89')"
+            :un-checked-children="$t('i18n_c5a2c23d89')"
             @click="toggleFullscreenViewLog"
           />
         </a-form-item>
-        <a-form-item :label="$t('i18n.5d9c139f38')">
+        <a-form-item :label="$t('i18n_5d9c139f38')">
           <a-radio-group v-model:value="themeView" button-style="solid">
             <a-radio-button v-for="item in getSupportThemes" :key="item.value" :value="item.value">
               {{ item.label }}
             </a-radio-button>
           </a-radio-group>
 
-          <template #help>{{ $t('i18n.2b4bb321d7') }}</template>
+          <template #help>{{ $t('i18n_2b4bb321d7') }}</template>
         </a-form-item>
-        <a-form-item :label="$t('i18n.593e04dfad')">
+        <a-form-item :label="$t('i18n_593e04dfad')">
           <a-radio-group v-model:value="menuThemeView" button-style="solid">
-            <a-radio-button value="light">{{ $t('i18n.48d0a09bdd') }}</a-radio-button>
-            <a-radio-button value="dark">{{ $t('i18n.41e8e8b993') }}</a-radio-button>
+            <a-radio-button value="light">{{ $t('i18n_48d0a09bdd') }}</a-radio-button>
+            <a-radio-button value="dark">{{ $t('i18n_41e8e8b993') }}</a-radio-button>
           </a-radio-group>
 
-          <template #help>{{ $t('i18n.fbfeb76b33') }}</template>
+          <template #help>{{ $t('i18n_fbfeb76b33') }}</template>
         </a-form-item>
 
-        <a-form-item :label="$t('i18n.4f50cd2a5e')">
+        <a-form-item :label="$t('i18n_4f50cd2a5e')">
           <a-switch
-            :checked-children="$t('i18n.03e59bb33c')"
+            :checked-children="$t('i18n_03e59bb33c')"
             :checked="compactView"
-            :un-checked-children="$t('i18n.43e534acf9')"
+            :un-checked-children="$t('i18n_43e534acf9')"
             @click="toggleCompactView"
           />
         </a-form-item>
-        <a-form-item :label="$t('i18n.295bb704f5')">
-          <template #help>{{ $t('i18n.9030cebe31') }}</template>
+        <a-form-item :label="$t('i18n_295bb704f5')">
+          <template #help>{{ $t('i18n_9030cebe31') }}</template>
           <a-radio-group v-model:value="locale" button-style="solid">
             <a-radio-button v-for="item in supportLang" :key="item.value" :value="item.value">{{
               item.label
@@ -468,16 +468,16 @@
       v-if="bindMfaTip"
       v-model:open="bindMfaTip"
       destroy-on-close
-      :title="$t('i18n.84777ebf8b')"
+      :title="$t('i18n_84777ebf8b')"
       :footer="null"
       :mask-closable="false"
       :closable="false"
       :keyboard="false"
     >
       <a-space direction="vertical">
-        <a-alert :message="$t('i18n.84777ebf8b')" :description="$t('i18n.4af980516d')" type="error" :closable="false" />
+        <a-alert :message="$t('i18n_84777ebf8b')" :description="$t('i18n_4af980516d')" type="error" :closable="false" />
         <a-row align="middle" type="flex" justify="center">
-          <a-button type="danger" @click="toBindMfa"> {{ $t('i18n.97a19328a8') }} </a-button>
+          <a-button type="danger" @click="toBindMfa"> {{ $t('i18n_97a19328a8') }} </a-button>
         </a-row>
       </a-space>
     </CustomModal>
@@ -487,7 +487,7 @@
       v-model:open="viewLogVisible"
       destroy-on-close
       :width="'90vw'"
-      :title="$t('i18n.cda84be2f6')"
+      :title="$t('i18n_cda84be2f6')"
       :footer="null"
       :mask-closable="false"
     >
@@ -547,35 +547,35 @@ export default {
       // 表单校验规则
       rules: {
         name: [
-          { required: true, message: this.$t('i18n.916ff9eddd'), trigger: 'blur' },
-          { max: 10, message: this.$t('i18n.6446b6c707'), trigger: 'blur' },
-          { min: 2, message: this.$t('i18n.6446b6c707'), trigger: 'blur' }
+          { required: true, message: this.$t('i18n_916ff9eddd'), trigger: 'blur' },
+          { max: 10, message: this.$t('i18n_6446b6c707'), trigger: 'blur' },
+          { min: 2, message: this.$t('i18n_6446b6c707'), trigger: 'blur' }
         ],
 
         oldPwd: [
-          { required: true, message: this.$t('i18n.9c19a424dc'), trigger: 'blur' },
-          { max: 20, message: this.$t('i18n.f4b7c18635'), trigger: 'blur' },
-          { min: 6, message: this.$t('i18n.f4b7c18635'), trigger: 'blur' }
+          { required: true, message: this.$t('i18n_9c19a424dc'), trigger: 'blur' },
+          { max: 20, message: this.$t('i18n_f4b7c18635'), trigger: 'blur' },
+          { min: 6, message: this.$t('i18n_f4b7c18635'), trigger: 'blur' }
         ],
 
         newPwd: [
-          { required: true, message: this.$t('i18n.abdd7ea830'), trigger: 'blur' },
-          { max: 20, message: this.$t('i18n.f4b7c18635'), trigger: 'blur' },
-          { min: 6, message: this.$t('i18n.f4b7c18635'), trigger: 'blur' }
+          { required: true, message: this.$t('i18n_abdd7ea830'), trigger: 'blur' },
+          { max: 20, message: this.$t('i18n_f4b7c18635'), trigger: 'blur' },
+          { min: 6, message: this.$t('i18n_f4b7c18635'), trigger: 'blur' }
         ],
 
         confirmPwd: [
-          { required: true, message: this.$t('i18n.a7a9a2156a'), trigger: 'blur' },
-          { max: 20, message: this.$t('i18n.f4b7c18635'), trigger: 'blur' },
-          { min: 6, message: this.$t('i18n.f4b7c18635'), trigger: 'blur' }
+          { required: true, message: this.$t('i18n_a7a9a2156a'), trigger: 'blur' },
+          { max: 20, message: this.$t('i18n_f4b7c18635'), trigger: 'blur' },
+          { min: 6, message: this.$t('i18n_f4b7c18635'), trigger: 'blur' }
         ],
 
         email: [
           // { required: true, message: "请输入邮箱", trigger: "blur" }
         ],
         twoCode: [
-          { required: true, message: this.$t('i18n.7e866fece6'), trigger: ['change', 'blur'] },
-          { pattern: /^\d{6}$/, message: this.$t('i18n.da1abf0865'), trigger: ['change', 'blur'] }
+          { required: true, message: this.$t('i18n_7e866fece6'), trigger: ['change', 'blur'] },
+          { pattern: /^\d{6}$/, message: this.$t('i18n_da1abf0865'), trigger: ['change', 'blur'] }
         ]
       },
       MFA_APP_TIP_ARRAY,
@@ -720,11 +720,11 @@ export default {
         .then((flag) => {
           if (flag) {
             $notification.success({
-              message: this.$t('i18n.fe231ff92f')
+              message: this.$t('i18n_fe231ff92f')
             })
           } else {
             $notification.success({
-              message: this.$t('i18n.c75d0beca8')
+              message: this.$t('i18n_c75d0beca8')
             })
           }
         })
@@ -736,11 +736,11 @@ export default {
         .then((flag) => {
           if (flag) {
             $notification.success({
-              message: this.$t('i18n.63c9d63eeb')
+              message: this.$t('i18n_63c9d63eeb')
             })
           } else {
             $notification.success({
-              message: this.$t('i18n.1498557b2d')
+              message: this.$t('i18n_1498557b2d')
             })
           }
         })
@@ -752,11 +752,11 @@ export default {
         .then((flag) => {
           if (flag) {
             $notification.success({
-              message: this.$t('i18n.ef28d3bff2')
+              message: this.$t('i18n_ef28d3bff2')
             })
           } else {
             $notification.success({
-              message: this.$t('i18n.ba6ea3d480')
+              message: this.$t('i18n_ba6ea3d480')
             })
           }
         })
@@ -768,11 +768,11 @@ export default {
         .then((flag) => {
           if (flag) {
             $notification.success({
-              message: this.$t('i18n.af51211a73')
+              message: this.$t('i18n_af51211a73')
             })
           } else {
             $notification.success({
-              message: this.$t('i18n.1afdb4a364')
+              message: this.$t('i18n_1afdb4a364')
             })
           }
         })
@@ -784,11 +784,11 @@ export default {
         .then((fullscreenViewLog) => {
           if (fullscreenViewLog) {
             $notification.success({
-              message: this.$t('i18n.82b89bd049')
+              message: this.$t('i18n_82b89bd049')
             })
           } else {
             $notification.success({
-              message: this.$t('i18n.57978c11d1')
+              message: this.$t('i18n_57978c11d1')
             })
           }
         })
@@ -799,11 +799,11 @@ export default {
         .then((compact) => {
           if (compact) {
             $notification.success({
-              message: this.$t('i18n.6e60d2fc75')
+              message: this.$t('i18n_6e60d2fc75')
             })
           } else {
             $notification.success({
-              message: this.$t('i18n.702430b89d')
+              message: this.$t('i18n_702430b89d')
             })
           }
         })
@@ -813,24 +813,24 @@ export default {
         .restGuide()
         .then(() => {
           $notification.success({
-            message: this.$t('i18n.dddf944f5f')
+            message: this.$t('i18n_dddf944f5f')
           })
         })
     },
     // 彻底退出登录
     logOutAll() {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.8e38d55231'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_8e38d55231'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return useUserStore()
             .logOut()
             .then(() => {
               $notification.success({
-                message: this.$t('i18n.499f058a0b')
+                message: this.$t('i18n_499f058a0b')
               })
               localStorage.clear()
               this.$router.replace({
@@ -844,17 +844,17 @@ export default {
     // 切换账号登录
     logOutSwap() {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.ac783bca36'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_ac783bca36'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return useUserStore()
             .logOut()
             .then(() => {
               $notification.success({
-                message: this.$t('i18n.499f058a0b')
+                message: this.$t('i18n_499f058a0b')
               })
               useAppStore().changeWorkspace('')
               this.$router.replace({
@@ -868,17 +868,17 @@ export default {
     // 退出登录
     logOut() {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.70b9a2c450'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_70b9a2c450'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return useUserStore()
             .logOut()
             .then(() => {
               $notification.success({
-                message: this.$t('i18n.499f058a0b')
+                message: this.$t('i18n_499f058a0b')
               })
               const query = Object.assign({}, this.$route.query)
               this.$router.replace({
@@ -899,7 +899,7 @@ export default {
       // 判断两次新密码是否一致
       if (this.temp.newPwd !== this.temp.confirmPwd) {
         $notification.error({
-          message: this.$t('i18n.6f15f0beea')
+          message: this.$t('i18n_6f15f0beea')
         })
         return
       }
@@ -946,7 +946,7 @@ export default {
     sendEmailCode() {
       if (!this.temp.email) {
         $notification.error({
-          message: this.$t('i18n.2ba4c81587')
+          message: this.$t('i18n_2ba4c81587')
         })
         return
       }
@@ -1016,7 +1016,7 @@ export default {
         location.href = url
       } else {
         $notification.error({
-          message: this.$t('i18n.db2d99ed33')
+          message: this.$t('i18n_db2d99ed33')
         })
       }
     },
@@ -1055,7 +1055,7 @@ export default {
 
           $notification.info({
             // placement: "",
-            message: this.$t('i18n.d1b8eaaa9e')
+            message: this.$t('i18n_d1b8eaaa9e')
           })
         }
       })
@@ -1076,11 +1076,11 @@ export default {
         })
       } else {
         $confirm({
-          title: this.$t('i18n.c4535759ee'),
+          title: this.$t('i18n_c4535759ee'),
           zIndex: 1009,
-          content: this.$t('i18n.2b21998b7b'),
-          okText: this.$t('i18n.e83a256e4f'),
-          cancelText: this.$t('i18n.625fb26b4b'),
+          content: this.$t('i18n_2b21998b7b'),
+          okText: this.$t('i18n_e83a256e4f'),
+          cancelText: this.$t('i18n_625fb26b4b'),
           onOk: () => {
             return closeMfa({
               code: this.temp.twoCode

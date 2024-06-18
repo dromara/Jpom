@@ -4,11 +4,11 @@
       <a-card hoverable class="card">
         <a-card-meta>
           <template #description>
-            <a-result status="404" title="404" :sub-title="$t('i18n.603dc06c4b')">
+            <a-result status="404" title="404" :sub-title="$t('i18n_603dc06c4b')">
               <a-space>
                 <a-button type="primary" @click="goHome">
                   <HomeOutlined />
-                  <span>{{ $t('i18n.5a1367058c') }}</span>
+                  <span>{{ $t('i18n_5a1367058c') }}</span>
                 </a-button>
                 <!-- <a-button type="primary" @click="goBack">
                   <left-outlined />

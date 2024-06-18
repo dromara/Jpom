@@ -15,13 +15,13 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%commandName%']"
-            :placeholder="$t('i18n.1f08329bc4')"
+            :placeholder="$t('i18n_1f08329bc4')"
             class="search-input-item"
             @press-enter="getCommandLogData"
           />
           <a-input
             v-model:value="listQuery['%sshName%']"
-            :placeholder="$t('i18n.d584e1493b')"
+            :placeholder="$t('i18n_d584e1493b')"
             class="search-input-item"
             @press-enter="getCommandLogData"
           />
@@ -39,7 +39,7 @@
               }
             "
             allow-clear
-            :placeholder="$t('i18n.3fea7ca76c')"
+            :placeholder="$t('i18n_3fea7ca76c')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
@@ -58,14 +58,14 @@
               }
             "
             allow-clear
-            :placeholder="$t('i18n.ff9814bf6b')"
+            :placeholder="$t('i18n_ff9814bf6b')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in triggerExecTypeMap" :key="key">{{ val }}</a-select-option>
           </a-select>
-          <a-tooltip :title="$t('i18n.4838a3bd20')">
+          <a-tooltip :title="$t('i18n_4838a3bd20')">
             <a-button type="primary" :loading="loading" @click="getCommandLogData">{{
-              $t('i18n.e5f71fc31e')
+              $t('i18n_e5f71fc31e')
             }}</a-button>
           </a-tooltip>
         </a-space>
@@ -82,26 +82,26 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'status'">
-          <span>{{ statusMap[text] || $t('i18n.1622dc9b6b') }}</span>
+          <span>{{ statusMap[text] || $t('i18n_1622dc9b6b') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'triggerExecType'">
-          <span>{{ triggerExecTypeMap[text] || $t('i18n.1622dc9b6b') }}</span>
+          <span>{{ triggerExecTypeMap[text] || $t('i18n_1622dc9b6b') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'exitCode'">
-          <a-tag v-if="text == 0" color="green">{{ $t('i18n.330363dfc5') }}</a-tag>
+          <a-tag v-if="text == 0" color="green">{{ $t('i18n_330363dfc5') }}</a-tag>
           <a-tag v-else color="orange">{{ text || '-' }}</a-tag>
         </template>
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button type="primary" size="small" :disabled="!record.hasLog" @click="handleView(record)">{{
-              $t('i18n.607e7a4f37')
+              $t('i18n_607e7a4f37')
             }}</a-button>
             <a-button type="primary" size="small" :disabled="!record.hasLog" @click="handleDownload(record)"
-              ><DownloadOutlined />{{ $t('i18n.456d29ef8b') }}</a-button
+              ><DownloadOutlined />{{ $t('i18n_456d29ef8b') }}</a-button
             >
             <a-button type="primary" danger size="small" @click="handleDelete(record)">{{
-              $t('i18n.2f4aaddde3')
+              $t('i18n_2f4aaddde3')
             }}</a-button>
           </a-space>
         </template>
@@ -115,7 +115,7 @@
       :width="style.width"
       :body-style="style.bodyStyle"
       :style="style.style"
-      :title="$t('i18n.c84ddfe8a6')"
+      :title="$t('i18n_c84ddfe8a6')"
       :footer="null"
       :mask-closable="false"
     >
@@ -144,35 +144,35 @@ export default {
       logVisible: false,
       columns: [
         {
-          title: `ssh ${this.$t('i18n.d7ec2d3fea')}`,
+          title: `ssh ${this.$t('i18n_d7ec2d3fea')}`,
           dataIndex: 'sshName',
           ellipsis: true
         },
         {
-          title: this.$t('i18n.6496a5a043'),
+          title: this.$t('i18n_6496a5a043'),
           dataIndex: 'commandName',
           ellipsis: true
         },
         {
-          title: this.$t('i18n.3fea7ca76c'),
+          title: this.$t('i18n_3fea7ca76c'),
           dataIndex: 'status',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.3fb63afb4e'),
+          title: this.$t('i18n_3fb63afb4e'),
           dataIndex: 'exitCode',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.ff9814bf6b'),
+          title: this.$t('i18n_ff9814bf6b'),
           dataIndex: 'triggerExecType',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.70b3635aa3'),
+          title: this.$t('i18n_70b3635aa3'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -182,7 +182,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('i18n.f782779e8b'),
+          title: this.$t('i18n_f782779e8b'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -192,13 +192,13 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('i18n.a497562c8e'),
+          title: this.$t('i18n_a497562c8e'),
           dataIndex: 'modifyUser',
           width: 120,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
           align: 'center',
           fixed: 'right',
@@ -246,11 +246,11 @@ export default {
     //  删除命令
     handleDelete(row) {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.50fe3400c7'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_50fe3400c7'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return deleteCommandLog(row.id).then((res) => {
             if (res.code === 200) {

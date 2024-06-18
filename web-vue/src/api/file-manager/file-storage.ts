@@ -89,14 +89,14 @@ export function triggerUrl(params) {
 }
 
 export const sourceMap = {
-  0: t('i18n.d5a73b0c7f'),
-  1: t('i18n.fcba60e773'),
-  2: t('i18n.f26ef91424'),
-  3: t('i18n.d40b511510')
+  0: t('i18n_d5a73b0c7f'),
+  1: t('i18n_fcba60e773'),
+  2: t('i18n_f26ef91424'),
+  3: t('i18n_d40b511510')
 }
 
 export const statusMap = {
-  0: t('i18n.2d455ce5cd'),
-  1: t('i18n.50940ed76f'),
-  2: t('i18n.af924a1a14')
+  0: t('i18n_2d455ce5cd'),
+  1: t('i18n_50940ed76f'),
+  2: t('i18n_af924a1a14')
 }

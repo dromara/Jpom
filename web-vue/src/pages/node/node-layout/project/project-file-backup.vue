@@ -12,7 +12,7 @@
           x: 'max-content'
         }"
       >
-        <template v-if="backupListData.path" #title> {{ $t('i18n.1b38c0bc86') }}{{ backupListData.path }} </template>
+        <template v-if="backupListData.path" #title> {{ $t('i18n_1b38c0bc86') }}{{ backupListData.path }} </template>
 
         <template #bodyCell="{ column, text, record }">
           <template v-if="column.dataIndex === 'filename'">
@@ -33,10 +33,10 @@
           <template v-else-if="column.dataIndex === 'operation'">
             <a-space>
               <a-button size="small" type="primary" @click="handleBackupFile(record)">{{
-                $t('i18n.f26225bde6')
+                $t('i18n_f26225bde6')
               }}</a-button>
               <a-button size="small" type="primary" danger @click="handlBackupeDelete(record)">{{
-                $t('i18n.2f4aaddde3')
+                $t('i18n_2f4aaddde3')
               }}</a-button>
             </a-space>
           </template>
@@ -57,9 +57,9 @@
                   viewList = true
                 }
               "
-              >{{ $t('i18n.adcd1dd701') }}
+              >{{ $t('i18n_adcd1dd701') }}
             </a-button>
-            <a-button size="small" type="primary" @click="loadData">{{ $t('i18n.90b5a467c1') }}</a-button>
+            <a-button size="small" type="primary" @click="loadData">{{ $t('i18n_90b5a467c1') }}</a-button>
           </a-space>
         </div>
 
@@ -87,11 +87,11 @@
         >
           <template #title>
             <a-popconfirm
-              :title="`${uploadPath ? $t('i18n.bdd4cddd22') + uploadPath + $t('i18n.dadd4907c2') : ''} ${$t(
-                'i18n.aefd8f9f27'
-              )},${$t('i18n.500789168c')}`"
-              :ok-text="$t('i18n.587a63264b')"
-              :cancel-text="$t('i18n.b1a09cee8e')"
+              :title="`${uploadPath ? $t('i18n_bdd4cddd22') + uploadPath + $t('i18n_dadd4907c2') : ''} ${$t(
+                'i18n_aefd8f9f27'
+              )},${$t('i18n_500789168c')}`"
+              :ok-text="$t('i18n_587a63264b')"
+              :cancel-text="$t('i18n_b1a09cee8e')"
               :ok-button-props="{
                 loading: recoverLoading
               }"
@@ -102,11 +102,11 @@
                 <QuestionCircleOutlined style="color: red" />
               </template>
               <!-- @click="recoverPath(uploadPath)" -->
-              <a-button size="small" type="primary">{{ $t('i18n.69de8d7f40') }}</a-button>
+              <a-button size="small" type="primary">{{ $t('i18n_69de8d7f40') }}</a-button>
             </a-popconfirm>
 
             <a-space>
-              <a-tag v-if="uploadPath" color="#2db7f5">{{ $t('i18n.2c8109fa0b') }}{{ uploadPath || '' }}</a-tag>
+              <a-tag v-if="uploadPath" color="#2db7f5">{{ $t('i18n_2c8109fa0b') }}{{ uploadPath || '' }}</a-tag>
             </a-space>
           </template>
 
@@ -119,7 +119,7 @@
             </template>
             <template v-else-if="column.dataIndex === 'isDirectory'">
               <a-tooltip placement="topLeft" :title="text">
-                <span>{{ text ? $t('i18n.767fa455bb') : $t('i18n.2a0c4740f1') }}</span>
+                <span>{{ text ? $t('i18n_767fa455bb') : $t('i18n_2a0c4740f1') }}</span>
               </a-tooltip>
             </template>
             <template v-else-if="column.dataIndex === 'fileSizeLong'">
@@ -135,23 +135,23 @@
             <template v-else-if="column.dataIndex === 'operation'">
               <a-space>
                 <template v-if="record.isDirectory">
-                  <a-tooltip :title="$t('i18n.6c14188ba0')">
-                    <a-button size="small" type="primary" :disabled="true">{{ $t('i18n.f26ef91424') }}</a-button>
+                  <a-tooltip :title="$t('i18n_6c14188ba0')">
+                    <a-button size="small" type="primary" :disabled="true">{{ $t('i18n_f26ef91424') }}</a-button>
                   </a-tooltip>
                 </template>
                 <template v-else>
                   <a-button size="small" type="primary" @click="handleDownload(record)">{{
-                    $t('i18n.f26ef91424')
+                    $t('i18n_f26ef91424')
                   }}</a-button>
                 </template>
                 <template v-if="record.isDirectory">
                   <!-- record.filename -->
                   <a-popconfirm
                     :title="`${
-                      record.filename ? $t('i18n.bdd4cddd22') + record.filename + $t('i18n.dadd4907c2') : ''
-                    } ${$t('i18n.aefd8f9f27')},${$t('i18n.500789168c')}`"
-                    :ok-text="$t('i18n.587a63264b')"
-                    :cancel-text="$t('i18n.b1a09cee8e')"
+                      record.filename ? $t('i18n_bdd4cddd22') + record.filename + $t('i18n_dadd4907c2') : ''
+                    } ${$t('i18n_aefd8f9f27')},${$t('i18n_500789168c')}`"
+                    :ok-text="$t('i18n_587a63264b')"
+                    :cancel-text="$t('i18n_b1a09cee8e')"
                     :ok-button-props="{
                       loading: recoverLoading
                     }"
@@ -161,17 +161,17 @@
                     <template #icon>
                       <QuestionCircleOutlined style="color: red" />
                     </template>
-                    <a-button size="small" type="primary">{{ $t('i18n.69de8d7f40') }}</a-button>
+                    <a-button size="small" type="primary">{{ $t('i18n_69de8d7f40') }}</a-button>
                   </a-popconfirm>
                 </template>
                 <template v-else>
                   <a-button size="small" type="primary" :loading="recoverLoading" @click="recover(record)">{{
-                    $t('i18n.69de8d7f40')
+                    $t('i18n_69de8d7f40')
                   }}</a-button>
                 </template>
 
                 <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-                  $t('i18n.2f4aaddde3')
+                  $t('i18n_2f4aaddde3')
                 }}</a-button>
               </a-space>
             </template>
@@ -227,25 +227,25 @@ export default {
       selectedKeys: [],
       columns: [
         {
-          title: this.$t('i18n.d2e2560089'),
+          title: this.$t('i18n_d2e2560089'),
           dataIndex: 'filename',
           ellipsis: true
         },
 
         {
-          title: this.$t('i18n.396b7d3f91'),
+          title: this.$t('i18n_396b7d3f91'),
           dataIndex: 'fileSizeLong',
           width: 120,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.1303e638b5'),
+          title: this.$t('i18n_1303e638b5'),
           dataIndex: 'modifyTimeLong',
           width: 180,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
           width: 180,
           align: 'center',
@@ -255,30 +255,30 @@ export default {
 
       fileColumns: [
         {
-          title: this.$t('i18n.d2e2560089'),
+          title: this.$t('i18n_d2e2560089'),
           dataIndex: 'filename',
           ellipsis: true
         },
         {
-          title: this.$t('i18n.28b988ce6a'),
+          title: this.$t('i18n_28b988ce6a'),
           dataIndex: 'isDirectory',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.396b7d3f91'),
+          title: this.$t('i18n_396b7d3f91'),
           dataIndex: 'fileSizeLong',
           width: 120,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.1303e638b5'),
+          title: this.$t('i18n_1303e638b5'),
           dataIndex: 'modifyTimeLong',
           width: 180,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
           width: 180,
           align: 'center',
@@ -333,7 +333,7 @@ export default {
       const key = 'root-' + new Date().getTime()
       this.treeList = [
         {
-          filename: this.$t('i18n.cfeff30d2c') + (this.temp.filename || ''),
+          filename: this.$t('i18n_cfeff30d2c') + (this.temp.filename || ''),
           level: 1,
           isDirectory: true,
           key: key,
@@ -405,7 +405,7 @@ export default {
     loadFileList() {
       if (Object.keys(this.tempNode).length === 0) {
         $notification.warn({
-          message: this.$t('i18n.bcaf69a038')
+          message: this.$t('i18n_bcaf69a038')
         })
         return false
       }
@@ -438,7 +438,7 @@ export default {
     // 下载
     handleDownload(record) {
       $notification.info({
-        message: this.$t('i18n.e4bf491a0d')
+        message: this.$t('i18n_e4bf491a0d')
       })
       // 请求参数
       const params = {
@@ -454,14 +454,14 @@ export default {
     // 删除
     handleDelete(record) {
       const msg = record.isDirectory
-        ? this.$t('i18n.3cc09369ad') + record.filename + this.$t('i18n.52a8df6678')
-        : this.$t('i18n.3cc09369ad') + record.filename + this.$t('i18n.48e79b3340')
+        ? this.$t('i18n_3cc09369ad') + record.filename + this.$t('i18n_52a8df6678')
+        : this.$t('i18n_3cc09369ad') + record.filename + this.$t('i18n_48e79b3340')
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
         content: msg,
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return backupDeleteProjectFile({
             nodeId: this.nodeId,
@@ -483,13 +483,13 @@ export default {
     },
     // 删除备份
     handlBackupeDelete(record) {
-      const msg = this.$t('i18n.3cc09369ad') + record.filename + this.$t('i18n.115cd58b5d')
+      const msg = this.$t('i18n_3cc09369ad') + record.filename + this.$t('i18n_115cd58b5d')
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
         content: msg,
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return backupDeleteProjectFile({
             nodeId: this.nodeId,
@@ -519,11 +519,11 @@ export default {
         this.recoverPath(record.filename)
       } else {
         $confirm({
-          title: this.$t('i18n.c4535759ee'),
+          title: this.$t('i18n_c4535759ee'),
           zIndex: 1009,
-          content: this.$t('i18n.d2cac1245d') + record.filename + this.$t('i18n.e039ffccc8'),
-          okText: this.$t('i18n.e83a256e4f'),
-          cancelText: this.$t('i18n.625fb26b4b'),
+          content: this.$t('i18n_d2cac1245d') + record.filename + this.$t('i18n_e039ffccc8'),
+          okText: this.$t('i18n_e83a256e4f'),
+          cancelText: this.$t('i18n_625fb26b4b'),
           onOk() {
             // // 请求参数
             this.recoverNet('', record.filename)

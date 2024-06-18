@@ -1,29 +1,29 @@
 <template>
   <div>
     <a-form :model="temp" :label-col="{ span: 2 }" :wrapper-col="{ span: 20 }">
-      <a-form-item :label="$t('i18n.ce23a42b47')" name="name">
-        <a-input :placeholder="$t('i18n.5f4c724e61')" :disabled="true" :value="temp.taskData && temp.taskData.name" />
+      <a-form-item :label="$t('i18n_ce23a42b47')" name="name">
+        <a-input :placeholder="$t('i18n_5f4c724e61')" :disabled="true" :value="temp.taskData && temp.taskData.name" />
       </a-form-item>
 
-      <a-form-item :label="$t('i18n.f98994f7ec')" name="taskType">
+      <a-form-item :label="$t('i18n_f98994f7ec')" name="taskType">
         <a-radio-group :value="temp.taskData && temp.taskData.taskType" :disabled="true">
           <a-radio :value="0"> SSH </a-radio>
-          <a-radio :value="1"> {{ $t('i18n.3bf3c0a8d6') }} </a-radio>
+          <a-radio :value="1"> {{ $t('i18n_3bf3c0a8d6') }} </a-radio>
         </a-radio-group>
       </a-form-item>
 
-      <a-form-item name="releasePath" :label="$t('i18n.dbb2df00cf')">
+      <a-form-item name="releasePath" :label="$t('i18n_dbb2df00cf')">
         <a-input
-          :placeholder="$t('i18n.5f4c724e61')"
+          :placeholder="$t('i18n_5f4c724e61')"
           :disabled="true"
           :value="temp.taskData && temp.taskData.releasePath"
         />
       </a-form-item>
-      <a-form-item name="releasePath" :label="$t('i18n.3fea7ca76c')" :help="temp.taskData && temp.taskData.statusMsg">
-        {{ statusMap[temp.taskData && temp.taskData.status] || $t('i18n.1622dc9b6b') }}
+      <a-form-item name="releasePath" :label="$t('i18n_3fea7ca76c')" :help="temp.taskData && temp.taskData.statusMsg">
+        {{ statusMap[temp.taskData && temp.taskData.status] || $t('i18n_1622dc9b6b') }}
       </a-form-item>
 
-      <a-form-item :label="$t('i18n.c84ddfe8a6')">
+      <a-form-item :label="$t('i18n_c84ddfe8a6')">
         <a-tabs :active-key="activeKey" @change="tabCallback">
           <a-tab-pane v-for="item in temp.taskList" :key="item.id">
             <template #tab>
@@ -54,9 +54,9 @@
           </a-tab-pane>
         </a-tabs>
       </a-form-item>
-      <a-form-item :label="$t('i18n.cfb00269fd')" name="releaseBeforeCommand">
+      <a-form-item :label="$t('i18n_cfb00269fd')" name="releaseBeforeCommand">
         <a-tabs tab-position="right">
-          <a-tab-pane key="before" :tab="$t('i18n.d0c879f900')">
+          <a-tab-pane key="before" :tab="$t('i18n_d0c879f900')">
             <code-editor
               height="40vh"
               :content="temp.taskData && temp.taskData.beforeScript"
@@ -66,7 +66,7 @@
               }"
             ></code-editor>
           </a-tab-pane>
-          <a-tab-pane key="after" :tab="$t('i18n.9b1c5264a0')">
+          <a-tab-pane key="after" :tab="$t('i18n_9b1c5264a0')">
             <code-editor
               height="40vh"
               :content="temp.taskData && temp.taskData.afterScript"

@@ -13,7 +13,7 @@
       <a-space>
         <a-input
           v-model:value="listQuery['name']"
-          :placeholder="$t('i18n.d7ec2d3fea')"
+          :placeholder="$t('i18n_d7ec2d3fea')"
           class="search-input-item"
           @press-enter="loadData"
         />
@@ -24,7 +24,7 @@
           @press-enter="loadData"
         />
 
-        <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
+        <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
       </a-space>
     </template>
     <template #bodyCell="{ column, text, record }">
@@ -41,7 +41,7 @@
             text.config &&
             text.config
               .map((item) => {
-                return ($t('i18n.27ba6eb343') + item.gateway || '') + '#' + ($t('i18n.d1aa9c2da9') + item.subnet || '')
+                return ($t('i18n_27ba6eb343') + item.gateway || '') + '#' + ($t('i18n_d1aa9c2da9') + item.subnet || '')
               })
               .join(',')
           }`"
@@ -71,7 +71,7 @@
       </template>
       <template v-else-if="column.dataIndex === 'operation'">
         <a-space>
-          <a-tooltip :title="$t('i18n.2f4aaddde3')">
+          <a-tooltip :title="$t('i18n_2f4aaddde3')">
             <a-button size="small" type="link" @click="doAction(record, 'remove')"><DeleteOutlined /></a-button>
           </a-tooltip>
         </a-space>
@@ -107,14 +107,14 @@ export default {
       renderSize,
       columns: [
         {
-          title: this.$t('i18n.faaadc447b'),
+          title: this.$t('i18n_faaadc447b'),
           width: 80,
           ellipsis: true,
           align: 'center',
           customRender: ({ index }) => `${index + 1}`
         },
         {
-          title: this.$t('i18n.d7ec2d3fea'),
+          title: this.$t('i18n_d7ec2d3fea'),
           dataIndex: 'name',
           ellipsis: true,
           tooltip: true
@@ -126,7 +126,7 @@ export default {
           tooltip: true
         },
         {
-          title: this.$t('i18n.df011658c3'),
+          title: this.$t('i18n_df011658c3'),
           dataIndex: 'scope',
           ellipsis: true
         },
@@ -136,13 +136,13 @@ export default {
           ellipsis: true
         },
         {
-          title: this.$t('i18n.226b091218'),
+          title: this.$t('i18n_226b091218'),
           dataIndex: 'driver',
           ellipsis: true,
           width: 80
         },
         {
-          title: this.$t('i18n.eca37cb072'),
+          title: this.$t('i18n_eca37cb072'),
           dataIndex: 'Created',
           ellipsis: true,
           width: 180,
@@ -154,7 +154,7 @@ export default {
       ],
       action: {
         remove: {
-          msg: this.$t('i18n.022b6ea624'),
+          msg: this.$t('i18n_022b6ea624'),
           api: dockerVolumesRemove
         }
       }
@@ -188,11 +188,11 @@ export default {
         return
       }
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
         content: action.msg,
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return action
             .api(this.urlPrefix, {

@@ -11,17 +11,17 @@
     >
       <a-menu-item key="admin-manager">
         <template v-if="mode === 'normal'">
-          <a-tooltip :title="$t('i18n.4d85ac1250')" color="cyan">
+          <a-tooltip :title="$t('i18n_4d85ac1250')" color="cyan">
             <SettingOutlined :style="{ fontSize: '18px' }" />
 
-            <span>{{ $t('i18n.4d85ac1250') }}</span>
+            <span>{{ $t('i18n_4d85ac1250') }}</span>
           </a-tooltip>
         </template>
         <template v-if="mode === 'management'">
-          <a-tooltip :title="$t('i18n.d9c28e376c')" color="cyan">
+          <a-tooltip :title="$t('i18n_d9c28e376c')" color="cyan">
             <DesktopOutlined :style="{ fontSize: '18px' }" />
 
-            <span>{{ $t('i18n.d9c28e376c') }}</span>
+            <span>{{ $t('i18n_d9c28e376c') }}</span>
           </a-tooltip>
         </template>
       </a-menu-item>
@@ -142,7 +142,7 @@ export default {
       // 如果路由不存在
       if (!subMenu.path) {
         $notification.error({
-          message: this.$t('i18n.130318a2a1')
+          message: this.$t('i18n_130318a2a1')
         })
         return false
       }

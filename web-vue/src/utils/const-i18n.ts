@@ -26,12 +26,12 @@ export const MFA_APP_TIP_ARRAY = [
  * 项目 DSL 示例
  */
 export const PROJECT_DSL_DEFATUL =
-  t('i18n.3f5af13b4b') +
+  t('i18n_3f5af13b4b') +
   '\n' +
-  t('i18n.13c76c38b7') +
+  t('i18n_13c76c38b7') +
   '\n' +
   'description:' +
-  t('i18n.db06c78d1e') +
+  t('i18n_db06c78d1e') +
   '\n' +
   'run:\r\n' +
   '  start:\r\n' +
@@ -66,17 +66,17 @@ export const PROJECT_DSL_DEFATUL =
   '#    scriptEnv:\r\n' +
   '#      "boot_active": test\r\n' +
   '#  fileChangeReload: true\r\n' +
-  t('i18n.8d6d47fbed') +
+  t('i18n_8d6d47fbed') +
   '#  execPath: ./\r\n' +
   'file:\r\n' +
-  t('i18n.0eccc9451d') +
+  t('i18n_0eccc9451d') +
   '#  backupCount: 5\r\n' +
-  t('i18n.8ba977b4b7') +
+  t('i18n_8ba977b4b7') +
   "#  backupSuffix: [ '.jar','.html','^.+\\.(?i)(txt)$' ]\r\n" +
-  t('i18n.7b61408779') +
+  t('i18n_7b61408779') +
   '#  backupPath: /data/jpom_backup\r\n' +
   'config:\r\n' +
-  t('i18n.0d467f7889') +
+  t('i18n_0d467f7889') +
   '#  autoBackToFile: true\r\n' +
   '\r\n'
 
@@ -87,7 +87,7 @@ export const PROJECT_DSL_DEFATUL =
  */
 export const CRON_DATA_SOURCE = [
   {
-    title: t('i18n.6948363f65'),
+    title: t('i18n_6948363f65'),
     options: [
       {
         title: '',
@@ -96,61 +96,61 @@ export const CRON_DATA_SOURCE = [
     ]
   },
   {
-    title: t('i18n.d5d46dd79b'),
+    title: t('i18n_d5d46dd79b'),
     options: [
       {
-        title: t('i18n.76ebb2be96'),
+        title: t('i18n_76ebb2be96'),
         value: '0 0/1 * * * ?'
       },
       {
-        title: t('i18n.b2f296d76a'),
+        title: t('i18n_b2f296d76a'),
         value: '0 0/5 * * * ?'
       },
       {
-        title: t('i18n.3bdab2c607'),
+        title: t('i18n_3bdab2c607'),
         value: '0 0/10 * * * ?'
       },
       {
-        title: t('i18n.751a79afde'),
+        title: t('i18n_751a79afde'),
         value: '0 0/30 * * * ?'
       }
     ]
   },
   {
-    title: t('i18n.99b3c97515'),
+    title: t('i18n_99b3c97515'),
     options: [
       {
-        title: t('i18n.860c00f4f7'),
+        title: t('i18n_860c00f4f7'),
         value: '0 0 0/1 * * ?'
       }
     ]
   },
   {
-    title: t('i18n.15fa91e3ab'),
+    title: t('i18n_15fa91e3ab'),
     options: [
       {
-        title: t('i18n.616879745d'),
+        title: t('i18n_616879745d'),
         value: '0 0 0,12 * * ?'
       },
       {
-        title: t('i18n.8844085e15'),
+        title: t('i18n_8844085e15'),
         value: '0 0 0 * * ?'
       }
     ]
   },
   {
-    title: t('i18n.8da42dd738'),
+    title: t('i18n_8da42dd738'),
     options: [
       {
-        title: t('i18n.6334eec584'),
+        title: t('i18n_6334eec584'),
         value: '0/5 * * * * ?'
       },
       {
-        title: t('i18n.14a25beebb'),
+        title: t('i18n_14a25beebb'),
         value: '0/10 * * * * ?'
       },
       {
-        title: t('i18n.354a3dcdbd'),
+        title: t('i18n_354a3dcdbd'),
         value: '0/30 * * * * ?'
       }
     ]

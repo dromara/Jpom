@@ -4,7 +4,7 @@
       <template #tab>
         <span>
           <SettingOutlined />
-          {{ $t('i18n.3181790b4b') }}
+          {{ $t('i18n_3181790b4b') }}
         </span>
       </template>
 
@@ -18,14 +18,14 @@
             height="calc(100vh - 200px)"
           >
             <template #tool_before>
-              <a-alert v-if="temp.file" show-icon :message="`${$t('i18n.37c1eb9b23')}:${temp.file}`" />
+              <a-alert v-if="temp.file" show-icon :message="`${$t('i18n_37c1eb9b23')}:${temp.file}`" />
             </template>
           </code-editor>
         </a-form-item>
         <a-form-item :wrapper-col="{ span: 14, offset: 2 }">
           <a-space>
-            <a-button type="primary" class="btn" @click="onSubmit(false)">{{ $t('i18n.be5fbbe34c') }}</a-button>
-            <a-button type="primary" danger class="btn" @click="onSubmit(true)">{{ $t('i18n.6aab88d6a3') }}</a-button>
+            <a-button type="primary" class="btn" @click="onSubmit(false)">{{ $t('i18n_be5fbbe34c') }}</a-button>
+            <a-button type="primary" danger class="btn" @click="onSubmit(true)">{{ $t('i18n_6aab88d6a3') }}</a-button>
           </a-space>
         </a-form-item>
       </a-form>
@@ -34,12 +34,12 @@
       <template #tab>
         <span>
           <LockOutlined />
-          {{ $t('i18n.decef97c7c') }}
+          {{ $t('i18n_decef97c7c') }}
         </span>
       </template>
-      <a-alert :message="`${$t('i18n.22cf31df5d')}${ipTemp.ip}`" type="success" />
-      <a-alert :message="$t('i18n.578adf7a12')" style="margin-top: 10px" banner />
-      <a-alert :message="$t('i18n.49645e398b')" style="margin-top: 10px" banner />
+      <a-alert :message="`${$t('i18n_22cf31df5d')}${ipTemp.ip}`" type="success" />
+      <a-alert :message="$t('i18n_578adf7a12')" style="margin-top: 10px" banner />
+      <a-alert :message="$t('i18n_49645e398b')" style="margin-top: 10px" banner />
       <a-form
         ref="editIpConfigForm"
         style="margin-top: 10px"
@@ -51,9 +51,9 @@
           <template #label>
             <a-space align="center">
               <a-tooltip>
-                <template #title>{{ $t('i18n.02db59c146') }} </template>
+                <template #title>{{ $t('i18n_02db59c146') }} </template>
                 <StopFilled />
-                IP{{ $t('i18n.ff1fda9e47') }}
+                IP{{ $t('i18n_ff1fda9e47') }}
               </a-tooltip>
             </a-space>
           </template>
@@ -61,16 +61,16 @@
             v-model:value="ipTemp.prohibited"
             :rows="8"
             class="ip-list-config"
-            :placeholder="$t('i18n.5569a840c8')"
+            :placeholder="$t('i18n_5569a840c8')"
           />
         </a-form-item>
         <a-form-item name="allowed">
           <template #label>
             <a-space align="center">
               <a-tooltip>
-                <template #title> {{ $t('i18n.8e331a52de') }} </template>
+                <template #title> {{ $t('i18n_8e331a52de') }} </template>
                 <CheckCircleFilled />
-                IP{{ $t('i18n.98a315c0fc') }}
+                IP{{ $t('i18n_98a315c0fc') }}
               </a-tooltip>
             </a-space>
           </template>
@@ -78,12 +78,12 @@
             v-model:value="ipTemp.allowed"
             :rows="8"
             class="ip-list-config"
-            :placeholder="$t('i18n.847afa1ff2')"
+            :placeholder="$t('i18n_847afa1ff2')"
           />
         </a-form-item>
 
         <a-form-item :wrapper-col="{ offset: 10 }" class="ip-config-button">
-          <a-button type="primary" class="btn" @click="onSubmitIp()">{{ $t('i18n.be5fbbe34c') }}</a-button>
+          <a-button type="primary" class="btn" @click="onSubmitIp()">{{ $t('i18n_be5fbbe34c') }}</a-button>
         </a-form-item>
       </a-form>
     </a-tab-pane>
@@ -93,25 +93,25 @@
       <template #tab>
         <span>
           <ApiOutlined />
-          {{ $t('i18n.a0d0ebc519') }}
+          {{ $t('i18n_a0d0ebc519') }}
         </span>
       </template>
-      <a-alert :message="`${$t('i18n.c9b79a2b4f')}`" style="margin-top: 10px; margin-bottom: 20px" banner />
+      <a-alert :message="`${$t('i18n_c9b79a2b4f')}`" style="margin-top: 10px; margin-bottom: 20px" banner />
       <a-row justify="center" type="flex">
         <a-form ref="editProxyForm" :model="proxyConfigData">
           <a-row v-for="(item, index) in proxyConfigData.globalProxy" :key="index">
             <a-space>
-              <a-form-item :label="$t('i18n.3ac34faf6d')" name="pattern">
+              <a-form-item :label="$t('i18n_3ac34faf6d')" name="pattern">
                 <a-input
                   v-model:value="item.pattern"
                   style="width: 30vw"
                   :max-length="200"
-                  :placeholder="$t('i18n.0a9634edf2')"
+                  :placeholder="$t('i18n_0a9634edf2')"
                 >
                 </a-input>
               </a-form-item>
-              <a-form-item :label="$t('i18n.fc954d25ec')">
-                <a-input v-model:value="item.proxyAddress" style="width: 30vw" :placeholder="$t('i18n.dcf14deb0e')">
+              <a-form-item :label="$t('i18n_fc954d25ec')">
+                <a-input v-model:value="item.proxyAddress" style="width: 30vw" :placeholder="$t('i18n_dcf14deb0e')">
                   <template #addonBefore>
                     <a-select v-model:value="item.proxyType" style="width: 100px">
                       <a-select-option value="HTTP">HTTP</a-select-option>
@@ -133,7 +133,7 @@
                     }
                   "
                 >
-                  {{ $t('i18n.2f4aaddde3') }}
+                  {{ $t('i18n_2f4aaddde3') }}
                 </a-button>
               </a-form-item>
             </a-space>
@@ -156,9 +156,9 @@
                     }
                   }
                 "
-                >{{ $t('i18n.66ab5e9f24') }}</a-button
+                >{{ $t('i18n_66ab5e9f24') }}</a-button
               >
-              <a-button type="primary" @click="saveProxyConfigHannder">{{ $t('i18n.be5fbbe34c') }}</a-button>
+              <a-button type="primary" @click="saveProxyConfigHannder">{{ $t('i18n_be5fbbe34c') }}</a-button>
             </a-space>
           </a-form-item>
         </a-form>
@@ -232,11 +232,11 @@ export default {
     // submit
     onSubmit(restart) {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.863a95c914'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_863a95c914'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           this.temp.restart = restart
           return editConfig(this.temp).then((res) => {
@@ -258,7 +258,7 @@ export default {
 
       this.globalLoading({
         spinning: true,
-        tip: (msg || this.$t('i18n.85da2e5bb1')) + `,${this.$t('i18n.809b12d6a0')},${this.$t('i18n.af013dd9dc')}`
+        tip: (msg || this.$t('i18n_85da2e5bb1')) + `,${this.$t('i18n_809b12d6a0')},${this.$t('i18n_af013dd9dc')}`
       })
       setTimeout(() => {
         //
@@ -271,7 +271,7 @@ export default {
                   spinning: false
                 })
                 $notification.success({
-                  message: this.$t('i18n.906f6102a7')
+                  message: this.$t('i18n_906f6102a7')
                 })
 
                 setTimeout(() => {
@@ -280,7 +280,7 @@ export default {
               } else {
                 if (this.checkCount > RESTART_UPGRADE_WAIT_TIME_COUNT) {
                   $notification.warning({
-                    message: this.$t('i18n.953ec2172b') + (res.msg || '')
+                    message: this.$t('i18n_953ec2172b') + (res.msg || '')
                   })
                   this.globalLoading({
                     spinning: false
@@ -296,7 +296,7 @@ export default {
                   spinning: false
                 })
                 $notification.error({
-                  message: this.$t('i18n.0e502fed63')
+                  message: this.$t('i18n_0e502fed63')
                 })
                 clearInterval(this.timer)
               }
@@ -308,11 +308,11 @@ export default {
     // submit ip config
     onSubmitIp() {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.a2e62165dc'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_a2e62165dc'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return editIpConfig(this.ipTemp).then((res) => {
             if (res.code === 200) {

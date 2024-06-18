@@ -16,28 +16,28 @@
         <a-space wrap class="search-box">
           <!-- <a-input v-model="listQuery['name']" @pressEnter="loadData" placeholder="名称" class="search-input-item" /> -->
           <div>
-            {{ $t('i18n.843f05194a') }}
+            {{ $t('i18n_843f05194a') }}
             <a-switch
               v-model:checked="listQuery['showAll']"
-              :checked-children="$t('i18n.0a60ac8f02')"
-              :un-checked-children="$t('i18n.c9744f45e7')"
+              :checked-children="$t('i18n_0a60ac8f02')"
+              :un-checked-children="$t('i18n_c9744f45e7')"
             />
           </div>
           <div>
-            {{ $t('i18n.a09375d96c') }}
+            {{ $t('i18n_a09375d96c') }}
             <a-switch
               v-model:checked="listQuery['dangling']"
-              :checked-children="$t('i18n.0a60ac8f02')"
-              :un-checked-children="$t('i18n.c9744f45e7')"
+              :checked-children="$t('i18n_0a60ac8f02')"
+              :un-checked-children="$t('i18n_c9744f45e7')"
             />
           </div>
-          <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
+          <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
           <a-button
             type="primary"
             danger
             :disabled="!tableSelections || !tableSelections.length"
             @click="batchDelete"
-            >{{ $t('i18n.7fb62b3011') }}</a-button
+            >{{ $t('i18n_7fb62b3011') }}</a-button
           >
 
           |
@@ -45,7 +45,7 @@
           <a-input-search
             v-model:value="pullImageName"
             style="width: 260px"
-            :placeholder="$t('i18n.8b83cd1f29')"
+            :placeholder="$t('i18n_8b83cd1f29')"
             class="search-input-item"
             @search="pullImage"
           >
@@ -65,7 +65,7 @@
             :before-upload="beforeUpload"
           >
             <LoadingOutlined v-if="percentage" />
-            <a-button v-else type="primary"> <UploadOutlined />{{ $t('i18n.8d9a071ee2') }} </a-button>
+            <a-button v-else type="primary"> <UploadOutlined />{{ $t('i18n_8d9a071ee2') }} </a-button>
           </a-upload>
         </a-space>
       </template>
@@ -95,20 +95,20 @@
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-tooltip :title="$t('i18n.e0a0e26031')">
+            <a-tooltip :title="$t('i18n_e0a0e26031')">
               <a-button size="small" type="link" @click="createContainer(record)"><SelectOutlined /></a-button>
             </a-tooltip>
-            <a-tooltip :title="$t('i18n.159a3a8037')">
+            <a-tooltip :title="$t('i18n_159a3a8037')">
               <a-button size="small" type="link" :disabled="!record.repoTags" @click="tryPull(record)"
                 ><CloudDownloadOutlined
               /></a-button>
             </a-tooltip>
-            <a-tooltip :title="$t('i18n.8e389298e4')">
+            <a-tooltip :title="$t('i18n_8e389298e4')">
               <a-button size="small" type="link" @click="saveImage(record.id.split(':')[1])"
                 ><DownloadOutlined
               /></a-button>
             </a-tooltip>
-            <a-tooltip :title="$t('i18n.0306ea1908')">
+            <a-tooltip :title="$t('i18n_0306ea1908')">
               <a-button size="small" type="link" @click="doAction(record, 'remove')"><DeleteOutlined /></a-button>
             </a-tooltip>
           </a-space>
@@ -196,29 +196,29 @@ export default {
       temp: {},
       rules: {
         name: [
-          { required: true, message: this.$t('i18n.5c502af799'), trigger: 'blur' },
+          { required: true, message: this.$t('i18n_5c502af799'), trigger: 'blur' },
           {
             pattern: /[a-zA-Z0-9][a-zA-Z0-9_.-]$/,
-            message: this.$t('i18n.8d5c1335b6'),
+            message: this.$t('i18n_8d5c1335b6'),
             trigger: 'blur'
           }
         ]
       },
       columns: [
         {
-          title: this.$t('i18n.faaadc447b'),
+          title: this.$t('i18n_faaadc447b'),
           width: '80px',
           ellipsis: true,
           align: 'center',
           customRender: ({ index }) => `${index + 1}`
         },
         {
-          title: this.$t('i18n.d7ec2d3fea'),
+          title: this.$t('i18n_d7ec2d3fea'),
           dataIndex: 'repoTags',
           ellipsis: true
         },
         {
-          title: this.$t('i18n.40aff14380'),
+          title: this.$t('i18n_40aff14380'),
           dataIndex: 'id',
           ellipsis: true,
           width: 140,
@@ -226,7 +226,7 @@ export default {
           id: true
         },
         {
-          title: this.$t('i18n.5aabec5c62'),
+          title: this.$t('i18n_5aabec5c62'),
           dataIndex: 'parentId',
           ellipsis: true,
           width: 140,
@@ -234,13 +234,13 @@ export default {
           id: true
         },
         {
-          title: this.$t('i18n.ad35f58fb3'),
+          title: this.$t('i18n_ad35f58fb3'),
           dataIndex: 'size',
           ellipsis: true,
           width: 120
         },
         {
-          title: this.$t('i18n.eca37cb072'),
+          title: this.$t('i18n_eca37cb072'),
           dataIndex: 'created',
           sorter: (a, b) => new Number(a.created) - new Number(b.created),
           sortDirections: ['descend', 'ascend'],
@@ -253,7 +253,7 @@ export default {
         },
 
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
           fixed: 'right',
           width: '160px'
@@ -262,7 +262,7 @@ export default {
 
       action: {
         remove: {
-          msg: this.$t('i18n.fc06c70960'),
+          msg: this.$t('i18n_fc06c70960'),
           api: dockerImageRemove
         }
       },
@@ -306,11 +306,11 @@ export default {
         return
       }
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
         content: action.msg,
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return action
             .api(this.urlPrefix, {
@@ -332,7 +332,7 @@ export default {
       const repoTags = record?.repoTags[0]
       if (!repoTags) {
         $notification.error({
-          message: this.$t('i18n.f99ead0a76')
+          message: this.$t('i18n_f99ead0a76')
         })
         return
       }
@@ -408,7 +408,7 @@ export default {
     pullImage() {
       if (!this.pullImageName) {
         $notification.warn({
-          message: this.$t('i18n.6ef90ec712')
+          message: this.$t('i18n_6ef90ec712')
         })
         return
       }
@@ -437,11 +437,11 @@ export default {
       let ids = this.tableSelections
 
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.0f539ff117'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_0f539ff117'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return dockerImageBatchRemove(this.urlPrefix, {
             id: this.reqDataId,

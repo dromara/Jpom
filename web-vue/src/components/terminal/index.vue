@@ -1,8 +1,8 @@
 <template>
   <div class="flex-100">
-    <a-result v-if="disconnect" status="warning" :title="$t('i18n.af4d18402a')">
+    <a-result v-if="disconnect" status="warning" :title="$t('i18n_af4d18402a')">
       <template #extra>
-        <a-button type="primary" @click="initSocket">{{ $t('i18n.5dc09dd5bd') }}</a-button>
+        <a-button type="primary" @click="initSocket">{{ $t('i18n_5dc09dd5bd') }}</a-button>
       </template>
     </a-result>
     <div v-else :id="domId" class="flex-100"></div>
@@ -73,7 +73,7 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: this.$t('i18n.9bf5aa6672')
+          message: this.$t('i18n_9bf5aa6672')
         })
         this.dispose()
       }
@@ -81,7 +81,7 @@ export default {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
         this.dispose()
-        $message.warning(this.$t('i18n.84e12f7434'))
+        $message.warning(this.$t('i18n_84e12f7434'))
       }
     },
     dispose() {

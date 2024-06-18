@@ -7,12 +7,12 @@
         <a-layout-sider theme="light" class="sider" width="25%">
           <div class="dir-container">
             <a-space>
-              <a-button size="small" type="primary" @click="loadData">{{ $t('i18n.90b5a467c1') }}</a-button>
+              <a-button size="small" type="primary" @click="loadData">{{ $t('i18n_90b5a467c1') }}</a-button>
               <a-button v-show="noFileModes.includes(runMode)" size="small" type="primary" @click="goConsole">
-                {{ $t('i18n.b5c3770699') }}
+                {{ $t('i18n_b5c3770699') }}
               </a-button>
               <a-button size="small" type="primary" @click="backupList">
-                {{ $t('i18n.9014d6d289') }}
+                {{ $t('i18n_9014d6d289') }}
               </a-button>
             </a-space>
           </div>
@@ -44,52 +44,52 @@
               <a-space>
                 <a-dropdown :disabled="!Object.keys(tempNode).length">
                   <a-button size="small" type="primary" @click="(e) => e.preventDefault()"
-                    ><UploadOutlined />{{ $t('i18n.d5a73b0c7f') }}</a-button
+                    ><UploadOutlined />{{ $t('i18n_d5a73b0c7f') }}</a-button
                   >
                   <template #overlay>
                     <a-menu>
                       <a-menu-item @click="handleUpload">
-                        <a-space><FileOutlined />{{ $t('i18n.a6fc9e3ae6') }}</a-space>
+                        <a-space><FileOutlined />{{ $t('i18n_a6fc9e3ae6') }}</a-space>
                       </a-menu-item>
                       <a-menu-item @click="handleZipUpload">
-                        <a-space><FileZipOutlined />{{ $t('i18n.37f031338a') }}</a-space>
+                        <a-space><FileZipOutlined />{{ $t('i18n_37f031338a') }}</a-space>
                       </a-menu-item>
                     </a-menu>
                   </template>
                 </a-dropdown>
                 <a-dropdown :disabled="!Object.keys(tempNode).length">
                   <a-button size="small" type="primary" @click="(e) => e.preventDefault()"
-                    ><PlusOutlined />{{ $t('i18n.26bb841878') }}</a-button
+                    ><PlusOutlined />{{ $t('i18n_26bb841878') }}</a-button
                   >
                   <template #overlay>
                     <a-menu>
                       <a-menu-item @click="handleAddFile(1)">
                         <a-space>
                           <FolderAddOutlined />
-                          <a-space>{{ $t('i18n.547ee197e5') }}</a-space>
+                          <a-space>{{ $t('i18n_547ee197e5') }}</a-space>
                         </a-space>
                       </a-menu-item>
                       <a-menu-item @click="handleAddFile(2)">
                         <a-space>
                           <FileAddOutlined />
-                          <a-space>{{ $t('i18n.497ddf508a') }}</a-space>
+                          <a-space>{{ $t('i18n_497ddf508a') }}</a-space>
                         </a-space>
                       </a-menu-item>
                     </a-menu>
                   </template>
                 </a-dropdown>
-                <a-tooltip :title="$t('i18n.9065a208e8')">
+                <a-tooltip :title="$t('i18n_9065a208e8')">
                   <a-button size="small" type="primary" @click="openRemoteUpload"><CloudDownloadOutlined /></a-button>
                 </a-tooltip>
-                <a-tooltip :title="$t('i18n.5e32f72bbf')">
+                <a-tooltip :title="$t('i18n_5e32f72bbf')">
                   <a-button size="small" type="primary" @click="loadFileList"><ReloadOutlined /></a-button>
                 </a-tooltip>
-                <a-tooltip :title="$t('i18n.de6bc95d3b')">
+                <a-tooltip :title="$t('i18n_de6bc95d3b')">
                   <a-button size="small" type="primary" danger @click="clearFile"><DeleteOutlined /></a-button>
                 </a-tooltip>
 
-                <a-tag v-if="uploadPath" color="#2db7f5">{{ $t('i18n.2c8109fa0b') }}{{ uploadPath || '' }}</a-tag>
-                <div>{{ $t('i18n.9e98fa5c0d') }}</div>
+                <a-tag v-if="uploadPath" color="#2db7f5">{{ $t('i18n_2c8109fa0b') }}{{ uploadPath || '' }}</a-tag>
+                <div>{{ $t('i18n_9e98fa5c0d') }}</div>
               </a-space>
             </template>
 
@@ -102,22 +102,22 @@
                       <a-menu>
                         <a-menu-item key="1">
                           <a-button :disabled="!record.textFileEdit" type="link" @click="goReadFile(record)">
-                            <BarsOutlined /> {{ $t('i18n.5854370b86') }}
+                            <BarsOutlined /> {{ $t('i18n_5854370b86') }}
                           </a-button>
                         </a-menu-item>
                         <a-menu-item key="2">
                           <a-button type="link" @click="handleRenameFile(record)">
-                            <HighlightOutlined />{{ $t('i18n.c8ce4b36cb') }}
+                            <HighlightOutlined />{{ $t('i18n_c8ce4b36cb') }}
                           </a-button>
                         </a-menu-item>
                         <a-menu-item key="3">
                           <a-button type="link" @click="hannderCopy(record)"
-                            ><CopyOutlined />{{ $t('i18n.7a811cc1e5') }}</a-button
+                            ><CopyOutlined />{{ $t('i18n_7a811cc1e5') }}</a-button
                           >
                         </a-menu-item>
                         <a-sub-menu key="4" :disabled="!record.isDirectory">
                           <template #title>
-                            <a-button type="link"><CompressOutlined />{{ $t('i18n.072fa90836') }}</a-button>
+                            <a-button type="link"><CompressOutlined />{{ $t('i18n_072fa90836') }}</a-button>
                           </template>
                           <a-menu-item>
                             <a-button type="link" @click="hannderCompress(record, 'zip')">
@@ -141,7 +141,7 @@
                 </a-tooltip>
               </template>
               <template v-else-if="column.dataIndex === 'isDirectory'">
-                <span>{{ text ? $t('i18n.767fa455bb') : $t('i18n.2a0c4740f1') }}</span>
+                <span>{{ text ? $t('i18n_767fa455bb') : $t('i18n_2a0c4740f1') }}</span>
               </template>
               <template v-else-if="column.dataIndex === 'fileSizeLong'">
                 <a-tooltip placement="topLeft" :title="`${text ? renderSize(text) : record.fileSize}`">
@@ -156,30 +156,30 @@
               <template v-else-if="column.dataIndex === 'operation'">
                 <a-space>
                   <template v-if="record.isDirectory">
-                    <a-tooltip :title="$t('i18n.c6f1c6e062')">
-                      <a-button size="small" type="primary" :disabled="true">{{ $t('i18n.95b351c862') }}</a-button>
+                    <a-tooltip :title="$t('i18n_c6f1c6e062')">
+                      <a-button size="small" type="primary" :disabled="true">{{ $t('i18n_95b351c862') }}</a-button>
                     </a-tooltip>
-                    <a-tooltip :title="$t('i18n.6c14188ba0')">
-                      <a-button size="small" type="primary" :disabled="true">{{ $t('i18n.f26ef91424') }}</a-button>
+                    <a-tooltip :title="$t('i18n_6c14188ba0')">
+                      <a-button size="small" type="primary" :disabled="true">{{ $t('i18n_f26ef91424') }}</a-button>
                     </a-tooltip>
                   </template>
                   <template v-else>
-                    <a-tooltip :title="$t('i18n.17b5e684e5')">
+                    <a-tooltip :title="$t('i18n_17b5e684e5')">
                       <a-button
                         size="small"
                         type="primary"
                         :loading="editLoading"
                         :disabled="!record.textFileEdit"
                         @click="handleEditFile(record)"
-                        >{{ $t('i18n.95b351c862') }}</a-button
+                        >{{ $t('i18n_95b351c862') }}</a-button
                       >
                     </a-tooltip>
                     <a-button size="small" type="primary" @click="handleDownload(record)">{{
-                      $t('i18n.f26ef91424')
+                      $t('i18n_f26ef91424')
                     }}</a-button>
                   </template>
                   <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-                    $t('i18n.2f4aaddde3')
+                    $t('i18n_2f4aaddde3')
                   }}</a-button>
                 </a-space>
               </template>
@@ -193,7 +193,7 @@
             :closable="!uploading"
             :keyboard="false"
             width="35vw"
-            :title="$t('i18n.15c0ba2767')"
+            :title="$t('i18n_15c0ba2767')"
             :footer="null"
             :mask-closable="false"
           >
@@ -223,7 +223,7 @@
                   <span v-else>-</span>
                 </template>
 
-                <a-button v-else><UploadOutlined />{{ $t('i18n.fd7e0c997d') }}</a-button>
+                <a-button v-else><UploadOutlined />{{ $t('i18n_fd7e0c997d') }}</a-button>
               </a-upload>
 
               <a-row v-if="percentage">
@@ -234,11 +234,11 @@
                         ({{ renderSize(percentageInfo.total) }})
                       </template>
                       <template v-if="percentageInfo.duration">
-                        {{ $t('i18n.833249fb92') }}:{{ formatDuration(percentageInfo.duration) }}
+                        {{ $t('i18n_833249fb92') }}:{{ formatDuration(percentageInfo.duration) }}
                       </template>
                       <template v-if="uploadFileList.length">
-                        {{ $t('i18n.769d88e425') }} {{ successSize }} {{ $t('i18n.d047d84986')
-                        }}{{ uploadFileList.length }}{{ $t('i18n.930882bb0a') }}
+                        {{ $t('i18n_769d88e425') }} {{ successSize }} {{ $t('i18n_d047d84986')
+                        }}{{ uploadFileList.length }}{{ $t('i18n_930882bb0a') }}
                       </template>
                     </template>
                   </a-progress>
@@ -246,7 +246,7 @@
               </a-row>
 
               <a-button type="primary" :disabled="fileUploadDisabled" @click="startUpload">{{
-                $t('i18n.020f1ecd62')
+                $t('i18n_020f1ecd62')
               }}</a-button>
             </a-space>
           </CustomModal>
@@ -258,7 +258,7 @@
             :closable="!uploading"
             :keyboard="false"
             width="35vw"
-            :title="$t('i18n.e31ca72849')"
+            :title="$t('i18n_e31ca72849')"
             :footer="null"
             :mask-closable="false"
           >
@@ -281,7 +281,7 @@
                 "
               >
                 <LoadingOutlined v-if="percentage" />
-                <a-button v-else><UploadOutlined />{{ $t('i18n.a17450a5ff') }}</a-button>
+                <a-button v-else><UploadOutlined />{{ $t('i18n_a17450a5ff') }}</a-button>
               </a-upload>
               <a-row v-if="percentage">
                 <a-col span="24">
@@ -291,11 +291,11 @@
                         ({{ renderSize(percentageInfo.total) }})
                       </template>
                       <template v-if="percentageInfo.duration">
-                        {{ $t('i18n.833249fb92') }}:{{ formatDuration(percentageInfo.duration) }}
+                        {{ $t('i18n_833249fb92') }}:{{ formatDuration(percentageInfo.duration) }}
                       </template>
                       <template v-if="uploadFileList.length">
-                        {{ $t('i18n.769d88e425') }} {{ successSize }} {{ $t('i18n.d047d84986')
-                        }}{{ uploadFileList.length }}{{ $t('i18n.930882bb0a') }}
+                        {{ $t('i18n_769d88e425') }} {{ successSize }} {{ $t('i18n_d047d84986')
+                        }}{{ uploadFileList.length }}{{ $t('i18n_930882bb0a') }}
                       </template>
                     </template>
                   </a-progress>
@@ -304,8 +304,8 @@
 
               <a-switch
                 v-model:checked="uploadData.checkBox"
-                :checked-children="$t('i18n.164cf07e1c')"
-                :un-checked-children="$t('i18n.fd7b461411')"
+                :checked-children="$t('i18n_164cf07e1c')"
+                :un-checked-children="$t('i18n_fd7b461411')"
                 style="margin-bottom: 10px"
               />
 
@@ -313,11 +313,11 @@
                 v-model:value="uploadData.stripComponents"
                 style="width: 100%"
                 :min="0"
-                :placeholder="$t('i18n.3f8b64991f')"
+                :placeholder="$t('i18n_3f8b64991f')"
               />
 
               <a-button type="primary" :disabled="fileUploadDisabled" @click="startZipUpload">{{
-                $t('i18n.020f1ecd62')
+                $t('i18n_020f1ecd62')
               }}</a-button>
             </a-space>
           </CustomModal>
@@ -327,7 +327,7 @@
             v-model:open="editFileVisible"
             destroy-on-close
             width="80vw"
-            :title="`${$t('i18n.47ff744ef6')} ${filename}`"
+            :title="`${$t('i18n_47ff744ef6')} ${filename}`"
             :mask-closable="true"
             @cancel="handleCloseModal"
           >
@@ -348,10 +348,10 @@
 
             <template #footer>
               <a-button @click="handleCloseModal">
-                {{ $t('i18n.b15d91274e') }}
+                {{ $t('i18n_b15d91274e') }}
               </a-button>
               <a-button type="primary" @click="updateFileData">
-                {{ $t('i18n.be5fbbe34c') }}
+                {{ $t('i18n_be5fbbe34c') }}
               </a-button>
               <a-button
                 type="primary"
@@ -362,7 +362,7 @@
                   }
                 "
               >
-                {{ $t('i18n.280379cee4') }}
+                {{ $t('i18n_280379cee4') }}
               </a-button>
             </template>
           </CustomModal>
@@ -372,7 +372,7 @@
             v-model:open="uploadRemoteFileVisible"
             destroy-on-close
             :confirm-loading="confirmLoading"
-            :title="$t('i18n.5d488af335')"
+            :title="$t('i18n_5d488af335')"
             :mask-closable="false"
             @ok="handleRemoteUpload"
             @cancel="closeRemoteUpload"
@@ -384,22 +384,22 @@
               :wrapper-col="{ span: 18 }"
               :rules="rules"
             >
-              <a-form-item :label="$t('i18n.a66fff7541')" name="url">
-                <a-input v-model:value="remoteDownloadData.url" :placeholder="$t('i18n.7457228a61')" />
+              <a-form-item :label="$t('i18n_a66fff7541')" name="url">
+                <a-input v-model:value="remoteDownloadData.url" :placeholder="$t('i18n_7457228a61')" />
               </a-form-item>
-              <a-form-item :label="$t('i18n.50fefde769')">
+              <a-form-item :label="$t('i18n_50fefde769')">
                 <a-switch
                   v-model:checked="remoteDownloadData.unzip"
-                  :checked-children="$t('i18n.0a60ac8f02')"
-                  :un-checked-children="$t('i18n.c9744f45e7')"
+                  :checked-children="$t('i18n_0a60ac8f02')"
+                  :un-checked-children="$t('i18n_c9744f45e7')"
                 />
               </a-form-item>
-              <a-form-item v-if="remoteDownloadData.unzip" :label="$t('i18n.5effe31353')">
+              <a-form-item v-if="remoteDownloadData.unzip" :label="$t('i18n_5effe31353')">
                 <a-input-number
                   v-model:value="remoteDownloadData.stripComponents"
                   style="width: 100%"
                   :min="0"
-                  :placeholder="$t('i18n.3f8b64991f')"
+                  :placeholder="$t('i18n_3f8b64991f')"
                 />
               </a-form-item>
             </a-form>
@@ -410,18 +410,18 @@
             v-model:open="addFileFolderVisible"
             destroy-on-close
             width="300px"
-            :title="addFileOrFolderType === 1 ? $t('i18n.2d9e932510') : $t('i18n.e48a715738')"
+            :title="addFileOrFolderType === 1 ? $t('i18n_2d9e932510') : $t('i18n_e48a715738')"
             :footer="null"
             :mask-closable="true"
           >
             <a-space direction="vertical" style="width: 100%">
-              <span v-if="uploadPath">{{ $t('i18n.4e33dde280') }}{{ uploadPath }}</span>
+              <span v-if="uploadPath">{{ $t('i18n_4e33dde280') }}{{ uploadPath }}</span>
               <!-- <a-tag v-if="">目录创建成功后需要手动刷新右边树才能显示出来哟</a-tag> -->
 
-              <a-input v-model:value="fileFolderName" :placeholder="$t('i18n.55939c108f')" />
+              <a-input v-model:value="fileFolderName" :placeholder="$t('i18n_55939c108f')" />
               <a-row type="flex" justify="center">
                 <a-button type="primary" :disabled="fileFolderName.length === 0" @click="startAddFileFolder">{{
-                  $t('i18n.e83a256e4f')
+                  $t('i18n_e83a256e4f')
                 }}</a-button>
               </a-row>
             </a-space>
@@ -432,16 +432,16 @@
             v-model:open="renameFileFolderVisible"
             destroy-on-close
             width="300px"
-            :title="`${$t('i18n.c8ce4b36cb')}`"
+            :title="`${$t('i18n_c8ce4b36cb')}`"
             :footer="null"
             :mask-closable="true"
           >
             <a-space direction="vertical" style="width: 100%">
-              <a-input v-model:value="fileFolderName" :placeholder="$t('i18n.f139c5cf32')" />
+              <a-input v-model:value="fileFolderName" :placeholder="$t('i18n_f139c5cf32')" />
 
               <a-row type="flex" justify="center">
                 <a-button type="primary" :disabled="fileFolderName.length === 0" @click="renameFileFolder">{{
-                  $t('i18n.e83a256e4f')
+                  $t('i18n_e83a256e4f')
                 }}</a-button>
               </a-row>
             </a-space>
@@ -456,7 +456,7 @@
       destroy-on-close
       width="80vw"
       height="80vh"
-      :title="$t('i18n.9014d6d289')"
+      :title="$t('i18n_9014d6d289')"
       :footer="null"
       :mask-closable="true"
       @cancel="
@@ -558,18 +558,18 @@ export default {
       },
       columns: [
         {
-          title: this.$t('i18n.d2e2560089'),
+          title: this.$t('i18n_d2e2560089'),
           dataIndex: 'filename',
           ellipsis: true
         },
         {
-          title: this.$t('i18n.28b988ce6a'),
+          title: this.$t('i18n_28b988ce6a'),
           dataIndex: 'isDirectory',
           width: '100px',
           ellipsis: true
         },
         {
-          title: this.$t('i18n.396b7d3f91'),
+          title: this.$t('i18n_396b7d3f91'),
           dataIndex: 'fileSizeLong',
           width: 120,
           ellipsis: true,
@@ -577,7 +577,7 @@ export default {
           sorter: (a, b) => a.fileSizeLong - b.fileSizeLong
         },
         {
-          title: this.$t('i18n.1303e638b5'),
+          title: this.$t('i18n_1303e638b5'),
           dataIndex: 'modifyTimeLong',
           width: '180px',
           ellipsis: true,
@@ -585,7 +585,7 @@ export default {
           sorter: (a, b) => a.modifyTimeLong - b.modifyTimeLong
         },
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
           width: '180px',
           align: 'center',
@@ -597,7 +597,7 @@ export default {
         url: [
           {
             required: true,
-            message: this.$t('i18n.0221d43e46'),
+            message: this.$t('i18n_0221d43e46'),
             trigger: 'change'
           }
         ]
@@ -641,7 +641,7 @@ export default {
     loadData() {
       const key = 'root-' + new Date().getTime()
       this.tempNode = {
-        filename: this.$t('i18n.cfeff30d2c') + (this.absPath || ''),
+        filename: this.$t('i18n_cfeff30d2c') + (this.absPath || ''),
         level: 1,
         isDirectory: true,
         key: key,
@@ -718,7 +718,7 @@ export default {
     handleUpload() {
       if (Object.keys(this.tempNode).length === 0) {
         $notification.error({
-          message: this.$t('i18n.bcaf69a038')
+          message: this.$t('i18n_bcaf69a038')
         })
         return
       }
@@ -856,7 +856,7 @@ export default {
     handleZipUpload() {
       if (Object.keys(this.tempNode).length === 0) {
         $notification.error({
-          message: this.$t('i18n.bcaf69a038')
+          message: this.$t('i18n_bcaf69a038')
         })
         return
       }
@@ -1064,7 +1064,7 @@ export default {
     loadFileList() {
       if (Object.keys(this.tempNode).length === 0) {
         $notification.warn({
-          message: this.$t('i18n.bcaf69a038')
+          message: this.$t('i18n_bcaf69a038')
         })
         return false
       }
@@ -1096,14 +1096,14 @@ export default {
     // 清空文件
     clearFile() {
       const msg = this.uploadPath
-        ? this.$t('i18n.c840c88b7c') + this.uploadPath + this.$t('i18n.3f553922ae')
-        : this.$t('i18n.26bd746dc3')
+        ? this.$t('i18n_c840c88b7c') + this.uploadPath + this.$t('i18n_3f553922ae')
+        : this.$t('i18n_26bd746dc3')
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         content: msg,
-        okText: this.$t('i18n.e83a256e4f'),
+        okText: this.$t('i18n_e83a256e4f'),
         zIndex: 1009,
-        cancelText: this.$t('i18n.625fb26b4b'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return deleteProjectFile({
             nodeId: this.nodeId,
@@ -1124,7 +1124,7 @@ export default {
     // 下载
     handleDownload(record) {
       $notification.info({
-        message: this.$t('i18n.e4bf491a0d')
+        message: this.$t('i18n_e4bf491a0d')
       })
       // 请求参数
       const params = {
@@ -1138,14 +1138,14 @@ export default {
     // 删除
     handleDelete(record) {
       const msg = record.isDirectory
-        ? this.$t('i18n.3cc09369ad') + record.filename + this.$t('i18n.52a8df6678')
-        : this.$t('i18n.3cc09369ad') + record.filename + this.$t('i18n.48e79b3340')
+        ? this.$t('i18n_3cc09369ad') + record.filename + this.$t('i18n_52a8df6678')
+        : this.$t('i18n_3cc09369ad') + record.filename + this.$t('i18n_48e79b3340')
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         content: msg,
-        okText: this.$t('i18n.e83a256e4f'),
+        okText: this.$t('i18n_e83a256e4f'),
         zIndex: 1009,
-        cancelText: this.$t('i18n.625fb26b4b'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return deleteProjectFile({
             nodeId: this.nodeId,

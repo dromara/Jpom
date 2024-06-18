@@ -21,7 +21,7 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$t('i18n.ce23a42b47')"
+            :placeholder="$t('i18n_ce23a42b47')"
             class="search-input-item"
             @press-enter="loadData"
           />
@@ -39,7 +39,7 @@
               }
             "
             allow-clear
-            :placeholder="$t('i18n.3fea7ca76c')"
+            :placeholder="$t('i18n_3fea7ca76c')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
@@ -58,13 +58,13 @@
               }
             "
             allow-clear
-            :placeholder="$t('i18n.8aa25f5fbe')"
+            :placeholder="$t('i18n_8aa25f5fbe')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in taskTypeMap" :key="key">{{ val }}</a-select-option>
           </a-select>
-          <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
+          <a-tooltip :title="$t('i18n_4838a3bd20')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -84,36 +84,36 @@
         </template>
 
         <template v-else-if="column.dataIndex === 'status'">
-          <a-tag v-if="text === 2" color="green">{{ statusMap[text] || $t('i18n.1622dc9b6b') }}</a-tag>
+          <a-tag v-if="text === 2" color="green">{{ statusMap[text] || $t('i18n_1622dc9b6b') }}</a-tag>
           <a-tag v-else-if="text === 0 || text === 1" color="orange">{{
-            statusMap[text] || $t('i18n.1622dc9b6b')
+            statusMap[text] || $t('i18n_1622dc9b6b')
           }}</a-tag>
           <a-tag v-else-if="text === 4" color="blue">
-            {{ statusMap[text] || $t('i18n.1622dc9b6b') }}
+            {{ statusMap[text] || $t('i18n_1622dc9b6b') }}
           </a-tag>
-          <a-tag v-else-if="text === 3" color="red">{{ statusMap[text] || $t('i18n.1622dc9b6b') }}</a-tag>
-          <a-tag v-else>{{ statusMap[text] || $t('i18n.1622dc9b6b') }}</a-tag>
+          <a-tag v-else-if="text === 3" color="red">{{ statusMap[text] || $t('i18n_1622dc9b6b') }}</a-tag>
+          <a-tag v-else>{{ statusMap[text] || $t('i18n_1622dc9b6b') }}</a-tag>
         </template>
         <template v-else-if="column.dataIndex === 'taskType'">
-          <span>{{ taskTypeMap[text] || $t('i18n.1622dc9b6b') }}</span>
+          <span>{{ taskTypeMap[text] || $t('i18n_1622dc9b6b') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'fileType'">
-          <span v-if="text == 2">{{ $t('i18n.28f6e7a67b') }}</span>
-          <span v-else>{{ $t('i18n.26183c99bf') }}</span>
+          <span v-if="text == 2">{{ $t('i18n_28f6e7a67b') }}</span>
+          <span v-else>{{ $t('i18n_26183c99bf') }}</span>
         </template>
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button type="primary" size="small" @click="handleView(record)">{{ $t('i18n.607e7a4f37') }}</a-button>
+            <a-button type="primary" size="small" @click="handleView(record)">{{ $t('i18n_607e7a4f37') }}</a-button>
 
-            <a-button type="primary" size="small" @click="handleRetask(record)">{{ $t('i18n.9e09315960') }}</a-button>
+            <a-button type="primary" size="small" @click="handleRetask(record)">{{ $t('i18n_9e09315960') }}</a-button>
             <a-button
               type="primary"
               danger
               size="small"
               :disabled="!(record.status === 0 || record.status === 1)"
               @click="handleCancelTask(record)"
-              >{{ $t('i18n.625fb26b4b') }}</a-button
+              >{{ $t('i18n_625fb26b4b') }}</a-button
             >
             <a-button
               type="primary"
@@ -121,7 +121,7 @@
               size="small"
               :disabled="record.status === 0 || record.status === 1"
               @click="handleDelete(record)"
-              >{{ $t('i18n.2f4aaddde3') }}</a-button
+              >{{ $t('i18n_2f4aaddde3') }}</a-button
             >
           </a-space>
         </template>
@@ -130,7 +130,7 @@
     <!-- 任务详情 -->
     <CustomDrawer
       v-if="detailsVisible"
-      :title="$t('i18n.4a98bf0c68')"
+      :title="$t('i18n_4a98bf0c68')"
       placement="right"
       :width="'80vw'"
       :open="detailsVisible"
@@ -148,7 +148,7 @@
       v-model:open="releaseFileVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$t('i18n.7e930b95ef')"
+      :title="$t('i18n_7e930b95ef')"
       width="70%"
       :mask-closable="false"
       @ok="handleReCrateTask"
@@ -160,18 +160,18 @@
         :label-col="{ span: 4 }"
         :wrapper-col="{ span: 20 }"
       >
-        <a-form-item :label="$t('i18n.ce23a42b47')" name="name">
-          <a-input v-model:value="temp.name" :placeholder="$t('i18n.5f4c724e61')" :max-length="50" />
+        <a-form-item :label="$t('i18n_ce23a42b47')" name="name">
+          <a-input v-model:value="temp.name" :placeholder="$t('i18n_5f4c724e61')" :max-length="50" />
         </a-form-item>
 
-        <a-form-item :label="$t('i18n.f98994f7ec')" name="taskType">
+        <a-form-item :label="$t('i18n_f98994f7ec')" name="taskType">
           <a-radio-group v-model:value="temp.taskType" :disabled="true">
             <a-radio :value="0"> SSH </a-radio>
-            <a-radio :value="1"> {{ $t('i18n.3bf3c0a8d6') }} </a-radio>
+            <a-radio :value="1"> {{ $t('i18n_3bf3c0a8d6') }} </a-radio>
           </a-radio-group>
         </a-form-item>
 
-        <a-form-item v-if="temp.taskType === 0" name="taskDataIds" :label="$t('i18n.b188393ea7')">
+        <a-form-item v-if="temp.taskType === 0" name="taskDataIds" :label="$t('i18n_b188393ea7')">
           <a-row>
             <a-col :span="22">
               <a-select
@@ -188,7 +188,7 @@
                   }
                 "
                 mode="multiple"
-                :placeholder="$t('i18n.260a3234f2')"
+                :placeholder="$t('i18n_260a3234f2')"
               >
                 <a-select-option v-for="ssh in sshList" :key="ssh.id">
                   <a-tooltip :title="ssh.name"> {{ ssh.name }}</a-tooltip>
@@ -200,7 +200,7 @@
             </a-col>
           </a-row>
         </a-form-item>
-        <a-form-item v-else-if="temp.taskType === 1" name="taskDataIds" :label="$t('i18n.473badc394')">
+        <a-form-item v-else-if="temp.taskType === 1" name="taskDataIds" :label="$t('i18n_473badc394')">
           <a-row>
             <a-col :span="22">
               <a-select
@@ -217,7 +217,7 @@
                   }
                 "
                 mode="multiple"
-                :placeholder="$t('i18n.f8a613d247')"
+                :placeholder="$t('i18n_f8a613d247')"
               >
                 <a-select-option v-for="ssh in nodeList" :key="ssh.id">
                   <a-tooltip :title="ssh.name"> {{ ssh.name }}</a-tooltip>
@@ -230,18 +230,18 @@
           </a-row>
         </a-form-item>
 
-        <a-form-item name="releasePathParent" :label="$t('i18n.dbb2df00cf')">
-          <a-input v-model:value="temp.releasePath" :placeholder="$t('i18n.ee9a51488f')" :disabled="true" />
+        <a-form-item name="releasePathParent" :label="$t('i18n_dbb2df00cf')">
+          <a-input v-model:value="temp.releasePath" :placeholder="$t('i18n_ee9a51488f')" :disabled="true" />
         </a-form-item>
 
-        <a-form-item name="releasePathParent" :label="$t('i18n.a91ce167c1')">
-          <a-input v-model:value="temp.fileId" :placeholder="$t('i18n.ea8a79546f')" />
+        <a-form-item name="releasePathParent" :label="$t('i18n_a91ce167c1')">
+          <a-input v-model:value="temp.fileId" :placeholder="$t('i18n_ea8a79546f')" />
         </a-form-item>
 
-        <a-form-item :label="$t('i18n.cfb00269fd')" name="releaseBeforeCommand">
+        <a-form-item :label="$t('i18n_cfb00269fd')" name="releaseBeforeCommand">
           <a-form-item-rest>
             <a-tabs tab-position="right">
-              <a-tab-pane key="before" :tab="$t('i18n.d0c879f900')">
+              <a-tab-pane key="before" :tab="$t('i18n_d0c879f900')">
                 <code-editor
                   v-model:content="temp.beforeScript"
                   height="40vh"
@@ -250,9 +250,9 @@
                   }"
                 ></code-editor>
 
-                <div style="margin-top: 10px">{{ $t('i18n.00de0ae1da') }}</div>
+                <div style="margin-top: 10px">{{ $t('i18n_00de0ae1da') }}</div>
               </a-tab-pane>
-              <a-tab-pane key="after" :tab="$t('i18n.9b1c5264a0')">
+              <a-tab-pane key="after" :tab="$t('i18n_9b1c5264a0')">
                 <code-editor
                   v-model:content="temp.afterScript"
                   height="40vh"
@@ -261,7 +261,7 @@
                   }"
                 ></code-editor>
 
-                <div style="margin-top: 10px">{{ $t('i18n.08ac1eace7') }}</div>
+                <div style="margin-top: 10px">{{ $t('i18n_08ac1eace7') }}</div>
               </a-tab-pane>
             </a-tabs>
           </a-form-item-rest>
@@ -273,27 +273,27 @@
       v-if="viewFileVisible"
       v-model:open="viewFileVisible"
       destroy-on-close
-      :title="`${$t('i18n.9de72a79fe')}`"
+      :title="`${$t('i18n_9de72a79fe')}`"
       :footer="null"
       :mask-closable="false"
     >
       <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-item :label="$t('i18n.29139c2a1a')" name="name">
+        <a-form-item :label="$t('i18n_29139c2a1a')" name="name">
           {{ temp.name }}
         </a-form-item>
-        <a-form-item :label="$t('i18n.0ff425e276')" name="name">
+        <a-form-item :label="$t('i18n_0ff425e276')" name="name">
           {{ temp.id }}
         </a-form-item>
-        <a-form-item :label="$t('i18n.396b7d3f91')" name="size">
+        <a-form-item :label="$t('i18n_396b7d3f91')" name="size">
           {{ renderSize(temp.size) }}
         </a-form-item>
-        <a-form-item v-if="temp.validUntil" :label="$t('i18n.1fa23f4daa')" name="validUntil">
+        <a-form-item v-if="temp.validUntil" :label="$t('i18n_1fa23f4daa')" name="validUntil">
           {{ parseTime(temp.validUntil) }}
         </a-form-item>
-        <a-form-item v-if="temp.workspaceId" :label="$t('i18n.3a6970ac26')" name="global">
-          {{ temp.workspaceId === 'GLOBAL' ? $t('i18n.2be75b1044') : $t('i18n.98d69f8b62') }}
+        <a-form-item v-if="temp.workspaceId" :label="$t('i18n_3a6970ac26')" name="global">
+          {{ temp.workspaceId === 'GLOBAL' ? $t('i18n_2be75b1044') : $t('i18n_98d69f8b62') }}
         </a-form-item>
-        <a-form-item :label="$t('i18n.8d6f38b4b1')" name="description">
+        <a-form-item :label="$t('i18n_8d6f38b4b1')" name="description">
           {{ temp.description }}
         </a-form-item>
       </a-form>
@@ -334,59 +334,59 @@ export default {
       confirmLoading: false,
       columns: [
         {
-          title: this.$t('i18n.78caf7115c'),
+          title: this.$t('i18n_78caf7115c'),
           dataIndex: 'name',
           ellipsis: true,
           width: 150,
           tooltip: true
         },
         {
-          title: this.$t('i18n.9e2e02ef08'),
+          title: this.$t('i18n_9e2e02ef08'),
           dataIndex: 'taskType',
           width: '100px',
           ellipsis: true
         },
         {
-          title: this.$t('i18n.9d577fe51b'),
+          title: this.$t('i18n_9d577fe51b'),
           dataIndex: 'fileType',
           width: '100px',
           ellipsis: true
         },
         {
-          title: this.$t('i18n.3fea7ca76c'),
+          title: this.$t('i18n_3fea7ca76c'),
           dataIndex: 'status',
           width: '100px',
           ellipsis: true
         },
 
         {
-          title: this.$t('i18n.920f05031b'),
+          title: this.$t('i18n_920f05031b'),
           dataIndex: 'statusMsg',
           ellipsis: true,
           width: 200,
           tooltip: true
         },
         {
-          title: this.$t('i18n.0ff425e276'),
+          title: this.$t('i18n_0ff425e276'),
           dataIndex: 'fileId',
           ellipsis: true,
           width: 150
         },
         {
-          title: this.$t('i18n.dbb2df00cf'),
+          title: this.$t('i18n_dbb2df00cf'),
           dataIndex: 'releasePath',
           width: '100px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('i18n.a497562c8e'),
+          title: this.$t('i18n_a497562c8e'),
           dataIndex: 'modifyUser',
           width: '120px',
           ellipsis: true
         },
         {
-          title: this.$t('i18n.b341f9a861'),
+          title: this.$t('i18n_b341f9a861'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -394,7 +394,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('i18n.4871f7722d'),
+          title: this.$t('i18n_4871f7722d'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -403,7 +403,7 @@ export default {
         },
 
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
           align: 'center',
 
@@ -416,9 +416,9 @@ export default {
       nodeList: [],
       releaseFileVisible: false,
       releaseFileRules: {
-        name: [{ required: true, message: this.$t('i18n.89d18c88a3'), trigger: 'blur' }],
+        name: [{ required: true, message: this.$t('i18n_89d18c88a3'), trigger: 'blur' }],
 
-        taskDataIds: [{ required: true, message: this.$t('i18n.3e51d1bc9c'), trigger: 'blur' }]
+        taskDataIds: [{ required: true, message: this.$t('i18n_3e51d1bc9c'), trigger: 'blur' }]
       },
       viewFileVisible: false
     }
@@ -456,11 +456,11 @@ export default {
     //  删除命令
     handleDelete(row) {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.50fe3400c7'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_50fe3400c7'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return deleteReleaseTask({
             id: row.id
@@ -549,11 +549,11 @@ export default {
     // 取消
     handleCancelTask(record) {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.7824ed010c'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_7824ed010c'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         oonOk: () => {
           return cancelReleaseTask({ id: record.id }).then((res) => {
             if (res.code === 200) {
@@ -579,7 +579,7 @@ export default {
               this.viewFileVisible = true
             } else {
               $notification.warning({
-                message: this.$t('i18n.3e445d03aa')
+                message: this.$t('i18n_3e445d03aa')
               })
             }
           }
@@ -594,7 +594,7 @@ export default {
               this.viewFileVisible = true
             } else {
               $notification.warning({
-                message: this.$t('i18n.3e445d03aa')
+                message: this.$t('i18n_3e445d03aa')
               })
             }
           }

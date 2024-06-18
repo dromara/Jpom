@@ -15,7 +15,7 @@
         <a-space>
           <a-input ref="inputRef" v-model:value="selectInput" :max-length="maxLength" :placeholder="inputPlaceholder" />
           <a-button type="text" @click="addInput(selectInput)">
-            <template #icon> <plus-outlined /> </template>{{ $t('i18n.66ab5e9f24') }}</a-button
+            <template #icon> <plus-outlined /> </template>{{ $t('i18n_66ab5e9f24') }}</a-button
           >
         </a-space>
       </template>
@@ -52,13 +52,13 @@ export default {
     inputPlaceholder: {
       type: String,
       default: function () {
-        return t('i18n.101a86bc84')
+        return t('i18n_101a86bc84')
       }
     },
     selectPlaceholder: {
       type: String,
       default: function () {
-        return t('i18n.708c9d6d2a')
+        return t('i18n_708c9d6d2a')
       }
     },
     selStyle: { type: String, default: '' },

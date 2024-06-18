@@ -6,7 +6,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="system-task-stat"
-      :empty-description="$t('i18n.4ef719810b')"
+      :empty-description="$t('i18n_4ef719810b')"
       size="middle"
       row-key="taskId"
       :columns="taskColumns"
@@ -55,7 +55,7 @@ export default {
 
       taskColumns: [
         {
-          title: this.$t('i18n.3a3778f20c'),
+          title: this.$t('i18n_3a3778f20c'),
           dataIndex: 'taskId',
 
           // sorter: (a, b) => (a && b ? a.localeCompare(b, "zh-CN") : 0),
@@ -64,19 +64,19 @@ export default {
           ellipsis: true,
           filters: [
             {
-              text: this.$t('i18n.fcba60e773'),
+              text: this.$t('i18n_fcba60e773'),
               value: 'build'
             },
             {
-              text: this.$t('i18n.e0ba3b9145'),
+              text: this.$t('i18n_e0ba3b9145'),
               value: 'script'
             },
             {
-              text: this.$t('i18n.8c7c7f3cfa'),
+              text: this.$t('i18n_8c7c7f3cfa'),
               value: 'server_script'
             },
             {
-              text: `ssh ${this.$t('i18n.ba311d8a6a')}`,
+              text: `ssh ${this.$t('i18n_ba311d8a6a')}`,
               value: 'ssh_command'
             }
           ],
@@ -96,28 +96,28 @@ export default {
         //   // sortDirections: ["descend", "ascend"],
         // },
         {
-          title: this.$t('i18n.d4aea8d7e6'),
+          title: this.$t('i18n_d4aea8d7e6'),
           dataIndex: 'executeCount',
           sortDirections: ['descend', 'ascend'],
           width: 140,
           sorter: (a, b) => a.executeCount || 0 - b.executeCount || 0
         },
         {
-          title: this.$t('i18n.e7d83a24ba'),
+          title: this.$t('i18n_e7d83a24ba'),
           dataIndex: 'succeedCount',
           sortDirections: ['descend', 'ascend'],
           width: 140,
           sorter: (a, b) => a.succeedCount || 0 - b.succeedCount || 0
         },
         {
-          title: this.$t('i18n.d3e480c8c0'),
+          title: this.$t('i18n_d3e480c8c0'),
           dataIndex: 'failedCount',
           sortDirections: ['descend', 'ascend'],
           width: 140,
           sorter: (a, b) => a.failedCount || 0 - b.failedCount || 0
         },
         {
-          title: this.$t('i18n.17c06f6a8b'),
+          title: this.$t('i18n_17c06f6a8b'),
           dataIndex: 'lastExecuteTime',
           sortDirections: ['descend', 'ascend'],
           defaultSortOrder: 'descend',

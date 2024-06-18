@@ -7,7 +7,7 @@
       :auto-refresh-time="30"
       :active-page="activePage"
       table-name="build-history-list"
-      :empty-description="$t('i18n.2b36926bc1')"
+      :empty-description="$t('i18n_2b36926bc1')"
       :data-source="list"
       size="middle"
       :columns="columns"
@@ -27,7 +27,7 @@
             v-model:value="listQuery['%buildName%']"
             allow-clear
             class="search-input-item"
-            :placeholder="$t('i18n.50a299c847')"
+            :placeholder="$t('i18n_50a299c847')"
             @press-enter="loadData"
           />
           <a-select
@@ -44,7 +44,7 @@
               }
             "
             allow-clear
-            :placeholder="$t('i18n.e1c965efff')"
+            :placeholder="$t('i18n_e1c965efff')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in statusMap" :key="key">{{ val }}</a-select-option>
@@ -63,14 +63,14 @@
               }
             "
             allow-clear
-            :placeholder="$t('i18n.9057ac9664')"
+            :placeholder="$t('i18n_9057ac9664')"
             class="search-input-item"
           >
             <a-select-option v-for="(val, key) in triggerBuildTypeMap" :key="key">{{ val }}</a-select-option>
           </a-select>
           <a-range-picker :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
-          <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
+          <a-tooltip :title="$t('i18n_4838a3bd20')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
           </a-tooltip>
           <a-button
             type="primary"
@@ -78,16 +78,16 @@
             :disabled="!tableSelections || tableSelections.length <= 0"
             @click="handleBatchDelete"
           >
-            {{ $t('i18n.7fb62b3011') }}
+            {{ $t('i18n_7fb62b3011') }}
           </a-button>
         </a-space>
       </template>
       <template #tableHelp>
         <a-tooltip>
           <template #title>
-            <div>{{ $t('i18n.005de9a4eb') }}</div>
-            <div>{{ $t('i18n.9cd0554305') }}</div>
-            <div>{{ $t('i18n.952232ca52') }}</div>
+            <div>{{ $t('i18n_005de9a4eb') }}</div>
+            <div>{{ $t('i18n_9cd0554305') }}</div>
+            <div>{{ $t('i18n_952232ca52') }}</div>
           </template>
           <QuestionCircleOutlined />
         </a-tooltip>
@@ -99,15 +99,15 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'buildNumberId'">
-          <a-tooltip :title="text + `( ${$t('i18n.aac62bc255')} )`">
+          <a-tooltip :title="text + `( ${$t('i18n_aac62bc255')} )`">
             <a-tag color="#108ee9" @click="handleBuildLog(record)">
               #{{ text }}<template v-if="record.fromBuildNumberId">&lt;-{{ record.fromBuildNumberId }}</template>
             </a-tag>
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'status'">
-          <a-tooltip :title="record.statusMsg || statusMap[text] || $t('i18n.1622dc9b6b')">
-            <a-tag :color="statusColor[record.status]">{{ statusMap[text] || $t('i18n.1622dc9b6b') }}</a-tag>
+          <a-tooltip :title="record.statusMsg || statusMap[text] || $t('i18n_1622dc9b6b')">
+            <a-tag :color="statusColor[record.status]">{{ statusMap[text] || $t('i18n_1622dc9b6b') }}</a-tag>
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'releaseMethod'">
@@ -123,8 +123,8 @@
 
         <template v-else-if="column.dataIndex === 'resultFileSize'">
           <a-tooltip
-            :title="`${$t('i18n.16646e46b1')}${renderSize(record.resultFileSize)}， ${$t(
-              'i18n.77e501b44b'
+            :title="`${$t('i18n_16646e46b1')}${renderSize(record.resultFileSize)}， ${$t(
+              'i18n_77e501b44b'
             )} ${renderSize(record.buildLogFileSize)}`"
           >
             <span v-if="record.resultFileSize">{{ renderSize(record.resultFileSize) }}</span>
@@ -135,8 +135,8 @@
 
         <template v-else-if="column.dataIndex === 'endTime'">
           <a-tooltip
-            :title="`${$t('i18n.61e84eb5bb')}${parseTime(record.startTime)}，${
-              record.endTime ? $t('i18n.590dbb68cf') + parseTime(record.endTime) : ''
+            :title="`${$t('i18n_61e84eb5bb')}${parseTime(record.startTime)}，${
+              record.endTime ? $t('i18n_590dbb68cf') + parseTime(record.endTime) : ''
             }`"
           >
             <span v-if="record.endTime">{{
@@ -148,22 +148,22 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-tooltip :title="$t('i18n.b38d7db9b0')">
+            <a-tooltip :title="$t('i18n_b38d7db9b0')">
               <a-button size="small" type="primary" :disabled="!record.hasLog" @click="handleDownload(record)"
-                ><DownloadOutlined />{{ $t('i18n.456d29ef8b') }}</a-button
+                ><DownloadOutlined />{{ $t('i18n_456d29ef8b') }}</a-button
               >
             </a-tooltip>
 
-            <a-tooltip :title="$t('i18n.02e35447d4')">
+            <a-tooltip :title="$t('i18n_02e35447d4')">
               <a-button size="small" type="primary" :disabled="!record.hasFile" @click="handleFile(record)"
                 ><DownloadOutlined />
-                {{ $t('i18n.7dfcab648d') }}
+                {{ $t('i18n_7dfcab648d') }}
               </a-button>
             </a-tooltip>
 
             <a-dropdown>
               <a @click="(e) => e.preventDefault()">
-                {{ $t('i18n.0ec9eaf9c3') }}
+                {{ $t('i18n_0ec9eaf9c3') }}
                 <DownOutlined />
               </a>
               <template #overlay>
@@ -176,20 +176,20 @@
                         type="primary"
                         danger
                         @click="handleRollback(record)"
-                        >{{ $t('i18n.d00b485b26') }}
+                        >{{ $t('i18n_d00b485b26') }}
                       </a-button>
                     </template>
                     <template v-else>
-                      <a-tooltip :title="$t('i18n.2d94b9cf0e')">
+                      <a-tooltip :title="$t('i18n_2d94b9cf0e')">
                         <a-button size="small" :disabled="true" type="primary" danger
-                          >{{ $t('i18n.d00b485b26') }}
+                          >{{ $t('i18n_d00b485b26') }}
                         </a-button>
                       </a-tooltip>
                     </template>
                   </a-menu-item>
                   <a-menu-item>
                     <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-                      $t('i18n.2f4aaddde3')
+                      $t('i18n_2f4aaddde3')
                     }}</a-button>
                   </a-menu-item>
                 </a-menu>
@@ -294,21 +294,21 @@ export default {
       tableSelections: [],
       columns: [
         {
-          title: this.$t('i18n.50a299c847'),
+          title: this.$t('i18n_50a299c847'),
           dataIndex: 'buildName',
           width: 120,
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('i18n.46e4265791'),
+          title: this.$t('i18n_46e4265791'),
           dataIndex: 'buildNumberId',
           width: '90px',
           align: 'center',
           ellipsis: true
         },
         {
-          title: this.$t('i18n.2432b57515'),
+          title: this.$t('i18n_2432b57515'),
           dataIndex: 'buildRemark',
           width: 120,
           ellipsis: true,
@@ -316,62 +316,62 @@ export default {
         },
 
         {
-          title: this.$t('i18n.3fea7ca76c'),
+          title: this.$t('i18n_3fea7ca76c'),
           dataIndex: 'status',
           width: '100px',
           align: 'center',
           ellipsis: true
         },
         {
-          title: this.$t('i18n.ff9814bf6b'),
+          title: this.$t('i18n_ff9814bf6b'),
           dataIndex: 'triggerBuildType',
           align: 'center',
           width: '100px',
           ellipsis: true
         },
         {
-          title: this.$t('i18n.ad35f58fb3'),
+          title: this.$t('i18n_ad35f58fb3'),
           dataIndex: 'resultFileSize',
           width: '100px',
           sorter: true,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.592c595891'),
+          title: this.$t('i18n_592c595891'),
           dataIndex: 'startTime',
           sorter: true,
           customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
-          title: this.$t('i18n.39f1374d36'),
+          title: this.$t('i18n_39f1374d36'),
           dataIndex: 'endTime',
           // sorter: true,
 
           width: '120px'
         },
         {
-          title: this.$t('i18n.af427d2541'),
+          title: this.$t('i18n_af427d2541'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
-          title: this.$t('i18n.f98994f7ec'),
+          title: this.$t('i18n_f98994f7ec'),
           dataIndex: 'releaseMethod',
           width: '100px',
           ellipsis: true
         },
         {
-          title: this.$t('i18n.f9ac4b2aa6'),
+          title: this.$t('i18n_f9ac4b2aa6'),
           dataIndex: 'modifyUser',
           width: '130px',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
 
           width: '220px',
@@ -445,11 +445,11 @@ export default {
     // 回滚
     handleRollback(record) {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.fb61d4d708'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_fb61d4d708'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           // 重新发布
           return rollback(record.id).then((res) => {
@@ -472,11 +472,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.ad8b626496'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_ad8b626496'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return deleteBuildHistory(record.id).then((res) => {
             if (res.code === 200) {
@@ -493,16 +493,16 @@ export default {
     handleBatchDelete() {
       if (!this.tableSelections || this.tableSelections.length <= 0) {
         $notification.warning({
-          message: this.$t('i18n.5d817c403e')
+          message: this.$t('i18n_5d817c403e')
         })
         return
       }
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.02d46f7e6f'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_02d46f7e6f'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           // 删除
           return deleteBuildHistory(this.tableSelections.join(',')).then((res) => {
@@ -537,7 +537,7 @@ export default {
     handerConfirm() {
       if (!this.tableSelections.length) {
         $notification.warning({
-          message: this.$t('i18n.2b4cf3d74e')
+          message: this.$t('i18n_2b4cf3d74e')
         })
         return
       }
@@ -553,7 +553,7 @@ export default {
         })
       if (!selectData.length) {
         $notification.warning({
-          message: this.$t('i18n.a637a42173')
+          message: this.$t('i18n_a637a42173')
         })
         return
       }

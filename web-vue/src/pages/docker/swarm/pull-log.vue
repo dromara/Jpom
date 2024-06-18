@@ -2,7 +2,7 @@
   <div>
     <log-view
       :ref="`logView`"
-      :title-name="$t('i18n.6a658517f3')"
+      :title-name="$t('i18n_6a658517f3')"
       :visible="visible"
       @close="
         () => {
@@ -12,23 +12,23 @@
     >
       <template #before>
         <a-space>
-          <a-input-number v-model:value="tail" :placeholder="$t('i18n.5734b2db4e')" style="width: 150px">
+          <a-input-number v-model:value="tail" :placeholder="$t('i18n_5734b2db4e')" style="width: 150px">
             <template #addonBefore>
-              <a-tooltip :title="$t('i18n.25b6c22d8a')">{{ $t('i18n.87eb55155a') }} </a-tooltip>
+              <a-tooltip :title="$t('i18n_25b6c22d8a')">{{ $t('i18n_87eb55155a') }} </a-tooltip>
             </template>
           </a-input-number>
           <div>
-            {{ $t('i18n.d731dc9325') }}
+            {{ $t('i18n_d731dc9325') }}
             <a-switch
               v-model:checked="timestamps"
-              :checked-children="$t('i18n.4d775d4cd7')"
-              :un-checked-children="$t('i18n.2064fc6808')"
+              :checked-children="$t('i18n_4d775d4cd7')"
+              :un-checked-children="$t('i18n_2064fc6808')"
             />
           </div>
-          <a-button type="primary" size="small" @click="init"><ReloadOutlined /> {{ $t('i18n.694fc5efa9') }} </a-button>
+          <a-button type="primary" size="small" @click="init"><ReloadOutlined /> {{ $t('i18n_694fc5efa9') }} </a-button>
           |
           <a-button type="primary" :disabled="!logId" size="small" @click="download">
-            <DownloadOutlined /> {{ $t('i18n.f26ef91424') }}
+            <DownloadOutlined /> {{ $t('i18n_f26ef91424') }}
           </a-button>
           |
         </a-space>

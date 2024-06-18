@@ -1,7 +1,7 @@
 <template>
   <div class="">
     <template v-if="useSuggestions">
-      <a-result :title="$t('i18n.a396da3e22')" :sub-title="$t('i18n.13d947ea19')"> </a-result>
+      <a-result :title="$t('i18n_a396da3e22')" :sub-title="$t('i18n_13d947ea19')"> </a-result>
     </template>
 
     <CustomTable
@@ -31,7 +31,7 @@
             v-if="!nodeId"
             v-model:value="listQuery.nodeId"
             allow-clear
-            :placeholder="$t('i18n.f8a613d247')"
+            :placeholder="$t('i18n_f8a613d247')"
             class="search-input-item"
           >
             <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
@@ -39,7 +39,7 @@
           <a-select
             v-model:value="listQuery.group"
             allow-clear
-            :placeholder="$t('i18n.ec22193ed1')"
+            :placeholder="$t('i18n_ec22193ed1')"
             class="search-input-item"
             @change="getNodeProjectData"
           >
@@ -47,13 +47,13 @@
           </a-select>
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$t('i18n.1e93bdad2a')"
+            :placeholder="$t('i18n_1e93bdad2a')"
             class="search-input-item"
             @press-enter="getNodeProjectData"
           />
           <a-input
             v-model:value="listQuery['%projectId%']"
-            :placeholder="$t('i18n.47dd8dbc7d')"
+            :placeholder="$t('i18n_47dd8dbc7d')"
             class="search-input-item"
             @press-enter="getNodeProjectData"
           />
@@ -61,14 +61,14 @@
           <a-select
             v-model:value="listQuery.runMode"
             allow-clear
-            :placeholder="$t('i18n.17d444b642')"
+            :placeholder="$t('i18n_17d444b642')"
             class="search-input-item"
           >
             <a-select-option v-for="item in runModeList" :key="item">{{ item }}</a-select-option>
           </a-select>
-          <a-tooltip :title="$t('i18n.4838a3bd20')">
+          <a-tooltip :title="$t('i18n_4838a3bd20')">
             <a-button :loading="loading" type="primary" @click="getNodeProjectData">{{
-              $t('i18n.e5f71fc31e')
+              $t('i18n_e5f71fc31e')
             }}</a-button>
           </a-tooltip>
 
@@ -77,29 +77,29 @@
       </template>
       <template #toolPrefix>
         <a-dropdown v-if="selectedRowKeys && selectedRowKeys.length">
-          <a-button type="primary" size="small"> {{ $t('i18n.7f7c624a84') }} <DownOutlined /> </a-button>
+          <a-button type="primary" size="small"> {{ $t('i18n_7f7c624a84') }} <DownOutlined /> </a-button>
           <template #overlay>
             <a-menu>
               <a-menu-item>
-                <a-button type="primary" @click="batchStart">{{ $t('i18n.93e894325d') }}</a-button>
+                <a-button type="primary" @click="batchStart">{{ $t('i18n_93e894325d') }}</a-button>
               </a-menu-item>
               <a-menu-item>
-                <a-button type="primary" @click="batchRestart">{{ $t('i18n.73651ba2db') }}</a-button>
+                <a-button type="primary" @click="batchRestart">{{ $t('i18n_73651ba2db') }}</a-button>
               </a-menu-item>
               <a-menu-item>
-                <a-button type="primary" danger @click="batchStop">{{ $t('i18n.a03c00714f') }}</a-button>
+                <a-button type="primary" danger @click="batchStop">{{ $t('i18n_a03c00714f') }}</a-button>
               </a-menu-item>
             </a-menu>
           </template>
         </a-dropdown>
         <a-button v-else type="primary" size="small" :disabled="true">
-          {{ $t('i18n.7f7c624a84') }} <DownOutlined />
+          {{ $t('i18n_7f7c624a84') }} <DownOutlined />
         </a-button>
 
-        <a-button type="primary" size="small" @click="openAdd"><PlusOutlined />{{ $t('i18n.66ab5e9f24') }}</a-button>
+        <a-button type="primary" size="small" @click="openAdd"><PlusOutlined />{{ $t('i18n_66ab5e9f24') }}</a-button>
         <template v-if="!nodeId">
           <a-dropdown v-if="nodeMap && Object.keys(nodeMap).length">
-            <a-button type="primary" size="small" danger> {{ $t('i18n.6a620e3c07') }} <DownOutlined /></a-button>
+            <a-button type="primary" size="small" danger> {{ $t('i18n_6a620e3c07') }} <DownOutlined /></a-button>
             <template #overlay>
               <a-menu>
                 <a-menu-item v-for="(nodeName, key) in nodeMap" :key="key" @click="reSyncProject(key)">
@@ -110,18 +110,18 @@
           </a-dropdown>
         </template>
         <a-button v-else type="primary" size="small" danger @click="reSyncProject(nodeId)">
-          <SyncOutlined />{{ $t('i18n.6a620e3c07') }}
+          <SyncOutlined />{{ $t('i18n_6a620e3c07') }}
         </a-button>
 
         <a-button v-if="nodeId" size="small" type="primary" @click="handlerExportData()"
-          ><DownloadOutlined />{{ $t('i18n.55405ea6ff') }}</a-button
+          ><DownloadOutlined />{{ $t('i18n_55405ea6ff') }}</a-button
         >
         <a-dropdown v-if="nodeId">
           <template #overlay>
             <a-menu>
               <a-menu-item key="1">
                 <a-button type="primary" size="small" @click="handlerImportTemplate()">{{
-                  $t('i18n.2e505d23f7')
+                  $t('i18n_2e505d23f7')
                 }}</a-button>
               </a-menu-item>
             </a-menu>
@@ -136,7 +136,7 @@
             :before-upload="importBeforeUpload"
           >
             <a-button size="small" type="primary"
-              ><UploadOutlined /> {{ $t('i18n.8d9a071ee2') }} <DownOutlined />
+              ><UploadOutlined /> {{ $t('i18n_8d9a071ee2') }} <DownOutlined />
             </a-button>
           </a-upload>
         </a-dropdown>
@@ -146,8 +146,8 @@
           <template #title>
             <div>
               <ul>
-                <li>{{ $t('i18n.2141ffaec9') }}</li>
-                <li>{{ $t('i18n.74d980d4f4') }}</li>
+                <li>{{ $t('i18n_2141ffaec9') }}</li>
+                <li>{{ $t('i18n_74d980d4f4') }}</li>
               </ul>
             </div>
           </template>
@@ -203,7 +203,7 @@
           <template v-else>
             <a-tooltip
               v-if="noFileModes.includes(record.runMode)"
-              :title="`${$t('i18n.d7bebd0e5e')}   ${
+              :title="`${$t('i18n_d7bebd0e5e')}   ${
                 (projectStatusMap[record.nodeId] &&
                   projectStatusMap[record.nodeId][record.projectId] &&
                   projectStatusMap[record.nodeId][record.projectId].statusMsg) ||
@@ -217,8 +217,8 @@
                   projectStatusMap[record.nodeId][record.projectId].pid > 0
                 "
                 disabled
-                :checked-children="$t('i18n.8493205602')"
-                :un-checked-children="$t('i18n.d58a55bcee')"
+                :checked-children="$t('i18n_8493205602')"
+                :un-checked-children="$t('i18n_d58a55bcee')"
               />
             </a-tooltip>
             <span v-else>-</span>
@@ -228,7 +228,7 @@
         <template v-else-if="column.dataIndex === 'port'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$t('i18n.2b04210d33')}${(
+            :title="`${$t('i18n_2b04210d33')}${(
               (projectStatusMap[record.nodeId] &&
                 projectStatusMap[record.nodeId][record.projectId] &&
                 projectStatusMap[record.nodeId][record.projectId].pids) || [
@@ -237,7 +237,7 @@
                   projectStatusMap[record.nodeId][record.projectId].pid) ||
                   '-'
               ]
-            ).join(',')} / ${$t('i18n.4c096c51a3')}${
+            ).join(',')} / ${$t('i18n_4c096c51a3')}${
               (projectStatusMap[record.nodeId] &&
                 projectStatusMap[record.nodeId][record.projectId] &&
                 projectStatusMap[record.nodeId][record.projectId].port) ||
@@ -267,21 +267,21 @@
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleFile(record)">{{ $t('i18n.2a0c4740f1') }}</a-button>
+            <a-button size="small" type="primary" @click="handleFile(record)">{{ $t('i18n_2a0c4740f1') }}</a-button>
             <template v-if="noFileModes.includes(record.runMode)">
               <a-button size="small" type="primary" @click="handleConsole(record)">{{
-                $t('i18n.b5c3770699')
+                $t('i18n_b5c3770699')
               }}</a-button>
             </template>
             <template v-else>
-              <a-tooltip :title="$t('i18n.904615588b')">
-                <a-button size="small" type="primary" :disabled="true">{{ $t('i18n.b5c3770699') }}</a-button></a-tooltip
+              <a-tooltip :title="$t('i18n_904615588b')">
+                <a-button size="small" type="primary" :disabled="true">{{ $t('i18n_b5c3770699') }}</a-button></a-tooltip
               >
             </template>
 
             <a-dropdown>
               <a @click="(e) => e.preventDefault()">
-                {{ $t('i18n.0ec9eaf9c3') }}
+                {{ $t('i18n_0ec9eaf9c3') }}
                 <DownOutlined />
               </a>
               <template #overlay>
@@ -289,40 +289,40 @@
                   <a-menu-item>
                     <template v-if="noFileModes.includes(record.runMode)">
                       <a-button size="small" type="primary" @click="handleTrigger(record)">{{
-                        $t('i18n.4696724ed3')
+                        $t('i18n_4696724ed3')
                       }}</a-button>
                     </template>
                     <template v-else>
-                      <a-tooltip :title="$t('i18n.4e54369108')">
+                      <a-tooltip :title="$t('i18n_4e54369108')">
                         <a-button size="small" type="primary" :disabled="true">{{
-                          $t('i18n.4696724ed3')
+                          $t('i18n_4696724ed3')
                         }}</a-button></a-tooltip
                       >
                     </template>
                   </a-menu-item>
                   <a-menu-item v-if="noFileModes.includes(record.runMode)">
                     <a-button size="small" type="primary" @click="handleLogBack(record)"
-                      >{{ $t('i18n.2926598213') }}
+                      >{{ $t('i18n_2926598213') }}
                     </a-button>
                   </a-menu-item>
                   <a-menu-item>
                     <a-button size="small" type="primary" @click="copyItem(record)">{{
-                      $t('i18n.79d3abe929')
+                      $t('i18n_79d3abe929')
                     }}</a-button>
                   </a-menu-item>
                   <a-menu-item>
                     <a-button size="small" type="primary" danger @click="handleDelete(record, '')">{{
-                      $t('i18n.c0f4a31865')
+                      $t('i18n_c0f4a31865')
                     }}</a-button>
                   </a-menu-item>
                   <a-menu-item>
                     <a-button size="small" type="primary" danger @click="handleDelete(record, 'thorough')">{{
-                      $t('i18n.7327966572')
+                      $t('i18n_7327966572')
                     }}</a-button>
                   </a-menu-item>
                   <a-menu-item>
                     <a-button size="small" type="primary" danger @click="migrateWorkspace(record)">{{
-                      $t('i18n.3adb55fbb5')
+                      $t('i18n_3adb55fbb5')
                     }}</a-button>
                   </a-menu-item>
                   <a-menu-item>
@@ -331,7 +331,7 @@
                       type="primary"
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
                       @click="sortItemHander(record, index, 'top')"
-                      >{{ $t('i18n.3d43ff1199') }}</a-button
+                      >{{ $t('i18n_3d43ff1199') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
@@ -340,7 +340,7 @@
                       type="primary"
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) <= 1"
                       @click="sortItemHander(record, index, 'up')"
-                      >{{ $t('i18n.315eacd193') }}</a-button
+                      >{{ $t('i18n_315eacd193') }}</a-button
                     >
                   </a-menu-item>
                   <a-menu-item>
@@ -349,7 +349,7 @@
                       type="primary"
                       :disabled="(listQuery.page - 1) * listQuery.limit + (index + 1) === listQuery.total"
                       @click="sortItemHander(record, index, 'down')"
-                      >{{ $t('i18n.17acd250da') }}</a-button
+                      >{{ $t('i18n_17acd250da') }}</a-button
                     >
                   </a-menu-item>
                 </a-menu>
@@ -434,8 +434,8 @@
               </template>
             </a-list-item-meta>
             <div>
-              <a-tooltip :title="`${item.cause || $t('i18n.dd4e55c39c')}`"
-                >{{ item.cause || $t('i18n.dd4e55c39c') }}
+              <a-tooltip :title="`${item.cause || $t('i18n_dd4e55c39c')}`"
+                >{{ item.cause || $t('i18n_dd4e55c39c') }}
               </a-tooltip>
             </div>
           </a-list-item>
@@ -447,7 +447,7 @@
       v-if="triggerVisible"
       v-model:open="triggerVisible"
       destroy-on-close
-      :title="$t('i18n.4696724ed3')"
+      :title="$t('i18n_4696724ed3')"
       width="50%"
       :footer="null"
       :mask-closable="false"
@@ -455,18 +455,18 @@
       <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
         <a-tabs default-active-key="1">
           <template #rightExtra>
-            <a-tooltip :title="$t('i18n.01ad26f4a9')">
-              <a-button type="primary" size="small" @click="resetTrigger">{{ $t('i18n.4b9c3271dc') }}</a-button>
+            <a-tooltip :title="$t('i18n_01ad26f4a9')">
+              <a-button type="primary" size="small" @click="resetTrigger">{{ $t('i18n_4b9c3271dc') }}</a-button>
             </a-tooltip>
           </template>
-          <a-tab-pane key="1" :tab="$t('i18n.1a6aa24e76')">
+          <a-tab-pane key="1" :tab="$t('i18n_1a6aa24e76')">
             <a-space direction="vertical" style="width: 100%">
-              <a-alert :message="$t('i18n.947d983961')" type="warning">
+              <a-alert :message="$t('i18n_947d983961')" type="warning">
                 <template #description>
                   <ul>
-                    <li>{{ $t('i18n.9a00e13160') }}</li>
-                    <li>{{ $t('i18n.632a907224') }}</li>
-                    <li>{{ $t('i18n.cb9b3ec760') }}</li>
+                    <li>{{ $t('i18n_9a00e13160') }}</li>
+                    <li>{{ $t('i18n_632a907224') }}</li>
+                    <li>{{ $t('i18n_cb9b3ec760') }}</li>
                   </ul>
                 </template>
               </a-alert>
@@ -475,7 +475,7 @@
                 v-for="item in triggerUses"
                 :key="item.value"
                 type="info"
-                :message="`${item.desc}${$t('i18n.b9a4098131')}(${$t('i18n.00a070c696')})`"
+                :message="`${item.desc}${$t('i18n_b9a4098131')}(${$t('i18n_00a070c696')})`"
               >
                 <template #description>
                   <a-typography-paragraph
@@ -487,7 +487,7 @@
                 </template>
               </a-alert>
 
-              <a-alert type="info" :message="`${$t('i18n.8d202b890c')}(${$t('i18n.00a070c696')})`">
+              <a-alert type="info" :message="`${$t('i18n_8d202b890c')}(${$t('i18n_00a070c696')})`">
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchTriggerUrl }">
                     <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
@@ -505,7 +505,7 @@
       v-model:open="editProjectVisible"
       destroy-on-close
       width="60vw"
-      :title="$t('i18n.bd49bc196c')"
+      :title="$t('i18n_bd49bc196c')"
       :confirm-loading="confirmLoading"
       :mask-closable="false"
       @ok="
@@ -518,8 +518,8 @@
       "
     >
       <a-form :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$t('i18n.7e2b40fc86')" :help="$t('i18n.dd23fdf796')">
-          <a-select v-model:value="temp.nodeId" allow-clear :placeholder="$t('i18n.f8a613d247')">
+        <a-form-item :label="$t('i18n_7e2b40fc86')" :help="$t('i18n_dd23fdf796')">
+          <a-select v-model:value="temp.nodeId" allow-clear :placeholder="$t('i18n_f8a613d247')">
             <a-select-option v-for="(nodeName, key) in nodeMap" :key="key">{{ nodeName }}</a-select-option>
           </a-select>
         </a-form-item>
@@ -547,42 +547,42 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="50vw"
-      :title="$t('i18n.c6f6a9b234')"
+      :title="$t('i18n_c6f6a9b234')"
       :mask-closable="false"
       @ok="migrateWorkspaceOk"
     >
       <a-space direction="vertical" style="width: 100%">
-        <a-alert :message="$t('i18n.947d983961')" type="warning" show-icon>
+        <a-alert :message="$t('i18n_947d983961')" type="warning" show-icon>
           <template #description>
-            {{ $t('i18n.8e6184c0d3') }}
+            {{ $t('i18n_8e6184c0d3') }}
             <ul>
               <li>
-                {{ $t('i18n.829706defc') }}
+                {{ $t('i18n_829706defc') }}
 
                 <ol>
-                  <li>{{ $t('i18n.3c070ea334') }}</li>
-                  <li>{{ $t('i18n.d84323ba8d') }}</li>
+                  <li>{{ $t('i18n_3c070ea334') }}</li>
+                  <li>{{ $t('i18n_d84323ba8d') }}</li>
                 </ol>
               </li>
-              <li>{{ $t('i18n.cb28aee4f0') }}</li>
-              <li>{{ $t('i18n.44ef546ded') }}</li>
-              <li>{{ $t('i18n.cb46672712') }}</li>
+              <li>{{ $t('i18n_cb28aee4f0') }}</li>
+              <li>{{ $t('i18n_44ef546ded') }}</li>
+              <li>{{ $t('i18n_cb46672712') }}</li>
             </ul>
           </template>
         </a-alert>
-        <a-alert :message="$t('i18n.b15689296a')" type="error" show-icon>
+        <a-alert :message="$t('i18n_b15689296a')" type="error" show-icon>
           <template #description>
             <ul>
-              <li>{{ $t('i18n.24ad6f3354') }}</li>
-              <li>{{ $t('i18n.8f0c429b46') }}</li>
-              <li>{{ $t('i18n.471c6b19cf') }}</li>
+              <li>{{ $t('i18n_24ad6f3354') }}</li>
+              <li>{{ $t('i18n_8f0c429b46') }}</li>
+              <li>{{ $t('i18n_471c6b19cf') }}</li>
             </ul>
           </template>
         </a-alert>
       </a-space>
       <a-form :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item> </a-form-item>
-        <a-form-item :label="$t('i18n.b4a8c78284')" name="workspaceId">
+        <a-form-item :label="$t('i18n_b4a8c78284')" name="workspaceId">
           <a-select
             v-model:value="temp.workspaceId"
             show-search
@@ -596,13 +596,13 @@
                 )
               }
             "
-            :placeholder="$t('i18n.b3bda9bf9e')"
+            :placeholder="$t('i18n_b3bda9bf9e')"
             @change="loadMigrateWorkspaceNodeList"
           >
             <a-select-option v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item :label="$t('i18n.6953a488e3')" name="nodeId">
+        <a-form-item :label="$t('i18n_6953a488e3')" name="nodeId">
           <a-select
             v-model:value="temp.nodeId"
             show-search
@@ -616,7 +616,7 @@
                 )
               }
             "
-            :placeholder="$t('i18n.1d53247d61')"
+            :placeholder="$t('i18n_1d53247d61')"
           >
             <a-select-option v-for="item in migrateWorkspaceNodeList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
@@ -628,7 +628,7 @@
       v-if="lobbackVisible"
       v-model:open="lobbackVisible"
       destroy-on-close
-      :title="$t('i18n.15f01c43e8')"
+      :title="$t('i18n_15f01c43e8')"
       width="850px"
       :footer="null"
       :mask-closable="false"
@@ -705,20 +705,20 @@ export default {
 
       columns: [
         {
-          title: this.$t('i18n.33c9e2388e'),
+          title: this.$t('i18n_33c9e2388e'),
           dataIndex: 'projectId',
           width: 100,
           ellipsis: true
         },
 
         {
-          title: this.$t('i18n.738a41f965'),
+          title: this.$t('i18n_738a41f965'),
           dataIndex: 'name',
           // width: 200,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.d438e83c16'),
+          title: this.$t('i18n_d438e83c16'),
           dataIndex: 'group',
           sorter: true,
           width: '100px',
@@ -726,40 +726,40 @@ export default {
           tooltip: true
         },
         {
-          title: this.$t('i18n.b1785ef01e'),
+          title: this.$t('i18n_b1785ef01e'),
           dataIndex: 'nodeId',
           width: 90,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.e4b51d5cd0'),
+          title: this.$t('i18n_e4b51d5cd0'),
           dataIndex: 'status',
           align: 'center',
           width: 100,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.aabdc3b7c0'),
+          title: this.$t('i18n_aabdc3b7c0'),
           dataIndex: 'path',
           ellipsis: true,
           width: 120
         },
         {
-          title: this.$t('i18n.03a74a9a8a'),
+          title: this.$t('i18n_03a74a9a8a'),
           dataIndex: 'logPath',
           ellipsis: true,
           width: 120
         },
 
         {
-          title: this.$t('i18n.504c43b70a'),
+          title: this.$t('i18n_504c43b70a'),
           dataIndex: 'port',
           width: 100,
           ellipsis: true
         },
 
         {
-          title: this.$t('i18n.17d444b642'),
+          title: this.$t('i18n_17d444b642'),
           dataIndex: 'runMode',
           width: 90,
           ellipsis: true
@@ -772,7 +772,7 @@ export default {
           tooltip: true
         },
         {
-          title: this.$t('i18n.eca37cb072'),
+          title: this.$t('i18n_eca37cb072'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -780,7 +780,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('i18n.1303e638b5'),
+          title: this.$t('i18n_1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           ellipsis: true,
           sorter: true,
@@ -788,20 +788,20 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('i18n.9baca0054e'),
+          title: this.$t('i18n_9baca0054e'),
           dataIndex: 'modifyUser',
           width: '130px',
           ellipsis: true,
           sorter: true
         },
         {
-          title: this.$t('i18n.c35c1a1330'),
+          title: this.$t('i18n_c35c1a1330'),
           dataIndex: 'sortValue',
           sorter: true,
           width: '80px'
         },
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
           align: 'center',
           fixed: 'right',
@@ -812,10 +812,10 @@ export default {
 
       triggerVisible: false,
       triggerUses: [
-        { desc: this.$t('i18n.0e16902c1e'), value: 'status' },
-        { desc: this.$t('i18n.6b29a6e523'), value: 'start' },
-        { desc: this.$t('i18n.d75c02d050'), value: 'stop' },
-        { desc: this.$t('i18n.f3e93355ee'), value: 'restart' }
+        { desc: this.$t('i18n_0e16902c1e'), value: 'status' },
+        { desc: this.$t('i18n_6b29a6e523'), value: 'start' },
+        { desc: this.$t('i18n_d75c02d050'), value: 'stop' },
+        { desc: this.$t('i18n_f3e93355ee'), value: 'restart' }
       ],
 
       editProjectVisible: false,
@@ -974,7 +974,7 @@ export default {
                   data2[item.projectId] = {
                     port: 0,
                     pid: 0,
-                    error: this.$t('i18n.44ed625b19')
+                    error: this.$t('i18n_44ed625b19')
                   }
                 })
                 this.projectStatusMap = {
@@ -990,7 +990,7 @@ export default {
     // 文件管理
     handleFile(record) {
       this.temp = Object.assign({}, record)
-      this.drawerTitle = `${this.$t('i18n.8780e6b3d1')}(${this.temp.name})`
+      this.drawerTitle = `${this.$t('i18n_8780e6b3d1')}(${this.temp.name})`
       this.drawerFileVisible = true
     },
     // 关闭文件管理对话框
@@ -1001,7 +1001,7 @@ export default {
     // 控制台
     handleConsole(record) {
       this.temp = Object.assign({}, record)
-      this.drawerTitle = `${this.$t('i18n.b5c3770699')}(${this.temp.name})`
+      this.drawerTitle = `${this.$t('i18n_b5c3770699')}(${this.temp.name})`
       this.drawerConsoleVisible = true
     },
     // 关闭控制台
@@ -1027,7 +1027,7 @@ export default {
       this.onFileClose()
       this.drawerReadFileVisible = true
       this.temp.readFilePath = (path + '/' + filename).replace(new RegExp('//', 'gm'), '/')
-      this.drawerTitle = `${this.$t('i18n.5854370b86')}(${filename})`
+      this.drawerTitle = `${this.$t('i18n_5854370b86')}(${filename})`
     },
     onReadFileClose() {
       this.drawerReadFileVisible = false
@@ -1073,17 +1073,17 @@ export default {
     batchStart() {
       if (this.selectedRowKeys.length <= 0) {
         $notification.warning({
-          message: this.$t('i18n.576669e450')
+          message: this.$t('i18n_576669e450')
         })
         return
       }
       this.temp = {
-        title: this.$t('i18n.93e894325d'),
+        title: this.$t('i18n_93e894325d'),
         data: this.selectedRowKeysToId()
       }
 
       this.batchVisible = true
-      this.batchOptInfo(0, this.$t('i18n.8e54ddfe24'), 'start')
+      this.batchOptInfo(0, this.$t('i18n_8e54ddfe24'), 'start')
     },
     // 批量操作
     batchOptInfo(index, msg, opt) {
@@ -1091,7 +1091,7 @@ export default {
         return
       }
       const value = this.temp.data[index]
-      value.cause = msg + this.$t('i18n.aed1dfbc31')
+      value.cause = msg + this.$t('i18n_aed1dfbc31')
       this.updateBatchData(index, value)
       if (value.runMode !== 'File') {
         const params = {
@@ -1107,12 +1107,12 @@ export default {
             this.batchOptInfo(index + 1, msg, opt)
           })
           .catch(() => {
-            value.cause = msg + this.$t('i18n.acd5cb847a')
+            value.cause = msg + this.$t('i18n_acd5cb847a')
             this.updateBatchData(index, value)
             this.batchOptInfo(index + 1, msg, opt)
           })
       } else {
-        value.cause = this.$t('i18n.92636e8c8f')
+        value.cause = this.$t('i18n_92636e8c8f')
         this.updateBatchData(index, value)
         this.batchOptInfo(index + 1, msg, opt)
       }
@@ -1122,31 +1122,31 @@ export default {
     batchRestart() {
       if (this.selectedRowKeys.length <= 0) {
         $notification.warning({
-          message: this.$t('i18n.03580275cb')
+          message: this.$t('i18n_03580275cb')
         })
         return
       }
       this.temp = {
-        title: this.$t('i18n.7737f088de'),
+        title: this.$t('i18n_7737f088de'),
         data: this.selectedRowKeysToId()
       }
       this.batchVisible = true
-      this.batchOptInfo(0, this.$t('i18n.01b4e06f39'), 'restart')
+      this.batchOptInfo(0, this.$t('i18n_01b4e06f39'), 'restart')
     },
 
     //批量关闭
     batchStop() {
       if (this.selectedRowKeys.length <= 0) {
         $notification.warning({
-          message: this.$t('i18n.373a1efdc0')
+          message: this.$t('i18n_373a1efdc0')
         })
       }
       this.temp = {
-        title: this.$t('i18n.b30d07c036'),
+        title: this.$t('i18n_b30d07c036'),
         data: this.selectedRowKeysToId()
       }
       this.batchVisible = true
-      this.batchOptInfo(0, this.$t('i18n.095e938e2a'), 'stop')
+      this.batchOptInfo(0, this.$t('i18n_095e938e2a'), 'stop')
     },
 
     // 获取复选框属性 判断是否可以勾选
@@ -1165,11 +1165,11 @@ export default {
     },
     reSyncProject(nodeId) {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.24384ba6c1'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_24384ba6c1'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return syncProject(nodeId).then((res) => {
             if (res.code == 200) {
@@ -1185,22 +1185,22 @@ export default {
     // 排序
     sortItemHander(record, index, method) {
       const msgData = {
-        top: this.$t('i18n.0079d91f95'),
-        up: this.$t('i18n.b166a66d67'),
-        down: this.$t('i18n.7a7e25e9eb')
+        top: this.$t('i18n_0079d91f95'),
+        up: this.$t('i18n_b166a66d67'),
+        down: this.$t('i18n_7a7e25e9eb')
       }
-      let msg = msgData[method] || this.$t('i18n.49574eee58')
+      let msg = msgData[method] || this.$t('i18n_49574eee58')
       if (!record.sortValue) {
-        msg += `${this.$t('i18n.57c0a41ec6')},${this.$t('i18n.066f903d75')},${this.$t('i18n.c4e2cd2266')}`
+        msg += `${this.$t('i18n_57c0a41ec6')},${this.$t('i18n_066f903d75')},${this.$t('i18n_c4e2cd2266')}`
       }
       // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
       const compareId = this.projList[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
         content: msg,
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return sortItemProject({
             id: record.id,
@@ -1282,7 +1282,7 @@ export default {
       delete temp.outGivingProject
       this.temp = {
         ...temp,
-        name: temp.name + this.$t('i18n.0428b36ab1'),
+        name: temp.name + this.$t('i18n_0428b36ab1'),
         id: temp.projectId + '_copy',
         lib: temp.lib + '_copy'
       }
@@ -1298,17 +1298,17 @@ export default {
     },
     // 删除
     handleDelete(record, thorough) {
-      const msg = thorough ? this.$t('i18n.8580ad66b0') : this.$t('i18n.954fb7fa21')
+      const msg = thorough ? this.$t('i18n_8580ad66b0') : this.$t('i18n_954fb7fa21')
       const html = thorough
         ? "<b style='font-size: 24px;color:red;font-weight: bold;'>" + msg + '</b>'
         : "<b style='font-size: 20px;font-weight: bold;'>" + msg + '</b>'
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
         content: h('p', { innerHTML: html }, null),
         okButtonProps: { type: 'primary', danger: !!thorough, size: thorough ? 'small' : 'middle' },
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return deleteProject({
             nodeId: record.nodeId,
@@ -1360,13 +1360,13 @@ export default {
     migrateWorkspaceOk() {
       if (!this.temp.workspaceId) {
         $notification.warn({
-          message: this.$t('i18n.b3bda9bf9e')
+          message: this.$t('i18n_b3bda9bf9e')
         })
         return false
       }
       if (!this.temp.nodeId) {
         $notification.warn({
-          message: this.$t('i18n.1d53247d61')
+          message: this.$t('i18n_1d53247d61')
         })
         return false
       }

@@ -14,19 +14,19 @@
 
         <a-col v-if="extendBar" style="padding-left: 10px">
           <a-space>
-            <a-tooltip :title="$t('i18n.65f66dfe97')">
+            <a-tooltip :title="$t('i18n_65f66dfe97')">
               <a-button type="primary" size="small" @click="clearLogCache"
-                ><DeleteOutlined />{{ $t('i18n.288f0c404c') }}</a-button
+                ><DeleteOutlined />{{ $t('i18n_288f0c404c') }}</a-button
               >
             </a-tooltip>
             <!-- <a-tooltip title="内容超过边界自动换行">
                   <a-switch v-model="temp.wordBreak" checked-children="自动换行" un-checked-children="不换行" @change="onChange" />
                 </a-tooltip> -->
-            <a-tooltip :title="$t('i18n.0693e17fc1')">
+            <a-tooltip :title="$t('i18n_0693e17fc1')">
               <a-switch
                 v-model:checked="temp.logScroll"
-                :checked-children="$t('i18n.e0ce74fcac')"
-                :un-checked-children="$t('i18n.18b34cf50d')"
+                :checked-children="$t('i18n_e0ce74fcac')"
+                :un-checked-children="$t('i18n_18b34cf50d')"
                 @change="onChange"
               />
             </a-tooltip>

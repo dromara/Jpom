@@ -20,7 +20,7 @@
           />
           <a-input
             v-model:value="listQuery['nodeName']"
-            :placeholder="$t('i18n.d7ec2d3fea')"
+            :placeholder="$t('i18n_d7ec2d3fea')"
             class="search-input-item"
             @press-enter="loadData"
           />
@@ -38,17 +38,17 @@
               }
             "
             allow-clear
-            :placeholder="$t('i18n.464f3d4ea3')"
+            :placeholder="$t('i18n_464f3d4ea3')"
             class="search-input-item"
           >
-            <a-select-option key="worker">{{ $t('i18n.41e9f0c9c6') }}</a-select-option>
-            <a-select-option key="manager">{{ $t('i18n.a6269ede6c') }}</a-select-option>
+            <a-select-option key="worker">{{ $t('i18n_41e9f0c9c6') }}</a-select-option>
+            <a-select-option key="manager">{{ $t('i18n_a6269ede6c') }}</a-select-option>
           </a-select>
 
-          <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
-          <a-statistic-countdown format="s" :title="$t('i18n.0f8403d07e')" :value="countdownTime" @finish="loadData">
+          <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
+          <a-statistic-countdown format="s" :title="$t('i18n_0f8403d07e')" :value="countdownTime" @finish="loadData">
             <template #suffix>
-              <div style="font-size: 12px">{{ $t('i18n.ee6ce96abb') }}</div>
+              <div style="font-size: 12px">{{ $t('i18n_ee6ce96abb') }}</div>
             </template>
           </a-statistic-countdown>
         </a-space>
@@ -63,11 +63,11 @@
         <template v-else-if="column.dataIndex === 'hostname'">
           <a-popover
             placement="topLeft"
-            :title="`${$t('i18n.07a0e44145')}${record.description && record.description.hostname}`"
+            :title="`${$t('i18n_07a0e44145')}${record.description && record.description.hostname}`"
           >
             <template #content>
               <p>
-                {{ $t('i18n.a472019766') }}: <a-tag>{{ record.id }}</a-tag>
+                {{ $t('i18n_a472019766') }}: <a-tag>{{ record.id }}</a-tag>
               </p>
               <template v-if="record.description && record.description.resources">
                 <p>
@@ -81,7 +81,7 @@
               </template>
               <template v-if="record.description && record.description.engine">
                 <p>
-                  {{ $t('i18n.fe2df04a16') }}:
+                  {{ $t('i18n_fe2df04a16') }}:
                   <a-tag>{{ record.description.engine.engineVersion }}</a-tag>
                 </p>
               </template>
@@ -94,7 +94,7 @@
         <template v-else-if="column.dataIndex === 'state'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$t('i18n.9b3e947cc9')}${record.status && record.status.state} ${$t('i18n.fb91527ce5')}${
+            :title="`${$t('i18n_9b3e947cc9')}${record.status && record.status.state} ${$t('i18n_fb91527ce5')}${
               record.spec ? record.spec.availability || '' : ''
             }`"
           >
@@ -116,9 +116,9 @@
         <template v-else-if="column.dataIndex === 'role'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$t('i18n.20f32e1979')}${record.spec && record.spec.role} ${
+            :title="`${$t('i18n_20f32e1979')}${record.spec && record.spec.role} ${
               record.managerStatus && record.managerStatus.reachability === 'REACHABLE'
-                ? $t('i18n.88c5680d0d') + record.managerStatus.reachability
+                ? $t('i18n_88c5680d0d') + record.managerStatus.reachability
                 : ''
             }`"
           >
@@ -149,7 +149,7 @@
         <template v-else-if="column.dataIndex === 'updatedAt'">
           <a-tooltip
             placement="topLeft"
-            :title="`${$t('i18n.bf94b97d1a')}${text} ${$t('i18n.312f45014a')}${record.createdAt}`"
+            :title="`${$t('i18n_bf94b97d1a')}${text} ${$t('i18n_312f45014a')}${record.createdAt}`"
           >
             <span>
               {{ text }}
@@ -160,15 +160,15 @@
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <template v-if="record.managerStatus && record.managerStatus.leader">
-              <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n.8347a927c0') }}</a-button>
-              <a-tooltip :title="$t('i18n.28c1c35cd9')">
-                <a-button size="small" type="primary" danger :disabled="true">{{ $t('i18n.b3b1f709d4') }}</a-button>
+              <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n_8347a927c0') }}</a-button>
+              <a-tooltip :title="$t('i18n_28c1c35cd9')">
+                <a-button size="small" type="primary" danger :disabled="true">{{ $t('i18n_b3b1f709d4') }}</a-button>
               </a-tooltip>
             </template>
             <template v-else>
-              <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n.8347a927c0') }}</a-button>
+              <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n_8347a927c0') }}</a-button>
               <a-button size="small" type="primary" danger @click="handleLeava(record)">{{
-                $t('i18n.b3b1f709d4')
+                $t('i18n_b3b1f709d4')
               }}</a-button>
             </template>
           </a-space>
@@ -181,22 +181,22 @@
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$t('i18n.61e7fa1227')"
+      :title="$t('i18n_61e7fa1227')"
       :mask-closable="false"
       @ok="handleEditOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$t('i18n.464f3d4ea3')" name="role">
+        <a-form-item :label="$t('i18n_464f3d4ea3')" name="role">
           <a-radio-group v-model:value="temp.role" name="role" :disabled="temp.leader">
-            <a-radio value="WORKER"> {{ $t('i18n.41e9f0c9c6') }}</a-radio>
-            <a-radio value="MANAGER"> {{ $t('i18n.a6269ede6c') }} </a-radio>
+            <a-radio value="WORKER"> {{ $t('i18n_41e9f0c9c6') }}</a-radio>
+            <a-radio value="MANAGER"> {{ $t('i18n_a6269ede6c') }} </a-radio>
           </a-radio-group>
         </a-form-item>
-        <a-form-item :label="$t('i18n.3fea7ca76c')" name="availability">
+        <a-form-item :label="$t('i18n_3fea7ca76c')" name="availability">
           <a-radio-group v-model:value="temp.availability" name="availability">
-            <a-radio value="ACTIVE"> {{ $t('i18n.fe32def462') }}</a-radio>
-            <a-radio value="PAUSE"> {{ $t('i18n.8d63ef388e') }} </a-radio>
-            <a-radio value="DRAIN"> {{ $t('i18n.f113c10ade') }} </a-radio>
+            <a-radio value="ACTIVE"> {{ $t('i18n_fe32def462') }}</a-radio>
+            <a-radio value="PAUSE"> {{ $t('i18n_8d63ef388e') }} </a-radio>
+            <a-radio value="DRAIN"> {{ $t('i18n_f113c10ade') }} </a-radio>
           </a-radio-group>
         </a-form-item>
       </a-form>
@@ -232,13 +232,13 @@ export default {
       editVisible: false,
       initSwarmVisible: false,
       rules: {
-        role: [{ required: true, message: this.$t('i18n.9d7d471b77'), trigger: 'blur' }],
-        availability: [{ required: true, message: this.$t('i18n.4c7c58b208'), trigger: 'blur' }]
+        role: [{ required: true, message: this.$t('i18n_9d7d471b77'), trigger: 'blur' }],
+        availability: [{ required: true, message: this.$t('i18n_4c7c58b208'), trigger: 'blur' }]
       },
 
       columns: [
         {
-          title: this.$t('i18n.faaadc447b'),
+          title: this.$t('i18n_faaadc447b'),
           width: 80,
           ellipsis: true,
           align: 'center',
@@ -246,31 +246,31 @@ export default {
         },
         // { title: "节点Id", dataIndex: "id", ellipsis: true, },
         {
-          title: this.$t('i18n.6707667676'),
+          title: this.$t('i18n_6707667676'),
           dataIndex: 'hostname',
           ellipsis: true
         },
         {
-          title: this.$t('i18n.c1786d9e11'),
+          title: this.$t('i18n_c1786d9e11'),
           width: 150,
           dataIndex: 'address',
           ellipsis: true
         },
         {
-          title: this.$t('i18n.3fea7ca76c'),
+          title: this.$t('i18n_3fea7ca76c'),
           width: 140,
           dataIndex: 'state',
           ellipsis: true
         },
         {
-          title: this.$t('i18n.464f3d4ea3'),
+          title: this.$t('i18n_464f3d4ea3'),
           width: 110,
           dataIndex: 'role',
           ellipsis: true
         },
 
         {
-          title: this.$t('i18n.996dc32a98'),
+          title: this.$t('i18n_996dc32a98'),
           width: 140,
           align: 'center',
           dataIndex: 'os',
@@ -284,7 +284,7 @@ export default {
         //   width: 170,
         // },
         {
-          title: this.$t('i18n.1303e638b5'),
+          title: this.$t('i18n_1303e638b5'),
           dataIndex: 'updatedAt',
 
           ellipsis: true,
@@ -292,7 +292,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
           fixed: 'right',
           align: 'center',
@@ -358,11 +358,11 @@ export default {
     //
     handleLeava(record) {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.f5399c620e'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_f5399c620e'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return dockerSwarmNodeLeave({
             nodeId: record.id,

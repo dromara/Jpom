@@ -12,12 +12,12 @@
         <log-view2 :ref="`logView`" height="calc(100vh - 140px)">
           <template #before>
             <a-space>
-              <a-button type="primary" size="small" @click="loadData">{{ $t('i18n.694fc5efa9') }}</a-button>
+              <a-button type="primary" size="small" @click="loadData">{{ $t('i18n_694fc5efa9') }}</a-button>
               <a-button type="primary" danger size="small" :disabled="!temp.path" @click="deleteLog">{{
-                $t('i18n.2f4aaddde3')
+                $t('i18n_2f4aaddde3')
               }}</a-button>
               <a-button type="primary" size="small" :disabled="!temp.path" @click="downloadLog">{{
-                $t('i18n.f26ef91424')
+                $t('i18n_f26ef91424')
               }}</a-button>
               |
             </a-space>
@@ -133,13 +133,13 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: `web socket ${this.$t('i18n.7030ff6470')},${this.$t('i18n.226a6f9cdd')}`
+          message: `web socket ${this.$t('i18n_7030ff6470')},${this.$t('i18n_226a6f9cdd')}`
         })
       }
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
         console.error(err)
-        $message.warning(this.$t('i18n.5bcda1b4d7') + node.dataRef.path)
+        $message.warning(this.$t('i18n_5bcda1b4d7') + node.dataRef.path)
         // clearInterval(this.heart);
       }
     },
@@ -162,11 +162,11 @@ export default {
     // 删除文件
     deleteLog() {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.3c9eeee356'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_3c9eeee356'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return deleteLog({
             nodeId: null,

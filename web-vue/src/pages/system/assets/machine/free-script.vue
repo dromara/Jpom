@@ -12,15 +12,15 @@
             >
               <template #tool_before>
                 <a-tooltip>
-                  <template #title>{{ $t('i18n.3a94281b91') }}</template>
-                  {{ $t('i18n.92e3a830ae') }}
+                  <template #title>{{ $t('i18n_3a94281b91') }}</template>
+                  {{ $t('i18n_92e3a830ae') }}
                   <QuestionCircleOutlined />
                 </a-tooltip>
               </template>
             </code-editor>
           </a-form-item>
-          <a-form-item :label="$t('i18n.938dd62952')" name="path">
-            <a-input v-model:value="temp.path" :placeholder="$t('i18n.622d00a119')" />
+          <a-form-item :label="$t('i18n_938dd62952')" name="path">
+            <a-input v-model:value="temp.path" :placeholder="$t('i18n_622d00a119')" />
           </a-form-item>
         </a-form>
       </a-col>
@@ -29,12 +29,12 @@
           <template #before>
             <a-space>
               <a-button type="primary" size="small" :loading="loading" :disabled="!temp.content" @click="onSubmit()">{{
-                $t('i18n.1a6aa24e76')
+                $t('i18n_1a6aa24e76')
               }}</a-button>
               <a-switch
                 v-model:checked="temp.appendTemplate"
-                :checked-children="$t('i18n.87e2f5bf75')"
-                :un-checked-children="$t('i18n.e3ee3ca673')"
+                :checked-children="$t('i18n_87e2f5bf75')"
+                :un-checked-children="$t('i18n_e3ee3ca673')"
               />
             </a-space>
           </template>
@@ -89,14 +89,14 @@ const conentScript = () => {
   socket_.onerror = (err) => {
     console.error(err)
     $notification.error({
-      message: `web socket ${($t('i18n.7030ff6470'), $t('i18n.226a6f9cdd'))}`
+      message: `web socket ${($t('i18n_7030ff6470'), $t('i18n_226a6f9cdd'))}`
     })
   }
   socket_.onclose = (err) => {
     //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
     console.error(err)
     loading.value = false
-    $message.warning($t('i18n.a53d137403'))
+    $message.warning($t('i18n_a53d137403'))
     // clearInterval(this.heart);
   }
   socketRef.value = socket_

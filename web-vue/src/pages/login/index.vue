@@ -6,24 +6,24 @@
         <br />
         <template v-if="action === 'login'">
           <a-form :model="loginForm" :label-col="{ span: 0 }" :wrapper-col="{ span: 24 }" @finish="handleLogin">
-            <a-form-item name="loginName" :rules="[{ required: true, message: $t('i18n.08b1fa1304') }]">
-              <a-input v-model:value="loginForm.loginName" autocomplete="true" :placeholder="$t('i18n.819767ada1')" />
+            <a-form-item name="loginName" :rules="[{ required: true, message: $t('i18n_08b1fa1304') }]">
+              <a-input v-model:value="loginForm.loginName" autocomplete="true" :placeholder="$t('i18n_819767ada1')" />
             </a-form-item>
-            <a-form-item name="userPwd" :rules="[{ required: true, message: $t('i18n.e39ffe99e9') }]">
+            <a-form-item name="userPwd" :rules="[{ required: true, message: $t('i18n_e39ffe99e9') }]">
               <a-input-password
                 v-model:value="loginForm.userPwd"
                 autocomplete="true"
-                :placeholder="$t('i18n.a810520460')"
+                :placeholder="$t('i18n_a810520460')"
               />
             </a-form-item>
             <a-form-item
               v-if="!disabledCaptcha"
               name="code"
-              :rules="[{ required: true, message: $t('i18n.d0c06a0df1') }]"
+              :rules="[{ required: true, message: $t('i18n_d0c06a0df1') }]"
             >
               <a-row>
                 <a-col :span="14">
-                  <a-input v-model:value="loginForm.code" :placeholder="$t('i18n.983f59c9d4')" />
+                  <a-input v-model:value="loginForm.code" :placeholder="$t('i18n_983f59c9d4')" />
                 </a-col>
                 <a-col :offset="2" :span="8">
                   <div class="rand-code">
@@ -35,11 +35,11 @@
             </a-form-item>
             <a-form-item :wrapper-col="{ span: 24 }">
               <a-button type="primary" html-type="submit" class="btn-login" :loading="loading">
-                {{ $t('i18n.402d19e50f') }}
+                {{ $t('i18n_402d19e50f') }}
               </a-button>
             </a-form-item>
             <template v-if="enabledOauth2Provides.length">
-              <a-divider>{{ $t('i18n.0f004c4cf7') }}</a-divider>
+              <a-divider>{{ $t('i18n_0f004c4cf7') }}</a-divider>
               <a-form-item :wrapper-col="{ span: 24 }">
                 <a-space :size="20" wrap>
                   <template v-for="(item, index) in oauth2AllProvides">
@@ -88,19 +88,19 @@
             @finish="handleMfa"
           >
             <a-form-item
-              :label="$t('i18n.983f59c9d4')"
+              :label="$t('i18n_983f59c9d4')"
               name="mfaCode"
-              :help="$t('i18n.5c4d3c836f')"
+              :help="$t('i18n_5c4d3c836f')"
               :rules="[
-                { required: true, message: $t('i18n.7e866fece6') },
-                { pattern: /^\d{6}$/, message: $t('i18n.da1abf0865') }
+                { required: true, message: $t('i18n_7e866fece6') },
+                { pattern: /^\d{6}$/, message: $t('i18n_da1abf0865') }
               ]"
             >
-              <a-input v-model:value="mfaData.mfaCode" :placeholder="$t('i18n.674e7808b5')" />
+              <a-input v-model:value="mfaData.mfaCode" :placeholder="$t('i18n_674e7808b5')" />
             </a-form-item>
 
             <a-button type="primary" html-type="submit" class="btn-login">
-              {{ $t('i18n.e83a256e4f') }}
+              {{ $t('i18n_e83a256e4f') }}
             </a-button>
           </a-form>
         </template>
@@ -129,37 +129,37 @@ const { t: $t } = useI18n()
 
 const oauth2AllProvides = ref([
   {
-    name: $t('i18n.4ba304e77a'),
+    name: $t('i18n_4ba304e77a'),
     key: 'dingtalk',
     img: dingtalkImg
   },
   {
-    name: $t('i18n.5516b3130c'),
+    name: $t('i18n_5516b3130c'),
     key: 'feishu',
     img: feishuImg
   },
   {
-    name: $t('i18n.af3a9b6303'),
+    name: $t('i18n_af3a9b6303'),
     key: 'wechat_enterprise',
     img: qyWeixinImg
   },
   {
-    name: `gitee ${$t('i18n.efae7764ac')}`,
+    name: `gitee ${$t('i18n_efae7764ac')}`,
     key: 'gitee',
     img: giteeImg
   },
   {
-    name: `maxkey ${$t('i18n.b6e8fb4106')}`,
+    name: `maxkey ${$t('i18n_b6e8fb4106')}`,
     key: 'maxkey',
     img: maxkeyImg
   },
   {
-    name: `github ${$t('i18n.efae7764ac')}`,
+    name: `github ${$t('i18n_efae7764ac')}`,
     key: 'github',
     img: githubImg
   },
   {
-    name: $t('i18n.ab13dd3381'),
+    name: $t('i18n_ab13dd3381'),
     key: 'mygitlab',
     img: gitlabImg
   }
@@ -179,7 +179,7 @@ const theme = computed(() => {
 const router = useRouter()
 const route = useRoute()
 
-const loginTitle = ref($t('i18n.0de68f5626'))
+const loginTitle = ref($t('i18n_0de68f5626'))
 const loginForm = reactive<IFormState>({
   loginName: '',
   userPwd: '',
@@ -233,7 +233,7 @@ const getLoginConfig = () => {
       const demo = res.data.demo
       const p = h('p', { innerHTML: demo.msg }, [])
       $notification.info({
-        message: $t('i18n.947d983961'),
+        message: $t('i18n_947d983961'),
         description: h('div', {}, [p]),
         key: login_tip_key,
         duration: null
@@ -301,7 +301,7 @@ const checkOauth2 = () => {
 const toOauth2Url = (provide: string) => {
   oauth2Url({ provide: provide }).then((res) => {
     if (res.code === 200 && res.data) {
-      $message.loading({ content: $t('i18n.4c83203419'), key: 'oauth2', duration: 0 })
+      $message.loading({ content: $t('i18n_4c83203419'), key: 'oauth2', duration: 0 })
       location.href = res.data.toUrl
     }
   })
@@ -383,12 +383,12 @@ const checkHasLoginInfo = () => {
     const p = h(
       'p',
       {
-        innerHTML: `${$t('i18n.cfbb3341d5')}<b>${useUserStore.userInfo.name || ''}</b> ${$t('i18n.17006d4d51')}`
+        innerHTML: `${$t('i18n_cfbb3341d5')}<b>${useUserStore.userInfo.name || ''}</b> ${$t('i18n_17006d4d51')}`
       },
       []
     )
     $notification.open({
-      message: $t('i18n.697d60299e'),
+      message: $t('i18n_697d60299e'),
       description: h('div', {}, [p]),
       btn: () =>
         h(
@@ -401,7 +401,7 @@ const checkHasLoginInfo = () => {
               router.push({ path: '/' })
             }
           },
-          { default: () => $t('i18n.7653297de3') }
+          { default: () => $t('i18n_7653297de3') }
         ),
       key: tip_has_login_key,
       duration: null

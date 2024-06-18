@@ -7,11 +7,11 @@
         <div class="dir-container">
           <template v-if="temp.projectList && temp.cacheData">
             <a-form layout="inline" autocomplete="off">
-              <a-form-item :label="$t('i18n.3bf3c0a8d6')">
+              <a-form-item :label="$t('i18n_3bf3c0a8d6')">
                 <a-select
                   :value="`${temp.cacheData.useNodeId},${temp.cacheData.useProjectId}`"
                   style="width: 200px"
-                  :placeholder="$t('i18n.f8a613d247')"
+                  :placeholder="$t('i18n_f8a613d247')"
                   @change="nodeChange"
                 >
                   <a-select-option v-for="item in temp.projectList" :key="`${item.nodeId},${item.projectId}`">
@@ -42,21 +42,21 @@
             <a-form layout="inline" autocomplete="off">
               <a-space direction="vertical" style="width: 100%">
                 <a-space>
-                  <a-form-item :label="$t('i18n.5349f417e9')">
+                  <a-form-item :label="$t('i18n_5349f417e9')">
                     <!-- 关键词： -->
                     <!-- ^.*\d+.*$ -->
                     <!-- .*(0999996|0999995).*   .*(a|b).* -->
-                    <a-tooltip placement="right" :title="$t('i18n.e5ae5b36db')">
+                    <a-tooltip placement="right" :title="$t('i18n_e5ae5b36db')">
                       <a-input
                         v-model:value="temp.cacheData.keyword"
-                        :placeholder="$t('i18n.2d05c9d012')"
+                        :placeholder="$t('i18n_2d05c9d012')"
                         :style="`width: 250px`"
                         @press-enter="sendSearchLog"
                       >
                       </a-input>
                     </a-tooltip>
                   </a-form-item>
-                  <a-form-item :label="$t('i18n.a20341341b')">
+                  <a-form-item :label="$t('i18n_a20341341b')">
                     <a-input-number
                       id="inputNumber"
                       v-model:value="temp.cacheData.beforeCount"
@@ -65,7 +65,7 @@
                       @press-enter="sendSearchLog"
                     />
                   </a-form-item>
-                  <a-form-item :label="$t('i18n.10d6dfd112')">
+                  <a-form-item :label="$t('i18n_10d6dfd112')">
                     <a-input-number
                       id="inputNumber"
                       v-model:value="temp.cacheData.afterCount"
@@ -74,28 +74,28 @@
                       @press-enter="sendSearchLog"
                     />
                   </a-form-item>
-                  <a-popover :title="$t('i18n.108d492247')">
+                  <a-popover :title="$t('i18n_108d492247')">
                     <template #content>
                       <ul>
-                        <li><b>^.*\d+.*$</b> - {{ $t('i18n.66c15f2815') }}</li>
-                        <li><b>.*(a|b).*</b> - {{ $t('i18n.a1638e78e8') }}</li>
+                        <li><b>^.*\d+.*$</b> - {{ $t('i18n_66c15f2815') }}</li>
+                        <li><b>.*(a|b).*</b> - {{ $t('i18n_a1638e78e8') }}</li>
                         <li>
-                          <b>.*({{ $t('i18n.c195df6308') }}).*</b> -
-                          {{ $t('i18n.346008472d') }}
+                          <b>.*({{ $t('i18n_c195df6308') }}).*</b> -
+                          {{ $t('i18n_346008472d') }}
                         </li>
                       </ul>
                     </template>
                     <a-button type="link" style="padding: 0"
                       ><UnorderedListOutlined /><span style="margin-left: 2px">{{
-                        $t('i18n.be5b6463cf')
+                        $t('i18n_be5b6463cf')
                       }}</span></a-button
                     >
                   </a-popover>
                 </a-space>
                 <a-space>
-                  <a-form-item :label="$t('i18n.ff9dffec4d')">
+                  <a-form-item :label="$t('i18n_ff9dffec4d')">
                     <!--  -->
-                    <a-tooltip placement="right" :title="$t('i18n.a9463d0f1a')">
+                    <a-tooltip placement="right" :title="$t('i18n_a9463d0f1a')">
                       <a-select
                         :style="`width: 250px`"
                         :value="temp.cacheData.first"
@@ -107,12 +107,12 @@
                           }
                         "
                       >
-                        <a-select-option value="false">{{ $t('i18n.518df98392') }}</a-select-option>
-                        <a-select-option value="true">{{ $t('i18n.9914219dd1') }} </a-select-option>
+                        <a-select-option value="false">{{ $t('i18n_518df98392') }}</a-select-option>
+                        <a-select-option value="true">{{ $t('i18n_9914219dd1') }} </a-select-option>
                       </a-select>
                     </a-tooltip>
                   </a-form-item>
-                  <a-form-item :label="$t('i18n.d82ab35b27')">
+                  <a-form-item :label="$t('i18n_d82ab35b27')">
                     <a-input-number
                       id="inputNumber"
                       v-model:value="temp.cacheData.head"
@@ -121,7 +121,7 @@
                       @press-enter="sendSearchLog"
                     />
                   </a-form-item>
-                  <a-form-item :label="$t('i18n.10145884ba')">
+                  <a-form-item :label="$t('i18n_10145884ba')">
                     <a-input-number
                       id="inputNumber"
                       v-model:value="temp.cacheData.tail"
@@ -130,42 +130,42 @@
                       @press-enter="sendSearchLog"
                     />
                   </a-form-item>
-                  <a-popover :title="$t('i18n.257dc29ef7')">
+                  <a-popover :title="$t('i18n_257dc29ef7')">
                     <template #content>
                       <ul>
                         <li>
-                          <b>{{ $t('i18n.625aa478e2') }}</b> -
-                          {{ $t('i18n.cb25f04b46') }}
+                          <b>{{ $t('i18n_625aa478e2') }}</b> -
+                          {{ $t('i18n_cb25f04b46') }}
                         </li>
                         <li>
-                          <b>{{ $t('i18n.704f33fc74') }}</b> -
-                          {{ $t('i18n.7d3f2fd640') }}
+                          <b>{{ $t('i18n_704f33fc74') }}</b> -
+                          {{ $t('i18n_7d3f2fd640') }}
                         </li>
                         <li>
-                          <b>{{ $t('i18n.5d414afd86') }}</b> -
-                          {{ $t('i18n.4effdeb1ff') }}
+                          <b>{{ $t('i18n_5d414afd86') }}</b> -
+                          {{ $t('i18n_4effdeb1ff') }}
                         </li>
                         <li>
-                          <b>{{ $t('i18n.8ea4c3f537') }}</b> -
-                          {{ $t('i18n.9b0bc05511') }}
+                          <b>{{ $t('i18n_8ea4c3f537') }}</b> -
+                          {{ $t('i18n_9b0bc05511') }}
                         </li>
                         <li>
-                          <b>{{ $t('i18n.758edf4666') }}</b> -
-                          {{ $t('i18n.3f2d5bd6cc') }}
+                          <b>{{ $t('i18n_758edf4666') }}</b> -
+                          {{ $t('i18n_3f2d5bd6cc') }}
                         </li>
                         <li>
-                          <b>{{ $t('i18n.6e2d78a20e') }}</b> -
-                          {{ $t('i18n.59d20801e9') }}
+                          <b>{{ $t('i18n_6e2d78a20e') }}</b> -
+                          {{ $t('i18n_59d20801e9') }}
                         </li>
                         <li>
-                          <b>{{ $t('i18n.abba4043d8') }}</b> -
-                          {{ $t('i18n.4bbc09fc55') }}
+                          <b>{{ $t('i18n_abba4043d8') }}</b> -
+                          {{ $t('i18n_4bbc09fc55') }}
                         </li>
                       </ul>
                     </template>
                     <a-button type="link" style="padding: 0"
                       ><UnorderedListOutlined /><span style="margin-left: 2px">{{
-                        $t('i18n.62170d5b0a')
+                        $t('i18n_62170d5b0a')
                       }}</span></a-button
                     >
                   </a-popover>
@@ -344,7 +344,7 @@ export default {
         console.error(err)
         $notification.error({
           key: 'log-read-error',
-          message: `web socket ${this.$t('i18n.7030ff6470')},${this.$t('i18n.226a6f9cdd')}`
+          message: `web socket ${this.$t('i18n_7030ff6470')},${this.$t('i18n_226a6f9cdd')}`
         })
         clearInterval(this.socketCache[id].heart)
       }
@@ -355,7 +355,7 @@ export default {
           key: 'log-read-close',
           message:
             ((this.nodeName[item.nodeId] && this.nodeName[item.nodeId].name) || '') +
-            ` ${this.$t('i18n.ab3725d06b')}[tail-log]`
+            ` ${this.$t('i18n_ab3725d06b')}[tail-log]`
         })
         clearInterval(this.socketCache[id].heart)
       }
@@ -452,7 +452,7 @@ export default {
           this.sendSearchLog()
         } else {
           //
-          $message.error(this.$t('i18n.765d09eea5'))
+          $message.error(this.$t('i18n_765d09eea5'))
         }
       }
     },

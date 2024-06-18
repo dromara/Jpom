@@ -140,8 +140,8 @@ export function deleteMonitorOperate(id) {
 }
 
 export const notifyStyle = {
-  0: t('i18n.4a0e9142e7'),
-  1: t('i18n.3bc5e602b2'),
-  2: t('i18n.ff17b9f9cd'),
+  0: t('i18n_4a0e9142e7'),
+  1: t('i18n_3bc5e602b2'),
+  2: t('i18n_ff17b9f9cd'),
   3: 'webhook'
 }

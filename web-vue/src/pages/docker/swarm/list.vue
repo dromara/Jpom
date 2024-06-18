@@ -1,10 +1,10 @@
 <template>
   <div>
     <template v-if="useSuggestions">
-      <a-result :title="$t('i18n.55e690333a')" :sub-title="$t('i18n.9878af9db5')">
+      <a-result :title="$t('i18n_55e690333a')" :sub-title="$t('i18n_9878af9db5')">
         <template #extra>
           <router-link to="/system/assets/docker-list">
-            <a-button key="console" type="primary">{{ $t('i18n.6dcf6175d8') }}</a-button></router-link
+            <a-button key="console" type="primary">{{ $t('i18n_6dcf6175d8') }}</a-button></router-link
           >
         </template>
       </a-result>
@@ -15,7 +15,7 @@
       default-auto-refresh
       :auto-refresh-time="5"
       table-name="docker-swarm-list"
-      :empty-description="$t('i18n.ab9c827798')"
+      :empty-description="$t('i18n_ab9c827798')"
       :active-page="activePage"
       size="middle"
       :data-source="list"
@@ -32,18 +32,18 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            :placeholder="$t('i18n.d7ec2d3fea')"
+            :placeholder="$t('i18n_d7ec2d3fea')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%tag%']"
-            :placeholder="$t('i18n.14d342362f')"
+            :placeholder="$t('i18n_14d342362f')"
             class="search-input-item"
             @press-enter="loadData"
           />
-          <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
+          <a-tooltip :title="$t('i18n_4838a3bd20')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -56,14 +56,14 @@
         </template>
         <template v-else-if="column.dataIndex instanceof Array && column.dataIndex.includes('status')">
           <template v-if="record.machineDocker">
-            <a-tag v-if="record.machineDocker.status === 1" color="green">{{ $t('i18n.fd6e80f1e0') }}</a-tag>
+            <a-tag v-if="record.machineDocker.status === 1" color="green">{{ $t('i18n_fd6e80f1e0') }}</a-tag>
             <a-tooltip v-else :title="record.machineDocker.failureMsg">
-              <a-tag color="red">{{ $t('i18n.757a730c9e') }}</a-tag>
+              <a-tag color="red">{{ $t('i18n_757a730c9e') }}</a-tag>
             </a-tooltip>
           </template>
 
-          <a-tooltip v-else :title="$t('i18n.33675a9bb3')">
-            <a-tag color="red">{{ $t('i18n.5169b9af9d') }}</a-tag>
+          <a-tooltip v-else :title="$t('i18n_33675a9bb3')">
+            <a-tag color="red">{{ $t('i18n_5169b9af9d') }}</a-tag>
           </a-tooltip>
         </template>
 
@@ -75,24 +75,24 @@
                 :disabled="record.machineDocker.status !== 1"
                 type="primary"
                 @click="handleConsole(record, 'server')"
-                >{{ $t('i18n.47d68cd0f4') }}</a-button
+                >{{ $t('i18n_47d68cd0f4') }}</a-button
               >
               <a-button
                 size="small"
                 :disabled="record.machineDocker.status !== 1"
                 type="primary"
                 @click="handleConsole(record, 'node')"
-                >{{ $t('i18n.3bf3c0a8d6') }}</a-button
+                >{{ $t('i18n_3bf3c0a8d6') }}</a-button
               >
             </template>
             <template v-else>
-              <a-button size="small" :disabled="true" type="primary">{{ $t('i18n.47d68cd0f4') }}</a-button>
-              <a-button size="small" :disabled="true" type="primary">{{ $t('i18n.3bf3c0a8d6') }}</a-button>
+              <a-button size="small" :disabled="true" type="primary">{{ $t('i18n_47d68cd0f4') }}</a-button>
+              <a-button size="small" :disabled="true" type="primary">{{ $t('i18n_3bf3c0a8d6') }}</a-button>
             </template>
 
-            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n.95b351c862') }}</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n_95b351c862') }}</a-button>
             <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-              $t('i18n.2f4aaddde3')
+              $t('i18n_2f4aaddde3')
             }}</a-button>
           </a-space>
         </template>
@@ -104,17 +104,17 @@
       v-model:open="editVisible"
       destroy-on-close
       :confirm-loading="confirmLoading"
-      :title="$t('i18n.d8a36a8a25')"
+      :title="$t('i18n_d8a36a8a25')"
       :mask-closable="false"
       @ok="handleEditOk"
     >
       <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
-        <a-form-item :label="$t('i18n.c3f28b34bb')" name="name">
-          <a-input v-model:value="temp.name" :placeholder="$t('i18n.a51cd0898f')" />
+        <a-form-item :label="$t('i18n_c3f28b34bb')" name="name">
+          <a-input v-model:value="temp.name" :placeholder="$t('i18n_a51cd0898f')" />
         </a-form-item>
 
-        <a-form-item :label="$t('i18n.14d342362f')" name="tag"
-          ><a-input v-model:value="temp.tag" :placeholder="$t('i18n.77017a3140')" />
+        <a-form-item :label="$t('i18n_14d342362f')" name="tag"
+          ><a-input v-model:value="temp.tag" :placeholder="$t('i18n_77017a3140')" />
         </a-form-item>
       </a-form>
     </CustomModal>
@@ -169,40 +169,40 @@ export default {
       consoleVisible: false,
       columns: [
         {
-          title: this.$t('i18n.d7ec2d3fea'),
+          title: this.$t('i18n_d7ec2d3fea'),
           dataIndex: 'name',
           ellipsis: true,
           tooltip: true
         },
 
         {
-          title: this.$t('i18n.7329a2637c'),
+          title: this.$t('i18n_7329a2637c'),
           dataIndex: 'swarmId',
           ellipsis: true,
           align: 'center',
           tooltip: true
         },
         {
-          title: this.$t('i18n.a823cfa70c'),
+          title: this.$t('i18n_a823cfa70c'),
           dataIndex: 'tag',
           ellipsis: true,
           tooltip: true
         },
         {
-          title: this.$t('i18n.3fea7ca76c'),
+          title: this.$t('i18n_3fea7ca76c'),
           dataIndex: ['machineDocker', 'status'],
           ellipsis: true,
           align: 'center',
           width: '100px'
         },
         {
-          title: this.$t('i18n.3bcc1c7a20'),
+          title: this.$t('i18n_3bcc1c7a20'),
           dataIndex: 'modifyUser',
           width: 120,
           ellipsis: true
         },
         {
-          title: this.$t('i18n.1303e638b5'),
+          title: this.$t('i18n_1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -210,7 +210,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('i18n.11724cd00b'),
+          title: this.$t('i18n_11724cd00b'),
           dataIndex: ['machineDocker', 'swarmCreatedAt'],
           sorter: true,
           ellipsis: true,
@@ -218,7 +218,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('i18n.fe87269484'),
+          title: this.$t('i18n_fe87269484'),
           dataIndex: ['machineDocker', 'swarmUpdatedAt'],
           sorter: true,
           ellipsis: true,
@@ -226,7 +226,7 @@ export default {
           width: '170px'
         },
         {
-          title: this.$t('i18n.2b6bc0f293'),
+          title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
           fixed: 'right',
           align: 'center',
@@ -236,11 +236,11 @@ export default {
 
       rules: {
         // id: [{ required: true, message: "Please input ID", trigger: "blur" }],
-        name: [{ required: true, message: this.$t('i18n.5ca6c1b6c7'), trigger: 'blur' }],
+        name: [{ required: true, message: this.$t('i18n_5ca6c1b6c7'), trigger: 'blur' }],
 
         tag: [
-          { required: true, message: this.$t('i18n.3b9418269c'), trigger: 'blur' },
-          { pattern: /^\w{1,10}$/, message: this.$t('i18n.89944d6ccb') }
+          { required: true, message: this.$t('i18n_3b9418269c'), trigger: 'blur' },
+          { pattern: /^\w{1,10}$/, message: this.$t('i18n_89944d6ccb') }
         ]
       },
       confirmLoading: false
@@ -331,11 +331,11 @@ export default {
     // 删除
     handleDelete(record) {
       $confirm({
-        title: this.$t('i18n.c4535759ee'),
+        title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n.1593dc4920'),
-        okText: this.$t('i18n.e83a256e4f'),
-        cancelText: this.$t('i18n.625fb26b4b'),
+        content: this.$t('i18n_1593dc4920'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
           return delSwarm({
             id: record.id

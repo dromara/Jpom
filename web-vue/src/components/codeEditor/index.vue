@@ -5,7 +5,7 @@
       height: height
     }"
   >
-    <a-spin v-if="loading" :tip="$t('i18n.6a8c30bd06')" :spinning="loading">
+    <a-spin v-if="loading" :tip="$t('i18n_6a8c30bd06')" :spinning="loading">
       <a-skeleton />
     </a-spin>
     <template v-else>
@@ -14,7 +14,7 @@
 
         <a-space class="tool-bar-end">
           <div>
-            {{ $t('i18n.08902526f1')
+            {{ $t('i18n_08902526f1')
             }}<a-select
               v-model:value="cmOptions.theme"
               show-search
@@ -28,7 +28,7 @@
                   )
                 }
               "
-              :placeholder="$t('i18n.37b30fc862')"
+              :placeholder="$t('i18n_37b30fc862')"
               style="width: 150px"
               @select="handleSelectTheme"
             >
@@ -36,7 +36,7 @@
             </a-select>
           </div>
           <div>
-            {{ $t('i18n.117a9cbc8d')
+            {{ $t('i18n_117a9cbc8d')
             }}<a-select
               v-model:value="cmOptions.mode"
               show-search
@@ -50,11 +50,11 @@
                   )
                 }
               "
-              :placeholder="$t('i18n.773b1a5ef6')"
+              :placeholder="$t('i18n_773b1a5ef6')"
               style="width: 150px"
               @select="handleSelectMode"
             >
-              <a-select-option value="">{{ $t('i18n.773b1a5ef6') }}</a-select-option>
+              <a-select-option value="">{{ $t('i18n_773b1a5ef6') }}</a-select-option>
               <a-select-option v-for="item in modeList" :key="item.mode">{{ item.name }}</a-select-option>
             </a-select>
           </div>
@@ -62,13 +62,13 @@
           <a-tooltip>
             <template #title>
               <ul>
-                <li><b>Ctrl-F / Cmd-F</b>&nbsp;{{ $t('i18n.99d3e5c718') }}</li>
-                <li><b>Ctrl-G / Cmd-G</b>&nbsp;{{ $t('i18n.6292498392') }}</li>
-                <li><b>Shift-Ctrl-G / Shift-Cmd-G</b>&nbsp;{{ $t('i18n.11e88c95ee') }}</li>
-                <li><b>Shift-Ctrl-F / Cmd-Option-F</b>&nbsp;{{ $t('i18n.d324f8b5c9') }}</li>
-                <li><b>Shift-Ctrl-R / Shift-Cmd-Option-F</b>&nbsp;{{ $t('i18n.b9c4cf7483') }}</li>
-                <li><b>Alt-F</b>&nbsp;{{ $t('i18n.9402665a2c') }}</li>
-                <li><b>Alt-G</b>&nbsp;{{ $t('i18n.5fc6c33832') }}</li>
+                <li><b>Ctrl-F / Cmd-F</b>&nbsp;{{ $t('i18n_99d3e5c718') }}</li>
+                <li><b>Ctrl-G / Cmd-G</b>&nbsp;{{ $t('i18n_6292498392') }}</li>
+                <li><b>Shift-Ctrl-G / Shift-Cmd-G</b>&nbsp;{{ $t('i18n_11e88c95ee') }}</li>
+                <li><b>Shift-Ctrl-F / Cmd-Option-F</b>&nbsp;{{ $t('i18n_d324f8b5c9') }}</li>
+                <li><b>Shift-Ctrl-R / Shift-Cmd-Option-F</b>&nbsp;{{ $t('i18n_b9c4cf7483') }}</li>
+                <li><b>Alt-F</b>&nbsp;{{ $t('i18n_9402665a2c') }}</li>
+                <li><b>Alt-G</b>&nbsp;{{ $t('i18n_5fc6c33832') }}</li>
               </ul>
             </template>
             <QuestionCircleOutlined />
@@ -307,7 +307,7 @@ export default {
     placeholder: {
       type: String,
       default: function () {
-        return t('i18n.a11cc7a65b')
+        return t('i18n_a11cc7a65b')
       }
     }
   },
@@ -375,14 +375,14 @@ export default {
         // { name: 'ayu深2', theme: 'ayu-mirage' },
         // { name: '浅灰', theme: 'bespin' }
 
-        { name: this.$t('i18n.72eae3107e'), theme: 'abbott' },
-        { name: this.$t('i18n.96c1c8f4ee'), theme: 'abcdef' },
-        { name: this.$t('i18n.cad01fe13c'), theme: 'ambiance-mobile' },
-        { name: this.$t('i18n.1880b85dc5'), theme: 'ambiance' },
-        { name: this.$t('i18n.50ed14e70b'), theme: 'dracula' },
-        { name: this.$t('i18n.d937a135b9'), theme: 'eclipse' },
-        { name: this.$t('i18n.be1956b246'), theme: 'blackboard' },
-        { name: this.$t('i18n.8cae9cb626'), theme: 'idea' },
+        { name: this.$t('i18n_72eae3107e'), theme: 'abbott' },
+        { name: this.$t('i18n_96c1c8f4ee'), theme: 'abcdef' },
+        { name: this.$t('i18n_cad01fe13c'), theme: 'ambiance-mobile' },
+        { name: this.$t('i18n_1880b85dc5'), theme: 'ambiance' },
+        { name: this.$t('i18n_50ed14e70b'), theme: 'dracula' },
+        { name: this.$t('i18n_d937a135b9'), theme: 'eclipse' },
+        { name: this.$t('i18n_be1956b246'), theme: 'blackboard' },
+        { name: this.$t('i18n_8cae9cb626'), theme: 'idea' },
         { name: 'ayu-dark', theme: 'ayu-dark' },
         { name: 'ayu-mirage', theme: 'ayu-mirage' },
         { name: 'base16-dark', theme: 'base16-dark' },

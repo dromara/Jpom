@@ -131,7 +131,7 @@ instance.interceptors.response.use(
       $notification.error({
         key: 'network-error-no-response',
         message: 'Network Error No response',
-        description: t('i18n.9ee0deb3c8') + error
+        description: t('i18n_9ee0deb3c8') + error
       })
     } else if (!error.response.config.headers[NO_NOTIFY_KEY]) {
       const { status, statusText, data } = error.response
@@ -139,12 +139,12 @@ instance.interceptors.response.use(
         $notification.error({
           key: 'network-error-no-response',
           message: 'Network Error',
-          description: t('i18n.9ee0deb3c8') + error
+          description: t('i18n_9ee0deb3c8') + error
         })
       } else {
         $notification.error({
           key: 'network-error-status-' + status,
-          message: t('i18n.cc9a708364') + status,
+          message: t('i18n_cc9a708364') + status,
           description: (statusText || '') + (data || '')
         })
       }
@@ -196,8 +196,8 @@ async function request<T = any>(arg: string | AxiosRequestConfig, config?: Axios
   if (data.code === 999) {
     $notification.error({
       key: 'prohibit-access',
-      message: t('i18n.bb9ef827bf'),
-      description: t('i18n.f05e3ec44d')
+      message: t('i18n_bb9ef827bf'),
+      description: t('i18n_f05e3ec44d')
     })
     window.location.href = jpomWindow_.routerBase + '/prohibit-access'
     return Promise.reject(data)
@@ -208,7 +208,7 @@ async function request<T = any>(arg: string | AxiosRequestConfig, config?: Axios
     // 如果 headers 里面配置了 tip: no 就不用弹出提示信息
     if (!response.config.headers[NO_NOTIFY_KEY]) {
       $notification.error({
-        message: t('i18n.1a8f90122f') + (pro ? '' : response.config.url),
+        message: t('i18n_1a8f90122f') + (pro ? '' : response.config.url),
         description: data.msg
       })
       console.error(response.config.url, data)
@@ -227,8 +227,8 @@ async function handleRefreshTokenAndRetryQueue(config: InternalAxiosRequestConfi
       try {
         $notification.info({
           key: 'login-timeout',
-          message: t('i18n.72d46ec2cf'),
-          description: t('i18n.f652d8cca7')
+          message: t('i18n_72d46ec2cf'),
+          description: t('i18n_f652d8cca7')
         })
         // 执行续签操作
         const result = await refreshToken()
@@ -238,8 +238,8 @@ async function handleRefreshTokenAndRetryQueue(config: InternalAxiosRequestConfi
           await userStore.login(result.data)
           $notification.success({
             key: 'login-timeout',
-            message: t('i18n.72d46ec2cf'),
-            description: t('i18n.a7c8eea801')
+            message: t('i18n_72d46ec2cf'),
+            description: t('i18n_a7c8eea801')
           })
           // 更新token到config中，以便于后续请求使用新token
           config.headers[TOKEN_HEADER_KEY] = userStore.getToken()
@@ -247,12 +247,12 @@ async function handleRefreshTokenAndRetryQueue(config: InternalAxiosRequestConfi
           resolve(result2)
           isRefreshing = false
         } else {
-          toLoginOnly(t('i18n.72d46ec2cf'), t('i18n.edc1185b8e') + result.msg + t('i18n.d3fb6a7c83'))
+          toLoginOnly(t('i18n_72d46ec2cf'), t('i18n_edc1185b8e') + result.msg + t('i18n_d3fb6a7c83'))
           return
         }
       } catch (error) {
         //reject('Failed to refresh token:' + error)
-        toLoginOnly(t('i18n.72d46ec2cf'), t('i18n.edc1185b8e') + error + t('i18n.d3fb6a7c83'))
+        toLoginOnly(t('i18n_72d46ec2cf'), t('i18n_edc1185b8e') + error + t('i18n_d3fb6a7c83'))
       } finally {
       }
     })
@@ -274,7 +274,7 @@ async function handleRefreshTokenAndRetryQueue(config: InternalAxiosRequestConfi
 }
 
 function toLogin(res: IResponse<any>, response: AxiosResponse<IResponse<any>>) {
-  return toLogin2(t('i18n.1a8f90122f') + (pro ? '' : response.config.url), res.msg)
+  return toLogin2(t('i18n_1a8f90122f') + (pro ? '' : response.config.url), res.msg)
 }
 
 function toLogin2(message: any, description: any) {
