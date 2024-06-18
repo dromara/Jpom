@@ -163,16 +163,8 @@
         <a-form-item name="secondaryDirectory" :label="$t('i18n.871cc8602a')">
           <a-input v-model:value="temp.secondaryDirectory" :placeholder="$t('i18n.9c99e8bec9')" />
         </a-form-item>
-        <a-form-item
-          name="selectProject"
-          :label="$t('i18n.c4e0c6b6fe')"
-          :help="$t('i18n.25be899f66')"
-        >
-          <a-select
-            v-model:value="temp.selectProjectArray"
-            mode="multiple"
-            :placeholder="$t('i18n.b29fd18c93')"
-          >
+        <a-form-item name="selectProject" :label="$t('i18n.c4e0c6b6fe')" :help="$t('i18n.25be899f66')">
+          <a-select v-model:value="temp.selectProjectArray" mode="multiple" :placeholder="$t('i18n.b29fd18c93')">
             <a-select-option v-for="item in itemProjectList" :key="item.id" :value="`${item.projectId}@${item.nodeId}`">
               {{ item.nodeName }}-{{ item.cacheProjectName || item.projectId }}
             </a-select-option>

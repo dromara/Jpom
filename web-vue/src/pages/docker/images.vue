@@ -31,9 +31,7 @@
               :un-checked-children="$t('i18n.c9744f45e7')"
             />
           </div>
-          <a-button type="primary" :loading="loading" @click="loadData">{{
-            $t('i18n.e5f71fc31e')
-          }}</a-button>
+          <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
           <a-button
             type="primary"
             danger

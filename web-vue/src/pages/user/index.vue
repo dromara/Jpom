@@ -35,22 +35,16 @@
             @press-enter="loadData"
           />
           <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('i18n.e5f71fc31e')
-            }}</a-button>
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">{{ $t('i18n.66ab5e9f24') }}</a-button>
-          <a-button type="primary" @click="systemNotificationOpen = true">{{
-            $t('i18n.7c223eb6e9')
-          }}</a-button>
+          <a-button type="primary" @click="systemNotificationOpen = true">{{ $t('i18n.7c223eb6e9') }}</a-button>
         </a-space>
       </template>
       <template #tableBodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEdit(record)">{{
-              $t('i18n.95b351c862')
-            }}</a-button>
+            <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n.95b351c862') }}</a-button>
             <a-dropdown>
               <a @click="(e) => e.preventDefault()"> {{ $t('i18n.0ec9eaf9c3') }} <DownOutlined /> </a>
               <template #overlay>

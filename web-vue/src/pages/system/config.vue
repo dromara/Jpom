@@ -24,12 +24,8 @@
         </a-form-item>
         <a-form-item :wrapper-col="{ span: 14, offset: 2 }">
           <a-space>
-            <a-button type="primary" class="btn" @click="onSubmit(false)">{{
-              $t('i18n.be5fbbe34c')
-            }}</a-button>
-            <a-button type="primary" danger class="btn" @click="onSubmit(true)">{{
-              $t('i18n.6aab88d6a3')
-            }}</a-button>
+            <a-button type="primary" class="btn" @click="onSubmit(false)">{{ $t('i18n.be5fbbe34c') }}</a-button>
+            <a-button type="primary" danger class="btn" @click="onSubmit(true)">{{ $t('i18n.6aab88d6a3') }}</a-button>
           </a-space>
         </a-form-item>
       </a-form>
@@ -100,11 +96,7 @@
           {{ $t('i18n.a0d0ebc519') }}
         </span>
       </template>
-      <a-alert
-        :message="`${$t('i18n.c9b79a2b4f')}`"
-        style="margin-top: 10px; margin-bottom: 20px"
-        banner
-      />
+      <a-alert :message="`${$t('i18n.c9b79a2b4f')}`" style="margin-top: 10px; margin-bottom: 20px" banner />
       <a-row justify="center" type="flex">
         <a-form ref="editProxyForm" :model="proxyConfigData">
           <a-row v-for="(item, index) in proxyConfigData.globalProxy" :key="index">
@@ -119,11 +111,7 @@
                 </a-input>
               </a-form-item>
               <a-form-item :label="$t('i18n.fc954d25ec')">
-                <a-input
-                  v-model:value="item.proxyAddress"
-                  style="width: 30vw"
-                  :placeholder="$t('i18n.dcf14deb0e')"
-                >
+                <a-input v-model:value="item.proxyAddress" style="width: 30vw" :placeholder="$t('i18n.dcf14deb0e')">
                   <template #addonBefore>
                     <a-select v-model:value="item.proxyType" style="width: 100px">
                       <a-select-option value="HTTP">HTTP</a-select-option>
@@ -170,9 +158,7 @@
                 "
                 >{{ $t('i18n.66ab5e9f24') }}</a-button
               >
-              <a-button type="primary" @click="saveProxyConfigHannder">{{
-                $t('i18n.be5fbbe34c')
-              }}</a-button>
+              <a-button type="primary" @click="saveProxyConfigHannder">{{ $t('i18n.be5fbbe34c') }}</a-button>
             </a-space>
           </a-form-item>
         </a-form>
@@ -272,9 +258,7 @@ export default {
 
       this.globalLoading({
         spinning: true,
-        tip:
-          (msg || this.$t('i18n.85da2e5bb1')) +
-          `,${this.$t('i18n.809b12d6a0')},${this.$t('i18n.af013dd9dc')}`
+        tip: (msg || this.$t('i18n.85da2e5bb1')) + `,${this.$t('i18n.809b12d6a0')},${this.$t('i18n.af013dd9dc')}`
       })
       setTimeout(() => {
         //

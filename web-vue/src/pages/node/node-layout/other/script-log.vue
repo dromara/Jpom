@@ -44,10 +44,7 @@
             allow-clear
             input-read-only
             :show-time="{ format: 'HH:mm:ss' }"
-            :placeholder="[
-              $t('i18n.7fbc0f9aae'),
-              $t('i18n.cbc44b5663')
-            ]"
+            :placeholder="[$t('i18n.7fbc0f9aae'), $t('i18n.cbc44b5663')]"
             format="YYYY-MM-DD HH:mm:ss"
             value-format="YYYY-MM-DD HH:mm:ss"
             @change="
@@ -61,9 +58,7 @@
             "
           />
           <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('i18n.e5f71fc31e')
-            }}</a-button>
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
           </a-tooltip>
           <a-tooltip>
             <template #title>
@@ -104,9 +99,7 @@
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="viewLog(record)">{{
-              $t('i18n.0ea78e4279')
-            }}</a-button>
+            <a-button size="small" type="primary" @click="viewLog(record)">{{ $t('i18n.0ea78e4279') }}</a-button>
 
             <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
               $t('i18n.2f4aaddde3')

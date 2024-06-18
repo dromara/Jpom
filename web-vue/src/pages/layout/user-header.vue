@@ -5,7 +5,9 @@
       <a-button v-if="mode === 'normal'" type="dashed" class="workspace jpom-workspace btn-group-item">
         <div class="workspace-name">
           <a-tooltip
-            :title="`${$t('i18n.8f36f2ede7')}${selectWorkspace.name} ${$t('i18n.d7ec97aecd')}${selectWorkspace.group || $t('i18n.71dc8feb59')}${$t('i18n.5942e7ebd0')}`"
+            :title="`${$t('i18n.8f36f2ede7')}${selectWorkspace.name} ${$t('i18n.d7ec97aecd')}${
+              selectWorkspace.group || $t('i18n.71dc8feb59')
+            }${$t('i18n.5942e7ebd0')}`"
             placement="bottom"
           >
             <SwitcherOutlined />

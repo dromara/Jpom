@@ -48,9 +48,7 @@
             @change="onChangeTime"
           />
           <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('i18n.e5f71fc31e')
-            }}</a-button>
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -65,9 +63,7 @@
         </template>
 
         <template v-if="column.dataIndex === 'useMfa'">
-          <a-tag>{{
-            text ? $t('i18n.ecff77a8d4') : $t('i18n.869ec83e33')
-          }}</a-tag>
+          <a-tag>{{ text ? $t('i18n.ecff77a8d4') : $t('i18n.869ec83e33') }}</a-tag>
         </template>
 
         <template v-if="column.dataIndex === 'operateCode'">

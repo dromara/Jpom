@@ -22,9 +22,7 @@
           />
 
           <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('i18n.e5f71fc31e')
-            }}</a-button>
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">{{ $t('i18n.66ab5e9f24') }}</a-button>
         </a-space>
@@ -38,12 +36,8 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button type="primary" size="small" @click="handleEdit(record)">{{
-              $t('i18n.95b351c862')
-            }}</a-button>
-            <a-button type="primary" size="small" @click="handleLogRead(record)">{{
-              $t('i18n.607e7a4f37')
-            }}</a-button>
+            <a-button type="primary" size="small" @click="handleEdit(record)">{{ $t('i18n.95b351c862') }}</a-button>
+            <a-button type="primary" size="small" @click="handleLogRead(record)">{{ $t('i18n.607e7a4f37') }}</a-button>
             <a-button type="primary" danger size="small" @click="handleDelete(record)">{{
               $t('i18n.2f4aaddde3')
             }}</a-button>
@@ -135,9 +129,7 @@
               </a-col>
             </a-row>
 
-            <a-button type="primary" @click="() => temp.projectList.push({})">{{
-              $t('i18n.66ab5e9f24')
-            }}</a-button>
+            <a-button type="primary" @click="() => temp.projectList.push({})">{{ $t('i18n.66ab5e9f24') }}</a-button>
           </a-space>
         </a-form-item>
       </a-form>

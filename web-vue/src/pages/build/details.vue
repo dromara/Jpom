@@ -51,9 +51,7 @@
           {{ data.aliasCode }}
         </a-descriptions-item>
         <a-descriptions-item :label="$t('i18n.d175a854a6')">
-          <a-tag>{{
-            data.sourceDirExist ? $t('i18n.df9497ea98') : $t('i18n.d7d11654a7')
-          }}</a-tag>
+          <a-tag>{{ data.sourceDirExist ? $t('i18n.df9497ea98') : $t('i18n.d7d11654a7') }}</a-tag>
         </a-descriptions-item>
         <a-descriptions-item :label="$t('i18n.eca37cb072')">
           {{ parseTime(data.createTimeMillis) }}
@@ -124,18 +122,16 @@
                 {{ parseTime(item.endTime) }}
               </div>
               <div>
-                {{ $t('i18n.b5a1e1f2d1')
-                }}{{ triggerBuildTypeMap[item.triggerBuildType] || $t('i18n.1622dc9b6b') }}
+                {{ $t('i18n.b5a1e1f2d1') }}{{ triggerBuildTypeMap[item.triggerBuildType] || $t('i18n.1622dc9b6b') }}
               </div>
               <div>
-                {{ $t('i18n.8dbe0c2ffa') }}{{ renderSize(item.resultFileSize) }}({{
-                  $t('i18n.7dfcab648d')
-                }})/{{ renderSize(item.buildLogFileSize) }}({{ $t('i18n.456d29ef8b') }})
+                {{ $t('i18n.8dbe0c2ffa') }}{{ renderSize(item.resultFileSize) }}({{ $t('i18n.7dfcab648d') }})/{{
+                  renderSize(item.buildLogFileSize)
+                }}({{ $t('i18n.456d29ef8b') }})
               </div>
 
               <div>
-                {{ $t('i18n.3c014532b1')
-                }}{{ formatDuration((item.endTime || 0) - (item.startTime || 0), '', 2) }}
+                {{ $t('i18n.3c014532b1') }}{{ formatDuration((item.endTime || 0) - (item.startTime || 0), '', 2) }}
               </div>
               <div>
                 {{ $t('i18n.e8321f5a61') }}

@@ -136,11 +136,7 @@
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
-            <a-input-number
-              v-model:value="temp.cpuShares"
-              style="width: 100%"
-              :placeholder="$t('i18n.9ac4765895')"
-            />
+            <a-input-number v-model:value="temp.cpuShares" style="width: 100%" :placeholder="$t('i18n.9ac4765895')" />
           </a-form-item>
           <a-form-item name="cpusetCpus">
             <template #label>
@@ -150,28 +146,17 @@
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
-            <a-input
-              v-model:value="temp.cpusetCpus"
-              style="width: 100%"
-              :placeholder="$t('i18n.9c55e8e0f3')"
-            />
+            <a-input v-model:value="temp.cpusetCpus" style="width: 100%" :placeholder="$t('i18n.9c55e8e0f3')" />
           </a-form-item>
           <a-form-item name="cpusetMems">
             <template #label>
               CpusetMems
               <a-tooltip>
-                <template #title>
-                  {{ $t('i18n.470e9baf32')
-                  }}{{ $t('i18n.b28c17d2a6') }}</template
-                >
+                <template #title> {{ $t('i18n.470e9baf32') }}{{ $t('i18n.b28c17d2a6') }}</template>
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
-            <a-input
-              v-model:value="temp.cpusetMems"
-              style="width: 100%"
-              :placeholder="$t('i18n.8c7d19b32a')"
-            />
+            <a-input v-model:value="temp.cpusetMems" style="width: 100%" :placeholder="$t('i18n.8c7d19b32a')" />
           </a-form-item>
           <a-form-item name="cpuPeriod">
             <template #label>
@@ -181,11 +166,7 @@
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
-            <a-input-number
-              v-model:value="temp.cpuPeriod"
-              style="width: 100%"
-              :placeholder="$t('i18n.c325ddecb1')"
-            />
+            <a-input-number v-model:value="temp.cpuPeriod" style="width: 100%" :placeholder="$t('i18n.c325ddecb1')" />
           </a-form-item>
           <a-form-item name="cpuQuota">
             <template #label>
@@ -195,11 +176,7 @@
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
-            <a-input-number
-              v-model:value="temp.cpuQuota"
-              style="width: 100%"
-              :placeholder="$t('i18n.df1da2dc59')"
-            />
+            <a-input-number v-model:value="temp.cpuQuota" style="width: 100%" :placeholder="$t('i18n.df1da2dc59')" />
           </a-form-item>
 
           <a-form-item name="memory">
@@ -210,11 +187,7 @@
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
-            <a-input
-              v-model:value="temp.memory"
-              style="width: 100%"
-              :placeholder="$t('i18n.0b3edfaf28')"
-            />
+            <a-input v-model:value="temp.memory" style="width: 100%" :placeholder="$t('i18n.0b3edfaf28')" />
           </a-form-item>
           <a-form-item name="memorySwap">
             <template #label>
@@ -224,11 +197,7 @@
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
-            <a-input
-              v-model:value="temp.memorySwap"
-              style="width: 100%"
-              :placeholder="$t('i18n.ebc96f0a5d')"
-            />
+            <a-input v-model:value="temp.memorySwap" style="width: 100%" :placeholder="$t('i18n.ebc96f0a5d')" />
           </a-form-item>
           <a-form-item name="memoryReservation">
             <template #label>
@@ -238,11 +207,7 @@
                 <QuestionCircleOutlined />
               </a-tooltip>
             </template>
-            <a-input
-              v-model:value="temp.memoryReservation"
-              style="width: 100%"
-              :placeholder="$t('i18n.0a63bf5b41')"
-            />
+            <a-input v-model:value="temp.memoryReservation" style="width: 100%" :placeholder="$t('i18n.0a63bf5b41')" />
           </a-form-item>
         </a-form>
       </a-col>

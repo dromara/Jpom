@@ -5,9 +5,7 @@
       <template #message>
         <a-space>
           <template #split> <a-divider type="vertical" /> </template>
-          <a href="https://jpom.top/pages/legal-risk/" target="_blank"
-            >{{ $t('i18n.9f01272a10') }}<LinkOutlined />
-          </a>
+          <a href="https://jpom.top/pages/legal-risk/" target="_blank">{{ $t('i18n.9f01272a10') }}<LinkOutlined /> </a>
           <a href="https://jpom.top" target="_blank">{{ $t('i18n.19fa0be4d2') }}<LinkOutlined /> </a>
         </a-space>
       </template>
@@ -36,17 +34,14 @@
 
         <ul>
           <li>
-            Star {{ $t('i18n.80198317ff') }}
-            <a href="https://gitee.com/dromara/Jpom" target="_blank">Gitee</a> /
+            Star {{ $t('i18n.80198317ff') }} <a href="https://gitee.com/dromara/Jpom" target="_blank">Gitee</a> /
             <a href="https://github.com/dromara/Jpom" target="_blank">Github</a>
           </li>
           <li>{{ $t('i18n.49a9d6c7e6') }}</li>
           <li>{{ $t('i18n.de4cf8bdfa') }}</li>
           <li>
             {{ $t('i18n.7a93e0a6ae')
-            }}<a href="https://jpom.top/pages/enterprise-service/" target="_blank">{{
-              $t('i18n.da89135649')
-            }}</a>
+            }}<a href="https://jpom.top/pages/enterprise-service/" target="_blank">{{ $t('i18n.da89135649') }}</a>
           </li>
         </ul>
         <div></div>
@@ -73,11 +68,7 @@
                   <!-- <setting-outlined key="setting" />
                   <edit-outlined key="edit" />
                   <ellipsis-outlined key="ellipsis" /> -->
-                  <a-card-meta
-                    :title="$t('i18n.55f01e138a')"
-                    :description="$t('i18n.0ee3ca5e88')"
-                  >
-                  </a-card-meta>
+                  <a-card-meta :title="$t('i18n.55f01e138a')" :description="$t('i18n.0ee3ca5e88')"> </a-card-meta>
                 </template>
               </a-card>
             </a-col>
@@ -95,11 +86,7 @@
                   <!-- <img alt="alipay" :src="alipayQrcorde" style="width: 90%; margin: 5%" /> -->
                 </template>
                 <template #actions>
-                  <a-card-meta
-                    :title="$t('i18n.a1da57ab69')"
-                    :description="$t('i18n.2331a990aa')"
-                  >
-                  </a-card-meta>
+                  <a-card-meta :title="$t('i18n.a1da57ab69')" :description="$t('i18n.2331a990aa')"> </a-card-meta>
 
                   <!-- <setting-outlined key="setting" />
                 <edit-outlined key="edit" />

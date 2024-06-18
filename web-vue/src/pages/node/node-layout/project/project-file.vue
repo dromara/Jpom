@@ -7,9 +7,7 @@
         <a-layout-sider theme="light" class="sider" width="25%">
           <div class="dir-container">
             <a-space>
-              <a-button size="small" type="primary" @click="loadData">{{
-                $t('i18n.90b5a467c1')
-              }}</a-button>
+              <a-button size="small" type="primary" @click="loadData">{{ $t('i18n.90b5a467c1') }}</a-button>
               <a-button v-show="noFileModes.includes(runMode)" size="small" type="primary" @click="goConsole">
                 {{ $t('i18n.b5c3770699') }}
               </a-button>
@@ -51,14 +49,10 @@
                   <template #overlay>
                     <a-menu>
                       <a-menu-item @click="handleUpload">
-                        <a-space
-                          ><FileOutlined />{{ $t('i18n.a6fc9e3ae6') }}</a-space
-                        >
+                        <a-space><FileOutlined />{{ $t('i18n.a6fc9e3ae6') }}</a-space>
                       </a-menu-item>
                       <a-menu-item @click="handleZipUpload">
-                        <a-space
-                          ><FileZipOutlined />{{ $t('i18n.37f031338a') }}</a-space
-                        >
+                        <a-space><FileZipOutlined />{{ $t('i18n.37f031338a') }}</a-space>
                       </a-menu-item>
                     </a-menu>
                   </template>
@@ -94,9 +88,7 @@
                   <a-button size="small" type="primary" danger @click="clearFile"><DeleteOutlined /></a-button>
                 </a-tooltip>
 
-                <a-tag v-if="uploadPath" color="#2db7f5"
-                  >{{ $t('i18n.2c8109fa0b') }}{{ uploadPath || '' }}</a-tag
-                >
+                <a-tag v-if="uploadPath" color="#2db7f5">{{ $t('i18n.2c8109fa0b') }}{{ uploadPath || '' }}</a-tag>
                 <div>{{ $t('i18n.9e98fa5c0d') }}</div>
               </a-space>
             </template>
@@ -125,11 +117,7 @@
                         </a-menu-item>
                         <a-sub-menu key="4" :disabled="!record.isDirectory">
                           <template #title>
-                            <a-button type="link"
-                              ><CompressOutlined />{{
-                                $t('i18n.072fa90836')
-                              }}</a-button
-                            >
+                            <a-button type="link"><CompressOutlined />{{ $t('i18n.072fa90836') }}</a-button>
                           </template>
                           <a-menu-item>
                             <a-button type="link" @click="hannderCompress(record, 'zip')">
@@ -153,11 +141,7 @@
                 </a-tooltip>
               </template>
               <template v-else-if="column.dataIndex === 'isDirectory'">
-                <span>{{
-                  text
-                    ? $t('i18n.767fa455bb')
-                    : $t('i18n.2a0c4740f1')
-                }}</span>
+                <span>{{ text ? $t('i18n.767fa455bb') : $t('i18n.2a0c4740f1') }}</span>
               </template>
               <template v-else-if="column.dataIndex === 'fileSizeLong'">
                 <a-tooltip placement="topLeft" :title="`${text ? renderSize(text) : record.fileSize}`">
@@ -173,14 +157,10 @@
                 <a-space>
                   <template v-if="record.isDirectory">
                     <a-tooltip :title="$t('i18n.c6f1c6e062')">
-                      <a-button size="small" type="primary" :disabled="true">{{
-                        $t('i18n.95b351c862')
-                      }}</a-button>
+                      <a-button size="small" type="primary" :disabled="true">{{ $t('i18n.95b351c862') }}</a-button>
                     </a-tooltip>
                     <a-tooltip :title="$t('i18n.6c14188ba0')">
-                      <a-button size="small" type="primary" :disabled="true">{{
-                        $t('i18n.f26ef91424')
-                      }}</a-button>
+                      <a-button size="small" type="primary" :disabled="true">{{ $t('i18n.f26ef91424') }}</a-button>
                     </a-tooltip>
                   </template>
                   <template v-else>
@@ -243,9 +223,7 @@
                   <span v-else>-</span>
                 </template>
 
-                <a-button v-else
-                  ><UploadOutlined />{{ $t('i18n.fd7e0c997d') }}</a-button
-                >
+                <a-button v-else><UploadOutlined />{{ $t('i18n.fd7e0c997d') }}</a-button>
               </a-upload>
 
               <a-row v-if="percentage">
@@ -256,14 +234,11 @@
                         ({{ renderSize(percentageInfo.total) }})
                       </template>
                       <template v-if="percentageInfo.duration">
-                        {{ $t('i18n.833249fb92') }}:{{
-                          formatDuration(percentageInfo.duration)
-                        }}
+                        {{ $t('i18n.833249fb92') }}:{{ formatDuration(percentageInfo.duration) }}
                       </template>
                       <template v-if="uploadFileList.length">
-                        {{ $t('i18n.769d88e425') }} {{ successSize }}
-                        {{ $t('i18n.d047d84986') }}{{ uploadFileList.length
-                        }}{{ $t('i18n.930882bb0a') }}
+                        {{ $t('i18n.769d88e425') }} {{ successSize }} {{ $t('i18n.d047d84986')
+                        }}{{ uploadFileList.length }}{{ $t('i18n.930882bb0a') }}
                       </template>
                     </template>
                   </a-progress>
@@ -306,9 +281,7 @@
                 "
               >
                 <LoadingOutlined v-if="percentage" />
-                <a-button v-else
-                  ><UploadOutlined />{{ $t('i18n.a17450a5ff') }}</a-button
-                >
+                <a-button v-else><UploadOutlined />{{ $t('i18n.a17450a5ff') }}</a-button>
               </a-upload>
               <a-row v-if="percentage">
                 <a-col span="24">
@@ -318,14 +291,11 @@
                         ({{ renderSize(percentageInfo.total) }})
                       </template>
                       <template v-if="percentageInfo.duration">
-                        {{ $t('i18n.833249fb92') }}:{{
-                          formatDuration(percentageInfo.duration)
-                        }}
+                        {{ $t('i18n.833249fb92') }}:{{ formatDuration(percentageInfo.duration) }}
                       </template>
                       <template v-if="uploadFileList.length">
-                        {{ $t('i18n.769d88e425') }} {{ successSize }}
-                        {{ $t('i18n.d047d84986') }}{{ uploadFileList.length
-                        }}{{ $t('i18n.930882bb0a') }}
+                        {{ $t('i18n.769d88e425') }} {{ successSize }} {{ $t('i18n.d047d84986')
+                        }}{{ uploadFileList.length }}{{ $t('i18n.930882bb0a') }}
                       </template>
                     </template>
                   </a-progress>
@@ -415,10 +385,7 @@
               :rules="rules"
             >
               <a-form-item :label="$t('i18n.a66fff7541')" name="url">
-                <a-input
-                  v-model:value="remoteDownloadData.url"
-                  :placeholder="$t('i18n.7457228a61')"
-                />
+                <a-input v-model:value="remoteDownloadData.url" :placeholder="$t('i18n.7457228a61')" />
               </a-form-item>
               <a-form-item :label="$t('i18n.50fefde769')">
                 <a-switch
@@ -427,10 +394,7 @@
                   :un-checked-children="$t('i18n.c9744f45e7')"
                 />
               </a-form-item>
-              <a-form-item
-                v-if="remoteDownloadData.unzip"
-                :label="$t('i18n.5effe31353')"
-              >
+              <a-form-item v-if="remoteDownloadData.unzip" :label="$t('i18n.5effe31353')">
                 <a-input-number
                   v-model:value="remoteDownloadData.stripComponents"
                   style="width: 100%"
@@ -446,24 +410,15 @@
             v-model:open="addFileFolderVisible"
             destroy-on-close
             width="300px"
-            :title="
-              addFileOrFolderType === 1
-                ? $t('i18n.2d9e932510')
-                : $t('i18n.e48a715738')
-            "
+            :title="addFileOrFolderType === 1 ? $t('i18n.2d9e932510') : $t('i18n.e48a715738')"
             :footer="null"
             :mask-closable="true"
           >
             <a-space direction="vertical" style="width: 100%">
-              <span v-if="uploadPath"
-                >{{ $t('i18n.4e33dde280') }}{{ uploadPath }}</span
-              >
+              <span v-if="uploadPath">{{ $t('i18n.4e33dde280') }}{{ uploadPath }}</span>
               <!-- <a-tag v-if="">目录创建成功后需要手动刷新右边树才能显示出来哟</a-tag> -->
 
-              <a-input
-                v-model:value="fileFolderName"
-                :placeholder="$t('i18n.55939c108f')"
-              />
+              <a-input v-model:value="fileFolderName" :placeholder="$t('i18n.55939c108f')" />
               <a-row type="flex" justify="center">
                 <a-button type="primary" :disabled="fileFolderName.length === 0" @click="startAddFileFolder">{{
                   $t('i18n.e83a256e4f')
@@ -482,10 +437,7 @@
             :mask-closable="true"
           >
             <a-space direction="vertical" style="width: 100%">
-              <a-input
-                v-model:value="fileFolderName"
-                :placeholder="$t('i18n.f139c5cf32')"
-              />
+              <a-input v-model:value="fileFolderName" :placeholder="$t('i18n.f139c5cf32')" />
 
               <a-row type="flex" justify="center">
                 <a-button type="primary" :disabled="fileFolderName.length === 0" @click="renameFileFolder">{{
@@ -1144,9 +1096,7 @@ export default {
     // 清空文件
     clearFile() {
       const msg = this.uploadPath
-        ? this.$t('i18n.c840c88b7c') +
-          this.uploadPath +
-          this.$t('i18n.3f553922ae')
+        ? this.$t('i18n.c840c88b7c') + this.uploadPath + this.$t('i18n.3f553922ae')
         : this.$t('i18n.26bd746dc3')
       $confirm({
         title: this.$t('i18n.c4535759ee'),
@@ -1188,12 +1138,8 @@ export default {
     // 删除
     handleDelete(record) {
       const msg = record.isDirectory
-        ? this.$t('i18n.3cc09369ad') +
-          record.filename +
-          this.$t('i18n.52a8df6678')
-        : this.$t('i18n.3cc09369ad') +
-          record.filename +
-          this.$t('i18n.48e79b3340')
+        ? this.$t('i18n.3cc09369ad') + record.filename + this.$t('i18n.52a8df6678')
+        : this.$t('i18n.3cc09369ad') + record.filename + this.$t('i18n.48e79b3340')
       $confirm({
         title: this.$t('i18n.c4535759ee'),
         content: msg,

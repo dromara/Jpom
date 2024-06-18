@@ -7,11 +7,7 @@
           <a href="https://jpom.top" target="_blank">{{ $t('i18n.620efec150') }}</a>
         </template>
         <a-steps :current="setpCurrent">
-          <a-step
-            :title="$t('i18n.b5c291805e')"
-            status="process"
-            :description="$t('i18n.3904bfe0db')"
-          >
+          <a-step :title="$t('i18n.b5c291805e')" status="process" :description="$t('i18n.3904bfe0db')">
             <template #icon>
               <user-outlined />
             </template>
@@ -142,11 +138,7 @@
         </a-row>
       </a-card>
       <div v-else>
-        <a-result
-          status="warning"
-          :title="$t('i18n.65cf4248a8')"
-          :sub-title="$t('i18n.70a6bc1e94')"
-        >
+        <a-result status="warning" :title="$t('i18n.65cf4248a8')" :sub-title="$t('i18n.70a6bc1e94')">
           <template #extra>
             <a-button type="primary" @click="goHome"> {{ $t('i18n.0bbc7458b4') }} </a-button>
           </template>

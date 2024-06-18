@@ -1,10 +1,7 @@
 <template>
   <div>
     <a-page-header :back-icon="false">
-      <template #title>
-        {{ $t('i18n.57d9738dfe') }}{{ getUserInfo.name
-        }}{{ $t('i18n.b4df22abfb') }}</template
-      >
+      <template #title> {{ $t('i18n.57d9738dfe') }}{{ getUserInfo.name }}{{ $t('i18n.b4df22abfb') }}</template>
       <template #subTitle>{{ $t('i18n.0af5d9f8e8') }} </template>
       <template #tags>
         <a-tag color="blue">
@@ -33,8 +30,7 @@
           <a-badge color="blue" :count="statData['workspaceCount'] || '0'" show-zero />
         </span>
         <span
-          >{{ $t('i18n.5866b4bced')
-          }}<a-badge color="cyan" :count="statData['clusterCount'] || '0'" show-zero
+          >{{ $t('i18n.5866b4bced') }}<a-badge color="cyan" :count="statData['clusterCount'] || '0'" show-zero
         /></span>
       </a-space>
     </a-page-header>

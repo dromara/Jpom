@@ -45,9 +45,7 @@
             @press-enter="loadData"
           />
           <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button :loading="loading" type="primary" @click="loadData">{{
-              $t('i18n.e5f71fc31e')
-            }}</a-button>
+            <a-button :loading="loading" type="primary" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
           </a-tooltip>
 
           <a-button type="primary" @click="handleEdit()">{{ $t('i18n.66ab5e9f24') }}</a-button>
@@ -113,15 +111,9 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleExec(record)">{{
-              $t('i18n.1a6aa24e76')
-            }}</a-button>
-            <a-button size="small" type="primary" @click="handleLog(record)">{{
-              $t('i18n.456d29ef8b')
-            }}</a-button>
-            <a-button size="small" type="primary" @click="handleTrigger(record)">{{
-              $t('i18n.4696724ed3')
-            }}</a-button>
+            <a-button size="small" type="primary" @click="handleExec(record)">{{ $t('i18n.1a6aa24e76') }}</a-button>
+            <a-button size="small" type="primary" @click="handleLog(record)">{{ $t('i18n.456d29ef8b') }}</a-button>
+            <a-button size="small" type="primary" @click="handleTrigger(record)">{{ $t('i18n.4696724ed3') }}</a-button>
 
             <a-dropdown>
               <a @click="(e) => e.preventDefault()">
@@ -133,11 +125,7 @@
                   <a-menu-item>
                     <!-- <a-button size="small" :type="`${record.scriptType === 'server-sync' ? '' : 'primary'}`" @click="handleEdit(record)">{{ record.scriptType === "server-sync" ? "查看" : " 编辑" }}</a-button> -->
                     <a-tooltip
-                      :title="`${
-                        record.scriptType === 'server-sync'
-                          ? $t('i18n.1f0d13a9ad')
-                          : $t('i18n.2f4aaddde3')
-                      }`"
+                      :title="`${record.scriptType === 'server-sync' ? $t('i18n.1f0d13a9ad') : $t('i18n.2f4aaddde3')}`"
                     >
                       <a-button
                         size="small"
@@ -221,9 +209,7 @@
         <a-tabs default-active-key="1">
           <template #rightExtra>
             <a-tooltip :title="$t('i18n.01ad26f4a9')">
-              <a-button type="primary" size="small" @click="resetTrigger">{{
-                $t('i18n.4b9c3271dc')
-              }}</a-button>
+              <a-button type="primary" size="small" @click="resetTrigger">{{ $t('i18n.4b9c3271dc') }}</a-button>
             </a-tooltip>
           </template>
           <a-tab-pane key="1" :tab="$t('i18n.1a6aa24e76')">
@@ -238,20 +224,14 @@
                   </ul>
                 </template>
               </a-alert>
-              <a-alert
-                type="info"
-                :message="`${$t('i18n.de78b73dab')}(${$t('i18n.00a070c696')})`"
-              >
+              <a-alert type="info" :message="`${$t('i18n.de78b73dab')}(${$t('i18n.00a070c696')})`">
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.triggerUrl }">
                     <a-tag>GET</a-tag> <span>{{ temp.triggerUrl }} </span>
                   </a-typography-paragraph>
                 </template>
               </a-alert>
-              <a-alert
-                type="info"
-                :message="`${$t('i18n.8d202b890c')}(${$t('i18n.00a070c696')})`"
-              >
+              <a-alert type="info" :message="`${$t('i18n.8d202b890c')}(${$t('i18n.00a070c696')})`">
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchTriggerUrl }">
                     <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>

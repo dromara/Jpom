@@ -61,9 +61,7 @@
             <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
           </a-select>
           <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button type="primary" :loading="loading" @click="loadData">{{
-              $t('i18n.e5f71fc31e')
-            }}</a-button>
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">{{ $t('i18n.66ab5e9f24') }}</a-button>
           <a-button :disabled="!tableSelections.length" type="primary" @click="syncToWorkspaceShow()">
@@ -112,11 +110,7 @@
         <template v-else-if="column.dataIndex === 'tlsVerify'">
           <a-tooltip
             placement="topLeft"
-            :title="
-              record.tlsVerify
-                ? $t('i18n.1058a0be42') + record.certInfo
-                : $t('i18n.007f23e18f')
-            "
+            :title="record.tlsVerify ? $t('i18n.1058a0be42') + record.certInfo : $t('i18n.007f23e18f')"
           >
             <template v-if="record.tlsVerify">
               <template v-if="record.certExist">
@@ -168,9 +162,7 @@
                     }}</a-button>
                   </p>
                 </template>
-                <a-button size="small" type="primary"
-                  ><EditOutlined />{{ $t('i18n.85fe5099f6') }}</a-button
-                >
+                <a-button size="small" type="primary"><EditOutlined />{{ $t('i18n.85fe5099f6') }}</a-button>
               </a-popover>
             </template>
             <template v-else>
@@ -189,9 +181,7 @@
               $t('i18n.1c3cf7f5f0')
             }}</a-button>
             <a-dropdown>
-              <a @click="(e) => e.preventDefault()">
-                {{ $t('i18n.0ec9eaf9c3') }} <DownOutlined />
-              </a>
+              <a @click="(e) => e.preventDefault()"> {{ $t('i18n.0ec9eaf9c3') }} <DownOutlined /> </a>
               <template #overlay>
                 <a-menu>
                   <a-menu-item>
@@ -245,9 +235,7 @@
                   </li>
                   <li>{{ $t('i18n.6aa7403b18') }}</li>
                   <li>
-                    {{ $t('i18n.92c6aa6db9') }}>{{
-                      $t('i18n.e049546ff3')
-                    }}
+                    {{ $t('i18n.92c6aa6db9') }}>{{ $t('i18n.e049546ff3') }}
                     <b>ssh/monitor-script.sh</b>
                     {{ $t('i18n.f0eb685a84') }}
                   </li>
@@ -256,29 +244,24 @@
               <template v-else>
                 <ul>
                   <li>
-                    {{ $t('i18n.c46938460b')
-                    }}<b style="color: red">{{ $t('i18n.7010264d22') }}</b>
+                    {{ $t('i18n.c46938460b') }}<b style="color: red">{{ $t('i18n.7010264d22') }}</b>
                   </li>
                   <li>
                     {{ $t('i18n.ba1f68b5dd') }}
                     <b style="color: red">docker {{ $t('i18n.47768ed092') }}</b>
                   </li>
                   <li>
-                    {{ $t('i18n.fdba50ca2d')
-                    }}<b style="color: red"> {{ $t('i18n.7e000409bb') }} </b>
+                    {{ $t('i18n.fdba50ca2d') }}<b style="color: red"> {{ $t('i18n.7e000409bb') }} </b>
                   </li>
                   <li>
-                    {{ $t('i18n.5bb5b33ae4')
-                    }}<b style="color: red">{{ $t('i18n.73ed447971') }}</b
+                    {{ $t('i18n.5bb5b33ae4') }}<b style="color: red">{{ $t('i18n.73ed447971') }}</b
                     >（{{ $t('i18n.9c942ea972') }}
                   </li>
                   <li>
-                    {{ $t('i18n.8b1512bf3a')
-                    }}<b style="color: red">{{ $t('i18n.8fd9daf8e9') }}</b>
+                    {{ $t('i18n.8b1512bf3a') }}<b style="color: red">{{ $t('i18n.8fd9daf8e9') }}</b>
                   </li>
                   <li>
-                    {{ $t('i18n.ba8d1dca4a')
-                    }}<b style="color: red">{{ $t('i18n.0e25ab3b51') }}</b>
+                    {{ $t('i18n.ba8d1dca4a') }}<b style="color: red">{{ $t('i18n.0e25ab3b51') }}</b>
                   </li>
                 </ul>
               </template>
@@ -336,10 +319,7 @@
         </a-form-item>
         <template v-if="!temp.enableSsh">
           <a-form-item label="host" name="host">
-            <a-input
-              v-model:value="temp.host"
-              :placeholder="`${$t('i18n.dc32f465da')}://127.0.0.1:2375`"
-            />
+            <a-input v-model:value="temp.host" :placeholder="`${$t('i18n.dc32f465da')}://127.0.0.1:2375`" />
           </a-form-item>
 
           <a-form-item :label="$t('i18n.2780a6a3cf')" name="tlsVerify">
@@ -381,22 +361,13 @@
               <a-input v-model:value="temp.registryUrl" :placeholder="$t('i18n.e4bea943de')" />
             </a-form-item>
             <a-form-item :label="$t('i18n.b4c83b0b56')" name="registryUsername">
-              <a-input
-                v-model:value="temp.registryUsername"
-                :placeholder="$t('i18n.b4c83b0b56')"
-              />
+              <a-input v-model:value="temp.registryUsername" :placeholder="$t('i18n.b4c83b0b56')" />
             </a-form-item>
             <a-form-item :label="$t('i18n.791870de48')" name="registryPassword">
-              <a-input-password
-                v-model:value="temp.registryPassword"
-                :placeholder="$t('i18n.791870de48')"
-              />
+              <a-input-password v-model:value="temp.registryPassword" :placeholder="$t('i18n.791870de48')" />
             </a-form-item>
             <a-form-item :label="$t('i18n.feda0df7ef')" name="registryEmail">
-              <a-input
-                v-model:value="temp.registryEmail"
-                :placeholder="$t('i18n.feda0df7ef')"
-              />
+              <a-input v-model:value="temp.registryEmail" :placeholder="$t('i18n.feda0df7ef')" />
             </a-form-item>
           </a-collapse-panel>
         </a-collapse>
@@ -562,10 +533,7 @@
                 <a-list-item style="display: block">
                   <a-row>
                     <a-col :span="10">Docker {{ $t('i18n.5b47861521') }}{{ item.name }}</a-col>
-                    <a-col :span="10"
-                      >{{ $t('i18n.2358e1ef49')
-                      }}{{ item.workspace && item.workspace.name }}</a-col
-                    >
+                    <a-col :span="10">{{ $t('i18n.2358e1ef49') }}{{ item.workspace && item.workspace.name }}</a-col>
                     <a-col :span="4"> </a-col>
                   </a-row>
                 </a-list-item>
@@ -578,10 +546,7 @@
                 <a-list-item style="display: block">
                   <a-row>
                     <a-col :span="10">{{ $t('i18n.f668c8c881') }}{{ item.name }}</a-col>
-                    <a-col :span="10"
-                      >{{ $t('i18n.2358e1ef49')
-                      }}{{ item.workspace && item.workspace.name }}</a-col
-                    >
+                    <a-col :span="10">{{ $t('i18n.2358e1ef49') }}{{ item.workspace && item.workspace.name }}</a-col>
                     <a-col :span="4"> </a-col>
                   </a-row>
                 </a-list-item>

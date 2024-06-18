@@ -45,9 +45,7 @@
               @press-enter="loadData"
             />
             <a-tooltip :title="$t('i18n.4838a3bd20')">
-              <a-button type="primary" :loading="loading" @click="loadData">{{
-                $t('i18n.e5f71fc31e')
-              }}</a-button>
+              <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
             </a-tooltip>
             <a-button type="primary" @click="handleAdd">{{ $t('i18n.c1690fcca5') }}</a-button>
           </a-space>
@@ -81,9 +79,7 @@
             <a-button size="small" type="primary" @click="handleDeployFile(record)">{{
               $t('i18n.a9f94dcd57')
             }}</a-button>
-            <a-button size="small" type="primary" @click="handleDownload(record)">{{
-              $t('i18n.55405ea6ff')
-            }}</a-button>
+            <a-button size="small" type="primary" @click="handleDownload(record)">{{ $t('i18n.55405ea6ff') }}</a-button>
             <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
               $t('i18n.2f4aaddde3')
             }}</a-button>

@@ -50,10 +50,7 @@
       </template>
       <template #bodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'value'">
-          <a-tooltip
-            placement="topLeft"
-            :title="record.privacy === 1 ? $t('i18n.b12d003367') : text"
-          >
+          <a-tooltip placement="topLeft" :title="record.privacy === 1 ? $t('i18n.b12d003367') : text">
             <EyeInvisibleOutlined v-if="record.privacy === 1" />
             <span v-else>{{ text }}</span>
           </a-tooltip>
@@ -65,16 +62,12 @@
         </template>
 
         <template v-else-if="column.dataIndex === 'workspaceId'">
-          <span>{{
-            text === 'GLOBAL' ? $t('i18n.2be75b1044') : $t('i18n.691b11e443')
-          }}</span>
+          <span>{{ text === 'GLOBAL' ? $t('i18n.2be75b1044') : $t('i18n.691b11e443') }}</span>
         </template>
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleEnvEdit(record)">{{
-              $t('i18n.95b351c862')
-            }}</a-button>
+            <a-button size="small" type="primary" @click="handleEnvEdit(record)">{{ $t('i18n.95b351c862') }}</a-button>
             <a-button size="small" type="primary" :disabled="record.privacy === 1" @click="handleTrigger(record)">{{
               $t('i18n.4696724ed3')
             }}</a-button>
@@ -98,21 +91,10 @@
     >
       <a-form ref="editEnvForm" :rules="rulesEnv" :model="envTemp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
         <a-form-item :label="$t('i18n.d7ec2d3fea')" name="name">
-          <a-input
-            v-model:value="envTemp.name"
-            :max-length="50"
-            :placeholder="$t('i18n.7cb8d163bb')"
-          />
+          <a-input v-model:value="envTemp.name" :max-length="50" :placeholder="$t('i18n.7cb8d163bb')" />
         </a-form-item>
-        <a-form-item
-          :label="$t('i18n.fe7509e0ed')"
-          :prop="`${envTemp.privacy === 1 ? '' : 'value'}`"
-        >
-          <a-textarea
-            v-model:value="envTemp.value"
-            :rows="5"
-            :placeholder="$t('i18n.9a2ee7044f')"
-          />
+        <a-form-item :label="$t('i18n.fe7509e0ed')" :prop="`${envTemp.privacy === 1 ? '' : 'value'}`">
+          <a-textarea v-model:value="envTemp.value" :rows="5" :placeholder="$t('i18n.9a2ee7044f')" />
         </a-form-item>
         <a-form-item :label="$t('i18n.3bdd08adab')" name="description">
           <a-textarea
@@ -188,9 +170,7 @@
         <a-tabs default-active-key="1">
           <template #rightExtra>
             <a-tooltip :title="$t('i18n.01ad26f4a9')">
-              <a-button type="primary" size="small" @click="resetTrigger">{{
-                $t('i18n.4b9c3271dc')
-              }}</a-button>
+              <a-button type="primary" size="small" @click="resetTrigger">{{ $t('i18n.4b9c3271dc') }}</a-button>
             </a-tooltip>
           </template>
           <a-tab-pane key="1" :tab="$t('i18n.8dc09ebe97')">

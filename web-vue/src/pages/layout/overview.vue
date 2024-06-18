@@ -1,10 +1,7 @@
 <template>
   <div>
     <a-page-header :back-icon="false">
-      <template #title>
-        {{ $t('i18n.57d9738dfe') }}{{ getUserInfo.name
-        }}{{ $t('i18n.cd7d67d588') }}</template
-      >
+      <template #title> {{ $t('i18n.57d9738dfe') }}{{ getUserInfo.name }}{{ $t('i18n.cd7d67d588') }}</template>
       <template #subTitle>
         {{ $t('i18n.5195c0d198', { count: (myWorkspaceList && myWorkspaceList.length) || 0 }) }}
       </template>
@@ -73,9 +70,7 @@
                     <span>{{ item.buildName || '-' }}</span>
                   </a-col>
                   <a-col>
-                    <a-tooltip
-                      :title="item.statusMsg || statusMap[item.status] || $t('i18n.1622dc9b6b')"
-                    >
+                    <a-tooltip :title="item.statusMsg || statusMap[item.status] || $t('i18n.1622dc9b6b')">
                       <a-tag :color="statusColor[item.status]" @click="handleBuildLog(item)">
                         {{ statusMap[item.status] || $t('i18n.1622dc9b6b') }}
                       </a-tag>

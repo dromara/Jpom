@@ -112,9 +112,7 @@
             <a-form-item :label="$t('i18n.b3ef35a359')" name="repositoryId">
               <a-input-search
                 :value="`${
-                  tempRepository
-                    ? tempRepository.name + '[' + tempRepository.gitUrl + ']'
-                    : $t('i18n.ad311f3211')
+                  tempRepository ? tempRepository.name + '[' + tempRepository.gitUrl + ']' : $t('i18n.ad311f3211')
                 }`"
                 read-only
                 :placeholder="$t('i18n.ad311f3211')"
@@ -208,8 +206,7 @@
                 <a-tooltip>
                   {{ $t('i18n.c2ee58c247') }}
                   <template #title>
-                    {{ $t('i18n.c7689f4c9a') }}<b>{{ $t('i18n.2b607a562a') }} </b
-                    >{{ $t('i18n.7e33f94952') }}
+                    {{ $t('i18n.c7689f4c9a') }}<b>{{ $t('i18n.2b607a562a') }} </b>{{ $t('i18n.7e33f94952') }}
                     <b>cd xxx && mvn clean package</b>
                   </template>
                   <QuestionCircleOutlined v-if="!temp.id" />
@@ -377,11 +374,7 @@
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
               </template>
-              <a-input
-                v-model:value="temp.resultDirFile"
-                :max-length="200"
-                :placeholder="$t('i18n.2cdbbdabf1')"
-              />
+              <a-input v-model:value="temp.resultDirFile" :max-length="200" :placeholder="$t('i18n.2cdbbdabf1')" />
             </a-form-item>
 
             <a-alert v-if="temp.buildMode === undefined" :message="$t('i18n.46032a715e')" banner />
@@ -728,10 +721,7 @@
                   <a-row>
                     <a-col :span="10">
                       <a-tooltip :title="$t('i18n.a34545bd16')">
-                        <a-input
-                          v-model:value="tempExtraData.dockerBuildArgs"
-                          :placeholder="$t('i18n.6e70d2fb91')"
-                        />
+                        <a-input v-model:value="tempExtraData.dockerBuildArgs" :placeholder="$t('i18n.6e70d2fb91')" />
                       </a-tooltip>
                     </a-col>
                     <a-col :span="4" style="text-align: right">{{ $t('i18n.3f016aa454') }}</a-col>
@@ -987,9 +977,7 @@
               </template>
               <a-input-search
                 :value="`${
-                  tempExtraData
-                    ? tempExtraData.noticeScriptId || $t('i18n.b9b176e37a')
-                    : $t('i18n.b9b176e37a')
+                  tempExtraData ? tempExtraData.noticeScriptId || $t('i18n.b9b176e37a') : $t('i18n.b9b176e37a')
                 }`"
                 read-only
                 :placeholder="$t('i18n.b9b176e37a')"
@@ -1061,9 +1049,7 @@
                     <a-space>
                       <a-tooltip>
                         {{ $t('i18n.7f7ee903da') }}
-                        <template #title>
-                          {{ $t('i18n.ba619a0942') }},{{ $t('i18n.8a1767a0d2') }}
-                        </template>
+                        <template #title> {{ $t('i18n.ba619a0942') }},{{ $t('i18n.8a1767a0d2') }} </template>
 
                         <QuestionCircleOutlined v-if="!temp.id" />
                       </a-tooltip>
@@ -1107,11 +1093,7 @@
                 </a-col>
               </a-row>
             </a-form-item>
-            <a-form-item
-              :label="$t('i18n.2f5e828ecd')"
-              name="aliasCode"
-              :help="$t('i18n.8c67370ee5')"
-            >
+            <a-form-item :label="$t('i18n.2f5e828ecd')" name="aliasCode" :help="$t('i18n.8c67370ee5')">
               <a-row>
                 <a-col :span="10">
                   <a-input-search

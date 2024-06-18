@@ -13,9 +13,7 @@
                   })
                 "
               >
-                <a-button type="link" :disabled="tabList.length <= 1">{{
-                  $t('i18n.6816da19f3')
-                }}</a-button>
+                <a-button type="link" :disabled="tabList.length <= 1">{{ $t('i18n.6816da19f3') }}</a-button>
               </a-menu-item>
               <a-menu-item
                 @click="

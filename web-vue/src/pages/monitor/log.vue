@@ -42,9 +42,7 @@
           </a-select>
           <a-range-picker :show-time="{ format: 'HH:mm:ss' }" format="YYYY-MM-DD HH:mm:ss" @change="onchangeTime" />
           <a-tooltip :title="$t('i18n.4838a3bd20')">
-            <a-button :loading="loading" type="primary" @click="loadData">{{
-              $t('i18n.e5f71fc31e')
-            }}</a-button>
+            <a-button :loading="loading" type="primary" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -69,9 +67,7 @@
           <span>{{ text ? $t('i18n.330363dfc5') : $t('i18n.acd5cb847a') }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
-          <a-button size="small" type="primary" @click="handleDetail(record)">{{
-            $t('i18n.f26225bde6')
-          }}</a-button>
+          <a-button size="small" type="primary" @click="handleDetail(record)">{{ $t('i18n.f26225bde6') }}</a-button>
         </template>
       </template>
     </a-table>

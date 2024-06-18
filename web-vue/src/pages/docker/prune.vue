@@ -45,8 +45,7 @@
         </a-tooltip>
       </a-form-item>
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }"
-        >{{ $t('i18n.4d49b2a15f')
-        }}{{ pruneTypes[pruneForm.pruneType] && pruneTypes[pruneForm.pruneType].command }}
+        >{{ $t('i18n.4d49b2a15f') }}{{ pruneTypes[pruneForm.pruneType] && pruneTypes[pruneForm.pruneType].command }}
         prune xxxxx
       </a-form-item>
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
