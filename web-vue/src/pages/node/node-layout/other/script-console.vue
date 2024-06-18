@@ -30,21 +30,14 @@
       @ok="startExecution"
     >
       <a-form ref="ruleForm" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-        <a-form-item
-          :label="$t('i18n.abba4775e1')"
-          :help="`${commandParams.length ? $t('i18n.916cde39c4') : ''}`"
-        >
+        <a-form-item :label="$t('i18n.abba4775e1')" :help="`${commandParams.length ? $t('i18n.916cde39c4') : ''}`">
           <a-space direction="vertical" style="width: 100%">
             <a-row v-for="(item, index) in commandParams" :key="item.key">
               <a-col :span="22">
                 <a-input
                   v-model:value="item.value"
-                  :addon-before="`${$t('i18n.3d0a2df9ec')}${index + 1}${$t(
-                    'pages.node.node-layout.other.script-console.97f7c43a'
-                  )}`"
-                  :placeholder="`${$t('i18n.3d0a2df9ec')}${$t(
-                    'pages.node.node-layout.other.script-console.97f7c43a'
-                  )} ${item.desc ? ',' + item.desc : ''}`"
+                  :addon-before="`${$t('i18n.3d0a2df9ec')}${index + 1}${$t('i18n.fe7509e0ed')}`"
+                  :placeholder="`${$t('i18n.3d0a2df9ec')}${$t('i18n.fe7509e0ed')} ${item.desc ? ',' + item.desc : ''}`"
                 >
                   <template #suffix>
                     <a-tooltip v-if="item.desc" :title="item.desc">
@@ -161,9 +154,7 @@ export default {
       this.socket.onerror = (err) => {
         console.error(err)
         $notification.error({
-          message: `web socket ${this.$t('i18n.7030ff6470')},${this.$t(
-            'pages.node.node-layout.other.script-console.763330b'
-          )}`
+          message: `web socket ${this.$t('i18n.7030ff6470')},${this.$t('i18n.226a6f9cdd')}`
         })
         clearInterval(this.heart)
         this.btnLoading = true

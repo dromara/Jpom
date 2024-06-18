@@ -96,14 +96,10 @@
           {{ $t('i18n.7f7c624a84') }} <DownOutlined />
         </a-button>
 
-        <a-button type="primary" size="small" @click="openAdd"
-          ><PlusOutlined />{{ $t('i18n.66ab5e9f24') }}</a-button
-        >
+        <a-button type="primary" size="small" @click="openAdd"><PlusOutlined />{{ $t('i18n.66ab5e9f24') }}</a-button>
         <template v-if="!nodeId">
           <a-dropdown v-if="nodeMap && Object.keys(nodeMap).length">
-            <a-button type="primary" size="small" danger>
-              {{ $t('i18n.6a620e3c07') }} <DownOutlined
-            /></a-button>
+            <a-button type="primary" size="small" danger> {{ $t('i18n.6a620e3c07') }} <DownOutlined /></a-button>
             <template #overlay>
               <a-menu>
                 <a-menu-item v-for="(nodeName, key) in nodeMap" :key="key" @click="reSyncProject(key)">
@@ -271,9 +267,7 @@
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="handleFile(record)">{{
-              $t('i18n.2a0c4740f1')
-            }}</a-button>
+            <a-button size="small" type="primary" @click="handleFile(record)">{{ $t('i18n.2a0c4740f1') }}</a-button>
             <template v-if="noFileModes.includes(record.runMode)">
               <a-button size="small" type="primary" @click="handleConsole(record)">{{
                 $t('i18n.b5c3770699')
@@ -281,9 +275,7 @@
             </template>
             <template v-else>
               <a-tooltip :title="$t('i18n.904615588b')">
-                <a-button size="small" type="primary" :disabled="true">{{
-                  $t('i18n.b5c3770699')
-                }}</a-button></a-tooltip
+                <a-button size="small" type="primary" :disabled="true">{{ $t('i18n.b5c3770699') }}</a-button></a-tooltip
               >
             </template>
 
@@ -464,9 +456,7 @@
         <a-tabs default-active-key="1">
           <template #rightExtra>
             <a-tooltip :title="$t('i18n.01ad26f4a9')">
-              <a-button type="primary" size="small" @click="resetTrigger">{{
-                $t('i18n.4b9c3271dc')
-              }}</a-button>
+              <a-button type="primary" size="small" @click="resetTrigger">{{ $t('i18n.4b9c3271dc') }}</a-button>
             </a-tooltip>
           </template>
           <a-tab-pane key="1" :tab="$t('i18n.1a6aa24e76')">
@@ -497,10 +487,7 @@
                 </template>
               </a-alert>
 
-              <a-alert
-                type="info"
-                :message="`${$t('i18n.8d202b890c')}(${$t('i18n.00a070c696')})`"
-              >
+              <a-alert type="info" :message="`${$t('i18n.8d202b890c')}(${$t('i18n.00a070c696')})`">
                 <template #description>
                   <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchTriggerUrl }">
                     <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
@@ -1204,9 +1191,7 @@ export default {
       }
       let msg = msgData[method] || this.$t('i18n.49574eee58')
       if (!record.sortValue) {
-        msg += `${this.$t('i18n.57c0a41ec6')},${this.$t('i18n.066f903d75')},${this.$t(
-          'pages.node.search.dad3b017'
-        )}`
+        msg += `${this.$t('i18n.57c0a41ec6')},${this.$t('i18n.066f903d75')},${this.$t('i18n.c4e2cd2266')}`
       }
       // console.log(this.list, index, this.list[method === "top" ? index : method === "up" ? index - 1 : index + 1]);
       const compareId = this.projList[method === 'top' ? index : method === 'up' ? index - 1 : index + 1].id

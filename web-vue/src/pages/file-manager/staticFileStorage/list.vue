@@ -42,14 +42,10 @@
               @press-enter="loadData"
             />
             <a-tooltip :title="$t('i18n.4838a3bd20')">
-              <a-button type="primary" :loading="loading" @click="loadData">{{
-                $t('i18n.e5f71fc31e')
-              }}</a-button>
+              <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n.e5f71fc31e') }}</a-button>
             </a-tooltip>
             <!-- <a-button type="primary" @click="handleUpload">上传文件</a-button> -->
-            <a-button type="primary" @click="reScanner">{{
-              $t('i18n.56525d62ac')
-            }}</a-button>
+            <a-button type="primary" @click="reScanner">{{ $t('i18n.56525d62ac') }}</a-button>
 
             <a-button
               type="primary"
@@ -102,18 +98,13 @@
             </a-tooltip>
           </template>
           <template v-else-if="column.dataIndex === 'source'">
-            <a-tooltip
-              placement="topLeft"
-              :title="`${sourceMap[text] || $t('i18n.1622dc9b6b')}`"
-            >
+            <a-tooltip placement="topLeft" :title="`${sourceMap[text] || $t('i18n.1622dc9b6b')}`">
               <span>{{ sourceMap[text] || $t('i18n.1622dc9b6b') }}</span>
             </a-tooltip>
           </template>
 
           <template v-else-if="column.dataIndex === 'status'">
-            <a-tag v-if="text === 1" color="green">{{
-              $t('i18n.df9497ea98')
-            }}</a-tag>
+            <a-tag v-if="text === 1" color="green">{{ $t('i18n.df9497ea98') }}</a-tag>
             <a-tag v-else color="red">{{ $t('i18n.162e219f6d') }}</a-tag>
           </template>
 
@@ -160,18 +151,11 @@
       >
         <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
           <a-form-item :label="$t('i18n.29139c2a1a')" name="name">
-            <a-input
-              v-model:value="temp.name"
-              :placeholder="$t('i18n.29139c2a1a')"
-              :disabled="true"
-            />
+            <a-input v-model:value="temp.name" :placeholder="$t('i18n.29139c2a1a')" :disabled="true" />
           </a-form-item>
 
           <a-form-item :label="$t('i18n.8d6f38b4b1')" name="description">
-            <a-textarea
-              v-model:value="temp.description"
-              :placeholder="$t('i18n.411672c954')"
-            />
+            <a-textarea v-model:value="temp.description" :placeholder="$t('i18n.411672c954')" />
           </a-form-item>
         </a-form>
       </CustomModal>
@@ -190,18 +174,14 @@
           <a-tabs default-active-key="1">
             <template #rightExtra>
               <a-tooltip :title="$t('i18n.84415a6bb1')">
-                <a-button type="primary" size="small" @click="resetTrigger">{{
-                  $t('i18n.4b9c3271dc')
-                }}</a-button>
+                <a-button type="primary" size="small" @click="resetTrigger">{{ $t('i18n.4b9c3271dc') }}</a-button>
               </a-tooltip>
             </template>
             <a-tab-pane key="1" :tab="$t('i18n.0b58866c3e')">
               <a-space direction="vertical" style="width: 100%">
                 <a-alert
                   type="info"
-                  :message="`${$t('i18n.d911cffcd5')}(${$t(
-                    'pages.file-manager.staticFileStorage.list.4c8d1a3b'
-                  )})`"
+                  :message="`${$t('i18n.d911cffcd5')}(${$t('i18n.00a070c696')})`"
                 >
                   <template #description>
                     <a-typography-paragraph :copyable="{ text: temp.triggerDownloadUrl }">
@@ -211,16 +191,11 @@
                   </template>
                 </a-alert>
                 <a :href="temp.triggerDownloadUrl" target="_blank">
-                  <a-button size="small" type="primary"
-                    ><DownloadOutlined />{{ $t('i18n.2a813bc3eb') }}</a-button
-                  >
+                  <a-button size="small" type="primary"><DownloadOutlined />{{ $t('i18n.2a813bc3eb') }}</a-button>
                 </a>
               </a-space>
             </a-tab-pane>
-            <a-tab-pane
-              v-if="temp.triggerAliasDownloadUrl"
-              :tab="$t('i18n.d61af4e686')"
-            >
+            <a-tab-pane v-if="temp.triggerAliasDownloadUrl" :tab="$t('i18n.d61af4e686')">
               <a-space direction="vertical" style="width: 100%">
                 <a-alert :message="$t('i18n.947d983961')" type="warning">
                   <template #description>
@@ -237,9 +212,7 @@
                 </a-alert>
                 <a-alert
                   type="info"
-                  :message="`${$t('i18n.d911cffcd5')}(${$t(
-                    'pages.file-manager.staticFileStorage.list.4c8d1a3b'
-                  )})`"
+                  :message="`${$t('i18n.d911cffcd5')}(${$t('i18n.00a070c696')})`"
                 >
                   <template #description>
                     <a-typography-paragraph :copyable="{ text: temp.triggerAliasDownloadUrl }">
@@ -249,9 +222,7 @@
                   </template>
                 </a-alert>
                 <a :href="temp.triggerAliasDownloadUrl" target="_blank">
-                  <a-button size="small" type="primary"
-                    ><DownloadOutlined />{{ $t('i18n.2a813bc3eb') }}</a-button
-                  >
+                  <a-button size="small" type="primary"><DownloadOutlined />{{ $t('i18n.2a813bc3eb') }}</a-button>
                 </a>
               </a-space>
             </a-tab-pane>
@@ -406,13 +377,9 @@ export default {
       ],
 
       rules: {
-        name: [
-          { required: true, message: this.$t('i18n.7aa81d1573'), trigger: 'blur' }
-        ],
+        name: [{ required: true, message: this.$t('i18n.7aa81d1573'), trigger: 'blur' }],
 
-        url: [
-          { required: true, message: this.$t('i18n.f4dd45fca9'), trigger: 'blur' }
-        ]
+        url: [{ required: true, message: this.$t('i18n.f4dd45fca9'), trigger: 'blur' }]
       },
 
       temp: {},

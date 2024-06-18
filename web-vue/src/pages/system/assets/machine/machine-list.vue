@@ -79,29 +79,15 @@
             :placeholder="$t('i18n.88f5c7ac4a')"
             class="search-input-item"
           >
-            <a-select-option value="networkDelay">{{
-              $t('i18n.204222d167')
-            }}</a-select-option>
+            <a-select-option value="networkDelay">{{ $t('i18n.204222d167') }}</a-select-option>
             <a-select-option value="osOccupyCpu">cpu</a-select-option>
-            <a-select-option value="osOccupyDisk">{{
-              $t('i18n.1d650a60a5')
-            }}</a-select-option>
-            <a-select-option value="osOccupyMemory">{{
-              $t('i18n.9932551cd5')
-            }}</a-select-option>
-            <a-select-option value="modifyTimeMillis">{{
-              $t('i18n.a001a226fd')
-            }}</a-select-option>
-            <a-select-option value="createTimeMillis">{{
-              $t('i18n.eca37cb072')
-            }}</a-select-option>
+            <a-select-option value="osOccupyDisk">{{ $t('i18n.1d650a60a5') }}</a-select-option>
+            <a-select-option value="osOccupyMemory">{{ $t('i18n.9932551cd5') }}</a-select-option>
+            <a-select-option value="modifyTimeMillis">{{ $t('i18n.a001a226fd') }}</a-select-option>
+            <a-select-option value="createTimeMillis">{{ $t('i18n.eca37cb072') }}</a-select-option>
           </a-select>
-          <a-button :loading="loading" type="primary" @click="getMachineList">{{
-            $t('i18n.e5f71fc31e')
-          }}</a-button>
-          <a-button type="primary" @click="addMachine">{{
-            $t('i18n.66ab5e9f24')
-          }}</a-button>
+          <a-button :loading="loading" type="primary" @click="getMachineList">{{ $t('i18n.e5f71fc31e') }}</a-button>
+          <a-button type="primary" @click="addMachine">{{ $t('i18n.66ab5e9f24') }}</a-button>
 
           <a-dropdown v-if="tableSelections && tableSelections.length">
             <template #overlay>
@@ -117,14 +103,10 @@
                 </a-menu-item>
               </a-menu>
             </template>
-            <a-button type="primary">
-              {{ $t('i18n.7f7c624a84') }} <DownOutlined />
-            </a-button>
+            <a-button type="primary"> {{ $t('i18n.7f7c624a84') }} <DownOutlined /> </a-button>
           </a-dropdown>
           <a-tooltip v-else :title="$t('i18n.98cd2bdc03')">
-            <a-button :disabled="true" type="primary">
-              {{ $t('i18n.7f7c624a84') }}<DownOutlined
-            /></a-button>
+            <a-button :disabled="true" type="primary"> {{ $t('i18n.7f7c624a84') }}<DownOutlined /></a-button>
           </a-tooltip>
         </a-space>
       </template>
@@ -156,9 +138,7 @@
         <template v-else-if="column.dataIndex === 'status'">
           <a-tooltip
             :title="`${$t('i18n.e703c7367c')}${statusMap[record.status]} ${
-              record.statusMsg
-                ? $t('i18n.8d13037eb7') + record.statusMsg
-                : $t('i18n.77e100e462')
+              record.statusMsg ? $t('i18n.8d13037eb7') + record.statusMsg : $t('i18n.77e100e462')
             } `"
           >
             <a-tag :color="record.status === 1 ? 'green' : 'pink'" style="margin-right: 0">
@@ -184,9 +164,7 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button type="primary" size="small" @click="handleEdit(record)">{{
-              $t('i18n.95b351c862')
-            }}</a-button>
+            <a-button type="primary" size="small" @click="handleEdit(record)">{{ $t('i18n.95b351c862') }}</a-button>
             <a-button type="primary" size="small" @click="syncToWorkspaceShow(record)">{{
               $t('i18n.e39de3376e')
             }}</a-button>
@@ -215,9 +193,7 @@
               <a-col :span="7" style="text-align: right" class="text-overflow-hidden">
                 <a-tooltip
                   :title="`${$t('i18n.e703c7367c')}${statusMap[item.status]} ${
-                    item.statusMsg
-                      ? $t('i18n.8d13037eb7') + item.statusMsg
-                      : $t('i18n.77e100e462')
+                    item.statusMsg ? $t('i18n.8d13037eb7') + item.statusMsg : $t('i18n.77e100e462')
                   } `"
                 >
                   <a-tag :color="item.status === 1 ? 'green' : 'pink'" style="margin-right: 0">
@@ -230,9 +206,7 @@
 
           <a-tooltip :title="item.osName">
             <a-row class="item-info">
-              <a-col :span="6" class="title text-overflow-hidden">{{
-                $t('i18n.2027743b8d')
-              }}</a-col>
+              <a-col :span="6" class="title text-overflow-hidden">{{ $t('i18n.2027743b8d') }}</a-col>
               <a-col :span="18" class="content text-overflow-hidden">
                 <a-button
                   :disabled="!item.osName"
@@ -248,9 +222,7 @@
           </a-tooltip>
           <a-tooltip :title="item.osVersion">
             <a-row class="item-info">
-              <a-col :span="6" class="title text-overflow-hidden">{{
-                $t('i18n.3006a3da65')
-              }}</a-col>
+              <a-col :span="6" class="title text-overflow-hidden">{{ $t('i18n.3006a3da65') }}</a-col>
               <a-col :span="18" class="content text-overflow-hidden">
                 {{ item.osVersion || '-' }}
               </a-col>
@@ -258,9 +230,7 @@
           </a-tooltip>
           <a-tooltip :title="item.osLoadAverage">
             <a-row class="item-info">
-              <a-col :span="6" class="title text-overflow-hidden">{{
-                $t('i18n.9e96d9c8d3')
-              }}</a-col>
+              <a-col :span="6" class="title text-overflow-hidden">{{ $t('i18n.9e96d9c8d3') }}</a-col>
               <a-col :span="18" class="content text-overflow-hidden">
                 {{ item.osLoadAverage || '-' }}
               </a-col>
@@ -268,9 +238,7 @@
           </a-tooltip>
           <a-tooltip :title="item.jpomVersion">
             <a-row class="item-info">
-              <a-col :span="6" class="title text-overflow-hidden">{{
-                $t('i18n.4a346aae15')
-              }}</a-col>
+              <a-col :span="6" class="title text-overflow-hidden">{{ $t('i18n.4a346aae15') }}</a-col>
               <a-col :span="18" class="content text-overflow-hidden">
                 <a-button
                   :disabled="!item.jpomVersion"
@@ -298,9 +266,7 @@
               <a-button type="primary" size="small" @click="viewMachineNode(item)">{{
                 $t('i18n.3bf3c0a8d6')
               }}</a-button>
-              <a-button size="small" @click="deleteMachineInfo(item)">{{
-                $t('i18n.2f4aaddde3')
-              }}</a-button>
+              <a-button size="small" @click="deleteMachineInfo(item)">{{ $t('i18n.2f4aaddde3') }}</a-button>
             </a-button-group>
           </a-row>
         </a-card>
@@ -348,11 +314,7 @@
     >
       <a-form ref="editNodeForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 19 }">
         <a-form-item :label="$t('i18n.e4013f8b81')" name="name">
-          <a-input
-            v-model:value="temp.name"
-            :max-length="50"
-            :placeholder="$t('i18n.e4013f8b81')"
-          />
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n.e4013f8b81')" />
         </a-form-item>
         <a-form-item :label="$t('i18n.93e1df604a')" name="groupName">
           <custom-select
@@ -381,11 +343,7 @@
           <template #help>{{ $t('i18n.6f8da7dcca') }}</template>
           <a-input v-model:value="temp.jpomUrl" :placeholder="$t('i18n.1235b052ff')">
             <template #addonBefore>
-              <a-select
-                v-model:value="temp.jpomProtocol"
-                :placeholder="$t('i18n.e825ec7800')"
-                style="width: 160px"
-              >
+              <a-select v-model:value="temp.jpomProtocol" :placeholder="$t('i18n.e825ec7800')" style="width: 160px">
                 <a-select-option value="Http"> Http:// </a-select-option>
                 <a-select-option value="Https"> Https:// </a-select-option>
               </a-select>
@@ -394,10 +352,7 @@
         </a-form-item>
 
         <a-form-item :label="$t('i18n.86fb7b5421')" name="loginName">
-          <a-input
-            v-model:value="temp.jpomUsername"
-            :placeholder="$t('i18n.f8460626f0')"
-          />
+          <a-input v-model:value="temp.jpomUsername" :placeholder="$t('i18n.f8460626f0')" />
           <template #help>{{ $t('i18n.eec342f34e') }}</template>
         </a-form-item>
         <a-form-item :name="`${temp.id ? 'loginPwd-update' : 'loginPwd'}`">
@@ -411,10 +366,7 @@
               <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
-          <a-input-password
-            v-model:value="temp.jpomPassword"
-            :placeholder="$t('i18n.e5a63852fd')"
-          />
+          <a-input-password v-model:value="temp.jpomPassword" :placeholder="$t('i18n.e5a63852fd')" />
         </a-form-item>
 
         <a-collapse>
@@ -426,9 +378,7 @@
                 :un-checked-children="$t('i18n.c9744f45e7')"
                 default-checked
               />
-              {{ $t('i18n.8e34aa1a59') }},{{
-                $t('i18n.715ec3b393')
-              }}
+              {{ $t('i18n.8e34aa1a59') }},{{ $t('i18n.715ec3b393') }}
             </a-form-item>
 
             <a-form-item :label="$t('i18n.67425c29a5')" name="timeOut">
@@ -441,10 +391,7 @@
             </a-form-item>
 
             <a-form-item :label="$t('i18n.fc954d25ec')" name="jpomHttpProxy">
-              <a-input
-                v-model:value="temp.jpomHttpProxy"
-                :placeholder="$t('i18n.dcf14deb0e')"
-              >
+              <a-input v-model:value="temp.jpomHttpProxy" :placeholder="$t('i18n.dcf14deb0e')">
                 <template #addonBefore>
                   <a-select
                     v-model:value="temp.jpomHttpProxyType"
@@ -467,9 +414,7 @@
                 default-value="0"
                 :placeholder="$t('i18n.3c8eada338')"
               >
-                <a-select-option :value="0">{{
-                  $t('i18n.8a3e316cd7')
-                }}</a-select-option>
+                <a-select-option :value="0">{{ $t('i18n.8a3e316cd7') }}</a-select-option>
                 <a-select-option :value="1">BASE64</a-select-option>
                 <a-select-option :value="2">AES</a-select-option>
               </a-select>
@@ -547,21 +492,13 @@
       :mask-closable="false"
     >
       <a-space direction="vertical" style="width: 100%">
-        <a-alert
-          v-if="nodeList && nodeList.length"
-          :message="$t('i18n.566c67e764')"
-          type="info"
-          show-icon
-        />
+        <a-alert v-if="nodeList && nodeList.length" :message="$t('i18n.566c67e764')" type="info" show-icon />
         <a-list bordered :data-source="nodeList">
           <template #renderItem="{ item }">
             <a-list-item style="display: block">
               <a-row>
                 <a-col :span="10">{{ $t('i18n.5d83794cfa') }}{{ item.name }}</a-col>
-                <a-col :span="10"
-                  >{{ $t('i18n.2358e1ef49')
-                  }}{{ item.workspace && item.workspace.name }}</a-col
-                >
+                <a-col :span="10">{{ $t('i18n.2358e1ef49') }}{{ item.workspace && item.workspace.name }}</a-col>
                 <a-col :span="4">
                   <a-button type="link" @click="toNode(item.id, item.name, item.workspace && item.workspace.id)">
                     <LoginOutlined /> </a-button
@@ -584,9 +521,7 @@
       @ok="onSubmitWhitelist"
     >
       <a-alert
-        :message="`${$t('i18n.6fa1229ea9')},${$t(
-          'pages.system.assets.machine.machine-list.d732193c'
-        )},${$t('i18n.332ba869d9')}`"
+        :message="`${$t('i18n.6fa1229ea9')},${$t('i18n.acf14aad3c')},${$t('i18n.332ba869d9')}`"
         style="margin-top: 10px; margin-bottom: 20px"
         banner
       />
@@ -653,9 +588,7 @@
         </a-space>
       </template>
       <a-alert
-        :message="`${$t('i18n.10c385b47e')},${$t(
-          'pages.system.assets.machine.machine-list.d732193c'
-        )},${$t('i18n.332ba869d9')}`"
+        :message="`${$t('i18n.10c385b47e')},${$t('i18n.acf14aad3c')},${$t('i18n.332ba869d9')}`"
         style="margin-top: 10px; margin-bottom: 20px"
         banner
       />
@@ -747,9 +680,7 @@ export default {
       syncToWorkspaceVisible: false,
       temp: {},
       rules: {
-        name: [
-          { required: true, message: this.$t('i18n.cbdc4f58f6'), trigger: 'blur' }
-        ]
+        name: [{ required: true, message: this.$t('i18n.cbdc4f58f6'), trigger: 'blur' }]
       },
       drawerVisible: false,
       drawerUpgradeVisible: false,
@@ -849,9 +780,7 @@ export default {
           align: 'center',
           ellipsis: true,
           customRender: ({ text }) => {
-            return text
-              ? this.$t('i18n.0a60ac8f02')
-              : this.$t('i18n.c9744f45e7')
+            return text ? this.$t('i18n.0a60ac8f02') : this.$t('i18n.c9744f45e7')
           }
         },
         {
@@ -1173,9 +1102,7 @@ export default {
     onNodeSubmit(restart) {
       $confirm({
         title: this.$t('i18n.c4535759ee'),
-        content: restart
-          ? this.$t('i18n.0cf4f0ba82')
-          : this.$t('i18n.863a95c914'),
+        content: restart ? this.$t('i18n.0cf4f0ba82') : this.$t('i18n.863a95c914'),
         okText: this.$t('i18n.e83a256e4f'),
         zIndex: 1009,
         cancelText: this.$t('i18n.625fb26b4b'),
