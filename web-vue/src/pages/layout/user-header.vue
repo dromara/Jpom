@@ -4,12 +4,13 @@
       <!-- 工作空间信息 -->
       <a-button v-if="mode === 'normal'" type="dashed" class="workspace jpom-workspace btn-group-item">
         <div class="workspace-name">
-          <a-tooltip
-            :title="`${$t('i18n_8f36f2ede7')}${selectWorkspace.name} ${$t('i18n_d7ec97aecd')}${
-              selectWorkspace.group || $t('i18n_71dc8feb59')
-            }${$t('i18n_5942e7ebd0')}`"
-            placement="bottom"
-          >
+          <a-tooltip placement="bottom">
+            <template #title>
+              <!-- 【】\u3011 -->
+              {{ $t('i18n_8f36f2ede7') }}{{ selectWorkspace.name }} {{ `\u3010` }}{{ $t('i18n_3bf9c5b8af')
+              }}{{ selectWorkspace.group || $t('i18n_71dc8feb59') }}
+              {{ `\u3011` }}
+            </template>
             <SwitcherOutlined />
             {{ selectWorkspace.name }}
             <template v-if="myClusterList.length > 1 && selectWorkspace.clusterInfoId">

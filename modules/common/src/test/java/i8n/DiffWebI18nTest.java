@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
  */
 public class DiffWebI18nTest {
 
-    Pattern pattern = Pattern.compile("t\\('(.*?)'.*?\\)");
+    public static final Pattern pattern = Pattern.compile("t\\('(.*?)'.*?\\)");
 
     @Test
     public void test() throws Exception {
@@ -35,7 +35,7 @@ public class DiffWebI18nTest {
         String rootPath = file.getAbsolutePath();
         File rootFile = new File(rootPath).getParentFile().getParentFile();
         rootFile = FileUtil.file(rootFile, "web-vue");
-        JSONObject zhCn = this.loadJson(rootFile, "zh_cn2");
+        JSONObject zhCn = loadJson(rootFile, "zh_cn2");
         Map<String, String> cacheKey = new HashMap<>();
         this.generateWaitMap(zhCn, "", cacheKey);
         Collection<String> values = cacheKey.values();
@@ -65,7 +65,7 @@ public class DiffWebI18nTest {
         });
         walkFile(rootFile, file1 -> {
             try {
-                matchFile(file1, pattern, newKeyMap);
+                matchFile(file1, newKeyMap);
             } catch (Exception e) {
                 throw Lombok.sneakyThrow(e);
             }
@@ -126,14 +126,14 @@ public class DiffWebI18nTest {
         });
     }
 
-    private void matchFile(File file, Pattern pattern, Map<String, String> newKeyMap) throws Exception {
+    private void matchFile(File file, Map<String, String> newKeyMap) throws Exception {
         StringWriter writer = new StringWriter();
         boolean modified = false;
         Charset charset = CharsetUtil.CHARSET_UTF_8;
         try (BufferedReader reader = Files.newBufferedReader(file.toPath(), charset)) {
             String line;
             while ((line = reader.readLine()) != null) {
-                Matcher matcher = pattern.matcher(line);
+                Matcher matcher = DiffWebI18nTest.pattern.matcher(line);
                 String newLine = line;
                 while (matcher.find()) {
                     String key = matcher.group(1);
