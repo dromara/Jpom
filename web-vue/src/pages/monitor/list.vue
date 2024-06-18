@@ -184,7 +184,8 @@
                 :label="`${project.name} - ${project.runMode}`"
                 :disabled="!noFileModes.includes(project.runMode)"
               >
-                {{ $t('i18n_0341329b1d') }}{{ project.nodeName }}{{ $t('i18n_5942e7ebd0') }}{{ project.name }} -
+                <!-- 【】\u3010\u3011 -->
+                \u3010{{ project.nodeName }}\u3011{{ project.name }} -
                 {{ project.runMode }}
               </a-select-option>
             </a-select-opt-group>
