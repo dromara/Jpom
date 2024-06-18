@@ -1232,8 +1232,8 @@
           chooseScriptVisible === 1
             ? tempExtraData.noticeScriptId
             : temp.script?.indexOf('$ref.script.') != -1
-              ? temp.script.replace('$ref.script.', '')
-              : ''
+            ? temp.script.replace('$ref.script.', '')
+            : ''
         "
         mode="choose"
         @confirm="

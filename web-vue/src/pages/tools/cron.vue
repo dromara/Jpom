@@ -5,90 +5,62 @@
         <a-space direction="vertical" style="width: 100%">
           <a-alert :message="$t('i18n_9880bd3ba1')" type="info" />
           <a-collapse>
-            <a-collapse-panel key="1" :header="$t('i18n_ef734bf850')">
-              {{ $t('i18n_71c6871780') }}<br />{{ $t('i18n_e930e7890f') }}
+            <a-collapse-panel key="1" :header="$t('i18n_ef734bf850')"
+              >{{ $t('i18n_71c6871780') }}<br />{{ $t('i18n_e930e7890f') }}
               <ol>
                 <li>
-                  <strong>{{ $t('i18n_daf783c8cd') }}</strong> ：{{ $t('i18n_3444bf320c') }}~59
+                  <strong>{{ $t('i18n_daf783c8cd') }}</strong
+                  >{{ $t('i18n_d57796d6ac') }}
                 </li>
                 <li>
-                  <strong>{{ $t('i18n_609b5f0a08') }}</strong> ：{{ $t('i18n_3444bf320c') }}~23
+                  <strong>{{ $t('i18n_609b5f0a08') }}</strong
+                  >{{ $t('i18n_867cc1aac4') }}
                 </li>
                 <li>
-                  <strong>{{ $t('i18n_3edddd85ac') }}</strong> ：{{ $t('i18n_0b35ccf5df') }}~31，<strong>"L"</strong>
-                  {{ $t('i18n_7b961e05d0') }}
+                  <strong>{{ $t('i18n_3edddd85ac') }}</strong
+                  >{{ $t('i18n_9b7ada2613') }}<strong>"L"</strong>{{ $t('i18n_7b961e05d0') }}
                 </li>
                 <li>
-                  <strong>{{ $t('i18n_e42b99d599') }}</strong>
-                  ：{{ $t('i18n_0b35ccf5df') }}~12，{{ $t('i18n_41cb3d959a') }}"jan","feb", "mar", "apr", "may","jun",
-                  "jul", "aug","sep","oct", "nov", "dec"
+                  <strong>{{ $t('i18n_e42b99d599') }}</strong
+                  >{{ $t('i18n_ffd67549cf') }}
                 </li>
                 <li>
-                  <strong>{{ $t('i18n_a657f46f5b') }}</strong> ：{{ $t('i18n_3444bf320c') }} (Sunday)~6(Saturday)，7{{
-                    $t('i18n_6d4ca2c602')
-                  }}"sun","mon", "tue", "wed", "thu","fri", "sat"，<strong>"L"</strong>
-                  {{ $t('i18n_207d9580c1') }}
+                  <strong>{{ $t('i18n_a657f46f5b') }}</strong
+                  >{{ $t('i18n_312e044529') }}<strong>"L"</strong>{{ $t('i18n_207d9580c1') }}
                 </li>
               </ol>
               <p>{{ $t('i18n_f6d96c1c8c') }}<br /></p>
 
-              <pre>
-    {{$t('i18n_0c4eef1b88')}}<strong >{{$t('i18n_0c1fec657f')}}</strong> ，{{$t('i18n_fb413eeaaf')}}~59，{{$t('i18n_689fe0fdcf')}}
-    {{$t('i18n_4803a725e9')}}<strong >{{$t('i18n_465260fe80')}}</strong> ，{{$t('i18n_ee11dbb340')}}~2099，{{$t('i18n_66af7eed0d')}}
-    </pre>
-              <p>
-                {{ $t('i18n_3ae4c953fe') }}<br />
-                {{ $t('i18n_ba8d1dca4a') }}
-              </p>
+              <pre>{{$t('i18n_0c4eef1b88')}}<strong >{{$t('i18n_0c1fec657f')}}</strong>{{$t('i18n_55da97b631')}}<strong >{{$t('i18n_465260fe80')}}</strong>{{$t('i18n_9443399e7d')}}</pre>
+              <p>{{ $t('i18n_3ae4c953fe') }}<br />{{ $t('i18n_ba8d1dca4a') }}</p>
 
-              <pre>
-                {{ $t('i18n_674a284936') }}
-                </pre
-              >
+              <pre>{{ $t('i18n_674a284936') }}</pre>
               <p>{{ $t('i18n_01226f48fc') }}</p>
 
               <ul>
-                <li><strong>*</strong> ：{{ $t('i18n_0bff05c9cf') }}</li>
-                <li>
-                  <strong>?</strong>
-                  ：{{ $t('i18n_f553f6fac6') }}"*"{{ $t('i18n_290c19383c') }}
-                </li>
-                <li>
-                  <strong>*&#47;2</strong>
-                  ：{{ $t('i18n_e7fc1b7414') }}
-                </li>
-                <li>
-                  <strong>2-8</strong>
-                  ：{{ $t('i18n_c4a665c9a4') }},3,4,5,6,7,8{{ $t('i18n_daf783c8cd') }}
-                </li>
-                <li><strong>2,3,5,8</strong> ：{{ $t('i18n_fb5616f2af') }}</li>
-                <li><strong>cronA | cronB</strong> ：{{ $t('i18n_1c82793e77') }}</li>
+                <li><strong>*</strong>{{ $t('i18n_0ccaa1c8b2') }}</li>
+                <li><strong>?</strong>{{ $t('i18n_6470685fcd') }}</li>
+                <li><strong>*&#47;2</strong>{{ $t('i18n_d0be2fcd05') }}</li>
+                <li><strong>2-8</strong>{{ $t('i18n_8c0283435b') }}</li>
+                <li><strong>2,3,5,8</strong>{{ $t('i18n_61341628ab') }}</li>
+                <li><strong>cronA | cronB</strong>{{ $t('i18n_ed6a8ee039') }}</li>
               </ul>
               {{ $t('i18n_932b4b7f79') }}
-
-              <pre>
-    {{ $t('i18n_66aff87835') }} &gt; {{ $t('i18n_f0f0cf0143') }} &gt; {{ $t('i18n_d2fbc22d41') }},）
-    </pre
-              >
+              <pre>{{ $t('i18n_8724641ba8') }}</pre>
               <p>
-                {{ $t('i18n_b2c5b372f0') }},3,6/3{{ $t('i18n_e924fb42bc') }}“/”{{ $t('i18n_a138d343fb') }},3,(6/3)，{{
-                  $t('i18n_d814a262ef')
-                }},3,6{{ $t('i18n_755ac8eaae') }}<br />
+                {{ $t('i18n_3c99ea4ec2') }}<br />
                 <br />
               </p>
 
               <p>{{ $t('i18n_c2add44a1d') }}</p>
 
               <ul>
-                <li><strong>5 * * * *</strong> ：{{ $t('i18n_b0407a7dd0') }}:05,01:05……</li>
-                <li><strong>* * * * *</strong> ：{{ $t('i18n_5114ebf444') }}</li>
-                <li><strong>*&#47;2 * * * *</strong> ：{{ $t('i18n_a22fa8941a') }}</li>
-                <li><strong>* 12 * * *</strong> ：12{{ $t('i18n_c1fc70650e') }}</li>
-                <li><strong>59 11 * * 1,2</strong> ：{{ $t('i18n_11103e19bd') }}:59{{ $t('i18n_1a6aa24e76') }}</li>
-                <li>
-                  <strong>3-18&#47;5 * * * *</strong>
-                  ：3~18{{ $t('i18n_71a312821c') }}:03, 0:08, 0:13, 0:18, 1:03, 1:08……
-                </li>
+                <li><strong>5 * * * *</strong>{{ $t('i18n_4a6f3aa451') }}</li>
+                <li><strong>* * * * *</strong>{{ $t('i18n_1f0c93d776') }}</li>
+                <li><strong>*&#47;2 * * * *</strong>{{ $t('i18n_e97a16a6d7') }}</li>
+                <li><strong>* 12 * * *</strong>{{ $t('i18n_a3751dc408') }}</li>
+                <li><strong>59 11 * * 1,2</strong>{{ $t('i18n_c0996d0a94') }}</li>
+                <li><strong>3-18&#47;5 * * * *</strong>{{ $t('i18n_b3f9beb536') }}</li>
               </ul>
             </a-collapse-panel>
           </a-collapse>
@@ -129,7 +101,7 @@
             </a-form-item>
 
             <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-              <a-button type="primary" html-type="submit"> {{ $t('i18n_4328677c29') }} </a-button>
+              <a-button type="primary" html-type="submit">{{ $t('i18n_e26dcacfb1') }}</a-button>
             </a-form-item>
           </a-form>
         </a-space>
