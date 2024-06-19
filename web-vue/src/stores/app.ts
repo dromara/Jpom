@@ -16,6 +16,7 @@ import { getHashQuery } from '@/utils/utils'
 import { RouteLocationNormalized } from 'vue-router'
 import { executionRequest } from '@/api/external'
 import { parseTime, pageBuildInfo } from '@/utils/const'
+import { useGuideStore } from '@/stores/guide'
 
 export const useAppStore = defineStore('app', {
   state: () => ({
@@ -50,7 +51,11 @@ export const useAppStore = defineStore('app', {
       this.isShowInfo = true
       // 控制台输出版本号信息
       const buildInfo = pageBuildInfo()
-      executionRequest('https://jpom.top/docs/versions.show', { ...buildInfo, p: to.path })
+      executionRequest('https://jpom.top/docs/versions.show', {
+        ...buildInfo,
+        p: to.path,
+        l: useGuideStore().getLocale()
+      })
         .then((data) => {
           console.log(
             '\n %c ' + parseTime(buildInfo.t) + ' %c vs %c ' + buildInfo.v + ' %c vs %c ' + data,

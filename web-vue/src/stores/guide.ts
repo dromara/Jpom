@@ -8,7 +8,7 @@
 /// See the Mulan PSL v2 for more details.
 ///
 import { t, defaultLocale, normalLang } from '@/i18n'
-import { useAllMenuStore } from './menu2'
+
 /**
  * 引导相关 store
  *
@@ -144,11 +144,6 @@ export const useGuideStore = defineStore('guide', {
       cache.locale = locale || 'zh-cn'
       this.setGuideCache(cache)
       //
-      //清空本地 tabs
-      const menuStore = useAllMenuStore()
-      // 调用其他 action
-      menuStore.clearTabs('normal', { key: 'all' })
-      menuStore.clearTabs('management', { key: 'all' })
       location.reload()
     }
   },

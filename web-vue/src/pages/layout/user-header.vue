@@ -456,7 +456,7 @@
           />
         </a-form-item>
         <a-form-item :label="$t('i18n_295bb704f5')">
-          <template #help>{{ $t('i18n_9030cebe31') }}</template>
+          <template #help>{{ $t('i18n_92f9a3c474') }}</template>
 
           <a-select v-model:value="locale" style="width: 220px">
             <a-select-option v-for="item in supportLang" :key="item.value" :value="item.value">{{
