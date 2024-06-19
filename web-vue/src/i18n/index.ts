@@ -19,40 +19,42 @@ type LangType = {
 export const langDict: { [key: string]: LangType } = {
   'zh-cn': {
     // 🇨🇳
-    label: '\u4e2d\u6587\u002d\u7b80\u4f53',
+    label: '\u7b80\u4f53\u4e2d\u6587',
     antd: () => import(/* @vite-ignore  */ 'ant-design-vue/es/locale/zh_CN'),
     local: () => import(/* @vite-ignore  */ './locales/zh_cn.json')
+  },
+  'zh-hk': {
+    // 🇭🇰
+    label: '\u7e41\u4f53\u4e2d\u6587\uff08\u4e2d\u56fd\u9999\u6e2f\uff09',
+    antd: () => import(/* @vite-ignore  */ 'ant-design-vue/es/locale/zh_HK'),
+    local: () => import(/* @vite-ignore  */ './locales/zh_hk.json')
+  },
+  'zh-tw': {
+    // 🇨🇳
+    label: '\u7e41\u4f53\u4e2d\u6587\uff08\u4e2d\u56fd\u53f0\u6e7e\uff09',
+    antd: () => import(/* @vite-ignore  */ 'ant-design-vue/es/locale/zh_TW'),
+    local: () => import(/* @vite-ignore  */ './locales/zh_tw.json')
   },
   'en-us': {
     // 🇺🇸
     label: 'English',
     antd: () => import(/* @vite-ignore  */ 'ant-design-vue/es/locale/en_US'),
     local: () => import(/* @vite-ignore  */ './locales/en_us.json')
-  },
-  'zh-hk': {
-    // 🇭🇰
-    label: '\u4e2d\u6587\u002d\u9999\u6e2f',
-    antd: () => import(/* @vite-ignore  */ 'ant-design-vue/es/locale/zh_HK'),
-    local: () => import(/* @vite-ignore  */ './locales/zh_hk.json')
-  },
-  'zh-tw': {
-    // 🇨🇳
-    label: '\u4e2d\u6587\u002d\u81fa\u7063',
-    antd: () => import(/* @vite-ignore  */ 'ant-design-vue/es/locale/zh_TW'),
-    local: () => import(/* @vite-ignore  */ './locales/zh_tw.json')
   }
 }
+export const defaultLocale = 'zh-cn'
 
 const i18n = createI18n<Record<string, any>>({
   legacy: false,
-  // locale: 'zh-cn', // 默认显示语言
+  locale: defaultLocale, // 默认显示语言
+  fallbackLocale: defaultLocale, // 默认显示语言
   warnHtmlMessage: false
 })
 
 export default i18n
 export const changeLang = async (langKey: string) => {
   langKey = langKey.toLowerCase()
-  const lang = langDict[langKey || 'zh-cn']
+  const lang = langDict[langKey || defaultLocale]
   await loadLanguageAsync(langKey, lang)
   return await lang.antd()
 }
@@ -78,13 +80,4 @@ export const supportLang = Object.keys(langDict).map((key: string) => {
   }
 })
 
-// [
-//   {
-//     label: '\u7b80\u4f53\u4e2d\u6587',
-//     value: 'zh-cn'
-//   },
-//   {
-//     label: 'English',
-//     value: 'en-us'
-//   }
-// ]
+export const supportLangArray = supportLang.map((item) => item.value)
