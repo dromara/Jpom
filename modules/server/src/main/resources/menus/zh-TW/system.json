@@ -1,0 +1,135 @@
+[
+  {
+    "title": "資產總覽",
+    "icon_v3": "laptop",
+    "id": "system-overview"
+  },
+  {
+    "title": "資產管理",
+    "icon_v3": "hdd",
+    "id": "assets-manager",
+    "childs": [
+      {
+        "id": "machine_node_info",
+        "title": "機器管理",
+        "role": "system"
+      },
+      {
+        "id": "machine_ssh_info",
+        "title": "SSH管理",
+        "role": "system"
+      },
+      {
+        "id": "machine_docker_info",
+        "title": "Docker管理",
+        "role": "system"
+      },
+      {
+        "id": "global_repository",
+        "title": "共享倉庫",
+        "role": "system"
+      },
+      {
+        "id": "script_library",
+        "title": "指令碼庫",
+        "role": "system"
+      }
+    ]
+  },
+  {
+    "title": "配置管理",
+    "icon_v3": "save",
+    "id": "config",
+    "childs": [
+      {
+        "id": "authConfig",
+        "title": "認證管理",
+        "role": "system"
+      },
+      {
+        "id": "monitorConfigEmail",
+        "title": "郵箱配置",
+        "role": "system"
+      },
+      {
+        "id": "systemExtConfig",
+        "title": "系統配置目錄",
+        "role": "system"
+      }
+    ]
+  },
+  {
+    "title": "使用者管理",
+    "icon_v3": "user",
+    "id": "user",
+    "childs": [
+      {
+        "id": "userList",
+        "title": "使用者列表",
+        "role": "system"
+      },
+      {
+        "id": "permission_group",
+        "title": "許可權組",
+        "role": "system"
+      },
+      {
+        "id": "user_log",
+        "title": "操作日誌",
+        "role": "system"
+      },
+      {
+        "id": "user_login_log",
+        "title": "登入日誌",
+        "role": "system"
+      }
+    ]
+  },
+  {
+    "title": "服務端配置",
+    "icon_v3": "setting",
+    "id": "setting",
+    "childs": [
+      {
+        "id": "workspace",
+        "title": "工作空間&叢集",
+        "role": "system"
+      },
+      {
+        "id": "globalEnv",
+        "title": "全域性變數",
+        "role": "system"
+      },
+      {
+        "id": "cacheManage",
+        "title": "快取管理",
+        "role": "system"
+      },
+      {
+        "id": "logManage",
+        "title": "系統日誌",
+        "role": "system"
+      },
+      {
+        "id": "update",
+        "title": "線上升級",
+        "role": "sys"
+      },
+      {
+        "id": "sysConfig",
+        "title": "系統配置",
+        "role": "system"
+      },
+      {
+        "id": "backup",
+        "title": "資料庫備份",
+        "role": "system",
+        "storageMode": "H2"
+      },
+      {
+        "id": "about",
+        "title": "關於系統"
+      }
+    ]
+  }
+]
