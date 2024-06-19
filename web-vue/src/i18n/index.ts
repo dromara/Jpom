@@ -25,16 +25,18 @@ export const langDict: { [key: string]: LangType } = {
     local: () => import(/* @vite-ignore  */ './locales/en_us.json')
   }
 }
+export const defaultLocale = 'zh-cn'
 
 const i18n = createI18n<Record<string, any>>({
   legacy: false,
-  // locale: 'zh-cn', // 默认显示语言
+  locale: defaultLocale, // 默认显示语言
+  fallbackLocale: defaultLocale, // 默认显示语言
   warnHtmlMessage: false
 })
 
 export const changeLang = async (langKey: string) => {
   langKey = langKey.toLowerCase()
-  const lang = langDict[langKey || 'zh-cn']
+  const lang = langDict[langKey || defaultLocale]
   await loadLanguageAsync(langKey, lang)
   return await lang.antd()
 }
@@ -61,7 +63,17 @@ export const supportLang = [
     value: 'zh-cn'
   },
   {
+    label: '\u7e41\u4f53\u4e2d\u6587\uff08\u4e2d\u56fd\u9999\u6e2f\uff09',
+    value: 'zh-hk'
+  },
+  {
+    label: '\u7e41\u4f53\u4e2d\u6587\uff08\u4e2d\u56fd\u53f0\u6e7e\uff09',
+    value: 'zh-tw'
+  },
+  {
     label: 'English',
     value: 'en-us'
   }
 ]
+
+export const supportLangArray = supportLang.map((item) => item.value)
