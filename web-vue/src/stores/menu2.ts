@@ -1,3 +1,4 @@
+import { path } from 'node:path'
 ///
 /// Copyright (c) 2019 Of Him Code Technology Studio
 /// Jpom is licensed under Mulan PSL v2.
@@ -13,6 +14,7 @@ import { MANAGEMENT_ACTIVE_TAB_KEY, MANAGEMENT_TAB_LIST_KEY, MANAGEMENT_ACTIVE_M
 
 import { getMenu, getSystemMenu } from '@/api/menu'
 import routeMenuMap from '@/router/route-menu'
+import { title } from 'process'
 
 const api: any = {
   normal: getMenu,
@@ -123,18 +125,37 @@ export const useAllMenuStore = defineStore('menu2', {
         })
         let tabList = this[mode + '_tabList'] || []
         // 过滤已经不能显示的菜单
-        tabList = tabList.filter((item: any) => {
-          return (
-            menus.filter((menu: any) => {
-              return (
-                menu.path == item.path ||
-                menu.childs?.filter((subMenu: any) => {
+        tabList = tabList
+          .map((item: any) => {
+            const newTitle = menus
+              .map((menu: any) => {
+                // console.log(menu)
+                if (menu.path == item.path) {
+                  return menu.title
+                }
+                const findSub = menu.childs?.find((subMenu: any) => {
                   return subMenu.path === item.path
-                }).length > 0
-              )
-            }).length > 0
-          )
-        })
+                })
+                if (findSub) {
+                  return findSub.title
+                }
+              })
+              .find((title: any) => title)
+
+            return { ...item, title: newTitle }
+          })
+          .filter((item: any) => {
+            return (
+              menus.filter((menu: any) => {
+                return (
+                  menu.path == item.path ||
+                  menu.childs?.filter((subMenu: any) => {
+                    return subMenu.path === item.path
+                  }).length > 0
+                )
+              }).length > 0
+            )
+          })
         this.setTabList(mode, tabList)
 
         if (!currentMenu) {

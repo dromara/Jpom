@@ -27,14 +27,14 @@ export const langDict: { [key: string]: LangType } = {
     local: () => import(/* @vite-ignore  */ './locales/zh_cn.json')
   },
   'zh-hk': {
-    // 🇭🇰
-    label: '\u7e41\u4f53\u4e2d\u6587\uff08\u4e2d\u56fd\u9999\u6e2f\uff09',
+    // 🇭🇰 繁體中文（中國香港）
+    label: '\u7e41\u9ad4\u4e2d\u6587\uff08\u4e2d\u570b\u9999\u6e2f\uff09',
     antd: () => import(/* @vite-ignore  */ 'ant-design-vue/es/locale/zh_HK'),
     local: () => import(/* @vite-ignore  */ './locales/zh_hk.json')
   },
   'zh-tw': {
-    // 🇨🇳
-    label: '\u7e41\u4f53\u4e2d\u6587\uff08\u4e2d\u56fd\u53f0\u6e7e\uff09',
+    // 🇨🇳 繁體中文（中國臺灣）
+    label: '\u7e41\u9ad4\u4e2d\u6587\uff08\u4e2d\u570b\u81fa\u7063\uff09',
     antd: () => import(/* @vite-ignore  */ 'ant-design-vue/es/locale/zh_TW'),
     local: () => import(/* @vite-ignore  */ './locales/zh_tw.json')
   },

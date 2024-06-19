@@ -429,9 +429,9 @@ export function compareVersion(version1: string, version2: string) {
 
 // 当前页面构建信息
 export function pageBuildInfo() {
-  const htmlVersion = document.head.querySelector('[name~=jpom-version][content]')?.content
-  const buildTime = document.head.querySelector('[name~=build-time][content]')?.content
-  const buildEnv = document.head.querySelector('[name~=build-env][content]')?.content
+  const htmlVersion = (document.head.querySelector('[name~=jpom-version][content]') as any)?.content
+  const buildTime = (document.head.querySelector('[name~=build-time][content]') as any)?.content
+  const buildEnv = (document.head.querySelector('[name~=build-env][content]') as any)?.content
   return {
     v: htmlVersion,
     t: buildTime,

@@ -13,7 +13,6 @@ import '@/assets/reset.less'
 import App from './App.vue'
 import router from './router'
 import '@/router/auth'
-import CustomModal from '@/components/customModal/index.vue'
 import i18n from './i18n'
 import { changeLang, defaultLocale } from './i18n'
 
@@ -26,9 +25,6 @@ changeLang(defaultLocale).then(() => {
   app.use(router)
   app.use(pinia)
   app.use(i18n)
-
-  // 增加弹窗全局引入
-  app.component('CustomModal', CustomModal)
 
   app.mount('#app')
 })
