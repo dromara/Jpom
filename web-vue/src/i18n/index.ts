@@ -11,16 +11,33 @@
 import { createI18n } from 'vue-i18n'
 
 type LangType = {
+  label: string
   antd: () => Promise<any>
   local: () => Promise<any>
 }
 
 export const langDict: { [key: string]: LangType } = {
   'zh-cn': {
+    // 🇨🇳
+    label: '\u7b80\u4f53\u4e2d\u6587',
     antd: () => import(/* @vite-ignore  */ 'ant-design-vue/es/locale/zh_CN'),
     local: () => import(/* @vite-ignore  */ './locales/zh_cn.json')
   },
+  'zh-hk': {
+    // 🇭🇰
+    label: '\u7e41\u4f53\u4e2d\u6587\uff08\u4e2d\u56fd\u9999\u6e2f\uff09',
+    antd: () => import(/* @vite-ignore  */ 'ant-design-vue/es/locale/zh_HK'),
+    local: () => import(/* @vite-ignore  */ './locales/zh_hk.json')
+  },
+  'zh-tw': {
+    // 🇨🇳
+    label: '\u7e41\u4f53\u4e2d\u6587\uff08\u4e2d\u56fd\u53f0\u6e7e\uff09',
+    antd: () => import(/* @vite-ignore  */ 'ant-design-vue/es/locale/zh_TW'),
+    local: () => import(/* @vite-ignore  */ './locales/zh_tw.json')
+  },
   'en-us': {
+    // 🇺🇸
+    label: 'English',
     antd: () => import(/* @vite-ignore  */ 'ant-design-vue/es/locale/en_US'),
     local: () => import(/* @vite-ignore  */ './locales/en_us.json')
   }
@@ -34,6 +51,7 @@ const i18n = createI18n<Record<string, any>>({
   warnHtmlMessage: false
 })
 
+export default i18n
 export const changeLang = async (langKey: string) => {
   langKey = langKey.toLowerCase()
   const lang = langDict[langKey || defaultLocale]
@@ -53,27 +71,13 @@ export const loadLanguageAsync = async (langKey: string, langDict: LangType) => 
   return setI18nLanguage(langKey) // 返回并且设置
 }
 
-export default i18n
-
 export const { t } = i18n.global
 
-export const supportLang = [
-  {
-    label: '\u7b80\u4f53\u4e2d\u6587',
-    value: 'zh-cn'
-  },
-  {
-    label: '\u7e41\u4f53\u4e2d\u6587\uff08\u4e2d\u56fd\u9999\u6e2f\uff09',
-    value: 'zh-hk'
-  },
-  {
-    label: '\u7e41\u4f53\u4e2d\u6587\uff08\u4e2d\u56fd\u53f0\u6e7e\uff09',
-    value: 'zh-tw'
-  },
-  {
-    label: 'English',
-    value: 'en-us'
+export const supportLang = Object.keys(langDict).map((key: string) => {
+  return {
+    label: langDict[key].label,
+    value: key
   }
-]
+})
 
 export const supportLangArray = supportLang.map((item) => item.value)

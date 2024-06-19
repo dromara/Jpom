@@ -457,11 +457,12 @@
         </a-form-item>
         <a-form-item :label="$t('i18n_295bb704f5')">
           <template #help>{{ $t('i18n_9030cebe31') }}</template>
-          <a-radio-group v-model:value="locale" button-style="solid">
-            <a-radio-button v-for="item in supportLang" :key="item.value" :value="item.value">{{
+
+          <a-select v-model:value="locale" style="width: 220px">
+            <a-select-option v-for="item in supportLang" :key="item.value" :value="item.value">{{
               item.label
-            }}</a-radio-button>
-          </a-radio-group>
+            }}</a-select-option>
+          </a-select>
         </a-form-item>
       </a-form>
     </CustomModal>
@@ -634,6 +635,7 @@ export default {
     },
     locale: {
       set: function (value) {
+        console.log(value)
         useGuideStore().changeLocale(value)
       },
       get: function () {
