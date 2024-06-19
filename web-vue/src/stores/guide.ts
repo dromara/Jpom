@@ -1,4 +1,4 @@
-import { t } from '@/i18n'
+import { supportLang, t } from '@/i18n'
 ///
 /// Copyright (c) 2019 Of Him Code Technology Studio
 /// Jpom is licensed under Mulan PSL v2.
@@ -265,8 +265,7 @@ export const useGuideStore = defineStore('guide', {
     getLocale: (state) => {
       return () => {
         const locale = state.guideCache.locale || navigator.language
-        const array = ['zh-cn', 'en-us', 'zh_cn', 'en_us']
-        if (array.includes(locale.toLowerCase())) {
+        if (supportLang.map((item) => item.value).includes(locale.toLowerCase())) {
           // 避免非法字符串
           return locale
         }
