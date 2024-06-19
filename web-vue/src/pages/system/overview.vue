@@ -1,7 +1,10 @@
 <template>
   <div>
     <a-page-header :back-icon="false">
-      <template #title> {{ $t('i18n_57d9738dfe') }}{{ getUserInfo.name }}{{ $t('i18n_b4df22abfb') }}</template>
+      <!-- 【】\u3010\u3011 -->
+      <template #title>
+        {{ $t('i18n_60585cf697') }}{{ `\u3010` }}{{ getUserInfo.name }}{{ `\u3011` }}{{ $t('i18n_20a9290498') }}
+      </template>
       <template #subTitle>{{ $t('i18n_0af5d9f8e8') }} </template>
       <template #tags>
         <a-tag color="blue">

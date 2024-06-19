@@ -32,4 +32,5 @@ export interface GlobalWindow {
   uploadFileConcurrent: string
   oauth2Provide: string
   transportEncryption: string
+  jpomDefaultLocale: string
 }

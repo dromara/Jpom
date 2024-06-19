@@ -57,10 +57,27 @@ public class I18nMessageUtil {
             Locale locale = Locale.getDefault();
             String country = locale.getCountry();
             if (StrUtil.equals("zh", country)) {
+                // 中国
                 return "zh-CN";
             }
             return "en-US";
         });
+    }
+
+    /**
+     * 尝试获取语言(系统语言)
+     *
+     * @return 语言
+     */
+    public static String tryGetSystemLanguage() {
+        String language = null;
+        for (int i = 2; i < LANGUAGE_OBTAIN.size(); i++) {
+            language = LANGUAGE_OBTAIN.get(i).get();
+            if (language != null) {
+                break;
+            }
+        }
+        return language;
     }
 
     /**
