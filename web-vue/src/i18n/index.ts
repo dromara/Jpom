@@ -9,6 +9,7 @@
 ///
 
 import { createI18n } from 'vue-i18n'
+import zhCn from './locales/zh_cn.json'
 
 type LangType = {
   label: string
@@ -44,11 +45,14 @@ export const langDict: { [key: string]: LangType } = {
 }
 export const defaultLocale = 'zh-cn'
 
-const i18n = createI18n<Record<string, any>>({
+const i18n = createI18n<Record<string, any>, any, any>({
   legacy: false,
   locale: defaultLocale, // 默认显示语言
   fallbackLocale: defaultLocale, // 默认显示语言
-  warnHtmlMessage: false
+  warnHtmlMessage: false,
+  messages: {
+    'zh-cn': zhCn
+  }
 })
 
 export default i18n
@@ -67,10 +71,12 @@ export const setI18nLanguage = (langKey: string) => {
 export const loadLanguageAsync = async (langKey: string, langDict: LangType) => {
   const langFile = await langDict.local()
   // 动态加载对应的语言包
+  // @ts-ignore
   i18n.global.setLocaleMessage(langKey, langFile)
   return setI18nLanguage(langKey) // 返回并且设置
 }
 
+// @ts-ignore
 export const { t } = i18n.global
 
 export const supportLang = Object.keys(langDict).map((key: string) => {
