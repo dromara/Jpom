@@ -45,7 +45,7 @@ const onMatchMediaChange = (e: MediaQueryListEvent) => {
 }
 const changeI18n = (lang: string) => {
   changeLang(lang).then((antdLoadLang) => {
-    antdLang.value = antdLoadLang
+    antdLang.value = antdLoadLang.default
   })
 }
 //console.log('app', new Date().getTime())
