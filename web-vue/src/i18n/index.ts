@@ -109,7 +109,7 @@ export const changeLang = async (langKey: string) => {
     await lang.dayjs()
     lang.isDayjsLoad = true
   }
-  console.log('langKey', langKey)
+
   dayjs.locale(langKey)
   lang.isLoad = true
   return lang.antdLang
