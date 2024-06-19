@@ -21,7 +21,6 @@ import Components from 'unplugin-vue-components/vite'
 //ant-design-vue
 import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers'
 import postcss from 'postcss'
-import topLevelAwait from 'vite-plugin-top-level-await'
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }: ConfigEnv) => {
   // 加载环境配置
@@ -142,8 +141,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
           }
           return code
         }
-      },
-      topLevelAwait()
+      }
     ]
   }
 })
