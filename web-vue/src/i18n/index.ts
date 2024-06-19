@@ -10,13 +10,16 @@
 
 import { createI18n } from 'vue-i18n'
 import { GlobalWindow } from '@/interface/common'
+import dayjs from 'dayjs'
 
 type LangType = {
   label: string
   isLoad?: boolean
   antdLang?: any
+  isDayjsLoad?: boolean
   antd: () => Promise<any>
   local: () => Promise<any>
+  dayjs: () => Promise<any>
 }
 
 export const langDict: { [key: string]: LangType } = {
@@ -24,25 +27,29 @@ export const langDict: { [key: string]: LangType } = {
     // 🇨🇳
     label: '\u7b80\u4f53\u4e2d\u6587',
     antd: () => import(/* @vite-ignore  */ 'ant-design-vue/es/locale/zh_CN'),
-    local: () => import(/* @vite-ignore  */ './locales/zh_cn.json')
+    local: () => import(/* @vite-ignore  */ './locales/zh_cn.json'),
+    dayjs: () => import(/* @vite-ignore  */ 'dayjs/locale/zh-cn')
   },
   'zh-hk': {
     // 🇭🇰
     label: '\u7e41\u4f53\u4e2d\u6587\uff08\u4e2d\u56fd\u9999\u6e2f\uff09',
     antd: () => import(/* @vite-ignore  */ 'ant-design-vue/es/locale/zh_HK'),
-    local: () => import(/* @vite-ignore  */ './locales/zh_hk.json')
+    local: () => import(/* @vite-ignore  */ './locales/zh_hk.json'),
+    dayjs: () => import(/* @vite-ignore  */ 'dayjs/locale/zh-hk')
   },
   'zh-tw': {
     // 🇨🇳
     label: '\u7e41\u4f53\u4e2d\u6587\uff08\u4e2d\u56fd\u53f0\u6e7e\uff09',
     antd: () => import(/* @vite-ignore  */ 'ant-design-vue/es/locale/zh_TW'),
-    local: () => import(/* @vite-ignore  */ './locales/zh_tw.json')
+    local: () => import(/* @vite-ignore  */ './locales/zh_tw.json'),
+    dayjs: () => import(/* @vite-ignore  */ 'dayjs/locale/zh-tw')
   },
   'en-us': {
     // 🇺🇸
     label: 'English',
     antd: () => import(/* @vite-ignore  */ 'ant-design-vue/es/locale/en_US'),
-    local: () => import(/* @vite-ignore  */ './locales/en_us.json')
+    local: () => import(/* @vite-ignore  */ './locales/en_us.json'),
+    dayjs: () => import(/* @vite-ignore  */ 'dayjs/locale/en')
   }
 }
 
@@ -98,6 +105,12 @@ export const changeLang = async (langKey: string) => {
   if (!lang.antdLang) {
     lang.antdLang = await lang.antd()
   }
+  if (!lang.isDayjsLoad) {
+    await lang.dayjs()
+    lang.isDayjsLoad = true
+  }
+  console.log('langKey', langKey)
+  dayjs.locale(langKey)
   lang.isLoad = true
   return lang.antdLang
 }
