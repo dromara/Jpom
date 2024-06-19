@@ -15,15 +15,21 @@ import router from './router'
 import '@/router/auth'
 import CustomModal from '@/components/customModal/index.vue'
 import i18n from './i18n'
-const pinia = createPinia()
+import { changeLang, defaultLocale } from './i18n'
 
-const app = createApp(App)
+changeLang(defaultLocale).then(() => {
+  //console.log('defaultLocale done', new Date().getTime())
+  const pinia = createPinia()
 
-app.use(router)
-app.use(pinia)
-app.use(i18n)
+  const app = createApp(App)
 
-// 增加弹窗全局引入
-app.component('CustomModal', CustomModal)
+  app.use(router)
+  app.use(pinia)
+  app.use(i18n)
 
-app.mount('#app')
+  // 增加弹窗全局引入
+  app.component('CustomModal', CustomModal)
+
+  app.mount('#app')
+})
+//console.log('app done', new Date().getTime())
