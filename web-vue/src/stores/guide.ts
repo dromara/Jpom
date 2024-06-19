@@ -1,4 +1,3 @@
-import { t, supportLangArray, defaultLocale } from '@/i18n'
 ///
 /// Copyright (c) 2019 Of Him Code Technology Studio
 /// Jpom is licensed under Mulan PSL v2.
@@ -8,7 +7,7 @@ import { t, supportLangArray, defaultLocale } from '@/i18n'
 /// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 /// See the Mulan PSL v2 for more details.
 ///
-
+import { t, defaultLocale, normalLang } from '@/i18n'
 import { useAllMenuStore } from './menu2'
 /**
  * 引导相关 store
@@ -264,13 +263,8 @@ export const useGuideStore = defineStore('guide', {
     },
     getLocale: (state) => {
       return () => {
-        let locale = state.guideCache.locale || navigator.language
-        locale = locale.replace('_', '-')
-        if (supportLangArray.includes(locale.toLowerCase())) {
-          // 避免非法字符串
-          return locale
-        }
-        return defaultLocale
+        const locale = state.guideCache.locale || navigator.language
+        return normalLang(locale, defaultLocale)
       }
     }
   }

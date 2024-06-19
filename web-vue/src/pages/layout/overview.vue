@@ -1,7 +1,10 @@
 <template>
   <div>
     <a-page-header :back-icon="false">
-      <template #title> {{ $t('i18n_57d9738dfe') }}{{ getUserInfo.name }}{{ $t('i18n_cd7d67d588') }}</template>
+      <!-- 【】\u3010\u3011 -->
+      <template #title>
+        {{ $t('i18n_50c7929dd9') }}{{ `\u3010` }} {{ getUserInfo.name }} {{ `\u3011` }}{{ $t('i18n_77834eb6f5') }}
+      </template>
       <template #subTitle>
         {{ $t('i18n_5195c0d198', { count: (myWorkspaceList && myWorkspaceList.length) || 0 }) }}
       </template>

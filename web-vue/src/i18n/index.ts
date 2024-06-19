@@ -9,10 +9,12 @@
 ///
 
 import { createI18n } from 'vue-i18n'
-import zhCn from './locales/zh_cn.json'
+import { GlobalWindow } from '@/interface/common'
 
 type LangType = {
   label: string
+  isLoad?: boolean
+  antdLang?: any
   antd: () => Promise<any>
   local: () => Promise<any>
 }
@@ -43,41 +45,6 @@ export const langDict: { [key: string]: LangType } = {
     local: () => import(/* @vite-ignore  */ './locales/en_us.json')
   }
 }
-export const defaultLocale = 'zh-cn'
-
-const i18n = createI18n<Record<string, any>, any, any>({
-  legacy: false,
-  locale: defaultLocale, // 默认显示语言
-  fallbackLocale: defaultLocale, // 默认显示语言
-  warnHtmlMessage: false,
-  messages: {
-    'zh-cn': zhCn
-  }
-})
-
-export default i18n
-export const changeLang = async (langKey: string) => {
-  langKey = langKey.toLowerCase()
-  const lang = langDict[langKey || defaultLocale]
-  await loadLanguageAsync(langKey, lang)
-  return await lang.antd()
-}
-
-export const setI18nLanguage = (langKey: string) => {
-  // @ts-ignore
-  i18n.global.locale = langKey
-  return langKey
-}
-export const loadLanguageAsync = async (langKey: string, langDict: LangType) => {
-  const langFile = await langDict.local()
-  // 动态加载对应的语言包
-  // @ts-ignore
-  i18n.global.setLocaleMessage(langKey, langFile)
-  return setI18nLanguage(langKey) // 返回并且设置
-}
-
-// @ts-ignore
-export const { t } = i18n.global
 
 export const supportLang = Object.keys(langDict).map((key: string) => {
   return {
@@ -87,3 +54,55 @@ export const supportLang = Object.keys(langDict).map((key: string) => {
 })
 
 export const supportLangArray = supportLang.map((item) => item.value)
+
+export const normalLang = (locale: string, def: string) => {
+  locale = locale.replace('_', '-')
+  if (supportLangArray.includes(locale.toLowerCase())) {
+    // 避免非法字符串
+    return locale
+  }
+  return def
+}
+// 默认语言优先读取服务端配置
+const jw = window as unknown as GlobalWindow
+let defaultLocaleTemp = jw.jpomDefaultLocale === '<jpomDefaultLocale>' ? 'zh-cn' : jw.jpomDefaultLocale
+defaultLocaleTemp = normalLang(defaultLocaleTemp, 'zh-ch')
+if (!langDict[defaultLocaleTemp]) {
+  defaultLocaleTemp = 'zh-cn'
+}
+export const defaultLocale = defaultLocaleTemp
+
+const i18n = createI18n<Record<string, any>, any, any>({
+  legacy: false,
+  locale: defaultLocale, // 默认显示语言
+  fallbackLocale: defaultLocale, // 默认显示语言
+  warnHtmlMessage: false
+})
+
+export default i18n
+export const changeLang = async (langKey: string) => {
+  langKey = langKey?.toLowerCase()
+  const lang = langDict[langKey] || langDict[defaultLocale]
+  const global = i18n.global as any
+  if (!lang.isLoad) {
+    // 动态加载对应的语言包
+    const langFile = await lang.local()
+    global.setLocaleMessage(langKey, langFile)
+    if (i18n.mode === 'legacy') {
+      global.locale = langKey
+    } else {
+      global.locale.value = langKey
+    }
+  }
+  if (!lang.antdLang) {
+    lang.antdLang = await lang.antd()
+  }
+  lang.isLoad = true
+  return lang.antdLang
+}
+
+// 优先加载默认语言避免出现 key 找不到
+await changeLang(defaultLocale)
+
+// @ts-ignore
+export const { t } = i18n.global

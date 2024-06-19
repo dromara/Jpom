@@ -120,10 +120,13 @@ export default {
       })
     },
     addItemHander() {
+      const title = this.$t('i18n_ef016ab402')
+      const other = this.$t('i18n_956ab8a9f7')
+      const content = `${title} 【${this.addName}】 ${other}`
       $confirm({
         title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: this.$t('i18n_bd8b1dbc5a') + this.addName + this.$t('i18n_14b58d4b77'),
+        content: content,
         okText: this.$t('i18n_e83a256e4f'),
         cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {

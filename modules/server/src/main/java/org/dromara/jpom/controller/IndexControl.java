@@ -123,7 +123,7 @@ public class IndexControl extends BaseServerController {
                 html = StrUtil.replace(html, item, jsCommonContext);
             }
         }
-
+        String language = I18nMessageUtil.tryGetSystemLanguage();
         // <routerBase>
         String proxyPath = UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH);
         html = StrUtil.replace(html, "<routerBase>", proxyPath);
@@ -136,6 +136,7 @@ public class IndexControl extends BaseServerController {
         html = StrUtil.replace(html, "<uploadFileConcurrent>", String.valueOf(nodeConfig.getUploadFileConcurrent()));
         html = StrUtil.replace(html, "<oauth2Provide>", oauth2Provide);
         html = StrUtil.replace(html, "<transportEncryption>", webConfig.getTransportEncryption());
+        html = StrUtil.replace(html, "<jpomDefaultLocale>", language);
         // 修改网页标题
         String title = ReUtil.get("<title>.*?</title>", html, 0);
         if (StrUtil.isNotEmpty(title)) {

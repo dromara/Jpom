@@ -28,9 +28,7 @@ const getGuideCache = useGuideStore.getGuideCache
 const i18nHook = useI18n()
 const t = i18nHook.t
 
-const antdLang = ref<Locale>({
-  locale: 'zh-cn'
-})
+const antdLang = ref<Locale>()
 
 const nowLang = computed(() => {
   return useGuideStore.getLocale()
@@ -49,7 +47,6 @@ const changeI18n = async (lang: string) => {
   changeLang(lang).then((antdLoadLang) => {
     antdLang.value = antdLoadLang
   })
-  i18nHook.locale.value = lang
 }
 
 onMounted(() => {

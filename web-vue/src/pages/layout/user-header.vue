@@ -635,7 +635,6 @@ export default {
     },
     locale: {
       set: function (value) {
-        console.log(value)
         useGuideStore().changeLocale(value)
       },
       get: function () {

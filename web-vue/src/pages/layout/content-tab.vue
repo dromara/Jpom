@@ -51,6 +51,7 @@
 import userHeader from './user-header.vue'
 import { useAllMenuStore } from '@/stores/menu2'
 import { useI18n } from 'vue-i18n'
+import { Key } from 'ant-design-vue/es/_util/type'
 const { t: $t } = useI18n()
 const router = useRouter()
 const route = useRoute()
@@ -86,7 +87,7 @@ const activeTab = (key?: string) => {
   return activeTab
 }
 
-const onEdit = (key: string, action: 'remove') => {
+const onEdit = (key: Key | MouseEvent | KeyboardEvent, action: 'add' | 'remove') => {
   if (action === 'remove') {
     if (tabList.value.length === 1) {
       $notification.warn({
