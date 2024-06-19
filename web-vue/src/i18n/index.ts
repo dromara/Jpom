@@ -56,17 +56,18 @@ export const supportLang = Object.keys(langDict).map((key: string) => {
 export const supportLangArray = supportLang.map((item) => item.value)
 
 export const normalLang = (locale: string, def: string) => {
-  locale = locale.replace('_', '-')
-  if (supportLangArray.includes(locale.toLowerCase())) {
+  locale = locale.replace('_', '-').toLowerCase()
+  if (supportLangArray.includes(locale)) {
     // 避免非法字符串
     return locale
   }
+  console.warn(`[i18n] ${locale} is not support, use ${def} instead`)
   return def
 }
 // 默认语言优先读取服务端配置
 const jw = window as unknown as GlobalWindow
 let defaultLocaleTemp = jw.jpomDefaultLocale === '<jpomDefaultLocale>' ? 'zh-cn' : jw.jpomDefaultLocale
-defaultLocaleTemp = normalLang(defaultLocaleTemp, 'zh-ch')
+defaultLocaleTemp = normalLang(defaultLocaleTemp, 'zh-cn')
 if (!langDict[defaultLocaleTemp]) {
   defaultLocaleTemp = 'zh-cn'
 }
