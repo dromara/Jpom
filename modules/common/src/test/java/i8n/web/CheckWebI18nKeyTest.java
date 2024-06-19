@@ -1,4 +1,4 @@
-package i8n;
+package i8n.web;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;

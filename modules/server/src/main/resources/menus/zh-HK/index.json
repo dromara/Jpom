@@ -1,0 +1,176 @@
+[
+  {
+    "title": "概括總覽",
+    "icon_v3": "laptop",
+    "id": "overview"
+  },
+  {
+    "title": "節點&項目",
+    "icon_v3": "apartment",
+    "id": "outgiving",
+    "childs": [
+      {
+        "title": "邏輯節點",
+        "id": "nodeList"
+      },
+      {
+        "title": "項目列表",
+        "id": "projectSearch"
+      },
+      {
+        "id": "outgivingList",
+        "title": "分發列表"
+      },
+      {
+        "id": "outgivingLog",
+        "title": "分發日誌"
+      },
+      {
+        "id": "outgivingWhitelistDirectory",
+        "title": "授權配置",
+        "role": "system"
+      },
+      {
+        "id": "logRead",
+        "title": "日誌搜索"
+      }
+    ]
+  },
+  {
+    "title": "在線構建",
+    "icon_v3": "build",
+    "id": "build",
+    "childs": [
+      {
+        "id": "repository",
+        "title": "倉庫信息"
+      },
+      {
+        "id": "buildList",
+        "title": "構建列表"
+      },
+      {
+        "id": "buildHistory",
+        "title": "構建歷史"
+      }
+    ]
+  },
+  {
+    "title": "SSH管理",
+    "icon_v3": "code",
+    "id": "sshManager",
+    "childs": [
+      {
+        "title": "SSH列表",
+        "id": "sshList"
+      },
+      {
+        "title": "命令管理",
+        "id": "commandList"
+      },
+      {
+        "title": "命令執行記錄",
+        "id": "commandLogList"
+      }
+    ]
+  },
+  {
+    "title": "腳本管理",
+    "icon_v3": "file-text",
+    "id": "scriptManager",
+    "childs": [
+      {
+        "title": "節點腳本列表",
+        "id": "scriptAllList"
+      },
+      {
+        "title": "腳本列表",
+        "id": "serverScriptList"
+      },
+      {
+        "title": "腳本執行記錄",
+        "id": "serverScriptLogList"
+      },
+      {
+        "title": "環境變量",
+        "id": "configWorkspaceEnv"
+      }
+    ]
+  },
+  {
+    "title": "Docker管理",
+    "icon_v3": "cloud-server",
+    "id": "dockerManager",
+    "childs": [
+      {
+        "title": "Docker列表",
+        "id": "dockerList"
+      },
+      {
+        "title": "集羣列表",
+        "id": "dockerSwarm"
+      }
+    ]
+  },
+  {
+    "title": "監控管理",
+    "icon_v3": "monitor",
+    "id": "monitor",
+    "childs": [
+      {
+        "id": "monitorList",
+        "title": "監控列表"
+      },
+      {
+        "id": "monitorLog",
+        "title": "監控日誌"
+      },
+      {
+        "id": "userOptLog",
+        "title": "操作監控"
+      }
+    ]
+  },
+  {
+    "title": "文件管理",
+    "icon_v3": "file",
+    "id": "file-manager",
+    "childs": [
+      {
+        "id": "fileStorage",
+        "title": "文件列表"
+      },
+      {
+        "id": "staticFileStorage",
+        "title": "靜態文件"
+      },
+      {
+        "id": "fileReleaseTask",
+        "title": "發佈任務"
+      }
+    ]
+  },
+  {
+    "title": "其他管理",
+    "icon_v3": "tool",
+    "id": "tools",
+    "childs": [
+      {
+        "id": "certificate",
+        "title": "證書管理"
+      },
+      {
+        "id": "myWorkspaceList",
+        "title": "我的工作空間"
+      },
+      {
+        "id": "netTools",
+        "title": "網絡工具"
+      },
+      {
+        "id": "cronTools",
+        "title": "Cron表達式"
+      }
+    ]
+  }
+]
