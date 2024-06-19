@@ -43,12 +43,13 @@ const nowLang = computed(() => {
 const onMatchMediaChange = (e: MediaQueryListEvent) => {
   useGuideStore.setSystemIsDark(e.matches)
 }
-const changeI18n = async (lang: string) => {
+const changeI18n = (lang: string) => {
   changeLang(lang).then((antdLoadLang) => {
     antdLang.value = antdLoadLang
+    //console.log('changeLang page end', new Date().getTime())
   })
 }
-
+//console.log('app', new Date().getTime())
 onMounted(() => {
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', onMatchMediaChange)
   changeI18n(nowLang.value)
