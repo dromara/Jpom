@@ -100,9 +100,8 @@ export const changeLang = async (langKey: string) => {
   lang.isLoad = true
   return lang.antdLang
 }
-
+// 用 vite-plugin-top-level-await 插件：另一个选择是使用 vite-plugin-top-level-await 插件。这个插件可以帮助你在不支持 top-level-await 的环境中使用该特性。它通过转换代码来兼容旧浏览器。
 // 优先加载默认语言避免出现 key 找不到
 await changeLang(defaultLocale)
-
 // @ts-ignore
 export const { t } = i18n.global
