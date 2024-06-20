@@ -1,5 +1,13 @@
 # 🚀 版本日志
 
+## 2.11.8.1-beta
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】修复 静态文件扫描到空时更新数据库异常（感谢[@blackcat](https://gitee.com/kylin_lawliet) [Gitee issues IA6UO0](https://gitee.com/dromara/Jpom/issues/IA6UO0) ）
+
+------
+
 ## 2.11.7.1-beta (2024-06-20)
 
 ### 🐞 解决BUG、优化功能
