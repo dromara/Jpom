@@ -103,7 +103,6 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       }),
       createHtmlPlugin({
         minify: true,
-        viteNext: true,
         inject: {
           data: {
             title: env.JPOM_APP_TITLE,
