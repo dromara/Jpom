@@ -335,6 +335,9 @@ public class SshHandler extends BaseTerminalHandler {
         SocketSessionUtil.close(session);
     }
 
+    /**
+     * 控制台案件事件处理
+     */
     public static class KeyEventCycle {
 
         // 输入缓存
@@ -349,6 +352,11 @@ public class SshHandler extends BaseTerminalHandler {
         private Charset charset;
         private KeyControl keyControl = KeyControl.KEY_END;
 
+        /**
+         * 从控制台读取输入按键进行处理
+         * @param consumer 完整命令后输入回调
+         * @param bytes 输入按键
+         */
         public void read(Consumer<String> consumer, byte... bytes) {
             String str = new String(bytes, charset);
             if (keyControl == KeyControl.KEY_TAB && tabInputPause) {
@@ -395,6 +403,10 @@ public class SshHandler extends BaseTerminalHandler {
             }
         }
 
+        /**
+         * 从SSH服务端接收字节
+         * @param bytes 字节
+         */
         public void receive(byte... bytes) {
             if (inputReceive) {
                 String str = new String(bytes, charset);
