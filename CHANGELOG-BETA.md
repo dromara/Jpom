@@ -1,5 +1,22 @@
 # 🚀 版本日志
 
+## 2.11.8.1-beta
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】修复 静态文件扫描到空时更新数据库异常（感谢[@blackcat](https://gitee.com/kylin_lawliet) [Gitee issues IA6UO0](https://gitee.com/dromara/Jpom/issues/IA6UO0) ）
+2. 【server】修复 SSH命令行操作日志支持更全展示（感谢[@beens](https://gitee.com/beens) [Gitee issues IA6P3J](https://gitee.com/dromara/Jpom/issues/IA6P3J) ）
+
+------
+
+## 2.11.7.1-beta (2024-06-20)
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】修复 操作确认交互弹窗层级过低无法正常显示使用（感谢@ccx2480）
+
+------
+
 ## 2.11.6.6-beta (2024-06-19)
 
 ### 🐣 新增功能

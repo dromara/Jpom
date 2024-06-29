@@ -342,20 +342,23 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
                 StaticFileStorageModel where = new StaticFileStorageModel();
                 where.setParentAbsolutePath(absolutePath);
                 List<StaticFileStorageModel> list = this.listByBean(where);
-                if (CollUtil.isNotEmpty(list)) {
-                    List<String> collect = list.stream()
-                        .filter(staticFileStorageModel -> !ObjectUtil.equals(staticFileStorageModel.getScanTaskId(), taskId))
-                        .filter(staticFileStorageModel -> {
-                            File file1 = FileUtil.file(staticFileStorageModel.getAbsolutePath());
-                            if (staticFileStorageModel.type() == 1) {
-                                return !FileUtil.exist(file1);
-                            }
-                            // 删除子目录
-                            this.delete(staticFileStorageModel.getId(), staticFileStorageModel.getAbsolutePath());
+                if (CollUtil.isEmpty(list)) {
+                    return;
+                }
+                List<String> collect = list.stream()
+                    .filter(staticFileStorageModel -> !ObjectUtil.equals(staticFileStorageModel.getScanTaskId(), taskId))
+                    .filter(staticFileStorageModel -> {
+                        File file1 = FileUtil.file(staticFileStorageModel.getAbsolutePath());
+                        if (staticFileStorageModel.type() == 1) {
                             return !FileUtil.exist(file1);
-                        })
-                        .map(BaseIdModel::getId)
-                        .collect(Collectors.toList());
+                        }
+                        // 删除子目录
+                        this.delete(staticFileStorageModel.getId(), staticFileStorageModel.getAbsolutePath());
+                        return !FileUtil.exist(file1);
+                    })
+                    .map(BaseIdModel::getId)
+                    .collect(Collectors.toList());
+                if (CollUtil.isNotEmpty(collect)) {
                     this.update(Entity.create().set("status", 0), Entity.create().set("id", collect));
                 }
             }
@@ -508,20 +511,24 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
                 StaticFileStorageModel where = new StaticFileStorageModel();
                 where.setParentAbsolutePath(absolutePath);
                 List<StaticFileStorageModel> list = this.listByBean(where);
-                if (CollUtil.isNotEmpty(list)) {
-                    List<String> collect = list.stream()
-                        .filter(staticFileStorageModel -> {
-                            if (staticFileStorageModel.type() == 1) {
-                                return true;
-                            }
-                            // 删除子目录
-                            this.delete(staticFileStorageModel.getId(), staticFileStorageModel.getAbsolutePath());
-                            return false;
-                        })
-                        .map(BaseIdModel::getId)
-                        .collect(Collectors.toList());
-                    this.update(Entity.create().set("status", 0), Entity.create().set("id", collect));
+                if (CollUtil.isEmpty(list)) {
+                    return;
                 }
+                List<String> collect = list.stream()
+                    .filter(staticFileStorageModel -> {
+                        if (staticFileStorageModel.type() == 1) {
+                            return true;
+                        }
+                        // 删除子目录
+                        this.delete(staticFileStorageModel.getId(), staticFileStorageModel.getAbsolutePath());
+                        return false;
+                    })
+                    .map(BaseIdModel::getId)
+                    .collect(Collectors.toList());
+                if (CollUtil.isEmpty(collect)) {
+                    return;
+                }
+                this.update(Entity.create().set("status", 0), Entity.create().set("id", collect));
             }
         }
     }
