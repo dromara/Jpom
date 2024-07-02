@@ -154,7 +154,7 @@ function installJdkFn() {
 			errorExit "系统环境变量中已经存在 JAVA_HOME，请检查配置是否正确.或者终端是否重新加载环境变量：source $userProfileName"
 		fi
 
-		download_url=$(curl -s https://download.jpom.top/jdk-url/8/${ARCH})
+		download_url=$(curl -s https://d.jpom.download/jdk-url/8/${ARCH})
 
 		curl -LfSo jdk.tar.gz "${download_url}"
 
@@ -456,7 +456,7 @@ done
 # 判断是否存在文件
 if [[ ! -f "${fileName}" ]]; then
 	echo "================开始下载 $fileName================"
-	curl -LfSo "${fileName}" "https://download.jpom.top/$use_tag/${versions}/${url_type}-${versions}-release.tar.gz"
+	curl -LfSo "${fileName}" "https://d.jpom.download/$use_tag/${versions}/${url_type}-${versions}-release.tar.gz"
 fi
 # 解压
 tar -zxf "${fileName}" -C "${jpom_dir}"

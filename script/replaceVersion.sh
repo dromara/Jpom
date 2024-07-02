@@ -87,11 +87,11 @@ function updateDocUrlItem() {
 		cat >"${pwd}/temp-docs.log" <<EOF
 ## ${1}-${use_tag}
 
-- [jpom-$1.zip](https://download.jpom.top/$use_tag/$1/jpom-$1.zip)
-- [server-$1-release.tar.gz](https://download.jpom.top/$use_tag/$1/server-$1-release.tar.gz) | [sha1sum](https://download.jpom.top/$use_tag/$1/server-$1-release.tar.gz.sha1)
-- [server-$1-release.zip](https://download.jpom.top/$use_tag/$1/server-$1-release.zip) | [sha1sum](https://download.jpom.top/$use_tag/$1/server-$1-release.zip.sha1)
-- [agent-$1-release.tar.gz](https://download.jpom.top/$use_tag/$1/agent-$1-release.tar.gz) | [sha1sum](https://download.jpom.top/$use_tag/$1/agent-$1-release.tar.gz.sha1)
-- [agent-$1-release.zip](https://download.jpom.top/$use_tag/$1/agent-$1-release.zip) | [sha1sum](https://download.jpom.top/$use_tag/$1/agent-$1-release.zip.sha1)
+- [jpom-$1.zip](https://d.jpom.download/$use_tag/$1/jpom-$1.zip)
+- [server-$1-release.tar.gz](https://d.jpom.download/$use_tag/$1/server-$1-release.tar.gz) | [sha1sum](https://d.jpom.download/$use_tag/$1/server-$1-release.tar.gz.sha1)
+- [server-$1-release.zip](https://d.jpom.download/$use_tag/$1/server-$1-release.zip) | [sha1sum](https://d.jpom.download/$use_tag/$1/server-$1-release.zip.sha1)
+- [agent-$1-release.tar.gz](https://d.jpom.download/$use_tag/$1/agent-$1-release.tar.gz) | [sha1sum](https://d.jpom.download/$use_tag/$1/agent-$1-release.tar.gz.sha1)
+- [agent-$1-release.zip](https://d.jpom.download/$use_tag/$1/agent-$1-release.zip) | [sha1sum](https://d.jpom.download/$use_tag/$1/agent-$1-release.zip.sha1)
 
 --------
 

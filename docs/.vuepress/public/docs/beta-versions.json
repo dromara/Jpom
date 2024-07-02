@@ -2,8 +2,8 @@
   "url": "https://jpom.top/docs/versions.json",
   "tag_name": "v2.11.7.1",
   "tagName": "v2.11.7.1",
-  "agentUrl": "https://download.jpom.top/beta/2.11.7.1/agent-2.11.7.1-release.zip",
-  "serverUrl": "https://download.jpom.top/beta/2.11.7.1/server-2.11.7.1-release.zip",
+  "agentUrl": "https://d.jpom.download/beta/2.11.7.1/agent-2.11.7.1-release.zip",
+  "serverUrl": "https://d.jpom.download/beta/2.11.7.1/server-2.11.7.1-release.zip",
   "changelogUrl": "https://gitee.com/dromara/Jpom/raw/beta/CHANGELOG-BETA.md",
   "downloadUrl": "https://jpom.top/pages/all-downloads/"
 }

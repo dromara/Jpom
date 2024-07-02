@@ -62,7 +62,7 @@ function download() {
 		# 获取最新的版本号
 		url_type=$(echo "${type}" | tr 'A-Z' 'a-z')
 		versions=$(curl -LfsS https://jpom.top/docs/versions.release.tag)
-		download_url="https://download.jpom.top/release/${versions}/${url_type}-${versions}-release.tar.gz"
+		download_url="https://d.jpom.download/release/${versions}/${url_type}-${versions}-release.tar.gz"
 		wget -O "${type}.tar.gz" "${download_url}"
 	else
 		echo "解压离线安装包"
