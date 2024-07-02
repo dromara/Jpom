@@ -63,7 +63,7 @@ const htmlModule: VdoingThemeConfig["htmlModules"] = {
 
   `,
   windowRB: `
-
+  <div class="custom-block danger"><p class="custom-block-title">系统公告</p> <p>近期我们下载中心受到持续的恶意刷流量，累计流量金额已经超过 <b>300 元</b>给我们的长期运营带来了很大的挑战。我们已经做过基础规则防护和限速均不能有效限制，经过我们慎重考虑后决定临时下架下载中心的 CDN 服务，具体恢复时间敬请通知</p></div>
   `,
 };
 
