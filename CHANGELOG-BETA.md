@@ -6,6 +6,7 @@
 
 1. 【server】修复 静态文件扫描到空时更新数据库异常（感谢[@blackcat](https://gitee.com/kylin_lawliet) [Gitee issues IA6UO0](https://gitee.com/dromara/Jpom/issues/IA6UO0) ）
 2. 【server】修复 SSH命令行操作日志支持更全展示（感谢[@beens](https://gitee.com/beens) [Gitee issues IA6P3J](https://gitee.com/dromara/Jpom/issues/IA6P3J) ）
+3. 【all】优化 升级 hutool、oshi、mwiede-jsch、fastjson2 版本
 
 ------
 
