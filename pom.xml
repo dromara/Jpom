@@ -48,12 +48,12 @@
         <skipTests>true</skipTests>
         <maven.test.skip>true</maven.test.skip>
         <!--        <maven.javadoc.skip>true</maven.javadoc.skip>-->
-        <hutool.version>5.8.27</hutool.version>
-        <fastjson2.version>2.0.46</fastjson2.version>
+        <hutool.version>5.8.28</hutool.version>
+        <fastjson2.version>2.0.51</fastjson2.version>
         <fastjson-version>2.0.46</fastjson-version>
         <jna-version>5.14.0</jna-version>
-        <mwiede.jsch-version>0.2.16</mwiede.jsch-version>
-        <oshi.version>6.4.12</oshi.version>
+        <mwiede.jsch-version>0.2.18</mwiede.jsch-version>
+        <oshi.version>6.4.13</oshi.version>
         <tomcat.version>9.0.86</tomcat.version>
         <yaml.version>2.2</yaml.version>
         <!--  h2 不能直接升级 The write format 2 is smaller than the supported format 3-->
