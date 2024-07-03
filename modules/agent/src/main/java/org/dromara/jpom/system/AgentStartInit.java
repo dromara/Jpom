@@ -238,7 +238,7 @@ public class AgentStartInit implements ILoadEvent, ISystemTask {
         String build = urlBuilder.build();
         try (HttpResponse execute = HttpUtil.createGet(build, true).execute()) {
             String body = execute.body();
-            log.info("推送注册结果:{}", body);
+            log.info(I18nMessageUtil.get("i18n.push_registration_result.dccf"), body);
         }
     }
 

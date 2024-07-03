@@ -427,7 +427,7 @@ public class NodeForward {
             return message;
         }
         // 判断是否都成功
-        Assert.state(success.size() == total, StrUtil.format("上传异常,完成数量不匹配 {}/{}", success.size(), total));
+        Assert.state(success.size() == total, StrUtil.format(I18nMessageUtil.get("i18n.upload_exception_mismatched_count.687f"), success.size(), total));
         //
         return Optional.ofNullable(doneCallback)
             .map(function -> function.apply(sliceData))
