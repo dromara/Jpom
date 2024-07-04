@@ -240,9 +240,9 @@ public class ReleaseManage {
                 tag.set(tagSize - 1, CollUtil.join(versionList, StrUtil.DOT));
                 String newVersion = CollUtil.join(tag, StrUtil.COLON);
                 if (match) {
-                    logRecorder.system("dockerTag version number incrementing {} -> {}", s, newVersion);
+                    logRecorder.system(I18nMessageUtil.get("i18n.docker_image_tag_version_increment.d436"), s, newVersion);
                 } else {
-                    logRecorder.systemWarning("version number incrementing error,No numeric version number {} ", s);
+                    logRecorder.systemWarning(I18nMessageUtil.get("i18n.version_increment_error.0157"), s);
                 }
                 return newVersion;
             })
@@ -298,17 +298,21 @@ public class ReleaseManage {
             }
             // 推送 - 只选择一个 docker 服务来推送到远程仓库
             Boolean pushToRepository = this.buildExtraModule.getPushToRepository();
+            Boolean pushToRepositoryAfterDelete = this.buildExtraModule.getPushToRepositoryAfterDelete();
             if (pushToRepository != null && pushToRepository) {
                 List<String> repositoryList = StrUtil.splitTrim(dockerTag, StrUtil.COMMA);
+                Map<String, Object> map2 = new HashMap<>(map);
                 for (String repositoryItem : repositoryList) {
-                    logRecorder.system("start push to repository in({}),{} {}{}", map.get("name"), StrUtil.emptyToDefault((String) map.get("registryUrl"), StrUtil.EMPTY), repositoryItem, System.lineSeparator());
+                    String registryUrl = StrUtil.emptyToDefault((String) map2.get("registryUrl"), StrUtil.EMPTY);
+                    Object name = map2.get("name");
+                    logRecorder.system(I18nMessageUtil.get("i18n.start_push_image_to_remote_repo.10a7"), name, registryUrl, repositoryItem, System.lineSeparator());
                     //
-                    map.put("repository", repositoryItem);
+                    map2.put("repository", repositoryItem);
                     Consumer<String> logConsumer = logRecorder::info;
-                    map.put("logConsumer", logConsumer);
+                    map2.put("logConsumer", logConsumer);
                     IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
                     try {
-                        plugin.execute("pushImage", map);
+                        plugin.execute("pushImage", map2);
                     } catch (Exception e) {
                         logRecorder.error(I18nMessageUtil.get("i18n.push_image_container_exception.2090"), e);
                     }
@@ -316,6 +320,23 @@ public class ReleaseManage {
             }
             // 发布 docker 服务
             this.updateSwarmService(dockerTag, this.buildExtraModule.getDockerSwarmId(), this.buildExtraModule.getDockerSwarmServiceName());
+            // 推送后删除本地镜像
+            if (pushToRepository != null && pushToRepository && pushToRepositoryAfterDelete != null && pushToRepositoryAfterDelete) {
+                // 删除本地镜像
+                List<String> repositoryList = StrUtil.splitTrim(dockerTag, StrUtil.COMMA);
+                Map<String, Object> map2 = new HashMap<>(map);
+                for (String repositoryItem : repositoryList) {
+                    Object name = map2.get("name");
+                    logRecorder.system(I18nMessageUtil.get("i18n.auto_delete_local_image_after_push.c13d"), name, repositoryItem, System.lineSeparator());
+                    map2.put("imageId", repositoryItem);
+                    IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+                    try {
+                        plugin.execute("removeImage", map2);
+                    } catch (Exception e) {
+                        logRecorder.error(I18nMessageUtil.get("i18n.delete_local_image_failed.91fa"), e);
+                    }
+                }
+            }
         } finally {
             CommandUtil.systemFastDel(tempPath);
         }
@@ -342,7 +363,7 @@ public class ReleaseManage {
     }
 
     private boolean doDockerImage(DockerInfoModel dockerInfoModel, Map<String, String> envMap, File dockerfile, File baseDir, String dockerTag, BuildExtraModule extraModule) {
-        logRecorder.system("{} start build image {}{}", dockerInfoModel.getName(), dockerTag, System.lineSeparator());
+        logRecorder.system(I18nMessageUtil.get("i18n.start_building_image.eacd"), dockerInfoModel.getName(), dockerTag, System.lineSeparator());
         Map<String, Object> map = machineDockerServer.dockerParameter(dockerInfoModel);
         //.toParameter();
         map.put("Dockerfile", dockerfile);
@@ -376,7 +397,7 @@ public class ReleaseManage {
             logRecorder.systemError(I18nMessageUtil.get("i18n.no_command_to_execute.340b"));
             return null;
         }
-        logRecorder.system("{} start exec{}", DateUtil.now(), System.lineSeparator());
+        logRecorder.system(I18nMessageUtil.get("i18n.start_executing.87e7"), DateUtil.now(), System.lineSeparator());
 
         File sourceFile = BuildUtil.getSourceById(this.buildExtraModule.getId());
         Map<String, String> envFileMap = buildEnv.environment();
@@ -441,7 +462,7 @@ public class ReleaseManage {
             if (StrUtil.isEmpty(releasePath)) {
                 logRecorder.systemWarning(I18nMessageUtil.get("i18n.publish_directory_is_empty.79c6"));
             } else {
-                logRecorder.system("{} {} start ftp upload{}", DateUtil.now(), item.getName(), System.lineSeparator());
+                logRecorder.system(I18nMessageUtil.get("i18n.start_upload_ftp_file.20be"), DateUtil.now(), item.getName(), System.lineSeparator());
                 MySftp.ProgressMonitor sftpProgressMonitor = sshService.createProgressMonitor(logRecorder);
                 MySftp sftp = new MySftp(session, charset, timeout, sftpProgressMonitor);
                 channelSftp = sftp.getClient();

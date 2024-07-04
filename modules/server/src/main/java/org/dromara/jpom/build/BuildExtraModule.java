@@ -119,6 +119,10 @@ public class BuildExtraModule extends BaseModel {
      */
     private Boolean pushToRepository;
     /**
+     * 是否执行推送到仓库中后删除
+     */
+    private Boolean pushToRepositoryAfterDelete;
+    /**
      * docker tag 版本字段递增
      */
     private Boolean dockerTagIncrement;
