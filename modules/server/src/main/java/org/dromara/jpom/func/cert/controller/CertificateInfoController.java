@@ -47,7 +47,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.security.cert.X509Certificate;
+import java.security.cert.X509Certificate;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -239,7 +239,7 @@ public class CertificateInfoController extends BaseServerController {
                 PublicKey pubkey = certificate.getPublicKey();
                 certificateInfoService.testKey(pubkey, prikey);
                 //
-                X509Certificate cert = X509Certificate.getInstance(certificate.getEncoded());
+                X509Certificate cert = certificateInfoService.getInstance(certificate.getEncoded());
                 // 填充
                 CertificateInfoModel certificateInfoModel = certificateInfoService.filling(cert);
                 certificateInfoModel.setKeyType(keyStore.getType());

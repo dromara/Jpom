@@ -36,8 +36,8 @@ import org.dromara.jpom.service.h2db.BaseGlobalOrWorkspaceService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import javax.security.cert.CertificateEncodingException;
-import javax.security.cert.X509Certificate;
+import java.io.ByteArrayInputStream;
+import java.security.cert.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -46,7 +46,6 @@ import java.nio.file.StandardCopyOption;
 import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.cert.Certificate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -141,8 +140,8 @@ public class CertificateInfoService extends BaseGlobalOrWorkspaceService<Certifi
                 .collect(Collectors.toList());
             Certificate certificate0 = certificates.get(0);
             Certificate certificate1 = CollUtil.get(certificates, 1);
-            X509Certificate x509Certificate0 = X509Certificate.getInstance(certificate0.getEncoded());
-            X509Certificate x509Certificate1 = certificate1 != null ? X509Certificate.getInstance(certificate1.getEncoded()) : null;
+            X509Certificate x509Certificate0 = getInstance(certificate0.getEncoded());
+            X509Certificate x509Certificate1 = certificate1 != null ? getInstance(certificate1.getEncoded()) : null;
             Principal issuerDN = x509Certificate0.getIssuerDN();
             Principal subjectDN = x509Certificate0.getSubjectDN();
             Assert.state(issuerDN != null && subjectDN != null, I18nMessageUtil.get("i18n.certificate_info_error_issuer_or_subject_DN_not_found.805d"));
@@ -189,6 +188,10 @@ public class CertificateInfoService extends BaseGlobalOrWorkspaceService<Certifi
             log.error(I18nMessageUtil.get("i18n.parse_certificate_exception.3b6c"), e);
             throw new IllegalStateException(I18nMessageUtil.get("i18n.parse_certificate_unknown_error.c43c") + e.getMessage());
         }
+    }
+
+    public X509Certificate getInstance(byte[]  bytes) throws CertificateException {
+        return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(bytes));
     }
 
     public File getFilePath(CertificateInfoModel model) {
