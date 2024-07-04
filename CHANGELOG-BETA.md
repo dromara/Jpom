@@ -1,5 +1,13 @@
 # 🚀 版本日志
 
+## 2.11.8.3-beta (2024-07-05)
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】修复 淘汰javax.security.cert.X509Certificate（感谢[@Jie](https://github.com/index-jie) [Githup issues 84](https://github.com/dromara/Jpom/issues/86) ）
+
+------
+
 ## 2.11.8.2-beta (2024-07-04)
 
 ### 🐞 解决BUG、优化功能
