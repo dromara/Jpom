@@ -1437,6 +1437,7 @@
 	"i18n.start_executing_upload_post_command.1c1b":"开始执行上传后命令",
 	"i18n.start_executing_upload_pre_command.fb5c":"开始执行上传前命令",
 	"i18n.start_execution.00d7":"开始执行",
+	"i18n.start_loading_database.b040":"开始加载 {} 数据库",
 	"i18n.start_migrating.20d6":"开始迁移 {} {}",
 	"i18n.start_migrating_h2_data_to.f478":"开始迁移 h2 数据到 {}",
 	"i18n.start_new_thread_for_h2_database_backup.9337":"启动一个新线程来执行 H2 数据库备份...启动",

@@ -94,7 +94,7 @@ public class InitDb implements DisposableBean, ILoadEvent {
         log.debug(I18nMessageUtil.get("i18n.need_execute_pre_events.b848"), BEFORE_CALLBACK.size());
         BEFORE_CALLBACK.forEach(Runnable::run);
         IStorageService storageService = StorageServiceFactory.get();
-        log.info("start load {} db", dbExtConfig.getMode());
+        log.info(I18nMessageUtil.get("i18n.start_loading_database.b040"), dbExtConfig.getMode());
         DSFactory dsFactory = storageService.init(dbExtConfig);
         final String[] sqlFileNow = {StrUtil.EMPTY};
         try {
