@@ -1474,7 +1474,7 @@ export default {
         buildMode: [{ required: true, message: this.$t('i18n_e3e85de50c'), trigger: 'blur' }],
         releaseMethod: [{ required: true, message: this.$t('i18n_6d7f0f06be'), trigger: 'blur' }],
         branchName: [{ required: true, message: this.$t('i18n_50951f5e74'), trigger: 'blur' }],
-        script: [{ required: true, message: this.$t('i18n_50951f5e74'), trigger: 'blur' }],
+        script: [{ required: true, message: this.$t('i18n_67aa1c0169'), trigger: 'blur' }],
         resultDirFile: [{ required: true, message: this.$t('i18n_cc92cf1e25'), trigger: 'blur' }],
         // releasePath: [{ required: true, message: '请填写发布目录', trigger: 'blur' }],
         repositoryId: [
@@ -1856,6 +1856,7 @@ export default {
         })
         .catch(({ errorFields }) => {
           if (errorFields && errorFields[0]) {
+            // console.log(errorFields[0])
             const msg = errorFields[0].errors && errorFields[0].errors[0]
             if (msg) {
               $notification.warn({
@@ -1865,12 +1866,22 @@ export default {
             }
             // 切换到对应的流程
             const filedName = errorFields[0].name && errorFields[0].name[0]
-            filedName &&
-              this.rulesSteps.forEach((item, index) => {
+            if (filedName) {
+              for (let itemIndex in this.rulesSteps) {
+                const item = this.rulesSteps[itemIndex]
+                // console.log(itemIndex, filedName)
                 if (item.includes(filedName)) {
-                  this.stepsChange(index)
+                  this.stepsChange(Number(itemIndex))
+                  break
                 }
-              })
+
+                // this.rulesSteps.forEach((item, index) => {
+                //   if (item.includes(filedName)) {
+                //     this.stepsChange(index)
+                //   }
+                // })
+              }
+            }
           }
         })
     },

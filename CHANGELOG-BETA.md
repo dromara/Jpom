@@ -5,6 +5,7 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【server】修复 非管理员用户无法使用脚本库数据（感谢[@丁炳坤](https://gitee.com/dbk12138) [Gitee issues IA8ZKP](https://gitee.com/dromara/Jpom/issues/IA8ZKP) ）
+2. 【server】修复 构建编辑页面未输入构建命令提示错误（感谢[@yt](https://gitee.com/a1127583020) [Gitee issues IAAI8D](https://gitee.com/dromara/Jpom/issues/IAAI8D) ）
 
 ------
 
