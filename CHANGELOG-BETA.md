@@ -6,6 +6,7 @@
 
 1. 【server】修复 非管理员用户无法使用脚本库数据（感谢[@丁炳坤](https://gitee.com/dbk12138) [Gitee issues IA8ZKP](https://gitee.com/dromara/Jpom/issues/IA8ZKP) ）
 2. 【server】修复 构建编辑页面未输入构建命令提示错误（感谢[@yt](https://gitee.com/a1127583020) [Gitee issues IAAI8D](https://gitee.com/dromara/Jpom/issues/IAAI8D) ）
+3. 【server】优化 构建容器镜像支持推送到远程仓库后自动删除本地镜像（感谢 [@爱琳琳真是太好了](https://gitee.com/qiqi513_admin) [Gitee issues IA6UBO](https://gitee.com/dromara/Jpom/issues/IA6UBO) ）
 
 ------
 
@@ -105,7 +106,7 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【server】修复 没有端口的容器重建页面异常（感谢@冰淇淋还是冰激凌）
-2. 【server】修复 工作空间菜单配置错误（感谢@Again...                       .）
+2. 【server】修复 工作空间菜单配置错误（感谢@Again... .）
 3. 【server】优化 ssh 管理独立 tab 页面使用默认的字符串排序
 4. 【server】修复 服务端脚本无法执行、参数值描述不对应（感谢@冰淇淋还是冰激凌）
 
@@ -173,7 +174,7 @@
 
 ### 🐞 解决BUG、优化功能
 
-1. 【server】升级 前端组件版本 
+1. 【server】升级 前端组件版本
 2. 【all】优化 管理脚本删除 `-XX:-UseBiasedLocking` 使其能在高版本 jdk 运行
 3. 【server】修复 构建列表卡片模式按钮文字错乱
 4. 【server】修复 项目列表和逻辑节点卡片视图冲突

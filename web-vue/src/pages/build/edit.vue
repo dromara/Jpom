@@ -782,6 +782,42 @@
                       </a-col>
                       <a-col :span="6" style="text-align: right">
                         <a-space>
+                          <a-tooltip
+                            >{{ $t('i18n_c43743d213') }}<template #title>{{ $t('i18n_f1e3ef0def') }}</template>
+                            <QuestionCircleOutlined v-if="!temp.id" />
+                          </a-tooltip>
+
+                          <a-switch
+                            v-model:checked="tempExtraData.pushToRepositoryAfterDelete"
+                            :disabled="!tempExtraData.pushToRepository"
+                            :checked-children="$t('i18n_0a60ac8f02')"
+                            :un-checked-children="$t('i18n_c9744f45e7')"
+                          />
+                        </a-space>
+                      </a-col>
+                      <a-col :span="6" style="text-align: right">
+                        <a-space>
+                          <a-tooltip>
+                            {{ $t('i18n_159a3a8037') }}
+                            <template #title>{{ $t('i18n_ab968d842f') }} </template>
+                            <QuestionCircleOutlined v-if="!temp.id" />
+                          </a-tooltip>
+
+                          <a-switch
+                            v-model:checked="tempExtraData.dockerBuildPull"
+                            :checked-children="$t('i18n_0a60ac8f02')"
+                            :un-checked-children="$t('i18n_c9744f45e7')"
+                          />
+                        </a-space>
+                      </a-col>
+                    </a-row>
+                  </a-form-item-rest>
+                </a-form-item>
+                <a-form-item name="pushToRepository2" :label="` `" :colon="false">
+                  <a-form-item-rest>
+                    <a-row>
+                      <a-col :span="6" style="text-align: right">
+                        <a-space>
                           <a-tooltip>
                             {{ $t('i18n_9fb61a9936') }}
                             <template #title>
@@ -812,35 +848,20 @@
                           />
                         </a-space>
                       </a-col>
-                      <a-col :span="6" style="text-align: right">
-                        <a-space>
-                          <a-tooltip>
-                            {{ $t('i18n_159a3a8037') }}
-                            <template #title>{{ $t('i18n_ab968d842f') }} </template>
-                            <QuestionCircleOutlined v-if="!temp.id" />
-                          </a-tooltip>
-
-                          <a-switch
-                            v-model:checked="tempExtraData.dockerBuildPull"
-                            :checked-children="$t('i18n_0a60ac8f02')"
-                            :un-checked-children="$t('i18n_c9744f45e7')"
-                          />
-                        </a-space>
-                      </a-col>
                     </a-row>
                   </a-form-item-rest>
                 </a-form-item>
                 <a-form-item v-if="tempExtraData.dockerSwarmId" name="dockerSwarmServiceName">
+                  <template #label>
+                    <a-tooltip>
+                      {{ $t('i18n_b5ce5efa6e') }}
+                      <template #title>
+                        {{ $t('i18n_2f67a19f9d') }}
+                      </template>
+                      <QuestionCircleOutlined v-if="!temp.id" />
+                    </a-tooltip>
+                  </template>
                   <a-form-item-rest>
-                    <template #label>
-                      <a-tooltip>
-                        {{ $t('i18n_b5ce5efa6e') }}
-                        <template #title>
-                          {{ $t('i18n_2f67a19f9d') }}
-                        </template>
-                        <QuestionCircleOutlined v-if="!temp.id" />
-                      </a-tooltip>
-                    </template>
                     <a-select
                       v-model:value="tempExtraData.dockerSwarmServiceName"
                       allow-clear
