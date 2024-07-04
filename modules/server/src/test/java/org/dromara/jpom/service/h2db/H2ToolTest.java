@@ -167,7 +167,7 @@ public class H2ToolTest extends ApplicationStartTest {
         setting.set(SqlLog.KEY_SHOW_SQL, "true");
         setting.set(SqlLog.KEY_SQL_LEVEL, "DEBUG");
         setting.set(SqlLog.KEY_SHOW_PARAMS, "true");
-        log.info("start load h2 db");
+        log.info("开始加载 H2 数据库");
         // 创建连接
         DSFactory dsFactory = DSFactory.create(setting);
         return dsFactory.getDataSource();
