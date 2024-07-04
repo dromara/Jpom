@@ -187,17 +187,17 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> implements
             BackupInfoModel backupInfo = new BackupInfoModel();
             backupInfo.setId(backupInfoModel.getId());
             try {
-                log.debug("启动一个新线程来执行 H2 数据库备份...启动");
+                log.debug(I18nMessageUtil.get("i18n.start_new_thread_for_h2_database_backup.9337"));
                 StorageServiceFactory.get().backupSql(url, user, pass, backupSqlPath, tableNameList);
                 // 修改备份任务执行完成
                 backupInfo.setFileSize(FileUtil.size(file));
                 backupInfo.setSha1Sum(SecureUtil.sha1(file));
                 backupInfo.setStatus(BackupStatusEnum.SUCCESS.getCode());
                 this.updateById(backupInfo);
-                log.debug("启动一个新线程来执行 H2 数据库备份...成功");
+                log.debug(I18nMessageUtil.get("i18n.start_new_thread_for_h2_database_backup_success.3b5b"));
             } catch (Exception e) {
                 // 记录错误日志信息，修改备份任务执行失败
-                log.error("备份 h2 数据库异常", e);
+                log.error(I18nMessageUtil.get("i18n.backup_h2_database_exception.c647"), e);
                 backupInfo.setStatus(BackupStatusEnum.FAILED.getCode());
                 this.updateById(backupInfo);
             }
