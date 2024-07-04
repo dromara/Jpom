@@ -8,6 +8,14 @@ export function getScriptLibraryList(params: any) {
   })
 }
 
+export function getScriptLibraryNoPermissionList(params: any) {
+  return axios({
+    url: '/system/assets/script-library/list-data-no-permission',
+    method: 'post',
+    data: params
+  })
+}
+
 export function editScriptLibrary(params: any) {
   return axios({
     url: '/system/assets/script-library/edit',

@@ -106,7 +106,7 @@
   </div>
 </template>
 <script>
-import { getScriptLibraryList } from '@/api/system/script-library'
+import { getScriptLibraryNoPermissionList } from '@/api/system/script-library'
 import codeEditor from '@/components/codeEditor'
 
 import { CRON_DATA_SOURCE } from '@/utils/const-i18n'
@@ -230,7 +230,7 @@ export default {
     loadData(pointerEvent) {
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page
       this.loading = true
-      getScriptLibraryList(this.listQuery).then((res) => {
+      getScriptLibraryNoPermissionList(this.listQuery).then((res) => {
         if (res.code === 200) {
           this.list = res.data.result
           this.listQuery.total = res.data.total
