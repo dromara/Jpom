@@ -109,12 +109,13 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
             FileUtil.mkdir(file);
             file = FileUtil.createTempFile("jpom", ".temp", file, true);
         } catch (Exception e) {
-            log.error(StrUtil.format("Jpom Failed to create data directory, directory location：{}," +
-                "Please check whether the current user has permission to this directory or modify the configuration file：{} jpom.path in is the path where the directory can be created", path, extConfigPath), e);
+            log.error(StrUtil.format(I18nMessageUtil.get("i18n.jpom_create_data_dir_failed.6202"), path, extConfigPath), e);
             asyncExit(-1);
         }
         FileUtil.del(file);
-        log.info("Jpom[{}] Current data path：{} External configuration file path：{}", JpomManifest.getInstance().getVersion(), path, extConfigPath);
+        String tip1 = I18nMessageUtil.get("i18n.current_data_path.5572");
+        String tip2 = I18nMessageUtil.get("i18n.external_config_file_path.06ec");
+        log.info("Jpom[{}] {}：{} {}：{}", JpomManifest.getInstance().getVersion(), tip1, path, tip2, extConfigPath);
     }
 
     private void install() {
@@ -244,15 +245,15 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
         String localhostStr = Opt.ofBlankAble(address).orElseGet(NetUtil::getLocalhostStr);
         String url = StrUtil.format("http://{}:{}", localhostStr, port);
         if (type == Type.Server) {
-            log.info("{} Successfully started,Can use happily => {} 【The current address is for reference only】", type, url);
+            log.info(I18nMessageUtil.get("i18n.start_success_short_message.4c97"), type, url);
         } else if (type == Type.Agent) {
-            log.info("{} Successfully started,Please go to the server to configure and use,Current node address => {} 【The current address is for reference only】", type, url);
+            log.info(I18nMessageUtil.get("i18n.start_success_message.d31f"), type, url);
         }
     }
 
 
     private void clearTemp() {
-        log.debug("Automatically clean up temporary directories");
+        log.debug(I18nMessageUtil.get("i18n.auto_clean_temp_dir.11d2"));
         File file = configBean.getTempPath();
         /**
          * @author Hotstrip
@@ -263,20 +264,20 @@ public class JpomApplicationEvent implements ApplicationListener<ApplicationEven
             FileUtil.del(file);
         } catch (Exception e) {
             // Try again  jzy 2021-07-31
-            log.warn("Attempt to delete temporary folder failed, try to handle read-only permission：{}", e.getMessage());
+            log.warn(I18nMessageUtil.get("i18n.delete_temp_folder_failed_with_read_only_permission.00ae"), e.getMessage());
             List<File> files = FileUtil.loopFiles(file);
             long count = files.stream().map(file12 -> file12.setWritable(true)).filter(aBoolean -> aBoolean).count();
-            log.warn("Cumulative number of files in temporary folder: {}, number of successful processing：{}", CollUtil.size(files), count);
+            log.warn(I18nMessageUtil.get("i18n.temp_folder_file_count.8e31"), CollUtil.size(files), count);
             try {
                 FileUtil.del(file.toPath());
             } catch (Exception e1) {
                 e1.addSuppressed(e);
                 boolean causedBy = ExceptionUtil.isCausedBy(e1, AccessDeniedException.class);
                 if (causedBy) {
-                    log.error(I18nMessageUtil.get("i18n.clear_temp_file_failed_manually.0dad") + FileUtil.getAbsolutePath(file), e);
+                    log.error("{}{}", I18nMessageUtil.get("i18n.clear_temp_file_failed_manually.0dad"), FileUtil.getAbsolutePath(file), e);
                     return;
                 }
-                log.error(I18nMessageUtil.get("i18n.clear_temp_file_failed_check_directory.7340") + FileUtil.getAbsolutePath(file), e);
+                log.error("{}{}", I18nMessageUtil.get("i18n.clear_temp_file_failed_check_directory.7340"), FileUtil.getAbsolutePath(file), e);
             }
         }
     }

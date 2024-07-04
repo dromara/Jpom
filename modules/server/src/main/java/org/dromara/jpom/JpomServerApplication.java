@@ -17,6 +17,7 @@ import cn.hutool.extra.spring.SpringUtil;
 import cn.keepbx.jpom.JpomAppType;
 import cn.keepbx.jpom.Type;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.data.SystemIpConfigModel;
 import org.dromara.jpom.service.system.SystemParametersServer;
 import org.dromara.jpom.service.user.UserService;
@@ -77,7 +78,7 @@ public class JpomServerApplication {
         if (ArrayUtil.containsIgnoreCase(args, "--rest:ip_config")) {
             SystemParametersServer parametersServer = SpringUtil.getBean(SystemParametersServer.class);
             parametersServer.delByKey(SystemIpConfigModel.ID);
-            log.info("Clear IP whitelist configuration successfully");
+            log.info(I18nMessageUtil.get("i18n.clear_ip_whitelist_config_success.8cf6"));
         }
         //  重置超级管理员密码
         if (ArrayUtil.containsIgnoreCase(args, "--rest:super_user_pwd")) {
@@ -86,7 +87,7 @@ public class JpomServerApplication {
             if (restResult != null) {
                 log.info(restResult);
             } else {
-                log.error("There is no super administrator account in the system");
+                log.error(I18nMessageUtil.get("i18n.no_super_admin_account.538d"));
             }
         }
         // 关闭超级管理员 mfa
@@ -96,11 +97,11 @@ public class JpomServerApplication {
             if (restResult != null) {
                 log.info(restResult);
             } else {
-                log.error("There is no super administrator account in the system");
+                log.error(I18nMessageUtil.get("i18n.no_super_admin_account.538d"));
             }
         }
 
 
-        log.info("Time-consuming to start this time：{}", DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
+        log.info(I18nMessageUtil.get("i18n.startup_duration.54fe"), DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
     }
 }
