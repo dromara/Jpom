@@ -1135,6 +1135,7 @@
 	"i18n_674a284936":"The second part will only be matched when isMatchSecond is true, and it is turned off by default.",
 	"i18n_674e7808b5":"MFA verification code",
 	"i18n_679de60f71":"Please fill in the log item name",
+	"i18n_67aa1c0169":"Please fill in the build command",
 	"i18n_67aa2d01b9":"Workspace menus, environment variables, and node distribution authorization need to be configured one by one",
 	"i18n_67b667bf98":"partial backup",
 	"i18n_67e3d3e09c":"batch build",
