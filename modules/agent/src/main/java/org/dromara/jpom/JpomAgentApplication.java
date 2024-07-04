@@ -51,7 +51,7 @@ public class JpomAgentApplication {
         springApplicationBuilder.run(args);
         // 自动向服务端推送
         autoPushToServer(args);
-        log.info("Time-consuming to start this time：{}", DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
+        log.info(I18nMessageUtil.get("i18n.startup_duration.54fe"), DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
     }
 
     /**
@@ -66,7 +66,7 @@ public class JpomAgentApplication {
         }
         String arg = ArrayUtil.get(args, i + 1);
         if (StrUtil.isEmpty(arg)) {
-            log.error("not found auto-push-to-server url");
+            log.error(I18nMessageUtil.get("i18n.auto_push_url_not_found.88a7"));
             return;
         }
         try {
