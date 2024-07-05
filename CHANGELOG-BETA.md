@@ -4,7 +4,9 @@
 
 ### 🐞 解决BUG、优化功能
 
-1. 【server】修复 淘汰javax.security.cert.X509Certificate（感谢[@Jie](https://github.com/index-jie) [Githup issues 84](https://github.com/dromara/Jpom/issues/86) ）
+1. 【server】修复 淘汰javax.security.cert.X509Certificate（感谢[@Jie](https://github.com/index-jie) [Github issues 84](https://github.com/dromara/Jpom/issues/86) ）
+2. 【all】优化 启动控制台日志完善 i18n
+3. 【server】修复 证书删除后弹窗未正常关闭
 
 ------
 

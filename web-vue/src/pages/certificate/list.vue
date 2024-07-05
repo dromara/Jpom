@@ -431,7 +431,7 @@ export default {
         content: this.$t('i18n_efe9d26148'),
         okText: this.$t('i18n_e83a256e4f'),
         cancelText: this.$t('i18n_625fb26b4b'),
-        onOk() {
+        onOk: () => {
           return deleteCert({
             id: record.id
           }).then((res) => {
