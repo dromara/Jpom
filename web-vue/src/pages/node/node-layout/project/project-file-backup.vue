@@ -524,9 +524,9 @@ export default {
           content: this.$t('i18n_d2cac1245d') + record.filename + this.$t('i18n_e039ffccc8'),
           okText: this.$t('i18n_e83a256e4f'),
           cancelText: this.$t('i18n_625fb26b4b'),
-          onOk() {
+          onOk: () => {
             // // 请求参数
-            this.recoverNet('', record.filename)
+            return this.recoverNet('', record.filename)
           }
         })
       }
@@ -543,7 +543,7 @@ export default {
       }
       this.recoverLoading = true
       // 删除
-      backupRecoverProjectFile(params)
+      return backupRecoverProjectFile(params)
         .then((res) => {
           if (res.code === 200) {
             $notification.success({

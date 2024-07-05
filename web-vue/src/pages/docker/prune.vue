@@ -140,33 +140,30 @@ export default {
           content: this.$t('i18n_8e8bcfbb4f'),
           okText: this.$t('i18n_e83a256e4f'),
           cancelText: this.$t('i18n_625fb26b4b'),
-          async onOk() {
-            return await new Promise((resolve, reject) => {
-              // 组装参数
-              const params = {
-                id: that.reqDataId,
-                pruneType: that.pruneForm.pruneType
-              }
+          onOk: () => {
+            // 组装参数
+            const params = {
+              id: that.reqDataId,
+              pruneType: that.pruneForm.pruneType
+            }
 
-              that.pruneTypes[params.pruneType] &&
-                that.pruneTypes[params.pruneType].filters.forEach((element) => {
-                  params[element] = that.pruneForm[element]
-                })
-              that.loading = true
-              dockerPrune(that.urlPrefix, params)
-                .then((res) => {
-                  if (res.code === 200) {
-                    $notification.success({
-                      message: res.msg
-                    })
-                  }
-                  resolve()
-                })
-                .catch(reject)
-                .finally(() => {
-                  that.loading = false
-                })
-            })
+            that.pruneTypes[params.pruneType] &&
+              that.pruneTypes[params.pruneType].filters.forEach((element) => {
+                params[element] = that.pruneForm[element]
+              })
+            that.loading = true
+            return dockerPrune(that.urlPrefix, params)
+              .then((res) => {
+                if (res.code === 200) {
+                  $notification.success({
+                    message: res.msg
+                  })
+                }
+              })
+
+              .finally(() => {
+                that.loading = false
+              })
           }
         })
       })
