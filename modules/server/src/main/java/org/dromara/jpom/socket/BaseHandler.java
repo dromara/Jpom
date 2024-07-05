@@ -24,9 +24,7 @@ import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.system.init.OperateLogController;
 import org.dromara.jpom.util.SocketSessionUtil;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.WebSocketMessage;
-import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.util.Map;
@@ -79,6 +77,26 @@ public abstract class BaseHandler extends TextWebSocketHandler {
         try {
             setLanguage(session);
             super.handleMessage(session, message);
+        } finally {
+            clearLanguage();
+        }
+    }
+
+    @Override
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        try {
+            setLanguage(session);
+            super.handleTextMessage(session, message);
+        } finally {
+            clearLanguage();
+        }
+    }
+
+    @Override
+    protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {
+        try {
+            setLanguage(session);
+            super.handleBinaryMessage(session, message);
         } finally {
             clearLanguage();
         }
