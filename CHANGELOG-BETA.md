@@ -1,10 +1,19 @@
 # 🚀 版本日志
 
+## 2.11.8.4-beta
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】优化 登录验证码去除易混淆字母（oO0、lL1、q9Q、pP）
+2. 【server】修复 批量构建引起环境变量丢失问题（感谢@[xieliangza](https://github.com/xieliangza) [Github issues 88](https://github.com/dromara/Jpom/issues/88) ）
+
+------
+
 ## 2.11.8.3-beta (2024-07-05)
 
 ### 🐞 解决BUG、优化功能
 
-1. 【server】修复 淘汰javax.security.cert.X509Certificate（感谢[@Jie](https://github.com/index-jie) [Github issues 84](https://github.com/dromara/Jpom/issues/86) ）
+1. 【server】修复 淘汰 javax.security.cert.X509Certificate（感谢[@Jie](https://github.com/index-jie) [Github issues 84](https://github.com/dromara/Jpom/issues/86) ）
 2. 【all】优化 启动控制台日志完善 i18n
 3. 【server】修复 证书删除后弹窗未正常关闭
 

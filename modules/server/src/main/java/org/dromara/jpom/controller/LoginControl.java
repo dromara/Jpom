@@ -13,6 +13,8 @@ import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.LFUCache;
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.captcha.CircleCaptcha;
+import cn.hutool.captcha.generator.CodeGenerator;
+import cn.hutool.captcha.generator.RandomGenerator;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateUtil;
@@ -88,6 +90,8 @@ public class LoginControl extends BaseServerController implements InitializingBe
     private static final TimedCache<String, String> MFA_TOKEN = CacheUtil.newTimedCache(TimeUnit.MINUTES.toMillis(10));
 
     private static final String LOGIN_CODE = "login_code";
+    // 去重容易混淆的字符串，oO0、lL1、q9Q、pP，区分大小写
+    private static final CodeGenerator codeGenerator = new RandomGenerator("abcdefghjkmnrstuvwxyzABCDEFGHIJKMNRSTUVWXYZ2345678", 4);
 
     private final UserService userService;
     private final UserConfig userConfig;
@@ -120,7 +124,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
 
     private CircleCaptcha createCaptcha(String theme) {
         int height = 50;
-        CircleCaptcha circleCaptcha = new CircleCaptcha(100, height, 4, 8);
+        CircleCaptcha circleCaptcha = new CircleCaptcha(100, height, codeGenerator, 8);
         if (StrUtil.equalsIgnoreCase(theme, "dark")) {
             circleCaptcha.setBackground(Color.darkGray);
         } else {

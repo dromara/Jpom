@@ -1255,7 +1255,8 @@ export default {
         onOk: () => {
           this.tableSelections.forEach((item) => {
             startBuild({
-              id: item
+              id: item,
+              buildEnvParameter: this.list.find((item2) => item2.id === item)?.buildEnvParameter
             }).then((res) => {
               if (res.code === 200) {
                 //
