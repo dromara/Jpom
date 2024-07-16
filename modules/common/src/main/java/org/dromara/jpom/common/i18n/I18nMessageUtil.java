@@ -9,6 +9,9 @@
  */
 package org.dromara.jpom.common.i18n;
 
+import cn.hutool.core.comparator.ComparatorChain;
+import cn.hutool.core.comparator.FuncComparator;
+import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
@@ -26,6 +29,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -98,6 +103,13 @@ public class I18nMessageUtil {
 
     /**
      * 获取语言 通过 http 请求
+     * <p>
+     * Accept-Language
+     * 在Web应用程序中，HTTP规范规定了浏览器会在请求中携带Accept-Language头，用来指示用户浏览器设定的语言顺序，如：
+     * <p>
+     * Accept-Language: zh-CN,zh;q=0.8,en;q=0.2
+     * <p>
+     * 上述HTTP请求头表示优先选择简体中文，其次选择中文，最后选择英文。q表示权重，解析后我们可获得一个根据优先级排序的语言列表，把它转换为Java的Locale，即获得了用户的Locale。大多数框架通常只返回权重最高的Locale。
      *
      * @return 语言
      */
@@ -105,9 +117,47 @@ public class I18nMessageUtil {
         ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (servletRequestAttributes != null) {
             HttpServletRequest request = servletRequestAttributes.getRequest();
-            return ServletUtil.getHeader(request, Header.ACCEPT_LANGUAGE.getValue(), CharsetUtil.CHARSET_UTF_8);
+            String header = ServletUtil.getHeader(request, Header.ACCEPT_LANGUAGE.getValue(), CharsetUtil.CHARSET_UTF_8);
+            return headerAcceptLanguageBest(header);
         }
         return null;
+    }
+
+    public static String headerAcceptLanguageBest(String header) {
+        List<String> languageTags = StrUtil.splitTrim(header, StrUtil.COMMA);
+        return languageTags.stream()
+            .map(tag -> {
+                String[] parts = tag.trim().split(";");
+
+                float quality = 1.0f; // Default quality is 1.0
+
+                if (parts.length > 0) {
+                    // The first part is the language code
+                    String locale = parts[0];
+
+                    if (parts.length > 1) {
+                        // If there's a second part, it's the quality factor
+                        String qPart = parts[1].trim();
+                        if (qPart.startsWith("q=")) {
+                            try {
+                                quality = Float.parseFloat(qPart.substring(2));
+                            } catch (NumberFormatException e) {
+                                // Ignore if parsing fails
+                            }
+                        }
+                    }
+                    return new Tuple(locale, quality);
+                }
+                return null;
+            })
+            .filter(Objects::nonNull)
+            .max((o1, o2) -> {
+                FuncComparator<Tuple> funcComparator = new FuncComparator<>(true, objects -> objects.get(1));
+                FuncComparator<Tuple> funcComparator2 = new FuncComparator<>(true, objects -> objects.get(0));
+                return ComparatorChain.of(funcComparator, funcComparator2).compare(o1, o2);
+            })
+            .map((Function<Tuple, String>) objects -> objects.get(0))
+            .orElse(null);
     }
 
     /**
@@ -121,12 +171,14 @@ public class I18nMessageUtil {
         language = StrUtil.replace(language, "_", "-");
         switch (language) {
             case "en-us":
+            case "en":
                 return "en-US";
             case "zh-tw":
                 return "zh-TW";
             case "zh-hk":
                 return "zh-HK";
             case "zh-cn":
+            case "zh":
             default:
                 return "zh-CN";
         }
