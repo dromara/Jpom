@@ -6,6 +6,7 @@
 
 1. 【server】优化 登录验证码去除易混淆字母（oO0、lL1、q9Q、pP）
 2. 【server】修复 批量构建引起环境变量丢失问题（感谢@[xieliangza](https://github.com/xieliangza) [Github issues 88](https://github.com/dromara/Jpom/issues/88) ）
+3. 【all】优化 解析 HTTP `Accept-Language` 请求头支持多语言最高优先级
 
 ------
 
