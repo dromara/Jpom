@@ -152,6 +152,12 @@ notices-2: # 可选的
   link: https://www.jnpfsoft.com/index.html?from=jpom
   bgColor: '#404040'
   textColor: '#ffffff'
+- name: 橙单免费代码生成
+  desc: 卓越的代码生成能力，全优的代码生成质量
+  avatar: /images/friends/ad/orangeforms-logo.png
+  link: https://www.orangeforms.com/?from=jpom
+  bgColor: '#f37700'
+  textColor: '#ffffff'
 ```
 :::
 

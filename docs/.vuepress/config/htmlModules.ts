@@ -34,6 +34,7 @@ const htmlModule: VdoingThemeConfig["htmlModules"] = {
          添加小助手：备注 <b>Jpom</b> 进群
         </div>`,
   sidebarT: `
+  <div style="width:230px;margin:0 auto;display:flex;flex-direction: column;">
     <a href="https://gitee.com/dromara/MaxKey" target="_blank">
       <img  loading="lazy" class="no-zoom" height="60" width="224" src="/images/friends/ad/maxkey-banner.png">
     </a>
@@ -48,11 +49,18 @@ const htmlModule: VdoingThemeConfig["htmlModules"] = {
     </a>
     <a href="https://www.jnpfsoft.com/index.html?from=jpom" target="_blank"  style="background:#dcf3ff">
           <img  loading="lazy" class="no-zoom" height="60" width="224" src="/images/friends/ad/jnpfsoft-banner.png">
-        </a>
-    <div>
-    <span style='color: gray;font-size: smaller;'></span>
-            <span style='color: #E01E5A;font-size: smaller;font-weight: bolder;float: right'>❤️<a href='/pages/589c8e/'>成为赞助商</a></span>
-            </div>
+    </a>
+     <a href="https://www.orangeforms.com/?from=jpom" target="_blank"  style="background:#f37700">
+          <img  loading="lazy" class="no-zoom" height="60" width="224" src="/images/friends/ad/orangeforms-banner.jpg">
+    </a>
+    <div style="order: 9999;">
+      <span style='color: gray;font-size: smaller;'>广告采用随机轮播方式显示</span>
+      <span style='color: #E01E5A;font-size: smaller;font-weight: bolder;float: right'>❤️<a href='/pages/589c8e/'>成为赞助商</a></span>
+    </div>
+    <div style="order: 100000;background-color:var(--borderColor);width:100%;height:1px;margin: 30px 0px 0px 0px;position:relative;">
+          <button style="border-radius: 100%;padding: 0;text-align: center;border: none;background-color: #ff3861;cursor: pointer;position: absolute;left: calc(50% - 15px);top: -15px;height: 30px;width: 30px;color: #fff;" onclick="document.getElementsByClassName('sidebar-slot-top')[0].style.display='none'">收</button>
+    </div>
+    </div>
   `,
   // 万维广告
   pageT: `
