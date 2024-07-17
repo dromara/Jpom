@@ -996,6 +996,7 @@
                   <QuestionCircleOutlined v-if="!temp.id" />
                 </a-tooltip>
               </template>
+              <template #help>{{ $t('i18n_b095ceda99') }}</template>
               <a-input-search
                 :value="`${
                   tempExtraData ? tempExtraData.noticeScriptId || $t('i18n_b9b176e37a') : $t('i18n_b9b176e37a')

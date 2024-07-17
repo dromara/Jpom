@@ -1972,6 +1972,7 @@
   "i18n_b04209e785": "Linked Data:",
   "i18n_b05345caad": "owner",
   "i18n_b07a33c3a8": "Please select a distribution node",
+  "i18n_b095ceda99": "The selected script needs to configure the monitored event name in the script description to take effect",
   "i18n_b0b9df58fd": "SSH Node",
   "i18n_b0fa44acbb": "Occupancy:",
   "i18n_b10b082c25": "The values are: stop, beforeStop, start, beforeRestart",

@@ -1972,6 +1972,7 @@
   "i18n_b04209e785": "关联数据：",
   "i18n_b05345caad": "所有者",
   "i18n_b07a33c3a8": "请选择分发节点",
+  "i18n_b095ceda99": "选择的脚本需要将监听的事件名配置到脚本描述中才能生效奥",
   "i18n_b0b9df58fd": "SSH节点",
   "i18n_b0fa44acbb": "占用率：",
   "i18n_b10b082c25": "的值有：stop、beforeStop、start、beforeRestart",
