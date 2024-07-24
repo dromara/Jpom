@@ -14,6 +14,7 @@ import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
@@ -50,6 +51,7 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
     private final String secondaryDirectory;
     private final Boolean closeFirst;
     private int stripComponents;
+    private String fileName;
 
     public OutGivingItemRun(OutGivingModel item,
                             OutGivingNodeProject outGivingNodeProject,
@@ -76,6 +78,7 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
         OutGivingNodeProject.Status result;
         long time = SystemClock.now();
         String fileSize = FileUtil.readableFileSize(file);
+        this.fileName = StrUtil.emptyToDefault(this.fileName, this.file.getName());
         try {
             if (this.outGivingNodeProject.getDisabled() != null && this.outGivingNodeProject.getDisabled()) {
                 // 禁用
@@ -84,7 +87,7 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
             }
             this.updateStatus(this.outGivingId, OutGivingNodeProject.Status.Ing, I18nMessageUtil.get("i18n.start_distribution.bce5"));
             //
-            JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file, this.secondaryDirectory,
+            JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file, this.fileName, this.secondaryDirectory,
                 this.outGivingNodeProject.getProjectId(),
                 unzip,
                 afterOpt,

@@ -55,6 +55,7 @@ import org.dromara.jpom.service.node.ProjectInfoCacheService;
 import org.dromara.jpom.service.outgiving.DbOutGivingLogService;
 import org.dromara.jpom.service.outgiving.OutGivingServer;
 import org.dromara.jpom.system.ServerConfig;
+import org.dromara.jpom.util.FileUtils;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -302,7 +303,7 @@ public class OutGivingProjectController extends BaseServerController {
         File file = FileUtil.file(serverConfig.getUserTempPath(), ServerConst.OUTGIVING_FILE, id);
         FileUtil.mkdir(file);
         File downloadFile = HttpUtil.downloadFileFromUrl(url, file);
-        this.startTask(outGivingModel, downloadFile, autoUnzip, stripComponents, selectProject, true);
+        this.startTask(outGivingModel, downloadFile, null, autoUnzip, stripComponents, selectProject, true);
         return JsonMessage.success(I18nMessageUtil.get("i18n.download_success_and_distribute.ae94"));
     }
 
@@ -392,7 +393,8 @@ public class OutGivingProjectController extends BaseServerController {
         outGivingServer.updateById(outGivingModel);
         File storageSavePath = serverConfig.fileStorageSavePath();
         File file = FileUtil.file(storageSavePath, storageModel.getPath());
-        this.startTask(outGivingModel, file, autoUnzip, stripComponents, selectProject, false);
+        String fileName = FileUtils.safeFileName(storageModel.getName(), storageModel.getExtName(), "file-storage." + storageModel.getExtName());
+        this.startTask(outGivingModel, file, fileName, autoUnzip, stripComponents, selectProject, false);
         return JsonMessage.success(I18nMessageUtil.get("i18n.start_distribution_exclamation.9fc2"));
     }
 
@@ -426,7 +428,8 @@ public class OutGivingProjectController extends BaseServerController {
         outGivingServer.updateById(outGivingModel);
 
         File file = FileUtil.file(storageModel.getAbsolutePath());
-        this.startTask(outGivingModel, file, autoUnzip, stripComponents, selectProject, false);
+        String fileName = FileUtils.safeFileName(storageModel.getName(), storageModel.getExtName(), "file-storage." + storageModel.getExtName());
+        this.startTask(outGivingModel, file, fileName, autoUnzip, stripComponents, selectProject, false);
         return JsonMessage.success(I18nMessageUtil.get("i18n.start_distribution_exclamation.9fc2"));
     }
 
@@ -439,7 +442,7 @@ public class OutGivingProjectController extends BaseServerController {
      * @param stripComponents 剔除目录
      * @param selectProject   选择指定项目
      */
-    private void startTask(OutGivingModel outGivingModel, File file, String autoUnzip,
+    private void startTask(OutGivingModel outGivingModel, File file, String fileName, String autoUnzip,
                            String stripComponents,
                            String selectProject,
                            boolean deleteFile) {
@@ -454,6 +457,7 @@ public class OutGivingProjectController extends BaseServerController {
             .id(outGivingModel.getId())
             .file(file)
             .userModel(getUser())
+            .fileName(fileName)
             .unzip(unzip)
             .mode(outGivingModel.getMode())
             .modeData(outGivingModel.getModeData())

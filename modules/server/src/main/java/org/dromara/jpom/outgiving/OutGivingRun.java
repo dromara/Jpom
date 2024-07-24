@@ -80,6 +80,7 @@ public class OutGivingRun {
     private UserModel userModel;
     private boolean unzip;
     private int stripComponents;
+    private String fileName;
     /**
      * 分发方式
      * upload: "手动上传",
@@ -195,6 +196,7 @@ public class OutGivingRun {
                         final OutGivingNodeProject outGivingNodeProject = outGivingNodeProjects.get(nowIndex);
                         final OutGivingItemRun outGivingRun = new OutGivingItemRun(item, outGivingNodeProject, file, unzip, sleepTime);
                         outGivingRun.setStripComponents(stripComponents);
+                        outGivingRun.setFileName(fileName);
                         OutGivingNodeProject.Status status = outGivingRun.call();
                         if (status != OutGivingNodeProject.Status.Ok) {
                             if (afterOpt == AfterOpt.Order_Must_Restart) {
@@ -221,6 +223,7 @@ public class OutGivingRun {
             for (final OutGivingNodeProject outGivingNodeProject : outGivingNodeProjects) {
                 final OutGivingItemRun outGivingItemRun = new OutGivingItemRun(item, outGivingNodeProject, file, unzip, null);
                 outGivingItemRun.setStripComponents(stripComponents);
+                outGivingItemRun.setFileName(fileName);
                 syncFinisher.addWorker(() -> {
                     try {
                         statusList.add(outGivingItemRun.call());
@@ -378,14 +381,14 @@ public class OutGivingRun {
      * @param closeFirst 保存项目文件前先关闭项目
      * @return json
      */
-    public static JsonMessage<String> fileUpload(File file, String levelName, String projectId,
+    public static JsonMessage<String> fileUpload(File file, String fileName, String levelName, String projectId,
                                                  boolean unzip,
                                                  AfterOpt afterOpt,
                                                  NodeModel nodeModel,
                                                  boolean clearOld,
                                                  Boolean closeFirst,
                                                  BiConsumer<Long, Long> streamProgress) {
-        return fileUpload(file, levelName, projectId, unzip, afterOpt, nodeModel, clearOld, null, closeFirst, streamProgress);
+        return fileUpload(file, fileName, levelName, projectId, unzip, afterOpt, nodeModel, clearOld, null, closeFirst, streamProgress);
     }
 
     /**
@@ -402,7 +405,7 @@ public class OutGivingRun {
      * @param closeFirst 保存项目文件前先关闭项目
      * @return json
      */
-    public static JsonMessage<String> fileUpload(File file, String levelName, String projectId,
+    public static JsonMessage<String> fileUpload(File file, String fileName, String levelName, String projectId,
                                                  boolean unzip,
                                                  AfterOpt afterOpt,
                                                  NodeModel nodeModel,
@@ -410,7 +413,7 @@ public class OutGivingRun {
                                                  Integer sleepTime,
                                                  Boolean closeFirst,
                                                  BiConsumer<Long, Long> streamProgress) {
-        return fileUpload(file, levelName, projectId, unzip, afterOpt, nodeModel, clearOld, sleepTime, closeFirst, 0, streamProgress);
+        return fileUpload(file, fileName, levelName, projectId, unzip, afterOpt, nodeModel, clearOld, sleepTime, closeFirst, 0, streamProgress);
     }
 
     /**
@@ -427,7 +430,10 @@ public class OutGivingRun {
      * @param closeFirst 保存项目文件前先关闭项目
      * @return json
      */
-    public static JsonMessage<String> fileUpload(File file, String levelName, String projectId,
+    public static JsonMessage<String> fileUpload(File file,
+                                                 String fileName,
+                                                 String levelName,
+                                                 String projectId,
                                                  boolean unzip,
                                                  AfterOpt afterOpt,
                                                  NodeModel nodeModel,
@@ -457,6 +463,7 @@ public class OutGivingRun {
         data.put("closeFirst", closeFirst);
         try {
             return NodeForward.requestSharding(nodeModel, NodeUrl.Manage_File_Upload_Sharding, data, file,
+                fileName,
                 sliceData -> {
                     sliceData.putAll(data);
                     return NodeForward.request(nodeModel, NodeUrl.Manage_File_Sharding_Merge, sliceData);

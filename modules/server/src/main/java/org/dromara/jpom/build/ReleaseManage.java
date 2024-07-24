@@ -556,7 +556,7 @@ public class ReleaseManage {
             //
             Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / buildExtConfig.getLogReduceProgressRatio()));
             int finalI = i;
-            JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file, startPath,
+            JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file, file.getName(), startPath,
                 projectId, false, last ? afterOpt : AfterOpt.No, nodeModel, false,
                 this.buildExtraModule.getProjectUploadCloseFirst(), (total, progressSize) -> {
                     double progressPercentage = Math.floor(((float) progressSize / total) * 100);
@@ -604,7 +604,7 @@ public class ReleaseManage {
         JsonMessage<String> jsonMessage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, tarGz, (unZip, zipFile) -> {
             String name = zipFile.getName();
             Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / buildExtConfig.getLogReduceProgressRatio()));
-            return OutGivingRun.fileUpload(zipFile,
+            return OutGivingRun.fileUpload(zipFile, zipFile.getName(),
                 this.buildExtraModule.getProjectSecondaryDirectory(),
                 projectId,
                 unZip,

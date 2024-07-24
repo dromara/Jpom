@@ -17,6 +17,7 @@ import cn.hutool.core.io.NioUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.Lombok;
@@ -231,5 +232,16 @@ public class FileUtils {
             // 删除文件夹
             FileUtil.del(src);
         }
+    }
+
+    public static String safeFileName(String name1, String extName, String defaultName){
+        // 需要考虑文件名中存在非法字符 [\s\\/:\*\?\"<>\|]
+        String name = ReUtil.replaceAll(name1, "[\\s\\\\/:\\*\\?\\\"<>\\|]", "");
+        if (StrUtil.isEmpty(name)) {
+            name = defaultName;
+        } else if (!StrUtil.endWith(name, StrUtil.DOT + extName)) {
+            name += StrUtil.DOT + extName;
+        }
+        return name;
     }
 }

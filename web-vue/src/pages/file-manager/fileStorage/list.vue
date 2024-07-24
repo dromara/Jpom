@@ -217,6 +217,8 @@
         <a-form ref="editForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
           <a-form-item :label="$t('i18n_29139c2a1a')" name="name">
             <a-input v-model:value="temp.name" :placeholder="$t('i18n_29139c2a1a')" />
+            <!-- [\s\\/:\*\?\"<>\|] -->
+            <template #help>{{ $t('i18n_9f4a0d67c6') }}</template>
           </a-form-item>
           <a-form-item :label="$t('i18n_824607be6b')" name="keepDay">
             <a-input-number

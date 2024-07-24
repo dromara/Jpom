@@ -27,6 +27,7 @@ import org.dromara.jpom.func.files.service.FileStorageService;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.user.TriggerTokenLogServer;
 import org.dromara.jpom.system.ServerConfig;
+import org.dromara.jpom.util.FileUtils;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -131,7 +132,7 @@ public class FileStorageApiController extends BaseDownloadApiController {
         File storageSavePath = serverConfig.fileStorageSavePath();
         File fileStorageFile = FileUtil.file(storageSavePath, storageModel.getPath());
         // 需要考虑文件名中存在非法字符
-        String name = this.convertName(storageModel.getName(), storageModel.getExtName(), fileStorageFile.getName());
+        String name = FileUtils.safeFileName(storageModel.getName(), storageModel.getExtName(), fileStorageFile.getName());
         //    解析断点续传相关信息
         long fileSize = FileUtil.size(fileStorageFile);
         long[] resolveRange = this.resolveRange(request, fileSize, storageModel.getId(), storageModel.getName(), response);
