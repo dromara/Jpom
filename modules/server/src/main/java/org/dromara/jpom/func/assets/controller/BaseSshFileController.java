@@ -46,6 +46,7 @@ import org.dromara.jpom.util.CompressionFileUtil;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.multipart.MultipartFile;
@@ -479,6 +480,53 @@ public abstract class BaseSshFileController extends BaseServerController {
             sftp.delFile(path);
         }
         return false;
+    }
+
+    /**
+     * 上传分片
+     *
+     * @param file       文件对象
+     * @param sliceId    分片id
+     * @param totalSlice 总分片
+     * @param nowSlice   当前分片
+     * @param fileSumMd5 文件 md5
+     * @return json
+     */
+    @PostMapping(value = "upload-sharding", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.UPLOAD, log = false)
+    public IJsonMessage<String> uploadSharding(MultipartFile file,
+                                               String sliceId,
+                                               Integer totalSlice,
+                                               Integer nowSlice,
+                                               String fileSumMd5,
+                                               @ValidatorItem String id,
+                                               @ValidatorItem String allowPathParent,
+                                               @ValidatorItem String nextPath) {
+        return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
+            String remotePath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath);
+            Session session = null;
+            ChannelSftp channel = null;
+            try {
+                session = sshService.getSessionByModel(machineSshModel);
+                channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
+                channel.cd(remotePath);
+                String originalFilename = file.getOriginalFilename();
+                // xxxx.txt.1
+                originalFilename = StrUtil.subBefore(originalFilename, ".", true);
+                if (nowSlice == 0) {
+                    channel.put(file.getInputStream(), originalFilename, ChannelSftp.OVERWRITE);
+                } else {
+                    channel.put(file.getInputStream(), originalFilename, ChannelSftp.APPEND);
+                }
+            } catch (Exception e) {
+                log.error(I18nMessageUtil.get("i18n.ssh_file_upload_exception.5c1c"), e);
+                return new JsonMessage<>(400, I18nMessageUtil.get("i18n.upload_failed.b019") + e.getMessage());
+            } finally {
+                JschUtil.close(channel);
+                JschUtil.close(session);
+            }
+            return JsonMessage.success(I18nMessageUtil.get("i18n.upload_success.a769"));
+        });
     }
 
 

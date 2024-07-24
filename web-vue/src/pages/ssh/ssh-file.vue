@@ -48,6 +48,7 @@
       <a-empty v-if="treeList.length === 0" :image="Empty.PRESENTED_IMAGE_SIMPLE" />
       <a-directory-tree
         v-model:selectedKeys="selectedKeys"
+        v-model:expandedKeys="expandedKeys"
         :tree-data="treeList"
         :field-names="replaceFields"
         @select="onSelect"
@@ -85,6 +86,13 @@
                 </a-menu>
               </template>
             </a-dropdown>
+            <a-button
+              size="small"
+              :disabled="!tempNode.nextPath"
+              type="primary"
+              @click="uploadShardingFileVisible = true"
+              >{{ $t('i18n_dda8b4c10f') }}</a-button
+            >
             <a-dropdown :disabled="!tempNode.nextPath">
               <a-button size="small" type="primary" @click="(e) => e.preventDefault()">{{
                 $t('i18n_26bb841878')
@@ -226,6 +234,78 @@
           >{{ $t('i18n_020f1ecd62') }}</a-button
         >
       </CustomModal>
+      <!-- 分片上传 -->
+      <CustomModal
+        v-if="uploadShardingFileVisible"
+        v-model:open="uploadShardingFileVisible"
+        destroy-on-close
+        :confirm-loading="confirmLoading"
+        :closable="!confirmLoading"
+        :keyboard="false"
+        width="35vw"
+        :title="$t('i18n_d65551b090')"
+        :footer="null"
+        :mask-closable="false"
+      >
+        <a-space direction="vertical" size="large" style="width: 100%">
+          <a-alert :message="$t('i18n_776bf504a4')" type="warning">
+            <template #description>
+              <ul>
+                <li>
+                  {{ $t('i18n_383952103d') }}
+                </li>
+                <li>{{ $t('i18n_d85279c536') }}</li>
+              </ul>
+            </template>
+          </a-alert>
+          <a-upload
+            :file-list="uploadFileList"
+            :before-upload="
+              (file) => {
+                uploadFileList = [file]
+                return false
+              }
+            "
+            multiple
+            :disabled="!!percentage"
+            @remove="
+              (file) => {
+                const index = uploadFileList.indexOf(file)
+                //const newFileList = this.uploadFileList.slice();
+
+                uploadFileList.splice(index, 1)
+                return true
+              }
+            "
+          >
+            <template v-if="percentage">
+              <LoadingOutlined v-if="uploadFileList.length" />
+              <span v-else>-</span>
+            </template>
+
+            <a-button v-else><UploadOutlined />{{ $t('i18n_fd7e0c997d') }}</a-button>
+          </a-upload>
+
+          <a-row v-if="percentage">
+            <a-col span="24">
+              <a-progress :percent="percentage" class="max-progress">
+                <template #format="percent">
+                  {{ percent }}%<template v-if="percentageInfo.total">
+                    ({{ renderSize(percentageInfo.total) }})
+                  </template>
+                  <template v-if="percentageInfo.duration">
+                    {{ $t('i18n_833249fb92') }}:{{ formatDuration(percentageInfo.duration) }}
+                  </template>
+                </template>
+              </a-progress>
+            </a-col>
+          </a-row>
+
+          <a-button type="primary" :disabled="fileUploadDisabled" @click="startUploadSharding">{{
+            $t('i18n_020f1ecd62')
+          }}</a-button>
+        </a-space>
+      </CustomModal>
       <!--  新增文件 目录    -->
       <CustomModal
         v-if="addFileFolderVisible"
@@ -251,7 +331,7 @@
           </a-row>
         </a-space>
       </CustomModal>
-
+      <!-- 编辑文件 -->
       <CustomModal
         v-if="editFileVisible"
         v-model:open="editFileVisible"
@@ -391,16 +471,19 @@ import {
   uploadFile,
   parsePermissions,
   calcFilePermissionValue,
-  changeFilePermission
+  changeFilePermission,
+  uploadShardingFile
 } from '@/api/ssh-file'
 
 import codeEditor from '@/components/codeEditor'
-import { ZIP_ACCEPT, renderSize, parseTime } from '@/utils/const'
+import { ZIP_ACCEPT, renderSize, parseTime, concurrentExecution, formatDuration } from '@/utils/const'
 import { Empty } from 'ant-design-vue'
+import { uploadPieces } from '@/utils/upload-pieces'
 export default {
   components: {
     codeEditor
   },
+  inject: ['globalLoading'],
   props: {
     sshId: {
       type: String,
@@ -504,10 +587,17 @@ export default {
         asc: true
       },
       confirmLoading: false,
-      selectedKeys: []
+      selectedKeys: [],
+      expandedKeys: [],
+      uploadShardingFileVisible: false,
+      percentage: 0,
+      percentageInfo: {}
     }
   },
   computed: {
+    fileUploadDisabled() {
+      return this.uploadFileList.length === 0 || this.confirmLoading
+    },
     nowPath() {
       if (!this.tempNode.allowPathParent) {
         return ''
@@ -537,6 +627,7 @@ export default {
     this.loadData()
   },
   methods: {
+    formatDuration,
     changeSort(key, asc) {
       this.sortMethod = { key: key, asc: asc }
       localStorage.setItem('ssh-list-sort', JSON.stringify(this.sortMethod))
@@ -822,7 +913,116 @@ export default {
           })
       })
     },
+    startUploadSharding() {
+      // 设置上传状态
+      this.confirmLoading = true
+      // 遍历上传文件
+      concurrentExecution(
+        this.uploadFileList.map((item, index) => {
+          // console.log(item);
+          return index
+        }),
+        // 并发数只能是 1
+        1,
+        (curItem) => {
+          const file = this.uploadFileList[curItem]
+          this.uploadFileList = this.uploadFileList.map((fileItem, fileIndex) => {
+            if (fileIndex === curItem) {
+              fileItem.status = 'uploading'
+            }
+            return fileItem
+          })
+          this.percentage = 0
+          this.percentageInfo = {}
+          return new Promise((resolve, reject) => {
+            uploadPieces({
+              file,
+              resolveFileProcess: (msg) => {
+                this.globalLoading({
+                  spinning: true,
+                  tip: msg
+                })
+              },
+              resolveFileEnd: () => {
+                this.globalLoading(false)
+              },
+              process: (process, end, total, duration) => {
+                this.percentage = Math.max(this.percentage, process)
+                this.percentageInfo = { end, total, duration }
+              },
+              success: () => {
+                // 合并
+                $notification.success({
+                  message: this.$t('i18n_a7699ba731')
+                })
+                this.uploadFileList = this.uploadFileList.map((fileItem, fileIndex) => {
+                  if (fileIndex === curItem) {
+                    fileItem.status = 'done'
+                  }
+                  return fileItem
+                })
 
+                resolve()
+              },
+              error: (msg) => {
+                this.uploadFileList = this.uploadFileList.map((fileItem, fileIndex) => {
+                  if (fileIndex === curItem) {
+                    fileItem.status = 'error'
+                  }
+                  return fileItem
+                })
+                $notification.error({
+                  message: msg
+                })
+                this.confirmLoading = false
+                reject()
+              },
+              uploadCallback: (formData) => {
+                return new Promise((resolve, reject) => {
+                  formData.append('id', this.reqDataId)
+                  formData.append('allowPathParent', this.tempNode.allowPathParent)
+                  formData.append('unzip', this.uploadFileZip)
+                  formData.append('nextPath', this.tempNode.nextPath)
+
+                  // 上传文件
+                  uploadShardingFile(this.baseUrl, formData)
+                    .then((res) => {
+                      if (res.code === 200) {
+                        resolve()
+                      } else {
+                        reject()
+                      }
+                    })
+                    .catch(() => {
+                      reject()
+                    })
+                })
+              }
+            })
+          })
+        }
+      )
+        .then(() => {
+          //this.uploading = this.successSize !== this.uploadFileList.length
+          // // 判断是否全部上传完成
+          // if (!this.uploading) {
+          //   this.uploadFileList = []
+          //   setTimeout(() => {
+          //     this.loadFileList()
+          //     this.uploadFileVisible = false
+          //   }, 2000)
+          // }
+          this.percentage = 0
+          this.percentageInfo = {}
+          this.uploadFileList = []
+          this.loadFileList()
+          this.uploadShardingFileVisible = false
+        })
+        .finally(() => {
+          this.confirmLoading = false
+          //
+        })
+    },
     // 编辑
     handleEdit(record) {
       this.temp = Object.assign({}, record)
@@ -1005,6 +1205,9 @@ export default {
 }
 </script>
 <style scoped>
+:deep(.ant-progress-text) {
+  width: auto;
+}
 .ssh-file-layout {
   padding: 0;
   min-height: calc(100vh - 75px);
