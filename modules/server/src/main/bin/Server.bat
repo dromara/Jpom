@@ -51,6 +51,16 @@ set JAVA_OPTS_EXT= -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true -Dap
 set APP_OPTS= -Djpom.application.tag="%PID_TAG%" -Dlogging.config="%logback_configurationFile%" -Dspring.config.location="%application_conf%"
 set JAVA_OPTS= %JAVA_MEM_OPTS% %JAVA_OPTS_EXT% %APP_OPTS%
 
+java -version 2>&1 | findstr "version" > temp.txt
+set /p temp_version= < temp.txt
+rem del temp_version.txt
+echo %version% | findstr "1.8." > nul
+if %errorlevel% equ 0 (
+    set JAVA_OPTS= %JAVA_OPTS%
+) else (
+	set JAVA_OPTS= %JAVA_OPTS% --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/jdk.internal.ref=ALL-UNNAMED
+)
+
 set ARGS=%*
 set JPOM_LOG=%log_dir%
 if not exist %log_dir% md %log_dir%
