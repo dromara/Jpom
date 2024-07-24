@@ -1768,6 +1768,7 @@
   "i18n_9ee9d48699": "Modification is not supported after creation",
   "i18n_9f01272a10": " legal risk",
   "i18n_9f0de3800b": "Please fill in the warehouse name.",
+  "i18n_9f4a0d67c6": "It is recommended not to have blank spaces, tables, other blanks, \\,/,:, *,?, _ # # _,<,>, \\, in the file name| Waiting for special characters",
   "i18n_9f52492fbc": "For configuration details, please refer to the configuration example.",
   "i18n_9f6090c819": "The incoming parameters are: buildId, buildName, type, statusMsg, triggerTime",
   "i18n_9f6fa346d8": "Please enter an SSH name",

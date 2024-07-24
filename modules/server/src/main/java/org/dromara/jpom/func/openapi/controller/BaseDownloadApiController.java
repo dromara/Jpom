@@ -86,17 +86,6 @@ public abstract class BaseDownloadApiController extends BaseJpomController {
         return new long[]{fromPos, downloadSize};
     }
 
-    protected String convertName(String name1, String extName, String defaultName) {
-        // 需要考虑文件名中存在非法字符
-        String name = ReUtil.replaceAll(name1, "[\\s\\\\/:\\*\\?\\\"<>\\|]", "");
-        if (StrUtil.isEmpty(name)) {
-            name = defaultName;
-        } else if (!StrUtil.endWith(name, StrUtil.DOT + extName)) {
-            name += StrUtil.DOT + extName;
-        }
-        return name;
-    }
-
     public void download(File file, long fileSize, String name, long[] resolveRange, HttpServletResponse response) throws IOException {
         Assert.state(FileUtil.isFile(file), I18nMessageUtil.get("i18n.file_does_not_exist_anymore.2fab"));
         String contentType = ObjectUtil.defaultIfNull(FileUtil.getMimeType(name), "application/octet-stream");
