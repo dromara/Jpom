@@ -8,6 +8,7 @@
 2. 【server】修复 批量构建引起环境变量丢失问题（感谢@[xieliangza](https://github.com/xieliangza) [Github issues 88](https://github.com/dromara/Jpom/issues/88) ）
 3. 【all】优化 解析 HTTP `Accept-Language` 请求头支持多语言最高优先级
 4. 【server】修复 页面未刷新情况下打开弹窗次数过多不能提示窗口层级太低（感谢[@lin_yeqi](https://gitee.com/lin_yeqi) [Gitee issues IAEBUZ](https://gitee.com/dromara/Jpom/issues/IAEBUZ) ）
+5. 【server】优化 分发日志现在关联数据信息（感谢[@pumpkinor](https://gitee.com/pumpkinor) [Gitee issues IAF7IV](https://gitee.com/dromara/Jpom/issues/IAF7IV) ）
 
 ------
 
