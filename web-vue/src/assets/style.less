@@ -1,3 +1,6 @@
+:root {
+  --notification-z-index: 1050;
+}
 .search-box {
   margin-bottom: 0 !important;
   box-sizing: border-box;
@@ -13,4 +16,8 @@
 // 国际化时表单换行
 .ant-form-item .ant-form-item-label > label {
   white-space: normal;
+}
+
+.ant-notification {
+  z-index: var(--notification-z-index) !important;
 }

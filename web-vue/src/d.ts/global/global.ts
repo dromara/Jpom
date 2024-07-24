@@ -15,13 +15,43 @@ import { useUserStore } from '@/stores/user'
 import { useGuideStore } from '@/stores/guide'
 import { ModalFuncProps } from 'ant-design-vue/es/modal/Modal'
 import { increaseZIndex } from '@/utils/utils'
+import { NotificationArgsProps } from 'ant-design-vue/es/notification'
 
 export const jpomWindow = () => {
   return window as unknown as GlobalWindow
 }
 // 注册全局的组件
 export const $message = message
-export const $notification = notification
+
+const updateNotificationZIndex = () => {
+  document.documentElement.style.setProperty('--notification-z-index', String(increaseZIndex()))
+}
+export const $notification = {
+  ...notification,
+  success: (config: NotificationArgsProps) => {
+    updateNotificationZIndex()
+    return notification.success(config)
+  },
+  error: (config: NotificationArgsProps) => {
+    updateNotificationZIndex()
+    return notification.error(config)
+  },
+  info: (config: NotificationArgsProps) => {
+    updateNotificationZIndex()
+    return notification.info(config)
+  },
+  warning: (config: NotificationArgsProps) => {
+    updateNotificationZIndex()
+    return notification.warning(config)
+  },
+  open: (config: NotificationArgsProps) => {
+    updateNotificationZIndex()
+    return notification.open(config)
+  }
+}
+
+// --notification-z-index
+
 //
 export const $confirm = (props: ModalFuncProps) => {
   return Modal.confirm({ ...props, zIndex: increaseZIndex() })
