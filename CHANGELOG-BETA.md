@@ -11,6 +11,7 @@
 5. 【server】优化 分发日志现在关联数据信息（感谢[@pumpkinor](https://gitee.com/pumpkinor) [Gitee issues IAF7IV](https://gitee.com/dromara/Jpom/issues/IAF7IV) ）
 6. 【server】优化 分发文件使用文件中心或者静态文件上传至节点使用实际文件名（感谢[@pumpkinor](https://gitee.com/pumpkinor) [Gitee issues IAF7GD](https://gitee.com/dromara/Jpom/issues/IAF7GD) ）
 7. 【server】优化 SSH 文件管理支持浏览器分片上传（感谢[@超人那个超i](https://gitee.com/chao_a) [Gitee issues IAD9W4](https://gitee.com/dromara/Jpom/issues/IAD9W4) ）
+8. 【all】优化 管理脚本判断 JDK9+ 自动添加解除限制反射参数：--add-opens=xxxx
 
 ------
 
