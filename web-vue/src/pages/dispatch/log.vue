@@ -246,6 +246,12 @@ export default {
           width: 100
         },
         {
+          title: this.$t('i18n_45a4922d3f'),
+          dataIndex: 'modeData',
+          ellipsis: true,
+          width: 100
+        },
+        {
           title: this.$t('i18n_f9ac4b2aa6'),
           dataIndex: 'modifyUser',
           ellipsis: true,
