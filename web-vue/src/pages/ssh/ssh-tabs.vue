@@ -11,6 +11,8 @@
     >
       <a-directory-tree
         v-if="treeList.length"
+        v-model:expandedKeys="expandedKeys"
+        v-model:selectedKeys="selectedKeys"
         multiple
         default-expand-all
         :tree-data="treeList"
@@ -89,7 +91,9 @@ export default {
         children: 'children',
         title: 'name',
         key: 'id'
-      }
+      },
+      expandedKeys: [],
+      selectedKeys: []
     }
   },
   computed: {},

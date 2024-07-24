@@ -33,6 +33,19 @@ export function uploadFile(baseUrl, formData) {
   })
 }
 
+export function uploadShardingFile(baseUrl, formData) {
+  return axios({
+    url: baseUrl + 'upload-sharding',
+    headers: {
+      'Content-Type': 'multipart/form-data;charset=UTF-8'
+    },
+    method: 'post',
+    // 0 表示无超时时间
+    timeout: 0,
+    data: formData
+  })
+}
+
 /**
  * 授权目录列表
  * @param {String} id
