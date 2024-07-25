@@ -93,9 +93,13 @@ JAVA_OPTS="$JAVA_OPTS -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true -
 JAVA_OPTS="$JAVA_OPTS -Dlogging.config=$logback_configurationFile -Dspring.config.location=$application_conf"
 JAVA_OPTS="$JAVA_OPTS -Djava.io.tmpdir=$tmpdir"
 
-# JDK11+
-JAVA_OPTS="$JAVA_OPTS --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/jdk.internal.ref=ALL-UNNAMED"
-
+java_8=$($JAVA -version 2>&1 | grep -E '1.8\..*')
+if [ -n "$java_8" ]; then
+  JAVA_OPTS="$JAVA_OPTS "
+else
+  # JDK9+
+  JAVA_OPTS="$JAVA_OPTS --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/jdk.internal.ref=ALL-UNNAMED"
+fi
 if [[ -z "${RUN_ARG}" ]]; then
   MAIN_ARGS="$*"
 else
