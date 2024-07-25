@@ -1,6 +1,6 @@
 # 🚀 版本日志
 
-## 2.11.8.4-beta
+## 2.11.8.4-beta (2024-07-25)
 
 ### 🐞 解决BUG、优化功能
 
@@ -8,7 +8,7 @@
 2. 【server】修复 批量构建引起环境变量丢失问题（感谢@[xieliangza](https://github.com/xieliangza) [Github issues 88](https://github.com/dromara/Jpom/issues/88) ）
 3. 【all】优化 解析 HTTP `Accept-Language` 请求头支持多语言最高优先级
 4. 【server】修复 页面未刷新情况下打开弹窗次数过多不能提示窗口层级太低（感谢[@lin_yeqi](https://gitee.com/lin_yeqi) [Gitee issues IAEBUZ](https://gitee.com/dromara/Jpom/issues/IAEBUZ) ）
-5. 【server】优化 分发日志现在关联数据信息（感谢[@pumpkinor](https://gitee.com/pumpkinor) [Gitee issues IAF7IV](https://gitee.com/dromara/Jpom/issues/IAF7IV) ）
+5. 【server】优化 分发日志显示关联数据信息（感谢[@pumpkinor](https://gitee.com/pumpkinor) [Gitee issues IAF7IV](https://gitee.com/dromara/Jpom/issues/IAF7IV) ）
 6. 【server】优化 分发文件使用文件中心或者静态文件上传至节点使用实际文件名（感谢[@pumpkinor](https://gitee.com/pumpkinor) [Gitee issues IAF7GD](https://gitee.com/dromara/Jpom/issues/IAF7GD) ）
 7. 【server】优化 SSH 文件管理支持浏览器分片上传（感谢[@超人那个超i](https://gitee.com/chao_a) [Gitee issues IAD9W4](https://gitee.com/dromara/Jpom/issues/IAD9W4) ）
 8. 【all】优化 管理脚本判断 JDK9+ 自动添加解除限制反射参数：--add-opens=xxxx
