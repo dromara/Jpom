@@ -24,7 +24,7 @@ export const jpomWindow = () => {
 export const $message = message
 
 const updateNotificationZIndex = () => {
-  document.documentElement.style.setProperty('--notification-z-index', String(increaseZIndex()))
+  //document.documentElement.style.setProperty('--increase-z-index', String(increaseZIndex()))
 }
 export const $notification = {
   ...notification,
@@ -50,7 +50,7 @@ export const $notification = {
   }
 }
 
-// --notification-z-index
+// --increase-z-index
 
 //
 export const $confirm = (props: ModalFuncProps) => {
