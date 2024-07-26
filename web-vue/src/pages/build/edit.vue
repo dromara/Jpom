@@ -1550,13 +1550,25 @@ export default {
 
       dslDefault:
         this.$t('i18n_ee19907fad') +
+        '\n' +
+        this.$t('i18n_d242bc3990') +
+        '\n' +
+        this.$t('i18n_429d4dbc55') +
+        '\n' +
         'runsOn: ubuntu-latest\n' +
         this.$t('i18n_f1a2a46f52') +
+        '\n' +
         'fromTag: xxx\n' +
         this.$t('i18n_36df970248') +
+        '\n' +
         this.$t('i18n_30ff009ab3') +
+        '\n' +
         this.$t('i18n_ed40308fe9') +
+        '\n' +
         this.$t('i18n_df5f80946d') +
+        '\n' +
+        this.$t('i18n_2296651945') +
+        '\n' +
         'steps:\n' +
         '  - uses: java\n' +
         '    version: 8\n' +
@@ -1569,30 +1581,39 @@ export default {
         '#  - uses: python3\n' +
         '#    version: 3.6.6\n' +
         this.$t('i18n_23559b6453') +
+        '\n' +
         '  - uses: cache\n' +
         '    path: /root/.m2\n' +
         this.$t('i18n_1abf39bdb6') +
+        '\n' +
         '    type: global\n' +
         this.$t('i18n_f63345630c') +
+        '\n' +
         '  - uses: cache\n' +
         '    path: ${JPOM_WORKING_DIR}/web-vue/node_modules\n' +
         this.$t('i18n_5457c2e99f') +
+        '\n' +
         '    mode: copy\n' +
         '  - run: npm config set registry https://registry.npmmirror.com\n' +
         this.$t('i18n_7bcc3f169c') +
+        '\n' +
         '  - run: cd  ${JPOM_WORKING_DIR}/web-vue && npm i && npm run build\n' +
         '  - run: cd ${JPOM_WORKING_DIR} && mvn package -s script/settings.xml\n' +
         this.$t('i18n_ea89a319ec') +
+        '\n' +
         '# binds:\n' +
         '#  - /Users/user/.m2/settings.xml:/root/.m2/\n' +
         this.$t('i18n_8d90b15eaf') +
+        '\n' +
         '# dirChildrenOnly = true will create /var/data/titi and /var/data/tata dirChildrenOnly = false will create /var/data/root/titi and /var/data/root/tata\n' +
         '# copy:\n' +
         '#  - /Users/user/.m2/settings.xml:/root/.m2/:false\n' +
         this.$t('i18n_2b94686a65') +
+        '\n' +
         'env:\n' +
         '  NODE_OPTIONS: --max-old-space-size=900\n' +
         this.$t('i18n_993a5c7eee') +
+        '\n' +
         '#hostConfig:\n' +
         '#  CpuShares: 1',
       loading: false,
