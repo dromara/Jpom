@@ -57,7 +57,7 @@
         <tomcat.version>9.0.86</tomcat.version>
         <yaml.version>2.2</yaml.version>
         <!--  h2 不能直接升级 The write format 2 is smaller than the supported format 3-->
-        <h2.version>2.1.214</h2.version>
+        <h2.version>2.2.220</h2.version>
         <postgresql.version>42.3.10</postgresql.version>
         <!-- logback 不能升级
         https://github.com/spring-projects/spring-boot/issues/34708
