@@ -1,5 +1,31 @@
 # 🚀 版本日志
 
+## 2.11.9-release (2024-08-02)
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】修复 静态文件扫描到空时更新数据库异常（感谢[@blackcat](https://gitee.com/kylin_lawliet) [Gitee issues IA6UO0](https://gitee.com/dromara/Jpom/issues/IA6UO0) ）
+2. 【server】修复 SSH命令行操作日志支持更全展示（感谢[@beens](https://gitee.com/beens) [Gitee issues IA6P3J](https://gitee.com/dromara/Jpom/issues/IA6P3J) ）
+3. 【all】优化 升级 hutool、oshi、mwiede-jsch、fastjson2 版本
+4. 【server】修复 非管理员用户无法使用脚本库数据（感谢[@丁炳坤](https://gitee.com/dbk12138) [Gitee issues IA8ZKP](https://gitee.com/dromara/Jpom/issues/IA8ZKP) ）
+5. 【server】修复 构建编辑页面未输入构建命令提示错误（感谢[@yt](https://gitee.com/a1127583020) [Gitee issues IAAI8D](https://gitee.com/dromara/Jpom/issues/IAAI8D) ）
+6. 【server】优化 构建容器镜像支持推送到远程仓库后自动删除本地镜像（感谢 [@爱琳琳真是太好了](https://gitee.com/qiqi513_admin) [Gitee issues IA6UBO](https://gitee.com/dromara/Jpom/issues/IA6UBO) ）
+7. 【server】修复 淘汰 javax.security.cert.X509Certificate（感谢[@Jie](https://github.com/index-jie) [Github issues 84](https://github.com/dromara/Jpom/issues/86) ）
+8. 【all】优化 启动控制台日志完善 i18n
+9. 【server】修复 证书删除后弹窗未正常关闭
+10. 【server】优化 登录验证码去除易混淆字母（oO0、lL1、q9Q、pP）
+11. 【server】修复 批量构建引起环境变量丢失问题（感谢@[xieliangza](https://github.com/xieliangza) [Github issues 88](https://github.com/dromara/Jpom/issues/88) ）
+12. 【all】优化 解析 HTTP `Accept-Language` 请求头支持多语言最高优先级
+13. 【server】修复 页面未刷新情况下打开弹窗次数过多不能提示窗口层级太低（感谢[@lin_yeqi](https://gitee.com/lin_yeqi) [Gitee issues IAEBUZ](https://gitee.com/dromara/Jpom/issues/IAEBUZ) ）
+14. 【server】优化 分发日志显示关联数据信息（感谢[@pumpkinor](https://gitee.com/pumpkinor) [Gitee issues IAF7IV](https://gitee.com/dromara/Jpom/issues/IAF7IV) ）
+15. 【server】优化 分发文件使用文件中心或者静态文件上传至节点使用实际文件名（感谢[@pumpkinor](https://gitee.com/pumpkinor) [Gitee issues IAF7GD](https://gitee.com/dromara/Jpom/issues/IAF7GD) ）
+16. 【server】优化 SSH 文件管理支持浏览器分片上传（感谢[@超人那个超i](https://gitee.com/chao_a) [Gitee issues IAD9W4](https://gitee.com/dromara/Jpom/issues/IAD9W4) ）
+17. 【all】优化 管理脚本判断 JDK9+ 自动添加解除限制反射参数：--add-opens=xxxx
+18. 【server】优化 更多组件的页面层级问题，避免层级错乱无法正常使用页面相关功能
+19. 【server】修复 容器构建 DSL 配置示例错乱
+
+------
+
 ## 2.11.8-release (2024-06-20)
 
 ### 🐞 解决BUG、优化功能
