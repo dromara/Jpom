@@ -16,7 +16,7 @@
     <parent>
         <artifactId>jpom-storage-module-parent</artifactId>
         <groupId>org.dromara.jpom.storage-module</groupId>
-        <version>2.11.8.4</version>
+        <version>2.11.8.5</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
