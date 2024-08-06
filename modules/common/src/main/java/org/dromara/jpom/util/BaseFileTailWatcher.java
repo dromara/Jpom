@@ -137,7 +137,7 @@ public abstract class BaseFileTailWatcher<T extends AutoCloseable> {
     public void start() {
         //this.tailWatcherRun = new FileTailWatcherRun(logFile, this::sendAll);
         if (this.tailer != null) {
-            this.tailer.stop();
+            return;
         }
         this.tailer = new Tailer(logFile, charset, line -> {
             limitQueue.offer(line);
@@ -148,7 +148,7 @@ public abstract class BaseFileTailWatcher<T extends AutoCloseable> {
 
     public void restart() {
         if (this.tailer != null) {
-            this.tailer.stop();
+            this.close();
         }
         this.sendAll("Relisten to the file............");
         this.start();
@@ -158,6 +158,10 @@ public abstract class BaseFileTailWatcher<T extends AutoCloseable> {
      * 关闭
      */
     protected void close() {
+        if (this.tailer == null) {
+            return;
+        }
         this.tailer.stop();
+        this.tailer = null;
     }
 }
