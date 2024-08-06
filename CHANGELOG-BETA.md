@@ -5,6 +5,7 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【all】修复 多会话使用文件跟踪器可能出现多个线程未关闭问题（感谢[@沐剑屏](https://gitee.com/MuJianPing) [Gitee issues IAI0I1](https://gitee.com/dromara/Jpom/issues/IAI0I1) ）
+2. 【all】修复 windows 管理脚本在 JDK 1.8 无法正常启动（感谢@流浪的墨染青衫、@LL）
 
 ------
 
