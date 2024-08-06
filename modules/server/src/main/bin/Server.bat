@@ -54,7 +54,7 @@ set JAVA_OPTS= %JAVA_MEM_OPTS% %JAVA_OPTS_EXT% %APP_OPTS%
 java -version 2>&1 | findstr "version" > temp.txt
 set /p temp_version= < temp.txt
 rem del temp_version.txt
-echo %version% | findstr "1.8." > nul
+echo %temp_version% | findstr "1.8." > nul
 if %errorlevel% equ 0 (
     set JAVA_OPTS= %JAVA_OPTS%
 ) else (
