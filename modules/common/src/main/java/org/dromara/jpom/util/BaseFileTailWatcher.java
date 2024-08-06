@@ -136,6 +136,9 @@ public abstract class BaseFileTailWatcher<T extends AutoCloseable> {
 
     public void start() {
         //this.tailWatcherRun = new FileTailWatcherRun(logFile, this::sendAll);
+        if (this.tailer != null) {
+            this.tailer.stop();
+        }
         this.tailer = new Tailer(logFile, charset, line -> {
             limitQueue.offer(line);
             this.sendAll(line);
