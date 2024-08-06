@@ -53,7 +53,7 @@ public class AgentFileTailWatcher<T extends AutoCloseable> extends BaseFileTailW
      */
     public static boolean addWatcher(File file, Charset charset, Session session) throws IOException {
         if (!FileUtil.isFile(file)) {
-            log.warn(I18nMessageUtil.get("i18n.file_or_directory_not_found.f03e") + file.getPath());
+            log.warn("{}{}", I18nMessageUtil.get("i18n.file_or_directory_not_found.f03e"), file.getPath());
             return false;
         }
         AgentFileTailWatcher<Session> agentFileTailWatcher = CONCURRENT_HASH_MAP.computeIfAbsent(file, s -> {
