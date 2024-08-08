@@ -111,6 +111,7 @@ public class MonitorListController extends BaseServerController {
                                               @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.monitor_name_cannot_be_empty.514a") String name,
                                               @ValidatorItem(msg = "i18n.configure_monitoring_interval.9741") String execCron,
                                               String notifyUser, String webhook,
+                                              String useLanguage,
                                               HttpServletRequest request) {
         String status = getParameter("status");
         String autoRestart = getParameter("autoRestart");
@@ -151,6 +152,7 @@ public class MonitorListController extends BaseServerController {
         monitorModel.projects(nodeProjects);
         monitorModel.setStatus(start);
         monitorModel.setWebhook(webhook);
+        monitorModel.setUseLanguage(useLanguage);
         monitorModel.notifyUser(notifyUserList);
         monitorModel.setName(name);
 

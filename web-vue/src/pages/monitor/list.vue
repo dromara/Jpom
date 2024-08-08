@@ -243,6 +243,14 @@
           </template>
           <a-input v-model:value="temp.webhook" :placeholder="$t('i18n_77373db7d8')" />
         </a-form-item>
+        <a-form-item name="useLanguage">
+          <template #label>使用语言</template>
+          <a-select v-model:value="temp.useLanguage" placeholder="选择监控使用的语言">
+            <a-select-option v-for="item in supportLang" :key="item.value" :value="item.value">
+              {{ item.label }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
       </a-form>
     </CustomModal>
   </div>
@@ -254,7 +262,7 @@ import { getUserListAll } from '@/api/user/user'
 import { getNodeListAll, getProjectListAll } from '@/api/node'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, itemGroupBy, parseTime } from '@/utils/const'
 import { CRON_DATA_SOURCE } from '@/utils/const-i18n'
-
+import { supportLang } from '@/i18n'
 export default {
   data() {
     return {
@@ -343,7 +351,8 @@ export default {
           }
         ]
       },
-      confirmLoading: false
+      confirmLoading: false,
+      supportLang
     }
   },
   computed: {
@@ -487,7 +496,8 @@ export default {
           status: this.temp.status ? 'on' : 'off',
           autoRestart: this.temp.autoRestart ? 'on' : 'off',
           projects: JSON.stringify(projects),
-          notifyUser: JSON.stringify(targetKeysTemp)
+          notifyUser: JSON.stringify(targetKeysTemp),
+          useLanguage: this.temp.useLanguage
         }
         this.confirmLoading = true
         editMonitor(params)

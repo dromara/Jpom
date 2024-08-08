@@ -69,6 +69,10 @@ public class MonitorModel extends BaseWorkspaceModel {
      * webhook
      */
     private String webhook;
+    /**
+     * 使用语言
+     */
+    private String useLanguage;
 
     public String getExecCron() {
         if (execCron == null) {

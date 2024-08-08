@@ -11,7 +11,6 @@ package org.dromara.jpom.monitor;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
@@ -26,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.model.data.MonitorModel;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.log.MonitorNotifyLog;
@@ -75,19 +75,27 @@ public class MonitorItem implements Task {
     public void execute() {
         // 重新查询
         this.monitorModel = monitorService.getByKey(monitorId);
-        List<MonitorModel.NodeProject> nodeProjects = monitorModel.projects();
-        //
-        List<Boolean> collect = nodeProjects.stream().map(nodeProject -> {
-            String nodeId = nodeProject.getNode();
-            NodeModel nodeModel = nodeService.getByKey(nodeId);
-            if (nodeModel == null) {
-                return true;
-            }
-            return this.reqNodeStatus(nodeModel, nodeProject.getProjects());
-        }).filter(aBoolean -> !aBoolean).collect(Collectors.toList());
-        boolean allRun = CollUtil.isEmpty(collect);
-        // 报警状态
-        monitorService.setAlarm(monitorModel.getId(), !allRun);
+        try {
+            I18nMessageUtil.setLanguage(this.monitorModel.getUseLanguage());
+            List<MonitorModel.NodeProject> nodeProjects = monitorModel.projects();
+            //
+            List<Boolean> collect = nodeProjects.stream()
+                .map(nodeProject -> {
+                    String nodeId = nodeProject.getNode();
+                    NodeModel nodeModel = nodeService.getByKey(nodeId);
+                    if (nodeModel == null) {
+                        return true;
+                    }
+                    return this.reqNodeStatus(nodeModel, nodeProject.getProjects());
+                })
+                .filter(aBoolean -> !aBoolean)
+                .collect(Collectors.toList());
+            boolean allRun = CollUtil.isEmpty(collect);
+            // 报警状态
+            monitorService.setAlarm(monitorModel.getId(), !allRun);
+        } finally {
+            I18nMessageUtil.clearLanguage();
+        }
     }
 
     /**
@@ -101,60 +109,63 @@ public class MonitorItem implements Task {
         if (projects == null || projects.isEmpty()) {
             return true;
         }
-        List<Boolean> collect = projects.stream().map(id -> {
-            //
-            String title;
-            String context;
-            try {
-                //查询项目运行状态
-                JsonMessage<JSONObject> jsonMessage = NodeForward.request(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", id);
-                if (jsonMessage.success()) {
-                    JSONObject jsonObject = jsonMessage.getData();
-                    int pid = jsonObject.getIntValue("pId");
-                    String statusMsg = jsonObject.getString("statusMsg");
-                    boolean runStatus = this.checkNotify(monitorModel, nodeModel, id, pid > 0, statusMsg);
-                    // 检查副本
-                    List<Boolean> booleanList = null;
-                    JSONArray copys = jsonObject.getJSONArray("copys");
-                    if (CollUtil.isNotEmpty(copys)) {
-                        booleanList = copys.stream()
-                            .map(o -> {
-                                JSONObject jsonObject1 = (JSONObject) o;
+        List<Boolean> collect = projects.stream()
+            .map(id -> {
+                //
+                String title;
+                String context;
+                try {
+                    //查询项目运行状态
+                    JsonMessage<JSONObject> jsonMessage = NodeForward.request(nodeModel, NodeUrl.Manage_GetProjectStatus, "id", id);
+                    if (jsonMessage.success()) {
+                        JSONObject jsonObject = jsonMessage.getData();
+                        int pid = jsonObject.getIntValue("pId");
+                        String statusMsg = jsonObject.getString("statusMsg");
+                        boolean runStatus = this.checkNotify(monitorModel, nodeModel, id, pid > 0, statusMsg);
+                        // 检查副本
+                        List<Boolean> booleanList = null;
+                        JSONArray copys = jsonObject.getJSONArray("copys");
+                        if (CollUtil.isNotEmpty(copys)) {
+                            booleanList = copys.stream()
+                                .map(o -> {
+                                    JSONObject jsonObject1 = (JSONObject) o;
 
-                                boolean status = jsonObject1.getBooleanValue("status");
-                                return MonitorItem.this.checkNotify(monitorModel, nodeModel, id, status, StrUtil.EMPTY);
-                            })
-                            .filter(aBoolean -> !aBoolean)
-                            .collect(Collectors.toList());
+                                    boolean status = jsonObject1.getBooleanValue("status");
+                                    return MonitorItem.this.checkNotify(monitorModel, nodeModel, id, status, StrUtil.EMPTY);
+                                })
+                                .filter(aBoolean -> !aBoolean)
+                                .collect(Collectors.toList());
+                        }
+                        return runStatus && CollUtil.isEmpty(booleanList);
+                    } else {
+                        title = StrUtil.format(I18nMessageUtil.get("i18n.node_status_code_abnormal.4d22"), nodeModel.getName(), jsonMessage.getCode());
+                        context = jsonMessage.toString();
                     }
-                    return runStatus && CollUtil.isEmpty(booleanList);
-                } else {
-                    title = StrUtil.format(I18nMessageUtil.get("i18n.node_status_code_abnormal.4d22"), nodeModel.getName(), jsonMessage.getCode());
-                    context = jsonMessage.toString();
+                } catch (Exception e) {
+                    log.error(I18nMessageUtil.get("i18n.monitor_node_exception.6ff1"), nodeModel.getName(), e.getMessage());
+                    //
+                    title = StrUtil.format(I18nMessageUtil.get("i18n.node_running_status_abnormal.3160"), nodeModel.getName());
+                    context = ExceptionUtil.stacktraceToString(e);
                 }
-            } catch (Exception e) {
-                log.error(I18nMessageUtil.get("i18n.monitor_node_exception.6ff1"), nodeModel.getName(), e.getMessage());
-                //
-                title = StrUtil.format(I18nMessageUtil.get("i18n.node_running_status_abnormal.3160"), nodeModel.getName());
-                context = ExceptionUtil.stacktraceToString(e);
-            }
-            // 获取上次状态
-            boolean pre = this.getPreStatus(monitorModel.getId(), nodeModel.getId(), id);
-            if (pre) {
-                // 上次正常
-                MonitorNotifyLog monitorNotifyLog = new MonitorNotifyLog();
-                monitorNotifyLog.setStatus(false);
-                monitorNotifyLog.setTitle(title);
-                monitorNotifyLog.setContent(context);
-                monitorNotifyLog.setCreateTime(System.currentTimeMillis());
-                monitorNotifyLog.setNodeId(nodeModel.getId());
-                monitorNotifyLog.setProjectId(id);
-                monitorNotifyLog.setMonitorId(monitorModel.getId());
-                //
-                this.notifyMsg(nodeModel, monitorNotifyLog);
-            }
-            return false;
-        }).filter(aBoolean -> !aBoolean).collect(Collectors.toList());
+                // 获取上次状态
+                boolean pre = this.getPreStatus(monitorModel.getId(), nodeModel.getId(), id);
+                if (pre) {
+                    // 上次正常
+                    MonitorNotifyLog monitorNotifyLog = new MonitorNotifyLog();
+                    monitorNotifyLog.setStatus(false);
+                    monitorNotifyLog.setTitle(title);
+                    monitorNotifyLog.setContent(context);
+                    monitorNotifyLog.setCreateTime(System.currentTimeMillis());
+                    monitorNotifyLog.setNodeId(nodeModel.getId());
+                    monitorNotifyLog.setProjectId(id);
+                    monitorNotifyLog.setMonitorId(monitorModel.getId());
+                    //
+                    this.notifyMsg(nodeModel, monitorNotifyLog);
+                }
+                return false;
+            })
+            .filter(aBoolean -> !aBoolean)
+            .collect(Collectors.toList());
         return CollUtil.isEmpty(collect);
     }
 
@@ -205,6 +216,7 @@ public class MonitorItem implements Task {
         }
         if (!pre && !runStatus) {
             // 上一次是异常，并且当前还是异常
+            log.warn("触发报警信息自动忽略，当前处于持续报警中,{}", monitorModel.getName());
             return false;
         }
         MonitorNotifyLog monitorNotifyLog = new MonitorNotifyLog();
@@ -229,6 +241,19 @@ public class MonitorItem implements Task {
      * @return true 为正常状态,false 异常状态
      */
     private boolean getPreStatus(String monitorId, String nodeId, String projectId) {
+        MonitorNotifyLog entity1 = this.getPreData(monitorId, nodeId, projectId);
+        return entity1 == null || entity1.status();
+    }
+
+    /**
+     * 获取上次是否也为异常状态
+     *
+     * @param monitorId 监控id
+     * @param nodeId    节点id
+     * @param projectId 项目id
+     * @return data
+     */
+    private MonitorNotifyLog getPreData(String monitorId, String nodeId, String projectId) {
         // 检查是否已经触发通知
 
         MonitorNotifyLog monitorNotifyLog = new MonitorNotifyLog();
@@ -237,8 +262,7 @@ public class MonitorItem implements Task {
         monitorNotifyLog.setMonitorId(monitorId);
 
         List<MonitorNotifyLog> queryList = dbMonitorNotifyLogService.queryList(monitorNotifyLog, 1, new Order("createTime", Direction.DESC));
-        MonitorNotifyLog entity1 = CollUtil.getFirst(queryList);
-        return entity1 == null || entity1.status();
+        return CollUtil.getFirst(queryList);
     }
 
     private void notifyMsg(NodeModel nodeModel, MonitorNotifyLog monitorNotifyLog) {
@@ -280,7 +304,7 @@ public class MonitorItem implements Task {
         //
         dbMonitorNotifyLogService.insert(monitorNotifyLog);
         String logId = monitorNotifyLog.getId();
-        ThreadUtil.execute(() -> {
+        I18nThreadUtil.execute(() -> {
             try {
                 plugin.execute(webhook, map);
                 dbMonitorNotifyLogService.updateStatus(logId, true, null);
@@ -347,7 +371,7 @@ public class MonitorItem implements Task {
 
     private void send(MonitorModel.Notify notify, String logId, String title, String context) {
         // 异常发送
-        ThreadUtil.execute(() -> {
+        I18nThreadUtil.execute(() -> {
             try {
                 NotifyUtil.send(notify, title, context);
                 dbMonitorNotifyLogService.updateStatus(logId, true, null);
