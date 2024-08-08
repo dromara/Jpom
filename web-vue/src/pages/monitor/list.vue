@@ -250,8 +250,8 @@
           <a-input v-model:value="temp.webhook" :placeholder="$t('i18n_77373db7d8')" />
         </a-form-item>
         <a-form-item name="useLanguage">
-          <template #label>使用语言</template>
-          <a-select v-model:value="temp.useLanguage" placeholder="选择监控使用的语言">
+          <template #label>{{ $t('i18n_0b6811e5b1') }}</template>
+          <a-select v-model:value="temp.useLanguage" :placeholder="$t('i18n_9e0c797c04')">
             <a-select-option v-for="item in supportLang" :key="item.value" :value="item.value">
               {{ item.label }}
             </a-select-option>
@@ -259,20 +259,19 @@
         </a-form-item>
         <a-form-item name="useLanguage">
           <template #label>
-            <a-tooltip>
-              沉默时间
-              <QuestionCircleOutlined v-show="!temp.id" />
-              <template #title>当监控到持续异常时监控通知发送成功后在一段时间内部重复发送报警通知</template>
+            <a-tooltip
+              >{{ $t('i18n_2b696d1fec') }}<QuestionCircleOutlined v-show="!temp.id" />
+              <template #title>{{ $t('i18n_7a28e9cd4a') }}</template>
             </a-tooltip>
           </template>
 
-          <a-input-number v-model:value="temp.silenceTime" placeholder="请输入沉默时间" style="width: 100%">
+          <a-input-number v-model:value="temp.silenceTime" :placeholder="$t('i18n_5ae4a8f177')" style="width: 100%">
             <template #addonAfter>
-              <a-select v-model:value="temp.silenceUnit" style="width: 100px" placeholder="选择单位">
-                <a-select-option value="DAYS">天</a-select-option>
-                <a-select-option value="HOURS">小时</a-select-option>
-                <a-select-option value="MINUTES">分钟</a-select-option>
-                <a-select-option value="SECONDS">秒</a-select-option>
+              <a-select v-model:value="temp.silenceUnit" style="width: 100px" :placeholder="$t('i18n_1a2c905e87')">
+                <a-select-option value="DAYS">{{ $t('i18n_249aba7632') }}</a-select-option>
+                <a-select-option value="HOURS">{{ $t('i18n_2de0d491d0') }}</a-select-option>
+                <a-select-option value="MINUTES">{{ $t('i18n_3a17b7352e') }}</a-select-option>
+                <a-select-option value="SECONDS">{{ $t('i18n_0c1fec657f') }}</a-select-option>
               </a-select>
             </template>
           </a-input-number>

@@ -161,7 +161,7 @@ public class MonitorListController extends BaseServerController {
         monitorModel.notifyUser(notifyUserList);
         monitorModel.setName(name);
         Integer silenceTime1 = ObjectUtil.defaultIfNull(silenceTime, 0);
-        Assert.state(silenceTime1 >= 0, "沉默时间不能小于 0");
+        Assert.state(silenceTime1 >= 0, I18nMessageUtil.get("i18n.min_silence_duration.b87f"));
         monitorModel.setSilenceTime(silenceTime1);
         TimeUnit timeUnit = EnumUtil.fromString(TimeUnit.class, silenceUnit, TimeUnit.MINUTES);
         monitorModel.setSilenceUnit(timeUnit.name());
