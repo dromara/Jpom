@@ -20,3 +20,5 @@ ADD,BUILD_INFO,createUser,String,50,,创建人,false
 ADD,SCRIPT_LIBRARY,createUser,String,50,,创建人,false
 ALTER,MONITORNOTIFYLOG,title,String,500,,异常描述,false
 ADD,MONITOR_INFO,useLanguage,String,20,,使用语言,false
+ADD,MONITOR_INFO,silenceTime,Integer,,,沉默时间,false
+ADD,MONITOR_INFO,silenceUnit,String,20,,沉默单位,false

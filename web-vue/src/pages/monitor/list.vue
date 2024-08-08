@@ -1,7 +1,12 @@
 <template>
   <div>
     <!-- 数据表格 -->
-    <a-table
+    <CustomTable
+      is-show-tools
+      default-auto-refresh
+      :auto-refresh-time="30"
+      table-name="monitor-list"
+      :active-page="activePage"
       :data-source="list"
       size="middle"
       :columns="columns"
@@ -11,6 +16,7 @@
         x: 'max-content'
       }"
       @change="changePage"
+      @refresh="loadData"
     >
       <template #title>
         <a-space wrap class="search-box">
@@ -53,7 +59,7 @@
           <a-button type="primary" @click="handleAdd">{{ $t('i18n_66ab5e9f24') }}</a-button>
         </a-space>
       </template>
-      <template #bodyCell="{ column, text, record }">
+      <template #tableBodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'name'">
           <a-tooltip placement="topLeft" :title="text">
             <span>{{ text }}</span>
@@ -96,7 +102,7 @@
           </a-space>
         </template>
       </template>
-    </a-table>
+    </CustomTable>
     <!-- 编辑区 -->
     <CustomModal
       v-if="editMonitorVisible"
@@ -185,7 +191,7 @@
                 :disabled="!noFileModes.includes(project.runMode)"
               >
                 <!-- 【】\u3010\u3011 -->
-                \u3010{{ project.nodeName }}\u3011{{ project.name }} -
+                {{ `\u3010` }}{{ project.nodeName }}{{ `\u3011` }} {{ project.name }} -
                 {{ project.runMode }}
               </a-select-option>
             </a-select-opt-group>
@@ -250,6 +256,26 @@
               {{ item.label }}
             </a-select-option>
           </a-select>
+        </a-form-item>
+        <a-form-item name="useLanguage">
+          <template #label>
+            <a-tooltip>
+              沉默时间
+              <QuestionCircleOutlined v-show="!temp.id" />
+              <template #title>当监控到持续异常时监控通知发送成功后在一段时间内部重复发送报警通知</template>
+            </a-tooltip>
+          </template>
+
+          <a-input-number v-model:value="temp.silenceTime" placeholder="请输入沉默时间" style="width: 100%">
+            <template #addonAfter>
+              <a-select v-model:value="temp.silenceUnit" style="width: 100px" placeholder="选择单位">
+                <a-select-option value="DAYS">天</a-select-option>
+                <a-select-option value="HOURS">小时</a-select-option>
+                <a-select-option value="MINUTES">分钟</a-select-option>
+                <a-select-option value="SECONDS">秒</a-select-option>
+              </a-select>
+            </template>
+          </a-input-number>
         </a-form-item>
       </a-form>
     </CustomModal>
@@ -358,6 +384,9 @@ export default {
   computed: {
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
+    },
+    activePage() {
+      return this.$attrs.routerUrl === this.$route.path
     }
   },
   watch: {},
@@ -496,8 +525,8 @@ export default {
           status: this.temp.status ? 'on' : 'off',
           autoRestart: this.temp.autoRestart ? 'on' : 'off',
           projects: JSON.stringify(projects),
-          notifyUser: JSON.stringify(targetKeysTemp),
-          useLanguage: this.temp.useLanguage
+          notifyUser: JSON.stringify(targetKeysTemp)
+          //useLanguage: this.temp.useLanguage
         }
         this.confirmLoading = true
         editMonitor(params)

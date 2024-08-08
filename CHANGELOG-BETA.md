@@ -2,6 +2,10 @@
 
 ## 2.11.9.1-beta
 
+### 🐣 新增功能
+
+1. 【server】新增 项目监控新增沉默时间配置，避免报警后不再触发报警
+
 ### 🐞 解决BUG、优化功能
 
 1. 【all】修复 多会话使用文件跟踪器可能出现多个线程未关闭问题（感谢[@沐剑屏](https://gitee.com/MuJianPing) [Gitee issues IAI0I1](https://gitee.com/dromara/Jpom/issues/IAI0I1) ）

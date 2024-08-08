@@ -1,7 +1,12 @@
 <template>
   <div>
     <!-- 数据表格 -->
-    <a-table
+    <CustomTable
+      is-show-tools
+      default-auto-refresh
+      :auto-refresh-time="30"
+      table-name="monitor-log-list"
+      :active-page="activePage"
       :data-source="list"
       size="middle"
       :columns="columns"
@@ -11,6 +16,7 @@
         x: 'max-content'
       }"
       @change="change"
+      @refresh="loadData"
     >
       <template #title>
         <a-space wrap class="search-box">
@@ -46,7 +52,7 @@
           </a-tooltip>
         </a-space>
       </template>
-      <template #bodyCell="{ column, text, record }">
+      <template #tableBodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'nodeId'">
           <a-tooltip placement="topLeft" :title="text">
             <span>{{ nodeMap[text] }}</span>
@@ -70,7 +76,7 @@
           <a-button size="small" type="primary" @click="handleDetail(record)">{{ $t('i18n_f26225bde6') }}</a-button>
         </template>
       </template>
-    </a-table>
+    </CustomTable>
     <!-- 详情区 -->
     <CustomModal
       v-if="detailVisible"
@@ -172,6 +178,9 @@ export default {
     // 分页
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
+    },
+    activePage() {
+      return this.$attrs.routerUrl === this.$route.path
     }
   },
   created() {
