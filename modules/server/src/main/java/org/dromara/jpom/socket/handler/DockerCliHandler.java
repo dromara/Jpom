@@ -87,32 +87,37 @@ public class DockerCliHandler extends BaseTerminalHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        HandlerItem handlerItem = HANDLER_ITEM_CONCURRENT_HASH_MAP.get(session.getId());
-        if (handlerItem == null) {
-            sendBinary(session, I18nMessageUtil.get("i18n.already_offline.d3b5"));
-            IoUtil.close(session);
-            return;
-        }
-        String payload = message.getPayload();
-        JSONValidator.Type type = StringUtil.validatorJson(payload);
-        if (type == JSONValidator.Type.Object) {
-            JSONObject jsonObject = JSONObject.parseObject(payload);
-            String data = jsonObject.getString("data");
-            if (StrUtil.equals(data, "jpom-heart")) {
-                // 心跳消息不转发
-                return;
-            }
-            if (StrUtil.equals(data, "resize")) {
-                // 缓存区大小
-                handlerItem.resize(jsonObject);
-                return;
-            }
-        }
         try {
-            handlerItem.sendCommand(payload);
-        } catch (Exception e) {
-            sendBinary(session, "Failure:" + e.getMessage());
-            log.error(I18nMessageUtil.get("i18n.command_execution_exception.4ccd"), e);
+            setLanguage(session);
+            HandlerItem handlerItem = HANDLER_ITEM_CONCURRENT_HASH_MAP.get(session.getId());
+            if (handlerItem == null) {
+                sendBinary(session, I18nMessageUtil.get("i18n.already_offline.d3b5"));
+                IoUtil.close(session);
+                return;
+            }
+            String payload = message.getPayload();
+            JSONValidator.Type type = StringUtil.validatorJson(payload);
+            if (type == JSONValidator.Type.Object) {
+                JSONObject jsonObject = JSONObject.parseObject(payload);
+                String data = jsonObject.getString("data");
+                if (StrUtil.equals(data, "jpom-heart")) {
+                    // 心跳消息不转发
+                    return;
+                }
+                if (StrUtil.equals(data, "resize")) {
+                    // 缓存区大小
+                    handlerItem.resize(jsonObject);
+                    return;
+                }
+            }
+            try {
+                handlerItem.sendCommand(payload);
+            } catch (Exception e) {
+                sendBinary(session, "Failure:" + e.getMessage());
+                log.error(I18nMessageUtil.get("i18n.command_execution_exception.4ccd"), e);
+            }
+        } finally {
+            clearLanguage();
         }
     }
 

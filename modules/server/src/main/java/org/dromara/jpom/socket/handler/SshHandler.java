@@ -25,9 +25,6 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.hc.core5.http.Chars;
-import org.bouncycastle.asn1.esf.SPuri;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
@@ -50,14 +47,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
  * ssh 处理2
@@ -124,37 +119,42 @@ public class SshHandler extends BaseTerminalHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        HandlerItem handlerItem = HANDLER_ITEM_CONCURRENT_HASH_MAP.get(session.getId());
-        if (handlerItem == null) {
-            sendBinary(session, I18nMessageUtil.get("i18n.already_offline.d3b5"));
-            IoUtil.close(session);
-            return;
-        }
-        String payload = message.getPayload();
-
-        JSONValidator.Type type = StringUtil.validatorJson(payload);
-        if (type == JSONValidator.Type.Object) {
-            JSONObject jsonObject = JSONObject.parseObject(payload);
-            String data = jsonObject.getString("data");
-            if (StrUtil.equals(data, "jpom-heart")) {
-                // 心跳消息不转发
-                return;
-            }
-            if (StrUtil.equals(data, "resize")) {
-                // 缓存区大小
-                handlerItem.resize(jsonObject);
-                return;
-            }
-        }
-        //
-        Map<String, Object> attributes = session.getAttributes();
-        UserModel userInfo = (UserModel) attributes.get("userInfo");
-        boolean sshCommandNotLimited = (boolean) attributes.get("sshCommandNotLimited");
         try {
-            this.sendCommand(handlerItem, payload, userInfo, sshCommandNotLimited);
-        } catch (Exception e) {
-            sendBinary(session, "Failure:" + e.getMessage());
-            log.error(I18nMessageUtil.get("i18n.command_execution_exception.4ccd"), e);
+            setLanguage(session);
+            HandlerItem handlerItem = HANDLER_ITEM_CONCURRENT_HASH_MAP.get(session.getId());
+            if (handlerItem == null) {
+                sendBinary(session, I18nMessageUtil.get("i18n.already_offline.d3b5"));
+                IoUtil.close(session);
+                return;
+            }
+            String payload = message.getPayload();
+
+            JSONValidator.Type type = StringUtil.validatorJson(payload);
+            if (type == JSONValidator.Type.Object) {
+                JSONObject jsonObject = JSONObject.parseObject(payload);
+                String data = jsonObject.getString("data");
+                if (StrUtil.equals(data, "jpom-heart")) {
+                    // 心跳消息不转发
+                    return;
+                }
+                if (StrUtil.equals(data, "resize")) {
+                    // 缓存区大小
+                    handlerItem.resize(jsonObject);
+                    return;
+                }
+            }
+            //
+            Map<String, Object> attributes = session.getAttributes();
+            UserModel userInfo = (UserModel) attributes.get("userInfo");
+            boolean sshCommandNotLimited = (boolean) attributes.get("sshCommandNotLimited");
+            try {
+                this.sendCommand(handlerItem, payload, userInfo, sshCommandNotLimited);
+            } catch (Exception e) {
+                sendBinary(session, "Failure:" + e.getMessage());
+                log.error(I18nMessageUtil.get("i18n.command_execution_exception.4ccd"), e);
+            }
+        } finally {
+            clearLanguage();
         }
     }
 
@@ -354,8 +354,9 @@ public class SshHandler extends BaseTerminalHandler {
 
         /**
          * 从控制台读取输入按键进行处理
+         *
          * @param consumer 完整命令后输入回调
-         * @param bytes 输入按键
+         * @param bytes    输入按键
          */
         public void read(Consumer<String> consumer, byte... bytes) {
             String str = new String(bytes, charset);
@@ -405,6 +406,7 @@ public class SshHandler extends BaseTerminalHandler {
 
         /**
          * 从SSH服务端接收字节
+         *
          * @param bytes 字节
          */
         public void receive(byte... bytes) {
