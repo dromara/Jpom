@@ -119,6 +119,7 @@ public abstract class BaseProxyHandler extends BaseHandler {
         String op = json.getString("op");
         ConsoleCommandOp consoleCommandOp = StrUtil.isNotEmpty(op) ? ConsoleCommandOp.valueOf(op) : null;
         try {
+            setLanguage(session);
             String textMessage;
             if (proxySession != null) {
                 textMessage = this.handleTextMessage(attributes, session, proxySession, json, consoleCommandOp);
@@ -131,6 +132,8 @@ public abstract class BaseProxyHandler extends BaseHandler {
         } catch (Exception e) {
             log.error(I18nMessageUtil.get("i18n.handle_message_exception.0bdc"), e);
             this.sendMsg(session, I18nMessageUtil.get("i18n.handle_message_exception_with_colon.56f0") + e.getMessage());
+        } finally {
+            clearLanguage();
         }
     }
 
