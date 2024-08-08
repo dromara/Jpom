@@ -18,3 +18,5 @@ ADD,USER_INFO,source,String,100,,账号来源
 ADD,MACHINE_NODE_INFO,extendInfo,TEXT,,,扩展信息
 ADD,BUILD_INFO,createUser,String,50,,创建人,false
 ADD,SCRIPT_LIBRARY,createUser,String,50,,创建人,false
+ALTER,MONITORNOTIFYLOG,title,String,500,,异常描述,false
+ADD,MONITOR_INFO,useLanguage,String,20,,使用语言,false
