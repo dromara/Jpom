@@ -86,7 +86,7 @@ public class MonitorItem implements Task {
                     String nodeId = nodeProject.getNode();
                     NodeModel nodeModel = nodeService.getByKey(nodeId);
                     if (nodeModel == null) {
-                        log.error("监控项：{} 对应的节点不存在 {}", this.monitorModel.getName(), nodeId);
+                        log.error(I18nMessageUtil.get("i18n.monitoring_item_node_not_found.19dc"), this.monitorModel.getName(), nodeId);
                         return true;
                     }
                     return this.reqNodeStatus(nodeModel, nodeProject.getProjects());
@@ -237,7 +237,7 @@ public class MonitorItem implements Task {
             // 上一次是异常，并且当前还是异常
             Integer silenceTime = this.monitorModel.getSilenceTime();
             if (silenceTime == null) {
-                log.warn("触发报警信息自动忽略，当前处于持续报警中,{}", monitorModel.getName());
+                log.warn(I18nMessageUtil.get("i18n.auto_ignore_current_continuous_alert.2e21"), monitorModel.getName());
                 return false;
             }
 
@@ -246,7 +246,7 @@ public class MonitorItem implements Task {
             if (preData.getCreateTime() + millis > System.currentTimeMillis()) {
                 if (preData.getNotifyStatus() != null && preData.getNotifyStatus()) {
                     // 通知成功
-                    log.warn("触发报警信息自动忽略，上次通知成功并且当前处于持续报警中,{}", monitorModel.getName());
+                    log.warn(I18nMessageUtil.get("i18n.auto_ignore_continuous_alert.9a9a"), monitorModel.getName());
                     return false;
                 }
             }
@@ -304,7 +304,7 @@ public class MonitorItem implements Task {
 
     private void notifyMsg(NodeModel nodeModel, MonitorNotifyLog monitorNotifyLog, ProjectInfoCacheModel projectInfoCacheModel) {
         if (projectInfoCacheModel == null) {
-            log.error("监控的项目信息丢失不能正常发送监控通知：{} => {}", monitorModel.getName(), monitorNotifyLog.getTitle());
+            log.error(I18nMessageUtil.get("i18n.monitoring_project_info_loss_notification_failure.272b"), monitorModel.getName(), monitorNotifyLog.getTitle());
             return;
         }
         List<String> notify = monitorModel.notifyUser();
