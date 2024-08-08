@@ -279,8 +279,9 @@
             "
           >
             <template v-if="percentage">
-              <LoadingOutlined v-if="uploadFileList.length" />
-              <span v-else>-</span>
+              <template v-if="uploadFileList?.length">
+                <LoadingOutlined v-if="uploadFileList.length > 1" />
+              </template>
             </template>
 
             <a-button v-else><UploadOutlined />{{ $t('i18n_fd7e0c997d') }}</a-button>
@@ -964,6 +965,12 @@ export default {
 
                 resolve()
               },
+              uploadChunkError: () => {
+                this.confirmLoading = false
+                this.percentage = 0
+                this.percentageInfo = {}
+                this.uploadFileList = []
+              },
               error: (msg) => {
                 this.uploadFileList = this.uploadFileList.map((fileItem, fileIndex) => {
                   if (fileIndex === curItem) {
@@ -975,6 +982,8 @@ export default {
                   message: msg
                 })
                 this.confirmLoading = false
+                this.percentage = 0
+                this.percentageInfo = {}
                 reject()
               },
               uploadCallback: (formData) => {

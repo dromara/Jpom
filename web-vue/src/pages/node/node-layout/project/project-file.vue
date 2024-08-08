@@ -219,8 +219,9 @@
                 "
               >
                 <template v-if="percentage">
-                  <LoadingOutlined v-if="uploadFileList.length" />
-                  <span v-else>-</span>
+                  <template v-if="uploadFileList?.length">
+                    <LoadingOutlined v-if="uploadFileList.length > 1" />
+                  </template>
                 </template>
 
                 <a-button v-else><UploadOutlined />{{ $t('i18n_fd7e0c997d') }}</a-button>
@@ -242,6 +243,14 @@
                       </template>
                     </template>
                   </a-progress>
+                  <a-tag v-if="percentage >= 100">
+                    {{
+                      uploadFileList.find((fileItem, fileIndex) => {
+                        return (fileItem.status = 'uploading')
+                      })?.name
+                    }}
+                    文件合并中
+                  </a-tag>
                 </a-col>
               </a-row>
 
