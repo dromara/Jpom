@@ -32,6 +32,7 @@ interface PiecesPar {
   error: Function
   resolveFileProcess: Function
   resolveFileEnd: Function
+  uploadChunkError?: Function
 }
 
 /**
@@ -51,7 +52,8 @@ export const uploadPieces = ({
   process,
   error,
   resolveFileProcess,
-  resolveFileEnd
+  resolveFileEnd,
+  uploadChunkError
 }: PiecesPar) => {
   // 如果文件传入为空直接 return 返回
   if (!file || file.length < 1) {
@@ -199,6 +201,7 @@ export const uploadPieces = ({
           })
           .catch(() => {
             reject()
+            uploadChunkError && uploadChunkError()
           })
       })
     }).then((uploadData) => {
