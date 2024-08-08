@@ -11,6 +11,7 @@ package org.dromara.jpom.monitor;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
@@ -42,6 +43,7 @@ import org.dromara.jpom.webhook.DefaultWebhookPluginImpl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -84,6 +86,7 @@ public class MonitorItem implements Task {
                     String nodeId = nodeProject.getNode();
                     NodeModel nodeModel = nodeService.getByKey(nodeId);
                     if (nodeModel == null) {
+                        log.error("监控项：{} 对应的节点不存在 {}", this.monitorModel.getName(), nodeId);
                         return true;
                     }
                     return this.reqNodeStatus(nodeModel, nodeProject.getProjects());
@@ -147,20 +150,30 @@ public class MonitorItem implements Task {
                     title = StrUtil.format(I18nMessageUtil.get("i18n.node_running_status_abnormal.3160"), nodeModel.getName());
                     context = ExceptionUtil.stacktraceToString(e);
                 }
+                MonitorNotifyLog monitorNotifyLog = new MonitorNotifyLog();
+                monitorNotifyLog.setStatus(false);
+                monitorNotifyLog.setTitle(title);
+                monitorNotifyLog.setContent(context);
+                monitorNotifyLog.setCreateTime(System.currentTimeMillis());
+                monitorNotifyLog.setNodeId(nodeModel.getId());
+                monitorNotifyLog.setProjectId(id);
+                monitorNotifyLog.setMonitorId(monitorModel.getId());
                 // 获取上次状态
-                boolean pre = this.getPreStatus(monitorModel.getId(), nodeModel.getId(), id);
+                MonitorNotifyLog preData = this.getPreData(monitorModel.getId(), nodeModel.getId(), id);
+                boolean pre = preData == null || preData.status();
                 if (pre) {
                     // 上次正常
-                    MonitorNotifyLog monitorNotifyLog = new MonitorNotifyLog();
-                    monitorNotifyLog.setStatus(false);
-                    monitorNotifyLog.setTitle(title);
-                    monitorNotifyLog.setContent(context);
-                    monitorNotifyLog.setCreateTime(System.currentTimeMillis());
-                    monitorNotifyLog.setNodeId(nodeModel.getId());
-                    monitorNotifyLog.setProjectId(id);
-                    monitorNotifyLog.setMonitorId(monitorModel.getId());
-                    //
                     this.notifyMsg(nodeModel, monitorNotifyLog);
+                } else {
+                    Integer silenceTime = this.monitorModel.getSilenceTime();
+                    if (silenceTime != null) {
+                        TimeUnit timeUnit = EnumUtil.fromString(TimeUnit.class, this.monitorModel.getSilenceUnit(), TimeUnit.MINUTES);
+                        long millis = timeUnit.toMillis(this.monitorModel.getSilenceTime());
+                        if (preData.getCreateTime() + millis < System.currentTimeMillis()) {
+                            // 上次不正常并且过了沉默时间
+                            this.notifyMsg(nodeModel, monitorNotifyLog);
+                        }
+                    }
                 }
                 return false;
             })
@@ -180,14 +193,20 @@ public class MonitorItem implements Task {
     private boolean checkNotify(MonitorModel monitorModel, NodeModel nodeModel, String id, boolean runStatus, String statusMsg) {
         // 获取上次状态
         String copyMsg = StrUtil.EMPTY;
-        boolean pre = this.getPreStatus(monitorModel.getId(), nodeModel.getId(), id);
+        MonitorNotifyLog preData = this.getPreData(monitorModel.getId(), nodeModel.getId(), id);
+        boolean pre = preData == null || preData.status();
+        ProjectInfoCacheModel projectInfoCacheModel = projectInfoCacheService.getData(nodeModel.getId(), id);
+        String projectName = id;
+        if (projectInfoCacheModel != null) {
+            projectName = StrUtil.format("{}/{}", projectInfoCacheModel.getName(), id);
+        }
         String title = null;
         String context = null;
         //查询项目运行状态
         if (runStatus) {
             if (!pre) {
                 // 上次是异常状态
-                title = StrUtil.format(I18nMessageUtil.get("i18n.node_service_resumed_normal_operation.2cbd"), nodeModel.getName(), id, copyMsg);
+                title = StrUtil.format(I18nMessageUtil.get("i18n.node_service_resumed_normal_operation.2cbd"), nodeModel.getName(), projectName, copyMsg);
                 context = "";
             }
         } else {
@@ -199,25 +218,38 @@ public class MonitorItem implements Task {
                     if (reJson.success()) {
                         // 重启成功
                         runStatus = true;
-                        title = StrUtil.format(I18nMessageUtil.get("i18n.node_service_stopped_successful_restart.603b"), nodeModel.getName(), id, copyMsg);
+                        title = StrUtil.format(I18nMessageUtil.get("i18n.node_service_stopped_successful_restart.603b"), nodeModel.getName(), projectName, copyMsg);
                     } else {
-                        title = StrUtil.format(I18nMessageUtil.get("i18n.node_service_stopped_failed_restart.4307"), nodeModel.getName(), id, copyMsg);
+                        title = StrUtil.format(I18nMessageUtil.get("i18n.node_service_stopped_failed_restart.4307"), nodeModel.getName(), projectName, copyMsg);
                     }
                     context = I18nMessageUtil.get("i18n.restart_result.253f") + reJson;
                 } catch (Exception e) {
                     log.error(I18nMessageUtil.get("i18n.restart_operation.5e3a"), e);
-                    title = StrUtil.format(I18nMessageUtil.get("i18n.node_service_stopped_abnormal_restart.a5c0"), nodeModel.getName(), id, copyMsg);
+                    title = StrUtil.format(I18nMessageUtil.get("i18n.node_service_stopped_abnormal_restart.a5c0"), nodeModel.getName(), projectName, copyMsg);
                     context = ExceptionUtil.stacktraceToString(e);
                 }
             } else {
-                title = StrUtil.format(I18nMessageUtil.get("i18n.node_service_not_running.ad89"), nodeModel.getName(), id, copyMsg);
+                title = StrUtil.format(I18nMessageUtil.get("i18n.node_service_not_running.ad89"), nodeModel.getName(), projectName, copyMsg);
                 context = I18nMessageUtil.get("i18n.please_check_in_time.3b4f");
             }
         }
         if (!pre && !runStatus) {
             // 上一次是异常，并且当前还是异常
-            log.warn("触发报警信息自动忽略，当前处于持续报警中,{}", monitorModel.getName());
-            return false;
+            Integer silenceTime = this.monitorModel.getSilenceTime();
+            if (silenceTime == null) {
+                log.warn("触发报警信息自动忽略，当前处于持续报警中,{}", monitorModel.getName());
+                return false;
+            }
+
+            TimeUnit timeUnit = EnumUtil.fromString(TimeUnit.class, this.monitorModel.getSilenceUnit(), TimeUnit.MINUTES);
+            long millis = timeUnit.toMillis(this.monitorModel.getSilenceTime());
+            if (preData.getCreateTime() + millis > System.currentTimeMillis()) {
+                if (preData.getNotifyStatus() != null && preData.getNotifyStatus()) {
+                    // 通知成功
+                    log.warn("触发报警信息自动忽略，上次通知成功并且当前处于持续报警中,{}", monitorModel.getName());
+                    return false;
+                }
+            }
         }
         MonitorNotifyLog monitorNotifyLog = new MonitorNotifyLog();
         monitorNotifyLog.setStatus(runStatus);
@@ -266,12 +298,20 @@ public class MonitorItem implements Task {
     }
 
     private void notifyMsg(NodeModel nodeModel, MonitorNotifyLog monitorNotifyLog) {
+        ProjectInfoCacheModel projectInfoCacheModel = projectInfoCacheService.getData(nodeModel.getId(), monitorNotifyLog.getProjectId());
+        this.notifyMsg(nodeModel, monitorNotifyLog, projectInfoCacheModel);
+    }
+
+    private void notifyMsg(NodeModel nodeModel, MonitorNotifyLog monitorNotifyLog, ProjectInfoCacheModel projectInfoCacheModel) {
+        if (projectInfoCacheModel == null) {
+            log.error("监控的项目信息丢失不能正常发送监控通知：{} => {}", monitorModel.getName(), monitorNotifyLog.getTitle());
+            return;
+        }
         List<String> notify = monitorModel.notifyUser();
         // 发送通知
         if (monitorNotifyLog.getTitle() == null) {
             return;
         }
-        ProjectInfoCacheModel projectInfoCacheModel = projectInfoCacheService.getData(nodeModel.getId(), monitorNotifyLog.getProjectId());
         monitorNotifyLog.setWorkspaceId(projectInfoCacheModel.getWorkspaceId());
         //
         notify.forEach(notifyUser -> this.sendNotifyMsgToUser(monitorNotifyLog, notifyUser));

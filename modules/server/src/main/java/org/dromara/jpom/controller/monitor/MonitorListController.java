@@ -12,6 +12,8 @@ package org.dromara.jpom.controller.monitor;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.RegexPool;
 import cn.hutool.core.lang.Validator;
+import cn.hutool.core.util.EnumUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
@@ -38,6 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 监控列表
@@ -112,6 +115,8 @@ public class MonitorListController extends BaseServerController {
                                               @ValidatorItem(msg = "i18n.configure_monitoring_interval.9741") String execCron,
                                               String notifyUser, String webhook,
                                               String useLanguage,
+                                              Integer silenceTime,
+                                              String silenceUnit,
                                               HttpServletRequest request) {
         String status = getParameter("status");
         String autoRestart = getParameter("autoRestart");
@@ -155,6 +160,11 @@ public class MonitorListController extends BaseServerController {
         monitorModel.setUseLanguage(useLanguage);
         monitorModel.notifyUser(notifyUserList);
         monitorModel.setName(name);
+        Integer silenceTime1 = ObjectUtil.defaultIfNull(silenceTime, 0);
+        Assert.state(silenceTime1 >= 0, "沉默时间不能小于 0");
+        monitorModel.setSilenceTime(silenceTime1);
+        TimeUnit timeUnit = EnumUtil.fromString(TimeUnit.class, silenceUnit, TimeUnit.MINUTES);
+        monitorModel.setSilenceUnit(timeUnit.name());
 
         if (StrUtil.isEmpty(id)) {
             //添加监控

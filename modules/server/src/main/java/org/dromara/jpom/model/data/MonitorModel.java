@@ -73,6 +73,14 @@ public class MonitorModel extends BaseWorkspaceModel {
      * 使用语言
      */
     private String useLanguage;
+    /**
+     * 静默时间
+     */
+    private Integer silenceTime;
+    /**
+     * 静默单位
+     */
+    private String silenceUnit;
 
     public String getExecCron() {
         if (execCron == null) {
