@@ -206,5 +206,6 @@ public class CronUtils {
      */
     public static void remove(String id) {
         CronUtil.remove(id);
+        TASK_STAT.remove(id);
     }
 }
