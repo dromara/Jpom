@@ -56,11 +56,11 @@ public class FileManageController extends BaseAgentController {
 
     @RequestMapping(value = "sharding-merge", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<CommandOpResult> shardingMerge(String type,
-                                                      @ValidatorItem String path,
-                                                      Integer stripComponents,
-                                                      String sliceId,
-                                                      Integer totalSlice,
-                                                      String fileSumMd5) throws Exception {
+                                                       @ValidatorItem(msg = "i18n.file_directory_missing.6b1d") String path,
+                                                       Integer stripComponents,
+                                                       String sliceId,
+                                                       Integer totalSlice,
+                                                       String fileSumMd5) throws Exception {
         String tempPathName = agentConfig.getFixedTempPathName();
         File successFile = this.shardingTryMerge(tempPathName, sliceId, totalSlice, fileSumMd5);
         File lib = FileUtil.file(path);

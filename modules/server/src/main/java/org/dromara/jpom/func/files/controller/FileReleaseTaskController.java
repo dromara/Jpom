@@ -71,13 +71,13 @@ public class FileReleaseTaskController extends BaseServerController {
 
     @PostMapping(value = "add-task", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public IJsonMessage<String> addTask(@ValidatorItem String fileId,
-                                        @ValidatorItem(value = ValidatorRule.NUMBERS) Integer fileType,
-                                        @ValidatorItem String name,
-                                        @ValidatorItem(value = ValidatorRule.NUMBERS) int taskType,
-                                        @ValidatorItem String taskDataIds,
-                                        @ValidatorItem String releasePathParent,
-                                        @ValidatorItem String releasePathSecondary,
+    public IJsonMessage<String> addTask(@ValidatorItem(msg = "i18n.file_id_missing.0e39") String fileId,
+                                        @ValidatorItem(value = ValidatorRule.NUMBERS, msg = "i18n.select_file_type.064a") Integer fileType,
+                                        @ValidatorItem(msg = "i18n.task_name.2ca5") String name,
+                                        @ValidatorItem(value = ValidatorRule.NUMBERS, msg = "i18n.select_publish_method.29b4") int taskType,
+                                        @ValidatorItem(msg = "i18n.select_related_data_id.7fba") String taskDataIds,
+                                        @ValidatorItem(msg = "i18n.select_publish_directory.db60") String releasePathParent,
+                                        @ValidatorItem(msg = "i18n.publish_subdirectory.dc0d") String releasePathSecondary,
                                         String beforeScript,
                                         String afterScript,
                                         HttpServletRequest request) {
@@ -119,11 +119,11 @@ public class FileReleaseTaskController extends BaseServerController {
      */
     @PostMapping(value = "re-task", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
-    public IJsonMessage<String> reTask(@ValidatorItem String fileId,
-                                       @ValidatorItem String name,
-                                       @ValidatorItem(value = ValidatorRule.NUMBERS) int taskType,
-                                       @ValidatorItem String taskDataIds,
-                                       @ValidatorItem String parentTaskId,
+    public IJsonMessage<String> reTask(@ValidatorItem(msg = "i18n.file_id_missing.0e39") String fileId,
+                                       @ValidatorItem(msg = "i18n.task_name.2ca5") String name,
+                                       @ValidatorItem(value = ValidatorRule.NUMBERS, msg = "i18n.select_publish_method.29b4") int taskType,
+                                       @ValidatorItem(msg = "i18n.select_related_data_id.7fba") String taskDataIds,
+                                       @ValidatorItem(msg = "i18n.missing_parent_id.4331") String parentTaskId,
                                        String beforeScript,
                                        String afterScript,
                                        HttpServletRequest request) {
@@ -155,7 +155,7 @@ public class FileReleaseTaskController extends BaseServerController {
      */
     @GetMapping(value = "cancel-task", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public IJsonMessage<String> hasFile(@ValidatorItem String id, HttpServletRequest request) {
+    public IJsonMessage<String> hasFile(@ValidatorItem(msg = "i18n.missing_task_id.12a7") String id, HttpServletRequest request) {
         FileReleaseTaskLogModel taskLogModel = fileReleaseTaskService.getByKey(id, request);
         Assert.notNull(taskLogModel, I18nMessageUtil.get("i18n.task_not_exist.47e9"));
         fileReleaseTaskService.cancelTask(taskLogModel.getId());
@@ -170,7 +170,7 @@ public class FileReleaseTaskController extends BaseServerController {
      */
     @GetMapping(value = "details", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<JSONObject> details(@ValidatorItem String id, HttpServletRequest request) {
+    public IJsonMessage<JSONObject> details(@ValidatorItem(msg = "i18n.missing_task_id.12a7") String id, HttpServletRequest request) {
         FileReleaseTaskLogModel taskLogModel = fileReleaseTaskService.getByKey(id, request);
         Assert.notNull(taskLogModel, I18nMessageUtil.get("i18n.task_not_exist.47e9"));
         JSONObject jsonObject = new JSONObject();
@@ -190,7 +190,7 @@ public class FileReleaseTaskController extends BaseServerController {
      */
     @GetMapping(value = "delete", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public IJsonMessage<JSONObject> delete(@ValidatorItem String id, HttpServletRequest request) {
+    public IJsonMessage<JSONObject> delete(@ValidatorItem(msg = "i18n.missing_task_id.12a7") String id, HttpServletRequest request) {
         FileReleaseTaskLogModel taskLogModel = fileReleaseTaskService.getByKey(id, request);
         Assert.notNull(taskLogModel, I18nMessageUtil.get("i18n.task_not_exist.47e9"));
 

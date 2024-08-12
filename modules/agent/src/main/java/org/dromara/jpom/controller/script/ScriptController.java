@@ -144,8 +144,8 @@ public class ScriptController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<JSONObject> getNowLog(@ValidatorItem() String id,
-                                              @ValidatorItem() String executeId,
+    public IJsonMessage<JSONObject> getNowLog(@ValidatorItem(msg = "i18n.log_id_missing.3500") String id,
+                                              @ValidatorItem(msg = "i18n.missing_execution_id.14d0") String executeId,
                                               @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "i18n.incorrect_line_number.5877") int line) {
         NodeScriptModel item = nodeScriptServer.getItem(id);
         Assert.notNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
@@ -166,8 +166,8 @@ public class ScriptController extends BaseAgentController {
      * @return json
      */
     @RequestMapping(value = "del_log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<Object> delLog(@ValidatorItem() String id,
-                                       @ValidatorItem() String executeId) {
+    public IJsonMessage<Object> delLog(@ValidatorItem(msg = "i18n.log_id_missing.3500") String id,
+                                       @ValidatorItem(msg = "i18n.missing_execution_id.14d0") String executeId) {
         NodeScriptModel item = nodeScriptServer.getItem(id);
         if (item == null) {
             return JsonMessage.success(I18nMessageUtil.get("i18n.script_template_not_exist.1d5b"));

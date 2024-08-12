@@ -120,7 +120,7 @@ public class ProjectStatusController extends BaseAgentController {
 
     @RequestMapping(value = "operate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<CommandOpResult> operate(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.incorrect_project_id.5f70") String id,
-                                                 @ValidatorItem String opt) throws Exception {
+                                                 @ValidatorItem(msg = "i18n.missing_operation_parameter.b16b") String opt) {
         NodeProjectInfoModel item = projectInfoService.getItem(id);
         Assert.notNull(item, I18nMessageUtil.get("i18n.no_project_found.ef5e"));
         ConsoleCommandOp consoleCommandOp = EnumUtil.fromStringQuietly(ConsoleCommandOp.class, opt);

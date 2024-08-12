@@ -81,7 +81,7 @@ public class BuildInfoHistoryController extends BaseServerController {
     @RequestMapping(value = "/build/history/download_file_by_build", method = RequestMethod.GET)
     @Feature(method = MethodFeature.DOWNLOAD)
     public void downloadFile(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.no_data.1ac0") String buildId,
-                             @ValidatorItem(ValidatorRule.NUMBERS) int buildNumberId,
+                             @ValidatorItem(value = ValidatorRule.NUMBERS,msg = "i18n.missing_build_id.2feb") int buildNumberId,
                              HttpServletResponse response,
                              HttpServletRequest request) {
         String workspaceId = dbBuildHistoryLogService.getCheckUserWorkspace(request);

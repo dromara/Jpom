@@ -45,9 +45,9 @@ public class AgentWorkspaceEnvVarController extends BaseAgentController {
      * @return json
      */
     @PostMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<Object> updateWorkspaceEnvVar(@ValidatorItem String name,
-                                                      @ValidatorItem String value,
-                                                      @ValidatorItem String description,
+    public IJsonMessage<Object> updateWorkspaceEnvVar(@ValidatorItem(msg = "i18n.name_required.856d") String name,
+                                                      @ValidatorItem(msg = "i18n.value.2e81") String value,
+                                                      @ValidatorItem(msg = "i18n.description.615e") String description,
                                                       Integer privacy) {
         String workspaceId = getWorkspaceId();
         synchronized (AgentWorkspaceEnvVarController.class) {
