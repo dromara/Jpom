@@ -95,7 +95,7 @@ public class ProjectFileBackupController extends BaseAgentController {
      * @return list
      */
     @RequestMapping(value = "backup-item-files", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<List<JSONObject>> backupItemFiles(String id, String path, @ValidatorItem String backupId) {
+    public IJsonMessage<List<JSONObject>> backupItemFiles(String id, String path, @ValidatorItem(msg = "i18n.backup_id_missing.eaa2") String backupId) {
         // 查询项目路径
         NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel();
         File lib = projectFileBackupService.pathProjectBackup(projectInfoModel, backupId);
@@ -118,7 +118,7 @@ public class ProjectFileBackupController extends BaseAgentController {
      * @param backupId  备份id
      */
     @GetMapping(value = "backup-download", produces = MediaType.APPLICATION_JSON_VALUE)
-    public void download(String id, @ValidatorItem String backupId, @ValidatorItem String filename, String levelName, HttpServletResponse response) {
+    public void download(String id, @ValidatorItem(msg = "i18n.backup_id_missing.eaa2") String backupId, @ValidatorItem String filename, String levelName, HttpServletResponse response) {
         try {
             NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel();
             File lib = projectFileBackupService.pathProjectBackup(projectInfoModel, backupId);
@@ -144,7 +144,7 @@ public class ProjectFileBackupController extends BaseAgentController {
      * @return msg
      */
     @RequestMapping(value = "backup-delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<Object> deleteFile(String id, @ValidatorItem String backupId, @ValidatorItem String filename, String levelName) {
+    public IJsonMessage<Object> deleteFile(String id, @ValidatorItem(msg = "i18n.backup_id_missing.eaa2") String backupId, @ValidatorItem String filename, String levelName) {
         NodeProjectInfoModel projectInfoModel = super.getProjectInfoModel();
         File lib = projectFileBackupService.pathProjectBackup(projectInfoModel, backupId);
         File file = FileUtil.file(lib, StrUtil.emptyToDefault(levelName, FileUtil.FILE_SEPARATOR), filename);
