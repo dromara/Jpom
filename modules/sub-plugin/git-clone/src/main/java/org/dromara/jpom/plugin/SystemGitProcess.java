@@ -65,8 +65,8 @@ public class SystemGitProcess extends AbstractGitProcess {
                 // 已经配置
                 return url;
             }
-            username = URLUtil.encode(username);
-            password = URLUtil.encode(password);
+            username = URLUtil.encodeAll(username);
+            password = URLUtil.encodeAll(password);
             String userInfo = username + ":" + password;
             URL url1 = new URL(null, url, new URLStreamHandler() {
                 @Override
