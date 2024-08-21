@@ -67,22 +67,26 @@ public class SystemGitProcess extends AbstractGitProcess {
             }
             username = URLUtil.encodeAll(username);
             password = URLUtil.encodeAll(password);
-            String userInfo = username + ":" + password;
-            URL url1 = new URL(null, url, new URLStreamHandler() {
-                @Override
-                protected URLConnection openConnection(URL u) throws IOException {
-                    return null;
-                }
-
-                @Override
-                protected void setURL(URL u, String protocol, String host, int port, String authority, String userInfo2, String path, String query, String ref) {
-                    super.setURL(u, protocol, host, port, StrUtil.format("{}@{}", userInfo, authority), userInfo, path, query, ref);
-                }
-            });
+            URL url1 = getUrl(username, password, url);
             return url1.toString();
         }
         // ssh 原样返回
         return url;
+    }
+
+    private static URL getUrl(String username, String password, String url) throws MalformedURLException {
+        String userInfo = username + ":" + password;
+        return new URL(null, url, new URLStreamHandler() {
+            @Override
+            protected URLConnection openConnection(URL u) throws IOException {
+                return null;
+            }
+
+            @Override
+            protected void setURL(URL u, String protocol, String host, int port, String authority, String userInfo2, String path, String query, String ref) {
+                super.setURL(u, protocol, host, port, StrUtil.format("{}@{}", userInfo, authority), userInfo, path, query, ref);
+            }
+        });
     }
 
     private String warpSsh(String command) {
