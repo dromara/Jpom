@@ -33,6 +33,10 @@ interface PiecesPar {
   resolveFileProcess: Function
   resolveFileEnd: Function
   uploadChunkError?: Function
+  /**
+   * 文件切片并发数量控制
+   */
+  concurrentNum?: number
 }
 
 /**
@@ -53,7 +57,8 @@ export const uploadPieces = ({
   error,
   resolveFileProcess,
   resolveFileEnd,
-  uploadChunkError
+  uploadChunkError,
+  concurrentNum = uploadFileConcurrent
 }: PiecesPar) => {
   // 如果文件传入为空直接 return 返回
   if (!file || file.length < 1) {
@@ -169,7 +174,7 @@ export const uploadPieces = ({
     const startTime: number = new Date().getTime()
     // 设置初始化进度（避免第一份分片卡顿）
     process(0.01, 1, total, new Date().getTime() - startTime)
-    concurrentExecution(chunkList, uploadFileConcurrent, (curItem) => {
+    concurrentExecution(chunkList, concurrentNum, (curItem) => {
       return new Promise((resolve, reject) => {
         const { chunk } = getChunkInfo(file, curItem, chunkSize)
         const chunkInfo: IChunkInfo2 = {

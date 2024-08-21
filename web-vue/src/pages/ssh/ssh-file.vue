@@ -937,6 +937,8 @@ export default {
           this.percentageInfo = {}
           return new Promise((resolve, reject) => {
             uploadPieces({
+              /** ssh 文件上传 目前切片并发控制为1 */
+              concurrentNum: 1,
               file,
               resolveFileProcess: (msg) => {
                 this.globalLoading({
