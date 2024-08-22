@@ -39,6 +39,7 @@
     <version>2.11.9.1</version>
     <url>https://gitee.com/dromara/Jpom</url>
     <properties>
+        <spring-framework.version>5.3.39</spring-framework.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
         <!--当前程序兼容 jpom 最新版本号-->

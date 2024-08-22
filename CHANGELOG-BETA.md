@@ -8,6 +8,8 @@
 2. 【server】修复 SSH 分片上传极大概率上传失败问题（感谢@勤思·、@张飞鸿）
 3. 【all】升级 hutool 版本
 4. 【server】优化 时长格式化工具支持 i18n 国际化
+5. 【server】修复 终端日志处理字节'7'导致的日志补全记录不全 （感谢@[adao](https://github.com/YazaiHu) [Github issues 91](https://github.com/dromara/Jpom/issues/91) ）
+6. 【server】升级 spring 包到 5.3.39 修复漏洞 CVE-2024-38808，CVE-2024-38809（感谢@[龙猫](https://gitee.com/woyeshimao)）[Gitee Pr 281](https://gitee.com/dromara/Jpom/pulls/281)
 
 ------
 
