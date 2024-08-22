@@ -19,8 +19,12 @@ import cn.hutool.core.net.url.UrlBuilder;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.*;
+import cn.hutool.script.ScriptUtil;
 import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONValidator;
+import lombok.Lombok;
+import org.dromara.jpom.util.StringUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -115,9 +119,25 @@ public class BaiduBceRpcTexttransTest {
         while (matcher.find()) {
             //System.out.println(result);
             String jsonContent = matcher.group(1);
-            jsonObject1 = JSONObject.parseObject(jsonContent);
-            if (!this.checkHasI18nKey(jsonObject1)) {
-                return jsonObject1;
+            JSONValidator.Type type = StringUtil.validatorJson(jsonContent);
+            if (type == JSONValidator.Type.Object) {
+                jsonObject1 = JSONObject.parseObject(jsonContent);
+                if (!this.checkHasI18nKey(jsonObject1)) {
+                    return jsonObject1;
+                }
+            } else {
+                try {
+                    String eval = (String) ScriptUtil.getJavaScriptEngine().eval(jsonContent);
+                    type = StringUtil.validatorJson(eval);
+                    if (type == JSONValidator.Type.Object) {
+                        jsonObject1 = JSONObject.parseObject(eval);
+                        if (!this.checkHasI18nKey(jsonObject1)) {
+                            return jsonObject1;
+                        }
+                    }
+                } catch (Exception e) {
+                    throw Lombok.sneakyThrow(e);
+                }
             }
         }
         Assert.assertNotNull("翻译失败或者提取失败", jsonObject1);
