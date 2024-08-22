@@ -10,7 +10,6 @@
 package org.dromara.jpom;
 
 import cn.hutool.core.date.BetweenFormatter;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
@@ -21,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.ServerOpenApi;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.system.AgentStartInit;
+import org.dromara.jpom.util.StringUtil;
 import org.springframework.boot.Banner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -51,7 +51,7 @@ public class JpomAgentApplication {
         springApplicationBuilder.run(args);
         // 自动向服务端推送
         autoPushToServer(args);
-        log.info(I18nMessageUtil.get("i18n.startup_duration.54fe"), DateUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
+        log.info(I18nMessageUtil.get("i18n.startup_duration.54fe"), StringUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
     }
 
     /**

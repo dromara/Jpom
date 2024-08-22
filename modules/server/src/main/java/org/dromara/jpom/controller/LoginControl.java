@@ -17,7 +17,6 @@ import cn.hutool.captcha.generator.CodeGenerator;
 import cn.hutool.captcha.generator.RandomGenerator;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.BetweenFormatter;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -206,7 +205,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
             try {
                 long lockTime = userModel.overLockTime(userConfig.getAlwaysLoginError());
                 if (lockTime > 0) {
-                    String msg = DateUtil.formatBetween(lockTime * 1000, BetweenFormatter.Level.SECOND);
+                    String msg = StringUtil.formatBetween(lockTime * 1000, BetweenFormatter.Level.SECOND);
                     updateModel = userModel.errorLock(userConfig.getAlwaysLoginError());
                     this.ipError();
                     userLoginLogServer.fail(userModel, 2, false, request);

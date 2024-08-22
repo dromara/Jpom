@@ -28,6 +28,7 @@ import org.dromara.jpom.model.outgiving.OutGivingModel;
 import org.dromara.jpom.model.outgiving.OutGivingNodeProject;
 import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.service.outgiving.DbOutGivingLogService;
+import org.dromara.jpom.util.StringUtil;
 
 import java.io.File;
 import java.util.concurrent.Callable;
@@ -107,14 +108,14 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
             result = jsonMessage.success() ? OutGivingNodeProject.Status.Ok : OutGivingNodeProject.Status.Fail;
 
             JSONObject jsonObject = jsonMessage.toJson();
-            jsonObject.put("upload_duration", new BetweenFormatter(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND, 2).format());
+            jsonObject.put("upload_duration", StringUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND, 2));
             jsonObject.put("upload_file_size", fileSize);
             this.updateStatus(this.outGivingId, result, jsonObject.toString());
         } catch (Exception e) {
             log.error(I18nMessageUtil.get("i18n.distribution_exception_saving.8285"), this.outGivingNodeProject.getNodeId(), this.outGivingNodeProject.getProjectId(), e);
             result = OutGivingNodeProject.Status.Fail;
             JSONObject jsonObject = JsonMessage.toJson(500, e.getMessage());
-            jsonObject.put("upload_duration", new BetweenFormatter(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND, 2).format());
+            jsonObject.put("upload_duration", StringUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND, 2));
             jsonObject.put("upload_file_size", fileSize);
             this.updateStatus(this.outGivingId, result, jsonObject.toString());
         }
