@@ -436,7 +436,11 @@ public class SshHandler extends BaseTerminalHandler {
                     }
                 } else {
                     if (keyControl == KeyControl.KEY_TAB) {
-                        if (bytes[0] == 7 || Arrays.equals(new byte[]{13, 10}, bytes)) {
+                        if (bytes[0] == 7) {
+                            // 接收到终端响铃，就删除响铃
+                            bytes = Arrays.copyOfRange(bytes, 1, bytes.length);
+                        }
+                        if (Arrays.equals(new byte[]{13, 10}, bytes)) {
                             inputReceive = false;
                             return;
                         }
