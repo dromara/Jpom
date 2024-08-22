@@ -13,3 +13,7 @@ The following is a user request:
 ```
 const template = {REQUEST_STR}
 ```
+
+// 要求输出的请求和结果分开，不要输出到一个代码片段并且是 json 代码片段
+// 输出的变量请使用 var 语法
+// 输出的 json 结果中不要声明注释
