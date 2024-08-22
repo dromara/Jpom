@@ -143,8 +143,7 @@ public class SystemUpdateController extends BaseServerController implements ILoa
                                                   String sliceId,
                                                   Integer totalSlice,
                                                   Integer nowSlice,
-                                                  String fileSumMd5) throws IOException {
-        MultipartHttpServletRequest multiRequest = getMultiRequest();
+                                                  String fileSumMd5, MultipartHttpServletRequest multiRequest) throws IOException {
         if (StrUtil.isNotEmpty(machineId)) {
             MachineNodeModel model = machineNodeServer.getByKey(machineId);
             Assert.notNull(model, I18nMessageUtil.get("i18n.no_machine_found.c16c"));
