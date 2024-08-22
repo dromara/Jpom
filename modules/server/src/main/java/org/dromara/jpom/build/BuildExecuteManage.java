@@ -11,7 +11,7 @@ package org.dromara.jpom.build;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
@@ -782,7 +782,7 @@ public class BuildExecuteManage implements Runnable {
 
     public void runTask() {
         currentThread = Thread.currentThread();
-        logRecorder.system(I18nMessageUtil.get("i18n.start_executing_build_task.a5ac"), DateUtil.formatBetween(SystemClock.now() - submitTaskTime));
+        logRecorder.system(I18nMessageUtil.get("i18n.start_executing_build_task.a5ac"), StringUtil.formatBetween(SystemClock.now() - submitTaskTime, BetweenFormatter.Level.MILLISECOND));
 
         // 判断任务是否被取消
         BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(this.logId);
@@ -834,7 +834,7 @@ public class BuildExecuteManage implements Runnable {
                     stop = true;
                     break;
                 }
-                logRecorder.system(I18nMessageUtil.get("i18n.execution_ended_with_duration.a59b"), processItem.name(), DateUtil.formatBetween(SystemClock.now() - processItemStartTime));
+                logRecorder.system(I18nMessageUtil.get("i18n.execution_ended_with_duration.a59b"), processItem.name(), StringUtil.formatBetween(SystemClock.now() - processItemStartTime, BetweenFormatter.Level.MILLISECOND));
             }
             if (!stop) {
                 // 没有执行 stop
@@ -857,7 +857,7 @@ public class BuildExecuteManage implements Runnable {
             this.asyncWebHooks("error", "process", processName, "statusMsg", e.getMessage());
         } finally {
             this.clearResources();
-            logRecorder.system(I18nMessageUtil.get("i18n.build_finished_duration.7f7c"), DateUtil.formatBetween(SystemClock.now() - startTime));
+            logRecorder.system(I18nMessageUtil.get("i18n.build_finished_duration.7f7c"), StringUtil.formatBetween(SystemClock.now() - startTime, BetweenFormatter.Level.MILLISECOND));
             this.asyncWebHooks("done");
             IoUtil.close(logRecorder);
             BaseServerController.removeAll();

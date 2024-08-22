@@ -11,7 +11,6 @@ package org.dromara.jpom.service.user;
 
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.date.BetweenFormatter;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
@@ -27,6 +26,7 @@ import org.dromara.jpom.model.user.TriggerTokenLogBean;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.ITriggerToken;
 import org.dromara.jpom.service.h2db.BaseDbService;
+import org.dromara.jpom.util.StringUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -180,7 +180,7 @@ public class TriggerTokenLogServer extends BaseDbService<TriggerTokenLogBean> im
         long start = SystemClock.now();
         // 调用方法处理逻辑
         cleanTriggerToken();
-        log.debug("clean trigger token end... cost time: {}", DateUtil.formatBetween(SystemClock.now() - start, BetweenFormatter.Level.MILLISECOND));
+        log.debug("clean trigger token end... cost time: {}", StringUtil.formatBetween(SystemClock.now() - start, BetweenFormatter.Level.MILLISECOND));
     }
 
     /**

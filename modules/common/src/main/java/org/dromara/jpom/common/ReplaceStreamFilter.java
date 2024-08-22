@@ -9,12 +9,13 @@
  */
 package org.dromara.jpom.common;
 
-import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.util.StringUtil;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -50,7 +51,7 @@ public class ReplaceStreamFilter implements Filter {
                 .map(s -> wrapper.getParameterMap())
                 .map(JSONObject::toJSONString)
                 .orElse(StrUtil.EMPTY);
-            log.warn("[timeout] {} {} {}", wrapper.getRequestURI(), reqData, DateUtil.formatBetween(l));
+            log.warn("[timeout] {} {} {}", wrapper.getRequestURI(), reqData, StringUtil.formatBetween(l, BetweenFormatter.Level.MILLISECOND));
         }
     }
 }

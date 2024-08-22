@@ -12,6 +12,7 @@ package org.dromara.jpom.util;
 import cn.hutool.core.collection.CollStreamUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.map.MapUtil;
@@ -256,6 +257,47 @@ public class StringUtil {
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
         return CollStreamUtil.toMap(collect, objects -> objects.get(0), objects -> objects.get(1));
+    }
+
+    /**
+     * 时长格式化（支持国际化）
+     *
+     * @param betweenMs 间隔时长
+     * @param level     单位
+     * @return 格式化后的字符串
+     */
+    public static String formatBetween(long betweenMs, BetweenFormatter.Level level) {
+        return formatBetween(betweenMs, level, 0);
+    }
+
+    /**
+     * 时长格式化（支持国际化）
+     *
+     * @param betweenMs     间隔时长
+     * @param level         单位
+     * @param levelMaxCount 最大单位数量
+     * @return 格式化后的字符串
+     */
+    public static String formatBetween(long betweenMs, BetweenFormatter.Level level, int levelMaxCount) {
+        BetweenFormatter betweenFormatter = new BetweenFormatter(betweenMs, level, levelMaxCount);
+        betweenFormatter.setSeparator(",");
+        betweenFormatter.setLevelFormatter(level1 -> {
+            switch (level1) {
+                case MILLISECOND:
+                    return I18nMessageUtil.get("i18n.milliseconds.2115");
+                case SECOND:
+                    return I18nMessageUtil.get("i18n.duration_unit.0c1f");
+                case MINUTE:
+                    return I18nMessageUtil.get("i18n.minutes.3a17");
+                case DAY:
+                    return I18nMessageUtil.get("i18n.day_or_sky.249a");
+                case HOUR:
+                    return I18nMessageUtil.get("i18n.hours.2de0");
+                default:
+                    return level1.name();
+            }
+        });
+        return betweenFormatter.format();
     }
 
 }

@@ -9,8 +9,8 @@
  */
 package org.dromara.jpom.db;
 
+import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.date.SystemClock;
 import cn.hutool.core.exceptions.CheckedUtil;
@@ -27,6 +27,7 @@ import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.system.JpomRuntimeException;
+import org.dromara.jpom.util.StringUtil;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -117,7 +118,7 @@ public class StorageServiceFactory {
                 total += migrateH2ToNowItem(aClass, h2DsFactory, nowDsFactory, targetNode);
             }
             long endTime = SystemClock.now();
-            log.info(I18nMessageUtil.get("i18n.migration_completed.7a30"), total, DateUtil.formatBetween(endTime - time));
+            log.info(I18nMessageUtil.get("i18n.migration_completed.7a30"), total, StringUtil.formatBetween(endTime - time, BetweenFormatter.Level.MILLISECOND));
             h2DsFactory.destroy();
             nowDsFactory.destroy();
             log.info(I18nMessageUtil.get("i18n.prepare_to_delete_current_database_file.1e6a"));
