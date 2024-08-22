@@ -19,7 +19,6 @@ import cn.hutool.http.Header;
 import cn.hutool.http.HtmlUtil;
 import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.jpom.common.BaseJpomController;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.interceptor.HandlerMethodInterceptor;
 import org.springframework.context.annotation.Configuration;
@@ -412,7 +411,6 @@ public class ParameterInterceptor implements HandlerMethodInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        BaseJpomController.clearResources();
         I18nMessageUtil.clearLanguage();
     }
 

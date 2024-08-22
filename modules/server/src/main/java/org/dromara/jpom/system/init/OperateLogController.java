@@ -21,7 +21,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONValidator;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
+import org.apache.tomcat.util.http.fileupload.FileUploadBase;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -44,10 +44,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 操作记录控制器
@@ -158,8 +155,11 @@ public class OperateLogController implements AopLogInterface {
             }
         }
         //
+        String contentType = request.getContentType();
+        String method = request.getMethod();
+        boolean isMultipartContent = StrUtil.equalsIgnoreCase(cn.hutool.http.Method.POST.name(), method) && StrUtil.startWith(contentType, FileUploadBase.MULTIPART);
         Map<String, Object> allData = new HashMap<>(30);
-        String body = ServletFileUpload.isMultipartContent(request) ? null : ServletUtil.getBody(request);
+        String body = isMultipartContent ? null : ServletUtil.getBody(request);
         if (StrUtil.isNotEmpty(body)) {
             JSONValidator.Type type = StringUtil.validatorJson(body);
             if (type == null || type == JSONValidator.Type.Value) {

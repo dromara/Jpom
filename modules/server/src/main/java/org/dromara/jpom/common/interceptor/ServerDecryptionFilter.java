@@ -13,8 +13,9 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.ContentType;
+import cn.hutool.http.Method;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
+import org.apache.tomcat.util.http.fileupload.FileUploadBase;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.transport.BodyRewritingRequestWrapper;
 import org.dromara.jpom.common.transport.MultipartRequestWrapper;
@@ -78,6 +79,7 @@ public class ServerDecryptionFilter implements Filter {
         }
         log.debug(I18nMessageUtil.get("i18n.request_needs_decoding.d4d7"), encryptor.name());
         String contentType = request.getContentType();
+        String method = request.getMethod();
         if (ContentType.isDefault(contentType)) {
             // 普通表单
             HttpServletRequestWrapper wrapper = new ParameterRequestWrapper(request, encryptor);
@@ -93,7 +95,7 @@ public class ServerDecryptionFilter implements Filter {
             }
             BodyRewritingRequestWrapper requestWrapper = new BodyRewritingRequestWrapper(request, temp.getBytes(StandardCharsets.UTF_8));
             chain.doFilter(requestWrapper, response);
-        } else if (ServletFileUpload.isMultipartContent(request)) {
+        } else if (StrUtil.equalsIgnoreCase(Method.POST.name(), method) && StrUtil.startWith(contentType, FileUploadBase.MULTIPART)) {
             // 文件上传
             HttpServletRequestWrapper wrapper = new MultipartRequestWrapper(request, encryptor);
             chain.doFilter(wrapper, response);

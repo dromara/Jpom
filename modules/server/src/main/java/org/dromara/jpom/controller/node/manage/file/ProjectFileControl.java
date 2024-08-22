@@ -26,6 +26,7 @@ import org.dromara.jpom.service.node.ProjectInfoCacheService;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -65,9 +66,9 @@ public class ProjectFileControl extends BaseServerController {
      */
     @RequestMapping(value = "upload-sharding", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.PROJECT_FILE, method = MethodFeature.UPLOAD, log = false)
-    public IJsonMessage<String> uploadSharding(String sliceId) {
+    public IJsonMessage<String> uploadSharding(String sliceId, MultipartHttpServletRequest request) {
         Assert.state(BaseServerController.SHARDING_IDS.containsKey(sliceId), I18nMessageUtil.get("i18n.invalid_shard_id.46fd"));
-        return NodeForward.requestMultipart(getNode(), getMultiRequest(), NodeUrl.Manage_File_Upload_Sharding);
+        return NodeForward.requestMultipart(getNode(), request, NodeUrl.Manage_File_Upload_Sharding);
     }
 
     /**

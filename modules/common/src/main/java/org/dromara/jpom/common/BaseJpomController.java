@@ -16,7 +16,6 @@ import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.util.FileUtils;
 import org.springframework.util.Assert;
@@ -24,8 +23,6 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
-import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -178,43 +175,6 @@ public abstract class BaseJpomController {
         return Convert.toInt(getParameter(name), def);
     }
 
-
-    // ----------------文件上传
-    /**
-     * cache
-     */
-    private static final ThreadLocal<MultipartHttpServletRequest> THREAD_LOCAL_MULTIPART_HTTP_SERVLET_REQUEST = new ThreadLocal<>();
-
-    /**
-     * 释放资源
-     */
-    public static void clearResources() {
-        THREAD_LOCAL_MULTIPART_HTTP_SERVLET_REQUEST.remove();
-    }
-
-    /**
-     * 获取文件上传请求对象
-     *
-     * @return multipart
-     */
-    protected MultipartHttpServletRequest getMultiRequest() {
-        HttpServletRequest request = getRequest();
-        if (request instanceof MultipartHttpServletRequest) {
-            return (MultipartHttpServletRequest) request;
-        }
-        if (ServletFileUpload.isMultipartContent(request)) {
-            MultipartHttpServletRequest multipartHttpServletRequest = THREAD_LOCAL_MULTIPART_HTTP_SERVLET_REQUEST.get();
-            if (multipartHttpServletRequest != null) {
-                return multipartHttpServletRequest;
-            }
-            multipartHttpServletRequest = new StandardMultipartHttpServletRequest(request);
-            THREAD_LOCAL_MULTIPART_HTTP_SERVLET_REQUEST.set(multipartHttpServletRequest);
-            return multipartHttpServletRequest;
-        }
-        throw new IllegalArgumentException("not MultipartHttpServletRequest");
-    }
-
-    // ------------------------文件上传结束
 
     /**
      * 全局获取请求对象
