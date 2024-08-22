@@ -328,7 +328,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
             }
             this.sendMsg(restartMessage.setData(I18nMessageUtil.get("i18n.reconnect_failure.7c01")), session);
         } catch (Exception e) {
-            log.error(I18nMessageUtil.get("i18n.reconnect_plugin_failure_after_upgrade.73e3") + id, e);
+            log.error("{}{}", I18nMessageUtil.get("i18n.reconnect_plugin_failure_after_upgrade.73e3"), id, e);
             this.sendMsg(restartMessage.setData(I18nMessageUtil.get("i18n.reconnect_plugin_failure.cc6c")), session);
         }
         return false;
@@ -352,7 +352,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                 this.onError(session, I18nMessageUtil.get("i18n.node_connection_lost.b6c7"), id);
             }
         } catch (Exception e) {
-            log.error(I18nMessageUtil.get("i18n.upgrade_failure_with_colon.59f1") + id, e);
+            log.error("{}{}", I18nMessageUtil.get("i18n.upgrade_failure_with_colon.59f1"), id, e);
             this.onError(session, I18nMessageUtil.get("i18n.node_upgrade_failed.4493") + e.getMessage(), id);
         }
     }
