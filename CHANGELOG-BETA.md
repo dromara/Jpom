@@ -1,5 +1,13 @@
 # 🚀 版本日志
 
+## 2.11.9.3-beta
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】优化 构建 webhook 携带工作空间和集群id参数（workspaceId、clusterInfoId、workspaceName）（感谢@🦁子） 
+
+------
+
 ## 2.11.9.2-beta (2024-08-22)
 
 ### 🐞 解决BUG、优化功能
