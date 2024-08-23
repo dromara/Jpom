@@ -5,6 +5,7 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【server】优化 构建 webhook 携带工作空间和集群id参数（workspaceId、clusterInfoId、workspaceName）（感谢@🦁子） 
+2. 【server】修复 构建命令引用脚本时相关脚本引用脚本库未生效问题（感谢@木迷榖）
 
 ------
 
