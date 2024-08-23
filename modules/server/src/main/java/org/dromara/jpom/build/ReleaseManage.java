@@ -41,6 +41,7 @@ import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
+import org.dromara.jpom.func.assets.server.ScriptLibraryServer;
 import org.dromara.jpom.func.files.service.FileStorageService;
 import org.dromara.jpom.model.AfterOpt;
 import org.dromara.jpom.model.BaseEnum;
@@ -108,6 +109,7 @@ public class ReleaseManage {
     private static MachineDockerServer machineDockerServer;
     private static BuildExtConfig buildExtConfig;
     private static FileStorageService fileStorageService;
+    private static ScriptLibraryServer scriptLibraryServer;
 
     private void loadService() {
         buildExecuteService = ObjectUtil.defaultIfNull(buildExecuteService, () -> SpringUtil.getBean(BuildExecuteService.class));
@@ -115,6 +117,7 @@ public class ReleaseManage {
         machineDockerServer = ObjectUtil.defaultIfNull(machineDockerServer, () -> SpringUtil.getBean(MachineDockerServer.class));
         buildExtConfig = ObjectUtil.defaultIfNull(buildExtConfig, () -> SpringUtil.getBean(BuildExtConfig.class));
         fileStorageService = ObjectUtil.defaultIfNull(fileStorageService, () -> SpringUtil.getBean(FileStorageService.class));
+        scriptLibraryServer = ObjectUtil.defaultIfNull(scriptLibraryServer, () -> SpringUtil.getBean(ScriptLibraryServer.class));
     }
 
     private Integer getRealBuildNumberId() {
@@ -398,7 +401,8 @@ public class ReleaseManage {
             return null;
         }
         logRecorder.system(I18nMessageUtil.get("i18n.start_executing.87e7"), DateUtil.now(), System.lineSeparator());
-
+        // 替换脚本库 // 替换全局变量
+        releaseCommand = scriptLibraryServer.referenceReplace(releaseCommand);
         File sourceFile = BuildUtil.getSourceById(this.buildExtraModule.getId());
         Map<String, String> envFileMap = buildEnv.environment();
 

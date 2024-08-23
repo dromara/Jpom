@@ -213,7 +213,8 @@
                 </a-tooltip>
               </template>
               <template #help>
-                {{ $t('i18n_1ad696efdc') }}
+                <div>{{ $t('i18n_1ad696efdc') }}</div>
+                <div>{{ $t('i18n_872ad6c96e') }}</div>
               </template>
 
               <!-- <a-textarea
@@ -614,7 +615,8 @@
                   </a-tooltip>
                 </template>
                 <template #help>
-                  {{ $t('i18n_9fb12a2d14') }}
+                  <div>{{ $t('i18n_9fb12a2d14') }}</div>
+                  <div>{{ $t('i18n_872ad6c96e') }}</div>
                 </template>
                 <a-form-item-rest>
                   <code-editor
