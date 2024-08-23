@@ -171,9 +171,8 @@
                   fileList.find((fileItem, fileIndex) => {
                     return (fileItem.status = 'uploading')
                   })?.name
-                }}
-                文件合并中
-              </a-tag>
+                }}{{ $t('i18n_ade63665b2') }}</a-tag
+              >
               <a-button v-else type="primary"><UploadOutlined />{{ $t('i18n_fd7e0c997d') }}</a-button>
             </a-upload>
           </a-form-item>

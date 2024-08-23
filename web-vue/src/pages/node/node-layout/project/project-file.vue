@@ -248,9 +248,8 @@
                       uploadFileList.find((fileItem, fileIndex) => {
                         return (fileItem.status = 'uploading')
                       })?.name
-                    }}
-                    文件合并中
-                  </a-tag>
+                    }}{{ $t('i18n_ade63665b2') }}</a-tag
+                  >
                 </a-col>
               </a-row>
 

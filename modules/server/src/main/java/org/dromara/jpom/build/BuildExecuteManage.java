@@ -609,10 +609,10 @@ public class BuildExecuteManage implements Runnable {
             ScriptModel keyAndGlobal = scriptServer.getByKey(scriptId);
             Assert.notNull(keyAndGlobal, I18nMessageUtil.get("i18n.select_correct_script.ff2d"));
             script = keyAndGlobal.getContext();
-            // 替换脚本库 // 替换全局变量
-            script = scriptLibraryServer.referenceReplace(script);
             logRecorder.system(I18nMessageUtil.get("i18n.introducing_script_content.a55b"), keyAndGlobal.getName(), scriptId);
         }
+        // 替换脚本库 // 替换全局变量
+        script = scriptLibraryServer.referenceReplace(script);
         Map<String, String> environment = taskData.environmentMapBuilder.environment();
 
         InputStream templateInputStream = ExtConfigBean.getConfigResourceInputStream("/exec/template." + CommandUtil.SUFFIX);
