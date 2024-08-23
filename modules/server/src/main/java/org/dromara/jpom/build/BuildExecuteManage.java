@@ -40,6 +40,7 @@ import org.dromara.jpom.func.files.service.FileStorageService;
 import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.data.CommandExecLogModel;
 import org.dromara.jpom.model.data.RepositoryModel;
+import org.dromara.jpom.model.data.WorkspaceModel;
 import org.dromara.jpom.model.docker.DockerInfoModel;
 import org.dromara.jpom.model.enums.BuildReleaseMethod;
 import org.dromara.jpom.model.enums.BuildStatus;
@@ -53,6 +54,7 @@ import org.dromara.jpom.service.dblog.DbBuildHistoryLogService;
 import org.dromara.jpom.service.docker.DockerInfoService;
 import org.dromara.jpom.service.script.ScriptExecuteLogServer;
 import org.dromara.jpom.service.script.ScriptServer;
+import org.dromara.jpom.service.system.WorkspaceService;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.util.*;
 import org.dromara.jpom.webhook.DefaultWebhookPluginImpl;
@@ -105,6 +107,7 @@ public class BuildExecuteManage implements Runnable {
     private static BuildExtConfig buildExtConfig;
     private static FileStorageService fileStorageService;
     private static BuildExecutorPoolService buildExecutorPoolService;
+    private static WorkspaceService workspaceService;
 
     private void loadService() {
         buildExecuteService = ObjectUtil.defaultIfNull(buildExecuteService, () -> SpringUtil.getBean(BuildExecuteService.class));
@@ -117,6 +120,7 @@ public class BuildExecuteManage implements Runnable {
         buildExtConfig = ObjectUtil.defaultIfNull(buildExtConfig, () -> SpringUtil.getBean(BuildExtConfig.class));
         fileStorageService = ObjectUtil.defaultIfNull(fileStorageService, () -> SpringUtil.getBean(FileStorageService.class));
         buildExecutorPoolService = ObjectUtil.defaultIfNull(buildExecutorPoolService, () -> SpringUtil.getBean(BuildExecutorPoolService.class));
+        workspaceService = ObjectUtil.defaultIfNull(workspaceService, () -> SpringUtil.getBean(WorkspaceService.class));
     }
 
     /**
@@ -886,7 +890,7 @@ public class BuildExecuteManage implements Runnable {
      */
     private String asyncWebHooks(String type, Object... other) {
         BuildInfoModel buildInfoModel = taskData.buildInfoModel;
-        Map<String, Object> map = new HashMap<>(10);
+        Map<String, Object> map = new HashMap<>(15);
         //
         for (int i = 0; i < other.length; i += 2) {
             map.put(other[i].toString(), other[i + 1]);
@@ -903,6 +907,15 @@ public class BuildExecuteManage implements Runnable {
         String resultDirFile = buildExtraModule.getResultDirFile();
         map.put("buildResultDirFile", resultDirFile);
         map.put("buildResultFile", BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), this.taskData.buildInfoModel.getBuildId(), resultDirFile));
+        //
+        map.put("releaseMethod", buildInfoModel.getReleaseMethod());
+        String workspaceId = buildInfoModel.getWorkspaceId();
+        map.put("workspaceId", workspaceId);
+        WorkspaceModel model = workspaceService.getByKey(workspaceId);
+        if (model != null) {
+            map.put("clusterInfoId", model.getClusterInfoId());
+            map.put("workspaceName", model.getName());
+        }
 
         Opt.ofBlankAble(buildInfoModel.getWebhook())
             .ifPresent(s ->
