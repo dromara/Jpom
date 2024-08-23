@@ -36,6 +36,7 @@ import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.exception.LogRecorderCloseException;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
+import org.dromara.jpom.func.assets.server.ScriptLibraryServer;
 import org.dromara.jpom.func.files.service.FileStorageService;
 import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.data.CommandExecLogModel;
@@ -108,6 +109,7 @@ public class BuildExecuteManage implements Runnable {
     private static FileStorageService fileStorageService;
     private static BuildExecutorPoolService buildExecutorPoolService;
     private static WorkspaceService workspaceService;
+    private static ScriptLibraryServer scriptLibraryServer;
 
     private void loadService() {
         buildExecuteService = ObjectUtil.defaultIfNull(buildExecuteService, () -> SpringUtil.getBean(BuildExecuteService.class));
@@ -121,6 +123,7 @@ public class BuildExecuteManage implements Runnable {
         fileStorageService = ObjectUtil.defaultIfNull(fileStorageService, () -> SpringUtil.getBean(FileStorageService.class));
         buildExecutorPoolService = ObjectUtil.defaultIfNull(buildExecutorPoolService, () -> SpringUtil.getBean(BuildExecutorPoolService.class));
         workspaceService = ObjectUtil.defaultIfNull(workspaceService, () -> SpringUtil.getBean(WorkspaceService.class));
+        scriptLibraryServer = ObjectUtil.defaultIfNull(scriptLibraryServer, () -> SpringUtil.getBean(ScriptLibraryServer.class));
     }
 
     /**
@@ -606,6 +609,8 @@ public class BuildExecuteManage implements Runnable {
             ScriptModel keyAndGlobal = scriptServer.getByKey(scriptId);
             Assert.notNull(keyAndGlobal, I18nMessageUtil.get("i18n.select_correct_script.ff2d"));
             script = keyAndGlobal.getContext();
+            // 替换脚本库 // 替换全局变量
+            script = scriptLibraryServer.referenceReplace(script);
             logRecorder.system(I18nMessageUtil.get("i18n.introducing_script_content.a55b"), keyAndGlobal.getName(), scriptId);
         }
         Map<String, String> environment = taskData.environmentMapBuilder.environment();
