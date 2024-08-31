@@ -1256,8 +1256,8 @@
           chooseScriptVisible === 1
             ? tempExtraData.noticeScriptId
             : temp.script?.indexOf('$ref.script.') != -1
-            ? temp.script.replace('$ref.script.', '')
-            : ''
+              ? temp.script.replace('$ref.script.', '')
+              : ''
         "
         mode="choose"
         @confirm="
@@ -1406,7 +1406,7 @@ export default {
       default: 0
     }
   },
-  emits: ['confirm', 'update:editSteps'],
+  emits: ['confirm', 'update:editSteps', 'changeBuildMode'],
   data() {
     return {
       //   afterOptList,
@@ -1997,6 +1997,7 @@ export default {
         this.loadDockerAllTag()
       }
       this.temp = { ...this.temp, script: '' }
+      this.$emit('changeBuildMode', e.target.value)
     },
     // 查询 docker tag
     loadDockerAllTag() {

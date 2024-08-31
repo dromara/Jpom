@@ -46,7 +46,19 @@ public class EnvironmentMapBuilder {
     }
 
     public EnvironmentMapBuilder put(String name, String value) {
-        map.put(name, new Item(value, false));
+        map.put(name, new Item(value, false, false));
+        return this;
+    }
+
+    /**
+     * 系统变量
+     *
+     * @param name  变量名
+     * @param value 值
+     * @return this
+     */
+    public EnvironmentMapBuilder putSystem(String name, String value) {
+        map.put(name, new Item(value, false, true));
         return this;
     }
 
@@ -205,5 +217,9 @@ public class EnvironmentMapBuilder {
          * 隐私
          */
         private boolean privacy;
+        /**
+         * 是否为系统变量
+         */
+        private boolean system;
     }
 }

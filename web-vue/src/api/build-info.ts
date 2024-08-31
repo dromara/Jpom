@@ -43,6 +43,20 @@ export function getBuildGet(params) {
 }
 
 /**
+ * 构建环境变量
+ * @param {
+ *
+ * } params
+ */
+export function getBuildEnvironment(params) {
+  return axios({
+    url: '/build/manage/environment',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
  * 构建分组
  */
 export function getBuildGroupAll() {
