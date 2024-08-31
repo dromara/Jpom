@@ -11,20 +11,19 @@ package org.dromara.jpom.controller.build;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
-import org.dromara.jpom.build.BuildExecuteManage;
-import org.dromara.jpom.build.BuildExecuteService;
-import org.dromara.jpom.build.BuildUtil;
-import org.dromara.jpom.build.ResultDirFileAction;
+import org.dromara.jpom.build.*;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorConfig;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.BaseEnum;
+import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.enums.BuildStatus;
 import org.dromara.jpom.model.log.BuildHistoryLog;
@@ -34,7 +33,9 @@ import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.service.dblog.BuildInfoService;
 import org.dromara.jpom.service.dblog.DbBuildHistoryLogService;
+import org.dromara.jpom.service.system.WorkspaceEnvVarService;
 import org.dromara.jpom.util.FileUtils;
+import org.dromara.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,6 +44,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -60,13 +63,16 @@ public class BuildInfoManageController extends BaseServerController {
     private final BuildInfoService buildInfoService;
     private final DbBuildHistoryLogService dbBuildHistoryLogService;
     private final BuildExecuteService buildExecuteService;
+    private final WorkspaceEnvVarService workspaceEnvVarService;
 
     public BuildInfoManageController(BuildInfoService buildInfoService,
                                      DbBuildHistoryLogService dbBuildHistoryLogService,
-                                     BuildExecuteService buildExecuteService) {
+                                     BuildExecuteService buildExecuteService,
+                                     WorkspaceEnvVarService workspaceEnvVarService) {
         this.buildInfoService = buildInfoService;
         this.dbBuildHistoryLogService = dbBuildHistoryLogService;
         this.buildExecuteService = buildExecuteService;
+        this.workspaceEnvVarService = workspaceEnvVarService;
     }
 
     /**
@@ -140,6 +146,43 @@ public class BuildInfoManageController extends BaseServerController {
             buildInfoService.updateStatus(id, BuildStatus.Cancel, I18nMessageUtil.get("i18n.manual_cancel.8464"));
         }
         return JsonMessage.success(I18nMessageUtil.get("i18n.cancel_success.285f"));
+    }
+
+    /**
+     * 获取可用环境变量
+     *
+     * @param id id
+     * @return json
+     */
+    @RequestMapping(value = "/build/manage/environment", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public IJsonMessage<Map<String, EnvironmentMapBuilder.Item>> environment(String id, Integer buildMode, HttpServletRequest request) {
+        BuildInfoModel item = buildInfoService.getByKey(id, request);
+        EnvironmentMapBuilder environmentMapBuilder;
+        // 解析变量
+        if (item != null) {
+            environmentMapBuilder = workspaceEnvVarService.getEnv(item.getWorkspaceId());
+            environmentMapBuilder.putStr(StringUtil.parseEnvStr(item.getBuildEnvParameter()));
+            //
+            buildMode = item.getBuildMode();
+            if (buildMode != null && buildMode == 1) {
+                // 容器中的环境变量
+                String script = item.getScript();
+                DockerYmlDsl dockerYmlDsl = DockerYmlDsl.build(script);
+                Map<String, String> dockerEnv = ObjectUtil.defaultIfNull(dockerYmlDsl.getEnv(), new HashMap<>(0));
+                environmentMapBuilder.putStr(dockerEnv);
+            }
+        } else {
+            String workspace = buildInfoService.getCheckUserWorkspace(request);
+            environmentMapBuilder = workspaceEnvVarService.getEnv(workspace);
+        }
+        // 获取系统变量
+        if (buildMode != null && buildMode == 0) {
+            ProcessBuilder processBuilder = new ProcessBuilder();
+            Map<String, String> environment = processBuilder.environment();
+            environment.forEach(environmentMapBuilder::putSystem);
+        }
+        return JsonMessage.success("", environmentMapBuilder.clonePrivacyData());
     }
 
     /**

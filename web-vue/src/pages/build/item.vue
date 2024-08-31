@@ -22,22 +22,16 @@
       <template #title>
         <template v-if="id">
           <a-menu v-model:selectedKeys="menuKey" mode="horizontal" class="menu" @click="menuClick">
-            <a-menu-item key="info">
-              <span><InfoOutlined /> {{ $t('i18n_224aef211c') }}</span>
-            </a-menu-item>
-            <a-menu-item key="edit">
-              <span> <EditOutlined /> {{ $t('i18n_e54c5ecb54') }}</span>
-            </a-menu-item>
-            <a-menu-item key="trigger">
-              <span><ApiOutlined /> {{ $t('i18n_4696724ed3') }}</span>
-            </a-menu-item>
+            <a-menu-item key="info"> <InfoOutlined /> {{ $t('i18n_224aef211c') }} </a-menu-item>
+            <a-menu-item key="edit"> <EditOutlined /> {{ $t('i18n_e54c5ecb54') }} </a-menu-item>
+            <a-menu-item key="trigger"> <ApiOutlined /> {{ $t('i18n_4696724ed3') }} </a-menu-item>
+            <a-menu-item key="environment"><UnorderedListOutlined />{{ $t('i18n_3867e350eb') }}</a-menu-item>
           </a-menu>
         </template>
         <template v-else>
           <a-menu v-model:selectedKeys="menuKey" mode="horizontal" class="menu" @click="menuClick">
-            <a-menu-item key="edit">
-              <span> <EditOutlined /> {{ $t('i18n_44a6891817') }}</span>
-            </a-menu-item>
+            <a-menu-item key="edit"> <EditOutlined /> {{ $t('i18n_44a6891817') }} </a-menu-item>
+            <a-menu-item key="environment"><UnorderedListOutlined />{{ $t('i18n_3867e350eb') }}</a-menu-item>
           </a-menu>
         </template>
       </template>
@@ -60,8 +54,47 @@
               stepsCurrent = current
             }
           "
+          @change-build-mode="
+            (buildMode1) => {
+              buildMode = buildMode1
+              getEnvironmentList()
+            }
+          "
         ></editBuildPage>
         <triggerPage v-if="id" v-show="menuKey.includes('trigger')" :id="id" />
+
+        <div v-show="menuKey.includes('environment')">
+          <a-list size="small" bordered :data-source="Object.keys(environment)">
+            <template #renderItem="{ item }">
+              <a-list-item style="display: block">
+                <a-row :wrap="true">
+                  <a-col :span="12" :flex="12" class="text-overflow-hidden">
+                    <a-tooltip placement="topLeft" :title="item">
+                      {{ item }}
+                    </a-tooltip>
+                  </a-col>
+
+                  <a-col :span="12" :flex="12" class="text-overflow-hidden">
+                    <a-tooltip
+                      placement="topLeft"
+                      :title="environment[item].privacy ? $t('i18n_b12d003367') : environment[item].value"
+                    >
+                      <EyeInvisibleOutlined v-if="environment[item].privacy" />
+                      <CodeOutlined v-if="environment[item].system" />
+                      {{ environment[item].value }}
+                    </a-tooltip>
+                  </a-col>
+                </a-row>
+              </a-list-item>
+            </template>
+            <template #header>
+              <b>{{ $t('i18n_c0ad27a701') }}</b>
+            </template>
+            <!-- <template #footer>
+        <div>Footer</div>
+      </template> -->
+          </a-list>
+        </div>
       </div>
       <!-- <template> </template> -->
 
@@ -117,6 +150,7 @@
 import detailsPage from './details.vue'
 import editBuildPage from './edit.vue'
 import triggerPage from './trigger.vue'
+import { getBuildEnvironment } from '@/api/build-info'
 export default {
   components: {
     detailsPage,
@@ -145,7 +179,9 @@ export default {
   data() {
     return {
       menuKey: ['info'],
-      stepsCurrent: this.editSteps
+      stepsCurrent: this.editSteps,
+      environment: {},
+      buildMode: null
     }
   },
   created() {
@@ -155,6 +191,7 @@ export default {
     } else {
       this.menuKey = [array[1]]
     }
+    this.getEnvironmentList()
   },
   methods: {
     menuClick(item) {
@@ -162,6 +199,18 @@ export default {
     },
     onClose() {
       this.$emit('close')
+    },
+    // 获取可用环境变量
+    getEnvironmentList() {
+      // 构建基础信息
+      getBuildEnvironment({
+        id: this.id,
+        buildMode: this.buildMode
+      }).then((res) => {
+        if (res.data) {
+          this.environment = res.data || {}
+        }
+      })
     }
   }
 }

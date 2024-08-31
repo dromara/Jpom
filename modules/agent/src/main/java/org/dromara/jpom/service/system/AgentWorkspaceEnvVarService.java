@@ -44,7 +44,7 @@ public class AgentWorkspaceEnvVarService extends BaseOperService<WorkspaceEnvVar
             .map(map -> CollStreamUtil.toMap(map.values(), WorkspaceEnvVarModel.WorkspaceEnvVarItemModel::getName, workspaceEnvVarItemModel -> {
                 // 需要考虑兼容之前没有隐私变量字段，默认为隐私字段
                 Integer privacy = workspaceEnvVarItemModel.getPrivacy();
-                return new EnvironmentMapBuilder.Item(workspaceEnvVarItemModel.getValue(), privacy == null || privacy == 1);
+                return new EnvironmentMapBuilder.Item(workspaceEnvVarItemModel.getValue(), privacy == null || privacy == 1, false);
             }))
             .orElse(new HashMap<>(1));
         return EnvironmentMapBuilder.builder(objectMap);

@@ -66,7 +66,7 @@ public class WorkspaceEnvVarService extends BaseWorkspaceService<WorkspaceEnvVar
         List<WorkspaceEnvVarModel> list = super.listByEntity(entity);
         Map<String, EnvironmentMapBuilder.Item> map = CollStreamUtil.toMap(list, WorkspaceEnvVarModel::getName, workspaceEnvVarModel -> {
             Integer privacy = workspaceEnvVarModel.getPrivacy();
-            return new EnvironmentMapBuilder.Item(workspaceEnvVarModel.getValue(), privacy != null && privacy == 1);
+            return new EnvironmentMapBuilder.Item(workspaceEnvVarModel.getValue(), privacy != null && privacy == 1, false);
         });
         // java.lang.UnsupportedOperationException
         return EnvironmentMapBuilder.builder(map);
