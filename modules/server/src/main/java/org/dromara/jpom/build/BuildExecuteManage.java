@@ -1001,24 +1001,23 @@ public class BuildExecuteManage implements Runnable {
             // 创建执行器
             scriptFile = scriptExecuteLogServer.toExecLogFile(scriptModel);
             scriptExecuteLogServer.updateStatus(logModel.getId(), CommandExecLogModel.Status.ING);
-            int waitFor = JpomApplication.getInstance().execScript(scriptModel.getContext(), file -> {
-                try {
-                    // 输出环境变量
-                    taskData.environmentMapBuilder.eachStr(s -> {
-                        logRecorder.system(s);
-                        scriptLog.info(s);
-                    }, map);
-                    //
-                    return CommandUtil.execWaitFor(file, null, environment, null, (s, process) -> {
-                        logRecorder.info(s);
-                        scriptLog.info(s);
-                        lastMsg[0] = s;
-                    });
-                } catch (IOException | InterruptedException e) {
-                    scriptExecuteLogServer.updateStatus(logModel.getId(), CommandExecLogModel.Status.ERROR);
-                    throw Lombok.sneakyThrow(e);
-                }
-            });
+            int waitFor;
+            try {
+                // 输出环境变量
+                taskData.environmentMapBuilder.eachStr(s -> {
+                    logRecorder.system(s);
+                    scriptLog.info(s);
+                }, map);
+                //
+                waitFor = CommandUtil.execWaitFor(scriptFile, null, environment, null, (s, process) -> {
+                    logRecorder.info(s);
+                    scriptLog.info(s);
+                    lastMsg[0] = s;
+                });
+            } catch (IOException | InterruptedException e) {
+                scriptExecuteLogServer.updateStatus(logModel.getId(), CommandExecLogModel.Status.ERROR);
+                throw Lombok.sneakyThrow(e);
+            }
             logRecorder.system(I18nMessageUtil.get("i18n.execute_script_exit_code.64a8"), type, waitFor);
             scriptExecuteLogServer.updateStatus(logModel.getId(), CommandExecLogModel.Status.DONE, waitFor);
             // 判断是否为严格执行
