@@ -22,6 +22,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import lombok.Lombok;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
@@ -61,6 +62,7 @@ import java.util.stream.Collectors;
  * add git with ssh key to visit repository
  * @since 2019/7/15
  **/
+@Slf4j
 public class JGitUtil {
 
     /**
@@ -87,6 +89,9 @@ public class JGitUtil {
                 }
             }
             return urlTrue;
+        } catch (NoRemoteRepositoryException ex) {
+            log.warn("JGit: No remote repository found for url: {}", url);
+            return false;
         }
     }
 
@@ -127,7 +132,8 @@ public class JGitUtil {
      */
     private static Git reClone(Map<String, Object> parameter, String branchName, String tagName, File file, PrintWriter printWriter) throws GitAPIException, IOException {
         println(printWriter, StrUtil.EMPTY);
-        println(printWriter, "JGit: Automatically re-clones repositories");
+        String string = I18nMessageUtil.get("i18n.auto_reclone_repository.60f6");
+        println(printWriter, "JGit: " + string);
         if (!FileUtil.clean(file)) {
             FileUtil.del(file.toPath());
         }
@@ -397,13 +403,16 @@ public class JGitUtil {
             MergeResult mergeResult = call.getMergeResult();
             RebaseResult rebaseResult = call.getRebaseResult();
             if (mergeResult != null) {
-                println(printWriter, "mergeResult {}", mergeResult);
+                String string = I18nMessageUtil.get("i18n.merge_result.454b");
+                println(printWriter, string + ": {}", mergeResult);
             }
             if (rebaseResult != null) {
-                println(printWriter, "rebaseResult {}", rebaseResult);
+                String string = I18nMessageUtil.get("i18n.rebase_result.55d4");
+                println(printWriter, string + "：{}", rebaseResult);
             }
             if (fetchedFrom != null) {
-                println(printWriter, "fetchedFrom {}", fetchedFrom);
+                String string = I18nMessageUtil.get("i18n.source.d6c1");
+                println(printWriter, string + ": {}", fetchedFrom);
             }
             //			if (fetchResult != null) {
             //				println(printWriter, "fetchResult {}", fetchResult);
