@@ -851,6 +851,9 @@ public class BuildExecuteManage implements Runnable {
             }
         } catch (LogRecorderCloseException logRecorderCloseException) {
             log.warn(I18nMessageUtil.get("i18n.build_log_recorder_closed.1cc7"), processName);
+            String string = I18nMessageUtil.get("i18n.log_recorder_abnormally_closed.e53d");
+            buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Error, string);
+            this.asyncWebHooks("error", "process", processName, "statusMsg", string);
         } catch (DiyInterruptException diyInterruptException) {
             // 主动中断
             this.asyncWebHooks("stop", "process", processName, "statusMsg", diyInterruptException.getMessage());
