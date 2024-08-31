@@ -720,6 +720,7 @@
 	"i18n.log_file_not_found.7f2e":"没有日志文件:",
 	"i18n.log_id_missing.3500":"日志ID缺失",
 	"i18n.log_reading.a4c8":"日志阅读",
+	"i18n.log_recorder_abnormally_closed.e53d":"日志记录器异常关闭",
 	"i18n.log_recorder_error_message.ee3e":"日志记录器被关闭/或者未启用",
 	"i18n.log_recorder_not_enabled.5a4e":"日志记录器未启用",
 	"i18n.log_retention_days.99d1":"统计日志保留天数 {}",

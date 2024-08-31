@@ -117,7 +117,7 @@ public class BaiduBceRpcTexttransTest {
         //
         JSONObject jsonObject1 = null;
         while (matcher.find()) {
-            //System.out.println(result);
+            System.out.println(result);
             String jsonContent = matcher.group(1);
             JSONValidator.Type type = StringUtil.validatorJson(jsonContent);
             if (type == JSONValidator.Type.Object) {
