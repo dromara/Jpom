@@ -89,6 +89,10 @@
             </template>
             <template #header>
               <b>{{ $t('i18n_c0ad27a701') }}</b>
+              <a-alert
+                message="展示的环境变量可能在实际执行中触发修改值或者新增变量的情况,请以最终执行变量为准"
+                type="warning"
+              />
             </template>
             <!-- <template #footer>
         <div>Footer</div>

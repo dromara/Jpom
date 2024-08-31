@@ -172,6 +172,8 @@ public class BuildInfoManageController extends BaseServerController {
                 Map<String, String> dockerEnv = ObjectUtil.defaultIfNull(dockerYmlDsl.getEnv(), new HashMap<>(0));
                 environmentMapBuilder.putStr(dockerEnv);
             }
+            //
+            BuildExecuteManage.appendBuildDefaultEnv(environmentMapBuilder, item);
         } else {
             String workspace = buildInfoService.getCheckUserWorkspace(request);
             environmentMapBuilder = workspaceEnvVarService.getEnv(workspace);

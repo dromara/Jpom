@@ -38,6 +38,7 @@ import org.dromara.jpom.exception.LogRecorderCloseException;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.func.assets.server.ScriptLibraryServer;
 import org.dromara.jpom.func.files.service.FileStorageService;
+import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.data.CommandExecLogModel;
 import org.dromara.jpom.model.data.RepositoryModel;
@@ -366,16 +367,23 @@ public class BuildExecuteManage implements Runnable {
             logRecorder.system(I18nMessageUtil.get("i18n.delete_build_cache.c7f3"));
             CommandUtil.systemFastDel(this.gitFile);
         }
-        //
-        taskData.environmentMapBuilder.put("BUILD_ID", this.buildExtraModule.getId());
-        taskData.environmentMapBuilder.put("BUILD_NAME", this.buildExtraModule.getName());
-        taskData.environmentMapBuilder.put("BUILD_SOURCE_FILE", FileUtil.getAbsolutePath(this.gitFile));
-        taskData.environmentMapBuilder.put("BUILD_NUMBER_ID", String.valueOf(this.taskData.buildInfoModel.getBuildId()));
-        taskData.environmentMapBuilder.put("BUILD_ORIGINAL_RESULT_DIR_FILE", buildInfoModel.getResultDirFile());
-        // 配置的分支名称，可能存在模糊匹配的情况
-        taskData.environmentMapBuilder.put("BUILD_CONFIG_BRANCH_NAME", this.taskData.buildInfoModel.getBranchName());
+        // 构建环境变量
+        appendBuildDefaultEnv(taskData.environmentMapBuilder, buildInfoModel);
         return null;
     }
+
+    public static void appendBuildDefaultEnv(EnvironmentMapBuilder environmentMapBuilder, BuildInfoModel buildInfoModel) {
+        //
+        File gitFile = BuildUtil.getSourceById(buildInfoModel.getId());
+        environmentMapBuilder.put("BUILD_ID", buildInfoModel.getId());
+        environmentMapBuilder.put("BUILD_NAME", buildInfoModel.getName());
+        environmentMapBuilder.put("BUILD_SOURCE_FILE", FileUtil.getAbsolutePath(gitFile));
+        environmentMapBuilder.put("BUILD_NUMBER_ID", String.valueOf(buildInfoModel.getBuildId()));
+        environmentMapBuilder.put("BUILD_ORIGINAL_RESULT_DIR_FILE", buildInfoModel.getResultDirFile());
+        // 配置的分支名称，可能存在模糊匹配的情况
+        environmentMapBuilder.put("BUILD_CONFIG_BRANCH_NAME", buildInfoModel.getBranchName());
+    }
+
 
     /**
      * 拉取代码后并缓存环境变量
