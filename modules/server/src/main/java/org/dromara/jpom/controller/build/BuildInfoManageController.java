@@ -201,6 +201,7 @@ public class BuildInfoManageController extends BaseServerController {
         data.put("logId", queryByBean.getId());
         data.put("status", status);
         data.put("statusMsg", queryByBean.getStatusMsg());
+        data.put("environment", queryByBean.toEnvironmentMapBuilder().clonePrivacyData());
         // 构建中
         //data.put("buildRun", status == BuildStatus.Ing.getCode());
         return JsonMessage.success("", data);

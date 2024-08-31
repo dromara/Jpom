@@ -11,6 +11,7 @@ package org.dromara.jpom.model;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.BooleanUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,9 @@ import java.util.function.Consumer;
  * @since 2023/2/11
  */
 public class EnvironmentMapBuilder {
+
+    // 隐私变量占位符
+    public static final String PRIVACY_PLACEHOLDER = "******";
 
     private final Map<String, Item> map;
 
@@ -113,7 +117,7 @@ public class EnvironmentMapBuilder {
         consumer.accept("##################################################################################");
         for (Map.Entry<String, Item> entry : map.entrySet()) {
             Item entryValue = entry.getValue();
-            String value = entryValue.privacy ? "******" : entryValue.value;
+            String value = entryValue.privacy ? PRIVACY_PLACEHOLDER : entryValue.value;
             consumer.accept(entry.getKey() + "=" + value);
         }
         Optional.ofNullable(appendMap).ifPresent(objectMap -> {
@@ -152,8 +156,38 @@ public class EnvironmentMapBuilder {
         return BooleanUtil.toBoolean(value);
     }
 
+    /**
+     * 将对象转 json
+     *
+     * @return 原始对象
+     */
     public String toDataJsonStr() {
         return JSONObject.toJSONString(map);
+    }
+
+    /**
+     * 将对象转隐私 json
+     *
+     * @return 隐私变量自动隐藏对象
+     */
+    public String toPrivacyDataJsonStr() {
+        Map<String, Item> clone = clonePrivacyData();
+        return JSONObject.toJSONString(clone);
+    }
+
+    /**
+     * 将对象转隐私 json
+     *
+     * @return 隐私变量自动隐藏对象
+     */
+    public Map<String, Item> clonePrivacyData() {
+        Map<String, Item> clone = ObjectUtil.clone(map);
+        clone.forEach((k, v) -> {
+            if (v.privacy) {
+                v.value = PRIVACY_PLACEHOLDER;
+            }
+        });
+        return clone;
     }
 
     public JSONObject toDataJson() {

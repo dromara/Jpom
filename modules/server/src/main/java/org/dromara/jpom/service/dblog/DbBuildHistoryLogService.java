@@ -28,6 +28,7 @@ import org.dromara.jpom.build.BuildUtil;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.model.BaseDbModel;
+import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.enums.BuildStatus;
@@ -109,8 +110,9 @@ public class DbBuildHistoryLogService extends BaseWorkspaceService<BuildHistoryL
     protected void fillSelectResult(BuildHistoryLog data) {
         super.fillSelectResult(data);
         Optional.ofNullable(data).ifPresent(buildHistoryLog -> {
-            // 不能返回环境变量的信息（存在隐私字段）
-            buildHistoryLog.setBuildEnvCache(null);
+            // 不能返回环境变量的信息（存在隐私字段）将隐私变量隐藏后返回
+            EnvironmentMapBuilder builder = buildHistoryLog.toEnvironmentMapBuilder();
+            buildHistoryLog.setBuildEnvCache(builder.toPrivacyDataJsonStr());
         });
 
     }
