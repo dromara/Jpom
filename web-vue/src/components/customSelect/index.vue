@@ -15,8 +15,9 @@
         <a-space>
           <a-input ref="inputRef" v-model:value="selectInput" :max-length="maxLength" :placeholder="inputPlaceholder" />
           <a-button type="text" @click="addInput(selectInput)">
-            <template #icon> <plus-outlined /> </template>{{ $t('i18n_66ab5e9f24') }}</a-button
-          >
+            <template #icon> <plus-outlined /> </template>{{ $t('i18n_66ab5e9f24') }}
+          </a-button>
+          <slot name="suffix"></slot>
         </a-space>
       </template>
       <a-select-option v-if="selectPlaceholder" value="">{{ selectPlaceholder }}</a-select-option>
