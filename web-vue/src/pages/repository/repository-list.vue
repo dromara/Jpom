@@ -206,6 +206,16 @@
             :input-placeholder="$t('i18n_bd0362bed3')"
             :select-placeholder="$t('i18n_9cac799f2f')"
           >
+            <template #suffix>
+              <a-tooltip>
+                <template #title>
+                  <div>
+                    分组为虚拟逻辑分组，并非独立管理分组数据（如果在此处新增后并未保存相关数据对应的分组不会被保存）
+                  </div>
+                </template>
+                <QuestionCircleOutlined />
+              </a-tooltip>
+            </template>
           </custom-select>
         </a-form-item>
         <a-form-item :label="$t('i18n_e4bea943de')" name="gitUrl">
