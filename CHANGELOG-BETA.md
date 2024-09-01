@@ -4,12 +4,13 @@
 
 ### 🐞 解决BUG、优化功能
 
-1. 【server】优化 构建 webhook 携带工作空间和集群id参数（workspaceId、clusterInfoId、workspaceName）（感谢@🦁子） 
+1. 【server】优化 构建 webhook 携带工作空间和集群id参数（workspaceId、clusterInfoId、workspaceName）（感谢@🦁子）
 2. 【server】修复 构建命令引用脚本时相关脚本引用脚本库未生效问题（感谢@木迷榖）
 3. 【server】优化 构建命令、本地发布命令支持直接引起脚本库（`G@("xx")` xx 为脚本标记）
 4. 【server】修复 构建时日志记录器异常关闭未提示并且构建状态未修改（感谢@陈晨🍊）
 5. 【server】优化 构建日志弹窗支持查看可用环境变量
 6. 【server】优化 构建支持查看可用环境变量（感谢[@慌i](https://gitee.com/L_FaN) [Gitee issues IALAUW](https://gitee.com/dromara/Jpom/issues/IALAUW) ）
+7. 【server】升级 mysql 驱动版本到 8.2.0
 
 ------
 

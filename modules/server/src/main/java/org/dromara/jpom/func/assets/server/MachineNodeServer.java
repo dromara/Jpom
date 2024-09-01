@@ -113,6 +113,7 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
             log.debug(I18nMessageUtil.get("i18n.node_machine_table_exists_no_need_to_fix.2625"), count);
             return;
         }
+        // 迁移旧数据
         List<NodeModel> list = nodeService.list(false);
         if (CollUtil.isEmpty(list)) {
             log.debug(I18nMessageUtil.get("i18n.no_node_info_no_need_to_fix_machine_data.562e"));
