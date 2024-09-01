@@ -116,6 +116,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
             log.debug(I18nMessageUtil.get("i18n.ssh_data_repair_not_needed.203f"), count);
             return;
         }
+        // 迁移旧数据
         List<SshModel> list = sshService.list(false);
         if (CollUtil.isEmpty(list)) {
             log.debug(I18nMessageUtil.get("i18n.no_ssh_info_no_need_to_fix_machine_data.0946"));
@@ -351,7 +352,7 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
     }
 
     /**
-     * 更新 容器状态
+     * 更新 ssh状态
      *
      * @param id     ID
      * @param status 状态值
