@@ -25,6 +25,8 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.db.Entity;
+import cn.hutool.db.sql.Direction;
+import cn.hutool.db.sql.Order;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.keepbx.jpom.IJsonMessage;
@@ -109,6 +111,27 @@ public class MachineSshController extends BaseGroupNameController {
     public IJsonMessage<PageResultDto<MachineSshModel>> listJson(HttpServletRequest request) {
         PageResultDto<MachineSshModel> pageResultDto = machineSshServer.listPage(request);
         return JsonMessage.success("", pageResultDto);
+    }
+
+    @PostMapping(value = "search", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public IJsonMessage<List<MachineSshModel>> listJson(HttpServletRequest request, String name, int limit, String mustId) {
+        Entity entity = new Entity();
+        if (StrUtil.isNotBlank(name)) {
+            entity.set("name", "like %" + name + "%");
+        }
+        List<MachineSshModel> sshModelList = machineSshServer.queryList(entity, limit, new Order("createTimeMillis", Direction.DESC));
+        if (StrUtil.isNotBlank(mustId) && CollUtil.isNotEmpty(sshModelList)) {
+            // 存在 id 并且搜索结果不为空
+            boolean noneMatch = sshModelList.stream().noneMatch(machineSshModel -> StrUtil.equals(machineSshModel.id(), mustId));
+            if (noneMatch) {
+                MachineSshModel server = machineSshServer.getByKey(mustId);
+                if (server != null) {
+                    sshModelList.add(server);
+                }
+            }
+        }
+        return JsonMessage.success("", sshModelList);
     }
 
 

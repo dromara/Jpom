@@ -433,6 +433,7 @@ public class MachineDockerServer extends BaseDbService<MachineDockerModel> imple
             Assert.notNull(sshModel, I18nMessageUtil.get("i18n.ssh_info_does_not_exist.5ed0"));
             // 需要关闭之前的连接，避免阻塞
             parameter.put("closeBefore", true);
+            parameter.put("sshUseSudo", machineDockerModel.getSshUseSudo());
             parameter.put("session", (Supplier<Session>) () -> machineSshServer.getSessionByModel(sshModel));
         }
         return parameter;

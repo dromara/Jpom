@@ -139,6 +139,7 @@ public class MachineDockerController extends BaseGroupNameController {
         String enableSshStr = getParameter("enableSsh");
         boolean enableSsh = Convert.toBool(enableSshStr, false);
         String machineSshId = getParameter("machineSshId");
+        boolean sshUseSudo = Convert.toBool(getParameter("sshUseSudo"), false);
         if (enableSsh) {
             MachineSshModel model = machineSshServer.getByKey(machineSshId);
             host = "ssh://" + model.getHost() + ":" + (model.getPort() == null ? 22 : model.getPort());
@@ -180,6 +181,7 @@ public class MachineDockerController extends BaseGroupNameController {
         machineDockerModel.setRegistryPassword(registryPassword);
         machineDockerModel.setRegistryEmail(registryEmail);
         machineDockerModel.setGroupName(groupName);
+        machineDockerModel.setSshUseSudo(sshUseSudo);
         //
         machineDockerModel.setId(id);
         return machineDockerModel;

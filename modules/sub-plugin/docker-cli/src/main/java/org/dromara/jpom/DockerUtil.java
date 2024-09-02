@@ -93,6 +93,7 @@ public class DockerUtil {
         String registryPassword = (String) parameter.get("registryPassword");
         String registryEmail = (String) parameter.get("registryEmail");
         String registryUrl = (String) parameter.get("registryUrl");
+        Boolean sshUseSudo = (Boolean) parameter.get("sshUseSudo");
         Supplier<Session> sessionSupplier = (Supplier<Session>) parameter.get("session");
         //
         DefaultDockerClientConfig.Builder defaultConfigBuilder = DefaultDockerClientConfig.createDefaultConfigBuilder();
@@ -111,7 +112,7 @@ public class DockerUtil {
         DockerClientConfig config = defaultConfigBuilder.build();
         if (sessionSupplier != null) {
             // 通过SSH连接Docker
-            JschDockerHttpClient httpClient = new JschDockerHttpClient(config.getDockerHost(), sessionSupplier);
+            JschDockerHttpClient httpClient = new JschDockerHttpClient(config.getDockerHost(), sshUseSudo != null && sshUseSudo, sessionSupplier);
             dockerClient = DockerClientImpl.getInstance(config, httpClient);
         } else {
             ApacheDockerHttpClient.Builder builder = new ApacheDockerHttpClient.Builder()

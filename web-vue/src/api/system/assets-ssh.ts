@@ -20,6 +20,15 @@ export function machineSshListData(params) {
   })
 }
 
+// 搜索 ssh 列表
+export function machineSshSearchData(params) {
+  return axios({
+    url: '/system/assets/ssh/search',
+    method: 'post',
+    data: params
+  })
+}
+
 export function machineSshListGroup(params) {
   return axios({
     url: '/system/assets/ssh/list-group',
