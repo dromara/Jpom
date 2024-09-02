@@ -5,5 +5,6 @@
   "agentUrl": "https://d.jpom.download/release/2.11.9/agent-2.11.9-release.zip",
   "serverUrl": "https://d.jpom.download/release/2.11.9/server-2.11.9-release.zip",
   "changelogUrl": "https://gitee.com/dromara/Jpom/raw/master/CHANGELOG.md",
-  "downloadUrl": "https://jpom.top/pages/all-downloads/"
+  "downloadUrl": "https://jpom.top/pages/all-downloads/",
+  "downloadSource": "cloudflare"
 }
