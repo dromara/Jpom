@@ -283,7 +283,7 @@
               <a-tooltip>
                 <template #title>
                   <div>
-                    分组为虚拟逻辑分组，并非独立管理分组数据（如果在此处新增后并未保存相关数据对应的分组不会被保存）
+                    {{ $t('i18n_bd7c7abc8c') }}
                   </div>
                 </template>
                 <QuestionCircleOutlined />
@@ -303,13 +303,13 @@
             </div>
           </template>
         </a-form-item>
-        <a-form-item v-if="temp.enableSsh" label="sudo执行" name="sshUseSudo">
+        <a-form-item v-if="temp.enableSsh" :label="$t('i18n_cbd9ffe1b8')" name="sshUseSudo">
           <a-switch
             v-model:checked="temp.sshUseSudo"
             :checked-children="$t('i18n_8493205602')"
             :un-checked-children="$t('i18n_d58a55bcee')"
           />
-          <template #help> 是否需要使用 sudo 执行：docker system dial-stdio </template>
+          <template #help>{{ $t('i18n_5ab9bf3591') }}</template>
         </a-form-item>
         <a-form-item v-if="temp.enableSsh" :label="$t('i18n_a5617f0369')" name="enableSsh">
           <a-select
@@ -325,7 +325,7 @@
           >
             <template v-if="searchSshListLoading || !sshList.length" #notFoundContent>
               <a-spin v-if="searchSshListLoading" size="small" />
-              <span v-else>没有搜索到任何 SSH 信息</span>
+              <span v-else>{{ $t('i18n_e5fae81ed4') }}</span>
             </template>
             <a-select-option v-for="item in sshList" :key="item.id" :disabled="!item.dockerInfo" :value="item.id">
               <a-tooltip :title="`${item.name}(${item.host})`">
