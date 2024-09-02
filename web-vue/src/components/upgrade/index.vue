@@ -49,7 +49,7 @@
       </a-timeline-item>
       <a-timeline-item v-if="temp.downloadSource">
         <a-space>
-          <span>下载源：{{ temp.downloadSource }} </span>
+          <span>{{ $t('i18n_3200fba1c6') }}{{ temp.downloadSource }} </span>
         </a-space>
       </a-timeline-item>
       <a-timeline-item>
@@ -492,10 +492,12 @@ export default {
       const title = this.$t('i18n_ec6e39a177')
       const alterB = this.$t('i18n_ddf0c97bce')
       const li = [this.$t('i18n_a94feac256'), this.$t('i18n_b55f286cba'), this.$t('i18n_a52a10123f')]
-      const downloadSource = '当前下载源：'
+      const downloadSource = this.$t('i18n_917381e4a5')
       const html = `${title}
       <ul style="color:red;">
-        <li style="display: ${this.temp.downloadSource ? 'revert' : 'none'};">${downloadSource}<b>${this.temp.downloadSource}</b></li>
+        <li style="display: ${this.temp.downloadSource ? 'revert' : 'none'};">${downloadSource}<b>${
+        this.temp.downloadSource
+      }</b></li>
         <li>${li[0]}</li>
         <li>${li[1]}<b>${alterB}</b></li>
         <li>${li[2]}</li>

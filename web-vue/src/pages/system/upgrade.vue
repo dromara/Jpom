@@ -606,11 +606,13 @@ export default {
     },
     // 下载远程最新文件
     downloadRemoteEvent() {
-      const downloadSource = '当前下载源：'
+      const downloadSource = this.$t('i18n_917381e4a5')
       const html = `
         ${this.$t('i18n_35b89dbc59')}
         <ul style='color:red;'>
-          <li style="display: ${this.temp.downloadSource ? 'revert' : 'none'};">${downloadSource}<b>${this.temp.downloadSource}</b></li>
+          <li style="display: ${this.temp.downloadSource ? 'revert' : 'none'};">${downloadSource}<b>${
+        this.temp.downloadSource
+      }</b></li>
           <li>${this.$t('i18n_bb316d9acd')}</li>
           <li>${this.$t('i18n_56bb769354')}<b>${this.$t('i18n_ddf0c97bce')}</b></li>
           <li>${this.$t('i18n_2c74d8485f')}</li>
