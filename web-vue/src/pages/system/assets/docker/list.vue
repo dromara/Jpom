@@ -303,13 +303,30 @@
             </div>
           </template>
         </a-form-item>
+        <a-form-item v-if="temp.enableSsh" label="sudo执行" name="sshUseSudo">
+          <a-switch
+            v-model:checked="temp.sshUseSudo"
+            :checked-children="$t('i18n_8493205602')"
+            :un-checked-children="$t('i18n_d58a55bcee')"
+          />
+          <template #help> 是否需要使用 sudo 执行：docker system dial-stdio </template>
+        </a-form-item>
         <a-form-item v-if="temp.enableSsh" :label="$t('i18n_a5617f0369')" name="enableSsh">
           <a-select
             v-model:value="temp.machineSshId"
-            allow-clear
+            :default-active-first-option="false"
+            :show-arrow="false"
             :placeholder="$t('i18n_a5617f0369')"
             class="search-input-item"
+            :not-found-content="searchSshListLoading || !sshList.length ? undefined : null"
+            :filter-option="false"
+            :show-search="true"
+            @search="sshListData"
           >
+            <template v-if="searchSshListLoading || !sshList.length" #notFoundContent>
+              <a-spin v-if="searchSshListLoading" size="small" />
+              <span v-else>没有搜索到任何 SSH 信息</span>
+            </template>
             <a-select-option v-for="item in sshList" :key="item.id" :disabled="!item.dockerInfo" :value="item.id">
               <a-tooltip :title="`${item.name}(${item.host})`">
                 <template #title>
@@ -638,7 +655,7 @@ import {
   dockerListGroup,
   statusMap
 } from '@/api/system/assets-docker'
-import { machineSshListData } from '@/api/system/assets-ssh'
+import { machineSshSearchData } from '@/api/system/assets-ssh'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 import { getWorkSpaceListAll } from '@/api/workspace'
 import Console from '@/pages/docker/console'
@@ -786,7 +803,8 @@ export default {
       },
       tableSelections: [],
       certificateVisible: false,
-      confirmLoading: false
+      confirmLoading: false,
+      searchSshListLoading: false
     }
   },
   computed: {
@@ -806,7 +824,6 @@ export default {
     }
   },
   mounted() {
-    this.sshListData()
     this.loadData()
     this.loadGroupList()
   },
@@ -821,12 +838,21 @@ export default {
         }
       })
     },
-    sshListData() {
-      machineSshListData().then((res) => {
-        if (res.code === 200) {
-          this.sshList = res.data.result
-        }
+    sshListData(name) {
+      this.searchSshListLoading = true
+      machineSshSearchData({
+        limit: 10,
+        mustId: this.temp?.machineSshId,
+        name: name
       })
+        .then((res) => {
+          if (res.code === 200) {
+            this.sshList = res.data || []
+          }
+        })
+        .finally(() => {
+          this.searchSshListLoading = false
+        })
     },
     // 加载数据
     loadData(pointerEvent) {
@@ -855,7 +881,7 @@ export default {
     handleAdd() {
       this.temp = {}
       this.editVisible = true
-
+      this.sshListData()
       this.$refs['editForm']?.resetFields()
     },
     // 控制台
@@ -904,7 +930,7 @@ export default {
     handleEdit(record) {
       this.temp = { ...record }
       this.editVisible = true
-
+      this.sshListData()
       // this.temp = { ...this.temp };
 
       this.$refs['editForm']?.resetFields()

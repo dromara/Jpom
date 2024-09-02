@@ -52,9 +52,11 @@ public final class JschDockerHttpClient implements DockerHttpClient {
     private final Session session;
     private final CloseableHttpClient httpClient;
     private final HttpHost host;
+    private final boolean useSudo;
 
-    public JschDockerHttpClient(URI dockerHostUri, Supplier<Session> sessionSupplier) {
+    public JschDockerHttpClient(URI dockerHostUri, boolean useSudo, Supplier<Session> sessionSupplier) {
         this.session = sessionSupplier.get();
+        this.useSudo = useSudo;
         Registry<ConnectionSocketFactory> socketFactoryRegistry = createConnectionSocketFactoryRegistry(session);
         //
         if ("ssh".equals(dockerHostUri.getScheme())) {
@@ -194,7 +196,7 @@ public final class JschDockerHttpClient implements DockerHttpClient {
             .register("ssh", new PlainConnectionSocketFactory() {
                 @Override
                 public Socket createSocket(HttpContext context) throws IOException {
-                    return new JschSocket(session);
+                    return new JschSocket(session, useSudo);
                 }
             })
             .build();

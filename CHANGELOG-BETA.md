@@ -11,6 +11,8 @@
 5. 【server】优化 构建日志弹窗支持查看可用环境变量
 6. 【server】优化 构建支持查看可用环境变量（感谢[@慌i](https://gitee.com/L_FaN) [Gitee issues IALAUW](https://gitee.com/dromara/Jpom/issues/IALAUW) ）
 7. 【server】升级 mysql 驱动版本到 8.2.0
+8. 【server】优化 ssh docker 独立配置是否需要 sudo 执行
+9. 【server】修复 ssh docker 选型固定只有最新 10 条调整为搜索下拉（@山上雪）
 
 ------
 

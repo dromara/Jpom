@@ -122,6 +122,10 @@ public class MachineDockerModel extends BaseGroupNameModel {
      * SSH Id
      */
     private String machineSshId;
+    /**
+     * 是否使用 sudo 执行命令
+     */
+    private Boolean sshUseSudo;
 
 
     public void setFailureMsg(String failureMsg) {

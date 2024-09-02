@@ -9,7 +9,6 @@
  */
 package org.dromara.jpom.ssh;
 
-import cn.hutool.system.SystemUtil;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
@@ -31,9 +30,11 @@ class JschSocket extends Socket {
     private Channel channel;
     private InputStream inputStream;
     private OutputStream outputStream;
+    private final boolean useSudo;
 
-    JschSocket(Session session) {
+    JschSocket(Session session, boolean useSudo) {
         this.session = session;
+        this.useSudo = useSudo;
     }
 
     @Override
@@ -60,9 +61,8 @@ class JschSocket extends Socket {
         try {
             // only 18.09 and up
             channel = session.openChannel("exec");
-            boolean jpomCommandUseSudo = SystemUtil.getBoolean("JPOM_COMMAND_USE_SUDO", false);
             String command;
-            if (jpomCommandUseSudo) {
+            if (useSudo) {
                 command = "sudo docker system dial-stdio";
             } else {
                 command = "docker system dial-stdio";
