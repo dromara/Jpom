@@ -2,20 +2,20 @@
   <div>
     <a-timeline>
       <a-timeline-item>
-        <span class="layui-elem-quote">
+        <span>
           {{ $t('i18n_0c5c8d2d11') }}{{ temp.name }} - {{ temp.osType }} - {{ temp.operatingSystem }} -
           <a-tag>{{ temp.architecture }} </a-tag>
           <a-tag>{{ temp.id }}</a-tag>
         </span>
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote">
+        <span>
           {{ $t('i18n_2684c4634d') }}<a-tag>{{ temp.serverVersion }}</a-tag>
           <a-tag>{{ temp.kernelVersion }}</a-tag>
         </span>
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote"
+        <span
           >{{ $t('i18n_3d06693eb5') }} <a-tag>cpu:{{ temp.nCPU || temp.NCPU }}</a-tag>
           <a-tag>{{ $t('i18n_af708b659f') }}{{ renderSize(temp.memTotal) }}</a-tag>
 
@@ -24,14 +24,14 @@
         </span>
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote">{{ $t('i18n_089a88ecee') }}{{ temp.systemTime }} </span>
+        <span>{{ $t('i18n_089a88ecee') }}{{ temp.systemTime }} </span>
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote">{{ $t('i18n_b6728e74a4') }}{{ temp.dockerRootDir }} </span>
+        <span>{{ $t('i18n_b6728e74a4') }}{{ temp.dockerRootDir }} </span>
       </a-timeline-item>
       <template v-if="temp.swarm">
         <a-timeline-item>
-          <div class="layui-elem-quote">
+          <div>
             {{ $t('i18n_e414392917') }}
             <div style="padding-left: 10px">
               <a-space direction="vertical" style="width: 100%">
@@ -53,7 +53,7 @@
         </a-timeline-item>
       </template>
       <a-timeline-item v-if="temp.plugins">
-        <div class="layui-elem-quote">
+        <div>
           {{ $t('i18n_b9bcb4d623') }}
 
           <a-list item-layout="horizontal" :data-source="Object.keys(temp.plugins)" size="small">
@@ -67,7 +67,7 @@
         </div>
       </a-timeline-item>
       <a-timeline-item v-if="temp.registryConfig">
-        <div class="layui-elem-quote">
+        <div>
           {{ $t('i18n_92f3fdb65f') }}
           <a-list item-layout="horizontal" :data-source="Object.keys(temp.registryConfig.indexConfigs)" size="small">
             <template #renderItem="{ item }">

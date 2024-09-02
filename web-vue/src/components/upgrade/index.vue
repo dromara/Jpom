@@ -2,17 +2,17 @@
   <div>
     <a-timeline>
       <a-timeline-item>
-        <span class="layui-elem-quote"
+        <span
           >{{ $t('i18n_231f655e35') }}{{ temp.timeStamp }}
           <a-tag v-if="nodeId || machineId">agent</a-tag>
           <a-tag v-else>server</a-tag>
         </span>
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote">{{ $t('i18n_e60389f6d6') }}{{ temp.vueTimeStamp }}</span>
+        <span>{{ $t('i18n_e60389f6d6') }}{{ temp.vueTimeStamp }}</span>
       </a-timeline-item>
       <a-timeline-item v-if="!nodeId && !machineId">
-        <span class="layui-elem-quote">{{ $t('i18n_bdc1fdde6c') }}</span>
+        <span>{{ $t('i18n_bdc1fdde6c') }}</span>
         <a-space>
           <a-switch
             v-model:checked="temp.joinBetaRelease"
@@ -35,7 +35,7 @@
       </a-timeline-item>
       <a-timeline-item>
         <a-space>
-          <span class="layui-elem-quote">{{ $t('i18n_07683555af') }}{{ temp.version }} </span>
+          <span>{{ $t('i18n_07683555af') }}{{ temp.version }} </span>
           <template v-if="temp.upgrade !== undefined">
             <a-tag v-if="temp.upgrade" color="pink" @click="upgrageVerion"
               >{{ $t('i18n_ac2f4259f1') }}{{ temp.newVersion }} {{ temp.newBeta ? '/beta' : '' }}
@@ -47,27 +47,32 @@
           </template>
         </a-space>
       </a-timeline-item>
-      <a-timeline-item>
-        <span class="layui-elem-quote">{{ $t('i18n_b57ecea951') }}{{ formatDuration(temp.upTime) }}</span>
+      <a-timeline-item v-if="temp.downloadSource">
+        <a-space>
+          <span>下载源：{{ temp.downloadSource }} </span>
+        </a-space>
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote"
-          >{{ $t('i18n_4c096c51a3') }}<a-tag>{{ temp.port }}</a-tag></span
-        >
-        <span class="layui-elem-quote">&nbsp;&nbsp;</span>
-        <span class="layui-elem-quote"
-          >{{ $t('i18n_2b04210d33') }}<a-tag>{{ temp.pid }}</a-tag></span
-        >
+        <span>{{ $t('i18n_b57ecea951') }}{{ formatDuration(temp.upTime) }}</span>
+      </a-timeline-item>
+      <a-timeline-item>
+        <span>
+          {{ $t('i18n_4c096c51a3') }}<a-tag>{{ temp.port }}</a-tag>
+        </span>
+        <span>&nbsp;&nbsp;</span>
+        <span>
+          {{ $t('i18n_2b04210d33') }}<a-tag>{{ temp.pid }}</a-tag>
+        </span>
       </a-timeline-item>
       <a-timeline-item>
         <a-alert :message="$t('i18n_5785f004ea')" type="warning" show-icon />
       </a-timeline-item>
       <a-timeline-item>
-        <span class="layui-elem-quote"
-          >{{ $t('i18n_a9add9b059') }}<a-tag>{{ temp.dataPath }}</a-tag>
+        <span>
+          {{ $t('i18n_a9add9b059') }}<a-tag>{{ temp.dataPath }}</a-tag>
         </span>
-        <span v-if="temp.jarFile" class="layui-elem-quote"
-          >{{ $t('i18n_9ce5d5202a') }}<a-tag>{{ temp.jarFile }}</a-tag>
+        <span v-if="temp.jarFile">
+          {{ $t('i18n_9ce5d5202a') }}<a-tag>{{ temp.jarFile }}</a-tag>
         </span>
       </a-timeline-item>
     </a-timeline>
@@ -467,7 +472,8 @@ export default {
           ...this.temp,
           upgrade: data.upgrade,
           newVersion: data.tagName,
-          newBeta: data.beta
+          newBeta: data.beta,
+          downloadSource: data.downloadSource
         }
 
         if (this.temp.upgrade && data.changelog) {
@@ -486,9 +492,10 @@ export default {
       const title = this.$t('i18n_ec6e39a177')
       const alterB = this.$t('i18n_ddf0c97bce')
       const li = [this.$t('i18n_a94feac256'), this.$t('i18n_b55f286cba'), this.$t('i18n_a52a10123f')]
-
+      const downloadSource = '当前下载源：'
       const html = `${title}
       <ul style="color:red;">
+        <li style="display: ${this.temp.downloadSource ? 'revert' : 'none'};">${downloadSource}<b>${this.temp.downloadSource}</b></li>
         <li>${li[0]}</li>
         <li>${li[1]}<b>${alterB}</b></li>
         <li>${li[2]}</li>

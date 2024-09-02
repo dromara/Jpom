@@ -362,7 +362,8 @@ export default {
             this.temp = {
               ...this.temp,
               upgrade: upgrade,
-              newVersion: res.data.tagName
+              newVersion: res.data.tagName,
+              downloadSource: res.data.downloadSource
             }
             // this.temp.upgrade = upgrade;
             // this.temp.newVersion = ;
@@ -605,15 +606,18 @@ export default {
     },
     // 下载远程最新文件
     downloadRemoteEvent() {
+      const downloadSource = '当前下载源：'
       const html = `
         ${this.$t('i18n_35b89dbc59')}
         <ul style='color:red;'>
+          <li style="display: ${this.temp.downloadSource ? 'revert' : 'none'};">${downloadSource}<b>${this.temp.downloadSource}</b></li>
           <li>${this.$t('i18n_bb316d9acd')}</li>
           <li>${this.$t('i18n_56bb769354')}<b>${this.$t('i18n_ddf0c97bce')}</b></li>
           <li>${this.$t('i18n_2c74d8485f')}</li>
           <li>${this.$t('i18n_a52a10123f')}</li>
         </ul>
       `
+
       $confirm({
         title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,

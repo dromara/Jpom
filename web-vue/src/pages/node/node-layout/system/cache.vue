@@ -5,17 +5,17 @@
         <a-alert :message="$t('i18n_5785f004ea')" style="margin-top: 10px; margin-bottom: 40px" banner />
         <a-timeline>
           <a-timeline-item v-if="temp.dateTime">
-            <span class="layui-elem-quote">
+            <span>
               {{ $t('i18n_9ddaa182bd') }}{{ temp.dateTime }}
               <a-tag>{{ temp.timeZoneId }}</a-tag>
             </span>
           </a-timeline-item>
           <a-timeline-item>
-            <span class="layui-elem-quote">{{ $t('i18n_37f1931729') }}{{ renderSize(temp.dataSize) }}</span>
+            <span>{{ $t('i18n_37f1931729') }}{{ renderSize(temp.dataSize) }}</span>
           </a-timeline-item>
           <a-timeline-item v-if="temp.fileSize">
             <a-space>
-              <span class="layui-elem-quote">{{ $t('i18n_ea3c5c0d25') }}{{ renderSize(temp.fileSize) }}</span>
+              <span>{{ $t('i18n_ea3c5c0d25') }}{{ renderSize(temp.fileSize) }}</span>
               <a-button size="small" type="primary" class="btn" @click="clear('fileSize')">{{
                 $t('i18n_288f0c404c')
               }}</a-button>
@@ -23,7 +23,7 @@
           </a-timeline-item>
           <a-timeline-item v-if="temp.oldJarsSize">
             <a-space>
-              <span class="layui-elem-quote">{{ $t('i18n_413d8ba722') }}{{ renderSize(temp.oldJarsSize) }}</span>
+              <span>{{ $t('i18n_413d8ba722') }}{{ renderSize(temp.oldJarsSize) }}</span>
               <a-button size="small" type="primary" class="btn" @click="clear('oldJarsSize')">{{
                 $t('i18n_288f0c404c')
               }}</a-button>
@@ -32,23 +32,23 @@
 
           <a-timeline-item>
             <a-space>
-              <span class="layui-elem-quote">{{ $t('i18n_775fde44cf') }}{{ temp.pidPort }}</span>
+              <span>{{ $t('i18n_775fde44cf') }}{{ temp.pidPort }}</span>
               <a-button v-if="temp.pidPort" size="small" type="primary" class="btn" @click="clear('pidPort')">{{
                 $t('i18n_288f0c404c')
               }}</a-button>
             </a-space>
           </a-timeline-item>
           <a-timeline-item>
-            <span class="layui-elem-quote">{{ $t('i18n_25f29ebbe6') }}{{ temp.scriptExecLogSize }}</span>
+            <span>{{ $t('i18n_25f29ebbe6') }}{{ temp.scriptExecLogSize }}</span>
           </a-timeline-item>
           <a-timeline-item>
-            <span class="layui-elem-quote">{{ $t('i18n_9b9e426d16') }}{{ temp.readFileOnLineCount }}</span>
+            <span>{{ $t('i18n_9b9e426d16') }}{{ temp.readFileOnLineCount }}</span>
           </a-timeline-item>
           <a-timeline-item>
-            <span class="layui-elem-quote">{{ $t('i18n_b6ee682dac') }}{{ temp.pluginSize || 0 }}</span>
+            <span>{{ $t('i18n_b6ee682dac') }}{{ temp.pluginSize || 0 }}</span>
           </a-timeline-item>
           <a-timeline-item>
-            <div class="layui-elem-quote">
+            <div>
               {{ $t('i18n_4ab578f3df') }}
               <template v-if="temp.envVarKeys?.length">
                 <a-tag v-for="(item, index) in temp.envVarKeys" :key="index">
@@ -61,7 +61,7 @@
             </div>
           </a-timeline-item>
           <a-timeline-item>
-            <div class="layui-elem-quote">
+            <div>
               {{ $t('i18n_eb7f9ceb71')
               }}<template v-if="temp.scriptLibraryTagMap && Object.keys(temp.scriptLibraryTagMap).length">
                 <a-tag v-for="(item, key) in temp.scriptLibraryTagMap" :key="key">
