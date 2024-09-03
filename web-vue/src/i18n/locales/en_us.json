@@ -543,7 +543,7 @@
   "i18n_3103effdfd": "Please enter your account name",
   "i18n_31070fd376": "manual rollback",
   "i18n_310c809904": "Bind to the current workspace",
-  "i18n_312e044529": " : Range: 0 (Sunday)~ 6 (Saturday), 7 can also represent Sunday, and supports case-insensitive aliases: _ ##_sun \",\" mon \",\" tue \",\" wed \",\" thu \",\" fri \",\" sat \",",
+  "i18n_312e044529": " : Range: 0 (Sunday)~ 6 (Saturday), 7 can also represent Sunday, and supports case-insensitive aliases: \"sun\",\"mon\",\"tue\",\"wed\",\"thu\",\"fri\",\"sat\",",
   "i18n_312f45014a": "Creation time:",
   "i18n_314f5aca4e": "In a single trigger address: the first random string is the build ID, and the second random string is the token.",
   "i18n_315eacd193": "Move Up",
@@ -1111,7 +1111,7 @@
   "i18n_643f39d45f": "non-suspended",
   "i18n_6446b6c707": "Nickname length is 2-10",
   "i18n_646a518953": "Please enter the project ID",
-  "i18n_6470685fcd": ": means to match any time at this position (consistent with _ ##_ * \")",
+  "i18n_6470685fcd": ": means to match any time at this position (consistent with \"*\")",
   "i18n_649231bdee": "file suffix",
   "i18n_64933b1012": "Storage options",
   "i18n_6496a5a043": "command name",
@@ -2833,6 +2833,6 @@
   "i18n_ff9dffec4d": "search mode",
   "i18n_ffa9fd37b5": "Workspace management",
   "i18n_ffaf95f0ef": "Startup container, you can see many devices on the host, you can perform mount. You can start the docker container in the docker container.",
-  "i18n_ffd67549cf": ": Range: 1~ 12, also supports case-insensitive aliases: _ ##_jan \",\" feb \",\" mar \",\" apr \",\" may \",\" jun \",\" jul \",\" aug \",\" sep \",\" oct \",\" nov \",\" dec \"",
+  "i18n_ffd67549cf": ": Range: 1~ 12, also supports case-insensitive aliases: \"jan\",\"feb\",\"mar\",\"apr\",\"may\",\"jun\",\"jul\",\"aug\",\"sep\",\"oct\",\"nov\",\"dec\"",
   "i18n_fffd3ce745": "share"
 }
