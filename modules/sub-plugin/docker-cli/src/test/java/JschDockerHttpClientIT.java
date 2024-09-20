@@ -49,7 +49,7 @@ public class JschDockerHttpClientIT {
             .build();
 
 
-        try (final DockerHttpClient dockerHttpClient = new JschDockerHttpClient(dockerClientConfig.getDockerHost(), () -> newSession)) {
+        try (final DockerHttpClient dockerHttpClient = new JschDockerHttpClient(dockerClientConfig.getDockerHost(), false, () -> newSession)) {
 
 
             final DockerClient dockerClient = DockerClientImpl.getInstance(dockerClientConfig, dockerHttpClient);
