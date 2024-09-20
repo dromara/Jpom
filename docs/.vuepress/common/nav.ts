@@ -154,6 +154,7 @@ export default [
     items: [
       { text: "Gitee", link: "https://gitee.com/dromara/Jpom" },
       { text: "Github", link: "https://github.com/dromara/Jpom" },
+      { text: "Gitcode", link: "https://gitcode.com/dromara/Jpom/" },
     ],
   },
 ];
