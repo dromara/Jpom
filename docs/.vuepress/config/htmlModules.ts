@@ -41,9 +41,6 @@ const htmlModule: VdoingThemeConfig["htmlModules"] = {
     <a href="https://www.xiaonuo.vip" target="_blank">
       <img  loading="lazy" class="no-zoom" height="60" width="224" src="/images/friends/ad/snowy-banner.jpg">
     </a>
-     <a href="https://doc.zyplayer.com/#/integrate/zyplayer-doc?utm=jpom" target="_blank">
-      <img  loading="lazy" class="no-zoom" height="60" width="224"  style="background-color: #c6ddff;color: #ffffff" src="/images/friends/ad/zyplayer-doc-banner.png">
-    </a>
      <a href="https://gitee.com/qingqinkj/mdp-lcode-ui-web" target="_blank" >
       <img  loading="lazy" class="no-zoom" height="60" width="224" src="/images/friends/ad/mdp-banner2.png">
     </a>

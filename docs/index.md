@@ -134,12 +134,6 @@ notices-2: # 可选的
   link: https://www.xiaonuo.vip
   bgColor: '#1373CC'
   textColor: '#ffffff'
-- name: zyplayer-doc
-  desc: 可私有化部署的文档与知识库管理平台
-  avatar: /images/friends/ad/zyplayer-doc-logo.png
-  link: https://doc.zyplayer.com/#/integrate/zyplayer-doc?utm=jpom
-  bgColor: '#c6ddff'
-  textColor: '#000000'
 - name: 唛盟(mdp-lcode)
   desc: 低代码开发平台</br>一体化智能开发神器，告别繁琐代码
   avatar: /images/friends/ad/mdp.png
