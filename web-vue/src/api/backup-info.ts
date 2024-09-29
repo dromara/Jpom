@@ -111,11 +111,20 @@ export function uploadBackupFile(formData) {
   })
 }
 
+export function getTriggerUrl(params) {
+  return axios({
+    url: '/system/backup/trigger-url',
+    method: 'post',
+    params: params
+  })
+}
+
 export const backupTypeArray = [
   { key: 0, value: t('i18n_6d68bd5458'), disabled: false },
   { key: 1, value: t('i18n_67b667bf98'), disabled: false },
   { key: 2, value: t('i18n_90c0458a4c'), disabled: true },
-  { key: 3, value: t('i18n_590e5b46a0'), disabled: true }
+  { key: 3, value: t('i18n_590e5b46a0'), disabled: true },
+  { key: 4, value: '触发器', disabled: true }
 ]
 
 export const arrayToMap = (arra) => {
