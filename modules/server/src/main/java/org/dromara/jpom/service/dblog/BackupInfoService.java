@@ -90,7 +90,7 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> implements
         if (autoBackupReserveDay != null && autoBackupReserveDay > 0) {
             //
             Entity entity = Entity.create();
-            entity.set("backupType", 3);
+            entity.set("backupType", BackupTypeEnum.AUTO.getCode());
             entity.set("createTimeMillis", " < " + (SystemClock.now() - TimeUnit.DAYS.toMillis(autoBackupReserveDay)));
             List<Entity> entities = super.queryList(entity);
             if (entities != null) {
@@ -110,7 +110,7 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> implements
         Integer autoBackupIntervalDay = dbExtConfig.getAutoBackupIntervalDay();
         if (autoBackupIntervalDay != null && autoBackupIntervalDay > 0) {
             BackupInfoModel backupInfoModel = new BackupInfoModel();
-            backupInfoModel.setBackupType(3);
+            backupInfoModel.setBackupType(BackupTypeEnum.AUTO.getCode());
             List<BackupInfoModel> infoModels = super.queryList(backupInfoModel, 1, new Order("createTimeMillis", Direction.DESC));
             BackupInfoModel first = CollUtil.getFirst(infoModels);
             if (first != null) {
@@ -133,6 +133,23 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> implements
         }
         // 执行数据库备份
         return this.backupToSql(null, BackupTypeEnum.AUTO);
+    }
+
+
+    /**
+     * 触发器备份
+     */
+    public Future<BackupInfoModel> triggerBackup() {
+        if (dbExtConfig.getMode() != DbExtConfig.Mode.H2) {
+            return null;
+        }
+        try {
+            BaseServerController.resetInfo(UserModel.EMPTY);
+            // 执行数据库备份
+            return this.backupToSql(null, BackupTypeEnum.TRIGGER);
+        } finally {
+            BaseServerController.removeEmpty();
+        }
     }
 
     /**

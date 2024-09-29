@@ -18,31 +18,32 @@ import org.dromara.jpom.model.BaseEnum;
  * @since 2021-11-24
  */
 public enum BackupTypeEnum implements BaseEnum {
-	/**
-	 * 备份类型{0: 全量, 1: 部分}
-	 */
-	ALL(0, "全量备份"),
-	PART(1, "部分备份"),
-	IMPORT(2, "导入备份"),
-	AUTO(3, "自动备份"),
-	;
+    /**
+     * 备份类型{0: 全量, 1: 部分}
+     */
+    ALL(0, "全量备份"),
+    PART(1, "部分备份"),
+    IMPORT(2, "导入备份"),
+    AUTO(3, "自动备份"),
+    TRIGGER(4, "触发器"),
+    ;
 
-	BackupTypeEnum(int code, String desc) {
-		this.code = code;
-		this.desc = desc;
-	}
+    BackupTypeEnum(int code, String desc) {
+        this.code = code;
+        this.desc = desc;
+    }
 
-	final int code;
-	final String desc;
+    final int code;
+    final String desc;
 
-	@Override
-	public int getCode() {
-		return code;
-	}
+    @Override
+    public int getCode() {
+        return code;
+    }
 
-	@Override
-	public String getDesc() {
-		return desc;
-	}
+    @Override
+    public String getDesc() {
+        return desc;
+    }
 
 }

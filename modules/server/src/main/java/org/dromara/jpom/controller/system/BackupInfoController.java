@@ -24,6 +24,9 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.ServerOpenApi;
+import org.dromara.jpom.common.UrlRedirectUtil;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
@@ -39,12 +42,11 @@ import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.permission.SystemPermission;
 import org.dromara.jpom.service.dblog.BackupInfoService;
+import org.dromara.jpom.service.system.SystemParametersServer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -69,9 +71,12 @@ public class BackupInfoController extends BaseServerController {
 
 
     private final BackupInfoService backupInfoService;
+    private final SystemParametersServer systemParametersServer;
 
-    public BackupInfoController(BackupInfoService backupInfoService) {
+    public BackupInfoController(BackupInfoService backupInfoService,
+                                SystemParametersServer systemParametersServer) {
         this.backupInfoService = backupInfoService;
+        this.systemParametersServer = systemParametersServer;
     }
 
     /**
@@ -277,4 +282,34 @@ public class BackupInfoController extends BaseServerController {
         return new JsonMessage<>(200, "", list);
     }
 
+
+    /**
+     * get a trigger url
+     *
+     * @param rest rest
+     * @return json
+     */
+    @RequestMapping(value = "/system/backup/trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public IJsonMessage<Map<String, String>> getTriggerUrl(String rest, HttpServletRequest request) {
+        String configToken = systemParametersServer.getConfig("backup-db-token", String.class);
+        if (StrUtil.isEmpty(configToken) || StrUtil.isNotEmpty(rest)) {
+            configToken = IdUtil.fastUUID();
+            systemParametersServer.upsert("backup-db-token", configToken, "备份数据触发器");
+        }
+        Map<String, String> map = this.getToken(configToken, request);
+        String string = I18nMessageUtil.get("i18n.reset_success.faa3");
+        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : string, map);
+    }
+
+    private Map<String, String> getToken(String token, HttpServletRequest request) {
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH);
+        String url = ServerOpenApi.BACKUP_TRIGGER_URL.
+            replace("{token}", token);
+        String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
+        Map<String, String> map = new HashMap<>(10);
+        map.put("triggerUrl", FileUtil.normalize(triggerBuildUrl));
+        map.put("token", token);
+        return map;
+    }
 }
