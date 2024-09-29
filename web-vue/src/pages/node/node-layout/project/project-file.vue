@@ -16,14 +16,23 @@
               </a-button>
             </a-space>
           </div>
-          <a-directory-tree
-            v-model:selectedKeys="selectedKeys"
-            v-model:expandedKeys="expandedKeys"
-            auto-expand-parent
-            :field-names="treeReplaceFields"
-            :tree-data="treeList"
-            @select="nodeClick"
-          ></a-directory-tree>
+          <a-spin tip="加载中" :spinning="loading">
+            <a-directory-tree
+              v-model:selectedKeys="selectedKeys"
+              v-model:expandedKeys="expandedKeys"
+              auto-expand-parent
+              :field-names="treeReplaceFields"
+              :tree-data="treeList"
+              @select="nodeClick"
+              @expand="
+                (expandedKeys, { expanded, node }) => {
+                  if (expanded) {
+                    nodeClick(expandedKeys, { node })
+                  }
+                }
+              "
+            ></a-directory-tree>
+          </a-spin>
           <!--   :loadData="onTreeData" -->
         </a-layout-sider>
         <!-- 表格 -->

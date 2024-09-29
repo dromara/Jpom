@@ -46,14 +46,23 @@
         </a-space>
       </a-row>
       <a-empty v-if="treeList.length === 0" :image="Empty.PRESENTED_IMAGE_SIMPLE" />
-      <a-directory-tree
-        v-model:selectedKeys="selectedKeys"
-        v-model:expandedKeys="expandedKeys"
-        :tree-data="treeList"
-        :field-names="replaceFields"
-        @select="onSelect"
-      >
-      </a-directory-tree>
+      <a-spin v-else tip="加载中" :spinning="loading">
+        <a-directory-tree
+          v-model:selectedKeys="selectedKeys"
+          v-model:expandedKeys="expandedKeys"
+          :tree-data="treeList"
+          :field-names="replaceFields"
+          @select="onSelect"
+          @expand="
+            (expandedKeys, { expanded, node }) => {
+              if (expanded) {
+                onSelect(expandedKeys, { node })
+              }
+            }
+          "
+        >
+        </a-directory-tree>
+      </a-spin>
     </a-layout-sider>
     <!-- 表格 -->
     <a-layout-content class="file-content">
