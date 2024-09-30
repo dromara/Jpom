@@ -1253,7 +1253,6 @@ export default {
 }
 .tree-container {
   overflow-x: auto;
-  // overflow-y: auto;
   :deep(.ant-tree-title) {
     word-break: keep-all;
     white-space: nowrap;
@@ -1262,11 +1261,7 @@ export default {
     display: flex;
     align-items: center;
   }
-  :deep(
-      :where(.css-dev-only-do-not-override-19iuou).ant-tree.ant-tree-directory
-        .ant-tree-treenode
-        .ant-tree-node-content-wrapper.ant-tree-node-selected
-    ) {
+  :deep(.ant-tree.ant-tree-directory .ant-tree-treenode .ant-tree-node-content-wrapper.ant-tree-node-selected) {
     background-color: #1677ff;
   }
 }
