@@ -396,6 +396,9 @@ public class BuildExecuteManage implements Runnable {
             BuildHistoryLog buildInfoModel = new BuildHistoryLog();
             buildInfoModel.setId(logId);
             buildInfoModel.setBuildEnvCache(taskData.environmentMapBuilder.toDataJsonStr());
+            //
+            buildInfoModel.setRepositoryLastCommitId(taskData.repositoryLastCommitId);
+            buildInfoModel.setRepositoryLastCommitMsg(taskData.repositoryLastCommitMsg);
             dbBuildHistoryLogService.updateById(buildInfoModel);
         }
         return pull;
@@ -484,6 +487,7 @@ public class BuildExecuteManage implements Runnable {
                     }
                 }
                 taskData.repositoryLastCommitId = result[0];
+                taskData.repositoryLastCommitMsg = msg;
             } else if (repoType == RepositoryModel.RepoType.Svn) {
                 // svn
                 Map<String, Object> map = repositoryModel.toMap();
@@ -502,6 +506,7 @@ public class BuildExecuteManage implements Runnable {
                     }
                 }
                 taskData.repositoryLastCommitId = result[0];
+                taskData.repositoryLastCommitMsg = msg;
             } else {
                 String format = StrUtil.format(I18nMessageUtil.get("i18n.unsupported_type_with_placeholder.71a2"), repoType.getDesc());
                 logRecorder.systemError(format);

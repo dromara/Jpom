@@ -7,6 +7,8 @@
 1. 【server】升级 docker-java 版本到 3.4.0
 2. 【server】优化 数据库备份支持外部调用触发器来实现自定义备份周期（感谢@刘志远）
 3. 【server】优化 SSH、项目 文件管理树加载 loading 避免网络卡顿影响树渲染错误（感谢@Bo）
+4. 【server】优化 SSH、项目 文件管理树支持横向滚动条
+5. 【server】优化 构建记录存储最后 commitId commitMsg 信息（感谢@program）
 
 ------
 
