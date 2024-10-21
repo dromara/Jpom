@@ -9,6 +9,7 @@
 3. 【server】优化 SSH、项目 文件管理树加载 loading 避免网络卡顿影响树渲染错误（感谢@Bo）
 4. 【server】优化 SSH、项目 文件管理树支持横向滚动条
 5. 【server】优化 构建记录存储最后 commitId commitMsg 信息（感谢@program）
+6. 【server】优化 引用脚本库时出现 ${xxxx} 出现引用失败：No group with name {xxxx} （感谢[@foot_print](https://gitee.com/zhangyf35) [Gitee issues IAW413](https://gitee.com/dromara/Jpom/issues/IAW413) ）
 
 ------
 
