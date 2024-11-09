@@ -26,6 +26,8 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.Const;
+import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.log.UserOperateLogV1;
@@ -44,7 +46,10 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * 操作记录控制器
@@ -58,9 +63,6 @@ public class OperateLogController implements AopLogInterface {
     private static final ThreadLocal<CacheInfo> CACHE_INFO_THREAD_LOCAL = new ThreadLocal<>();
 
     private final DbUserOperateLogService dbUserOperateLogService;
-
-    private final String[] logFilterPar = new String[]{"pwd", "pass", "password"};
-
 
     public OperateLogController(DbUserOperateLogService dbUserOperateLogService) {
         this.dbUserOperateLogService = dbUserOperateLogService;
@@ -150,8 +152,8 @@ public class OperateLogController implements AopLogInterface {
         Set<Map.Entry<String, String>> entries = map.entrySet();
         for (Map.Entry<String, String> entry : entries) {
             String key = entry.getKey();
-            if (StrUtil.containsAnyIgnoreCase(key, logFilterPar)) {
-                entry.setValue("***");
+            if (StrUtil.containsAnyIgnoreCase(key, ServerConst.PRIVACY_VARIABLE_KEYWORDS)) {
+                entry.setValue(Const.PRIVACY_PLACEHOLDER);
             }
         }
         //

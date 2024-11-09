@@ -94,4 +94,12 @@ public class Const {
      * 第一次服务端安装信息
      */
     public static final String INSTALL = "INSTALL.json";
+    /**
+     * 隐私变量占位符
+     */
+    public static final String PRIVACY_PLACEHOLDER = "******";
+    /**
+     * 隐私变量关键词（避免在日志中出现）
+     */
+    public static final String[] PRIVACY_VARIABLE_KEYWORDS = new String[]{"pwd", "pass", "password", "token"};
 }
