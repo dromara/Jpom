@@ -1350,7 +1350,7 @@
   "i18n_791b6d0e62": "排名按照字母 a-z 排序",
   "i18n_79698c57a2": "當前工作空間還沒有節點",
   "i18n_798f660048": "模版節點",
-  "i18n_799ac8bf40": "支援變數引用：{'${TASK_ID}'}、{'${FILE_ID}'}、{'${FILE_NAME}'}、{'${FILE_EXT_NAME}'}",
+  "i18n_799ac8bf40": "支援變數引用：{'${TASK_ID}'}、{'${FILE_ID}'}、{'${FILE_NAME}'}、{'${FILE_EXT_NAME}'}、{'${RELEASE_PATH}'}",
   "i18n_79a7072ee1": "令牌 url",
   "i18n_79c6b6cff7": "關聯分組",
   "i18n_79d3abe929": "複製",
