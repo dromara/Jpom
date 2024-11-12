@@ -200,15 +200,11 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         List<String> list;
         if (taskType == 0) {
             list = StrUtil.splitTrim(taskDataIds, StrUtil.COMMA);
-            list = list.stream()
-                       .filter(s -> sshService.exists(new SshModel(s)))
-                       .collect(Collectors.toList());
+            list = list.stream().filter(s -> sshService.exists(new SshModel(s))).collect(Collectors.toList());
             Assert.notEmpty(list, I18nMessageUtil.get("i18n.select_correct_ssh.aa93"));
         } else if (taskType == 1) {
             list = StrUtil.splitTrim(taskDataIds, StrUtil.COMMA);
-            list = list.stream()
-                       .filter(s -> nodeService.exists(new NodeModel(s)))
-                       .collect(Collectors.toList());
+            list = list.stream().filter(s -> nodeService.exists(new NodeModel(s))).collect(Collectors.toList());
             Assert.notEmpty(list, I18nMessageUtil.get("i18n.select_correct_node.1b4e"));
         } else {
             throw new IllegalArgumentException(I18nMessageUtil.get("i18n.unsupported_method.a1de"));
@@ -316,9 +312,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         update.setStatusMsg(I18nMessageUtil.get("i18n.manual_cancel_task.e592"));
         Entity updateEntity = this.dataBeanToEntity(update);
         //
-        Entity where = Entity.create()
-                             .set("taskId", taskId)
-                             .set("status", CollUtil.newArrayList(0, 1));
+        Entity where = Entity.create().set("taskId", taskId).set("status", CollUtil.newArrayList(0, 1));
         this.update(updateEntity, where);
         this.updateRootStatus(taskId, 4, I18nMessageUtil.get("i18n.manual_cancel_task.e592"));
     }
@@ -348,10 +342,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                 try {
                     this.updateStatus(taskId, modelId, 1, I18nMessageUtil.get("i18n.start_publishing_file.a14e"));
                     File logFile = logFile(model);
-                    logRecorder = LogRecorder.builder()
-                                             .file(logFile)
-                                             .charset(CharsetUtil.CHARSET_UTF_8)
-                                             .build();
+                    logRecorder = LogRecorder.builder().file(logFile).charset(CharsetUtil.CHARSET_UTF_8).build();
                     NodeModel item = nodeService.getByKey(model.getTaskDataId());
                     if (item == null) {
                         logRecorder.systemError(I18nMessageUtil.get("i18n.no_node_entry_found.b1ef"), model.getTaskDataId());
@@ -381,21 +372,21 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                     name = StrUtil.wrapIfMissing(name, StrUtil.EMPTY, StrUtil.DOT + storageModel.getExtName());
                     LogRecorder finalLogRecorder = logRecorder;
                     JsonMessage<String> jsonMessage = NodeForward.requestSharding(item, NodeUrl.Manage_File_Upload_Sharding2, data, storageSaveFile, name,
-                                                                                  sliceData -> {
-                                                                                      sliceData.putAll(data);
-                                                                                      return NodeForward.request(item, NodeUrl.Manage_File_Sharding_Merge2, sliceData);
-                                                                                  },
-                                                                                  (total, progressSize) -> {
+                        sliceData -> {
+                            sliceData.putAll(data);
+                            return NodeForward.request(item, NodeUrl.Manage_File_Sharding_Merge2, sliceData);
+                        },
+                        (total, progressSize) -> {
 
-                                                                                      double progressPercentage = Math.floor(((float) progressSize / total) * 100);
-                                                                                      int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
-                                                                                      if (progressRangeList.add(progressRange)) {
-                                                                                          String info = I18nMessageUtil.get("i18n.upload_progress_template.ac3f");
-                                                                                          finalLogRecorder.system(info,
-                                                                                                                  FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
-                                                                                                                  NumberUtil.formatPercent(((float) progressSize / total), 0));
-                                                                                      }
-                                                                                  });
+                            double progressPercentage = Math.floor(((float) progressSize / total) * 100);
+                            int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
+                            if (progressRangeList.add(progressRange)) {
+                                String info = I18nMessageUtil.get("i18n.upload_progress_template.ac3f");
+                                finalLogRecorder.system(info,
+                                    FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
+                                    NumberUtil.formatPercent(((float) progressSize / total), 0));
+                            }
+                        });
                     if (!jsonMessage.success()) {
                         throw new IllegalStateException(I18nMessageUtil.get("i18n.file_upload_failed.462e") + jsonMessage);
                     }
@@ -438,8 +429,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
     private void runNodeScript(String content, NodeModel model, LogRecorder logRecorder, String id, EnvironmentMapBuilder environmentMapBuilder, String path) throws IOException {
         INodeInfo nodeInfo = NodeForward.parseNodeInfo(model);
         IUrlItem urlItem = NodeForward.parseUrlItem(nodeInfo, model.getWorkspaceId(), NodeUrl.FreeScriptRun, DataContentType.FORM_URLENCODED);
-        try (IProxyWebSocket proxySession = TransportServerFactory.get()
-                                                                  .websocket(nodeInfo, urlItem)) {
+        try (IProxyWebSocket proxySession = TransportServerFactory.get().websocket(nodeInfo, urlItem)) {
             proxySession.onMessage(s -> {
                 if (StrUtil.equals(s, "JPOM_SYSTEM_TAG:" + id)) {
                     try {
@@ -494,10 +484,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                 try {
                     this.updateStatus(taskId, modelId, 1, I18nMessageUtil.get("i18n.start_publishing_file.a14e"));
                     File logFile = logFile(model);
-                    logRecorder = LogRecorder.builder()
-                                             .file(logFile)
-                                             .charset(CharsetUtil.CHARSET_UTF_8)
-                                             .build();
+                    logRecorder = LogRecorder.builder().file(logFile).charset(CharsetUtil.CHARSET_UTF_8).build();
                     SshModel item = sshService.getByKey(model.getTaskDataId());
                     if (item == null) {
                         logRecorder.systemError(I18nMessageUtil.get("i18n.no_ssh_entry_found.d0e1"), model.getTaskDataId());
@@ -569,12 +556,10 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         fileReleaseTaskLogModel.setTaskId(taskId);
         List<FileReleaseTaskLogModel> logModels = this.listByBean(fileReleaseTaskLogModel);
         Map<Integer, List<FileReleaseTaskLogModel>> map = logModels.stream()
-                                                                   .collect(CollectorUtil.groupingBy(logModel -> ObjectUtil.defaultIfNull(logModel.getStatus(), 0), Collectors.toList()));
+            .collect(CollectorUtil.groupingBy(logModel -> ObjectUtil.defaultIfNull(logModel.getStatus(), 0), Collectors.toList()));
         StringBuilder stringBuilder = new StringBuilder();
         //
-        Opt.ofBlankAble(statusMsg)
-           .ifPresent(s -> stringBuilder.append(s)
-                                        .append(StrUtil.SPACE));
+        Opt.ofBlankAble(statusMsg).ifPresent(s -> stringBuilder.append(s).append(StrUtil.SPACE));
         Set<Map.Entry<Integer, List<FileReleaseTaskLogModel>>> entries = map.entrySet();
         for (Map.Entry<Integer, List<FileReleaseTaskLogModel>> entry : entries) {
             Integer key = entry.getKey();
@@ -625,8 +610,8 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
 
     public File logFile(FileReleaseTaskLogModel model) {
         return FileUtil.file(jpomApplication.getDataPath(), "file-release-log",
-                             model.getTaskId(),
-                             model.getId() + ".log"
+            model.getTaskId(),
+            model.getId() + ".log"
         );
     }
 
@@ -643,7 +628,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         Entity updateEntity = this.dataBeanToEntity(update);
         //
         Entity where = Entity.create()
-                             .set("status", CollUtil.newArrayList(0, 1));
+            .set("status", CollUtil.newArrayList(0, 1));
         return this.update(updateEntity, where);
     }
 }
