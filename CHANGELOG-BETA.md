@@ -6,6 +6,7 @@
 
 1. 【server】修复 容器构建自定义插件，环境变量不匹配问题（感谢[@杨晓龙](https://gitee.com/pubresyang) [Gitee pr 285](https://gitee.com/dromara/Jpom/pulls/285) ）
 2. 【agent】优化 项目日志文件编码格式支持独立配置（感谢[@不渡](https://gitee.com/zhangjxing) [Gitee issues IB3DCP](https://gitee.com/dromara/Jpom/issues/IB3DCP) ）
+3. 【all】优化 使用默认语言时增加判断所在时区来识别中文环境
 
 ------
 
