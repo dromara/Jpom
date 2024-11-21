@@ -175,7 +175,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
         //
         this.loopCheckRun(nodeProjectInfoModel, originalModel, true);
         CommandOpResult status = this.status(nodeProjectInfoModel, originalModel);
-        this.asyncWebHooks(nodeProjectInfoModel, originalModel, "start", "result", status.msgStr());
+        this.asyncWebHooks(nodeProjectInfoModel, originalModel, "start", "result", status);
         return status;
     }
 
@@ -377,7 +377,12 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
                 }
                 // 等待 状态成功
                 boolean run = this.loopCheckRun(nodeProjectInfoModel, originalModel, true);
-                CommandOpResult result = CommandOpResult.of(run, run ? "restart done" : "restart done,but unsuccessful");
+                CommandOpResult result;
+                if (run) {
+                    result = this.status(nodeProjectInfoModel, originalModel);
+                } else {
+                    result = CommandOpResult.of(false, "restart done,but unsuccessful");
+                }
                 this.asyncWebHooks(nodeProjectInfoModel, originalModel, "restart", "result", result);
                 return result;
 

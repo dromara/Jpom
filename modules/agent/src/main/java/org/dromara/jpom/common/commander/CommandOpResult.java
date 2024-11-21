@@ -13,6 +13,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson2.JSONObject;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -125,5 +126,9 @@ public class CommandOpResult {
 
     public String msgStr() {
         return CollUtil.join(msgs, StrUtil.COMMA);
+    }
+
+    public String toString() {
+        return JSONObject.toJSONString(this);
     }
 }

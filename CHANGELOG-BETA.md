@@ -11,6 +11,7 @@
 5. 【server】优化 构建记录存储最后 commitId commitMsg 信息（感谢@program）
 6. 【server】优化 引用脚本库时出现 ${xxxx} 出现引用失败：No group with name {xxxx} （感谢[@foot_print](https://gitee.com/zhangyf35) [Gitee issues IAW413](https://gitee.com/dromara/Jpom/issues/IAW413) ）
 7. 【server】优化 构建环境变量自动识别系统变量密文相关关键词：pwd、pass、password、token 为隐私变量（感谢[@lin_yeqi](https://gitee.com/lin_yeqi) [Gitee issues IB34L9](https://gitee.com/dromara/Jpom/issues/IB34L9) ）
+8. 【agent】优化 项目状态触发器 result 参数返回 json 类型，DSL 项目重启成功返回 pid（感谢@新）
 
 ------
 
