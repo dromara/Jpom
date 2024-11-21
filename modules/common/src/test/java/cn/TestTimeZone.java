@@ -14,8 +14,19 @@ public class TestTimeZone {
     public void test() {
         TimeZone timeZone = TimeZone.getDefault();
         String[] availableIDs = TimeZone.getAvailableIDs();
+
         for (String availableID : availableIDs) {
-            System.out.println(availableID);
+            TimeZone zone = TimeZone.getTimeZone(availableID);
+
+            // 获取偏移量
+            int offset = zone.getRawOffset();
+
+            // 判断是否为东八区
+            if (offset == 8 * 60 * 60 * 1000) {
+                System.out.println(availableID);
+            } else {
+                //System.out.println("系统默认时区不是东八区");
+            }
         }
         System.out.println("=====");
         System.out.println(timeZone);
