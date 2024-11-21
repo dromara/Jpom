@@ -47,6 +47,10 @@ public class NodeProjectInfoModel extends BaseWorkspaceModel {
      */
     private String logPath;
     /**
+     * 日志编码
+     */
+    private String logCharset;
+    /**
      * java 模式运行的 class
      */
     private String mainClass;

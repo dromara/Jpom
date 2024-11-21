@@ -117,8 +117,10 @@
               </div>
               <div v-if="item.repositoryLastCommitId">
                 <div>
-                  提交ID: {{ (item.repositoryLastCommitId || '').slice(0, 8) }}
-                  <span v-if="item.repositoryLastCommitMsg">提交消息: {{ item.repositoryLastCommitMsg || '' }}</span>
+                  {{ $t('i18n_e235b0d4af') }}{{ (item.repositoryLastCommitId || '').slice(0, 8) }}
+                  <span v-if="item.repositoryLastCommitMsg"
+                    >{{ $t('i18n_f27822dd8a') }}{{ item.repositoryLastCommitMsg || '' }}</span
+                  >
                 </div>
               </div>
               <div>

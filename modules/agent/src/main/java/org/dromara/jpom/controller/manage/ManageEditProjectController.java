@@ -205,6 +205,7 @@ public class ManageEditProjectController extends BaseAgentController {
             exits.setDslContent(projectInfo.getDslContent());
             exits.setDslEnv(projectInfo.getDslEnv());
             exits.setJavaExtDirsCp(projectInfo.javaExtDirsCp());
+            exits.setLogCharset(projectInfo.getLogCharset());
             if (runMode == RunMode.Link) {
                 // 如果是链接模式
                 Assert.state(runMode == exits.getRunMode(), I18nMessageUtil.get("i18n.existing_project_cannot_be_soft_link.aa5a"));

@@ -22,7 +22,6 @@ import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.i18n.I18nThreadUtil;
-import org.dromara.jpom.configuration.ProjectLogConfig;
 import org.dromara.jpom.exception.IllegalArgument2Exception;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.data.DslYmlDto;
@@ -39,6 +38,7 @@ import org.dromara.jpom.util.FileUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.Future;
 
@@ -51,20 +51,17 @@ public class DslScriptServer {
 
     private final AgentWorkspaceEnvVarService agentWorkspaceEnvVarService;
     private final NodeScriptServer nodeScriptServer;
-    private final ProjectLogConfig logConfig;
     private final JpomApplication jpomApplication;
     private final ProjectInfoService projectInfoService;
     private final ScriptLibraryService scriptLibraryService;
 
     public DslScriptServer(AgentWorkspaceEnvVarService agentWorkspaceEnvVarService,
                            NodeScriptServer nodeScriptServer,
-                           ProjectLogConfig logConfig,
                            JpomApplication jpomApplication,
                            ProjectInfoService projectInfoService,
                            ScriptLibraryService scriptLibraryService) {
         this.agentWorkspaceEnvVarService = agentWorkspaceEnvVarService;
         this.nodeScriptServer = nodeScriptServer;
-        this.logConfig = logConfig;
         this.jpomApplication = jpomApplication;
         this.projectInfoService = projectInfoService;
         this.scriptLibraryService = scriptLibraryService;
@@ -211,7 +208,8 @@ public class DslScriptServer {
             // 系统生成的脚本需要自动删除
             autoDelete = true;
         }
-        DslScriptBuilder builder = new DslScriptBuilder(consoleCommandOp.name(), environment, scriptProcess.getScriptArgs(), log, logConfig.getFileCharset());
+        Charset charset = projectInfoService.resolveLogCharset(nodeProjectInfoModel, originalModel);
+        DslScriptBuilder builder = new DslScriptBuilder(consoleCommandOp.name(), environment, scriptProcess.getScriptArgs(), log, charset);
         builder.setScriptFile(scriptFile);
         builder.setAutoDelete(autoDelete);
         return builder;
