@@ -70,6 +70,9 @@ public class I18nMessageUtil {
             if (StrUtil.equalsAny(id, "Asia/Hong_Kong")) {
                 return "zh-HK";
             }
+            if (StrUtil.equalsAny(id, "Asia/Taipei")) {
+                return "zh-TW";
+            }
             return "en-US";
         });
     }
