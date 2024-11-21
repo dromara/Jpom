@@ -323,7 +323,8 @@ public class DockerBuild implements AutoCloseable {
      * @return 结果
      */
     private String otherScript(Map<String, Object> step, String name) {
-        String path = String.format("/opt/jpom_%s", name);
+        String version = String.valueOf(step.get("version"));
+        String path = String.format("/opt/jpom_%s_%s",name,version);
         StringBuilder script = new StringBuilder("# " + name + "Script\n");
         Map<String, String> map = new HashMap<>();
         map.put("JPOM_PLUGIN_PATH", path);
