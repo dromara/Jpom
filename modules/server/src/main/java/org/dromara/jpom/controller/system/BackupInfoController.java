@@ -295,7 +295,8 @@ public class BackupInfoController extends BaseServerController {
         String configToken = systemParametersServer.getConfig("backup-db-token", String.class);
         if (StrUtil.isEmpty(configToken) || StrUtil.isNotEmpty(rest)) {
             configToken = IdUtil.fastUUID();
-            systemParametersServer.upsert("backup-db-token", configToken, "备份数据触发器");
+            String desc = I18nMessageUtil.get("i18n.backup_data_trigger.a71a");
+            systemParametersServer.upsert("backup-db-token", configToken, desc);
         }
         Map<String, String> map = this.getToken(configToken, request);
         String string = I18nMessageUtil.get("i18n.reset_success.faa3");

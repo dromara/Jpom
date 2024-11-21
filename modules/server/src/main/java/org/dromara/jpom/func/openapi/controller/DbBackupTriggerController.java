@@ -60,7 +60,7 @@ public class DbBackupTriggerController {
         Assert.state(StrUtil.equals(configToken, token), I18nMessageUtil.get("i18n.trigger_token_error_or_expired.8976"));
         //
         Future<BackupInfoModel> future = backupInfoService.triggerBackup();
-        Assert.notNull(future, "当前数据库不支持自动备份");
+        Assert.notNull(future, I18nMessageUtil.get("i18n.database_auto_backup_support.7b8f"));
         //
         int reserveCountInt = Convert.toInt(reserveCount, 0);
         if (reserveCountInt > 0) {
