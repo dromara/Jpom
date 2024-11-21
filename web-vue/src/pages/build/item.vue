@@ -93,9 +93,9 @@
                 <template #message>
                   <div>{{ $t('i18n_f11569cfa9') }}</div>
                   <div>
-                    系统环境变量中变量名包含：
-                    <a-tag v-for="(item, index) in privacyVariableKeywords" :key="index">{{ item }}</a-tag>
-                    关键词时自动识别为隐私变量
+                    {{ $t('i18n_a2741f6eb3')
+                    }}<a-tag v-for="(item, index) in privacyVariableKeywords" :key="index">{{ item }}</a-tag
+                    >{{ $t('i18n_a17b905126') }}
                   </div>
                 </template>
               </a-alert>

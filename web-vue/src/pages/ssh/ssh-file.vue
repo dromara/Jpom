@@ -46,7 +46,7 @@
         </a-space>
       </a-row>
       <a-empty v-if="treeList.length === 0" :image="Empty.PRESENTED_IMAGE_SIMPLE" />
-      <a-spin v-else tip="加载中" :spinning="loading">
+      <a-spin v-else :tip="$t('i18n_f013ea9dcb')" :spinning="loading">
         <div class="tree-container">
           <a-directory-tree
             v-model:selectedKeys="selectedKeys"
@@ -1226,7 +1226,7 @@ export default {
   }
 }
 </script>
-<style scoped lang="less">
+<style lang="less" scoped>
 :deep(.ant-progress-text) {
   width: auto;
 }

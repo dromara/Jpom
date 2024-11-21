@@ -124,7 +124,7 @@ export const backupTypeArray = [
   { key: 1, value: t('i18n_67b667bf98'), disabled: false },
   { key: 2, value: t('i18n_90c0458a4c'), disabled: true },
   { key: 3, value: t('i18n_590e5b46a0'), disabled: true },
-  { key: 4, value: '触发器', disabled: true }
+  { key: 4, value: t('i18n_4696724ed3'), disabled: true }
 ]
 
 export const arrayToMap = (arra) => {

@@ -183,19 +183,21 @@
               <a-button type="primary" size="small" @click="resetTrigger">{{ $t('i18n_4b9c3271dc') }}</a-button>
             </a-tooltip>
           </template>
-          <a-tab-pane key="1" tab="备份">
+          <a-tab-pane key="1" :tab="$t('i18n_664b37da22')">
             <a-space direction="vertical" style="width: 100%">
               <a-alert :message="$t('i18n_947d983961')" type="warning">
                 <template #description>
                   <ul>
-                    <li>reserveCount 表示触发器生成的备份保留个数</li>
+                    <li>{{ $t('i18n_caed797183') }}</li>
                   </ul>
                 </template>
               </a-alert>
 
               <a-alert type="info">
                 <template #message>
-                  <a-typography-paragraph :copyable="{ text: temp.triggerUrl }">触发备份 </a-typography-paragraph>
+                  <a-typography-paragraph :copyable="{ text: temp.triggerUrl }">{{
+                    $t('i18n_af83388834')
+                  }}</a-typography-paragraph>
                 </template>
                 <template #description>
                   <a-tag>GET</a-tag> <span>{{ temp.triggerUrl }} </span>

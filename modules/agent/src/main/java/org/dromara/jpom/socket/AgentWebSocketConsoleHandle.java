@@ -22,7 +22,6 @@ import org.dromara.jpom.common.commander.ProjectCommander;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.configuration.AgentConfig;
-import org.dromara.jpom.configuration.ProjectLogConfig;
 import org.dromara.jpom.model.RunMode;
 import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
@@ -50,7 +49,6 @@ import java.nio.charset.Charset;
 public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
 
     private static ProjectInfoService projectInfoService;
-    private static ProjectLogConfig logConfig;
     private static ProjectCommander projectCommander;
 
     @Autowired
@@ -58,7 +56,6 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                      AgentConfig agentConfig,
                      ProjectCommander projectCommander) {
         AgentWebSocketConsoleHandle.projectInfoService = projectInfoService;
-        AgentWebSocketConsoleHandle.logConfig = agentConfig.getProject().getLog();
         AgentWebSocketConsoleHandle.projectCommander = projectCommander;
         setAgentAuthorize(agentConfig.getAuthorize());
     }
@@ -254,7 +251,8 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                 int beforeCount = reqJson.getIntValue("beforeCount");
                 int afterCount = reqJson.getIntValue("afterCount");
                 String keyword = reqJson.getString("keyword");
-                Charset charset = logConfig.getFileCharset();
+                NodeProjectInfoModel originalModel = projectInfoService.resolveModel(nodeProjectInfoModel);
+                Charset charset = projectInfoService.resolveLogCharset(nodeProjectInfoModel, originalModel);
                 //BaseFileTailWatcher.detectorCharset(file);
                 String resultMsg = FileSearchUtil.searchList(file, charset, keyword, beforeCount, afterCount, head, tail, first, objects -> {
                     try {
@@ -287,7 +285,8 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
             file = FileUtil.file(libFile, fileName);
         }
         try {
-            Charset charset = logConfig.getFileCharset();
+            NodeProjectInfoModel originalModel = projectInfoService.resolveModel(nodeProjectInfoModel);
+            Charset charset = projectInfoService.resolveLogCharset(nodeProjectInfoModel, originalModel);
             boolean watcher = AgentFileTailWatcher.addWatcher(file, charset, session);
             if (!watcher) {
                 SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.listen_file_failed_may_not_exist.fd56"));
