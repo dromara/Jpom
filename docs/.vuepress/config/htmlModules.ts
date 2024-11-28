@@ -45,7 +45,7 @@ const htmlModule: VdoingThemeConfig["htmlModules"] = {
       <img  loading="lazy" class="no-zoom" height="60" width="224" src="/images/friends/ad/mdp-banner2.png">
     </a>
     <a href="https://www.jnpfsoft.com/index.html?from=jpom" target="_blank"  style="background:#dcf3ff">
-          <img  loading="lazy" class="no-zoom" height="60" width="224" src="/images/friends/ad/jnpfsoft-banner.png">
+          <img  loading="lazy" class="no-zoom" height="60" width="224" src="/images/friends/ad/jnpfsoft-banner2.png">
     </a>
      <a href="https://www.orangeforms.com/?from=jpom" target="_blank"  style="background:#f37700">
           <img  loading="lazy" class="no-zoom" height="60" width="224" src="/images/friends/ad/orangeforms-banner.jpg">
