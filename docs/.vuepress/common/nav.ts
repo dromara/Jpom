@@ -7,6 +7,10 @@ export default [
         text: "🔖回到首页",
         link: "/",
       },
+      {
+      text: "dromara 官网",
+      link: "https://dromara.org",
+      },
     ],
   },
   {
