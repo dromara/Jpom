@@ -12,6 +12,7 @@ $(function() {
     '127.0.0.1',
     'jpom.top',
     'jops.top',
+    'jpom.dromara.org',
     'webcache.googleusercontent.com',
     '192.168.'
   ]
