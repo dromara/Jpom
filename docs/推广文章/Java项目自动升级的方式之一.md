@@ -55,7 +55,7 @@ tags:
 - 在线升级是自动下载新的程序包、上传升级是手动上传新的程序包到系统中。
 - 手动升级是最原始的大家平常使用的升级方式：手动下载新的程序包、手动上传新的程序包到服务器中。
 
-Jpom 升级文档：[https://jpom.top/pages/FQA/upgrade/](https://jpom.top/pages/FQA/upgrade/)
+Jpom 升级文档：[文档](/pages/FQA/upgrade/)
 
 ## 升级前提 📌
 

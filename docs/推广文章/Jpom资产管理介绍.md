@@ -64,7 +64,7 @@ Jpom 2.10.x 版本主要是解决了遗留问题、优化部分不易用的功�
 13. 用户自定义工作空间排序、备注别名；
 14. 更多优化、小变动更新期待您来发现。
 
-完整的更新日志：[https://jpom.top/pages/changelog/new/](https://jpom.top/pages/changelog/new/)
+完整的更新日志：[更新日志](/pages/changelog/new/)
 
 ### 致谢 🤝
 
