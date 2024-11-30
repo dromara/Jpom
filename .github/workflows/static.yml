@@ -33,11 +33,13 @@ jobs:
               uses: actions/checkout@v3
             - name: Setup Pages
               uses: actions/configure-pages@v3
+            - name: 'build' # 步骤二，执行sh命令文件
+              run: npm install && npm run lbuild # 运行目录是仓库根目录
             - name: Upload artifact
               uses: actions/upload-pages-artifact@v1
               with:
                   # Upload entire repository
-                  path: './static'
+                  path: './dist'
             - name: Deploy to GitHub Pages
               id: deployment
               uses: actions/deploy-pages@v2
