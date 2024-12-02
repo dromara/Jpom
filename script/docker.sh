@@ -18,7 +18,9 @@
 # docker buildx create --use
 
 # 服务端
-docker buildx build --platform linux/amd64,linux/arm64,linux/ppc64le,linux/arm64/v8 -t jpomdocker/jpom:2.11.11.1 -t jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .
+docker buildx build --platform linux/amd64,linux/arm64,linux/ppc64le -t jpomdocker/jpom:2.11.11 -t jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .
+
+docker buildx build --platform linux/amd64,linux/arm64,linux/ppc64le -t registry.cn-chengdu.aliyuncs.com/jpomdocker/jpom:2.11.11 -t registry.cn-chengdu.aliyuncs.com/jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .
 
 
 

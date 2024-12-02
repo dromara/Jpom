@@ -201,6 +201,23 @@ docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
 
 #### Using Mount to Store Data (may have compatibility issues in some environments)
 
+1. Alibaba Cloud Repository
+
+```shell
+docker pull registry.cn-chengdu.aliyuncs.com/jpomdocker/jpom
+mkdir -p /home/jpom-server/logs
+mkdir -p /home/jpom-server/data
+mkdir -p /home/jpom-server/conf
+docker run -d -p 2122:2122 \
+	--name jpom-server \
+	-v /home/jpom-server/logs:/usr/local/jpom-server/logs \
+	-v /home/jpom-server/data:/usr/local/jpom-server/data \
+	-v /home/jpom-server/conf:/usr/local/jpom-server/conf \
+	jpomdocker/jpom
+```
+
+2. Docker Hub Repository
+
 ```shell
 docker pull jpomdocker/jpom
 mkdir -p /home/jpom-server/logs
@@ -215,6 +232,23 @@ docker run -d -p 2122:2122 \
 ```
 
 #### Using Docker Volumes to Store Data
+
+1. Alibaba Cloud Repository
+
+```shell
+docker pull registry.cn-chengdu.aliyuncs.com/jpomdocker/jpom
+docker volume create jpom-server-data
+docker volume create jpom-server-logs
+docker volume create jpom-server-conf
+docker run -d -p 2122:2122 \
+	--name jpom-server \
+	-v jpom-server-data:/usr/local/jpom-server/data \
+	-v jpom-server-logs:/usr/local/jpom-server/logs \
+	-v jpom-server-conf:/usr/local/jpom-server/conf \
+	jpomdocker/jpom
+```
+
+2. Docker Hub Repository
 
 ```shell
 docker pull jpomdocker/jpom
