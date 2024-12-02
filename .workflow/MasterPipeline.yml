@@ -39,14 +39,14 @@ stages:
         artifacts:
           - name: all_zip
             path:
-              - modules/server/target/server-2.11.10-release.zip
-              - modules/agent/target/agent-2.11.10-release.zip
+              - modules/server/target/server-2.11.11-release.zip
+              - modules/agent/target/agent-2.11.11-release.zip
           - name: server_zip
             path:
-              - modules/server/target/server-2.11.10-release.zip
+              - modules/server/target/server-2.11.11-release.zip
           - name: agent_zip
             path:
-              - modules/agent/target/agent-2.11.10-release.zip
+              - modules/agent/target/agent-2.11.11-release.zip
         settings: []
         strategy:
           retry: '0'
@@ -60,7 +60,7 @@ stages:
         name: publish_general_artifacts
         displayName: 合并打包
         dependArtifact: all_zip
-        artifactName: jpom-2.11.10
+        artifactName: jpom-2.11.11
         strategy:
           retry: '0'
 strategy:
