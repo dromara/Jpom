@@ -1353,7 +1353,7 @@
   "i18n_791b6d0e62": "Ranking is sorted alphabetically a-z",
   "i18n_79698c57a2": "The current workspace has no nodes yet",
   "i18n_798f660048": "template node",
-  "i18n_799ac8bf40": "Support variable references: {'${TASK_ID }'}、{'${ FILE_ID }'}、{'${ FILE_NAME }'}、{'${ FILE_EXT_NAME}'}",
+  "i18n_799ac8bf40": "Support variable references: {'${TASK_ID }'}、{'${ FILE_ID }'}、{'${ FILE_NAME }'}、{'${ FILE_EXT_NAME}'}、{'${RELEASE_PATH}'}",
   "i18n_79a7072ee1": "Token URL",
   "i18n_79c6b6cff7": "association grouping",
   "i18n_79d3abe929": "copy",
