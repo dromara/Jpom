@@ -42,7 +42,7 @@
 </p>
 
 <p align="center">
-        👉 大陆站：<a target="_blank" href="https://jpom.top">https://jpom.top</a>  👈
+  👉 大陆站：<a target="_blank" href="https://jpom.top">https://jpom.top</a>  👈
 </p>
 
 ## 😭 日常开发中，您是否有以下痛点？

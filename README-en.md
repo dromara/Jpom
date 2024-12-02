@@ -4,7 +4,7 @@
 	</a>
 </p>
 <p align="center">
-	<strong>🚀Simple and lightweight low-invasive online build, automated deployment, daily operations, and project monitoring software.</strong>
+	<strong>【dromara】🚀Simple and lightweight low-invasive online build, automated deployment, daily operations, and project monitoring software.</strong>
 </p>
 <p align="center">
    【<strong>It is also a native ops software</strong> / <a href="./README.md">中文</a>】
@@ -38,7 +38,10 @@
 </p>
 
 <p align="center">
-	👉 <a target="_blank" href="https://jpom.top">https://jpom.top/</a>  👈
+	👉 International Station：<a target="_blank" href="https://jpom.dromara.org">https://jpom.dromara.org</a>  👈
+</p>
+<p align="center">
+	👉Mainland Station：<a target="_blank" href="https://jpom.top">https://jpom.top/</a>  👈
 </p>
 
 ## 😭 Do you experience these pain points in your daily development?
