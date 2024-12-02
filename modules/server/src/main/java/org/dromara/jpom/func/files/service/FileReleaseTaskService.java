@@ -261,6 +261,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         environmentMapBuilder.put("FILE_ID", taskRoot.getFileId());
         environmentMapBuilder.put("FILE_NAME", storageModel.getName());
         environmentMapBuilder.put("FILE_EXT_NAME", storageModel.getExtName());
+        environmentMapBuilder.put("RELEASE_PATH", taskRoot.getReleasePath());
         //
         String syncFinisherId = "file-release:" + taskId;
         StrictSyncFinisher strictSyncFinisher = SyncFinisherUtil.create(syncFinisherId, logModels.size());
