@@ -297,7 +297,10 @@ bash install.sh Server jdk
 <code-block title="docker">
 ```bash
 # 此方式未挂载数据目录（不推荐）
+# 阿里云仓库
 docker run -p 2122:2122 --name jpom-server jpomdocker/jpom
+# docker hub 仓库
+docker run -p 2122:2122 --name jpom-server registry.cn-chengdu.aliyuncs.com/jpomdocker/jpom
 ```
   </code-block>
 </code-group>
