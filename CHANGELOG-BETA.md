@@ -8,7 +8,6 @@
 2. 【agent】优化 项目日志文件编码格式支持独立配置（感谢[@不渡](https://gitee.com/zhangjxing) [Gitee issues IB3DCP](https://gitee.com/dromara/Jpom/issues/IB3DCP) ）
 3. 【all】优化 使用默认语言时增加判断所在时区来识别中文环境
 4. 【all】升级 fastjson 依赖版本
-5. 【server】升级 mwiede.jsch 依赖版本
 
 ------
 
