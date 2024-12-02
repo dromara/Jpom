@@ -17,15 +17,18 @@
  	<a target="_blank" href="https://github.com/dromara/Jpom">
 		<img src="https://img.shields.io/github/stars/dromara/Jpom.svg?style=social" alt="github star"/>
     </a>
+ 	<a target="_blank" href="https://gitcode.com/dromara/Jpom">
+		<img src="https://gitcode.com/dromara/Jpom/star/badge.svg" alt="gitcode star"/>
+    </a>
     <a target="_blank" href="https://license.coscl.org.cn/MulanPSL2">
 		<img src="https://img.shields.io/:license-MulanPSL2-blue.svg" alt="license"/>
 	  </a>
-    <a target="_blank" href="https://gitee.com/dromara/Jpom">
-        <img src='https://img.shields.io/badge/JDK-1.8.0_40+-green.svg' alt='jdk'/>
-    </a>
 </p>
 
 <p align="center">
+  <a target="_blank" href="https://gitee.com/dromara/Jpom">
+        <img src='https://img.shields.io/badge/JDK-1.8.0_40+-green.svg' alt='jdk'/>
+    </a>
     <a target="_blank" href="https://www.codacy.com/gh/dromara/Jpom/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dromara/Jpom&amp;utm_campaign=Badge_Grade">
       <img src="https://app.codacy.com/project/badge/Grade/843b953f1446449c9a075e44ea778336" alt="codacy"/>
     </a>
