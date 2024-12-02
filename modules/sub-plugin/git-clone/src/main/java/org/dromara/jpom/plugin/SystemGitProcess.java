@@ -29,6 +29,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Hong
@@ -184,6 +185,8 @@ public class SystemGitProcess extends AbstractGitProcess {
         // 获取提交日志
         String[] command = {"git", "log", "-1", branchOrTag};
         String[] commitId = new String[1];
+        StringBuilder commitInfo = new StringBuilder();
+        AtomicBoolean nextMsg = new AtomicBoolean(false);
 
         CommandUtil.exec(saveFile, null, line -> {
             printWriter.println(line);
@@ -192,12 +195,18 @@ public class SystemGitProcess extends AbstractGitProcess {
                 List<String> list = StrUtil.splitTrim(line, StrUtil.SPACE);
                 commitId[0] = CollUtil.get(list, 1);
             }
+            if (StrUtil.startWithIgnoreCase(line, "Date:")) {
+                nextMsg.set(true);
+            } else if (nextMsg.get()) {
+                commitInfo.append(line).append("\n");
+            }
         }, command);
-        return new String[]{commitId[0], StrUtil.EMPTY};
+        return new String[]{commitId[0], commitInfo.toString()};
     }
 
     private void reClone(PrintWriter printWriter, String branchOrTag) throws IOException {
-        printWriter.println("SystemGit: Automatically re-clones repositories");
+        String string = I18nMessageUtil.get("i18n.auto_reclone_repository.60f6");
+        printWriter.println("SystemGit: " + string);
         // 先删除本地目录
         File savePath = getSaveFile();
         if (!FileUtil.clean(savePath)) {

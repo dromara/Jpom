@@ -49,7 +49,6 @@ import org.springframework.util.Assert;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.Attributes;
@@ -76,19 +75,16 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
      */
     public static final Map<Integer, CacheObject<String>> PID_PORT = new SafeConcurrentHashMap<>();
 
-    protected final Charset fileCharset;
     protected final SystemCommander systemCommander;
     protected final ProjectConfig projectConfig;
     protected final ProjectLogConfig projectLogConfig;
     protected final DslScriptServer dslScriptServer;
     protected final ProjectInfoService projectInfoService;
 
-    public AbstractProjectCommander(Charset fileCharset,
-                                    SystemCommander systemCommander,
+    public AbstractProjectCommander(SystemCommander systemCommander,
                                     ProjectConfig projectConfig,
                                     DslScriptServer dslScriptServer,
                                     ProjectInfoService projectInfoService) {
-        this.fileCharset = fileCharset;
         this.systemCommander = systemCommander;
         this.projectConfig = projectConfig;
         this.projectLogConfig = projectConfig.getLog();
@@ -175,7 +171,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
         //
         this.loopCheckRun(nodeProjectInfoModel, originalModel, true);
         CommandOpResult status = this.status(nodeProjectInfoModel, originalModel);
-        this.asyncWebHooks(nodeProjectInfoModel, originalModel, "start", "result", status.msgStr());
+        this.asyncWebHooks(nodeProjectInfoModel, originalModel, "start", "result", status);
         return status;
     }
 
@@ -377,7 +373,12 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
                 }
                 // 等待 状态成功
                 boolean run = this.loopCheckRun(nodeProjectInfoModel, originalModel, true);
-                CommandOpResult result = CommandOpResult.of(run, run ? "restart done" : "restart done,but unsuccessful");
+                CommandOpResult result;
+                if (run) {
+                    result = this.status(nodeProjectInfoModel, originalModel);
+                } else {
+                    result = CommandOpResult.of(false, "restart done,but unsuccessful");
+                }
                 this.asyncWebHooks(nodeProjectInfoModel, originalModel, "restart", "result", result);
                 return result;
 
@@ -573,7 +574,7 @@ public abstract class AbstractProjectCommander implements ProjectCommander {
             return Optional.ofNullable(status)
                 .map(strings -> {
                     File log = projectInfoService.resolveAbsoluteLogFile(nodeProjectInfoModel, originalModel);
-                    FileUtil.appendLines(strings, log, fileCharset);
+                    FileUtil.appendLines(strings, log, projectInfoService.resolveLogCharset(nodeProjectInfoModel, originalModel));
                     return strings;
                 })
                 .map(CollUtil::getLast)

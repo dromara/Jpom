@@ -128,6 +128,16 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
      */
     private Long buildLogFileSize;
 
+    /**
+     * 仓库代码最后一次变动信息（ID，git 为 commit hash, svn 最后的版本号）
+     */
+    private String repositoryLastCommitId;
+
+    /**
+     * 仓库代码最后一次变动信息
+     */
+    private String repositoryLastCommitMsg;
+
     public void setBuildRemark(String buildRemark) {
         this.buildRemark = StrUtil.maxLength(buildRemark, 240);
     }

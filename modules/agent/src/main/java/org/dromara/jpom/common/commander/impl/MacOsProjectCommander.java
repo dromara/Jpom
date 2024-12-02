@@ -42,7 +42,7 @@ public class MacOsProjectCommander extends BaseUnixProjectCommander {
                                  SystemCommander systemCommander,
                                  DslScriptServer dslScriptServer,
                                  ProjectInfoService projectInfoService) {
-        super(agentConfig.getProject().getLog().getFileCharset(), systemCommander, agentConfig.getProject(), dslScriptServer, projectInfoService);
+        super(systemCommander, agentConfig.getProject(), dslScriptServer, projectInfoService);
     }
 
     @Override

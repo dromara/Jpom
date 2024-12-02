@@ -16,6 +16,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.dromara.jpom.common.Const;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -30,8 +31,6 @@ import java.util.function.Consumer;
  */
 public class EnvironmentMapBuilder {
 
-    // 隐私变量占位符
-    public static final String PRIVACY_PLACEHOLDER = "******";
 
     private final Map<String, Item> map;
 
@@ -58,7 +57,8 @@ public class EnvironmentMapBuilder {
      * @return this
      */
     public EnvironmentMapBuilder putSystem(String name, String value) {
-        map.put(name, new Item(value, false, true));
+        boolean privacy = StrUtil.containsAnyIgnoreCase(name, Const.PRIVACY_VARIABLE_KEYWORDS);
+        map.put(name, new Item(value, privacy, true));
         return this;
     }
 
@@ -129,7 +129,7 @@ public class EnvironmentMapBuilder {
         consumer.accept("##################################################################################");
         for (Map.Entry<String, Item> entry : map.entrySet()) {
             Item entryValue = entry.getValue();
-            String value = entryValue.privacy ? PRIVACY_PLACEHOLDER : entryValue.value;
+            String value = entryValue.privacy ? Const.PRIVACY_PLACEHOLDER : entryValue.value;
             consumer.accept(entry.getKey() + "=" + value);
         }
         Optional.ofNullable(appendMap).ifPresent(objectMap -> {
@@ -196,7 +196,7 @@ public class EnvironmentMapBuilder {
         Map<String, Item> clone = ObjectUtil.clone(map);
         clone.forEach((k, v) -> {
             if (v.privacy) {
-                v.value = PRIVACY_PLACEHOLDER;
+                v.value = Const.PRIVACY_PLACEHOLDER;
             }
         });
         return clone;

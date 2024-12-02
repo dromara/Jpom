@@ -52,6 +52,7 @@ public class TaskData {
      * 仓库代码最后一次变动信息（ID，git 为 commit hash, svn 最后的版本号）
      */
     protected String repositoryLastCommitId;
+    protected String repositoryLastCommitMsg;
     /**
      * 是否差异构建
      */

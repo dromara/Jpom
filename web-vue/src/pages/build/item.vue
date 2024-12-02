@@ -89,7 +89,16 @@
             </template>
             <template #header>
               <b>{{ $t('i18n_c0ad27a701') }}</b>
-              <a-alert :message="$t('i18n_f11569cfa9')" type="warning" />
+              <a-alert type="warning">
+                <template #message>
+                  <div>{{ $t('i18n_f11569cfa9') }}</div>
+                  <div>
+                    {{ $t('i18n_a2741f6eb3')
+                    }}<a-tag v-for="(item, index) in privacyVariableKeywords" :key="index">{{ item }}</a-tag
+                    >{{ $t('i18n_a17b905126') }}
+                  </div>
+                </template>
+              </a-alert>
             </template>
             <!-- <template #footer>
         <div>Footer</div>
@@ -182,6 +191,7 @@ export default {
       menuKey: ['info'],
       stepsCurrent: this.editSteps,
       environment: {},
+      privacyVariableKeywords: [],
       buildMode: null
     }
   },
@@ -209,7 +219,8 @@ export default {
         buildMode: this.buildMode
       }).then((res) => {
         if (res.data) {
-          this.environment = res.data || {}
+          this.environment = res.data?.data || {}
+          this.privacyVariableKeywords = res.data?.privacyVariableKeywords || []
         }
       })
     }

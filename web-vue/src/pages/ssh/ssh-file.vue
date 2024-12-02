@@ -46,14 +46,25 @@
         </a-space>
       </a-row>
       <a-empty v-if="treeList.length === 0" :image="Empty.PRESENTED_IMAGE_SIMPLE" />
-      <a-directory-tree
-        v-model:selectedKeys="selectedKeys"
-        v-model:expandedKeys="expandedKeys"
-        :tree-data="treeList"
-        :field-names="replaceFields"
-        @select="onSelect"
-      >
-      </a-directory-tree>
+      <a-spin v-else :tip="$t('i18n_f013ea9dcb')" :spinning="loading">
+        <div class="tree-container">
+          <a-directory-tree
+            v-model:selectedKeys="selectedKeys"
+            v-model:expandedKeys="expandedKeys"
+            :tree-data="treeList"
+            :field-names="replaceFields"
+            @select="onSelect"
+            @expand="
+              (expandedKeys, { expanded, node }) => {
+                if (expanded) {
+                  onSelect(expandedKeys, { node })
+                }
+              }
+            "
+          >
+          </a-directory-tree>
+        </div>
+      </a-spin>
     </a-layout-sider>
     <!-- 表格 -->
     <a-layout-content class="file-content">
@@ -1215,7 +1226,7 @@ export default {
   }
 }
 </script>
-<style scoped>
+<style lang="less" scoped>
 :deep(.ant-progress-text) {
   width: auto;
 }
@@ -1239,5 +1250,19 @@ export default {
 .title {
   font-weight: 600;
   font-size: larger;
+}
+.tree-container {
+  overflow-x: auto;
+  :deep(.ant-tree-title) {
+    word-break: keep-all;
+    white-space: nowrap;
+  }
+  :deep(.ant-tree-node-content-wrapper) {
+    display: flex;
+    align-items: center;
+  }
+  :deep(.ant-tree.ant-tree-directory .ant-tree-treenode .ant-tree-node-content-wrapper.ant-tree-node-selected) {
+    background-color: #1677ff;
+  }
 }
 </style>

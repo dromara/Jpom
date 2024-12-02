@@ -272,6 +272,7 @@ public class OutGivingProjectEditController extends BaseServerController {
         defData.put("name", outGivingModel.getName());
         defData.put("group", outGivingModel.getGroup());
         //
+        defData.put("logCharset", getParameter("logCharset"));
         // 运行模式
         String runMode = getParameter("runMode");
         RunMode runMode1 = EnumUtil.fromString(RunMode.class, runMode, RunMode.ClassPath);
