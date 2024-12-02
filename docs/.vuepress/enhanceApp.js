@@ -59,6 +59,8 @@ export default ({
         // 图片悬停显示描述
         imgAddLayerTip()
         isStarRepo(to.path)
+        //
+        new EmbedLiteSDK({appId: 'f394f6e2-7219-4a06-b19e-06f5907dc96e', code: 'embedvXWqahpL1LXZ0KbDaWWK'});
       })
     })
   }

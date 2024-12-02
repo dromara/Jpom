@@ -106,6 +106,7 @@ export default <HeadTags>[
   ["script", { src: "/assets/js/common.js" }],
   // 百度统计 js
   ["script", { }, baidutj],
+  ["script", { src: "https://agi-dev-platform-web.bj.bcebos.com/ai_apaas/embed/output/embedLiteSDK.js?responseExpires=0" }],
   [
     "link",
     {
