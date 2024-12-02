@@ -21,7 +21,6 @@ import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.JvmUtil;
 
 import java.io.File;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -35,12 +34,11 @@ import java.util.Optional;
 @Slf4j
 public abstract class BaseUnixProjectCommander extends AbstractProjectCommander {
 
-    public BaseUnixProjectCommander(Charset fileCharset,
-                                    SystemCommander systemCommander,
+    public BaseUnixProjectCommander(SystemCommander systemCommander,
                                     ProjectConfig projectConfig,
                                     DslScriptServer dslScriptServer,
                                     ProjectInfoService projectInfoService) {
-        super(fileCharset, systemCommander, projectConfig, dslScriptServer, projectInfoService);
+        super(systemCommander, projectConfig, dslScriptServer, projectInfoService);
     }
 
     @Override

@@ -260,6 +260,24 @@
           </a-select>
         </a-form-item>
 
+        <a-form-item v-show="noFileModes.includes(temp.runMode) && temp.runMode !== 'Link'">
+          <template #label>
+            <a-tooltip
+              >{{ $t('i18n_340eb70415')
+              }}<template #title>
+                <ul>
+                  <li>{{ $t('i18n_401c396b51') }}</li>
+                  <li>
+                    {{ $t('i18n_aef1a0752a') }}
+                  </li>
+                </ul>
+              </template>
+              <QuestionCircleOutlined v-show="temp.type !== 'edit'" />
+            </a-tooltip>
+          </template>
+          <a-input v-model:value="temp.logCharset" :placeholder="$t('i18n_c6c2497dbe')" />
+        </a-form-item>
+
         <a-form-item
           v-show="
             (javaModes.includes(temp.runMode) && temp.runMode !== 'Jar') ||

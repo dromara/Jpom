@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 public class ScriptLibraryServer extends BaseDbService<ScriptLibraryModel> {
 
     private final Pattern pattern = PatternPool.get("G@\\(\"(.*?)\"\\)", Pattern.DOTALL);
+    private final String placeholder = "JPOM____PLACEHOLDER";
 
     /**
      * 引用替换
@@ -61,9 +62,11 @@ public class ScriptLibraryServer extends BaseDbService<ScriptLibraryModel> {
                 }
             }
             Assert.notNull(scriptLibraryModel, StrUtil.format(I18nMessageUtil.get("i18n.error_message.483d"), tag));
-            matcher.appendReplacement(modified, scriptLibraryModel.getScript());
+            String modelScript = scriptLibraryModel.getScript();
+            modelScript = StrUtil.replace(modelScript, "${", placeholder);
+            matcher.appendReplacement(modified, modelScript);
         }
         matcher.appendTail(modified);
-        return modified.toString();
+        return StrUtil.replace(modified.toString(), placeholder, "${");
     }
 }

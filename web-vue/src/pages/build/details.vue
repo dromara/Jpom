@@ -103,19 +103,25 @@
             <a-space direction="vertical" style="width: 100%">
               <div>
                 <a-space>
-                  <span :style="`color: ${statusColor[item.status]};`" @click="handleBuildLog(item)"
-                    >#{{ item.buildNumberId }} <EyeOutlined
-                  /></span>
+                  <span :style="`color: ${statusColor[item.status]};`" @click="handleBuildLog(item)">
+                    #{{ item.buildNumberId }} <EyeOutlined />
+                  </span>
                   <span v-if="item.buildRemark">{{ $t('i18n_65571516e2') }}{{ item.buildRemark }}</span>
                 </a-space>
               </div>
               <div>
                 <a-tooltip :title="item.statusMsg || statusMap[item.status] || $t('i18n_1622dc9b6b')">
-                  {{ $t('i18n_bec98b4d6a')
-                  }}<a-tag :color="statusColor[item.status]">{{
-                    statusMap[item.status] || $t('i18n_1622dc9b6b')
-                  }}</a-tag>
+                  {{ $t('i18n_bec98b4d6a') }}
+                  <a-tag :color="statusColor[item.status]">{{ statusMap[item.status] || $t('i18n_1622dc9b6b') }}</a-tag>
                 </a-tooltip>
+              </div>
+              <div v-if="item.repositoryLastCommitId">
+                <div>
+                  {{ $t('i18n_e235b0d4af') }}{{ (item.repositoryLastCommitId || '').slice(0, 8) }}
+                  <span v-if="item.repositoryLastCommitMsg"
+                    >{{ $t('i18n_f27822dd8a') }}{{ item.repositoryLastCommitMsg || '' }}</span
+                  >
+                </div>
               </div>
               <div>
                 {{ $t('i18n_14e6d83ff5') }}{{ parseTime(item.startTime) }} ~

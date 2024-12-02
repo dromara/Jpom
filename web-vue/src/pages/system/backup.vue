@@ -42,6 +42,7 @@
           </a-tooltip>
           <a-button type="primary" @click="handleAdd">{{ $t('i18n_a4006e5c1e') }}</a-button>
           <a-button type="primary" @click="handleSqlUpload">{{ $t('i18n_90c0458a4c') }}</a-button>
+          <a-button type="primary" @click="handleTrigger()">{{ $t('i18n_4696724ed3') }}</a-button>
         </a-space>
       </template>
       <template #bodyCell="{ column, text, record }">
@@ -164,6 +165,49 @@
         </a-radio-group>
         <br /> -->
     </CustomModal>
+
+    <!-- 触发器 -->
+    <CustomModal
+      v-if="triggerVisible"
+      v-model:open="triggerVisible"
+      destroy-on-close
+      :title="$t('i18n_4696724ed3')"
+      width="50%"
+      :footer="null"
+      :mask-closable="false"
+    >
+      <a-form ref="editTriggerForm" :model="temp" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
+        <a-tabs default-active-key="1">
+          <template #rightExtra>
+            <a-tooltip :title="$t('i18n_01ad26f4a9')">
+              <a-button type="primary" size="small" @click="resetTrigger">{{ $t('i18n_4b9c3271dc') }}</a-button>
+            </a-tooltip>
+          </template>
+          <a-tab-pane key="1" :tab="$t('i18n_664b37da22')">
+            <a-space direction="vertical" style="width: 100%">
+              <a-alert :message="$t('i18n_947d983961')" type="warning">
+                <template #description>
+                  <ul>
+                    <li>{{ $t('i18n_caed797183') }}</li>
+                  </ul>
+                </template>
+              </a-alert>
+
+              <a-alert type="info">
+                <template #message>
+                  <a-typography-paragraph :copyable="{ text: temp.triggerUrl }">{{
+                    $t('i18n_af83388834')
+                  }}</a-typography-paragraph>
+                </template>
+                <template #description>
+                  <a-tag>GET</a-tag> <span>{{ temp.triggerUrl }} </span>
+                </template>
+              </a-alert>
+            </a-space>
+          </a-tab-pane>
+        </a-tabs>
+      </a-form>
+    </CustomModal>
   </div>
 </template>
 <script>
@@ -177,7 +221,8 @@ import {
   getBackupList,
   getTableNameList,
   restoreBackup,
-  uploadBackupFile
+  uploadBackupFile,
+  getTriggerUrl
 } from '@/api/backup-info'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, renderSize } from '@/utils/const'
 
@@ -200,7 +245,7 @@ export default {
       uploadSqlFileVisible: false,
 
       backupType: 0,
-
+      triggerVisible: false,
       columns: [
         {
           title: this.$t('i18n_77b9ecc8b1'),
@@ -465,6 +510,34 @@ export default {
     changePage(pagination, filters, sorter) {
       this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter })
       this.loadData()
+    }, // 触发器
+    handleTrigger() {
+      this.temp = Object.assign({}, {})
+
+      getTriggerUrl({}).then((res) => {
+        if (res.code === 200) {
+          this.fillTriggerResult(res)
+          this.triggerVisible = true
+        }
+      })
+    },
+    // 重置触发器
+    resetTrigger() {
+      getTriggerUrl({
+        rest: 'rest'
+      }).then((res) => {
+        if (res.code === 200) {
+          $notification.success({
+            message: res.msg
+          })
+          this.fillTriggerResult(res)
+        }
+      })
+    },
+    fillTriggerResult(res) {
+      this.temp.triggerUrl = `${location.protocol}//${location.host}${res.data.triggerUrl}`
+      this.temp.triggerUrl = `${this.temp.triggerUrl}?reserveCount=2`
+      this.temp = { ...this.temp }
     }
   }
 }

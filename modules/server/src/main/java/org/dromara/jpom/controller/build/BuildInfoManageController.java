@@ -18,6 +18,7 @@ import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.build.*;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorConfig;
 import org.dromara.jpom.common.validator.ValidatorItem;
@@ -156,7 +157,7 @@ public class BuildInfoManageController extends BaseServerController {
      */
     @RequestMapping(value = "/build/manage/environment", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<Map<String, EnvironmentMapBuilder.Item>> environment(String id, Integer buildMode, HttpServletRequest request) {
+    public IJsonMessage<JSONObject> environment(String id, Integer buildMode, HttpServletRequest request) {
         BuildInfoModel item = buildInfoService.getByKey(id, request);
         EnvironmentMapBuilder environmentMapBuilder;
         // 解析变量
@@ -184,7 +185,11 @@ public class BuildInfoManageController extends BaseServerController {
             Map<String, String> environment = processBuilder.environment();
             environment.forEach(environmentMapBuilder::putSystem);
         }
-        return JsonMessage.success("", environmentMapBuilder.clonePrivacyData());
+        Map<String, EnvironmentMapBuilder.Item> data = environmentMapBuilder.clonePrivacyData();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("data", data);
+        jsonObject.put("privacyVariableKeywords", Const.PRIVACY_VARIABLE_KEYWORDS);
+        return JsonMessage.success("", jsonObject);
     }
 
     /**

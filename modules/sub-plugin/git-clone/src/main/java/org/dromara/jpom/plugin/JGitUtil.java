@@ -171,14 +171,14 @@ public class JGitUtil {
         Integer protocol = (Integer) parameter.get("protocol");
         String username = (String) parameter.get("username");
         String password = StrUtil.emptyToDefault((String) parameter.get("password"), StrUtil.EMPTY);
+        //
+        Optional.ofNullable(timeout)
+            .map(integer -> integer <= 0 ? null : integer)
+            .ifPresent(transportCommand::setTimeout);
         if (protocol == 0) {
             // http
             CredentialsProvider credentialsProvider = new SslVerifyUsernamePasswordCredentialsProvider(username, password);
             transportCommand.setCredentialsProvider(credentialsProvider);
-            //
-            Optional.ofNullable(timeout)
-                .map(integer -> integer <= 0 ? null : integer)
-                .ifPresent(transportCommand::setTimeout);
         } else if (protocol == 1) {
             // ssh
             //File rsaFile = BuildUtil.getRepositoryRsaFile(repositoryModel);

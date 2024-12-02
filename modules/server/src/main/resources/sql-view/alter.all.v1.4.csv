@@ -23,3 +23,5 @@ ADD,MONITOR_INFO,useLanguage,String,20,,使用语言,false
 ADD,MONITOR_INFO,silenceTime,Integer,,,沉默时间,false
 ADD,MONITOR_INFO,silenceUnit,String,20,,沉默单位,false
 ADD,MACHINE_DOCKER_INFO,sshUseSudo,tinyint,0,,是否使用 sudo 执行命令,false
+ADD,BUILDHISTORYLOG,repositoryLastCommitId,String,255,,"仓库代码最后一次变动信息（ID，git 为 commit hash, svn 最后的版本号）",false
+ADD,BUILDHISTORYLOG,repositoryLastCommitMsg,String,255,,"仓库代码最后一次变动信息",false

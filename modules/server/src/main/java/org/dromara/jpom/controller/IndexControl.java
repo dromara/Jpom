@@ -255,10 +255,11 @@ public class IndexControl extends BaseServerController {
         if (inDocker) {
             extendPlugins.add("inDocker");
         }
+        //extendPlugins.add("db-" + dbExtConfig.getMode().name().toLowerCase());
         // 验证 git 仓库信息
         try {
             IPlugin plugin = PluginFactory.getPlugin("git-clone");
-            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>(0);
             boolean systemGit = (boolean) plugin.execute("systemGit", map);
             if (systemGit) {
                 extendPlugins.add("system-git");

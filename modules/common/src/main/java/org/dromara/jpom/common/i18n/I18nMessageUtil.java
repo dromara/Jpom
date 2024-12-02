@@ -26,10 +26,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -64,6 +61,17 @@ public class I18nMessageUtil {
             if (StrUtil.equals("zh", country)) {
                 // 中国
                 return "zh-CN";
+            }
+            TimeZone timeZone = TimeZone.getDefault();
+            String id = timeZone.getID();
+            if (StrUtil.equalsAny(id, "Asia/Chongqing", "Asia/Shanghai")) {
+                return "zh-CN";
+            }
+            if (StrUtil.equalsAny(id, "Asia/Hong_Kong")) {
+                return "zh-HK";
+            }
+            if (StrUtil.equalsAny(id, "Asia/Taipei")) {
+                return "zh-TW";
             }
             return "en-US";
         });
