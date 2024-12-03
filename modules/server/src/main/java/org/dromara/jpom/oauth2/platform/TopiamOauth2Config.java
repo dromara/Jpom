@@ -12,30 +12,40 @@ package org.dromara.jpom.oauth2.platform;
 import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import me.zhyd.oauth.config.AuthConfig;
 import me.zhyd.oauth.request.AuthRequest;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
-import org.dromara.jpom.oauth2.custom.MaxKeyAuthOauth2Request;
-import org.dromara.jpom.oauth2.custom.MaxKeyOauth2AuthSource;
+import org.dromara.jpom.oauth2.custom.TopiamAuthOauth2Request;
+import org.dromara.jpom.oauth2.custom.TopiamOauth2AuthSource;
 import org.springframework.util.Assert;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author bwcx_jzy
- * @since 2023/3/26
+ * @since 2024/12/03
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class MaxKeyOauth2Config extends CustomOauth2Config {
-    public static final String KEY = "OAUTH_CONFIG_CUSTOM_OAUTH2";
+public class TopiamOauth2Config extends CustomOauth2Config {
+    public static final String KEY = "OAUTH_CONFIG_TOPIAM_OAUTH2";
 
 
     @Override
     public String provide() {
-        return "maxkey";
+        return "topiam";
     }
 
     public AuthRequest authRequest() {
         Assert.state(this.enabled(), StrUtil.format(I18nMessageUtil.get("i18n.oauth2_not_enabled.c8b7"), this.provide()));
-        MaxKeyOauth2AuthSource maxKeyOauth2AuthSource = new MaxKeyOauth2AuthSource(this);
-        return new MaxKeyAuthOauth2Request(this.authConfig(), maxKeyOauth2AuthSource);
+        TopiamOauth2AuthSource oauth2AuthSource = new TopiamOauth2AuthSource(this);
+        AuthConfig config = this.authConfig();
+        List<String> scopes = new ArrayList<>();
+        scopes.add("openid");
+        scopes.add("email");
+        scopes.add("profile");
+        config.setScopes(scopes);
+        return new TopiamAuthOauth2Request(config, oauth2AuthSource);
     }
 }
