@@ -106,7 +106,7 @@ function checkIsLocal() {
 const allowDisparity = 1000 * 60 * 60 * 24 * 30
 const client_id = 'ea3bda02d8f2a6ab9dd7f337b7df1318714c5e3d867c3b59d293c1acbb360b30'
 const client_secret = 'xxx'
-let redirect_uri = 'https://jpom.top'
+let redirect_uri = location.origin
 
 
 // 判断当前是否已 star
@@ -120,9 +120,9 @@ function isStarRepo(url) {
   }
 
   // 判断是否在主域名下
-  if (checkIsLocal()) {
-    redirect_uri = 'http://127.0.0.1:2216'
-  }
+  // if (checkIsLocal()) {
+  //   redirect_uri = 'http://127.0.0.1:2216'
+  // }
 
   // 判断是否近期已经判断过了
   try {
