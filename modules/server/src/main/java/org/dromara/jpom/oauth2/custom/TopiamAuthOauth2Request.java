@@ -1,24 +1,18 @@
 /*
- * spring-boot-justauth - Demo project for Spring Boot JustAuth
- * Copyright © 2022-Present Jinan Yuanchuang Network Technology Co., Ltd. (support@topiam.cn)
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (c) 2019 Of Him Code Technology Studio
+ * Jpom is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ * 			http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
  */
 package org.dromara.jpom.oauth2.custom;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
+import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONObject;
 import lombok.Lombok;
 import me.zhyd.oauth.config.AuthConfig;
@@ -30,7 +24,6 @@ import me.zhyd.oauth.model.AuthUser;
 import me.zhyd.oauth.request.AuthDefaultRequest;
 import me.zhyd.oauth.utils.Base64Utils;
 import me.zhyd.oauth.utils.UrlBuilder;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -55,12 +48,12 @@ public class TopiamAuthOauth2Request extends AuthDefaultRequest {
         JSONObject response = JSONObject.parseObject(body);
         checkResponse(response);
         return AuthToken.builder()
-            .accessToken(response.getString("access_token"))
-            .refreshToken(response.getString("refresh_token"))
-            .idToken(response.getString("id_token"))
-            .tokenType(response.getString("token_type"))
-            .scope(response.getString("scope"))
-            .build();
+                .accessToken(response.getString("access_token"))
+                .refreshToken(response.getString("refresh_token"))
+                .idToken(response.getString("id_token"))
+                .tokenType(response.getString("token_type"))
+                .scope(response.getString("scope"))
+                .build();
     }
 
     @Override
@@ -69,19 +62,19 @@ public class TopiamAuthOauth2Request extends AuthDefaultRequest {
         JSONObject result = JSONObject.parseObject(body);
         checkResponse(result);
         return AuthUser.builder()
-            .uuid(result.getString("sub"))
-            .username(result.getString("preferred_username"))
-            .nickname(result.getString("nickname"))
-            .avatar(result.getString("picture"))
-            .email(result.getString("email"))
-            .token(authToken)
-            .source(source.toString())
-            .build();
+                .uuid(result.getString("sub"))
+                .username(result.getString("preferred_username"))
+                .nickname(result.getString("nickname"))
+                .avatar(result.getString("picture"))
+                .email(result.getString("email"))
+                .token(authToken)
+                .source(source.toString())
+                .build();
     }
 
     @Override
     protected String doGetUserInfo(AuthToken authToken) {
-        HttpRequest httpRequest = cn.hutool.http.HttpUtil.createGet(source.userInfo());
+        HttpRequest httpRequest = HttpUtil.createGet(source.userInfo());
         httpRequest.header("Authorization", "Bearer " + authToken.getAccessToken());
         try (HttpResponse execute = httpRequest.execute()) {
             return execute.body();
@@ -93,7 +86,7 @@ public class TopiamAuthOauth2Request extends AuthDefaultRequest {
     @Override
     public String authorize(String state) {
         return UrlBuilder.fromBaseUrl(super.authorize(state))
-            .queryParam("scope", StringUtils.join(this.config.getScopes(), " ")).build();
+                .queryParam("scope", StrUtil.join(" ", this.config.getScopes())).build();
     }
 
     public static void checkResponse(JSONObject object) {
@@ -108,7 +101,7 @@ public class TopiamAuthOauth2Request extends AuthDefaultRequest {
     }
 
     protected String getAccessToken(String code) {
-        HttpRequest httpRequest = cn.hutool.http.HttpUtil.createPost(source.accessToken());
+        HttpRequest httpRequest = HttpUtil.createPost(source.accessToken());
 
         httpRequest.header("Authorization", getBasic(config.getClientId(), config.getClientSecret()));
         Map<String, Object> form = new HashMap<>(7);
