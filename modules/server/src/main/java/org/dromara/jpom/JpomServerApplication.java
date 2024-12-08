@@ -11,20 +11,17 @@ package org.dromara.jpom;
 
 import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.SystemClock;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.extra.spring.SpringUtil;
 import cn.keepbx.jpom.JpomAppType;
 import cn.keepbx.jpom.Type;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
-import org.dromara.jpom.model.data.SystemIpConfigModel;
-import org.dromara.jpom.service.system.SystemParametersServer;
-import org.dromara.jpom.service.user.UserService;
+import org.dromara.jpom.startup.CommandExecutor;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.boot.Banner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.ServletComponentScan;
+import org.springframework.context.ApplicationContext;
 
 /**
  * jpom 启动类
@@ -73,35 +70,13 @@ public class JpomServerApplication {
         //
         SpringApplicationBuilder springApplicationBuilder = new SpringApplicationBuilder(JpomServerApplication.class);
         springApplicationBuilder.bannerMode(Banner.Mode.LOG);
-        springApplicationBuilder.run(args);
-        // 重置 ip 授权配置
-        if (ArrayUtil.containsIgnoreCase(args, "--rest:ip_config")) {
-            SystemParametersServer parametersServer = SpringUtil.getBean(SystemParametersServer.class);
-            parametersServer.delByKey(SystemIpConfigModel.ID);
-            log.info(I18nMessageUtil.get("i18n.clear_ip_whitelist_config_success.8cf6"));
-        }
-        //  重置超级管理员密码
-        if (ArrayUtil.containsIgnoreCase(args, "--rest:super_user_pwd")) {
-            UserService userService = SpringUtil.getBean(UserService.class);
-            String restResult = userService.restSuperUserPwd();
-            if (restResult != null) {
-                log.info(restResult);
-            } else {
-                log.error(I18nMessageUtil.get("i18n.no_super_admin_account.538d"));
-            }
-        }
-        // 关闭超级管理员 mfa
-        if (ArrayUtil.containsIgnoreCase(args, "--close:super_user_mfa")) {
-            UserService userService = SpringUtil.getBean(UserService.class);
-            String restResult = userService.closeSuperUserMfa();
-            if (restResult != null) {
-                log.info(restResult);
-            } else {
-                log.error(I18nMessageUtil.get("i18n.no_super_admin_account.538d"));
-            }
-        }
+        ApplicationContext applicationContext = springApplicationBuilder.run(args);
 
+        // 使用命令执行器处理启动参数
+        CommandExecutor commandExecutor = new CommandExecutor(applicationContext, args);
+        commandExecutor.execute();
 
+        //
         log.info(I18nMessageUtil.get("i18n.startup_duration.54fe"), StringUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND));
     }
 }
