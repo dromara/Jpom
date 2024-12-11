@@ -1042,10 +1042,11 @@ export default {
      * @returns {*}
      */
     getTreeNode(keys) {
-      let node = this.treeList[keys[0]]
-      for (let key of keys.slice(1)) {
+      let node = this.treeList.find((node) => node.activeKey[0] == keys.slice(0, 1)[0])
+      const nodeKeys = keys.slice(1)
+      for (let [index, key] of nodeKeys.entries()) {
         if (key >= 0 && key < node.children.length) {
-          node = node.children[key]
+          node = node.children.find((node) => node.activeKey.slice(index + 1, index + 2) == key)
         } else {
           throw new Error('Invalid key: ' + key)
         }
