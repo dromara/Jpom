@@ -5,6 +5,11 @@
 ### 🐣 新增功能
 
 1. 【server】新增 支持使用 TOPIAM 企业数字身份管控平台登录（oauth2）
+2. 【all】升级 hutool 版本
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】修复 ssh文件管理显示错位（感谢[@lin_yeqi](https://gitee.com/lin_yeqi) [Gitee issues IB98AU](https://gitee.com/dromara/Jpom/issues/IB98AU) ）
 
 ### 🐞 解决BUG、优化功能
 
