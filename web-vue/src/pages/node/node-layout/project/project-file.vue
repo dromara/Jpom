@@ -728,6 +728,9 @@ export default {
     // 点击树节点
     nodeClick(selectedKeys, { node }) {
       if (node.dataRef.isDirectory) {
+        if (node.dataRef.key === this.tempNode.key) {
+          return
+        }
         this.tempNode = node.dataRef
         this.expandedKeys = [this.tempNode.key]
         this.loadFileList()
