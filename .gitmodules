@@ -4,8 +4,8 @@
 	branch = master
 [submodule "docs"]
 	path = docs
-	url = git@gitee.com:dromara/Jpom.git
-	branch = docs
+	url = git@github.com:bwcx-jzy/jpom-docs.git
+	branch = main
 [submodule "download-link"]
 	path = download-link
 	url = git@gitee.com:dromara/Jpom.git
