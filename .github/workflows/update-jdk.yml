@@ -1,0 +1,41 @@
+## 利用GitHub Actions定时更新 jdk 镜像
+
+name: baiduPush
+
+# 两种触发方式：一、push代码，二、每天国际标准时间23点（北京时间+8即早上7点）运行
+on:
+  push:
+    branches:
+      - error-understand # 不需要每次推送执行，所以选择error-understand分支
+  schedule:
+    - cron: '*/5 * * * *' # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/events-that-trigger-workflows#scheduled-events-schedule
+
+# on:
+#   schedule:
+#     - cron: '*/5 * * * *' # 每5分钟一次，测试用
+
+jobs:
+  bot:
+    runs-on: ubuntu-latest # 运行环境为最新版的Ubuntu
+    steps:
+      - name: 'Checkout codes' # 步骤一，获取仓库代码
+        uses: actions/checkout@v4
+        with:
+          ref: download_link
+      - name: 'Run build' # 步骤二，执行sh命令文件
+        run: |
+          set -x
+          ruby -v
+          ls -lR
+          cat jdk.rb
+          bundle install
+          ruby jdk.rb
+          ls -lR jdk/
+      - name: Deploy download_link
+        uses: JamesIves/github-pages-deploy-action@v4
+        if: github.event_name == 'push' && github.ref == 'refs/heads/download_link'
+        with:
+          # This is the branch where the docs are deployed to
+          branch: download_link
+          folder: ./
+
