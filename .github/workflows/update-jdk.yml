@@ -7,8 +7,8 @@ on:
   push:
     branches:
       - error-understand # 不需要每次推送执行，所以选择error-understand分支
-  schedule:
-    - cron: '5 * * * *' # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/events-that-trigger-workflows#scheduled-events-schedule
+#  schedule:
+#    - cron: '5 * * * *' # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/events-that-trigger-workflows#scheduled-events-schedule
   workflow_dispatch:
     inputs:
       tags:
