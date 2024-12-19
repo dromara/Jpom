@@ -43,5 +43,5 @@ results.each do |result|
   FileUtils.mkdir_p "jdk/#{result[:version]}"
   `echo "#{result[:path]}" > jdk/#{result[:version]}/#{result[:arch]}`
 end
-`git config --global user.email "#{ENV['gitee_email']}" && git config --global user.name "jpom jdk"`
-`git add . && git commit -m "update jdk" && git push origin download_link`
+#`git config --global user.email "#{ENV['gitee_email']}" && git config --global user.name "jpom jdk"`
+#`git add . && git commit -m "update jdk" && git push origin download_link`
