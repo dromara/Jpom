@@ -30,6 +30,10 @@ public class MachineNodeStatLogModel extends BaseDbModel {
      */
     private String machineId;
     /**
+     * cpu ticks
+     */
+    private String cpuTicks;
+    /**
      * 占用cpu
      */
     private Double occupyCpu;
