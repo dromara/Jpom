@@ -11,8 +11,6 @@
 
 1. 【server】修复 ssh文件管理显示错位（感谢[@lin_yeqi](https://gitee.com/lin_yeqi) [Gitee issues IB98AU](https://gitee.com/dromara/Jpom/issues/IB98AU) ）
 
-### 🐞 解决BUG、优化功能
-
 ------
 
 ## 2.11.10.2-beta (2024-12-02)
