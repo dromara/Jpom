@@ -16,6 +16,7 @@ import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
+import cn.hutool.system.SystemUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.Type;
 import cn.keepbx.jpom.model.JsonMessage;
@@ -67,6 +68,7 @@ import java.util.Optional;
 public class SystemUpdateController extends BaseServerController implements ILoadEvent {
 
     private static final String JOIN_JPOM_BETA_RELEASE = "JOIN_JPOM_BETA_RELEASE";
+    private static final String JPOM_REMOTE_VERSION_AUTH = "JPOM_REMOTE_VERSION_AUTH";
 
     private final BackupInfoService backupInfoService;
     private final ServerConfig serverConfig;
@@ -89,6 +91,8 @@ public class SystemUpdateController extends BaseServerController implements ILoa
             cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
             //
             JSONObject jsonObject = new JSONObject();
+            String auth = systemParametersServer.getConfig(JPOM_REMOTE_VERSION_AUTH, String.class);
+            jsonObject.put("auth", auth);
             jsonObject.put("manifest", instance);
             jsonObject.put("remoteVersion", remoteVersion);
             jsonObject.put("joinBetaRelease", RemoteVersion.betaRelease());
@@ -104,6 +108,15 @@ public class SystemUpdateController extends BaseServerController implements ILoa
         String isBeta = I18nMessageUtil.get("i18n.joined_beta_program.c4e2");
         String closeBeta = I18nMessageUtil.get("i18n.close_beta_plan_success.5a94");
         return JsonMessage.success(betaBool ? isBeta : closeBeta);
+    }
+
+    @GetMapping(value = "change-download-auth", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public IJsonMessage<String> changeDownloadAuth(String auth) {
+        String data = StrUtil.emptyToDefault(auth, "");
+        systemParametersServer.upsert(JPOM_REMOTE_VERSION_AUTH, data, I18nMessageUtil.get("i18n.var download_authorization_code.3148"));
+        SystemUtil.set(JPOM_REMOTE_VERSION_AUTH, data);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.update_success.55aa"));
     }
 
     private boolean changeBetaRelease2(String beta) {
@@ -215,7 +228,7 @@ public class SystemUpdateController extends BaseServerController implements ILoa
     @GetMapping(value = "remote_upgrade.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DOWNLOAD)
     public IJsonMessage<String> upgrade(HttpServletRequest request,
-                                        String machineId) throws IOException {
+                                        String machineId) {
 
         IJsonMessage<String> message = this.tryRequestMachine(machineId, request, NodeUrl.REMOTE_UPGRADE);
         return Optional.ofNullable(message).orElseGet(() -> {
@@ -232,6 +245,9 @@ public class SystemUpdateController extends BaseServerController implements ILoa
     public void afterPropertiesSet(ApplicationContext applicationContext) throws Exception {
         String config = systemParametersServer.getConfig(JOIN_JPOM_BETA_RELEASE, String.class);
         boolean release2 = this.changeBetaRelease2(config);
-        log.debug("beta plan:{}", release2);
+        String auth = systemParametersServer.getConfig(JPOM_REMOTE_VERSION_AUTH, String.class);
+        String msg = I18nMessageUtil.get("i18n.version_config_info.7b29");
+        log.debug("{} beta:{} auth:{}", msg, release2, auth);
+        SystemUtil.set(JPOM_REMOTE_VERSION_AUTH, auth);
     }
 }
