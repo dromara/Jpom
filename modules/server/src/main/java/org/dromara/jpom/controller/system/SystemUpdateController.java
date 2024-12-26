@@ -114,9 +114,9 @@ public class SystemUpdateController extends BaseServerController implements ILoa
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<String> changeDownloadAuth(String auth) {
         String data = StrUtil.emptyToDefault(auth, "");
-        systemParametersServer.upsert(JPOM_REMOTE_VERSION_AUTH, data, "下载授权码");
+        systemParametersServer.upsert(JPOM_REMOTE_VERSION_AUTH, data, I18nMessageUtil.get("i18n.var download_authorization_code.3148"));
         SystemUtil.set(JPOM_REMOTE_VERSION_AUTH, data);
-        return JsonMessage.success("更新成功");
+        return JsonMessage.success(I18nMessageUtil.get("i18n.update_success.55aa"));
     }
 
     private boolean changeBetaRelease2(String beta) {
@@ -246,7 +246,7 @@ public class SystemUpdateController extends BaseServerController implements ILoa
         String config = systemParametersServer.getConfig(JOIN_JPOM_BETA_RELEASE, String.class);
         boolean release2 = this.changeBetaRelease2(config);
         String auth = systemParametersServer.getConfig(JPOM_REMOTE_VERSION_AUTH, String.class);
-        String msg = "版本配置信息";
+        String msg = I18nMessageUtil.get("i18n.version_config_info.7b29");
         log.debug("{} beta:{} auth:{}", msg, release2, auth);
         SystemUtil.set(JPOM_REMOTE_VERSION_AUTH, auth);
     }
