@@ -50,6 +50,16 @@
       <a-timeline-item v-if="temp.downloadSource">
         <a-space>
           <span>{{ $t('i18n_3200fba1c6') }}{{ temp.downloadSource }} </span>
+          <div v-if="!nodeId && !machineId">
+            <a-input-password
+              v-model:value="temp.auth"
+              placeholder="请配置下载授权码"
+              @press-enter="changeDownloadAuth"
+            >
+              <template #prefix> 下载授权码： </template>
+            </a-input-password>
+            <!-- <a-typography-paragraph v-model:content="temp.auth" style="display: inline; margin-bottom: 0" editable /> -->
+          </div>
         </a-space>
       </a-timeline-item>
       <a-timeline-item>
@@ -119,7 +129,8 @@ import {
   checkVersion,
   remoteUpgrade,
   uploadUpgradeFileMerge,
-  changBetaRelease
+  changBetaRelease,
+  changeDownloadAuth
 } from '@/api/system'
 import { useGuideStore } from '@/stores/guide'
 import markdownit from 'markdown-it'
@@ -204,7 +215,8 @@ export default {
         this.temp = {
           ...this.temp,
           vueTimeStamp: parseTime(this.getMeta('build-time')),
-          joinBetaRelease: res.data?.joinBetaRelease
+          joinBetaRelease: res.data?.joinBetaRelease,
+          auth: res.data?.auth || ''
         }
         //
         changelog({
@@ -496,8 +508,8 @@ export default {
       const html = `${title}
       <ul style="color:red;">
         <li style="display: ${this.temp.downloadSource ? 'revert' : 'none'};">${downloadSource}<b>${
-        this.temp.downloadSource
-      }</b></li>
+          this.temp.downloadSource
+        }</b></li>
         <li>${li[0]}</li>
         <li>${li[1]}<b>${alterB}</b></li>
         <li>${li[2]}</li>
@@ -551,6 +563,29 @@ export default {
         onOk: () => {
           return changBetaRelease({
             beta: beta
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
+              })
+
+              this.loadData()
+            }
+          })
+        }
+      })
+    },
+    changeDownloadAuth() {
+      $confirm({
+        title: this.$t('i18n_c4535759ee'),
+        content:
+          '确定要更改下载授权码码？请您自行确认授权码是否正确，仅到触发下载时才能使用到下载授权码，错误的授权码将不能正常下载更新包',
+        okText: this.$t('i18n_e83a256e4f'),
+        zIndex: 1009,
+        cancelText: this.$t('i18n_625fb26b4b'),
+        onOk: () => {
+          return changeDownloadAuth({
+            auth: this.temp.auth
           }).then((res) => {
             if (res.code === 200) {
               $notification.success({
