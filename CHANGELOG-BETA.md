@@ -1,16 +1,23 @@
 # 🚀 版本日志
 
-## 2.11.11.1-beta
+## 2.11.11.2-beta (2024-12-26)
 
 ### 🐣 新增功能
 
-1. 【server】新增 支持使用 TOPIAM 企业数字身份管控平台登录（oauth2）
-2. 【all】升级 hutool 版本
-3. 【server】新增 服务端在线升级页面支持配置下载授权码，方便国内用户使用全速 CDN
+1. 【all】升级 hutool 版本
+2. 【server】新增 服务端在线升级页面支持配置下载授权码，方便国内用户使用全速 CDN
 
 ### 🐞 解决BUG、优化功能
 
 1. 【server】修复 ssh文件管理显示错位（感谢[@lin_yeqi](https://gitee.com/lin_yeqi) [Gitee issues IB98AU](https://gitee.com/dromara/Jpom/issues/IB98AU) ）
+
+------
+
+## 2.11.11.1-beta (2024-12-03)
+
+### 🐣 新增功能
+
+1. 【server】新增 支持使用 TOPIAM 企业数字身份管控平台登录（oauth2）
 
 ------
 
