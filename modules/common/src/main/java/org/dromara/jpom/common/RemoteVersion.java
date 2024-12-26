@@ -46,6 +46,10 @@ import java.util.function.Consumer;
 @Slf4j
 public class RemoteVersion extends cn.keepbx.jpom.RemoteVersion {
 
+    @Override
+    public String getDownloadSource() {
+        return super.getDownloadSource();
+    }
 
     @Override
     public String toString() {
