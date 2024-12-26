@@ -78,7 +78,7 @@ public class RemoteVersion extends cn.keepbx.jpom.RemoteVersion {
         } catch (HttpException httpException) {
             String message = httpException.getMessage();
             if (StrUtil.containsAnyIgnoreCase(message, "Server response error with status code: [403]")) {
-                String msg = "可能是下载授权码错误或者对应授权码被禁用以及触发限流机制";
+                String msg = I18nMessageUtil.get("i18n.error_message.44ce");
                 throw new IllegalStateException(message + " " + msg);
             }
             throw Lombok.sneakyThrow(httpException);

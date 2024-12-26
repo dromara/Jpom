@@ -92,7 +92,7 @@ public abstract class BaseExceptionHandler {
         if (SystemUtil.getOsInfo().isWindows()) {
             // Target must be a directory
             if (StrUtil.containsIgnoreCase(message, "Target must be a directory")) {
-                String s = "当前系统环境为 windows 请检查对应操作文件是否被其他进程占用或者停止运行对应项目后再试";
+                String s = I18nMessageUtil.get("i18n.system_environment_message.f7d4");
                 return new JsonMessage<>(405, message + " " + s);
             }
         }

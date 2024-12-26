@@ -53,10 +53,10 @@
           <div v-if="!nodeId && !machineId">
             <a-input-password
               v-model:value="temp.auth"
-              placeholder="请配置下载授权码"
+              :placeholder="$t('i18n_a55ae13421')"
               @press-enter="changeDownloadAuth"
             >
-              <template #prefix> 下载授权码： </template>
+              <template #prefix>{{ $t('i18n_31353ecf96') }}</template>
             </a-input-password>
             <!-- <a-typography-paragraph v-model:content="temp.auth" style="display: inline; margin-bottom: 0" editable /> -->
           </div>
@@ -508,8 +508,8 @@ export default {
       const html = `${title}
       <ul style="color:red;">
         <li style="display: ${this.temp.downloadSource ? 'revert' : 'none'};">${downloadSource}<b>${
-          this.temp.downloadSource
-        }</b></li>
+        this.temp.downloadSource
+      }</b></li>
         <li>${li[0]}</li>
         <li>${li[1]}<b>${alterB}</b></li>
         <li>${li[2]}</li>
@@ -578,8 +578,8 @@ export default {
     changeDownloadAuth() {
       $confirm({
         title: this.$t('i18n_c4535759ee'),
-        content:
-          '确定要更改下载授权码码？请您自行确认授权码是否正确，仅到触发下载时才能使用到下载授权码，错误的授权码将不能正常下载更新包',
+        content: this.$t('i18n_d2913cea31'),
+
         okText: this.$t('i18n_e83a256e4f'),
         zIndex: 1009,
         cancelText: this.$t('i18n_625fb26b4b'),
