@@ -246,7 +246,7 @@ public class ProjectFileControl extends BaseAgentController {
                     CompressionFileUtil.unCompress(file, lib, stripComponentsValue);
                 } finally {
                     if (!FileUtil.del(file)) {
-                        log.error(I18nMessageUtil.get("i18n.delete_file_failure_with_full_stop.6c96") + file.getPath());
+                        log.error("{}{}", I18nMessageUtil.get("i18n.delete_file_failure_with_full_stop.6c96"), file.getPath());
                     }
                 }
             } else {

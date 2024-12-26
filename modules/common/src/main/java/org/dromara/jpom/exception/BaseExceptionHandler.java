@@ -11,6 +11,7 @@ package org.dromara.jpom.exception;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.exceptions.ValidateException;
+import cn.hutool.core.io.file.visitor.MoveVisitor;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
 import cn.keepbx.jpom.IJsonMessage;
@@ -76,16 +77,26 @@ public abstract class BaseExceptionHandler {
      *
      * @param request 请求
      * @param e       异常
+     * @see MoveVisitor
      */
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class, ValidateException.class})
     @ResponseBody
     public IJsonMessage<String> paramExceptionHandler(HttpServletRequest request, Exception e) {
+        String message = e.getMessage();
         if (log.isDebugEnabled()) {
             log.debug("controller  {}", request.getRequestURI(), e);
         } else {
-            log.warn("controller {} {}", request.getRequestURI(), e.getMessage());
+            log.warn("controller {} {}", request.getRequestURI(), message);
         }
-        return new JsonMessage<>(405, e.getMessage());
+        //
+        if (SystemUtil.getOsInfo().isWindows()) {
+            // Target must be a directory
+            if (StrUtil.containsIgnoreCase(message, "Target must be a directory")) {
+                String s = I18nMessageUtil.get("i18n.system_environment_message.f7d4");
+                return new JsonMessage<>(405, message + " " + s);
+            }
+        }
+        return new JsonMessage<>(405, message);
     }
 
 

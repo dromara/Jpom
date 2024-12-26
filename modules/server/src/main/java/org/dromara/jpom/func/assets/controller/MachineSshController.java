@@ -381,7 +381,7 @@ public class MachineSshController extends BaseGroupNameController {
     @GetMapping(value = "export-data", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DOWNLOAD)
     public void exportData(HttpServletResponse response, HttpServletRequest request) throws IOException {
-        String prefix = I18nMessageUtil.get("i18n.exported_ssh_data.2896");
+        String prefix = I18nMessageUtil.get("i18n.exported_ssh_data.ce88");
         String fileName = prefix + DateTime.now().toString(DatePattern.NORM_DATE_FORMAT) + ".csv";
         this.setApplicationHeader(response, fileName);
         //

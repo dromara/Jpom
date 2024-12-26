@@ -11,12 +11,16 @@ package org.dromara.jpom.common;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Tuple;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpDownloader;
+import cn.hutool.http.HttpException;
 import cn.hutool.http.HttpUtil;
 import cn.keepbx.jpom.Type;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
@@ -46,7 +50,6 @@ import java.util.function.Consumer;
 @Slf4j
 public class RemoteVersion extends cn.keepbx.jpom.RemoteVersion {
 
-
     @Override
     public String toString() {
         return JSONObject.toJSONString(cn.keepbx.jpom.RemoteVersion.cacheInfo());
@@ -60,6 +63,7 @@ public class RemoteVersion extends cn.keepbx.jpom.RemoteVersion {
      * @param checkRepeat 是否验证重复
      * @return 保存的全路径
      * @throws IOException 异常
+     * @see HttpDownloader#requestDownload(String, int)
      */
     public static Tuple download(String savePath, Type type, boolean checkRepeat) throws IOException {
         cn.keepbx.jpom.RemoteVersion remoteVersion = loadRemoteInfo();
@@ -68,7 +72,17 @@ public class RemoteVersion extends cn.keepbx.jpom.RemoteVersion {
         String remoteUrl = type.getRemoteUrl(remoteVersion);
         Assert.hasText(remoteUrl, I18nMessageUtil.get("i18n.new_version_exists_download_unavailable.4ba7"));
         // 下载
-        File downloadFileFromUrl = HttpUtil.downloadFileFromUrl(remoteUrl, savePath);
+        File downloadFileFromUrl;
+        try {
+            downloadFileFromUrl = HttpUtil.downloadFileFromUrl(remoteUrl, savePath);
+        } catch (HttpException httpException) {
+            String message = httpException.getMessage();
+            if (StrUtil.containsAnyIgnoreCase(message, "Server response error with status code: [403]")) {
+                String msg = I18nMessageUtil.get("i18n.error_message.44ce");
+                throw new IllegalStateException(message + " " + msg);
+            }
+            throw Lombok.sneakyThrow(httpException);
+        }
         // 解析压缩包
         File file = JpomManifest.zipFileFind(FileUtil.getAbsolutePath(downloadFileFromUrl), type, savePath);
         // 检查

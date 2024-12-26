@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletRequest;
  */
 @RestControllerAdvice
 @Slf4j
-public class GlobalDefaultExceptionHandler extends BaseExceptionHandler {
+public class ServerExceptionHandler extends BaseExceptionHandler {
 
     /**
      * 声明要捕获的异常

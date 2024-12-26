@@ -1,0 +1,2 @@
+alterType,tableName,name,type,len,defaultValue,comment,notNull
+ADD,MACHINE_NODE_STAT_LOG,cpuTicks,TEXT,,,CPU负载信息
