@@ -1,5 +1,13 @@
 # 🚀 版本日志
 
+## 2.11.11.3-beta
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】优化 构建页面保存按钮使用 loading （感谢[@hhh](https://gitee.com/who9264) [Gitee issues IBD8WF](https://gitee.com/dromara/Jpom/issues/IBD8WF) ）
+
+------
+
 ## 2.11.11.2-beta (2024-12-26)
 
 ### 🐣 新增功能

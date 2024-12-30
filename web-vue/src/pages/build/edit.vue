@@ -1266,8 +1266,8 @@
           chooseScriptVisible === 1
             ? tempExtraData.noticeScriptId
             : temp.script?.indexOf('$ref.script.') != -1
-            ? temp.script.replace('$ref.script.', '')
-            : ''
+              ? temp.script.replace('$ref.script.', '')
+              : ''
         "
         mode="choose"
         @confirm="
@@ -1416,7 +1416,7 @@ export default {
       default: 0
     }
   },
-  emits: ['confirm', 'update:editSteps', 'changeBuildMode'],
+  emits: ['confirm', 'update:editSteps', 'changeBuildMode', 'saveChange'],
   data() {
     return {
       //   afterOptList,
@@ -1867,6 +1867,7 @@ export default {
     },
     // 提交节点数据
     handleEditBuildOk(build) {
+      this.$emit('saveChange', true)
       // 检验表单
       this.$refs['editBuildForm']
         .validate()
@@ -1897,19 +1898,25 @@ export default {
             extraData: JSON.stringify(tempExtraData),
             resultKeepDay: this.temp.resultKeepDay || 0
           }
+          this.$emit('saveChange', true)
           // 提交数据
-          editBuild(this.temp).then((res) => {
-            if (res.code === 200) {
-              // 成功
-              $notification.success({
-                message: res.msg
-              })
-              //
-              this.$emit('confirm', build, res.data, this.temp.buildEnvParameter)
-            }
-          })
+          editBuild(this.temp)
+            .then((res) => {
+              if (res.code === 200) {
+                // 成功
+                $notification.success({
+                  message: res.msg
+                })
+                //
+                this.$emit('confirm', build, res.data, this.temp.buildEnvParameter)
+              }
+            })
+            .finally(() => {
+              this.$emit('saveChange', false)
+            })
         })
         .catch(({ errorFields }) => {
+          this.$emit('saveChange', false)
           if (errorFields && errorFields[0]) {
             // console.log(errorFields[0])
             const msg = errorFields[0].errors && errorFields[0].errors[0]
