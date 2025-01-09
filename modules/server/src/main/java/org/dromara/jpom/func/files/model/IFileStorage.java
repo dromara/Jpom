@@ -15,7 +15,13 @@ package org.dromara.jpom.func.files.model;
  */
 public interface IFileStorage {
 
+    String getId();
+
     String getName();
 
     String getExtName();
+
+    default String getAliasCode() {
+        return null;
+    }
 }

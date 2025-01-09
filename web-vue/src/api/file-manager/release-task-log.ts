@@ -55,6 +55,30 @@ export function deleteReleaseTask(params) {
   })
 }
 
+export function getTaskTemplate(params) {
+  return axios({
+    url: '/file-storage/release-task/get-template',
+    method: 'get',
+    params: params
+  })
+}
+
+export function listTaskTemplate(params) {
+  return axios({
+    url: '/file-storage/release-task/list-template',
+    method: 'post',
+    data: params
+  })
+}
+
+export function deleteTaskTemplate(params) {
+  return axios({
+    url: '/file-storage/release-task/delete-template',
+    method: 'get',
+    params: params
+  })
+}
+
 // 任务详情
 export function taskDetails(params) {
   return axios({

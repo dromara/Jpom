@@ -9,6 +9,7 @@
 3. 【server】优化 用户操作日志记录表中用户 id 长度不够照成登录失败问题（感谢[@Halo](https://gitee.com/halo-lmf) [Gitee issues IBFNKE](https://gitee.com/dromara/Jpom/issues/IBFNKE) ）
 4. 【agent】优化 DSL 项目备份支持配置开启或者关闭差异备份（默认使用差异备份：仅备份变动过的文件）（感谢[@ercats](https://gitee.com/ercats) [Gitee issues IBF73J](https://gitee.com/dromara/Jpom/issues/IBF73J) ）
 5. 【server】优化 构建 webhook 新增 git 的提交id和提交信息参数（感谢[@皮儿卡啦没有丘](https://gitee.com/Aimeia) [Gitee issues IBDEU0](https://gitee.com/dromara/Jpom/issues/IBDEU0) ）
+6. 【server】优化 文件中心发布文件支持保存为模板方便后续使用（感谢[@lin_yeqi](https://gitee.com/lin_yeqi) [Gitee issues IB2FRF](https://gitee.com/dromara/Jpom/issues/IB2FRF) ）
 
 ------
 

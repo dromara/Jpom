@@ -199,6 +199,17 @@
           </a-tabs>
         </a-form-item-rest>
       </a-form-item>
+      <a-form-item label="模板" name="save2Template">
+        <a-radio-group v-model:value="temp.save2Template">
+          <a-radio value=""> 不保存</a-radio>
+          <a-radio value="id"> 文件ID</a-radio>
+          <a-radio value="alias" :disabled="fileType === 2">别名 </a-radio>
+        </a-radio-group>
+        <template #help>
+          <div>是否将本次发布的信息存储为发布任务模板，方便下次快捷使用相同配置信息来发布任务。</div>
+          <div>（需要选择以什么方式去重存储发布模板，默认每一种方式只会存储保留最新的发布模板,别名模板优先级最高）</div>
+        </template>
+      </a-form-item>
     </a-form>
     <!-- 配置授权目录 -->
     <CustomModal
@@ -249,8 +260,8 @@
               ? temp.beforeScript?.replace('$ref.script.', '')
               : ''
             : temp.afterScript?.indexOf('$ref.script.') !== -1
-            ? temp.afterScript?.replace('$ref.script.', '')
-            : ''
+              ? temp.afterScript?.replace('$ref.script.', '')
+              : ''
         "
         mode="choose"
         @confirm="
@@ -300,11 +311,26 @@ import { getNodeListAll } from '@/api/node'
 import codeEditor from '@/components/codeEditor'
 import whiteList from '@/pages/dispatch/white-list.vue'
 import scriptPage from '@/pages/script/script-list.vue'
+import { getTaskTemplate } from '@/api/file-manager/release-task-log'
 export default {
   components: {
     codeEditor,
     whiteList,
     scriptPage
+  },
+  props: {
+    fileId: {
+      type: String,
+      default: ''
+    },
+    fileType: {
+      type: Number,
+      default: 0
+    },
+    alias: {
+      type: String,
+      default: ''
+    }
   },
   emits: ['commit'],
   data() {
@@ -335,7 +361,30 @@ export default {
   },
   created() {
     this.temp = { taskType: 0 }
-    this.taskTypeChange(0)
+
+    getTaskTemplate({
+      id: this.fileId,
+      alias: this.alias,
+      fileType: this.fileType
+    }).then((res) => {
+      if (res.code === 200) {
+        const data = JSON.parse(res.data?.data || '{}')
+        if (data) {
+          this.temp = {
+            ...this.temp,
+            ...data
+          }
+          this.taskTypeChange().then(() => {
+            this.temp = {
+              ...this.temp,
+              taskDataIds: data.taskDataIds?.split(',')
+            }
+          })
+        } else {
+          this.taskTypeChange()
+        }
+      }
+    })
     this.loadAccesList()
   },
   methods: {
@@ -343,10 +392,13 @@ export default {
       const value = this.temp.taskType
       this.temp = { ...this.temp, taskDataIds: undefined }
       if (value === 0) {
-        this.loadSshList()
+        return this.loadSshList()
       } else if (value === 1) {
-        this.loadNodeList()
+        return this.loadNodeList()
       }
+      return new Promise((resolve) => {
+        resolve()
+      })
     },
     // 创建任务
     tryCommit() {
@@ -367,19 +419,23 @@ export default {
     },
     // 加载 SSH 列表
     loadSshList() {
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         this.sshList = []
-        getSshListAll().then((res) => {
-          if (res.code === 200) {
-            this.sshList = res.data
-            resolve()
-          }
-        })
+        getSshListAll()
+          .then((res) => {
+            if (res.code === 200) {
+              this.sshList = res.data
+              resolve()
+            }
+          })
+          .catch((err) => {
+            reject(err)
+          })
       })
     },
     // 加载节点
     loadNodeList() {
-      getNodeListAll().then((res) => {
+      return getNodeListAll().then((res) => {
         if (res.code === 200) {
           this.nodeList = res.data
         }
