@@ -7,6 +7,7 @@
 1. 【server】优化 构建页面保存按钮使用 loading （感谢[@hhh](https://gitee.com/who9264) [Gitee issues IBD8WF](https://gitee.com/dromara/Jpom/issues/IBD8WF) ）
 2. 【server】优化 SSH 文件列表支持跟随目录排序
 3. 【server】优化 用户操作日志记录表中用户 id 长度不够照成登录失败问题（感谢[@Halo](https://gitee.com/halo-lmf) [Gitee issues IBFNKE](https://gitee.com/dromara/Jpom/issues/IBFNKE) ）
+4. 【agent】优化 DSL 项目备份支持配置开启或者关闭差异备份（默认使用差异备份：仅备份变动过的文件）（感谢@摩诃丶）
 
 ------
 
