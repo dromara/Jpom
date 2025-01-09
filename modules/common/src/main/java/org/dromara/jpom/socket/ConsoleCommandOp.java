@@ -12,7 +12,7 @@ package org.dromara.jpom.socket;
 import lombok.Getter;
 
 /**
- * 控制台socket 操作枚举
+ * 控制台 socket 操作枚举
  *
  * @author bwcx_jzy
  * @since 2019/4/16
