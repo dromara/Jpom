@@ -921,6 +921,12 @@ public class BuildExecuteManage implements Runnable {
         map.put("buildName", buildInfoModel.getName());
         map.put("buildSourceFile", FileUtil.getAbsolutePath(this.gitFile));
         map.put("type", type);
+        if (taskData.repositoryLastCommitId != null) {
+            map.put("commitId", taskData.repositoryLastCommitId);
+        }
+        if (taskData.repositoryLastCommitMsg != null) {
+            map.put("commitMsg", taskData.repositoryLastCommitMsg);
+        }
         map.put("triggerBuildType", taskData.triggerBuildType);
         map.put("triggerTime", SystemClock.now());
         String triggerUser = Optional.ofNullable(taskData.userModel).map(BaseIdModel::getId).orElse(UserModel.SYSTEM_ADMIN);
