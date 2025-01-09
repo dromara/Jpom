@@ -85,7 +85,7 @@ export const PROJECT_DSL_DEFATUL =
   "\n#  backupSuffix: [ '.jar','.html','^.+\\.(?i)(txt)$' ]\r\n" +
   t('i18n_7b61408779') +
   '\n#  backupPath: /data/jpom_backup\r\n' +
-  '# 是否开启差异备份（仅备份变动过的文件）' +
+  t('i18n_96972aa0df') +
   '\n#  diffBackup: true\r\n' +
   'config:\r\n' +
   t('i18n_0d467f7889') +

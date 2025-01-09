@@ -199,15 +199,19 @@
           </a-tabs>
         </a-form-item-rest>
       </a-form-item>
-      <a-form-item label="模板" name="save2Template">
+      <a-form-item :label="$t('i18n_59cf15fe6b')" name="save2Template">
         <a-radio-group v-model:value="temp.save2Template">
-          <a-radio value=""> 不保存</a-radio>
-          <a-radio value="id"> 文件ID</a-radio>
-          <a-radio value="alias" :disabled="fileType === 2">别名 </a-radio>
+          <a-radio value="">{{ $t('i18n_e2d8fba259') }}</a-radio>
+          <a-radio value="id">{{ $t('i18n_f4273e1bb4') }}</a-radio>
+          <a-radio value="alias" :disabled="fileType === 2">{{ $t('i18n_8351876236') }}</a-radio>
         </a-radio-group>
         <template #help>
-          <div>是否将本次发布的信息存储为发布任务模板，方便下次快捷使用相同配置信息来发布任务。</div>
-          <div>（需要选择以什么方式去重存储发布模板，默认每一种方式只会存储保留最新的发布模板,别名模板优先级最高）</div>
+          <div>
+            {{ $t('i18n_ca527c48cf') }}
+          </div>
+          <div>
+            {{ $t('i18n_6d110422ce') }}
+          </div>
         </template>
       </a-form-item>
     </a-form>
@@ -260,8 +264,8 @@
               ? temp.beforeScript?.replace('$ref.script.', '')
               : ''
             : temp.afterScript?.indexOf('$ref.script.') !== -1
-              ? temp.afterScript?.replace('$ref.script.', '')
-              : ''
+            ? temp.afterScript?.replace('$ref.script.', '')
+            : ''
         "
         mode="choose"
         @confirm="
