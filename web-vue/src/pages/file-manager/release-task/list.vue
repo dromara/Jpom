@@ -72,7 +72,7 @@
           <a-tooltip :title="$t('i18n_4838a3bd20')">
             <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
           </a-tooltip>
-          <a-button type="primary" @click="handleTemplate">任务模板</a-button>
+          <a-button type="primary" @click="handleTemplate">{{ $t('i18n_938246ce8b') }}</a-button>
         </a-space>
       </template>
       <template #tableBodyCell="{ column, text, record }">
@@ -312,7 +312,7 @@
       width="80%"
       height="80%"
       destroy-on-close
-      title="查看发布模板"
+      :title="$t('i18n_ce1c5765e4')"
       :footer="null"
       :mask-closable="false"
     >

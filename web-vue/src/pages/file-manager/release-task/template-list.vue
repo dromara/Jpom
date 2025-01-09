@@ -21,13 +21,13 @@
         <a-space wrap class="search-box">
           <a-input
             v-model:value="listQuery['%name%']"
-            placeholder="模板名称"
+            :placeholder="$t('i18n_a5d1c511d7')"
             class="search-input-item"
             @press-enter="loadData"
           />
           <a-input
             v-model:value="listQuery['%templateTag%']"
-            placeholder="模板标记"
+            :placeholder="$t('i18n_16a3a4ed35')"
             class="search-input-item"
             @press-enter="loadData"
           />
@@ -45,11 +45,11 @@
               }
             "
             allow-clear
-            placeholder="模板来源"
+            :placeholder="$t('i18n_104000e24a')"
             class="search-input-item"
           >
-            <a-select-option :key="1">文件中心</a-select-option>
-            <a-select-option :key="2">静态文件</a-select-option>
+            <a-select-option :key="1">{{ $t('i18n_26183c99bf') }}</a-select-option>
+            <a-select-option :key="2">{{ $t('i18n_28f6e7a67b') }}</a-select-option>
           </a-select>
 
           <a-tooltip :title="$t('i18n_4838a3bd20')">
@@ -104,28 +104,28 @@ export default {
       confirmLoading: false,
       columns: [
         {
-          title: '模板名称',
+          title: this.$t('i18n_a5d1c511d7'),
           dataIndex: 'name',
           ellipsis: true,
           width: 150,
           tooltip: true
         },
         {
-          title: '模板标记',
+          title: this.$t('i18n_16a3a4ed35'),
           dataIndex: 'templateTag',
           ellipsis: true,
           width: 150,
           tooltip: true
         },
         {
-          title: '模板来源',
+          title: this.$t('i18n_104000e24a'),
           dataIndex: 'fileType',
           width: '100px',
           ellipsis: true
         },
 
         {
-          title: '创建时间',
+          title: this.$t('i18n_eca37cb072'),
           dataIndex: 'createTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -133,7 +133,7 @@ export default {
           width: '170px'
         },
         {
-          title: '修改时间',
+          title: this.$t('i18n_1303e638b5'),
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
@@ -183,7 +183,7 @@ export default {
       $confirm({
         title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: '确定要删除该发布任务模板吗？',
+        content: this.$t('i18n_059b86dbe1'),
         okText: this.$t('i18n_e83a256e4f'),
         cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
