@@ -9,9 +9,13 @@
  */
 package org.dromara.jpom.func.files.controller;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.db.Entity;
+import cn.hutool.db.sql.Direction;
+import cn.hutool.db.sql.Order;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
@@ -22,7 +26,10 @@ import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.controller.outgiving.OutGivingWhitelistService;
 import org.dromara.jpom.func.files.model.FileReleaseTaskLogModel;
+import org.dromara.jpom.func.files.model.FileReleaseTaskTemplate;
+import org.dromara.jpom.func.files.model.IFileStorage;
 import org.dromara.jpom.func.files.service.FileReleaseTaskService;
+import org.dromara.jpom.func.files.service.FileReleaseTaskTemplateService;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.AgentWhitelist;
 import org.dromara.jpom.model.data.ServerWhitelist;
@@ -57,14 +64,17 @@ public class FileReleaseTaskController extends BaseServerController {
     private final FileReleaseTaskService fileReleaseTaskService;
     private final OutGivingWhitelistService outGivingWhitelistService;
     private final ScriptServer scriptServer;
+    private final FileReleaseTaskTemplateService fileReleaseTaskTemplateService;
 
     public FileReleaseTaskController(FileReleaseTaskService fileReleaseTaskService,
                                      OutGivingWhitelistService outGivingWhitelistService,
                                      NodeService nodeService,
-                                     ScriptServer scriptServer) {
+                                     ScriptServer scriptServer,
+                                     FileReleaseTaskTemplateService fileReleaseTaskTemplateService) {
         this.fileReleaseTaskService = fileReleaseTaskService;
         this.outGivingWhitelistService = outGivingWhitelistService;
         this.scriptServer = scriptServer;
+        this.fileReleaseTaskTemplateService = fileReleaseTaskTemplateService;
         this.nodeService = nodeService;
     }
 
@@ -80,6 +90,7 @@ public class FileReleaseTaskController extends BaseServerController {
                                         @ValidatorItem(msg = "i18n.publish_subdirectory.dc0d") String releasePathSecondary,
                                         String beforeScript,
                                         String afterScript,
+                                        String save2Template,
                                         HttpServletRequest request) {
         // 判断参数
         ServerWhitelist configDeNewInstance = outGivingWhitelistService.getServerWhitelistData(request);
@@ -100,7 +111,23 @@ public class FileReleaseTaskController extends BaseServerController {
 
         String releasePath = FileUtil.normalize(releasePathParent + StrUtil.SLASH + releasePathSecondary);
 
-        return fileReleaseTaskService.addTask(fileId, fileType, name, taskType, taskDataIds, releasePath, beforeScript, afterScript, null, request);
+        IFileStorage storageModel = fileReleaseTaskService.addTask(fileId, fileType, name, taskType, taskDataIds, releasePath, beforeScript, afterScript, null, request);
+        // 判断是否需要存储为模板
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("name", name);
+        jsonObject.put("releasePath", releasePath);
+        jsonObject.put("save2Template", save2Template);
+        jsonObject.put("fileType", fileType);
+        jsonObject.put("fileId", fileId);
+        jsonObject.put("taskType", taskType);
+        jsonObject.put("taskDataIds", taskDataIds);
+        jsonObject.put("releasePathParent", releasePathParent);
+        jsonObject.put("releasePathSecondary", releasePathSecondary);
+        jsonObject.put("beforeScript", beforeScript);
+        jsonObject.put("afterScript", afterScript);
+        String workspaceId = fileReleaseTaskTemplateService.getCheckUserWorkspace(request);
+        fileReleaseTaskTemplateService.add(save2Template, workspaceId, storageModel, fileType, jsonObject);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.create_success.04a6"));
     }
 
 
@@ -131,7 +158,8 @@ public class FileReleaseTaskController extends BaseServerController {
         Assert.notNull(parentTask, I18nMessageUtil.get("i18n.parent_task_not_exist.ca1b"));
         Integer fileType = parentTask.getFileType();
         fileType = ObjectUtil.defaultIfNull(fileType, 1);
-        return fileReleaseTaskService.addTask(fileId, fileType, name, taskType, taskDataIds, parentTask.getReleasePath(), beforeScript, afterScript, null, request);
+        fileReleaseTaskService.addTask(fileId, fileType, name, taskType, taskDataIds, parentTask.getReleasePath(), beforeScript, afterScript, null, request);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.create_success.04a6"));
     }
 
     /**
@@ -145,6 +173,67 @@ public class FileReleaseTaskController extends BaseServerController {
         //
         PageResultDto<FileReleaseTaskLogModel> listPage = fileReleaseTaskService.listPage(request);
         return JsonMessage.success("", listPage);
+    }
+
+
+    /**
+     * 发布模块列表
+     *
+     * @return json
+     */
+    @PostMapping(value = "list-template", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public IJsonMessage<PageResultDto<FileReleaseTaskTemplate>> listTemplate(HttpServletRequest request) {
+        //
+        PageResultDto<FileReleaseTaskTemplate> listPage = fileReleaseTaskTemplateService.listPage(request);
+        return JsonMessage.success("", listPage);
+    }
+
+    /**
+     * 获取模板
+     *
+     * @param id 模板id
+     * @return json
+     */
+    @GetMapping(value = "get-template", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public IJsonMessage<FileReleaseTaskTemplate> getTemplate(@ValidatorItem(msg = "id不能为空") String id,
+                                                             String alias,
+                                                             Integer fileType,
+                                                             HttpServletRequest request) {
+        Entity entity = new Entity();
+        String workspaceId = fileReleaseTaskTemplateService.getCheckUserWorkspace(request);
+        entity.set("workspaceId", workspaceId);
+        if (fileType != null && (fileType == 1 || fileType == 2)) {
+            entity.set("fileType", fileType);
+        }
+        if (StrUtil.isNotEmpty(alias)) {
+            entity.set("templateTag", "alias:" + alias);
+        } else {
+            entity.set("templateTag", "id:" + id);
+        }
+        //
+        List<FileReleaseTaskTemplate> templates = fileReleaseTaskTemplateService.queryList(entity, 1, new Order("modifyTimeMillis", Direction.DESC), new Order("createTimeMillis", Direction.DESC));
+        if (CollUtil.isEmpty(templates) && StrUtil.isNotEmpty(alias)) {
+            // 别名没有查询到，查询id
+            entity.set("templateTag", "id:" + id);
+            templates = fileReleaseTaskTemplateService.queryList(entity, 1, new Order("modifyTimeMillis", Direction.DESC), new Order("createTimeMillis", Direction.DESC));
+        }
+        return JsonMessage.success("", CollUtil.getFirst(templates));
+    }
+
+    /**
+     * 删除模板
+     *
+     * @param id 模板id
+     * @return json
+     */
+    @GetMapping(value = "delete-template", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public IJsonMessage<JSONObject> deleteTemplate(@ValidatorItem(msg = "id不能为空") String id, HttpServletRequest request) {
+        //
+        fileReleaseTaskTemplateService.delByKey(id, request);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 
     /**
