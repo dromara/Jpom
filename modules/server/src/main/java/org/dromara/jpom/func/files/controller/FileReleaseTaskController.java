@@ -197,7 +197,7 @@ public class FileReleaseTaskController extends BaseServerController {
      */
     @GetMapping(value = "get-template", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<FileReleaseTaskTemplate> getTemplate(@ValidatorItem(msg = "id不能为空") String id,
+    public IJsonMessage<FileReleaseTaskTemplate> getTemplate(@ValidatorItem(msg = "i18n.id_not_empty.bf1f") String id,
                                                              String alias,
                                                              Integer fileType,
                                                              HttpServletRequest request) {
@@ -230,7 +230,7 @@ public class FileReleaseTaskController extends BaseServerController {
      */
     @GetMapping(value = "delete-template", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public IJsonMessage<JSONObject> deleteTemplate(@ValidatorItem(msg = "id不能为空") String id, HttpServletRequest request) {
+    public IJsonMessage<JSONObject> deleteTemplate(@ValidatorItem(msg = "i18n.id_not_empty.bf1f") String id, HttpServletRequest request) {
         //
         fileReleaseTaskTemplateService.delByKey(id, request);
         return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
