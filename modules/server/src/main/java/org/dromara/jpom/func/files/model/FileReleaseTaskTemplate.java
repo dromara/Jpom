@@ -20,7 +20,7 @@ import org.dromara.jpom.model.BaseWorkspaceModel;
  */
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "FILE_RELEASE_TASK_TEMPLATE",
-    nameKey = "文件发布模板")
+    nameKey = "i18n.file_publish_template.745e")
 @Data
 public class FileReleaseTaskTemplate extends BaseWorkspaceModel {
 

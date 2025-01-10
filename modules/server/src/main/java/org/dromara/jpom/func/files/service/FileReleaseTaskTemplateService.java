@@ -12,6 +12,7 @@ package org.dromara.jpom.func.files.service;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.alibaba.fastjson2.JSONObject;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.func.files.model.FileReleaseTaskTemplate;
 import org.dromara.jpom.func.files.model.IFileStorage;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
@@ -49,7 +50,7 @@ public class FileReleaseTaskTemplateService extends BaseWorkspaceService<FileRel
                     nameTag = "ID";
                 } else {
                     templateTag = "alias:" + aliasCode;
-                    nameTag = "别名";
+                    nameTag = I18nMessageUtil.get("i18n.alias.6dc7");
                 }
                 break;
             default:
@@ -60,7 +61,8 @@ public class FileReleaseTaskTemplateService extends BaseWorkspaceService<FileRel
         FileReleaseTaskTemplate fileReleaseTaskTemplate = new FileReleaseTaskTemplate();
         fileReleaseTaskTemplate.setId(dataId);
         fileReleaseTaskTemplate.setFileType(fileType);
-        fileReleaseTaskTemplate.setName(storage.getName() + "-" + nameTag + "发布模板");
+        String s = I18nMessageUtil.get("i18n.publish_template.4fb3");
+        fileReleaseTaskTemplate.setName(storage.getName() + "-" + nameTag + s);
         fileReleaseTaskTemplate.setData(data.toJSONString());
         fileReleaseTaskTemplate.setTemplateTag(templateTag);
         this.upsert(fileReleaseTaskTemplate);
