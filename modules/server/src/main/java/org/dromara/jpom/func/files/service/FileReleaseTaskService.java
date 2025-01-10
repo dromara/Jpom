@@ -22,7 +22,6 @@ import cn.hutool.core.util.*;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.ssh.JschUtil;
-import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import com.jcraft.jsch.ChannelSftp;
@@ -87,6 +86,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
     private final FileStorageService fileStorageService;
     private final StaticFileStorageService staticFileStorageService;
     private final ScriptServer scriptServer;
+    private final FileReleaseTaskTemplateService fileReleaseTaskTemplateService;
 
     private final Map<String, String> cancelTag = new SafeConcurrentHashMap<>();
 
@@ -98,7 +98,8 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                                   ServerConfig serverConfig,
                                   FileStorageService fileStorageService,
                                   StaticFileStorageService staticFileStorageService,
-                                  ScriptServer scriptServer) {
+                                  ScriptServer scriptServer,
+                                  FileReleaseTaskTemplateService fileReleaseTaskTemplateService) {
         this.sshService = sshService;
         this.jpomApplication = jpomApplication;
         this.workspaceEnvVarService = workspaceEnvVarService;
@@ -108,6 +109,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         this.fileStorageService = fileStorageService;
         this.staticFileStorageService = staticFileStorageService;
         this.scriptServer = scriptServer;
+        this.fileReleaseTaskTemplateService = fileReleaseTaskTemplateService;
     }
 
     /**
@@ -171,18 +173,18 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
      * @param beforeScript 发布前脚本
      * @param afterScript  发布后的脚本
      * @param request      请求
-     * @return json
+     * @return fileStorage
      */
-    public IJsonMessage<String> addTask(String fileId,
-                                        Integer fileType,
-                                        String name,
-                                        int taskType,
-                                        String taskDataIds,
-                                        String releasePath,
-                                        String beforeScript,
-                                        String afterScript,
-                                        Map<String, String> env,
-                                        HttpServletRequest request) {
+    public IFileStorage addTask(String fileId,
+                                Integer fileType,
+                                String name,
+                                int taskType,
+                                String taskDataIds,
+                                String releasePath,
+                                String beforeScript,
+                                String afterScript,
+                                Map<String, String> env,
+                                HttpServletRequest request) {
         Tuple tuple;
         switch (fileType) {
             case 1:
@@ -237,7 +239,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
             this.insert(releaseTaskLogModel);
         }
         this.startTask(taskRoot.getId(), file, env, storageModel);
-        return JsonMessage.success(I18nMessageUtil.get("i18n.create_success.04a6"));
+        return storageModel;
     }
 
     /**

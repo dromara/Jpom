@@ -234,7 +234,13 @@
         :confirm-loading="confirmLoading"
         @ok="releaseFileOk()"
       >
-        <releaseFile v-if="releaseFileVisible" ref="releaseFile" @commit="handleCommitTask"></releaseFile>
+        <releaseFile
+          v-if="releaseFileVisible"
+          ref="releaseFile"
+          :file-type="2"
+          :file-id="temp.fileId"
+          @commit="handleCommitTask"
+        ></releaseFile>
       </CustomModal>
     </div>
 
