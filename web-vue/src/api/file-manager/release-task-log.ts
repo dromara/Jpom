@@ -7,6 +7,7 @@
 /// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 /// See the Mulan PSL v2 for more details.
 ///
+
 import { t } from '@/i18n'
 import axios from '@/api/config'
 
@@ -50,6 +51,30 @@ export function cancelReleaseTask(params) {
 export function deleteReleaseTask(params) {
   return axios({
     url: '/file-storage/release-task/delete',
+    method: 'get',
+    params: params
+  })
+}
+
+export function getTaskTemplate(params) {
+  return axios({
+    url: '/file-storage/release-task/get-template',
+    method: 'get',
+    params: params
+  })
+}
+
+export function listTaskTemplate(params) {
+  return axios({
+    url: '/file-storage/release-task/list-template',
+    method: 'post',
+    data: params
+  })
+}
+
+export function deleteTaskTemplate(params) {
+  return axios({
+    url: '/file-storage/release-task/delete-template',
     method: 'get',
     params: params
   })

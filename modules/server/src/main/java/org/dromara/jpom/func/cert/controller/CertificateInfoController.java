@@ -47,7 +47,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.security.cert.X509Certificate;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -56,6 +55,7 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.*;
 
 /**
@@ -364,7 +364,8 @@ public class CertificateInfoController extends BaseServerController {
             // 创建发布任务
             Map<String, String> env = new HashMap<>();
             env.put("CERT_SERIAL_NUMBER_STR", model.getSerialNumberStr());
-            return fileReleaseTaskService.addTask(fileId, 1, name, taskType, taskDataIds, releasePath, beforeScript, afterScript, env, request);
+            fileReleaseTaskService.addTask(fileId, 1, name, taskType, taskDataIds, releasePath, beforeScript, afterScript, env, request);
+            return JsonMessage.success(I18nMessageUtil.get("i18n.create_success.04a6"));
         } finally {
             FileUtil.del(tempSave);
         }

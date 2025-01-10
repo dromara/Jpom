@@ -7,48 +7,35 @@
  * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
  */
-package org.dromara.jpom.socket;
+package org.dromara.jpom.func.files.model;
 
-import lombok.Getter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.model.BaseWorkspaceModel;
 
 /**
- * 控制台 socket 操作枚举
- *
  * @author bwcx_jzy
- * @since 2019/4/16
+ * @since 2025/1/9
  */
-@Getter
-public enum ConsoleCommandOp {
-    /**
-     * 启动
-     */
-    start(true),
-    stop(true),
-    restart(true),
-    status,
-    /**
-     * 重载
-     */
-    reload(true),
-    /**
-     * 运行日志
-     */
-    showlog,
-    /**
-     * 心跳
-     */
-    heart,
-    ;
-    /**
-     * 是否支持手动操作（执行）
-     */
-    private final boolean canOpt;
+@EqualsAndHashCode(callSuper = true)
+@TableName(value = "FILE_RELEASE_TASK_TEMPLATE",
+    nameKey = "i18n.file_publish_template.745e")
+@Data
+public class FileReleaseTaskTemplate extends BaseWorkspaceModel {
 
-    ConsoleCommandOp() {
-        this.canOpt = false;
-    }
+    /**
+     * 模板名称
+     */
+    private String name;
+    /**
+     * 模板标签
+     */
+    private String templateTag;
+    /**
+     * 模板数据
+     */
+    private String data;
 
-    ConsoleCommandOp(boolean canOpt) {
-        this.canOpt = canOpt;
-    }
+    private Integer fileType;
 }

@@ -40,7 +40,7 @@ export const PROJECT_DSL_DEFATUL =
   '\n' +
   t('i18n_13c76c38b7') +
   '\n' +
-  'description:' +
+  'description: ' +
   t('i18n_db06c78d1e') +
   '\n' +
   'run:\r\n' +
@@ -77,17 +77,19 @@ export const PROJECT_DSL_DEFATUL =
   '#      "boot_active": test\r\n' +
   '#  fileChangeReload: true\r\n' +
   t('i18n_8d6d47fbed') +
-  '#  execPath: ./\r\n' +
+  '\n#  execPath: ./\r\n' +
   'file:\r\n' +
   t('i18n_0eccc9451d') +
-  '#  backupCount: 5\r\n' +
+  '\n#  backupCount: 5\r\n' +
   t('i18n_8ba977b4b7') +
-  "#  backupSuffix: [ '.jar','.html','^.+\\.(?i)(txt)$' ]\r\n" +
+  "\n#  backupSuffix: [ '.jar','.html','^.+\\.(?i)(txt)$' ]\r\n" +
   t('i18n_7b61408779') +
-  '#  backupPath: /data/jpom_backup\r\n' +
+  '\n#  backupPath: /data/jpom_backup\r\n' +
+  t('i18n_96972aa0df') +
+  '\n#  diffBackup: true\r\n' +
   'config:\r\n' +
   t('i18n_0d467f7889') +
-  '#  autoBackToFile: true\r\n' +
+  '\n#  autoBackToFile: true\r\n' +
   '\r\n'
 
 /**

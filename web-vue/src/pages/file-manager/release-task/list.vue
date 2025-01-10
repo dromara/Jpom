@@ -1,8 +1,13 @@
 <template>
   <div>
-    <a-table
+    <CustomTable
       size="middle"
+      is-show-tools
+      default-auto-refresh
+      :auto-refresh-time="30"
       :data-source="commandList"
+      table-name="release-task-list"
+      :active-page="activePage"
       :columns="columns"
       bordered
       :pagination="pagination"
@@ -16,6 +21,7 @@
           loadData()
         }
       "
+      @refresh="loadData"
     >
       <template #title>
         <a-space wrap class="search-box">
@@ -66,9 +72,10 @@
           <a-tooltip :title="$t('i18n_4838a3bd20')">
             <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
           </a-tooltip>
+          <a-button type="primary" @click="handleTemplate">{{ $t('i18n_938246ce8b') }}</a-button>
         </a-space>
       </template>
-      <template #bodyCell="{ column, text, record }">
+      <template #tableBodyCell="{ column, text, record }">
         <template v-if="column.tooltip">
           <a-tooltip placement="topLeft" :title="text">
             <span>{{ text }}</span>
@@ -126,7 +133,7 @@
           </a-space>
         </template>
       </template>
-    </a-table>
+    </CustomTable>
     <!-- 任务详情 -->
     <CustomDrawer
       v-if="detailsVisible"
@@ -298,6 +305,19 @@
         </a-form-item>
       </a-form>
     </CustomModal>
+    <!-- 查看发布模板 -->
+    <CustomModal
+      v-if="templateVisible"
+      v-model:open="templateVisible"
+      width="80%"
+      height="80%"
+      destroy-on-close
+      :title="$t('i18n_ce1c5765e4')"
+      :footer="null"
+      :mask-closable="false"
+    >
+      <templateList v-if="templateVisible"></templateList>
+    </CustomModal>
   </div>
 </template>
 <script>
@@ -314,13 +334,15 @@ import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime, r
 import taskDetailsPage from './details.vue'
 import { getSshListAll } from '@/api/ssh'
 import codeEditor from '@/components/codeEditor'
+import templateList from './template-list.vue'
 import { hasFile } from '@/api/file-manager/file-storage'
 import { getNodeListAll } from '@/api/node'
 import { hasStaticFile } from '@/api/file-manager/static-storage'
 export default {
   components: {
     taskDetailsPage,
-    codeEditor
+    codeEditor,
+    templateList
   },
   data() {
     return {
@@ -420,12 +442,16 @@ export default {
 
         taskDataIds: [{ required: true, message: this.$t('i18n_3e51d1bc9c'), trigger: 'blur' }]
       },
-      viewFileVisible: false
+      viewFileVisible: false,
+      templateVisible: false
     }
   },
   computed: {
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
+    },
+    activePage() {
+      return this.$attrs.routerUrl === this.$route.path
     }
   },
   mounted() {
@@ -439,7 +465,9 @@ export default {
       this.temp = { ...row }
       this.detailsVisible = true
     },
-
+    handleTemplate() {
+      this.templateVisible = true
+    },
     // 获取命令数据
     loadData(pointerEvent) {
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page
