@@ -12,11 +12,14 @@ package org.dromara.jpom.func.assets.model;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.extra.ftp.FtpConfig;
 import cn.hutool.extra.ftp.FtpMode;
+import com.alibaba.fastjson2.JSONArray;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.dromara.jpom.db.TableName;
 import org.dromara.jpom.model.BaseGroupNameModel;
+
+import java.util.List;
 
 /**
  * @author bwcx_jzy
@@ -77,10 +80,21 @@ public class MachineFtpModel extends BaseGroupNameModel {
      * 状态消息
      */
     private String statusMsg;
-
+    /**
+     * 允许编辑后缀
+     */
+    private String allowEditSuffix;
 
     public MachineFtpModel(String id) {
         setId(id);
+    }
+
+    public void allowEditSuffix(List<String> allowEditSuffix) {
+        if (allowEditSuffix == null) {
+            this.allowEditSuffix = null;
+        } else {
+            this.allowEditSuffix = JSONArray.toJSONString(allowEditSuffix);
+        }
     }
 
     public FtpConfig toFtpConfig() {
