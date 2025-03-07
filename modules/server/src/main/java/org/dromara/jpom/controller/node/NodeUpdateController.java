@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.*;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
+import org.dromara.jpom.controller.system.SystemUpdateController;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.openapi.controller.NodeInfoController;
 import org.dromara.jpom.model.AgentFileModel;
@@ -49,6 +50,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 
 /**
  * @author bwcx_jzy
@@ -195,6 +197,9 @@ public class NodeUpdateController extends BaseServerController {
         String contextPath = UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH);
         String url = String.format("/%s/%s", contextPath, ServerOpenApi.RECEIVE_PUSH);
         jsonObject.put("url", FileUtil.normalize(url));
+        // 下载授权码
+        String auth = systemParametersServer.getConfig(SystemUpdateController.JPOM_REMOTE_VERSION_AUTH, String.class);
+        jsonObject.put("auth", auth);
         return JsonMessage.success("", jsonObject);
     }
 
