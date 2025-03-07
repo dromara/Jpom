@@ -68,7 +68,7 @@ import java.util.Optional;
 public class SystemUpdateController extends BaseServerController implements ILoadEvent {
 
     private static final String JOIN_JPOM_BETA_RELEASE = "JOIN_JPOM_BETA_RELEASE";
-    private static final String JPOM_REMOTE_VERSION_AUTH = "JPOM_REMOTE_VERSION_AUTH";
+    public static final String JPOM_REMOTE_VERSION_AUTH = "JPOM_REMOTE_VERSION_AUTH";
 
     private final BackupInfoService backupInfoService;
     private final ServerConfig serverConfig;
