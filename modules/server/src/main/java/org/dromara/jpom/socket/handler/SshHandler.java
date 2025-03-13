@@ -484,7 +484,7 @@ public class SshHandler extends BaseTerminalHandler {
                     int backCount = 0;
                     for (byte aByte : bytes) {
                         if (aByte == 8) {
-                            buffer.deleteCharAt(inputSelection);
+                            buffer.deleteCharAt(inputSelection - 1);
                             backCount++;
                         }
                     }
