@@ -348,9 +348,12 @@ public class SshHandler extends BaseTerminalHandler {
         private boolean tabInputPause = false;
         // 光标位置
         private int inputSelection = 0;
+        // 搜索状态，0未开始，1开始搜索，2搜索结束
+        private int searchState = 0;
         @Setter
         private Charset charset;
         private KeyControl keyControl = KeyControl.KEY_END;
+        private Consumer<String> consumer;
 
         /**
          * 从控制台读取输入按键进行处理
@@ -359,6 +362,7 @@ public class SshHandler extends BaseTerminalHandler {
          * @param bytes    输入按键
          */
         public void read(Consumer<String> consumer, byte... bytes) {
+            this.consumer = consumer;
             String str = new String(bytes, charset);
             if (keyControl == KeyControl.KEY_TAB && tabInputPause) {
                 if (str.equalsIgnoreCase("y") || str.equalsIgnoreCase("n")) {
@@ -372,8 +376,11 @@ public class SshHandler extends BaseTerminalHandler {
                 inputSelection += str.length();
             } else if (keyControl == KeyControl.KEY_ENTER) {
                 // 回车，结束当前输入周期
-                if (buffer.length() > 0) {
+                if (buffer.length() > 0 && searchState != 1) {
                     consumer.accept(buffer.toString());
+                } else if (searchState == 1) {
+                    // Control + R结束
+                    searchState = 2;
                 }
                 // 重置周期
                 buffer = new StringBuffer();
@@ -401,6 +408,9 @@ public class SshHandler extends BaseTerminalHandler {
             } else if (keyControl == KeyControl.KEY_ETX) {
                 buffer = new StringBuffer();
                 inputSelection = 0;
+            } else if (keyControl == KeyControl.KEY_SEARCH) {
+                buffer = new StringBuffer();
+                searchState = 1;
             }
         }
 
@@ -410,6 +420,17 @@ public class SshHandler extends BaseTerminalHandler {
          * @param bytes 字节
          */
         public void receive(byte... bytes) {
+            if (searchState == 2) {
+                // 处理搜索命令结束后，接收到ssh服务器返回的完整命令
+                int index = indexOf(bytes, new byte[]{27, 91, 75});
+                if (index > -1) {
+                    bytes = Arrays.copyOf(bytes, index);
+                }
+                String str = new String(bytes, charset).split("# ")[1];
+                consumer.accept(str.trim());
+                searchState = 0;
+                return;
+            }
             if (inputReceive) {
                 String str = new String(bytes, charset);
                 if (keyControl == KeyControl.KEY_UP || keyControl == KeyControl.KEY_DOWN) {
@@ -434,6 +455,7 @@ public class SshHandler extends BaseTerminalHandler {
                     } catch (Exception e) {
                         log.error("", e);
                     }
+                    return;
                 } else {
                     if (keyControl == KeyControl.KEY_TAB) {
                         if (bytes[0] == 7) {
@@ -474,6 +496,30 @@ public class SshHandler extends BaseTerminalHandler {
             inputReceive = false;
         }
 
+        /**
+         * 查找指定字节数组在原始字节数组中的位置
+         *
+         * @param originalArray 原始字节数组
+         * @param byteArrayToFind 要查找的字节数组
+         * @return 找到的位置索引，如果找不到返回 -1
+         */
+        private static int indexOf(byte[] originalArray, byte[] byteArrayToFind) {
+            // 遍历原始字节数组，查找匹配的起始位置
+            for (int i = 0; i <= originalArray.length - byteArrayToFind.length; i++) {
+                boolean match = true;
+                for (int j = 0; j < byteArrayToFind.length; j++) {
+                    if (originalArray[i + j] != byteArrayToFind[j]) {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
     }
 
     /**
@@ -483,6 +529,7 @@ public class SshHandler extends BaseTerminalHandler {
         KEY_TAB((byte) 9), // TAB
         KEY_ETX((byte) 3), // Control + C
         KEY_ENTER((byte) 13), // Enter
+        KEY_SEARCH((byte) 18), // Control + R
         KEY_BACK((byte) 127), // 退格键
         KEY_DELETE(new byte[]{27, 91, 51, 126}), // DELETE键
         KEY_LEFT(new byte[]{27, 91, 68}), // 左
