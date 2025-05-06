@@ -9,16 +9,13 @@
  */
 package org.dromara.jpom.oauth2.platform;
 
-import cn.hutool.core.lang.RegexPool;
-import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import me.zhyd.oauth.request.AuthRequest;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
-import org.dromara.jpom.oauth2.AuthOauth2MaxKeyRequest;
-import org.dromara.jpom.oauth2.BaseOauth2Config;
-import org.dromara.jpom.oauth2.Oauth2MaxKeyAuthSource;
+import org.dromara.jpom.oauth2.custom.MaxKeyAuthOauth2Request;
+import org.dromara.jpom.oauth2.custom.MaxKeyOauth2AuthSource;
 import org.springframework.util.Assert;
 
 /**
@@ -27,23 +24,9 @@ import org.springframework.util.Assert;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class MaxKeyOauth2Config extends BaseOauth2Config {
+public class MaxKeyOauth2Config extends CustomOauth2Config {
     public static final String KEY = "OAUTH_CONFIG_CUSTOM_OAUTH2";
 
-    private String authorizationUri;
-    private String accessTokenUri;
-    private String userInfoUri;
-
-
-    /**
-     * 验证数据
-     */
-    public void check() {
-        super.check();
-        Validator.validateMatchRegex(RegexPool.URL_HTTP, this.authorizationUri, I18nMessageUtil.get("i18n.configure_correct_auth_url.22e7"));
-        Validator.validateMatchRegex(RegexPool.URL_HTTP, this.accessTokenUri, I18nMessageUtil.get("i18n.configure_correct_token_url.7bba"));
-        Validator.validateMatchRegex(RegexPool.URL_HTTP, this.userInfoUri, I18nMessageUtil.get("i18n.configure_correct_user_info_url.1276"));
-    }
 
     @Override
     public String provide() {
@@ -51,8 +34,8 @@ public class MaxKeyOauth2Config extends BaseOauth2Config {
     }
 
     public AuthRequest authRequest() {
-        Assert.state(this.enabled(),  StrUtil.format(I18nMessageUtil.get("i18n.oauth2_not_enabled.c8b7"), this.provide()));
-        Oauth2MaxKeyAuthSource oauth2MaxKeyAuthSource = new Oauth2MaxKeyAuthSource(this);
-        return new AuthOauth2MaxKeyRequest(this.authConfig(), oauth2MaxKeyAuthSource);
+        Assert.state(this.enabled(), StrUtil.format(I18nMessageUtil.get("i18n.oauth2_not_enabled.c8b7"), this.provide()));
+        MaxKeyOauth2AuthSource maxKeyOauth2AuthSource = new MaxKeyOauth2AuthSource(this);
+        return new MaxKeyAuthOauth2Request(this.authConfig(), maxKeyOauth2AuthSource);
     }
 }

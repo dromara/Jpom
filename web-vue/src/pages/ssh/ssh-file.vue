@@ -71,7 +71,7 @@
       <!-- <div ref="filter" class="filter"></div> -->
       <a-table
         size="middle"
-        :data-source="fileList"
+        :data-source="sortFileList"
         :loading="loading"
         :columns="columns"
         :pagination="false"
@@ -627,6 +627,13 @@ export default {
     },
     reqDataId() {
       return this.sshId || this.machineSshId
+    },
+    sortFileList() {
+      return this.fileList.slice(0).sort((a, b) => {
+        const aV = a[this.sortMethod.key] || ''
+        const bV = b[this.sortMethod.key] || ''
+        return this.sortMethod.asc ? bV.localeCompare(aV) : aV.localeCompare(bV)
+      })
     }
   },
   mounted() {
@@ -649,6 +656,11 @@ export default {
     // 加载数据
     loadData() {
       this.loading = true
+      this.treeList = []
+      this.fileList = []
+      this.selectedKeys = []
+      this.expandedKeys = []
+      this.tempNode = {}
       getRootFileList(this.baseUrl, this.reqDataId).then((res) => {
         if (res.code === 200) {
           this.treeList = res.data
@@ -680,10 +692,11 @@ export default {
      * @returns {*}
      */
     getTreeNode(keys) {
-      let node = this.treeList[keys[0]]
-      for (let key of keys.slice(1)) {
+      let node = this.treeList.find((node) => node.activeKey[0] == keys.slice(0, 1)[0])
+      const nodeKeys = keys.slice(1)
+      for (let [index, key] of nodeKeys.entries()) {
         if (key >= 0 && key < node.children.length) {
-          node = node.children[key]
+          node = node.children.find((node) => node.activeKey.slice(index + 1, index + 2) == key)
         } else {
           throw new Error('Invalid key: ' + key)
         }

@@ -159,8 +159,12 @@ export default {
           this.fastInstallInfo.host = `${location.protocol}//${location.host}${res.data.url}?token=${
             res.data.token
           }\\&workspaceId=${this.getWorkspaceId()}`
+          let auth = ''
+          if (res.data.auth) {
+            auth = `+authorize ${res.data.auth}`
+          }
           this.fastInstallInfo.shUrls = res.data.shUrls.map((item) => {
-            item.allText = `${item.url} ${this.fastInstallInfo.key} \\'${this.fastInstallInfo.host}\\'`
+            item.allText = `${item.url}${auth} ${this.fastInstallInfo.key} \\'${this.fastInstallInfo.host}\\'`
             return item
           })
           this.fastInstallInfo.bindCommand = `sh ./bin/Agent.sh restart -s ${this.fastInstallInfo.key} \\'${this.fastInstallInfo.host}\\' && tail -f ./logs/agent.log`

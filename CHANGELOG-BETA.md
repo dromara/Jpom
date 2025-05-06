@@ -1,5 +1,50 @@
 # 🚀 版本日志
 
+## 2.11.11.4-beta (2025-05-06)
+
+### 🐣 新增功能
+
+1. 【server】新增 远程安装时的授权码支持（感谢@奇奇）
+2. 【server】修复 SSH控制台输入Control + R后无法记录日志的问题
+3. 【server】优化 容器构建镜像新增 [毫秒镜像](https://1ms.run/) 临时仓库
+4. 【all】优化 修改 tomcat版本到9.0.99安全版本 （感谢@[龙猫](https://gitee.com/woyeshimao) [Gitee pr 292](https://gitee.com/dromara/Jpom/pulls/292)）
+
+------
+
+## 2.11.11.3-beta (2025-01-10)
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】优化 构建页面保存按钮使用 loading （感谢[@hhh](https://gitee.com/who9264) [Gitee issues IBD8WF](https://gitee.com/dromara/Jpom/issues/IBD8WF) ）
+2. 【server】优化 SSH 文件列表支持跟随目录排序
+3. 【server】优化 用户操作日志记录表中用户 id 长度不够照成登录失败问题（感谢[@Halo](https://gitee.com/halo-lmf) [Gitee issues IBFNKE](https://gitee.com/dromara/Jpom/issues/IBFNKE) ）
+4. 【agent】优化 DSL 项目备份支持配置开启或者关闭差异备份（默认使用差异备份：仅备份变动过的文件）（感谢[@ercats](https://gitee.com/ercats) [Gitee issues IBF73J](https://gitee.com/dromara/Jpom/issues/IBF73J) ）
+5. 【server】优化 构建 webhook 新增 git 的提交id和提交信息参数（感谢[@皮儿卡啦没有丘](https://gitee.com/Aimeia) [Gitee issues IBDEU0](https://gitee.com/dromara/Jpom/issues/IBDEU0) ）
+6. 【server】优化 文件中心发布文件支持保存为模板方便后续使用（感谢[@lin_yeqi](https://gitee.com/lin_yeqi) [Gitee issues IB2FRF](https://gitee.com/dromara/Jpom/issues/IB2FRF) ）
+
+------
+
+## 2.11.11.2-beta (2024-12-26)
+
+### 🐣 新增功能
+
+1. 【all】升级 hutool 版本
+2. 【server】新增 服务端在线升级页面支持配置下载授权码，方便国内用户使用全速 CDN
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】修复 ssh文件管理显示错位（感谢[@lin_yeqi](https://gitee.com/lin_yeqi) [Gitee issues IB98AU](https://gitee.com/dromara/Jpom/issues/IB98AU) ）
+
+------
+
+## 2.11.11.1-beta (2024-12-03)
+
+### 🐣 新增功能
+
+1. 【server】新增 支持使用 TOPIAM 企业数字身份管控平台登录（oauth2）
+
+------
+
 ## 2.11.10.2-beta (2024-12-02)
 
 ### 🐞 解决BUG、优化功能

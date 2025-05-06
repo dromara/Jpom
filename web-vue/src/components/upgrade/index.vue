@@ -50,6 +50,16 @@
       <a-timeline-item v-if="temp.downloadSource">
         <a-space>
           <span>{{ $t('i18n_3200fba1c6') }}{{ temp.downloadSource }} </span>
+          <div v-if="!nodeId && !machineId">
+            <a-input-password
+              v-model:value="temp.auth"
+              :placeholder="$t('i18n_a55ae13421')"
+              @press-enter="changeDownloadAuth"
+            >
+              <template #prefix>{{ $t('i18n_31353ecf96') }}</template>
+            </a-input-password>
+            <!-- <a-typography-paragraph v-model:content="temp.auth" style="display: inline; margin-bottom: 0" editable /> -->
+          </div>
         </a-space>
       </a-timeline-item>
       <a-timeline-item>
@@ -119,7 +129,8 @@ import {
   checkVersion,
   remoteUpgrade,
   uploadUpgradeFileMerge,
-  changBetaRelease
+  changBetaRelease,
+  changeDownloadAuth
 } from '@/api/system'
 import { useGuideStore } from '@/stores/guide'
 import markdownit from 'markdown-it'
@@ -204,7 +215,8 @@ export default {
         this.temp = {
           ...this.temp,
           vueTimeStamp: parseTime(this.getMeta('build-time')),
-          joinBetaRelease: res.data?.joinBetaRelease
+          joinBetaRelease: res.data?.joinBetaRelease,
+          auth: res.data?.auth || ''
         }
         //
         changelog({
@@ -551,6 +563,29 @@ export default {
         onOk: () => {
           return changBetaRelease({
             beta: beta
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
+              })
+
+              this.loadData()
+            }
+          })
+        }
+      })
+    },
+    changeDownloadAuth() {
+      $confirm({
+        title: this.$t('i18n_c4535759ee'),
+        content: this.$t('i18n_d2913cea31'),
+
+        okText: this.$t('i18n_e83a256e4f'),
+        zIndex: 1009,
+        cancelText: this.$t('i18n_625fb26b4b'),
+        onOk: () => {
+          return changeDownloadAuth({
+            auth: this.temp.auth
           }).then((res) => {
             if (res.code === 200) {
               $notification.success({

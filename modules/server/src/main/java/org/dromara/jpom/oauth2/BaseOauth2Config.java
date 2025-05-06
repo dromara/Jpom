@@ -39,6 +39,9 @@ public abstract class BaseOauth2Config {
     static {
         Set<Class<?>> classes = ClassUtil.scanPackageBySuper(BaseOauth2Config.class.getPackage().getName(), BaseOauth2Config.class);
         for (Class<?> aClass : classes) {
+            if (ClassUtil.isAbstract(aClass)) {
+                continue;
+            }
             Field field = ReflectUtil.getField(aClass, "KEY");
             Assert.notNull(field, I18nMessageUtil.get("i18n.key_field_not_configured.7b22") + aClass.getName());
             String staticFieldValue = (String) ReflectUtil.getStaticFieldValue(field);

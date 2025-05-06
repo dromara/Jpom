@@ -194,15 +194,22 @@ public class ProjectFileBackupService {
                 File backupPath = this.pathProject(infoModel);
                 // 获取文件列表
                 Map<String, File> backupFiles = this.listFiles(backupItemPath);
-                Map<String, File> nowFiles = this.listFiles(projectPath);
-                nowFiles.forEach((fileSha1, file) -> {
-                    // 当前目录存在的，但是备份目录也存在的相同文件则删除
-                    File backupFile = backupFiles.get(fileSha1);
-                    if (backupFile != null) {
-                        CommandUtil.systemFastDel(backupFile);
-                        backupFiles.remove(fileSha1);
-                    }
-                });
+                // 差异备份
+                boolean diffBackup = Optional.ofNullable(dslYmlDto)
+                    .map(DslYmlDto::getFile)
+                    .map(DslYmlDto.FileConfig::getDiffBackup)
+                    .orElse(true);
+                if (diffBackup) {
+                    Map<String, File> nowFiles = this.listFiles(projectPath);
+                    nowFiles.forEach((fileSha1, file) -> {
+                        // 当前目录存在的，但是备份目录也存在的相同文件则删除
+                        File backupFile = backupFiles.get(fileSha1);
+                        if (backupFile != null) {
+                            CommandUtil.systemFastDel(backupFile);
+                            backupFiles.remove(fileSha1);
+                        }
+                    });
+                }
                 // 判断保存指定后缀
                 String[] backupSuffix = Optional.ofNullable(dslYmlDto)
                     .map(DslYmlDto::getFile)

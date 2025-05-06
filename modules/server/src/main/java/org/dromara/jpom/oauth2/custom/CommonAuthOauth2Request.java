@@ -7,7 +7,7 @@
  * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
  */
-package org.dromara.jpom.oauth2;
+package org.dromara.jpom.oauth2.custom;
 
 import com.alibaba.fastjson2.JSONObject;
 import me.zhyd.oauth.config.AuthConfig;
@@ -18,11 +18,11 @@ import me.zhyd.oauth.model.AuthUser;
 import me.zhyd.oauth.request.AuthDefaultRequest;
 
 /**
- * @author MaxKey
+ * @author bwcx_jzy
  */
-public class AuthOauth2MaxKeyRequest extends AuthDefaultRequest {
+public class CommonAuthOauth2Request extends AuthDefaultRequest {
 
-    public AuthOauth2MaxKeyRequest(AuthConfig config, AuthSource source) {
+    public CommonAuthOauth2Request(AuthConfig config, AuthSource source) {
         super(config, source);
     }
 

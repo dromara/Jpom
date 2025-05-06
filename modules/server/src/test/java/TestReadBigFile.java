@@ -163,7 +163,7 @@ public class TestReadBigFile {
         log.info("解析文件耗时：{}", DateUtil.formatBetween(SystemClock.now() - start2));
         Assert.state(StrUtil.equals(newSha1, fileSumMd5), () -> {
             log.warn("文件合并异常 {}:{} -> {}", FileUtil.getAbsolutePath(successFile), newSha1, fileSumMd5);
-            return "文件合并后异常,文件不完成可能被损坏";
+            return "文件合并后异常,文件不完整可能被损坏";
         });
         log.info("合并+解析文件花费：" + DateUtil.formatBetween(SystemClock.now() - start));
     }
@@ -216,7 +216,7 @@ public class TestReadBigFile {
         log.info("解析文件耗时：{}", DateUtil.formatBetween(SystemClock.now() - start2));
         Assert.state(StrUtil.equals(newSha1, fileSumMd5), () -> {
             log.warn("文件合并异常 {}:{} -> {}", FileUtil.getAbsolutePath(successFile), newSha1, fileSumMd5);
-            return "文件合并后异常,文件不完成可能被损坏";
+            return "文件合并后异常,文件不完整可能被损坏";
         });
         log.info("合并+解析文件花费：" + DateUtil.formatBetween(SystemClock.now() - start));
     }
