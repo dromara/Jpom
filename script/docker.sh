@@ -18,9 +18,9 @@
 # docker buildx create --use
 
 # 服务端
-docker buildx build --platform linux/amd64,linux/arm64,linux/ppc64le -t jpomdocker/jpom:2.11.11 -t jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .
+docker buildx build --platform linux/amd64,linux/arm64,linux/ppc64le -t jpomdocker/jpom:2.11.12 -t jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .
 
-docker buildx build --platform linux/amd64,linux/arm64,linux/ppc64le -t registry.cn-chengdu.aliyuncs.com/jpomdocker/jpom:2.11.11 -t registry.cn-chengdu.aliyuncs.com/jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .
+docker buildx build --platform linux/amd64,linux/arm64,linux/ppc64le -t registry.cn-chengdu.aliyuncs.com/jpomdocker/jpom:2.11.12 -t registry.cn-chengdu.aliyuncs.com/jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .
 
 
 
@@ -29,7 +29,7 @@ docker buildx build --platform linux/amd64,linux/arm64,linux/ppc64le,linux/arm64
 #docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .
 
 # docker logs --tail="100" jpom-server
-# docker run -d -p 2122:2122 --name jpom-server -v /etc/localtime:/etc/localtime:ro -v jpom-server-vol:/usr/local/jpom-server jpomdocker/jpom:mac-arm-2.11.11.1
+# docker run -d -p 2122:2122 --name jpom-server -v /etc/localtime:/etc/localtime:ro -v jpom-server-vol:/usr/local/jpom-server jpomdocker/jpom:mac-arm-2.11.12.1
 # docker run -d -p 2122:2122 --name jpom-server -v D:/home/jpom-server/logs:/usr/local/jpom-server/logs -v D:/home/jpom-server/data:/usr/local/jpom-server/data -v D:/home/jpom-server/conf:/usr/local/jpom-server/conf jpomdocker/jpom
 # docker stop jpom-server
 # docker rm jpom-server
