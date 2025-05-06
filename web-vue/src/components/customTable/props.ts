@@ -7,6 +7,7 @@
 /// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 /// See the Mulan PSL v2 for more details.
 ///
+
 import { t } from '@/i18n'
 import { initDefaultProps } from 'ant-design-vue/es/_util/props-util'
 import { tableProps } from 'ant-design-vue/es/table'

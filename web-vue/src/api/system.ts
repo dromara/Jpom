@@ -278,6 +278,15 @@ export function changBetaRelease(params) {
   })
 }
 
+export function changeDownloadAuth(params) {
+  return axios({
+    url: '/system/change-download-auth',
+    method: 'get',
+    headers: {},
+    params
+  })
+}
+
 /**
  * 检查新版本
  *@param {String} nodeId 节点 ID

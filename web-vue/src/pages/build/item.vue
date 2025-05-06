@@ -60,6 +60,11 @@
               getEnvironmentList()
             }
           "
+          @save-change="
+            (loading) => {
+              saveLoading = loading
+            }
+          "
         ></editBuildPage>
         <triggerPage v-if="id" v-show="menuKey.includes('trigger')" :id="id" />
 
@@ -120,7 +125,7 @@
             {{ $t('i18n_625fb26b4b') }}
           </a-button>
           <a-tooltip v-if="id" :title="$t('i18n_18c7e2556e')">
-            <a-button @click="$refs.editBuild.refresh()"> {{ $t('i18n_694fc5efa9') }}</a-button>
+            <a-button :loading="saveLoading" @click="$refs.editBuild.refresh()"> {{ $t('i18n_694fc5efa9') }}</a-button>
           </a-tooltip>
           <a-divider type="vertical" />
           <a-button
@@ -145,10 +150,10 @@
           >
           <a-divider type="vertical" />
 
-          <a-button type="primary" @click="$refs.editBuild.handleEditBuildOk(false)">
+          <a-button type="primary" :loading="saveLoading" @click="$refs.editBuild.handleEditBuildOk(false)">
             {{ $t('i18n_be5fbbe34c') }}
           </a-button>
-          <a-button type="primary" @click="$refs.editBuild.handleEditBuildOk(true)">
+          <a-button type="primary" :loading="saveLoading" @click="$refs.editBuild.handleEditBuildOk(true)">
             {{ $t('i18n_a577822cdd') }}
           </a-button>
         </a-space>
@@ -192,7 +197,8 @@ export default {
       stepsCurrent: this.editSteps,
       environment: {},
       privacyVariableKeywords: [],
-      buildMode: null
+      buildMode: null,
+      saveLoading: false
     }
   },
   created() {

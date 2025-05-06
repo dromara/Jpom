@@ -385,7 +385,14 @@
         :mask-closable="false"
         @ok="releaseFileOk()"
       >
-        <releaseFile v-if="releaseFileVisible" ref="releaseFile" @commit="handleCommitTask"></releaseFile>
+        <releaseFile
+          v-if="releaseFileVisible"
+          ref="releaseFile"
+          :file-type="1"
+          :file-id="temp.fileId"
+          :alias="temp.aliasCode"
+          @commit="handleCommitTask"
+        ></releaseFile>
       </CustomModal>
     </div>
     <!-- 选择确认区域 -->
@@ -895,7 +902,7 @@ export default {
     // 发布文件
     handleReleaseFile(record) {
       this.releaseFileVisible = true
-      this.temp = { fileId: record.id }
+      this.temp = { fileId: record.id, aliasCode: record.aliasCode }
     },
 
     handleCommitTask(data) {

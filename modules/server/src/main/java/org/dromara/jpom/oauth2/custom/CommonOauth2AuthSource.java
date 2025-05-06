@@ -7,22 +7,21 @@
  * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
  */
-package org.dromara.jpom.oauth2;
+package org.dromara.jpom.oauth2.custom;
 
 import me.zhyd.oauth.config.AuthSource;
-import me.zhyd.oauth.request.AuthDefaultRequest;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
-import org.dromara.jpom.oauth2.platform.MaxKeyOauth2Config;
+import org.dromara.jpom.oauth2.platform.CustomOauth2Config;
 import org.springframework.util.Assert;
 
 /**
- * @author MaxKey
+ * @author bwcx_jzy
  */
-public class Oauth2MaxKeyAuthSource implements AuthSource {
+public abstract class CommonOauth2AuthSource implements AuthSource {
 
-    private final MaxKeyOauth2Config oauthConfig;
+    private final CustomOauth2Config oauthConfig;
 
-    public Oauth2MaxKeyAuthSource(MaxKeyOauth2Config oauthConfig) {
+    public CommonOauth2AuthSource(CustomOauth2Config oauthConfig) {
         this.oauthConfig = oauthConfig;
     }
 
@@ -42,12 +41,5 @@ public class Oauth2MaxKeyAuthSource implements AuthSource {
     public String userInfo() {
         Assert.notNull(oauthConfig, I18nMessageUtil.get("i18n.oauth2_not_configured.9c85"));
         return oauthConfig.getUserInfoUri();
-    }
-
-
-    @Override
-    public Class<? extends AuthDefaultRequest> getTargetClass() {
-        // TODO Auto-generated method stub
-        return AuthOauth2MaxKeyRequest.class;
     }
 }

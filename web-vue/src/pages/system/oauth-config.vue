@@ -283,6 +283,79 @@
           </a-form-item>
         </a-form>
       </a-tab-pane>
+      <a-tab-pane key="topiam" tab="TOPIAM">
+        <a-form ref="editForm" :model="topiam" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
+          <a-form-item :label="$t('i18n_780afeac65')" name="enabled">
+            <a-switch
+              v-model:checked="topiam.enabled"
+              :checked-children="$t('i18n_7854b52a88')"
+              :un-checked-children="$t('i18n_5c56a88945')"
+            />
+          </a-form-item>
+          <a-form-item :label="$t('i18n_99593f7623')" name="clientId">
+            <a-input v-model:value="topiam.clientId" type="text" :placeholder="$t('i18n_a0b9b4e048')" />
+          </a-form-item>
+          <a-form-item :label="$t('i18n_e0ec07be7d')" name="clientSecret">
+            <a-input-password v-model:value="topiam.clientSecret" :placeholder="$t('i18n_52c6af8174')" />
+          </a-form-item>
+          <a-form-item :label="$t('i18n_bcf48bf7a8')" name="authorizationUri">
+            <a-input v-model:value="topiam.authorizationUri" type="text" :placeholder="$t('i18n_543296e005')" />
+          </a-form-item>
+          <a-form-item :label="$t('i18n_79a7072ee1')" name="accessTokenUri">
+            <a-input v-model:value="topiam.accessTokenUri" type="text" :placeholder="$t('i18n_8704e7bdb7')" />
+          </a-form-item>
+          <a-form-item :label="$t('i18n_2527efedcd')" name="userInfoUri">
+            <a-input v-model:value="topiam.userInfoUri" type="text" :placeholder="$t('i18n_ce84c416f9')" />
+          </a-form-item>
+          <a-form-item :label="$t('i18n_51d47ddc69')" name="redirectUri">
+            <template #help>{{ $t('i18n_d27cf91998') }}{{ `${host}/oauth2-topiam` }}</template>
+            <a-input v-model:value="topiam.redirectUri" type="text" :placeholder="$t('i18n_8363193305')" />
+          </a-form-item>
+
+          <a-form-item :label="$t('i18n_953357d914')" name="ignoreCheckState">
+            <a-switch
+              v-model:checked="topiam.ignoreCheckState"
+              :checked-children="$t('i18n_c0d5d68f5f')"
+              :un-checked-children="$t('i18n_b7579706a3')"
+            />
+          </a-form-item>
+
+          <a-form-item :label="$t('i18n_2e1f215c5d')" name="autoCreteUser">
+            <a-switch
+              v-model:checked="topiam.autoCreteUser"
+              :checked-children="$t('i18n_7854b52a88')"
+              :un-checked-children="$t('i18n_5c56a88945')"
+            />
+          </a-form-item>
+          <a-form-item v-if="topiam.autoCreteUser" :label="$t('i18n_f49dfdace4')" name="permissionGroup">
+            <template #help>{{ $t('i18n_434d9bd852') }}</template>
+            <a-select
+              v-model:value="topiam.permissionGroup"
+              show-search
+              :filter-option="
+                (input, option) => {
+                  const children = option.children && option.children()
+                  return (
+                    children &&
+                    children[0].children &&
+                    children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  )
+                }
+              "
+              :placeholder="$t('i18n_72d14a3890')"
+              mode="multiple"
+            >
+              <a-select-option v-for="item in permissionGroup" :key="item.id">
+                {{ item.name }}
+              </a-select-option>
+            </a-select>
+          </a-form-item>
+
+          <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
+            <a-button type="primary" class="btn" @click="onSubmit('topiam')">{{ $t('i18n_939d5345ad') }}</a-button>
+          </a-form-item>
+        </a-form>
+      </a-tab-pane>
       <a-tab-pane key="gitee" tab="Gitee">
         <a-form ref="editForm" :model="gitee" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
           <a-form-item :label="$t('i18n_780afeac65')" name="enabled">
@@ -498,8 +571,9 @@ export default {
       feishu: {},
       mygitlab: {},
       wechat_enterprise: {},
+      topiam: {},
       rules: {},
-      provides: ['gitee', 'maxkey', 'github', 'dingtalk', 'feishu', 'mygitlab', 'wechat_enterprise'],
+      provides: ['gitee', 'maxkey', 'github', 'dingtalk', 'feishu', 'mygitlab', 'wechat_enterprise', 'topiam'],
       host: '',
       permissionGroup: []
     }

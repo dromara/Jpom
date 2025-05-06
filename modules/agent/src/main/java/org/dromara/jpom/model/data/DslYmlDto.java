@@ -177,6 +177,11 @@ public class DslYmlDto extends BaseJsonModel {
          * 项目文件备份路径
          */
         private String backupPath;
+
+        /**
+         * 是否开启差异备份，默认使用差异备份
+         */
+        private Boolean diffBackup;
     }
 
     @Data

@@ -165,7 +165,8 @@ public class InitDb implements DisposableBean, ILoadEvent {
             JpomApplicationEvent.asyncExit(2);
             throw Lombok.sneakyThrow(e);
         }
-        log.info("{} db Successfully loaded, url is 【{}】", storageService.mode(), storageService.dbUrl());
+        String s = "数据库加载成功，URL为";
+        log.info("{} {}：[{}]", storageService.mode(), s, storageService.dbUrl());
     }
 
 
@@ -229,7 +230,9 @@ public class InitDb implements DisposableBean, ILoadEvent {
                         }
                     })
                     .sum();
-                log.info("exec init SQL file: {} complete, and affected rows is: {}", name, rows);
+                String s = "执行初始化SQL文件";
+                String s1 = "影响行数";
+                log.info("{}：{}，{}：{}", s, name, s1, rows);
             });
         } catch (SQLException e) {
             throw Lombok.sneakyThrow(e);
@@ -263,11 +266,12 @@ public class InitDb implements DisposableBean, ILoadEvent {
         Opt.ofNullable(environment.getProperty("backup-h2")).ifPresent(s -> {
             // 备份数据库
             this.addCallback(I18nMessageUtil.get("i18n.backup_database.9524"), () -> {
-                log.info("Start backing up the database");
+                log.info("开始备份数据库");
                 Future<BackupInfoModel> backupInfoModelFuture = backupInfoService.autoBackup();
                 try {
                     BackupInfoModel backupInfoModel = backupInfoModelFuture.get();
-                    log.info("Complete the backup database, save the path as {}", backupInfoModel.getFilePath());
+                    String s1 = "数据库备份完成，保存路径为";
+                    log.info("{}：{}", s1, backupInfoModel.getFilePath());
                 } catch (Exception e) {
                     throw new JpomRuntimeException(StrUtil.format("Backup database failed：{}", e.getMessage()), e);
                 }
@@ -282,7 +286,8 @@ public class InitDb implements DisposableBean, ILoadEvent {
                 try {
                     String dbFiles = StorageServiceFactory.get().deleteDbFiles();
                     if (dbFiles != null) {
-                        log.info("Automatically backup data files to {} path", dbFiles);
+                        String s1 = "自动备份数据文件到路径";
+                        log.info("{}：{}", s1, dbFiles);
                     }
                 } catch (Exception e) {
                     log.error("Failed to import according to sql,{}", s, e);
@@ -332,12 +337,12 @@ public class InitDb implements DisposableBean, ILoadEvent {
             //
             Opt.ofNullable(environment.getProperty("transform-sql")).ifPresent(s -> StorageServiceFactory.get().transformSql(file));
             //
-            log.info("Start importing data:{}", sqlPath);
+            log.info("开始导入数据：{}", sqlPath);
             boolean flag = backupInfoService.restoreWithSql(sqlPath);
             if (!flag) {
                 throw new JpomRuntimeException(StrUtil.format("Failed to import according to sql,{}", sqlPath));
             }
-            log.info("Import successfully according to sql,{}", sqlPath);
+            log.info("导入成功：{}", sqlPath);
             return true;
         });
     }

@@ -1,0 +1,3 @@
+alterType,tableName,name,type,len,defaultValue,comment,notNull
+ADD,MACHINE_NODE_STAT_LOG,cpuTicks,TEXT,,,CPU负载信息
+ALTER,USEROPERATELOGV1,userId,String,50,,操作的用户ID,false

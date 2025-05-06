@@ -309,6 +309,7 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
             machineNodeModel.setOsOccupyCpu(ObjectUtil.defaultIfNull(jsonObject.getDouble("cpu"), -1D));
             //
             machineNodeStatLogModel.setOccupyCpu(machineNodeModel.getOsOccupyCpu());
+            machineNodeStatLogModel.setCpuTicks(StrUtil.toStringOrNull(jsonObject.getByPath("cpuInfo.ticks")));
             machineNodeStatLogModel.setOccupyMemory(machineNodeModel.getOsOccupyMemory());
             machineNodeStatLogModel.setOccupyDisk(machineNodeModel.getOsOccupyDisk());
             machineNodeStatLogModel.setOccupySwapMemory(jsonObject.getDouble("swapMemory"));

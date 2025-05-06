@@ -119,7 +119,7 @@ import dingtalkImg from '@/assets/images/dingtalk.svg'
 import githubImg from '@/assets/images/github.svg'
 import feishuImg from '@/assets/images/feishu.svg'
 import gitlabImg from '@/assets/images/gitlab.svg'
-// import weixinImg from '@/assets/images/weixin.svg'
+import topiamImg from '@/assets/images/topiam.svg'
 import qyWeixinImg from '@/assets/images/qyweixin.svg'
 import { useGuideStore } from '@/stores/guide'
 import { Button } from 'ant-design-vue'
@@ -152,6 +152,11 @@ const oauth2AllProvides = ref([
     name: `maxkey ${$t('i18n_b6e8fb4106')}`,
     key: 'maxkey',
     img: maxkeyImg
+  },
+  {
+    name: `TOPIAM ${$t('i18n_b6e8fb4106')}`,
+    key: 'topiam',
+    img: topiamImg
   },
   {
     name: `github ${$t('i18n_efae7764ac')}`,
@@ -536,6 +541,6 @@ onBeforeUnmount(() => {
 .oauth2-item img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 </style>

@@ -383,6 +383,7 @@ public class ExtractI18nTest {
                     return key;
                 }
                 System.err.println("翻译前后的值相等但是 md5 不一致：" + md5 + "," + last);
+                return key;
             }
         }
         return null;

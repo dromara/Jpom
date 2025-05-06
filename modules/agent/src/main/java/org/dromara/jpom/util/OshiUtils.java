@@ -108,6 +108,7 @@ public class OshiUtils {
         jsonObject.put("time", SystemClock.now());
         CpuInfo cpuInfo = OshiUtil.getCpuInfo(CPU_STAT_SLEEP);
         jsonObject.put("cpu", cpuInfo.getUsed());
+        jsonObject.put("cpuInfo", cpuInfo);
         //
         GlobalMemory globalMemory = OshiUtil.getMemory();
         // 在不使用交换空间的情况下，启动一个新的应用最大可用内存的大小，
