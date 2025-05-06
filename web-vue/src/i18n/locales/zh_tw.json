@@ -2676,7 +2676,7 @@
 	"i18n_edc1185b8e":"嘗試自動續簽失敗",
 	"i18n_edd716f524":"請選擇釋出的一級目錄",
 	"i18n_ede2c450d1":"沒有任何登入日誌",
-	"i18n_ee19907fad":"# 基礎映象 目前支援 ubuntu-latest、ubuntu-git",
+	"i18n_ee19907fad":"# 基礎映象 目前支援 ubuntu-latest、ubuntu-git、ubuntu-1ms-latest、ubuntu-1ms-git",
 	"i18n_ee4fac2f3c":"為了避免部分節點不能及時響應造成監控阻塞,節點統計超時時間不受節點超時配置影響將採用預設超時時間(10秒)",
 	"i18n_ee6ce96abb":"s 秒",
 	"i18n_ee8ecb9ee0":"優先順序",

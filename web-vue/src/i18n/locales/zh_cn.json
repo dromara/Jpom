@@ -2676,7 +2676,7 @@
   "i18n_edc1185b8e": "尝试自动续签失败",
   "i18n_edd716f524": "请选择发布的一级目录",
   "i18n_ede2c450d1": "没有任何登录日志",
-  "i18n_ee19907fad": "# 基础镜像 目前支持 ubuntu-latest、ubuntu-git",
+  "i18n_ee19907fad": "# 基础镜像 目前支持 ubuntu-latest、ubuntu-git、ubuntu-1ms-latest、ubuntu-1ms-git",
   "i18n_ee4fac2f3c": "为了避免部分节点不能及时响应造成监控阻塞,节点统计超时时间不受节点超时配置影响将采用默认超时时间(10秒)",
   "i18n_ee6ce96abb": "s 秒",
   "i18n_ee8ecb9ee0": "优先级",
