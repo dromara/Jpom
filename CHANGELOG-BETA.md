@@ -5,9 +5,12 @@
 ### 🐣 新增功能
 
 1. 【server】新增 远程安装时的授权码支持（感谢@奇奇）
-2. 【server】修复 SSH控制台输入Control + R后无法记录日志的问题
-3. 【server】优化 容器构建镜像新增 [毫秒镜像](https://1ms.run/) 临时仓库
-4. 【all】优化 修改 tomcat版本到9.0.99安全版本 （感谢@[龙猫](https://gitee.com/woyeshimao) [Gitee pr 292](https://gitee.com/dromara/Jpom/pulls/292)）
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】修复 SSH控制台输入Control + R后无法记录日志的问题
+2. 【server】优化 容器构建镜像新增 [毫秒镜像](https://1ms.run/) 临时仓库
+3. 【all】优化 修改 tomcat版本到9.0.99安全版本 （感谢@[龙猫](https://gitee.com/woyeshimao) [Gitee pr 292](https://gitee.com/dromara/Jpom/pulls/292)）
 
 ------
 
