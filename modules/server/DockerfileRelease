@@ -15,22 +15,22 @@ LABEL build_info="dromara/Jpom build-date:- ${BUILD_DATE}"
 LABEL maintainer="bwcx-jzy <bwcx_jzy@163.com>"
 LABEL documentation="https://jpom.top"
 
-ENV JPOM_HOME	/usr/local/jpom-server
-ENV JPOM_PKG_VERSION	2.11.12
-ENV JPOM_PKG	server-${JPOM_PKG_VERSION}-release.tar.gz
-ENV SHA1_NAME server-${JPOM_PKG_VERSION}-release.tar.gz.sha1
+ENV JPOM_HOME=/usr/local/jpom-server
+ENV JPOM_PKG_VERSION=2.11.12
+ENV JPOM_PKG=server-${JPOM_PKG_VERSION}-release.tar.gz
+ENV SHA1_NAME=server-${JPOM_PKG_VERSION}-release.tar.gz.sha1
 
-ENV JPOM_DATA_PATH ${JPOM_HOME}/data
-ENV JPOM_LOG_PATH ${JPOM_HOME}/logs
+ENV JPOM_DATA_PATH=${JPOM_HOME}/data
+ENV JPOM_LOG_PATH=${JPOM_HOME}/logs
 # 数据目录
-ENV jpom.path ${JPOM_DATA_PATH}
+ENV jpom.path=${JPOM_DATA_PATH}
 
 WORKDIR ${JPOM_HOME}
 
 RUN apt-get install -y git
 
 # 时区
-ENV TZ Asia/Shanghai
+ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone
 
 RUN mkdir -p ${JPOM_HOME}

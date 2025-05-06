@@ -8,7 +8,7 @@
 # See the Mulan PSL v2 for more details.
 #
 
-FROM openjdk:8
+FROM maven:3.9.6-eclipse-temurin-8
 
 ARG BUILD_DATE
 LABEL build_info="dromara/Jpom build-date:- ${BUILD_DATE}"

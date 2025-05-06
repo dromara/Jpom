@@ -20,6 +20,9 @@
 # 服务端
 docker buildx build --platform linux/amd64,linux/arm64,linux/ppc64le -t jpomdocker/jpom:2.11.12 -t jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .
 
+# 插件端
+docker buildx build --platform linux/amd64,linux/arm64,linux/ppc64le -t jpomdocker/jpom-agent:2.11.12 -t jpomdocker/jpom-agent:latest -f ./modules/agent/DockerfileRelease --push .
+
 docker buildx build --platform linux/amd64,linux/arm64,linux/ppc64le -t registry.cn-chengdu.aliyuncs.com/jpomdocker/jpom:2.11.12 -t registry.cn-chengdu.aliyuncs.com/jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .
 
 

@@ -8,7 +8,7 @@
 # See the Mulan PSL v2 for more details.
 #
 
-FROM openjdk:8
+FROM maven:3.9.6-eclipse-temurin-8
 
 ARG BUILD_DATE
 LABEL build_info="dromara/Jpom build-date:- ${BUILD_DATE}"
@@ -33,8 +33,8 @@ RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezo
 
 RUN mkdir -p ${JPOM_HOME}
 #
-RUN curl -LfSo ${JPOM_HOME}/${JPOM_PKG} https://d.jpom.download/beta/${JPOM_PKG_VERSION}/${JPOM_PKG}
-RUN curl -LfsSo ${JPOM_HOME}/${SHA1_NAME} https://d.jpom.download/beta/${JPOM_PKG_VERSION}/${SHA1_NAME} && \
+RUN curl -LfSo ${JPOM_HOME}/${JPOM_PKG} https://d.jpom.download/release/${JPOM_PKG_VERSION}/${JPOM_PKG}
+RUN curl -LfsSo ${JPOM_HOME}/${SHA1_NAME} https://d.jpom.download/release/${JPOM_PKG_VERSION}/${SHA1_NAME} && \
     ESUM=`cat ${JPOM_HOME}/${SHA1_NAME}` && \
     echo "${ESUM} ${JPOM_HOME}/${JPOM_PKG}" | sha1sum -c -;
 RUN tar -zxvf ${JPOM_HOME}/${JPOM_PKG} -C ${JPOM_HOME}
