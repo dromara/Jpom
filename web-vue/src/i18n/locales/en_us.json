@@ -2676,7 +2676,7 @@
 	"i18n_edc1185b8e":"Attempt to auto-renew failed",
 	"i18n_edd716f524":"Please select a first-level directory for publication",
 	"i18n_ede2c450d1":"No login logs",
-	"i18n_ee19907fad":"#Basic image, currently supports ubuntu-latest、ubuntu-git",
+	"i18n_ee19907fad":"#Basic image, currently supports ubuntu-latest、ubuntu-git、ubuntu-1ms-latest、ubuntu-1ms-git",
 	"i18n_ee4fac2f3c":"In order to avoid monitoring blockage caused by some nodes failing to respond in time, the node statistical timeout time is not affected by the node timeout configuration, and the default timeout time (10 seconds) will be used.",
 	"i18n_ee6ce96abb":"s second",
 	"i18n_ee8ecb9ee0":"priority",

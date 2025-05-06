@@ -1567,7 +1567,7 @@ export default {
         '\n' +
         this.$t('i18n_429d4dbc55') +
         '\n' +
-        'runsOn: ubuntu-latest\n' +
+        'runsOn: ubuntu-1ms-latest\n' +
         this.$t('i18n_f1a2a46f52') +
         '\n' +
         'fromTag: xxx\n' +
