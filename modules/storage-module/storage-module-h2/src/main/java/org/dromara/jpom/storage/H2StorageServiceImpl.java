@@ -146,7 +146,7 @@ public class H2StorageServiceImpl implements IStorageService {
      * @return jdbc
      */
     public String getDefaultDbUrl(DbExtConfig dbExtConfig) {
-        File file = FileUtil.file(StorageServiceFactory.dbLocalPath(), this.getDbName());
+        File file = FileUtil.file(StorageServiceFactory.getInstance().dbLocalPath(), this.getDbName());
         String path = FileUtil.getAbsolutePath(file);
         return StrUtil.format("jdbc:h2:{};CACHE_SIZE={};MODE=MYSQL;LOCK_TIMEOUT=10000", path, dbExtConfig.getCacheSize().toKilobytes());
     }
@@ -181,7 +181,7 @@ public class H2StorageServiceImpl implements IStorageService {
      * 恢复数据库
      */
     public File recoverDb() throws Exception {
-        File dbLocalPathFile = StorageServiceFactory.dbLocalPath();
+        File dbLocalPathFile = StorageServiceFactory.getInstance().dbLocalPath();
         if (!FileUtil.exist(dbLocalPathFile)) {
             return null;
         }
@@ -195,14 +195,14 @@ public class H2StorageServiceImpl implements IStorageService {
         map.put("recoverBackup", recoverBackup);
         File backupSql = (File) plugin.execute("recoverToSql", map);
         // 清空记录
-        StorageServiceFactory.clearExecuteSqlLog();
+        StorageServiceFactory.getInstance().clearExecuteSqlLog();
         // 记录恢复的 sql
         return backupSql;
     }
 
     @Override
     public boolean hasDbData() throws Exception {
-        File dbLocalPathFile = StorageServiceFactory.dbLocalPath();
+        File dbLocalPathFile = StorageServiceFactory.getInstance().dbLocalPath();
         if (!FileUtil.exist(dbLocalPathFile)) {
             return false;
         }
@@ -219,7 +219,7 @@ public class H2StorageServiceImpl implements IStorageService {
      */
     @Override
     public String deleteDbFiles() throws Exception {
-        File dbLocalPathFile = StorageServiceFactory.dbLocalPath();
+        File dbLocalPathFile = StorageServiceFactory.getInstance().dbLocalPath();
         if (!FileUtil.exist(dbLocalPathFile)) {
             return null;
         }
@@ -232,7 +232,7 @@ public class H2StorageServiceImpl implements IStorageService {
         map.put("backupPath", deleteBackup);
         plugin.execute("deleteDbFiles", map);
         // 清空记录
-        StorageServiceFactory.clearExecuteSqlLog();
+        StorageServiceFactory.getInstance().clearExecuteSqlLog();
         return FileUtil.getAbsolutePath(deleteBackup);
     }
 

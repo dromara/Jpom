@@ -28,6 +28,8 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author bwcx_jzy
@@ -49,6 +51,9 @@ public class StorageTableFactory {
             CsvReader csvReader = CsvUtil.getReader(csvReadConfig);
             BufferedReader bufferedReader = IoUtil.getUtf8Reader(inputStream);
             List<TableViewData> tableViewData = csvReader.read(bufferedReader, TableViewData.class);
+            tableViewData = tableViewData.stream()
+                .peek(data -> data.setTableName(StorageServiceFactory.getInstance().parseRealTableName(data.getTableName())))
+                .collect(Collectors.toList());
 
             Map<String, List<TableViewData>> map = CollStreamUtil.groupByKey(tableViewData, TableViewData::getTableName);
             StringBuilder stringBuffer = new StringBuilder();
@@ -79,6 +84,9 @@ public class StorageTableFactory {
             CsvReader csvReader = CsvUtil.getReader(csvReadConfig);
             BufferedReader bufferedReader = IoUtil.getUtf8Reader(inputStream);
             List<TableViewAlterData> tableViewData = csvReader.read(bufferedReader, TableViewAlterData.class);
+            tableViewData = tableViewData.stream()
+                .peek(data -> data.setTableName(StorageServiceFactory.getInstance().parseRealTableName(data.getTableName())))
+                .collect(Collectors.toList());
             IStorageSqlBuilderService sqlBuilderService = StorageTableFactory.get();
             return sqlBuilderService.generateAlterTableSql(tableViewData);
 
@@ -94,6 +102,9 @@ public class StorageTableFactory {
             CsvReader csvReader = CsvUtil.getReader(csvReadConfig);
             BufferedReader bufferedReader = IoUtil.getUtf8Reader(inputStream);
             List<TableViewIndexData> tableViewData = csvReader.read(bufferedReader, TableViewIndexData.class);
+            tableViewData = tableViewData.stream()
+                .peek(data -> data.setTableName(StorageServiceFactory.getInstance().parseRealTableName(data.getTableName())))
+                .collect(Collectors.toList());
             IStorageSqlBuilderService sqlBuilderService = StorageTableFactory.get();
             return sqlBuilderService.generateIndexSql(tableViewData);
 
@@ -108,8 +119,8 @@ public class StorageTableFactory {
      * @return 单例的 IStorageSqlBuilderService
      */
     public static IStorageSqlBuilderService get() {
-        Assert.notNull(StorageServiceFactory.getMode(), I18nMessageUtil.get("i18n.unknown_database_mode.f9e5"));
-        return Singleton.get(IStorageSqlBuilderService.class.getName(), (CheckedUtil.Func0Rt<IStorageSqlBuilderService>) () -> doCreateStorageService(StorageServiceFactory.getMode()));
+        Assert.notNull(StorageServiceFactory.getInstance().getMode(), I18nMessageUtil.get("i18n.unknown_database_mode.f9e5"));
+        return Singleton.get(IStorageSqlBuilderService.class.getName(), (CheckedUtil.Func0Rt<IStorageSqlBuilderService>) () -> doCreateStorageService(StorageServiceFactory.getInstance().getMode()));
     }
 
 

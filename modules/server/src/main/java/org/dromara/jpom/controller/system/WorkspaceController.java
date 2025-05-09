@@ -180,14 +180,15 @@ public class WorkspaceController extends BaseServerController {
                 .map(aClass1 -> aClass1 != Void.class ? aClass1 : null)
                 .map(aClass1 -> {
                     TableName tableName1 = aClass1.getAnnotation(TableName.class);
-                    return tableName1.value();
+                    return workspaceService.parseRealTableName(tableName1);
                 })
                 .orElse(StrUtil.EMPTY);
             //
-            String sql = "select  count(1) as cnt from " + tableName.value() + " where workspaceId=?";
+            String value = workspaceService.parseRealTableName(tableName);
+            String sql = "select  count(1) as cnt from " + value + " where workspaceId=?";
             Number number = workspaceService.queryNumber(sql, id);
 
-            TreeNode<String> treeNode = new TreeNode<>(tableName.value(), parent, I18nMessageUtil.get(tableName.nameKey()), 0);
+            TreeNode<String> treeNode = new TreeNode<>(value, parent, I18nMessageUtil.get(tableName.nameKey()), 0);
             //
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("workspaceBind", tableName.workspaceBind());
@@ -229,14 +230,16 @@ public class WorkspaceController extends BaseServerController {
                 TableName tableName1 = parents.getAnnotation(TableName.class);
                 Assert.notNull(tableName1, I18nMessageUtil.get("i18n.parent_table_info_config_error.2f52") + aClass);
                 //
-                String sql = "select  count(1) as cnt from " + tableName1.value() + " where workspaceId=?";
+                String value = workspaceService.parseRealTableName(tableName1);
+                String sql = "select  count(1) as cnt from " + value + " where workspaceId=?";
                 int cnt = ObjectUtil.defaultIfNull(workspaceService.queryNumber(sql, id), Number::intValue, 0);
                 Assert.state(cnt <= 0, StrUtil.format(I18nMessageUtil.get("i18n.associated_data_and_exist_in_workspace.5fa7"), I18nMessageUtil.get(tableName.nameKey()), I18nMessageUtil.get(tableName1.nameKey())));
                 // 等待自动删除
                 autoDeleteClass.add(aClass);
             } else {
                 // 其他严格检查的情况
-                String sql = "select  count(1) as cnt from " + tableName.value() + " where workspaceId=?";
+                String value = workspaceService.parseRealTableName(tableName);
+                String sql = "select  count(1) as cnt from " + value + " where workspaceId=?";
                 int cnt = ObjectUtil.defaultIfNull(workspaceService.queryNumber(sql, id), Number::intValue, 0);
                 Assert.state(cnt <= 0, I18nMessageUtil.get("i18n.associated_data_exists_in_workspace.8827") + I18nMessageUtil.get(tableName.nameKey()));
             }
@@ -249,10 +252,11 @@ public class WorkspaceController extends BaseServerController {
         for (Class<?> aClass : autoDeleteClass) {
             TableName tableName = aClass.getAnnotation(TableName.class);
             // 自动删除
-            String sql = "delete from " + tableName.value() + " where workspaceId=?";
+            String value = workspaceService.parseRealTableName(tableName);
+            String sql = "delete from " + value + " where workspaceId=?";
             int execute = workspaceService.execute(sql, id);
             if (execute > 0) {
-                autoDelete.append(StrUtil.format(I18nMessageUtil.get("i18n.auto_delete_data.ca62"), tableName.value(), execute));
+                autoDelete.append(StrUtil.format(I18nMessageUtil.get("i18n.auto_delete_data.ca62"), value, execute));
             }
         }
         // 删除缓存

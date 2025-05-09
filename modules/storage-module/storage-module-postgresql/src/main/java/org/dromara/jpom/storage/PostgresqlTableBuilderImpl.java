@@ -41,7 +41,7 @@ public class PostgresqlTableBuilderImpl implements IStorageSqlBuilderService {
         modelClassSet.forEach(modelClass -> {
             TableName annotation = modelClass.getAnnotation(TableName.class);
             // 统一处理成小写，model也应该不会出现转为小写后重名的field
-            String tableName = annotation.value().toLowerCase();
+            String tableName = StorageServiceFactory.getInstance().parseRealTableName(annotation).toLowerCase();
             Field[] boolFieldArr = ReflectUtil.getFields(modelClass, field -> Boolean.class.equals(field.getType()) || boolean.class.equals(field.getType()));
             Set<String> nameSet = Arrays.stream(boolFieldArr)
                 .map(field -> field.getName().toLowerCase())

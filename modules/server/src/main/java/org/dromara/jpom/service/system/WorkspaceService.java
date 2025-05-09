@@ -48,10 +48,11 @@ public class WorkspaceService extends BaseDbService<WorkspaceModel> implements I
             if (tableName == null) {
                 continue;
             }
-            String sql = "update " + tableName.value() + " set workspaceId=? where (workspaceId is null or workspaceId='' or workspaceId='null')";
+            String realTableName = super.parseRealTableName(tableName);
+            String sql = "update " + realTableName + " set workspaceId=? where (workspaceId is null or workspaceId='' or workspaceId='null')";
             int execute = this.execute(sql, Const.WORKSPACE_DEFAULT_ID);
             if (execute > 0) {
-                log.info(I18nMessageUtil.get("i18n.fix_null_workspace_data.4d0b"), tableName.value(), execute);
+                log.info(I18nMessageUtil.get("i18n.fix_null_workspace_data.4d0b"), realTableName, execute);
             }
             total += execute;
         }
