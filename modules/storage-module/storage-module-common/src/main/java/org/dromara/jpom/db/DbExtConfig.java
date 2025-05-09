@@ -151,6 +151,10 @@ public class DbExtConfig implements InitializingBean {
         /**
          * Mariadb
          */
-        MARIADB
+        MARIADB,
+        /**
+         * Dameng
+         */
+        DAMENG,
     }
 }

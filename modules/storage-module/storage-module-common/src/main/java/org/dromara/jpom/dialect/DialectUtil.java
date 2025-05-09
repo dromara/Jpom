@@ -10,6 +10,7 @@
 package org.dromara.jpom.dialect;
 
 import cn.hutool.db.dialect.Dialect;
+import cn.hutool.db.dialect.impl.DmDialect;
 import cn.hutool.db.dialect.impl.H2Dialect;
 import cn.hutool.db.dialect.impl.MysqlDialect;
 import cn.hutool.db.dialect.impl.PostgresqlDialect;
@@ -48,6 +49,10 @@ public class DialectUtil {
 
     public static Dialect getMySqlDialect() {
         return DIALECT_CACHE.computeIfAbsent(DbExtConfig.Mode.MYSQL, key -> new MysqlDialect());
+    }
+
+    public static Dialect getDmDialect() {
+        return DIALECT_CACHE.computeIfAbsent(DbExtConfig.Mode.DAMENG, key -> new DmDialect());
     }
 
     /**
@@ -93,6 +98,8 @@ public class DialectUtil {
                 return getMySqlDialect();
             case POSTGRESQL:
                 return getPostgresqlDialect();
+            case DAMENG:
+                return getDmDialect();
             default:
                 throw new IllegalArgumentException(I18nMessageUtil.get("i18n.unknown_database_dialect_type.951b") + mode);
         }
