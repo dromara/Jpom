@@ -11,11 +11,7 @@
 jpom:
   db:
     # 数据库默认 支持 ：H2、MYSQL、MARIADB、POSTGRESQL、DAMENG
-    mode: MYSQL
-    url: jdbc:mysql://127.0.0.1:3306/jpom
-    # 数据库账号 默认 jpom
-    #user-name: jpom
-    user-name: root
-    # 数据库密码 默认 jpom 如果自行配置请保证密码强度
-    # user-pwd: jpom
-    user-pwd: k@4Qoi6qdV#OYjQd
+    mode: DAMENG
+    url: jdbc:dm://192.168.30.29:5236/DMSERVER
+    user-name: SYSDBA
+    user-pwd: SYSDBA001

@@ -26,6 +26,7 @@
         <module>storage-module-mysql</module>
         <module>storage-module-postgresql</module>
         <module>storage-module-mariadb</module>
+        <module>storage-module-dameng</module>
     </modules>
     <modelVersion>4.0.0</modelVersion>
     <version>2.11.12</version>

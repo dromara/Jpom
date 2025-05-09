@@ -141,6 +141,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.dromara.jpom.storage-module</groupId>
+            <artifactId>storage-module-dameng</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>me.zhyd.oauth</groupId>
             <artifactId>JustAuth</artifactId>
             <version>1.16.6</version>
