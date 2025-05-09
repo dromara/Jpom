@@ -99,7 +99,8 @@ public class DataInitEvent implements ILoadEvent, ICacheTask {
                 TableName tableName1 = parents.getAnnotation(TableName.class);
                 Assert.notNull(tableName1, I18nMessageUtil.get("i18n.parent_table_info_config_error.2f52") + aClass);
             }
-            String sql = "select workspaceId,count(1) as allCount from " + tableName.value() + " group by workspaceId";
+            String value = workspaceService.parseRealTableName(tableName);
+            String sql = "select workspaceId,count(1) as allCount from " + value + " group by workspaceId";
             List<Entity> query = workspaceService.query(sql);
             for (Entity entity : query) {
                 String workspaceId = (String) entity.get("workspaceId");
@@ -107,9 +108,9 @@ public class DataInitEvent implements ILoadEvent, ICacheTask {
                 if (workspaceIds.contains(workspaceId)) {
                     continue;
                 }
-                String format = StrUtil.format(I18nMessageUtil.get("i18n.table_error_workspace_data.9021"), I18nMessageUtil.get(tableName.nameKey()), tableName.value(), allCount, workspaceId);
+                String format = StrUtil.format(I18nMessageUtil.get("i18n.table_error_workspace_data.9021"), I18nMessageUtil.get(tableName.nameKey()), value, allCount, workspaceId);
                 log.error(format);
-                List<String> stringList = errorWorkspaceTable.computeIfAbsent(tableName.value(), s -> new ArrayList<>());
+                List<String> stringList = errorWorkspaceTable.computeIfAbsent(value, s -> new ArrayList<>());
                 stringList.add(format);
             }
         }

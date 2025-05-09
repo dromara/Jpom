@@ -96,7 +96,9 @@ jpom:
     max-wait: 10
     min-idle: 1
     show-sql: false
-  # 构建相关配置
+    # 表名前缀
+#    table-prefix: jpom_
+  # 构建相关配置s
   build:
     # 最多保存多少份历史记录
     max-history-count: 1000

@@ -50,12 +50,12 @@ public class H2TableToCsv2Test extends ApplicationStartTest {
         Set<Class<?>> classes = ClassUtil.scanPackageByAnnotation("org.dromara.jpom", TableName.class);
         Map<String, Map<String, Field>> TABLE_NAME_MAP = CollStreamUtil.toMap(classes, aClass -> {
             TableName tableName = aClass.getAnnotation(TableName.class);
-            return tableName.value();
+            return StorageServiceFactory.getInstance().parseRealTableName(tableName);
         }, aClass -> {
             Map<String, Field> fieldMap = ReflectUtil.getFieldMap(aClass);
             return new CaseInsensitiveMap<>(fieldMap);
         });
-        IStorageService iStorageService = StorageServiceFactory.get();
+        IStorageService iStorageService = StorageServiceFactory.getInstance().get();
         List<Entity> query = Db.use(iStorageService.getDsFactory().getDataSource()).query("SELECT * FROM INFORMATION_SCHEMA.COLUMNS  where TABLE_SCHEMA='PUBLIC'");
 
         Map<String, List<JSONObject>> listMap = query.stream().map(entity -> {
@@ -120,7 +120,7 @@ public class H2TableToCsv2Test extends ApplicationStartTest {
 
     private String tableRemarks(String tableName) throws SQLException {
         String sql = "SELECT * FROM INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA='PUBLIC' and  TABLE_NAME=?";
-        IStorageService iStorageService = StorageServiceFactory.get();
+        IStorageService iStorageService = StorageServiceFactory.getInstance().get();
         List<Entity> query = Db.use(iStorageService.getDsFactory().getDataSource()).query(sql, tableName);
         Entity entity = CollUtil.getFirst(query);
         return entity.getStr("REMARKS");

@@ -59,7 +59,7 @@ public class DefaultDbH2PluginImpl implements IDefaultPlugin {
             DataSource dataSource = (DataSource) parameter.get("dataSource");
             if (dataSource == null) {
                 // 加载数据源
-                dataSource = StorageServiceFactory.get().getDsFactory().getDataSource();
+                dataSource = StorageServiceFactory.getInstance().get().getDsFactory().getDataSource();
             }
             this.restoreBackupSql(backupSqlPath, dataSource);
         } else if (StrUtil.equals("recoverToSql", method)) {
