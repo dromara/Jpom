@@ -12,6 +12,6 @@ jpom:
   db:
     # 数据库默认 支持 ：H2、MYSQL、MARIADB、POSTGRESQL、DAMENG
     mode: DAMENG
-    url: jdbc:dm://192.168.30.29:5236/DMSERVER
+    url: jdbc:dm://192.168.30.29:5236?schema=JPOM
     user-name: SYSDBA
     user-pwd: SYSDBA001
