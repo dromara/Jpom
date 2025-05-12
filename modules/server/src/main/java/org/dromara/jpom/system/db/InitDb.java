@@ -187,7 +187,7 @@ public class InitDb implements DisposableBean, ILoadEvent {
         Optional.ofNullable(listMap.get("table")).ifPresent(resources -> {
             for (Resource resource : resources) {
                 String sql = StorageTableFactory.initTable(resource);
-                if (mode.equals(DbExtConfig.Mode.DAMENG)){
+                if (mode.equals(DbExtConfig.Mode.DAMENG)) {
                     sql = sql.toUpperCase();
                 }
                 this.executeSql(sql, resource.getFilename(), mode, executeSqlLog, dataSource, eachSql);
@@ -199,7 +199,7 @@ public class InitDb implements DisposableBean, ILoadEvent {
         Optional.ofNullable(listMap.get("alter")).ifPresent(resources -> {
             for (Resource resource : resources) {
                 String sql = StorageTableFactory.initAlter(resource);
-                if (mode.equals(DbExtConfig.Mode.DAMENG)){
+                if (mode.equals(DbExtConfig.Mode.DAMENG)) {
                     sql = sql.toUpperCase();
                 }
                 this.executeSql(sql, resource.getFilename(), mode, executeSqlLog, dataSource, eachSql);
@@ -208,7 +208,7 @@ public class InitDb implements DisposableBean, ILoadEvent {
         Optional.ofNullable(listMap.get("index")).ifPresent(resources -> {
             for (Resource resource : resources) {
                 String sql = StorageTableFactory.initIndex(resource);
-                if (mode.equals(DbExtConfig.Mode.DAMENG)){
+                if (mode.equals(DbExtConfig.Mode.DAMENG)) {
                     sql = sql.toUpperCase();
                 }
                 this.executeSql(sql, resource.getFilename(), mode, executeSqlLog, dataSource, eachSql);
@@ -325,15 +325,23 @@ public class InitDb implements DisposableBean, ILoadEvent {
             });
             log.info(I18nMessageUtil.get("i18n.start_waiting_for_data_migration.e76f"));
         };
-        Opt.ofNullable(environment.getProperty("h2-migrate-mysql")).ifPresent(s -> {
-            migrateOpr.accept(DbExtConfig.Mode.MYSQL);
-        });
-        Opt.ofNullable(environment.getProperty("h2-migrate-postgresql")).ifPresent(s -> {
-            migrateOpr.accept(DbExtConfig.Mode.POSTGRESQL);
-        });
-        Opt.ofNullable(environment.getProperty("h2-migrate-mariadb")).ifPresent(s -> {
-            migrateOpr.accept(DbExtConfig.Mode.MARIADB);
-        });
+        for (DbExtConfig.Mode mode : DbExtConfig.Mode.values()) {
+            if (mode == DbExtConfig.Mode.H2) {
+                continue;
+            }
+            Opt.ofNullable(environment.getProperty("h2-migrate-" + mode.name().toLowerCase())).ifPresent(s -> {
+                migrateOpr.accept(mode);
+            });
+        }
+//        Opt.ofNullable(environment.getProperty("h2-migrate-mysql")).ifPresent(s -> {
+//            migrateOpr.accept(DbExtConfig.Mode.MYSQL);
+//        });
+//        Opt.ofNullable(environment.getProperty("h2-migrate-postgresql")).ifPresent(s -> {
+//            migrateOpr.accept(DbExtConfig.Mode.POSTGRESQL);
+//        });
+//        Opt.ofNullable(environment.getProperty("h2-migrate-mariadb")).ifPresent(s -> {
+//            migrateOpr.accept(DbExtConfig.Mode.MARIADB);
+//        });
     }
 
     private void importH2Sql(Environment environment, String importH2Sql) {
