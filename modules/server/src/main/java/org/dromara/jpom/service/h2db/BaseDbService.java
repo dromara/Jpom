@@ -102,7 +102,9 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * @return list
      */
     public List<String> listGroupName() {
-        String sql = "select groupName from " + this.getTableName() + " group by groupName";
+        String group = DialectUtil.wrapField("groupName");
+        String sql = String.format("select %s from %s group by %s", group, getTableName(), group);
+        //String sql = "select groupName from " + this.getTableName() + " group by groupName";
         return this.listGroupByName(sql, "groupName");
     }
 
