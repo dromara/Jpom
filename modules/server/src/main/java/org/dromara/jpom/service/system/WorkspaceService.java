@@ -54,11 +54,12 @@ public class WorkspaceService extends BaseDbService<WorkspaceModel> implements I
             }
 
             String workspaceId = DialectUtil.wrapField("workspaceId");
-            String sql = StrUtil.format("update " + tableName.value() + " set {}=? where ({} is null or {}='' or {}='null')",
+            String value = super.parseRealTableName(tableName);
+            String sql = StrUtil.format("update " + value + " set {}=? where ({} is null or {}='' or {}='null')",
                 workspaceId,workspaceId,workspaceId,workspaceId);
             int execute = this.execute(sql, Const.WORKSPACE_DEFAULT_ID);
             if (execute > 0) {
-                log.info(I18nMessageUtil.get("i18n.fix_null_workspace_data.4d0b"), tableName.value(), execute);
+                log.info(I18nMessageUtil.get("i18n.fix_null_workspace_data.4d0b"), value, execute);
             }
             total += execute;
         }
