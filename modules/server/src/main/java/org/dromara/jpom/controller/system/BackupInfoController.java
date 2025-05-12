@@ -129,7 +129,7 @@ public class BackupInfoController extends BaseServerController {
             return new JsonMessage<>(400, I18nMessageUtil.get("i18n.backup_file_not_exist.9628"));
         }
         // 清空 sql 加载记录
-        StorageServiceFactory.clearExecuteSqlLog();
+        StorageServiceFactory.getInstance().clearExecuteSqlLog();
         // 还原备份文件
         boolean flag = backupInfoService.restoreWithSql(filePath);
         if (flag) {
@@ -199,7 +199,7 @@ public class BackupInfoController extends BaseServerController {
         String saveFileName = UnicodeUtil.toUnicode(originalFilename);
         saveFileName = saveFileName.replace(StrUtil.BACKSLASH, "_");
         // 存储目录
-        File directory = FileUtil.file(StorageServiceFactory.dbLocalPath(), DbExtConfig.BACKUP_DIRECTORY_NAME);
+        File directory = FileUtil.file(StorageServiceFactory.getInstance().dbLocalPath(), DbExtConfig.BACKUP_DIRECTORY_NAME);
         // 生成唯一id
         String format = String.format("%s_%s", IdUtil.fastSimpleUUID(), saveFileName);
         format = StrUtil.maxLength(format, 40);
@@ -267,7 +267,7 @@ public class BackupInfoController extends BaseServerController {
         Set<Class<?>> classes = ClassUtil.scanPackageByAnnotation("org.dromara.jpom", TableName.class);
         Map<String, String> TABLE_NAME_MAP = CollStreamUtil.toMap(classes, aClass -> {
             TableName tableName = aClass.getAnnotation(TableName.class);
-            return tableName.value();
+            return backupInfoService.parseRealTableName(tableName);
         }, aClass -> {
             TableName tableName = aClass.getAnnotation(TableName.class);
             return I18nMessageUtil.get(tableName.nameKey());

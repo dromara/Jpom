@@ -97,6 +97,8 @@ jpom:
     min-idle: 1
     # 控制台是否打印 sql 信息
     show-sql: false
+      # 表名前缀
+    table-prefix:
   # 构建相关配置
   build:
     # 最多保存多少份历史记录

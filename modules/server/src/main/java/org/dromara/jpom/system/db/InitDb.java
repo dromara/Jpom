@@ -93,7 +93,7 @@ public class InitDb implements DisposableBean, ILoadEvent {
         //
         log.debug(I18nMessageUtil.get("i18n.need_execute_pre_events.b848"), BEFORE_CALLBACK.size());
         BEFORE_CALLBACK.forEach(Runnable::run);
-        IStorageService storageService = StorageServiceFactory.get();
+        IStorageService storageService = StorageServiceFactory.getInstance().get();
         log.info(I18nMessageUtil.get("i18n.start_loading_database.b040"), dbExtConfig.getMode());
         DSFactory dsFactory = storageService.init(dbExtConfig);
         final String[] sqlFileNow = {StrUtil.EMPTY};
@@ -107,7 +107,7 @@ public class InitDb implements DisposableBean, ILoadEvent {
                 String filename = resource.getFilename();
                 List<String> list = StrUtil.splitTrim(filename, StrUtil.DOT);
                 String modeType = CollUtil.get(list, 1);
-                return StrUtil.equalsAnyIgnoreCase(modeType, "all", StorageServiceFactory.getMode().name());
+                return StrUtil.equalsAnyIgnoreCase(modeType, "all", StorageServiceFactory.getInstance().getMode().name());
             };
             List<Resource> resourceList = Arrays.stream(csvResources).filter(filter).collect(Collectors.toList());
             //
@@ -138,10 +138,10 @@ public class InitDb implements DisposableBean, ILoadEvent {
             DataSource dataSource = dsFactory.getDataSource();
             // 第一次初始化数据库
             // 加载 sql 变更记录，避免重复执行
-            Set<String> executeSqlLog = StorageServiceFactory.loadExecuteSqlLog();
+            Set<String> executeSqlLog = StorageServiceFactory.getInstance().loadExecuteSqlLog();
             tryInitSql(dbExtConfig.getMode(), listMap, executeSqlLog, dataSource, s -> sqlFileNow[0] = s);
             //
-            StorageServiceFactory.saveExecuteSqlLog(executeSqlLog);
+            StorageServiceFactory.getInstance().saveExecuteSqlLog(executeSqlLog);
             // 执行回调方法
             log.debug(I18nMessageUtil.get("i18n.need_execute_callbacks.b708"), AFTER_CALLBACK.size());
             long count = AFTER_CALLBACK.entrySet()
@@ -247,18 +247,18 @@ public class InitDb implements DisposableBean, ILoadEvent {
         //
         GlobalPruneTimer.INSTANCE.shutdownNow();
         // 关闭数据库
-        IoUtil.close(StorageServiceFactory.get());
+        IoUtil.close(StorageServiceFactory.getInstance().get());
     }
 
     private void prepareCallback(Environment environment) {
         Opt.ofNullable(environment.getProperty("rest:load_init_db")).ifPresent(s -> {
             // 重新执行数据库初始化操作，一般用于手动修改数据库字段错误后，恢复默认的字段
-            StorageServiceFactory.clearExecuteSqlLog();
+            StorageServiceFactory.getInstance().clearExecuteSqlLog();
         });
         Opt.ofNullable(environment.getProperty("recover:h2db")).ifPresent(s -> {
             // 恢复数据库，一般用于非正常关闭程序导致数据库奔溃，执行恢复数据逻辑
             try {
-                this.recoverSqlFile = StorageServiceFactory.get().recoverDb();
+                this.recoverSqlFile = StorageServiceFactory.getInstance().get().recoverDb();
             } catch (Exception e) {
                 throw new JpomRuntimeException("Failed to restore database", e);
             }
@@ -284,7 +284,7 @@ public class InitDb implements DisposableBean, ILoadEvent {
             // 删除掉旧数据
             this.addBeforeCallback(() -> {
                 try {
-                    String dbFiles = StorageServiceFactory.get().deleteDbFiles();
+                    String dbFiles = StorageServiceFactory.getInstance().get().deleteDbFiles();
                     if (dbFiles != null) {
                         String s1 = "自动备份数据文件到路径";
                         log.info("{}：{}", s1, dbFiles);
@@ -304,14 +304,14 @@ public class InitDb implements DisposableBean, ILoadEvent {
                 throw new JpomRuntimeException(StrUtil.format(I18nMessageUtil.get("i18n.incorrect_mode_for_migration.caef"), targetMode));
             }
             // 都提前清理
-            StorageServiceFactory.clearExecuteSqlLog();
+            StorageServiceFactory.getInstance().clearExecuteSqlLog();
             //
             String user = environment.getProperty("h2-user");
             String url = environment.getProperty("h2-url");
             String pass = environment.getProperty("h2-pass");
             this.addCallback(I18nMessageUtil.get("i18n.migrate_data.f556"), () -> {
                 //
-                StorageServiceFactory.migrateH2ToNow(dbExtConfig, url, user, pass, targetMode);
+                StorageServiceFactory.getInstance().migrateH2ToNow(dbExtConfig, url, user, pass, targetMode);
                 return false;
             });
             log.info(I18nMessageUtil.get("i18n.start_waiting_for_data_migration.e76f"));
@@ -335,7 +335,7 @@ public class InitDb implements DisposableBean, ILoadEvent {
                 throw new JpomRuntimeException(StrUtil.format("sql file does not exist :{}", sqlPath));
             }
             //
-            Opt.ofNullable(environment.getProperty("transform-sql")).ifPresent(s -> StorageServiceFactory.get().transformSql(file));
+            Opt.ofNullable(environment.getProperty("transform-sql")).ifPresent(s -> StorageServiceFactory.getInstance().get().transformSql(file));
             //
             log.info("开始导入数据：{}", sqlPath);
             boolean flag = backupInfoService.restoreWithSql(sqlPath);

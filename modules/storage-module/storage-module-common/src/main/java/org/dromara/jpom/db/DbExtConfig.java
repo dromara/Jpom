@@ -94,6 +94,10 @@ public class DbExtConfig implements InitializingBean {
      * @see cn.hutool.db.sql.SqlLog#KEY_SHOW_SQL
      */
     private Boolean showSql = false;
+    /**
+     * 表前缀
+     */
+    private String tablePrefix = "";
 
     public String userName() {
         return StrUtil.emptyToDefault(this.userName, DbExtConfig.DEFAULT_USER_OR_AUTHORIZATION);
@@ -132,7 +136,9 @@ public class DbExtConfig implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        StorageServiceFactory.setMode(this.getMode());
+        StorageServiceFactory instance = StorageServiceFactory.getInstance();
+        instance.setMode(this.getMode());
+        instance.setTablePrefix(this.getTablePrefix());
     }
 
     public enum Mode {
