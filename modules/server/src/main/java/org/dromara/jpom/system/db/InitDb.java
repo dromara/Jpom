@@ -187,6 +187,9 @@ public class InitDb implements DisposableBean, ILoadEvent {
         Optional.ofNullable(listMap.get("table")).ifPresent(resources -> {
             for (Resource resource : resources) {
                 String sql = StorageTableFactory.initTable(resource);
+                if (mode.equals(DbExtConfig.Mode.DAMENG)){
+                    sql = sql.toUpperCase();
+                }
                 this.executeSql(sql, resource.getFilename(), mode, executeSqlLog, dataSource, eachSql);
             }
         });
@@ -196,12 +199,18 @@ public class InitDb implements DisposableBean, ILoadEvent {
         Optional.ofNullable(listMap.get("alter")).ifPresent(resources -> {
             for (Resource resource : resources) {
                 String sql = StorageTableFactory.initAlter(resource);
+                if (mode.equals(DbExtConfig.Mode.DAMENG)){
+                    sql = sql.toUpperCase();
+                }
                 this.executeSql(sql, resource.getFilename(), mode, executeSqlLog, dataSource, eachSql);
             }
         });
         Optional.ofNullable(listMap.get("index")).ifPresent(resources -> {
             for (Resource resource : resources) {
                 String sql = StorageTableFactory.initIndex(resource);
+                if (mode.equals(DbExtConfig.Mode.DAMENG)){
+                    sql = sql.toUpperCase();
+                }
                 this.executeSql(sql, resource.getFilename(), mode, executeSqlLog, dataSource, eachSql);
             }
         });

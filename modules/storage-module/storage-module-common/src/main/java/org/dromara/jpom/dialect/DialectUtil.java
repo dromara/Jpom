@@ -16,13 +16,12 @@ import cn.hutool.db.dialect.impl.MysqlDialect;
 import cn.hutool.db.dialect.impl.PostgresqlDialect;
 import cn.hutool.db.sql.Wrapper;
 import cn.hutool.extra.spring.SpringUtil;
-import org.dromara.jpom.common.i18n.I18nMessageUtil;
-import org.dromara.jpom.db.DbExtConfig;
-
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.db.DbExtConfig;
 
 /**
  * 数据库方言工具类
@@ -53,26 +52,57 @@ public class DialectUtil {
 
     public static Dialect getDmDialect() {
         return DIALECT_CACHE.computeIfAbsent(DbExtConfig.Mode.DAMENG, key -> {
-            // 这里移除了 keywords，因为所有字段都需要加引号  达梦默认机制 不加引号会自动转为大写字段因数据库存的为驼峰，会导致找不到字段！
-            Wrapper wrapper = new Wrapper('"') {
+            Set<String> DAMENG_KEYWORDS = Stream.of(
+                "USER", "ORDER", "GROUP", "LEVEL", "MODE", "TABLE", "SELECT", "INDEX",
+                "COLUMN", "VALUES", "WHERE", "FROM", "UPDATE", "DELETE", "INSERT",
+                "CREATE", "ALTER", "DROP", "PRIMARY", "KEY", "VIEW", "TRIGGER", "SEQUENCE",
+                "SESSION", "ONLINE", "PASSWORD", "DEFAULT", "GRANT", "OPTION"
+            ).collect(Collectors.toSet());
+
+            final char DAMENG_QUOTE_CHAR = '"'; // 达梦的引用字符
+
+            Wrapper dmWrapper = new Wrapper(DAMENG_QUOTE_CHAR) {
 
                 @Override
                 public String wrap(String field) {
-                    // 直接将字段传递给 super.wrap，不进行 unWrap
-                    return super.wrap(field);
+                    if (field == null) {
+                        return null;
+                    }
+
+                    // 1. 尝试去除字段本身可能带有的引号
+                    String unWrappedField = field;
+                    if (field.length() >= 2 && field.charAt(0) == DAMENG_QUOTE_CHAR && field.charAt(field.length() - 1) == DAMENG_QUOTE_CHAR) {
+                        unWrappedField = field.substring(1, field.length() - 1);
+                    }
+                    // 2. 将处理后的字段名转换为大写
+                    String upperCaseField = unWrappedField.toUpperCase();
+
+                    // 3. 检查转换后的大写字段名是否为关键字
+                    if (DAMENG_KEYWORDS.contains(upperCaseField)) {
+                        // 如果是关键字，则给这个大写形式的字段名加上双引号
+                        return DAMENG_QUOTE_CHAR + upperCaseField + DAMENG_QUOTE_CHAR;
+                    } else {
+                        // 如果不是关键字，则返回大写形式的字段名（不加引号）
+                        return upperCaseField;
+                    }
                 }
 
                 @Override
                 public String unWrap(String field) {
-                    // 移除外部引号
-                    return super.unWrap(field);
+                    if (field == null) {
+                        return null;
+                    }
+                    // 标准的去除引号逻辑
+                    if (field.length() >= 2 && field.charAt(0) == DAMENG_QUOTE_CHAR && field.charAt(field.length() - 1) == DAMENG_QUOTE_CHAR) {
+                        return field.substring(1, field.length() - 1);
+                    }
+                    return field;
                 }
             };
 
-            // 设置DmDialect方言
-            DmDialect dmDialect = new DmDialect();
-            dmDialect.setWrapper(wrapper);
-            return dmDialect;
+            DmDialect dialect = new DmDialect();
+            dialect.setWrapper(dmWrapper);
+            return dialect;
         });
     }
 

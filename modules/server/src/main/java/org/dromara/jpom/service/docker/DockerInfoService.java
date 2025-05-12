@@ -15,6 +15,7 @@ import cn.hutool.db.Entity;
 import cn.hutool.db.sql.Condition;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.model.docker.DockerInfoModel;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
@@ -77,7 +78,7 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> {
      * @return count
      */
     public int countByTag(String workspaceId, String tag) {
-        String sql = StrUtil.format("SELECT * FROM {} where workspaceId=? and instr(tags,?)", super.getTableName());
+        String sql = StrUtil.format("SELECT * FROM {} where {}=? and instr(tags,?)", super.getTableName(), DialectUtil.wrapField("workspaceId"));
         return (int) super.count(sql, workspaceId, StrUtil.wrap(tag, StrUtil.COLON));
     }
 
