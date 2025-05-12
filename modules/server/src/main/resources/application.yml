@@ -97,7 +97,7 @@ jpom:
     min-idle: 1
     show-sql: false
     # 表名前缀
-#    table-prefix: jpom_
+  #    table-prefix: jpom_
   # 构建相关配置s
   build:
     # 最多保存多少份历史记录
