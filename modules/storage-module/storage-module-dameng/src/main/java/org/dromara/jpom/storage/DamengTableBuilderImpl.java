@@ -293,6 +293,6 @@ public class DamengTableBuilderImpl implements IStorageSqlBuilderService {
 
     @Override
     public String delimiter() {
-        return "-- dameng delimiter";
+        return "-- DAMENG DELIMITER";
     }
 }

@@ -10,7 +10,7 @@
 
 DROP FUNCTION IF EXISTS column_exists;
 
--- dameng delimiter
+-- DAMENG DELIMITER
 
 CREATE OR REPLACE FUNCTION column_exists(
     tname VARCHAR2,
@@ -30,11 +30,11 @@ RETURN (v_count > 0);  -- 如果找到列，返回 TRUE，否则返回 FALSE
 END
 
 
--- dameng delimiter
+-- DAMENG DELIMITER
 
 DROP PROCEDURE IF EXISTS drop_column_if_exists;
 
--- dameng delimiter
+-- DAMENG DELIMITER
 
 CREATE OR REPLACE PROCEDURE drop_column_if_exists(
     tname IN VARCHAR2,
@@ -61,11 +61,11 @@ END IF;
 END;
 
 
--- dameng delimiter
+-- DAMENG DELIMITER
 
 DROP PROCEDURE IF EXISTS add_column_if_not_exists;
 
--- dameng delimiter
+-- DAMENG DELIMITER
 
 CREATE OR REPLACE PROCEDURE add_column_if_not_exists(
     tname IN VARCHAR2,
@@ -111,11 +111,11 @@ END;
 
 
 
--- dameng delimiter
+-- DAMENG DELIMITER
 
 DROP PROCEDURE IF EXISTS drop_index_if_exists;
 
--- dameng delimiter
+-- DAMENG DELIMITER
 
 CREATE OR REPLACE PROCEDURE drop_index_if_exists(
     p_tablename IN VARCHAR2,
@@ -124,33 +124,26 @@ CREATE OR REPLACE PROCEDURE drop_index_if_exists(
 IS
     v_count INT;
 drop_index_sql VARCHAR2(4000);
-v_owner VARCHAR2(100);
 BEGIN
--- 查找当前用户拥有的该索引
+-- 步骤 1: 查找当前用户（模式）拥有的，并且是建立在指定表上的该索引
+-- USER_INDEXES 视图只显示当前用户拥有的索引
 SELECT COUNT(*)
 INTO v_count
 FROM USER_INDEXES
-WHERE TABLE_NAME = UPPER(p_tablename)
-  AND INDEX_NAME = UPPER(p_idxname);
+WHERE TABLE_NAME = UPPER(p_tablename)   -- 确保索引是属于 p_tablename 指定的表
+  AND INDEX_NAME = UPPER(p_idxname);    -- 匹配索引名 (转换为大写以兼容不区分大小写的场景)
 
+-- 步骤 2: 如果在当前模式中找到了该索引
 IF v_count > 0 THEN
-        -- 构造 DROP INDEX SQL（USER_INDEXES 无需带 schema）
+        -- 构造 DROP INDEX SQL 语句
+        -- 对于当前模式的索引，DROP INDEX 语句不需要指定模式名（用户名）
+        -- 直接使用索引名即可，加上双引号以处理特殊字符或大小写敏感的索引名（如果需要）
         drop_index_sql := 'DROP INDEX "' || UPPER(p_idxname) || '"';
 EXECUTE IMMEDIATE drop_index_sql;
-ELSE
-        -- 查找 DBA_INDEXES 中是否存在（非当前用户的索引）
-SELECT OWNER INTO v_owner
-FROM DBA_INDEXES
-WHERE TABLE_NAME = UPPER(p_tablename)
-  AND INDEX_NAME = UPPER(p_idxname)
-  AND ROWNUM = 1;
-
--- 拼接带 schema 的 DROP INDEX
-drop_index_sql := 'DROP INDEX "' || v_owner || '"."' || UPPER(p_idxname) || '"';
-EXECUTE IMMEDIATE drop_index_sql;
 END IF;
-EXCEPTION
-    WHEN NO_DATA_FOUND THEN
-        NULL; -- 索引不存在，忽略
-END;
 
+EXCEPTION
+    WHEN OTHERS THEN
+        -- 此处选择重新抛出异常，以便调用者能感知到非“索引不存在”类型的错误。
+        RAISE;
+END drop_index_if_exists;

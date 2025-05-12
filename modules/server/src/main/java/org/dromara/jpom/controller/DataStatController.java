@@ -10,10 +10,12 @@
 package org.dromara.jpom.controller;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.func.assets.server.MachineNodeServer;
 import org.dromara.jpom.func.assets.server.MachineSshServer;
@@ -145,7 +147,9 @@ public class DataStatController {
                 long disableUserCount = userService.count(userModel);
                 map.put("disableUserCount", disableUserCount);
             }
-            String sql = "select count(1) from " + userService.getTableName() + " where twoFactorAuthKey is null or twoFactorAuthKey=''";
+            String twoFactorAuthKey = DialectUtil.wrapField("twoFactorAuthKey");
+            String sql = StrUtil.format("select count(1) from {} where {} is null or {}=''",
+                userService.getTableName(),twoFactorAuthKey,twoFactorAuthKey);
             Number closeTwoFactorAuth = ObjectUtil.defaultIfNull(userService.queryNumber(sql), 0);
             map.put("openTwoFactorAuth", count - closeTwoFactorAuth.intValue());
         }

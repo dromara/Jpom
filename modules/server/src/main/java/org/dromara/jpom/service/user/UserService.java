@@ -111,8 +111,10 @@ public class UserService extends BaseDbService<UserModel> {
         Integer status = userModel.getStatus();
         Assert.state(status == null || status == 1, ServerConst.ACCOUNT_LOCKED_TIP);
         String id = userModel.getId();
-        String sql = "select password from " + this.tableName + " where id=?";
-        List<Entity> query = super.query(sql, id);
+        Entity condition = Entity.create(this.tableName)
+            .set("id", id)
+            .setFieldNames("password");
+        List<Entity> query = super.queryList(condition);
         Entity first = CollUtil.getFirst(query);
         Assert.notEmpty(first, I18nMessageUtil.get("i18n.no_user_info.0355"));
         String password = (String) first.get("password");
