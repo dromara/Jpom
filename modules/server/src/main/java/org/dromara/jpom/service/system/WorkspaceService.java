@@ -9,10 +9,14 @@
  */
 package org.dromara.jpom.service.system;
 
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.db.Entity;
+import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.model.BaseWorkspaceModel;
 import org.dromara.jpom.model.data.WorkspaceModel;
 import org.dromara.jpom.service.IStatusRecover;
@@ -48,7 +52,10 @@ public class WorkspaceService extends BaseDbService<WorkspaceModel> implements I
             if (tableName == null) {
                 continue;
             }
-            String sql = "update " + tableName.value() + " set workspaceId=? where (workspaceId is null or workspaceId='' or workspaceId='null')";
+
+            String workspaceId = DialectUtil.wrapField("workspaceId");
+            String sql = StrUtil.format("update " + tableName.value() + " set {}=? where ({} is null or {}='' or {}='null')",
+                workspaceId,workspaceId,workspaceId,workspaceId);
             int execute = this.execute(sql, Const.WORKSPACE_DEFAULT_ID);
             if (execute > 0) {
                 log.info(I18nMessageUtil.get("i18n.fix_null_workspace_data.4d0b"), tableName.value(), execute);

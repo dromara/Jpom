@@ -19,6 +19,7 @@ import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.model.BaseWorkspaceModel;
 import org.dromara.jpom.model.data.WorkspaceModel;
 import org.dromara.jpom.service.IStatusRecover;
@@ -99,7 +100,9 @@ public class DataInitEvent implements ILoadEvent, ICacheTask {
                 TableName tableName1 = parents.getAnnotation(TableName.class);
                 Assert.notNull(tableName1, I18nMessageUtil.get("i18n.parent_table_info_config_error.2f52") + aClass);
             }
-            String sql = "select workspaceId,count(1) as allCount from " + tableName.value() + " group by workspaceId";
+            String workspaceIdField = DialectUtil.wrapField("workspaceId");
+            String sql =StrUtil.format("select {},count(1) as allCount from {} group by {}",
+                workspaceIdField,tableName.value(),workspaceIdField);
             List<Entity> query = workspaceService.query(sql);
             for (Entity entity : query) {
                 String workspaceId = (String) entity.get("workspaceId");
