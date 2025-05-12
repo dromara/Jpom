@@ -4,7 +4,7 @@
 
 ### 🐣 新增功能
 
-1. 【server】新增 数据库支持使用达梦数据库（感谢@W）
+1. 【server】新增 数据库支持使用达梦数据库（感谢[@wxyShine](https://gitee.com/wxyShine) ）
 
 ### 🐞 解决BUG、优化功能
 
