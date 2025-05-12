@@ -17,11 +17,28 @@ import lombok.Data;
  */
 @Data
 public class TableViewRowData {
-
+    /**
+     * 字段名
+     */
     private String name;
+    /**
+     * 字段类型
+     */
     private String type;
+    /**
+     * 字段长度
+     */
     private Integer len;
+    /**
+     * 默认值
+     */
     private String defaultValue;
+    /**
+     * 是否非空
+     */
     private Boolean notNull;
+    /**
+     * 字段备注
+     */
     private String comment;
 }

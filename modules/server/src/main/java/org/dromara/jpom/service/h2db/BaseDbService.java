@@ -54,9 +54,6 @@ import java.util.stream.Stream;
 @Slf4j
 public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonService<T> {
 
-    @Autowired
-    @Lazy
-    private DbExtConfig extConfig;
     /**
      * 旧版本分组
      */

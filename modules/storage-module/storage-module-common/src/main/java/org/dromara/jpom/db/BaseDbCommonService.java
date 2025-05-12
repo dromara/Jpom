@@ -65,13 +65,20 @@ public abstract class BaseDbCommonService<T> {
     protected final Class<T> tClass;
     protected final DbExtConfig.Mode dbMode;
 
+    protected DbExtConfig extConfig;
+
     @SuppressWarnings("unchecked")
     public BaseDbCommonService() {
         this.tClass = (Class<T>) TypeUtil.getTypeArgument(this.getClass());
         TableName annotation = tClass.getAnnotation(TableName.class);
         Assert.notNull(annotation, I18nMessageUtil.get("i18n.configure_table_name.f6fd"));
-        this.tableName = annotation.value();
-        this.dbMode = SpringUtil.getBean(DbExtConfig.class).getMode();
+        this.extConfig = SpringUtil.getBean(DbExtConfig.class);
+        this.tableName = parseRealTableName(annotation);
+        this.dbMode = extConfig.getMode();
+    }
+
+    public String parseRealTableName(TableName annotation) {
+        return StorageServiceFactory.getInstance().parseRealTableName(annotation);
     }
 
     public String getDataDesc() {
@@ -81,7 +88,7 @@ public abstract class BaseDbCommonService<T> {
     }
 
     protected DataSource getDataSource() {
-        DSFactory dsFactory = StorageServiceFactory.get().getDsFactory();
+        DSFactory dsFactory = StorageServiceFactory.getInstance().get().getDsFactory();
         return dsFactory.getDataSource();
     }
 
@@ -406,6 +413,6 @@ public abstract class BaseDbCommonService<T> {
      * @param e 异常
      */
     private JpomRuntimeException warpException(Exception e) {
-        return StorageServiceFactory.get().warpException(e);
+        return StorageServiceFactory.getInstance().get().warpException(e);
     }
 }
