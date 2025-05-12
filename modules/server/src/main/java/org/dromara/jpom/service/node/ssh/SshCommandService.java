@@ -22,6 +22,7 @@ import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.cron.CronUtils;
+import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.assets.server.ScriptLibraryServer;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
@@ -125,7 +126,9 @@ public class SshCommandService extends BaseWorkspaceService<CommandModel> implem
      */
     @Override
     public List<CommandModel> queryStartingList() {
-        String sql = "select * from " + super.getTableName() + " where autoExecCron is not null and autoExecCron <> ''";
+        String autoExecCron = DialectUtil.wrapField("autoExecCron");
+        String sql =StrUtil.format("select * from {} where {} is not null and {} <> ''",
+            super.getTableName(),autoExecCron,autoExecCron);
         return super.queryList(sql);
     }
 

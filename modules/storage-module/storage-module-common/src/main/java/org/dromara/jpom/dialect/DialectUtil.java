@@ -52,7 +52,28 @@ public class DialectUtil {
     }
 
     public static Dialect getDmDialect() {
-        return DIALECT_CACHE.computeIfAbsent(DbExtConfig.Mode.DAMENG, key -> new DmDialect());
+        return DIALECT_CACHE.computeIfAbsent(DbExtConfig.Mode.DAMENG, key -> {
+            // 这里移除了 keywords，因为所有字段都需要加引号  达梦默认机制 不加引号会自动转为大写字段因数据库存的为驼峰，会导致找不到字段！
+            Wrapper wrapper = new Wrapper('"') {
+
+                @Override
+                public String wrap(String field) {
+                    // 直接将字段传递给 super.wrap，不进行 unWrap
+                    return super.wrap(field);
+                }
+
+                @Override
+                public String unWrap(String field) {
+                    // 移除外部引号
+                    return super.unWrap(field);
+                }
+            };
+
+            // 设置DmDialect方言
+            DmDialect dmDialect = new DmDialect();
+            dmDialect.setWrapper(wrapper);
+            return dmDialect;
+        });
     }
 
     /**

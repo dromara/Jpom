@@ -9,12 +9,14 @@
  */
 package org.dromara.jpom.service.node.script;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.node.NodeScriptCacheModel;
@@ -46,7 +48,9 @@ public class NodeScriptServer extends BaseNodeService<NodeScriptCacheModel> impl
      * @return nodeId list
      */
     public List<String> hasScriptNode() {
-        String sql = "select nodeId from " + super.getTableName() + " group by nodeId ";
+        String nodeId = DialectUtil.wrapField("nodeId");
+        String sql = StrUtil.format("select {} from {} group by {} ",
+            nodeId,super.getTableName(),nodeId);
         List<Entity> query = super.query(sql);
         if (query == null) {
             return null;
