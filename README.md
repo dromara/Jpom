@@ -345,6 +345,11 @@ docker-compose -f docker-compose.yml up
 6. 启动开发模式，控制台执行 `npm run dev`
 7. 根据控制台输出的地址访问前端页面：`http://127.0.0.1:3000/`（非本机访问把 `127.0.0.1` 换成您的服务器 IP 地址）
 
+
+### 方式七：云平台一键安装
+
+- [Rainbond Cloud](https://hub.grapps.cn/marketplace/apps/837)
+
 ## 管理 Jpom 命令
 
 1. Windows 系统使用 bat 脚本文件。
