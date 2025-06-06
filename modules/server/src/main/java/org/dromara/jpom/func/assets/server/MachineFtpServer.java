@@ -2,12 +2,14 @@ package org.dromara.jpom.func.assets.server;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Opt;
+import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.ftp.Ftp;
 import cn.hutool.extra.ftp.FtpConfig;
+import cn.hutool.extra.ftp.FtpMode;
 import cn.keepbx.jpom.event.IAsyncLoad;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
@@ -130,7 +132,9 @@ public class MachineFtpServer extends BaseDbService<MachineFtpModel> implements 
             this.updateStatus(machineFtpModel.getId(), 2, I18nMessageUtil.get("i18n.disable_monitoring.4615"));
             return;
         }
-        try (Ftp ftp = new Ftp(this.toFtpConfig(machineFtpModel), machineFtpModel.getMode())) {
+
+        try (Ftp ftp = new Ftp(this.toFtpConfig(machineFtpModel),
+            EnumUtil.fromString(FtpMode.class, machineFtpModel.getMode(), FtpMode.Active))) {
             ftp.pwd();
             //
             this.updateStatus(machineFtpModel.getId(), 1, "");

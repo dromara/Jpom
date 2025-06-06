@@ -69,9 +69,9 @@ public class MachineFtpModel extends BaseGroupNameModel {
     /**
      * 模式
      */
-    private FtpMode mode;
+    private String mode;
     /**
-     * ssh连接状态
+     * ftp连接状态
      * <p>
      * 状态{0，无法连接，1 正常，2 禁用监控}
      */
