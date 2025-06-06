@@ -9,16 +9,27 @@
  */
 package org.dromara.jpom.permission;
 
+import java.util.function.Supplier;
 import lombok.Getter;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
-import org.dromara.jpom.func.assets.server.*;
+import org.dromara.jpom.func.assets.server.MachineDockerServer;
+import org.dromara.jpom.func.assets.server.MachineFtpServer;
+import org.dromara.jpom.func.assets.server.MachineNodeServer;
+import org.dromara.jpom.func.assets.server.MachineSshServer;
+import org.dromara.jpom.func.assets.server.ScriptLibraryServer;
 import org.dromara.jpom.func.cert.service.CertificateInfoService;
 import org.dromara.jpom.func.files.service.FileReleaseTaskService;
 import org.dromara.jpom.func.files.service.FileStorageService;
 import org.dromara.jpom.func.files.service.StaticFileStorageService;
 import org.dromara.jpom.func.system.service.ClusterInfoService;
 import org.dromara.jpom.func.user.server.UserLoginLogServer;
-import org.dromara.jpom.service.dblog.*;
+import org.dromara.jpom.service.dblog.BackupInfoService;
+import org.dromara.jpom.service.dblog.BuildInfoService;
+import org.dromara.jpom.service.dblog.DbBuildHistoryLogService;
+import org.dromara.jpom.service.dblog.DbMonitorNotifyLogService;
+import org.dromara.jpom.service.dblog.DbUserOperateLogService;
+import org.dromara.jpom.service.dblog.RepositoryService;
+import org.dromara.jpom.service.dblog.SshTerminalExecuteLogService;
 import org.dromara.jpom.service.docker.DockerInfoService;
 import org.dromara.jpom.service.docker.DockerSwarmInfoService;
 import org.dromara.jpom.service.h2db.BaseDbService;
@@ -26,6 +37,7 @@ import org.dromara.jpom.service.monitor.MonitorService;
 import org.dromara.jpom.service.monitor.MonitorUserOptService;
 import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.service.node.ProjectInfoCacheService;
+import org.dromara.jpom.service.node.ftp.FtpService;
 import org.dromara.jpom.service.node.script.NodeScriptExecuteLogServer;
 import org.dromara.jpom.service.node.script.NodeScriptServer;
 import org.dromara.jpom.service.node.ssh.CommandExecLogService;
@@ -40,8 +52,6 @@ import org.dromara.jpom.service.system.WorkspaceEnvVarService;
 import org.dromara.jpom.service.system.WorkspaceService;
 import org.dromara.jpom.service.user.UserPermissionGroupServer;
 import org.dromara.jpom.service.user.UserService;
-
-import java.util.function.Supplier;
 
 /**
  * 功能模块
@@ -65,6 +75,8 @@ public enum ClassFeature {
     SSH_TERMINAL_LOG(() -> I18nMessageUtil.get("i18n.ssh_terminal_log.775f"), SshTerminalExecuteLogService.class),
     SSH_COMMAND(() -> I18nMessageUtil.get("i18n.ssh_command_management.c40a"), SshCommandService.class),
     SSH_COMMAND_LOG(() -> I18nMessageUtil.get("i18n.ssh_command_log.7fd1"), CommandExecLogService.class),
+    FTP(() -> "FTP管理", SshService.class),
+    FTP_FILE(() -> "FTP文件管理", FtpService.class),
     OUTGIVING(() -> I18nMessageUtil.get("i18n.distribute_management.3a2d"), OutGivingServer.class),
     LOG_READ(() -> I18nMessageUtil.get("i18n.log_reading.a4c8"), LogReadServer.class),
     OUTGIVING_LOG(() -> I18nMessageUtil.get("i18n.distribute_log.c612"), DbOutGivingLogService.class),
@@ -74,6 +86,8 @@ public enum ClassFeature {
     OPT_MONITOR(() -> I18nMessageUtil.get("i18n.operation_monitoring.0cd5"), MonitorUserOptService.class),
     DOCKER(() -> I18nMessageUtil.get("i18n.docker_management.e7e5"), DockerInfoService.class),
     DOCKER_SWARM(() -> I18nMessageUtil.get("i18n.container_cluster.a5b4"), DockerSwarmInfoService.class),
+
+
     /**
      * ssh
      */
