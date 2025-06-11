@@ -154,7 +154,7 @@ public class MachineFtpController extends BaseGroupNameController {
             Assert.hasText(password, I18nMessageUtil.get("i18n.login_password_required.9605"));
         } else {
             boolean exists = machineFtpServer.exists(new MachineFtpModel(id));
-            Assert.state(exists, "不存在对应ftp");
+            Assert.state(exists, I18nMessageUtil.get("i18n.ftp_not_exist.f9b3"));
         }
 
         MachineFtpModel model = new MachineFtpModel();
@@ -186,7 +186,7 @@ public class MachineFtpController extends BaseGroupNameController {
         entity.set(DialectUtil.wrapField("user"), model.getUser());
         Opt.ofBlankAble(id).ifPresent(s -> entity.set("id", StrUtil.format(" <> {}", s)));
         boolean exists = machineFtpServer.exists(entity);
-        Assert.state(!exists, "对应的FTP已经存在啦");
+        Assert.state(!exists, I18nMessageUtil.get("i18n.ftp_already_exists.d66b"));
 
         // 测试连接
         try (Ftp ftp = new Ftp(machineFtpServer.toFtpConfig(model),
@@ -195,8 +195,8 @@ public class MachineFtpController extends BaseGroupNameController {
             List<String> ls = ftp.ls(".");
             System.out.println(ls);
         } catch (Exception e) {
-            log.error("连接FTP失败", e);
-            return new JsonMessage<>(500, "连接FTP失败：" + e.getMessage());
+            log.error(I18nMessageUtil.get("i18n.ftp_connection_failed.1f2f"), e);
+            return new JsonMessage<>(500, I18nMessageUtil.get("i18n.ftp_connection_failed_message.bd99") + e.getMessage());
         }
 
         model.setStatus(1);
@@ -232,7 +232,7 @@ public class MachineFtpController extends BaseGroupNameController {
         List<String> list = StrUtil.splitTrim(ids, StrUtil.COMMA);
         for (String id : list) {
             MachineFtpModel machineFtpModel = machineFtpServer.getByKey(id);
-            Assert.notNull(machineFtpModel, "没有对应的FTP");
+            Assert.notNull(machineFtpModel, I18nMessageUtil.get("i18n.no_ftp_correspondence.23c4"));
             boolean exists = workspaceService.exists(new WorkspaceModel(workspaceId));
             Assert.state(exists, I18nMessageUtil.get("i18n.workspace_not_exist.a6fd"));
             if (!ftpService.existsFtp2(workspaceId, id)) {
@@ -302,7 +302,8 @@ public class MachineFtpController extends BaseGroupNameController {
     @GetMapping(value = "import-template", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public void importTemplate(HttpServletResponse response) throws IOException {
-        String fileName = "ftp导入模板.csv";
+        String prefix = I18nMessageUtil.get("i18n.ftp_import_template.8fa3");
+        String fileName = prefix + ".csv";
         this.setApplicationHeader(response, fileName);
         //
         CsvWriter writer = CsvUtil.getWriter(response.getWriter());
@@ -316,7 +317,7 @@ public class MachineFtpController extends BaseGroupNameController {
     @GetMapping(value = "export-data", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DOWNLOAD)
     public void exportData(HttpServletResponse response, HttpServletRequest request) throws IOException {
-        String prefix = "导出的 ftp 数据";
+        String prefix = I18nMessageUtil.get("i18n.exported_ftp_data.2b54");
         String fileName = prefix + DateTime.now().toString(DatePattern.NORM_DATE_FORMAT) + ".csv";
         this.setApplicationHeader(response, fileName);
         //
@@ -360,8 +361,6 @@ public class MachineFtpController extends BaseGroupNameController {
      *
      * @return json
      */
-//            writer.writeLine("name", "groupName", "host", "port", "user", "password", "serverLanguageCode", "systemKey", "charset", "mode", "timeout");
-
     @PostMapping(value = "import-data", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.UPLOAD)
     public IJsonMessage<String> importData(MultipartFile file) throws IOException {

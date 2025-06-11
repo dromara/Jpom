@@ -165,7 +165,7 @@ public class InitDb implements DisposableBean, ILoadEvent {
             JpomApplicationEvent.asyncExit(2);
             throw Lombok.sneakyThrow(e);
         }
-        String s = "数据库加载成功，URL为";
+        String s = I18nMessageUtil.get("i18n.database_load_success_url.5f64");
         log.info("{} {}：[{}]", storageService.mode(), s, storageService.dbUrl());
     }
 
@@ -230,8 +230,8 @@ public class InitDb implements DisposableBean, ILoadEvent {
                         }
                     })
                     .sum();
-                String s = "执行初始化SQL文件";
-                String s1 = "影响行数";
+                String s = I18nMessageUtil.get("i18n.initialize_sql.6691");
+                String s1 = I18nMessageUtil.get("i18n.affected_rows.5781");
                 log.info("{}：{}，{}：{}", s, name, s1, rows);
             });
         } catch (SQLException e) {
@@ -266,11 +266,11 @@ public class InitDb implements DisposableBean, ILoadEvent {
         Opt.ofNullable(environment.getProperty("backup-h2")).ifPresent(s -> {
             // 备份数据库
             this.addCallback(I18nMessageUtil.get("i18n.backup_database.9524"), () -> {
-                log.info("开始备份数据库");
+                log.info(I18nMessageUtil.get("i18n.start_backup_database.e554"));
                 Future<BackupInfoModel> backupInfoModelFuture = backupInfoService.autoBackup();
                 try {
                     BackupInfoModel backupInfoModel = backupInfoModelFuture.get();
-                    String s1 = "数据库备份完成，保存路径为";
+                    String s1 = I18nMessageUtil.get("i18n.database_backup_complete_path.861b");
                     log.info("{}：{}", s1, backupInfoModel.getFilePath());
                 } catch (Exception e) {
                     throw new JpomRuntimeException(StrUtil.format("Backup database failed：{}", e.getMessage()), e);
@@ -286,7 +286,7 @@ public class InitDb implements DisposableBean, ILoadEvent {
                 try {
                     String dbFiles = StorageServiceFactory.get().deleteDbFiles();
                     if (dbFiles != null) {
-                        String s1 = "自动备份数据文件到路径";
+                        String s1 = I18nMessageUtil.get("i18n.auto_backup_path.a16b");
                         log.info("{}：{}", s1, dbFiles);
                     }
                 } catch (Exception e) {
@@ -337,12 +337,12 @@ public class InitDb implements DisposableBean, ILoadEvent {
             //
             Opt.ofNullable(environment.getProperty("transform-sql")).ifPresent(s -> StorageServiceFactory.get().transformSql(file));
             //
-            log.info("开始导入数据：{}", sqlPath);
+            log.info(I18nMessageUtil.get("i18n.start_import_data.ea31"), sqlPath);
             boolean flag = backupInfoService.restoreWithSql(sqlPath);
             if (!flag) {
                 throw new JpomRuntimeException(StrUtil.format("Failed to import according to sql,{}", sqlPath));
             }
-            log.info("导入成功：{}", sqlPath);
+            log.info(I18nMessageUtil.get("i18n.import_success.ef46"), sqlPath);
             return true;
         });
     }

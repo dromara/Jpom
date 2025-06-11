@@ -34,7 +34,7 @@ import org.dromara.jpom.util.StringUtil;
  * @since 2025/05/29
  */
 @TableName(value = "FTP_INFO",
-    nameKey = "ftp信息表")
+    nameKey = "i18n.ftp_info_table.b177")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor

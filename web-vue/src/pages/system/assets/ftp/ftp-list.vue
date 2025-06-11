@@ -11,12 +11,11 @@
       :columns="columns"
       size="middle"
       :pagination="pagination"
-
       row-key="id"
       :row-selection="rowSelection"
       :scroll="{
-            x: 'max-content'
-          }"
+        x: 'max-content'
+      }"
       @change="changePage"
       @refresh="loadData"
     >
@@ -25,7 +24,7 @@
           <a-input
             v-model:value="listQuery['%name%']"
             class="search-input-item"
-            placeholder="ftp名称"
+            :placeholder="$t('i18n_1add83f77b')"
             @press-enter="loadData"
           />
           <a-input
@@ -38,15 +37,15 @@
             v-model:value="listQuery.groupName"
             show-search
             :filter-option="
-                  (input, option) => {
-                    const children = option.children && option.children()
-                    return (
-                      children &&
-                      children[0].children &&
-                      children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                    )
-                  }
-                "
+              (input, option) => {
+                const children = option.children && option.children()
+                return (
+                  children &&
+                  children[0].children &&
+                  children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                )
+              }
+            "
             allow-clear
             :placeholder="$t('i18n_829abe5a8d')"
             class="search-input-item"
@@ -61,14 +60,11 @@
           <a-button type="primary" @click="handleAdd">{{ $t('i18n_66ab5e9f24') }}</a-button>
           <a-button :disabled="!tableSelections.length" type="primary" @click="syncToWorkspaceShow()">
             {{ $t('i18n_82d2c66f47') }}
-          </a-button
-          >
-          <a-button type="primary" @click="handlerExportData()"
-          >
-            <DownloadOutlined/>
+          </a-button>
+          <a-button type="primary" @click="handlerExportData()">
+            <DownloadOutlined />
             {{ $t('i18n_55405ea6ff') }}
-          </a-button
-          >
+          </a-button>
           <a-dropdown>
             <template #overlay>
               <a-menu>
@@ -87,9 +83,9 @@
               :before-upload="beforeUpload"
             >
               <a-button type="primary">
-                <UploadOutlined/>
+                <UploadOutlined />
                 {{ $t('i18n_8d9a071ee2') }}
-                <DownOutlined/>
+                <DownOutlined />
               </a-button>
             </a-upload>
           </a-dropdown>
@@ -106,7 +102,7 @@
               </ul>
             </div>
           </template>
-          <QuestionCircleOutlined/>
+          <QuestionCircleOutlined />
         </a-tooltip>
       </template>
       <template #tableBodyCell="{ column, text, record }">
@@ -122,12 +118,10 @@
           <a-tooltip :title="`${text}:${record.port}`"> {{ text }}:{{ record.port }}</a-tooltip>
         </template>
 
-
         <template v-else-if="column.dataIndex === 'status'">
           <a-tooltip :title="`${record.statusMsg || $t('i18n_77e100e462')}`">
-            <a-tag :color="statusMap[record.status] && statusMap[record.status].color">{{
-                (statusMap[record.status] && statusMap[record.status].desc) || $t('i18n_1622dc9b6b')
-              }}
+            <a-tag :color="statusMap[record.status] && statusMap[record.status].color"
+              >{{ (statusMap[record.status] && statusMap[record.status].desc) || $t('i18n_1622dc9b6b') }}
             </a-tag>
           </a-tooltip>
         </template>
@@ -138,33 +132,29 @@
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <a-button size="small" type="primary" @click="syncToWorkspaceShow(record)">{{
-                $t('i18n_e39de3376e')
-              }}
+            <a-button size="small" type="primary" @click="syncToWorkspaceShow(record)"
+              >{{ $t('i18n_e39de3376e') }}
             </a-button>
             <a-button size="small" type="primary" @click="handleFile(record)">{{ $t('i18n_2a0c4740f1') }}</a-button>
-            <a-button size="small" type="primary" @click="handleViewWorkspaceFtp(record)">{{
-                $t('i18n_1c3cf7f5f0')
-              }}
+            <a-button size="small" type="primary" @click="handleViewWorkspaceFtp(record)"
+              >{{ $t('i18n_1c3cf7f5f0') }}
             </a-button>
 
             <a-dropdown>
               <a @click="(e) => e.preventDefault()">
                 {{ $t('i18n_0ec9eaf9c3') }}
-                <DownOutlined/>
+                <DownOutlined />
               </a>
               <template #overlay>
                 <a-menu>
                   <a-menu-item>
-                    <a-button size="small" type="primary" @click="handleEdit(record)">{{
-                        $t('i18n_95b351c862')
-                      }}
+                    <a-button size="small" type="primary" @click="handleEdit(record)"
+                      >{{ $t('i18n_95b351c862') }}
                     </a-button>
                   </a-menu-item>
                   <a-menu-item>
-                    <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-                        $t('i18n_2f4aaddde3')
-                      }}
+                    <a-button size="small" type="primary" danger @click="handleDelete(record)"
+                      >{{ $t('i18n_2f4aaddde3') }}
                     </a-button>
                   </a-menu-item>
                   <!--                      <a-menu-item>
@@ -187,13 +177,13 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="600px"
-      title="编辑FTP"
+      :title="$t('i18n_7eef73a0eb')"
       :mask-closable="false"
       @ok="handleEditFtpOk"
     >
       <a-form ref="editFtpForm" :rules="rules" :model="temp" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-        <a-form-item label="FTP名称" name="name">
-          <a-input v-model:value="temp.name" :max-length="50" placeholder="FTP名称"/>
+        <a-form-item :label="$t('i18n_cdf2e36c2a')" name="name">
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n_cdf2e36c2a')" />
         </a-form-item>
         <a-form-item :label="$t('i18n_1014b33d22')" name="group">
           <custom-select
@@ -212,14 +202,14 @@
                     {{ $t('i18n_f92d505ff5') }}
                   </div>
                 </template>
-                <QuestionCircleOutlined/>
+                <QuestionCircleOutlined />
               </a-tooltip>
             </template>
           </custom-select>
         </a-form-item>
         <a-form-item label="Host" name="host">
           <a-input-group compact name="host">
-            <a-input v-model:value="temp.host" style="width: 70%" :placeholder="$t('i18n_3d83a07747')"/>
+            <a-input v-model:value="temp.host" style="width: 70%" :placeholder="$t('i18n_3d83a07747')" />
             <a-form-item-rest>
               <a-input-number
                 v-model:value="temp.port"
@@ -230,8 +220,8 @@
             </a-form-item-rest>
           </a-input-group>
         </a-form-item>
-        <a-form-item label="传输模式" name="mode">
-          <a-radio-group v-model:value="temp.mode" :options="options"/>
+        <a-form-item :label="$t('i18n_d55b5f6ce4')" name="mode">
+          <a-radio-group v-model:value="temp.mode" :options="options" />
         </a-form-item>
         <a-form-item name="user">
           <template #label>
@@ -239,17 +229,15 @@
               {{ $t('i18n_819767ada1') }}
               <template #title>
                 {{ $t('i18n_f0a1428f65') }}<b>$ref.wEnv.xxxx</b> xxxx {{ $t('i18n_c1b72e7ded') }}
-              </template
-              >
-              <QuestionCircleOutlined v-if="!temp.id"/>
+              </template>
+              <QuestionCircleOutlined v-if="!temp.id" />
             </a-tooltip>
           </template>
           <a-input v-model:value="temp.user" :placeholder="$t('i18n_1fd02a90c3')">
             <template #suffix>
-              <a-tooltip v-if="temp.id" title="密码字段在编辑的时候不会返回，如果需要重置或者清空就请点我">
-                <a-button size="small" type="primary" danger @click="handerRestHideField(temp)">{{
-                    $t('i18n_4403fca0c0')
-                  }}
+              <a-tooltip v-if="temp.id" :title="$t('i18n_fcfbc11bb9')">
+                <a-button size="small" type="primary" danger @click="handerRestHideField(temp)"
+                  >{{ $t('i18n_4403fca0c0') }}
                 </a-button>
               </a-tooltip>
             </template>
@@ -261,17 +249,14 @@
         <!--					<a-input-password v-model="temp.password" placeholder="密码"/>-->
         <!--				</a-form-item>-->
         <!-- 修改时可以不填写 -->
-        <a-form-item
-          :name="`${temp.type === 'add' ? 'password' : 'password-update'}`"
-        >
+        <a-form-item :name="`${temp.type === 'add' ? 'password' : 'password-update'}`">
           <template #label>
             <a-tooltip>
               {{ $t('i18n_a810520460') }}
               <template #title>
                 {{ $t('i18n_63dd96a28a') }}<b>$ref.wEnv.xxxx</b> xxxx {{ $t('i18n_c1b72e7ded') }}
-              </template
-              >
-              <QuestionCircleOutlined v-if="!temp.id"/>
+              </template>
+              <QuestionCircleOutlined v-if="!temp.id" />
             </a-tooltip>
           </template>
           <!-- <a-input-password v-model="temp.password" :placeholder="`${temp.type === 'add' ? '密码' : '密码若没修改可以不用填写'}`" /> -->
@@ -280,21 +265,21 @@
             :env-list="envVarList"
             :placeholder="`${temp.type === 'add' ? $t('i18n_a810520460') : $t('i18n_6c08692a3a')}`"
             @change="
-                  (v) => {
-                    temp = { ...temp, password: v }
-                  }
-                "
+              (v) => {
+                temp = { ...temp, password: v }
+              }
+            "
           >
           </custom-input>
         </a-form-item>
-        <a-form-item label="服务器语言" name="serverLanguageCode">
-          <a-input v-model:value="temp.serverLanguageCode" placeholder="服务器语言"/>
+        <a-form-item :label="$t('i18n_4bb37cc406')" name="serverLanguageCode">
+          <a-input v-model:value="temp.serverLanguageCode" :placeholder="$t('i18n_4bb37cc406')" />
         </a-form-item>
-        <a-form-item label="系统关键词" name="systemKey">
-          <a-input v-model:value="temp.systemKey" placeholder="服务器系统关键词"/>
+        <a-form-item :label="$t('i18n_0d1ee51203')" name="systemKey">
+          <a-input v-model:value="temp.systemKey" :placeholder="$t('i18n_e020a4df74')" />
         </a-form-item>
         <a-form-item :label="$t('i18n_6143a714d0')" name="charset">
-          <a-input v-model:value="temp.charset" :placeholder="$t('i18n_6143a714d0')"/>
+          <a-input v-model:value="temp.charset" :placeholder="$t('i18n_6143a714d0')" />
         </a-form-item>
         <a-form-item :label="$t('i18n_67425c29a5')" name="timeout">
           <a-input-number
@@ -305,8 +290,8 @@
           />
         </a-form-item>
         <a-form-item :label="$t('i18n_649231bdee')" name="suffix">
-          <template #help>
-            {{ "此配置仅对服务端管理生效, 工作空间的 ftp 配置需要单独配置" }}<span style="color: red">{{ "配置方式：FTP管理->操作栏中->关联按钮->对应工作空间->操作栏中->配置按钮" }}</span>
+          <template #help
+            >{{ $t('i18n_fb5037a644') }}<span style="color: red">{{ $t('i18n_64c8791ba1') }}</span>
           </template>
           <a-textarea
             v-model:value="temp.allowEditSuffix"
@@ -327,12 +312,12 @@
       width="90vw"
       :open="drawerVisible"
       @close="
-            () => {
-              drawerVisible = false
-            }
-          "
+        () => {
+          drawerVisible = false
+        }
+      "
     >
-      <ftp-file v-if="drawerVisible" :machine-ftp-id="temp.id"/>
+      <ftp-file v-if="drawerVisible" :machine-ftp-id="temp.id" />
     </CustomDrawer>
 
     <!-- 查看 ftp 关联工作空间的信息 -->
@@ -341,14 +326,14 @@
       v-model:open="viewWorkspaceFtp"
       destroy-on-close
       width="50%"
-      title="关联工作空间ftp"
+      :title="$t('i18n_d769de863b')"
       :footer="null"
       :mask-closable="false"
     >
       <a-space direction="vertical" style="width: 100%">
         <a-alert
           v-if="workspaceFtpList && workspaceFtpList.length"
-          message="已经分配到工作空间的 FTP 无法直接删除，需要到分配到的各个工作空间逐一删除后才能删除资产 FTP"
+          :message="$t('i18n_f06a391743')"
           type="info"
           show-icon
         />
@@ -360,10 +345,10 @@
                 <a-col :span="10">{{ $t('i18n_2358e1ef49') }}{{ item.workspace && item.workspace.name }}</a-col>
                 <a-col :span="4">
                   <a-button v-if="item.workspace" size="small" type="primary" @click="configWorkspaceFtp(item)"
-                  >{{ $t('i18n_224e2ccda8') }}
+                    >{{ $t('i18n_224e2ccda8') }}
                   </a-button>
                   <a-button v-else size="small" type="primary" danger @click="handleDeleteWorkspaceItem(item)"
-                  >{{ $t('i18n_2f4aaddde3') }}
+                    >{{ $t('i18n_2f4aaddde3') }}
                   </a-button>
                 </a-col>
               </a-row>
@@ -378,7 +363,7 @@
       destroy-on-close
       :confirm-loading="confirmLoading"
       width="50%"
-      title="配置ftp"
+      :title="$t('i18n_66e623e6f8')"
       :mask-closable="false"
       @ok="handleConfigWorkspaceFtpOk"
     >
@@ -390,15 +375,10 @@
         :wrapper-col="{ span: 18 }"
       >
         <a-form-item label="" :label-col="{ span: 0 }" :wrapper-col="{ span: 24 }">
-          <a-alert :message="$t('i18n_ce7e6e0ea9')" banner/>
+          <a-alert :message="$t('i18n_ce7e6e0ea9')" banner />
         </a-form-item>
-        <a-form-item label="FTP 名称">
-          <a-input
-            v-model:value="temp.name"
-            :disabled="true"
-            :max-length="50"
-            placeholder="FTP 名称"
-          />
+        <a-form-item :label="$t('i18n_148d37218a')">
+          <a-input v-model:value="temp.name" :disabled="true" :max-length="50" :placeholder="$t('i18n_148d37218a')" />
         </a-form-item>
         <a-form-item :label="$t('i18n_6a588459d0')">
           <a-input
@@ -414,7 +394,7 @@
             <a-tooltip>
               {{ $t('i18n_7a3c815b1e') }}
               <template #title> {{ $t('i18n_d0874922f0') }}</template>
-              <QuestionCircleOutlined/>
+              <QuestionCircleOutlined />
             </a-tooltip>
           </template>
           <a-textarea
@@ -474,15 +454,15 @@
               v-model:value="temp.workspaceId"
               show-search
               :filter-option="
-                    (input, option) => {
-                      const children = option.children && option.children()
-                      return (
-                        children &&
-                        children[0].children &&
-                        children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                      )
-                    }
-                  "
+                (input, option) => {
+                  const children = option.children && option.children()
+                  return (
+                    children &&
+                    children[0].children &&
+                    children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                  )
+                }
+              "
               :placeholder="$t('i18n_b3bda9bf9e')"
             >
               <a-select-option v-for="item in workspaceList" :key="item.id">{{ item.name }}</a-select-option>
@@ -491,7 +471,6 @@
         </a-form>
       </a-space>
     </CustomModal>
-
   </div>
 </template>
 <script>
@@ -507,7 +486,7 @@ import {
   importTemplate,
   exportData,
   importData,
-  statusMap,
+  statusMap
 } from '@/api/system/assets-ftp'
 import {
   COMPUTED_PAGINATION,
@@ -523,8 +502,8 @@ import fastInstall from '@/pages/node/fast-install.vue'
 import CustomSelect from '@/components/customSelect'
 import CustomInput from '@/components/customInput'
 import FtpFile from '@/pages/ftp/ftp-file'
-import {deleteForeFtp} from '@/api/ftp'
-import {getWorkspaceEnvAll, getWorkSpaceListAll} from '@/api/workspace'
+import { deleteForeFtp } from '@/api/ftp'
+import { getWorkspaceEnvAll, getWorkSpaceListAll } from '@/api/workspace'
 
 export default {
   components: {
@@ -544,8 +523,8 @@ export default {
       statusMap,
       // 传输模式: '',
       options: [
-        {label: "主动模式", value: 'Active'},
-        {label: "被动模式", value: 'Passive'}
+        { label: this.$t('i18n_a49f609d09'), value: 'Active' },
+        { label: this.$t('i18n_087c992cc0'), value: 'Passive' }
       ],
 
       columns: [
@@ -573,25 +552,25 @@ export default {
           tooltip: true
         },
         {
-          title: "服务器语言",
+          title: this.$t('i18n_4bb37cc406'),
           dataIndex: 'serverLanguageCode',
           width: 120,
           sorter: true,
           ellipsis: true
         },
         {
-          title: '服务器系统关键词',
+          title: this.$t('i18n_e020a4df74'),
           dataIndex: 'systemKey',
           sorter: true,
           width: '100px',
           ellipsis: true
         },
         {
-          title: "编码格式",
-          dataIndex: "charset",
+          title: this.$t('i18n_6143a714d0'),
+          dataIndex: 'charset',
           sorter: true,
           width: 120,
-          ellipsis: true,
+          ellipsis: true
         },
         {
           title: this.$t('i18n_7912615699'),
@@ -605,7 +584,7 @@ export default {
           dataIndex: 'createTimeMillis',
           ellipsis: true,
           sorter: true,
-          customRender: ({text}) => parseTime(text),
+          customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
@@ -613,7 +592,7 @@ export default {
           dataIndex: 'modifyTimeMillis',
           sorter: true,
           ellipsis: true,
-          customRender: ({text}) => parseTime(text),
+          customRender: ({ text }) => parseTime(text),
           width: '170px'
         },
         {
@@ -629,9 +608,9 @@ export default {
 
       // 表单校验规则
       rules: {
-        name: [{required: true, message: this.$t('i18n_06e2f88f42'), trigger: 'blur'}],
-        host: [{required: true, message: this.$t('i18n_81485b76d8'), trigger: 'blur'}],
-        port: [{required: true, message: this.$t('i18n_8d0fa2ee2d'), trigger: 'blur'}],
+        name: [{ required: true, message: this.$t('i18n_06e2f88f42'), trigger: 'blur' }],
+        host: [{ required: true, message: this.$t('i18n_81485b76d8'), trigger: 'blur' }],
+        port: [{ required: true, message: this.$t('i18n_8d0fa2ee2d'), trigger: 'blur' }],
         connectType: [
           {
             required: true,
@@ -640,9 +619,9 @@ export default {
           }
         ],
 
-        mode: [{required: true, message: this.$t('i18n_3103effdfd'), trigger: 'blur'}],
-        user: [{required: true, message: this.$t('i18n_3103effdfd'), trigger: 'blur'}],
-        password: [{required: true, message: this.$t('i18n_209f2b8e91'), trigger: 'blur'}]
+        mode: [{ required: true, message: this.$t('i18n_3103effdfd'), trigger: 'blur' }],
+        user: [{ required: true, message: this.$t('i18n_3103effdfd'), trigger: 'blur' }],
+        password: [{ required: true, message: this.$t('i18n_209f2b8e91'), trigger: 'blur' }]
       },
       nodeVisible: false,
 
@@ -768,7 +747,7 @@ export default {
     },
     // 分页、排序、筛选变化时触发
     changePage(pagination, filters, sorter) {
-      this.listQuery = CHANGE_PAGE(this.listQuery, {pagination, sorter})
+      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter })
       this.loadData()
     },
     // 安装节点
@@ -862,7 +841,7 @@ export default {
         okText: this.$t('i18n_e83a256e4f'),
         cancelText: this.$t('i18n_625fb26b4b'),
         onOk: async () => {
-          const {code, msg} = await deleteForeFtp(record.id)
+          const { code, msg } = await deleteForeFtp(record.id)
           if (code === 200) {
             $notification.success({
               message: msg
@@ -909,7 +888,7 @@ export default {
         return false
       }
       if (!this.temp.ids) {
-        this.temp = {...this.temp, ids: this.tableSelections.join(',')}
+        this.temp = { ...this.temp, ids: this.tableSelections.join(',') }
         this.tableSelections = []
       }
       this.confirmLoading = true
@@ -934,7 +913,7 @@ export default {
       $confirm({
         title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: "真的要清除 FTP 隐藏字段信息么？（密码）",
+        content: this.$t('i18n_91a828d055'),
         okText: this.$t('i18n_e83a256e4f'),
         cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
@@ -954,7 +933,7 @@ export default {
       window.open(importTemplate(), '_blank')
     },
     handlerExportData() {
-      window.open(exportData({...this.listQuery}), '_blank')
+      window.open(exportData({ ...this.listQuery }), '_blank')
     },
     beforeUpload(file) {
       const formData = new FormData()

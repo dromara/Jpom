@@ -226,7 +226,7 @@ public abstract class BaseFtpFileController extends BaseServerController {
              ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
             if (inputStream == null) {
-                throw new RuntimeException("文件不存在或无法打开: " + normalize);
+                throw new RuntimeException(I18nMessageUtil.get("i18n.file_not_exist_or_unable_to_open.b045") + normalize);
             }
 
             IoUtil.copy(inputStream, outputStream);
@@ -235,7 +235,7 @@ public abstract class BaseFtpFileController extends BaseServerController {
             return outputStream.toString(charset.name());
 
         } catch (IOException e) {
-            throw new RuntimeException("FTP 读取文件失败", e);
+            throw new RuntimeException(I18nMessageUtil.get("i18n.ftp_read_file_failed.e738"), e);
         }
     }
 
@@ -262,10 +262,10 @@ public abstract class BaseFtpFileController extends BaseServerController {
             // 直接upload到原来目录 会覆盖更新文件
             boolean success = ftp.upload(normalizeDir, file);
             if (!success) {
-                throw new RuntimeException("FTP 上传失败");
+                throw new RuntimeException(I18nMessageUtil.get("i18n.ftp_upload_failed.8298"));
             }
         } catch (IOException e) {
-            throw new RuntimeException("FTP 连接或操作异常", e);
+            throw new RuntimeException(I18nMessageUtil.get("i18n.ftp_connection_or_operation_exception.09af"), e);
         }
     }
 
@@ -293,14 +293,14 @@ public abstract class BaseFtpFileController extends BaseServerController {
              InputStream inputStream = ftp.getClient().retrieveFileStream(normalize)) {
 
             if (inputStream == null) {
-                throw new RuntimeException("文件不存在或无法下载: " + normalize);
+                throw new RuntimeException(I18nMessageUtil.get("i18n.file_not_exist_or_unable_to_download.b977") + normalize);
             }
 
             IoUtil.copy(inputStream, response.getOutputStream());
             ftp.getClient().completePendingCommand(); // 关键！
 
         } catch (IOException e) {
-            throw new RuntimeException("FTP 下载文件失败", e);
+            throw new RuntimeException(I18nMessageUtil.get("i18n.ftp_download_file_failed.2e42"), e);
         }
     }
 
@@ -331,7 +331,7 @@ public abstract class BaseFtpFileController extends BaseServerController {
                 log.warn(I18nMessageUtil.get("i18n.get_folder_failure.0fda"), e);
                 Throwable causedBy = ExceptionUtil.getCausedBy(e, SftpException.class);
                 if (causedBy != null) {
-                    throw new IllegalStateException("无法查询文件夹FTP，" + causedBy.getMessage());
+                    throw new IllegalStateException(I18nMessageUtil.get("i18n.ftp_folder_query_failed.0011") + causedBy.getMessage());
                 }
                 throw new IllegalStateException(I18nMessageUtil.get("i18n.query_folder_failed.3f0e") + e.getMessage());
             }
@@ -387,7 +387,7 @@ public abstract class BaseFtpFileController extends BaseServerController {
                 jsonArray.add(jsonObject);
             }
         } catch (Exception e) {
-            log.error("连接FTP失败", e);
+            log.error(I18nMessageUtil.get("i18n.ftp_connection_failed.1f2f"), e);
         }
         return jsonArray;
     }
@@ -438,8 +438,8 @@ public abstract class BaseFtpFileController extends BaseServerController {
                 String newPath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + newname);
                 ftp.getClient().rename(oldPath, newPath);
             } catch (Exception e) {
-                log.error("FTP重命名失败异常", e);
-                return new JsonMessage<>(400, "FTP重命名失败异常" + e.getMessage());
+                log.error(I18nMessageUtil.get("i18n.ftp_rename_failed_exception.0fcc"), e);
+                return new JsonMessage<>(400, I18nMessageUtil.get("i18n.ftp_rename_failed_exception.0fcc") + e.getMessage());
             }
             return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
         });
@@ -548,8 +548,8 @@ public abstract class BaseFtpFileController extends BaseServerController {
                     ftp.uploadFileOrDirectory(remotePath, filePath);
                 }
             } catch (Exception e) {
-                log.error("FTP上传文件异常", e);
-                return new JsonMessage<>(400, "FTP上传文件异常" + e.getMessage());
+                log.error(I18nMessageUtil.get("i18n.ftp_upload_file_exception.118c"), e);
+                return new JsonMessage<>(400, I18nMessageUtil.get("i18n.ftp_upload_file_exception.118c") + e.getMessage());
             } finally {
                 CommandUtil.systemFastDel(filePath);
                 CommandUtil.systemFastDel(tempUnzipPath);
@@ -585,7 +585,7 @@ public abstract class BaseFtpFileController extends BaseServerController {
                 File filePath = null;
                 try {
                     if (ftp.exist(remotePath)) {
-                        return new JsonMessage<>(400, "文件夹或文件已经存在");
+                        return new JsonMessage<>(400, I18nMessageUtil.get("i18n.file_exists.145b"));
                     }
                     if (Convert.toBool(unFolder, false)) {
                         // 创建空文件到临时保存路径
@@ -606,8 +606,8 @@ public abstract class BaseFtpFileController extends BaseServerController {
                                 return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
                             }
                         } catch (Exception e) {
-                            log.error("FTP创建文件夹异常", e);
-                            return new JsonMessage<>(500, "FTP创建文件夹异常" + e.getMessage());
+                            log.error(I18nMessageUtil.get("i18n.ftp_create_folder_exception.a4fe"), e);
+                            return new JsonMessage<>(500, I18nMessageUtil.get("i18n.ftp_create_folder_exception.a4fe") + e.getMessage());
                         }
                     }
                     List<String> result = new ArrayList<>();
@@ -626,12 +626,6 @@ public abstract class BaseFtpFileController extends BaseServerController {
 
 
     public String getPermissionString(FTPFile file) {
-        // 如果权限信息无效，说明是 Windows FTP，返回占位符或空字符串
-        if (!file.hasPermission(FTPFile.USER_ACCESS, FTPFile.READ_PERMISSION)
-            && !file.hasPermission(FTPFile.GROUP_ACCESS, FTPFile.READ_PERMISSION)
-            && !file.hasPermission(FTPFile.WORLD_ACCESS, FTPFile.READ_PERMISSION)) {
-            return "---------"; // 或返回 "N/A"、空串 ""
-        }
 
         // 否则按照 Unix 风格格式化
         StringBuilder sb = new StringBuilder();
