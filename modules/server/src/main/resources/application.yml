@@ -160,7 +160,7 @@ spring:
     #    active: mysql
     #    active: mariadb
     #    active: postgresql
-    active: dameng
+    #    active: dameng
 
   web:
     resources:
