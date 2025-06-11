@@ -16,6 +16,7 @@ import cn.hutool.core.util.StrUtil;
 import java.util.List;
 import java.util.function.BiFunction;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.func.assets.model.MachineFtpModel;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
@@ -39,7 +40,7 @@ public class MachineFtpFileController extends BaseFtpFileController {
     @Override
     protected <T> T checkConfigPath(String id, BiFunction<MachineFtpModel, ItemConfig, T> function) {
         MachineFtpModel machineFtpModel = machineFtpServer.getByKey(id, false);
-        Assert.notNull(machineFtpModel, "没有对应的Ftp");
+        Assert.notNull(machineFtpModel, I18nMessageUtil.get("i18n.no_ftp_server_correspondence.1af7"));
         return function.apply(machineFtpModel, new ItemConfig() {
             @Override
             public List<String> allowEditSuffix() {

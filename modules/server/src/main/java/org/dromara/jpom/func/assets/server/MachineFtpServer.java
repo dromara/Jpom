@@ -99,7 +99,7 @@ public class MachineFtpServer extends BaseDbService<MachineFtpModel> implements 
             String linkGroup = clusterInfoService.getCurrent().getLinkGroup();
             List<String> linkGroups = StrUtil.splitTrim(linkGroup, StrUtil.COMMA);
             if (CollUtil.isEmpty(linkGroups)) {
-                log.warn("当前集群还未绑定分组,不能监控 FTP 资产信息");
+                log.warn(I18nMessageUtil.get("i18n.cluster_not_grouped.8f54"));
                 return;
             }
             entity.set("groupName", linkGroups);
@@ -140,12 +140,12 @@ public class MachineFtpServer extends BaseDbService<MachineFtpModel> implements 
             this.updateStatus(machineFtpModel.getId(), 1, "");
         } catch (Exception e) {
             String message = e.getMessage();
-            String s = "监控";
+            String s = I18nMessageUtil.get("i18n.monitor_name.9aff");
             if (StrUtil.containsIgnoreCase(message, "timeout")) {
-                String s1 = "超时";
+                String s1 = I18nMessageUtil.get("i18n.timeout.e944");
                 log.error("{} ftp[{}] {} {}", s, machineFtpModel.getName(), s1, message);
             } else {
-                String s1 = "异常";
+                String s1 = I18nMessageUtil.get("i18n.exception.c195");
                 log.error("{} ftp[{}] {}", s, machineFtpModel.getName(), s1, e);
             }
             this.updateStatus(machineFtpModel.getId(), 0, message);

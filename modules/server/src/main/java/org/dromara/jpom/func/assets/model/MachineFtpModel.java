@@ -28,7 +28,7 @@ import java.util.List;
  */
 @EqualsAndHashCode(callSuper = true)
 @TableName(value = "MACHINE_FTP_INFO",
-    nameKey = "资产FTP信息")
+    nameKey = "i18n.asset_ftp_info.3b75")
 @Data
 @NoArgsConstructor
 public class MachineFtpModel extends BaseGroupNameModel {

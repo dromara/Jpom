@@ -1,7 +1,7 @@
 <template>
   <div>
     <template v-if="useSuggestions">
-      <a-result title="当前工作空间还没有FTP" sub-title="请到【系统管理】-> 【资产管理】-> 【FTP管理】新增FTP，或者将已新增的FTP授权关联、分配到此工作空间">
+      <a-result :title="$t('i18n_80b7af89ee')" :sub-title="$t('i18n_3bc3bdc031')">
         <template #extra>
           <router-link to="/system/assets/ftp-list">
             <a-button key="console" type="primary">{{ $t('i18n_6dcf6175d8') }}</a-button></router-link
@@ -36,7 +36,7 @@
           <a-input
             v-model:value="listQuery['%name%']"
             class="search-input-item"
-            placeholder="ftp名称"
+            :placeholder="$t('i18n_1add83f77b')"
             @press-enter="loadData"
           />
           <a-select
@@ -71,7 +71,7 @@
         </a-space>
       </template>
 
-<!--      <template #tableHelp>
+      <!--      <template #tableHelp>
         <a-tooltip>
           <template #title>
             <div>
@@ -116,7 +116,7 @@
 
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-<!--            <a-dropdown>
+            <!--            <a-dropdown>
               <a-button size="small" type="primary" @click="handleTerminal(record, false)"
                 >{{ $t('i18n_4722bc0c56') }}<DownOutlined
               /></a-button>
@@ -147,23 +147,21 @@
               <a-button size="small" type="primary" @click="handleFile(record)">{{ $t('i18n_2a0c4740f1') }}</a-button>
             </template>
             <template v-else>
-              <a-tooltip placement="topLeft" title="如果按钮不可用,请去资产管理 ftp 列表的关联中新增当前工作空间允许管理的授权文件夹">
+              <a-tooltip placement="topLeft" :title="$t('i18n_2a04f7b9be')">
                 <a-button size="small" type="primary" :disabled="true">{{ $t('i18n_2a0c4740f1') }}</a-button>
               </a-tooltip>
             </template>
 
-            <a-tooltip placement="topLeft" title="如果按钮不可用,请去资产管理 ftp 列表的关联中新增当前工作空间允许管理的授权文件夹">
-              <a-button size="small" type="primary" @click="handleEdit(record)">{{
-                  $t('i18n_95b351c862')
-                }}</a-button>
+            <a-tooltip placement="topLeft" :title="$t('i18n_2a04f7b9be')">
+              <a-button size="small" type="primary" @click="handleEdit(record)">{{ $t('i18n_95b351c862') }}</a-button>
             </a-tooltip>
-            <a-tooltip placement="topLeft" title="如果按钮不可用,请去资产管理 ftp 列表的关联中新增当前工作空间允许管理的授权文件夹">
+            <a-tooltip placement="topLeft" :title="$t('i18n_2a04f7b9be')">
               <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
-                  $t('i18n_2f4aaddde3')
-                }}</a-button>
+                $t('i18n_2f4aaddde3')
+              }}</a-button>
             </a-tooltip>
 
-<!--            <a-dropdown>
+            <!--            <a-dropdown>
               <a @click="(e) => e.preventDefault()">
                 {{ $t('i18n_0ec9eaf9c3') }}
                 <DownOutlined />
@@ -188,7 +186,6 @@
                 </a-menu>
               </template>
             </a-dropdown>-->
-
           </a-space>
         </template>
       </template>
@@ -199,7 +196,7 @@
       v-model:open="editFtpVisible"
       destroy-on-close
       width="600px"
-      title="编辑 FTP"
+      :title="$t('i18n_eb3a60fbc0')"
       :mask-closable="false"
       :confirm-loading="confirmLoading"
       @ok="handleEditSshOk"
@@ -209,15 +206,17 @@
           <a-alert type="info" show-icon style="width: 100%; margin-bottom: 10px">
             <template #message>
               <ul>
-                <li>{{ "此编辑仅能编辑当前 FTP 在此工作空间的名称信" }}</li>
-                <li>{{ "如果要配置 FTP 请到【系统管理】-> 【资产管理】-> 【FTP 管理】中去配置。" }}</li>
-                <li>{{ "当前 FTP 的授权目录（文件目录、文件后缀）需要请到 【系统管理】-> 【资产管理】-> 【FTP 管理】-> 操作栏中->关联按钮->对应工作空间->操作栏中->配置按钮" }}</li>
+                <li>{{ $t('i18n_3c943b89c6') }}</li>
+                <li>{{ $t('i18n_774aecfd99') }}</li>
+                <li>
+                  {{ $t('i18n_4d4ab2f8f5') }}
+                </li>
               </ul>
             </template>
           </a-alert>
         </template>
-        <a-form-item label="FTP 名称" name="name">
-          <a-input v-model:value="temp.name" :max-length="50" placeholder="FTP 名称" />
+        <a-form-item :label="$t('i18n_148d37218a')" name="name">
+          <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n_148d37218a')" />
         </a-form-item>
         <a-form-item :label="$t('i18n_1014b33d22')" name="group">
           <custom-select
@@ -315,7 +314,7 @@ import {
   PAGE_DEFAULT_LIST_QUERY,
   parseTime,
   renderSize,
-  formatDuration,
+  formatDuration
 } from '@/utils/const'
 import { getWorkSpaceListAll } from '@/api/workspace'
 
@@ -373,7 +372,7 @@ export default {
         },
 
         {
-          title: "端口",
+          title: this.$t('i18n_c76cfefe72'),
           dataIndex: ['machineFtp', 'port'],
           width: 80,
           ellipsis: true
@@ -533,7 +532,7 @@ export default {
       $confirm({
         title: this.$t('i18n_c4535759ee'),
         zIndex: 1009,
-        content: "真的要删除 FTP 么？",
+        content: this.$t('i18n_03113c0f1a'),
         okText: this.$t('i18n_e83a256e4f'),
         cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
