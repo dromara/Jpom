@@ -1,17 +1,28 @@
 <template>
   <div class="">
     <!-- 数据表格 -->
-    <a-table
+    <CustomTable
+      is-show-tools
+      default-auto-refresh
+      :auto-refresh-time="30"
+      :active-page="activePage"
+      table-name="server-script-log-list"
       :data-source="list"
       size="middle"
       :columns="columns"
       :pagination="pagination"
       bordered
-      row-key="id"
+      :row-key="
+        (record) => {
+          return record.id + ':' + record.scriptId
+        }
+      "
       :scroll="{
         x: 'max-content'
       }"
+      :row-selection="rowSelection"
       @change="changePage"
+      @refresh="loadData"
     >
       <template #title>
         <a-space wrap class="search-box">
@@ -80,9 +91,17 @@
           <a-tooltip :title="$t('i18n_4838a3bd20')">
             <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
           </a-tooltip>
+          <a-button
+            type="primary"
+            danger
+            :disabled="!tableSelections || tableSelections.length <= 0"
+            @click="handleBatchDelete"
+          >
+            {{ $t('i18n_7fb62b3011') }}
+          </a-button>
         </a-space>
       </template>
-      <template #bodyCell="{ column, text, record }">
+      <template #tableBodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'scriptName'">
           <a-tooltip placement="topLeft" :title="text">
             <span>{{ text }}</span>
@@ -122,7 +141,7 @@
           </a-space>
         </template>
       </template>
-    </a-table>
+    </CustomTable>
     <!-- 日志 -->
 
     <script-log-view
@@ -138,7 +157,7 @@
   </div>
 </template>
 <script>
-import { getScriptLogList, scriptDel, triggerExecTypeMap } from '@/api/server-script'
+import { getScriptLogList, scriptDel, triggerExecTypeMap, scriptBatchDel } from '@/api/server-script'
 import ScriptLogView from '@/pages/script/script-log-view'
 import { statusMap } from '@/api/command'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
@@ -215,12 +234,25 @@ export default {
 
           width: '150px'
         }
-      ]
+      ],
+      tableSelections: []
     }
   },
   computed: {
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
+    },
+    activePage() {
+      return this.$attrs.routerUrl === this.$route.path
+    },
+    rowSelection() {
+      return {
+        onChange: (selectedRowKeys) => {
+          this.tableSelections = selectedRowKeys
+        },
+        selectedRowKeys: this.tableSelections,
+        type: 'checkbox'
+      }
     }
   },
   mounted() {
@@ -271,6 +303,36 @@ export default {
     changePage(pagination, filters, sorter) {
       this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter })
       this.loadData()
+    },
+    // 批量删除
+    handleBatchDelete() {
+      if (!this.tableSelections || this.tableSelections.length <= 0) {
+        $notification.warning({
+          message: this.$t('i18n_5d817c403e')
+        })
+        return
+      }
+      $confirm({
+        title: this.$t('i18n_c4535759ee'),
+        zIndex: 1009,
+        content: '真的要删除这些脚本日志吗？',
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
+        onOk: () => {
+          // 删除
+          return scriptBatchDel({
+            ids: this.tableSelections.join(',')
+          }).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
+              })
+              this.tableSelections = []
+              this.loadData()
+            }
+          })
+        }
+      })
     }
   }
 }

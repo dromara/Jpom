@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.util.List;
 
 /**
  * @author bwcx_jzy
@@ -51,8 +52,7 @@ public class ScriptLogController extends BaseServerController {
     private final ScriptExecuteLogServer scriptExecuteLogServer;
     private final ScriptServer scriptServer;
 
-    public ScriptLogController(ScriptExecuteLogServer scriptExecuteLogServer,
-                               ScriptServer scriptServer) {
+    public ScriptLogController(ScriptExecuteLogServer scriptExecuteLogServer, ScriptServer scriptServer) {
         this.scriptExecuteLogServer = scriptExecuteLogServer;
         this.scriptServer = scriptServer;
     }
@@ -78,9 +78,7 @@ public class ScriptLogController extends BaseServerController {
      */
     @RequestMapping(value = "del_log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
-    public IJsonMessage<Object> delLog(@ValidatorItem() String id,
-                                       @ValidatorItem() String executeId,
-                                       HttpServletRequest request) {
+    public IJsonMessage<Object> delLog(@ValidatorItem() String id, @ValidatorItem() String executeId, HttpServletRequest request) {
         ScriptModel item = null;
         try {
             item = scriptServer.getByKeyAndGlobal(id, request, "ignore");
@@ -97,6 +95,36 @@ public class ScriptLogController extends BaseServerController {
     }
 
     /**
+     * 批量删除日志
+     *
+     * @param ids id+
+     * @return json
+     */
+    @RequestMapping(value = "batch_del_log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.DEL)
+    public IJsonMessage<Object> delLog(@ValidatorItem() String ids, HttpServletRequest request) {
+        List<String> list = StrUtil.splitTrim(ids, StrUtil.COMMA);
+        ScriptModel item = null;
+        for (String itemId : list) {
+            String[] list1 = StrUtil.splitToArray(itemId, StrUtil.COLON);
+            String id = list1[1];
+            String executeId = list1[0];
+            try {
+                item = scriptServer.getByKeyAndGlobal(id, request, "ignore");
+            } catch (IllegalArgumentException | IllegalStateException e) {
+                if (!StrUtil.equals("ignore", e.getMessage())) {
+                    throw e;
+                }
+            }
+            File logFile = item == null ? ScriptModel.logFile(id, executeId) : item.logFile(executeId);
+            boolean fastDel = CommandUtil.systemFastDel(logFile);
+            Assert.state(!fastDel, I18nMessageUtil.get("i18n.delete_log_file_failure.bf0b"));
+            scriptExecuteLogServer.delByKey(executeId);
+        }
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
+    }
+
+    /**
      * 获取的日志
      *
      * @param id        id
@@ -106,10 +134,7 @@ public class ScriptLogController extends BaseServerController {
      */
     @RequestMapping(value = "log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<JSONObject> getNowLog(@ValidatorItem() String id,
-                                              @ValidatorItem() String executeId,
-                                              @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "i18n.line_number_error.c65d") int line,
-                                              HttpServletRequest request) {
+    public IJsonMessage<JSONObject> getNowLog(@ValidatorItem() String id, @ValidatorItem() String executeId, @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "i18n.line_number_error.c65d") int line, HttpServletRequest request) {
         ScriptModel item = scriptServer.getByKey(id, request);
         Assert.notNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
         File logFile = item.logFile(executeId);
