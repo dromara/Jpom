@@ -10,6 +10,7 @@
 package org.dromara.jpom.controller.ssh;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
@@ -77,13 +78,16 @@ public class CommandLogController extends BaseServerController {
     @RequestMapping(value = "del", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<String> del(String id, HttpServletRequest request) {
-        CommandExecLogModel execLogModel = commandExecLogService.getByKey(id, request);
-        Assert.notNull(execLogModel, I18nMessageUtil.get("i18n.no_record.ff41"));
-        File logFile = execLogModel.logFile();
-        boolean fastDel = CommandUtil.systemFastDel(logFile);
-        Assert.state(!fastDel, I18nMessageUtil.get("i18n.log_file_cleanup_failed.3a3b"));
-        //
-        commandExecLogService.delByKey(id);
+        List<String> list = StrUtil.splitTrim(id, StrUtil.COMMA);
+        for (String id1 : list) {
+            CommandExecLogModel execLogModel = commandExecLogService.getByKey(id1, request);
+            Assert.notNull(execLogModel, I18nMessageUtil.get("i18n.no_record.ff41"));
+            File logFile = execLogModel.logFile();
+            boolean fastDel = CommandUtil.systemFastDel(logFile);
+            Assert.state(!fastDel, I18nMessageUtil.get("i18n.log_file_cleanup_failed.3a3b"));
+            //
+            commandExecLogService.delByKey(id1);
+        }
         return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
@@ -137,8 +141,7 @@ public class CommandLogController extends BaseServerController {
      */
     @RequestMapping(value = "log", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<JSONObject> log(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.no_data.1ac0") String id,
-                                        @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "i18n.line_number_error.c65d") int line, HttpServletRequest request) {
+    public IJsonMessage<JSONObject> log(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.no_data.1ac0") String id, @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "i18n.line_number_error.c65d") int line, HttpServletRequest request) {
         CommandExecLogModel item = commandExecLogService.getByKey(id, request);
         Assert.notNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
 
