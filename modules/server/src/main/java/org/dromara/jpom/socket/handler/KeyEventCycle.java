@@ -165,7 +165,8 @@ public class KeyEventCycle {
                     }
                 }
                 str = new String(Arrays.copyOfRange(bytes, 0, bytes.length - backCount), charset);
-                buffer.insert(inputSelection-1, str);
+                // #https://gitee.com/dromara/Jpom/issues/ICA57K
+                buffer.insert(inputSelection - 1, str);
                 inputSelection += str.length();
             }
         }
@@ -175,7 +176,7 @@ public class KeyEventCycle {
     /**
      * 查找指定字节数组在原始字节数组中的位置
      *
-     * @param originalArray 原始字节数组
+     * @param originalArray   原始字节数组
      * @param byteArrayToFind 要查找的字节数组
      * @return 找到的位置索引，如果找不到返回 -1
      */

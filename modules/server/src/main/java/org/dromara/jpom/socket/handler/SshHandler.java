@@ -23,7 +23,6 @@ import com.alibaba.fastjson2.JSONValidator;
 import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.i18n.I18nThreadUtil;
@@ -42,7 +41,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -52,7 +50,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 
 /**
  * ssh 处理2
@@ -304,7 +301,11 @@ public class SshHandler extends BaseTerminalHandler {
                 //如果没有数据来，线程会一直阻塞在这个地方等待数据。
                 while ((i = inputStream.read(buffer)) != NioUtil.EOF) {
                     byte[] tempBytes = Arrays.copyOfRange(buffer, 0, i);
-                    keyEventCycle.receive(tempBytes);
+                    try {
+                        keyEventCycle.receive(tempBytes);
+                    } catch (Exception e) {
+                        log.warn("keyEventCycle.receive", e);
+                    }
                     sendBinary(session, new String(tempBytes, machineSshModel.charset()));
                 }
             } catch (Exception e) {

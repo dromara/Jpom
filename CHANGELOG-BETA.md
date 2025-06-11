@@ -9,6 +9,7 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【server】优化 数据库表支持配置前缀 `jpom.db.table-prefix` （感谢@ccx2480）
+2. 【server】修复 终端输入命令，按Backspace 会退出终端（感谢[@dgs](https://gitee.com/dgs0924) [Gitee issues ICA57K](https://gitee.com/dromara/Jpom/issues/ICA57K) ）
 
 ------
 
