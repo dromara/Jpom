@@ -28,12 +28,15 @@ import cn.keepbx.jpom.model.JsonMessage;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
@@ -44,12 +47,10 @@ import org.dromara.jpom.configuration.AssetsConfig;
 import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.func.BaseGroupNameController;
 import org.dromara.jpom.func.assets.model.MachineFtpModel;
-import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.assets.server.MachineFtpServer;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.AgentWhitelist;
 import org.dromara.jpom.model.data.FtpModel;
-import org.dromara.jpom.model.data.SshModel;
 import org.dromara.jpom.model.data.WorkspaceModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.permission.ClassFeature;
@@ -65,10 +66,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletRequest;
-import java.nio.charset.Charset;
-import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -88,6 +85,7 @@ public class MachineFtpController extends BaseGroupNameController {
     private final FtpService ftpService;
     private final ServerConfig serverConfig;
 
+
     public MachineFtpController(MachineFtpServer machineFtpServer, AssetsConfig assetsConfig, WorkspaceService workspaceService, FtpService ftpService, ServerConfig serverConfig) {
         super(machineFtpServer);
         this.machineFtpServer = machineFtpServer;
@@ -95,6 +93,7 @@ public class MachineFtpController extends BaseGroupNameController {
         this.workspaceService = workspaceService;
         this.ftpService = ftpService;
         this.serverConfig = serverConfig;
+
     }
 
     @PostMapping(value = "list-data", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -166,6 +165,7 @@ public class MachineFtpController extends BaseGroupNameController {
         model.setSystemKey(systemKey);
         // 如果密码传递不为空就设置值 因为上面已经判断了只有修改的情况下 password 才可能为空
         Opt.ofBlankAble(password).ifPresent(model::setPassword);
+
         // 获取允许编辑的后缀
         List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, I18nMessageUtil.get("i18n.suffix_cannot_be_empty.ec72"));
         model.allowEditSuffix(allowEditSuffixList);
@@ -188,12 +188,16 @@ public class MachineFtpController extends BaseGroupNameController {
         boolean exists = machineFtpServer.exists(entity);
         Assert.state(!exists, I18nMessageUtil.get("i18n.ftp_already_exists.d66b"));
 
+
+        MachineFtpModel byKey = machineFtpServer.getByKey(id,false);
+        Optional.ofNullable(byKey).ifPresent(item -> {
+            model.setPassword(StrUtil.emptyToDefault(model.getPassword(), item.getPassword()));
+        });
+
         // 测试连接
         try (Ftp ftp = new Ftp(machineFtpServer.toFtpConfig(model),
-            EnumUtil.fromString(FtpMode.class, mode, FtpMode.Active))) {
+            EnumUtil.fromString(FtpMode.class, mode, FtpMode.Active)))  {
             ftp.pwd();
-            List<String> ls = ftp.ls(".");
-            System.out.println(ls);
         } catch (Exception e) {
             log.error(I18nMessageUtil.get("i18n.ftp_connection_failed.1f2f"), e);
             return new JsonMessage<>(500, I18nMessageUtil.get("i18n.ftp_connection_failed_message.bd99") + e.getMessage());
@@ -263,12 +267,6 @@ public class MachineFtpController extends BaseGroupNameController {
             ftpModel.fileDirs(null);
         } else {
             List<String> list = StrSplitter.splitTrim(fileDirs, StrUtil.LF, true);
-            /*for (String s : list) {
-                String normalize = FileUtil.normalize(s + StrUtil.SLASH);
-                int count = StrUtil.count(normalize, StrUtil.SLASH);
-                Assert.state(count >= 2, I18nMessageUtil.get("i18n.ssh_authorization_directory_cannot_be_root.8125"));
-            }*/
-            //
             UserModel userModel = getUser();
             Assert.state(!userModel.isDemoUser(), PermissionInterceptor.DEMO_TIP);
             ftpModel.fileDirs(list);

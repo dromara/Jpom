@@ -1,6 +1,7 @@
 package org.dromara.jpom.func.assets.server;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -9,10 +10,17 @@ import cn.hutool.cron.task.Task;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.ftp.Ftp;
 import cn.hutool.extra.ftp.FtpConfig;
+import cn.hutool.extra.ftp.FtpException;
 import cn.hutool.extra.ftp.FtpMode;
 import cn.keepbx.jpom.event.IAsyncLoad;
+import java.time.Duration;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.PreDestroy;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.net.ftp.FTPClient;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
@@ -41,6 +49,9 @@ public class MachineFtpServer extends BaseDbService<MachineFtpModel> implements 
     private final ClusterInfoService clusterInfoService;
     private final AssetsConfig.FtpConfig ftpConfig;
     private final AssetsExecutorPoolService assetsExecutorPoolService;
+
+    private final Map<String, Ftp> ftpConnectionPool = new ConcurrentHashMap<>();
+
 
     public MachineFtpServer(ClusterInfoService clusterInfoService,
                             AssetsConfig assetsConfig,
@@ -132,9 +143,8 @@ public class MachineFtpServer extends BaseDbService<MachineFtpModel> implements 
             this.updateStatus(machineFtpModel.getId(), 2, I18nMessageUtil.get("i18n.disable_monitoring.4615"));
             return;
         }
-
-        try (Ftp ftp = new Ftp(this.toFtpConfig(machineFtpModel),
-            EnumUtil.fromString(FtpMode.class, machineFtpModel.getMode(), FtpMode.Active))) {
+        log.warn("machineFtpModel:{}",machineFtpModel);
+        try (Ftp ftp = getFtpClient(machineFtpModel)) {
             ftp.pwd();
             //
             this.updateStatus(machineFtpModel.getId(), 1, "");
@@ -173,4 +183,63 @@ public class MachineFtpServer extends BaseDbService<MachineFtpModel> implements 
         String cron = Opt.ofBlankAble(monitorCron).orElse("0 0/1 * * * ?");
         CronUtils.add(CRON_ID, cron, () -> MachineFtpServer.this);
     }
+
+
+    /**
+     * 获取或创建 Ftp 连接，自动重连失效连接
+     *
+     * @param machineFtpModel 模型
+     * @return Ftp 实例
+     */
+    public synchronized Ftp getFtpClient(MachineFtpModel machineFtpModel) {
+        MachineFtpModel model = this.getByKey(machineFtpModel.getId(), false);
+        Optional.ofNullable(model).ifPresent(machineSshModel -> {
+            machineFtpModel.setPassword(StrUtil.emptyToDefault(machineFtpModel.getPassword(), machineFtpModel.getPassword()));
+        });
+        String id = machineFtpModel.getId();
+        Ftp ftp = ftpConnectionPool.get(id);
+        try {
+            if (ftp != null) {
+                ftp.pwd();
+                return ftp;
+            }
+        } catch (Exception e) {
+            System.out.println(machineFtpModel);
+            log.warn("检测 FTP 连接失效 [{}]，准备重建: {}", id, e.getMessage());
+            IoUtil.close(ftp);
+        }
+
+        try {
+            FtpConfig config = toFtpConfig(machineFtpModel);
+            Ftp tmpFtp = new Ftp(config, EnumUtil.fromString(FtpMode.class, machineFtpModel.getMode(), FtpMode.Active));
+
+            tmpFtp.pwd();
+
+            ftpConnectionPool.put(id, tmpFtp);
+            return tmpFtp;
+        } catch (FtpException e) {
+            log.error("构建 FTP 客户端失败 [{}]: {}", id, e.getMessage());
+            throw Lombok.sneakyThrow(e);
+        }
+//        return ftp;
+    }
+
+    /**
+     * 销毁所有连接（服务销毁时调用）
+     */
+/*    @PreDestroy
+    public void destroy() {
+        synchronized (ftpConnectionPool) {
+            for (Ftp ftp : ftpConnectionPool.values()) {
+                try {
+                    if (ftp != null && ftp.getClient().isAvailable()) {
+                        ftp.close();
+                    }
+                } catch (Exception e) {
+                    log.warn("关闭 FTP 连接失败", e);
+                }
+            }
+            ftpConnectionPool.clear();
+        }
+    }*/
 }

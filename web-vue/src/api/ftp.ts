@@ -27,6 +27,14 @@ export function getFtpGroupAll() {
   })
 }
 
+// 根据 nodeId 查询列表
+export function getFtpListAll() {
+  return axios({
+    url: '/node/ftp/list_data_all.json',
+    method: 'get'
+  })
+}
+
 /**
  * 编辑 FTP
  * @param {*} params
