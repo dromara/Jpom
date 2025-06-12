@@ -7,6 +7,7 @@
  * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
  * See the Mulan PSL v2 for more details.
  */
+
 package org.dromara.jpom.build;
 
 import cn.hutool.core.collection.CollUtil;
@@ -22,6 +23,7 @@ import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.extra.ftp.Ftp;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.extra.ssh.JschUtil;
 import cn.keepbx.jpom.model.JsonMessage;
@@ -30,6 +32,21 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.Session;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
@@ -39,14 +56,17 @@ import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.BuildExtConfig;
+import org.dromara.jpom.func.assets.model.MachineFtpModel;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
+import org.dromara.jpom.func.assets.server.MachineFtpServer;
 import org.dromara.jpom.func.assets.server.ScriptLibraryServer;
 import org.dromara.jpom.func.files.service.FileStorageService;
 import org.dromara.jpom.model.AfterOpt;
 import org.dromara.jpom.model.BaseEnum;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.data.BuildInfoModel;
+import org.dromara.jpom.model.data.FtpModel;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.data.SshModel;
 import org.dromara.jpom.model.docker.DockerInfoModel;
@@ -60,6 +80,7 @@ import org.dromara.jpom.plugins.JschUtils;
 import org.dromara.jpom.service.docker.DockerInfoService;
 import org.dromara.jpom.service.docker.DockerSwarmInfoService;
 import org.dromara.jpom.service.node.NodeService;
+import org.dromara.jpom.service.node.ftp.FtpService;
 import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.system.ExtConfigBean;
 import org.dromara.jpom.system.JpomRuntimeException;
@@ -68,17 +89,6 @@ import org.dromara.jpom.util.LogRecorder;
 import org.dromara.jpom.util.MySftp;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.util.Assert;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * 发布管理
@@ -110,6 +120,8 @@ public class ReleaseManage {
     private static BuildExtConfig buildExtConfig;
     private static FileStorageService fileStorageService;
     private static ScriptLibraryServer scriptLibraryServer;
+    private static MachineFtpServer machineFtpServer;
+
 
     private void loadService() {
         buildExecuteService = ObjectUtil.defaultIfNull(buildExecuteService, () -> SpringUtil.getBean(BuildExecuteService.class));
@@ -118,6 +130,7 @@ public class ReleaseManage {
         buildExtConfig = ObjectUtil.defaultIfNull(buildExtConfig, () -> SpringUtil.getBean(BuildExtConfig.class));
         fileStorageService = ObjectUtil.defaultIfNull(fileStorageService, () -> SpringUtil.getBean(FileStorageService.class));
         scriptLibraryServer = ObjectUtil.defaultIfNull(scriptLibraryServer, () -> SpringUtil.getBean(ScriptLibraryServer.class));
+        machineFtpServer = ObjectUtil.defaultIfNull(machineFtpServer, () -> SpringUtil.getBean(MachineFtpServer.class));
     }
 
     private Integer getRealBuildNumberId() {
@@ -198,6 +211,8 @@ public class ReleaseManage {
             return this.localCommand();
         } else if (releaseMethod == BuildReleaseMethod.DockerImage.getCode()) {
             return this.doDockerImage();
+        } else if (releaseMethod == BuildReleaseMethod.Ftp.getCode()) {
+            this.doFtp();
         } else if (releaseMethod == BuildReleaseMethod.No.getCode()) {
             return null;
         } else {
@@ -500,6 +515,61 @@ public class ReleaseManage {
         } finally {
             JschUtil.close(channelSftp);
             JschUtil.close(session);
+        }
+    }
+
+
+    /**
+     * ftp发布
+     *
+     * @throws IOException
+     */
+    private void doFtp() {
+        String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
+        FtpService ftpService = SpringUtil.getBean(FtpService.class);
+        List<String> strings = StrUtil.splitTrim(releaseMethodDataId, StrUtil.COMMA);
+        for (String releaseMethodDataIdItem : strings) {
+            FtpModel item = ftpService.getByKey(releaseMethodDataIdItem, false);
+            if (item == null) {
+                logRecorder.systemError("没有找到对应的ftp项：{}", releaseMethodDataIdItem);
+                continue;
+            }
+
+            String releasePath = this.buildExtraModule.getReleaseFtpPath();
+
+            if (StrUtil.isEmpty(releasePath)) {
+                logRecorder.systemWarning(I18nMessageUtil.get("i18n.publish_directory_is_empty.79c6"));
+            } else {
+                logRecorder.system(I18nMessageUtil.get("i18n.start_upload_ftp_file.20be"), DateUtil.now(), item.getName(), System.lineSeparator());
+
+                MachineFtpModel machineFtpModel = ftpService.getMachineFtpModel(item);
+                try (Ftp ftp = machineFtpServer.getFtpClient(machineFtpModel)) {
+
+
+                    String prefix = "";
+                    if (!StrUtil.startWith(releasePath, StrUtil.SLASH)) {
+                        prefix = ftp.pwd();
+                    }
+                    String normalizePath = FileUtil.normalize(prefix + StrUtil.SLASH + releasePath);
+                    if (this.buildExtraModule.isClearOld()) {
+                        try {
+                            if (ftp.exist(normalizePath)) {
+                                ftp.delDir(normalizePath);
+                            }
+                        } catch (Exception e) {
+                            if (!StrUtil.startWithIgnoreCase(e.getMessage(), "No such file")) {
+                                logRecorder.error(I18nMessageUtil.get("i18n.clear_build_product_failed.edd4"), e);
+                            }
+                        }
+                    }
+                    ftpService.uploadWithProgress(ftp, this.resultFile, normalizePath, logRecorder, 5);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                logRecorder.system(I18nMessageUtil.get("i18n.start_upload_ftp_file.20be"), DateUtil.now(), item.getName(), System.lineSeparator());
+
+                logRecorder.system("{} {} ftp upload done", DateUtil.now(), item.getName());
+            }
         }
     }
 

@@ -13,11 +13,16 @@ package org.dromara.jpom.service.node.ftp;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.ftp.Ftp;
 import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.SftpException;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.ServerConst;
@@ -79,61 +84,12 @@ public class FtpService extends BaseWorkspaceService<FtpModel> {
      * @param ftpModel ftpModel
      * @return session
      */
-    public MachineFtpModel getMachineSshModel(FtpModel ftpModel) {
+    public MachineFtpModel getMachineFtpModel(FtpModel ftpModel) {
         MachineFtpModel ftpModel1 = machineFtpServer.getByKey(ftpModel.getMachineFtpId(), false);
-        Assert.notNull(ftpModel1, I18nMessageUtil.get("i18n.asset_ssh_not_exist.cd43"));
+        Assert.notNull(ftpModel1, "不存在对应的资产FTP");
         return ftpModel1;
     }
 
-
-    /**
-     * 上传文件
-     *
-     * @param machineSshModel ssh
-     * @param remotePath      远程路径
-     * @param desc            文件夹或者文件
-     */
-/*    public void uploadDir(MachineSshModel machineSshModel, String remotePath, File desc) {
-        Session session = null;
-        ChannelSftp channel = null;
-        // MachineSshModel machineSshModel = this.getMachineSshModel(sshModel);
-        try {
-            session = this.getSessionByModel(machineSshModel);
-            channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
-            try (Sftp sftp = new Sftp(channel, machineSshModel.charset(), machineSshModel.timeout())) {
-                sftp.syncUpload(desc, remotePath);
-            }
-            //uploadDir(channel, remotePath, desc, sshModel.getCharsetT());
-        } finally {
-            JschUtil.close(channel);
-            JschUtil.close(session);
-        }
-    }*/
-
-    /**
-     * 下载文件
-     *
-     * @param ftpModel   实体
-     * @param remoteFile 远程文件
-     * @param save       文件对象
-     * @throws IOException   io
-     * @throws SftpException sftp
-     */
-  /*  public void download(FtpModel ftpModel, String remoteFile, File save) throws IOException, SftpException {
-        Session session = null;
-        ChannelSftp channel = null;
-        OutputStream output = null;
-        try (Ftp ftp = new Ftp(machineFtpServer.toFtpConfig(machineFtpModel), ftpMode)) {
-            session = this.getSessionByModel(ftpModel);
-            channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
-            output = Files.newOutputStream(save.toPath());
-            channel.get(remoteFile, output);
-        } finally {
-            IoUtil.close(output);
-            JschUtil.close(channel);
-            JschUtil.close(session);
-        }
-    }*/
 
     /**
      * 将ssh信息同步到其他工作空间
@@ -169,20 +125,6 @@ public class FtpService extends BaseWorkspaceService<FtpModel> {
             });
     }
 
-    public long countByMachine(String machineSshId) {
-        FtpModel ftpModel = new FtpModel();
-        ftpModel.setMachineFtpId(machineSshId);
-        return this.count(ftpModel);
-    }
-
-    public void existsSsh(String workspaceId, String machineFtpId) {
-        //
-        FtpModel where = new FtpModel();
-        where.setWorkspaceId(workspaceId);
-        where.setMachineFtpId(machineFtpId);
-        FtpModel data = this.queryByBean(where);
-        Assert.isNull(data, () -> I18nMessageUtil.get("i18n.ssh_already_exists_in_workspace.569e") + data.getName());
-    }
 
     public boolean existsFtp2(String workspaceId, String machineFtpId) {
         //
@@ -231,9 +173,83 @@ public class FtpService extends BaseWorkspaceService<FtpModel> {
         };
     }
 
-    public FtpModel getByMachineSshId(String id) {
+    public FtpModel getByMachineFtpId(String id) {
         FtpModel model = new FtpModel();
         model.setMachineFtpId(id);
         return queryByBean(model);
+    }
+
+    /**
+     * FTP 上传文件（带进度）
+     *
+     * @param ftp              hutool 的 ftp 对象
+     * @param localFile        本地文件
+     * @param remotePath       远程文件完整路径
+     * @param logRecorder      日志记录器
+     * @param progressRatio    进度输出频率，例如 5 表示每 5% 输出一次
+     */
+    public void uploadWithProgress(Ftp ftp, File localFile, String remotePath,
+                                          LogRecorder logRecorder, int progressRatio) throws IOException {
+        long total = localFile.length();
+        Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) (100f / progressRatio));
+
+        try (InputStream in = Files.newInputStream(localFile.toPath())) {
+            ProgressInputStream progressInputStream = new ProgressInputStream(in, total, now -> {
+                double percent = Math.floor((double) now / total * 100);
+                int range = (int) (percent / progressRatio);
+                if (progressRangeList.add(range)) {
+                    logRecorder.system(I18nMessageUtil.get("i18n.upload_progress_with_units.44ad"),
+                        localFile.getName(),
+                        FileUtil.readableFileSize(now),
+                        FileUtil.readableFileSize(total),
+                        String.format("%.0f%%", percent)
+                    );
+                }
+            });
+
+             remotePath = remotePath + StrUtil.SLASH + localFile.getName();
+            ftp.getClient().storeFile(remotePath, progressInputStream);
+        }
+    }
+
+    /**
+     * 包装带进度的 InputStream
+     */
+    private static class ProgressInputStream extends InputStream {
+        private final InputStream in;
+        private final long totalSize;
+        private long readSize = 0;
+        private final Consumer<Long> onProgress;
+
+        public ProgressInputStream(InputStream in, long totalSize, Consumer<Long> onProgress) {
+            this.in = in;
+            this.totalSize = totalSize;
+            this.onProgress = onProgress;
+        }
+
+        @Override
+        public int read() throws IOException {
+            int b = in.read();
+            if (b != -1) {
+                readSize++;
+                onProgress.accept(readSize);
+            }
+            return b;
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            int count = in.read(b, off, len);
+            if (count > 0) {
+                readSize += count;
+                onProgress.accept(readSize);
+            }
+            return count;
+        }
+
+        @Override
+        public void close() throws IOException {
+            in.close();
+        }
     }
 }

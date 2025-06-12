@@ -17,14 +17,12 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.ftp.Ftp;
-import cn.hutool.extra.ftp.FtpMode;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
@@ -220,8 +218,7 @@ public abstract class BaseFtpFileController extends BaseServerController {
     private String readFile(MachineFtpModel machineFtpModel, String allowPathParent, String nextPath, String name, Charset charset) {
         String normalize = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name);
 
-        try (Ftp ftp = new Ftp(machineFtpServer.toFtpConfig(machineFtpModel),
-            EnumUtil.fromString(FtpMode.class, machineFtpModel.getMode(), FtpMode.Active));
+        try (Ftp ftp = machineFtpServer.getFtpClient(machineFtpModel);
              InputStream inputStream = ftp.getClient().retrieveFileStream(normalize);
              ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
@@ -255,16 +252,13 @@ public abstract class BaseFtpFileController extends BaseServerController {
                           File file) {
         String normalizeDir = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath);
 
-        // 通过 EnumUtil.fromString 获取枚举，默认 FtpMode.Active
-        FtpMode ftpMode = EnumUtil.fromString(FtpMode.class, machineFtpModel.getMode(), FtpMode.Active);
-
-        try (Ftp ftp = new Ftp(machineFtpServer.toFtpConfig(machineFtpModel), ftpMode)) {
+        try (Ftp ftp = machineFtpServer.getFtpClient(machineFtpModel)) {
             // 直接upload到原来目录 会覆盖更新文件
             boolean success = ftp.upload(normalizeDir, file);
             if (!success) {
                 throw new RuntimeException(I18nMessageUtil.get("i18n.ftp_upload_failed.8298"));
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(I18nMessageUtil.get("i18n.ftp_connection_or_operation_exception.09af"), e);
         }
     }
@@ -288,9 +282,9 @@ public abstract class BaseFtpFileController extends BaseServerController {
 
         String normalize = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name);
 
-        try (Ftp ftp = new Ftp(machineFtpServer.toFtpConfig(machineFtpModel),
-            EnumUtil.fromString(FtpMode.class, machineFtpModel.getMode(), FtpMode.Active));
-             InputStream inputStream = ftp.getClient().retrieveFileStream(normalize)) {
+        InputStream inputStream = null;
+        try (Ftp ftp = machineFtpServer.getFtpClient(machineFtpModel)) {
+            inputStream = ftp.getClient().retrieveFileStream(normalize);
 
             if (inputStream == null) {
                 throw new RuntimeException(I18nMessageUtil.get("i18n.file_not_exist_or_unable_to_download.b977") + normalize);
@@ -301,6 +295,8 @@ public abstract class BaseFtpFileController extends BaseServerController {
 
         } catch (IOException e) {
             throw new RuntimeException(I18nMessageUtil.get("i18n.ftp_download_file_failed.2e42"), e);
+        } finally {
+            IoUtil.close(inputStream);
         }
     }
 
@@ -317,9 +313,7 @@ public abstract class BaseFtpFileController extends BaseServerController {
     private JSONArray listDir(MachineFtpModel ftpModel, String allowPathParent, String nextPath, ItemConfig itemConfig) throws SftpException {
 
         List<String> allowEditSuffix = itemConfig.allowEditSuffix();
-        try (Ftp ftp = new Ftp(machineFtpServer.toFtpConfig(ftpModel),
-            EnumUtil.fromString(FtpMode.class, ftpModel.getMode(), FtpMode.Active))) {
-
+        try (Ftp ftp = machineFtpServer.getFtpClient(ftpModel)) {
             String children2 = StrUtil.emptyToDefault(nextPath, StrUtil.SLASH);
             String allPath = StrUtil.format("{}/{}", allowPathParent, children2);
             allPath = FileUtil.normalize(allPath);
@@ -359,7 +353,7 @@ public abstract class BaseFtpFileController extends BaseServerController {
                 jsonArray.add(jsonObject);
             }
             return jsonArray;
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -377,8 +371,7 @@ public abstract class BaseFtpFileController extends BaseServerController {
             return jsonArray;
         }
 
-        try (Ftp ftp = new Ftp(machineFtpServer.toFtpConfig(ftpModel),
-            EnumUtil.fromString(FtpMode.class, ftpModel.getMode(), FtpMode.Active))) {
+        try (Ftp ftp = machineFtpServer.getFtpClient(ftpModel)) {
             for (String allowPathParent : list) {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("id", SecureUtil.sha1(allowPathParent));
@@ -404,8 +397,7 @@ public abstract class BaseFtpFileController extends BaseServerController {
         Assert.state(!StrUtil.equals(name2, StrUtil.SLASH), I18nMessageUtil.get("i18n.cannot_delete_root_dir.fcdc"));
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineFtpModel, itemConfig) -> {
 
-            try (Ftp ftp = new Ftp(machineFtpServer.toFtpConfig(machineFtpModel),
-                EnumUtil.fromString(FtpMode.class, machineFtpModel.getMode(), FtpMode.Active))) {
+            try (Ftp ftp = machineFtpServer.getFtpClient(machineFtpModel)) {
                 String normalize = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name2);
                 Assert.state(!StrUtil.equals(normalize, StrUtil.SLASH), I18nMessageUtil.get("i18n.cannot_delete_root_dir.fcdc"));
                 // 尝试删除
@@ -432,8 +424,7 @@ public abstract class BaseFtpFileController extends BaseServerController {
 
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineFtpModel, itemConfig) -> {
 
-            try (Ftp ftp = new Ftp(machineFtpServer.toFtpConfig(machineFtpModel),
-                EnumUtil.fromString(FtpMode.class, machineFtpModel.getMode(), FtpMode.Active))) {
+            try (Ftp ftp = machineFtpServer.getFtpClient(machineFtpModel)) {
                 String oldPath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name);
                 String newPath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + newname);
                 ftp.getClient().rename(oldPath, newPath);
@@ -523,9 +514,7 @@ public abstract class BaseFtpFileController extends BaseServerController {
             String remotePath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath);
             File filePath = null;
             File tempUnzipPath = null;
-            try (Ftp ftp = new Ftp(machineFtpServer.toFtpConfig(machineFtpModel),
-                EnumUtil.fromString(FtpMode.class, machineFtpModel.getMode(), FtpMode.Active))) {
-
+            try (Ftp ftp = machineFtpServer.getFtpClient(machineFtpModel)) {
                 // 保存路径
                 File tempPath = serverConfig.getUserTempPath();
                 File savePath = FileUtil.file(tempPath, "ftp", machineFtpModel.getId());
@@ -578,8 +567,7 @@ public abstract class BaseFtpFileController extends BaseServerController {
         Assert.state(!StrUtil.contains(name, StrUtil.SLASH), I18nMessageUtil.get("i18n.file_name_error_message.7a25"));
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineFtpModel, itemConfig) -> {
 
-            try (Ftp ftp = new Ftp(machineFtpServer.toFtpConfig(machineFtpModel),
-                EnumUtil.fromString(FtpMode.class, machineFtpModel.getMode(), FtpMode.Active))) {
+            try (Ftp ftp = machineFtpServer.getFtpClient(machineFtpModel)) {
                 String remotePath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name);
 
                 File filePath = null;
@@ -618,7 +606,7 @@ public abstract class BaseFtpFileController extends BaseServerController {
                     // 删除临时文件
                     CommandUtil.systemFastDel(filePath);
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
