@@ -370,20 +370,20 @@ public class BuildInfoController extends BaseServerController {
     private void formatFtp(JSONObject jsonObject, HttpServletRequest request) {
         // 发布方式
         String releaseMethodDataId = jsonObject.getString("releaseMethodDataId_6");
-        Assert.hasText(releaseMethodDataId, "请选择分发FTP项");
+        Assert.hasText(releaseMethodDataId, I18nMessageUtil.get("i18n.ftp_selection.c903"));
 
         String releasePath = jsonObject.getString("releasePath");
-        Assert.hasText(releasePath, "请输入发布到ftp中的目录");
+        Assert.hasText(releasePath, I18nMessageUtil.get("i18n.ftp_directory.a790"));
         releasePath = FileUtil.normalize(releasePath);
         List<String> strings = StrUtil.splitTrim(releaseMethodDataId, StrUtil.COMMA);
         for (String releaseMethodDataIdItem : strings) {
             FtpModel ftpServiceItem = ftpService.getByKey(releaseMethodDataIdItem, request);
-            Assert.notNull(ftpServiceItem, "没有对应的ftp项");
+            Assert.notNull(ftpServiceItem, I18nMessageUtil.get("i18n.no_ftp_item.8e39"));
             //
             if (releasePath.startsWith(StrUtil.SLASH)) {
                 // 以根路径开始
                 List<String> fileDirs = ftpServiceItem.fileDirs();
-                Assert.notEmpty(fileDirs, ftpServiceItem.getName() + "此ftp未授权操作此目录");
+                Assert.notEmpty(fileDirs, ftpServiceItem.getName() + I18nMessageUtil.get("i18n.ftp_unauthorized_directory.df73"));
 
                 boolean find = false;
                 for (String fileDir : fileDirs) {
@@ -391,7 +391,7 @@ public class BuildInfoController extends BaseServerController {
                         find = true;
                     }
                 }
-                Assert.state(find, ftpServiceItem.getName() + "此ftp未授权操作此目录");
+                Assert.state(find, ftpServiceItem.getName() + I18nMessageUtil.get("i18n.ftp_unauthorized_directory.df73"));
             }
 
         }

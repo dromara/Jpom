@@ -531,7 +531,7 @@ public class ReleaseManage {
         for (String releaseMethodDataIdItem : strings) {
             FtpModel item = ftpService.getByKey(releaseMethodDataIdItem, false);
             if (item == null) {
-                logRecorder.systemError("没有找到对应的ftp项：{}", releaseMethodDataIdItem);
+                logRecorder.systemError(I18nMessageUtil.get("i18n.ftp_item_not_found.60a7"), releaseMethodDataIdItem);
                 continue;
             }
 
