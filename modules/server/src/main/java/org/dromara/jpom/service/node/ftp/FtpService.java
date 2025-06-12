@@ -86,7 +86,7 @@ public class FtpService extends BaseWorkspaceService<FtpModel> {
      */
     public MachineFtpModel getMachineFtpModel(FtpModel ftpModel) {
         MachineFtpModel ftpModel1 = machineFtpServer.getByKey(ftpModel.getMachineFtpId(), false);
-        Assert.notNull(ftpModel1, "不存在对应的资产FTP");
+        Assert.notNull(ftpModel1, I18nMessageUtil.get("i18n.no_matching_asset_ftp.d420"));
         return ftpModel1;
     }
 

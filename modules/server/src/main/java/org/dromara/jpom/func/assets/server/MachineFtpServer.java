@@ -205,7 +205,7 @@ public class MachineFtpServer extends BaseDbService<MachineFtpModel> implements 
             }
         } catch (Exception e) {
             System.out.println(machineFtpModel);
-            log.warn("检测 FTP 连接失效 [{}]，准备重建: {}", id, e.getMessage());
+            log.warn(I18nMessageUtil.get("i18n.check_ftp_connection_failed.f7de"), id, e.getMessage());
             IoUtil.close(ftp);
         }
 
@@ -218,7 +218,7 @@ public class MachineFtpServer extends BaseDbService<MachineFtpModel> implements 
             ftpConnectionPool.put(id, tmpFtp);
             return tmpFtp;
         } catch (FtpException e) {
-            log.error("构建 FTP 客户端失败 [{}]: {}", id, e.getMessage());
+            log.error(I18nMessageUtil.get("i18n.ftp_client_build_failure.aa55"), id, e.getMessage());
             throw Lombok.sneakyThrow(e);
         }
 //        return ftp;
@@ -236,7 +236,7 @@ public class MachineFtpServer extends BaseDbService<MachineFtpModel> implements 
                         ftp.close();
                     }
                 } catch (Exception e) {
-                    log.warn("关闭 FTP 连接失败", e);
+                    log.warn(I18nMessageUtil.get("i18n.ftp_connection_failure.0f31"), e);
                 }
             }
             ftpConnectionPool.clear();
