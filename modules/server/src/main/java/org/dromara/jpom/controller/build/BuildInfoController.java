@@ -39,6 +39,7 @@ import org.dromara.jpom.model.AfterOpt;
 import org.dromara.jpom.model.BaseEnum;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.BuildInfoModel;
+import org.dromara.jpom.model.data.FtpModel;
 import org.dromara.jpom.model.data.RepositoryModel;
 import org.dromara.jpom.model.data.SshModel;
 import org.dromara.jpom.model.enums.BuildReleaseMethod;
@@ -51,6 +52,7 @@ import org.dromara.jpom.service.dblog.BuildInfoService;
 import org.dromara.jpom.service.dblog.DbBuildHistoryLogService;
 import org.dromara.jpom.service.dblog.RepositoryService;
 import org.dromara.jpom.service.docker.DockerInfoService;
+import org.dromara.jpom.service.node.ftp.FtpService;
 import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.service.script.ScriptServer;
 import org.dromara.jpom.util.CommandUtil;
@@ -78,6 +80,7 @@ public class BuildInfoController extends BaseServerController {
 
     private final DbBuildHistoryLogService dbBuildHistoryLogService;
     private final SshService sshService;
+    private final FtpService ftpService;
     private final BuildInfoService buildInfoService;
     private final RepositoryService repositoryService;
     private final BuildExecuteService buildExecuteService;
@@ -87,7 +90,7 @@ public class BuildInfoController extends BaseServerController {
     protected final MachineDockerServer machineDockerServer;
 
     public BuildInfoController(DbBuildHistoryLogService dbBuildHistoryLogService,
-                               SshService sshService,
+                               SshService sshService, FtpService ftpService,
                                BuildInfoService buildInfoService,
                                RepositoryService repositoryService,
                                BuildExecuteService buildExecuteService,
@@ -97,6 +100,7 @@ public class BuildInfoController extends BaseServerController {
                                MachineDockerServer machineDockerServer) {
         this.dbBuildHistoryLogService = dbBuildHistoryLogService;
         this.sshService = sshService;
+        this.ftpService = ftpService;
         this.buildInfoService = buildInfoService;
         this.repositoryService = repositoryService;
         this.buildExecuteService = buildExecuteService;
@@ -262,6 +266,8 @@ public class BuildInfoController extends BaseServerController {
             // dockerSwarmId default
             String dockerSwarmId = this.formatDocker(jsonObject, request);
             jsonObject.put("releaseMethodDataId", dockerSwarmId);
+        } else if (releaseMethod1 == BuildReleaseMethod.Ftp){
+            this.formatFtp(jsonObject, request);
         }
         // 检查关联数据ID
         buildInfoModel.setReleaseMethodDataId(jsonObject.getString("releaseMethodDataId"));
@@ -351,6 +357,43 @@ public class BuildInfoController extends BaseServerController {
                     Assert.state(checkInputItem, sshServiceItem.getName() + I18nMessageUtil.get("i18n.publish_command_contains_forbidden_command.097d"));
                 }
             }
+        }
+        jsonObject.put("releaseMethodDataId", releaseMethodDataId);
+    }
+
+    /**
+     * 验证构建信息
+     * 当发布方式为【FTP】的时候
+     *
+     * @param jsonObject 配置信息
+     */
+    private void formatFtp(JSONObject jsonObject, HttpServletRequest request) {
+        // 发布方式
+        String releaseMethodDataId = jsonObject.getString("releaseMethodDataId_6");
+        Assert.hasText(releaseMethodDataId, I18nMessageUtil.get("i18n.ftp_selection.c903"));
+
+        String releasePath = jsonObject.getString("releasePath");
+        Assert.hasText(releasePath, I18nMessageUtil.get("i18n.ftp_directory.a790"));
+        releasePath = FileUtil.normalize(releasePath);
+        List<String> strings = StrUtil.splitTrim(releaseMethodDataId, StrUtil.COMMA);
+        for (String releaseMethodDataIdItem : strings) {
+            FtpModel ftpServiceItem = ftpService.getByKey(releaseMethodDataIdItem, request);
+            Assert.notNull(ftpServiceItem, I18nMessageUtil.get("i18n.no_ftp_item.8e39"));
+            //
+            if (releasePath.startsWith(StrUtil.SLASH)) {
+                // 以根路径开始
+                List<String> fileDirs = ftpServiceItem.fileDirs();
+                Assert.notEmpty(fileDirs, ftpServiceItem.getName() + I18nMessageUtil.get("i18n.ftp_unauthorized_directory.df73"));
+
+                boolean find = false;
+                for (String fileDir : fileDirs) {
+                    if (FileUtil.isSub(new File(fileDir), new File(releasePath))) {
+                        find = true;
+                    }
+                }
+                Assert.state(find, ftpServiceItem.getName() + I18nMessageUtil.get("i18n.ftp_unauthorized_directory.df73"));
+            }
+
         }
         jsonObject.put("releaseMethodDataId", releaseMethodDataId);
     }

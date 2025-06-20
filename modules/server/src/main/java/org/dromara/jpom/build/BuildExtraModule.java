@@ -74,6 +74,10 @@ public class BuildExtraModule extends BaseModel {
      */
     private String releasePath;
     /**
+     * 发布到ftp中的目录
+     */
+    private String releaseFtpPath;
+    /**
      * 工作空间 ID
      */
     private String workspaceId;

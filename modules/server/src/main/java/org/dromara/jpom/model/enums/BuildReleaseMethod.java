@@ -25,6 +25,7 @@ public enum BuildReleaseMethod implements BaseEnum {
 	Ssh(3, "SSH"),
 	LocalCommand(4, "本地命令行"),
 	DockerImage(5, "Docker镜像"),
+	Ftp(6, "FTP"),
 	;
 	private final int code;
 	private final String desc;
