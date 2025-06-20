@@ -1,12 +1,3 @@
-/*
- * Copyright (c) 2019 Of Him Code Technology Studio
- * Jpom is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- * 			http://license.coscl.org.cn/MulanPSL2
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- */
 package org.dromara.jpom.func.assets.controller;
 
 import cn.hutool.core.collection.CollUtil;
@@ -19,19 +10,34 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.net.NetUtil;
 import cn.hutool.core.text.StrSplitter;
-import cn.hutool.core.text.csv.*;
+import cn.hutool.core.text.csv.CsvData;
+import cn.hutool.core.text.csv.CsvReadConfig;
+import cn.hutool.core.text.csv.CsvReader;
+import cn.hutool.core.text.csv.CsvRow;
+import cn.hutool.core.text.csv.CsvUtil;
+import cn.hutool.core.text.csv.CsvWriter;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.URLUtil;
 import cn.hutool.db.Entity;
-import cn.hutool.db.sql.Direction;
-import cn.hutool.db.sql.Order;
+import cn.hutool.extra.ftp.Ftp;
+import cn.hutool.extra.ftp.FtpMode;
 import cn.hutool.extra.servlet.ServletUtil;
-import cn.hutool.extra.ssh.JschUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
-import com.jcraft.jsch.Session;
+import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.interceptor.PermissionInterceptor;
@@ -40,20 +46,18 @@ import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.configuration.AssetsConfig;
 import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.func.BaseGroupNameController;
-import org.dromara.jpom.func.assets.model.MachineSshModel;
-import org.dromara.jpom.func.assets.server.MachineSshServer;
+import org.dromara.jpom.func.assets.model.MachineFtpModel;
+import org.dromara.jpom.func.assets.server.MachineFtpServer;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.AgentWhitelist;
-import org.dromara.jpom.model.data.SshModel;
+import org.dromara.jpom.model.data.FtpModel;
 import org.dromara.jpom.model.data.WorkspaceModel;
-import org.dromara.jpom.model.log.SshTerminalExecuteLog;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.permission.SystemPermission;
-import org.dromara.jpom.service.dblog.SshTerminalExecuteLogService;
-import org.dromara.jpom.service.node.ssh.SshService;
+import org.dromara.jpom.service.node.ftp.FtpService;
 import org.dromara.jpom.service.system.WorkspaceService;
 import org.dromara.jpom.system.ServerConfig;
 import org.springframework.http.MediaType;
@@ -64,76 +68,40 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
-import java.nio.charset.Charset;
-import java.util.*;
-import java.util.function.Function;
-
 /**
  * @author bwcx_jzy
- * @since 2023/2/25
+ * @since 2024/8/31
  */
 @RestController
-@RequestMapping(value = "/system/assets/ssh")
+@RequestMapping(value = "/system/assets/ftp")
 @Feature(cls = ClassFeature.SYSTEM_ASSETS_MACHINE_SSH)
 @SystemPermission
 @Slf4j
-public class MachineSshController extends BaseGroupNameController {
+public class MachineFtpController extends BaseGroupNameController {
 
-    private final MachineSshServer machineSshServer;
-    private final SshService sshService;
-    private final SshTerminalExecuteLogService sshTerminalExecuteLogService;
+    private final MachineFtpServer machineFtpServer;
+    private final AssetsConfig.FtpConfig ftpConfig;
     private final WorkspaceService workspaceService;
+    private final FtpService ftpService;
     private final ServerConfig serverConfig;
-    private final AssetsConfig.SshConfig sshConfig;
 
-    public MachineSshController(MachineSshServer machineSshServer,
-                                SshService sshService,
-                                SshTerminalExecuteLogService sshTerminalExecuteLogService,
-                                WorkspaceService workspaceService,
-                                ServerConfig serverConfig,
-                                AssetsConfig assetsConfig) {
-        super(machineSshServer);
-        this.machineSshServer = machineSshServer;
-        this.sshService = sshService;
-        this.sshTerminalExecuteLogService = sshTerminalExecuteLogService;
+
+    public MachineFtpController(MachineFtpServer machineFtpServer, AssetsConfig assetsConfig, WorkspaceService workspaceService, FtpService ftpService, ServerConfig serverConfig) {
+        super(machineFtpServer);
+        this.machineFtpServer = machineFtpServer;
+        this.ftpConfig = assetsConfig.getFtp();
         this.workspaceService = workspaceService;
+        this.ftpService = ftpService;
         this.serverConfig = serverConfig;
-        this.sshConfig = assetsConfig.getSsh();
+
     }
 
     @PostMapping(value = "list-data", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<PageResultDto<MachineSshModel>> listJson(HttpServletRequest request) {
-        PageResultDto<MachineSshModel> pageResultDto = machineSshServer.listPage(request);
+    public IJsonMessage<PageResultDto<MachineFtpModel>> listJson(HttpServletRequest request) {
+        PageResultDto<MachineFtpModel> pageResultDto = machineFtpServer.listPage(request);
         return JsonMessage.success("", pageResultDto);
     }
-
-    @PostMapping(value = "search", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<List<MachineSshModel>> listJson(HttpServletRequest request, String name, int limit, String mustId) {
-        Entity entity = new Entity();
-        if (StrUtil.isNotBlank(name)) {
-            entity.set("name", "like %" + name + "%");
-        }
-        List<MachineSshModel> sshModelList = machineSshServer.queryList(entity, limit, new Order("createTimeMillis", Direction.DESC));
-        if (StrUtil.isNotBlank(mustId) && CollUtil.isNotEmpty(sshModelList)) {
-            // 存在 id 并且搜索结果不为空
-            boolean noneMatch = sshModelList.stream().noneMatch(machineSshModel -> StrUtil.equals(machineSshModel.id(), mustId));
-            if (noneMatch) {
-                MachineSshModel server = machineSshServer.getByKey(mustId);
-                if (server != null) {
-                    sshModelList.add(server);
-                }
-            }
-        }
-        return JsonMessage.success("", sshModelList);
-    }
-
 
     @Override
     @GetMapping(value = "list-group", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -141,7 +109,7 @@ public class MachineSshController extends BaseGroupNameController {
     public IJsonMessage<Collection<String>> listGroup() {
         Collection<String> list = dbService.listGroupName();
         // 合并配置禁用分组
-        List<String> monitorGroupName = sshConfig.getDisableMonitorGroupName();
+        List<String> monitorGroupName = ftpConfig.getDisableMonitorGroupName();
         if (monitorGroupName != null) {
             list.addAll(monitorGroupName);
             //
@@ -154,15 +122,15 @@ public class MachineSshController extends BaseGroupNameController {
     /**
      * 编辑
      *
-     * @param name        名称
-     * @param host        主机
-     * @param user        用户名
-     * @param password    密码
-     * @param connectType 连接方式
-     * @param privateKey  私钥
-     * @param port        端口
-     * @param charset     编码格式
-     * @param id          ID
+     * @param name               名称
+     * @param host               主机
+     * @param user               用户名
+     * @param password           密码
+     * @param serverLanguageCode 服务器语言
+     * @param systemKey          服务器系统关键词
+     * @param port               端口
+     * @param charset            编码格式
+     * @param id                 ID
      * @return json
      */
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -171,156 +139,94 @@ public class MachineSshController extends BaseGroupNameController {
                                      @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.host_cannot_be_empty.644a") String host,
                                      @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.parameter_error_user_cannot_be_empty.9239") String user,
                                      String password,
-                                     MachineSshModel.ConnectType connectType,
-                                     String privateKey,
                                      @ValidatorItem(value = ValidatorRule.POSITIVE_INTEGER, msg = "i18n.parameter_error_port_error.810d") int port,
                                      String charset,
                                      String id,
                                      Integer timeout,
                                      String allowEditSuffix,
+                                     String serverLanguageCode,
+                                     String systemKey,
+                                     String mode,
                                      String groupName) {
         boolean add = StrUtil.isEmpty(id);
         if (add) {
-            // 优先判断参数 如果是 password 在修改时可以不填写
-            if (connectType == MachineSshModel.ConnectType.PASS) {
-                Assert.hasText(password, I18nMessageUtil.get("i18n.login_password_required.9605"));
-            } else if (connectType == MachineSshModel.ConnectType.PUBKEY) {
-                //Assert.hasText(privateKey, "请填写证书内容");
-            }
+            Assert.hasText(password, I18nMessageUtil.get("i18n.login_password_required.9605"));
         } else {
-            boolean exists = machineSshServer.exists(new MachineSshModel(id));
-            Assert.state(exists, I18nMessageUtil.get("i18n.ssh_not_exist.2e40"));
+            boolean exists = machineFtpServer.exists(new MachineFtpModel(id));
+            Assert.state(exists, I18nMessageUtil.get("i18n.ftp_not_exist.f9b3"));
         }
-        MachineSshModel sshModel = new MachineSshModel();
-        sshModel.setId(id);
-        sshModel.setGroupName(groupName);
-        sshModel.setHost(host);
+
+        MachineFtpModel model = new MachineFtpModel();
+        model.setId(id);
+        model.setGroupName(groupName);
+        model.setHost(host);
+        model.setServerLanguageCode(serverLanguageCode);
+        model.setMode(mode);
+        model.setSystemKey(systemKey);
         // 如果密码传递不为空就设置值 因为上面已经判断了只有修改的情况下 password 才可能为空
-        Opt.ofBlankAble(password).ifPresent(sshModel::setPassword);
-        if (StrUtil.startWith(privateKey, URLUtil.FILE_URL_PREFIX)) {
-            String rsaPath = StrUtil.removePrefix(privateKey, URLUtil.FILE_URL_PREFIX);
-            Assert.state(FileUtil.isFile(rsaPath), I18nMessageUtil.get("i18n.private_key_file_not_exist.49ed"));
-        }
-        Opt.ofNullable(privateKey).ifPresent(sshModel::setPrivateKey);
+        Opt.ofBlankAble(password).ifPresent(model::setPassword);
 
         // 获取允许编辑的后缀
         List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, I18nMessageUtil.get("i18n.suffix_cannot_be_empty.ec72"));
-        sshModel.allowEditSuffix(allowEditSuffixList);
-        sshModel.setPort(port);
-        sshModel.setUser(user);
-        sshModel.setName(name);
-        sshModel.setConnectType(connectType.name());
-        sshModel.setTimeout(timeout);
+        model.allowEditSuffix(allowEditSuffixList);
+        model.setPort(port);
+        model.setUser(user);
+        model.setName(name);
+        model.setTimeout(timeout);
         try {
             Charset.forName(charset);
-            sshModel.setCharset(charset);
+            model.setCharset(charset);
         } catch (Exception e) {
             return new JsonMessage<>(405, I18nMessageUtil.get("i18n.correct_encoding_format_required.1f7f") + e.getMessage());
         }
         // 判断重复
         Entity entity = Entity.create();
-        entity.set("host", sshModel.getHost());
-        entity.set("port", sshModel.getPort());
-        entity.set(DialectUtil.wrapField("user"), sshModel.getUser());
-        entity.set("connectType", sshModel.getConnectType());
+        entity.set("host", model.getHost());
+        entity.set("port", model.getPort());
+        entity.set(DialectUtil.wrapField("user"), model.getUser());
         Opt.ofBlankAble(id).ifPresent(s -> entity.set("id", StrUtil.format(" <> {}", s)));
-        boolean exists = machineSshServer.exists(entity);
-        Assert.state(!exists, I18nMessageUtil.get("i18n.ssh_already_exists_with_message.d284"));
-        try {
+        boolean exists = machineFtpServer.exists(entity);
+        Assert.state(!exists, I18nMessageUtil.get("i18n.ftp_already_exists.d66b"));
 
-            String workspaceId = getWorkspaceId();
-            Session session = machineSshServer.getSessionByModel(sshModel);
-            JschUtil.close(session);
+
+        MachineFtpModel byKey = machineFtpServer.getByKey(id,false);
+        Optional.ofNullable(byKey).ifPresent(item -> {
+            model.setPassword(StrUtil.emptyToDefault(model.getPassword(), item.getPassword()));
+        });
+
+        // 测试连接
+        try (Ftp ftp = new Ftp(machineFtpServer.toFtpConfig(model),
+            EnumUtil.fromString(FtpMode.class, mode, FtpMode.Active)))  {
+            ftp.pwd();
         } catch (Exception e) {
-            log.warn(I18nMessageUtil.get("i18n.ssh_connection_failed.4719"), e);
-            return new JsonMessage<>(505, I18nMessageUtil.get("i18n.ssh_connection_failed.74ab") + e.getMessage());
+            log.error(I18nMessageUtil.get("i18n.ftp_connection_failed.1f2f"), e);
+            return new JsonMessage<>(500, I18nMessageUtil.get("i18n.ftp_connection_failed_message.bd99") + e.getMessage());
         }
-        sshModel.setStatus(1);
-        int i = add ? machineSshServer.insert(sshModel) : machineSshServer.updateById(sshModel);
+
+        model.setStatus(1);
+        int i = add ? machineFtpServer.insert(model) : machineFtpServer.updateById(model);
         return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
-
-    @PostMapping(value = "delete", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.DEL)
-    public IJsonMessage<String> delete(@ValidatorItem String id) {
-        long count = sshService.countByMachine(id);
-        Assert.state(count <= 0, StrUtil.format(I18nMessageUtil.get("i18n.ssh_connections_warning.1ddb"), count));
-        machineSshServer.delByKey(id);
-        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
-    }
-
-    /**
-     * 执行记录
-     *
-     * @return json
-     */
-    @PostMapping(value = "log-list-data", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(cls = ClassFeature.SSH_TERMINAL_LOG, method = MethodFeature.LIST)
-    public IJsonMessage<PageResultDto<SshTerminalExecuteLog>> logListData(HttpServletRequest request) {
-        Map<String, String> paramMap = ServletUtil.getParamMap(request);
-        PageResultDto<SshTerminalExecuteLog> pageResult = sshTerminalExecuteLogService.listPage(paramMap);
-        return JsonMessage.success(I18nMessageUtil.get("i18n.get_success.fb55"), pageResult);
-    }
-
-    @GetMapping(value = "list-workspace-ssh", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "list-workspace-ftp", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<List<SshModel>> listWorkspaceSsh(@ValidatorItem String id) {
-        MachineSshModel machineSshModel = machineSshServer.getByKey(id);
-        Assert.notNull(machineSshModel, I18nMessageUtil.get("i18n.no_machine.89ed"));
-        SshModel sshModel = new SshModel();
-        sshModel.setMachineSshId(id);
-        List<SshModel> modelList = sshService.listByBean(sshModel);
+    public IJsonMessage<List<FtpModel>> listWorkspaceFtp(@ValidatorItem String id) {
+        MachineFtpModel machineFtpModel = machineFtpServer.getByKey(id);
+        Assert.notNull(machineFtpModel, I18nMessageUtil.get("i18n.no_machine.89ed"));
+        FtpModel ftpModel = new FtpModel();
+        ftpModel.setMachineFtpId(id);
+        List<FtpModel> modelList = ftpService.listByBean(ftpModel);
         modelList = Optional.ofNullable(modelList).orElseGet(ArrayList::new);
-        for (SshModel model : modelList) {
+        for (FtpModel model : modelList) {
             model.setWorkspace(workspaceService.getByKey(model.getWorkspaceId()));
         }
         return JsonMessage.success("", modelList);
     }
 
     /**
-     * 保存工作空间配置
+     * 将 ftp 分配到指定工作空间
      *
-     * @param fileDirs          文件夹
-     * @param id                ID
-     * @param notAllowedCommand 禁止输入的命令
-     * @return json
-     */
-    @PostMapping(value = "save-workspace-config", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Feature(method = MethodFeature.EDIT)
-    public IJsonMessage<String> saveWorkspaceConfig(
-        String fileDirs,
-        @ValidatorItem String id,
-        String notAllowedCommand,
-        String allowEditSuffix) {
-        SshModel sshModel = new SshModel(id);
-        // 目录
-        if (StrUtil.isEmpty(fileDirs)) {
-            sshModel.fileDirs(null);
-        } else {
-            List<String> list = StrSplitter.splitTrim(fileDirs, StrUtil.LF, true);
-            for (String s : list) {
-                String normalize = FileUtil.normalize(s + StrUtil.SLASH);
-                int count = StrUtil.count(normalize, StrUtil.SLASH);
-                Assert.state(count >= 2, I18nMessageUtil.get("i18n.ssh_authorization_directory_cannot_be_root.8125"));
-            }
-            //
-            UserModel userModel = getUser();
-            Assert.state(!userModel.isDemoUser(), PermissionInterceptor.DEMO_TIP);
-            sshModel.fileDirs(list);
-        }
-        sshModel.setNotAllowedCommand(notAllowedCommand);
-        // 获取允许编辑的后缀
-        List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, I18nMessageUtil.get("i18n.suffix_cannot_be_empty.ec72"));
-        sshModel.allowEditSuffix(allowEditSuffixList);
-        sshService.updateById(sshModel);
-        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
-    }
-
-    /**
-     * 将 ssh 分配到指定工作空间
-     *
-     * @param ids         ssh id
+     * @param ids         ftp id
      * @param workspaceId 工作空间id
      * @return json
      */
@@ -329,17 +235,46 @@ public class MachineSshController extends BaseGroupNameController {
     public IJsonMessage<String> distribute(@ValidatorItem String ids, @ValidatorItem String workspaceId) {
         List<String> list = StrUtil.splitTrim(ids, StrUtil.COMMA);
         for (String id : list) {
-            MachineSshModel machineSshModel = machineSshServer.getByKey(id);
-            Assert.notNull(machineSshModel, I18nMessageUtil.get("i18n.no_corresponding_ssh.aa68"));
+            MachineFtpModel machineFtpModel = machineFtpServer.getByKey(id);
+            Assert.notNull(machineFtpModel, I18nMessageUtil.get("i18n.no_ftp_correspondence.23c4"));
             boolean exists = workspaceService.exists(new WorkspaceModel(workspaceId));
             Assert.state(exists, I18nMessageUtil.get("i18n.workspace_not_exist.a6fd"));
-            //
-            if (!sshService.existsSsh2(workspaceId, id)) {
-                //
-                sshService.insert(machineSshModel, workspaceId);
+            if (!ftpService.existsFtp2(workspaceId, id)) {
+                ftpService.insert(machineFtpModel, workspaceId);
             }
         }
 
+        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
+    }
+
+
+    /**
+     * 保存工作空间配置
+     *
+     * @param fileDirs 文件夹
+     * @param id       ID
+     * @return json
+     */
+    @PostMapping(value = "save-workspace-config", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public IJsonMessage<String> saveWorkspaceConfig(
+        String fileDirs,
+        @ValidatorItem String id,
+        String allowEditSuffix) {
+        FtpModel ftpModel = new FtpModel(id);
+        // 目录
+        if (StrUtil.isEmpty(fileDirs)) {
+            ftpModel.fileDirs(null);
+        } else {
+            List<String> list = StrSplitter.splitTrim(fileDirs, StrUtil.LF, true);
+            UserModel userModel = getUser();
+            Assert.state(!userModel.isDemoUser(), PermissionInterceptor.DEMO_TIP);
+            ftpModel.fileDirs(list);
+        }
+        // 获取允许编辑的后缀
+        List<String> allowEditSuffixList = AgentWhitelist.parseToList(allowEditSuffix, I18nMessageUtil.get("i18n.suffix_cannot_be_empty.ec72"));
+        ftpModel.allowEditSuffix(allowEditSuffixList);
+        ftpService.updateById(ftpModel);
         return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
@@ -352,11 +287,10 @@ public class MachineSshController extends BaseGroupNameController {
     @PostMapping(value = "rest-hide-field", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<String> restHideField(@ValidatorItem String id) {
-        MachineSshModel machineSshModel = new MachineSshModel();
-        machineSshModel.setId(id);
-        machineSshModel.setPassword(StrUtil.EMPTY);
-        machineSshModel.setPrivateKey(StrUtil.EMPTY);
-        machineSshServer.updateById(machineSshModel);
+        MachineFtpModel machineFtpModel = new MachineFtpModel();
+        machineFtpModel.setId(id);
+        machineFtpModel.setPassword(StrUtil.EMPTY);
+        machineFtpServer.updateById(machineFtpModel);
         return new JsonMessage<>(200, I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
@@ -366,14 +300,14 @@ public class MachineSshController extends BaseGroupNameController {
     @GetMapping(value = "import-template", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public void importTemplate(HttpServletResponse response) throws IOException {
-        String fileName = I18nMessageUtil.get("i18n.ssh_import_template_csv.14fa");
+        String prefix = I18nMessageUtil.get("i18n.ftp_import_template.8fa3");
+        String fileName = prefix + ".csv";
         this.setApplicationHeader(response, fileName);
         //
         CsvWriter writer = CsvUtil.getWriter(response.getWriter());
-        writer.writeLine("name", "groupName", "host", "port", "user", "password", "charset", "connectType", "privateKey", "timeout");
+        writer.writeLine("name", "groupName", "host", "port", "user", "password", "serverLanguageCode", "systemKey", "charset", "mode", "timeout");
         writer.flush();
     }
-
 
     /**
      * 导出数据
@@ -381,25 +315,25 @@ public class MachineSshController extends BaseGroupNameController {
     @GetMapping(value = "export-data", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DOWNLOAD)
     public void exportData(HttpServletResponse response, HttpServletRequest request) throws IOException {
-        String prefix = I18nMessageUtil.get("i18n.exported_ssh_data.ce88");
+        String prefix = I18nMessageUtil.get("i18n.exported_ftp_data.2b54");
         String fileName = prefix + DateTime.now().toString(DatePattern.NORM_DATE_FORMAT) + ".csv";
         this.setApplicationHeader(response, fileName);
         //
         CsvWriter writer = CsvUtil.getWriter(response.getWriter());
         int pageInt = 0;
-        writer.writeLine("name", "groupName", "host", "port", "user", "password", "charset", "connectType", "privateKey", "timeout");
+        writer.writeLine("name", "groupName", "host", "port", "user", "password", "serverLanguageCode", "systemKey", "charset", "mode", "timeout");
         while (true) {
             Map<String, String> paramMap = ServletUtil.getParamMap(request);
             paramMap.remove("workspaceId");
             // 下一页
             paramMap.put("page", String.valueOf(++pageInt));
-            PageResultDto<MachineSshModel> listPage = machineSshServer.listPage(paramMap, false);
+            PageResultDto<MachineFtpModel> listPage = machineFtpServer.listPage(paramMap, false);
             if (listPage.isEmpty()) {
                 break;
             }
             listPage.getResult()
                 .stream()
-                .map((Function<MachineSshModel, List<Object>>) machineSshModel -> CollUtil.newArrayList(
+                .map((Function<MachineFtpModel, List<Object>>) machineSshModel -> CollUtil.newArrayList(
                     machineSshModel.getName(),
                     machineSshModel.getGroupName(),
                     machineSshModel.getHost(),
@@ -407,8 +341,7 @@ public class MachineSshController extends BaseGroupNameController {
                     machineSshModel.getUser(),
                     machineSshModel.getPassword(),
                     machineSshModel.getCharset(),
-                    machineSshModel.getConnectType(),
-                    machineSshModel.getPrivateKey(),
+                    machineSshModel.getMode(),
                     machineSshModel.getTimeout()
                 ))
                 .map(objects -> objects.stream().map(StrUtil::toStringOrNull).toArray(String[]::new))
@@ -472,38 +405,44 @@ public class MachineSshController extends BaseGroupNameController {
                 String password = csvRow.getByName("password");
                 String charset = csvRow.getByName("charset");
                 //
-                String type = csvRow.getByName("connectType");
-                type = StrUtil.emptyToDefault(type, "").toUpperCase();
-                MachineSshModel.ConnectType connectType = EnumUtil.fromString(MachineSshModel.ConnectType.class, type, MachineSshModel.ConnectType.PASS);
-                String privateKey = csvRow.getByName("privateKey");
+                String mode = csvRow.getByName("mode");
+                FtpMode ftpMode = EnumUtil.fromString(FtpMode.class, mode, FtpMode.Active);
+                mode = ftpMode.name();
+                String serverLanguageCode = csvRow.getByName("serverLanguageCode");
+                String systemKey = csvRow.getByName("systemKey");
+
                 Integer timeout = Convert.toInt(csvRow.getByName("timeout"));
                 //
-                MachineSshModel where = new MachineSshModel();
+                MachineFtpModel where = new MachineFtpModel();
                 where.setHost(host);
                 where.setUser(user);
                 where.setPort(port);
-                where.setConnectType(connectType.name());
-                MachineSshModel machineSshModel = machineSshServer.queryByBean(where);
-                if (machineSshModel == null) {
+                where.setMode(mode);
+                MachineFtpModel machineFtpModel = machineFtpServer.queryByBean(where);
+                if (machineFtpModel == null) {
                     // 添加
                     where.setName(name);
                     where.setGroupName(groupName);
                     where.setPassword(password);
-                    where.setPrivateKey(privateKey);
+                    where.setMode(mode);
                     where.setTimeout(timeout);
                     where.setCharset(charset);
-                    machineSshServer.insert(where);
+                    where.setServerLanguageCode(serverLanguageCode);
+                    where.setSystemKey(systemKey);
+                    machineFtpServer.insert(where);
                     addCount++;
                 } else {
-                    MachineSshModel update = new MachineSshModel();
-                    update.setId(machineSshModel.getId());
+                    MachineFtpModel update = new MachineFtpModel();
+                    update.setId(machineFtpModel.getId());
                     update.setName(name);
                     update.setGroupName(groupName);
                     update.setPassword(password);
-                    update.setPrivateKey(privateKey);
+                    update.setMode(mode);
                     update.setTimeout(timeout);
                     update.setCharset(charset);
-                    machineSshServer.updateById(update);
+                    where.setServerLanguageCode(serverLanguageCode);
+                    where.setSystemKey(systemKey);
+                    machineFtpServer.updateById(update);
                     updateCount++;
                 }
             }
@@ -513,4 +452,6 @@ public class MachineSshController extends BaseGroupNameController {
         String fileCharsetStr = Optional.ofNullable(fileCharset).map(Charset::name).orElse(StrUtil.EMPTY);
         return JsonMessage.success(I18nMessageUtil.get("i18n.import_success_with_details.a4a0"), fileCharsetStr, addCount, updateCount);
     }
+
+
 }

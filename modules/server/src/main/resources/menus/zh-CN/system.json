@@ -20,6 +20,11 @@
         "role": "system"
       },
       {
+        "id": "machine_ftp_info",
+        "title": "FTP管理",
+        "role": "system"
+      },
+      {
         "id": "machine_docker_info",
         "title": "Docker管理",
         "role": "system"
