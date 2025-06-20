@@ -91,7 +91,7 @@
                           >
                             <VerticalLeftOutlined v-if="!!item.fixed" class="custom-column-list__icon" />
                             <HolderOutlined v-else class="custom-column-list__icon" />
-                            <a-checkbox :value="item.dataIndex" :disabled="!!item.fixed">
+                            <a-checkbox :value="String(item.dataIndex)" :disabled="!!item.fixed">
                               {{ item.title }}
                             </a-checkbox>
                             <a-divider style="margin: 2px 0" />
@@ -377,7 +377,7 @@ export default defineComponent({
           storageService.setColumnConfig(
             customColumnList.value.map((item) => {
               return {
-                key: item.dataIndex,
+                key: String(item.dataIndex),
                 checked: item.checked
               } as CatchStorageType
             })

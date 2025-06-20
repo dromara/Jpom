@@ -11,6 +11,7 @@
 1. 【server】优化 数据库表支持配置前缀 `jpom.db.table-prefix` （感谢@ccx2480）
 2. 【server】修复 终端输入命令，按Backspace 会退出终端（感谢[@dgs](https://gitee.com/dgs0924) [Gitee issues ICA57K](https://gitee.com/dromara/Jpom/issues/ICA57K) ）
 3. 【server】优化 脚本日志和 SSH 命令日志支持批量删除（感谢[@lin_yeqi](https://gitee.com/lin_yeqi) [Gitee issues IBIM6W](https://gitee.com/dromara/Jpom/issues/IBIM6W) ）
+4. 【server】修复 表格自定义列在部分字段不生效情况
 
 ------
 
