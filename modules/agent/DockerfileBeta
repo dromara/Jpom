@@ -16,7 +16,7 @@ LABEL maintainer="bwcx-jzy <bwcx_jzy@163.com>"
 LABEL documentation="https://jpom.top"
 
 ENV JPOM_HOME=/usr/local/jpom-agent
-ENV JPOM_PKG_VERSION=2.11.11.4
+ENV JPOM_PKG_VERSION=2.11.12.1
 ENV JPOM_PKG=agent-${JPOM_PKG_VERSION}-release.tar.gz
 ENV SHA1_NAME=agent-${JPOM_PKG_VERSION}-release.tar.gz.sha1
 
