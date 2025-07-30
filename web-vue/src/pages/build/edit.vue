@@ -748,6 +748,34 @@
                     </a-col>
                   </a-row>
                 </a-form-item>
+                <a-form-item :label="$t('i18n_7ddbe15c84')">
+                  <a-auto-complete
+                    v-model:value="tempExtraData.dockerImagesNetworkMode"
+                    :placeholder="$t('i18n_abd9ee868a')"
+                    :options="[
+                      {
+                        title: $t('i18n_c36ab9a223'),
+                        value: 'bridge'
+                      },
+                      {
+                        title: $t('i18n_3d6acaa5ca'),
+                        value: 'none'
+                      },
+                      {
+                        title: $t('i18n_fcaef5b17a'),
+                        value: 'container:<name|id>'
+                      },
+                      {
+                        title: $t('i18n_ff39c45fbc'),
+                        value: 'host'
+                      }
+                    ]"
+                  >
+                    <template #option="item">
+                      {{ item.title }}
+                    </template>
+                  </a-auto-complete>
+                </a-form-item>
                 <a-form-item name="swarmId">
                   <template #label>
                     <a-tooltip>
@@ -1333,8 +1361,8 @@
           chooseScriptVisible === 1
             ? tempExtraData.noticeScriptId
             : temp.script?.indexOf('$ref.script.') != -1
-            ? temp.script.replace('$ref.script.', '')
-            : ''
+              ? temp.script.replace('$ref.script.', '')
+              : ''
         "
         mode="choose"
         @confirm="

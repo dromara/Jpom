@@ -392,6 +392,7 @@ public class ReleaseManage {
         map.put("pull", extraModule.getDockerBuildPull());
         map.put("noCache", extraModule.getDockerNoCache());
         map.put("labels", extraModule.getDockerImagesLabels());
+        map.put("networkMode", extraModule.getDockerImagesNetworkMode());
         map.put("env", envMap);
         Consumer<String> logConsumer = logRecorder::append;
         map.put("logConsumer", logConsumer);
