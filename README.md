@@ -41,10 +41,6 @@
 </p>
 
 <p align="center">
-	👉 国际站：<a target="_blank" href="https://jpom.dromara.org">https://jpom.dromara.org</a>  👈
-</p>
-
-<p align="center">
   👉 大陆站：<a target="_blank" href="https://jpom.top">https://jpom.top</a>  👈
 </p>
 

@@ -38,9 +38,6 @@
 </p>
 
 <p align="center">
-	👉 International Station：<a target="_blank" href="https://jpom.dromara.org">https://jpom.dromara.org</a>  👈
-</p>
-<p align="center">
 	👉Mainland Station：<a target="_blank" href="https://jpom.top">https://jpom.top/</a>  👈
 </p>
 
