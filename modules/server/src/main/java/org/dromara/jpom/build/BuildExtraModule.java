@@ -154,6 +154,10 @@ public class BuildExtraModule extends BaseModel {
      */
     private String dockerImagesLabels;
     /**
+     * 镜像网络模式
+     */
+    private String dockerImagesNetworkMode;
+    /**
      * 项目二级目录
      */
     private String projectSecondaryDirectory;

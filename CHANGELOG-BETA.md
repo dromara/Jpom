@@ -5,6 +5,7 @@
 ### 🐣 新增功能
 
 1. 【server】新增 数据库支持使用达梦数据库（感谢[@wxyShine](https://gitee.com/wxyShine) ）
+2. 【server】新增 FTP 管理，文件查看和构建发布方式新增 FTP 支持
 
 ### 🐞 解决BUG、优化功能
 
@@ -12,6 +13,7 @@
 2. 【server】修复 终端输入命令，按Backspace 会退出终端（感谢[@dgs](https://gitee.com/dgs0924) [Gitee issues ICA57K](https://gitee.com/dromara/Jpom/issues/ICA57K) ）
 3. 【server】优化 脚本日志和 SSH 命令日志支持批量删除（感谢[@lin_yeqi](https://gitee.com/lin_yeqi) [Gitee issues IBIM6W](https://gitee.com/dromara/Jpom/issues/IBIM6W) ）
 4. 【server】修复 表格自定义列在部分字段不生效情况
+5. 【server】优化 构建发布方式中 Docker 镜像支持配置网络模式（感谢@酱总）
 
 ------
 
