@@ -38,11 +38,10 @@
 </p>
 
 <p align="center">
-	👉 International Station：<a target="_blank" href="https://jpom.dromara.org">https://jpom.dromara.org</a>  👈
-</p>
-<p align="center">
 	👉Mainland Station：<a target="_blank" href="https://jpom.top">https://jpom.top/</a>  👈
 </p>
+
+[https://jpom.top/pages/project-suspended/](https://jpom.top/pages/project-suspended/)
 
 ## 😭 Do you experience these pain points in your daily development?
 
