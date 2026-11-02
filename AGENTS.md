@@ -48,7 +48,6 @@ Jpom 是一款“简而轻的低侵入式在线构建、自动部署、日常运
 | `jpom-parent/` | Jpom 仓库（`.gitmodules` 默认 `master`，开发实际用 `dev`） | 全部源码、构建/发版脚本、Gitee Go 与 GitHub Actions 配置 |
 | `docs/` | `bwcx-jzy/jpom-docs` 仓库 `main` 分支 | 官网/文档站（VuePress），由 GitHub Pages 发布 |
 | `download-link/` | Jpom 仓库 `download_link` 分支 | JDK 下载镜像清单（`jdk.rb`），非业务代码 |
-| `aliyun-computenest/` | Jpom 仓库 `aliyun-computenest` 分支 | 阿里云计算巢部署配置 |
 | `script/`（根） | `gitmodules` 分支 | 发布安装包到 Cloudflare R2（`deploy-release-r2.sh`）、同步下载链接、敏感信息检查等维护脚本 |
 | `.run/` | `gitmodules` 分支 | IDEA 本地运行配置（`JpomServerApplication` / `JpomAgentApplication`） |
 
@@ -136,7 +135,6 @@ git -C docs checkout main
 ### 3.3 其他分支
 
 - `download_link`：提供 JDK 下载清单（`download-link/` 子模块），由 `update-jdk.yml` 手动触发（或推送 `error-understand` 分支）更新并发布。
-- `aliyun-computenest`：阿里云计算巢部署配置（`config.yaml`、`templates` 等）。
 - `gitmodules`：本工作区的聚合分支（子模块指针 + 发版工具），不包含业务代码。
 
 ## 4. 版本号、产物与发布渠道
