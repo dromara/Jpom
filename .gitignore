@@ -54,3 +54,8 @@ screenshot
 web-vue/stats.html
 .baidubce.token
 *.class
+
+# 发版脚本生成的安装包/校验文件（如 deploy-release-oss.sh 在仓库根目录生成的 jpom-x.y.z.zip）
+*.zip
+*.tar.gz
+*.sha1
