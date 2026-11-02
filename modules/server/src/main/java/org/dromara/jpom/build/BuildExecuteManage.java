@@ -485,6 +485,34 @@ public class BuildExecuteManage implements Runnable {
                         logRecorder.systemError(format);
                         throw new DiyInterruptException(format);
                     }
+                    // 文件路径级差异过滤：只有指定路径下的文件变更才触发构建
+                    if (StrUtil.isNotEmpty(repositoryLastCommitId)) {
+                        String includePath = buildExtraModule.getDiffIncludePath();
+                        String excludePath = buildExtraModule.getDiffExcludePath();
+                        if (StrUtil.isNotEmpty(includePath) || StrUtil.isNotEmpty(excludePath)) {
+                            List<String> changedFiles = getGitChangedFiles(repositoryLastCommitId, result[0]);
+                            if (changedFiles == null) {
+                                logRecorder.system("获取变更文件列表失败，跳过文件级差异检查");
+                            } else if (changedFiles.isEmpty()) {
+                                String format = StrUtil.format("两次提交间无文件变更: {} -> {}", repositoryLastCommitId, result[0]);
+                                logRecorder.systemError(format);
+                                throw new DiyInterruptException(format);
+                            } else {
+                                boolean matched = changedFiles.stream()
+                                    .anyMatch(f -> AntPathUtil.matchDiffPath(f, includePath, excludePath));
+                                if (!matched) {
+                                    String format = StrUtil.format("变更文件不在监听范围[include: {}, exclude: {}], 变更文件: {}",
+                                        includePath, excludePath, CollUtil.join(changedFiles, ", "));
+                                    logRecorder.systemError(format);
+                                    throw new DiyInterruptException(format);
+                                }
+                                logRecorder.system("变更文件中匹配路径规则的文件: {}",
+                                    changedFiles.stream()
+                                        .filter(f -> AntPathUtil.matchDiffPath(f, includePath, excludePath))
+                                        .collect(Collectors.joining(", ")));
+                            }
+                        }
+                    }
                 }
                 taskData.repositoryLastCommitId = result[0];
                 taskData.repositoryLastCommitMsg = msg;
@@ -503,6 +531,34 @@ public class BuildExecuteManage implements Runnable {
                         String format = StrUtil.format(I18nMessageUtil.get("i18n.no_changes_in_repository_code.b1aa"), result[0]);
                         logRecorder.systemError(format);
                         throw new DiyInterruptException(format);
+                    }
+                    // 文件路径级差异过滤：只有指定路径下的文件变更才触发构建
+                    if (StrUtil.isNotEmpty(repositoryLastCommitId)) {
+                        String includePath = buildExtraModule.getDiffIncludePath();
+                        String excludePath = buildExtraModule.getDiffExcludePath();
+                        if (StrUtil.isNotEmpty(includePath) || StrUtil.isNotEmpty(excludePath)) {
+                            List<String> changedFiles = getSvnChangedFiles(repositoryLastCommitId, result[0]);
+                            if (changedFiles == null) {
+                                logRecorder.system("获取SVN变更文件列表失败，跳过文件级差异检查");
+                            } else if (changedFiles.isEmpty()) {
+                                String format = StrUtil.format("两次提交间无文件变更: r{} -> r{}", repositoryLastCommitId, result[0]);
+                                logRecorder.systemError(format);
+                                throw new DiyInterruptException(format);
+                            } else {
+                                boolean matched = changedFiles.stream()
+                                    .anyMatch(f -> AntPathUtil.matchDiffPath(f, includePath, excludePath));
+                                if (!matched) {
+                                    String format = StrUtil.format("变更文件不在监听范围[include: {}, exclude: {}], 变更文件: {}",
+                                        includePath, excludePath, CollUtil.join(changedFiles, ", "));
+                                    logRecorder.systemError(format);
+                                    throw new DiyInterruptException(format);
+                                }
+                                logRecorder.system("变更文件中匹配路径规则的文件: {}",
+                                    changedFiles.stream()
+                                        .filter(f -> AntPathUtil.matchDiffPath(f, includePath, excludePath))
+                                        .collect(Collectors.joining(", ")));
+                            }
+                        }
                     }
                 }
                 taskData.repositoryLastCommitId = result[0];
@@ -538,6 +594,82 @@ public class BuildExecuteManage implements Runnable {
         // 输出环境变量
         taskData.environmentMapBuilder.eachStr(logRecorder::system);
         return null;
+    }
+
+    /**
+     * 获取Git两次提交间的变更文件列表
+     *
+     * @param oldCommitId 旧提交hash
+     * @param newCommitId 新提交hash
+     * @return 以/开头的相对路径列表，失败返回null
+     */
+    private List<String> getGitChangedFiles(String oldCommitId, String newCommitId) {
+        try {
+            List<String> lines = new ArrayList<>();
+            int exitCode = CommandUtil.exec(this.gitFile, null,
+                line -> {
+                    if (StrUtil.isNotEmpty(line)) {
+                        lines.add(StrUtil.trim(line));
+                    }
+                },
+                "git", "diff", "--name-only", oldCommitId, newCommitId);
+            if (exitCode != 0) {
+                logRecorder.system("git diff 退出码: {}", exitCode);
+                return null;
+            }
+            return lines.stream()
+                .filter(StrUtil::isNotEmpty)
+                .map(s -> FileUtil.normalize(StrUtil.SLASH + s))
+                .collect(Collectors.toList());
+        } catch (Exception e) {
+            logRecorder.system("获取Git变更文件异常: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 获取SVN两个版本间的变更文件列表
+     * <p>
+     * svn diff --summarize 输出格式示例:
+     * <pre>
+     * M       src/main/App.java
+     * A       src/main/NewFile.java
+     * D       docs/old.txt
+     * </pre>
+     * 第一个字符为状态码(M/A/D/R)，后面是空格+文件路径
+     *
+     * @param oldRevision 旧版本号
+     * @param newRevision 新版本号
+     * @return 以/开头的相对路径列表，失败返回null
+     */
+    private List<String> getSvnChangedFiles(String oldRevision, String newRevision) {
+        try {
+            List<String> lines = new ArrayList<>();
+            int exitCode = CommandUtil.exec(this.gitFile, null,
+                line -> {
+                    if (StrUtil.isNotEmpty(line)) {
+                        lines.add(line);
+                    }
+                },
+                "svn", "diff", "--summarize",
+                "-r", oldRevision + ":" + newRevision);
+            if (exitCode != 0) {
+                logRecorder.system("svn diff 退出码: {}", exitCode);
+                return null;
+            }
+            return lines.stream()
+                .filter(s -> StrUtil.isNotEmpty(s) && s.length() > 1)
+                .map(s -> {
+                    // 格式: "M       path/to/file" - 跳过第一个状态字符，trim 得到纯路径
+                    String path = StrUtil.trim(StrUtil.subSuf(s, 1));
+                    return FileUtil.normalize(StrUtil.SLASH + path);
+                })
+                .filter(s -> StrUtil.isNotEmpty(s) && s.length() > 1)
+                .collect(Collectors.toList());
+        } catch (Exception e) {
+            logRecorder.system("获取SVN变更文件异常: {}", e.getMessage());
+            return null;
+        }
     }
 
     private String dockerCommand() {

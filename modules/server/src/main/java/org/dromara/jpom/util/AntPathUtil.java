@@ -59,4 +59,58 @@ public class AntPathUtil {
         });
         return paths;
     }
+
+    /**
+     * 判断路径是否匹配任一Ant规则
+     * <p>
+     * 支持直接配置目录路径（如 /modules/server），会自动尝试目录下的所有文件匹配。
+     * 即配置 /modules/server 等价于同时匹配 /modules/server 和 /modules/server/**
+     *
+     * @param path  以/开头的文件路径
+     * @param rules 逗号分隔的Ant规则，null或空返回false
+     * @return true 如果匹配任一规则
+     */
+    public static boolean matchAny(String path, String rules) {
+        if (StrUtil.isEmpty(rules)) {
+            return false;
+        }
+        List<String> ruleList = StrUtil.splitTrim(rules, StrUtil.COMMA);
+        for (String rule : ruleList) {
+            String normalizedRule = FileUtil.normalize(StrUtil.SLASH + rule);
+            if (ANT_PATH_MATCHER.match(normalizedRule, path)) {
+                return true;
+            }
+            // 如果规则不含通配符，自动尝试作为目录匹配（追加 /**）
+            // 这样用户配置 /modules/server 就能匹配该目录下所有文件
+            if (!StrUtil.containsAny(normalizedRule, "*", "?", "{")) {
+                String dirRule = normalizedRule + "/**";
+                if (ANT_PATH_MATCHER.match(dirRule, path)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 差异路径过滤：include匹配 + exclude排除
+     * <p>
+     * includePath为空 → 通过（向后兼容）
+     * includePath非空 → 至少匹配一个 → 再检查excludePath排除
+     *
+     * @param path        变更文件的仓库相对路径
+     * @param includePath 包含规则（逗号分隔），null或空表示不过滤
+     * @param excludePath 排除规则（逗号分隔），null或空表示不排除
+     * @return true 表示该文件变更有效（触发构建）
+     */
+    public static boolean matchDiffPath(String path, String includePath, String excludePath) {
+        String normalizedPath = FileUtil.normalize(StrUtil.SLASH + path);
+        if (StrUtil.isNotEmpty(includePath) && !matchAny(normalizedPath, includePath)) {
+            return false;
+        }
+        if (StrUtil.isNotEmpty(excludePath) && matchAny(normalizedPath, excludePath)) {
+            return false;
+        }
+        return true;
+    }
 }
