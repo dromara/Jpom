@@ -15,7 +15,7 @@
   4. 不要提交构建产物与本地工具文件：`target/`、`dist/`、`*.bak`、`pom.xml.versionsBackup`、`*.zip`、`*.tar.gz`、`*.sha1`、`.tmp/`、`awscliv2.zip`、`ossutil-*/`、`node_modules/`，以及 `*.pem`、`*.key` 等密钥/证书文件。
   5. **每次提交、推送前都必须做敏感信息检查**（开源仓库）：不得提交真实密码、Token、密钥、证书、内网地址和用户隐私数据。提交前运行 `bash script/check-sensitive.sh --all`，推送前加上 `--range <基线>..HEAD`，详见第 8 节。
   6. **GitHub 是 Gitee 的自动镜像，只读**：主仓库在 Gitee（`gitee.com/dromara/Jpom`），Gitee 收到推送后会自动镜像到 GitHub（`github.com/dromara/Jpom`）。**代码提交、推送、PR、tag、Release 一律只对 Gitee 操作；禁止直接向 GitHub 提交、推送、提 PR 或做任何写操作。**
-  7. **文档与临时文件分离（`.tmp` 治理）**：`.tmp/` 只放**可随时删除**的产物（构建/依赖缓存、下载的二进制、PoC 复现环境、大体积证据、一次性脚本）；**不要把唯一一份文档或结论只放在 `.tmp/`**。需要留存的文档（审计/分析/验证记录、环境信息、操作手册）写入工作区内的独立文档库 `dev-docs/`（独立 git 仓库，不提交到本仓，规则见 `dev-docs/README.md`）；任务收尾时把 `.tmp/` 中值得保留的 md 归档过去，详见第 9 节。
+  7. **文档记录规则（开发文档 → `dev-docs/`，用户文档 → `docs/`）**：**开发过程中的一切产出（需求/方案、代码分析、审计、验证与回归、排障、技术决策、issue/PR 处理记录、AI 会话结论、环境信息、操作手册）都必须记录到工作区独立文档库 `dev-docs/`**（独立私有 git 仓库，不提交到本仓，规则见 `dev-docs/README.md`）；只有**用户需要学习/操作**的必要文档（功能使用说明、安装/升级/配置操作、FAQ、必要的技术说明，以及发版必须更新的版本号/更新日志/下载页）才更新到 `docs/`（jpom-docs）。`.tmp/`、`jpom-parent/.tmp/` 只放**可随时删除**的产物，**不得作为唯一副本**，任务收尾必须迁移/归档。判断方法与收尾清单见第 9 节。
 
 ## 1. 项目概览
 
@@ -132,6 +132,7 @@ git -C docs checkout main
 - 文档站发布统一走 GitHub Pages；历史 OSS 回退工作流（`ali-oss.yml`）及配套 `Refresh.py`、`cdn-urllist.txt` 已随阿里云 OSS 停用一并移除，`baiduPush.yml` 为每日百度收录推送。
 - 本地预览：`cd docs && npm install && npm run ldev`（默认端口 `2216`）。
 - **例外说明**：`docs` 是独立的 GitHub 仓库（`bwcx-jzy/jpom-docs`），其 `main`/`dist` 与 GitHub Pages 流程不受“主仓只在 Gitee 操作”的限制；但**不要**把 Jpom 主仓代码提交到这个仓库。
+- **内容边界**：本仓库只承载**用户文档**（功能使用说明、安装/升级/配置操作、FAQ、必要的技术说明）与发版信息；**开发过程记录、内部环境信息、审计与漏洞细节、issue 分析、内部决策写 `dev-docs/`，不要提交到这里**（详见第 9 节）。
 
 ### 3.3 其他分支
 
@@ -450,7 +451,44 @@ bash script/check-sensitive.sh --all --range origin/dev..HEAD
 3. 由维护者用 `git filter-repo`（或 BFG）清理历史，并协调强推与镜像（Gitee/GitHub）同步；操作前先备份。
 4. 按 `jpom-parent/SECURITY.md` 的流程披露与说明修复措施。
 
-## 9. 常见坑
+## 9. 文档记录规则：开发文档（dev-docs）与用户文档（jpom-docs）
+
+> 目标：**开发过程中的一切产出都有唯一、长期、可检索的落点**；公开文档站只承载用户需要的内容。
+
+### 9.1 两条硬规则
+
+1. **开发过程 → `dev-docs/`（必须记录）**：需求与方案、代码分析/审计、验证与回归记录、排障过程、技术决策、issue/PR 处理记录、AI 会话结论、环境信息、可复用操作手册，全部写入工作区 `dev-docs/`，按 `dev-docs/README.md` 第 7 节落位与提交。`.tmp/`、`jpom-parent/.tmp/` 只做临时中转，**不得作为唯一副本**；任务收尾必须**迁移**/归档到 dev-docs（迁移后删除 `.tmp` 原稿）。
+2. **用户文档 → `docs/`（jpom-docs，按需）**：只有**用户需要学习/操作**的内容才更新到公开文档站，包括：功能使用说明、安装/升级/配置操作、常见问题（FAQ）、必要的技术说明（架构/原理/兼容性/安全说明），以及发版必须同步的版本号/更新日志/下载页。**开发过程记录、内部环境信息、审计与漏洞细节、issue 分析、内部决策禁止写入 jpom-docs。**
+
+### 9.2 判断方法（写之前先问 4 个问题）
+
+| # | 问题 | 判断 |
+| --- | --- | --- |
+| 1 | 读者是谁？ | 内部开发者/维护者 → `dev-docs/`；最终用户 → `docs/`（jpom-docs） |
+| 2 | 这是过程记录还是产品说明？ | 过程记录（分析/审计/验证/排障/决策/issue 处理）→ `dev-docs/`；产品说明 → `docs/` |
+| 3 | 需要长期留存吗？ | 需要 → 必须写入 `dev-docs/`，不能只留 `.tmp` |
+| 4 | 会涉及内网 IP、内部路径、未修复漏洞细节、凭据或用户隐私吗？ | 会 → 只能进 `dev-docs/`（私有），**绝不能**进 jpom-docs |
+
+### 9.3 落位速查
+
+| 内容 | 落点 |
+| --- | --- |
+| 开发过程记录（分析/审计/验证/排障/决策/issue 处理） | `dev-docs/archive/<YYYY-MM>-<主题>/`（可用 `dev-docs/templates/dev-record.md`） |
+| 环境信息（IP/VMID/账号/端口/访问方式） | `dev-docs/environments/<环境>/` |
+| 可复用操作手册 / 排障步骤 | `dev-docs/runbooks/` |
+| 面向用户的功能/操作说明、FAQ、必要技术说明 | `docs/docs/`（jpom-docs），按 3.2 流程评审发布 |
+| 发版必改的用户文档（版本号/更新日志/下载页） | `docs/`（第 6 节发版流程） |
+| 临时产物（构建缓存、二进制、PoC 环境、大体积证据） | `.tmp/`（可随时删除，收尾清理） |
+
+### 9.4 任务收尾清单（每次开发任务结束前）
+
+- [ ] `.tmp/`、`jpom-parent/.tmp/` 中值得留存的 md/结论是否已迁移到 dev-docs？
+- [ ] 关键结论（含未验证项、后续建议、用户文档影响）是否已按 `dev-docs/templates/dev-record.md` 记录？
+- [ ] dev-docs 是否已提交（提交信息用 `docs(...)` 前缀）？
+- [ ] 本次改动是否影响用户使用？→ 是：在开发记录里写清“jpom-docs 需要更新的页面”，并按 3.2 流程更新或提出建议
+- [ ] 提交 docs 前是否检查过内部信息（内网地址、内部路径、未修复漏洞细节、凭据、用户隐私）？
+
+## 10. 常见坑
 
 - **子模块分支错位**：`.gitmodules` 里 `jpom-parent` 默认 `master`，开发应在 `dev`；`git submodule update --remote` 会切走，操作前先确认。
 - **根仓 `pom.xml` 过期**（版本 2.9.10，仅用于 IDE 聚合导入）：实际构建请在 `jpom-parent/` 内执行 Maven。
@@ -460,14 +498,15 @@ bash script/check-sensitive.sh --all --range origin/dev..HEAD
 - **文档站发布**：只走 GitHub Pages（push `docs` 的 `main`）；历史 `deploy-docs-pages.sh` 与 `ali-oss.yml` 已删除。
 - **根目录 `README.md` 的子模块说明可能过时**：以 `.gitmodules` 实际配置为准（`docs` 已指向 `bwcx-jzy/jpom-docs` 的 `main`）。
 - **不要提交**工作区根部的本地工具/临时文件：`.tmp/`、`awscliv2.zip`、`ossutil-2.3.0-linux-amd64/`、`aws/` 等。
-- **`.tmp/` 不是文档仓库**：`.tmp/` 只用于可丢弃的临时产物；需要留存的文档、环境信息和操作手册写 `dev-docs/`（第 0 节第 7 条），任务结束前归档并提交，避免 `.tmp` 被清理后文档丢失。
+- **`.tmp/` 不是文档仓库**：`.tmp/`、`jpom-parent/.tmp/` 只用于可丢弃的临时产物；开发过程记录、环境信息和操作手册写 `dev-docs/`（第 0 节第 7 条、第 9 节），任务结束前迁移/归档并提交，避免 `.tmp` 被清理后文档丢失。
+- **jpom-docs 不是开发文档仓库**：`docs/` 只放用户需要学习/操作的必要文档；开发过程记录、内部环境、审计与未修复漏洞细节禁止进入 `docs/`（第 9 节）。
 - **敏感信息检查**：提交前运行 `bash script/check-sensitive.sh --all`，推送前加上 `--range <基线>..HEAD`；`.gitignore` 已忽略密钥类文件与本地临时文件，禁止用 `git add -f` 绕过（详见第 8 节）。
 - **GitHub 只读**：主仓在 Gitee，GitHub 是 Gitee 自动镜像；不要直接向 GitHub 提交/推送/开 PR、不要配置 GitHub 推送 remote，`push.bat` 里的 GitHub 推送部分已过时。
 - **构建 JDK**：请使用 JDK 8；更高版本 JDK 可能因老版本 maven 插件/编译参数失败。
 - **Docker 构建**：`buildx` 需先启用 experimental / binfmt_misc，参见 `jpom-parent/script/docker-buildx.md`。
 - **项目已暂停维护**：不要在未授权情况下更新下载中心、镜像、文档站或发布公告；对外发布前与维护者确认。
 
-## 10. 相关权威文件
+## 11. 相关权威文件
 
 修改流程或结构后，请同步更新本文件与以下来源：
 
@@ -482,4 +521,4 @@ bash script/check-sensitive.sh --all --range origin/dev..HEAD
 - `jpom-parent/.workflow/`、`jpom-parent/.github/workflows/`：CI/流水线
 - `docs/README.md`、`docs/.github/workflows/deploy.yml`：文档站与部署
 - `.gitmodules`：子模块清单与默认分支
-- `dev-docs/README.md`：本地工作区文档库（文档写入规则、环境登记、历史归档；独立 git 仓库，不随本仓提交）
+- `dev-docs/README.md`、`dev-docs/AGENTS.md`：本地工作区文档库（文档写入规则、dev-docs/jpom-docs 分工、环境登记、历史归档；独立私有 git 仓库，不随本仓提交）
