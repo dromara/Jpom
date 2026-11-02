@@ -42,7 +42,16 @@ case "${ARCH_O}" in
 	;;
 esac;
 
-download_url=`curl -s https://gitee.com/dromara/Jpom/raw/download_link/jdk/${JAVA_VERSION}/${ARCH}`
+# -L 跟随 Gitee raw 的 302 跳转（跳转到 raw.giteeusercontent.com）
+download_url=`curl -fsSL "https://gitee.com/dromara/Jpom/raw/download_link/jdk/${JAVA_VERSION}/${ARCH}"`
+download_url=`echo "${download_url}" | tr -d '\r\n'`
+if [ -z "${download_url}" ] || ! echo "${download_url}" | grep -Eq '^https?://'; then
+	echo "not found java ${JAVA_VERSION} ${ARCH} download url"
+	exit 1
+fi
 
-wget ${download_url} -O jdk.tar.gz
+if ! wget "${download_url}" -O jdk.tar.gz; then
+	echo "download java ${JAVA_VERSION} ${ARCH} failure: ${download_url}"
+	exit 1
+fi
 tar -zxf jdk.tar.gz --strip-components 1 -C /opt/java/
