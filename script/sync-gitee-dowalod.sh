@@ -8,6 +8,13 @@
 # THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 # See the Mulan PSL v2 for more details.
 #
+# ============================================================================
+# 已废弃（DEPRECATED）：本脚本是 2.8/2.9 时代的下载清单整理工具。
+# 阿里云 OSS 已停用，脚本内的 OSS 同步命令与其生成的 download.jpom.top 链接
+# 均已失效（相关函数仍保留旧的生成逻辑，仅作历史参考，勿使用）。
+# 安装包上传与下载中心统一使用 Cloudflare R2：见 script/deploy-release-r2.sh，
+# 下载链接一律以 https://d2.jpom.download 为准。
+# ============================================================================
 
 
 DIR_PATH=$(cd `dirname $0`; pwd)""
@@ -129,7 +136,7 @@ done
 # checkZip
 
 
-# ossutilmac64 sync ${DIR_PATH}/temp-github/ oss://jpom-releases/release/ --delete -f
+# 历史 OSS 同步命令已停用（阿里云 OSS 不可用）：安装包上传请使用 script/deploy-release-r2.sh（Cloudflare R2）
 
 function updateDocUrlItem(){
 
