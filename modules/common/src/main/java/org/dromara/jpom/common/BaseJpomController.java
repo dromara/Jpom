@@ -48,7 +48,7 @@ public abstract class BaseJpomController {
      * @return ip
      */
     protected String getIp() {
-        return ServletUtil.getClientIP(getRequest());
+        return ClientIpUtil.resolve(getRequest());
     }
 
     /**
@@ -221,7 +221,7 @@ public abstract class BaseJpomController {
         if (request == null) {
             return null;
         }
-        return ServletUtil.getClientIP(request);
+        return ClientIpUtil.resolve(request);
     }
 
     public HttpServletRequest getRequest() {

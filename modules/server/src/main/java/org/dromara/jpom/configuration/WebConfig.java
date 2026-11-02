@@ -14,6 +14,10 @@ import lombok.Data;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * @author bwcx_jzy
  * @since 23/12/25 025
@@ -75,6 +79,27 @@ public class WebConfig {
      * BASE64
      */
     private String transportEncryption = "NONE";
+
+    /**
+     * 可信代理列表，支持 IP 与 CIDR（IPv4/IPv6）。
+     * <p>
+     * 只有 request 的 remoteAddr 命中该列表时才信任 X-Forwarded-For / X-Real-IP，
+     * 避免客户端伪造转发头绕过 IP 限制。未配置时默认信任本机回环，兼容同机反向代理部署。
+     */
+    private List<String> trustedProxies;
+
+    /**
+     * 默认可信代理：本机回环（同机 nginx 等反向代理场景）
+     */
+    private static final List<String> DEFAULT_TRUSTED_PROXIES = Collections.unmodifiableList(
+        Arrays.asList("127.0.0.1/32", "::1/128"));
+
+    public List<String> getTrustedProxies() {
+        if (this.trustedProxies == null || this.trustedProxies.isEmpty()) {
+            return DEFAULT_TRUSTED_PROXIES;
+        }
+        return this.trustedProxies;
+    }
 
     public String getName() {
         return StrUtil.emptyToDefault(name, I18nMessageUtil.get("i18n.jpom_project_maintenance_system.7f8e"));

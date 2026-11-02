@@ -19,6 +19,7 @@ import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.jpom.common.ClientIpUtil;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
@@ -231,7 +232,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
             attributes.put("permissionMsg", permissionMsg);
 
             //
-            String ip = ServletUtil.getClientIP(httpServletRequest);
+            String ip = ClientIpUtil.resolve(httpServletRequest);
             attributes.put("ip", ip);
             //
             String userAgent = ServletUtil.getHeaderIgnoreCase(httpServletRequest, HttpHeaders.USER_AGENT);
