@@ -7,6 +7,39 @@
 > 📦 安装包统一上传到 **Cloudflare R2**（下载中心 `https://d2.jpom.download`）。阿里云 OSS 已全面停用，
 > 上传使用根目录 `script/deploy-release-r2.sh`（依赖本机已配置好的 `rclone` remote `r2`）。
 
+## 一键版（推荐）
+
+根目录 `script/release.sh` 串联：合并分支 → CHANGELOG 日期 → 版本替换 → 前端/后端构建
+→ 产物完整性校验 → 服务端/插件端启动冒烟 → 提交/推送 Gitee → R2 上传 → docs 更新 →（可选）Docker。
+
+```bash
+cd <工作区根目录>
+
+# beta：按 tag 自动计算下一个版本（当前 2.11.12.1 → 2.11.12.2）
+bash script/release.sh beta
+
+# 只预检并打印计划，不修改任何文件
+bash script/release.sh beta --dry-run
+
+# 只做本地准备：合并 + 日期 + 版本号 + 构建 + 校验 + 冒烟 + 本地提交
+# （不推送、不上传 R2、不改文档，适合先本地验收）
+bash script/release.sh beta --to commit
+
+# 稳定版：按 tag.release 自动计算下一个 patch（2.11.12 → 2.11.13）
+bash script/release.sh release --yes
+
+# 断点续跑（示例：推送成功后从 R2 上传继续）
+bash script/release.sh beta --version 2.11.12.2 --from upload
+```
+
+安全约定：
+
+- 不带 `--yes` 时，push / R2 上传 / docs 发布 / Docker 推送前逐项交互确认；非交互环境必须显式 `--yes`。
+- `--dry-run` 只做预检并打印计划；`--no-push` / `--no-upload` / `--no-docs` 可关闭对应阶段（组合受保护）。
+- beta 要求 `dev` 的 `CHANGELOG-BETA.md` 已有对应版本段落（日期可由脚本补）；release 要求 `master` 的 `CHANGELOG.md` 已有 `x.y.z-release` 段落（release 日志需人工整理，脚本不自动生成）。
+- 只推送 Gitee；docs 子模块仍按既有流程推 GitHub Pages。beta 不打 tag、不创建 Gitee Release。
+- 日志在 `.tmp/release/`；失败后按日志提示用 `--from <阶段>` 续跑。
+
 ## 手动版
 
 1. 将 dev 分支合并到 master

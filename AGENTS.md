@@ -231,6 +231,7 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
   2. 运行版本替换脚本 + 打包 + 冒烟；
   3. `commit release <version>` / `commit beta <version>` —— 版本号提交。
 - 开始前：各子模块在预期分支、`git status` 干净、无遗留 `*.bak`。
+- **优先使用一键脚本 `script/release.sh`（见 6.6）**：它已包含合并、CHANGELOG 日期、版本替换、构建、产物校验、启动冒烟、推送、R2、docs 与可选 Docker；本文手动步骤保留用于排障与理解流程。
 
 ### 6.2 稳定版发版（手动版，按 `RELEASE.md` 整理）
 
@@ -330,6 +331,36 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
 - [ ] Docker 镜像已推送（稳定版：`<version>` 与 `latest`）
 - [ ] Gitee Release 已创建（GitHub 由镜像自动同步，不手动操作）
 - [ ] 已确认得到维护者授权，且所有正式渠道操作符合预期
+
+### 6.6 一键发版脚本（推荐）
+
+根目录 `script/release.sh` 把 6.2 / 6.3 的机械步骤串成一条命令，适用于 beta 与 stable：
+
+```bash
+# beta：自动计算下一个 beta（如 2.11.12.1 -> 2.11.12.2）
+bash script/release.sh beta
+
+# stable：自动计算下一个 patch（如 2.11.12 -> 2.11.13）
+bash script/release.sh release
+
+# 只预检并打印计划，不修改任何文件
+bash script/release.sh beta --dry-run
+
+# 只做本地准备（合并/日期/版本/构建/校验/冒烟/本地提交），不推送、不上传、不改文档
+bash script/release.sh beta --to commit
+
+# 失败后从指定阶段续跑（阶段：preflight/merge/changelog/version/build/verify/smoke/commit/push/upload/docs/docker/finish）
+bash script/release.sh beta --version 2.11.12.2 --from upload
+```
+
+脚本行为与安全约定：
+
+- 版本号默认由 `script/tag.*.txt` 自动计算；beta 要求源分支的 `CHANGELOG-BETA.md` 已有对应段落（日期可自动补），release 要求目标分支的 `CHANGELOG.md` 已有 `x.y.z-release` 段落（内容需人工整理）。
+- 默认依次执行：合并源分支 → 补日期 → `replaceVersion.sh` → 前端 `npm install && npm run build` → `mvn clean package` → 产物校验（sha1/zip/class 非空/class 与 `target/classes` 一致/前端 dist）→ 服务端与插件端启动冒烟 → 提交 → 推送 Gitee → R2 上传 → docs 更新 →（可选）Docker。
+- push / R2 / docs / Docker 前默认交互确认，非交互环境必须显式 `--yes`；`--dry-run` 只预检；`--no-push` / `--no-upload` / `--no-docs` 可关闭阶段（组合受保护）。
+- beta 不打 tag、不创建 Gitee Release；release 打 `vX.Y.Z` tag。只推 Gitee；docs 子模块按 3.2 推 GitHub Pages。
+- 本机 Maven 曾出现偶发坏包（0 字节 class、jar 内旧 class），脚本默认 `--build-retries 1` 自动重跑构建并重新校验；日志在 `.tmp/release/`。
+- 脚本需要 JDK、Maven、Node/npm、python3、unzip、curl、rclone（上传时）；可用 `--jdk-home`、`--mvn`、`--node`、`--npm`、`--npm-cache` 覆盖检测结果。
 
 ## 7. 提交规范与代码风格
 
@@ -440,7 +471,8 @@ bash script/check-sensitive.sh --all --range origin/dev..HEAD
 
 修改流程或结构后，请同步更新本文件与以下来源：
 
-- `RELEASE.md`（根目录）：发布流程（手动版 / 流水线版）
+- `RELEASE.md`（根目录）：发布流程（一键版 / 手动版 / 流水线版）
+- `script/release.sh`：一键发版编排脚本（合并、版本、构建、校验、冒烟、推送、R2、docs、Docker）
 - `script/check-sensitive.sh`：提交/推送前的隐私与密钥检查脚本（第 8 节）
 - `script/deploy-release-r2.sh`：安装包上传 Cloudflare R2（rclone）的发布脚本
 - `jpom-parent/SECURITY.md`：安全漏洞报告与披露流程
