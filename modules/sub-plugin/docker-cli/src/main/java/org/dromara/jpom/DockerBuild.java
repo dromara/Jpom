@@ -415,24 +415,41 @@ public class DockerBuild implements AutoCloseable {
     private void buildRunOn(DockerClient dockerClient, String runsOn, String image, File tempDir, LogRecorder logRecorder) {
         try {
             dockerClient.inspectImageCmd(image).exec();
-        } catch (NotFoundException e) {
-            HashSet<String> tags = new HashSet<>();
-            tags.add(image);
-            try {
-                File file = plugin.getResourceToFile(String.format("runs/%s/" + DockerUtil.DOCKER_FILE, runsOn), tempDir);
-                Assert.notNull(file, I18nMessageUtil.get("i18n.unsupported_prefix.4f8c") + runsOn);
-                dockerClient.buildImageCmd(file)
-                    .withTags(tags)
-                    .exec(new ResultCallback.Adapter<BuildResponseItem>() {
-                        @Override
-                        public void onNext(BuildResponseItem object) {
-                            String responseItem = DockerUtil.parseResponseItem(object);
-                            logRecorder.append(responseItem);
-                        }
-                    }).awaitCompletion();
-            } catch (InterruptedException ex) {
-                logRecorder.error(I18nMessageUtil.get("i18n.build_runs_on_image_interrupted.00fd"), ex);
-            }
+            // 镜像已经存在，无需构建
+            return;
+        } catch (NotFoundException ignored) {
+            // 镜像不存在，需要构建
+        }
+        File file = plugin.getResourceToFile(String.format("runs/%s/" + DockerUtil.DOCKER_FILE, runsOn), tempDir);
+        Assert.notNull(file, I18nMessageUtil.get("i18n.unsupported_prefix.4f8c") + runsOn);
+        HashSet<String> tags = new HashSet<>();
+        tags.add(image);
+        String errorMessage = String.format(I18nMessageUtil.get("i18n.build_runs_on_image_failed.0568"), image);
+        try {
+            dockerClient.buildImageCmd(file)
+                .withTags(tags)
+                .exec(new ResultCallback.Adapter<BuildResponseItem>() {
+                    @Override
+                    public void onNext(BuildResponseItem object) {
+                        String responseItem = DockerUtil.parseResponseItem(object);
+                        logRecorder.append(responseItem);
+                    }
+                }).awaitCompletion();
+        } catch (InterruptedException ex) {
+            logRecorder.error(I18nMessageUtil.get("i18n.build_runs_on_image_interrupted.00fd"), ex);
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(errorMessage, ex);
+        } catch (RuntimeException ex) {
+            // 构建命令执行异常时给出明确错误信息，避免后续流程只能看到 404 No such image
+            logRecorder.error(errorMessage, ex);
+            throw new IllegalStateException(errorMessage, ex);
+        }
+        // 构建结束后再次校验镜像是否存在，避免构建失败后继续创建容器（只会报 404 No such image）
+        try {
+            dockerClient.inspectImageCmd(image).exec();
+        } catch (NotFoundException ex) {
+            logRecorder.error(errorMessage, ex);
+            throw new IllegalStateException(errorMessage, ex);
         }
     }
 

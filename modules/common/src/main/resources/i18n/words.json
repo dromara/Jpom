@@ -114,6 +114,7 @@
 	"i18n.build_record_lost.f6a2":"构建记录丢失,无法继续构建",
 	"i18n.build_record_not_exist.8186":"构建记录不存在",
 	"i18n.build_resource_cleanup_failed.c4cf":"清理构建资源失败",
+	"i18n.build_runs_on_image_failed.0568":"构建 runsOn 镜像 %s 失败，请检查构建日志、网络或镜像源",
 	"i18n.build_runs_on_image_interrupted.00fd":"构建 runsOn 镜像被中断",
 	"i18n.build_source.2ef9":"构建来源,",
 	"i18n.build_status_abnormal.8ca1":"构建状态异常或者被取消",
