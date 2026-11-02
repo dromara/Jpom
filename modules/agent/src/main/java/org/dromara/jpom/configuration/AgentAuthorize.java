@@ -27,6 +27,12 @@ import org.dromara.jpom.util.JvmUtil;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.util.Set;
 
 /**
  * agent 端授权账号信息
@@ -91,7 +97,8 @@ public class AgentAuthorize {
             String oldAgentPwd = autoUser.getAgentPwd();
             if (StrUtil.isNotEmpty(oldAgentPwd)) {
                 this.agentPwd = oldAgentPwd;
-                log.info("Already authorized account:{} password:{} Authorization information storage location：{}", this.agentName, this.agentPwd, FileUtil.getAbsolutePath(path));
+                restrictFilePermission(path);
+                log.info("Already authorized account:{} Authorization information storage location：{}", this.agentName, FileUtil.getAbsolutePath(path));
                 return;
             }
         }
@@ -101,7 +108,31 @@ public class AgentAuthorize {
         autoUser.setAgentPwd(this.agentPwd);
         // 写入文件中
         JsonFileUtil.saveJson(path, autoUser.toJson());
-        log.info("Automatically generate authorized account:{}  password:{}  Authorization information storage location：{}", this.agentName, this.agentPwd, FileUtil.getAbsolutePath(path));
+        restrictFilePermission(path);
+        log.info("Automatically generate authorized account:{}  Authorization information storage location：{}", this.agentName, FileUtil.getAbsolutePath(path));
+    }
+
+    /**
+     * 收紧授权信息文件权限，避免同机其他用户直接读取明文密码
+     * <p>
+     * 非 POSIX 文件系统（如 Windows）不支持时忽略
+     *
+     * @param file 授权信息文件
+     */
+    private static void restrictFilePermission(File file) {
+        if (file == null || !file.isFile()) {
+            return;
+        }
+        Path path = file.toPath();
+        try {
+            if (Files.getFileAttributeView(path, PosixFileAttributeView.class) == null) {
+                return;
+            }
+            Set<PosixFilePermission> permissions = PosixFilePermissions.fromString("rw-------");
+            Files.setPosixFilePermissions(path, permissions);
+        } catch (Exception e) {
+            log.warn("Failed to restrict authorization information file permission: {}", FileUtil.getAbsolutePath(file), e);
+        }
     }
 
     public void init(JpomApplication configBean) {
