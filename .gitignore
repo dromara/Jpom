@@ -62,3 +62,18 @@ ossutil_output/
 # 本地下载的云工具（aws cli、ossutil 等）
 /aws/
 /ossutil-*/
+
+# ===== 密钥 / 证书 / 本地凭据（开源仓库禁止提交）=====
+# 提交前请同时运行：bash script/check-sensitive.sh --all
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.kdbx
+*.ppk
+*.ovpn
+id_rsa*
+id_ed25519*
+rclone.conf
