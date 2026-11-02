@@ -22,8 +22,13 @@ import cn.hutool.json.JSONObject;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import lombok.Lombok;
+import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
+import org.dromara.jpom.common.validator.ValidatorRule;
+import org.dromara.jpom.model.user.UserModel;
+import org.dromara.jpom.permission.SystemPermission;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,9 +48,14 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @since 2023/3/10
  */
+@Slf4j
 @RestController
 @RequestMapping(value = "/tools")
 public class ToolsController {
+    /**
+     * 网络工具超时时间上限（秒），避免单次请求长时间占用线程
+     */
+    private static final int MAX_TIMEOUT_SECOND = 60;
 
     @GetMapping(value = "cron", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<List<Long>> cron(@ValidatorItem String cron, @ValidatorItem int count, String date, boolean isMatchSecond) {
@@ -76,7 +86,9 @@ public class ToolsController {
     }
 
     @GetMapping(value = "ip-list", produces = MediaType.APPLICATION_JSON_VALUE)
+    @SystemPermission
     public IJsonMessage<List<JSONObject>> ipList() {
+        log.info("tools ip-list user:{}", currentUserName());
         Collection<NetworkInterface> networkInterfaces = NetUtil.getNetworkInterfaces();
         List<JSONObject> collect = networkInterfaces.stream()
             .sorted((o1, o2) -> 0)
@@ -118,22 +130,75 @@ public class ToolsController {
     }
 
     @GetMapping(value = "net-ping", produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<JSONObject> ping(@ValidatorItem String host, @ValidatorItem int timeout) {
-        boolean ping = NetUtil.ping(host, (int) TimeUnit.SECONDS.toMillis(Math.max(1, timeout)));
-        //
-        JSONObject jsonObject = this.parseIp(host);
-        jsonObject.set("ping", ping);
-        return JsonMessage.success("", jsonObject);
+    @SystemPermission
+    public IJsonMessage<JSONObject> ping(@ValidatorItem(range = "1:255") String host, @ValidatorItem int timeout) {
+        int timeoutSecond = normalizeTimeout(timeout);
+        String user = currentUserName();
+        try {
+            boolean ping = NetUtil.ping(host, (int) TimeUnit.SECONDS.toMillis(timeoutSecond));
+            //
+            JSONObject jsonObject = this.parseIp(host);
+            jsonObject.set("ping", ping);
+            log.info("tools net-ping user:{} host:{} timeout:{} result:{}", user, safeLogValue(host), timeoutSecond, ping);
+            return JsonMessage.success("", jsonObject);
+        } catch (RuntimeException e) {
+            log.info("tools net-ping user:{} host:{} timeout:{} error:{}", user, safeLogValue(host), timeoutSecond, e.getMessage());
+            throw e;
+        }
     }
 
     @GetMapping(value = "net-telnet", produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<JSONObject> telnet(@ValidatorItem String host, int port, @ValidatorItem int timeout) {
-        InetSocketAddress address = NetUtil.createAddress(host, port);
-        boolean open = NetUtil.isOpen(address, (int) TimeUnit.SECONDS.toMillis(Math.max(1, timeout)));
-        //
-        JSONObject jsonObject = this.parseIp(host);
-        jsonObject.set("open", open);
-        return JsonMessage.success("", jsonObject);
+    @SystemPermission
+    public IJsonMessage<JSONObject> telnet(@ValidatorItem(range = "1:255") String host,
+                                           @ValidatorItem(value = ValidatorRule.NUMBERS, range = "1:65535") int port,
+                                           @ValidatorItem int timeout) {
+        int timeoutSecond = normalizeTimeout(timeout);
+        String user = currentUserName();
+        try {
+            InetSocketAddress address = NetUtil.createAddress(host, port);
+            boolean open = NetUtil.isOpen(address, (int) TimeUnit.SECONDS.toMillis(timeoutSecond));
+            //
+            JSONObject jsonObject = this.parseIp(host);
+            jsonObject.set("open", open);
+            log.info("tools net-telnet user:{} host:{} port:{} timeout:{} result:{}", user, safeLogValue(host), port, timeoutSecond, open);
+            return JsonMessage.success("", jsonObject);
+        } catch (RuntimeException e) {
+            log.info("tools net-telnet user:{} host:{} port:{} timeout:{} error:{}", user, safeLogValue(host), port, timeoutSecond, e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * 限制超时时间在 1~60 秒之间，避免单次请求长时间占用线程
+     *
+     * @param timeout 原始超时时间（秒）
+     * @return 夹紧后的超时时间（秒）
+     */
+    static int normalizeTimeout(int timeout) {
+        return Math.min(Math.max(1, timeout), MAX_TIMEOUT_SECOND);
+    }
+
+    /**
+     * 当前操作人登录名，非登录上下文返回 -
+     *
+     * @return 登录名
+     */
+    private static String currentUserName() {
+        UserModel userModel = BaseServerController.getUserModel();
+        return userModel == null ? "-" : userModel.getId();
+    }
+
+    /**
+     * 清理日志字段中的换行符，避免日志注入
+     *
+     * @param value 原始值
+     * @return 清理后的值
+     */
+    private static String safeLogValue(String value) {
+        if (value == null) {
+            return "-";
+        }
+        return StrUtil.replace(StrUtil.replace(value, "\r", "_"), "\n", "_");
     }
 
     /**
