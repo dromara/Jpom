@@ -1,0 +1,2 @@
+alterType,tableName,name,type,len,defaultValue,comment,notNull
+ALTER,BUILDHISTORYLOG,repositoryLastCommitMsg,String,1000,,仓库代码最后一次变动信息,false
