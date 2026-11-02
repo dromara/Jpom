@@ -506,7 +506,14 @@ import {
   copyFileFolder,
   compressFileFolder
 } from '@/api/node-project'
-import { ZIP_ACCEPT, renderSize, formatDuration, concurrentExecution, parseTime, PAGE_DEFAULT_SHOW_TOTAL } from '@/utils/const'
+import {
+  ZIP_ACCEPT,
+  renderSize,
+  formatDuration,
+  concurrentExecution,
+  parseTime,
+  PAGE_DEFAULT_SHOW_TOTAL
+} from '@/utils/const'
 import codeEditor from '@/components/codeEditor'
 import projectFileBackup from './project-file-backup.vue'
 import { uploadPieces } from '@/utils/upload-pieces'
@@ -1105,6 +1112,8 @@ export default {
         })
         return false
       }
+      // 切换目录或刷新时回到第一页，避免停留在不存在的页码
+      this.pagination.current = 1
       // 请求参数
       const params = {
         nodeId: this.nodeId,
@@ -1137,7 +1146,13 @@ export default {
     },
     // 更新分页数据
     updatePagedFileList() {
-      const { current, pageSize } = this.pagination
+      const { pageSize } = this.pagination
+      // 数据量减少时修正当前页码，避免出现空白页
+      const maxPage = Math.max(1, Math.ceil(this.allFileList.length / pageSize))
+      if (this.pagination.current > maxPage) {
+        this.pagination.current = maxPage
+      }
+      const current = this.pagination.current
       const start = (current - 1) * pageSize
       const end = start + pageSize
       this.fileList = this.allFileList.slice(start, end)
