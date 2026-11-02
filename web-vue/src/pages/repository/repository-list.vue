@@ -745,6 +745,7 @@ export default {
         github: this.$t('i18n_4b1835640f'),
         gitlab_v3: this.$t('i18n_5bd1d267a9'),
         gitlab: this.$t('i18n_5bd1d267a9'),
+        gitlab_token: this.$t('i18n_5bd1d267a9'),
         gitea: this.$t('i18n_cd1aedc667'),
         gogs: this.$t('i18n_cd1aedc667'),
         other: this.$t('i18n_76530bff27')
