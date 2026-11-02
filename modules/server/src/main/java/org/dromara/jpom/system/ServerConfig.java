@@ -22,6 +22,7 @@ import org.dromara.jpom.configuration.*;
 import org.dromara.jpom.model.AgentFileModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.util.BaseFileTailWatcher;
+import org.dromara.jpom.util.JwtKeyUtil;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -190,6 +191,8 @@ public class ServerConfig implements InitializingBean {
         int initReadLine = ObjectUtil.defaultIfNull(this.initReadLine, 10);
         BaseFileTailWatcher.setInitReadLine(initReadLine);
         ExtConfigBean.setPath(path);
+        // 初始化 JWT 签名密钥：未配置时首次启动生成随机密钥并持久化，避免使用源码中的固定默认密钥
+        JwtKeyUtil.ensureKey(this.getUser(), configBean.getDataPath());
         //
         NodeConfig nodeConfig = getNode();
         DataSize messageSizeLimit = nodeConfig.getWebSocketMessageSizeLimit();
