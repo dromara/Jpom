@@ -60,6 +60,10 @@ web-vue/stats.html
 *.tar.gz
 *.sha1
 
+# ===== 本地临时产物 / AI 调试目录（不要提交）=====
+# 临时产物可随时删除；需要留存的开发文档请写工作区私有文档库 dev-docs/
+/.tmp/
+
 # ===== 密钥 / 证书 / 本地凭据（开源仓库禁止提交）=====
 # 提交前请同时运行：bash script/check-sensitive.sh --all
 *.pem
