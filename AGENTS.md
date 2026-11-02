@@ -133,6 +133,7 @@ git -C docs checkout main
 - 本地预览：`cd docs && npm install && npm run ldev`（默认端口 `2216`）。
 - **例外说明**：`docs` 是独立的 GitHub 仓库（`bwcx-jzy/jpom-docs`），其 `main`/`dist` 与 GitHub Pages 流程不受“主仓只在 Gitee 操作”的限制；但**不要**把 Jpom 主仓代码提交到这个仓库。
 - **内容边界**：本仓库只承载**用户文档**（功能使用说明、安装/升级/配置操作、FAQ、必要的技术说明）与发版信息；**开发过程记录、内部环境信息、审计与漏洞细节、issue 分析、内部决策写 `dev-docs/`，不要提交到这里**（详见第 9 节）。
+- **编写规范（强制）**：页面必须遵循 jpom-docs 的 Vdoing/VuePress 文档框架规范（目录/文件 `数字.` 前缀、front matter 五项、permalink 唯一且发布后不改、图片放 `public/images/`、新增一级栏目更新 `nav.ts`、提交前 `npm run lbuild` 通过），**不得随意新建结构或复制不兼容写法**；完整规范与检查清单见 `dev-docs/runbooks/jpom-docs-authoring.md`（摘要见第 9.5 节）。
 
 ### 3.3 其他分支
 
@@ -458,7 +459,7 @@ bash script/check-sensitive.sh --all --range origin/dev..HEAD
 ### 9.1 两条硬规则
 
 1. **开发过程 → `dev-docs/`（必须记录）**：需求与方案、代码分析/审计、验证与回归记录、排障过程、技术决策、issue/PR 处理记录、AI 会话结论、环境信息、可复用操作手册，全部写入工作区 `dev-docs/`，按 `dev-docs/README.md` 第 7 节落位与提交。`.tmp/`、`jpom-parent/.tmp/` 只做临时中转，**不得作为唯一副本**；任务收尾必须**迁移**/归档到 dev-docs（迁移后删除 `.tmp` 原稿）。
-2. **用户文档 → `docs/`（jpom-docs，按需）**：只有**用户需要学习/操作**的内容才更新到公开文档站，包括：功能使用说明、安装/升级/配置操作、常见问题（FAQ）、必要的技术说明（架构/原理/兼容性/安全说明），以及发版必须同步的版本号/更新日志/下载页。**开发过程记录、内部环境信息、审计与漏洞细节、issue 分析、内部决策禁止写入 jpom-docs。**
+2. **用户文档 → `docs/`（jpom-docs，按需）**：只有**用户需要学习/操作**的内容才更新到公开文档站，包括：功能使用说明、安装/升级/配置操作、常见问题（FAQ）、必要的技术说明（架构/原理/兼容性/安全说明），以及发版必须同步的版本号/更新日志/下载页。**开发过程记录、内部环境信息、审计与漏洞细节、issue 分析、内部决策禁止写入 jpom-docs。** 用户文档**必须遵守 jpom-docs 文档框架规范**（见 `dev-docs/runbooks/jpom-docs-authoring.md` 与第 9.5 节），不得随意创建不符合规范的页面结构。
 
 ### 9.2 判断方法（写之前先问 4 个问题）
 
@@ -476,7 +477,7 @@ bash script/check-sensitive.sh --all --range origin/dev..HEAD
 | 开发过程记录（分析/审计/验证/排障/决策/issue 处理） | `dev-docs/archive/<YYYY-MM>-<主题>/`（可用 `dev-docs/templates/dev-record.md`） |
 | 环境信息（IP/VMID/账号/端口/访问方式） | `dev-docs/environments/<环境>/` |
 | 可复用操作手册 / 排障步骤 | `dev-docs/runbooks/` |
-| 面向用户的功能/操作说明、FAQ、必要技术说明 | `docs/docs/`（jpom-docs），按 3.2 流程评审发布 |
+| 面向用户的功能/操作说明、FAQ、必要技术说明 | `docs/docs/`（jpom-docs），按 3.2 流程评审发布，并遵守第 9.5 节框架规范 |
 | 发版必改的用户文档（版本号/更新日志/下载页） | `docs/`（第 6 节发版流程） |
 | 临时产物（构建缓存、二进制、PoC 环境、大体积证据） | `.tmp/`（可随时删除，收尾清理） |
 
@@ -486,7 +487,20 @@ bash script/check-sensitive.sh --all --range origin/dev..HEAD
 - [ ] 关键结论（含未验证项、后续建议、用户文档影响）是否已按 `dev-docs/templates/dev-record.md` 记录？
 - [ ] dev-docs 是否已提交（提交信息用 `docs(...)` 前缀）？
 - [ ] 本次改动是否影响用户使用？→ 是：在开发记录里写清“jpom-docs 需要更新的页面”，并按 3.2 流程更新或提出建议
+- [ ] 需要更新 jpom-docs 时，是否按第 9.5 节框架规范编写（front matter / 命名 / permalink / nav / lbuild）？
 - [ ] 提交 docs 前是否检查过内部信息（内网地址、内部路径、未修复漏洞细节、凭据、用户隐私）？
+
+### 9.5 用户文档（jpom-docs）编写规范（强制）
+
+写 jpom-docs 页面必须遵守其 Vdoing/VuePress 框架规范，**不得随意新建结构或复制不兼容的写法**。完整规范与检查清单见 `dev-docs/runbooks/jpom-docs-authoring.md`，页面模板见 `dev-docs/templates/jpom-docs-page.md`。要点：
+
+- **目录与命名**：站点源在 `docs/docs/`；栏目内每一级文件/目录必须以 `数字.` 开头（如 `01.安装使用/`、`01.安装说明.md`）；侧边栏由主题按目录结构自动生成（显示时去掉数字前缀），**同级数字必须唯一**（重复会被覆盖/忽略），不要重排已有编号；无数字前缀的文件不会进入侧边栏。不要手改主题生成的 `docs/docs/@pages/`；`docs/docs/_posts/` 是随笔特例，不放用户文档。
+- **front matter（五项必填）**：`title`、`date`（`YYYY-MM-DD HH:mm:ss`）、`permalink`、`categories`、`tags`。`permalink` 全站唯一且**发布后不可修改**（导航/其它页面/外链引用），无栏目语义时用 `/pages/<6 位小写十六进制>/`，栏目已有语义前缀时沿用（`/pages/practice/...`、`/pages/FQA/...` 等）。`categories` 默认 `docs` + 目录层级（去掉数字前缀），与同栏目现有页面保持一致。
+- **主题自动补全的值必须人工核对**：首次 `npm run ldev` / `npm run lbuild` 时主题会给缺失字段写回 front matter（`title`=文件名、`date`=文件创建时间、`permalink`=随机、`categories`=目录链），**不能直接提交自动生成的值**。
+- **正文与资源**：中文、步骤化、命令可复制、写清适用版本/前置与验证方法；图片放 `docs/docs/.vuepress/public/images/<模块>/` 并用 `/images/...` 绝对路径；站内链接优先用 permalink 或相对 `.md`；使用 `:::tip` / `:::warning` / `:::danger` 容器。
+- **导航与栏目**：普通页面自动进侧边栏；**新增一级栏目或重点入口需手动更新 `docs/docs/.vuepress/common/nav.ts`**；栏目汇总页（如 `实践案例/实践案例.md`）需手动补链接。
+- **发版文档**：更新日志/下载页按第 6 节流程用 `docs/script/replaceVersion.sh` 与既有模板维护，版本号文件（`docs/docs/.vuepress/public/docs/` 下）由脚本维护，不手改。
+- **红线与校验**：不得出现内网 IP/内部域名/内部路径、未修复漏洞细节、真实凭据、用户隐私、内部 issue 讨论；提交前 `cd docs && npm run lbuild` 必须通过，并本地 `npm run ldev` 抽查页面/侧边栏/链接。
 
 ## 10. 常见坑
 
@@ -522,3 +536,4 @@ bash script/check-sensitive.sh --all --range origin/dev..HEAD
 - `docs/README.md`、`docs/.github/workflows/deploy.yml`：文档站与部署
 - `.gitmodules`：子模块清单与默认分支
 - `dev-docs/README.md`、`dev-docs/AGENTS.md`：本地工作区文档库（文档写入规则、dev-docs/jpom-docs 分工、环境登记、历史归档；独立私有 git 仓库，不随本仓提交）
+- `dev-docs/runbooks/jpom-docs-authoring.md`、`dev-docs/templates/jpom-docs-page.md`：jpom-docs 用户文档编写规范与页面模板（第 3.2、9.5 节）
