@@ -1,5 +1,24 @@
 # 🚀 版本日志
 
+## 2.11.12.2-beta
+
+### 🐣 新增功能
+
+1. 【server】新增 差异构建支持配置监听路径、排除路径（Ant 风格通配），仅当变更文件匹配规则时才触发构建（感谢@凉拌西瓜 [Gitee pr 295](https://gitee.com/dromara/Jpom/pulls/295) ）
+2. 【server】新增 项目文件列表支持分页展示，可切换每页条数（感谢@Justubborn [Gitee pr 294](https://gitee.com/dromara/Jpom/pulls/294) ）
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】修复 跨工作空间越权访问问题：Docker、SSH 命令、构建仓库、SSH/FTP 文件、监控、节点项目与节点分发等接口未校验资产所属工作空间（#115 #119 #120，CVE-2026-91993、CVE-2026-111605）
+2. 【server】修复 用户身份校验（checkUser）将入参解析为查询条件，可能被利用匹配任意用户的越权风险（#121，CVE-2026-120201）
+3. 【server】修复 系统初始化接口缺少用户名、密码参数校验，可能被绕过初始化的问题
+4. 【server】修复 数据库查询条件注入风险：主键条件以及分页过滤、排序字段统一使用占位符绑定和字段名白名单校验
+5. 【all】升级 Tomcat 9.0.123、JGit、BouncyCastle、commons-lang3 等依赖，修复已知安全漏洞（#118；#116 已评估为不受影响）
+6. 【all】优化 下载中心域名由 `d.jpom.download` 切换为 `d2.jpom.download`
+7. 【server】优化 节点监控异常通知内容不再包含完整异常堆栈，仅保留错误信息，减少正式环境无效日志（感谢@Robot [Gitee pr 293](https://gitee.com/dromara/Jpom/pulls/293) ）
+
+------
+
 ## 2.11.12.1-beta
 
 ### 🐣 新增功能
