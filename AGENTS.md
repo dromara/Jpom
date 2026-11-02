@@ -1,0 +1,363 @@
+# AGENTS.md
+
+> 本文件面向 AI 编码助手（也适合人类贡献者），说明 Jpom 项目的**仓库/子模块结构**、**分支用法**、**发版流程**与开发约定。
+>
+> 适用范围：本工作区根目录（Jpom 仓库 `gitmodules` 分支）。文中 `jpom-parent/`、`docs/` 等路径均相对工作区根目录。
+
+## 0. 先读：项目状态与硬性约束
+
+- **上游已暂停维护**：Jpom 官方于 2026-02 发布公告暂停维护（<https://jpom.top/pages/project-suspended/>），公告明确仍欢迎社区提交 PR，但常规发版节奏已停止。
+- 本工作区采用 **Git submodule 聚合布局**：根目录是同一 Jpom 仓库的 `gitmodules` 分支，只保留子模块指针与少量工具脚本；**真正的代码在 `jpom-parent/` 子模块中**。
+- AI 助手硬性约束：
+  1. 开发以 `jpom-parent` 为准，基线分支是 **`dev`**；外部贡献的 PR 只能提到 `dev`，不要向 `master` / `beta` 提 PR。
+  2. 子模块内的修改先在子模块仓库提交，再回根仓更新子模块指针；不要在根仓“顺手”提交子模块内的文件、也不要混用两个仓库的提交。
+  3. **没有明确授权时，不要执行任何发版动作**：不要上传 OSS/R2、不要推送 Docker 镜像、不要打 tag、不要创建 Gitee/GitHub Release、不要发布文档站。第 6 节流程仅用于理解与授权后执行。
+  4. 不要提交构建产物与本地工具文件：`target/`、`dist/`、`*.bak`、`pom.xml.versionsBackup`、`*.zip`、`*.tar.gz`、`*.sha1`、`.tmp/`、`awscliv2.zip`、`ossutil-*/`、`node_modules/` 等。
+
+## 1. 项目概览
+
+Jpom 是一款“简而轻的低侵入式在线构建、自动部署、日常运维、项目监控”软件，由**服务端 Server** 与**插件端 Agent** 组成。
+
+| 项 | 说明 |
+| --- | --- |
+| 后端 | Java 8（`java.version=1.8`），Spring Boot 2.7.18，Maven 多模块 |
+| 前端 | Vue 3 + Vite 5 + TypeScript + Ant Design Vue 4 + Pinia，目录 `jpom-parent/web-vue` |
+| 数据库 | 默认内置 H2；支持 MySQL / MariaDB / PostgreSQL / 达梦（Dameng） |
+| 默认端口 | Server `2122`，Agent `2123`，前端 dev server `3000`（代理到 `2122`） |
+| 许可证 | Mulan PSL v2（新增源文件需带版权头，见第 7 节） |
+| 构建产物 | `modules/server/target/server-<version>-release.{zip,tar.gz}`、`modules/agent/target/agent-<version>-release.{zip,tar.gz}`（均带 `.sha1`） |
+
+`jpom-parent/modules` 模块：
+
+| 模块 | 作用 |
+| --- | --- |
+| `server` | 服务端：Web UI/API、构建、SSH/FTP、Docker、监控、在线升级等 |
+| `agent` | 插件端：执行项目、脚本、文件、监控等任务 |
+| `common` | 公共代码、常量、工具、i18n 资源 |
+| `agent-transport` | 服务端与插件端通信（`agent-transport-common`、`agent-transport-http`） |
+| `storage-module` | 存储层，按数据库拆分子模块（h2 / mysql / mariadb / postgresql / dameng） |
+| `sub-plugin` | 功能插件：git-clone、svn-clone、docker-cli、email、webhook、ssh-jsch、encrypt 等 |
+
+## 2. 工作区结构与子模块
+
+| 路径 | 对应仓库 / 分支 | 作用 |
+| --- | --- | --- |
+| `.`（根目录） | Jpom 仓库 `gitmodules` 分支 | 子模块聚合：`.gitmodules`、`RELEASE.md`、根 `pom.xml`、`script/` 发布脚本 |
+| `jpom-parent/` | Jpom 仓库（`.gitmodules` 默认 `master`，开发实际用 `dev`） | 全部源码、构建/发版脚本、Gitee Go 与 GitHub Actions 配置 |
+| `docs/` | `bwcx-jzy/jpom-docs` 仓库 `main` 分支 | 官网/文档站（VuePress），由 GitHub Pages 发布 |
+| `download-link/` | Jpom 仓库 `download_link` 分支 | JDK 下载镜像清单（`jdk.rb`），非业务代码 |
+| `aliyun-computenest/` | Jpom 仓库 `aliyun-computenest` 分支 | 阿里云计算巢部署配置 |
+| `script/`（根） | `gitmodules` 分支 | 发布安装包到 OSS、发布文档站、同步下载链接等维护脚本 |
+| `.run/` | `gitmodules` 分支 | IDEA 本地运行配置（`JpomServerApplication` / `JpomAgentApplication`） |
+
+子模块常用命令（在根目录执行）：
+
+```bash
+git submodule status                  # 查看子模块当前 commit 与分支状态
+git submodule update --init --recursive   # 首次拉取/初始化子模块
+git -C jpom-parent checkout dev       # 代码开发切到 dev（推荐）
+git -C docs checkout main
+```
+
+注意事项：
+
+- `.gitmodules` 中 `jpom-parent` 的 `branch = master`，**不要**在开发时盲目执行 `git submodule update --remote`（会把子模块切到 master）。需要更新指针时，先确认子模块在预期分支，再在根仓 `git add jpom-parent` 提交指针。
+- 根仓 `HEAD` 记录的只是一组子模块 commit，**不代表子模块当前工作区分支/改动**；联调前先用 `git submodule status` 与各子模块 `git status` 确认。
+- 根仓 `master` 分支是完整代码快照（历史默认分支），本工作区使用的是 `gitmodules` 分支；两者内容不同，不要交叉提交。
+
+## 3. 分支体系与用法
+
+### 3.1 代码仓库 `jpom-parent`（核心）
+
+分支模型以 `jpom-parent/README.md` 的“项目分支说明”为准（其中 `docs` 分支为历史说明，文档现在已独立为 `jpom-docs` 仓库）：
+
+| 分支 | 类型 | 接受 PR | 用法与说明 |
+| --- | --- | --- | --- |
+| `dev` | 开发主线 | ✅ 是 | **所有功能/修复都先进入 `dev`**；PR 目标分支；保持随时可编译 |
+| `beta` | beta 预发布 | ❌ 否（受保护） | 由 `dev` 合并而来，用于发布 `x.y.z.N` beta 包；测试通过后合并到 `master` |
+| `master` | 稳定发布 | ❌ 否（受保护） | 只接受经过测试的 `beta`（或 `dev`）合并；稳定版构建、打 `v2.x.y` tag 都在此分支 |
+| `2.6.x` | 归档线 | ❌ 否 | 旧 2.6.x 版本维护线，已停止（最后提交 2021-09），仅历史参考 |
+| `main` | 归档 | ❌ 否 | 历史发布分支（最后提交 `commit release 2.11.1`），归档 |
+| `docs-docsify` / `backup-thymeleaf` / `stand-alone` / `i18n` / `pipeline` / `dev-ftp1` / `dev_netty` / `dev_script_library` | 归档/一次性特性分支 | ❌ 否 | 历史特性实验或迁移分支，**不要作为开发基线** |
+| `docs`（历史） | 文档 | — | 文档已拆分为独立 `jpom-docs` 仓库（`docs/` 子模块 `main` 分支） |
+
+推荐流程：
+
+```text
+功能分支/贡献者 fork ──PR──> dev ──测试后合并──> beta ──测试后合并──> master ──tag v2.x.y──> 发布
+```
+
+- `RELEASE.md`「手动版」第 1 步写的是“将 dev 分支合并到 master”，即允许跳过 beta 直接发稳定版；实际以维护者当次选择为准。
+- 功能分支从 `dev` 切出，命名可参考历史（`dev-ftp1`、`i18n`、`pipeline` 等），合并回 `dev` 后删除。
+- 贡献者典型操作流：
+
+  ```bash
+  # fork 后克隆 dev 分支
+  git clone -b dev https://gitee.com/<你的用户名>/Jpom.git
+  cd Jpom
+  git remote add upstream https://gitee.com/dromara/Jpom.git
+  git fetch upstream && git checkout -b fix/xxx upstream/dev
+  # 修改代码并提交（见第 7 节规范）
+  git push origin fix/xxx
+  # 在 Gitee 向 dromara/Jpom 的 dev 分支发起 PR
+  ```
+
+- 提交 PR 即视为签署 [CLA.md](jpom-parent/CLA.md)；请同时遵守 `CODE_OF_CONDUCT.md`。
+- 主仓在 Gitee（`gitee.com/dromara/Jpom`），GitHub（`github.com/dromara/Jpom`）为同步镜像；PR/Issue 主要走 Gitee。
+- 双远程推送的历史脚本为 `jpom-parent/script/push.bat`（会双向合并 `dev`/`master` 后推送 gitee、github 与 tags），属于维护者工具，执行前务必确认分支状态。
+
+### 3.2 文档仓库 `docs/`（jpom-docs）
+
+| 分支 | 用途 |
+| --- | --- |
+| `main` | 文档源文件，接受 PR；文档站内容在 `docs/docs/` 下 |
+| `dist` | GitHub Actions 自动构建产物分支，**不要手动提交**；GitHub Pages 从该分支发布 |
+
+- 发布链路：push `main` → `.github/workflows/deploy.yml` 构建（`npm install && npm run lbuild`）→ 推送 `dist` 分支 → GitHub Pages 发布（自定义域名以 `docs/docs/.vuepress/public/CNAME` 为准，当前为 `jpom.top`）。
+- `.github/workflows/ali-oss.yml` 已改为仅手动触发的回退方案；`baiduPush.yml` 为每日百度收录推送。
+- 本地预览：`cd docs && npm install && npm run ldev`（默认端口 `2216`）。
+
+### 3.3 其他分支
+
+- `download_link`：提供 JDK 下载清单（`download-link/` 子模块），由 `update-jdk.yml` 手动触发（或推送 `error-understand` 分支）更新并发布。
+- `aliyun-computenest`：阿里云计算巢部署配置（`config.yaml`、`templates` 等）。
+- `gitmodules`：本工作区的聚合分支（子模块指针 + 发版工具），不包含业务代码。
+
+## 4. 版本号、产物与发布渠道
+
+### 4.1 版本号规则
+
+| 类型 | 格式 | 示例 | 说明 |
+| --- | --- | --- | --- |
+| 稳定版 | `2.x.y` | `2.11.12` | 每次发版 patch +1；打 tag `v2.x.y` |
+| beta 版 | `2.x.y.N` | `2.11.12.1` | 以**当前已发布稳定版号**为前缀 + 递增序号；**beta 不打 tag** |
+| 下个稳定版 | `2.x.(y+1)` | `2.11.13` | beta 测稳后的稳定版号（历史：beta `2.11.11.1~4` → release `2.11.12`） |
+
+版本号记录位置（由替换脚本统一维护）：
+
+| 文件 | 作用 |
+| --- | --- |
+| `jpom-parent/script/tag.release.txt` | 当前稳定版号（替换脚本据此找旧版本） |
+| `jpom-parent/script/tag.beta.txt` | 当前 beta 版号 |
+| 各 `pom.xml` | Maven 工程版本（`mvn versions:set` 统一替换） |
+| `jpom-parent/.env`、`env-release.env`、`env-beta.env` | Docker Compose 使用的版本 |
+| `jpom-parent/web-vue/package.json` | 前端版本 |
+| `jpom-parent/modules/common/src/main/resources/banner.txt` | 启动 banner 版本 |
+| `docs/docs/.vuepress/public/docs/versions.release.tag`、`versions.beta.tag` | 文档站版本 |
+
+### 4.2 构建产物
+
+| 产物 | 路径 |
+| --- | --- |
+| 服务端整包 | `jpom-parent/modules/server/target/server-<version>-release.{zip,tar.gz}` + `.sha1` |
+| 插件端整包 | `jpom-parent/modules/agent/target/agent-<version>-release.{zip,tar.gz}` + `.sha1` |
+| 服务端/插件端合并包 | 由根目录 `script/deploy-release-oss.sh` 生成 `jpom-<version>.zip` |
+| 运行目录（解压态） | `modules/server/target/server-<version>-release/`（含 `bin/`、`conf/`、`lib/`） |
+
+### 4.3 发布渠道
+
+| 渠道 | 说明 |
+| --- | --- |
+| 下载中心 | `https://d2.jpom.download`（Cloudflare R2 托管）；稳定版路径 `release/<version>/`，beta 路径 `beta/<version>/` |
+| 历史 OSS | `oss://jpom-releases/release/<version>/`、`oss://jpom-releases/beta/<version>/`（根脚本仍按 OSS 编写，见 6.2） |
+| Docker Hub | `jpomdocker/jpom:<version>` 与 `:latest`（稳定版）；beta 镜像按需构建 |
+| Gitee / GitHub Release | 基于 tag `v2.x.y` 创建发行版，附安装包与 sha1 |
+
+Dockerfile 对应关系：`modules/server/DockerfileRelease`（稳定版）、`DockerfileReleaseJdk17`（JDK17 变体）、`DockerfileBeta`、`DockerfileBetaJdk17`；插件端 `modules/agent/DockerfileRelease`、`DockerfileBeta`。
+
+## 5. 构建与本地运行
+
+### 5.1 环境要求
+
+- JDK **8**（工程 `source/target=1.8`，与 CI 一致；更高 JDK 可能因老插件/编译参数出问题）
+- Maven **3.6+**（可用 `-s script/settings.xml` 走阿里云镜像）
+- Node.js **18**（CI 使用 18.x / 18.19.0）
+- 前端依赖安装：CI 与发版脚本使用 `npm install`；`web-vue/README.md` 推荐本地用 pnpm 8，但**发版打包请统一用 npm**，避免产物差异
+
+### 5.2 常用命令
+
+```bash
+# 1) 构建前端（必须先执行；产物直接写入服务端 resources）
+cd jpom-parent/web-vue
+npm install
+npm run build          # 输出到 modules/server/src/main/resources/dist
+
+# 2) 构建后端（会生成 server/agent 的 release zip/tar.gz/sha1）
+cd ../
+mvn clean package
+# CI 等价写法（跳过测试）：
+mvn -B -e clean package -Dmaven.test.skip=true -Dmaven.compile.fork=true -s script/settings.xml
+
+# 3) 本地开发
+cd web-vue && npm run dev        # http://127.0.0.1:3000 ，代理到 2122
+# 服务端：运行 org.dromara.jpom.JpomServerApplication（端口 2122）
+# 插件端：运行 org.dromara.jpom.JpomAgentApplication（端口 2123）
+
+# 4) 代码规范/辅助
+cd jpom-parent && mvn license:format   # 为源码补充/修正 Mulan PSL v2 版权头
+cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成多语言
+```
+
+要点：
+
+- **构建顺序不能反**：前端 `npm run build` 的产物进入 `modules/server/src/main/resources/dist`，`mvn package` 时打进服务端包。只跑 Maven 会导致页面 404 或旧页面。
+- 测试现状：各 `pom.xml` 默认 `skipTests=true`，CI 使用 `-Dmaven.test.skip=true`，没有自动化测试门禁；`src/test` 下多为手工/工具类测试。**发版前必须人工冒烟**：服务端与插件端包可正常启动、登录、核心功能可用、在线升级可用。
+- 数据库改动需在 `storage-module` 各数据库子模块同步实现，至少保证 H2 与 MySQL 兼容，不要只改 H2。
+- 前端 dev 代理配置在 `web-vue/.env.dev`（`JPOM_PROXY_HOST=127.0.0.1:2122`）。
+
+## 6. 发版流程（核心）
+
+### 6.1 前置说明
+
+- 项目已暂停维护，正式发版前必须确认：下载域名（R2/OSS）、Docker Hub、文档 Pages、Gitee/GitHub 凭据均可用；**无授权不得执行**。
+- 发版提交固定节奏（与历史提交一致）：
+  1. `releases(发布): 准备<version>` —— 更新 CHANGELOG；
+  2. 运行版本替换脚本 + 打包 + 冒烟；
+  3. `commit release <version>` / `commit beta <version>` —— 版本号提交。
+- 开始前：各子模块在预期分支、`git status` 干净、无遗留 `*.bak`。
+
+### 6.2 稳定版发版（手动版，按 `RELEASE.md` 整理）
+
+1. **合并代码**：将 `dev` 合并到 `beta` 测试；beta 稳定后合并到 `master`（或按 `RELEASE.md` 直接将 `dev` 合并到 `master`）。`master`/`beta` 不接受 PR。
+2. **更新 CHANGELOG**：`CHANGELOG-BETA.md` 对应版本补充发布日期；`CHANGELOG.md` 新增 `## 2.x.y-release (YYYY-MM-DD)` 段落（内容参考对应 beta 版本整理）。提交：`git commit -m "releases(发布): 准备release 2.x.y"`。
+3. **替换版本号**：
+
+   ```bash
+   cd jpom-parent/script
+   sh replaceVersion.sh 2.x.y release
+   ```
+
+   脚本会基于 `script/tag.release.txt` 的旧版本号，替换各 `pom.xml`、Dockerfile、`.env`、`env-release.env`、`web-vue/package.json`、`.workflow/MasterPipeline.yml`、`banner.txt`，并写回 `tag.release.txt`。产生的 `*.bak`、`pom.xml.versionsBackup` 不要提交。
+4. **打包前端**：`cd jpom-parent/web-vue && npm i && npm run build`。
+5. **打包后端**：`cd jpom-parent && mvn clean package`，确认 `modules/{server,agent}/target/*-release.zip|tar.gz|sha1` 已生成。
+6. **人工冒烟**：解压 server/agent 的 release 包，分别用 `bin/Server.sh start`、`bin/Agent.sh start`（Windows 用 `.bat`）启动，确认可启动、可登录、核心功能正常。
+7. **提交并打 tag**：
+
+   ```bash
+   cd jpom-parent
+   git add -A && git commit -m "commit release 2.x.y"
+   git tag v2.x.y
+   git push gitee master && git push gitee --tags
+   git push github master && git push github --tags
+   ```
+
+   （远程命名以本地配置为准，历史上为 `gitee` / `github` 双远程；也可参考 `script/push.bat`，但该脚本会双向合并分支，慎用。）
+8. **上传安装包**：
+
+   ```bash
+   cd <工作区根目录>
+   sh script/deploy-release-oss.sh
+   ```
+
+   脚本使用 `ossutil64`/`ossutilmac64` 上传到 `oss://jpom-releases/release/<version>/`（agent/server 的 zip、tar.gz、sha1 及合并包 `jpom-<version>.zip`）。注意：
+   - 脚本从 `jpom-parent/docs/version.txt` 读取版本，该文件在当前分支已不存在，执行前需确认版本来源或改造脚本（例如改用 `jpom-parent/script/tag.release.txt`）；
+   - 当前下载中心已迁移到 Cloudflare R2（`d2.jpom.download`），OSS 上传后可能还需同步到 R2（本工作区曾用 rclone 迁移），操作前确认目标 bucket。
+9. **发布文档**：
+
+   ```bash
+   cd docs/script
+   sh replaceVersion.sh 2.x.y release
+   # 手动把 CHANGELOG 的 release 段落同步到 docs/日志&下载/01.更新日志/01.最新.md
+   cd docs && npm install && npm run lbuild   # 本地验证构建
+   ```
+
+   发布方式：提交并 push `main` 分支，由 GitHub Actions（`.github/workflows/deploy.yml`）构建并推送 `dist` 分支，GitHub Pages 自动更新。历史方式为根目录 `sh script/deploy-docs-pages.sh`（yarn 构建 + ossutil 同步 `oss://jpom-docs/`），现已不是主链路。
+10. **测试远程更新**：在旧版本服务端上测试“在线升级”到新版本，确认下载与校验正常。
+11. **发布 Docker 镜像**（在 `jpom-parent` 下执行，需先启用 buildx，见 `jpom-parent/script/docker-buildx.md`）：
+
+    ```bash
+    docker buildx build --platform linux/amd64,linux/arm64 \
+      -t jpomdocker/jpom:2.x.y -t jpomdocker/jpom:latest \
+      -f ./modules/server/DockerfileRelease --push .
+    ```
+
+12. **创建发行版**：在 Gitee、GitHub 基于 tag `v2.x.y` 创建 Release，上传 server/agent 安装包与 sha1。
+13. **可选**：发布发版公告。
+
+### 6.3 beta 发版
+
+1. 将 `dev` 合并到 `beta`（或从 `dev` 切出 beta 发版线）。
+2. 更新 `CHANGELOG-BETA.md`：新增 `## 2.x.y.N-beta (YYYY-MM-DD)` 段落，提交 `releases(发布): 准备 2.x.y.N`。
+3. 替换版本号：`cd jpom-parent/script && sh replaceVersion.sh 2.x.y.N beta`（只改 beta 相关文件：`DockerfileBeta*`、pom、`env-beta.env`、banner、`tag.beta.txt`）。
+4. 前端、后端打包（同 6.2 第 4、5 步）。
+5. 人工冒烟测试。
+6. 提交 `commit beta 2.x.y.N`。
+7. 上传到 beta 渠道：`oss://jpom-releases/beta/<version>/` 或 R2 的 `beta/<version>/`（根脚本只处理 release，beta 需手动 `ossutil`/rclone 上传）。
+8. 可选构建 beta 镜像（`-f ./modules/server/DockerfileBeta`）。
+9. **beta 不打 tag、不创建 Gitee/GitHub Release**；测稳后按 6.2 合并到 `master` 发稳定版。
+
+### 6.4 流水线发版（Gitee Go）
+
+| 配置 | 触发 | 作用 |
+| --- | --- | --- |
+| `jpom-parent/.workflow/MasterPipeline.yml` | push `master`/`dev`，或手动 | Node 18 + `npm install && npm run build` + `mvn -B -e clean package -Dmaven.test.skip=true -Dmaven.compile.fork=true -s script/settings.xml`；产出 `all_zip`/`server_zip`/`agent_zip`，再由“合并打包”发布 `jpom-<version>` 制品 |
+| `jpom-parent/.workflow/docker-hub.yml` | push `dev` / tag 前缀 `v`，或手动 | 构建并推送服务端多平台镜像（示例版本号需手动更新） |
+| `jpom-parent/.github/workflows/build.yml` | push / PR 到 `master` | GitHub Actions 构建校验（Node 18 + JDK 8 + `mvn -B package`） |
+| `jpom-parent/.github/workflows/codeql-analysis.yml` | push / PR 到 `master` + 每周计划 | CodeQL 静态扫描 |
+| `jpom-parent/.github/workflows/update-jdk.yml` | 手动，或推送 `error-understand` 分支 | 检出 `download_link` 分支并更新 JDK 下载清单 |
+
+流水线发版注意：`MasterPipeline.yml` 内的版本号（artifact 路径、构建命令）是硬编码的，发版时需同步修改；`RELEASE.md` 特别提示“注意修改构建命令版本号”。`replaceVersion.sh` 的 release 模式会顺带替换该文件，但仍要复核。
+
+### 6.5 发版检查清单
+
+- [ ] 目标分支正确（稳定版 `master` / beta `beta`），工作区干净
+- [ ] CHANGELOG（release 与 beta）已更新并带日期
+- [ ] 版本替换脚本执行成功，`git diff` 无遗漏、无 `*.bak`
+- [ ] 前端已 build（`modules/server/src/main/resources/dist` 已更新）
+- [ ] `mvn clean package` 成功，server/agent 的 zip、tar.gz、sha1 齐全
+- [ ] 安装包人工启动/登录/核心功能冒烟通过
+- [ ] 提交 `commit release|beta <version>`，稳定版打 `v2.x.y` tag 并推送
+- [ ] 安装包已上传（OSS/R2 对应 release 或 beta 目录），sha1 可校验
+- [ ] 文档站版本号、CHANGELOG、下载链接已更新并发布
+- [ ] 在线升级测试通过（稳定版）
+- [ ] Docker 镜像已推送（稳定版：`<version>` 与 `latest`）
+- [ ] Gitee/GitHub Release 已创建（稳定版）
+- [ ] 已确认得到维护者授权，且所有正式渠道操作符合预期
+
+## 7. 提交规范与代码风格
+
+### 7.1 提交信息
+
+采用 **Conventional Commits + 中文简述**（与仓库历史一致）：
+
+- 格式：`type(scope): 中文说明`
+- 常用 type：`feat`、`fix`、`refactor`、`docs`、`build`、`ci`、`style`、`perf`、`chore`、`releases`（发版专用）
+- 常用 scope：`server`、`agent`、`web-vue`、`all`、`i18n`、`storage`、`system`、`h2db`、`docs`、`build`、`ci` 等
+- 示例：`feat(server): 新增构建后发布到 FTP`、`fix(web-vue): 修复表格自定义列不生效问题`、`docs: 更新 CHANGELOG-BETA.md 文件`
+- 发版固定提交：`releases(发布): 准备release 2.x.y` / `releases(发布): 准备 2.x.y.N`、`commit release 2.x.y` / `commit beta 2.x.y.N`
+- 历史提交中也有 gitmoji 风格（见根目录 `README.md` 的 emoji 表），但当前以 Conventional Commits 为主。
+
+### 7.2 代码风格
+
+- 以 `.editorconfig` 为准：默认 UTF-8、LF、Tab 缩进；`*.java`/`*.xml`/`*.sql` 4 空格；`*.vue`/`*.js`/`*.ts`/`*.json`/`*.yml` 2 空格；`*.bat` CRLF。
+- 换行符：代码仓库根 `.gitattributes`（`jpom-parent/.gitattributes`）声明 `* text=auto`、`*.sh eol=lf`、`*.bat eol=crlf`；建议 `git config --global core.autocrlf false`。
+- 版权头：新建源文件需带 Mulan PSL v2 头（模板见 `HEADER.txt`）；`license-maven-plugin` 在 `generate-sources` 阶段强制执行，可运行 `mvn license:format` 自动补全。
+- 前端：ESLint + Prettier（`web-vue/.eslintrc.json`、`.prettierrc.json`），提交前建议 `npm run lint:fix`。
+- 国际化：
+  - 后端：`modules/common/src/main/resources/i18n/messages_{zh_CN,zh_HK,zh_TW,en_US}.properties` 与 `words.json`；
+  - 前端：`web-vue/src/i18n/locales/zh_cn.json`（主文件）与 `en_us.json`（同步文件），新增文案后用 `npm run i18n` 生成（依赖 `.env` 中的百度翻译配置，特殊字符转义见 `web-vue/README.md` 的 `_#_` 说明）。
+- 新增/修改 UI 文案必须同时考虑中英（及繁体）语言资源，避免硬编码中文。
+
+## 8. 常见坑
+
+- **子模块分支错位**：`.gitmodules` 里 `jpom-parent` 默认 `master`，开发应在 `dev`；`git submodule update --remote` 会切走，操作前先确认。
+- **根仓 `pom.xml` 过期**（版本 2.9.10，仅用于 IDE 聚合导入）：实际构建请在 `jpom-parent/` 内执行 Maven。
+- **版本替换脚本**：`replaceVersion.sh` 必须传两个参数（新版本号 + `release`/`beta`），旧版本读自 `script/tag.*.txt`；脚本使用 GNU `sed -i.bak`，macOS 可能需要 `gsed` 或手动适配；执行后检查是否残留 `.bak`。
+- **`deploy-release-oss.sh` 已部分失效**：依赖的 `jpom-parent/docs/version.txt` 当前分支不存在；只处理 release 渠道；OSS 之后还可能需同步 R2。
+- **根脚本 `deploy-docs-pages.sh` 属历史链路**（yarn + OSS），当前文档站以 GitHub Pages（`docs/.github/workflows/deploy.yml`）为准。
+- **根目录 `README.md` 的子模块说明可能过时**：以 `.gitmodules` 实际配置为准（`docs` 已指向 `bwcx-jzy/jpom-docs` 的 `main`）。
+- **不要提交**工作区根部的本地工具/临时文件：`.tmp/`、`awscliv2.zip`、`ossutil-2.3.0-linux-amd64/`、`aws/` 等。
+- **构建 JDK**：请使用 JDK 8；更高版本 JDK 可能因老版本 maven 插件/编译参数失败。
+- **Docker 构建**：`buildx` 需先启用 experimental / binfmt_misc，参见 `jpom-parent/script/docker-buildx.md`。
+- **项目已暂停维护**：不要在未授权情况下更新下载中心、镜像、文档站或发布公告；对外发布前与维护者确认。
+
+## 9. 相关权威文件
+
+修改流程或结构后，请同步更新本文件与以下来源：
+
+- `RELEASE.md`（根目录）：发布流程（手动版 / 流水线版）
+- `jpom-parent/README.md`：分支说明、贡献指南
+- `jpom-parent/script/`：`replaceVersion.sh`、`release.sh`、`release-sha1sum.sh`、`push.bat`、`docker-buildx.md`
+- `jpom-parent/.workflow/`、`jpom-parent/.github/workflows/`：CI/流水线
+- `docs/README.md`、`docs/.github/workflows/deploy.yml`：文档站与部署
+- `.gitmodules`：子模块清单与默认分支
