@@ -286,8 +286,8 @@ public class DamengTableBuilderImpl implements IStorageSqlBuilderService {
         // 存储过程 'add_column_if_not_exists' 的 columninfo 参数可能是 VARCHAR(200)
         // 此限制应略小于存储过程参数的大小。
         int length = StrUtil.length(columnSql);
-        Assert.state(length <= 190, I18nMessageUtil.get("i18n.sql_statement_too_long.38d6") +
-            " 生成的列SQL定义长度为 " + length + " 字符。用于存储过程参数时最大约为190。");
+        Assert.state(length <= 190, I18nMessageUtil.get("i18n.sql_statement_too_long.38d6") + " " +
+            StrUtil.format(I18nMessageUtil.get("i18n.generated_column_sql_length.4869"), length));
         return columnSql;
     }
 

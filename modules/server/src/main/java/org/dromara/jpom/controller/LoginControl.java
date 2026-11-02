@@ -163,10 +163,10 @@ public class LoginControl extends BaseServerController implements InitializingBe
         removeSessionAttribute(LOGIN_CODE);
         removeSessionAttribute(LOGIN_CODE_TIME);
         String sCode = sCodeObj == null ? null : sCodeObj.toString();
-        Assert.state(StrUtil.isNotEmpty(sCode), I18nMessageUtil.get("i18n.captcha_invalid_refresh.a1f1"));
-        Assert.state(StrUtil.isNotEmpty(code), I18nMessageUtil.get("i18n.captcha_required.a1f2"));
+        Assert.state(StrUtil.isNotEmpty(sCode), I18nMessageUtil.get("i18n.captcha_invalid_refresh.8a0f"));
+        Assert.state(StrUtil.isNotEmpty(code), I18nMessageUtil.get("i18n.captcha_required.d0c0"));
         Long codeTime = sCodeTimeObj instanceof Number ? ((Number) sCodeTimeObj).longValue() : null;
-        Assert.state(codeTime != null && System.currentTimeMillis() - codeTime <= LOGIN_CODE_TTL, I18nMessageUtil.get("i18n.captcha_expired_refresh.a1f3"));
+        Assert.state(codeTime != null && System.currentTimeMillis() - codeTime <= LOGIN_CODE_TTL, I18nMessageUtil.get("i18n.captcha_expired_refresh.f752"));
         Assert.state(StrUtil.equalsIgnoreCase(code, sCode), I18nMessageUtil.get("i18n.correct_verification_code_required.ff0d"));
         return true;
     }

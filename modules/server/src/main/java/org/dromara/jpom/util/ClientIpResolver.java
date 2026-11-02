@@ -13,6 +13,7 @@ import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.ClientIpUtil;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.WebConfig;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
@@ -70,7 +71,7 @@ public class ClientIpResolver implements ClientIpUtil.Resolver, InitializingBean
                 }
                 IpRange range = IpRange.parse(item);
                 if (range == null) {
-                    log.warn("jpom.web.trusted-proxies 配置项非法，已忽略：{}", item);
+                    log.warn(I18nMessageUtil.get("i18n.trusted_proxies_config_invalid.d9d6"), item);
                     continue;
                 }
                 ranges.add(range);

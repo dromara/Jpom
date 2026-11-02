@@ -13,6 +13,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.UserConfig;
 
 import java.io.File;
@@ -67,7 +68,7 @@ public final class JwtKeyUtil {
         if (StrUtil.isNotBlank(configured)) {
             String key = configured.trim();
             if (key.length() < RECOMMENDED_KEY_LENGTH) {
-                log.warn("jpom.user.token-jwt-key 长度不足 {} 位，建议使用至少 {} 位的随机字符串", RECOMMENDED_KEY_LENGTH, RECOMMENDED_KEY_LENGTH);
+                log.warn(I18nMessageUtil.get("i18n.jwt_key_length_insufficient.0c9e"), RECOMMENDED_KEY_LENGTH, RECOMMENDED_KEY_LENGTH);
             }
             userConfig.setTokenJwtKey(key);
             return;
@@ -78,7 +79,7 @@ public final class JwtKeyUtil {
             try {
                 key = StrUtil.trim(FileUtil.readString(keyFile, CharsetUtil.CHARSET_UTF_8));
             } catch (Exception e) {
-                log.warn("读取 JWT 密钥文件失败：{}", FileUtil.getAbsolutePath(keyFile), e);
+                log.warn(I18nMessageUtil.get("i18n.read_jwt_key_file_failed.8493"), FileUtil.getAbsolutePath(keyFile), e);
             }
         }
         if (StrUtil.isBlank(key)) {
@@ -88,11 +89,10 @@ public final class JwtKeyUtil {
             FileUtil.mkParentDirs(keyFile);
             FileUtil.writeString(key, keyFile, CharsetUtil.CHARSET_UTF_8);
             setOwnerReadWriteOnly(keyFile);
-            log.warn("未配置 jpom.user.token-jwt-key，已自动生成随机 JWT 密钥并保存到 {}。" +
-                    "升级后旧登录 token 将失效，用户需要重新登录；集群部署请显式配置相同的 token-jwt-key。", FileUtil.getAbsolutePath(keyFile));
+            log.warn(I18nMessageUtil.get("i18n.jwt_key_auto_generated.e061"), FileUtil.getAbsolutePath(keyFile));
         } else {
             setOwnerReadWriteOnly(keyFile);
-            log.info("使用 JWT 密钥文件：{}", FileUtil.getAbsolutePath(keyFile));
+            log.info(I18nMessageUtil.get("i18n.using_jwt_key_file.8389"), FileUtil.getAbsolutePath(keyFile));
         }
         userConfig.setTokenJwtKey(key);
     }
@@ -106,7 +106,7 @@ public final class JwtKeyUtil {
         try {
             Files.setPosixFilePermissions(file.toPath(), PosixFilePermissions.fromString("rw-------"));
         } catch (UnsupportedOperationException | IOException | SecurityException e) {
-            log.debug("设置文件权限失败（当前环境可能不支持 POSIX 权限）：{}", FileUtil.getAbsolutePath(file), e);
+            log.debug(I18nMessageUtil.get("i18n.set_file_permissions_failed.55d8"), FileUtil.getAbsolutePath(file), e);
         }
     }
 }
