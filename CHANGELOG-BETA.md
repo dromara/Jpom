@@ -16,6 +16,17 @@
 5. 【all】升级 Tomcat 9.0.123、JGit、BouncyCastle、commons-lang3 等依赖，修复已知安全漏洞（#118；#116 已评估为不受影响）
 6. 【all】优化 下载中心域名由 `d.jpom.download` 切换为 `d2.jpom.download`
 7. 【server】优化 节点监控异常通知内容不再包含完整异常堆栈，仅保留错误信息，减少正式环境无效日志（感谢@Robot [Gitee pr 293](https://gitee.com/dromara/Jpom/pulls/293) ）
+8. 【server】修复 JWT 签名密钥未配置时回退到源码公开固定值的问题：现在首次启动自动生成随机密钥并持久化到 `<data>/.jwt-key`（权限 600），空白配置也视为未配置；建议显式配置至少 32 位随机 `jpom.user.token-jwt-key`
+9. 【server】修复 客户端可通过伪造 `X-Forwarded-For` / `X-Real-IP` 绕过 IP 白名单和登录 IP 失败锁定的问题：新增可信代理配置 `jpom.web.trusted-proxies`（默认仅信任本机回环），统一 IP 解析并在存在 IPv4 白名单时拒绝非 IPv4 客户端
+10. 【agent】修复 Agent 未配置授权密码时把自动生成的明文密码写入日志的问题：日志不再输出密码，`data/agent_authorize.json` 权限收紧为 600
+11. 【server】修复 `/tools/net-ping`、`/tools/net-telnet`、`/tools/ip-list` 缺少功能权限、任意登录用户可做服务端网络探测和网卡信息读取的问题：现在要求系统管理员权限，并限制端口/超时、增加操作日志；普通用户仍可使用 Cron 工具
+12. 【server】修复 登录验证码可被空串绕过、账号不存在与密码错误返回码不同导致账号枚举的问题：验证码校验前移并改为一次性、5 分钟有效，账号不存在与密码错误统一返回 501
+
+### ⚠️ 升级说明
+
+1. 未配置 `jpom.user.token-jwt-key` 的部署升级后会自动生成 `<data>/.jwt-key`，旧登录 token 将失效，用户需要重新登录；集群部署请为所有节点显式配置相同的 key。
+2. 反向代理不在本机时，请将代理地址配置到 `jpom.web.trusted-proxies`，否则 IP 白名单和登录 IP 锁定将看到代理 IP（这是安全收紧，不是故障）。
+3. `/tools/net-ping`、`/tools/net-telnet`、`/tools/ip-list` 现在仅系统管理员可访问，普通用户菜单会隐藏；验证码失败或过期后需要重新获取。
 
 ------
 
