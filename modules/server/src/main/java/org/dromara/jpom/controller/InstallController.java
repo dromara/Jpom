@@ -9,6 +9,7 @@
  */
 package org.dromara.jpom.controller;
 
+import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.keepbx.jpom.IJsonMessage;
@@ -80,6 +81,13 @@ public class InstallController extends BaseServerController {
             @ValidatorItem(value = ValidatorRule.WORD, msg = "i18n.login_name_cannot_contain_chinese_and_special_characters.48a8")
         }) String userName,
         @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.password_cannot_be_empty.89b5") String userPwd) {
+        // 防御性校验：不依赖参数拦截器（全新实例的首个请求等场景可能跳过拦截器），
+        // 避免使用空用户名/空密码初始化出无法登录的系统管理员账号
+        Assert.hasText(userName, I18nMessageUtil.get("i18n.login_name_cannot_be_empty.9a99"));
+        Assert.hasText(userPwd, I18nMessageUtil.get("i18n.password_cannot_be_empty.89b5"));
+        Assert.state(userName.length() >= UserModel.USER_NAME_MIN_LEN && userName.length() <= Const.ID_MAX_LEN,
+            I18nMessageUtil.get("i18n.login_name_length_range.fe8d"));
+        Assert.state(Validator.isWord(userName), I18nMessageUtil.get("i18n.login_name_cannot_contain_chinese_and_special_characters.48a8"));
         //
         Assert.state(!userService.canUse(), I18nMessageUtil.get("i18n.system_already_initialized.743c"));
 

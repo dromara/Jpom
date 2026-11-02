@@ -42,7 +42,7 @@ public class FtpFileController extends BaseFtpFileController {
 
     @Override
     protected <T> T checkConfigPath(String id, BiFunction<MachineFtpModel, ItemConfig, T> function) {
-        FtpModel ftpModel = ftpService.getByKey(id);
+        FtpModel ftpModel = ftpService.getByKey(id, getRequest());
         Assert.notNull(ftpModel, I18nMessageUtil.get("i18n.no_corresponding_ssh.aa68"));
         MachineFtpModel machineFtpModel = machineFtpServer.getByKey(ftpModel.getMachineFtpId(), false);
         return function.apply(machineFtpModel, ftpModel);
@@ -53,7 +53,7 @@ public class FtpFileController extends BaseFtpFileController {
         FileUtils.checkSlip(path);
         Opt.ofBlankAble(children).ifPresent(FileUtils::checkSlip);
 
-        FtpModel ftpModel = ftpService.getByKey(id);
+        FtpModel ftpModel = ftpService.getByKey(id, getRequest());
         Assert.notNull(ftpModel, I18nMessageUtil.get("i18n.no_corresponding_ssh.aa68"));
         List<String> fileDirs = ftpModel.fileDirs();
         String normalize = FileUtil.normalize(StrUtil.SLASH + path + StrUtil.SLASH);

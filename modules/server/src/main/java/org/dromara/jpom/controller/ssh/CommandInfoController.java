@@ -177,10 +177,11 @@ public class CommandInfoController extends BaseServerController {
     @Feature(method = MethodFeature.EXECUTE)
     public IJsonMessage<String> batch(String id,
                                       String params,
-                                      @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.running_node_cannot_be_empty.ffc6") String nodes) throws IOException {
+                                      @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.running_node_cannot_be_empty.ffc6") String nodes,
+                                      HttpServletRequest request) throws IOException {
         Assert.hasText(id, I18nMessageUtil.get("i18n.execution_command_required.1cf3"));
         Assert.hasText(nodes, I18nMessageUtil.get("i18n.execution_node_required.d747"));
-        String batchId = sshCommandService.executeBatch(id, params, nodes);
+        String batchId = sshCommandService.executeBatch(id, params, nodes, request);
         return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"), batchId);
     }
 

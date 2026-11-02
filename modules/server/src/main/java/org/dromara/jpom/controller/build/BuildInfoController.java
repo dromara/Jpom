@@ -472,15 +472,17 @@ public class BuildInfoController extends BaseServerController {
      * 获取分支信息
      *
      * @param repositoryId 仓库id
+     * @param request      请求
      * @return json
      * @throws Exception 异常
      */
     @RequestMapping(value = "/build/branch-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<JSONObject> branchList(
-        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.repository_id_cannot_be_empty.a42c") String repositoryId) throws Exception {
-        // 根据 repositoryId 查询仓库信息
-        RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, false);
+        @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.repository_id_cannot_be_empty.a42c") String repositoryId,
+        HttpServletRequest request) throws Exception {
+        // 根据 repositoryId 查询仓库信息（按当前工作空间校验仓库归属，避免跨工作空间访问）
+        RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, request);
         Assert.notNull(repositoryModel, I18nMessageUtil.get("i18n.invalid_repository_info.b4ad"));
         //
         Assert.state(repositoryModel.getRepoType() == 0, I18nMessageUtil.get("i18n.only_git_repositories_have_branch_info.d7f7"));

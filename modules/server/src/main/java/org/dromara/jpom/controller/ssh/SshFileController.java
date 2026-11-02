@@ -43,7 +43,7 @@ public class SshFileController extends BaseSshFileController {
 
     @Override
     protected <T> T checkConfigPath(String id, BiFunction<MachineSshModel, ItemConfig, T> function) {
-        SshModel sshModel = sshService.getByKey(id);
+        SshModel sshModel = sshService.getByKey(id, getRequest());
         Assert.notNull(sshModel, I18nMessageUtil.get("i18n.no_corresponding_ssh.aa68"));
         MachineSshModel machineSshModel = machineSshServer.getByKey(sshModel.getMachineSshId(), false);
         return function.apply(machineSshModel, sshModel);
@@ -54,7 +54,7 @@ public class SshFileController extends BaseSshFileController {
         FileUtils.checkSlip(path);
         Opt.ofBlankAble(children).ifPresent(FileUtils::checkSlip);
 
-        SshModel sshModel = sshService.getByKey(id);
+        SshModel sshModel = sshService.getByKey(id, getRequest());
         Assert.notNull(sshModel, I18nMessageUtil.get("i18n.no_corresponding_ssh.aa68"));
         List<String> fileDirs = sshModel.fileDirs();
         String normalize = FileUtil.normalize(StrUtil.SLASH + path + StrUtil.SLASH);
