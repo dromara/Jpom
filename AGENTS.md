@@ -15,6 +15,7 @@
   4. 不要提交构建产物与本地工具文件：`target/`、`dist/`、`*.bak`、`pom.xml.versionsBackup`、`*.zip`、`*.tar.gz`、`*.sha1`、`.tmp/`、`awscliv2.zip`、`ossutil-*/`、`node_modules/`，以及 `*.pem`、`*.key` 等密钥/证书文件。
   5. **每次提交、推送前都必须做敏感信息检查**（开源仓库）：不得提交真实密码、Token、密钥、证书、内网地址和用户隐私数据。提交前运行 `bash script/check-sensitive.sh --all`，推送前加上 `--range <基线>..HEAD`，详见第 8 节。
   6. **GitHub 是 Gitee 的自动镜像，只读**：主仓库在 Gitee（`gitee.com/dromara/Jpom`），Gitee 收到推送后会自动镜像到 GitHub（`github.com/dromara/Jpom`）。**代码提交、推送、PR、tag、Release 一律只对 Gitee 操作；禁止直接向 GitHub 提交、推送、提 PR 或做任何写操作。**
+  7. **文档与临时文件分离（`.tmp` 治理）**：`.tmp/` 只放**可随时删除**的产物（构建/依赖缓存、下载的二进制、PoC 复现环境、大体积证据、一次性脚本）；**不要把唯一一份文档或结论只放在 `.tmp/`**。需要留存的文档（审计/分析/验证记录、环境信息、操作手册）写入工作区内的独立文档库 `dev-docs/`（独立 git 仓库，不提交到本仓，规则见 `dev-docs/README.md`）；任务收尾时把 `.tmp/` 中值得保留的 md 归档过去，详见第 9 节。
 
 ## 1. 项目概览
 
@@ -428,6 +429,7 @@ bash script/check-sensitive.sh --all --range origin/dev..HEAD
 - **文档站发布**：只走 GitHub Pages（push `docs` 的 `main`）；历史 `deploy-docs-pages.sh` 与 `ali-oss.yml` 已删除。
 - **根目录 `README.md` 的子模块说明可能过时**：以 `.gitmodules` 实际配置为准（`docs` 已指向 `bwcx-jzy/jpom-docs` 的 `main`）。
 - **不要提交**工作区根部的本地工具/临时文件：`.tmp/`、`awscliv2.zip`、`ossutil-2.3.0-linux-amd64/`、`aws/` 等。
+- **`.tmp/` 不是文档仓库**：`.tmp/` 只用于可丢弃的临时产物；需要留存的文档、环境信息和操作手册写 `dev-docs/`（第 0 节第 7 条），任务结束前归档并提交，避免 `.tmp` 被清理后文档丢失。
 - **敏感信息检查**：提交前运行 `bash script/check-sensitive.sh --all`，推送前加上 `--range <基线>..HEAD`；`.gitignore` 已忽略密钥类文件与本地临时文件，禁止用 `git add -f` 绕过（详见第 8 节）。
 - **GitHub 只读**：主仓在 Gitee，GitHub 是 Gitee 自动镜像；不要直接向 GitHub 提交/推送/开 PR、不要配置 GitHub 推送 remote，`push.bat` 里的 GitHub 推送部分已过时。
 - **构建 JDK**：请使用 JDK 8；更高版本 JDK 可能因老版本 maven 插件/编译参数失败。
@@ -448,3 +450,4 @@ bash script/check-sensitive.sh --all --range origin/dev..HEAD
 - `jpom-parent/.workflow/`、`jpom-parent/.github/workflows/`：CI/流水线
 - `docs/README.md`、`docs/.github/workflows/deploy.yml`：文档站与部署
 - `.gitmodules`：子模块清单与默认分支
+- `dev-docs/README.md`：本地工作区文档库（文档写入规则、环境登记、历史归档；独立 git 仓库，不随本仓提交）
