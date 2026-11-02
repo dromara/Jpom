@@ -11,8 +11,10 @@
 - AI 助手硬性约束：
   1. 开发以 `jpom-parent` 为准，基线分支是 **`dev`**；外部贡献的 PR 只能提到 `dev`，不要向 `master` / `beta` 提 PR。
   2. 子模块内的修改先在子模块仓库提交，再回根仓更新子模块指针；不要在根仓“顺手”提交子模块内的文件、也不要混用两个仓库的提交。
-  3. **没有明确授权时，不要执行任何发版动作**：不要上传 OSS/R2、不要推送 Docker 镜像、不要打 tag、不要创建 Gitee/GitHub Release、不要发布文档站。第 6 节流程仅用于理解与授权后执行。
-  4. 不要提交构建产物与本地工具文件：`target/`、`dist/`、`*.bak`、`pom.xml.versionsBackup`、`*.zip`、`*.tar.gz`、`*.sha1`、`.tmp/`、`awscliv2.zip`、`ossutil-*/`、`node_modules/` 等。
+  3. **没有明确授权时，不要执行任何发版动作**：不要上传 OSS/R2、不要推送 Docker 镜像、不要打 tag、不要创建 Gitee Release、不要发布文档站。第 6 节流程仅用于理解与授权后执行。
+  4. 不要提交构建产物与本地工具文件：`target/`、`dist/`、`*.bak`、`pom.xml.versionsBackup`、`*.zip`、`*.tar.gz`、`*.sha1`、`.tmp/`、`awscliv2.zip`、`ossutil-*/`、`node_modules/`，以及 `*.pem`、`*.key` 等密钥/证书文件。
+  5. **每次提交、推送前都必须做敏感信息检查**（开源仓库）：不得提交真实密码、Token、密钥、证书、内网地址和用户隐私数据。提交前运行 `bash script/check-sensitive.sh --all`，推送前加上 `--range <基线>..HEAD`，详见第 8 节。
+  6. **GitHub 是 Gitee 的自动镜像，只读**：主仓库在 Gitee（`gitee.com/dromara/Jpom`），Gitee 收到推送后会自动镜像到 GitHub（`github.com/dromara/Jpom`）。**代码提交、推送、PR、tag、Release 一律只对 Gitee 操作；禁止直接向 GitHub 提交、推送、提 PR 或做任何写操作。**
 
 ## 1. 项目概览
 
@@ -65,6 +67,18 @@ git -C docs checkout main
 - 根仓 `HEAD` 记录的只是一组子模块 commit，**不代表子模块当前工作区分支/改动**；联调前先用 `git submodule status` 与各子模块 `git status` 确认。
 - 根仓 `master` 分支是完整代码快照（历史默认分支），本工作区使用的是 `gitmodules` 分支；两者内容不同，不要交叉提交。
 
+### 远程与镜像（重要）
+
+| 远程 | 地址 | 用途 |
+| --- | --- | --- |
+| Gitee（`origin`） | `gitee.com/dromara/Jpom` | **主仓库，唯一的代码推送目标** |
+| GitHub | `github.com/dromara/Jpom` | Gitee 自动镜像的**只读**仓库，不要 push/PR/tag/Release |
+| `jpom-docs`（docs 子模块） | `github.com/bwcx-jzy/jpom-docs` | 独立的文档站仓库，按 3.2 的文档流程操作（不属于 Jpom 主仓镜像） |
+
+- `git push` 只推 Gitee（如 `git push origin dev` / `git push gitee dev`，远程名以本地配置为准）；**不要** `git push github ...`。
+- 不要在 GitHub 上提 PR / Issue / Release / tag；GitHub 上的内容会在 Gitee 推送后由镜像自动同步。
+- 历史脚本 `jpom-parent/script/push.bat` 会向 gitee、github 双远程推送，**已不符合当前流程**，不要使用其中的 GitHub 推送部分。
+
 ## 3. 分支体系与用法
 
 ### 3.1 代码仓库 `jpom-parent`（核心）
@@ -88,6 +102,7 @@ git -C docs checkout main
 ```
 
 - `RELEASE.md`「手动版」第 1 步写的是“将 dev 分支合并到 master”，即允许跳过 beta 直接发稳定版；实际以维护者当次选择为准。
+- 远程操作只有 Gitee：提交、推送、tag、PR、Release 都不要直接对 GitHub 做（GitHub 由 Gitee 自动镜像），详见第 2 节“远程与镜像”。
 - 功能分支从 `dev` 切出，命名可参考历史（`dev-ftp1`、`i18n`、`pipeline` 等），合并回 `dev` 后删除。
 - 贡献者典型操作流：
 
@@ -103,8 +118,8 @@ git -C docs checkout main
   ```
 
 - 提交 PR 即视为签署 [CLA.md](jpom-parent/CLA.md)；请同时遵守 `CODE_OF_CONDUCT.md`。
-- 主仓在 Gitee（`gitee.com/dromara/Jpom`），GitHub（`github.com/dromara/Jpom`）为同步镜像；PR/Issue 主要走 Gitee。
-- 双远程推送的历史脚本为 `jpom-parent/script/push.bat`（会双向合并 `dev`/`master` 后推送 gitee、github 与 tags），属于维护者工具，执行前务必确认分支状态。
+- **主仓在 Gitee（`gitee.com/dromara/Jpom`），GitHub（`github.com/dromara/Jpom`）是 Gitee 自动镜像的只读仓库**：fork、分支、PR 全在 Gitee 上操作，PR 目标为 Gitee 的 `dev` 分支；不要向 GitHub 提 PR、推送代码、创建 tag 或 Release。
+- 历史脚本 `jpom-parent/script/push.bat` 会向 gitee、github 双远程推送并双向合并 `dev`/`master`，**已过时**；当前只需要推送 Gitee，GitHub 由镜像自动同步。
 
 ### 3.2 文档仓库 `docs/`（jpom-docs）
 
@@ -116,6 +131,7 @@ git -C docs checkout main
 - 发布链路：push `main` → `.github/workflows/deploy.yml` 构建（`npm install && npm run lbuild`）→ 推送 `dist` 分支 → GitHub Pages 发布（自定义域名以 `docs/docs/.vuepress/public/CNAME` 为准，当前为 `jpom.top`）。
 - `.github/workflows/ali-oss.yml` 已改为仅手动触发的回退方案；`baiduPush.yml` 为每日百度收录推送。
 - 本地预览：`cd docs && npm install && npm run ldev`（默认端口 `2216`）。
+- **例外说明**：`docs` 是独立的 GitHub 仓库（`bwcx-jzy/jpom-docs`），其 `main`/`dist` 与 GitHub Pages 流程不受“主仓只在 Gitee 操作”的限制；但**不要**把 Jpom 主仓代码提交到这个仓库。
 
 ### 3.3 其他分支
 
@@ -161,7 +177,7 @@ git -C docs checkout main
 | 下载中心 | `https://d2.jpom.download`（Cloudflare R2 托管）；稳定版路径 `release/<version>/`，beta 路径 `beta/<version>/` |
 | 历史 OSS | `oss://jpom-releases/release/<version>/`、`oss://jpom-releases/beta/<version>/`（根脚本仍按 OSS 编写，见 6.2） |
 | Docker Hub | `jpomdocker/jpom:<version>` 与 `:latest`（稳定版）；beta 镜像按需构建 |
-| Gitee / GitHub Release | 基于 tag `v2.x.y` 创建发行版，附安装包与 sha1 |
+| Gitee Release | 基于 tag `v2.x.y` 创建发行版，附安装包与 sha1；GitHub 由 Gitee 自动镜像，不手动操作 |
 
 Dockerfile 对应关系：`modules/server/DockerfileRelease`（稳定版）、`DockerfileReleaseJdk17`（JDK17 变体）、`DockerfileBeta`、`DockerfileBetaJdk17`；插件端 `modules/agent/DockerfileRelease`、`DockerfileBeta`。
 
@@ -209,7 +225,7 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
 
 ### 6.1 前置说明
 
-- 项目已暂停维护，正式发版前必须确认：下载域名（R2/OSS）、Docker Hub、文档 Pages、Gitee/GitHub 凭据均可用；**无授权不得执行**。
+- 项目已暂停维护，正式发版前必须确认：下载域名（R2/OSS）、Docker Hub、文档 Pages、Gitee 凭据均可用；**无授权不得执行**。GitHub 由 Gitee 自动镜像，不需要也不应单独准备 GitHub 推送凭据。
 - 发版提交固定节奏（与历史提交一致）：
   1. `releases(发布): 准备<version>` —— 更新 CHANGELOG；
   2. 运行版本替换脚本 + 打包 + 冒烟；
@@ -237,11 +253,10 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
    cd jpom-parent
    git add -A && git commit -m "commit release 2.x.y"
    git tag v2.x.y
-   git push gitee master && git push gitee --tags
-   git push github master && git push github --tags
+   git push origin master && git push origin --tags   # 只推 Gitee
    ```
 
-   （远程命名以本地配置为准，历史上为 `gitee` / `github` 双远程；也可参考 `script/push.bat`，但该脚本会双向合并分支，慎用。）
+   （`origin` 为 Gitee；**GitHub 由 Gitee 自动镜像同步，禁止 `git push github`**；历史脚本 `script/push.bat` 已过时，不要使用。）
 8. **上传安装包**：
 
    ```bash
@@ -271,7 +286,7 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
       -f ./modules/server/DockerfileRelease --push .
     ```
 
-12. **创建发行版**：在 Gitee、GitHub 基于 tag `v2.x.y` 创建 Release，上传 server/agent 安装包与 sha1。
+12. **创建发行版**：在 **Gitee** 基于 tag `v2.x.y` 创建 Release，上传 server/agent 安装包与 sha1。**不要到 GitHub 手动创建 Release/tag**，GitHub 内容由 Gitee 镜像自动同步。
 13. **可选**：发布发版公告。
 
 ### 6.3 beta 发版
@@ -284,7 +299,7 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
 6. 提交 `commit beta 2.x.y.N`。
 7. 上传到 beta 渠道：`oss://jpom-releases/beta/<version>/` 或 R2 的 `beta/<version>/`（根脚本只处理 release，beta 需手动 `ossutil`/rclone 上传）。
 8. 可选构建 beta 镜像（`-f ./modules/server/DockerfileBeta`）。
-9. **beta 不打 tag、不创建 Gitee/GitHub Release**；测稳后按 6.2 合并到 `master` 发稳定版。
+9. **beta 不打 tag、不创建 Gitee Release（GitHub 镜像无需操作）**；测稳后按 6.2 合并到 `master` 发稳定版。
 
 ### 6.4 流水线发版（Gitee Go）
 
@@ -311,7 +326,7 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
 - [ ] 文档站版本号、CHANGELOG、下载链接已更新并发布
 - [ ] 在线升级测试通过（稳定版）
 - [ ] Docker 镜像已推送（稳定版：`<version>` 与 `latest`）
-- [ ] Gitee/GitHub Release 已创建（稳定版）
+- [ ] Gitee Release 已创建（GitHub 由镜像自动同步，不手动操作）
 - [ ] 已确认得到维护者授权，且所有正式渠道操作符合预期
 
 ## 7. 提交规范与代码风格
@@ -338,7 +353,71 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
   - 前端：`web-vue/src/i18n/locales/zh_cn.json`（主文件）与 `en_us.json`（同步文件），新增文案后用 `npm run i18n` 生成（依赖 `.env` 中的百度翻译配置，特殊字符转义见 `web-vue/README.md` 的 `_#_` 说明）。
 - 新增/修改 UI 文案必须同时考虑中英（及繁体）语言资源，避免硬编码中文。
 
-## 8. 常见坑
+## 8. 开源项目：隐私与密钥泄露检查（提交/推送必做）
+
+> Jpom 是公开开源项目，提交与推送的内容会永久进入公共 git 历史。**密钥一旦进入历史就视为已泄露**，删除文件或 revert 都无法真正清除。
+
+### 8.1 红线：禁止提交的内容
+
+- **真实凭据**：密码、私钥（`id_rsa`、`*.pem`、`*.p12`、`*.jks`、`*.keystore` 等）、API Key / Token、云厂商 AK/SK、数据库账号、SSH 口令、CI / 镜像仓库 / rclone 凭据。
+- **真实配置**：`.env` 真实值、生产/测试数据库连接串、内网 IP、内部域名、VPN 配置。
+- **用户隐私**：真实用户名、手机号、邮箱、身份证/银行卡号、地址、订单、聊天记录、真实数据库导出。
+- **未脱敏的日志/截图/抓包**：可能包含 Cookie、JWT、Authorization、会话 ID、用户数据。
+- **提交身份**：`git config user.name` / `user.email` 会永久公开在提交历史中；请使用你愿意公开的身份，开源项目建议使用 GitHub/Gitee 的 noreply 邮箱，避免暴露私人邮箱或真名。
+- **本地文件**：`.claude/settings.local.json`、`.tmp/`、`aws/`、`ossutil-*`、本机脚本与配置（已由 `.gitignore` 忽略，禁止用 `git add -f` 绕过）。
+
+### 8.2 仓库里的示例占位值（不要替换成真实值）
+
+- `jpom-parent/.env`、`env-release.env`、`env-beta.env` 的 `SERVER_TOKEN` 是 docker-compose 演示值；不要把生产 token 填进去。
+- `jpom-parent/script/settings.xml` 的 `proxyuser/proxypass`、`repouser/repopwd` 是 Maven 模板占位。
+- `jpom-parent/web-vue/.env` 的 `BAIDU_FY_ID/SECRET` 是 `xxx` 占位。
+- 新增配置项时示例值必须写成 `xxx` / `your_xxx` / `change_me`，真实值用环境变量或本地未跟踪文件注入。
+
+### 8.3 提交前检查（每次 `git commit` 前）
+
+```bash
+git status --short          # 确认没有把无关文件/密钥文件加进来
+git diff --cached           # 逐行审阅即将提交的内容
+git config user.name; git config user.email   # 确认提交身份是愿意公开的（见 8.1）
+bash script/check-sensitive.sh --all   # 检查根仓 + 全部子模块的暂存区与未跟踪文件
+```
+
+- 告警必须逐条人工确认；确认误报也不要直接忽略，改用假数据或在脚本 `ALLOW_PATTERN` 中精确加入该占位值。
+- 新增 `*.pem` / `*.key` / `*.jks` / `.env.local` 等密钥类文件默认会被阻断；确需提交公开证书时先与维护者确认并脱敏。
+- 可选（能力更强，未安装可跳过）：`gitleaks detect --source . --redact`、`trufflehog git file://. --only-verified`。
+- 脚本只做启发式检查（暂存区新增行、未跟踪文件、指定提交区间），不能替代人工审阅；已提交历史请用 gitleaks 等工具扫描。
+
+### 8.4 推送前检查（每次 `git push` / 发版前）
+
+```bash
+# 检查 jpom-parent 即将推送的提交（基线/远程名按实际调整）
+bash script/check-sensitive.sh --repo jpom-parent --range origin/dev..HEAD
+
+# 直接审阅提交内容
+git -C jpom-parent log -p origin/dev..HEAD
+
+# 根仓推送前（子模块指针 + AGENTS.md 等）
+bash script/check-sensitive.sh --all --range origin/dev..HEAD
+```
+
+- Issue / PR / Release 描述、附件、截图中同样不得包含真实凭据与隐私信息。
+- 推送目标只能是 **Gitee**；GitHub 会在 Gitee 推送后由镜像自动同步，**不要**手动 `git push github`、提 GitHub PR 或创建 GitHub tag/Release。
+- 不要用 `git push --force` 掩盖已泄露提交（reflog、镜像、缓存仍可能恢复）；正确做法是轮换凭据（见 8.6）。
+
+### 8.5 测试与示例数据
+
+- 单元测试/示例统一用假数据（如 `Poc123456`、`example.com`、`127.0.0.1`），不要拷贝真实用户数据。
+- 日志/截图需脱敏：IP、域名、账号、token、Cookie、数据库名等。
+- 需要真实样本复现问题时，放到仓库外的临时目录（如 `~/jpom-work/`），不要留在 `.tmp/` 里。
+
+### 8.6 发现泄露后的处理
+
+1. **按“已泄露”处理**：立即轮换/吊销对应密码、Token、API Key、SSH 授权，不要只删文件或 revert。
+2. 通知维护者，评估是否影响已发布版本与用户。
+3. 由维护者用 `git filter-repo`（或 BFG）清理历史，并协调强推与镜像（Gitee/GitHub）同步；操作前先备份。
+4. 按 `jpom-parent/SECURITY.md` 的流程披露与说明修复措施。
+
+## 9. 常见坑
 
 - **子模块分支错位**：`.gitmodules` 里 `jpom-parent` 默认 `master`，开发应在 `dev`；`git submodule update --remote` 会切走，操作前先确认。
 - **根仓 `pom.xml` 过期**（版本 2.9.10，仅用于 IDE 聚合导入）：实际构建请在 `jpom-parent/` 内执行 Maven。
@@ -347,15 +426,20 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
 - **根脚本 `deploy-docs-pages.sh` 属历史链路**（yarn + OSS），当前文档站以 GitHub Pages（`docs/.github/workflows/deploy.yml`）为准。
 - **根目录 `README.md` 的子模块说明可能过时**：以 `.gitmodules` 实际配置为准（`docs` 已指向 `bwcx-jzy/jpom-docs` 的 `main`）。
 - **不要提交**工作区根部的本地工具/临时文件：`.tmp/`、`awscliv2.zip`、`ossutil-2.3.0-linux-amd64/`、`aws/` 等。
+- **敏感信息检查**：提交前运行 `bash script/check-sensitive.sh --all`，推送前加上 `--range <基线>..HEAD`；`.gitignore` 已忽略密钥类文件与本地临时文件，禁止用 `git add -f` 绕过（详见第 8 节）。
+- **GitHub 只读**：主仓在 Gitee，GitHub 是 Gitee 自动镜像；不要直接向 GitHub 提交/推送/开 PR、不要配置 GitHub 推送 remote，`push.bat` 里的 GitHub 推送部分已过时。
 - **构建 JDK**：请使用 JDK 8；更高版本 JDK 可能因老版本 maven 插件/编译参数失败。
 - **Docker 构建**：`buildx` 需先启用 experimental / binfmt_misc，参见 `jpom-parent/script/docker-buildx.md`。
 - **项目已暂停维护**：不要在未授权情况下更新下载中心、镜像、文档站或发布公告；对外发布前与维护者确认。
 
-## 9. 相关权威文件
+## 10. 相关权威文件
 
 修改流程或结构后，请同步更新本文件与以下来源：
 
 - `RELEASE.md`（根目录）：发布流程（手动版 / 流水线版）
+- `script/check-sensitive.sh`：提交/推送前的隐私与密钥检查脚本（第 8 节）
+- `jpom-parent/SECURITY.md`：安全漏洞报告与披露流程
+- `.gitignore`（根目录与 `jpom-parent/`）：临时文件、密钥/证书类文件忽略规则
 - `jpom-parent/README.md`：分支说明、贡献指南
 - `jpom-parent/script/`：`replaceVersion.sh`、`release.sh`、`release-sha1sum.sh`、`push.bat`、`docker-buildx.md`
 - `jpom-parent/.workflow/`、`jpom-parent/.github/workflows/`：CI/流水线
