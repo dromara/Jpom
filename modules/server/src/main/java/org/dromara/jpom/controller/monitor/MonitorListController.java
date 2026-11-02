@@ -148,9 +148,14 @@ public class MonitorListController extends BaseServerController {
         Assert.state(CollUtil.isNotEmpty(notifyUserList) || StrUtil.isNotEmpty(webhook), I18nMessageUtil.get("i18n.alarm_contact_or_webhook_required.6c24"));
 
         boolean start = "on".equalsIgnoreCase(status);
-        MonitorModel monitorModel = monitorService.getByKey(id);
-        if (monitorModel == null) {
+        MonitorModel monitorModel;
+        if (StrUtil.isEmpty(id)) {
+            // 新增监控
             monitorModel = new MonitorModel();
+        } else {
+            // 编辑监控：按当前工作空间校验归属，避免跨工作空间编辑其它空间的监控
+            monitorModel = monitorService.getByKey(id, request);
+            Assert.notNull(monitorModel, I18nMessageUtil.get("i18n.no_corresponding_data.4703"));
         }
         monitorModel.setAutoRestart("on".equalsIgnoreCase(autoRestart));
         monitorModel.setExecCron(this.checkCron(execCron));

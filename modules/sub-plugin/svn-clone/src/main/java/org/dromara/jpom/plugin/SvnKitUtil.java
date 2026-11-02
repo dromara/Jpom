@@ -26,6 +26,8 @@ import org.tmatesoft.svn.core.internal.wc.SVNFileUtil;
 import org.tmatesoft.svn.core.wc.*;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -188,6 +190,38 @@ public class SvnKitUtil {
             return new String[]{workingVersion + "", String.format(I18nMessageUtil.get("i18n.checkout_version.a586"), workingVersion)};
         } catch (SVNAuthenticationException s) {
             throw new JpomRuntimeException(I18nMessageUtil.get("i18n.incorrect_account_credentials.b2c5"), s);
+        }
+    }
+
+    /**
+     * 获取两个版本之间发生变更的文件路径
+     *
+     * @param wcDir       工作副本目录
+     * @param map         仓库认证参数
+     * @param oldRevision 旧版本号
+     * @param newRevision 新版本号
+     * @return 发生变更的路径列表（相对工作副本根目录）
+     * @throws SVNException svn 异常
+     */
+    public static List<String> diffChangedPaths(File wcDir, Map<String, Object> map, long oldRevision, long newRevision) throws SVNException {
+        SVNClientManager clientManager = getAuthClient(map);
+        try {
+            SVNWCClient wcClient = clientManager.getWCClient();
+            SVNInfo svnInfo = wcClient.doInfo(wcDir, SVNRevision.WORKING);
+            SVNURL url = svnInfo.getURL();
+            List<String> paths = new ArrayList<>();
+            SVNDiffClient diffClient = clientManager.getDiffClient();
+            diffClient.doDiffStatus(url, SVNRevision.create(oldRevision),
+                url, SVNRevision.create(newRevision),
+                SVNDepth.INFINITY, false, status -> {
+                    String path = status.getPath();
+                    if (StrUtil.isNotEmpty(path)) {
+                        paths.add(path);
+                    }
+                });
+            return paths;
+        } finally {
+            clientManager.dispose();
         }
     }
 }

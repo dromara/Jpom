@@ -106,7 +106,8 @@ public class NodeProjectInfoController extends BaseServerController {
     @GetMapping(value = "sync_project", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.PROJECT, method = MethodFeature.DEL)
     public IJsonMessage<Object> syncProject(String nodeId, HttpServletRequest request) {
-        NodeModel nodeModel = nodeService.getByKey(nodeId);
+        // 按当前工作空间校验节点归属，避免跨工作空间同步其它空间的节点项目
+        NodeModel nodeModel = nodeService.getByKey(nodeId, request);
         Assert.notNull(nodeModel, I18nMessageUtil.get("i18n.node_not_exist.760e"));
         int count = projectInfoCacheService.delCache(nodeId, request);
         String msg = projectInfoCacheService.syncExecuteNode(nodeModel);

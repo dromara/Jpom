@@ -41,6 +41,8 @@
 	👉Mainland Station：<a target="_blank" href="https://jpom.top">https://jpom.top/</a>  👈
 </p>
 
+[https://jpom.top/pages/project-suspended/](https://jpom.top/pages/project-suspended/)
+
 ## 😭 Do you experience these pain points in your daily development?
 
 - <font color="red">**No dedicated operations team, so developers have to handle operations tasks**</font>, including manual project building and deployment.

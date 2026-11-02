@@ -1058,6 +1058,38 @@
                 </a-row>
               </a-form-item-rest>
             </a-form-item>
+            <a-form-item v-if="tempExtraData.checkRepositoryDiff">
+              <template #label>
+                <a-tooltip>
+                  {{ $t('i18n_0b23d2f584_include') }}
+                  <template #title>
+                    {{ $t('i18n_diff_include_desc') }}
+                  </template>
+                  <QuestionCircleOutlined v-if="!temp.id" />
+                </a-tooltip>
+              </template>
+              <a-input
+                v-model:value="tempExtraData.diffIncludePath"
+                :placeholder="$t('i18n_diff_include_ph')"
+                allow-clear
+              />
+            </a-form-item>
+            <a-form-item v-if="tempExtraData.checkRepositoryDiff">
+              <template #label>
+                <a-tooltip>
+                  {{ $t('i18n_0b23d2f584_exclude') }}
+                  <template #title>
+                    {{ $t('i18n_diff_exclude_desc') }}
+                  </template>
+                  <QuestionCircleOutlined v-if="!temp.id" />
+                </a-tooltip>
+              </template>
+              <a-input
+                v-model:value="tempExtraData.diffExcludePath"
+                :placeholder="$t('i18n_diff_exclude_ph')"
+                allow-clear
+              />
+            </a-form-item>
             <a-form-item name="webhook">
               <template #label>
                 <a-tooltip>

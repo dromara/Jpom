@@ -12,6 +12,7 @@ package org.dromara.jpom.func.user.server;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.hutool.http.Header;
+import org.dromara.jpom.common.ClientIpUtil;
 import org.dromara.jpom.func.user.model.UserLoginLogModel;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.user.UserModel;
@@ -57,7 +58,7 @@ public class UserLoginLogServer extends BaseDbService<UserLoginLogModel> {
         userLoginLogModel.setSuccess(success);
         userLoginLogModel.setUseMfa(useMfa);
         userLoginLogModel.setOperateCode(operateCode);
-        userLoginLogModel.setIp(ServletUtil.getClientIP(request));
+        userLoginLogModel.setIp(ClientIpUtil.resolve(request));
         userLoginLogModel.setUserAgent(ServletUtil.getHeader(request, Header.USER_AGENT.getValue(), CharsetUtil.CHARSET_UTF_8));
         this.insert(userLoginLogModel);
     }

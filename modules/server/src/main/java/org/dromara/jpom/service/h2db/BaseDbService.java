@@ -20,6 +20,7 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.db.Entity;
 import cn.hutool.db.Page;
+import cn.hutool.db.sql.Condition;
 import cn.hutool.db.sql.Direction;
 import cn.hutool.db.sql.Order;
 import cn.hutool.extra.servlet.ServletUtil;
@@ -42,6 +43,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -70,6 +72,11 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         new Order("modifyTimeMillis", Direction.DESC),
         new Order("id", Direction.DESC)
     };
+
+    /**
+     * 允许作为查询/排序字段的标识符（请求参数名会作为数据库字段名使用，必须限制字符集）
+     */
+    private static final Pattern SAFE_FIELD_PATTERN = Pattern.compile("[A-Za-z0-9_]+");
 
     public BaseDbService() {
         super();
@@ -216,7 +223,8 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         this.removeUpdate(entity);
         //
         Entity where = new Entity();
-        where.set(ID_STR, id);
+        // 使用 Condition 绑定主键值，避免条件表达式注入（主键值可能来自请求参数）
+        where.set(ID_STR, new Condition(ID_STR, "=", id));
         if (whereConsumer != null) {
             whereConsumer.accept(where);
         }
@@ -325,7 +333,12 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
     public int delByKey(Object keyValue, Consumer<Entity> consumer) {
         Entity where = new Entity(tableName);
         if (keyValue != null) {
-            where.set(ID_STR, keyValue);
+            if (keyValue instanceof String) {
+                // 使用 Condition 绑定主键值，避免条件表达式注入（主键值可能来自请求参数）
+                where.set(ID_STR, new Condition(ID_STR, "=", keyValue));
+            } else {
+                where.set(ID_STR, keyValue);
+            }
         }
         if (consumer != null) {
             consumer.accept(where);
@@ -352,8 +365,11 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * @return true 存在
      */
     public boolean exists(String dataId) {
+        if (StrUtil.isEmpty(dataId)) {
+            return false;
+        }
         Entity entity = Entity.create();
-        entity.set(ID_STR, dataId);
+        entity.set(ID_STR, new Condition(ID_STR, "=", dataId));
         long count = this.count(entity);
         return count > 0;
     }
@@ -588,65 +604,90 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         List<String> ignoreField = new ArrayList<>(10);
         // 查询条件
         for (Map.Entry<String, String> stringStringEntry : paramMap.entrySet()) {
-            String key = stringStringEntry.getKey();
+            String rawKey = stringStringEntry.getKey();
             String value = stringStringEntry.getValue();
             if (StrUtil.isEmpty(value)) {
                 continue;
             }
-            key = StrUtil.removeAll(key, "%");
-            if (StrUtil.startWith(stringStringEntry.getKey(), "%") && StrUtil.endWith(stringStringEntry.getKey(), "%")) {
-                where.set(DialectUtil.wrapField(key), StrUtil.format(" like '%{}%'", value));
-            } else if (StrUtil.endWith(stringStringEntry.getKey(), "%")) {
-                where.set(DialectUtil.wrapField(key), StrUtil.format(" like '{}%'", value));
-            } else if (StrUtil.startWith(stringStringEntry.getKey(), "%")) {
-                where.set(DialectUtil.wrapField(key), StrUtil.format(" like '%{}'", value));
+            String key = StrUtil.removeAll(rawKey, "%");
+            String timeKey = StrUtil.removeAny(key, "[0]", "[1]");
+            // 请求参数名会被当作数据库字段名使用，必须先校验为合法标识符，避免被拼接为 SQL 片段
+            if (!isSafeFieldName(timeKey)) {
+                log.warn("ignore invalid query field name: {}", rawKey);
+                continue;
+            }
+            String wrapField = DialectUtil.wrapField(key);
+            if (StrUtil.startWith(rawKey, "%") && StrUtil.endWith(rawKey, "%")) {
+                where.set(wrapField, new Condition(wrapField, "like", "%" + value + "%"));
+            } else if (StrUtil.endWith(rawKey, "%")) {
+                where.set(wrapField, new Condition(wrapField, "like", value + "%"));
+            } else if (StrUtil.startWith(rawKey, "%")) {
+                where.set(wrapField, new Condition(wrapField, "like", "%" + value));
             } else if (StrUtil.containsIgnoreCase(key, "time") && StrUtil.contains(value, "~")) {
                 // 时间筛选
                 String[] val = StrUtil.splitToArray(value, "~");
                 if (val.length == 2) {
                     DateTime startDateTime = DateUtil.parse(val[0], DatePattern.NORM_DATETIME_FORMAT);
-                    where.set(key, ">= " + startDateTime.getTime());
+                    where.set(wrapField, new Condition(wrapField, ">=", startDateTime.getTime()));
 
                     DateTime endDateTime = DateUtil.parse(val[1], DatePattern.NORM_DATETIME_FORMAT);
                     if (startDateTime.equals(endDateTime)) {
                         endDateTime = DateUtil.endOfDay(endDateTime);
                     }
                     // 防止字段重复
-                    where.set(key + " ", "<= " + endDateTime.getTime());
+                    where.set(wrapField + " ", new Condition(wrapField, "<=", endDateTime.getTime()));
                 }
             } else if (StrUtil.containsIgnoreCase(key, "time")) {
                 // 时间筛选
-                String timeKey = StrUtil.removeAny(key, "[0]", "[1]");
                 if (ignoreField.contains(timeKey)) {
                     continue;
                 }
+                String timeWrapField = DialectUtil.wrapField(timeKey);
                 String startTime = paramMap.get(timeKey + "[0]");
                 String endTime = paramMap.get(timeKey + "[1]");
                 if (StrUtil.isAllNotEmpty(startTime, endTime)) {
                     DateTime startDateTime = DateUtil.parse(startTime, DatePattern.NORM_DATETIME_FORMAT);
-                    where.set(timeKey, ">= " + startDateTime.getTime());
+                    where.set(timeWrapField, new Condition(timeWrapField, ">=", startDateTime.getTime()));
 
                     DateTime endDateTime = DateUtil.parse(endTime, DatePattern.NORM_DATETIME_FORMAT);
                     if (startDateTime.equals(endDateTime)) {
                         endDateTime = DateUtil.endOfDay(endDateTime);
                     }
                     // 防止字段重复
-                    where.set(timeKey + " ", "<= " + endDateTime.getTime());
+                    where.set(timeWrapField + " ", new Condition(timeWrapField, "<=", endDateTime.getTime()));
                 }
                 ignoreField.add(timeKey);
             } else if (StrUtil.endWith(key, ":in")) {
                 String inKey = StrUtil.removeSuffix(key, ":in");
+                if (!isSafeFieldName(inKey)) {
+                    continue;
+                }
                 where.set(DialectUtil.wrapField(inKey), StrUtil.split(value, StrUtil.COMMA));
             } else {
-                where.set(DialectUtil.wrapField(key), value);
+                // 使用 Condition 绑定查询值，避免值被 Hutool 解析为条件表达式
+                where.set(wrapField, new Condition(wrapField, "=", value));
             }
         }
         // 排序
         if (StrUtil.isNotEmpty(orderField)) {
             orderField = StrUtil.removeAll(orderField, "%");
-            pageReq.addOrder(new Order(DialectUtil.wrapField(orderField), StrUtil.equalsIgnoreCase(order, "ascend") ? Direction.ASC : Direction.DESC));
+            if (isSafeFieldName(orderField)) {
+                pageReq.addOrder(new Order(DialectUtil.wrapField(orderField), StrUtil.equalsIgnoreCase(order, "ascend") ? Direction.ASC : Direction.DESC));
+            } else {
+                log.warn("ignore invalid order field: {}", orderField);
+            }
         }
         return this.listPage(where, pageReq, fill);
+    }
+
+    /**
+     * 是否为合法的数据库字段名（仅允许字母、数字、下划线）
+     *
+     * @param fieldName 字段名
+     * @return true 合法
+     */
+    private static boolean isSafeFieldName(String fieldName) {
+        return StrUtil.isNotEmpty(fieldName) && SAFE_FIELD_PATTERN.matcher(fieldName).matches();
     }
 
     public PageResultDto<T> listPage(Entity where, Page page, boolean fill) {

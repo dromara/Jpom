@@ -54,3 +54,21 @@ screenshot
 web-vue/stats.html
 .baidubce.token
 *.class
+
+# 发版脚本生成的安装包/校验文件（如 deploy-release-oss.sh 在仓库根目录生成的 jpom-x.y.z.zip）
+*.zip
+*.tar.gz
+*.sha1
+
+# ===== 密钥 / 证书 / 本地凭据（开源仓库禁止提交）=====
+# 提交前请同时运行：bash script/check-sensitive.sh --all
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa*
+id_ed25519*
+.env.local
+.env.*.local

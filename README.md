@@ -44,6 +44,8 @@
   👉 大陆站：<a target="_blank" href="https://jpom.top">https://jpom.top</a>  👈
 </p>
 
+[https://jpom.top/pages/project-suspended/](https://jpom.top/pages/project-suspended/)
+
 ## 😭 日常开发中，您是否有以下痛点？
 
 - <font color="red">**团队中没有专业的运维，开发还要做运维的活**</font>，需要自己手动构建、部署项目。

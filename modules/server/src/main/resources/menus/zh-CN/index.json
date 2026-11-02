@@ -176,7 +176,8 @@
       },
       {
         "id": "netTools",
-        "title": "网络工具"
+        "title": "网络工具",
+        "role": "system"
       },
       {
         "id": "cronTools",

@@ -343,7 +343,8 @@ public class OutGivingProjectEditController extends BaseServerController {
         List<Tuple> tuples = new ArrayList<>();
 
         for (String nodeId : nodeIds) {
-            NodeModel nodeModel = nodeService.getByKey(nodeId);
+            // 按当前工作空间校验节点归属，避免把其它工作空间的节点加入分发
+            NodeModel nodeModel = nodeService.getByKey(nodeId, request);
             Assert.notNull(nodeModel, I18nMessageUtil.get("i18n.node_not_exist.760e"));
             //String add = getParameter("add_" + nodeModel.getId());
 //			if (!nodeModel.getId().equals(add)) {

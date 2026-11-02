@@ -114,6 +114,20 @@ public class BuildExtraModule extends BaseModel {
     private Boolean checkRepositoryDiff;
 
     /**
+     * 差异构建 — 包含路径规则 (Ant风格，逗号分隔多个)
+     * 只有变更文件匹配这些规则时才触发构建，为空表示所有文件变更都触发
+     * 例如: /modules/server/**,/modules/common/**,/pom.xml
+     */
+    private String diffIncludePath;
+
+    /**
+     * 差异构建 — 排除路径规则 (Ant风格，逗号分隔多个)
+     * 匹配这些规则的变更文件即使匹配了includePath也会被排除
+     * 例如: /**&#47;*.md
+     */
+    private String diffExcludePath;
+
+    /**
      * 事件通知执行的脚本 ID
      */
     private String noticeScriptId;

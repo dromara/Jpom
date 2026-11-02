@@ -130,7 +130,8 @@ public class MonitorUserOptListController extends BaseServerController {
                                               String notifyUser,
                                               String monitorUser,
                                               String monitorOpt,
-                                              String monitorFeature) {
+                                              String monitorFeature,
+                                              HttpServletRequest request) {
 
         String status = getParameter("status");
 
@@ -171,9 +172,14 @@ public class MonitorUserOptListController extends BaseServerController {
 
 
         boolean start = "on".equalsIgnoreCase(status);
-        MonitorUserOptModel monitorModel = monitorUserOptService.getByKey(id);
-        if (monitorModel == null) {
+        MonitorUserOptModel monitorModel;
+        if (StrUtil.isEmpty(id)) {
+            // 新增监控
             monitorModel = new MonitorUserOptModel();
+        } else {
+            // 编辑监控：按当前工作空间校验归属，避免跨工作空间编辑其它空间的监控
+            monitorModel = monitorUserOptService.getByKey(id, request);
+            Assert.notNull(monitorModel, I18nMessageUtil.get("i18n.no_corresponding_data.4703"));
         }
         monitorModel.monitorUser(monitorUserArrays);
         monitorModel.setStatus(start);
@@ -187,7 +193,7 @@ public class MonitorUserOptListController extends BaseServerController {
             monitorUserOptService.insert(monitorModel);
             return JsonMessage.success(I18nMessageUtil.get("i18n.addition_succeeded.3fda"));
         }
-        monitorUserOptService.updateById(monitorModel);
+        monitorUserOptService.updateById(monitorModel, request);
         return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 
@@ -201,13 +207,15 @@ public class MonitorUserOptListController extends BaseServerController {
     @RequestMapping(value = "changeStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<Object> changeStatus(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.parameter_error_id_cannot_be_empty.86cc") String id,
-                                             String status) {
-        MonitorUserOptModel monitorModel = monitorUserOptService.getByKey(id);
+                                             String status,
+                                             HttpServletRequest request) {
+        // 按当前工作空间校验归属，避免跨工作空间修改其它空间的监控状态
+        MonitorUserOptModel monitorModel = monitorUserOptService.getByKey(id, request);
         Assert.notNull(monitorModel, I18nMessageUtil.get("i18n.monitoring_item_not_exist.32c8"));
 
         boolean bStatus = Convert.toBool(status, false);
         monitorModel.setStatus(bStatus);
-        monitorUserOptService.updateById(monitorModel);
+        monitorUserOptService.updateById(monitorModel, request);
         return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
     }
 

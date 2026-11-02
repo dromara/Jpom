@@ -12,6 +12,7 @@ package org.dromara.jpom.service.user;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.comparator.CompareUtil;
 import cn.hutool.core.date.SystemClock;
+import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
@@ -40,6 +41,11 @@ import java.util.stream.Collectors;
  */
 @Service
 public class UserService extends BaseDbService<UserModel> {
+    /**
+     * 用户密码摘要长度，密码使用 sha1 存储（40 位十六进制字符串）
+     */
+    private static final int PASSWORD_DIGEST_LENGTH = 40;
+
     private final SystemParametersServer systemParametersServer;
     private final UserBindWorkspaceService userBindWorkspaceService;
 
@@ -95,9 +101,25 @@ public class UserService extends BaseDbService<UserModel> {
      * @return userModel 用户对象
      */
     public UserModel checkUser(String userMd5) {
+        // 必须先校验摘要格式：queryByBean 底层使用 Hutool 条件查询，
+        // Hutool 会把 "is not null" 之类的字符串解析为 SQL 条件表达式（而不是普通值），
+        // 不校验时可通过 JPOM-USER-TOKEN 等入口匹配到任意用户（issue #121）
+        if (!UserService.isPasswordDigest(userMd5)) {
+            return null;
+        }
         UserModel userModel = new UserModel();
         userModel.setPassword(userMd5);
         return super.queryByBean(userModel);
+    }
+
+    /**
+     * 判断是否为合法的密码摘要（sha1 十六进制字符串）
+     *
+     * @param value 待校验的值
+     * @return true 是密码摘要
+     */
+    static boolean isPasswordDigest(String value) {
+        return StrUtil.length(value) == PASSWORD_DIGEST_LENGTH && Validator.isHex(value);
     }
 
     /**
