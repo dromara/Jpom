@@ -44,11 +44,13 @@
             size="middle"
             :loading="loading"
             :columns="columns"
-            :pagination="false"
+            :pagination="pagination"
             bordered
             :scroll="{
-              x: 'max-content'
+              x: 'max-content',
+              y: 'calc(100vh - 250px)'
             }"
+            @change="handleTableChange"
           >
             <template #title>
               <!-- <a-tag color="#2db7f5">项目目录: {{ absPath }}</a-tag>-->
@@ -504,7 +506,14 @@ import {
   copyFileFolder,
   compressFileFolder
 } from '@/api/node-project'
-import { ZIP_ACCEPT, renderSize, formatDuration, concurrentExecution, parseTime } from '@/utils/const'
+import {
+  ZIP_ACCEPT,
+  renderSize,
+  formatDuration,
+  concurrentExecution,
+  parseTime,
+  PAGE_DEFAULT_SHOW_TOTAL
+} from '@/utils/const'
 import codeEditor from '@/components/codeEditor'
 import projectFileBackup from './project-file-backup.vue'
 import { uploadPieces } from '@/utils/upload-pieces'
@@ -541,6 +550,7 @@ export default {
       loading: false,
       treeList: [],
       fileList: [],
+      allFileList: [],
       uploadFileList: [],
       tempNode: {},
       temp: {},
@@ -620,6 +630,17 @@ export default {
             trigger: 'change'
           }
         ]
+      },
+      pagination: {
+        current: 1,
+        pageSize: 50,
+        total: 0,
+        showSizeChanger: true,
+        showQuickJumper: true,
+        showTotal: (total) => {
+          return PAGE_DEFAULT_SHOW_TOTAL(total)
+        },
+        pageSizeOptions: ['20', '50', '100', '200']
       },
       addFileFolderVisible: false,
       // 目录1 文件2 标识
@@ -1091,6 +1112,8 @@ export default {
         })
         return false
       }
+      // 切换目录或刷新时回到第一页，避免停留在不存在的页码
+      this.pagination.current = 1
       // 请求参数
       const params = {
         nodeId: this.nodeId,
@@ -1102,19 +1125,37 @@ export default {
       // 加载文件
       getFileList(params).then((res) => {
         if (res.code === 200) {
-          // 区分目录和文件
-          res.data.forEach((element) => {
-            // if (!element.isDirectory) {
-            // 设置文件表格
-            this.fileList.push({
-              ...element
-            })
-            // }
-          })
+          // 保存全量数据
+          this.allFileList = res.data.map((element) => ({
+            ...element
+          }))
+          // 更新分页总数
+          this.pagination.total = res.data.length
+          // 根据分页设置显示数据
+          this.updatePagedFileList()
           this.fileList2TreeData(res.data)
         }
         this.loading = false
       })
+    },
+    // 表格分页变化
+    handleTableChange(pagination) {
+      this.pagination.current = pagination.current
+      this.pagination.pageSize = pagination.pageSize
+      this.updatePagedFileList()
+    },
+    // 更新分页数据
+    updatePagedFileList() {
+      const { pageSize } = this.pagination
+      // 数据量减少时修正当前页码，避免出现空白页
+      const maxPage = Math.max(1, Math.ceil(this.allFileList.length / pageSize))
+      if (this.pagination.current > maxPage) {
+        this.pagination.current = maxPage
+      }
+      const current = this.pagination.current
+      const start = (current - 1) * pageSize
+      const end = start + pageSize
+      this.fileList = this.allFileList.slice(start, end)
     },
     // 清空文件
     clearFile() {
