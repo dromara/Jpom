@@ -174,7 +174,9 @@ public abstract class BaseDbCommonService<T> {
             return null;
         }
         Entity where = new Entity(tableName);
-        where.set(ID_STR, keyValue);
+        // 使用 Condition 绑定主键值，避免 Hutool 将 "is not null" 一类的字符串解析为 SQL 条件表达式
+        // （主键值来自请求参数时属于注入点，见 issue #121 同类问题）
+        where.set(ID_STR, new Condition(ID_STR, "=", keyValue));
         Entity entity;
         try {
             Db db = Db.use(this.getDataSource(), DialectUtil.getDialectByMode(dbMode));
