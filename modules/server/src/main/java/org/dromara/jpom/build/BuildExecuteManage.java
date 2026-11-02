@@ -51,6 +51,7 @@ import org.dromara.jpom.model.script.ScriptExecuteLogModel;
 import org.dromara.jpom.model.script.ScriptModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.plugin.PluginFactory;
+import org.dromara.jpom.plugin.SvnKitUtil;
 import org.dromara.jpom.service.dblog.BuildInfoService;
 import org.dromara.jpom.service.dblog.DbBuildHistoryLogService;
 import org.dromara.jpom.service.docker.DockerInfoService;
@@ -537,7 +538,7 @@ public class BuildExecuteManage implements Runnable {
                         String includePath = buildExtraModule.getDiffIncludePath();
                         String excludePath = buildExtraModule.getDiffExcludePath();
                         if (StrUtil.isNotEmpty(includePath) || StrUtil.isNotEmpty(excludePath)) {
-                            List<String> changedFiles = getSvnChangedFiles(repositoryLastCommitId, result[0]);
+                            List<String> changedFiles = getSvnChangedFiles(map, repositoryLastCommitId, result[0]);
                             if (changedFiles == null) {
                                 logRecorder.system("获取SVN变更文件列表失败，跳过文件级差异检查");
                             } else if (changedFiles.isEmpty()) {
@@ -612,7 +613,7 @@ public class BuildExecuteManage implements Runnable {
                         lines.add(StrUtil.trim(line));
                     }
                 },
-                "git", "diff", "--name-only", oldCommitId, newCommitId);
+                "git", "-c", "core.quotepath=false", "diff", "--no-renames", "--name-only", oldCommitId, newCommitId);
             if (exitCode != 0) {
                 logRecorder.system("git diff 退出码: {}", exitCode);
                 return null;
@@ -630,41 +631,21 @@ public class BuildExecuteManage implements Runnable {
     /**
      * 获取SVN两个版本间的变更文件列表
      * <p>
-     * svn diff --summarize 输出格式示例:
-     * <pre>
-     * M       src/main/App.java
-     * A       src/main/NewFile.java
-     * D       docs/old.txt
-     * </pre>
-     * 第一个字符为状态码(M/A/D/R)，后面是空格+文件路径
+     * 使用 SVNKit 读取，避免依赖服务器安装 svn 命令行工具
      *
-     * @param oldRevision 旧版本号
-     * @param newRevision 新版本号
+     * @param repositoryMap 仓库认证参数
+     * @param oldRevision   旧版本号
+     * @param newRevision   新版本号
      * @return 以/开头的相对路径列表，失败返回null
      */
-    private List<String> getSvnChangedFiles(String oldRevision, String newRevision) {
+    private List<String> getSvnChangedFiles(Map<String, Object> repositoryMap, String oldRevision, String newRevision) {
         try {
-            List<String> lines = new ArrayList<>();
-            int exitCode = CommandUtil.exec(this.gitFile, null,
-                line -> {
-                    if (StrUtil.isNotEmpty(line)) {
-                        lines.add(line);
-                    }
-                },
-                "svn", "diff", "--summarize",
-                "-r", oldRevision + ":" + newRevision);
-            if (exitCode != 0) {
-                logRecorder.system("svn diff 退出码: {}", exitCode);
-                return null;
-            }
-            return lines.stream()
-                .filter(s -> StrUtil.isNotEmpty(s) && s.length() > 1)
-                .map(s -> {
-                    // 格式: "M       path/to/file" - 跳过第一个状态字符，trim 得到纯路径
-                    String path = StrUtil.trim(StrUtil.subSuf(s, 1));
-                    return FileUtil.normalize(StrUtil.SLASH + path);
-                })
-                .filter(s -> StrUtil.isNotEmpty(s) && s.length() > 1)
+            long oldRev = Long.parseLong(oldRevision);
+            long newRev = Long.parseLong(newRevision);
+            List<String> paths = SvnKitUtil.diffChangedPaths(this.gitFile, repositoryMap, oldRev, newRev);
+            return paths.stream()
+                .filter(StrUtil::isNotEmpty)
+                .map(s -> FileUtil.normalize(StrUtil.SLASH + s))
                 .collect(Collectors.toList());
         } catch (Exception e) {
             logRecorder.system("获取SVN变更文件异常: {}", e.getMessage());
