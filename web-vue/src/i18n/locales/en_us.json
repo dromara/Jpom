@@ -1573,6 +1573,7 @@
 	"i18n_8b6e758e4c":"Hover over the dashboard to reveal the specific meaning",
 	"i18n_8b73b025c0":"Simple to use, but does not support key export backups",
 	"i18n_8b83cd1f29":"Name of mirror to pull",
+	"i18n_8b996c2815":"The alias code can only be English and numbers.",
 	"i18n_8ba971a184":"private token",
 	"i18n_8ba977b4b7":"#Restrict backup to specified file suffixes (regular support)",
 	"i18n_8bd3f73502":"node password",
