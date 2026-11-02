@@ -11,7 +11,7 @@
 - AI 助手硬性约束：
   1. 开发以 `jpom-parent` 为准，基线分支是 **`dev`**；外部贡献的 PR 只能提到 `dev`，不要向 `master` / `beta` 提 PR。
   2. 子模块内的修改先在子模块仓库提交，再回根仓更新子模块指针；不要在根仓“顺手”提交子模块内的文件、也不要混用两个仓库的提交。
-  3. **没有明确授权时，不要执行任何发版动作**：不要上传 OSS/R2、不要推送 Docker 镜像、不要打 tag、不要创建 Gitee Release、不要发布文档站。第 6 节流程仅用于理解与授权后执行。
+  3. **没有明确授权时，不要执行任何发版动作**：不要上传制品到 R2（下载中心已全面使用 Cloudflare R2，阿里云 OSS 已停用）、不要推送 Docker 镜像、不要打 tag、不要创建 Gitee Release、不要发布文档站。第 6 节流程仅用于理解与授权后执行。
   4. 不要提交构建产物与本地工具文件：`target/`、`dist/`、`*.bak`、`pom.xml.versionsBackup`、`*.zip`、`*.tar.gz`、`*.sha1`、`.tmp/`、`awscliv2.zip`、`ossutil-*/`、`node_modules/`，以及 `*.pem`、`*.key` 等密钥/证书文件。
   5. **每次提交、推送前都必须做敏感信息检查**（开源仓库）：不得提交真实密码、Token、密钥、证书、内网地址和用户隐私数据。提交前运行 `bash script/check-sensitive.sh --all`，推送前加上 `--range <基线>..HEAD`，详见第 8 节。
   6. **GitHub 是 Gitee 的自动镜像，只读**：主仓库在 Gitee（`gitee.com/dromara/Jpom`），Gitee 收到推送后会自动镜像到 GitHub（`github.com/dromara/Jpom`）。**代码提交、推送、PR、tag、Release 一律只对 Gitee 操作；禁止直接向 GitHub 提交、推送、提 PR 或做任何写操作。**
@@ -49,7 +49,7 @@ Jpom 是一款“简而轻的低侵入式在线构建、自动部署、日常运
 | `docs/` | `bwcx-jzy/jpom-docs` 仓库 `main` 分支 | 官网/文档站（VuePress），由 GitHub Pages 发布 |
 | `download-link/` | Jpom 仓库 `download_link` 分支 | JDK 下载镜像清单（`jdk.rb`），非业务代码 |
 | `aliyun-computenest/` | Jpom 仓库 `aliyun-computenest` 分支 | 阿里云计算巢部署配置 |
-| `script/`（根） | `gitmodules` 分支 | 发布安装包到 OSS、发布文档站、同步下载链接等维护脚本 |
+| `script/`（根） | `gitmodules` 分支 | 发布安装包到 Cloudflare R2（`deploy-release-r2.sh`）、同步下载链接、敏感信息检查等维护脚本 |
 | `.run/` | `gitmodules` 分支 | IDEA 本地运行配置（`JpomServerApplication` / `JpomAgentApplication`） |
 
 子模块常用命令（在根目录执行）：
@@ -129,7 +129,7 @@ git -C docs checkout main
 | `dist` | GitHub Actions 自动构建产物分支，**不要手动提交**；GitHub Pages 从该分支发布 |
 
 - 发布链路：push `main` → `.github/workflows/deploy.yml` 构建（`npm install && npm run lbuild`）→ 推送 `dist` 分支 → GitHub Pages 发布（自定义域名以 `docs/docs/.vuepress/public/CNAME` 为准，当前为 `jpom.top`）。
-- `.github/workflows/ali-oss.yml` 已改为仅手动触发的回退方案；`baiduPush.yml` 为每日百度收录推送。
+- 文档站发布统一走 GitHub Pages；历史 OSS 回退工作流（`ali-oss.yml`）及配套 `Refresh.py`、`cdn-urllist.txt` 已随阿里云 OSS 停用一并移除，`baiduPush.yml` 为每日百度收录推送。
 - 本地预览：`cd docs && npm install && npm run ldev`（默认端口 `2216`）。
 - **例外说明**：`docs` 是独立的 GitHub 仓库（`bwcx-jzy/jpom-docs`），其 `main`/`dist` 与 GitHub Pages 流程不受“主仓只在 Gitee 操作”的限制；但**不要**把 Jpom 主仓代码提交到这个仓库。
 
@@ -167,7 +167,7 @@ git -C docs checkout main
 | --- | --- |
 | 服务端整包 | `jpom-parent/modules/server/target/server-<version>-release.{zip,tar.gz}` + `.sha1` |
 | 插件端整包 | `jpom-parent/modules/agent/target/agent-<version>-release.{zip,tar.gz}` + `.sha1` |
-| 服务端/插件端合并包 | 由根目录 `script/deploy-release-oss.sh` 生成 `jpom-<version>.zip` |
+| 服务端/插件端合并包 | 由根目录 `script/deploy-release-r2.sh` 生成 `jpom-<version>.zip` 并上传 R2 |
 | 运行目录（解压态） | `modules/server/target/server-<version>-release/`（含 `bin/`、`conf/`、`lib/`） |
 
 ### 4.3 发布渠道
@@ -175,7 +175,8 @@ git -C docs checkout main
 | 渠道 | 说明 |
 | --- | --- |
 | 下载中心 | `https://d2.jpom.download`（Cloudflare R2 托管）；稳定版路径 `release/<version>/`，beta 路径 `beta/<version>/` |
-| 历史 OSS | `oss://jpom-releases/release/<version>/`、`oss://jpom-releases/beta/<version>/`（根脚本仍按 OSS 编写，见 6.2） |
+| 上传工具 | 根目录 `script/deploy-release-r2.sh`（rclone remote `r2`，bucket `jpom-releases-apac`） |
+| 历史 OSS | 已停用（阿里云 AK 已禁用）；旧上传脚本 `deploy-release-oss.sh` 已删除，仅 git 历史可查 |
 | Docker Hub | `jpomdocker/jpom:<version>` 与 `:latest`（稳定版）；beta 镜像按需构建 |
 | Gitee Release | 基于 tag `v2.x.y` 创建发行版，附安装包与 sha1；GitHub 由 Gitee 自动镜像，不手动操作 |
 
@@ -225,7 +226,7 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
 
 ### 6.1 前置说明
 
-- 项目已暂停维护，正式发版前必须确认：下载域名（R2/OSS）、Docker Hub、文档 Pages、Gitee 凭据均可用；**无授权不得执行**。GitHub 由 Gitee 自动镜像，不需要也不应单独准备 GitHub 推送凭据。
+- 项目已暂停维护，正式发版前必须确认：下载域名（R2：`d2.jpom.download`）与 rclone remote 凭据、Docker Hub、文档 Pages、Gitee 凭据均可用；**无授权不得执行**。GitHub 由 Gitee 自动镜像，不需要也不应单独准备 GitHub 推送凭据。
 - 发版提交固定节奏（与历史提交一致）：
   1. `releases(发布): 准备<version>` —— 更新 CHANGELOG；
   2. 运行版本替换脚本 + 打包 + 冒烟；
@@ -257,16 +258,18 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
    ```
 
    （`origin` 为 Gitee；**GitHub 由 Gitee 自动镜像同步，禁止 `git push github`**；历史脚本 `script/push.bat` 已过时，不要使用。）
-8. **上传安装包**：
+8. **上传安装包到 R2**：
 
    ```bash
    cd <工作区根目录>
-   sh script/deploy-release-oss.sh
+   bash script/deploy-release-r2.sh release    # 可先加 --dry-run 预览
    ```
 
-   脚本使用 `ossutil64`/`ossutilmac64` 上传到 `oss://jpom-releases/release/<version>/`（agent/server 的 zip、tar.gz、sha1 及合并包 `jpom-<version>.zip`）。注意：
-   - 脚本从 `jpom-parent/docs/version.txt` 读取版本，该文件在当前分支已不存在，执行前需确认版本来源或改造脚本（例如改用 `jpom-parent/script/tag.release.txt`）；
-   - 当前下载中心已迁移到 Cloudflare R2（`d2.jpom.download`），OSS 上传后可能还需同步到 R2（本工作区曾用 rclone 迁移），操作前确认目标 bucket。
+   脚本使用 `rclone`（remote `r2`）上传到 `r2:jpom-releases-apac/release/<version>/`（agent/server 的 zip、tar.gz、sha1 及合并包 `jpom-<version>.zip`），随后自动通过 `https://d2.jpom.download` 回验 sha1。注意：
+   - 版本号取自 `jpom-parent/script/tag.release.txt`，无需再改脚本；
+   - 脚本可用 `R2_REMOTE` / `R2_BUCKET` / `R2_PUBLIC_BASE` 环境变量覆盖默认值；
+   - 阿里云 OSS 已停用，不要再尝试 `ossutil` 上传；
+   - Cloudflare 对 d2 域名的 GET 响应实测缓存约 8 天（`max-age=691200`），同一版本重复覆盖上传会触发脚本的 `--force` 保护，覆盖后需在 Cloudflare 控制台 Purge 对应 URL；
 9. **发布文档**：
 
    ```bash
@@ -276,7 +279,7 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
    cd docs && npm install && npm run lbuild   # 本地验证构建
    ```
 
-   发布方式：提交并 push `main` 分支，由 GitHub Actions（`.github/workflows/deploy.yml`）构建并推送 `dist` 分支，GitHub Pages 自动更新。历史方式为根目录 `sh script/deploy-docs-pages.sh`（yarn 构建 + ossutil 同步 `oss://jpom-docs/`），现已不是主链路。
+   发布方式：提交并 push `main` 分支，由 GitHub Actions（`.github/workflows/deploy.yml`）构建并推送 `dist` 分支，GitHub Pages 自动更新。历史 OSS 同步脚本（`deploy-docs-pages.sh`、`docs/.github/workflows/ali-oss.yml`）已删除。
 10. **测试远程更新**：在旧版本服务端上测试“在线升级”到新版本，确认下载与校验正常。
 11. **发布 Docker 镜像**（在 `jpom-parent` 下执行，需先启用 buildx，见 `jpom-parent/script/docker-buildx.md`）：
 
@@ -297,7 +300,7 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
 4. 前端、后端打包（同 6.2 第 4、5 步）。
 5. 人工冒烟测试。
 6. 提交 `commit beta 2.x.y.N`。
-7. 上传到 beta 渠道：`oss://jpom-releases/beta/<version>/` 或 R2 的 `beta/<version>/`（根脚本只处理 release，beta 需手动 `ossutil`/rclone 上传）。
+7. 上传到 beta 渠道：`bash script/deploy-release-r2.sh beta`（版本号取自 `jpom-parent/script/tag.beta.txt`，上传到 `r2:jpom-releases-apac/beta/<version>/` 并自动回验）。
 8. 可选构建 beta 镜像（`-f ./modules/server/DockerfileBeta`）。
 9. **beta 不打 tag、不创建 Gitee Release（GitHub 镜像无需操作）**；测稳后按 6.2 合并到 `master` 发稳定版。
 
@@ -322,7 +325,7 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
 - [ ] `mvn clean package` 成功，server/agent 的 zip、tar.gz、sha1 齐全
 - [ ] 安装包人工启动/登录/核心功能冒烟通过
 - [ ] 提交 `commit release|beta <version>`，稳定版打 `v2.x.y` tag 并推送
-- [ ] 安装包已上传（OSS/R2 对应 release 或 beta 目录），sha1 可校验
+- [ ] 安装包已上传 R2（release 或 beta 目录），`https://d2.jpom.download/...` 的 sha1 可校验
 - [ ] 文档站版本号、CHANGELOG、下载链接已更新并发布
 - [ ] 在线升级测试通过（稳定版）
 - [ ] Docker 镜像已推送（稳定版：`<version>` 与 `latest`）
@@ -422,8 +425,9 @@ bash script/check-sensitive.sh --all --range origin/dev..HEAD
 - **子模块分支错位**：`.gitmodules` 里 `jpom-parent` 默认 `master`，开发应在 `dev`；`git submodule update --remote` 会切走，操作前先确认。
 - **根仓 `pom.xml` 过期**（版本 2.9.10，仅用于 IDE 聚合导入）：实际构建请在 `jpom-parent/` 内执行 Maven。
 - **版本替换脚本**：`replaceVersion.sh` 必须传两个参数（新版本号 + `release`/`beta`），旧版本读自 `script/tag.*.txt`；脚本使用 GNU `sed -i.bak`，macOS 可能需要 `gsed` 或手动适配；执行后检查是否残留 `.bak`。
-- **`deploy-release-oss.sh` 已部分失效**：依赖的 `jpom-parent/docs/version.txt` 当前分支不存在；只处理 release 渠道；OSS 之后还可能需同步 R2。
-- **根脚本 `deploy-docs-pages.sh` 属历史链路**（yarn + OSS），当前文档站以 GitHub Pages（`docs/.github/workflows/deploy.yml`）为准。
+- **R2 上传脚本**：`script/deploy-release-r2.sh` 依赖本机 `rclone`（remote `r2`、bucket `jpom-releases-apac`），版本号取自 `jpom-parent/script/tag.*.txt`；支持 `--dry-run`（缺产物时非 0 退出）、`--deep-verify`（下载制品逐字节校验）、`--force`（同版本覆盖）与 `--skip-verify`；本机上行带宽慢时建议在服务器执行或用 `nohup` 后台跑。
+- **Cloudflare 缓存**：`d2.jpom.download` 的 GET 响应实测带 `cache-control: max-age=691200`（约 8 天，`cf-cache-status` 会变 HIT），同一版本重复覆盖上传后需在 Cloudflare 控制台 Purge，否则用户可能下到旧包；上传脚本的回验只能证明 R2 对象正确，不能证明边缘缓存已刷新。
+- **文档站发布**：只走 GitHub Pages（push `docs` 的 `main`）；历史 `deploy-docs-pages.sh` 与 `ali-oss.yml` 已删除。
 - **根目录 `README.md` 的子模块说明可能过时**：以 `.gitmodules` 实际配置为准（`docs` 已指向 `bwcx-jzy/jpom-docs` 的 `main`）。
 - **不要提交**工作区根部的本地工具/临时文件：`.tmp/`、`awscliv2.zip`、`ossutil-2.3.0-linux-amd64/`、`aws/` 等。
 - **敏感信息检查**：提交前运行 `bash script/check-sensitive.sh --all`，推送前加上 `--range <基线>..HEAD`；`.gitignore` 已忽略密钥类文件与本地临时文件，禁止用 `git add -f` 绕过（详见第 8 节）。
@@ -438,6 +442,7 @@ bash script/check-sensitive.sh --all --range origin/dev..HEAD
 
 - `RELEASE.md`（根目录）：发布流程（手动版 / 流水线版）
 - `script/check-sensitive.sh`：提交/推送前的隐私与密钥检查脚本（第 8 节）
+- `script/deploy-release-r2.sh`：安装包上传 Cloudflare R2（rclone）的发布脚本
 - `jpom-parent/SECURITY.md`：安全漏洞报告与披露流程
 - `.gitignore`（根目录与 `jpom-parent/`）：临时文件、密钥/证书类文件忽略规则
 - `jpom-parent/README.md`：分支说明、贡献指南
