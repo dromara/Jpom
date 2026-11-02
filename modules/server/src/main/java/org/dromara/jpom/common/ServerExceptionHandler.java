@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * 全局异常处理
  *
- * @author bwcx_jzy 
+ * @author bwcx_jzy
  * @since 2019/04/17
  */
 @RestControllerAdvice
