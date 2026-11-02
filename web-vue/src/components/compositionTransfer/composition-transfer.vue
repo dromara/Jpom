@@ -6,7 +6,7 @@
     :show-select-all="false"
     @change="onChange"
   >
-    <template #children="{ direction, selectedKeys, onItemSelect }">
+    <template #children="{ direction, onItemSelectAll }">
       <template v-if="direction === 'left'">
         <a-tree
           v-if="leftTreeData.length"
@@ -15,8 +15,8 @@
           :tree-data="leftTreeData"
           :checked-keys="leftCheckedKey"
           @check="
-            (_, props) => {
-              handleLeftChecked(_, props, [...selectedKeys, ...targetKeys], onItemSelect)
+            (checkedKeys, { halfCheckedKeys }) => {
+              handleLeftChecked(checkedKeys, halfCheckedKeys, onItemSelectAll)
             }
           "
         >
@@ -36,8 +36,8 @@
           :tree-data="rightTreeData"
           :checked-keys="rightCheckedKey"
           @check="
-            (_, props) => {
-              handleRightChecked(_, props, [...selectedKeys, ...targetKeys], onItemSelect)
+            (checkedKeys, { halfCheckedKeys }) => {
+              handleRightChecked(checkedKeys, halfCheckedKeys, onItemSelectAll)
             }
           "
         >
@@ -53,7 +53,7 @@
   </a-transfer>
 </template>
 <script>
-import { cloneDeep, flatten, getTreeKeys, handleLeftTreeData, handleRightTreeData, isChecked } from './utils'
+import { cloneDeep, flatten, getTreeKeys, handleLeftTreeData, handleRightTreeData } from './utils'
 import { Empty } from 'ant-design-vue'
 export default {
   props: {
@@ -152,19 +152,19 @@ export default {
       this.emitKeys = this.rightExpandedKey
     },
     // 左侧选择
-    handleLeftChecked(_, { node, halfCheckedKeys }, checkedKeys, itemSelect) {
-      this.leftCheckedKey = _
-      this.leftHalfCheckedKeys = [...new Set([...this.leftHalfCheckedKeys, ...halfCheckedKeys])]
-      this.leftCheckedAllKey = [...new Set([...this.leftHalfCheckedKeys, ...halfCheckedKeys, ..._])]
-      const { eventKey } = node
-      itemSelect(eventKey, !isChecked(checkedKeys, eventKey))
+    handleLeftChecked(checkedKeys, halfCheckedKeys, onItemSelectAll) {
+      this.leftCheckedKey = checkedKeys
+      this.leftHalfCheckedKeys = halfCheckedKeys
+      this.leftCheckedAllKey = [...new Set([...halfCheckedKeys, ...checkedKeys])]
+      // 同步穿梭框的选中集合，保证头部“勾选/总数”计数与实际勾选一致
+      onItemSelectAll(checkedKeys.filter((key) => !this.targetKeys.includes(key)))
     },
     // 右侧选择
-    handleRightChecked(_, { node, halfCheckedKeys }, checkedKeys, itemSelect) {
-      this.rightCheckedKey = _
-      this.rightCheckedAllKey = [...halfCheckedKeys, ..._]
-      const { eventKey } = node
-      itemSelect(eventKey, isChecked(_, eventKey))
+    handleRightChecked(checkedKeys, halfCheckedKeys, onItemSelectAll) {
+      this.rightCheckedKey = checkedKeys
+      this.rightCheckedAllKey = [...new Set([...halfCheckedKeys, ...checkedKeys])]
+      // 同步穿梭框的选中集合，保证头部“勾选/总数”计数与实际勾选一致
+      onItemSelectAll(checkedKeys.filter((key) => this.targetKeys.includes(key)))
     }
   }
 }
