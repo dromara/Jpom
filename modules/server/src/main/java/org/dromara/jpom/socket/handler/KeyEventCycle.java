@@ -169,14 +169,20 @@ public class KeyEventCycle {
                 int backCount = 0;
                 for (byte aByte : bytes) {
                     if (aByte == 8) {
-                        buffer.deleteCharAt(inputSelection - 1);
+                        // 光标已经在行首或者命令缓冲为空时不再删除，避免 deleteCharAt 索引越界
+                        if (buffer.length() > 0 && inputSelection > 0) {
+                            buffer.deleteCharAt(inputSelection - 1);
+                            inputSelection = Math.max(inputSelection - 1, 0);
+                        }
                         backCount++;
                     }
                 }
                 str = new String(Arrays.copyOfRange(bytes, 0, bytes.length - backCount), charset);
                 // #https://gitee.com/dromara/Jpom/issues/ICA57K
-                buffer.insert(inputSelection - 1, str);
-                inputSelection += str.length();
+                // 插入位置需要限制在 [0, buffer.length()] 范围，避免空命令行时 insert 索引越界
+                int insertIndex = Math.min(Math.max(inputSelection - 1, 0), buffer.length());
+                buffer.insert(insertIndex, str);
+                inputSelection = Math.min(inputSelection + str.length(), buffer.length());
             }
         }
         inputReceive = false;
