@@ -40,6 +40,7 @@
 25. 【server】优化 构建记录仓库提交说明字段长度加宽至 1000，避免较长提交信息写入失败（[Gitee issues ID35HQ](https://gitee.com/dromara/Jpom/issues/ID35HQ) ）
 26. 【server】修复 构建配置别名缺少规则校验提示的问题（[Gitee issues IBI5AF](https://gitee.com/dromara/Jpom/issues/IBI5AF) ）
 27. 【server】修复 权限组工作空间穿梭窗勾选计数错误的问题（[Gitee issues IBHK0I](https://gitee.com/dromara/Jpom/issues/IBHK0I) ）
+28. 【web-vue】修复 项目列表在无节点项目引导态整页加载（F5）时控制台空指针报错（countDownChange）的问题
 
 ### ⚠️ 升级说明
 
