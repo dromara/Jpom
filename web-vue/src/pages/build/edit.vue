@@ -1639,6 +1639,7 @@ export default {
         branchName: [{ required: true, message: this.$t('i18n_50951f5e74'), trigger: 'blur' }],
         script: [{ required: true, message: this.$t('i18n_67aa1c0169'), trigger: 'blur' }],
         resultDirFile: [{ required: true, message: this.$t('i18n_cc92cf1e25'), trigger: 'blur' }],
+        aliasCode: [{ pattern: /^\w+$/, message: this.$t('i18n_8b996c2815'), trigger: ['change', 'blur'] }],
         // releasePath: [{ required: true, message: '请填写发布目录', trigger: 'blur' }],
         repositoryId: [
           {
@@ -1652,7 +1653,8 @@ export default {
         ['buildMode'],
         ['name', 'branchName', 'repositoryId'],
         ['script', 'resultDirFile'],
-        ['releaseMethod']
+        ['releaseMethod'],
+        ['aliasCode']
         // name: [{ required: true, message: '请填写构建名称', trigger: 'blur', : 1 }],
         // buildMode: [{ required: true, message: '请选择构建方式', trigger: 'blur', : 0 }],
         // releaseMethod: [{ required: true, message: '请选择发布操作', trigger: 'blur', : 3 }],

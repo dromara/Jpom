@@ -448,6 +448,9 @@ public class ParameterInterceptor implements HandlerMethodInterceptor {
             String msg = validatorItem.msg();
             if (StrUtil.isEmpty(msg)) {
                 msg = I18nMessageUtil.get("i18n.parameter_validation_failed.f0a1");
+            } else if (StrUtil.startWith(msg, "i18n.")) {
+                // @ValidatorItem 的 msg 已统一替换为 i18n key，需要在这里转换为当前请求语言的文案
+                msg = I18nMessageUtil.get(msg);
             }
             JsonMessage<String> jsonMessage = new JsonMessage<>(validatorItem.code(), msg);
             log.warn("{} {} {} {} {}", request.getRequestURI(), parameterName, value, validatorItem.value(), jsonMessage);

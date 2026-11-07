@@ -247,7 +247,7 @@ public class DockerYmlDsl extends BaseJsonModel {
         Object version1 = step.get("version");
         Assert.notNull(version1, I18nMessageUtil.get("i18n.java_plugin_version_required.de39"));
         Integer version = Integer.valueOf(String.valueOf(version1));
-        List<Integer> supportedVersions = ListUtil.of(8, 11, 17, 18);
+        List<Integer> supportedVersions = ListUtil.of(8, 11, 17, 18, 21, 25);
         Assert.isTrue(supportedVersions.contains(version), String.format(I18nMessageUtil.get("i18n.supported_java_plugin_versions.bd70"), supportedVersions));
     }
 

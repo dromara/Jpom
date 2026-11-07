@@ -55,8 +55,14 @@
         <maven.test.skip>true</maven.test.skip>
         <!--        <maven.javadoc.skip>true</maven.javadoc.skip>-->
         <hutool.version>5.8.34</hutool.version>
-        <fastjson2.version>2.0.53</fastjson2.version>
-        <fastjson-version>2.0.53</fastjson-version>
+        <!-- 安全：fastjson2 ≤2.0.62 存在 AutoType 哈希碰撞绕过导致的远程代码执行（QVD-2026-45876，默认未开启
+             SupportAutoType 也可触发；Jpom 的 openapi 批量接口在鉴权前会用 fastjson2 解析不可信请求体）。
+             官方修复版本为 2.0.63，2.0.65 又修复了需开启 SupportAutoType 时才可触达的 AutoType 授权绕过；
+             此处升级到 2.0.66（class 文件主版本 52，兼容 Java 8）。com.alibaba:fastjson（fastjson1 兼容包）
+             必须与 fastjson2 核心同版本，否则会被根 pom dependencyManagement 钉回旧核心版本造成混版。
+             详见 .tmp/reports/fastjson-security.md -->
+        <fastjson2.version>2.0.66</fastjson2.version>
+        <fastjson-version>2.0.66</fastjson-version>
         <jna-version>5.14.0</jna-version>
         <mwiede.jsch-version>0.2.18</mwiede.jsch-version>
         <oshi.version>6.4.13</oshi.version>

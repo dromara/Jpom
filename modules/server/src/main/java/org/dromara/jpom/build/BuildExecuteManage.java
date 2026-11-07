@@ -493,21 +493,21 @@ public class BuildExecuteManage implements Runnable {
                         if (StrUtil.isNotEmpty(includePath) || StrUtil.isNotEmpty(excludePath)) {
                             List<String> changedFiles = getGitChangedFiles(repositoryLastCommitId, result[0]);
                             if (changedFiles == null) {
-                                logRecorder.system("获取变更文件列表失败，跳过文件级差异检查");
+                                logRecorder.system(I18nMessageUtil.get("i18n.failed_to_get_changed_file_list_skip_diff.92b7"));
                             } else if (changedFiles.isEmpty()) {
-                                String format = StrUtil.format("两次提交间无文件变更: {} -> {}", repositoryLastCommitId, result[0]);
+                                String format = StrUtil.format(I18nMessageUtil.get("i18n.no_file_changes_between_commits.48ed"), repositoryLastCommitId, result[0]);
                                 logRecorder.systemError(format);
                                 throw new DiyInterruptException(format);
                             } else {
                                 boolean matched = changedFiles.stream()
                                     .anyMatch(f -> AntPathUtil.matchDiffPath(f, includePath, excludePath));
                                 if (!matched) {
-                                    String format = StrUtil.format("变更文件不在监听范围[include: {}, exclude: {}], 变更文件: {}",
+                                    String format = StrUtil.format(I18nMessageUtil.get("i18n.changed_files_outside_watch_scope.b21c"),
                                         includePath, excludePath, CollUtil.join(changedFiles, ", "));
                                     logRecorder.systemError(format);
                                     throw new DiyInterruptException(format);
                                 }
-                                logRecorder.system("变更文件中匹配路径规则的文件: {}",
+                                logRecorder.system(I18nMessageUtil.get("i18n.changed_files_matching_path_rules.d17c"),
                                     changedFiles.stream()
                                         .filter(f -> AntPathUtil.matchDiffPath(f, includePath, excludePath))
                                         .collect(Collectors.joining(", ")));
@@ -540,21 +540,21 @@ public class BuildExecuteManage implements Runnable {
                         if (StrUtil.isNotEmpty(includePath) || StrUtil.isNotEmpty(excludePath)) {
                             List<String> changedFiles = getSvnChangedFiles(map, repositoryLastCommitId, result[0]);
                             if (changedFiles == null) {
-                                logRecorder.system("获取SVN变更文件列表失败，跳过文件级差异检查");
+                                logRecorder.system(I18nMessageUtil.get("i18n.failed_to_get_svn_changed_file_list_skip_diff.1886"));
                             } else if (changedFiles.isEmpty()) {
-                                String format = StrUtil.format("两次提交间无文件变更: r{} -> r{}", repositoryLastCommitId, result[0]);
+                                String format = StrUtil.format(I18nMessageUtil.get("i18n.no_file_changes_between_revisions.3aa2"), repositoryLastCommitId, result[0]);
                                 logRecorder.systemError(format);
                                 throw new DiyInterruptException(format);
                             } else {
                                 boolean matched = changedFiles.stream()
                                     .anyMatch(f -> AntPathUtil.matchDiffPath(f, includePath, excludePath));
                                 if (!matched) {
-                                    String format = StrUtil.format("变更文件不在监听范围[include: {}, exclude: {}], 变更文件: {}",
+                                    String format = StrUtil.format(I18nMessageUtil.get("i18n.changed_files_outside_watch_scope.b21c"),
                                         includePath, excludePath, CollUtil.join(changedFiles, ", "));
                                     logRecorder.systemError(format);
                                     throw new DiyInterruptException(format);
                                 }
-                                logRecorder.system("变更文件中匹配路径规则的文件: {}",
+                                logRecorder.system(I18nMessageUtil.get("i18n.changed_files_matching_path_rules.d17c"),
                                     changedFiles.stream()
                                         .filter(f -> AntPathUtil.matchDiffPath(f, includePath, excludePath))
                                         .collect(Collectors.joining(", ")));
@@ -615,7 +615,7 @@ public class BuildExecuteManage implements Runnable {
                 },
                 "git", "-c", "core.quotepath=false", "diff", "--no-renames", "--name-only", oldCommitId, newCommitId);
             if (exitCode != 0) {
-                logRecorder.system("git diff 退出码: {}", exitCode);
+                logRecorder.system(I18nMessageUtil.get("i18n.git_diff_exit_code.69f8"), exitCode);
                 return null;
             }
             return lines.stream()
@@ -623,7 +623,7 @@ public class BuildExecuteManage implements Runnable {
                 .map(s -> FileUtil.normalize(StrUtil.SLASH + s))
                 .collect(Collectors.toList());
         } catch (Exception e) {
-            logRecorder.system("获取Git变更文件异常: {}", e.getMessage());
+            logRecorder.system(I18nMessageUtil.get("i18n.get_git_changed_files_exception.6256"), e.getMessage());
             return null;
         }
     }
@@ -648,7 +648,7 @@ public class BuildExecuteManage implements Runnable {
                 .map(s -> FileUtil.normalize(StrUtil.SLASH + s))
                 .collect(Collectors.toList());
         } catch (Exception e) {
-            logRecorder.system("获取SVN变更文件异常: {}", e.getMessage());
+            logRecorder.system(I18nMessageUtil.get("i18n.get_svn_changed_files_exception.3e5b"), e.getMessage());
             return null;
         }
     }

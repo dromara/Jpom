@@ -1,5 +1,28 @@
 # 🚀 版本日志
 
+## 2.11.12.3-beta
+
+### 🐣 新增功能
+
+1. 【server】新增 容器构建 java 插件支持 JDK 21、25（#114）
+2. 【server】新增 仓库导入支持 GitLab 私人令牌方式，可直接使用 token 拉取项目（[Gitee issues I9AZSS](https://gitee.com/dromara/Jpom/issues/I9AZSS)）
+
+### 🐞 解决BUG、优化功能
+
+1. 【all】升级 fastjson2 及 fastjson1 兼容包到 2.0.66，修复 fastjson2 AutoType 哈希碰撞绕过导致的远程代码执行风险（影响 fastjson2 ≤2.0.62，QVD-2026-45876；openapi 批量接口在鉴权前会解析请求体）
+2. 【all】修复 后端参数校验失败时直接返回 i18n key 未翻译的问题（例如节点注册接口 `workspaceId` 为空时会提示 `i18n.workspace_id_required.c967`），现在按请求语言返回提示文案
+3. 【all】优化 补全后端 i18n 遗漏：构建差异检查、JWT 密钥、可信代理、数据库初始化/备份/导入、达梦列 SQL 长度、节点注册错误等 31 处提示与日志支持多语言（新增/补登记 19 个 key，同步 4 种语言），并修正登录验证码提示 key 未登记 words.json、后缀不符合规范的问题
+4. 【all】修复 管理脚本通过 `sh xxx.sh` 调用时报语法错误的问题，脚本自动切换到 bash 执行（[Gitee issues IC20RL](https://gitee.com/dromara/Jpom/issues/IC20RL)）
+5. 【server】修复 终端在空命令行按退格、方向键等按键时数组越界的问题（#109）
+6. 【server】优化 容器构建 runsOn 镜像构建失败时输出明确错误并中断构建，避免后续流程只报 `404 No such image`（#103）
+7. 【server】修复 构建产物目录配置为绝对路径时构建列表接口 500 的问题（[Gitee issues IA6VM8](https://gitee.com/dromara/Jpom/issues/IA6VM8)）
+8. 【server】优化 构建记录仓库提交说明字段长度加宽至 1000，避免较长提交信息写入失败（[Gitee issues ID35HQ](https://gitee.com/dromara/Jpom/issues/ID35HQ)）
+9. 【server】修复 构建配置别名缺少规则校验提示的问题（[Gitee issues IBI5AF](https://gitee.com/dromara/Jpom/issues/IBI5AF)）
+10. 【server】修复 权限组工作空间穿梭窗勾选计数错误的问题（[Gitee issues IBHK0I](https://gitee.com/dromara/Jpom/issues/IBHK0I)）
+
+
+------
+
 ## 2.11.12.2-beta (2026-11-02)
 
 ### 🐣 新增功能

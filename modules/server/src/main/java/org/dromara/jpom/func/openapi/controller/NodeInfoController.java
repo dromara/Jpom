@@ -79,9 +79,9 @@ public class NodeInfoController extends BaseServerController {
                                                 @ValidatorItem(msg = "i18n.workspace_id_required.c967") String workspaceId,
                                                 @ValidatorItem(value = ValidatorRule.NUMBERS, msg = "i18n.port_error.312e") int port,
                                                 String ping) {
-        Assert.state(StrUtil.equals(token, JpomManifest.getInstance().randomIdSign()), "token error");
+        Assert.state(StrUtil.equals(token, JpomManifest.getInstance().randomIdSign()), I18nMessageUtil.get("i18n.invalid_or_expired_token.bc43"));
         boolean exists = workspaceService.exists(new WorkspaceModel(workspaceId));
-        Assert.state(exists, "workspaceId error");
+        Assert.state(exists, I18nMessageUtil.get("i18n.workspace_not_exist.a6fd"));
         String sha1Id = SecureUtil.sha1(ips);
         //
         List<String> ipsList = StrUtil.split(ips, StrUtil.COMMA);
