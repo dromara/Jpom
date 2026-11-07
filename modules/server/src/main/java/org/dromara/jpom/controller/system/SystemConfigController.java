@@ -157,7 +157,7 @@ public class SystemConfigController extends BaseServerController {
             if (!StrUtil.equals(oldDbExtConfigUserName, newDbExtConfigUserName) || !StrUtil.equals(oldDbExtConfigUserPwd, newDbExtConfigUserPwd)) {
                 // 执行修改数据库账号密码
                 Assert.state(restartBool, I18nMessageUtil.get("i18n.modify_db_password_must_restart.d08d"));
-                StorageServiceFactory.get().alterUser(oldDbExtConfigUserName, newDbExtConfigUserName, newDbExtConfigUserPwd);
+                StorageServiceFactory.getInstance().get().alterUser(oldDbExtConfigUserName, newDbExtConfigUserName, newDbExtConfigUserPwd);
             }
         }
         Resource resource = ExtConfigBean.getResource();

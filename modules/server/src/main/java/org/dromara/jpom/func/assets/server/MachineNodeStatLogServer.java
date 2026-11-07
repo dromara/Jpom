@@ -45,7 +45,7 @@ public class MachineNodeStatLogServer extends BaseDbService<MachineNodeStatLogMo
         Entity entity = Entity.create();
         DateTime dateTime = DateUtil.beginOfDay(DateTime.now());
         dateTime = DateUtil.offsetDay(dateTime, -statLogKeepDays);
-        entity.set(" monitorTime", "< " + dateTime.getTime());
+        entity.set("monitorTime", "< " + dateTime.getTime());
         int del = this.del(entity);
         log.info(I18nMessageUtil.get("i18n.auto_clear_machine_node_stats_logs.5279"), del);
     }

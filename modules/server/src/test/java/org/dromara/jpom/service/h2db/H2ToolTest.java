@@ -47,7 +47,7 @@ public class H2ToolTest extends ApplicationStartTest {
     @Test
     public void testH2ShellForBackupSQL() throws SQLException {
         // 数据源参数
-        String url = StorageServiceFactory.get().dbUrl();
+        String url = StorageServiceFactory.getInstance().get().dbUrl();
 
         String user = dbExtConfig.userName();
         String pass = dbExtConfig.userPwd();
@@ -125,7 +125,7 @@ public class H2ToolTest extends ApplicationStartTest {
     @Test
     public void testH2DropAllObjects() throws SQLException {
         // 数据源参数
-        String url = StorageServiceFactory.get().dbUrl();
+        String url = StorageServiceFactory.getInstance().get().dbUrl();
 
         String user = dbExtConfig.userName();
         String pass = dbExtConfig.userPwd();

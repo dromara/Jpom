@@ -148,7 +148,7 @@ public class MonitorItem implements Task {
                     log.error(I18nMessageUtil.get("i18n.monitor_node_exception.6ff1"), nodeModel.getName(), e.getMessage());
                     //
                     title = StrUtil.format(I18nMessageUtil.get("i18n.node_running_status_abnormal.3160"), nodeModel.getName());
-                    context = ExceptionUtil.stacktraceToString(e);
+                    context = e.getMessage();
                 }
                 MonitorNotifyLog monitorNotifyLog = new MonitorNotifyLog();
                 monitorNotifyLog.setStatus(false);

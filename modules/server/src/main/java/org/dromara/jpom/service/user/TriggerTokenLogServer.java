@@ -21,6 +21,7 @@ import cn.keepbx.jpom.event.ISystemTask;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.user.TriggerTokenLogBean;
 import org.dromara.jpom.model.user.UserModel;
@@ -198,8 +199,8 @@ public class TriggerTokenLogServer extends BaseDbService<TriggerTokenLogBean> im
                 while (true) {
                     Page page = new Page(pageNumber, 50);
                     Entity entity = new Entity();
-                    entity.set("type", triggerToken.typeName());
-                    entity.setFieldNames("id", "dataId");
+                    entity.set(DialectUtil.wrapField("type"), triggerToken.typeName());
+                    entity.setFieldNames(DialectUtil.wrapField("id"), DialectUtil.wrapField("dataId"));
                     PageResultDto<TriggerTokenLogBean> pageResult = this.listPage(entity, page);
                     if (pageResult.isEmpty()) {
                         break;

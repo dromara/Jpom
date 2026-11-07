@@ -1,6 +1,11 @@
 <template>
   <div>
-    <a-table
+    <CustomTable
+      is-show-tools
+      default-auto-refresh
+      :auto-refresh-time="30"
+      :active-page="activePage"
+      table-name="ssh-command-log-list"
       size="middle"
       :data-source="commandList"
       :columns="columns"
@@ -9,7 +14,10 @@
       :scroll="{
         x: 'max-content'
       }"
+      row-key="id"
+      :row-selection="rowSelection"
       @change="changePage"
+      @refresh="getCommandLogData"
     >
       <template #title>
         <a-space wrap class="search-box">
@@ -68,9 +76,17 @@
               $t('i18n_e5f71fc31e')
             }}</a-button>
           </a-tooltip>
+          <a-button
+            type="primary"
+            danger
+            :disabled="!tableSelections || tableSelections.length <= 0"
+            @click="handleBatchDelete"
+          >
+            {{ $t('i18n_7fb62b3011') }}
+          </a-button>
         </a-space>
       </template>
-      <template #bodyCell="{ column, text, record }">
+      <template #tableBodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'sshName'">
           <a-tooltip placement="topLeft" :title="text">
             <span>{{ text }}</span>
@@ -106,7 +122,7 @@
           </a-space>
         </template>
       </template>
-    </a-table>
+    </CustomTable>
     <!-- 构建日志 -->
     <CustomModal
       v-if="logVisible"
@@ -204,7 +220,8 @@ export default {
           fixed: 'right',
           width: '200px'
         }
-      ]
+      ],
+      tableSelections: []
     }
   },
   computed: {
@@ -214,6 +231,18 @@ export default {
     },
     style() {
       return this.getFullscreenViewLogStyle()
+    },
+    activePage() {
+      return this.$attrs.routerUrl === this.$route.path
+    },
+    rowSelection() {
+      return {
+        onChange: (selectedRowKeys) => {
+          this.tableSelections = selectedRowKeys
+        },
+        selectedRowKeys: this.tableSelections,
+        type: 'checkbox'
+      }
     }
   },
   created() {},
@@ -257,6 +286,34 @@ export default {
               $notification.success({
                 message: res.msg
               })
+              this.getCommandLogData()
+            }
+          })
+        }
+      })
+    },
+    // 批量删除
+    handleBatchDelete() {
+      if (!this.tableSelections || this.tableSelections.length <= 0) {
+        $notification.warning({
+          message: this.$t('i18n_5d817c403e')
+        })
+        return
+      }
+      $confirm({
+        title: this.$t('i18n_c4535759ee'),
+        zIndex: 1009,
+        content: '真的要删除这些执行记录吗？',
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
+        onOk: () => {
+          // 删除
+          return deleteCommandLog(this.tableSelections.join(',')).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
+              })
+              this.tableSelections = []
               this.getCommandLogData()
             }
           })

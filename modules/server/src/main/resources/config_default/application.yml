@@ -58,9 +58,13 @@ jpom:
     token-expired: 24
     #登录token失效后自动续签时间（单位：分钟），默认为60，不自动续签
     token-renewal: 60
-    # jwt 签名(加密)的key 长度建议控制到 16位
+    # jwt 签名(加密)的key，建议使用至少 32 位随机字符串。
+    # 留空时首次启动会自动生成随机密钥并保存到 data/.jwt-key；集群部署请显式配置相同值。
     token-jwt-key:
   web:
+    # 受信任的反向代理地址（IP 或 CIDR，逗号分隔）。只有来源地址命中此列表时才读取 X-Forwarded-For/X-Real-IP；
+    # 默认仅信任本机回环（127.0.0.1/32、::1/128）。反向代理在其他机器时请配置为代理地址。
+    trusted-proxies: 127.0.0.1/32,::1/128
     # 前端接口 超时时间 单位秒(最小 5 秒)
     api-timeout: 20
     # 禁用页面引导导航
@@ -74,7 +78,7 @@ jpom:
   # 查看日志时初始读取最后多少行（默认10，0不读取）
   init-read-line: 10
   db:
-    # 数据库默认 支持 ：H2、MYSQL、MARIADB、POSTGRESQL
+    # 数据库默认 支持 ：H2、MYSQL、MARIADB、POSTGRESQL、DAMENG
     mode: H2
     # 日志存储条数，将自动清理旧数据,配置小于等于零则不清理
     log-storage-count: 10000
@@ -97,6 +101,8 @@ jpom:
     min-idle: 1
     # 控制台是否打印 sql 信息
     show-sql: false
+      # 表名前缀
+    table-prefix:
   # 构建相关配置
   build:
     # 最多保存多少份历史记录
@@ -126,6 +132,13 @@ jpom:
     monitor-pool-wait-queue: 500
     # ssh 资产
     ssh:
+      # 监控频率
+      monitor-cron: 0 0/1 * * * ?
+      # 指定分组不启用监控功能（如果想禁用所有配置 * 即可）
+      disable-monitor-group-name:
+        - 禁用监控
+    # ftp 资产
+    ftp:
       # 监控频率
       monitor-cron: 0 0/1 * * * ?
       # 指定分组不启用监控功能（如果想禁用所有配置 * 即可）

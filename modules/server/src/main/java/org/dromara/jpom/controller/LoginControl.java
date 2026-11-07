@@ -89,6 +89,14 @@ public class LoginControl extends BaseServerController implements InitializingBe
     private static final TimedCache<String, String> MFA_TOKEN = CacheUtil.newTimedCache(TimeUnit.MINUTES.toMillis(10));
 
     private static final String LOGIN_CODE = "login_code";
+    /**
+     * 登录验证码生成时间（毫秒时间戳），与 {@link #LOGIN_CODE} 同时写入、同时移除
+     */
+    private static final String LOGIN_CODE_TIME = "login_code_time";
+    /**
+     * 登录验证码有效期：5 分钟
+     */
+    private static final long LOGIN_CODE_TTL = TimeUnit.MINUTES.toMillis(5);
     // 去重容易混淆的字符串，oO0、lL1、q9Q、pP，区分大小写
     private static final CodeGenerator codeGenerator = new RandomGenerator("abcdefghjkmnrstuvwxyzABCDEFGHIJKMNRSTUVWXYZ2345678", 4);
 
@@ -117,6 +125,7 @@ public class LoginControl extends BaseServerController implements InitializingBe
         }
         CircleCaptcha captcha = this.createCaptcha(theme);
         setSessionAttribute(LOGIN_CODE, captcha.getCode());
+        setSessionAttribute(LOGIN_CODE_TIME, System.currentTimeMillis());
         String base64Data = captcha.getImageBase64Data();
         return new JsonMessage<>(200, "", base64Data);
     }
@@ -133,6 +142,33 @@ public class LoginControl extends BaseServerController implements InitializingBe
         circleCaptcha.setFont(new Font(null, Font.PLAIN, (int) (height * 0.75)));
         circleCaptcha.createCode();
         return circleCaptcha;
+    }
+
+    /**
+     * 校验登录验证码（一次性）
+     * <p>
+     * 校验前先移除 session 中的验证码与生成时间，无论校验是否通过都作废：
+     * 既修复“校验通过后才移除”导致同一 session 内可用空验证码持续绕过的问题，
+     * 也避免验证码失败后被反复猜测。
+     *
+     * @param code 请求提交的验证码
+     * @return true 校验通过
+     */
+    boolean validateLoginCaptcha(String code) {
+        // 使用 getSessionAttributeObj 判 null，不能用 getSessionAttribute 的 "" 兜底，
+        // 否则 session 中没有验证码时 "" 会与空串请求参数相等而绕过校验
+        Object sCodeObj = getSessionAttributeObj(LOGIN_CODE);
+        Object sCodeTimeObj = getSessionAttributeObj(LOGIN_CODE_TIME);
+        // 一次性：先移除，失败也作废
+        removeSessionAttribute(LOGIN_CODE);
+        removeSessionAttribute(LOGIN_CODE_TIME);
+        String sCode = sCodeObj == null ? null : sCodeObj.toString();
+        Assert.state(StrUtil.isNotEmpty(sCode), I18nMessageUtil.get("i18n.captcha_invalid_refresh.8a0f"));
+        Assert.state(StrUtil.isNotEmpty(code), I18nMessageUtil.get("i18n.captcha_required.d0c0"));
+        Long codeTime = sCodeTimeObj instanceof Number ? ((Number) sCodeTimeObj).longValue() : null;
+        Assert.state(codeTime != null && System.currentTimeMillis() - codeTime <= LOGIN_CODE_TTL, I18nMessageUtil.get("i18n.captcha_expired_refresh.f752"));
+        Assert.state(StrUtil.equalsIgnoreCase(code, sCode), I18nMessageUtil.get("i18n.correct_verification_code_required.ff0d"));
+        return true;
     }
 
     /**
@@ -185,21 +221,21 @@ public class LoginControl extends BaseServerController implements InitializingBe
         if (this.ipLock()) {
             return new JsonMessage<>(400, I18nMessageUtil.get("i18n.too_many_attempts.d88d"));
         }
+        // 验证码校验前移到账号查询之前：避免未解验证码即可通过账号状态判断进行账号枚举；
+        // 校验失败会直接抛出 Assert 异常，且验证码无论成败都已作废
+        if (!webConfig.isDisabledCaptcha()) {
+            this.validateLoginCaptcha(code);
+        }
         synchronized (loginName.intern()) {
             UserModel userModel = userService.getByKey(loginName);
             if (userModel == null) {
                 this.ipError();
-                return new JsonMessage<>(400, I18nMessageUtil.get("i18n.login_failed_please_enter_correct_password_and_account.03b2"));
+                // 与密码错误统一返回码和文案，避免通过 400/501 差异枚举账号
+                return new JsonMessage<>(501, I18nMessageUtil.get("i18n.login_failed_please_enter_correct_password_and_account.03b2"));
             }
             if (userModel.getStatus() != null && userModel.getStatus() == 0) {
                 userLoginLogServer.fail(userModel, 4, false, request);
                 return new JsonMessage<>(ServerConst.ACCOUNT_LOCKED, ServerConst.ACCOUNT_LOCKED_TIP.get());
-            }
-            if (!webConfig.isDisabledCaptcha()) {
-                // 获取验证码
-                String sCode = getSessionAttribute(LOGIN_CODE);
-                Assert.state(StrUtil.equalsIgnoreCase(code, sCode), I18nMessageUtil.get("i18n.correct_verification_code_required.ff0d"));
-                removeSessionAttribute(LOGIN_CODE);
             }
             UserModel updateModel = null;
             try {

@@ -26,6 +26,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.ClientIpUtil;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
@@ -123,7 +124,7 @@ public class OperateLogController implements AopLogInterface {
                 return;
             }
             // 获取ip地址
-            cacheInfo.ip = ServletUtil.getClientIP(request);
+            cacheInfo.ip = ClientIpUtil.resolve(request);
             // 获取节点
             cacheInfo.nodeModel = (NodeModel) request.getAttribute("node");
             //

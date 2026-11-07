@@ -19,6 +19,7 @@ import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.db.TableName;
+import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.model.BaseWorkspaceModel;
 import org.dromara.jpom.model.data.WorkspaceModel;
 import org.dromara.jpom.service.IStatusRecover;
@@ -99,7 +100,10 @@ public class DataInitEvent implements ILoadEvent, ICacheTask {
                 TableName tableName1 = parents.getAnnotation(TableName.class);
                 Assert.notNull(tableName1, I18nMessageUtil.get("i18n.parent_table_info_config_error.2f52") + aClass);
             }
-            String sql = "select workspaceId,count(1) as allCount from " + tableName.value() + " group by workspaceId";
+            String workspaceIdField = DialectUtil.wrapField("workspaceId");
+            String value = workspaceService.parseRealTableName(tableName);
+            String sql =StrUtil.format("select {},count(1) as allCount from {} group by {}",
+                workspaceIdField, value,workspaceIdField);
             List<Entity> query = workspaceService.query(sql);
             for (Entity entity : query) {
                 String workspaceId = (String) entity.get("workspaceId");
@@ -107,9 +111,9 @@ public class DataInitEvent implements ILoadEvent, ICacheTask {
                 if (workspaceIds.contains(workspaceId)) {
                     continue;
                 }
-                String format = StrUtil.format(I18nMessageUtil.get("i18n.table_error_workspace_data.9021"), I18nMessageUtil.get(tableName.nameKey()), tableName.value(), allCount, workspaceId);
+                String format = StrUtil.format(I18nMessageUtil.get("i18n.table_error_workspace_data.9021"), I18nMessageUtil.get(tableName.nameKey()), value, allCount, workspaceId);
                 log.error(format);
-                List<String> stringList = errorWorkspaceTable.computeIfAbsent(tableName.value(), s -> new ArrayList<>());
+                List<String> stringList = errorWorkspaceTable.computeIfAbsent(value, s -> new ArrayList<>());
                 stringList.add(format);
             }
         }

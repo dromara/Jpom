@@ -175,11 +175,11 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> implements
         final String fileName = LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.PURE_DATETIME_PATTERN);
 
         // 设置默认备份 SQL 的文件地址
-        File file = FileUtil.file(StorageServiceFactory.dbLocalPath(), DbExtConfig.BACKUP_DIRECTORY_NAME, fileName + DbExtConfig.SQL_FILE_SUFFIX);
+        File file = FileUtil.file(StorageServiceFactory.getInstance().dbLocalPath(), DbExtConfig.BACKUP_DIRECTORY_NAME, fileName + DbExtConfig.SQL_FILE_SUFFIX);
         final String backupSqlPath = FileUtil.getAbsolutePath(file);
 
         // 数据源参数
-        final String url = StorageServiceFactory.get().dbUrl();
+        final String url = StorageServiceFactory.getInstance().get().dbUrl();
 
         final String user = dbExtConfig.userName();
         final String pass = dbExtConfig.userPwd();
@@ -205,7 +205,7 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> implements
             backupInfo.setId(backupInfoModel.getId());
             try {
                 log.debug(I18nMessageUtil.get("i18n.start_new_thread_for_h2_database_backup.9337"));
-                StorageServiceFactory.get().backupSql(url, user, pass, backupSqlPath, tableNameList);
+                StorageServiceFactory.getInstance().get().backupSql(url, user, pass, backupSqlPath, tableNameList);
                 // 修改备份任务执行完成
                 backupInfo.setFileSize(FileUtil.size(file));
                 backupInfo.setSha1Sum(SecureUtil.sha1(file));

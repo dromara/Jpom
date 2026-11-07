@@ -10,7 +10,7 @@
 
 jpom:
   db:
-    # 数据库默认 支持 ：H2、MYSQL、MARIADB、POSTGRESQL
+    # 数据库默认 支持 ：H2、MYSQL、MARIADB、POSTGRESQL、DAMENG
     mode: POSTGRESQL
     url: jdbc:postgresql://127.0.0.1:5432/jpom
     # 数据库账号 默认 jpom

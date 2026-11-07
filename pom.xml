@@ -36,9 +36,14 @@
         简而轻的低侵入式在线构建、自动部署、日常运维、项目监控软件
     </description>
     <inceptionYear>2017</inceptionYear>
-    <version>2.11.12</version>
+    <version>2.11.12.3</version>
     <url>https://gitee.com/dromara/Jpom</url>
     <properties>
+        <!-- 安全（#116）：Spring Framework 5.3.x 已 EOL，5.3.40+ 未在 Maven Central 公开发布（5.3.x 最后公开版为 5.3.39），
+             无法通过版本覆盖修复 CVE-2024-38816 等；彻底修复需 Spring Boot 3.x + JDK17 破坏性迁移。
+             该 CVE 触发条件为 WebMvc.fn/WebFlux.fn 的 RouterFunctions + FileSystemResource 静态资源，
+             Jpom 未使用 RouterFunction 且运行在 Tomcat 上（官方公告说明 Tomcat/Jetty 下请求会被拒绝）。
+             详见 .tmp/reports/dependency-security.md -->
         <spring-framework.version>5.3.39</spring-framework.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
@@ -50,12 +55,24 @@
         <maven.test.skip>true</maven.test.skip>
         <!--        <maven.javadoc.skip>true</maven.javadoc.skip>-->
         <hutool.version>5.8.34</hutool.version>
-        <fastjson2.version>2.0.53</fastjson2.version>
-        <fastjson-version>2.0.53</fastjson-version>
+        <!-- 安全：fastjson2 ≤2.0.62 存在 AutoType 哈希碰撞绕过导致的远程代码执行（QVD-2026-45876，默认未开启
+             SupportAutoType 也可触发；Jpom 的 openapi 批量接口在鉴权前会用 fastjson2 解析不可信请求体）。
+             官方修复版本为 2.0.63，2.0.65 又修复了需开启 SupportAutoType 时才可触达的 AutoType 授权绕过；
+             此处升级到 2.0.66（class 文件主版本 52，兼容 Java 8）。com.alibaba:fastjson（fastjson1 兼容包）
+             必须与 fastjson2 核心同版本，否则会被根 pom dependencyManagement 钉回旧核心版本造成混版。
+             详见 .tmp/reports/fastjson-security.md -->
+        <fastjson2.version>2.0.66</fastjson2.version>
+        <fastjson-version>2.0.66</fastjson-version>
         <jna-version>5.14.0</jna-version>
         <mwiede.jsch-version>0.2.18</mwiede.jsch-version>
         <oshi.version>6.4.13</oshi.version>
-        <tomcat.version>9.0.99</tomcat.version>
+        <tomcat.version>9.0.123</tomcat.version>
+        <!-- 安全：Spring Boot 2.7.18 依赖管理默认 commons-lang3 3.12.0，升级到同线修复 CVE-2025-48924 的 3.18.0（Java 8 兼容） -->
+        <commons-lang3.version>3.18.0</commons-lang3.version>
+        <!-- 安全：JGit 5.13.x 同线补丁，修复 CVE-2025-4949（XXE），5.13.x 最后公开版为 5.13.5 -->
+        <jgit.version>5.13.5.202508271544-r</jgit.version>
+        <!-- 安全：BouncyCastle jdk18on（Java 8+）同线升级，修复 bcprov/bcpkix 多个 CVE（CVE-2026-13506 等） -->
+        <bouncycastle.version>1.86</bouncycastle.version>
         <yaml.version>2.2</yaml.version>
         <!--  h2 不能直接升级 The write format 2 is smaller than the supported format 3-->
         <h2.version>2.1.214</h2.version>
@@ -109,7 +126,33 @@
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-jdk18on</artifactId>
-                <version>1.78</version>
+                <version>${bouncycastle.version}</version>
+            </dependency>
+
+            <!-- 与 bcprov-jdk18on 对齐，docker-java-core 传递引入的 bcpkix-jdk18on:1.76 命中 CVE-2025-8916/CVE-2026-5588 -->
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpkix-jdk18on</artifactId>
+                <version>${bouncycastle.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcutil-jdk18on</artifactId>
+                <version>${bouncycastle.version}</version>
+            </dependency>
+
+            <!-- JGit（git-clone 插件传递引入）：5.13.3 命中 CVE-2025-4949，同线升级到 5.13.5 -->
+            <dependency>
+                <groupId>org.eclipse.jgit</groupId>
+                <artifactId>org.eclipse.jgit</artifactId>
+                <version>${jgit.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.jgit</groupId>
+                <artifactId>org.eclipse.jgit.ssh.jsch</artifactId>
+                <version>${jgit.version}</version>
             </dependency>
 
             <dependency>

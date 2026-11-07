@@ -74,6 +74,10 @@ public class BuildExtraModule extends BaseModel {
      */
     private String releasePath;
     /**
+     * 发布到ftp中的目录
+     */
+    private String releaseFtpPath;
+    /**
      * 工作空间 ID
      */
     private String workspaceId;
@@ -108,6 +112,20 @@ public class BuildExtraModule extends BaseModel {
      * 构建的时候判断仓库代码是否有变动，true 表示需要判断代码有变动才触发构建
      */
     private Boolean checkRepositoryDiff;
+
+    /**
+     * 差异构建 — 包含路径规则 (Ant风格，逗号分隔多个)
+     * 只有变更文件匹配这些规则时才触发构建，为空表示所有文件变更都触发
+     * 例如: /modules/server/**,/modules/common/**,/pom.xml
+     */
+    private String diffIncludePath;
+
+    /**
+     * 差异构建 — 排除路径规则 (Ant风格，逗号分隔多个)
+     * 匹配这些规则的变更文件即使匹配了includePath也会被排除
+     * 例如: /**&#47;*.md
+     */
+    private String diffExcludePath;
 
     /**
      * 事件通知执行的脚本 ID
@@ -149,6 +167,10 @@ public class BuildExtraModule extends BaseModel {
      * 镜像标签
      */
     private String dockerImagesLabels;
+    /**
+     * 镜像网络模式
+     */
+    private String dockerImagesNetworkMode;
     /**
      * 项目二级目录
      */

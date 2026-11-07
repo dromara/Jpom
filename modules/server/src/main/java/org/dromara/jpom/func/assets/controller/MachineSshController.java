@@ -155,7 +155,7 @@ public class MachineSshController extends BaseGroupNameController {
      * 编辑
      *
      * @param name        名称
-     * @param host        端口
+     * @param host        主机
      * @param user        用户名
      * @param password    密码
      * @param connectType 连接方式

@@ -102,7 +102,8 @@ public class BuildUtil {
             return null;
         }
         File result = FileUtil.file(getBuildDataFile(buildModelId), "history", BuildInfoModel.getBuildIdStr(buildId), "result");
-        return FileUtil.file(result, resultFile);
+        // 使用解析后的路径，避免 Windows 盘符/冒号等绝对路径字符直接拼接到子路径导致路径非法（Illegal char <:>）
+        return FileUtil.file(result, resultDirFileAction.getPath());
     }
 
     /**

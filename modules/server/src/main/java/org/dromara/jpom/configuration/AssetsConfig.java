@@ -42,6 +42,10 @@ public class AssetsConfig {
      */
     private SshConfig ssh;
     /**
+     * ftp 资产配置
+     */
+    private FtpConfig ftp;
+    /**
      * docker 资产配置
      */
     private DockerConfig docker;
@@ -50,6 +54,13 @@ public class AssetsConfig {
         return ObjectUtil.defaultIfNull(this.ssh, () -> {
             this.ssh = new SshConfig();
             return ssh;
+        });
+    }
+
+    public FtpConfig getFtp() {
+        return ObjectUtil.defaultIfNull(this.ftp, () -> {
+            this.ftp = new FtpConfig();
+            return ftp;
         });
     }
 
@@ -66,6 +77,24 @@ public class AssetsConfig {
     @Data
     @ConfigurationProperties("jpom.assets.ssh")
     public static class SshConfig {
+
+        /**
+         * 监控频率
+         */
+        private String monitorCron;
+        /**
+         * 禁用监控的分组名 （如果想禁用所有配置 * 即可）
+         */
+        private List<String> disableMonitorGroupName;
+
+    }
+
+    /**
+     * ftp 配置
+     */
+    @Data
+    @ConfigurationProperties("jpom.assets.ftp")
+    public static class FtpConfig {
 
         /**
          * 监控频率

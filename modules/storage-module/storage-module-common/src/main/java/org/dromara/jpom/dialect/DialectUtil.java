@@ -10,18 +10,18 @@
 package org.dromara.jpom.dialect;
 
 import cn.hutool.db.dialect.Dialect;
+import cn.hutool.db.dialect.impl.DmDialect;
 import cn.hutool.db.dialect.impl.H2Dialect;
 import cn.hutool.db.dialect.impl.MysqlDialect;
 import cn.hutool.db.dialect.impl.PostgresqlDialect;
 import cn.hutool.db.sql.Wrapper;
 import cn.hutool.extra.spring.SpringUtil;
-import org.dromara.jpom.common.i18n.I18nMessageUtil;
-import org.dromara.jpom.db.DbExtConfig;
-
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.db.DbExtConfig;
 
 /**
  * 数据库方言工具类
@@ -48,6 +48,62 @@ public class DialectUtil {
 
     public static Dialect getMySqlDialect() {
         return DIALECT_CACHE.computeIfAbsent(DbExtConfig.Mode.MYSQL, key -> new MysqlDialect());
+    }
+
+    public static Dialect getDmDialect() {
+        return DIALECT_CACHE.computeIfAbsent(DbExtConfig.Mode.DAMENG, key -> {
+            Set<String> DAMENG_KEYWORDS = Stream.of(
+                "USER", "ORDER", "GROUP", "LEVEL", "MODE", "TABLE", "SELECT", "INDEX",
+                "COLUMN", "VALUES", "WHERE", "FROM", "UPDATE", "DELETE", "INSERT",
+                "CREATE", "ALTER", "DROP", "PRIMARY", "KEY", "VIEW", "TRIGGER", "SEQUENCE",
+                "SESSION", "ONLINE", "PASSWORD", "DEFAULT", "GRANT", "OPTION"
+            ).collect(Collectors.toSet());
+
+            final char DAMENG_QUOTE_CHAR = '"'; // 达梦的引用字符
+
+            Wrapper dmWrapper = new Wrapper(DAMENG_QUOTE_CHAR) {
+
+                @Override
+                public String wrap(String field) {
+                    if (field == null) {
+                        return null;
+                    }
+
+                    // 1. 尝试去除字段本身可能带有的引号
+                    String unWrappedField = field;
+                    if (field.length() >= 2 && field.charAt(0) == DAMENG_QUOTE_CHAR && field.charAt(field.length() - 1) == DAMENG_QUOTE_CHAR) {
+                        unWrappedField = field.substring(1, field.length() - 1);
+                    }
+                    // 2. 将处理后的字段名转换为大写
+                    String upperCaseField = unWrappedField.toUpperCase();
+
+                    // 3. 检查转换后的大写字段名是否为关键字
+                    if (DAMENG_KEYWORDS.contains(upperCaseField)) {
+                        // 如果是关键字，则给这个大写形式的字段名加上双引号
+                        return DAMENG_QUOTE_CHAR + upperCaseField + DAMENG_QUOTE_CHAR;
+                    } else {
+                        // 如果不是关键字，则返回大写形式的字段名（不加引号）
+                        return upperCaseField;
+                    }
+                }
+
+                @Override
+                public String unWrap(String field) {
+                    if (field == null) {
+                        return null;
+                    }
+                    // 标准的去除引号逻辑
+                    if (field.length() >= 2 && field.charAt(0) == DAMENG_QUOTE_CHAR && field.charAt(field.length() - 1) == DAMENG_QUOTE_CHAR) {
+                        return field.substring(1, field.length() - 1);
+                    }
+                    return field;
+                }
+            };
+
+            DmDialect dialect = new DmDialect();
+            dialect.setWrapper(dmWrapper);
+            return dialect;
+        });
     }
 
     /**
@@ -93,6 +149,8 @@ public class DialectUtil {
                 return getMySqlDialect();
             case POSTGRESQL:
                 return getPostgresqlDialect();
+            case DAMENG:
+                return getDmDialect();
             default:
                 throw new IllegalArgumentException(I18nMessageUtil.get("i18n.unknown_database_dialect_type.951b") + mode);
         }

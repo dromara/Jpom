@@ -22,6 +22,7 @@ import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.i18n.I18nThreadUtil;
 import org.dromara.jpom.cron.CronUtils;
+import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.func.assets.model.MachineSshModel;
 import org.dromara.jpom.func.assets.server.ScriptLibraryServer;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
@@ -125,7 +126,9 @@ public class SshCommandService extends BaseWorkspaceService<CommandModel> implem
      */
     @Override
     public List<CommandModel> queryStartingList() {
-        String sql = "select * from " + super.getTableName() + " where autoExecCron is not null and autoExecCron <> ''";
+        String autoExecCron = DialectUtil.wrapField("autoExecCron");
+        String sql =StrUtil.format("select * from {} where {} is not null and {} <> ''",
+            super.getTableName(),autoExecCron,autoExecCron);
         return super.queryList(sql);
     }
 
@@ -157,15 +160,25 @@ public class SshCommandService extends BaseWorkspaceService<CommandModel> implem
     }
 
     /**
-     * 批量执行命令
+     * 批量执行命令（按请求工作空间校验命令模板和 SSH 节点归属）
      *
-     * @param id     命令 id
-     * @param nodes  ssh节点
-     * @param params 参数
+     * @param id      命令 id
+     * @param nodes   ssh节点
+     * @param params  参数
+     * @param request 请求
      * @return 批次ID
      */
-    public String executeBatch(String id, String params, String nodes) {
-        CommandModel commandModel = this.getByKey(id);
+    public String executeBatch(String id, String params, String nodes, HttpServletRequest request) {
+        // 命令模板必须属于当前请求工作空间
+        CommandModel commandModel = this.getByKey(id, request);
+        Assert.notNull(commandModel, I18nMessageUtil.get("i18n.no_corresponding_command.165e"));
+        List<String> sshIds = StrUtil.split(nodes, StrUtil.COMMA, true, true);
+        Assert.notEmpty(sshIds, I18nMessageUtil.get("i18n.ssh_node_required.4566"));
+        // 每一个 SSH 节点都必须属于当前请求工作空间，拒绝执行跨工作空间的节点
+        for (String sshId : sshIds) {
+            SshModel sshModel = sshService.getByKey(sshId, request);
+            Assert.notNull(sshModel, I18nMessageUtil.get("i18n.associated_ssh_node_contains_nonexistent_node.c7f5"));
+        }
         return this.executeBatch(commandModel, params, nodes, 0);
     }
 

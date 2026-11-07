@@ -157,7 +157,8 @@ public class OutGivingController extends BaseServerController {
                 String nodeId = StrUtil.sub(stringStringEntry.getKey(), indexOf, lastIndexOf);
                 //
                 String nodeIdProject = stringStringEntry.getValue();
-                NodeModel nodeModel = nodeService.getByKey(nodeId);
+                // 按当前工作空间校验节点归属，避免把其它工作空间的节点加入分发
+                NodeModel nodeModel = nodeService.getByKey(nodeId, request);
                 Assert.notNull(nodeModel, I18nMessageUtil.get("i18n.node_not_exist.0027"));
                 //
                 boolean exists = projectInfoCacheService.exists(nodeModel.getWorkspaceId(), nodeModel.getId(), nodeIdProject);

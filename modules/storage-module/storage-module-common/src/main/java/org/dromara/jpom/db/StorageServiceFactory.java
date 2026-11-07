@@ -21,7 +21,9 @@ import cn.hutool.db.*;
 import cn.hutool.db.ds.DSFactory;
 import cn.hutool.db.sql.Wrapper;
 import cn.hutool.setting.Setting;
+import lombok.Getter;
 import lombok.Lombok;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.dialect.DialectUtil;
@@ -53,25 +55,42 @@ public class StorageServiceFactory {
     /**
      * 当前运行模式
      */
-    private static DbExtConfig.Mode mode;
+    @Getter
+    @Setter
+    private DbExtConfig.Mode mode;
+
+    @Getter
+    @Setter
+    private String tablePrefix;
+
+    private StorageServiceFactory() {
+
+    }
+
+    public static StorageServiceFactory getInstance() {
+        return SingletonI.INSTANCE;
+    }
 
     /**
-     * 配置当前数据库 模式
-     *
-     * @param mode mode
+     * 单例模式
      */
-    public static void setMode(DbExtConfig.Mode mode) {
-        StorageServiceFactory.mode = mode;
+    private static final class SingletonI {
+        private static final StorageServiceFactory INSTANCE = new StorageServiceFactory();
     }
 
-    public static DbExtConfig.Mode getMode() {
-        return mode;
+    public String parseRealTableName(TableName annotation) {
+        return StrUtil.emptyToDefault(this.getTablePrefix(), StrUtil.EMPTY) + annotation.value();
     }
+
+    public String parseRealTableName(String tableName) {
+        return StrUtil.emptyToDefault(this.getTablePrefix(), StrUtil.EMPTY) + tableName;
+    }
+
 
     /**
      * 将数据迁移到当前环境
      */
-    public static void migrateH2ToNow(DbExtConfig dbExtConfig, String h2Url, String h2User, String h2Pass, DbExtConfig.Mode targetNode) {
+    public void migrateH2ToNow(DbExtConfig dbExtConfig, String h2Url, String h2User, String h2Pass, DbExtConfig.Mode targetNode) {
         log.info(I18nMessageUtil.get("i18n.start_migrating_h2_data_to.f478"), dbExtConfig.getMode());
         Assert.notNull(mode, I18nMessageUtil.get("i18n.target_database_info_not_specified.2ff6"));
         try {
@@ -86,7 +105,7 @@ public class StorageServiceFactory {
             log.info(I18nMessageUtil.get("i18n.h2_connection_successful.11f3"));
             // 设置默认备份 SQL 的文件地址
             String fileName = LocalDateTimeUtil.format(LocalDateTimeUtil.now(), DatePattern.PURE_DATETIME_PATTERN);
-            File file = FileUtil.file(StorageServiceFactory.dbLocalPath(), DbExtConfig.BACKUP_DIRECTORY_NAME, fileName + DbExtConfig.SQL_FILE_SUFFIX);
+            File file = FileUtil.file(StorageServiceFactory.getInstance().dbLocalPath(), DbExtConfig.BACKUP_DIRECTORY_NAME, fileName + DbExtConfig.SQL_FILE_SUFFIX);
             String backupSqlPath = FileUtil.getAbsolutePath(file);
             Setting setting = h2StorageService.createSetting(dbExtConfig, h2Url, h2User, h2Pass);
             // 数据源参数
@@ -101,17 +120,14 @@ public class StorageServiceFactory {
             nowDsFactory.getDataSource();
             log.info(I18nMessageUtil.get("i18n.connection_successful.0515"), dbExtConfig.getMode(), dbExtConfig.getUrl());
             Set<Class<?>> classes = ClassUtil.scanPackageByAnnotation("org.dromara.jpom", TableName.class);
-            classes = classes.stream()
-                .filter(aClass -> {
-                    TableName tableName = aClass.getAnnotation(TableName.class);
-                    DbExtConfig.Mode[] modes = tableName.modes();
-                    if (ArrayUtil.isEmpty(modes)) {
-                        return true;
-                    }
-                    return ArrayUtil.contains(modes, dbExtConfig.getMode());
-                })
-                .sorted((o1, o2) -> StrUtil.compare(o1.getSimpleName(), o2.getSimpleName(), false))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+            classes = classes.stream().filter(aClass -> {
+                TableName tableName = aClass.getAnnotation(TableName.class);
+                DbExtConfig.Mode[] modes = tableName.modes();
+                if (ArrayUtil.isEmpty(modes)) {
+                    return true;
+                }
+                return ArrayUtil.contains(modes, dbExtConfig.getMode());
+            }).sorted((o1, o2) -> StrUtil.compare(o1.getSimpleName(), o2.getSimpleName(), false)).collect(Collectors.toCollection(LinkedHashSet::new));
             log.info(I18nMessageUtil.get("i18n.prepare_to_migrate_data.f251"));
             int total = 0;
             for (Class<?> aClass : classes) {
@@ -129,18 +145,17 @@ public class StorageServiceFactory {
         }
     }
 
-    private static int migrateH2ToNowItem(Class<?> aClass, DSFactory h2DsFactory, DSFactory targetDsFactory, DbExtConfig.Mode targetNode) throws SQLException {
+    private int migrateH2ToNowItem(Class<?> aClass, DSFactory h2DsFactory, DSFactory targetDsFactory, DbExtConfig.Mode targetNode) throws SQLException {
         TableName tableName = aClass.getAnnotation(TableName.class);
         Wrapper targetModeWrapper = DialectUtil.getDialectByMode(targetNode).getWrapper();
-        Set<String> boolFieldSet = Arrays.stream(ReflectUtil.getFields(aClass, field -> Boolean.class.equals(field.getType()) || boolean.class.equals(field.getType())))
-            .map(Field::getName)
-            .collect(Collectors.toSet());
+        Set<String> boolFieldSet = Arrays.stream(ReflectUtil.getFields(aClass, field -> Boolean.class.equals(field.getType()) || boolean.class.equals(field.getType()))).map(Field::getName).collect(Collectors.toSet());
 
         String tableDesc = I18nMessageUtil.get(tableName.nameKey());
-        log.info(I18nMessageUtil.get("i18n.start_migrating.20d6"), tableDesc, tableName.value());
+        String value = parseRealTableName(tableName);
+        log.info(I18nMessageUtil.get("i18n.start_migrating.20d6"), tableDesc, value);
         int total = 0;
         while (true) {
-            Entity where = Entity.create(tableName.value());
+            Entity where = Entity.create(value);
             PageResult<Entity> pageResult;
             Db db = Db.use(h2DsFactory.getDataSource(), DialectUtil.getH2Dialect());
             Page page = new Page(1, 200);
@@ -149,23 +164,21 @@ public class StorageServiceFactory {
                 break;
             }
             // 过滤需要忽略迁移的数据
-            List<Entity> newResult = pageResult.stream()
-                .map(entity -> entity.toBeanIgnoreCase(aClass))
-                .map(o -> {
-                    // 兼容大小写
-                    Entity entity = Entity.create(targetModeWrapper.wrap(tableName.value()));
-                    return entity.parseBean(o, false, true);
-                }).peek(entity -> {
-                    if (DbExtConfig.Mode.POSTGRESQL.equals(targetNode)) {
-                        // tinyint类型查出来是数字，需转为bool
-                        boolFieldSet.forEach(fieldName -> {
-                            Object field = entity.get(fieldName);
-                            if (field instanceof Number) {
-                                entity.set(fieldName, BooleanUtil.toBoolean(field.toString()));
-                            }
-                        });
-                    }
-                }).collect(Collectors.toList());
+            List<Entity> newResult = pageResult.stream().map(entity -> entity.toBeanIgnoreCase(aClass)).map(o -> {
+                // 兼容大小写
+                Entity entity = Entity.create(targetModeWrapper.wrap(value));
+                return entity.parseBean(o, false, true);
+            }).peek(entity -> {
+                if (DbExtConfig.Mode.POSTGRESQL.equals(targetNode)) {
+                    // tinyint类型查出来是数字，需转为bool
+                    boolFieldSet.forEach(fieldName -> {
+                        Object field = entity.get(fieldName);
+                        if (field instanceof Number) {
+                            entity.set(fieldName, BooleanUtil.toBoolean(field.toString()));
+                        }
+                    });
+                }
+            }).collect(Collectors.toList());
             if (newResult.isEmpty()) {
                 if (pageResult.isLast()) {
                     // 最后一页
@@ -192,7 +205,7 @@ public class StorageServiceFactory {
             }
 
             // 删除数据
-            Entity deleteWhere = Entity.create(tableName.value());
+            Entity deleteWhere = Entity.create(value);
             deleteWhere.set("id", newResult.stream().map(entity -> entity.getStr("id")).collect(Collectors.toList()));
             db.del(deleteWhere);
         }
@@ -206,7 +219,7 @@ public class StorageServiceFactory {
      * @return sha1 log
      * @author bwcx_jzy
      */
-    public static Set<String> loadExecuteSqlLog() {
+    public Set<String> loadExecuteSqlLog() {
         File localPath = dbLocalPath();
         File file = FileUtil.file(localPath, "execute.init.sql.log");
         if (!FileUtil.isFile(file)) {
@@ -224,14 +237,14 @@ public class StorageServiceFactory {
      * @return 默认本地数据目录下面的 db 目录
      * @author bwcx_jzy
      */
-    public static File dbLocalPath() {
+    public File dbLocalPath() {
         return FileUtil.file(ExtConfigBean.getPath(), DB);
     }
 
     /**
      * 清除执行记录
      */
-    public static void clearExecuteSqlLog() {
+    public void clearExecuteSqlLog() {
         File localPath = dbLocalPath();
         File file = FileUtil.file(localPath, "execute.init.sql.log");
         FileUtil.del(file);
@@ -242,7 +255,7 @@ public class StorageServiceFactory {
      *
      * @author bwcx_jzy
      */
-    public static void saveExecuteSqlLog(Set<String> logs) {
+    public void saveExecuteSqlLog(Set<String> logs) {
         File localPath = dbLocalPath();
         File file = FileUtil.file(localPath, "execute.init.sql.log");
         FileUtil.writeUtf8Lines(logs, file);
@@ -253,7 +266,7 @@ public class StorageServiceFactory {
      *
      * @return 单例的 IStorageService
      */
-    public static IStorageService get() {
+    public IStorageService get() {
         Assert.notNull(mode, I18nMessageUtil.get("i18n.unknown_database_mode.f9e5"));
         return Singleton.get(IStorageService.class.getName(), (CheckedUtil.Func0Rt<IStorageService>) () -> doCreateStorageService(mode));
     }
@@ -265,7 +278,7 @@ public class StorageServiceFactory {
      *
      * @return {@code EngineFactory}
      */
-    private static IStorageService doCreateStorageService(DbExtConfig.Mode mode) {
+    private IStorageService doCreateStorageService(DbExtConfig.Mode mode) {
         final List<IStorageService> storageServiceList = ServiceLoaderUtil.loadList(IStorageService.class);
         if (storageServiceList != null) {
             for (IStorageService storageService : storageServiceList) {

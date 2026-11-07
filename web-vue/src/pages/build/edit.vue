@@ -748,6 +748,34 @@
                     </a-col>
                   </a-row>
                 </a-form-item>
+                <a-form-item :label="$t('i18n_7ddbe15c84')">
+                  <a-auto-complete
+                    v-model:value="tempExtraData.dockerImagesNetworkMode"
+                    :placeholder="$t('i18n_abd9ee868a')"
+                    :options="[
+                      {
+                        title: $t('i18n_c36ab9a223'),
+                        value: 'bridge'
+                      },
+                      {
+                        title: $t('i18n_3d6acaa5ca'),
+                        value: 'none'
+                      },
+                      {
+                        title: $t('i18n_fcaef5b17a'),
+                        value: 'container:<name|id>'
+                      },
+                      {
+                        title: $t('i18n_ff39c45fbc'),
+                        value: 'host'
+                      }
+                    ]"
+                  >
+                    <template #option="item">
+                      {{ item.title }}
+                    </template>
+                  </a-auto-complete>
+                </a-form-item>
                 <a-form-item name="swarmId">
                   <template #label>
                     <a-tooltip>
@@ -886,6 +914,73 @@
                   </a-form-item-rest>
                 </a-form-item>
               </template>
+
+              <!-- FTP -->
+              <template v-if="temp.releaseMethod === 6">
+                <a-form-item name="releaseMethodDataId" :help="$t('i18n_eaa85849f3')">
+                  <template #label>
+                    <a-tooltip
+                      >{{ $t('i18n_32e3c8b702') }}<template #title>{{ $t('i18n_eaa85849f3') }}</template>
+                      <QuestionCircleOutlined v-if="!temp.id" />
+                    </a-tooltip>
+                  </template>
+                  <a-row>
+                    <a-col :span="22">
+                      <a-select
+                        v-model:value="tempExtraData.releaseMethodDataId_6"
+                        show-search
+                        :filter-option="
+                          (input, option) => {
+                            const children = option.children && option.children()
+                            return (
+                              children &&
+                              children[0].children &&
+                              children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                            )
+                          }
+                        "
+                        mode="multiple"
+                        :placeholder="$t('i18n_cf93cd2cde')"
+                      >
+                        <a-select-option v-for="ftp in ftpList" :key="ftp.id" :disabled="!ftp.fileDirs">
+                          <a-tooltip :title="ftp.name"> {{ ftp.name }}</a-tooltip>
+                        </a-select-option>
+                      </a-select>
+                    </a-col>
+                    <a-col :span="1" style="margin-left: 10px">
+                      <ReloadOutlined @click="loadFtpList" />
+                    </a-col>
+                  </a-row>
+                </a-form-item>
+                <a-form-item name="releaseMethodDataId" :help="$t('i18n_8339e5e8e9')">
+                  <template #label>
+                    <a-tooltip :title="$t('i18n_8339e5e8e9')">
+                      {{ $t('i18n_dbb2df00cf') }}
+                      <QuestionCircleOutlined v-if="!temp.id" />
+                    </a-tooltip>
+                  </template>
+                  <a-input-group compact>
+                    <a-select
+                      v-model:value="tempExtraData.releaseFtpDir"
+                      show-search
+                      allow-clear
+                      style="width: 30%"
+                      :placeholder="$t('i18n_cf93cd2cde')"
+                    >
+                      <a-select-option v-for="item in selectFtpDirs" :key="item">
+                        <a-tooltip :title="item">{{ item }}</a-tooltip>
+                      </a-select-option>
+                    </a-select>
+                    <a-form-item-rest>
+                      <a-input
+                        v-model:value="tempExtraData.releasePath3"
+                        style="width: 70%"
+                        :placeholder="$t('i18n_a75a5a9525')"
+                      />
+                    </a-form-item-rest>
+                  </a-input-group>
+                </a-form-item>
+              </template>
             </template>
           </div>
 
@@ -962,6 +1057,38 @@
                   </a-col>
                 </a-row>
               </a-form-item-rest>
+            </a-form-item>
+            <a-form-item v-if="tempExtraData.checkRepositoryDiff">
+              <template #label>
+                <a-tooltip>
+                  {{ $t('i18n_0b23d2f584_include') }}
+                  <template #title>
+                    {{ $t('i18n_diff_include_desc') }}
+                  </template>
+                  <QuestionCircleOutlined v-if="!temp.id" />
+                </a-tooltip>
+              </template>
+              <a-input
+                v-model:value="tempExtraData.diffIncludePath"
+                :placeholder="$t('i18n_diff_include_ph')"
+                allow-clear
+              />
+            </a-form-item>
+            <a-form-item v-if="tempExtraData.checkRepositoryDiff">
+              <template #label>
+                <a-tooltip>
+                  {{ $t('i18n_0b23d2f584_exclude') }}
+                  <template #title>
+                    {{ $t('i18n_diff_exclude_desc') }}
+                  </template>
+                  <QuestionCircleOutlined v-if="!temp.id" />
+                </a-tooltip>
+              </template>
+              <a-input
+                v-model:value="tempExtraData.diffExcludePath"
+                :placeholder="$t('i18n_diff_exclude_ph')"
+                allow-clear
+              />
             </a-form-item>
             <a-form-item name="webhook">
               <template #label>
@@ -1384,6 +1511,7 @@ import {
   getBuildGet
 } from '@/api/build-info'
 import { getSshListAll } from '@/api/ssh'
+import { getFtpListAll } from '@/api/ftp'
 import { getRepositoryInfo } from '@/api/repository'
 import { getNodeListAll, getProjectListAll } from '@/api/node'
 // import { getScriptListAll } from "@/api/server-script";
@@ -1497,6 +1625,7 @@ export default {
       dispatchList: [],
       cascaderList: [],
       sshList: [],
+      ftpList: [],
       dockerSwarmList: [],
       //集群下 服务下拉数据
       swarmServiceListOptions: [],
@@ -1510,6 +1639,7 @@ export default {
         branchName: [{ required: true, message: this.$t('i18n_50951f5e74'), trigger: 'blur' }],
         script: [{ required: true, message: this.$t('i18n_67aa1c0169'), trigger: 'blur' }],
         resultDirFile: [{ required: true, message: this.$t('i18n_cc92cf1e25'), trigger: 'blur' }],
+        aliasCode: [{ pattern: /^\w+$/, message: this.$t('i18n_8b996c2815'), trigger: ['change', 'blur'] }],
         // releasePath: [{ required: true, message: '请填写发布目录', trigger: 'blur' }],
         repositoryId: [
           {
@@ -1523,7 +1653,8 @@ export default {
         ['buildMode'],
         ['name', 'branchName', 'repositoryId'],
         ['script', 'resultDirFile'],
-        ['releaseMethod']
+        ['releaseMethod'],
+        ['aliasCode']
         // name: [{ required: true, message: '请填写构建名称', trigger: 'blur', : 1 }],
         // buildMode: [{ required: true, message: '请选择构建方式', trigger: 'blur', : 0 }],
         // releaseMethod: [{ required: true, message: '请选择发布操作', trigger: 'blur', : 3 }],
@@ -1658,6 +1789,27 @@ export default {
       }
       return []
     },
+    selectFtpDirs() {
+      if (!this.ftpList || this.ftpList.length <= 0) {
+        return []
+      }
+      const findArray = this.ftpList.filter((item) => {
+        if (Array.isArray(this.tempExtraData.releaseMethodDataId_6)) {
+          return item.id === this.tempExtraData.releaseMethodDataId_6[0]
+        }
+        return item.id === this.tempExtraData.releaseMethodDataId_6
+      })
+      if (findArray.length) {
+        const fileDirs = findArray[0].fileDirs
+        if (!fileDirs) {
+          return []
+        }
+        return JSON.parse(fileDirs).map((item) => {
+          return (item + '/').replace(new RegExp('//', 'gm'), '/')
+        })
+      }
+      return []
+    },
     buildModeArray() {
       return Object.keys(this.buildModeMap).map((item) => {
         return {
@@ -1714,6 +1866,7 @@ export default {
       this.loadDispatchList()
       this.loadNodeProjectList()
       this.loadSshList()
+      this.loadFtpList()
       this.loadDockerSwarmListAll()
       // this.loadScriptListList();
 
@@ -1766,6 +1919,9 @@ export default {
         if (record.releaseMethod === 3) {
           this.tempExtraData.releaseMethodDataId_3 = this.tempExtraData.releaseMethodDataId.split(',')
         }
+        if (record.releaseMethod === 6) {
+          this.tempExtraData.releaseMethodDataId_6 = this.tempExtraData.releaseMethodDataId.split(',')
+        }
       }
       this.tempExtraData = { ...this.tempExtraData }
       this.changeRepositpry(true)
@@ -1789,6 +1945,25 @@ export default {
             ...this.tempExtraData,
             releaseSshDir: releaseSshDir,
             releasePath2: (this.tempExtraData.releasePath || '').slice(releaseSshDir.length)
+          }
+        }
+      })
+
+      this.loadFtpList().then(() => {
+        if (this.tempExtraData.releaseMethodDataId_6) {
+          //
+          const findDirs = this.selectFtpDirs
+            .filter((item) => {
+              return this.tempExtraData.releaseFtpPath && this.tempExtraData.releaseFtpPath.indexOf(item) > -1
+            })
+            .sort((item1, item2) => {
+              return item2.length - item1.length
+            })
+          const releaseFtpDir = findDirs[0] || ''
+          this.tempExtraData = {
+            ...this.tempExtraData,
+            releaseFtpDir: releaseFtpDir,
+            releasePath3: (this.tempExtraData.releaseFtpPath || '').slice(releaseFtpDir.length)
           }
         }
       })
@@ -1884,6 +2059,7 @@ export default {
             tempExtraData.releaseMethodDataId_2_node = this.temp.releaseMethodDataIdList[0]
             tempExtraData.releaseMethodDataId_2_project = this.temp.releaseMethodDataIdList[1]
           } else if (this.temp.releaseMethod === 3) {
+            // ssh
             //  (this. tempExtraData.releasePath || '').slice(releaseSshDir.length);
             tempExtraData.releasePath = (
               (tempExtraData.releaseSshDir || '') +
@@ -1891,6 +2067,14 @@ export default {
               (tempExtraData.releasePath2 || '')
             ).replace(new RegExp('//', 'gm'), '/')
             tempExtraData.releaseMethodDataId_3 = (tempExtraData.releaseMethodDataId_3 || []).join(',')
+          } else if (this.temp.releaseMethod === 6) {
+            // ftp
+            tempExtraData.releaseFtpPath = (
+              (tempExtraData.releaseFtpDir || '') +
+              '/' +
+              (tempExtraData.releasePath3 || '')
+            ).replace(new RegExp('//', 'gm'), '/')
+            tempExtraData.releaseMethodDataId_6 = (tempExtraData.releaseMethodDataId_6 || []).join(',')
           }
 
           this.temp = {
@@ -1970,6 +2154,18 @@ export default {
         getSshListAll().then((res) => {
           if (res.code === 200) {
             this.sshList = res.data
+            resolve()
+          }
+        })
+      })
+    },
+    // 加载 FTP 列表
+    loadFtpList() {
+      return new Promise((resolve) => {
+        this.ftpList = []
+        getFtpListAll().then((res) => {
+          if (res.code === 200) {
+            this.ftpList = res.data
             resolve()
           }
         })

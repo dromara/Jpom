@@ -13,6 +13,7 @@ import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Optional;
 
@@ -74,11 +75,17 @@ public class UserConfig {
     }
 
     /**
-     * 登录token 加密的key 长度建议控制到 16位
+     * 登录token 签名(加密)的key，建议使用至少 32 位的随机字符串。
+     * 未配置时由 {@link org.dromara.jpom.util.JwtKeyUtil} 在首次启动时生成并持久化到数据目录。
      */
     private String tokenJwtKey;
 
     public byte[] getTokenJwtKeyByte() {
-        return StrUtil.emptyToDefault(this.tokenJwtKey, "KZQfFBJTW2v6obS1").getBytes();
+        if (StrUtil.isBlank(this.tokenJwtKey)) {
+            // 正常情况下 ServerConfig 初始化时会调用 JwtKeyUtil 写入密钥；
+            // 走到这里说明启动流程异常，直接失败而不是回退到公开固定密钥。
+            throw new IllegalStateException("JWT token key is not configured or not initialized");
+        }
+        return this.tokenJwtKey.getBytes(StandardCharsets.UTF_8);
     }
 }

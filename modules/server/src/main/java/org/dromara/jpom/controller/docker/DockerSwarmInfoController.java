@@ -146,6 +146,9 @@ public class DockerSwarmInfoController extends BaseDockerSwarmInfoController {
 
     @Override
     protected Map<String, Object> toDockerParameter(String id) {
+        // 校验集群是否属于当前工作空间，避免跨工作空间使用集群 id 操作别的集群
+        DockerSwarmInfoMode dockerSwarmInfoMode = dockerSwarmInfoService.getByKey(id, getRequest());
+        Assert.notNull(dockerSwarmInfoMode, I18nMessageUtil.get("i18n.cluster_not_exist.4098"));
         return machineDockerServer.dockerParameter(id);
     }
 }

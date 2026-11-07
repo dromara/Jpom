@@ -9,6 +9,11 @@
 # See the Mulan PSL v2 for more details.
 #
 
+# 兼容通过 sh xxx.sh 调用（脚本依赖 bash 语法）
+if [ -z "${BASH_VERSION:-}" ]; then
+  exec bash "$0" "$@"
+fi
+
 case "$(uname)" in
 Linux)
 	bin_abs_path=$(readlink -f "$(dirname "$0")")

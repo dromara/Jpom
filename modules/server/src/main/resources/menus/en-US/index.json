@@ -165,7 +165,8 @@
       },
       {
         "id": "netTools",
-        "title": "network tools"
+        "title": "network tools",
+        "role": "system"
       },
       {
         "id": "cronTools",

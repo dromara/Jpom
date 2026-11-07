@@ -43,7 +43,7 @@ public class DockerVolumeController extends BaseDockerVolumeController {
 
     @Override
     protected Map<String, Object> toDockerParameter(String id) {
-        DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id);
+        DockerInfoModel dockerInfoModel = dockerInfoService.getByKey(id, getRequest());
         Assert.notNull(dockerInfoModel, I18nMessageUtil.get("i18n.no_docker_info.d685"));
         MachineDockerModel machineDockerModel = machineDockerServer.getByKey(dockerInfoModel.getMachineDockerId());
         Assert.notNull(machineDockerModel, I18nMessageUtil.get("i18n.no_corresponding_docker_asset.6f06"));

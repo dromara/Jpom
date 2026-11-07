@@ -74,6 +74,11 @@ const children = [
     component: () => import('../pages/ssh/command-log.vue')
   },
   {
+    path: '/ftp',
+    name: 'node-ftp',
+    component: () => import('../pages/ftp/ftp.vue')
+  },
+  {
     path: '/dispatch/list',
     name: 'dispatch-list',
     component: () => import('../pages/dispatch/list.vue')
@@ -176,6 +181,11 @@ const management = [
     path: '/system/assets/ssh-list',
     name: 'system-machine-ssh-list',
     component: () => import('../pages/system/assets/ssh/ssh-list.vue')
+  },
+  {
+    path: '/system/assets/ftp-list',
+    name: 'system-machine-ftp-list',
+    component: () => import('../pages/system/assets/ftp/ftp-list.vue')
   },
   {
     path: '/system/assets/docker-list',

@@ -28,6 +28,7 @@ import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.ClusterConfig;
 import org.dromara.jpom.cron.CronUtils;
+import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.func.assets.server.MachineNodeServer;
 import org.dromara.jpom.func.assets.server.MachineSshServer;
@@ -198,8 +199,11 @@ public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implemen
             return;
         }
         // 所以工作空间自动绑定集群Id
-        String sql = "update " + workspaceService.getTableName() + " set clusterInfoId=?";
-        workspaceService.execute(sql, installId);
+        Entity entity = new Entity();
+        entity.set(DialectUtil.wrapField("clusterInfoId"), installId);
+        workspaceService.update(entity, Entity.create().set(DialectUtil.wrapField("createTimeMillis"), "> 0"));
+        //String sql = "update " + workspaceService.getTableName() + " set clusterInfoId=?";
+        //workspaceService.execute(sql, installId);
         // 获取所有的资产分组
         List<String> list = this.listLinkGroups();
         String join = CollUtil.join(list, StrUtil.COMMA);

@@ -9,14 +9,17 @@
  */
 package org.dromara.jpom.service.script;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
+import cn.hutool.db.Entity;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.keepbx.jpom.cron.ICron;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.cron.CronUtils;
+import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.model.script.ScriptExecuteLogModel;
 import org.dromara.jpom.model.script.ScriptModel;
 import org.dromara.jpom.model.user.UserModel;
@@ -40,7 +43,9 @@ public class ScriptServer extends BaseGlobalOrWorkspaceService<ScriptModel> impl
 
     @Override
     public List<ScriptModel> queryStartingList() {
-        String sql = "select * from " + super.getTableName() + " where autoExecCron is not null and autoExecCron <> ''";
+        String autoExecCron = DialectUtil.wrapField("autoExecCron");
+        String sql =StrUtil.format("select * from {} where {} is not null and {} <> ''",
+            super.getTableName(),autoExecCron,autoExecCron);
         return super.queryList(sql);
     }
 

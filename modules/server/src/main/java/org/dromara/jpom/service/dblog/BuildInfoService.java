@@ -9,15 +9,18 @@
  */
 package org.dromara.jpom.service.dblog;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.cron.task.Task;
 import cn.hutool.db.Entity;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.keepbx.jpom.cron.ICron;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.build.BuildExecuteService;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.cron.CronUtils;
+import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.enums.BuildReleaseMethod;
 import org.dromara.jpom.model.enums.BuildStatus;
@@ -107,15 +110,36 @@ public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> imple
      */
     @Override
     public List<BuildInfoModel> queryStartingList() {
-        String sql = "select * from " + super.getTableName() + " where autoBuildCron is not null and autoBuildCron <> ''";
+        String autoBuildCron = DialectUtil.wrapField("autoBuildCron");
+        String sql =StrUtil.format("select * from {} where {} is not null and {} <> ''",
+        super.getTableName(),autoBuildCron,autoBuildCron);
         return super.queryList(sql);
     }
 
-    @Override
+/*    @Override
     public int statusRecover() {
         // 恢复异常数据
         String updateSql = "update " + super.getTableName() + " set status=? where status=? or status=? or status=?";
         return super.execute(updateSql, BuildStatus.AbnormalShutdown.getCode(), BuildStatus.Ing.getCode(), BuildStatus.PubIng.getCode(), BuildStatus.WaitExec.getCode());
+    }*/
+
+    @Override
+    public int statusRecover() {
+        // 创建 Entity 对象并设置更新的字段和新值
+        Entity entity = Entity.create(super.getTableName());
+        entity.set("status", BuildStatus.AbnormalShutdown.getCode()); // 设置新状态为 AbnormalShutdown
+
+        // 创建条件 Entity 对象，模拟多个条件
+        Entity condition = Entity.create(super.getTableName())
+            // 状态为 Ing  或者状态为 PubIng 或者状态为 WaitExec
+            .set("status", CollUtil.newArrayList(
+                BuildStatus.Ing.getCode(),
+                BuildStatus.PubIng.getCode(),
+                BuildStatus.WaitExec.getCode())
+            );
+
+        return this.update(entity,condition);
+//        return super.execute(entity, condition);
     }
 
     /**
@@ -145,9 +169,13 @@ public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> imple
 
 
     public List<BuildInfoModel> hasResultKeep() {
-        //
-        String sql = "select * from " + super.getTableName() + " where resultKeepDay>0";
-        return super.queryList(sql);
+        Entity entity = Entity.create("BUILD_INFO");
+        entity.set("resultKeepDay", "> 0");
+        List<Entity> list = super.queryList(entity);
+
+        return list.stream()
+            .map(e -> e.toBean(BuildInfoModel.class))
+            .collect(Collectors.toList());
     }
 
     private static class CronTask implements Task {

@@ -81,6 +81,15 @@ export function scriptDel(params) {
   })
 }
 
+// 批量删除执行记录
+export function scriptBatchDel(params) {
+  return axios({
+    url: '/script_log/batch_del_log',
+    method: 'post',
+    data: params
+  })
+}
+
 //执行记录 详情
 export function scriptLog(params) {
   return axios({

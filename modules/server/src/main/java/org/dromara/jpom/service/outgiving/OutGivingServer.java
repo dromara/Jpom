@@ -9,6 +9,7 @@
  */
 package org.dromara.jpom.service.outgiving;
 
+import cn.hutool.db.Entity;
 import org.dromara.jpom.model.outgiving.OutGivingModel;
 import org.dromara.jpom.model.outgiving.OutGivingNodeProject;
 import org.dromara.jpom.service.IStatusRecover;
@@ -59,7 +60,12 @@ public class OutGivingServer extends BaseWorkspaceService<OutGivingModel> implem
     @Override
     public int statusRecover() {
         // 恢复异常数据
-        String updateSql = "update " + super.getTableName() + " set status=? where status=?";
-        return super.execute(updateSql, OutGivingModel.Status.DONE.getCode(), OutGivingModel.Status.ING.getCode());
+        Entity entity = Entity.create(super.getTableName());
+        String statusField = "status";
+        entity.set(statusField, OutGivingModel.Status.DONE.getCode());
+
+        Entity condition = Entity.create(super.getTableName());
+        condition.set(statusField, OutGivingModel.Status.ING.getCode());
+        return super.update(entity, condition);
     }
 }

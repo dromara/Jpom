@@ -16,6 +16,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.keepbx.jpom.model.JsonMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.ClientIpUtil;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.data.SystemIpConfigModel;
 import org.dromara.jpom.service.system.SystemParametersServer;
@@ -45,32 +46,96 @@ public class IpInterceptor implements HandlerMethodInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
-        String clientIp = ServletUtil.getClientIP(request);
-        if (StrUtil.equals(NetUtil.LOCAL_IP, clientIp) || !Validator.isIpv4(clientIp)) {
-            // 本地 或者 非 ipv4 直接放开
+        String clientIp = ClientIpUtil.resolve(request);
+        if (this.isLoopback(clientIp)) {
+            // 本地回环请求始终放行（保留原有行为）
             return true;
         }
-        SystemIpConfigModel config = systemParametersServer.getConfig(SystemIpConfigModel.ID, SystemIpConfigModel.class);
+        SystemIpConfigModel config;
+        try {
+            config = systemParametersServer.getConfig(SystemIpConfigModel.ID, SystemIpConfigModel.class);
+        } catch (Exception e) {
+            // 配置读取异常：无法确认访问限制，按 fail-closed 处理
+            log.error(I18nMessageUtil.get("i18n.ip_authorization_interception_exception.8130"), e);
+            this.writeProhibition(response);
+            return false;
+        }
         if (config == null) {
             return true;
         }
         // 判断不允许访问
         String prohibited = config.getProhibited();
+        String allowed = config.getAllowed();
         try {
-            if (StrUtil.isNotEmpty(prohibited) && this.checkIp(prohibited, clientIp, false)) {
-                ServletUtil.write(response, JsonMessage.getString(IP_ACCESS_CODE, "Prohibition of access"), MediaType.APPLICATION_JSON_VALUE);
+            if (!this.isIpv4(clientIp)) {
+                // 黑白名单配置目前只支持 IPv4：非 IPv4（IPv6/非法转发头）无法匹配。
+                // 为避免“伪造 IPv6/非法 X-Forwarded-For 即整体绕过白名单”，存在白名单限制时直接拒绝；
+                // 仅配置黑名单（allowed 为空）时保持原放行语义，避免锁死 IPv6 部署。
+                if (StrUtil.isEmpty(allowed) || this.isAllowAll(allowed)) {
+                    return true;
+                }
+                log.warn("ip access denied, non-ipv4 client ip: {}", clientIp);
+                this.writeProhibition(response);
                 return false;
             }
-            String allowed = config.getAllowed();
+            if (StrUtil.isNotEmpty(prohibited) && this.checkIp(prohibited, clientIp, false)) {
+                this.writeProhibition(response);
+                return false;
+            }
             if (StrUtil.isEmpty(allowed) || this.checkIp(allowed, clientIp, true)) {
                 return true;
             }
         } catch (Exception e) {
-            log.warn(I18nMessageUtil.get("i18n.ip_authorization_interception_exception.8130"), e);
-            return true;
+            // 配置解析异常：存在访问限制配置时按 fail-closed 处理
+            log.error(I18nMessageUtil.get("i18n.ip_authorization_interception_exception.8130"), e);
+            this.writeProhibition(response);
+            return false;
         }
-        ServletUtil.write(response, JsonMessage.getString(IP_ACCESS_CODE, "Prohibition of access"), MediaType.APPLICATION_JSON_VALUE);
+        this.writeProhibition(response);
         return false;
+    }
+
+    private boolean isIpv4(String ip) {
+        return StrUtil.isNotBlank(ip) && Validator.isIpv4(ip);
+    }
+
+    /**
+     * 是否本地回环地址（兼容 IPv6 的等价写法）
+     *
+     * @param ip ip
+     * @return true 本地回环
+     */
+    private boolean isLoopback(String ip) {
+        if (StrUtil.isBlank(ip)) {
+            return false;
+        }
+        return StrUtil.equals("127.0.0.1", ip)
+            || StrUtil.equals("::1", ip)
+            || StrUtil.equals("0:0:0:0:0:0:0:1", ip);
+    }
+
+    /**
+     * 白名单是否配置了“全部放行”（0.0.0.0）
+     *
+     * @param allowed 白名单配置
+     * @return true 全部放行
+     */
+    private boolean isAllowAll(String allowed) {
+        String[] split = StrUtil.splitToArray(allowed, StrUtil.LF);
+        for (String itemIp : split) {
+            itemIp = itemIp.trim();
+            if (itemIp.startsWith("#")) {
+                continue;
+            }
+            if (StrUtil.equals(itemIp, "0.0.0.0")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void writeProhibition(HttpServletResponse response) {
+        ServletUtil.write(response, JsonMessage.getString(IP_ACCESS_CODE, "Prohibition of access"), MediaType.APPLICATION_JSON_VALUE);
     }
 
 

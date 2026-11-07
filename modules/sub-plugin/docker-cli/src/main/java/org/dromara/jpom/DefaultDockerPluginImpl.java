@@ -374,6 +374,7 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
         File baseDirectory = (File) parameter.get("baseDirectory");
         String tags = (String) parameter.get("tags");
         String buildArgs = (String) parameter.get("buildArgs");
+        String networkMode = (String) parameter.get("networkMode");
         Object pull = parameter.get("pull");
         Object noCache = parameter.get("noCache");
         String labels = (String) parameter.get("labels");
@@ -389,6 +390,9 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
                 .withDockerfile(dockerfile)
                 .withBuildAuthConfigs(authConfigurations)
                 .withTags(CollUtil.newHashSet(StrUtil.splitTrim(tags, StrUtil.COMMA)));
+            if (StrUtil.isNotEmpty(networkMode)){
+                buildImageCmd.withNetworkMode(networkMode);
+            }
             // 添加构建参数
             UrlQuery query = UrlQuery.of(buildArgs, CharsetUtil.CHARSET_UTF_8);
             query.getQueryMap()

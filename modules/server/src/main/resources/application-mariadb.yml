@@ -10,7 +10,7 @@
 
 jpom:
   db:
-    # 数据库默认 支持 ：H2、MYSQL、MARIADB、POSTGRESQL
+    # 数据库默认 支持 ：H2、MYSQL、MARIADB、POSTGRESQL、DAMENG
     mode: MARIADB
     url: jdbc:mariadb://127.0.0.1:3309/jpom
     # 数据库账号 默认 jpom
