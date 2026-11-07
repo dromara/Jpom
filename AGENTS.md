@@ -14,7 +14,7 @@
   3. **没有明确授权时，不要执行任何发版动作**：不要上传制品到 R2（下载中心已全面使用 Cloudflare R2，阿里云 OSS 已停用）、不要推送 Docker 镜像、不要打 tag、不要创建 Gitee Release、不要发布文档站。第 6 节流程仅用于理解与授权后执行。
   4. 不要提交构建产物与本地工具文件：`target/`、`dist/`、`*.bak`、`pom.xml.versionsBackup`、`*.zip`、`*.tar.gz`、`*.sha1`、`.tmp/`、`awscliv2.zip`、`ossutil-*/`、`node_modules/`，以及 `*.pem`、`*.key` 等密钥/证书文件。
   5. **每次提交、推送前都必须做敏感信息检查**（开源仓库）：不得提交真实密码、Token、密钥、证书、内网地址和用户隐私数据。提交前运行 `bash script/check-sensitive.sh --all`，推送前加上 `--range <基线>..HEAD`，详见第 8 节。
-  6. **GitHub 是 Gitee 的自动镜像（代码/分支/tag 只读），但 Release 不会自动同步**：主仓库在 Gitee（`gitee.com/dromara/Jpom`），Gitee 收到推送后会自动镜像代码与 tag 到 GitHub（`github.com/dromara/Jpom`）。**代码提交、推送、PR、tag 一律只对 Gitee 操作**；**GitHub Release 是唯一例外**——Gitee 镜像不会生成 GitHub Release，必须在 Gitee Release 创建后手动创建（推荐用 `script/release-post.sh` 自动完成，见 6.2 第 12 步）。
+  6. **GitHub 是 Gitee 的自动镜像（代码/分支/tag 只读），但 Release 不会自动同步**：主仓库在 Gitee（`gitee.com/dromara/Jpom`），Gitee 收到推送后会自动镜像代码与 tag 到 GitHub（`github.com/dromara/Jpom`）。**代码提交、推送、PR、tag 一律只对 Gitee 操作**；**GitHub Release 与经维护者明确授权的安全事件响应（issue 回复/关闭、仓库级 Security Advisory）是例外**——Gitee 镜像不会生成 GitHub Release，必须在 Gitee Release 创建后手动创建（推荐用 `script/release-post.sh` 自动完成，见 6.2 第 12 步）；安全事件响应需逐次授权并记录，仍禁止代码/PR/tag 写入。
   7. **文档记录规则（开发文档 → `dev-docs/`，用户文档 → `docs/`）**：**开发过程中的一切产出（需求/方案、代码分析、审计、验证与回归、排障、技术决策、issue/PR 处理记录、AI 会话结论、环境信息、操作手册）都必须记录到工作区独立文档库 `dev-docs/`**（独立私有 git 仓库，不提交到本仓，规则见 `dev-docs/README.md`）；只有**用户需要学习/操作**的必要文档（功能使用说明、安装/升级/配置操作、FAQ、必要的技术说明，以及发版必须更新的版本号/更新日志/下载页）才更新到 `docs/`（jpom-docs）。`.tmp/`、`jpom-parent/.tmp/` 只放**可随时删除**的产物，**不得作为唯一副本**，任务收尾必须迁移/归档。判断方法与收尾清单见第 9 节。
 
 ## 1. 项目概览
@@ -72,11 +72,11 @@ git -C docs checkout main
 | 远程 | 地址 | 用途 |
 | --- | --- | --- |
 | Gitee（`origin`） | `gitee.com/dromara/Jpom` | **主仓库，唯一的代码推送目标** |
-| GitHub | `github.com/dromara/Jpom` | Gitee 自动镜像的**只读**仓库，不要 push/PR/tag/Release |
+| GitHub | `github.com/dromara/Jpom` | Gitee 自动镜像的**只读**仓库；代码/分支/tag 不写，**Release 与经授权的安全响应（issue/GHSA）例外**（见 §0.6） |
 | `jpom-docs`（docs 子模块） | `github.com/bwcx-jzy/jpom-docs` | 独立的文档站仓库，按 3.2 的文档流程操作（不属于 Jpom 主仓镜像） |
 
 - `git push` 只推 Gitee（如 `git push origin dev` / `git push gitee dev`，远程名以本地配置为准）；**不要** `git push github ...`。
-- 不要在 GitHub 上提 PR / Issue / Release / tag；GitHub 上的内容会在 Gitee 推送后由镜像自动同步。
+- 不要在 GitHub 上提 PR 或创建 tag；**GitHub Release 与经维护者授权的安全响应（issue 回复/关闭、仓库级 GHSA）例外**（见 §0.6）；代码内容由 Gitee 推送后镜像自动同步。
 - 历史脚本 `jpom-parent/script/push.bat` 会向 gitee、github 双远程推送，**已不符合当前流程**，不要使用其中的 GitHub 推送部分。
 
 ## 3. 分支体系与用法
@@ -118,7 +118,7 @@ git -C docs checkout main
   ```
 
 - 提交 PR 即视为签署 [CLA.md](jpom-parent/CLA.md)；请同时遵守 `CODE_OF_CONDUCT.md`。
-- **主仓在 Gitee（`gitee.com/dromara/Jpom`），GitHub（`github.com/dromara/Jpom`）是 Gitee 自动镜像的只读仓库**：fork、分支、PR 全在 Gitee 上操作，PR 目标为 Gitee 的 `dev` 分支；不要向 GitHub 提 PR、推送代码、创建 tag 或 Release。
+- **主仓在 Gitee（`gitee.com/dromara/Jpom`），GitHub（`github.com/dromara/Jpom`）是 Gitee 自动镜像的只读仓库**：fork、分支、PR 全在 Gitee 上操作，PR 目标为 Gitee 的 `dev` 分支；不要向 GitHub 提 PR、推送代码、创建 tag。**GitHub Release 与经维护者授权的安全响应（issue 回复/关闭、仓库级 GHSA）例外**，见 §0.6、§6.2 第 12 步。
 - 历史脚本 `jpom-parent/script/push.bat` 会向 gitee、github 双远程推送并双向合并 `dev`/`master`，**已过时**；当前只需要推送 Gitee，GitHub 由镜像自动同步。
 
 ### 3.2 文档仓库 `docs/`（jpom-docs）
@@ -459,7 +459,7 @@ bash script/check-sensitive.sh --all --range origin/dev..HEAD
 ```
 
 - Issue / PR / Release 描述、附件、截图中同样不得包含真实凭据与隐私信息。
-- 推送目标只能是 **Gitee**；GitHub 会在 Gitee 推送后由镜像自动同步，**不要**手动 `git push github`、提 GitHub PR 或创建 GitHub tag/Release。
+- 推送目标只能是 **Gitee**；GitHub 会在 Gitee 推送后由镜像自动同步，**不要**手动 `git push github`、提 GitHub PR 或创建 GitHub tag/Release。**安全事件响应中的 GitHub issue 回复/关闭、仓库级 GHSA 写操作需维护者逐次授权并记录，仍禁止代码/PR/tag 写入。**
 - 不要用 `git push --force` 掩盖已泄露提交（reflog、镜像、缓存仍可能恢复）；正确做法是轮换凭据（见 8.6）。
 
 ### 8.5 测试与示例数据
@@ -538,7 +538,7 @@ bash script/check-sensitive.sh --all --range origin/dev..HEAD
 - **`.tmp/` 不是文档仓库**：`.tmp/`、`jpom-parent/.tmp/` 只用于可丢弃的临时产物；开发过程记录、环境信息和操作手册写 `dev-docs/`（第 0 节第 7 条、第 9 节），任务结束前迁移/归档并提交，避免 `.tmp` 被清理后文档丢失。
 - **jpom-docs 不是开发文档仓库**：`docs/` 只放用户需要学习/操作的必要文档；开发过程记录、内部环境、审计与未修复漏洞细节禁止进入 `docs/`（第 9 节）。
 - **敏感信息检查**：提交前运行 `bash script/check-sensitive.sh --all`，推送前加上 `--range <基线>..HEAD`；`.gitignore` 已忽略密钥类文件与本地临时文件，禁止用 `git add -f` 绕过（详见第 8 节）。
-- **GitHub 只读（Release 除外）**：主仓在 Gitee，GitHub 是 Gitee 自动镜像；不要直接向 GitHub 提交/推送/开 PR、不要配置 GitHub 推送 remote，`push.bat` 里的 GitHub 推送部分已过时。**但 GitHub Release 不会被镜像同步**，发版时必须手动创建（用 `script/release-post.sh`）。
+- **GitHub 只读（Release 与授权安全响应除外）**：主仓在 Gitee，GitHub 是 Gitee 自动镜像；不要直接向 GitHub 提交/推送/开 PR、不要配置 GitHub 推送 remote，`push.bat` 里的 GitHub 推送部分已过时。**但 GitHub Release 不会被镜像同步**，发版时必须手动创建（用 `script/release-post.sh`）；安全事件响应中的 issue/GHSA 写操作需单独授权并留记录。
 - **发版慢的常见原因**：本地 Maven 偶发坏包导致重复构建、手工 UI 验证串行、R2 单线程上传、Docker Hub 网络排障、发布后置/通知手工操作。优化：候选构建一次通过、UI 验证并行、R2 调优（已默认）、`--with-post` 自动发布后置；完整分析见 `dev-docs/runbooks/release-flow-timeline-and-optimization.md`。
 - **Docker Hub 国内网络**：`auth.docker.io` DNS 污染 + BuildKit token 不走代理会导致 push 失败；按 `dev-docs/runbooks/docker-hub-push-cn.md` 处理（私有 mihomo + 本地 mirror + crane 客户端推送）。
 - **构建 JDK**：请使用 JDK 8；更高版本 JDK 可能因老版本 maven 插件/编译参数失败。
