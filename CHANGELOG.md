@@ -1,5 +1,54 @@
 # 🚀 版本日志
 
+## 2.11.13-release (2026-11-07)
+
+### 🐣 新增功能
+
+1. 【server】新增 数据库支持使用达梦数据库（感谢[@wxyShine](https://gitee.com/wxyShine) ）
+2. 【server】新增 FTP 管理，文件查看和构建发布方式新增 FTP 支持
+3. 【server】新增 差异构建支持配置监听路径、排除路径（Ant 风格通配），仅当变更文件匹配规则时才触发构建（感谢@凉拌西瓜 [Gitee pr 295](https://gitee.com/dromara/Jpom/pulls/295) ）
+4. 【server】新增 项目文件列表支持分页展示，可切换每页条数（感谢@Justubborn [Gitee pr 294](https://gitee.com/dromara/Jpom/pulls/294) ）
+5. 【server】新增 容器构建 java 插件支持 JDK 21、25（#114）
+6. 【server】新增 仓库导入支持 GitLab 私人令牌方式，可直接使用 token 拉取项目（[Gitee issues I9AZSS](https://gitee.com/dromara/Jpom/issues/I9AZSS)）
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】优化 数据库表支持配置前缀 `jpom.db.table-prefix` （感谢@ccx2480）
+2. 【server】修复 终端输入命令，按Backspace 会退出终端（感谢[@dgs](https://gitee.com/dgs0924) [Gitee issues ICA57K](https://gitee.com/dromara/Jpom/issues/ICA57K) ）
+3. 【server】优化 脚本日志和 SSH 命令日志支持批量删除（感谢[@lin_yeqi](https://gitee.com/lin_yeqi) [Gitee issues IBIM6W](https://gitee.com/dromara/Jpom/issues/IBIM6W) ）
+4. 【server】修复 表格自定义列在部分字段不生效情况
+5. 【server】优化 构建发布方式中 Docker 镜像支持配置网络模式（感谢@酱总）
+6. 【server】修复 跨工作空间越权访问问题：Docker、SSH 命令、构建仓库、SSH/FTP 文件、监控、节点项目与节点分发等接口未校验资产所属工作空间（#115 #119 #120，CVE-2026-91993、CVE-2026-111605）
+7. 【server】修复 用户身份校验（checkUser）将入参解析为查询条件，可能被利用匹配任意用户的越权风险（#121，CVE-2026-120201）
+8. 【server】修复 系统初始化接口缺少用户名、密码参数校验，可能被绕过初始化的问题
+9. 【server】修复 数据库查询条件注入风险：主键条件以及分页过滤、排序字段统一使用占位符绑定和字段名白名单校验
+10. 【all】升级 Tomcat 9.0.123、JGit、BouncyCastle、commons-lang3 等依赖，修复已知安全漏洞（#118；#116 已评估为不受影响）
+11. 【all】优化 下载中心域名由 `d.jpom.download` 切换为 `d2.jpom.download`
+12. 【server】优化 节点监控异常通知内容不再包含完整异常堆栈，仅保留错误信息，减少正式环境无效日志（感谢@Robot [Gitee pr 293](https://gitee.com/dromara/Jpom/pulls/293) ）
+13. 【server】修复 JWT 签名密钥未配置时回退到源码公开固定值的问题：现在首次启动自动生成随机密钥并持久化到 `<data>/.jwt-key`（权限 600），空白配置也视为未配置；建议显式配置至少 32 位随机 `jpom.user.token-jwt-key`
+14. 【server】修复 客户端可通过伪造 `X-Forwarded-For` / `X-Real-IP` 绕过 IP 白名单和登录 IP 失败锁定的问题：新增可信代理配置 `jpom.web.trusted-proxies`（默认仅信任本机回环），统一 IP 解析并在存在 IPv4 白名单时拒绝非 IPv4 客户端
+15. 【agent】修复 Agent 未配置授权密码时把自动生成的明文密码写入日志的问题：日志不再输出密码，`data/agent_authorize.json` 权限收紧为 600
+16. 【server】修复 `/tools/net-ping`、`/tools/net-telnet`、`/tools/ip-list` 缺少功能权限、任意登录用户可做服务端网络探测和网卡信息读取的问题：现在要求系统管理员权限，并限制端口/超时、增加操作日志；普通用户仍可使用 Cron 工具
+17. 【server】修复 登录验证码可被空串绕过、账号不存在与密码错误返回码不同导致账号枚举的问题：验证码校验前移并改为一次性、5 分钟有效，账号不存在与密码错误统一返回 501
+18. 【all】升级 fastjson2 及 fastjson1 兼容包到 2.0.66，修复 fastjson2 AutoType 哈希碰撞绕过导致的远程代码执行风险（影响 fastjson2 ≤2.0.62，QVD-2026-45876；openapi 批量接口在鉴权前会解析请求体）
+19. 【all】修复 后端参数校验失败时直接返回 i18n key 未翻译的问题（例如节点注册接口 `workspaceId` 为空时会提示 `i18n.workspace_id_required.c967`），现在按请求语言返回提示文案
+20. 【all】优化 补全后端 i18n 遗漏：构建差异检查、JWT 密钥、可信代理、数据库初始化/备份/导入、达梦列 SQL 长度、节点注册错误等 31 处提示与日志支持多语言（新增/补登记 19 个 key，同步 4 种语言），并修正登录验证码提示 key 未登记 words.json、后缀不符合规范的问题
+21. 【all】修复 管理脚本通过 `sh xxx.sh` 调用时报语法错误的问题，脚本自动切换到 bash 执行（[Gitee issues IC20RL](https://gitee.com/dromara/Jpom/issues/IC20RL) ）
+22. 【server】修复 终端在空命令行按退格、方向键等按键时数组越界的问题（#109）
+23. 【server】优化 容器构建 runsOn 镜像构建失败时输出明确错误并中断构建，避免后续流程只报 `404 No such image`（#103）
+24. 【server】修复 构建产物目录配置为绝对路径时构建列表接口 500 的问题（[Gitee issues IA6VM8](https://gitee.com/dromara/Jpom/issues/IA6VM8) ）
+25. 【server】优化 构建记录仓库提交说明字段长度加宽至 1000，避免较长提交信息写入失败（[Gitee issues ID35HQ](https://gitee.com/dromara/Jpom/issues/ID35HQ) ）
+26. 【server】修复 构建配置别名缺少规则校验提示的问题（[Gitee issues IBI5AF](https://gitee.com/dromara/Jpom/issues/IBI5AF) ）
+27. 【server】修复 权限组工作空间穿梭窗勾选计数错误的问题（[Gitee issues IBHK0I](https://gitee.com/dromara/Jpom/issues/IBHK0I) ）
+
+### ⚠️ 升级说明
+
+1. 未配置 `jpom.user.token-jwt-key` 的部署升级后会自动生成 `<data>/.jwt-key`，旧登录 token 将失效，用户需要重新登录；集群部署请为所有节点显式配置相同的 key。
+2. 反向代理不在本机时，请将代理地址配置到 `jpom.web.trusted-proxies`，否则 IP 白名单和登录 IP 锁定将看到代理 IP（这是安全收紧，不是故障）。
+3. `/tools/net-ping`、`/tools/net-telnet`、`/tools/ip-list` 现在仅系统管理员可访问，普通用户菜单会隐藏；验证码失败或过期后需要重新获取。
+
+------
+
 ## 2.11.12-release (2025-05-06)
 
 ### 🐣 新增功能
