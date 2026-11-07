@@ -55,6 +55,8 @@
 #       --force-upload       同版本覆盖上传 R2（注意 Cloudflare 缓存）
 #       --deep-verify        R2 上传后从下载中心逐字节回验
 #       --with-docker        构建并推送 Docker 镜像
+#       --with-post          发布后自动创建 Gitee/GitHub Release 并发送微信群通知（stable）
+#       --no-post            不执行发布后置步骤（默认）
 #       --docker-platforms   默认 linux/amd64,linux/arm64
 #       --offline            Maven 使用离线模式
 #       --keep-temp          保留冒烟临时目录
@@ -120,6 +122,7 @@ PUSH=1
 UPLOAD=1
 DOCS=1
 DOCKER=0
+POST=0
 FORCE_UPLOAD=0
 DEEP_VERIFY=0
 KEEP_TEMP=0
@@ -251,6 +254,14 @@ while [ "$#" -gt 0 ]; do
 	--docker-platforms)
 		DOCKER_PLATFORMS_OPT=$(arg_value "$1" "${2:-}")
 		shift 2
+		;;
+	--with-post)
+		POST=1
+		shift
+		;;
+	--no-post)
+		POST=0
+		shift
 		;;
 	--offline)
 		OFFLINE=1
@@ -781,6 +792,12 @@ phase_preflight() {
 	if [ "$DOCKER" = "1" ] && phase_will_run docker; then
 		need_cmd docker
 		docker buildx version >/dev/null 2>&1 || die "docker buildx 不可用"
+	fi
+	if [ "$POST" = "1" ] && phase_will_run post; then
+		need_cmd curl
+		[ -f "${ROOT_DIR}/script/release-post.sh" ] || die "缺少 script/release-post.sh"
+		command -v gh >/dev/null 2>&1 || warn "未安装 gh：GitHub Release 步骤会被跳过（见 script/release-post.sh 说明）"
+		command -v secret-tool >/dev/null 2>&1 || warn "未安装 secret-tool：Gitee 令牌需用 GITEE_TOKEN 环境变量提供"
 	fi
 
 	git_clean_or_die "$PARENT_DIR" "jpom-parent"
@@ -1749,6 +1766,26 @@ phase_docker() {
 }
 
 # ---------------------------------------------------------------------------
+# 发布后置步骤（stable）：Gitee Release / GitHub Release / 微信群通知
+# ---------------------------------------------------------------------------
+phase_post() {
+	if [ "$POST" = "0" ]; then
+		log "未启用发布后置步骤（--with-post 可自动创建 Gitee/GitHub Release 并发送微信群通知）"
+		return 0
+	fi
+	if [ "$MODE" != "release" ]; then
+		log "beta 跳过发布后置步骤（beta 无 tag/Release）"
+		return 0
+	fi
+	section "发布后置步骤（Gitee/GitHub Release + 微信群通知）"
+	[ -f "${ROOT_DIR}/script/release-post.sh" ] || die "缺少 script/release-post.sh"
+	confirm "确认创建 Gitee/GitHub Release 并发送微信群通知（--no-post 可跳过）？"
+	if ! bash "${ROOT_DIR}/script/release-post.sh" release --version "${VERSION}" --yes; then
+		die "发布后置步骤失败；修复后可单独重跑：bash script/release-post.sh release --version ${VERSION} --yes"
+	fi
+}
+
+# ---------------------------------------------------------------------------
 # 收尾
 # ---------------------------------------------------------------------------
 phase_finish() {
@@ -1770,6 +1807,7 @@ phase_finish() {
  R2       : $( [ "$UPLOAD" = "1" ] && echo "https://d2.jpom.download/${MODE}/${VERSION}/" || echo "未上传" )
  文档     : $( [ "$DOCS" = "1" ] && echo "已提交/推送 docs main" || echo "未更新" )
  Docker   : $( [ "$DOCKER" = "1" ] && echo "已推送" || echo "未构建" )
+ 后置步骤 : $( [ "$POST" = "1" ] && echo "已执行（Gitee/GitHub Release + 群通知）" || echo "未执行（--with-post 可自动执行）" )
  日志     : ${LOG_DIR}/release.log
 ----------------------------------------------------------------
 
@@ -1778,8 +1816,9 @@ EOF
 	if [ "$MODE" = "release" ]; then
 		cat <<EOF
 1. 在旧版本服务端验证“在线升级”到 ${VERSION}（包来自 https://d2.jpom.download/release/${VERSION}/）
-2. 在 Gitee 基于 tag ${TAG} 创建发行版，上传 server/agent 的 zip/tar.gz 与 .sha1
-3. 如需发版公告，按维护者流程发布
+2. 如未用 --with-post：创建 Gitee/GitHub Release 并发送微信群通知
+     bash script/release-post.sh release --version ${VERSION} --yes
+3. Docker 镜像如未用 --with-docker：按 dev-docs/runbooks/docker-hub-push-cn.md 手工推送
 EOF
 	else
 		cat <<EOF
@@ -1793,7 +1832,7 @@ EOF
 # ---------------------------------------------------------------------------
 # 主流程
 # ---------------------------------------------------------------------------
-PHASES=(preflight merge changelog version build verify smoke commit push upload docs docker finish)
+PHASES=(preflight merge changelog version build verify smoke commit push upload docs docker post finish)
 
 phase_index() {
 	local target=$1

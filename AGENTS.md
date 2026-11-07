@@ -14,7 +14,7 @@
   3. **没有明确授权时，不要执行任何发版动作**：不要上传制品到 R2（下载中心已全面使用 Cloudflare R2，阿里云 OSS 已停用）、不要推送 Docker 镜像、不要打 tag、不要创建 Gitee Release、不要发布文档站。第 6 节流程仅用于理解与授权后执行。
   4. 不要提交构建产物与本地工具文件：`target/`、`dist/`、`*.bak`、`pom.xml.versionsBackup`、`*.zip`、`*.tar.gz`、`*.sha1`、`.tmp/`、`awscliv2.zip`、`ossutil-*/`、`node_modules/`，以及 `*.pem`、`*.key` 等密钥/证书文件。
   5. **每次提交、推送前都必须做敏感信息检查**（开源仓库）：不得提交真实密码、Token、密钥、证书、内网地址和用户隐私数据。提交前运行 `bash script/check-sensitive.sh --all`，推送前加上 `--range <基线>..HEAD`，详见第 8 节。
-  6. **GitHub 是 Gitee 的自动镜像，只读**：主仓库在 Gitee（`gitee.com/dromara/Jpom`），Gitee 收到推送后会自动镜像到 GitHub（`github.com/dromara/Jpom`）。**代码提交、推送、PR、tag、Release 一律只对 Gitee 操作；禁止直接向 GitHub 提交、推送、提 PR 或做任何写操作。**
+  6. **GitHub 是 Gitee 的自动镜像（代码/分支/tag 只读），但 Release 不会自动同步**：主仓库在 Gitee（`gitee.com/dromara/Jpom`），Gitee 收到推送后会自动镜像代码与 tag 到 GitHub（`github.com/dromara/Jpom`）。**代码提交、推送、PR、tag 一律只对 Gitee 操作**；**GitHub Release 是唯一例外**——Gitee 镜像不会生成 GitHub Release，必须在 Gitee Release 创建后手动创建（推荐用 `script/release-post.sh` 自动完成，见 6.2 第 12 步）。
   7. **文档记录规则（开发文档 → `dev-docs/`，用户文档 → `docs/`）**：**开发过程中的一切产出（需求/方案、代码分析、审计、验证与回归、排障、技术决策、issue/PR 处理记录、AI 会话结论、环境信息、操作手册）都必须记录到工作区独立文档库 `dev-docs/`**（独立私有 git 仓库，不提交到本仓，规则见 `dev-docs/README.md`）；只有**用户需要学习/操作**的必要文档（功能使用说明、安装/升级/配置操作、FAQ、必要的技术说明，以及发版必须更新的版本号/更新日志/下载页）才更新到 `docs/`（jpom-docs）。`.tmp/`、`jpom-parent/.tmp/` 只放**可随时删除**的产物，**不得作为唯一副本**，任务收尾必须迁移/归档。判断方法与收尾清单见第 9 节。
 
 ## 1. 项目概览
@@ -102,7 +102,7 @@ git -C docs checkout main
 ```
 
 - `RELEASE.md`「手动版」第 1 步写的是“将 dev 分支合并到 master”，即允许跳过 beta 直接发稳定版；实际以维护者当次选择为准。
-- 远程操作只有 Gitee：提交、推送、tag、PR、Release 都不要直接对 GitHub 做（GitHub 由 Gitee 自动镜像），详见第 2 节“远程与镜像”。
+- 远程操作只有 Gitee：提交、推送、tag、PR 都不要直接对 GitHub 做（GitHub 由 Gitee 自动镜像）；**Release 例外**：Gitee Release 创建后需手动创建 GitHub Release（推荐 `script/release-post.sh`），详见第 2 节“远程与镜像”。
 - 功能分支从 `dev` 切出，命名可参考历史（`dev-ftp1`、`i18n`、`pipeline` 等），合并回 `dev` 后删除。
 - 贡献者典型操作流：
 
@@ -178,8 +178,10 @@ git -C docs checkout main
 | 下载中心 | `https://d2.jpom.download`（Cloudflare R2 托管）；稳定版路径 `release/<version>/`，beta 路径 `beta/<version>/` |
 | 上传工具 | 根目录 `script/deploy-release-r2.sh`（rclone remote `r2`，bucket `jpom-releases-apac`） |
 | 历史 OSS | 已停用（阿里云 AK 已禁用）；旧上传脚本 `deploy-release-oss.sh` 已删除，仅 git 历史可查 |
-| Docker Hub | `jpomdocker/jpom:<version>` 与 `:latest`（稳定版）；beta 镜像按需构建 |
-| Gitee Release | 基于 tag `v2.x.y` 创建发行版，附安装包与 sha1；GitHub 由 Gitee 自动镜像，不手动操作 |
+| Docker Hub | `jpomdocker/jpom:<version>` 与 `:latest`、`jpomdocker/jpom-agent:<version>`（稳定版）；beta 镜像按需构建。国内网络推送步骤见 `dev-docs/runbooks/docker-hub-push-cn.md` |
+| Gitee Release | 基于 tag `v2.x.y` 创建发行版，附 server/agent 的 zip/tar.gz 与 sha1 |
+| GitHub Release | **需手动创建**（Gitee 镜像只同步代码/tag，不同步 Release）；用 `script/release-post.sh` 自动创建，正文同 Gitee 发行说明 |
+| 微信群发版通知 | 稳定版发布后向 7 个 Jpom 群发送（skill `jpom-release-notify`；也可用 `script/release-post.sh`）；默认不 @所有人、不发朋友圈 |
 
 Dockerfile 对应关系：`modules/server/DockerfileRelease`（稳定版）、`DockerfileReleaseJdk17`（JDK17 变体）、`DockerfileBeta`、`DockerfileBetaJdk17`；插件端 `modules/agent/DockerfileRelease`、`DockerfileBeta`。
 
@@ -233,7 +235,8 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
   2. 运行版本替换脚本 + 打包 + 冒烟；
   3. `commit release <version>` / `commit beta <version>` —— 版本号提交。
 - 开始前：各子模块在预期分支、`git status` 干净、无遗留 `*.bak`。
-- **优先使用一键脚本 `script/release.sh`（见 6.6）**：它已包含合并、CHANGELOG 日期、版本替换、构建、产物校验、启动冒烟、推送、R2、docs 与可选 Docker；本文手动步骤保留用于排障与理解流程。
+- **优先使用一键脚本 `script/release.sh`（见 6.6）**：它已包含合并、CHANGELOG 日期、版本替换、构建、产物校验、启动冒烟、推送、R2、docs 与可选 Docker/发布后置（Gitee/GitHub Release + 群通知）；本文手动步骤保留用于排障与理解流程。
+- **发版耗时**：2026-11-07 2.11.13 实测全流程约 5~6 小时（含三次候选重建、手工 23 项 UI 验证、R2 上传 36 分钟、Docker 网络排障）。瓶颈与优化方案见 `dev-docs/runbooks/release-flow-timeline-and-optimization.md`；并行化 + `--with-post` + R2 调优后目标约 1.5~2 小时。
 
 ### 6.2 稳定版发版（手动版，按 `RELEASE.md` 整理）
 
@@ -289,10 +292,23 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
     docker buildx build --platform linux/amd64,linux/arm64 \
       -t jpomdocker/jpom:2.x.y -t jpomdocker/jpom:latest \
       -f ./modules/server/DockerfileRelease --push .
+    # agent 同理（jpomdocker/jpom-agent），或用 --with-docker 交给 release.sh
     ```
 
-12. **创建发行版**：在 **Gitee** 基于 tag `v2.x.y` 创建 Release，上传 server/agent 安装包与 sha1。**不要到 GitHub 手动创建 Release/tag**，GitHub 内容由 Gitee 镜像自动同步。
-13. **可选**：发布发版公告。
+    > 国内网络下 `auth.docker.io`/`registry-1.docker.io` 可能因 DNS 污染与 BuildKit token 直连失败而推送失败；处置步骤（私有 mihomo 实例 + 本地 pull-through mirror + crane 客户端推送）见 `dev-docs/runbooks/docker-hub-push-cn.md`。
+
+12. **创建发行版（Gitee + GitHub）并发送群通知**：
+
+    ```bash
+    # 一次性完成：Gitee Release（创建+上传 8 个附件）→ GitHub Release（Latest）→ 微信群通知
+    bash script/release-post.sh release --version 2.x.y --yes
+    ```
+
+12.1 **Gitee Release**：基于 tag `v2.x.y` 创建 Release，上传 server/agent 的 zip/tar.gz 与 sha1（脚本已做：已存在则复用、附件缺失则补传、sha1 回验）。
+12.2 **GitHub Release**：`release-post.sh` 用 `gh` 创建同名 Release（正文同 Gitee，GitHub 自动提供源码 zip/tar.gz）。**注意：Gitee 镜像不会同步 Release，此步不可省略。**
+12.3 **微信群发版通知**：`release-post.sh` 调用 `jpom-release-notify` skill 发送到 7 个群（已送达则自动跳过，不重复发）；也可单独执行 `bash .dsh/skills/jpom-release-notify/scripts/send-notice.sh <msg>`。
+12.4 **归档**：在 `dev-docs/archive/<YYYY-MM>-release-<version>/` 记录 Release URL、digest、群通知 operationId/new_msg_id；群通知单独写 `notification-<version>.md`。
+13. **可选**：发布发版公告（已用 12.3 的群通知则无需重复）。
 
 ### 6.3 beta 发版
 
@@ -330,8 +346,10 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
 - [ ] 安装包已上传 R2（release 或 beta 目录），`https://d2.jpom.download/...` 的 sha1 可校验
 - [ ] 文档站版本号、CHANGELOG、下载链接已更新并发布
 - [ ] 在线升级测试通过（稳定版）
-- [ ] Docker 镜像已推送（稳定版：`<version>` 与 `latest`）
-- [ ] Gitee Release 已创建（GitHub 由镜像自动同步，不手动操作）
+- [ ] Docker 镜像已推送（稳定版：server/agent 的 `<version>` 与 `latest`，多平台 amd64+arm64）
+- [ ] Gitee Release 已创建并上传 zip/tar.gz/sha1
+- [ ] GitHub Release 已创建（Latest；Gitee 镜像不同步 Release，用 `script/release-post.sh`）
+- [ ] 微信群发版通知已发送并核对送达（`check-delivery.sh <version>` 全部命中）
 - [ ] 已确认得到维护者授权，且所有正式渠道操作符合预期
 
 ### 6.6 一键发版脚本（推荐）
@@ -351,18 +369,22 @@ bash script/release.sh beta --dry-run
 # 只做本地准备（合并/日期/版本/构建/校验/冒烟/本地提交），不推送、不上传、不改文档
 bash script/release.sh beta --to commit
 
-# 失败后从指定阶段续跑（阶段：preflight/merge/changelog/version/build/verify/smoke/commit/push/upload/docs/docker/finish）
+# 稳定版一条命令含发布后置（Gitee/GitHub Release + 微信群通知）
+bash script/release.sh release --yes --with-post
+
+# 失败后从指定阶段续跑（阶段：preflight/merge/changelog/version/build/verify/smoke/commit/push/upload/docs/docker/post/finish）
 bash script/release.sh beta --version 2.11.12.2 --from upload
 ```
 
 脚本行为与安全约定：
 
 - 版本号默认由 `script/tag.*.txt` 自动计算；beta 要求源分支的 `CHANGELOG-BETA.md` 已有对应段落（日期可自动补），release 要求目标分支的 `CHANGELOG.md` 已有 `x.y.z-release` 段落（内容需人工整理）。
-- 默认依次执行：合并源分支 → 补日期 → `replaceVersion.sh` → 前端 `npm install && npm run build` → `mvn clean package` → 产物校验（sha1/zip/class 非空/class 与 `target/classes` 一致/前端 dist）→ 服务端与插件端启动冒烟 → 提交 → 推送 Gitee → R2 上传 → docs 更新 →（可选）Docker。
+- 默认依次执行：合并源分支 → 补日期 → `replaceVersion.sh` → 前端 `npm install && npm run build` → `mvn clean package` → 产物校验（sha1/zip/class 非空/class 与 `target/classes` 一致/前端 dist）→ 服务端与插件端启动冒烟 → 提交 → 推送 Gitee → R2 上传 → docs 更新 →（可选）Docker →（可选）`--with-post` 发布后置。
 - push / R2 / docs / Docker 前默认交互确认，非交互环境必须显式 `--yes`；`--dry-run` 只预检；`--no-push` / `--no-upload` / `--no-docs` 可关闭阶段（组合受保护）。
-- beta 不打 tag、不创建 Gitee Release；release 打 `vX.Y.Z` tag。只推 Gitee；docs 子模块按 3.2 推 GitHub Pages。
+- beta 不打 tag、不创建 Release；release 打 `vX.Y.Z` tag、创建 Gitee+GitHub Release、推送 Docker（可选）并发送群通知。代码只推 Gitee；docs 子模块按 3.2 推 GitHub Pages。
 - 本机 Maven 曾出现偶发坏包（0 字节 class、jar 内旧 class），脚本默认 `--build-retries 1` 自动重跑构建并重新校验；日志在 `.tmp/release/`。
-- 脚本需要 JDK、Maven、Node/npm、python3、unzip、curl、rclone（上传时）；可用 `--jdk-home`、`--mvn`、`--node`、`--npm`、`--npm-cache` 覆盖检测结果。
+- 脚本需要 JDK、Maven、Node/npm、python3、unzip、curl、rclone（上传时）；`--with-post` 另需 Gitee 令牌（Keyring 或 `GITEE_TOKEN`）与 `gh`。可用 `--jdk-home`、`--mvn`、`--node`、`--npm`、`--npm-cache` 覆盖检测结果。
+- R2 上传默认已启用分片并发调优（`R2_CHUNK_SIZE=16M`、`R2_UPLOAD_CONCURRENCY=8`）；实测本机上行是瓶颈，完整产物约需 8~12 分钟，慢时可在服务端执行或后台运行。
 
 ## 7. 提交规范与代码风格
 
@@ -515,7 +537,9 @@ bash script/check-sensitive.sh --all --range origin/dev..HEAD
 - **`.tmp/` 不是文档仓库**：`.tmp/`、`jpom-parent/.tmp/` 只用于可丢弃的临时产物；开发过程记录、环境信息和操作手册写 `dev-docs/`（第 0 节第 7 条、第 9 节），任务结束前迁移/归档并提交，避免 `.tmp` 被清理后文档丢失。
 - **jpom-docs 不是开发文档仓库**：`docs/` 只放用户需要学习/操作的必要文档；开发过程记录、内部环境、审计与未修复漏洞细节禁止进入 `docs/`（第 9 节）。
 - **敏感信息检查**：提交前运行 `bash script/check-sensitive.sh --all`，推送前加上 `--range <基线>..HEAD`；`.gitignore` 已忽略密钥类文件与本地临时文件，禁止用 `git add -f` 绕过（详见第 8 节）。
-- **GitHub 只读**：主仓在 Gitee，GitHub 是 Gitee 自动镜像；不要直接向 GitHub 提交/推送/开 PR、不要配置 GitHub 推送 remote，`push.bat` 里的 GitHub 推送部分已过时。
+- **GitHub 只读（Release 除外）**：主仓在 Gitee，GitHub 是 Gitee 自动镜像；不要直接向 GitHub 提交/推送/开 PR、不要配置 GitHub 推送 remote，`push.bat` 里的 GitHub 推送部分已过时。**但 GitHub Release 不会被镜像同步**，发版时必须手动创建（用 `script/release-post.sh`）。
+- **发版慢的常见原因**：本地 Maven 偶发坏包导致重复构建、手工 UI 验证串行、R2 单线程上传、Docker Hub 网络排障、发布后置/通知手工操作。优化：候选构建一次通过、UI 验证并行、R2 调优（已默认）、`--with-post` 自动发布后置；完整分析见 `dev-docs/runbooks/release-flow-timeline-and-optimization.md`。
+- **Docker Hub 国内网络**：`auth.docker.io` DNS 污染 + BuildKit token 不走代理会导致 push 失败；按 `dev-docs/runbooks/docker-hub-push-cn.md` 处理（私有 mihomo + 本地 mirror + crane 客户端推送）。
 - **构建 JDK**：请使用 JDK 8；更高版本 JDK 可能因老版本 maven 插件/编译参数失败。
 - **Docker 构建**：`buildx` 需先启用 experimental / binfmt_misc，参见 `jpom-parent/script/docker-buildx.md`。
 - **项目已暂停维护**：不要在未授权情况下更新下载中心、镜像、文档站或发布公告；对外发布前与维护者确认。
@@ -527,7 +551,8 @@ bash script/check-sensitive.sh --all --range origin/dev..HEAD
 - `RELEASE.md`（根目录）：发布流程（一键版 / 手动版 / 流水线版）
 - `script/release.sh`：一键发版编排脚本（合并、版本、构建、校验、冒烟、推送、R2、docs、Docker）
 - `script/check-sensitive.sh`：提交/推送前的隐私与密钥检查脚本（第 8 节）
-- `script/deploy-release-r2.sh`：安装包上传 Cloudflare R2（rclone）的发布脚本
+- `script/deploy-release-r2.sh`：安装包上传 Cloudflare R2（rclone）的发布脚本（含分片并发调优）
+- `script/release-post.sh`：发布后置步骤（Gitee Release + GitHub Release + 微信群通知，幂等可重跑）
 - `jpom-parent/SECURITY.md`：安全漏洞报告与披露流程
 - `.gitignore`（根目录与 `jpom-parent/`）：临时文件、密钥/证书类文件忽略规则
 - `jpom-parent/README.md`：分支说明、贡献指南
@@ -537,3 +562,6 @@ bash script/check-sensitive.sh --all --range origin/dev..HEAD
 - `.gitmodules`：子模块清单与默认分支
 - `dev-docs/README.md`、`dev-docs/AGENTS.md`：本地工作区文档库（文档写入规则、dev-docs/jpom-docs 分工、环境登记、历史归档；独立私有 git 仓库，不随本仓提交）
 - `dev-docs/runbooks/jpom-docs-authoring.md`、`dev-docs/templates/jpom-docs-page.md`：jpom-docs 用户文档编写规范与页面模板（第 3.2、9.5 节）
+- `dev-docs/runbooks/release-flow-timeline-and-optimization.md`：发版耗时实测、瓶颈分析与优化方案
+- `dev-docs/runbooks/docker-hub-push-cn.md`：国内网络下 Docker Hub 推送操作手册
+- `.dsh/skills/jpom-release-notify/`：微信群发版通知 skill（默认不发朋友圈、不 @所有人）

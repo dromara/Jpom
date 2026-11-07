@@ -225,6 +225,13 @@ else
 	echo ">>> (dry-run) zip -j ${merged_zip} server-${version}-release.zip agent-${version}-release.zip"
 fi
 
+# 上传调优：实测单文件默认参数约 0.44MB/s，--s3-chunk-size 16M + --s3-upload-concurrency 8
+# 可提升到约 0.6MB/s（上行带宽为瓶颈时主要收益来自并发分片）；可用环境变量覆盖：
+#   R2_CHUNK_SIZE=16M  R2_UPLOAD_CONCURRENCY=8  R2_TRANSFERS=4
+R2_CHUNK_SIZE="${R2_CHUNK_SIZE:-16M}"
+R2_UPLOAD_CONCURRENCY="${R2_UPLOAD_CONCURRENCY:-8}"
+R2_TRANSFERS="${R2_TRANSFERS:-4}"
+
 upload_file() {
 	local src="$1"
 	local name
@@ -234,8 +241,13 @@ upload_file() {
 		echo ">>> (dry-run) rclone copyto ${src} ${dest}"
 		return 0
 	fi
-	echo ">>> 上传 ${name}"
-	rclone copyto "${src}" "${dest}" --retries 3 --low-level-retries 10 --stats 30s --stats-one-line
+	echo ">>> 上传 ${name}（$(file_size "${src}") bytes）"
+	local started_at
+	started_at=$(date +%s)
+	rclone copyto "${src}" "${dest}" 		--retries 3 --low-level-retries 10 		--s3-chunk-size "${R2_CHUNK_SIZE}" 		--s3-upload-concurrency "${R2_UPLOAD_CONCURRENCY}" 		--transfers "${R2_TRANSFERS}" 		--stats 15s --stats-one-line
+	local elapsed=$(( $(date +%s) - started_at ))
+	[ "${elapsed}" -gt 0 ] || elapsed=1
+	echo "    耗时 ${elapsed}s（约 $(( $(file_size "${src}") / elapsed / 1024 )) KB/s）"
 }
 
 for src in "${sources[@]}"; do
@@ -333,7 +345,8 @@ echo "================================================================"
 cat <<EOF
 1. 更新文档版本号并 push docs 仓库 main（GitHub Pages 自动构建）：
      cd docs/script && sh replaceVersion.sh ${version} ${channel}
-2. 在 Gitee 基于 tag 创建发行版并上传安装包与 sha1（GitHub 由镜像同步，不手动操作）
+2. 创建 Gitee/GitHub Release 并发送微信群通知（可重复执行、自动跳过已完成项）：
+     bash script/release-post.sh release --version ${version} --yes
 3. 在旧版本上验证在线升级（服务端读取 https://jpom.top/docs/*-versions.json，包来自 d2）
 4. 若本次是同一版本覆盖上传，请到 Cloudflare 控制台 Purge：
      ${R2_PUBLIC_BASE}/${channel}/${version}/*
