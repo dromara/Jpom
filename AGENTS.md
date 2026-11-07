@@ -429,6 +429,7 @@ bash script/release.sh beta --version 2.11.12.2 --from upload
 - `jpom-parent/script/settings.xml` 的 `proxyuser/proxypass`、`repouser/repopwd` 是 Maven 模板占位。
 - `jpom-parent/web-vue/.env` 的 `BAIDU_FY_ID/SECRET` 是 `xxx` 占位。
 - 新增配置项时示例值必须写成 `xxx` / `your_xxx` / `change_me`，真实值用环境变量或本地未跟踪文件注入。
+- **平台发布凭据不在本仓**：Gitee / GitHub / Docker Hub 凭据由维护者保存在本机 GNOME Keyring；读取位置、keyring 锁定处置与 GitHub token scope 限制见 `dev-docs/AGENTS.md` 的“平台发布凭据”。不要因为环境变量为空就判断“没有”；也不要把凭据写入本仓、日志或提交历史。
 
 ### 8.3 提交前检查（每次 `git commit` 前）
 
