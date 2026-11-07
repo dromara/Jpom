@@ -421,7 +421,7 @@ public class TerminalParserRecorder {
         TerminalParserRecorder recorder = new TerminalParserRecorder();
 
         try {
-            recorder.connect("192.168.30.29", 22, "user", "123456+.");
+            recorder.connect("127.0.0.1", 22, "user", "Poc123456");
 
             // 等待连接稳定
             Thread.sleep(2000);

@@ -697,7 +697,7 @@ public class SSHCommandRecorder {
         try {
             // 连接到SSH服务器
             System.out.println("正在连接SSH服务器...");
-            recorder.connect("192.168.30.29", 22, "user", "123456+.");
+            recorder.connect("127.0.0.1", 22, "user", "Poc123456");
 
             // 保持连接，让用户交互
             System.out.println("请在终端中执行命令，所有命令将被记录...");
