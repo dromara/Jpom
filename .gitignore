@@ -57,8 +57,7 @@ ossutil_output/
 # ===== 本地工作区临时产物 / 工具（不要提交）=====
 # AI 调试、漏洞验证、审计证据等临时目录（体积可能很大，放在仓库外更好）
 /.tmp/
-# 本地 AI 助手设置（机器相关，可能包含本机路径、命令历史等敏感信息）
-/.claude/settings.local.json
+# 本地 AI 设置已归档到 dev-docs/archive/2026-11-ai-settings/，不再在公开仓忽略保存
 # 本地下载的云工具（aws cli、ossutil 等）
 /aws/
 /ossutil-*/

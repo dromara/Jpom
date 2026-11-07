@@ -399,7 +399,7 @@ bash script/release.sh beta --version 2.11.12.2 --from upload
 - **用户隐私**：真实用户名、手机号、邮箱、身份证/银行卡号、地址、订单、聊天记录、真实数据库导出。
 - **未脱敏的日志/截图/抓包**：可能包含 Cookie、JWT、Authorization、会话 ID、用户数据。
 - **提交身份**：`git config user.name` / `user.email` 会永久公开在提交历史中；请使用你愿意公开的身份，开源项目建议使用 GitHub/Gitee 的 noreply 邮箱，避免暴露私人邮箱或真名。
-- **本地文件**：`.claude/settings.local.json`、`.tmp/`、`aws/`、`ossutil-*`、本机脚本与配置（已由 `.gitignore` 忽略，禁止用 `git add -f` 绕过）。
+- **本地文件**：`.dsh/settings.local.json` 等本地 AI 设置已归档到 `dev-docs/archive/2026-11-ai-settings/`（私有仓），不要提交到本仓；`.tmp/`、`aws/`、`ossutil-*`、本机脚本仍按 `.gitignore` 忽略。
 
 ### 8.2 仓库里的示例占位值（不要替换成真实值）
 
