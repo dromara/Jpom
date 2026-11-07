@@ -906,7 +906,8 @@ export default {
 
             // 重新计算倒计时
             // this.countdownTime = Date.now() + this.refreshInterval * 1000
-            this.$refs.nodeProjectSearch.countDownChange()
+            // 引导态（useSuggestions=true）下 CustomTable 未渲染，$refs 可能为空
+            this.$refs.nodeProjectSearch?.countDownChange?.()
           }
         })
         .finally(() => {
