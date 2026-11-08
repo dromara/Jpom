@@ -67,6 +67,8 @@ import java.nio.charset.Charset;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.dromara.jpom.permission.Feature;
+import org.dromara.jpom.permission.MethodFeature;
 
 /**
  * 项目管理
@@ -133,6 +135,7 @@ public class ProjectManageControl extends BaseServerController {
         Assert.state(exists, I18nMessageUtil.get("i18n.no_corresponding_data_or_permission.1291"));
     }
 
+    @Feature(method = MethodFeature.LIST)
     @RequestMapping(value = "getProjectData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<JSONObject> getProjectData(@ValidatorItem String id, HttpServletRequest request) {
         NodeModel node = getNode();
@@ -148,6 +151,7 @@ public class ProjectManageControl extends BaseServerController {
      * @return json
      * @author Hotstrip
      */
+    @Feature(method = MethodFeature.LIST)
     @RequestMapping(value = "project-access-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<List<String>> projectAccessList() {
         List<String> jsonArray = whitelistDirectoryService.getProjectDirectory(getNode());
@@ -196,6 +200,7 @@ public class ProjectManageControl extends BaseServerController {
      *
      * @return json
      */
+    @Feature(method = MethodFeature.LIST)
     @RequestMapping(value = "getProjectPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<JSONObject> getProjectPort(HttpServletRequest request) {
         return NodeForward.request(getNode(), request, NodeUrl.Manage_GetProjectPort);

@@ -26,6 +26,7 @@ import org.dromara.jpom.service.h2db.BaseNodeService;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.service.user.UserBindWorkspaceService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
@@ -42,6 +43,7 @@ import java.util.function.Supplier;
  * @since 2019/03/16.
  */
 @Configuration
+@Slf4j
 public class PermissionInterceptor implements HandlerMethodInterceptor {
 
     @Resource
@@ -94,9 +96,28 @@ public class PermissionInterceptor implements HandlerMethodInterceptor {
         }
         Feature feature = handlerMethod.getMethodAnnotation(Feature.class);
         if (feature == null) {
-            return true;
+            // 公开接口（@NotLogin）直接放行
+            boolean notLogin = handlerMethod.hasMethodAnnotation(NotLogin.class)
+                || handlerMethod.getBeanType().isAnnotationPresent(NotLogin.class);
+            if (notLogin) {
+                return true;
+            }
+            // 权限拦截 fail-closed：属于权限管理模块（类级 @Feature 且 cls 非 NULL）的控制器，
+            // 方法缺少 @Feature 时不再静默放行；未声明类级 @Feature 的控制器属于“登录即可”的公共/自助接口，保持原行为。
+            Feature classFeatureAnnotation = handlerMethod.getBeanType().getAnnotation(Feature.class);
+            if (classFeatureAnnotation == null || classFeatureAnnotation.cls() == ClassFeature.NULL) {
+                return true;
+            }
+            log.warn("handler {}#{} 未声明方法级 @Feature，按无权限拒绝（fail-closed）",
+                handlerMethod.getBeanType().getName(), handlerMethod.getMethod().getName());
+            this.errorMsg(response, I18nMessageUtil.get("i18n.no_permission.e343"));
+            return false;
         }
         MethodFeature method = feature.method();
+        if (method == MethodFeature.NULL) {
+            // 显式声明“无需功能权限”：仍受登录、@SystemPermission、@NodeDataPermission 等约束
+            return true;
+        }
         if (ArrayUtil.contains(DEMO, method) && userModel.isDemoUser()) {
             this.errorMsg(response, DEMO_TIP.get());
             return false;

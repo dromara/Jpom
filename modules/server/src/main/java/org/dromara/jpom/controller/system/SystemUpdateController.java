@@ -131,6 +131,7 @@ public class SystemUpdateController extends BaseServerController implements ILoa
      *
      * @return changelog md
      */
+    @Feature(method = MethodFeature.LIST)
     @PostMapping(value = "change_log", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<String> changeLog(HttpServletRequest request, String machineId) {
         boolean betaRelease = RemoteVersion.betaRelease();
@@ -209,6 +210,7 @@ public class SystemUpdateController extends BaseServerController implements ILoa
      * @return json
      * @see RemoteVersion
      */
+    @Feature(method = MethodFeature.LIST)
     @PostMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<cn.keepbx.jpom.RemoteVersion> checkVersion(HttpServletRequest request,
                                                                    String machineId) {

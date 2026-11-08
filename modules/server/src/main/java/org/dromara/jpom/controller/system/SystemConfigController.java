@@ -269,6 +269,7 @@ public class SystemConfigController extends BaseServerController {
      * @param proxys 参数
      * @return json
      */
+    @Feature(method = MethodFeature.EDIT)
     @PostMapping(value = "save_proxy_config", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<Object> saveProxyConfig(@RequestBody List<ProxySelectorConfig.ProxyConfigItem> proxys) {
         proxys = ObjectUtil.defaultIfNull(proxys, Collections.emptyList());

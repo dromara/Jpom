@@ -610,14 +610,18 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
                 continue;
             }
             String key = StrUtil.removeAll(rawKey, "%");
-            String timeKey = StrUtil.removeAny(key, "[0]", "[1]");
-            // 请求参数名会被当作数据库字段名使用，必须先校验为合法标识符，避免被拼接为 SQL 片段
-            if (!isSafeFieldName(timeKey)) {
+            // 请求参数名会被当作数据库字段名使用，必须先校验为合法标识符，避免被拼接为 SQL 片段；
+            // 注意 :in 后缀要在校验前剥离，否则 workspaceId:in 这类集合过滤会被误判为非法字段而静默丢弃
+            String filterField = resolveFilterField(rawKey);
+            if (filterField == null) {
                 log.warn("ignore invalid query field name: {}", rawKey);
                 continue;
             }
+            String timeKey = StrUtil.removeAny(key, "[0]", "[1]");
             String wrapField = DialectUtil.wrapField(key);
-            if (StrUtil.startWith(rawKey, "%") && StrUtil.endWith(rawKey, "%")) {
+            if (StrUtil.endWith(key, ":in")) {
+                where.set(DialectUtil.wrapField(filterField), StrUtil.split(value, StrUtil.COMMA));
+            } else if (StrUtil.startWith(rawKey, "%") && StrUtil.endWith(rawKey, "%")) {
                 where.set(wrapField, new Condition(wrapField, "like", "%" + value + "%"));
             } else if (StrUtil.endWith(rawKey, "%")) {
                 where.set(wrapField, new Condition(wrapField, "like", value + "%"));
@@ -657,12 +661,6 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
                     where.set(timeWrapField + " ", new Condition(timeWrapField, "<=", endDateTime.getTime()));
                 }
                 ignoreField.add(timeKey);
-            } else if (StrUtil.endWith(key, ":in")) {
-                String inKey = StrUtil.removeSuffix(key, ":in");
-                if (!isSafeFieldName(inKey)) {
-                    continue;
-                }
-                where.set(DialectUtil.wrapField(inKey), StrUtil.split(value, StrUtil.COMMA));
             } else {
                 // 使用 Condition 绑定查询值，避免值被 Hutool 解析为条件表达式
                 where.set(wrapField, new Condition(wrapField, "=", value));
@@ -678,6 +676,27 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
             }
         }
         return this.listPage(where, pageReq, fill);
+    }
+
+    /**
+     * 解析过滤参数名对应的数据库字段名
+     * <p>
+     * 支持 {@code %field%} 模糊查询、{@code field:in} 集合查询、{@code field[0]/field[1]} 时间范围；
+     * 先剥离这些后缀再校验字段名，避免 {@code workspaceId:in} 被误判为非法字段而丢弃。
+     *
+     * @param rawKey 原始请求参数名
+     * @return 合法字段名；非法返回 null
+     */
+    static String resolveFilterField(String rawKey) {
+        if (StrUtil.isEmpty(rawKey)) {
+            return null;
+        }
+        String field = StrUtil.removeAll(rawKey, "%");
+        if (StrUtil.endWith(field, ":in")) {
+            field = StrUtil.removeSuffix(field, ":in");
+        }
+        field = StrUtil.removeAny(field, "[0]", "[1]");
+        return isSafeFieldName(field) ? field : null;
     }
 
     /**
