@@ -60,6 +60,7 @@ bash script/release.sh beta --version 2.11.12.2 --from upload
 7. 提交一个 commit 2.x.x
 8. 基于 commit 新增 tag: v2.x.x 并且将代码推送到远程（只推 Gitee，GitHub 由镜像自动同步）
 9. 将包上传到 R2：`bash script/deploy-release-r2.sh release`（在仓库根目录执行；可加 `--dry-run` 先预览）
+   - 可选（CI 打包+上传）：`bash script/release.sh release --with-r2-ci` 把构建/上传交给 GitHub Actions `release-package.yml`，本机跳过构建并等 CI 完成后下载产物做校验+冒烟；CI 回验走 r2.dev，POC 可加 `--r2-ci-prefix ci-test`（不写正式目录）。需要 repo secrets `R2_ACCOUNT_ID`/`R2_ACCESS_KEY_ID`/`R2_SECRET_ACCESS_KEY`，详见 `dev-docs/runbooks/release-package-ci.md`
 10. 更新文档版本号：`cd ./docs/script && sh replaceVersion.sh 2.x.x release`
 11. 手动 copy 更新文档 changelog
 12. 发布文档：push docs 仓库 `main`，由 GitHub Actions 构建并发布到 GitHub Pages（详见 AGENTS.md 第 6.2 节）
@@ -71,7 +72,7 @@ bash script/release.sh beta --version 2.11.12.2 --from upload
 18. 归档记录到 `dev-docs/archive/<YYYY-MM>-release-<version>/`（含 `notification-<version>.md`）
 19. **发版后立即在 `dev` 补下一个 beta 版本日志段**：`CHANGELOG-BETA.md` 顶部新增 `## <新稳定版>.1-beta`（空“新增功能/解决BUG”小节），给刚发版的 beta 段补日期，提交 `releases(发布): 开始 <新稳定版>.1-beta 开发`。
 
-> beta 版上传：`bash script/deploy-release-r2.sh beta`（版本号取自 `jpom-parent/script/tag.beta.txt`）。
+> beta 版上传：`bash script/deploy-release-r2.sh beta`（版本号取自 `jpom-parent/script/tag.beta.txt`）；或用 `bash script/release.sh beta --with-r2-ci` 交给 GitHub Actions。
 
 ## 流水线版
 
@@ -80,7 +81,7 @@ bash script/release.sh beta --version 2.11.12.2 --from upload
 3. changelog 版本增加发版日期
 4. 执行-发布代码任务 (注意修改构建命令版本号)
 5. 基于 commit 新增 tag: v2.x.x 并且将代码推送到远程（只推 Gitee）
-6. 下载构建产物后上传到 R2：`bash script/deploy-release-r2.sh release`（在仓库根目录执行）
+6. 下载构建产物后上传到 R2：`bash script/deploy-release-r2.sh release`（在仓库根目录执行）；或 `bash script/release.sh release --with-r2-ci` 由 GitHub Actions 构建并上传（回验 r2.dev，见 `dev-docs/runbooks/release-package-ci.md`）
 7. 手动 copy 更新文档 changelog
 8. 执行-发布文档 (注意修改构建命令版本号)
 9. 测试远程更新是否正常
