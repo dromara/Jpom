@@ -1,6 +1,18 @@
 # 🚀 版本日志
 
-## 2.11.12.3-beta
+## 2.11.13.1-beta
+
+### 🐣 新增功能
+
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】修复 文件中心下载接口未认证 SQL 注入风险：Hutool 会把查询参数值解析为 SQL 条件表达式（如 `token=is not null` 绕过别名+token 校验），`sort` 参数可注入原生 ORDER BY，且数据库异常会把完整 SQL 回显给客户端；现在查询 Bean 值统一使用占位符绑定，`sort`/`filter_*` 增加字段白名单，token 增加格式校验，并修复别名下载可跨文件读取的越权问题
+
+
+------
+
+## 2.11.12.3-beta (2026-11-07)
 
 ### 🐣 新增功能
 
@@ -19,8 +31,6 @@
 8. 【server】优化 构建记录仓库提交说明字段长度加宽至 1000，避免较长提交信息写入失败（[Gitee issues ID35HQ](https://gitee.com/dromara/Jpom/issues/ID35HQ)）
 9. 【server】修复 构建配置别名缺少规则校验提示的问题（[Gitee issues IBI5AF](https://gitee.com/dromara/Jpom/issues/IBI5AF)）
 10. 【server】修复 权限组工作空间穿梭窗勾选计数错误的问题（[Gitee issues IBHK0I](https://gitee.com/dromara/Jpom/issues/IBHK0I)）
-11. 【server】修复 文件中心下载接口未认证 SQL 注入风险：Hutool 会把查询参数值解析为 SQL 条件表达式（如 `token=is not null` 绕过别名+token 校验），`sort` 参数可注入原生 ORDER BY，且数据库异常会把完整 SQL 回显给客户端；现在查询 Bean 值统一使用占位符绑定，`sort`/`filter_*` 增加字段白名单，token 增加格式校验，并修复别名下载可跨文件读取的越权问题
-
 
 ------
 
