@@ -11,7 +11,8 @@ name: docker-publish
 #    用于工作流自检，避免改 CI 后要等下一次发版才能验证。
 #
 # 首次启用限制：GitHub 要求 workflow_dispatch 的工作流先存在于默认分支 master 并运行过；
-# 本工作流第一次真正可用的时机是下一次稳定版发版（合并 dev→master 后 tag push 自动触发）。
+# 本工作流在 dev/beta 分支改动时会先触发一次 dry_run 自检（push 事件），自检运行后即可对任意 ref dispatch；
+# 若仓库从未运行过该工作流，需等工作流随发版进入默认分支 master 后的首次运行（tag push 会自动触发）。
 #
 # 需要仓库 secrets：DOCKERHUB_USERNAME（jpomdocker）、DOCKERHUB_TOKEN（Docker Hub 访问令牌/密码）。
 # 可选仓库变量：DOCKERHUB_NAMESPACE（默认 jpomdocker）、DOCKERHUB_SERVER_REPO（默认 jpom）、
@@ -228,13 +229,17 @@ jobs:
         env:
           IMAGE: ${{ matrix.image == 'server' && needs.prepare.outputs.server_image || needs.prepare.outputs.agent_image }}
           VERSION: ${{ needs.prepare.outputs.version }}
+          PLATFORMS: ${{ needs.prepare.outputs.platforms }}
           TAGS: ${{ matrix.image == 'server' && needs.prepare.outputs.server_tags || needs.prepare.outputs.agent_tags }}
         run: |
           set -euo pipefail
-          echo "回验镜像：${IMAGE}:${VERSION}"
+          echo "回验镜像：${IMAGE}:${VERSION}（期望平台：${PLATFORMS}）"
           inspect_out=$(docker buildx imagetools inspect "${IMAGE}:${VERSION}")
           printf '%s\n' "$inspect_out"
-          for platform in linux/amd64 linux/arm64; do
+          IFS=',' read -r -a platform_list <<<"$PLATFORMS"
+          for platform in "${platform_list[@]}"; do
+            platform=$(printf '%s' "$platform" | tr -d ' ')
+            [ -n "$platform" ] || continue
             if printf '%s\n' "$inspect_out" | grep -q "$platform"; then
               echo "OK：包含平台 $platform"
             else
@@ -260,7 +265,7 @@ jobs:
             echo
             echo "- digest：\`${digest}\`"
             echo "- tags：$(printf '%s' "$TAGS" | tr '\n' ' ')"
-            echo "- platforms：linux/amd64、linux/arm64"
+            echo "- platforms：${PLATFORMS}"
             echo
           } >>"$GITHUB_STEP_SUMMARY"
 

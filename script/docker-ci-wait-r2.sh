@@ -22,7 +22,8 @@
 #   IMAGES         server,agent / server / agent（默认 server,agent）
 #   WAIT_MINUTES   最长等待分钟数（默认 30；0 表示只检查一次）
 #   RETRY_INTERVAL 重试间隔秒数（默认 30）
-#   R2_BASE        下载中心地址（默认 https://d2.jpom.download）
+#   R2_BASE        下载基址（默认 https://d2.jpom.download；GitHub Actions 由工作流传入 R2 的 r2.dev
+#                  公开域名，因为 d2.jpom.download 对 GitHub runner 有 Cloudflare managed challenge）
 #-----------------------------------------------------------
 
 set -euo pipefail
