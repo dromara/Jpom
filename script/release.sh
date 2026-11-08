@@ -31,6 +31,8 @@
 #   bash script/release.sh beta --to commit              # 只做本地准备（不推送/不上传）
 #   bash script/release.sh beta --from upload            # 断点续跑：从上传开始
 #   bash script/release.sh beta --skip-build --skip-smoke # 使用已有产物（调试用）
+#   bash script/release.sh release --with-r2-ci           # 打包+R2 上传交给 GitHub Actions（CI 完成后本机校验+冒烟）
+#   bash script/release.sh beta --with-r2-ci --r2-ci-prefix ci-test   # POC：只上传到 ci-test 前缀
 #
 # 主要参数：
 #   beta|release             发版类型（必填）
@@ -55,6 +57,12 @@
 #       --no-docs            不更新/发布文档
 #       --force-upload       同版本覆盖上传 R2（注意 Cloudflare 缓存）
 #       --deep-verify        R2 上传后从下载中心逐字节回验
+#       --with-r2-ci         打包+上传 R2 改由 GitHub Actions release-package 工作流执行：
+#                            本机跳过构建/产物校验/启动冒烟，CI 成功后自动下载产物回本地做校验+冒烟
+#       --r2-ci-prefix PREFIX  CI 上传目标路径前缀（POC/灰度用，如 ci-test；空=正式 release|beta 目录）
+#       --r2-ci-ref REF       CI 触发的 ref（默认 release=v<version> tag、beta=目标分支）
+#       --no-r2-ci-wait       只触发 CI 不等待完成（不下载/校验/冒烟，需自行跟进）
+#       --r2-ci-timeout MIN   CI 等待超时分钟数（默认 30）
 #       --with-docker        发布 Docker 镜像（默认走 GitHub Actions，等待 run 完成并回验 Docker Hub）
 #       --docker-local       发布 Docker 镜像时改用本机 docker buildx 构建并推送（CI 不可用时兜底）
 #       --docker-ref REF     GitHub Actions 触发的 ref（release 默认 vX.Y.Z tag；beta 默认目标分支）
@@ -144,6 +152,12 @@ GH_REPO_OPT=""
 POST=0
 FORCE_UPLOAD=0
 DEEP_VERIFY=0
+R2CI=0
+R2_CI_PREFIX=""
+R2_CI_REF=""
+R2_CI_WAIT=1
+R2_CI_TIMEOUT=30
+R2CI_SMOKE_READY=0
 KEEP_TEMP=0
 ALLOW_NON_GITEE=0
 FORCE_VERSION=0
@@ -271,6 +285,26 @@ while [ "$#" -gt 0 ]; do
 	--deep-verify)
 		DEEP_VERIFY=1
 		shift
+		;;
+	--with-r2-ci)
+		R2CI=1
+		shift
+		;;
+	--r2-ci-prefix)
+		R2_CI_PREFIX=$(arg_value "$1" "${2:-}")
+		shift 2
+		;;
+	--r2-ci-ref)
+		R2_CI_REF=$(arg_value "$1" "${2:-}")
+		shift 2
+		;;
+	--no-r2-ci-wait)
+		R2_CI_WAIT=0
+		shift
+		;;
+	--r2-ci-timeout)
+		R2_CI_TIMEOUT=$(arg_value "$1" "${2:-}")
+		shift 2
 		;;
 	--with-docker)
 		DOCKER=1
@@ -417,6 +451,18 @@ DOCKER_REF=""
 DOCKER_RUN_ID=""
 DOCKER_RUN_URL=""
 [[ "$GH_REPO" =~ ^[^/[:space:]]+/[^/[:space:]]+$ ]] || die "--github-repo 需为 OWNER/REPO 格式：${GH_REPO}"
+[[ "$R2_CI_TIMEOUT" =~ ^[0-9]+$ ]] || die "--r2-ci-timeout 需为非负整数（分钟）：${R2_CI_TIMEOUT}"
+if [ -n "$R2_CI_PREFIX" ]; then
+	R2_CI_PREFIX="${R2_CI_PREFIX#/}"
+	R2_CI_PREFIX="${R2_CI_PREFIX%/}"
+	[[ "$R2_CI_PREFIX" =~ ^[A-Za-z0-9._/-]+$ ]] || die "非法的 --r2-ci-prefix：${R2_CI_PREFIX}"
+	case "${R2_CI_PREFIX%%/*}" in
+	release | beta) die "--r2-ci-prefix 不能以 release/beta 开头（会写入正式目录）" ;;
+	esac
+fi
+if [ "$R2CI" = "1" ] && [ "$PUSH" = "0" ]; then
+	die "--with-r2-ci 要求把代码/tag 推送到 Gitee（GitHub 镜像侧才能构建）；请去掉 --no-push"
+fi
 [[ "$DOCKER_WAIT_TIMEOUT" =~ ^[0-9]+$ ]] || die "--docker-wait-timeout 需为非负整数（分钟）：${DOCKER_WAIT_TIMEOUT}"
 [ -n "$DOCKER_PLATFORMS" ] || die "--docker-platforms 不能为空"
 
@@ -844,10 +890,19 @@ phase_preflight() {
 		need_cmd "$cmd"
 	done
 	if [ "$UPLOAD" = "1" ] && phase_will_run upload; then
-		need_cmd rclone
-		need_cmd curl
-		[ -f "$R2_SCRIPT" ] || die "缺少 R2 上传脚本：${R2_SCRIPT}"
-		rclone listremotes 2>/dev/null | grep -x "${R2_REMOTE}:" >/dev/null || die "rclone remote 不存在：${R2_REMOTE}"
+		if [ "$R2CI" = "1" ]; then
+			need_cmd gh
+			need_cmd curl
+			gh auth status >/dev/null 2>&1 ||
+				die "gh 未登录 GitHub（--with-r2-ci 需要触发 GitHub Actions）；可 gh auth login 或设置 GH_TOKEN"
+			[ -f "${ROOT_DIR}/script/release-r2-ci.sh" ] || die "缺少 CI 触发脚本：script/release-r2-ci.sh"
+			[ -f "${ROOT_DIR}/script/verify-release-artifacts.sh" ] || die "缺少产物校验脚本：script/verify-release-artifacts.sh"
+		else
+			need_cmd rclone
+			need_cmd curl
+			[ -f "$R2_SCRIPT" ] || die "缺少 R2 上传脚本：${R2_SCRIPT}"
+			rclone listremotes 2>/dev/null | grep -x "${R2_REMOTE}:" >/dev/null || die "rclone remote 不存在：${R2_REMOTE}"
+		fi
 	fi
 	if [ "$DOCKER" = "1" ] && phase_will_run docker; then
 		need_cmd curl
@@ -913,7 +968,7 @@ phase_preflight() {
 日期     : ${RELEASE_DATE}
 日志目录 : ${LOG_DIR}
 推送     : $( [ "$PUSH" = "1" ] && echo "是（Gitee ${GIT_REMOTE}）" || echo "否" )
-R2 上传  : $( [ "$UPLOAD" = "1" ] && echo "是（${R2_REMOTE}）" || echo "否" )
+R2 上传  : $( if [ "$UPLOAD" = "0" ]; then echo "否"; elif [ "$R2CI" = "1" ]; then echo "是（GitHub Actions 构建+上传${R2_CI_PREFIX:+，前缀 ${R2_CI_PREFIX}}）"; else echo "是（${R2_REMOTE}）"; fi )
 文档     : $( [ "$DOCS" = "1" ] && echo "是" || echo "否" )
 Docker   : $(docker_summary)
 ----------------------------------------------------------------
@@ -1222,6 +1277,10 @@ phase_version() {
 # ---------------------------------------------------------------------------
 phase_build() {
 	section "构建前端与后端"
+	if [ "$R2CI" = "1" ]; then
+		log "已启用 --with-r2-ci：构建由 GitHub Actions release-package 工作流执行，跳过本地构建"
+		return 0
+	fi
 	if [ "$BUILD" = "0" ]; then
 		warn "已跳过构建（--skip-build），将使用 target 下已有产物"
 		return 0
@@ -1274,139 +1333,16 @@ phase_tests() {
 # ---------------------------------------------------------------------------
 verify_artifacts() {
 	section "产物完整性校验"
-
-	local kinds=(server agent)
-	local exts=(zip tar.gz)
-	local kind ext file sha file_sha expected
-
-	for kind in "${kinds[@]}"; do
-		for ext in "${exts[@]}"; do
-			file="${PARENT_DIR}/modules/${kind}/target/${kind}-${VERSION}-release.${ext}"
-			sha="${file}.sha1"
-			[ -s "$file" ] || die "缺少产物：${file}"
-			[ -s "$sha" ] || die "缺少校验文件：${sha}"
-			file_sha=$(sha1_of "$file")
-			expected=$(tr -d ' \r\n' <"$sha")
-			[ "$file_sha" = "$expected" ] || die "${file} 的 sha1 与 .sha1 不一致"
-			case "$ext" in
-			zip) unzip -t "$file" >/dev/null || die "${file} zip 完整性校验失败" ;;
-			tar.gz) tar -tzf "$file" >/dev/null || die "${file} tar.gz 完整性校验失败" ;;
-			esac
-			log "OK  ${kind}-${VERSION}-release.${ext}  $(stat -c '%s' "$file") bytes  sha1=${file_sha:0:12}…"
-		done
-	done
-
 	mkdir -p "${LOG_DIR}/artifacts"
-	for kind in "${kinds[@]}"; do
-		local jar="${LOG_DIR}/artifacts/${kind}.jar"
-		unzip -p "${PARENT_DIR}/modules/${kind}/target/${kind}-${VERSION}-release.zip" "lib/${kind}-${VERSION}.jar" >"$jar" ||
-			die "无法从 ${kind} zip 中提取 lib/${kind}-${VERSION}.jar"
-		[ -s "$jar" ] || die "提取出的 ${kind} jar 为空"
-		if ! python3 - "$jar" "$kind" "${PARENT_DIR}/modules/${kind}/target/classes" <<'PY'
-import io
-import struct
-import sys
-import zipfile
-
-
-def class_min_size(data):
-	if len(data) < 10 or data[:4] != b"\xca\xfe\xba\xbe":
-		return -1
-	pos = 8
-	try:
-		count = struct.unpack(">H", data[8:10])[0]
-		pos = 10
-		i = 1
-		while i < count:
-			tag = data[pos]
-			pos += 1
-			if tag == 1:
-				length = struct.unpack(">H", data[pos : pos + 2])[0]
-				pos += 2 + length
-			elif tag in (3, 4, 9, 10, 11, 12, 17, 18):
-				pos += 4
-			elif tag in (5, 6):
-				pos += 8
-				i += 1
-			elif tag in (7, 8, 16, 19, 20):
-				pos += 2
-			elif tag == 15:
-				pos += 3
-			else:
-				return -1
-			i += 1
-		return pos
-	except Exception:
-		return -1
-
-
-def scan_jar(zf, label):
-	total = 0
-	bad = []
-	for info in zf.infolist():
-		name = info.filename
-		if name.endswith(".class"):
-			total += 1
-			data = zf.read(info)
-			min_size = class_min_size(data)
-			if min_size < 0 or len(data) < min_size:
-				bad.append((label + "!" + name, len(data), min_size))
-			elif b"Unresolved compilation problem" in data:
-				bad.append((label + "!" + name, "unresolved-compilation", 0))
-		elif name.startswith("BOOT-INF/lib/") and name.endswith(".jar"):
-			try:
-				nested = zipfile.ZipFile(io.BytesIO(zf.read(info)))
-			except Exception as exc:  # noqa: BLE001
-				bad.append((label + "!" + name, str(exc), 0))
-				continue
-			nested_total, nested_bad = scan_jar(nested, label + "!" + name)
-			total += nested_total
-			bad.extend(nested_bad)
-	return total, bad
-
-
-path, label, target_dir = sys.argv[1], sys.argv[2], sys.argv[3]
-import os
-
-with zipfile.ZipFile(path) as zf:
-	total, bad = scan_jar(zf, label)
-	# 关键：字节比对 BOOT-INF/classes 与 target/classes，防止 jar 打包了旧/坏 class
-	for info in zf.infolist():
-		if not info.filename.startswith("BOOT-INF/classes/") or not info.filename.endswith(".class"):
-			continue
-		rel = info.filename[len("BOOT-INF/classes/") :]
-		expected = os.path.join(target_dir, rel)
-		if not os.path.exists(expected):
-			bad.append((label + "!" + info.filename, "missing-in-target", 0))
-			continue
-		with open(expected, "rb") as fh:
-			if fh.read() != zf.read(info):
-				bad.append((label + "!" + info.filename, "differs-from-target", 0))
-	print(f"{label}: {total} classes, bad={len(bad)}")
-	if bad:
-		for item in bad[:10]:
-			print("BAD_CLASS", item)
-		sys.exit(1)
-PY
-		then
-			die "${kind} jar 完整性校验失败（存在空/截断/Unresolved compilation 的 class）"
-		fi
-		log "OK  ${kind} jar 完整性校验通过（class 非空/未截断）"
-	done
-
-	unzip -l "${LOG_DIR}/artifacts/server.jar" | grep 'BOOT-INF/classes/dist/index.html' >/dev/null ||
-		die "server jar 未包含前端产物 BOOT-INF/classes/dist/index.html"
-	log "OK  server jar 含前端 dist"
-
-	for kind in "${kinds[@]}"; do
-		local dir="${PARENT_DIR}/modules/${kind}/target/${kind}-${VERSION}-release"
-		[ -d "$dir" ] || die "缺少运行目录：${dir}"
-		[ -d "${dir}/bin" ] || die "运行目录缺少 bin：${dir}"
-	done
-	log "运行目录检查通过"
+	bash "${ROOT_DIR}/script/verify-release-artifacts.sh" \
+		--parent-dir "$PARENT_DIR" --version "$VERSION" --log-dir "${LOG_DIR}/artifacts"
 }
 
 phase_verify() {
+	if [ "$R2CI" = "1" ]; then
+		log "已启用 --with-r2-ci：产物完整性校验将在 CI 上传返回后、对下载的产物执行"
+		return 0
+	fi
 	if [ "$VERIFY" = "0" ]; then
 		warn "已跳过产物完整性校验（--skip-verify）"
 		return 0
@@ -1539,6 +1475,10 @@ PY
 }
 
 phase_smoke() {
+	if [ "$R2CI" = "1" ] && [ "$R2CI_SMOKE_READY" != "1" ]; then
+		log "已启用 --with-r2-ci：启动冒烟将在 CI 上传返回后、对下载的产物执行"
+		return 0
+	fi
 	if [ "$SMOKE" = "0" ]; then
 		warn "已跳过启动冒烟（--skip-smoke）"
 		return 0
@@ -1672,6 +1612,42 @@ phase_upload() {
 	fi
 	if [ "${PUSHED:-0}" != "1" ]; then
 		die "未推送代码就禁止上传制品；如确需跳过请使用 --no-upload"
+	fi
+	if [ "$R2CI" = "1" ]; then
+		local ref="${R2_CI_REF:-}"
+		if [ -z "$ref" ]; then
+			if [ "$MODE" = "release" ]; then
+				ref="$TAG"
+			else
+				ref="$TARGET_BRANCH"
+			fi
+		fi
+		local ci_args=(--channel "$MODE" --version "$VERSION" --ref "$ref" --repo "$GH_REPO"
+			--wait-timeout "$R2_CI_TIMEOUT" --download-dir "$PARENT_DIR")
+		[ -n "$R2_CI_PREFIX" ] && ci_args+=(--prefix "$R2_CI_PREFIX")
+		[ "$R2_CI_WAIT" = "0" ] && ci_args+=(--no-wait)
+		[ "$DEEP_VERIFY" = "1" ] && ci_args+=(--deep-verify)
+		confirm "确认触发 GitHub Actions 打包并上传 R2（${GH_REPO} ${ref}，前缀${R2_CI_PREFIX:-无}）？"
+		log "bash script/release-r2-ci.sh ${ci_args[*]}"
+		if ! bash "${ROOT_DIR}/script/release-r2-ci.sh" "${ci_args[@]}"; then
+			die "GitHub Actions 打包/上传失败；修复后可运行：bash script/release.sh ${MODE} --version ${VERSION} --from upload --with-r2-ci"
+		fi
+		if [ "$R2_CI_WAIT" = "0" ]; then
+			warn "已触发 GitHub Actions（--no-r2-ci-wait），未下载/校验产物；docs/R2 后续步骤需要人工跟进"
+			return 0
+		fi
+		UPLOADED=1
+		if [ "$VERIFY" = "1" ]; then
+			section "校验 CI 下载回的产物"
+			bash "${ROOT_DIR}/script/verify-release-artifacts.sh" \
+				--parent-dir "$PARENT_DIR" --version "$VERSION" --log-dir "$LOG_DIR" --downloaded ||
+				die "CI 下载回的产物完整性校验失败"
+		fi
+		if [ "$SMOKE" = "1" ]; then
+			R2CI_SMOKE_READY=1
+			phase_smoke
+		fi
+		return 0
 	fi
 	local args=("$MODE")
 	if [ "$FORCE_UPLOAD" = "1" ]; then args+=(--force); fi
@@ -2223,7 +2199,7 @@ phase_finish() {
  版本     : ${VERSION}
  分支     : ${TARGET_BRANCH} @ ${branch_head}
  Tag      : ${tag_desc}
- R2       : $( [ "$UPLOAD" = "1" ] && echo "https://d2.jpom.download/${MODE}/${VERSION}/" || echo "未上传" )
+ R2       : $( if [ "$UPLOAD" = "0" ]; then echo "未上传"; elif [ "$R2CI" = "1" ]; then echo "已由 GitHub Actions 上传${R2_CI_PREFIX:+（前缀 ${R2_CI_PREFIX}）}"; else echo "https://d2.jpom.download/${MODE}/${VERSION}/"; fi )
  文档     : $( [ "$DOCS" = "1" ] && echo "已提交/推送 docs main" || echo "未更新" )
  Docker   : ${docker_desc}
  后置步骤 : $( [ "$POST" = "1" ] && echo "已执行（Gitee/GitHub Release + 群通知）" || echo "未执行（--with-post 可自动执行）" )
@@ -2287,8 +2263,20 @@ print_plan() {
 	local upload_step="上传 R2 ${MODE}/${VERSION}"
 	local docs_step="更新 docs 并推送 docs main"
 	local docker_step docker_note docker_args=""
+	local step_build_web="前端 npm install && npm run build" step_build_backend="后端 mvn clean package"
+	local step_verify="产物完整性校验（含 jar class 非空检查）" step_smoke="服务端/插件端启动冒烟"
+	if [ "$R2CI" = "1" ]; then
+		step_build_web="前端/后端构建由 GitHub Actions 完成（本机跳过）"
+		step_build_backend="（不再本机构建，见第 10 步）"
+		step_verify="（CI 下载后）产物完整性校验"
+		step_smoke="（CI 下载后）服务端/插件端启动冒烟"
+	fi
 	if [ "$PUSH" = "0" ] || ! phase_will_run push; then push_step="提交（跳过推送）"; fi
-	if [ "$UPLOAD" = "0" ] || ! phase_will_run upload; then upload_step="跳过 R2 上传"; fi
+	if [ "$UPLOAD" = "0" ] || ! phase_will_run upload; then
+		upload_step="跳过 R2 上传"
+	elif [ "$R2CI" = "1" ]; then
+		upload_step="触发 GitHub Actions release-package 构建并上传 R2（等待后下载产物校验+冒烟）"
+	fi
 	if [ "$DOCS" = "0" ] || ! phase_will_run docs; then docs_step="跳过 docs"; fi
 	if [ "$DOCKER" = "1" ] && phase_will_run docker; then
 		if [ "$DOCKER_MODE" = "local" ]; then
@@ -2316,19 +2304,20 @@ print_plan() {
   1. 合并 ${SOURCE_BRANCH} -> ${TARGET_BRANCH}
   2. 给 CHANGELOG 的 ${VERSION}-${VERSION_SUFFIX} 补日期 ${RELEASE_DATE}
   3. 调用 replaceVersion.sh ${VERSION} ${MODE}
-  4. 前端 npm install && npm run build
-  5. 后端 mvn clean package
+  4. ${step_build_web}
+  5. ${step_build_backend}
   6. 回归单元测试（script/run-regression-tests.sh，默认执行）
-  7. 产物完整性校验（含 jar class 非空检查）
-  8. 服务端/插件端启动冒烟
+  7. ${step_verify}
+  8. ${step_smoke}
   9. ${push_step}
- 10. ${upload_step}
+ 10. ${upload_step}$( [ "$R2CI" = "1" ] && echo "
+     - 本机跳过构建/产物校验/启动冒烟；CI 成功后下载产物到 modules/*/target 再做校验与冒烟" )
  11. ${docs_step}
  12. ${docker_step}
 ${docker_note}
 
 下一步（去掉 --dry-run 即执行；远程操作会二次确认或需要 --yes）：
-  bash script/release.sh ${MODE} --target-branch ${TARGET_BRANCH} --source-branch ${SOURCE_BRANCH}$( [ -n "$VERSION_OPT" ] && echo " --version ${VERSION_OPT}" )${docker_args}
+  bash script/release.sh ${MODE} --target-branch ${TARGET_BRANCH} --source-branch ${SOURCE_BRANCH}$( [ -n "$VERSION_OPT" ] && echo " --version ${VERSION_OPT}" )$( [ "$R2CI" = "1" ] && echo " --with-r2-ci${R2_CI_PREFIX:+ --r2-ci-prefix ${R2_CI_PREFIX}}" )${docker_args}
 EOF
 }
 

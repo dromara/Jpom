@@ -32,6 +32,8 @@
 #   R2_REMOTE        rclone remote 名称，默认 r2
 #   R2_BUCKET        R2 bucket 名称，默认 jpom-releases-apac
 #   R2_PUBLIC_BASE   下载中心域名，默认 https://d2.jpom.download
+#   R2_PATH_PREFIX   目标路径前缀（可选，默认空；用于 CI POC/灰度，如 ci-test -> ci-test/<channel>/<version>/）
+#   R2_CHUNK_SIZE / R2_UPLOAD_CONCURRENCY / R2_TRANSFERS  上传调优参数
 #
 # 约定：
 #   - release 版本号读 jpom-parent/script/tag.release.txt
@@ -54,6 +56,9 @@ R2_REMOTE="${R2_REMOTE:-r2}"
 R2_BUCKET="${R2_BUCKET:-jpom-releases-apac}"
 R2_PUBLIC_BASE="${R2_PUBLIC_BASE:-https://d2.jpom.download}"
 R2_PUBLIC_BASE="${R2_PUBLIC_BASE%/}"
+R2_PATH_PREFIX="${R2_PATH_PREFIX:-}"
+R2_PATH_PREFIX="${R2_PATH_PREFIX#/}"
+R2_PATH_PREFIX="${R2_PATH_PREFIX%/}"
 
 channel="release"
 dry_run=0
@@ -158,10 +163,13 @@ sources=(
 	"${target_dir}/server/target/server-${version}-release.zip.sha1"
 )
 
+remote_rel="${R2_PATH_PREFIX:+${R2_PATH_PREFIX}/}${channel}/${version}"
+
 echo "================================================================"
 echo " 渠道：${channel}    版本：${version}"
-echo " 目标：${R2_REMOTE}:${R2_BUCKET}/${channel}/${version}/"
-echo " 下载：${R2_PUBLIC_BASE}/${channel}/${version}/"
+[ -n "${R2_PATH_PREFIX}" ] && echo " 路径前缀：${R2_PATH_PREFIX}（POC/灰度，不写正式目录）"
+echo " 目标：${R2_REMOTE}:${R2_BUCKET}/${remote_rel}/"
+echo " 下载：${R2_PUBLIC_BASE}/${remote_rel}/"
 [ "${dry_run}" -eq 1 ] && echo " 模式：DRY-RUN（不会执行任何上传）"
 echo "================================================================"
 
@@ -206,7 +214,7 @@ for src in "${sources[@]}"; do
 	fi
 done
 
-remote_dir="${R2_REMOTE}:${R2_BUCKET}/${channel}/${version}/"
+remote_dir="${R2_REMOTE}:${R2_BUCKET}/${remote_rel}/"
 stage_dir="${root_dir}/.tmp/deploy-r2.$$"
 merged_zip="${stage_dir}/jpom-${version}.zip"
 
@@ -298,7 +306,7 @@ else
 		name=$(basename "${src}")
 		local_sha1=$(sha1_of "${src}")
 		remote_sha1=$(curl -fsSL --retry 3 --retry-delay 2 \
-			"${R2_PUBLIC_BASE}/${channel}/${version}/${name}.sha1?${cache_buster}" 2>/dev/null | tr -d ' \r\n' || true)
+			"${R2_PUBLIC_BASE}/${remote_rel}/${name}.sha1?${cache_buster}" 2>/dev/null | tr -d ' \r\n' || true)
 		if [ "${local_sha1}" = "${remote_sha1}" ]; then
 			echo "OK   ${name}  sha1=${local_sha1}"
 		else
@@ -315,7 +323,7 @@ else
 			deep_file="${stage_dir}/deep-${name}"
 			echo ">>> deep-verify 下载 ${name}"
 			if ! curl -fsSL --retry 3 --retry-delay 2 -o "${deep_file}" \
-				"${R2_PUBLIC_BASE}/${channel}/${version}/${name}?${cache_buster}"; then
+				"${R2_PUBLIC_BASE}/${remote_rel}/${name}?${cache_buster}"; then
 				echo "FAIL ${name}  deep-verify 下载失败"
 				fail=1
 				continue
@@ -349,6 +357,6 @@ cat <<EOF
      bash script/release-post.sh release --version ${version} --yes
 3. 在旧版本上验证在线升级（服务端读取 https://jpom.top/docs/*-versions.json，包来自 d2）
 4. 若本次是同一版本覆盖上传，请到 Cloudflare 控制台 Purge：
-     ${R2_PUBLIC_BASE}/${channel}/${version}/*
+     ${R2_PUBLIC_BASE}/${remote_rel}/*
 5. 本机上行带宽较慢时，建议在服务端执行本脚本，或用 nohup 在后台运行
 EOF
