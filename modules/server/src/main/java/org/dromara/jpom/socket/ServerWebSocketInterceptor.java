@@ -10,6 +10,7 @@
 package org.dromara.jpom.socket;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.jwt.JWT;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Tuple;
@@ -22,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.dromara.jpom.common.ClientIpUtil;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.ServerOpenApi;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.interceptor.IpInterceptor;
 import org.dromara.jpom.common.interceptor.LoginInterceptor;
@@ -41,6 +43,7 @@ import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.service.user.UserBindWorkspaceService;
 import org.dromara.jpom.service.user.UserService;
+import org.dromara.jpom.util.JwtUtil;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
@@ -128,6 +131,31 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
             || StrUtil.equals("127.0.0.1", host)
             || StrUtil.equals("::1", host)
             || StrUtil.equals("0:0:0:0:0:0:0:1", host);
+    }
+
+    /**
+     * 兼容非浏览器 WebSocket 客户端：使用 Authorization(JWT) 或 JPOM-USER-TOKEN 请求头认证。
+     * 注意：不再接受 URL 中的 userId 密码摘要。
+     *
+     * @param request 请求
+     * @return 用户；无效返回 null
+     */
+    private UserModel checkHeaderUser(HttpServletRequest request) {
+        String authorization = request.getHeader(ServerOpenApi.HTTP_HEAD_AUTHORIZATION);
+        if (StrUtil.isNotEmpty(authorization)) {
+            JWT jwt = JwtUtil.readBody(authorization);
+            if (jwt != null && !JwtUtil.expired(jwt, 0)) {
+                UserModel userModel = userService.checkUser(JwtUtil.getId(jwt));
+                if (userModel != null) {
+                    return userModel;
+                }
+            }
+        }
+        String header = request.getHeader(ServerOpenApi.USER_TOKEN_HEAD);
+        if (StrUtil.isNotEmpty(header)) {
+            return userService.checkUser(header);
+        }
+        return null;
     }
 
     private boolean checkNode(HttpServletRequest httpServletRequest, Map<String, Object> attributes, UserModel userModel) {
@@ -263,22 +291,21 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
                 attributes.put("permissionMsg", I18nMessageUtil.get("i18n.no_permission.e343"));
                 return true;
             }
-            // 使用登录会话（HttpOnly Cookie）认证，不再使用 URL 中的密码摘要 userId
+            // 认证：浏览器使用登录会话（HttpOnly Cookie）；非浏览器客户端允许 HTTP 请求头
+            // 不再使用 URL 中的密码摘要 userId
             HttpSession session = httpServletRequest.getSession(false);
             UserModel sessionUser = session == null ? null : (UserModel) session.getAttribute(LoginInterceptor.SESSION_NAME);
-            if (sessionUser == null) {
+            UserModel userModel = sessionUser == null ? null : userService.getByKey(sessionUser.getId());
+            if (userModel == null) {
+                userModel = this.checkHeaderUser(httpServletRequest);
+            }
+            if (userModel == null) {
                 attributes.put("permissionMsg", I18nMessageUtil.get("i18n.not_logged_in.c89f"));
                 return true;
             }
             String workspaceId = httpServletRequest.getParameter(ServerConst.WORKSPACE_ID_REQ_HEADER);
             attributes.put("workspaceId", workspaceId);
             attributes.put("lang", httpServletRequest.getParameter("lang"));
-            // 重新读取用户，确保禁用/删除后旧会话立即失效
-            UserModel userModel = userService.getByKey(sessionUser.getId());
-            if (userModel == null) {
-                attributes.put("permissionMsg", I18nMessageUtil.get("i18n.user_not_exist.4892"));
-                return true;
-            }
             if (userModel.getStatus() != null && userModel.getStatus() == 0) {
                 attributes.put("permissionMsg", ServerConst.ACCOUNT_LOCKED_TIP.get());
                 return true;
