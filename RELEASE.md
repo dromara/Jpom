@@ -45,6 +45,7 @@ bash script/release.sh beta --version 2.11.12.2 --from upload
 - 只推送 Gitee；docs 子模块仍按既有流程推 GitHub Pages。beta 不打 tag、不创建 Release。
 - `--with-post` 在推送/R2/docs 完成后执行 `script/release-post.sh`（幂等）：创建 Gitee Release 并上传安装包、创建 GitHub Release（Latest）、发送 7 个微信群通知（已存在/已送达则跳过）。
 - 日志在 `.tmp/release/`；失败后按日志提示用 `--from <阶段>` 续跑。
+- **发版后仍需人工在 `dev` 补下一个 beta 版本日志段**（`CHANGELOG-BETA.md` 顶部 `## <新稳定版>.1-beta` 或 `<当前稳定版>.<N+1>-beta`，提交 `releases(发布): 开始 ...-beta 开发`）；`release.sh` 暂未自动化这一步，详见 `AGENTS.md` 6.2/6.3。
 
 ## 手动版
 
@@ -66,6 +67,7 @@ bash script/release.sh beta --version 2.11.12.2 --from upload
 16. **创建 GitHub Release**（Gitee 镜像不同步 Release；用 `bash script/release-post.sh release --version 2.x.x --github-only --yes`）
 17. **微信群发版通知**（`bash script/release-post.sh release --version 2.x.x --notify-only --yes`，或直接用 `jpom-release-notify` skill；默认不 @所有人、不发朋友圈）
 18. 归档记录到 `dev-docs/archive/<YYYY-MM>-release-<version>/`（含 `notification-<version>.md`）
+19. **发版后立即在 `dev` 补下一个 beta 版本日志段**：`CHANGELOG-BETA.md` 顶部新增 `## <新稳定版>.1-beta`（空“新增功能/解决BUG”小节），给刚发版的 beta 段补日期，提交 `releases(发布): 开始 <新稳定版>.1-beta 开发`。
 
 > beta 版上传：`bash script/deploy-release-r2.sh beta`（版本号取自 `jpom-parent/script/tag.beta.txt`）。
 

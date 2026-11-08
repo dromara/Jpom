@@ -309,6 +309,7 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
 12.3 **微信群发版通知**：`release-post.sh` 调用 `jpom-release-notify` skill 发送到 7 个群（已送达则自动跳过，不重复发）；也可单独执行 `bash .dsh/skills/jpom-release-notify/scripts/send-notice.sh <msg>`。
 12.4 **归档**：在 `dev-docs/archive/<YYYY-MM>-release-<version>/` 记录 Release URL、digest、群通知 operationId/new_msg_id；群通知单独写 `notification-<version>.md`。
 13. **可选**：发布发版公告（已用 12.3 的群通知则无需重复）。
+14. **发版后立即在 `dev` 上开始下一个 beta 版本日志段**：在 `CHANGELOG-BETA.md` 顶部新增 `## <新稳定版>.1-beta`（保留空的“新增功能/解决BUG”小节），并给刚发版的 beta 段补日期；提交 `releases(发布): 开始 <新稳定版>.1-beta 开发`。否则后续 dev 变更会被误记到**已发版**的 beta 段（2026-11-08 教训：`2.11.12.3-beta` 已随 2.11.13 发布，dev 未及时切段）。
 
 ### 6.3 beta 发版
 
@@ -321,6 +322,7 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
 7. 上传到 beta 渠道：`bash script/deploy-release-r2.sh beta`（版本号取自 `jpom-parent/script/tag.beta.txt`，上传到 `r2:jpom-releases-apac/beta/<version>/` 并自动回验）。
 8. 可选构建 beta 镜像（`-f ./modules/server/DockerfileBeta`）。
 9. **beta 不打 tag、不创建 Gitee Release（GitHub 镜像无需操作）**；测稳后按 6.2 合并到 `master` 发稳定版。
+10. **发版后立即在 `dev` 上补下一个 beta 版本日志段**：`## <当前稳定版>.<序号+1>-beta`，提交 `releases(发布): 开始 ...-beta 开发`，并给刚发版的 beta 段补日期。
 
 ### 6.4 流水线发版（Gitee Go）
 
@@ -350,6 +352,7 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
 - [ ] Gitee Release 已创建并上传 zip/tar.gz/sha1
 - [ ] GitHub Release 已创建（Latest；Gitee 镜像不同步 Release，用 `script/release-post.sh`）
 - [ ] 微信群发版通知已发送并核对送达（`check-delivery.sh <version>` 全部命中）
+- [ ] 发版后已在 `dev` 补下一个 beta 版本日志段（并给刚发版的版本补日期）
 - [ ] 已确认得到维护者授权，且所有正式渠道操作符合预期
 
 ### 6.6 一键发版脚本（推荐）
