@@ -615,6 +615,6 @@ bash script/check-sensitive.sh --all --range origin/dev..HEAD
 - `dev-docs/runbooks/docker-hub-push-cn.md`：国内网络下 Docker Hub 推送操作手册（本机兜底/排障）
 - `jpom-parent/.github/workflows/docker-publish.yml`：Docker 镜像发布工作流（tag `v*` 自动 / 手动 dispatch；构建并推送 server/agent 多平台镜像到 Docker Hub）；可选仓库变量 `DOCKERHUB_NAMESPACE`、`DOCKERHUB_SERVER_REPO`、`DOCKERHUB_AGENT_REPO`、`JPOM_DOWNLOAD_BASE`（CI 下载发布包默认 r2.dev）
 - `jpom-parent/modules/*/DockerfileRelease|DockerfileBeta`（含 Jdk17 变体）：构建时从 `ARG JPOM_DOWNLOAD_BASE`（默认 `https://d2.jpom.download`）下载对应发布包；CI 通过 build-args 传 r2.dev 地址
-- `jpom-parent/script/docker-ci-meta.sh`、`jpom-parent/script/docker-ci-wait-r2.sh`：Docker 发布工作流与 `release.sh --with-docker` 使用的版本/tag 解析与 R2 就绪等待辅助脚本
+- `jpom-parent/script/docker-ci-meta.sh`、`jpom-parent/script/docker-ci-wait-r2.sh`：Docker 发布工作流使用的版本/tag/Dockerfile 版本一致性解析与 R2 就绪等待辅助脚本（`release.sh` 的 CI 触发/等待/回验逻辑在根仓 `script/release.sh` 内）
 - `dev-docs/runbooks/docker-publish-ci.md`：Docker 镜像 CI 发布、验证与失败排查手册
 - `.dsh/skills/jpom-release-notify/`：微信群发版通知 skill（默认不发朋友圈、不 @所有人）
