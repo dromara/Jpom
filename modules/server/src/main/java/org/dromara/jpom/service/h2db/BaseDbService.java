@@ -291,7 +291,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * @return 影响行数
      */
     public int delByBean(T info) {
-        Entity where = this.dataBeanToEntity(info);
+        Entity where = this.dataBeanToQueryEntity(info);
         Assert.state(!where.isEmpty(), I18nMessageUtil.get("i18n.no_parameters_added_with_minus_two.a7cf"));
         return this.del(where);
     }
@@ -354,7 +354,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * @return true 存在
      */
     public boolean exists(T data) {
-        Entity entity = this.dataBeanToEntity(data);
+        Entity entity = this.dataBeanToQueryEntity(data);
         return this.exists(entity);
     }
 
@@ -428,7 +428,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * @return List
      */
     public List<T> queryList(T data, int count, Order... orders) {
-        Entity where = this.dataBeanToEntity(data);
+        Entity where = this.dataBeanToQueryEntity(data);
         return this.queryList(where, count, orders);
     }
 
@@ -500,7 +500,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * @return data
      */
     public List<T> listByBean(T data, boolean fill) {
-        Entity where = this.dataBeanToEntity(data);
+        Entity where = this.dataBeanToQueryEntity(data);
         List<Entity> entitys = this.queryList(where);
         return this.entityToBeanList(entitys, fill);
     }
@@ -512,7 +512,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * @return data
      */
     public T queryByBean(T data) {
-        Entity where = this.dataBeanToEntity(data);
+        Entity where = this.dataBeanToQueryEntity(data);
         Entity entity = this.query(where);
         return this.entityToBean(entity, true);
     }
@@ -530,7 +530,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
     }
 
     public long count(T data) {
-        return super.count(this.dataBeanToEntity(data));
+        return super.count(this.dataBeanToQueryEntity(data));
     }
 
     /**

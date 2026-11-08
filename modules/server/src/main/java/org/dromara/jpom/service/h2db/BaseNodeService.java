@@ -415,7 +415,7 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
             T data = ReflectUtil.newInstance(this.tClass);
             data.setNodeId(nodeId);
             data.dataId(dataId);
-            Entity entity1 = dataBeanToEntity(data);
+            Entity entity1 = dataBeanToQueryEntity(data);
             entity.putAll(entity1);
         });
 
