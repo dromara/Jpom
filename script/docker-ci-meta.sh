@@ -34,6 +34,8 @@
 #   DOCKERHUB_NAMESPACE      默认 jpomdocker
 #   DOCKERHUB_SERVER_REPO    默认 jpom
 #   DOCKERHUB_AGENT_REPO     默认 jpom-agent
+#   JPOM_DOWNLOAD_BASE       发布包下载基址（默认 https://d2.jpom.download；
+#                            GitHub Actions 使用 r2.dev 公开域名，见 workflow 中 JPOM_DOWNLOAD_BASE）
 #   REPO_DIR                 仓库根目录（默认脚本上级目录）
 #-----------------------------------------------------------
 
@@ -52,7 +54,7 @@ platforms_input="${INPUT_PLATFORMS:-linux/amd64,linux/arm64}"
 tags_override="${INPUT_TAGS_OVERRIDE:-}"
 dry_run_input="${INPUT_DRY_RUN:-false}"
 wait_r2_minutes="${INPUT_WAIT_R2_MINUTES:-30}"
-r2_base="${R2_BASE:-https://d2.jpom.download}"
+r2_base="${JPOM_DOWNLOAD_BASE:-${R2_BASE:-https://d2.jpom.download}}"
 dockerhub_namespace="${DOCKERHUB_NAMESPACE:-jpomdocker}"
 dockerhub_server_repo="${DOCKERHUB_SERVER_REPO:-jpom}"
 dockerhub_agent_repo="${DOCKERHUB_AGENT_REPO:-jpom-agent}"

@@ -71,6 +71,9 @@ concurrency:
   cancel-in-progress: false
 
 env:
+  # GitHub Actions runner 访问 d2.jpom.download 会被 Cloudflare managed challenge 拦截（403），
+  # 因此 CI 从 R2 bucket 的 r2.dev 公开域名下载发布包；如更换域名/桶，改仓库变量 JPOM_DOWNLOAD_BASE 即可。
+  JPOM_DOWNLOAD_BASE: ${{ vars.JPOM_DOWNLOAD_BASE || 'https://pub-a46506c7e8ff43fabc4c1ce8e5faffcb.r2.dev' }}
   DOCKERHUB_NAMESPACE: ${{ vars.DOCKERHUB_NAMESPACE || 'jpomdocker' }}
   DOCKERHUB_SERVER_REPO: ${{ vars.DOCKERHUB_SERVER_REPO || 'jpom' }}
   DOCKERHUB_AGENT_REPO: ${{ vars.DOCKERHUB_AGENT_REPO || 'jpom-agent' }}
@@ -111,6 +114,7 @@ jobs:
           INPUT_TAGS_OVERRIDE: ${{ inputs.tags_override || '' }}
           INPUT_DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
           INPUT_WAIT_R2_MINUTES: ${{ inputs.wait_r2_minutes || '30' }}
+          JPOM_DOWNLOAD_BASE: ${{ env.JPOM_DOWNLOAD_BASE }}
         run: bash script/docker-ci-meta.sh
 
       - name: 等待 R2 发布包就绪
@@ -210,6 +214,8 @@ jobs:
           provenance: false
           sbom: false
           tags: ${{ matrix.image == 'server' && needs.prepare.outputs.server_tags || needs.prepare.outputs.agent_tags }}
+          build-args: |
+            JPOM_DOWNLOAD_BASE=${{ env.JPOM_DOWNLOAD_BASE }}
           labels: |
             org.opencontainers.image.title=Jpom ${{ matrix.image }}
             org.opencontainers.image.source=https://gitee.com/dromara/Jpom
