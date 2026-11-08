@@ -92,14 +92,14 @@ jobs:
           java-version: '8'
 
       - name: 构建前端
-        working-directory: jpom-parent/web-vue
+        working-directory: web-vue
         run: |
           set -euo pipefail
           npm install --no-audit --no-fund
           npm run build
 
       - name: 构建后端发布包
-        working-directory: jpom-parent
+        working-directory: .
         run: |
           set -euo pipefail
           mvn -B -e clean package -Dmaven.test.skip=true -Dmaven.compile.fork=true
