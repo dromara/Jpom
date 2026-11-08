@@ -27,6 +27,7 @@ import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
 import org.dromara.jpom.service.manage.ProjectInfoService;
 import org.dromara.jpom.util.FileSearchUtil;
+import org.dromara.jpom.util.FileUtils;
 import org.dromara.jpom.util.SocketSessionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -239,8 +240,9 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
         //
         String fileName = reqJson.getString("logFile");
         File libFile = projectInfoService.resolveLibFile(nodeProjectInfoModel);
-        File file = FileUtil.file(libFile, fileName);
-        if (!FileUtil.isFile(file)) {
+        // 客户端可控日志文件名，限制在项目目录内，避免路径穿越
+        File file = FileUtils.resolveSubFile(libFile, fileName);
+        if (file == null || !FileUtil.isFile(file)) {
             return new JsonMessage<>(404, I18nMessageUtil.get("i18n.file_not_found.d952"));
         }
         I18nThreadUtil.execute(() -> {
@@ -282,7 +284,12 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
             file = projectInfoService.resolveAbsoluteLogFile(nodeProjectInfoModel);
         } else {
             File libFile = projectInfoService.resolveLibFile(nodeProjectInfoModel);
-            file = FileUtil.file(libFile, fileName);
+            // 客户端可控日志文件名，限制在项目目录内，避免路径穿越
+            file = FileUtils.resolveSubFile(libFile, fileName);
+            if (file == null) {
+                SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.file_not_found.d952"));
+                return;
+            }
         }
         try {
             NodeProjectInfoModel originalModel = projectInfoService.resolveModel(nodeProjectInfoModel);

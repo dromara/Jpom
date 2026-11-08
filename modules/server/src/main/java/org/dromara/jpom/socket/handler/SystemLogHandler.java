@@ -20,6 +20,7 @@ import org.dromara.jpom.socket.BaseProxyHandler;
 import org.dromara.jpom.socket.ConsoleCommandOp;
 import org.dromara.jpom.socket.ServiceFileTailWatcher;
 import org.dromara.jpom.system.LogbackConfig;
+import org.dromara.jpom.util.FileUtils;
 import org.dromara.jpom.util.SocketSessionUtil;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -61,7 +62,12 @@ public class SystemLogHandler extends BaseProxyHandler {
         if (consoleCommandOp == ConsoleCommandOp.showlog) {
 
             // 进入管理页面后需要实时加载日志
-            File file = FileUtil.file(LogbackConfig.getPath(), fileName);
+            // 文件名来自 WebSocket 客户端，必须限制在日志目录内，避免路径穿越读取任意文件
+            File file = FileUtils.resolveSubFile(FileUtil.file(LogbackConfig.getPath()), fileName);
+            if (file == null) {
+                SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.file_not_found.d952"));
+                return null;
+            }
             //
             File nowFile = (File) attributes.get("nowFile");
             if (nowFile != null && !nowFile.equals(file)) {
