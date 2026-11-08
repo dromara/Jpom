@@ -30,3 +30,7 @@ jobs:
           cache: maven
       - name: Build with Maven
         run: mvn -B package
+      # 根 pom 默认 maven.test.skip=true，package 不会执行单测；单独跑核心回归测试，
+      # 防止 2.11.13 那样「共享基础类改动+单测只覆盖工具函数」的回归再次漏出。
+      - name: Run regression unit tests
+        run: bash script/run-regression-tests.sh

@@ -42,6 +42,7 @@ import org.springframework.util.Assert;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -600,6 +601,34 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         String order = paramMap.get("order");
         //
         Page pageReq = this.parsePage(paramMap);
+        Entity where = buildWhere(paramMap, DialectUtil::wrapField);
+        // 排序
+        if (StrUtil.isNotEmpty(orderField)) {
+            orderField = StrUtil.removeAll(orderField, "%");
+            if (isSafeFieldName(orderField)) {
+                pageReq.addOrder(new Order(DialectUtil.wrapField(orderField), StrUtil.equalsIgnoreCase(order, "ascend") ? Direction.ASC : Direction.DESC));
+            } else {
+                log.warn("ignore invalid order field: {}", orderField);
+            }
+        }
+        return this.listPage(where, pageReq, fill);
+    }
+
+    /**
+     * 根据请求参数构建查询条件
+     * <p>
+     * 请求参数名会被当作数据库字段名使用，必须先校验为合法标识符、并用 {@link Condition} 绑定值，避免 SQL 注入；
+     * 同时 {@code %field%}、{@code field:in}、{@code field[0]/field[1]} 等过滤语法必须在字段名校验前剥离后缀。
+     * <p>
+     * 独立成静态包级方法是为了让单元测试能直接断言构建结果：2.11.13 曾因在字段名校验时未先剥离 {@code :in}
+     * 后缀，导致 {@code workspaceId:in} 被静默丢弃、工作空间隔离整体失效。**禁止只测试
+     * {@link #resolveFilterField(String)} 而跳过本方法**，否则同类回归仍会逃逸。
+     *
+     * @param paramMap     请求参数（调用方需已移除 page/limit/order_field/order 等分页参数）
+     * @param fieldWrapper 字段名包裹器（生产为 {@link DialectUtil#wrapField(String)}，单测可注入简单实现）
+     * @return 查询条件
+     */
+    static Entity buildWhere(Map<String, String> paramMap, Function<String, String> fieldWrapper) {
         Entity where = Entity.create();
         List<String> ignoreField = new ArrayList<>(10);
         // 查询条件
@@ -618,9 +647,9 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
                 continue;
             }
             String timeKey = StrUtil.removeAny(key, "[0]", "[1]");
-            String wrapField = DialectUtil.wrapField(key);
+            String wrapField = fieldWrapper.apply(key);
             if (StrUtil.endWith(key, ":in")) {
-                where.set(DialectUtil.wrapField(filterField), StrUtil.split(value, StrUtil.COMMA));
+                where.set(fieldWrapper.apply(filterField), StrUtil.split(value, StrUtil.COMMA));
             } else if (StrUtil.startWith(rawKey, "%") && StrUtil.endWith(rawKey, "%")) {
                 where.set(wrapField, new Condition(wrapField, "like", "%" + value + "%"));
             } else if (StrUtil.endWith(rawKey, "%")) {
@@ -646,7 +675,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
                 if (ignoreField.contains(timeKey)) {
                     continue;
                 }
-                String timeWrapField = DialectUtil.wrapField(timeKey);
+                String timeWrapField = fieldWrapper.apply(timeKey);
                 String startTime = paramMap.get(timeKey + "[0]");
                 String endTime = paramMap.get(timeKey + "[1]");
                 if (StrUtil.isAllNotEmpty(startTime, endTime)) {
@@ -666,16 +695,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
                 where.set(wrapField, new Condition(wrapField, "=", value));
             }
         }
-        // 排序
-        if (StrUtil.isNotEmpty(orderField)) {
-            orderField = StrUtil.removeAll(orderField, "%");
-            if (isSafeFieldName(orderField)) {
-                pageReq.addOrder(new Order(DialectUtil.wrapField(orderField), StrUtil.equalsIgnoreCase(order, "ascend") ? Direction.ASC : Direction.DESC));
-            } else {
-                log.warn("ignore invalid order field: {}", orderField);
-            }
-        }
-        return this.listPage(where, pageReq, fill);
+        return where;
     }
 
     /**
