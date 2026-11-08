@@ -896,7 +896,7 @@ phase_preflight() {
 			gh auth status >/dev/null 2>&1 ||
 				die "gh 未登录 GitHub（--with-r2-ci 需要触发 GitHub Actions）；可 gh auth login 或设置 GH_TOKEN"
 			[ -f "${ROOT_DIR}/script/release-r2-ci.sh" ] || die "缺少 CI 触发脚本：script/release-r2-ci.sh"
-			[ -f "${ROOT_DIR}/script/verify-release-artifacts.sh" ] || die "缺少产物校验脚本：script/verify-release-artifacts.sh"
+			[ -f "${PARENT_DIR}/script/verify-release-artifacts.sh" ] || die "缺少产物校验脚本：script/verify-release-artifacts.sh"
 		else
 			need_cmd rclone
 			need_cmd curl
@@ -1334,7 +1334,7 @@ phase_tests() {
 verify_artifacts() {
 	section "产物完整性校验"
 	mkdir -p "${LOG_DIR}/artifacts"
-	bash "${ROOT_DIR}/script/verify-release-artifacts.sh" \
+	bash "${PARENT_DIR}/script/verify-release-artifacts.sh" \
 		--parent-dir "$PARENT_DIR" --version "$VERSION" --log-dir "${LOG_DIR}/artifacts"
 }
 
@@ -1639,7 +1639,7 @@ phase_upload() {
 		UPLOADED=1
 		if [ "$VERIFY" = "1" ]; then
 			section "校验 CI 下载回的产物"
-			bash "${ROOT_DIR}/script/verify-release-artifacts.sh" \
+			bash "${PARENT_DIR}/script/verify-release-artifacts.sh" \
 				--parent-dir "$PARENT_DIR" --version "$VERSION" --log-dir "$LOG_DIR" --downloaded ||
 				die "CI 下载回的产物完整性校验失败"
 		fi

@@ -204,7 +204,7 @@ download_artifacts() {
 		log "OK  ${kind} 产物已下载并解压到 ${run_dir}"
 	done
 	if [ "$skip_verify" = "0" ]; then
-		bash "${root_dir}/script/verify-release-artifacts.sh" \
+		bash "${parent_dir}/script/verify-release-artifacts.sh" \
 			--parent-dir "$download_dir" --version "$version" --downloaded ||
 			die "下载后的产物完整性校验失败"
 	fi
