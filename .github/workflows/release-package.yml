@@ -109,7 +109,7 @@ jobs:
         run: |
           set -euo pipefail
           bash script/verify-release-artifacts.sh \
-            --parent-dir jpom-parent \
+            --parent-dir . \
             --version '${{ steps.meta.outputs.version }}'
 
       - name: 安装 rclone
@@ -182,7 +182,7 @@ jobs:
             echo '```'
             for kind in server agent; do
               for ext in zip tar.gz; do
-                file="jpom-parent/modules/${kind}/target/${kind}-${VERSION}-release.${ext}"
+                file="modules/${kind}/target/${kind}-${VERSION}-release.${ext}"
                 [ -f "$file" ] && echo "${file##*/}  $(sha1sum "$file" | awk '{print $1}')  $(du -h "$file" | cut -f1)"
               done
             done

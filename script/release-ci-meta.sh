@@ -35,7 +35,12 @@
 set -euo pipefail
 
 repo_dir="${REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
-parent_dir="${repo_dir}/jpom-parent"
+# 兼容两种布局：工作区根（含 jpom-parent/ 子目录，如本地调试）与 jpom-parent 仓库根（如 GitHub Actions checkout）
+if [ -d "${repo_dir}/jpom-parent" ]; then
+	parent_dir="${repo_dir}/jpom-parent"
+else
+	parent_dir="${repo_dir}"
+fi
 event="${GITHUB_EVENT_NAME:-workflow_dispatch}"
 ref="${GITHUB_REF:-refs/heads/dev}"
 ref_name="${GITHUB_REF_NAME:-${ref#refs/}}"
