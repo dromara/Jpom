@@ -12,7 +12,8 @@
 
 根目录 `script/release.sh` 串联：合并分支 → CHANGELOG 日期 → 版本替换 → 前端/后端构建
 → 产物完整性校验 → 服务端/插件端启动冒烟 → 提交/推送 Gitee → R2 上传 → docs 更新
-→（可选）Docker →（可选）`--with-post` 发布后置（Gitee/GitHub Release + 微信群通知）。
+→（可选）Docker（默认触发 GitHub Actions `docker-publish.yml` 并等待+回验）→
+（可选）`--with-post` 发布后置（Gitee/GitHub Release + 微信群通知）。
 
 ```bash
 cd <工作区根目录>
@@ -30,7 +31,7 @@ bash script/release.sh beta --to commit
 # 稳定版：按 tag.release 自动计算下一个 patch（2.11.12 → 2.11.13）
 bash script/release.sh release --yes
 
-# 稳定版一条命令含发布后置（Gitee/GitHub Release + 微信群通知）
+# 稳定版一条命令含 Docker（CI 发布+回验）与发布后置（Gitee/GitHub Release + 微信群通知）
 bash script/release.sh release --yes --with-post --with-docker
 
 # 断点续跑（示例：推送成功后从 R2 上传继续）
@@ -43,6 +44,7 @@ bash script/release.sh beta --version 2.11.12.2 --from upload
 - `--dry-run` 只做预检并打印计划；`--no-push` / `--no-upload` / `--no-docs` 可关闭对应阶段（组合受保护）。
 - beta 要求 `dev` 的 `CHANGELOG-BETA.md` 已有对应版本段落（日期可由脚本补）；release 要求 `master` 的 `CHANGELOG.md` 已有 `x.y.z-release` 段落（release 日志需人工整理，脚本不自动生成）。
 - 只推送 Gitee；docs 子模块仍按既有流程推 GitHub Pages。beta 不打 tag、不创建 Release。
+- Docker 镜像默认由 GitHub Actions `docker-publish.yml` 发布（`--with-docker` 触发并等待+回验；`--docker-local` 本机构建推送兜底，仍从 d2 下载发布包）；CI 下载发布包默认走 R2 r2.dev 公开域名（d2 对 GitHub runner 有 Cloudflare managed challenge），可用仓库变量 `JPOM_DOWNLOAD_BASE` 覆盖；`workflow_dispatch` 首次运行限制/当前可用状态见 `AGENTS.md` 6.2 第 11 步（本仓库 `dev` 自检运行后已可 dispatch）。
 - `--with-post` 在推送/R2/docs 完成后执行 `script/release-post.sh`（幂等）：创建 Gitee Release 并上传安装包、创建 GitHub Release（Latest）、发送 7 个微信群通知（已存在/已送达则跳过）。
 - 日志在 `.tmp/release/`；失败后按日志提示用 `--from <阶段>` 续跑。
 - **发版后仍需人工在 `dev` 补下一个 beta 版本日志段**（`CHANGELOG-BETA.md` 顶部 `## <新稳定版>.1-beta` 或 `<当前稳定版>.<N+1>-beta`，提交 `releases(发布): 开始 ...-beta 开发`）；`release.sh` 暂未自动化这一步，详见 `AGENTS.md` 6.2/6.3。
@@ -62,7 +64,7 @@ bash script/release.sh beta --version 2.11.12.2 --from upload
 11. 手动 copy 更新文档 changelog
 12. 发布文档：push docs 仓库 `main`，由 GitHub Actions 构建并发布到 GitHub Pages（详见 AGENTS.md 第 6.2 节）
 13. 测试远程更新是否正常
-14. 发布服务端/插件端 docker 镜像包 `docker buildx build --platform linux/amd64,linux/arm64 -t jpomdocker/jpom:2.x.x -t jpomdocker/jpom:latest -f ./modules/server/DockerfileRelease --push .`（agent 同理；国内网络问题见 `dev-docs/runbooks/docker-hub-push-cn.md`）
+14. 发布服务端/插件端 Docker 镜像（默认走 GitHub Actions）：推 tag `v2.x.x` 后 `docker-publish.yml` 自动触发（CI 从 R2 公开下载基址下载发布包构建：默认 r2.dev，`JPOM_DOWNLOAD_BASE` 可覆盖——`d2.jpom.download` 对 GitHub runner 有 Cloudflare managed challenge；工作流会等待 R2 就绪，务必先完成第 9 步 R2 上传）。推荐 `bash script/release.sh release --with-docker` 触发并等待回验；也可在 Actions 页面手动 `workflow_dispatch`（`channel=release`、`version=2.x.x`、`images=both`）。验证：run 成功 + `docker buildx imagetools inspect jpomdocker/jpom:2.x.x` 平台为 amd64+arm64、Docker Hub API digest 与 run 一致。本机兜底：`bash script/release.sh release --docker-local`；国内网络排障见 `dev-docs/runbooks/docker-hub-push-cn.md`，CI 操作与失败排查见 `dev-docs/runbooks/docker-publish-ci.md`。
 15. 在 **Gitee** 基于 tag 创建发行版，上传 server/agent 的 zip/tar.gz 与 sha1
 16. **创建 GitHub Release**（Gitee 镜像不同步 Release；用 `bash script/release-post.sh release --version 2.x.x --github-only --yes`）
 17. **微信群发版通知**（`bash script/release-post.sh release --version 2.x.x --notify-only --yes`，或直接用 `jpom-release-notify` skill；默认不 @所有人、不发朋友圈）
@@ -82,7 +84,7 @@ bash script/release.sh beta --version 2.11.12.2 --from upload
 7. 手动 copy 更新文档 changelog
 8. 执行-发布文档 (注意修改构建命令版本号)
 9. 测试远程更新是否正常
-10. 执行-发布镜像
+10. 发布镜像：推 tag 后由 GitHub Actions `docker-publish.yml` 自动发布（或手动 dispatch；详见 `AGENTS.md` 6.2 第 11 步）
 11. 在 Gitee 创建发行版并上传安装包
 12. 创建 GitHub Release（`bash script/release-post.sh release --version 2.x.x --github-only --yes`）
 13. 微信群发版通知（`bash script/release-post.sh release --version 2.x.x --notify-only --yes`）

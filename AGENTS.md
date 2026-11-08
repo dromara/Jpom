@@ -179,7 +179,7 @@ git -C docs checkout main
 | 下载中心 | `https://d2.jpom.download`（Cloudflare R2 托管）；稳定版路径 `release/<version>/`，beta 路径 `beta/<version>/` |
 | 上传工具 | 根目录 `script/deploy-release-r2.sh`（rclone remote `r2`，bucket `jpom-releases-apac`） |
 | 历史 OSS | 已停用（阿里云 AK 已禁用）；旧上传脚本 `deploy-release-oss.sh` 已删除，仅 git 历史可查 |
-| Docker Hub | `jpomdocker/jpom:<version>` 与 `:latest`、`jpomdocker/jpom-agent:<version>`（稳定版）；beta 镜像按需构建。国内网络推送步骤见 `dev-docs/runbooks/docker-hub-push-cn.md` |
+| Docker Hub | `jpomdocker/jpom:<version>` 与 `:latest`、`jpomdocker/jpom-agent:<version>`（稳定版）；beta 镜像按需构建。**由 GitHub Actions `.github/workflows/docker-publish.yml` 发布**（推 tag `v*` 自动发布稳定版；也可 `workflow_dispatch` 手动指定 channel/version/images）；本机 `bash script/release.sh <beta\|release> --docker-local` 兜底，CI 手册见 `dev-docs/runbooks/docker-publish-ci.md`，国内网络排障见 `dev-docs/runbooks/docker-hub-push-cn.md` |
 | Gitee Release | 基于 tag `v2.x.y` 创建发行版，附 server/agent 的 zip/tar.gz 与 sha1 |
 | GitHub Release | **需手动创建**（Gitee 镜像只同步代码/tag，不同步 Release）；用 `script/release-post.sh` 自动创建，正文同 Gitee 发行说明 |
 | 微信群发版通知 | 稳定版发布后向 7 个 Jpom 群发送（skill `jpom-release-notify`；也可用 `script/release-post.sh`）；默认不 @所有人、不发朋友圈 |
@@ -234,7 +234,7 @@ cd jpom-parent && bash script/run-regression-tests.sh
 
 ### 6.1 前置说明
 
-- 项目已暂停维护，正式发版前必须确认：下载域名（R2：`d2.jpom.download`）与 rclone remote 凭据、Docker Hub、文档 Pages、Gitee 凭据均可用；**无授权不得执行**。GitHub 由 Gitee 自动镜像，不需要也不应单独准备 GitHub 推送凭据。
+- 项目已暂停维护，正式发版前必须确认：下载域名（R2：`d2.jpom.download`）与 rclone remote 凭据、Docker Hub、文档 Pages、Gitee 凭据均可用；**无授权不得执行**。GitHub 由 Gitee 自动镜像，不需要也不应单独准备 GitHub 推送凭据；Docker 镜像发布所用的 GitHub 仓库 secrets 为 `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN`（在 GitHub 仓库 Settings → Secrets 配置，不落本仓）。另：GitHub Actions runner 访问 `d2.jpom.download` 会被 Cloudflare managed challenge 拦截（HTTP 403），CI 构建镜像改从 R2 的 r2.dev 公开域名下载发布包（默认 `https://pub-a46506c7e8ff43fabc4c1ce8e5faffcb.r2.dev`，可用 GitHub 仓库变量 `JPOM_DOWNLOAD_BASE` 覆盖）；`d2` 仍用于本机/`--docker-local` 构建与用户下载。
 - 发版提交固定节奏（与历史提交一致）：
   1. `releases(发布): 准备<version>` —— 更新 CHANGELOG；
   2. 运行版本替换脚本 + 打包 + 冒烟；
@@ -291,16 +291,28 @@ cd jpom-parent && bash script/run-regression-tests.sh
 
    发布方式：提交并 push `main` 分支，由 GitHub Actions（`.github/workflows/deploy.yml`）构建并推送 `dist` 分支，GitHub Pages 自动更新。历史 OSS 同步脚本（`deploy-docs-pages.sh`、`docs/.github/workflows/ali-oss.yml`）已删除。
 10. **测试远程更新**：在旧版本服务端上测试“在线升级”到新版本，确认下载与校验正常。
-11. **发布 Docker 镜像**（在 `jpom-parent` 下执行，需先启用 buildx，见 `jpom-parent/script/docker-buildx.md`）：
+11. **发布 Docker 镜像（默认由 GitHub Actions 发布）**：推 tag `v2.x.y`（第 7 步）后 `jpom-parent/.github/workflows/docker-publish.yml` 自动触发；镜像由 `DockerfileRelease` 从 R2 公开下载基址（默认 r2.dev `https://pub-a46506c7e8ff43fabc4c1ce8e5faffcb.r2.dev`，可用仓库变量 `JPOM_DOWNLOAD_BASE` 覆盖；`d2.jpom.download` 对 GitHub runner 有 Cloudflare managed challenge）下载 `/release/<version>/` 发布包构建，因此工作流会等待 R2 就绪（`wait_r2_minutes` 默认 30 分钟），务必在等待窗口内完成第 8 步的 R2 上传。CI 使用 GitHub 仓库 secrets `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN`（在仓库 Settings → Secrets 配置，**不写进本仓**）。
 
     ```bash
-    docker buildx build --platform linux/amd64,linux/arm64 \
-      -t jpomdocker/jpom:2.x.y -t jpomdocker/jpom:latest \
-      -f ./modules/server/DockerfileRelease --push .
-    # agent 同理（jpomdocker/jpom-agent），或用 --with-docker 交给 release.sh
+    # 推荐：一键脚本的 docker 阶段触发 CI，等待 run 结束并用 Docker Hub API 回验平台/digest
+    bash script/release.sh release --with-docker
+
+    # 查看/等待 run
+    gh run list --repo dromara/Jpom --workflow docker-publish.yml --limit 5
+    gh run watch <run-id> --repo dromara/Jpom
+
+    # 回验镜像平台与 digest（platforms 应含 linux/amd64,linux/arm64）
+    docker buildx imagetools inspect jpomdocker/jpom:2.x.y
+    docker buildx imagetools inspect jpomdocker/jpom-agent:2.x.y
+
+    # 手动补发（tag 自动触发失败、或需要指定 inputs 时）
+    gh workflow run docker-publish.yml --repo dromara/Jpom --ref v2.x.y \
+      -f channel=release -f version=2.x.y -f images=both
     ```
 
-    > 国内网络下 `auth.docker.io`/`registry-1.docker.io` 可能因 DNS 污染与 BuildKit token 直连失败而推送失败；处置步骤（私有 mihomo 实例 + 本地 pull-through mirror + crane 客户端推送）见 `dev-docs/runbooks/docker-hub-push-cn.md`。
+    验证口径：run 成功 + Docker Hub 上 server/agent 的 `<version>`/`latest` 平台（amd64+arm64）与 digest 回验通过；详细操作、inputs 与失败排查见 `dev-docs/runbooks/docker-publish-ci.md`。
+
+    > 本机兜底：CI 不可用时执行 `bash script/release.sh release --docker-local`（本机 buildx 构建推送），国内网络处置见 `dev-docs/runbooks/docker-hub-push-cn.md`。`workflow_dispatch` 首次运行限制：工作流需先存在并至少运行过一次；本仓库已在 `dev` 分支由 push 自检跑过一次（2026-11-08 实测），之后可对任意 ref dispatch；若从未运行过，需等它随发版进入 `master` 后由 tag push 首次触发。
 
 12. **创建发行版（Gitee + GitHub）并发送群通知**：
 
@@ -325,21 +337,23 @@ cd jpom-parent && bash script/run-regression-tests.sh
 5. **回归单测 + 人工冒烟测试**：`cd jpom-parent && bash script/run-regression-tests.sh`，再解压产物启动冒烟。
 6. 提交 `commit beta 2.x.y.N`。
 7. 上传到 beta 渠道：`bash script/deploy-release-r2.sh beta`（版本号取自 `jpom-parent/script/tag.beta.txt`，上传到 `r2:jpom-releases-apac/beta/<version>/` 并自动回验）。
-8. 可选构建 beta 镜像（`-f ./modules/server/DockerfileBeta`）。
+8. 可选发布 beta 镜像（`DockerfileBeta`，tag `<version>-beta`/`latest-beta`）：`bash script/release.sh beta --with-docker`（或 `gh workflow run docker-publish.yml --ref beta -f channel=beta -f version=2.x.y.N`）触发 GitHub Actions；CI 不可用/工作流从未运行过时用 `bash script/release.sh beta --docker-local` 本机 buildx 兜底（tag 规则与 CI 一致）。
 9. **beta 不打 tag、不创建 Gitee Release（GitHub 镜像无需操作）**；测稳后按 6.2 合并到 `master` 发稳定版。
 10. **发版后立即在 `dev` 上补下一个 beta 版本日志段**：`## <当前稳定版>.<序号+1>-beta`，提交 `releases(发布): 开始 ...-beta 开发`，并给刚发版的 beta 段补日期。
 
-### 6.4 流水线发版（Gitee Go）
+### 6.4 流水线发版（Gitee Go / GitHub Actions）
 
 | 配置 | 触发 | 作用 |
 | --- | --- | --- |
 | `jpom-parent/.workflow/MasterPipeline.yml` | push `master`/`dev`，或手动 | Node 18 + `npm install && npm run build` + `mvn -B -e clean package -Dmaven.test.skip=true -Dmaven.compile.fork=true -s script/settings.xml` + `bash script/run-regression-tests.sh`；产出 `all_zip`/`server_zip`/`agent_zip`，再由“合并打包”发布 `jpom-<version>` 制品 |
-| `jpom-parent/.workflow/docker-hub.yml` | push `dev` / tag 前缀 `v`，或手动 | 构建并推送服务端多平台镜像（示例版本号需手动更新） |
+| `jpom-parent/.github/workflows/docker-publish.yml` | push tag `v*`（自动发布稳定版）、手动 `workflow_dispatch`，或 push `dev`/`beta` 且仅 workflow/helper 脚本变更（dry_run 自检） | 由 `DockerfileRelease`/`DockerfileBeta` 从 R2 r2.dev 公开域名下载发布包构建（d2 对 runner 有 Cloudflare challenge，`JPOM_DOWNLOAD_BASE` 可覆盖），推送 server/agent 多平台镜像到 Docker Hub（等待 R2 就绪；tag 规则见 6.2 第 11 步，排障见 `dev-docs/runbooks/docker-publish-ci.md`） |
 | `jpom-parent/.github/workflows/build.yml` | push / PR 到 `master` | GitHub Actions 构建校验（Node 18 + JDK 8 + `mvn -B package` + 核心回归单测） |
 | `jpom-parent/.github/workflows/codeql-analysis.yml` | push / PR 到 `master` + 每周计划 | CodeQL 静态扫描 |
 | `jpom-parent/.github/workflows/update-jdk.yml` | 手动，或推送 `error-understand` 分支 | 检出 `download_link` 分支并更新 JDK 下载清单 |
 
 流水线发版注意：`MasterPipeline.yml` 内的版本号（artifact 路径、构建命令）是硬编码的，发版时需同步修改；`RELEASE.md` 特别提示“注意修改构建命令版本号”。`replaceVersion.sh` 的 release 模式会顺带替换该文件，但仍要复核。
+
+旧 Gitee Go 流水线 `jpom-parent/.workflow/docker-hub.yml` 已删除（版本号硬编码 `2.8.22`、只构建服务端，已废弃）；Docker 镜像改由 GitHub Actions `docker-publish.yml` 发布。
 
 ### 6.5 发版检查清单
 
@@ -355,7 +369,7 @@ cd jpom-parent && bash script/run-regression-tests.sh
 - [ ] 安装包已上传 R2（release 或 beta 目录），`https://d2.jpom.download/...` 的 sha1 可校验
 - [ ] 文档站版本号、CHANGELOG、下载链接已更新并发布
 - [ ] 在线升级测试通过（稳定版）
-- [ ] Docker 镜像已推送（稳定版：server/agent 的 `<version>` 与 `latest`，多平台 amd64+arm64）
+- [ ] Docker 镜像已由 CI 发布：`docker-publish.yml` 的 run 成功，Docker Hub 上 server/agent 的 `<version>`/`latest`（beta 为 `<version>-beta`/`latest-beta`）平台（amd64+arm64）与 digest 已回验（本机兜底：`--docker-local`；操作见 `dev-docs/runbooks/docker-publish-ci.md`）
 - [ ] Gitee Release 已创建并上传 zip/tar.gz/sha1
 - [ ] GitHub Release 已创建（Latest；Gitee 镜像不同步 Release，用 `script/release-post.sh`）
 - [ ] 微信群发版通知已发送并核对送达（`check-delivery.sh <version>` 全部命中）
@@ -385,18 +399,23 @@ bash script/release.sh release --yes --with-post
 
 # 失败后从指定阶段续跑（阶段：preflight/merge/changelog/version/build/tests/verify/smoke/commit/push/upload/docs/docker/post/finish）
 bash script/release.sh beta --version 2.11.12.2 --from upload
+
+# beta 镜像本机兜底（CI workflow 首次启用前，或 CI 不可用）
+bash script/release.sh beta --docker-local
 ```
 
 脚本行为与安全约定：
 
 - 版本号默认由 `script/tag.*.txt` 自动计算；beta 要求源分支的 `CHANGELOG-BETA.md` 已有对应段落（日期可自动补），release 要求目标分支的 `CHANGELOG.md` 已有 `x.y.z-release` 段落（内容需人工整理）。
-- 默认依次执行：合并源分支 → 补日期 → `replaceVersion.sh` → 前端 `npm install && npm run build` → `mvn clean package` → **回归单元测试（`tests` 阶段）** → 产物校验（sha1/zip/class 非空/class 与 `target/classes` 一致/前端 dist）→ 服务端与插件端启动冒烟 → 提交 → 推送 Gitee → R2 上传 → docs 更新 →（可选）Docker →（可选）`--with-post` 发布后置。
+- 默认依次执行：合并源分支 → 补日期 → `replaceVersion.sh` → 前端 `npm install && npm run build` → `mvn clean package` → **回归单元测试（`tests` 阶段）** → 产物校验（sha1/zip/class 非空/class 与 `target/classes` 一致/前端 dist）→ 服务端与插件端启动冒烟 → 提交 → 推送 Gitee → R2 上传 → docs 更新 →（可选）Docker（默认触发 GitHub Actions 并等待+回验）→（可选）`--with-post` 发布后置。
 - **共享基础类改动必须有行为级单测**；`tests` 阶段默认执行 `jpom-parent/script/run-regression-tests.sh`，只有明确记录原因时才使用 `--skip-tests`。
 - push / R2 / docs / Docker 前默认交互确认，非交互环境必须显式 `--yes`；`--dry-run` 只预检；`--no-push` / `--no-upload` / `--no-docs` 可关闭阶段（组合受保护）。
 - beta 不打 tag、不创建 Release；release 打 `vX.Y.Z` tag、创建 Gitee+GitHub Release、推送 Docker（可选）并发送群通知。代码只推 Gitee；docs 子模块按 3.2 推 GitHub Pages。
 - 本机 Maven 曾出现偶发坏包（0 字节 class、jar 内旧 class），脚本默认 `--build-retries 1` 自动重跑构建并重新校验；日志在 `.tmp/release/`。
 - 脚本需要 JDK、Maven、Node/npm、python3、unzip、curl、rclone（上传时）；`--with-post` 另需 Gitee 令牌（Keyring 或 `GITEE_TOKEN`）与 `gh`。可用 `--jdk-home`、`--mvn`、`--node`、`--npm`、`--npm-cache` 覆盖检测结果。
 - R2 上传默认已启用分片并发调优（`R2_CHUNK_SIZE=16M`、`R2_UPLOAD_CONCURRENCY=8`）；实测本机上行是瓶颈，完整产物约需 8~12 分钟，慢时可在服务端执行或后台运行。
+- Docker 发布默认走 GitHub Actions（`--with-docker`）：`docker` 阶段触发 `.github/workflows/docker-publish.yml`，等待 run 结束并用 Docker Hub API 回验 server/agent 镜像的平台与 digest；`--docker-wait`（默认等待）/`--no-docker-wait`（只触发不等待），`--docker-wait-timeout` 调整等待超时，`--docker-ref` 指定触发的 ref（默认 release 用 `vX.Y.Z` tag、beta 用目标分支），`--docker-platforms` 覆盖默认 `linux/amd64,linux/arm64`，`--github-repo` 指定 GitHub 仓库（默认 `dromara/Jpom`）。CI 模式要求代码/tag 已推送到 Gitee（脚本会等 Gitee→GitHub 镜像同步后再 dispatch）；`--docker-local` 无此要求。
+- 本机兜底：`--docker-local` 用本机 buildx 构建并推送（CI 不可用或 workflow 首次启用前，beta 镜像常用）；国内网络处置见 `dev-docs/runbooks/docker-hub-push-cn.md`。
 
 ## 7. 提交规范与代码风格
 
@@ -566,10 +585,10 @@ bash script/check-sensitive.sh --all --range origin/dev..HEAD
 - **jpom-docs 不是开发文档仓库**：`docs/` 只放用户需要学习/操作的必要文档；开发过程记录、内部环境、审计与未修复漏洞细节禁止进入 `docs/`（第 9 节）。
 - **敏感信息检查**：提交前运行 `bash script/check-sensitive.sh --all`，推送前加上 `--range <基线>..HEAD`；`.gitignore` 已忽略密钥类文件与本地临时文件，禁止用 `git add -f` 绕过（详见第 8 节）。
 - **GitHub 只读（Release 与授权安全响应除外）**：主仓在 Gitee，GitHub 是 Gitee 自动镜像；不要直接向 GitHub 提交/推送/开 PR、不要配置 GitHub 推送 remote，`push.bat` 里的 GitHub 推送部分已过时。**但 GitHub Release 不会被镜像同步**，发版时必须手动创建（用 `script/release-post.sh`）；安全事件响应中的 issue/GHSA 写操作需单独授权并留记录。
-- **发版慢的常见原因**：本地 Maven 偶发坏包导致重复构建、手工 UI 验证串行、R2 单线程上传、Docker Hub 网络排障、发布后置/通知手工操作。优化：候选构建一次通过、UI 验证并行、R2 调优（已默认）、`--with-post` 自动发布后置；完整分析见 `dev-docs/runbooks/release-flow-timeline-and-optimization.md`。
-- **Docker Hub 国内网络**：`auth.docker.io` DNS 污染 + BuildKit token 不走代理会导致 push 失败；按 `dev-docs/runbooks/docker-hub-push-cn.md` 处理（私有 mihomo + 本地 mirror + crane 客户端推送）。
+- **发版慢的常见原因**：本地 Maven 偶发坏包导致重复构建、手工 UI 验证串行、R2 单线程上传、发布后置/通知手工操作。优化：候选构建一次通过、UI 验证并行、R2 调优（已默认）、`--with-post` 自动发布后置、Docker 镜像改由 CI 发布（原 Docker Hub 网络排障约 50 分钟不再占用本机发版时间）；完整分析见 `dev-docs/runbooks/release-flow-timeline-and-optimization.md`。
+- **Docker 镜像发布**：正常由 GitHub Actions `docker-publish.yml` 发布（推 tag `v*` 自动 / `workflow_dispatch` 手动 / `release.sh --with-docker`），多架构由 GitHub runner 完成、本机只做回验。本机仅在 CI 不可用时兜底：`bash script/release.sh <beta|release> --docker-local`（国内网络 `auth.docker.io` DNS 污染 + BuildKit token 不走代理会导致 push 失败，按 `dev-docs/runbooks/docker-hub-push-cn.md` 处理）。CI 下载发布包走 R2 r2.dev 公开域名（d2 对 GitHub runner 返回 403 managed challenge），可用仓库变量 `JPOM_DOWNLOAD_BASE` 覆盖；本机兜底仍用 d2。**`workflow_dispatch` 首次运行限制**：工作流需先存在并至少运行过一次；本仓库已在 `dev` 分支由 push 自检运行过（2026-11-08 实测，之后可对任意 ref dispatch）；若从未运行过，需等它随发版进入 `master` 后由 tag push 首次触发，此前 beta 镜像用 `--docker-local`。
 - **构建 JDK**：请使用 JDK 8；更高版本 JDK 可能因老版本 maven 插件/编译参数失败。
-- **Docker 构建**：`buildx` 需先启用 experimental / binfmt_misc，参见 `jpom-parent/script/docker-buildx.md`。
+- **Docker 构建（本机兜底）**：只有本机构建/推送镜像（`--docker-local`）才需要 `buildx`（启用 experimental / binfmt_misc，参见 `jpom-parent/script/docker-buildx.md`）；正常发版由 GitHub Actions 完成，不需要本机 Docker 环境。
 - **项目已暂停维护**：不要在未授权情况下更新下载中心、镜像、文档站或发布公告；对外发布前与维护者确认。
 
 ## 11. 相关权威文件
@@ -593,5 +612,9 @@ bash script/check-sensitive.sh --all --range origin/dev..HEAD
 - `dev-docs/runbooks/jpom-docs-authoring.md`、`dev-docs/templates/jpom-docs-page.md`：jpom-docs 用户文档编写规范与页面模板（第 3.2、9.5 节）
 - `dev-docs/runbooks/release-flow-timeline-and-optimization.md`：发版耗时实测、瓶颈分析与优化方案
 - `dev-docs/runbooks/shared-change-regression-checklist.md`：共享基础类/横切逻辑改动的“影响面枚举 + 行为级单测 + 测试自证 + 接口回归”检查清单
-- `dev-docs/runbooks/docker-hub-push-cn.md`：国内网络下 Docker Hub 推送操作手册
+- `dev-docs/runbooks/docker-hub-push-cn.md`：国内网络下 Docker Hub 推送操作手册（本机兜底/排障）
+- `jpom-parent/.github/workflows/docker-publish.yml`：Docker 镜像发布工作流（tag `v*` 自动 / 手动 dispatch；构建并推送 server/agent 多平台镜像到 Docker Hub）；可选仓库变量 `DOCKERHUB_NAMESPACE`、`DOCKERHUB_SERVER_REPO`、`DOCKERHUB_AGENT_REPO`、`JPOM_DOWNLOAD_BASE`（CI 下载发布包默认 r2.dev）
+- `jpom-parent/modules/*/DockerfileRelease|DockerfileBeta`（含 Jdk17 变体）：构建时从 `ARG JPOM_DOWNLOAD_BASE`（默认 `https://d2.jpom.download`）下载对应发布包；CI 通过 build-args 传 r2.dev 地址
+- `jpom-parent/script/docker-ci-meta.sh`、`jpom-parent/script/docker-ci-wait-r2.sh`：Docker 发布工作流与 `release.sh --with-docker` 使用的版本/tag 解析与 R2 就绪等待辅助脚本
+- `dev-docs/runbooks/docker-publish-ci.md`：Docker 镜像 CI 发布、验证与失败排查手册
 - `.dsh/skills/jpom-release-notify/`：微信群发版通知 skill（默认不发朋友圈、不 @所有人）

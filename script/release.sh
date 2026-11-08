@@ -55,10 +55,16 @@
 #       --no-docs            不更新/发布文档
 #       --force-upload       同版本覆盖上传 R2（注意 Cloudflare 缓存）
 #       --deep-verify        R2 上传后从下载中心逐字节回验
-#       --with-docker        构建并推送 Docker 镜像
+#       --with-docker        发布 Docker 镜像（默认走 GitHub Actions，等待 run 完成并回验 Docker Hub）
+#       --docker-local       发布 Docker 镜像时改用本机 docker buildx 构建并推送（CI 不可用时兜底）
+#       --docker-ref REF     GitHub Actions 触发的 ref（release 默认 vX.Y.Z tag；beta 默认目标分支）
+#       --docker-platforms   多平台列表，默认 linux/amd64,linux/arm64
+#       --docker-wait        等待 GitHub Actions run 完成（默认）
+#       --no-docker-wait     只触发 GitHub Actions，不等待完成（跳过 Docker Hub 回验）
+#       --docker-wait-timeout MIN  等待 run 完成的超时分钟数（默认 30）
+#       --github-repo OWNER/REPO   GitHub 工作流仓库（默认 dromara/Jpom，也可用 GH_REPO 覆盖）
 #       --with-post          发布后自动创建 Gitee/GitHub Release 并发送微信群通知（stable）
 #       --no-post            不执行发布后置步骤（默认）
-#       --docker-platforms   默认 linux/amd64,linux/arm64
 #       --offline            Maven 使用离线模式
 #       --keep-temp          保留冒烟临时目录
 #       --allow-non-gitee    允许 origin 不是 Gitee（仅本地/测试用）
@@ -73,7 +79,13 @@
 # 环境变量：
 #   JAVA_HOME / MVN_ARGS / NPM_ARGS / R2_REMOTE / R2_BUCKET / R2_PUBLIC_BASE
 #   DOCKER_PLATFORMS / DOCKER_REPOSITORY / DOCKER_AGENT_REPOSITORY
+#   GH_REPO / GH_TOKEN    Docker CI 的 GitHub 仓库与 gh 认证（默认 dromara/Jpom）
 #   JPOM_GIT_SSH_COMMAND  覆盖 git 使用的 GIT_SSH_COMMAND（SSH 配置异常时可用）
+#
+# Docker 镜像发布（默认 CI）：
+#   走 GitHub Actions（jpom-parent/.github/workflows/docker-publish.yml）：
+#   等待 Gitee -> GitHub 镜像同步 -> dispatch 工作流 -> 等待 run 结束 -> 回验 Docker Hub。
+#   工作流首次启用前（尚未存在于默认分支 master）或 CI 不可用时，用 --docker-local 本机 buildx 兜底。
 #
 # 产物校验要点（本机 Maven 曾出现偶发 0 字节 class，必须拦）：
 #   - 所有 .class 魔数正确、常量池长度足够（含 BOOT-INF/lib 内嵌 jar）
@@ -124,6 +136,11 @@ PUSH=1
 UPLOAD=1
 DOCS=1
 DOCKER=0
+DOCKER_MODE="ci"
+DOCKER_REF_OPT=""
+DOCKER_WAIT=1
+DOCKER_WAIT_TIMEOUT_OPT=""
+GH_REPO_OPT=""
 POST=0
 FORCE_UPLOAD=0
 DEEP_VERIFY=0
@@ -134,7 +151,9 @@ OFFLINE=0
 DOCKER_PLATFORMS_OPT=""
 
 usage() {
-	sed -n '11,80p' "$0" | sed 's/^# \{0,1\}//'
+	# 打印文件头 ===== 之间的说明（随文件头增长自动适配，无需维护行号）
+	awk '/^# =+$/ { n++; if (n == 1) { print; inside = 1; next } if (n == 2) { print; exit } } inside' "$0" |
+		sed 's/^# \{0,1\}//'
 }
 
 die() {
@@ -255,10 +274,36 @@ while [ "$#" -gt 0 ]; do
 		;;
 	--with-docker)
 		DOCKER=1
+		DOCKER_MODE="ci"
 		shift
+		;;
+	--docker-local)
+		DOCKER=1
+		DOCKER_MODE="local"
+		shift
+		;;
+	--docker-ref)
+		DOCKER_REF_OPT=$(arg_value "$1" "${2:-}")
+		shift 2
 		;;
 	--docker-platforms)
 		DOCKER_PLATFORMS_OPT=$(arg_value "$1" "${2:-}")
+		shift 2
+		;;
+	--docker-wait)
+		DOCKER_WAIT=1
+		shift
+		;;
+	--no-docker-wait)
+		DOCKER_WAIT=0
+		shift
+		;;
+	--docker-wait-timeout)
+		DOCKER_WAIT_TIMEOUT_OPT=$(arg_value "$1" "${2:-}")
+		shift 2
+		;;
+	--github-repo)
+		GH_REPO_OPT=$(arg_value "$1" "${2:-}")
 		shift 2
 		;;
 	--with-post)
@@ -365,6 +410,15 @@ RELEASE_DATE=${RELEASE_DATE_OPT:-$(date +%F)}
 NPM_CACHE_DIR=${NPM_CACHE_OPT:-${ROOT_DIR}/.tmp/npm-cache}
 export npm_config_cache="$NPM_CACHE_DIR"
 DOCKER_PLATFORMS=${DOCKER_PLATFORMS_OPT:-${DOCKER_PLATFORMS:-linux/amd64,linux/arm64}}
+GH_REPO="${GH_REPO_OPT:-${GH_REPO:-dromara/Jpom}}"
+DOCKER_WORKFLOW="docker-publish.yml"
+DOCKER_WAIT_TIMEOUT=${DOCKER_WAIT_TIMEOUT_OPT:-${DOCKER_WAIT_TIMEOUT:-30}}
+DOCKER_REF=""
+DOCKER_RUN_ID=""
+DOCKER_RUN_URL=""
+[[ "$GH_REPO" =~ ^[^/[:space:]]+/[^/[:space:]]+$ ]] || die "--github-repo 需为 OWNER/REPO 格式：${GH_REPO}"
+[[ "$DOCKER_WAIT_TIMEOUT" =~ ^[0-9]+$ ]] || die "--docker-wait-timeout 需为非负整数（分钟）：${DOCKER_WAIT_TIMEOUT}"
+[ -n "$DOCKER_PLATFORMS" ] || die "--docker-platforms 不能为空"
 
 git -C "$PARENT_DIR" rev-parse --git-dir >/dev/null 2>&1 || die "不是 git 仓库：${PARENT_DIR}"
 if [ "$DOCS" = "1" ] && ! git -C "$DOCS_DIR" rev-parse --git-dir >/dev/null 2>&1; then
@@ -796,8 +850,18 @@ phase_preflight() {
 		rclone listremotes 2>/dev/null | grep -x "${R2_REMOTE}:" >/dev/null || die "rclone remote 不存在：${R2_REMOTE}"
 	fi
 	if [ "$DOCKER" = "1" ] && phase_will_run docker; then
-		need_cmd docker
-		docker buildx version >/dev/null 2>&1 || die "docker buildx 不可用"
+		need_cmd curl
+		if [ "$DOCKER_MODE" = "local" ]; then
+			need_cmd docker
+			docker buildx version >/dev/null 2>&1 ||
+				die "docker buildx 不可用（--docker-local 本机构建需要 buildx；也可去掉 --docker-local 走 GitHub Actions）"
+		else
+			need_cmd gh
+			gh auth status >/dev/null 2>&1 ||
+				die "gh 未登录 GitHub：请先执行 gh auth login（本机凭据在 GNOME Keyring），或设置 GH_TOKEN（CI 环境需 repo/workflow 权限）；--docker-local 可改走本机 buildx"
+			[ -f "${PARENT_DIR}/.github/workflows/${DOCKER_WORKFLOW}" ] ||
+				warn "未找到 ${PARENT_DIR}/.github/workflows/${DOCKER_WORKFLOW}；该工作流需先合并到 GitHub 仓库 ${GH_REPO} 的默认分支 master 才能 dispatch"
+		fi
 	fi
 	if [ "$POST" = "1" ] && phase_will_run post; then
 		need_cmd curl
@@ -851,7 +915,7 @@ phase_preflight() {
 推送     : $( [ "$PUSH" = "1" ] && echo "是（Gitee ${GIT_REMOTE}）" || echo "否" )
 R2 上传  : $( [ "$UPLOAD" = "1" ] && echo "是（${R2_REMOTE}）" || echo "否" )
 文档     : $( [ "$DOCS" = "1" ] && echo "是" || echo "否" )
-Docker   : $( [ "$DOCKER" = "1" ] && echo "是" || echo "否" )
+Docker   : $(docker_summary)
 ----------------------------------------------------------------
 EOF
 }
@@ -1752,14 +1816,316 @@ phase_docs() {
 }
 
 # ---------------------------------------------------------------------------
-# Docker（可选）
+# Docker 发布（默认 GitHub Actions；--docker-local 本机 buildx 兜底）
 # ---------------------------------------------------------------------------
-phase_docker() {
-	if [ "$DOCKER" = "0" ]; then
-		log "未启用 Docker（--with-docker 可构建并推送镜像）"
+docker_image_tags() {
+	if [ "$MODE" = "release" ]; then
+		printf '%s\n' "$VERSION" "latest"
+	else
+		printf '%s\n' "${VERSION}-beta" "latest-beta"
+	fi
+}
+
+docker_image_tags_csv() {
+	docker_image_tags | tr '\n' ',' | sed 's/,$//'
+}
+
+docker_summary() {
+	if [ "$DOCKER" != "1" ]; then
+		echo "否"
+	elif [ "$DOCKER_MODE" = "local" ]; then
+		echo "是（本机 buildx，${DOCKER_PLATFORMS}）"
+	else
+		echo "是（GitHub Actions ${GH_REPO} ${DOCKER_REF}，${DOCKER_PLATFORMS}）"
+	fi
+}
+
+resolve_docker_ref() {
+	if [ -n "$DOCKER_REF_OPT" ]; then
+		DOCKER_REF="$DOCKER_REF_OPT"
+	elif [ "$MODE" = "release" ]; then
+		DOCKER_REF="$TAG"
+	else
+		DOCKER_REF="$TARGET_BRANCH"
+	fi
+}
+
+# 本地 ref -> commit sha（tag 优先，annotated tag 自动解引用）
+docker_ci_local_sha() {
+	local ref=$1 sha
+	if sha=$(gitp rev-parse --verify --quiet "refs/tags/${ref}^{commit}"); then
+		printf '%s' "$sha"
 		return 0
 	fi
-	section "构建并推送 Docker 镜像"
+	if sha=$(gitp rev-parse --verify --quiet "refs/heads/${ref}^{commit}"); then
+		printf '%s' "$sha"
+		return 0
+	fi
+	if sha=$(gitp rev-parse --verify --quiet "refs/remotes/${GIT_REMOTE}/${ref}^{commit}"); then
+		printf '%s' "$sha"
+		return 0
+	fi
+	return 1
+}
+
+# 本地 ref 是 tag（tags）还是分支（heads）
+docker_ci_ref_kind() {
+	local ref=$1
+	if gitp rev-parse --verify --quiet "refs/tags/${ref}" >/dev/null; then
+		printf 'tags'
+	elif gitp rev-parse --verify --quiet "refs/heads/${ref}" >/dev/null ||
+		gitp rev-parse --verify --quiet "refs/remotes/${GIT_REMOTE}/${ref}" >/dev/null; then
+		printf 'heads'
+	else
+		return 1
+	fi
+}
+
+# 等待 Gitee -> GitHub 镜像同步：远端 ref 的 commit sha 与本地一致（最多 5 分钟）
+docker_ci_wait_ref_sync() {
+	local ref=$1 kind local_sha deadline remote_info remote_sha remote_type
+	kind=$(docker_ci_ref_kind "$ref") ||
+		die "无法判断 Docker 触发 ref ${ref} 是 tag 还是分支（本地不存在）；请检查 --docker-ref"
+	local_sha=$(docker_ci_local_sha "$ref") ||
+		die "无法解析 ${ref} 的本地 commit"
+	log "等待 GitHub ${GH_REPO} 镜像同步：${ref}（${kind}）-> ${local_sha:0:12}…（最多 5 分钟）"
+	deadline=$((SECONDS + 300))
+	while [ "$SECONDS" -lt "$deadline" ]; do
+		remote_info=$(gh api "repos/${GH_REPO}/git/ref/${kind}/${ref}" \
+			--jq '.object.sha + " " + .object.type' 2>/dev/null || true)
+		if [ -n "$remote_info" ]; then
+			remote_sha=${remote_info%% *}
+			remote_type=${remote_info##* }
+			if [ "$remote_type" = "tag" ]; then
+				remote_sha=$(gh api "repos/${GH_REPO}/git/tags/${remote_sha}" \
+					--jq '.object.sha' 2>/dev/null || true)
+			fi
+			if [ -n "$remote_sha" ] && [ "$remote_sha" = "$local_sha" ]; then
+				log "GitHub 镜像已同步：${ref} -> ${local_sha:0:12}…"
+				return 0
+			fi
+		fi
+		sleep 10
+	done
+	die "GitHub ${GH_REPO} 上的 ${ref} 在 5 分钟内未同步到本地 commit ${local_sha}；Gitee -> GitHub 镜像可能延迟，请稍后重试（或用 --docker-ref 指定已同步的 ref；也可 --docker-local 本机兜底）"
+}
+
+# 查找本次 dispatch 产生的 run：输出 "<run_id> <html_url>"，找不到返回 1
+docker_ci_find_run() {
+	local dispatched_at=$1 timeout=$2 deadline info local_sha
+	deadline=$((SECONDS + timeout))
+	local_sha=$(docker_ci_local_sha "$DOCKER_REF" || true)
+	while [ "$SECONDS" -lt "$deadline" ]; do
+		info=$(gh api "repos/${GH_REPO}/actions/workflows/${DOCKER_WORKFLOW}/runs?event=workflow_dispatch&per_page=20" 2>/dev/null |
+			python3 -c '
+import datetime
+import json
+import sys
+
+since = datetime.datetime.strptime(sys.argv[1], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=datetime.timezone.utc)
+since -= datetime.timedelta(seconds=120)  # 容忍 GitHub 与本机的时钟偏差
+sha, ref = sys.argv[2], sys.argv[3]
+try:
+    data = json.load(sys.stdin)
+except Exception:
+    sys.exit(0)
+candidates = []
+for run in data.get("workflow_runs") or []:
+    try:
+        created_at = datetime.datetime.strptime(
+            run.get("created_at") or "", "%Y-%m-%dT%H:%M:%SZ"
+        ).replace(tzinfo=datetime.timezone.utc)
+    except Exception:
+        continue
+    if created_at < since:
+        continue
+    if (sha and run.get("head_sha") == sha) or run.get("head_branch") == ref:
+        candidates.append((created_at, run.get("id"), run.get("html_url")))
+if not candidates:
+    sys.exit(0)
+candidates.sort()
+_, run_id, url = candidates[0]
+print(f"{run_id} {url}")
+' "$dispatched_at" "$local_sha" "$DOCKER_REF" || true)
+		if [ -n "$info" ]; then
+			printf '%s\n' "$info"
+			return 0
+		fi
+		sleep 5
+	done
+	return 1
+}
+
+docker_ci_run_field() {
+	local run_id=$1 field=$2
+	gh api "repos/${GH_REPO}/actions/runs/${run_id}" --jq ".${field}" 2>/dev/null || true
+}
+
+# 轮询 run 直到 completed（失败 die 并给出 run URL 与排查命令）
+docker_ci_wait_run() {
+	local run_id=$1 deadline status conclusion
+	deadline=$((SECONDS + DOCKER_WAIT_TIMEOUT * 60))
+	log "等待 GitHub Actions run 完成（超时 ${DOCKER_WAIT_TIMEOUT} 分钟）：${DOCKER_RUN_URL}"
+	while [ "$SECONDS" -lt "$deadline" ]; do
+		status=$(docker_ci_run_field "$run_id" status)
+		[ "$status" = "completed" ] && break
+		sleep 15
+	done
+	status=$(docker_ci_run_field "$run_id" status)
+	conclusion=$(docker_ci_run_field "$run_id" conclusion)
+	if [ "$status" != "completed" ]; then
+		die "GitHub Actions run ${run_id} 在 ${DOCKER_WAIT_TIMEOUT} 分钟内未完成（status=${status:-未知}）：${DOCKER_RUN_URL}
+可稍后查看：gh run view ${run_id} --repo ${GH_REPO}；确认完成后手动核对 Docker Hub 镜像"
+	fi
+	if [ "$conclusion" != "success" ]; then
+		die "GitHub Actions 发布 Docker 镜像失败（conclusion=${conclusion}）：${DOCKER_RUN_URL}
+排查日志：gh run view ${run_id} --repo ${GH_REPO} --log-failed"
+	fi
+}
+
+docker_ci_hub_tag_json() {
+	local repo=$1 tag=$2 out=$3
+	curl -sS --max-time 20 -o "$out" -w '%{http_code}' \
+		"https://hub.docker.com/v2/repositories/${repo}/tags/${tag}/" 2>/dev/null || true
+}
+
+# 回验 Docker Hub tag 存在且包含 amd64+arm64（网络/API 不可用只 warn）
+docker_ci_verify_tag() {
+	local repo=$1 tag=$2 json code attempt=0 archs arch_list
+	json="${LOG_DIR}/dockerhub-$(printf '%s' "${repo}_${tag}" | tr '/: ' '___').json"
+	while :; do
+		code=$(docker_ci_hub_tag_json "$repo" "$tag" "$json")
+		[ "$code" = "200" ] && break
+		if [ "$code" = "404" ] && [ "$attempt" -lt 6 ]; then
+			attempt=$((attempt + 1))
+			log "Docker Hub 暂未出现 ${repo}:${tag}（等待同步 ${attempt}/6）"
+			sleep 10
+			continue
+		fi
+		if [ "$code" = "404" ]; then
+			die "Docker Hub 上找不到 ${repo}:${tag}（https://hub.docker.com/r/${repo}/tags）；如 CI 刚完成可稍后手动核对"
+		fi
+		warn "Docker Hub 回验跳过（${repo}:${tag}，HTTP ${code:-无响应}）；以 GitHub Actions 内 imagetools 回验为准"
+		return 0
+	done
+	archs=$(python3 - "$json" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as fh:
+	data = json.load(fh)
+archs = []
+for image in data.get("images") or []:
+	arch = image.get("architecture")
+	if arch and arch not in archs:
+		archs.append(arch)
+for arch in sorted(archs):
+	print(arch)
+PY
+	) || {
+		warn "无法解析 Docker Hub 返回（${repo}:${tag}），跳过回验"
+		return 0
+	}
+	local expected_archs expected missing=""
+	expected_archs=$(printf '%s' "$DOCKER_PLATFORMS" | tr ',' '\n' |
+		sed -E 's#^[[:space:]]*##; s#^linux/##; s#/.*$##' | awk 'NF' | sort -u)
+	for expected in $expected_archs; do
+		printf '%s\n' "$archs" | grep -qx "$expected" || missing+="${expected} "
+	done
+	if [ -n "$missing" ]; then
+		arch_list=$(printf '%s\n' "$archs" | tr '\n' ',' | sed 's/,$//')
+		die "Docker Hub ${repo}:${tag} 架构不完整（实际 ${arch_list:-空}，缺少 ${missing}；期望 ${DOCKER_PLATFORMS}）"
+	fi
+	arch_list=$(printf '%s\n' "$archs" | tr '\n' ',' | sed 's/,$//')
+	log "OK  Docker Hub ${repo}:${tag}（arch=${arch_list}）"
+}
+
+docker_ci_hub_digest() {
+	local repo=$1 tag=$2 json code
+	json="${LOG_DIR}/dockerhub-digest-$(printf '%s' "${repo}_${tag}" | tr '/: ' '___').json"
+	code=$(docker_ci_hub_tag_json "$repo" "$tag" "$json")
+	[ "$code" = "200" ] || return 0
+	python3 - "$json" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as fh:
+	print(json.load(fh).get("digest", ""))
+PY
+}
+
+docker_ci_verify_hub() {
+	local server_repo="${DOCKER_REPOSITORY:-jpomdocker/jpom}"
+	local agent_repo="${DOCKER_AGENT_REPOSITORY:-jpomdocker/jpom-agent}"
+	local tag version_digest latest_digest
+	section "回验 Docker Hub 镜像"
+	log "回验仓库：${server_repo} / ${agent_repo}（tag：$(docker_image_tags_csv)）"
+	while IFS= read -r tag; do
+		[ -n "$tag" ] || continue
+		docker_ci_verify_tag "$server_repo" "$tag"
+		docker_ci_verify_tag "$agent_repo" "$tag"
+	done < <(docker_image_tags)
+	if [ "$MODE" = "release" ]; then
+		version_digest=$(docker_ci_hub_digest "$server_repo" "$VERSION")
+		latest_digest=$(docker_ci_hub_digest "$server_repo" "latest")
+		if [ -n "$version_digest" ] && [ -n "$latest_digest" ]; then
+			[ "$version_digest" = "$latest_digest" ] ||
+				die "Docker Hub 上 ${server_repo}:latest 与 ${server_repo}:${VERSION} 的 digest 不一致（${latest_digest:0:19}… != ${version_digest:0:19}…）"
+			log "OK  latest 与 ${VERSION} digest 一致：${version_digest:0:19}…"
+		else
+			warn "未能从 Docker Hub 取得 ${server_repo} 的 digest，跳过 latest 一致性校验"
+		fi
+	fi
+}
+
+# CI 模式：触发 GitHub Actions 并（默认）等待 + 回验
+docker_ci_publish() {
+	section "触发 GitHub Actions 发布 Docker 镜像"
+	if [ "${PUSHED:-0}" != "1" ]; then
+		die "CI 模式要求先把代码/tag 推送到 Gitee（--no-push 时 GitHub 镜像不会有该 ref）；请去掉 --no-push，或改用 --docker-local 本机 buildx 兜底"
+	fi
+	log "GitHub 仓库：${GH_REPO}"
+	log "工作流：${DOCKER_WORKFLOW}  ref=${DOCKER_REF}"
+	log "渠道：${MODE}  版本：${VERSION}  镜像 tag：$(docker_image_tags_csv)"
+	log "平台：${DOCKER_PLATFORMS}  等待：$( [ "$DOCKER_WAIT" = "1" ] && echo "是（超时 ${DOCKER_WAIT_TIMEOUT} 分钟）" || echo "否" )"
+	confirm "确认触发 GitHub Actions 发布 Docker 镜像（${GH_REPO} ${DOCKER_REF}）？"
+
+	docker_ci_wait_ref_sync "$DOCKER_REF"
+
+	local dispatched_at dispatch_output found
+	dispatched_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+	log "gh workflow run ${DOCKER_WORKFLOW} --repo ${GH_REPO} --ref ${DOCKER_REF} -f channel=${MODE} -f version=${VERSION} -f images=both -f platforms=${DOCKER_PLATFORMS}"
+	if ! dispatch_output=$(gh workflow run "$DOCKER_WORKFLOW" --repo "$GH_REPO" --ref "$DOCKER_REF" \
+		-f channel="$MODE" -f version="$VERSION" -f images=both -f platforms="$DOCKER_PLATFORMS" 2>&1); then
+		die "触发 GitHub Actions 失败：${dispatch_output}
+可能原因：工作流 ${DOCKER_WORKFLOW} 还没有在 ${GH_REPO} 运行过（workflow_dispatch 要求工作流先在默认分支存在并运行过至少一次；
+本仓库可由 dev/beta 分支改 workflow 时的 push 自检触发一次，或等工作流随发版进入 master 后由 tag push 触发）；也可改用 --docker-local 本机 buildx 兜底"
+	fi
+
+	if [ "$DOCKER_WAIT" = "0" ]; then
+		if found=$(docker_ci_find_run "$dispatched_at" 90); then
+			DOCKER_RUN_ID=${found%% *}
+			DOCKER_RUN_URL=${found#* }
+			log "已触发 GitHub Actions（--no-docker-wait，不等待完成）：${DOCKER_RUN_URL}"
+		else
+			warn "已触发 GitHub Actions，但暂未取到 run URL；请到 https://github.com/${GH_REPO}/actions/workflows/${DOCKER_WORKFLOW} 查看"
+		fi
+		warn "已跳过等待与 Docker Hub 回验（--no-docker-wait）"
+		return 0
+	fi
+
+	found=$(docker_ci_find_run "$dispatched_at" 180) ||
+		die "已触发 GitHub Actions，但 3 分钟内未找到本次 run（event=workflow_dispatch）；请到 https://github.com/${GH_REPO}/actions/workflows/${DOCKER_WORKFLOW} 查看"
+	DOCKER_RUN_ID=${found%% *}
+	DOCKER_RUN_URL=${found#* }
+	docker_ci_wait_run "$DOCKER_RUN_ID"
+	log "GitHub Actions 发布成功：${DOCKER_RUN_URL}"
+	docker_ci_verify_hub
+}
+
+# 本机模式（兜底）：保持原有 buildx 构建、推送与 imagetools 回验逻辑
+docker_local_publish() {
+	section "本机 buildx 构建并推送 Docker 镜像"
 	local server_dockerfile agent_dockerfile
 	if [ "$MODE" = "beta" ]; then
 		server_dockerfile="modules/server/DockerfileBeta"
@@ -1768,24 +2134,41 @@ phase_docker() {
 		server_dockerfile="modules/server/DockerfileRelease"
 		agent_dockerfile="modules/agent/DockerfileRelease"
 	fi
-	confirm "确认构建并推送 Docker 镜像（${DOCKER_PLATFORMS}）？"
+	confirm "确认本机 buildx 构建并推送 Docker 镜像（${DOCKER_PLATFORMS}）？"
 
 	local server_repo="${DOCKER_REPOSITORY:-jpomdocker/jpom}"
 	local agent_repo="${DOCKER_AGENT_REPOSITORY:-jpomdocker/jpom-agent}"
-	local server_tags=(-t "${server_repo}:${VERSION}")
-	local agent_tags=(-t "${agent_repo}:${VERSION}")
-	if [ "$MODE" = "release" ]; then
-		server_tags+=(-t "${server_repo}:latest")
-		agent_tags+=(-t "${agent_repo}:latest")
-	fi
+	local server_tags=() agent_tags=() tag
+	while IFS= read -r tag; do
+		[ -n "$tag" ] || continue
+		server_tags+=(-t "${server_repo}:${tag}")
+		agent_tags+=(-t "${agent_repo}:${tag}")
+	done < <(docker_image_tags)
+	[ "${#server_tags[@]}" -gt 0 ] || die "未能计算 Docker 镜像 tag"
+	log "镜像 tag 与 CI 规则一致：$(docker_image_tags_csv)"
 
 	run_in "$PARENT_DIR" docker buildx build --platform "$DOCKER_PLATFORMS" \
 		"${server_tags[@]}" -f "./${server_dockerfile}" --push .
 	run_in "$PARENT_DIR" docker buildx build --platform "$DOCKER_PLATFORMS" \
 		"${agent_tags[@]}" -f "./${agent_dockerfile}" --push .
-	docker buildx imagetools inspect "${server_repo}:${VERSION}" >/dev/null ||
-		die "Docker 镜像回验失败：${server_repo}:${VERSION}"
-	log "Docker 镜像推送完成"
+	local first_tag
+	first_tag=$(docker_image_tags | head -n 1)
+	docker buildx imagetools inspect "${server_repo}:${first_tag}" >/dev/null ||
+		die "Docker 镜像回验失败：${server_repo}:${first_tag}"
+	docker_ci_verify_hub
+	log "Docker 镜像推送完成（本机 buildx）"
+}
+
+phase_docker() {
+	if [ "$DOCKER" = "0" ]; then
+		log "未启用 Docker（--with-docker 走 GitHub Actions 发布镜像；--docker-local 本机 buildx 兜底）"
+		return 0
+	fi
+	if [ "$DOCKER_MODE" = "local" ]; then
+		docker_local_publish
+	else
+		docker_ci_publish
+	fi
 }
 
 # ---------------------------------------------------------------------------
@@ -1813,12 +2196,25 @@ phase_post() {
 # ---------------------------------------------------------------------------
 phase_finish() {
 	section "发版完成"
-	local branch_head tag_desc
+	local branch_head tag_desc docker_desc docker_followup
 	branch_head=$(gitp rev-parse --short HEAD)
 	if [ "$MODE" = "release" ]; then
 		tag_desc="${TAG}"
 	else
 		tag_desc="无（beta）"
+	fi
+	if [ "$DOCKER" = "0" ]; then
+		docker_desc="未启用（--with-docker 走 GitHub Actions；--docker-local 本机兜底）"
+		docker_followup="未发布；可补发：bash script/release.sh ${MODE} --version ${VERSION} --from docker --with-docker（GitHub Actions）或 --docker-local（本机 buildx 兜底）"
+	elif [ "$DOCKER_MODE" = "local" ]; then
+		docker_desc="已用本机 buildx 推送（${DOCKER_PLATFORMS}）"
+		docker_followup="已用本机 buildx 推送，建议到 Docker Hub 核对 tag：$(docker_image_tags_csv)"
+	elif [ "$DOCKER_WAIT" = "0" ]; then
+		docker_desc="已触发 GitHub Actions（未等待完成）${DOCKER_RUN_URL:+：${DOCKER_RUN_URL}}"
+		docker_followup="GitHub Actions 仍在运行，完成后核对 Docker Hub tag：$(docker_image_tags_csv)${DOCKER_RUN_URL:+（run：${DOCKER_RUN_URL}）}"
+	else
+		docker_desc="已由 GitHub Actions 发布并回验${DOCKER_RUN_URL:+：${DOCKER_RUN_URL}}"
+		docker_followup="已由 GitHub Actions 发布并回验 Docker Hub：$(docker_image_tags_csv)${DOCKER_RUN_URL:+（run：${DOCKER_RUN_URL}）}"
 	fi
 	cat <<EOF
 
@@ -1829,7 +2225,7 @@ phase_finish() {
  Tag      : ${tag_desc}
  R2       : $( [ "$UPLOAD" = "1" ] && echo "https://d2.jpom.download/${MODE}/${VERSION}/" || echo "未上传" )
  文档     : $( [ "$DOCS" = "1" ] && echo "已提交/推送 docs main" || echo "未更新" )
- Docker   : $( [ "$DOCKER" = "1" ] && echo "已推送" || echo "未构建" )
+ Docker   : ${docker_desc}
  后置步骤 : $( [ "$POST" = "1" ] && echo "已执行（Gitee/GitHub Release + 群通知）" || echo "未执行（--with-post 可自动执行）" )
  日志     : ${LOG_DIR}/release.log
 ----------------------------------------------------------------
@@ -1841,13 +2237,14 @@ EOF
 1. 在旧版本服务端验证“在线升级”到 ${VERSION}（包来自 https://d2.jpom.download/release/${VERSION}/）
 2. 如未用 --with-post：创建 Gitee/GitHub Release 并发送微信群通知
      bash script/release-post.sh release --version ${VERSION} --yes
-3. Docker 镜像如未用 --with-docker：按 dev-docs/runbooks/docker-hub-push-cn.md 手工推送
+3. Docker 镜像：${docker_followup}
 EOF
 	else
 		cat <<EOF
 1. 在测试环境验证 ${VERSION} 的核心功能（构建、SSH、监控、在线升级入口等）
 2. beta 没有 tag / Gitee Release；测稳后按 release 模式合并到 master 发稳定版
-3. 如后续同版本覆盖上传，注意 Cloudflare 缓存（约 8 天）并 Purge 对应 URL
+3. Docker 镜像：${docker_followup}
+4. 如后续同版本覆盖上传，注意 Cloudflare 缓存（约 8 天）并 Purge 对应 URL
 EOF
 	fi
 }
@@ -1889,14 +2286,30 @@ print_plan() {
 	local push_step="提交并推送 Gitee ${TARGET_BRANCH}$( [ "$MODE" = "release" ] && echo " + tag ${TAG}" )"
 	local upload_step="上传 R2 ${MODE}/${VERSION}"
 	local docs_step="更新 docs 并推送 docs main"
-	local docker_step
+	local docker_step docker_note docker_args=""
 	if [ "$PUSH" = "0" ] || ! phase_will_run push; then push_step="提交（跳过推送）"; fi
 	if [ "$UPLOAD" = "0" ] || ! phase_will_run upload; then upload_step="跳过 R2 上传"; fi
 	if [ "$DOCS" = "0" ] || ! phase_will_run docs; then docs_step="跳过 docs"; fi
 	if [ "$DOCKER" = "1" ] && phase_will_run docker; then
-		docker_step="构建并推送 Docker 镜像（${DOCKER_PLATFORMS}）"
+		if [ "$DOCKER_MODE" = "local" ]; then
+			docker_step="本机 docker buildx 构建并推送 Docker 镜像（${DOCKER_PLATFORMS}）"
+			docker_note="     - 本机兜底模式：直接 buildx --push，并用 imagetools 回验"
+			docker_args=" --docker-local"
+		else
+			docker_step="触发 GitHub Actions 发布 Docker 镜像（${GH_REPO} ${DOCKER_REF}）$( [ "$DOCKER_WAIT" = "1" ] && echo "，等待完成并回验 Docker Hub" || echo "，不等待完成" )"
+			docker_note="     - 仓库/workflow：${GH_REPO} / ${DOCKER_WORKFLOW}；镜像 tag：$(docker_image_tags_csv)"
+			docker_note+=$'\n'
+			docker_note+="     - 触发前等待 Gitee -> GitHub 镜像同步（最多 5 分钟）；等待超时 ${DOCKER_WAIT_TIMEOUT} 分钟"
+			docker_args=" --with-docker"
+		fi
+		docker_args+=" --docker-platforms ${DOCKER_PLATFORMS}"
+		[ -n "$DOCKER_REF_OPT" ] && docker_args+=" --docker-ref ${DOCKER_REF_OPT}"
+		[ "$DOCKER_WAIT" = "0" ] && docker_args+=" --no-docker-wait"
+		[ "$DOCKER_WAIT_TIMEOUT" != "30" ] && docker_args+=" --docker-wait-timeout ${DOCKER_WAIT_TIMEOUT}"
+		[ -n "$GH_REPO_OPT" ] && docker_args+=" --github-repo ${GH_REPO_OPT}"
 	else
-		docker_step="跳过 Docker"
+		docker_step="跳过 Docker（--with-docker 走 GitHub Actions；--docker-local 本机 buildx 兜底）"
+		docker_note="     - 如需发布镜像，追加 --with-docker（CI）或 --docker-local（本机兜底）"
 	fi
 	cat <<EOF
 执行顺序：
@@ -1912,9 +2325,10 @@ print_plan() {
  10. ${upload_step}
  11. ${docs_step}
  12. ${docker_step}
+${docker_note}
 
 下一步（去掉 --dry-run 即执行；远程操作会二次确认或需要 --yes）：
-  bash script/release.sh ${MODE} --target-branch ${TARGET_BRANCH} --source-branch ${SOURCE_BRANCH}$( [ -n "$VERSION_OPT" ] && echo " --version ${VERSION_OPT}" )
+  bash script/release.sh ${MODE} --target-branch ${TARGET_BRANCH} --source-branch ${SOURCE_BRANCH}$( [ -n "$VERSION_OPT" ] && echo " --version ${VERSION_OPT}" )${docker_args}
 EOF
 }
 
@@ -1953,7 +2367,11 @@ main() {
 	fi
 
 	compute_version
+	resolve_docker_ref
 	log "模式=${MODE}  旧版本=${OLD_VERSION}  新版本=${VERSION}  目标分支=${TARGET_BRANCH}"
+	if [ "$DOCKER" = "1" ]; then
+		log "Docker 发布：$(docker_summary)"
+	fi
 
 	if [ "$DRY_RUN" = "1" ]; then
 		phase_preflight
