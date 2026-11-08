@@ -195,12 +195,20 @@ download_artifacts() {
 			curl -fsSL --retry 3 --retry-delay 2 -o "$sha" "${public_url}/${file##*/}.sha1" ||
 				die "下载失败：${public_url}/${file##*/}.sha1"
 		done
-		# 解压运行目录，供 release.sh 冒烟使用
+		# 解压运行目录，供 release.sh 冒烟使用（兼容 tar 内是否带顶层目录两种打包方式）
 		local run_dir="${target}/${kind}/target/${kind}-${version}-release"
-		rm -rf "$run_dir"
-		tar -xzf "${target}/${kind}/target/${kind}-${version}-release.tar.gz" -C "${target}/${kind}/target" ||
+		local stage="${target}/${kind}/target/.extract-${kind}.$$"
+		rm -rf "$run_dir" "$stage"
+		mkdir -p "$stage"
+		tar -xzf "${target}/${kind}/target/${kind}-${version}-release.tar.gz" -C "$stage" ||
 			die "解压失败：${kind}-${version}-release.tar.gz"
-		[ -d "$run_dir" ] || die "解压后缺少运行目录：${run_dir}"
+		if [ -d "${stage}/${kind}-${version}-release" ]; then
+			mv "${stage}/${kind}-${version}-release" "$run_dir"
+			rm -rf "$stage"
+		else
+			mv "$stage" "$run_dir"
+		fi
+		[ -d "${run_dir}/bin" ] || die "解压后运行目录缺少 bin：${run_dir}"
 		log "OK  ${kind} 产物已下载并解压到 ${run_dir}"
 	done
 	if [ "$skip_verify" = "0" ]; then
