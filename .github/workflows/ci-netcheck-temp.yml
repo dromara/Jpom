@@ -1,0 +1,37 @@
+name: ci-netcheck-temp
+
+# 临时工作流：验证 GitHub Actions runner 到下载中心（d2.jpom.download）/Docker Hub 的网络可达性。
+# 仅用于本次 CI 迁移排障，验证完成后删除。
+
+on:
+  push:
+    paths:
+      - '.github/workflows/ci-netcheck-temp.yml'
+
+jobs:
+  netcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 网络可达性检查
+        run: |
+          set +e
+          echo "=== DNS: d2.jpom.download ==="
+          getent ahosts d2.jpom.download | head -5
+          echo "=== DNS: hub.docker.com ==="
+          getent ahosts hub.docker.com | head -3
+          echo "=== HEAD d2 tarball ==="
+          curl -sS -I --max-time 20 -o /tmp/h1 -w 'http=%{http_code} ip=%{remote_ip} size=%{size_download} err=%{errormsg}\n' https://d2.jpom.download/release/2.11.12/server-2.11.12-release.tar.gz
+          head -25 /tmp/h1 2>/dev/null
+          echo "=== GET range d2 tarball ==="
+          curl -sS -L --max-time 30 -r 0-0 -o /dev/null -w 'http=%{http_code} ip=%{remote_ip} size=%{size_download} err=%{errormsg}\n' https://d2.jpom.download/release/2.11.12/server-2.11.12-release.tar.gz
+          echo "=== sha1 file d2 ==="
+          curl -sS -L --max-time 30 -o /tmp/sha1 -w 'http=%{http_code} size=%{size_download} err=%{errormsg}\n' https://d2.jpom.download/release/2.11.12/server-2.11.12-release.tar.gz.sha1
+          cat /tmp/sha1 2>/dev/null
+          echo
+          echo "=== hub.docker.com API ==="
+          curl -sS -o /dev/null --max-time 20 -w 'http=%{http_code} err=%{errormsg}\n' https://hub.docker.com/v2/repositories/jpomdocker/jpom/
+          echo "=== auth.docker.io ==="
+          curl -sS -o /dev/null --max-time 20 -w 'http=%{http_code} err=%{errormsg}\n' 'https://auth.docker.io/token?service=registry.docker.io'
+          echo "=== registry-1.docker.io ==="
+          curl -sS -o /dev/null --max-time 20 -w 'http=%{http_code} err=%{errormsg}\n' https://registry-1.docker.io/v2/
+          echo "=== done ==="
