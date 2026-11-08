@@ -16,6 +16,7 @@
   5. **每次提交、推送前都必须做敏感信息检查**（开源仓库）：不得提交真实密码、Token、密钥、证书、内网地址和用户隐私数据。提交前运行 `bash script/check-sensitive.sh --all`，推送前加上 `--range <基线>..HEAD`，详见第 8 节。
   6. **GitHub 是 Gitee 的自动镜像（代码/分支/tag 只读），但 Release 不会自动同步**：主仓库在 Gitee（`gitee.com/dromara/Jpom`），Gitee 收到推送后会自动镜像代码与 tag 到 GitHub（`github.com/dromara/Jpom`）。**代码提交、推送、PR、tag 一律只对 Gitee 操作**；**GitHub Release 与经维护者明确授权的安全事件响应（issue 回复/关闭、仓库级 Security Advisory）是例外**——Gitee 镜像不会生成 GitHub Release，必须在 Gitee Release 创建后手动创建（推荐用 `script/release-post.sh` 自动完成，见 6.2 第 12 步）；安全事件响应需逐次授权并记录，仍禁止代码/PR/tag 写入。
   7. **文档记录规则（开发文档 → `dev-docs/`，用户文档 → `docs/`）**：**开发过程中的一切产出（需求/方案、代码分析、审计、验证与回归、排障、技术决策、issue/PR 处理记录、AI 会话结论、环境信息、操作手册）都必须记录到工作区独立文档库 `dev-docs/`**（独立私有 git 仓库，不提交到本仓，规则见 `dev-docs/README.md`）；只有**用户需要学习/操作**的必要文档（功能使用说明、安装/升级/配置操作、FAQ、必要的技术说明，以及发版必须更新的版本号/更新日志/下载页）才更新到 `docs/`（jpom-docs）。`.tmp/`、`jpom-parent/.tmp/` 只放**可随时删除**的产物，**不得作为唯一副本**，任务收尾必须迁移/归档。判断方法与收尾清单见第 9 节。
+  8. **共享基础类/横切逻辑改动必须做“影响面回归”**：修改被大量业务复用的基类或工具（如 `BaseDbService.listPage`、`BaseWorkspaceService`、`BaseGlobalOrWorkspaceService`、`BaseNodeService`、权限/拦截器、通用分页/查询、i18n 公共方法等）时，**必须**：先列出全部子类与调用方 → 补**行为级**单测（只测新抽出的工具函数不算）→ 运行 `bash jpom-parent/script/run-regression-tests.sh`（发版脚本已默认执行）→ 逐项回归受影响接口。**禁止**在未验证消费方的情况下修改共享基础类；2.11.13 的 `workspaceId:in` 回归（导致项目列表、节点脚本列表等全部工作空间列表串数据）即由此漏出，详见 `dev-docs/archive/2026-11-workspace-filter-regression/`。
 
 ## 1. 项目概览
 
@@ -216,12 +217,16 @@ cd web-vue && npm run dev        # http://127.0.0.1:3000 ，代理到 2122
 # 4) 代码规范/辅助
 cd jpom-parent && mvn license:format   # 为源码补充/修正 Mulan PSL v2 版权头
 cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成多语言
+
+# 5) 回归单元测试（共享基础类/安全修复必跑；根 pom 默认跳过测试）
+cd jpom-parent && bash script/run-regression-tests.sh
+# 新增核心回归用例时把测试类加入该脚本的 DEFAULT_TESTS，本地/CI/发版自动覆盖
 ```
 
 要点：
 
 - **构建顺序不能反**：前端 `npm run build` 的产物进入 `modules/server/src/main/resources/dist`，`mvn package` 时打进服务端包。只跑 Maven 会导致页面 404 或旧页面。
-- 测试现状：各 `pom.xml` 默认 `skipTests=true`，CI 使用 `-Dmaven.test.skip=true`，没有自动化测试门禁；`src/test` 下多为手工/工具类测试。**发版前必须人工冒烟**：服务端与插件端包可正常启动、登录、核心功能可用、在线升级可用。
+- 测试现状：各 `pom.xml` 默认 `skipTests=true` 且 `maven.test.skip=true`，`mvn package` / CI 构建**默认不执行任何单测**。核心回归集由 `bash jpom-parent/script/run-regression-tests.sh` 执行（GitHub Actions、Gitee Go 流水线与 `script/release.sh` 的 `tests` 阶段均已接入）。**共享基础类/安全修复必须补行为级单测**（只测工具函数不算）并跑通该脚本。**发版前必须人工冒烟**：服务端与插件端包可正常启动、登录、核心功能可用、在线升级可用。
 - 数据库改动需在 `storage-module` 各数据库子模块同步实现，至少保证 H2 与 MySQL 兼容，不要只改 H2。
 - 前端 dev 代理配置在 `web-vue/.env.dev`（`JPOM_PROXY_HOST=127.0.0.1:2122`）。
 
@@ -252,7 +257,7 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
    脚本会基于 `script/tag.release.txt` 的旧版本号，替换各 `pom.xml`、Dockerfile、`.env`、`env-release.env`、`web-vue/package.json`、`.workflow/MasterPipeline.yml`、`banner.txt`，并写回 `tag.release.txt`。产生的 `*.bak`、`pom.xml.versionsBackup` 不要提交。
 4. **打包前端**：`cd jpom-parent/web-vue && npm i && npm run build`。
 5. **打包后端**：`cd jpom-parent && mvn clean package`，确认 `modules/{server,agent}/target/*-release.zip|tar.gz|sha1` 已生成。
-6. **人工冒烟**：解压 server/agent 的 release 包，分别用 `bin/Server.sh start`、`bin/Agent.sh start`（Windows 用 `.bat`）启动，确认可启动、可登录、核心功能正常。
+6. **回归单测 + 人工冒烟**：先运行 `cd jpom-parent && bash script/run-regression-tests.sh`（根 pom 默认跳过测试，必须显式执行；`script/release.sh` 已把该步骤作为 `tests` 阶段自动执行）；再解压 server/agent 的 release 包，分别用 `bin/Server.sh start`、`bin/Agent.sh start`（Windows 用 `.bat`）启动，确认可启动、可登录、核心功能正常。
 7. **提交并打 tag**：
 
    ```bash
@@ -317,7 +322,7 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
 2. 更新 `CHANGELOG-BETA.md`：新增 `## 2.x.y.N-beta (YYYY-MM-DD)` 段落，提交 `releases(发布): 准备 2.x.y.N`。**若包含用户可见变更（权限收紧、接口参数/错误码、数据库字段/表结构、操作流程/页面交互变化），必须增加 `### ⚠️ 升级说明` 并在文档站更新日志同步。**
 3. 替换版本号：`cd jpom-parent/script && sh replaceVersion.sh 2.x.y.N beta`（只改 beta 相关文件：`DockerfileBeta*`、pom、`env-beta.env`、banner、`tag.beta.txt`）。
 4. 前端、后端打包（同 6.2 第 4、5 步）。
-5. 人工冒烟测试。
+5. **回归单测 + 人工冒烟测试**：`cd jpom-parent && bash script/run-regression-tests.sh`，再解压产物启动冒烟。
 6. 提交 `commit beta 2.x.y.N`。
 7. 上传到 beta 渠道：`bash script/deploy-release-r2.sh beta`（版本号取自 `jpom-parent/script/tag.beta.txt`，上传到 `r2:jpom-releases-apac/beta/<version>/` 并自动回验）。
 8. 可选构建 beta 镜像（`-f ./modules/server/DockerfileBeta`）。
@@ -328,9 +333,9 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
 
 | 配置 | 触发 | 作用 |
 | --- | --- | --- |
-| `jpom-parent/.workflow/MasterPipeline.yml` | push `master`/`dev`，或手动 | Node 18 + `npm install && npm run build` + `mvn -B -e clean package -Dmaven.test.skip=true -Dmaven.compile.fork=true -s script/settings.xml`；产出 `all_zip`/`server_zip`/`agent_zip`，再由“合并打包”发布 `jpom-<version>` 制品 |
+| `jpom-parent/.workflow/MasterPipeline.yml` | push `master`/`dev`，或手动 | Node 18 + `npm install && npm run build` + `mvn -B -e clean package -Dmaven.test.skip=true -Dmaven.compile.fork=true -s script/settings.xml` + `bash script/run-regression-tests.sh`；产出 `all_zip`/`server_zip`/`agent_zip`，再由“合并打包”发布 `jpom-<version>` 制品 |
 | `jpom-parent/.workflow/docker-hub.yml` | push `dev` / tag 前缀 `v`，或手动 | 构建并推送服务端多平台镜像（示例版本号需手动更新） |
-| `jpom-parent/.github/workflows/build.yml` | push / PR 到 `master` | GitHub Actions 构建校验（Node 18 + JDK 8 + `mvn -B package`） |
+| `jpom-parent/.github/workflows/build.yml` | push / PR 到 `master` | GitHub Actions 构建校验（Node 18 + JDK 8 + `mvn -B package` + 核心回归单测） |
 | `jpom-parent/.github/workflows/codeql-analysis.yml` | push / PR 到 `master` + 每周计划 | CodeQL 静态扫描 |
 | `jpom-parent/.github/workflows/update-jdk.yml` | 手动，或推送 `error-understand` 分支 | 检出 `download_link` 分支并更新 JDK 下载清单 |
 
@@ -343,6 +348,8 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
 - [ ] 版本替换脚本执行成功，`git diff` 无遗漏、无 `*.bak`
 - [ ] 前端已 build（`modules/server/src/main/resources/dist` 已更新）
 - [ ] `mvn clean package` 成功，server/agent 的 zip、tar.gz、sha1 齐全
+- [ ] 回归单元测试通过：`cd jpom-parent && bash script/run-regression-tests.sh`（`script/release.sh` 的 `tests` 阶段与 CI 已自动执行；使用 `--skip-tests` 必须在发布记录中说明原因）
+- [ ] 本次改动涉及共享基础类/横切逻辑 → 已列影响面清单、补行为级单测、逐项回归受影响接口（列表类必须验证“当前空间 + GLOBAL”数据范围）
 - [ ] 安装包人工启动/登录/核心功能冒烟通过
 - [ ] 提交 `commit release|beta <version>`，稳定版打 `v2.x.y` tag 并推送
 - [ ] 安装包已上传 R2（release 或 beta 目录），`https://d2.jpom.download/...` 的 sha1 可校验
@@ -370,20 +377,21 @@ bash script/release.sh release
 # 只预检并打印计划，不修改任何文件
 bash script/release.sh beta --dry-run
 
-# 只做本地准备（合并/日期/版本/构建/校验/冒烟/本地提交），不推送、不上传、不改文档
+# 只做本地准备（合并/日期/版本/构建/回归单测/校验/冒烟/本地提交），不推送、不上传、不改文档
 bash script/release.sh beta --to commit
 
 # 稳定版一条命令含发布后置（Gitee/GitHub Release + 微信群通知）
 bash script/release.sh release --yes --with-post
 
-# 失败后从指定阶段续跑（阶段：preflight/merge/changelog/version/build/verify/smoke/commit/push/upload/docs/docker/post/finish）
+# 失败后从指定阶段续跑（阶段：preflight/merge/changelog/version/build/tests/verify/smoke/commit/push/upload/docs/docker/post/finish）
 bash script/release.sh beta --version 2.11.12.2 --from upload
 ```
 
 脚本行为与安全约定：
 
 - 版本号默认由 `script/tag.*.txt` 自动计算；beta 要求源分支的 `CHANGELOG-BETA.md` 已有对应段落（日期可自动补），release 要求目标分支的 `CHANGELOG.md` 已有 `x.y.z-release` 段落（内容需人工整理）。
-- 默认依次执行：合并源分支 → 补日期 → `replaceVersion.sh` → 前端 `npm install && npm run build` → `mvn clean package` → 产物校验（sha1/zip/class 非空/class 与 `target/classes` 一致/前端 dist）→ 服务端与插件端启动冒烟 → 提交 → 推送 Gitee → R2 上传 → docs 更新 →（可选）Docker →（可选）`--with-post` 发布后置。
+- 默认依次执行：合并源分支 → 补日期 → `replaceVersion.sh` → 前端 `npm install && npm run build` → `mvn clean package` → **回归单元测试（`tests` 阶段）** → 产物校验（sha1/zip/class 非空/class 与 `target/classes` 一致/前端 dist）→ 服务端与插件端启动冒烟 → 提交 → 推送 Gitee → R2 上传 → docs 更新 →（可选）Docker →（可选）`--with-post` 发布后置。
+- **共享基础类改动必须有行为级单测**；`tests` 阶段默认执行 `jpom-parent/script/run-regression-tests.sh`，只有明确记录原因时才使用 `--skip-tests`。
 - push / R2 / docs / Docker 前默认交互确认，非交互环境必须显式 `--yes`；`--dry-run` 只预检；`--no-push` / `--no-upload` / `--no-docs` 可关闭阶段（组合受保护）。
 - beta 不打 tag、不创建 Release；release 打 `vX.Y.Z` tag、创建 Gitee+GitHub Release、推送 Docker（可选）并发送群通知。代码只推 Gitee；docs 子模块按 3.2 推 GitHub Pages。
 - 本机 Maven 曾出现偶发坏包（0 字节 class、jar 内旧 class），脚本默认 `--build-retries 1` 自动重跑构建并重新校验；日志在 `.tmp/release/`。
@@ -413,6 +421,21 @@ bash script/release.sh beta --version 2.11.12.2 --from upload
   - 后端：`modules/common/src/main/resources/i18n/messages_{zh_CN,zh_HK,zh_TW,en_US}.properties` 与 `words.json`；
   - 前端：`web-vue/src/i18n/locales/zh_cn.json`（主文件）与 `en_us.json`（同步文件），新增文案后用 `npm run i18n` 生成（依赖 `.env` 中的百度翻译配置，特殊字符转义见 `web-vue/README.md` 的 `_#_` 说明）。
 - 新增/修改 UI 文案必须同时考虑中英（及繁体）语言资源，避免硬编码中文。
+
+### 7.3 共享基础类/横切逻辑改动规范（强制）
+
+> 背景：2.11.13 的 `workspaceId:in` 回归——`BaseDbService.listPage` 加了字段名白名单后，**先校验、后剥离 `:in` 后缀**，服务端注入的工作空间过滤被静默丢弃，项目列表、节点脚本列表、文件中心等全部“工作空间/全局”列表跨空间串数据。当时也写了单测，但只测了新抽出的 `resolveFilterField` 纯函数，**没有测 `listPage` 真实行为**；且根 pom 默认跳过测试、CI 构造也跳过测试，导致回归直接进入正式版。详见 `dev-docs/archive/2026-11-workspace-filter-regression/`。
+
+修改以下对象时按下面的强制流程执行：
+
+- 典型对象：`BaseDbService`（尤其 `listPage`/`buildWhere`/`getByKey`/`exists`）、`BaseWorkspaceService`、`BaseGlobalOrWorkspaceService`、`BaseNodeService`、`BaseDbCommonService`、权限与拦截器（`PermissionInterceptor`、`@Feature` 处理）、通用查询/排序/过滤、i18n 公共方法、全局异常/响应包装。
+- 步骤：
+  1. **影响面枚举**：列出全部子类与调用方，例如 `grep -rn "extends BaseDbService\|extends BaseWorkspaceService\|extends BaseGlobalOrWorkspaceService\|extends BaseNodeService" --include=*.java modules/`、`grep -rn "\.listPage(" --include=*.java modules/server/src/main/java`；对每个消费方判断是否会受影响，写入开发记录的影响面表。
+  2. **补行为级单测**：断言被改方法的最终产物/结果，而不是只断言新抽出的辅助函数。例：`BaseDbService.buildWhere` 的测试必须断言 `workspaceId:in` 生成集合 `IN` 条件（`BaseDbServiceBuildWhereTest`）；把测试类加入 `jpom-parent/script/run-regression-tests.sh` 的 `DEFAULT_TESTS`。
+  3. **测试有效性自证**：临时把实现改回旧/错误写法，确认新测试**会失败**（反证测试不是摆设），再恢复并跑绿。
+  4. **逐项接口回归**：对用户可见列表，必须验证“当前工作空间 + GLOBAL”语义（dev 环境造两个空间的数据，确认切换空间后列表不串数据）；接口用 curl/E2E 证据归档到 dev-docs。
+  5. **门禁**：本地 `bash jpom-parent/script/run-regression-tests.sh`；CI（`.github/workflows/build.yml`、`.workflow/MasterPipeline.yml`）与 `script/release.sh` 的 `tests` 阶段默认执行；发版检查清单第 6.5 节对应项必须勾选。
+- 禁止事项：只测工具函数就宣称“已加单测”；以“构建能过/手工点了几下”代替行为回归；用 `--skip-tests` 跳过且不记录原因；把包含强制过滤条件的字符串参数（如 `workspaceId:in`）交给客户端可覆盖的参数名协议而不做冲突校验。
 
 ## 8. 开源项目：隐私与密钥泄露检查（提交/推送必做）
 
@@ -559,14 +582,16 @@ bash script/check-sensitive.sh --all --range origin/dev..HEAD
 - `script/deploy-release-r2.sh`：安装包上传 Cloudflare R2（rclone）的发布脚本（含分片并发调优）
 - `script/release-post.sh`：发布后置步骤（Gitee Release + GitHub Release + 微信群通知，幂等可重跑）
 - `jpom-parent/SECURITY.md`：安全漏洞报告与披露流程
+- `jpom-parent/script/run-regression-tests.sh`：核心回归单测入口（共享基础类/安全修复必跑；新增核心用例加入其 `DEFAULT_TESTS`）
 - `.gitignore`（根目录与 `jpom-parent/`）：临时文件、密钥/证书类文件忽略规则
 - `jpom-parent/README.md`：分支说明、贡献指南
-- `jpom-parent/script/`：`replaceVersion.sh`、`release.sh`、`release-sha1sum.sh`、`push.bat`、`docker-buildx.md`
-- `jpom-parent/.workflow/`、`jpom-parent/.github/workflows/`：CI/流水线
+- `jpom-parent/script/`：`replaceVersion.sh`、`release.sh`、`release-sha1sum.sh`、`run-regression-tests.sh`、`push.bat`、`docker-buildx.md`
+- `jpom-parent/.workflow/`、`jpom-parent/.github/workflows/`：CI/流水线（`.workflow/MasterPipeline.yml`、`.github/workflows/build.yml` 已包含回归测试步骤）
 - `docs/README.md`、`docs/.github/workflows/deploy.yml`：文档站与部署
 - `.gitmodules`：子模块清单与默认分支
 - `dev-docs/README.md`、`dev-docs/AGENTS.md`：本地工作区文档库（文档写入规则、dev-docs/jpom-docs 分工、环境登记、历史归档；独立私有 git 仓库，不随本仓提交）
 - `dev-docs/runbooks/jpom-docs-authoring.md`、`dev-docs/templates/jpom-docs-page.md`：jpom-docs 用户文档编写规范与页面模板（第 3.2、9.5 节）
 - `dev-docs/runbooks/release-flow-timeline-and-optimization.md`：发版耗时实测、瓶颈分析与优化方案
+- `dev-docs/runbooks/shared-change-regression-checklist.md`：共享基础类/横切逻辑改动的“影响面枚举 + 行为级单测 + 测试自证 + 接口回归”检查清单
 - `dev-docs/runbooks/docker-hub-push-cn.md`：国内网络下 Docker Hub 推送操作手册
 - `.dsh/skills/jpom-release-notify/`：微信群发版通知 skill（默认不发朋友圈、不 @所有人）

@@ -46,6 +46,7 @@
 #       --no-fetch           不执行 git fetch
 #       --skip-build         跳过前端/后端构建
 #       --build-retries N    产物校验失败时自动重跑构建的次数（默认 1，规避本机偶发坏包）
+#       --skip-tests         跳过回归单元测试（不推荐；共享基础类/安全修复必须执行）
 #       --skip-verify        跳过产物完整性校验（不推荐）
 #       --skip-smoke         跳过启动冒烟
 #       --skip-sensitive     跳过敏感信息检查（不推荐）
@@ -115,6 +116,7 @@ FETCH=1
 FETCH_EXPLICIT=0
 BUILD=1
 BUILD_RETRIES=1
+TESTS=1
 VERIFY=1
 SMOKE=1
 SENSITIVE=1
@@ -214,6 +216,10 @@ while [ "$#" -gt 0 ]; do
 	--build-retries)
 		BUILD_RETRIES=$(arg_value "$1" "${2:-}")
 		shift 2
+		;;
+	--skip-tests)
+		TESTS=0
+		shift
 		;;
 	--skip-verify)
 		VERIFY=0
@@ -1183,6 +1189,23 @@ phase_build() {
 }
 
 # ---------------------------------------------------------------------------
+# 回归单元测试
+# ---------------------------------------------------------------------------
+phase_tests() {
+	section "回归单元测试"
+	if [ "$TESTS" = "0" ]; then
+		warn "已跳过回归单元测试（--skip-tests，不推荐）"
+		return 0
+	fi
+	# 根 pom 默认 maven.test.skip=true，普通 package 不会跑单测；这里强制打开并运行核心回归集
+	local env_args=(MVN="$MVN_BIN")
+	if [ "$OFFLINE" = "1" ]; then
+		env_args+=(JPOM_MVN_OFFLINE=1)
+	fi
+	run_in "$PARENT_DIR" env "${env_args[@]}" bash ./script/run-regression-tests.sh
+}
+
+# ---------------------------------------------------------------------------
 # 产物完整性校验
 # ---------------------------------------------------------------------------
 verify_artifacts() {
@@ -1832,7 +1855,7 @@ EOF
 # ---------------------------------------------------------------------------
 # 主流程
 # ---------------------------------------------------------------------------
-PHASES=(preflight merge changelog version build verify smoke commit push upload docs docker post finish)
+PHASES=(preflight merge changelog version build tests verify smoke commit push upload docs docker post finish)
 
 phase_index() {
 	local target=$1
@@ -1882,12 +1905,13 @@ print_plan() {
   3. 调用 replaceVersion.sh ${VERSION} ${MODE}
   4. 前端 npm install && npm run build
   5. 后端 mvn clean package
-  6. 产物完整性校验（含 jar class 非空检查）
-  7. 服务端/插件端启动冒烟
-  8. ${push_step}
-  9. ${upload_step}
- 10. ${docs_step}
- 11. ${docker_step}
+  6. 回归单元测试（script/run-regression-tests.sh，默认执行）
+  7. 产物完整性校验（含 jar class 非空检查）
+  8. 服务端/插件端启动冒烟
+  9. ${push_step}
+ 10. ${upload_step}
+ 11. ${docs_step}
+ 12. ${docker_step}
 
 下一步（去掉 --dry-run 即执行；远程操作会二次确认或需要 --yes）：
   bash script/release.sh ${MODE} --target-branch ${TARGET_BRANCH} --source-branch ${SOURCE_BRANCH}$( [ -n "$VERSION_OPT" ] && echo " --version ${VERSION_OPT}" )
