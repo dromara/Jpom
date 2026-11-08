@@ -47,7 +47,7 @@ on:
       - '.github/workflows/release-package.yml'
       - 'script/release-ci-meta.sh'
       - 'script/verify-release-artifacts.sh'
-      - 'script/deploy-release-r2.sh'
+      - 'script/r2-upload-ci.sh'
 
 permissions:
   contents: read
@@ -145,11 +145,10 @@ jobs:
             echo "::error::缺少 R2_ACCOUNT_ID / R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY secrets，见 dev-docs/runbooks/release-package-ci.md"
             exit 1
           fi
-          args=("${CHANNEL}")
+          args=(--channel "${CHANNEL}" --version "${VERSION}" --prefix "${TARGET_PREFIX}")
           [ "${DEEP_VERIFY}" = "true" ] && args+=(--deep-verify)
-          [ -n "${TARGET_PREFIX}" ] && args+=(--force)
-          R2_PUBLIC_BASE="${JPOM_DOWNLOAD_BASE}" R2_PATH_PREFIX="${TARGET_PREFIX}" R2_BUCKET="${R2_BUCKET}" \
-            bash script/deploy-release-r2.sh "${args[@]}"
+          R2_PUBLIC_BASE="${JPOM_DOWNLOAD_BASE}" R2_BUCKET="${R2_BUCKET}" \
+            bash script/r2-upload-ci.sh "${args[@]}"
 
       - name: 写入执行摘要
         if: always()
