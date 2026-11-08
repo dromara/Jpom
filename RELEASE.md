@@ -50,7 +50,7 @@ bash script/release.sh beta --version 2.11.12.2 --from upload
 ## 手动版
 
 1. 将 dev 分支合并到 master
-2. changelog 版本增加发版日期
+2. changelog 版本增加发版日期；**若含用户可见变更（权限、接口参数/错误码、字段、操作流程），补充 `### ⚠️ 升级说明` 并同步文档站更新日志**
 3. 更新代码版本号：`cd ./jpom-parent/script && sh replaceVersion.sh 2.x.x release`
 4. 打包前端：`cd ./jpom-parent/web-vue && npm i && npm run build`
 5. 打包后端：`cd ./jpom-parent && mvn clean package`

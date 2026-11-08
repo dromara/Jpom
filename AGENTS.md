@@ -241,7 +241,7 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
 ### 6.2 稳定版发版（手动版，按 `RELEASE.md` 整理）
 
 1. **合并代码**：将 `dev` 合并到 `beta` 测试；beta 稳定后合并到 `master`（或按 `RELEASE.md` 直接将 `dev` 合并到 `master`）。`master`/`beta` 不接受 PR。
-2. **更新 CHANGELOG**：`CHANGELOG-BETA.md` 对应版本补充发布日期；`CHANGELOG.md` 新增 `## 2.x.y-release (YYYY-MM-DD)` 段落（内容参考对应 beta 版本整理）。提交：`git commit -m "releases(发布): 准备release 2.x.y"`。
+2. **更新 CHANGELOG**：`CHANGELOG-BETA.md` 对应版本补充发布日期；`CHANGELOG.md` 新增 `## 2.x.y-release (YYYY-MM-DD)` 段落（内容参考对应 beta 版本整理）。**若本次版本包含用户可见变更（权限收紧、接口参数/错误码、数据库字段/表结构、操作流程/页面交互变化），必须增加 `### ⚠️ 升级说明`，写清升级后需要用户执行的操作或行为变化，并同步到文档站更新日志。** 提交：`git commit -m "releases(发布): 准备release 2.x.y"`。
 3. **替换版本号**：
 
    ```bash
@@ -314,7 +314,7 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
 ### 6.3 beta 发版
 
 1. 将 `dev` 合并到 `beta`（或从 `dev` 切出 beta 发版线）。
-2. 更新 `CHANGELOG-BETA.md`：新增 `## 2.x.y.N-beta (YYYY-MM-DD)` 段落，提交 `releases(发布): 准备 2.x.y.N`。
+2. 更新 `CHANGELOG-BETA.md`：新增 `## 2.x.y.N-beta (YYYY-MM-DD)` 段落，提交 `releases(发布): 准备 2.x.y.N`。**若包含用户可见变更（权限收紧、接口参数/错误码、数据库字段/表结构、操作流程/页面交互变化），必须增加 `### ⚠️ 升级说明` 并在文档站更新日志同步。**
 3. 替换版本号：`cd jpom-parent/script && sh replaceVersion.sh 2.x.y.N beta`（只改 beta 相关文件：`DockerfileBeta*`、pom、`env-beta.env`、banner、`tag.beta.txt`）。
 4. 前端、后端打包（同 6.2 第 4、5 步）。
 5. 人工冒烟测试。
@@ -352,6 +352,7 @@ cd jpom-parent/web-vue && npm run lint && npm run i18n   # 前端 lint / 生成�
 - [ ] Gitee Release 已创建并上传 zip/tar.gz/sha1
 - [ ] GitHub Release 已创建（Latest；Gitee 镜像不同步 Release，用 `script/release-post.sh`）
 - [ ] 微信群发版通知已发送并核对送达（`check-delivery.sh <version>` 全部命中）
+- [ ] CHANGELOG 已包含本次用户可见变更（权限/参数/错误码/字段/操作流程）的 `### ⚠️ 升级说明`，并同步到文档站更新日志
 - [ ] 发版后已在 `dev` 补下一个 beta 版本日志段（并给刚发版的版本补日期）
 - [ ] 已确认得到维护者授权，且所有正式渠道操作符合预期
 
