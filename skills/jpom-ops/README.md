@@ -8,25 +8,32 @@
 
 ## 快速开始
 
+**Linux / macOS**（需 Python 3.8+；`jpom-api.sh` 是薄包装）：
+
 ```bash
 export JPOM_BASE_URL=http://127.0.0.1:2122
 export JPOM_TOKEN_FILE=/path/to/jpom-longterm-token   # chmod 600；或 JPOM_TOKEN=...
 export JPOM_WORKSPACE=DEFAULT
 
-# 能力清单（机器可读摘要）
 ./scripts/jpom-api.sh capabilities
-
-# 巡检
 ./scripts/jpom-api.sh workspaces
 ./scripts/jpom-api.sh nodes
-./scripts/jpom-api.sh node-machine-info --node-id <节点ID>
-./scripts/jpom-api.sh projects --node-id <节点ID>
-./scripts/jpom-api.sh builds
+./scripts/jpom-api.sh project-info --node-id <节点ID>
 ./scripts/jpom-api.sh build-history
-./scripts/jpom-api.sh monitors
 ./scripts/jpom-api.sh system-info
-./scripts/jpom-api.sh recent-logs --limit 10
 ```
+
+**Windows（cmd / PowerShell，推荐直接用 Python）**：
+
+```bat
+set JPOM_BASE_URL=http://127.0.0.1:2122
+set JPOM_TOKEN_FILE=C:\path\jpom-token
+set JPOM_WORKSPACE=DEFAULT
+python scripts\jpom_api.py capabilities
+python scripts\jpom_api.py nodes --limit 5
+```
+
+> 同一份 `scripts/jpom_api.py` 在 Windows / Linux / macOS 行为一致；无需 bash/curl。
 
 ## 能力覆盖
 

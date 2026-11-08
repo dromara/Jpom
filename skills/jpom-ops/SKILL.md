@@ -34,7 +34,21 @@ metadata:
 
 ## 2. 能力清单（README/文档同源）
 
-先运行 `./scripts/jpom-api.sh capabilities` 可获得机器可读的能力摘要。
+先运行 `capabilities` 获取机器可读的能力摘要。
+
+**运行方式（跨平台，仅需 Python 3.8+）**：
+
+```bash
+# Linux / macOS（sh 为薄包装，内部调用 py）
+./scripts/jpom-api.sh capabilities
+# Windows cmd / PowerShell（推荐）
+python scripts\jpom_api.py capabilities
+# 任意平台
+python3 scripts/jpom_api.py capabilities
+```
+
+> `scripts/jpom_api.py` 是唯一实现（标准库 urllib，无第三方依赖，不创建临时文件）；
+> `scripts/jpom-api.sh` 只是 Linux/macOS 的包装，需本机有 python3。
 
 ### 2.1 只读（默认可用，2.11.13 dev 环境逐条验证）
 
