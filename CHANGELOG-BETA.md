@@ -27,7 +27,7 @@
 5. **错误提示变化**：非法或无权限 token 会提前返回“token 错误或已失效”；按别名下载且过滤条件无匹配时，当前也会提示“token 错误或已失效”（已记录为后续体验优化项，不影响功能）。
 6. **无数据库表结构/字段变更**，无需手工迁移；升级前仍建议按惯例备份 `data`/`conf`。
 7. **WebSocket 鉴权与日志安全收紧**：
-   - WebSocket 改用登录会话（HttpOnly Cookie）认证，不再支持在 URL 中传 `userId=密码摘要`；前端已同步适配，升级后建议刷新页面；**自定义 WebSocket 客户端**需先登录或调用任意接口获取会话 Cookie，并按与页面同源的 `Origin` 连接。
+   - WebSocket 改用登录会话（HttpOnly Cookie）认证，不再支持在 URL 中传 `userId=密码摘要`；前端已同步适配，升级后建议刷新页面；**自定义 WebSocket 客户端**需先登录或调用任意接口获取会话 Cookie，并按与页面同源的 `Origin` 连接；非浏览器客户端也可改用 `Authorization`（JWT）或 `JPOM-USER-TOKEN`（长期 token）请求头认证。
    - WebSocket 现在同样受 IP 访问限制；**禁用账号无法建立新的 WebSocket 连接**；已经建立的连接不会因账号随后被禁用而立即断开（重连时会校验）。
    - 系统日志、插件端日志、项目日志的 WebSocket 日志文件名限制在日志/项目目录内，防止路径穿越与符号链接逃逸；若自定义日志文件不在默认日志/项目目录，可能无法通过 WebSocket 实时查看（安全收紧）。
    - 反向代理需保留 `Host`（或设置 `X-Forwarded-Host`）并允许 WebSocket Upgrade；否则同源校验可能拒绝连接（浏览器直连/常规 Nginx 反代无需额外配置）。
