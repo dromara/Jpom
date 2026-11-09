@@ -81,6 +81,10 @@ jobs:
     name: 构建并上传 R2（${{ github.ref_name }}）
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    env:
+      GOMODCACHE: ${{ runner.temp }}/go-mod-cache
+      GOCACHE: ${{ runner.temp }}/go-build-cache
+      GOTMPDIR: ${{ runner.temp }}/go-tmp
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
@@ -180,6 +184,11 @@ jobs:
             --parent-dir . \
             --version '${{ steps.meta.outputs.version }}' \
             --verify-go --go-only
+
+      - name: 清理 Go 构建缓存（避免 Maven license 插件扫描只读缓存文件）
+        shell: bash
+        run: |
+          rm -rf go-agent/.cache go-agent/build
 
       - name: 设置 JDK 8
         uses: actions/setup-java@v4
