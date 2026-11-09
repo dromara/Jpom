@@ -56,10 +56,10 @@ func (s *Service) Backup(info map[string]any) (string, error) {
 	backupID := newBackupID()
 	itemPath := filepath.Join(s.backupRoot(settings), backupID)
 	if exists(itemPath) {
-		return "", invalidf("备份目录冲突：%s", backupID)
+		return "", invalidSuffix("i18n.backup_directory_conflict.c13e", backupID)
 	}
 	if err := copyContent(lib, itemPath, true); err != nil {
-		return "", fmt.Errorf("备份项目文件失败:%w", err)
+		return "", failMessage(fmt.Sprintf("Backup project files failed: %v", err))
 	}
 	return backupID, nil
 }
@@ -256,7 +256,7 @@ func (s *Service) mergeBackupPath(info map[string]any, legacyID string) error {
 // backupItemPath returns the directory of one backup snapshot.
 func (s *Service) backupItemPath(info map[string]any, backupID string) (string, error) {
 	if strings.TrimSpace(backupID) == "" {
-		return "", invalidf("备份id缺失")
+		return "", invalidParamf("i18n.backup_id_missing.eaa2")
 	}
 	settings, err := s.backupSettings(info)
 	if err != nil {
@@ -302,6 +302,11 @@ func (s *Service) ListBackup(id string) (*BackupList, error) {
 
 // BackupItemFiles implements /manage/file/backup-item-files.
 func (s *Service) BackupItemFiles(id, relativePath, backupID string) ([]FileInfo, error) {
+	// @ValidatorItem(msg = 备份id缺失): the live Java agent validates this before
+	// resolving the project, so a missing backupId wins over a missing project.
+	if strings.TrimSpace(backupID) == "" {
+		return nil, invalidParamf("i18n.backup_id_missing.eaa2")
+	}
 	info, err := s.Project(id)
 	if err != nil {
 		return nil, err
@@ -325,10 +330,10 @@ func (s *Service) BackupItemFiles(id, relativePath, backupID string) ([]FileInfo
 // /manage/file/backup-download.
 func (s *Service) BackupDownloadPath(id, backupID, levelName, filename string) (string, error) {
 	if strings.TrimSpace(backupID) == "" {
-		return "", invalidf("备份id缺失")
+		return "", invalidParamf("i18n.backup_id_missing.eaa2")
 	}
 	if strings.TrimSpace(filename) == "" {
-		return "", invalidf("请选择文件")
+		return "", invalidParamf("i18n.parameter_validation_failed.f0a1")
 	}
 	info, err := s.Project(id)
 	if err != nil {
@@ -345,7 +350,10 @@ func (s *Service) BackupDownloadPath(id, backupID, levelName, filename string) (
 // CommandUtil#systemFastDel).
 func (s *Service) BackupDelete(id, backupID, levelName, filename string) error {
 	if strings.TrimSpace(backupID) == "" {
-		return invalidf("备份id缺失")
+		return invalidParamf("i18n.backup_id_missing.eaa2")
+	}
+	if strings.TrimSpace(filename) == "" {
+		return invalidParamf("i18n.parameter_validation_failed.f0a1")
 	}
 	info, err := s.Project(id)
 	if err != nil {
@@ -366,6 +374,9 @@ func (s *Service) BackupDelete(id, backupID, levelName, filename string) error {
 // BackupRecover restores files of a backup snapshot into the project,
 // mirroring ProjectFileBackupController#recoverFile.
 func (s *Service) BackupRecover(id, backupID, clearType, levelName, filename string) error {
+	if strings.TrimSpace(backupID) == "" {
+		return invalidParamf("i18n.parameter_validation_failed.f0a1")
+	}
 	info, err := s.Project(id)
 	if err != nil {
 		return err
@@ -384,7 +395,7 @@ func (s *Service) BackupRecover(id, backupID, clearType, levelName, filename str
 			return err
 		}
 		if !exists(backupFile) {
-			return invalidf("对应的文件不存在")
+			return invalidf("i18n.file_not_exist.5091")
 		}
 		projectFile, err := secureJoin(projectRoot, levelName)
 		if err != nil {
@@ -399,7 +410,7 @@ func (s *Service) BackupRecover(id, backupID, clearType, levelName, filename str
 			}
 		}
 		if err := copyContent(backupFile, projectFile, true); err != nil {
-			return fmt.Errorf("还原失败:%w", err)
+			return failMessage(fmt.Sprintf("Restore backup failed: %v", err))
 		}
 		return nil
 	}
@@ -408,14 +419,14 @@ func (s *Service) BackupRecover(id, backupID, clearType, levelName, filename str
 		return err
 	}
 	if !exists(backupFile) {
-		return invalidf("对应的文件不存在")
+		return invalidf("i18n.file_not_exist.5091")
 	}
 	projectFile, err := secureJoin(projectRoot, levelName, filename)
 	if err != nil {
 		return err
 	}
 	if err := copyFile(backupFile, projectFile, true); err != nil {
-		return fmt.Errorf("还原失败:%w", err)
+		return failMessage(fmt.Sprintf("Restore backup failed: %v", err))
 	}
 	return nil
 }

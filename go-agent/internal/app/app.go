@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"jpom.io/go-agent/internal/config"
+	"jpom.io/go-agent/internal/i18n"
 )
 
 const (
@@ -156,7 +157,7 @@ func New(confPath, baseDir, version, buildTime string) (*App, error) {
 	a.TempDir = filepath.Join(a.DataDir, dirTemp)
 	for _, dir := range []string{a.DataDir, a.LogsDir, a.TmpDir, a.ProjectLogDir, a.ConfDir, a.ScriptDir, a.GlobalScriptDir, a.ScriptRunCacheDir, a.TempDir} {
 		if err := os.MkdirAll(dir, 0o755); err != nil {
-			return nil, fmt.Errorf("创建目录失败 %s: %w", dir, err)
+			return nil, fmt.Errorf("create directory failed %s: %w", dir, err)
 		}
 	}
 	a.RandomID = randomHex(16)
@@ -203,7 +204,7 @@ func (a *App) initLog() error {
 	logPath := filepath.Join(a.LogsDir, "agent.log")
 	f, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
-		return fmt.Errorf("打开日志文件失败 %s: %w", logPath, err)
+		return fmt.Errorf("open log file failed %s: %w", logPath, err)
 	}
 	a.logFile = f
 	writer := io.MultiWriter(os.Stdout, f)
@@ -235,17 +236,17 @@ func (a *App) initAuthorize() error {
 	cfgAuth := a.Config.Jpom.Authorize
 	name := strings.TrimSpace(cfgAuth.AgentName)
 	if name == "" {
-		return fmt.Errorf("插件端登录名不能为空(jpom.authorize.agent-name)")
+		return fmt.Errorf("agent name must not be empty (jpom.authorize.agent-name)")
 	}
 	if strings.TrimSpace(cfgAuth.Authorize) != "" {
 		a.Auth = Auth{Name: name, Authorize: cfgAuth.Authorize}
-		a.Log().Warn("使用配置文件中的授权字符串(jpom.authorize.authorize)，不会重新生成")
+		a.Log().Warn("using authorize string from config file (jpom.authorize.authorize), it will not be regenerated")
 		return nil
 	}
 	authorizeFile := filepath.Join(a.DataDir, fileAgentAuthorize)
 	if strings.TrimSpace(cfgAuth.AgentPwd) != "" {
 		_ = os.Remove(authorizeFile)
-		a.Log().Info("使用配置文件自定义的授权信息", "account", name)
+		a.Log().Info("using custom authorization from config file", "account", name)
 		a.Auth = Auth{Name: name, Pwd: cfgAuth.AgentPwd, Authorize: sha1Hex(name + "@" + cfgAuth.AgentPwd)}
 		return nil
 	}
@@ -253,12 +254,12 @@ func (a *App) initAuthorize() error {
 		var info authorizeInfo
 		if err := json.Unmarshal(content, &info); err == nil {
 			if info.AgentName != "" && info.AgentName != name {
-				return fmt.Errorf("已存在的登录名 %s 与配置的登录名 %s 不一致", info.AgentName, name)
+				return fmt.Errorf("existing agent name %s does not match configured agent name %s", info.AgentName, name)
 			}
 			if info.AgentPwd != "" {
 				_ = os.Chmod(authorizeFile, 0o600)
 				a.Auth = Auth{Name: name, Pwd: info.AgentPwd, Authorize: sha1Hex(name + "@" + info.AgentPwd)}
-				a.Log().Info("读取已授权账号信息", "account", name, "file", authorizeFile)
+				a.Log().Info("loaded authorized account", "account", name, "file", authorizeFile)
 				return nil
 			}
 		}
@@ -266,11 +267,11 @@ func (a *App) initAuthorize() error {
 	pwd := randomString(10)
 	content, _ := json.Marshal(authorizeInfo{AgentName: name, AgentPwd: pwd})
 	if err := os.WriteFile(authorizeFile, content, 0o600); err != nil {
-		return fmt.Errorf("写入授权文件失败: %w", err)
+		return fmt.Errorf("write authorize file failed: %w", err)
 	}
 	_ = os.Chmod(authorizeFile, 0o600)
 	a.Auth = Auth{Name: name, Pwd: pwd, Authorize: sha1Hex(name + "@" + pwd)}
-	a.Log().Info("自动生成授权账号并写入文件", "account", name, "file", authorizeFile)
+	a.Log().Info("generated authorization account and wrote it to file", "account", name, "file", authorizeFile)
 	return nil
 }
 
@@ -287,11 +288,11 @@ func (a *App) initInstall() error {
 	info := installInfo{
 		InstallID:   randomHex(16),
 		InstallTime: time.Now().Format("2006-01-02 15:04:05"),
-		Desc:        "请勿删除此文件,删除后关联 id 将失效",
+		Desc:        i18n.T(i18n.LangZhCn, "i18n.go_install_file_desc"),
 	}
 	content, _ := json.Marshal(info)
 	if err := os.WriteFile(installFile, content, 0o644); err != nil {
-		return fmt.Errorf("写入安装信息失败: %w", err)
+		return fmt.Errorf("write install info failed: %w", err)
 	}
 	a.InstallID = info.InstallID
 	a.InstallTime = info.InstallTime
@@ -345,6 +346,9 @@ func (a *App) Manifest() map[string]any {
 		"installId": a.InstallID,
 		"debug":     a.Version == "dev",
 		"upTime":    fmt.Sprintf("%d", int64(time.Since(a.StartAt).Seconds())),
+		// engine 是 Go 版新增字段（G6）：Server 据此判断节点升级通道；
+		// Java 旧服务端/旧 Agent 反序列化时忽略未知字段，保持字节兼容。
+		"engine": "go",
 	}
 }
 

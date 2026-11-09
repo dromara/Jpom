@@ -142,22 +142,16 @@ func validCron(value string) bool {
 }
 
 // checkCron validates the cron expression (StringUtil.checkCron).
-func checkCron(value string) (string, error) {
+func checkCron(value string) (string, bool) {
 	trimmed := strings.TrimSpace(value)
 	if trimmed == "" {
-		return "", nil
+		return "", true
 	}
 	if !validCron(trimmed) {
-		return "", errCronFormat
+		return "", false
 	}
-	return trimmed, nil
+	return trimmed, true
 }
-
-type messageError string
-
-func (e messageError) Error() string { return string(e) }
-
-const errCronFormat = messageError("cron 表达式格式不正确")
 
 // codeBusinessError is the agent business error code: the Java agent maps
 // IllegalArgumentException/IllegalStateException (Assert.*) to code 405.
@@ -168,10 +162,25 @@ func scriptFailBusiness(c *httpx.Context, message string) {
 	c.JSONCode(codeBusinessError, message, nil)
 }
 
+// scriptFailParam writes a Spring @ValidatorItem validation failure (code 400;
+// custom message first, default 参数验证失败).
+func scriptFailParam(c *httpx.Context, message string) {
+	if strings.TrimSpace(message) == "" {
+		message = c.T("i18n.parameter_validation_failed.f0a1")
+	}
+	c.JSONCode(400, message, nil)
+}
+
+// scriptFailFormat writes a request body parsing failure
+// (HttpMessageNotReadableException -> HTTP 417, i18n.incorrect_parameter_format).
+func scriptFailFormat(c *httpx.Context) {
+	c.JSONCode(417, c.T("i18n.incorrect_parameter_format.9efb"), nil)
+}
+
 // scriptFailInternal writes a runtime error (code 500, msg=服务异常：<message>).
 func scriptFailInternal(c *httpx.Context, err error) {
 	c.App.Log().Error("script handler error", "path", c.R.URL.Path, "error", err)
-	c.JSONCode(500, "服务异常："+err.Error(), nil)
+	c.JSONCode(500, c.T("i18n.service_exception.3821")+err.Error(), nil)
 }
 
 // scriptSaveFields copies the editable NodeScriptModel fields of a form request.
@@ -195,8 +204,9 @@ func scriptSaveFields(c *httpx.Context) map[string]any {
 // registerScript owns /script/* and /script-library/* endpoints.
 func registerScript(r *httpx.Router, a *app.App) {
 	rt := runtimeFor(a)
-	// 把增强 DSL 执行器注册到项目域（/manage/operate 的 DSL 流程会走这里）
-	dsl.Register(rt.manager)
+	// 把增强 DSL 执行器注册到项目域（/manage/operate 的 DSL 流程会走这里），
+	// 语言使用代理配置语言（DslExecutor 接口无请求级 lang）。
+	dsl.Register(rt.manager, rt.lang)
 	// autoExecCron 统一注册到 sysinfo 调度器（等价 Java NodeScriptServer ICron#queryStartingList）
 	rt.manager.RegisterScriptCrons(scriptCronRegistry{}, rt.executor, rt.matchSecond, rt.lang)
 
@@ -229,12 +239,12 @@ func registerScript(r *httpx.Router, a *app.App) {
 	r.Handle(http.MethodPost, "/script/save.json", func(c *httpx.Context) {
 		context := c.Form("context")
 		if strings.TrimSpace(context) == "" {
-			scriptFailBusiness(c, "内容为空")
+			scriptFailBusiness(c, c.T("i18n.content_is_empty.3122"))
 			return
 		}
-		autoExecCron, err := checkCron(c.Form("autoExecCron"))
-		if err != nil {
-			scriptFailBusiness(c, err.Error())
+		autoExecCron, cronOK := checkCron(c.Form("autoExecCron"))
+		if !cronOK {
+			scriptFailBusiness(c, c.T("i18n.cron_expression_format_error.6dcd"))
 			return
 		}
 		global := scriptBool(c, "global", false)
@@ -252,14 +262,20 @@ func registerScript(r *httpx.Router, a *app.App) {
 		switch strings.ToLower(strings.TrimSpace(c.Form("type"))) {
 		case "add":
 			if exists {
-				scriptFailBusiness(c, "id已经存在啦")
+				scriptFailBusiness(c, c.T("i18n.id_already_exists.6208"))
 				return
 			}
 			item := scriptSaveFields(c)
 			item["id"] = script.NewExecutionID()
-			item["autoExecCron"] = autoExecCron
+			// Java add 分支不调用 setAutoExecCron/setDefArgs，缺参时字段为 null
+			// （Jackson NON_NULL 省略）；仅请求里出现过的字段才写入。
+			if c.HasForm("autoExecCron") {
+				item["autoExecCron"] = autoExecCron
+			}
 			item["workspaceId"] = workspaceID
-			item["nodeId"] = nodeID
+			if c.HasForm("nodeId") {
+				item["nodeId"] = nodeID
+			}
 			item["createTime"] = nowText()
 			item["lastRunUser"] = "-"
 			user := serverUser(c)
@@ -272,16 +288,18 @@ func registerScript(r *httpx.Router, a *app.App) {
 				return
 			}
 			rt.manager.UpsertScriptCron(scriptCronRegistry{}, rt.executor, stringField(item, "id"), rt.matchSecond, rt.lang)
-			c.OKMsg("添加成功", nil)
+			c.OKMsg(c.T("i18n.addition_succeeded.3fda"), nil)
 		case "sync":
 			item := map[string]any{}
 			if exists {
 				item = existing
 			} else {
 				item["id"] = id
-				item["nodeId"] = nodeID
+				if c.HasForm("nodeId") {
+					item["nodeId"] = nodeID
+				}
 			}
-			if exists && !isGlobal(existing) && global {
+			if exists && !isGlobal(existing) && global && c.HasForm("nodeId") {
 				item["nodeId"] = nodeID
 			}
 			item["scriptType"] = "server-sync"
@@ -289,6 +307,9 @@ func registerScript(r *httpx.Router, a *app.App) {
 			for key, value := range scriptSaveFields(c) {
 				item[key] = value
 			}
+			// Java sync 分支始终调用 eModel.setDefArgs(nodeScriptModel.getDefArgs())：
+			// 缺参时 convertToParam(null) -> "[]"（列表接口因此输出 []）。
+			item["defArgs"] = script.ConvertToParam(c.Form("defArgs"))
 			item["autoExecCron"] = autoExecCron
 			item["modifyTime"] = nowText()
 			if user := serverUser(c); user != "-" {
@@ -311,13 +332,15 @@ func registerScript(r *httpx.Router, a *app.App) {
 				}
 			}
 			rt.manager.UpsertScriptCron(scriptCronRegistry{}, rt.executor, id, rt.matchSecond, rt.lang)
-			c.OKMsg("修改成功", nil)
+			c.OKMsg(c.T("i18n.modify_success.69be"), nil)
 		default:
 			if !exists {
-				scriptFailBusiness(c, "没有数据")
+				scriptFailBusiness(c, c.T("i18n.no_data.1ac0"))
 				return
 			}
 			item := scriptSaveFields(c)
+			// Java edit 分支始终 setDefArgs(...)：缺参 -> "[]"；autoExecCron 缺参 -> ""
+			item["defArgs"] = script.ConvertToParam(c.Form("defArgs"))
 			item["autoExecCron"] = autoExecCron
 			item["modifyTime"] = nowText()
 			if user := serverUser(c); user != "-" {
@@ -328,7 +351,7 @@ func registerScript(r *httpx.Router, a *app.App) {
 				return
 			}
 			rt.manager.UpsertScriptCron(scriptCronRegistry{}, rt.executor, id, rt.matchSecond, rt.lang)
-			c.OKMsg("修改成功", nil)
+			c.OKMsg(c.T("i18n.modify_success.69be"), nil)
 		}
 	})
 
@@ -339,24 +362,35 @@ func registerScript(r *httpx.Router, a *app.App) {
 			return
 		}
 		rt.manager.UpsertScriptCron(scriptCronRegistry{}, rt.executor, id, rt.matchSecond, rt.lang)
-		c.OKMsg("删除成功", nil)
+		c.OKMsg(c.T("i18n.delete_success.0007"), nil)
 	})
 
 	r.Handle(http.MethodPost, "/script/log", func(c *httpx.Context) {
 		id := c.Form("id")
 		executeID := c.Form("executeId")
 		if strings.TrimSpace(id) == "" {
-			scriptFailBusiness(c, "日志ID缺失")
+			// @ValidatorItem(msg=log_id_missing) -> code 400
+			scriptFailParam(c, c.T("i18n.log_id_missing.3500"))
 			return
 		}
 		if strings.TrimSpace(executeID) == "" {
-			scriptFailBusiness(c, "执行ID缺失")
+			// @ValidatorItem(msg=missing_execution_id) -> code 400
+			scriptFailParam(c, c.T("i18n.missing_execution_id.14d0"))
 			return
 		}
-		line, err := strconv.Atoi(strings.TrimSpace(c.Form("line")))
-		if err != nil || line < 0 {
-			// Java validator POSITIVE_INTEGER 实际允许 0（前端首次拉取会传 0）
-			scriptFailBusiness(c, "行号不正确")
+		// @ValidatorItem(POSITIVE_INTEGER, msg=incorrect_line_number)：缺省/非数字/
+		// 负数都按 NOT_EMPTY/POSITIVE_INTEGER 校验失败 -> 400；实测 line=0 合法。
+		lineText := strings.TrimSpace(c.Form("line"))
+		line := 0
+		if lineText != "" {
+			parsed, err := strconv.Atoi(lineText)
+			if err != nil || parsed < 0 {
+				scriptFailParam(c, c.T("i18n.incorrect_line_number.5877"))
+				return
+			}
+			line = parsed
+		} else {
+			scriptFailParam(c, c.T("i18n.incorrect_line_number.5877"))
 			return
 		}
 		item, exists, err := rt.manager.Get(id)
@@ -366,13 +400,13 @@ func registerScript(r *httpx.Router, a *app.App) {
 		}
 		_ = item
 		if !exists {
-			scriptFailBusiness(c, "没有对应数据")
+			scriptFailBusiness(c, c.T("i18n.no_data_found.4ffb"))
 			return
 		}
 		logFile := rt.manager.LogFile(id, executeID)
 		total, lines, err := script.ReadLogFile(logFile, line)
 		if err != nil {
-			scriptFailBusiness(c, "日志文件错误")
+			scriptFailBusiness(c, c.T("i18n.log_file_error.473b"))
 			return
 		}
 		// 运行中判断
@@ -388,11 +422,11 @@ func registerScript(r *httpx.Router, a *app.App) {
 		id := c.Form("id")
 		executeID := c.Form("executeId")
 		if strings.TrimSpace(id) == "" {
-			scriptFailBusiness(c, "日志ID缺失")
+			scriptFailParam(c, c.T("i18n.log_id_missing.3500"))
 			return
 		}
 		if strings.TrimSpace(executeID) == "" {
-			scriptFailBusiness(c, "执行ID缺失")
+			scriptFailParam(c, c.T("i18n.missing_execution_id.14d0"))
 			return
 		}
 		_, exists, err := rt.manager.Get(id)
@@ -401,7 +435,7 @@ func registerScript(r *httpx.Router, a *app.App) {
 			return
 		}
 		if !exists {
-			c.OKMsg("对应的脚本模版已经不存在拉", nil)
+			c.OKMsg(c.T("i18n.script_template_not_exist.1d5b"), nil)
 			return
 		}
 		stillExists, err := rt.manager.DeleteLog(id, executeID)
@@ -410,21 +444,36 @@ func registerScript(r *httpx.Router, a *app.App) {
 			return
 		}
 		if stillExists {
-			scriptFailBusiness(c, "删除日志文件失败")
+			scriptFailBusiness(c, c.T("i18n.delete_log_file_failure.bf0b"))
 			return
 		}
-		c.OKMsg("删除成功", nil)
+		c.OKMsg(c.T("i18n.delete_success.0007"), nil)
 	})
 
 	r.Handle(http.MethodPost, "/script/exec", func(c *httpx.Context) {
 		id := c.Form("id")
+		if strings.TrimSpace(id) == "" {
+			// exec(@ValidatorItem String id) 未配置文案 -> 400 参数验证失败
+			scriptFailParam(c, "")
+			return
+		}
 		item, exists, err := rt.manager.Get(id)
 		if err != nil {
 			scriptFailInternal(c, err)
 			return
 		}
 		if !exists {
-			scriptFailBusiness(c, "对应脚本已经不存在啦")
+			scriptFailBusiness(c, c.T("i18n.script_not_exist.b180"))
+			return
+		}
+		args := c.Form("args")
+		if strings.TrimSpace(args) == "" {
+			args = stringField(item, "defArgs")
+		}
+		params, parseErr := script.TriggerParamMap(c.Form("params"))
+		if parseErr != nil {
+			// Java: JSONObject.parseObject(params) 抛 JSONException -> 500 服务异常
+			scriptFailInternal(c, parseErr)
 			return
 		}
 		executeID := script.NewExecutionID()
@@ -441,21 +490,28 @@ func registerScript(r *httpx.Router, a *app.App) {
 			scriptFailInternal(c, err)
 			return
 		}
-		args := c.Form("args")
-		if strings.TrimSpace(args) == "" {
-			args = stringField(item, "defArgs")
-		}
-		params := script.TriggerParamMap(c.Form("params"))
 		if err := rt.executor.Start(item, executeID, args, params, c.Lang); err != nil {
 			scriptFailBusiness(c, err.Error())
 			return
 		}
-		c.OKMsg("开始执行", executeID)
+		c.OKMsg(c.T("i18n.start_execution.00d7"), executeID)
 	})
 
 	r.Handle(http.MethodPost, "/script/pull_exec_log", func(c *httpx.Context) {
-		pullCount, err := strconv.Atoi(strings.TrimSpace(c.Form("pullCount")))
-		if err != nil || pullCount <= 0 {
+		text := strings.TrimSpace(c.Form("pullCount"))
+		if text == "" {
+			// @ValidatorItem int pullCount 缺省 -> NOT_EMPTY 校验失败 -> 400 参数验证失败
+			scriptFailParam(c, "")
+			return
+		}
+		pullCount, err := strconv.Atoi(text)
+		if err != nil {
+			// 非数字：@ValidatorItem 只校验非空，随后 Spring 绑定失败 -> 运行期 500
+			scriptFailInternal(c, err)
+			return
+		}
+		if pullCount <= 0 {
+			// Assert.state(pullCount > 0, "pull count error") -> 405
 			scriptFailBusiness(c, "pull count error")
 			return
 		}
@@ -480,7 +536,8 @@ func registerScript(r *httpx.Router, a *app.App) {
 			IDs []string `json:"ids"`
 		}
 		if err := c.BindJSON(&body); err != nil {
-			scriptFailBusiness(c, "参数存在不正确")
+			// @RequestBody 解析失败 -> 417 incorrect_parameter_format
+			scriptFailFormat(c)
 			return
 		}
 		for _, id := range body.IDs {
@@ -489,14 +546,18 @@ func registerScript(r *httpx.Router, a *app.App) {
 				return
 			}
 		}
-		c.OKMsg("删除成功", nil)
+		c.OKMsg(c.T("i18n.delete_success.0007"), nil)
 	})
 
 	r.Handle(http.MethodPost, "/script/change-workspace-id", func(c *httpx.Context) {
 		id := c.Form("id")
+		if strings.TrimSpace(id) == "" {
+			scriptFailParam(c, "")
+			return
+		}
 		newWorkspaceID := c.Form("newWorkspaceId")
 		if strings.TrimSpace(newWorkspaceID) == "" {
-			scriptFailBusiness(c, "请选择要修改的工作空间")
+			scriptFailBusiness(c, c.T("i18n.select_workspace_to_modify.ac87"))
 			return
 		}
 		_, exists, err := rt.manager.Get(id)
@@ -505,7 +566,7 @@ func registerScript(r *httpx.Router, a *app.App) {
 			return
 		}
 		if !exists {
-			scriptFailBusiness(c, "找不到对应的脚本信息")
+			scriptFailBusiness(c, c.T("i18n.script_info_not_found.bd8d"))
 			return
 		}
 		fields := map[string]any{
@@ -520,7 +581,7 @@ func registerScript(r *httpx.Router, a *app.App) {
 			scriptFailBusiness(c, err.Error())
 			return
 		}
-		c.OKMsg("修改成功", nil)
+		c.OKMsg(c.T("i18n.modify_success.69be"), nil)
 	})
 
 	// ---- 脚本库 ----
@@ -535,13 +596,18 @@ func registerScript(r *httpx.Router, a *app.App) {
 	})
 
 	r.Handle(http.MethodPost, "/script-library/get", func(c *httpx.Context) {
+		if strings.TrimSpace(c.Form("id")) == "" {
+			// @ValidatorItem String id -> 400 参数验证失败
+			scriptFailParam(c, "")
+			return
+		}
 		item, exists, err := rt.manager.LibraryGet(c.Form("id"))
 		if err != nil {
 			scriptFailInternal(c, err)
 			return
 		}
 		if !exists {
-			scriptFailBusiness(c, "找不到对应的脚本")
+			scriptFailBusiness(c, c.T("i18n.missing_script_message.af89"))
 			return
 		}
 		c.OK(item)
@@ -550,27 +616,34 @@ func registerScript(r *httpx.Router, a *app.App) {
 	r.Handle(http.MethodPost, "/script-library/save", func(c *httpx.Context) {
 		id := strings.TrimSpace(c.Form("id"))
 		if id == "" {
-			scriptFailBusiness(c, "脚本库 id 不能为空")
+			// @ValidatorItem String id -> 400 参数验证失败
+			scriptFailParam(c, "")
 			return
 		}
 		content := c.Form("script")
 		if strings.TrimSpace(content) == "" {
-			scriptFailBusiness(c, "脚本内容不能为空")
+			// @ValidatorItem(msg=script_content_cannot_be_empty) -> 400
+			scriptFailParam(c, c.T("i18n.script_content_cannot_be_empty.49be"))
 			return
 		}
 		if err := rt.manager.LibrarySave(id, content, c.Form("description"), c.Form("version")); err != nil {
 			scriptFailInternal(c, err)
 			return
 		}
-		c.OKMsg("保存成功", nil)
+		c.OKMsg(c.T("i18n.save_succeeded.3b10"), nil)
 	})
 
 	r.Handle(http.MethodPost, "/script-library/del", func(c *httpx.Context) {
+		if strings.TrimSpace(c.Form("id")) == "" {
+			// @ValidatorItem String id -> 400 参数验证失败
+			scriptFailParam(c, "")
+			return
+		}
 		if err := rt.manager.LibraryDelete(c.Form("id")); err != nil {
 			scriptFailInternal(c, err)
 			return
 		}
-		c.OKMsg("删除成功", nil)
+		c.OKMsg(c.T("i18n.delete_success.0007"), nil)
 	})
 }
 

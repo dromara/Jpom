@@ -109,7 +109,7 @@ func (m *Manager) Get(id string) (map[string]any, bool, error) {
 func (m *Manager) Add(value map[string]any) error {
 	id := stringField(value, "id")
 	if id == "" {
-		return fmt.Errorf("脚本 id 不能为空")
+		return fmt.Errorf("script id is required")
 	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -119,7 +119,7 @@ func (m *Manager) Add(value map[string]any) error {
 	}
 	for _, record := range records {
 		if record.Key == id {
-			return fmt.Errorf("id已经存在啦")
+			return fmt.Errorf("script id already exists")
 		}
 	}
 	records = append(records, Record{Key: id, Value: value})
@@ -130,7 +130,7 @@ func (m *Manager) Add(value map[string]any) error {
 func (m *Manager) Update(value map[string]any) error {
 	id := stringField(value, "id")
 	if id == "" {
-		return fmt.Errorf("脚本 id 不能为空")
+		return fmt.Errorf("script id is required")
 	}
 	return m.UpdateFields(id, value)
 }
@@ -139,7 +139,7 @@ func (m *Manager) Update(value map[string]any) error {
 // Java updateById: unknown/historical fields of the stored record are kept.
 func (m *Manager) UpdateFields(id string, fields map[string]any) error {
 	if strings.TrimSpace(id) == "" {
-		return fmt.Errorf("脚本 id 不能为空")
+		return fmt.Errorf("script id is required")
 	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -162,7 +162,7 @@ func (m *Manager) UpdateFields(id string, fields map[string]any) error {
 		records[index].Value = merged
 		return writeRecords(m.scriptFile, records, scriptFieldOrder)
 	}
-	return fmt.Errorf("数据不存在: %s", id)
+	return fmt.Errorf("script does not exist: %s", id)
 }
 
 // Delete removes a script template and its execution log directory, mirroring
@@ -241,7 +241,7 @@ func (m *Manager) ListExecLogs() ([]map[string]any, error) {
 func (m *Manager) AddExecLog(value map[string]any) error {
 	id := stringField(value, "id")
 	if id == "" {
-		return fmt.Errorf("执行记录 id 不能为空")
+		return fmt.Errorf("execution log id is required")
 	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -278,6 +278,16 @@ func (m *Manager) DeleteExecLog(id string) error {
 // scripts are written.
 func (m *Manager) RunCacheDir() string { return m.app.ScriptRunCacheDir }
 
+// ConsoleCharset returns jpom.system.console-charset (platform default when
+// absent): the charset script content is written with and process output is read
+// with in the Java agent (ExtConfigBean.getConsoleLogCharset).
+func (m *Manager) ConsoleCharset() string {
+	if m.app != nil && m.app.Config != nil {
+		return ConsoleCharset(m.app.Config.Jpom.System.ConsoleCharset)
+	}
+	return PlatformCharset()
+}
+
 // NewExecutionID returns a 32 char hex id (Hutool fastSimpleUUID equivalent).
 func NewExecutionID() string {
 	buffer := make([]byte, 16)
@@ -308,8 +318,12 @@ func (m *Manager) WriteScriptFile(context string) (string, error) {
 	if os.PathSeparator == '\\' {
 		suffix = "bat"
 	}
+	encoded, err := EncodeText(content, m.ConsoleCharset())
+	if err != nil {
+		return "", err
+	}
 	path := filepath.Join(m.RunCacheDir(), NewExecutionID()+"."+suffix)
-	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+	if err := os.WriteFile(path, encoded, 0o644); err != nil {
 		return "", err
 	}
 	return path, nil
@@ -331,8 +345,12 @@ func (m *Manager) WriteRawScriptFile(context string) (string, error) {
 	if os.PathSeparator == '\\' {
 		suffix = "bat"
 	}
+	encoded, err := EncodeText(content, m.ConsoleCharset())
+	if err != nil {
+		return "", err
+	}
 	path := filepath.Join(m.RunCacheDir(), NewExecutionID()+"."+suffix)
-	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+	if err := os.WriteFile(path, encoded, 0o644); err != nil {
 		return "", err
 	}
 	return path, nil

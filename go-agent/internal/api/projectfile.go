@@ -40,13 +40,13 @@ func registerProjectFile(r *httpx.Router, a *app.App) {
 			failProjectFile(c, err)
 			return
 		}
-		c.OKMsg("查询成功", files)
+		c.OKMsg(c.T("i18n.query_success.d72b"), files)
 	})
 
 	r.Handle(http.MethodPost, "/manage/file/diff_file", func(c *httpx.Context) {
 		var request projectfile.DiffFileRequest
 		if err := c.BindJSON(&request); err != nil {
-			c.JSONCode(417, "传入的参数格式不正确", nil)
+			c.JSONCode(417, c.T("i18n.incorrect_parameter_format.9efb"), nil)
 			return
 		}
 		result, err := service.DiffFile(request)
@@ -60,14 +60,14 @@ func registerProjectFile(r *httpx.Router, a *app.App) {
 	r.Handle(http.MethodPost, "/manage/file/batch_delete", func(c *httpx.Context) {
 		var request projectfile.DiffFileRequest
 		if err := c.BindJSON(&request); err != nil {
-			c.JSONCode(417, "传入的参数格式不正确", nil)
+			c.JSONCode(417, c.T("i18n.incorrect_parameter_format.9efb"), nil)
 			return
 		}
 		if err := service.BatchDelete(request); err != nil {
 			failProjectFile(c, err)
 			return
 		}
-		c.OKMsg("删除成功", nil)
+		c.OKMsg(c.T("i18n.delete_success.0007"), nil)
 	})
 
 	r.Handle(http.MethodPost, "/manage/file/upload-sharding", func(c *httpx.Context) {
@@ -89,7 +89,7 @@ func registerProjectFile(r *httpx.Router, a *app.App) {
 			failProjectFile(c, err)
 			return
 		}
-		c.OKMsg("上传成功", nil)
+		c.OKMsg(c.T("i18n.upload_success.a769"), nil)
 	})
 
 	r.Handle(http.MethodPost, "/manage/file2/upload-sharding", func(c *httpx.Context) {
@@ -111,7 +111,7 @@ func registerProjectFile(r *httpx.Router, a *app.App) {
 			failProjectFile(c, err)
 			return
 		}
-		c.OKMsg("上传成功", nil)
+		c.OKMsg(c.T("i18n.upload_success.a769"), nil)
 	})
 
 	r.Handle(http.MethodPost, "/manage/file/sharding-merge", func(c *httpx.Context) {
@@ -144,10 +144,10 @@ func registerProjectFile(r *httpx.Router, a *app.App) {
 			if !result.Success {
 				code = 405
 			}
-			c.JSONCode(code, "上传成功并重启", result.Data)
+			c.JSONCode(code, c.T("i18n.upload_success_and_restart.7bc3"), result.Data)
 			return
 		}
-		c.OKMsg("上传成功", nil)
+		c.OKMsg(c.T("i18n.upload_success.a769"), nil)
 	})
 
 	r.Handle(http.MethodPost, "/manage/file2/sharding-merge", func(c *httpx.Context) {
@@ -166,7 +166,7 @@ func registerProjectFile(r *httpx.Router, a *app.App) {
 			failProjectFile(c, err)
 			return
 		}
-		c.OKMsg("上传成功", nil)
+		c.OKMsg(c.T("i18n.upload_success.a769"), nil)
 	})
 
 	r.Handle(http.MethodPost, "/manage/file/deleteFile", func(c *httpx.Context) {
@@ -179,7 +179,7 @@ func registerProjectFile(r *httpx.Router, a *app.App) {
 			failProjectFile(c, err)
 			return
 		}
-		c.OKMsg(message, nil)
+		c.OKMsg(message.Text(c.Lang), nil)
 	})
 
 	r.Handle(http.MethodPost, "/manage/file/read_file", func(c *httpx.Context) {
@@ -196,7 +196,7 @@ func registerProjectFile(r *httpx.Router, a *app.App) {
 			failProjectFile(c, err)
 			return
 		}
-		c.OKMsg("复制成功", nil)
+		c.OKMsg(c.T("i18n.copy_success.20a4"), nil)
 	})
 
 	r.Handle(http.MethodPost, "/manage/file/compress", func(c *httpx.Context) {
@@ -204,7 +204,7 @@ func registerProjectFile(r *httpx.Router, a *app.App) {
 			failProjectFile(c, err)
 			return
 		}
-		c.OKMsg("压缩成功", nil)
+		c.OKMsg(c.T("i18n.compression_success.80b3"), nil)
 	})
 
 	r.Handle(http.MethodPost, "/manage/file/update_config_file", func(c *httpx.Context) {
@@ -212,22 +212,23 @@ func registerProjectFile(r *httpx.Router, a *app.App) {
 			failProjectFile(c, err)
 			return
 		}
-		c.OKMsg("文件写入成功", nil)
+		c.OKMsg(c.T("i18n.file_write_success.804a"), nil)
 	})
 
 	r.Handle(http.MethodGet, "/manage/file/download", func(c *httpx.Context) {
-		target, err := service.DownloadPath(c.Form("id"), c.Form("levelName"), c.Form("filename"))
+		target, displayPath, err := service.DownloadPath(c.Form("id"), c.Form("levelName"), c.Form("filename"))
 		if err != nil {
 			failProjectFile(c, err)
 			return
 		}
-		serveFileDownload(c, target, func(message string) {
-			writeFileRawJSONError(c, 400, message)
+		serveFileDownload(c, target, func() {
+			writeFileRawJSONError(c, 400, c.T("i18n.folder_download_not_supported.c3b7"))
 		}, func(message string) {
-			// The OS error may contain local paths: log it, but only return the
-			// Java message prefix to the caller (D8).
+			// Java returns the exception message in the data field (the msg stays
+			// the localized retry hint). Log the raw OS error for diagnostics.
 			c.App.Log().Warn("download project file failed", "path", target, "error", message)
-			writeFileRawJSONError(c, 400, "下载失败。请刷新页面后重试")
+			writeFileRawJSONErrorData(c, 400, c.T("i18n.download_failed_retry.c113"),
+				"FileNotFoundException: "+displayPath+" (No such file or directory)")
 		})
 	})
 
@@ -238,7 +239,7 @@ func registerProjectFile(r *httpx.Router, a *app.App) {
 			failProjectFile(c, err)
 			return
 		}
-		c.OKMsg(message, nil)
+		c.OKMsg(message.Text(c.Lang), nil)
 	})
 
 	r.Handle(http.MethodPost, "/manage/file/new_file_folder.json", func(c *httpx.Context) {
@@ -246,7 +247,7 @@ func registerProjectFile(r *httpx.Router, a *app.App) {
 			failProjectFile(c, err)
 			return
 		}
-		c.OKMsg("操作成功", nil)
+		c.OKMsg(c.T("i18n.operation_succeeded.3313"), nil)
 	})
 
 	r.Handle(http.MethodPost, "/manage/file/rename.json", func(c *httpx.Context) {
@@ -254,7 +255,7 @@ func registerProjectFile(r *httpx.Router, a *app.App) {
 			failProjectFile(c, err)
 			return
 		}
-		c.OKMsg("操作成功", nil)
+		c.OKMsg(c.T("i18n.operation_succeeded.3313"), nil)
 	})
 
 	// file backup endpoints
@@ -267,10 +268,10 @@ func registerProjectFile(r *httpx.Router, a *app.App) {
 		if result == nil {
 			// Jackson omits a null data field; a typed nil pointer in an any
 			// value would still be encoded as null.
-			c.OKMsg("查询成功", nil)
+			c.OKMsg(c.T("i18n.query_success.d72b"), nil)
 			return
 		}
-		c.OKMsg("查询成功", result)
+		c.OKMsg(c.T("i18n.query_success.d72b"), result)
 	})
 
 	r.Handle(http.MethodPost, "/manage/file/backup-item-files", func(c *httpx.Context) {
@@ -279,7 +280,7 @@ func registerProjectFile(r *httpx.Router, a *app.App) {
 			failProjectFile(c, err)
 			return
 		}
-		c.OKMsg("查询成功", files)
+		c.OKMsg(c.T("i18n.query_success.d72b"), files)
 	})
 
 	r.Handle(http.MethodGet, "/manage/file/backup-download", func(c *httpx.Context) {
@@ -288,10 +289,10 @@ func registerProjectFile(r *httpx.Router, a *app.App) {
 			failProjectFile(c, err)
 			return
 		}
-		serveFileDownload(c, target, func(message string) {
-			writeFileRawTextError(c, message)
+		serveFileDownload(c, target, func() {
+			writeFileRawTextError(c, c.T("i18n.folder_download_not_supported.c3b7"))
 		}, func(message string) {
-			writeFileRawTextError(c, "下载文件异常:"+message)
+			writeFileRawTextError(c, c.T("i18n.download_file_error.5bcd")+message)
 		})
 	})
 
@@ -300,7 +301,7 @@ func registerProjectFile(r *httpx.Router, a *app.App) {
 			failProjectFile(c, err)
 			return
 		}
-		c.OKMsg("删除成功", nil)
+		c.OKMsg(c.T("i18n.delete_success.0007"), nil)
 	})
 
 	r.Handle(http.MethodPost, "/manage/file/backup-recover", func(c *httpx.Context) {
@@ -308,7 +309,7 @@ func registerProjectFile(r *httpx.Router, a *app.App) {
 			failProjectFile(c, err)
 			return
 		}
-		c.OKMsg("还原成功", nil)
+		c.OKMsg(c.T("i18n.restore_success.4c7f"), nil)
 	})
 }
 
@@ -356,6 +357,23 @@ func projectResultMessage(result *project.OpResult) string {
 // 405 for validation failures (Spring Assert / JsonMessage.fail), 500 for
 // unexpected exceptions.
 func failProjectFile(c *httpx.Context, err error) {
+	// Service errors carry an i18n key so the message follows Accept-Language;
+	// Go only guards fall back to their (English) message.
+	if localized, ok := err.(interface {
+		HTTPCode() int
+		I18nKey() string
+		I18nArgs() []any
+		I18nSuffix() string
+	}); ok {
+		message := err.Error()
+		if key := localized.I18nKey(); key != "" {
+			message = c.T(key, localized.I18nArgs()...) + localized.I18nSuffix()
+		} else if suffix := localized.I18nSuffix(); suffix != "" {
+			message = suffix
+		}
+		c.JSONCode(localized.HTTPCode(), message, nil)
+		return
+	}
 	c.JSONCode(projectfile.HTTPCodeOf(err), err.Error(), nil)
 }
 
@@ -398,14 +416,14 @@ func fileFormBool(value string) bool {
 }
 
 // serveDownload streams an existing file (ServletUtil#write(response, file)).
-func serveFileDownload(c *httpx.Context, target string, dirHandler, errHandler func(string)) {
+func serveFileDownload(c *httpx.Context, target string, dirHandler func(), errHandler func(string)) {
 	stat, err := os.Stat(target)
 	if err != nil {
 		errHandler(err.Error())
 		return
 	}
 	if stat.IsDir() {
-		dirHandler("暂不支持下载文件夹")
+		dirHandler()
 		return
 	}
 	contentType := mime.TypeByExtension(filepath.Ext(target))
@@ -437,6 +455,14 @@ func writeFileRawJSONError(c *httpx.Context, code int, message string) {
 	c.W.Header().Set("Content-Type", "application/json;charset=UTF-8")
 	c.W.WriteHeader(http.StatusOK)
 	_, _ = fmt.Fprintf(c.W, "{\"code\":%d,\"msg\":%s}", code, fileJSONString(message))
+}
+
+// writeFileRawJSONErrorData writes a bare JsonMessage string including the data
+// field, where the Java download endpoint puts the original exception message.
+func writeFileRawJSONErrorData(c *httpx.Context, code int, message, data string) {
+	c.W.Header().Set("Content-Type", "application/json;charset=UTF-8")
+	c.W.WriteHeader(http.StatusOK)
+	_, _ = fmt.Fprintf(c.W, "{\"code\":%d,\"msg\":%s,\"data\":%s}", code, fileJSONString(message), fileJSONString(data))
 }
 
 // writeRawTextError writes a plain text error, used by backup-download which the

@@ -12,6 +12,8 @@ package script
 
 import (
 	"fmt"
+
+	"jpom.io/go-agent/internal/i18n"
 	"strconv"
 	"strings"
 	"time"
@@ -85,14 +87,14 @@ type CronPattern struct {
 func ParseCron(expression string) (*CronPattern, error) {
 	trimmed := strings.TrimSpace(expression)
 	if trimmed == "" {
-		return nil, fmt.Errorf("cron 表达式格式不正确")
+		return nil, fmt.Errorf("%s", i18n.T(i18n.DefaultLang(), "i18n.cron_expression_format_error.6dcd"))
 	}
 	pattern := &CronPattern{source: trimmed}
 	for _, groupText := range strings.Split(trimmed, "|") {
 		group := cronGroup{}
 		fields := strings.Fields(groupText)
 		if len(fields) < 5 || len(fields) > 7 {
-			return nil, fmt.Errorf("cron 表达式格式不正确: %s", expression)
+			return nil, fmt.Errorf("%s: %s", i18n.T(i18n.DefaultLang(), "i18n.cron_expression_format_error.6dcd"), expression)
 		}
 		if len(fields) == 5 {
 			fields = append([]string{"0"}, fields...)
@@ -103,7 +105,7 @@ func ParseCron(expression string) (*CronPattern, error) {
 		for index := 0; index < 7; index++ {
 			part, err := parseCronPart(cronFields[index], fields[index])
 			if err != nil {
-				return nil, fmt.Errorf("cron 表达式格式不正确: %s (%v)", expression, err)
+				return nil, fmt.Errorf("%s: %s (%v)", i18n.T(i18n.DefaultLang(), "i18n.cron_expression_format_error.6dcd"), expression, err)
 			}
 			group.parts[index] = part
 		}
@@ -117,7 +119,7 @@ func ParseCron(expression string) (*CronPattern, error) {
 func parseCronPart(field cronField, text string) (cronPart, error) {
 	text = strings.TrimSpace(text)
 	if text == "" {
-		return cronPart{}, fmt.Errorf("%s 字段为空", field.name)
+		return cronPart{}, fmt.Errorf("cron field %s is empty", field.name)
 	}
 	if text == "*" || text == "?" {
 		return cronPart{any: true}, nil
@@ -126,7 +128,7 @@ func parseCronPart(field cronField, text string) (cronPart, error) {
 	for _, item := range strings.Split(text, ",") {
 		item = strings.TrimSpace(item)
 		if item == "" {
-			return cronPart{}, fmt.Errorf("%s 字段存在空项", field.name)
+			return cronPart{}, fmt.Errorf("cron field %s contains an empty item", field.name)
 		}
 		base := item
 		step := 1
@@ -135,7 +137,7 @@ func parseCronPart(field cronField, text string) (cronPart, error) {
 			stepText := item[index+1:]
 			parsed, err := strconv.Atoi(stepText)
 			if err != nil || parsed <= 0 {
-				return cronPart{}, fmt.Errorf("%s 步长不正确: %s", field.name, item)
+				return cronPart{}, fmt.Errorf("invalid step for cron field %s: %s", field.name, item)
 			}
 			step = parsed
 		}
@@ -165,7 +167,7 @@ func parseCronPart(field cronField, text string) (cronPart, error) {
 			}
 		}
 		if start > end {
-			return cronPart{}, fmt.Errorf("%s 范围不正确: %s", field.name, item)
+			return cronPart{}, fmt.Errorf("invalid range for cron field %s: %s", field.name, item)
 		}
 		for value := start; value <= end; value += step {
 			values[value] = struct{}{}
@@ -183,10 +185,10 @@ func parseCronValue(field cronField, text string) (int, error) {
 	}
 	value, err := strconv.Atoi(text)
 	if err != nil {
-		return 0, fmt.Errorf("%s 值不正确: %s", field.name, text)
+		return 0, fmt.Errorf("invalid value for cron field %s: %s", field.name, text)
 	}
 	if value < field.min || value > field.max {
-		return 0, fmt.Errorf("%s 值超出范围: %d", field.name, value)
+		return 0, fmt.Errorf("cron field %s value out of range: %d", field.name, value)
 	}
 	return value, nil
 }
@@ -258,12 +260,10 @@ func NormalizeCron(expression string, matchSecond bool) (string, error) {
 	if trimmed == "" || strings.HasPrefix(trimmed, "!") {
 		return "", nil
 	}
-	if strings.Contains(trimmed, "|") {
-		return "", fmt.Errorf("暂不支持 | 分组的 cron 表达式: %s", trimmed)
-	}
-	if _, err := ParseCron(trimmed); err != nil {
-		return "", err
-	}
+	// sysinfo.CronManager 与 Hutool CronPattern 一致，支持 "|" 分组 OR、7 段年份、
+	// L/负数相对取值/月份别名等扩展语法；本函数只负责启用/禁用判断，表达式合法性
+	// 交给 sysinfo.RegisterCronTask 校验（非法时返回 error 并记录日志），避免本地
+	// 解析器成为 Hutool 超集语法的误拦截点。
 	return trimmed, nil
 }
 

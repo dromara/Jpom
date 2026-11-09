@@ -15,6 +15,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"sync"
 
 	"jpom.io/go-agent/internal/app"
@@ -56,7 +57,7 @@ func readWorkspaceEnvFile(a *app.App) (workspaceEnvVarFile, error) {
 		return values, nil
 	}
 	if err := jsonUnmarshal(content, &values); err != nil {
-		return nil, fmt.Errorf("解析 workspace_env_var.json 失败: %w", err)
+		return nil, fmt.Errorf("parse workspace_env_var.json failed: %w", err)
 	}
 	return values, nil
 }
@@ -67,14 +68,15 @@ func writeWorkspaceEnvFile(a *app.App, values workspaceEnvVarFile) error {
 
 // UpdateWorkspaceEnv 对应 /system/workspace_env/update。
 func UpdateWorkspaceEnv(a *app.App, workspaceID, name, value, description string, privacy *int) error {
-	if name == "" {
-		return &ParamError{Code: 405, Msg: "请填写名称"}
+	// @ValidatorItem 校验失败 -> code 400（自定义文案优先）
+	if strings.TrimSpace(name) == "" {
+		return paramErr(400, "i18n.name_required.856d")
 	}
-	if value == "" {
-		return &ParamError{Code: 405, Msg: "请填写值"}
+	if strings.TrimSpace(value) == "" {
+		return paramErr(400, "i18n.value.2e81")
 	}
-	if description == "" {
-		return &ParamError{Code: 405, Msg: "请填写描述"}
+	if strings.TrimSpace(description) == "" {
+		return paramErr(400, "i18n.description.615e")
 	}
 	workspaceEnvMu.Lock()
 	defer workspaceEnvMu.Unlock()

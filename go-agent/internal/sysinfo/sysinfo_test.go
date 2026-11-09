@@ -181,3 +181,83 @@ func TestParseDataSize(t *testing.T) {
 		}
 	}
 }
+
+func TestCronHutoolExtensions(t *testing.T) {
+	// 1) | 分组 OR：09:00 与 18:00 各触发一次，12:00 不触发。
+	groups, err := parseCron("0 0 9 * * ? | 0 0 18 * * ?")
+	if err != nil {
+		t.Fatalf("parseCron groups: %v", err)
+	}
+	day := time.Date(2026, 11, 9, 0, 0, 0, 0, time.Local)
+	if !groups.Match(day.Add(9*time.Hour), true) {
+		t.Error("09:00 应命中 | 分组")
+	}
+	if !groups.Match(day.Add(18*time.Hour), true) {
+		t.Error("18:00 应命中 | 分组")
+	}
+	if groups.Match(day.Add(12*time.Hour), true) {
+		t.Error("12:00 不应命中")
+	}
+
+	// 2) 7 段年份：仅匹配指定年份。
+	yearExpr, err := parseCron("0 0 9 9 11 ? 2026")
+	if err != nil {
+		t.Fatalf("parseCron year: %v", err)
+	}
+	if !yearExpr.Match(time.Date(2026, 11, 9, 9, 0, 0, 0, time.Local), true) {
+		t.Error("2026-11-09 09:00 应命中")
+	}
+	if yearExpr.Match(time.Date(2027, 11, 9, 9, 0, 0, 0, time.Local), true) {
+		t.Error("2027 年不应命中 2026 年限定表达式")
+	}
+	if _, err := parseCron("0 0 9 9 11 ? 2100"); err == nil {
+		t.Error("年份超出 1970-2099 应报错")
+	}
+	// 年份通配
+	wildYear, err := parseCron("0 0 9 9 11 ? *")
+	if err != nil {
+		t.Fatalf("parseCron year wildcard: %v", err)
+	}
+	if !wildYear.Match(time.Date(2027, 11, 9, 9, 0, 0, 0, time.Local), true) {
+		t.Error("年份通配应对任意年份生效")
+	}
+
+	// 3) 5 段表达式：秒默认为 0。
+	five, err := parseCron("0/10 * * * *")
+	if err != nil {
+		t.Fatalf("parseCron 5 fields: %v", err)
+	}
+	if !five.Match(day.Add(10*time.Minute), true) {
+		t.Error("5 段 */10 应在第 10 分钟触发")
+	}
+	if five.Match(day.Add(10*time.Minute).Add(time.Second), true) {
+		t.Error("5 段表达式秒固定为 0")
+	}
+
+	// 4) Hutool 星期映射：0=周日 ... 6=周六，MON=1。
+	monday := day
+	for monday.Weekday() != time.Monday {
+		monday = monday.AddDate(0, 0, 1)
+	}
+	monExpr, err := parseCron("0 0 9 * * MON")
+	if err != nil {
+		t.Fatalf("parseCron MON: %v", err)
+	}
+	if !monExpr.Match(monday.Add(9*time.Hour), true) {
+		t.Error("MON 应命中周一 09:00")
+	}
+	if monExpr.Match(monday.AddDate(0, 0, 1).Add(9*time.Hour), true) {
+		t.Error("MON 不应命中周二")
+	}
+	// Hutool Part.DAY_OF_WEEK 取值上限为 6（0=Sunday），7 非法。
+	if _, err := parseCron("0 0 9 * * 7"); err == nil {
+		t.Error("星期 7 超出 Hutool 取值范围应报错")
+	}
+	// L（字段最大值）与负数取值兼容 Hutool。
+	if _, err := parseCron("0 0 9 L * ?"); err != nil {
+		t.Errorf("L 应被接受（按字段最大值处理）: %v", err)
+	}
+	if _, err := parseCron("0 0 9 ? * MON-FRI"); err != nil {
+		t.Errorf("星期范围别名应被接受: %v", err)
+	}
+}

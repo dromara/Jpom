@@ -11,7 +11,6 @@
 package project
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -47,14 +46,14 @@ func (r *Runtime) SaveProject(params SaveParams) (string, error) {
 	// 自动创建日志文件并校验日志路径不是目录
 	logFile, err := r.Manager.TouchLogFile(info)
 	if err != nil {
-		return "", err
+		return "", ServiceError(err)
 	}
 	if stat, err := os.Stat(logFile); err == nil && stat.IsDir() {
-		return "", fmt.Errorf("项目log是一个已经存在的文件夹")
+		return "", ValidationKey(keyProjectLogIsFolder)
 	}
 	// WebHooks 地址校验
 	if token := tokenValue(info); token != "" && !urlHTTPPattern.MatchString(token) {
-		return "", fmt.Errorf("WebHooks 地址不合法")
+		return "", ValidationKey(keyInvalidWebhooksAddress)
 	}
 	// dsl 配置校验
 	if err := checkDslYml(info); err != nil {
@@ -70,14 +69,14 @@ func checkDslYml(info map[string]any) error {
 	}
 	content := GetString(info, "dslContent")
 	if strings.TrimSpace(content) == "" {
-		return fmt.Errorf("请配置 dsl 内容")
+		return ValidationKey(keyConfigureDslContent)
 	}
 	config, err := parseDslContent(content)
 	if err != nil {
 		return err
 	}
 	if !dslHasProcess(config, OpStatus) {
-		return fmt.Errorf("没有配置 run.status")
+		return ValidationKey(keyRunStatusNotConfigured)
 	}
 	return nil
 }
@@ -90,34 +89,34 @@ func (r *Runtime) checkSaveParameter(info map[string]any, preview, outGiving boo
 	}
 	runMode := ParseRunMode(GetString(info, "runMode"))
 	if runMode == "" {
-		return fmt.Errorf("请选择运行模式")
+		return ValidationKey(keySelectRunMode)
 	}
 	info["runMode"] = runMode
 	switch runMode {
 	case RunModeClassPath, RunModeJavaExtDirsCp:
 		if GetString(info, "mainClass") == "" {
-			return fmt.Errorf("ClassPath、JavaExtDirsCp 模式 MainClass必填")
+			return ValidationKey(keyClassPathRequired)
 		}
 		if runMode == RunModeJavaExtDirsCp && GetString(info, "javaExtDirsCp") == "" {
-			return fmt.Errorf("JavaExtDirsCp 模式 javaExtDirsCp必填")
+			return ValidationKey(keyJavaExtDirsCpRequired)
 		}
 	case RunModeJar, RunModeJarWar:
 		info["mainClass"] = ""
 	case RunModeLink:
 		linkID := GetString(info, "linkId")
 		if linkID == "" {
-			return fmt.Errorf("Link 模式 LinkId必填")
+			return ValidationKey(keyLinkIDRequired)
 		}
 		target, ok, err := r.Manager.Get(linkID)
 		if err != nil {
-			return err
+			return ServiceError(err)
 		}
 		if !ok || target == nil {
-			return fmt.Errorf("被软链的项目已经不存在啦，%s", linkID)
+			return ValidationKeySuffix(keySoftLinkTargetNotExist, linkID)
 		}
 		targetMode := GetString(target, "runMode")
 		if targetMode == RunModeFile || targetMode == RunModeLink {
-			return fmt.Errorf("软链项目模式错误")
+			return ValidationKey(keySoftLinkModeError)
 		}
 	}
 	info["outGivingProject"] = outGiving
@@ -127,11 +126,11 @@ func (r *Runtime) checkSaveParameter(info map[string]any, preview, outGiving boo
 	if !preview {
 		whitelistDirectory := GetString(info, "whitelistDirectory")
 		if whitelistDirectory == "" {
-			return fmt.Errorf("恢复授权数据异常或者没有选择授权目录")
+			return ValidationKey(keyRestoreAuthorize)
 		}
 		if !r.CheckProjectDirectory(whitelistDirectory) {
 			if !outGiving {
-				return fmt.Errorf("请选择正确的项目路径,或者还没有配置授权")
+				return ValidationKey(keySelectProjectPath)
 			}
 			if err := r.AddProjectWhiteList(whitelistDirectory); err != nil {
 				return err
@@ -140,7 +139,7 @@ func (r *Runtime) checkSaveParameter(info map[string]any, preview, outGiving boo
 		if logPath := GetString(info, "logPath"); logPath != "" {
 			if !r.CheckProjectDirectory(logPath) {
 				if !outGiving {
-					return fmt.Errorf("请填写的项目日志存储路径,或者还没有配置授权")
+					return ValidationKey(keyProjectLogPathRequired)
 				}
 				if err := r.AddProjectWhiteList(logPath); err != nil {
 					return err
@@ -150,7 +149,7 @@ func (r *Runtime) checkSaveParameter(info map[string]any, preview, outGiving boo
 	}
 	lib := GetString(info, "lib")
 	if lib == "" || lib == "/" || containsChinese(lib) {
-		return fmt.Errorf("项目路径不能为空,不能是顶级目录,不能包含中文")
+		return ValidationKey(keyInvalidProjectPath)
 	}
 	if err := checkSlip(lib); err != nil {
 		return err
@@ -173,7 +172,7 @@ func checkSlip(lib string) error {
 	tempDir := os.TempDir()
 	target := filepath.Join(tempDir, lib)
 	if !isSubPath(tempDir, target) {
-		return fmt.Errorf("项目路径存在提升目录问题")
+		return ValidationKey(keyProjectPathPromotion)
 	}
 	return nil
 }
@@ -193,23 +192,27 @@ func (r *Runtime) save(info map[string]any, params SaveParams) (string, error) {
 	runMode := GetString(info, "runMode")
 	if !ok || existing == nil {
 		if runMode != RunModeFile && runMode != RunModeDsl {
-			if r.IsRun(info) {
-				return "", fmt.Errorf("当前项目id已经被正在运行的程序占用")
+			running, err := r.IsRunE(info)
+			if err != nil {
+				return "", err
+			}
+			if running {
+				return "", ValidationKey(keyProjectIDInUse)
 			}
 		}
 		if params.Preview {
-			return "检查通过", nil
+			return tr(r.Lang(), keyCheckPassed), nil
 		}
 		if err := r.Manager.AddItem(info, params.UserName); err != nil {
-			return "", err
+			return "", ServiceError(err)
 		}
-		return "新增成功！", nil
+		return tr(r.Lang(), keyAddNewSuccess), nil
 	}
 	if params.Preview {
-		return "检查通过", nil
+		return tr(r.Lang(), keyCheckPassed), nil
 	}
 	if ws := GetString(existing, "workspaceId"); ws != "" && ws != workspaceID {
-		return "", fmt.Errorf("当前项目已经被其他工作空间关联,请检查确认后再操作或者使用孤独数据修正")
+		return "", ValidationKey(keyProjectAssociatedSpace)
 	}
 	if runMode != RunModeLink {
 		if err := r.moveTo(existing, info); err != nil {
@@ -233,9 +236,9 @@ func (r *Runtime) save(info map[string]any, params SaveParams) (string, error) {
 		}
 	})
 	if err != nil {
-		return "", err
+		return "", ServiceError(err)
 	}
-	return "修改成功", nil
+	return tr(r.Lang(), keyModifySuccess), nil
 }
 
 // dropNilValues 去掉请求中值为 null 的字段（Java 端 null 不会写入数据文件）。
@@ -269,7 +272,7 @@ func coerceProjectValues(info map[string]any) {
 // convertToBool 按 Spring/hutool Boolean 绑定语义解析（true/1/yes/y/on 为真）。
 func convertToBool(text string) bool {
 	switch strings.ToLower(strings.TrimSpace(text)) {
-	case "true", "1", "yes", "y", "on", "是", "真":
+	case "true", "1", "yes", "y", "on":
 		return true
 	default:
 		return false
@@ -289,7 +292,7 @@ func copyPresent(target, source map[string]any, keys ...string) {
 func (r *Runtime) checkProjectPath(info map[string]any) error {
 	id := GetString(info, "id")
 	if strings.Contains(id, " ") {
-		return fmt.Errorf("项目Id不能包含空格")
+		return ValidationKey(keyProjectIDContainsSpace)
 	}
 	if GetString(info, "runMode") == RunModeLink {
 		return nil
@@ -299,10 +302,10 @@ func (r *Runtime) checkProjectPath(info map[string]any) error {
 		return err
 	}
 	if strings.Contains(lib, " ") {
-		return fmt.Errorf("项目路径不能包含空格")
+		return ValidationKey(keyProjectPathNoSpaces)
 	}
 	if stat, err := os.Stat(lib); err == nil && !stat.IsDir() {
-		return fmt.Errorf("项目路径是一个已经存在的文件")
+		return ValidationKey(keyProjectPathIsFile)
 	}
 	list, err := r.Manager.List()
 	if err != nil {
@@ -320,7 +323,7 @@ func (r *Runtime) checkProjectPath(info map[string]any) error {
 			continue
 		}
 		if pathEquals(otherLib, lib) || isSubPath(otherLib, lib) || isSubPath(lib, otherLib) {
-			return fmt.Errorf("项目路径和【%s】项目冲突:%s", GetString(item, "name"), otherLib)
+			return ValidationKey(keyProjectPathConflict, GetString(item, "name"), otherLib)
 		}
 	}
 	return nil
@@ -337,36 +340,44 @@ func (r *Runtime) moveTo(old, news map[string]any) error {
 		return err
 	}
 	if !pathEquals(oldLib, newLib) {
-		if r.IsRun(old) {
-			return fmt.Errorf("正在运行的项目不能修改路径")
+		running, err := r.IsRunE(old)
+		if err != nil {
+			return err
+		}
+		if running {
+			return ValidationKey(keyRunningCannotChangePath)
 		}
 		if _, err := os.Stat(oldLib); err == nil {
 			if err := tempMoveContent(oldLib, newLib); err != nil {
-				return err
+				return ServiceError(err)
 			}
 		}
 	}
 	oldLog, err := r.Manager.TouchLogFile(old)
 	if err != nil {
-		return err
+		return ServiceError(err)
 	}
 	newLog, err := r.Manager.TouchLogFile(news)
 	if err != nil {
-		return err
+		return ServiceError(err)
 	}
 	if pathEquals(oldLog, newLog) {
 		return nil
 	}
-	if r.IsRun(old) {
-		return fmt.Errorf("正在运行的项目不能修改路径")
+	running, err := r.IsRunE(old)
+	if err != nil {
+		return err
+	}
+	if running {
+		return ValidationKey(keyRunningCannotChangePath)
 	}
 	if _, err := os.Stat(oldLog); err == nil {
 		if err := os.MkdirAll(filepath.Dir(newLog), 0o755); err != nil {
-			return err
+			return ServiceError(err)
 		}
 		if err := os.Rename(oldLog, newLog); err != nil {
 			if copyErr := copyFileContent(oldLog, newLog); copyErr != nil {
-				return copyErr
+				return ServiceError(copyErr)
 			}
 			_ = os.Remove(oldLog)
 		}
@@ -381,7 +392,7 @@ func (r *Runtime) moveTo(old, news map[string]any) error {
 			return err
 		}
 		if err := tempMoveContent(oldLogBack, newLogBack); err != nil {
-			return err
+			return ServiceError(err)
 		}
 	}
 	return nil
@@ -464,10 +475,14 @@ func (r *Runtime) DeleteProject(id, thorough string) (string, error) {
 		return "", err
 	}
 	if !ok || info == nil {
-		return "项目不存在", nil
+		return tr(r.Lang(), keyProjectNotExist), nil
 	}
-	if r.IsRun(info) {
-		return "", fmt.Errorf("不能删除正在运行的项目")
+	running, err := r.IsRunE(info)
+	if err != nil {
+		return "", err
+	}
+	if running {
+		return "", ValidationKey(keyCannotDeleteRunning)
 	}
 	list, err := r.Manager.List()
 	if err != nil {
@@ -478,32 +493,32 @@ func (r *Runtime) DeleteProject(id, thorough string) (string, error) {
 			continue
 		}
 		if GetString(item, "linkId") == id {
-			return "", fmt.Errorf("项目被%s软链中", GetString(item, "name"))
+			return "", ValidationKey(keyProjectSoftLinkedBy, GetString(item, "name"))
 		}
 	}
 	if strings.TrimSpace(thorough) != "" {
 		if logBack, err := r.Manager.ResolveLogBack(info); err == nil {
 			if proc.SystemFastDel(logBack) {
-				return "", fmt.Errorf("删除日志文件失败:%s", logBack)
+				return "", ValidationKeySuffix(keyDeleteLogFileFailed, logBack)
 			}
 		}
 		if logFile, err := r.Manager.ResolveLogFile(info); err == nil {
 			if proc.SystemFastDel(logFile) {
-				return "", fmt.Errorf("删除日志文件失败:%s", logFile)
+				return "", ValidationKeySuffix(keyDeleteLogFileFailed, logFile)
 			}
 		}
 		if GetString(info, "runMode") != RunModeLink {
 			if lib, err := r.Manager.ResolveLibFile(info); err == nil {
 				if proc.SystemFastDel(lib) {
-					return "", fmt.Errorf("删除项目文件失败:%s", lib)
+					return "", ValidationKeySuffix(keyDeleteProjectFileFailed, lib)
 				}
 			}
 		}
 	}
 	if err := r.Manager.DeleteItem(id); err != nil {
-		return "", err
+		return "", ServiceError(err)
 	}
-	return "删除成功！", nil
+	return tr(r.Lang(), keyDeletionSuccess), nil
 }
 
 // ReleaseOutGiving 释放节点分发（等价 ManageEditProjectController.releaseOutGiving）。
@@ -516,30 +531,30 @@ func (r *Runtime) ReleaseOutGiving(id, userName string) (string, error) {
 		if err := r.Manager.UpdateByID(id, userName, func(item map[string]any) {
 			item["outGivingProject"] = false
 		}); err != nil {
-			return "", err
+			return "", ServiceError(err)
 		}
 	}
-	return "释放成功", nil
+	return tr(r.Lang(), keyReleaseSuccessful), nil
 }
 
 // ChangeWorkspaceID 修改项目工作空间与节点（等价 /manage/change-workspace-id）。
 func (r *Runtime) ChangeWorkspaceID(id, newWorkspaceID, newNodeID, userName string) (string, error) {
 	if strings.TrimSpace(newWorkspaceID) == "" {
-		return "", fmt.Errorf("请选择要修改的工作空间")
+		return "", ValidationKey(keySelectWorkspaceToModify)
 	}
 	_, ok, err := r.Manager.Get(id)
 	if err != nil {
-		return "", err
+		return "", ServiceError(err)
 	}
 	if ok {
 		if err := r.Manager.UpdateByID(id, userName, func(item map[string]any) {
 			item["workspaceId"] = newWorkspaceID
 			item["nodeId"] = newNodeID
 		}); err != nil {
-			return "", err
+			return "", ServiceError(err)
 		}
 	}
-	return "修改成功", nil
+	return tr(r.Lang(), keyModifySuccess), nil
 }
 
 // CheckProjectDirectory 判断路径是否命中项目授权目录（等价 AgentWhitelist.checkPath）。
@@ -577,21 +592,21 @@ func (r *Runtime) AddProjectWhiteList(item string) error {
 		}
 	}
 	whitelist.Project = append(whitelist.Project, validated)
-	return WriteWhitelist(r.Options.BaseDir, whitelist)
+	return ServiceError(WriteWhitelist(r.Options.BaseDir, whitelist))
 }
 
 // validateWhitelistPath 校验授权目录（等价 AgentWhitelist.covertToArray）。
 func (r *Runtime) validateWhitelistPath(value string) (string, error) {
 	cleaned := filepath.Clean(strings.TrimSpace(value))
 	if !filepath.IsAbs(cleaned) {
-		return "", fmt.Errorf("需要配置绝对路径%s", cleaned)
+		return "", ValidationKeySuffix(keyNeedAbsolutePath, cleaned)
 	}
 	if filepath.Dir(cleaned) == cleaned {
-		return "", fmt.Errorf("不能配置根路径%s", cleaned)
+		return "", ValidationKeySuffix(keyCannotConfigureRootPath, cleaned)
 	}
 	agentDataPath := canonicalPath(filepath.Join(r.Options.BaseDir, "data"))
 	if strings.HasPrefix(agentDataPath, cleaned) {
-		return "", fmt.Errorf("项目路径授权不能包含 jpom 数据目录")
+		return "", ValidationKey(keyProjectPathAuthJpom)
 	}
 	return cleaned, nil
 }

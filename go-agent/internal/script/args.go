@@ -12,8 +12,11 @@ package script
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 	"unicode"
+
+	"jpom.io/go-agent/internal/i18n"
 )
 
 // CommandParam is one script argument as stored by Jpom
@@ -115,7 +118,7 @@ func ConvertLineStr(defArgs string) []CommandParam {
 	values := splitTrim(defArgs)
 	result := make([]CommandParam, 0, len(values))
 	for index, value := range values {
-		result = append(result, CommandParam{Value: value, Desc: fmt.Sprintf("参数%d", index+1)})
+		result = append(result, CommandParam{Value: value, Desc: i18n.T(i18n.DefaultLang(), "i18n.parameter.3d0a") + strconv.Itoa(index+1)})
 	}
 	return result
 }
@@ -155,22 +158,23 @@ func marshalOrderedArray(params []CommandParam) (string, error) {
 
 // TriggerParamMap converts the trigger parameters into environment variables:
 // every key is prefixed with trigger_ and converted to underline case
-// (ScriptController.exec / NodeScriptServer.execute).
-func TriggerParamMap(params string) map[string]string {
+// (ScriptController.exec / NodeScriptServer.execute). A malformed params value
+// returns an error (Java JSONObject.parseObject throws JSONException -> code 500).
+func TriggerParamMap(params string) (map[string]string, error) {
 	trimmed := strings.TrimSpace(params)
 	if trimmed == "" {
-		return nil
+		return nil, nil
 	}
 	decoded := map[string]any{}
 	if err := json.Unmarshal([]byte(trimmed), &decoded); err != nil {
-		return nil
+		return nil, err
 	}
 	result := make(map[string]string, len(decoded))
 	for key, value := range decoded {
 		name := toUnderlineCase("trigger_" + key)
 		result[name] = toString(value)
 	}
-	return result
+	return result, nil
 }
 
 func toString(value any) string {

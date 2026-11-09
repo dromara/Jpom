@@ -260,7 +260,7 @@ func JavaCommand(windows bool) (string, error) {
 			}
 		}
 	}
-	return "", fmt.Errorf("未找到 java 可执行文件，请配置 JAVA_HOME/PATH")
+	return "", fmt.Errorf("java executable not found, please configure JAVA_HOME or PATH")
 }
 
 // isExecutableFile 判断是否为可执行文件。

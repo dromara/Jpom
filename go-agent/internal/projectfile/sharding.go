@@ -35,7 +35,7 @@ type ShardingChunkOptions struct {
 func (s *Service) shardingDateDir() (string, error) {
 	dir := filepath.Join(s.app.TempDir, time.Now().Format("2006-01-02"))
 	if err := os.MkdirAll(dir, 0o755); err != nil {
-		return "", fmt.Errorf("创建临时目录失败:%w", err)
+		return "", failMessage(fmt.Sprintf("Create temporary directory failed: %v", err))
 	}
 	return dir, nil
 }
@@ -44,10 +44,10 @@ func (s *Service) shardingDateDir() (string, error) {
 // name. The server always sends a UUID, so only [0-9A-Za-z_-] is accepted.
 func validateSliceID(sliceID string) error {
 	if strings.TrimSpace(sliceID) == "" {
-		return invalidf("没有分片 id 信息")
+		return invalidf("i18n.no_shard_id_info.30f8")
 	}
 	if len(sliceID) > 128 {
-		return invalidf("分片 id 信息不合法")
+		return invalidMessage("Illegal shard id")
 	}
 	for _, value := range sliceID {
 		switch {
@@ -56,20 +56,20 @@ func validateSliceID(sliceID string) error {
 		case value >= 'A' && value <= 'Z':
 		case value == '-' || value == '_':
 		default:
-			return invalidf("分片 id 信息不合法")
+			return invalidMessage("Illegal shard id")
 		}
 	}
 	return nil
 }
 
-func parseIntParam(value, name string) (int, error) {
+func parseIntParam(value, key string) (int, error) {
 	value = strings.TrimSpace(value)
 	if value == "" {
-		return 0, invalidf("上传信息不完整：%s", name)
+		return 0, invalidf(key)
 	}
 	parsed, err := strconv.Atoi(value)
 	if err != nil {
-		return 0, invalidf("上传信息不完整：%s", name)
+		return 0, invalidf(key)
 	}
 	return parsed, nil
 }
@@ -78,7 +78,7 @@ func parseIntParam(value, name string) (int, error) {
 // sharding-merge, in the same order as BaseJpomController.
 func validateShardingCommon(fileSumMD5, sliceID string) error {
 	if strings.TrimSpace(fileSumMD5) == "" {
-		return invalidf("没有文件签名信息")
+		return invalidf("i18n.file_signature_info_not_found.83bf")
 	}
 	return validateSliceID(sliceID)
 }
@@ -99,39 +99,39 @@ func (s *Service) SaveShardingChunk(filename string, body io.Reader, options Sha
 	if err := validateShardingCommon(options.FileSumMD5, options.SliceID); err != nil {
 		return err
 	}
-	totalSlice, err := parseIntParam(options.TotalSlice, "totalSlice")
+	totalSlice, err := parseIntParam(options.TotalSlice, "i18n.incomplete_upload_info_total_slice.7e85")
 	if err != nil {
 		return err
 	}
-	nowSlice, err := parseIntParam(options.NowSlice, "nowSlice")
+	nowSlice, err := parseIntParam(options.NowSlice, "i18n.incomplete_upload_info_now_slice.34aa")
 	if err != nil {
 		return err
 	}
 	if totalSlice <= 0 || nowSlice < 0 || totalSlice < nowSlice {
-		return invalidf("当前上传的分片信息错误")
+		return invalidf("i18n.current_upload_chunk_info_incorrect.900e")
 	}
 	if body == nil {
-		return invalidf("没有上传文件")
+		return invalidf("i18n.no_uploaded_file.07ef")
 	}
 	original := filepath.Base(strings.ReplaceAll(filename, "\\", "/"))
 	if original == "" || original == "." || original == ".." || original == "/" {
-		return invalidf("没有上传文件")
+		return invalidf("i18n.no_uploaded_file.07ef")
 	}
 	itemsDir, err := s.uploadShardingItemPath(options.SliceID)
 	if err != nil {
 		return err
 	}
 	if err := os.MkdirAll(itemsDir, 0o755); err != nil {
-		return fmt.Errorf("创建分片目录失败:%w", err)
+		return failMessage(fmt.Sprintf("Create sharding directory failed: %v", err))
 	}
 	target := filepath.Join(itemsDir, original)
 	out, err := os.OpenFile(target, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0o644)
 	if err != nil {
-		return fmt.Errorf("保存分片失败:%w", err)
+		return failMessage(fmt.Sprintf("Save sharding chunk failed: %v", err))
 	}
 	if _, err := io.Copy(out, body); err != nil {
 		_ = out.Close()
-		return fmt.Errorf("保存分片失败:%w", err)
+		return failMessage(fmt.Sprintf("Save sharding chunk failed: %v", err))
 	}
 	return out.Close()
 }
@@ -152,7 +152,7 @@ func (s *Service) MergeSharding(sliceID, fileSumMD5, totalSliceValue string) (st
 	if err := validateShardingCommon(fileSumMD5, sliceID); err != nil {
 		return "", err
 	}
-	totalSlice, err := parseIntParam(totalSliceValue, "totalSlice")
+	totalSlice, err := parseIntParam(totalSliceValue, "i18n.incomplete_upload_info_total_slice.7e85")
 	if err != nil {
 		return "", err
 	}
@@ -165,7 +165,7 @@ func (s *Service) MergeSharding(sliceID, fileSumMD5, totalSliceValue string) (st
 		entries = nil
 	}
 	if len(entries) != totalSlice {
-		return "", invalidf("文件上传失败,存在分片丢失的情况, %d != %d", len(entries), totalSlice)
+		return "", invalidf("i18n.file_upload_failure_due_to_missing_chunks.1865", len(entries), totalSlice)
 	}
 	sliceDir := filepath.Dir(itemsDir)
 	baseName := trimLastExt(entries[0].Name())
@@ -178,38 +178,38 @@ func (s *Service) MergeSharding(sliceID, fileSumMD5, totalSliceValue string) (st
 	removeMerged := func() { _ = os.RemoveAll(mergedPath) }
 	out, err := os.OpenFile(mergedPath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0o644)
 	if err != nil {
-		return "", fmt.Errorf("合并分片失败:%w", err)
+		return "", failMessage(fmt.Sprintf("Merge sharding chunks failed: %v", err))
 	}
 	for _, entry := range sorted {
 		chunk, openErr := os.Open(filepath.Join(itemsDir, entry.Name()))
 		if openErr != nil {
 			_ = out.Close()
 			removeMerged()
-			return "", fmt.Errorf("合并分片失败:%w", openErr)
+			return "", failMessage(fmt.Sprintf("Merge sharding chunks failed: %v", openErr))
 		}
 		_, copyErr := io.Copy(out, chunk)
 		_ = chunk.Close()
 		if copyErr != nil {
 			_ = out.Close()
 			removeMerged()
-			return "", fmt.Errorf("合并分片失败:%w", copyErr)
+			return "", failMessage(fmt.Sprintf("Merge sharding chunks failed: %v", copyErr))
 		}
 	}
 	if err := out.Close(); err != nil {
 		removeMerged()
-		return "", fmt.Errorf("合并分片失败:%w", err)
+		return "", failMessage(fmt.Sprintf("Merge sharding chunks failed: %v", err))
 	}
 	actualMD5, err := fileMD5(mergedPath)
 	if err != nil {
 		removeMerged()
-		return "", fmt.Errorf("合并分片失败:%w", err)
+		return "", failMessage(fmt.Sprintf("Merge sharding chunks failed: %v", err))
 	}
 	if !strings.EqualFold(actualMD5, fileSumMD5) {
 		// Keep the chunks so the caller can retry after the upload was truncated;
 		// the Java agent deletes them here, which makes a retry impossible.
 		s.Log().Warn("file merge md5 mismatch", "path", mergedPath, "actual", actualMD5, "expect", fileSumMD5)
 		removeMerged()
-		return "", invalidf("文件合并后异常,文件不完整可能被损坏")
+		return "", invalidf("i18n.file_merge_error.f32f")
 	}
 	// Only remove the chunks after the merged file has been verified.
 	_ = os.RemoveAll(itemsDir)

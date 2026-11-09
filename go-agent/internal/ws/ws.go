@@ -30,6 +30,7 @@ import (
 
 	"jpom.io/go-agent/internal/app"
 	"jpom.io/go-agent/internal/httpx"
+	"jpom.io/go-agent/internal/i18n"
 	"jpom.io/go-agent/internal/project"
 	"jpom.io/go-agent/internal/script"
 )
@@ -185,8 +186,35 @@ func (m *Manager) authorized(session *Session, request *http.Request) bool {
 		return true
 	}
 	m.App.Log().Warn("websocket authorization failed", "path", request.URL.Path, "remote", request.RemoteAddr)
-	session.CloseWithReason(closeCannotAccept, "授权信息错误")
+	session.CloseWithReason(closeCannotAccept, m.translate(session, "i18n.auth_info_error.c184"))
 	return false
+}
+
+// sessionLang resolves the language of one websocket session: the handshake
+// lang parameter, then jpom.system.lang, then the agent default.
+func (m *Manager) sessionLang(session *Session) string {
+	if session != nil && session.Lang != "" {
+		return session.Lang
+	}
+	if m.App.Config != nil && m.App.Config.Jpom.System.Lang != "" {
+		return m.App.Config.Jpom.System.Lang
+	}
+	return i18n.DefaultLang()
+}
+
+// translate renders a client facing websocket message for the session language.
+func (m *Manager) translate(session *Session, key string, args ...any) string {
+	return i18n.T(m.sessionLang(session), key, args...)
+}
+
+// translateDefault renders a message using the configured agent language
+// (used outside a session context).
+func (m *Manager) translateDefault(key string, args ...any) string {
+	lang := ""
+	if m.App.Config != nil {
+		lang = m.App.Config.Jpom.System.Lang
+	}
+	return i18n.T(lang, key, args...)
 }
 
 // query returns the first query value.
@@ -237,6 +265,10 @@ func closeWithMessage(session *Session, message string) {
 	_ = session.SendJSON(jsonMessage(500, message))
 	session.Close()
 }
+
+// decodeLine decodes raw log bytes with the configured charset
+// (Java AgentFileTailWatcher charset / console charset).
+func decodeLine(data []byte, charset string) string { return script.DecodeText(data, charset) }
 
 // bodyString reads a string field from a decoded generic JSON object.
 func bodyString(value map[string]any, key string) string {

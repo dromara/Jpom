@@ -32,20 +32,17 @@ func (m *Manager) HandleScriptRun(c *httpx.Context) {
 	}
 	scriptID := query(c.R, "id")
 	workspaceID := query(c.R, "workspaceId")
+	// Java 的 onOpen 在参数缺失/脚本不存在时只发送提示帧、不关闭会话；
+	// 后续 onMessage 仍会按消息里的 scriptId 处理（不存在时再提示并关闭）。
 	if scriptID == "" || workspaceID == "" {
-		// Java 端只发提示，不关闭会话
-		_ = session.Send("脚本模板或者工作空间未知")
-		return
-	}
-	if _, exists, err := m.Scripts.Get(scriptID); err != nil {
-		closeWithMessage(session, "系统错误!")
+		_ = session.Send(m.translate(session, "i18n.unknown_script_template_or_workspace.27f1"))
+	} else if item, exists, err := m.Scripts.Get(scriptID); err != nil {
+		closeWithMessage(session, m.translate(session, "i18n.system_error.9417"))
 		return
 	} else if !exists {
-		_ = session.Send("没有找到对应的脚本模板")
-		return
-	}
-	if item, exists, _ := m.Scripts.Get(scriptID); exists {
-		_ = session.Send("连接成功：" + bodyString(item, "name"))
+		_ = session.Send(m.translate(session, "i18n.no_script_template_found.0498"))
+	} else {
+		_ = session.Send(m.translate(session, "i18n.connection_successful_with_message.5cf2") + bodyString(item, "name"))
 	}
 	for {
 		messageType, data, err := session.Read()
@@ -62,7 +59,7 @@ func (m *Manager) HandleScriptRun(c *httpx.Context) {
 		scriptID := bodyString(request, "scriptId")
 		item, exists, err := m.Scripts.Get(scriptID)
 		if err != nil || !exists {
-			_ = session.Send("没有对应脚本模板:" + scriptID)
+			_ = session.Send(m.translate(session, "i18n.no_script_template_specified.7d14") + scriptID)
 			return
 		}
 		operation := bodyString(request, "op")
@@ -70,17 +67,17 @@ func (m *Manager) HandleScriptRun(c *httpx.Context) {
 		case "start":
 			executeID := bodyString(request, "executeId")
 			if executeID == "" {
-				_ = session.Send("没有执行ID")
+				_ = session.Send(m.translate(session, "i18n.no_execution_id.68dc"))
 				return
 			}
 			if err := m.Executor.Attach(item, executeID, bodyString(request, "args"), session.ID, session.Send, session.Lang); err != nil {
-				_ = session.Send("执行异常：" + err.Error())
+				_ = session.Send(m.translate(session, "i18n.general_execution_exception.62e9") + err.Error())
 				return
 			}
 		case "stop":
 			executeID := bodyString(request, "executeId")
 			if executeID == "" {
-				_ = session.Send("没有执行ID")
+				_ = session.Send(m.translate(session, "i18n.no_execution_id.68dc"))
 				return
 			}
 			m.Executor.Stop(executeID)
@@ -102,7 +99,7 @@ func (m *Manager) HandleScriptRun(c *httpx.Context) {
 			frame[key] = value
 		}
 		frame["code"] = 200
-		frame["msg"] = "执行成功"
+		frame["msg"] = m.translate(session, "i18n.execution_succeeded.f56c")
 		_ = session.SendJSON(frame)
 	}
 }

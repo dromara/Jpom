@@ -87,11 +87,11 @@ func checkSilentFileSuffix(suffixes []string, filename string) bool {
 // charset name to use when reading or writing the file.
 func checkFileSuffix(suffixes []string, filename string) (string, error) {
 	if len(suffixes) == 0 {
-		return "", invalidf("没有配置可允许编辑的后缀")
+		return "", invalidf("i18n.editable_suffixes_not_configured.5b41")
 	}
 	rule := editCharset(suffixes, filename)
 	if rule == nil {
-		return "", invalidf("不允许编辑的文件后缀")
+		return "", invalidf("i18n.disallowed_file_extension.eb05")
 	}
 	return rule.charset, nil
 }
@@ -149,7 +149,7 @@ func decodeText(data []byte, charset string) (string, error) {
 	case "UTF-16BE":
 		return decodeUTF16(data, binary.BigEndian)
 	default:
-		return "", fmt.Errorf("不支持的编码格式:%s", charset)
+		return "", failMessage(fmt.Sprintf("Unsupported charset: %s", charset))
 	}
 }
 
@@ -164,7 +164,7 @@ func encodeText(text string, charset string) ([]byte, error) {
 		buf := make([]byte, 0, len(text))
 		for _, value := range text {
 			if value > 0xff {
-				return nil, fmt.Errorf("字符 %q 不能使用 ISO-8859-1 编码", value)
+				return nil, failMessage(fmt.Sprintf("Rune %q cannot be encoded with ISO-8859-1", value))
 			}
 			buf = append(buf, byte(value))
 		}
@@ -173,7 +173,7 @@ func encodeText(text string, charset string) ([]byte, error) {
 		buf := make([]byte, 0, len(text))
 		for _, value := range text {
 			if value > 0x7f {
-				return nil, fmt.Errorf("字符 %q 不能使用 US-ASCII 编码", value)
+				return nil, failMessage(fmt.Sprintf("Rune %q cannot be encoded with US-ASCII", value))
 			}
 			buf = append(buf, byte(value))
 		}
@@ -183,7 +183,7 @@ func encodeText(text string, charset string) ([]byte, error) {
 	case "UTF-16LE":
 		return encodeUTF16(text, binary.LittleEndian, true)
 	default:
-		return nil, fmt.Errorf("不支持的编码格式:%s", charset)
+		return nil, failMessage(fmt.Sprintf("Unsupported charset: %s", charset))
 	}
 }
 
@@ -233,14 +233,14 @@ var (
 
 func decodeGBK(data []byte) (string, error) {
 	if gbkDecoder == nil {
-		return "", fmt.Errorf("暂不支持 GBK 编码,请将 allowEditSuffix 配置为 UTF-8 或安装 GBK 支持")
+		return "", failMessage("GBK codec is not available")
 	}
 	return gbkDecoder(data)
 }
 
 func encodeGBK(text string) ([]byte, error) {
 	if gbkEncoder == nil {
-		return nil, fmt.Errorf("暂不支持 GBK 编码,请将 allowEditSuffix 配置为 UTF-8 或安装 GBK 支持")
+		return nil, failMessage("GBK codec is not available")
 	}
 	return gbkEncoder(text)
 }

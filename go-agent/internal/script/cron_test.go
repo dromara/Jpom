@@ -160,6 +160,45 @@ func TestCronMatchDayOfWeekAndMonth(t *testing.T) {
 	}
 }
 
+func TestCronMatchYearAndGroups(t *testing.T) {
+	at2026 := time.Date(2026, 11, 9, 12, 0, 0, 0, time.Local)
+	// 7 段年份字段按 now.Year() 匹配
+	yearPattern := mustCron(t, "0 0 12 * * ? 2026")
+	if !yearPattern.Match(at2026, true) {
+		t.Fatal("2026 must match the year field")
+	}
+	if yearPattern.Match(time.Date(2027, 11, 9, 12, 0, 0, 0, time.Local), true) {
+		t.Fatal("2027 must not match the year field 2026")
+	}
+	// 年份通配
+	if !mustCron(t, "0 0 12 * * ? *").Match(at2026, true) {
+		t.Fatal("wildcard year must match")
+	}
+	// | 分组 OR（不同时间点分别命中不同分组）
+	groups := mustCron(t, "0 0 9 * * ? | 0 0 18 * * ?")
+	if !groups.Match(time.Date(2026, 11, 9, 9, 0, 0, 0, time.Local), true) {
+		t.Fatal("9:00 must match the first group")
+	}
+	if !groups.Match(time.Date(2026, 11, 9, 18, 0, 0, 0, time.Local), true) {
+		t.Fatal("18:00 must match the second group")
+	}
+	if groups.Match(time.Date(2026, 11, 9, 12, 0, 0, 0, time.Local), true) {
+		t.Fatal("12:00 must not match any group")
+	}
+	// 闰年边界：2028-02-29 12:00 匹配 2 月 29 日
+	leap := mustCron(t, "0 0 12 29 2 ?")
+	if !leap.Match(time.Date(2028, 2, 29, 12, 0, 0, 0, time.Local), true) {
+		t.Fatal("leap day must match")
+	}
+	if leap.Match(time.Date(2027, 2, 28, 12, 0, 0, 0, time.Local), true) {
+		t.Fatal("non leap day must not match")
+	}
+	// 跨月：月末 31 日
+	if !mustCron(t, "0 0 12 31 * ?").Match(time.Date(2026, 12, 31, 12, 0, 0, 0, time.Local), true) {
+		t.Fatal("month end must match")
+	}
+}
+
 func TestNormalizeCronTimerMatchSecond(t *testing.T) {
 	// matchSecond=true keeps the expression untouched
 	cases := []string{"0 0/5 * * * ?", "*/5 * * * * ?", "0/5 * * * ?", "0 0 12 1 JAN ?"}
@@ -179,12 +218,25 @@ func TestNormalizeCronTimerMatchSecond(t *testing.T) {
 			t.Fatalf("matchSecond=false must keep %q, got %q (%v)", expression, normalized, err)
 		}
 	}
+	// | groups and 7 field year expressions are registered unchanged
+	orExpr := "0 0 9 * * ? | 0 0 18 * * ?"
+	if normalized, err := NormalizeCron(orExpr, false); err != nil || normalized != orExpr {
+		t.Fatalf("or group expression must be kept: %q %v", normalized, err)
+	}
+	yearExpr := "0 0 9 9 11 ? 2026"
+	if normalized, err := NormalizeCron(yearExpr, true); err != nil || normalized != yearExpr {
+		t.Fatalf("7 field expression must be kept: %q %v", normalized, err)
+	}
 	// disabled / invalid
 	if normalized, err := NormalizeCron("!0 0/5 * * * ?", false); err != nil || normalized != "" {
 		t.Fatalf("disabled cron must normalize to empty: %q %v", normalized, err)
 	}
-	if _, err := NormalizeCron("bad cron", false); err == nil {
-		t.Fatal("invalid cron must fail")
+	// 表达式合法性由 sysinfo（Hutool 超集）在注册时校验；这里只做启用/禁用判断，
+	// 因此 L/负数等 Hutool 扩展语法必须原样透传，非法表达式也不会被误拦截。
+	for _, expression := range []string{"0 0 9 L * ?", "0 0 9 * * ? -1", "bad cron"} {
+		if normalized, err := NormalizeCron(expression, true); err != nil || normalized != expression {
+			t.Fatalf("expression must be passed through for sysinfo validation: %q (%q %v)", expression, normalized, err)
+		}
 	}
 }
 

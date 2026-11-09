@@ -82,7 +82,7 @@ func (s *Service) UploadProjectFile(id, mergedPath string, options UploadOptions
 	// saveProjectFileBefore
 	if options.CloseFirst {
 		if err := s.stopProjectBefore(info); err != nil {
-			return UploadResult{}, invalidf("关闭项目失败：%v", err)
+			return UploadResult{}, invalidSuffix("i18n.close_project_failure.a1d2", err.Error())
 		}
 	}
 	if strings.EqualFold(strings.TrimSpace(options.ClearType), "clear") {
@@ -133,14 +133,14 @@ func (s *Service) PreflightProjectUpload(id, levelName string) error {
 func ValidateUploadPath(destinationPath string) (string, error) {
 	destinationPath = strings.TrimSpace(destinationPath)
 	if destinationPath == "" || strings.IndexByte(destinationPath, 0) >= 0 {
-		return "", invalidf("文件目录缺失")
+		return "", invalidParamf("i18n.file_directory_missing.6b1d")
 	}
 	if !filepath.IsAbs(destinationPath) {
-		return "", invalidf("文件目录缺失")
+		return "", invalidParamf("i18n.file_directory_missing.6b1d")
 	}
 	abs, err := filepath.Abs(destinationPath)
 	if err != nil {
-		return "", invalidf("文件目录缺失")
+		return "", invalidParamf("i18n.file_directory_missing.6b1d")
 	}
 	return abs, nil
 }
@@ -173,18 +173,18 @@ type DeleteOptions struct {
 
 // DeleteFile removes one file or clears a directory, mirroring
 // ProjectFileControl#deleteFile.
-func (s *Service) DeleteFile(id string, options DeleteOptions) (string, error) {
+func (s *Service) DeleteFile(id string, options DeleteOptions) (Message, error) {
 	info, err := s.Project(id)
 	if err != nil {
-		return "", err
+		return Message{}, err
 	}
 	_, dir, err := s.LibAndTarget(info, options.LevelName)
 	if err != nil {
-		return "", err
+		return Message{}, err
 	}
 	backupID, err := s.Backup(info)
 	if err != nil {
-		return "", err
+		return Message{}, err
 	}
 	defer s.CheckDiff(info, backupID)
 	if strings.EqualFold(strings.TrimSpace(options.Type), "clear") {
@@ -195,22 +195,22 @@ func (s *Service) DeleteFile(id string, options DeleteOptions) (string, error) {
 				"deleteType":  options.Type,
 				"fileName":    options.Filename,
 			})
-			return "清除成功", nil
+			return Message{Key: "i18n.clear_success_message.51f4"}, nil
 		}
 		if s.projectRunning(info) {
-			return "", invalidf("文件被占用，请先停止项目")
+			return Message{}, invalidf("i18n.file_in_use_stop_project_first.a2c3")
 		}
-		return "", fmt.Errorf("删除失败：%s", dir)
+		return Message{}, failSuffix("i18n.delete_failure_with_colon_and_full_stop.bc42", dir)
 	}
 	if strings.TrimSpace(options.Filename) == "" {
-		return "", invalidf("请选择要删除的文件")
+		return Message{}, invalidf("i18n.select_file_to_delete.33d6")
 	}
 	target, err := secureJoin(dir, options.Filename)
 	if err != nil {
-		return "", err
+		return Message{}, err
 	}
 	if err := os.RemoveAll(target); err != nil {
-		return "", fmt.Errorf("删除失败")
+		return Message{}, failKey("i18n.delete_failure.acf0")
 	}
 	s.webhook(info, "fileChange", map[string]any{
 		"changeEvent": "delete",
@@ -218,7 +218,7 @@ func (s *Service) DeleteFile(id string, options DeleteOptions) (string, error) {
 		"deleteType":  options.Type,
 		"fileName":    options.Filename,
 	})
-	return "删除成功", nil
+	return Message{Key: "i18n.delete_success.0007"}, nil
 }
 
 // BatchDelete removes the files listed in a DiffFileVo request, mirroring
@@ -246,7 +246,7 @@ func (s *Service) BatchDelete(request DiffFileRequest) error {
 			return err
 		}
 		if err := os.RemoveAll(target); err != nil {
-			return fmt.Errorf("删除失败：%s", target)
+			return failSuffix("i18n.delete_failure_with_colon_and_full_stop.bc42", target)
 		}
 	}
 	_ = dir
@@ -255,6 +255,20 @@ func (s *Service) BatchDelete(request DiffFileRequest) error {
 		"levelName":   request.Dir,
 	})
 	return nil
+}
+
+// javaFilePath renders a project file path exactly like the Java agent does with
+// FileUtil.file(lib, emptyToDefault(levelName, "/"), filename): an empty (or "/")
+// levelName keeps the double slash Java produces (lib//filename). Only used for
+// the messages the Java agent echoes back; filesystem access always uses the
+// cleaned path.
+func javaFilePath(lib, levelName, filename string) string {
+	lib = strings.TrimSuffix(lib, "/")
+	levelName = strings.TrimSpace(levelName)
+	if levelName == "" || levelName == "/" {
+		return lib + "//" + filename
+	}
+	return lib + "/" + strings.Trim(levelName, "/") + "/" + filename
 }
 
 // ReadFile returns the text content of a project file, mirroring
@@ -268,16 +282,17 @@ func (s *Service) ReadFile(id, filePath, filename string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	_, target, err := s.LibAndTarget(info, filePath, filename)
+	lib, target, err := s.LibAndTarget(info, filePath, filename)
 	if err != nil {
 		return "", err
 	}
 	content, err := os.ReadFile(target)
 	if err != nil {
 		// The Java agent lets hutool/FileReader throw, which Spring's generic
-		// handler renders as "服务异常：File not exist: <path>" (code 500).
+		// handler renders as "服务异常：File not exist: <path>" (code 500). The
+		// Java path keeps the double slash of lib//filename.
 		s.Log().Warn("read project file failed", "path", target, "error", err)
-		return "", fmt.Errorf("服务异常：File not exist: %s", target)
+		return "", failSuffix("i18n.service_exception.3821", "File not exist: "+javaFilePath(lib, filePath, filename))
 	}
 	return decodeText(content, charset)
 }
@@ -310,7 +325,7 @@ func (s *Service) UpdateConfigFile(id, filePath, filename, fileText string) erro
 		return err
 	}
 	if err := os.WriteFile(target, content, 0o644); err != nil {
-		return fmt.Errorf("文件写入失败:%w", err)
+		return failMessage(fmt.Sprintf("Write file failed: %v", err))
 	}
 	s.webhook(info, "fileChange", map[string]any{
 		"changeEvent": "edit",
@@ -352,7 +367,7 @@ func (s *Service) Copy(id, filePath, filename string) error {
 		}
 		counter++
 		if counter > 10000 {
-			return fmt.Errorf("复制失败,无法生成新的文件名")
+			return failMessage("Failed to generate a new name for copy")
 		}
 	}
 	if isDir(source) {
@@ -373,7 +388,7 @@ func (s *Service) CompressFileFolder(id, filePath, filename, archiveType string)
 		return err
 	}
 	if !isDir(source) {
-		return invalidf("请选择文件夹进行压缩")
+		return invalidf("i18n.select_folder_to_compress.915f")
 	}
 	var extension, kind string
 	switch archiveType {
@@ -384,7 +399,7 @@ func (s *Service) CompressFileFolder(id, filePath, filename, archiveType string)
 	case "tar.gz":
 		extension, kind = ".tar.gz", "tar.gz"
 	default:
-		return invalidf("不支持的压缩类型,%s", archiveType)
+		return invalidSuffix("i18n.compression_type_not_supported.9dea", archiveType)
 	}
 	base := mainName(filename)
 	counter := 0
@@ -406,7 +421,7 @@ func (s *Service) CompressFileFolder(id, filePath, filename, archiveType string)
 		}
 		counter++
 		if counter > 10000 {
-			return fmt.Errorf("压缩失败,无法生成新的文件名")
+			return failMessage("Failed to generate a new name for compress")
 		}
 	}
 	return Compress(source, target, kind)
@@ -416,6 +431,9 @@ func (s *Service) CompressFileFolder(id, filePath, filename, archiveType string)
 // ProjectFileControl#newFileFolder. unFolder uses the same inverted semantics as
 // Convert.toBool: unFolder=true creates a file, unset/false a directory.
 func (s *Service) NewFileFolder(id, levelName, filename, unFolder string) error {
+	if strings.TrimSpace(filename) == "" {
+		return invalidParamf("i18n.parameter_validation_failed.f0a1")
+	}
 	info, err := s.Project(id)
 	if err != nil {
 		return err
@@ -425,7 +443,7 @@ func (s *Service) NewFileFolder(id, levelName, filename, unFolder string) error 
 		return err
 	}
 	if exists(target) {
-		return invalidf("文件夹或者文件已存在")
+		return invalidf("i18n.folder_or_file_exists.c687")
 	}
 	folder := !toBool(unFolder, false)
 	if folder {
@@ -456,6 +474,9 @@ func (s *Service) NewFileFolder(id, levelName, filename, unFolder string) error 
 // Rename renames a file or directory inside the project, mirroring
 // ProjectFileControl#rename.
 func (s *Service) Rename(id, levelName, filename, newName string) error {
+	if strings.TrimSpace(filename) == "" {
+		return invalidParamf("i18n.parameter_validation_failed.f0a1")
+	}
 	info, err := s.Project(id)
 	if err != nil {
 		return err
@@ -469,10 +490,10 @@ func (s *Service) Rename(id, levelName, filename, newName string) error {
 		return err
 	}
 	if !exists(source) {
-		return invalidf("文件不存在")
+		return invalidf("i18n.file_not_found.d952")
 	}
 	if exists(target) {
-		return invalidf("文件名已经存在拉")
+		return invalidf("i18n.file_name_already_exists.0d4e")
 	}
 	if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
 		return err
@@ -489,72 +510,74 @@ func (s *Service) Rename(id, levelName, filename, newName string) error {
 	return nil
 }
 
-// DownloadPath resolves a project file for /manage/file/download.
-func (s *Service) DownloadPath(id, levelName, filename string) (string, error) {
+// DownloadPath resolves a project file for /manage/file/download. displayPath is
+// the Java style path (lib//filename for the root directory) used in the
+// FileNotFoundException data field of the error response.
+func (s *Service) DownloadPath(id, levelName, filename string) (string, string, error) {
 	if strings.TrimSpace(filename) == "" {
-		return "", invalidf("请选择文件")
+		return "", "", invalidf("i18n.select_file.9feb")
 	}
 	info, err := s.Project(id)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
-	_, target, err := s.LibAndTarget(info, levelName, filename)
+	lib, target, err := s.LibAndTarget(info, levelName, filename)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
-	return target, nil
+	return target, javaFilePath(lib, levelName, filename), nil
 }
 
 // RemoteDownload downloads a remote URL into the project, mirroring
 // ProjectFileControl#remoteDownload.
-func (s *Service) RemoteDownload(id, rawURL, levelName, unzip string, stripComponents int) (string, error) {
+func (s *Service) RemoteDownload(id, rawURL, levelName, unzip string, stripComponents int) (Message, error) {
 	rawURL = strings.TrimSpace(rawURL)
 	if rawURL == "" {
-		return "", invalidf("请输入正确的远程地址")
+		return Message{}, invalidf("i18n.correct_remote_address_required.0ce1")
 	}
 	parsed, err := url.Parse(rawURL)
 	if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Host == "" {
-		return "", invalidf("请输入正确的远程地址")
+		return Message{}, invalidf("i18n.correct_remote_address_required.0ce1")
 	}
 	info, err := s.Project(id)
 	if err != nil {
-		return "", err
+		return Message{}, err
 	}
 	dateDir, err := s.shardingDateDir()
 	if err != nil {
-		return "", fmt.Errorf("下载远程文件失败：%w", err)
+		return Message{}, failSuffix("i18n.download_remote_file_failed.fcc3", err.Error())
 	}
 	tempDir := filepath.Join(dateDir, randomHex(16))
 	if err := os.MkdirAll(tempDir, 0o755); err != nil {
-		return "", fmt.Errorf("下载远程文件失败：%w", err)
+		return Message{}, failSuffix("i18n.download_remote_file_failed.fcc3", err.Error())
 	}
 	downloadFile, size, err := downloadRemote(rawURL, tempDir)
 	if err != nil {
-		return "", fmt.Errorf("下载远程文件失败：%w", err)
+		return Message{}, failSuffix("i18n.download_remote_file_failed.fcc3", err.Error())
 	}
 	fileSize := readableSize(size)
 	backupID, err := s.Backup(info)
 	if err != nil {
-		return "", err
+		return Message{}, err
 	}
 	defer s.CheckDiff(info, backupID)
 	_, target, err := s.LibAndTarget(info, levelName)
 	if err != nil {
-		return "", err
+		return Message{}, err
 	}
 	if toBool(unzip, false) {
 		if err := s.Uncompress(downloadFile, target, stripComponents); err != nil {
-			return "", fmt.Errorf("下载远程文件失败：%w", err)
+			return Message{}, failSuffix("i18n.download_remote_file_failed.fcc3", err.Error())
 		}
 		if err := os.RemoveAll(downloadFile); err != nil {
 			s.Log().Error("delete downloaded temp file failed", "path", downloadFile, "error", err)
 		}
 	} else {
 		if err := os.MkdirAll(target, 0o755); err != nil {
-			return "", fmt.Errorf("下载远程文件失败：%w", err)
+			return Message{}, failSuffix("i18n.download_remote_file_failed.fcc3", err.Error())
 		}
 		if _, err := moveIntoDir(downloadFile, target); err != nil {
-			return "", fmt.Errorf("下载远程文件失败：%w", err)
+			return Message{}, failSuffix("i18n.download_remote_file_failed.fcc3", err.Error())
 		}
 	}
 	s.webhook(info, "fileChange", map[string]any{
@@ -565,7 +588,7 @@ func (s *Service) RemoteDownload(id, rawURL, levelName, unzip string, stripCompo
 		"fileName": filepath.Base(target),
 		"url":      rawURL,
 	})
-	return "下载成功文件大小：" + fileSize, nil
+	return Message{Key: "i18n.download_file_size.d4de", Suffix: fileSize}, nil
 }
 
 // downloadRemote downloads rawURL into destDir and returns the local path and
@@ -583,7 +606,7 @@ func downloadRemote(rawURL, destDir string) (string, int64, error) {
 	}
 	defer func() { _ = response.Body.Close() }()
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		return "", 0, fmt.Errorf("HTTP 状态码 %d", response.StatusCode)
+		return "", 0, failMessage(fmt.Sprintf("HTTP status %d", response.StatusCode))
 	}
 	name := replyFileName(response)
 	if name == "" {

@@ -11,7 +11,6 @@
 package ws
 
 import (
-	"fmt"
 	"os"
 	"regexp"
 	"strings"
@@ -26,16 +25,16 @@ type lineTuple struct {
 // searchProjectLog performs the console log search
 // (AgentWebSocketConsoleHandle#searchLog / FileSearchUtil#searchList): the
 // matched lines are sent one by one, then a summary line.
-func (m *Manager) searchProjectLog(session *Session, project map[string]any, request map[string]any) {
+func (m *Manager) searchProjectLog(session *Session, project map[string]any, request map[string]any, charset string) {
 	libDir, err := m.projectLibDir(project)
 	if err != nil {
-		_ = session.Send("执行命令失败,详情如下：")
+		_ = session.Send(m.translate(session, "i18n.command_execution_failed_details.77ed"))
 		_ = session.Send(err.Error())
 		return
 	}
 	file, ok := resolveSubFile(libDir, bodyString(request, "logFile"))
 	if !ok {
-		_ = session.Send("文件不存在")
+		_ = session.Send(m.translate(session, "i18n.file_not_found.d952"))
 		return
 	}
 	keyword := bodyString(request, "keyword")
@@ -45,9 +44,9 @@ func (m *Manager) searchProjectLog(session *Session, project map[string]any, req
 	tail := bodyInt(request, "tail")
 	first := bodyBool(request, "first")
 	go func() {
-		lines, total, err := readSearchLines(file, head, tail, first)
+		lines, total, err := readSearchLines(file, head, tail, first, charset)
 		if err != nil {
-			_ = session.Send("执行命令失败,详情如下：")
+			_ = session.Send(m.translate(session, "i18n.command_execution_failed_details.77ed"))
 			_ = session.Send(err.Error())
 			return
 		}
@@ -86,7 +85,7 @@ func (m *Manager) searchProjectLog(session *Session, project map[string]any, req
 				}
 			}
 		}
-		_ = session.Send(fmt.Sprintf("在 %d 行中搜索到并显示 %d 行", total, shown))
+		_ = session.Send(m.translate(session, "i18n.search_result_display.d2c3", total, shown))
 	}()
 }
 
@@ -114,7 +113,7 @@ func buildMatcher(keyword string) func(string) bool {
 
 // readSearchLines reads the line range selected by head/tail/first
 // (FileSearchUtil#calculate + readLastLine/readRangeLine).
-func readSearchLines(path string, head, tail int, first bool) ([]lineTuple, int, error) {
+func readSearchLines(path string, head, tail int, first bool, charset string) ([]lineTuple, int, error) {
 	content, err := os.ReadFile(path)
 	if err != nil {
 		return nil, 0, err
@@ -164,7 +163,7 @@ func readSearchLines(path string, head, tail int, first bool) ([]lineTuple, int,
 	lines := make([]lineTuple, 0, end-start+1)
 	for no := start; no <= end; no++ {
 		line := strings.TrimSuffix(all[no-1], "\r")
-		lines = append(lines, lineTuple{no: no, text: line})
+		lines = append(lines, lineTuple{no: no, text: decodeLine([]byte(line), charset)})
 	}
 	return lines, total, nil
 }

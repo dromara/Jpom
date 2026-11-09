@@ -18,6 +18,7 @@ import (
 	"github.com/gorilla/websocket"
 
 	"jpom.io/go-agent/internal/httpx"
+	"jpom.io/go-agent/internal/script"
 )
 
 // HandleSystemLog serves /system_log (AgentWebSocketSystemLogHandle): tails a
@@ -35,7 +36,7 @@ func (m *Manager) HandleSystemLog(c *httpx.Context) {
 		return
 	}
 	session.SetReadLimit(defaultTextLimit)
-	_ = session.Send("连接成功：插件端日志")
+	_ = session.Send(m.translate(session, "i18n.plugin_end_log_connection_successful.9035"))
 
 	currentFile := ""
 	for {
@@ -56,11 +57,11 @@ func (m *Manager) HandleSystemLog(c *httpx.Context) {
 		fileName := bodyString(request, "fileName")
 		file, ok := resolveSubFile(m.App.LogsDir, fileName)
 		if !ok {
-			_ = session.Send("文件不存在")
+			_ = session.Send(m.translate(session, "i18n.file_not_found.d952"))
 			continue
 		}
 		if info, err := os.Stat(file); err != nil || info.IsDir() {
-			_ = session.Send("文件不存在")
+			_ = session.Send(m.translate(session, "i18n.file_not_found.d952"))
 			continue
 		}
 		if currentFile != "" && currentFile != file {
@@ -68,7 +69,7 @@ func (m *Manager) HandleSystemLog(c *httpx.Context) {
 			m.Tail.DetachFile(currentFile, session.ID)
 		}
 		currentFile = file
-		attached, err := m.Tail.Attach(file, session)
+		attached, err := m.Tail.Attach(file, session, m.systemLogCharset())
 		if err != nil {
 			_ = session.Send(err.Error())
 			continue
@@ -78,6 +79,15 @@ func (m *Manager) HandleSystemLog(c *httpx.Context) {
 			m.App.Log().Warn("system log file not found", "file", file)
 		}
 	}
+}
+
+// systemLogCharset resolves jpom.system.log-charset (UTF-8 when absent).
+func (m *Manager) systemLogCharset() string {
+	configured := ""
+	if m.App.Config != nil {
+		configured = m.App.Config.Jpom.System.LogCharset
+	}
+	return script.SystemLogCharset(configured)
 }
 
 // resolveSubFile resolves a client supplied relative path inside baseDir and

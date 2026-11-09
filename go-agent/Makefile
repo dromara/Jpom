@@ -5,7 +5,9 @@ GO ?= go
 # 构建缓存必须位于工作区内（受限沙箱/CI 均可写）
 GOCACHE ?= $(CURDIR)/.cache/build
 GOTMPDIR ?= $(CURDIR)/.cache/tmp
-export GOCACHE GOTMPDIR
+GOMODCACHE ?= $(CURDIR)/.cache/mod
+GOSUMDB ?= off
+export GOCACHE GOTMPDIR GOMODCACHE GOSUMDB
 VERSION ?= dev
 BUILD_TIME ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 LDFLAGS := -s -w -X main.version=$(VERSION) -X main.buildTime=$(BUILD_TIME)

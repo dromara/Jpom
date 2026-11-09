@@ -75,7 +75,7 @@ func readLogTree(dir, root string) ([]map[string]any, error) {
 // resolveLogPath 解析日志目录下的相对路径，并防止路径穿越。
 func resolveLogPath(a *app.App, relative string) (string, error) {
 	if strings.TrimSpace(relative) == "" {
-		return "", &ParamError{Code: 405, Msg: "参数错误path错误"}
+		return "", paramErr(400, "i18n.parameter_error_path_error.f482")
 	}
 	root, err := filepath.Abs(a.LogsDir)
 	if err != nil {
@@ -86,7 +86,7 @@ func resolveLogPath(a *app.App, relative string) (string, error) {
 		return "", err
 	}
 	if target != root && !strings.HasPrefix(target, root+string(filepath.Separator)) {
-		return "", &ParamError{Code: 405, Msg: "参数错误path错误"}
+		return "", paramErr(405, "i18n.parameter_error_path_error.f482")
 	}
 	return target, nil
 }
@@ -99,13 +99,13 @@ func DeleteLog(a *app.App, relative string) error {
 	}
 	info, err := os.Stat(target)
 	if err != nil {
-		return &ParamError{Code: 405, Msg: "删除失败"}
+		return paramErr(405, "i18n.delete_failure.acf0")
 	}
 	if time.Since(info.ModTime()) <= 24*time.Hour {
-		return &ParamError{Code: 405, Msg: "不能删除近一天相关的日志(文件修改时间)"}
+		return paramErr(405, "i18n.cannot_delete_recent_logs.ee19")
 	}
 	if err := os.RemoveAll(target); err != nil {
-		return &ParamError{Code: 500, Msg: "删除失败"}
+		return paramErr(500, "i18n.delete_failure.acf0")
 	}
 	// 清理空目录（与 FileUtil.cleanEmpty 一致）。
 	parent := filepath.Dir(target)
@@ -131,7 +131,7 @@ func LogDownloadPath(a *app.App, relative string) (string, error) {
 	}
 	info, err := os.Stat(target)
 	if err != nil || info.IsDir() {
-		return "", fmt.Errorf("日志文件不存在")
+		return "", fmt.Errorf("log file does not exist")
 	}
 	return target, nil
 }

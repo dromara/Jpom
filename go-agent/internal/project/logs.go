@@ -11,7 +11,6 @@
 package project
 
 import (
-	"fmt"
 	"io"
 	"math"
 	"os"
@@ -28,69 +27,84 @@ import (
 const backLogMinSize = 100 * 1024
 
 // LogSize 返回日志备份目录是否存在与当前日志文件可读大小（等价 /manage/log/logSize）。
-func (r *Runtime) LogSize(info map[string]any) (bool, string) {
+func (r *Runtime) LogSize(info map[string]any) (bool, string, error) {
 	logBack, err := r.Manager.ResolveLogBack(info)
+	if err != nil {
+		return false, "", err
+	}
 	logBackExists := false
-	if err == nil {
-		if stat, err := os.Stat(logBack); err == nil && stat.IsDir() {
-			logBackExists = true
-		}
+	if stat, err := os.Stat(logBack); err == nil && stat.IsDir() {
+		logBackExists = true
 	}
 	file, err := r.Manager.ResolveLogFile(info)
 	if err != nil {
-		return logBackExists, ""
+		return logBackExists, "", err
 	}
 	stat, err := os.Stat(file)
 	if err != nil || stat.Size() <= 0 {
-		return logBackExists, ""
+		return logBackExists, "", nil
 	}
-	return logBackExists, readableFileSize(stat.Size())
+	return logBackExists, readableFileSize(stat.Size()), nil
 }
 
-// BackLog 清空项目控制台日志（等价 ProjectCommander.backLog）。
+// BackLog 清空项目控制台日志（兼容旧调用：异常返回错误文案）。
 func (r *Runtime) BackLog(info map[string]any) string {
 	original, err := r.Manager.ResolveModel(info)
 	if err != nil {
-		return "not exists"
+		return err.Error()
 	}
-	return r.backLog(info, original)
+	msg, err := r.backLog(info, original)
+	if err != nil {
+		return err.Error()
+	}
+	return msg
 }
 
-// backLog 清空日志并按配置备份。
-func (r *Runtime) backLog(info, original map[string]any) string {
+// backLog 清空日志并按配置备份（等价 ProjectCommander.backLog）。
+func (r *Runtime) backLog(info, original map[string]any) (string, error) {
 	file, err := r.Manager.TouchLogFile(info)
 	if err != nil {
-		return "not exists"
+		return "", ServiceError(err)
 	}
 	stat, err := os.Stat(file)
 	if err != nil || stat.IsDir() {
-		return "not exists"
+		return "not exists", nil
 	}
 	if stat.Size() <= backLogMinSize {
-		return "ok"
+		return "ok", nil
 	}
 	if r.resolveOpenLogBack(info, original) {
 		backDir, err := r.Manager.ResolveLogBack(info)
-		if err == nil {
-			backPath := filepath.Join(backDir, time.Now().Format("20060102150405")+".log")
-			if err := copyFileContent(file, backPath); err != nil && r.Log != nil {
-				r.Log.Warn("备份控制台日志失败", "file", file, "error", err)
-			}
+		if err != nil {
+			return "", err
+		}
+		backPath := filepath.Join(backDir, time.Now().Format("20060102150405")+".log")
+		if err := copyFileContent(file, backPath); err != nil && r.Log != nil {
+			r.Log.Warn("failed to backup project console log", "file", file, "error", err)
 		}
 	}
 	if output := proc.EmptyLogFile(file); strings.TrimSpace(output) != "" && r.Log != nil {
-		r.Log.Info("清空控制台日志", "file", file, "result", output)
+		r.Log.Info("project console log truncated", "file", file, "result", output)
 	}
-	return "ok"
+	return "ok", nil
 }
 
-// ResetLog 重置日志：返回消息与业务码（200 成功 / 201 失败）。
-func (r *Runtime) ResetLog(info map[string]any) (string, int) {
-	msg := r.BackLog(info)
-	if strings.Contains(msg, "ok") {
-		return "重置成功", 200
+// ResetLog 重置日志：返回消息、业务码（200/201）与异常。
+//
+// 等价 ProjectLogBackController.resetLog：异常由调用方统一返回 code=500 重置日志失败。
+func (r *Runtime) ResetLog(info map[string]any) (string, int, error) {
+	original, err := r.Manager.ResolveModel(info)
+	if err != nil {
+		return "", 500, err
 	}
-	return "重置失败：" + msg, 201
+	msg, err := r.backLog(info, original)
+	if err != nil {
+		return "", 500, err
+	}
+	if strings.Contains(msg, "ok") {
+		return tr(r.Lang(), keyResetSuccess), 200, nil
+	}
+	return tr(r.Lang(), keyResetFailed) + msg, 201, nil
 }
 
 // resolveOpenLogBack 是否开启控制台日志备份（等价 AbstractProjectCommander.resolveOpenLogBack）。
@@ -106,20 +120,20 @@ func (r *Runtime) resolveOpenLogBack(info, original map[string]any) bool {
 }
 
 // LogBackList 返回日志备份列表（等价 /manage/log/logBack）。
-func (r *Runtime) LogBackList(info map[string]any) map[string]any {
-	result := map[string]any{}
+func (r *Runtime) LogBackList(info map[string]any) (map[string]any, error) {
 	original, err := r.Manager.ResolveModel(info)
 	if err != nil {
-		return result
+		return nil, err
 	}
 	logFile, err := r.Manager.TouchLogFile(info)
 	if err != nil {
-		return result
+		return nil, ServiceError(err)
 	}
 	logBack, err := r.Manager.ResolveLogBack(info)
 	if err != nil {
-		return result
+		return nil, err
 	}
+	result := map[string]any{}
 	if stat, err := os.Stat(logBack); err == nil && stat.IsDir() {
 		entries, err := os.ReadDir(logBack)
 		if err == nil {
@@ -148,7 +162,7 @@ func (r *Runtime) LogBackList(info map[string]any) map[string]any {
 	} else {
 		result["logBackPath"] = logBack
 	}
-	return result
+	return result, nil
 }
 
 // fileToJSON 文件信息（等价 Java FileUtils.fileToJson；long 字段输出字符串）。
@@ -198,46 +212,47 @@ func dirSize(path string) (int64, error) {
 // LogBackDelete 删除指定日志备份文件/目录（等价 /manage/log/logBack_delete）。
 func (r *Runtime) LogBackDelete(info map[string]any, name string) error {
 	if strings.TrimSpace(name) == "" {
-		return fmt.Errorf("没有对应到文件")
+		return ValidationKey(keyNoFileFound)
 	}
 	logBack, err := r.Manager.ResolveLogBack(info)
 	if err != nil {
 		return err
 	}
 	if stat, err := os.Stat(logBack); err != nil || !stat.IsDir() {
-		return fmt.Errorf("没有对应文件夹")
+		return BusinessKey(keyNoCorrespondingFolder)
 	}
 	target, err := safeJoin(logBack, name)
 	if err != nil {
 		return err
 	}
 	if _, err := os.Lstat(target); err != nil {
-		return fmt.Errorf("没有对应文件")
+		return BusinessKey(keyNoCorrespondingFile)
 	}
-	if proc.SystemFastDel(target) {
-		return fmt.Errorf("删除失败：%s", target)
-	}
+	// Java 删除后不再检查结果，直接返回成功
+	proc.SystemFastDel(target)
 	return nil
 }
 
 // LogBackDownloadFile 解析备份文件下载路径（等价 /manage/log/logBack_download）。
 func (r *Runtime) LogBackDownloadFile(info map[string]any, name string) (string, error) {
 	if strings.TrimSpace(name) == "" {
-		return "", fmt.Errorf("请选择对应到文件")
+		return "", ValidationKey(keyCorrespondingFileNeeded)
 	}
 	logBack, err := r.Manager.ResolveLogBack(info)
 	if err != nil {
-		return "", err
+		// Java 在 try 中调用，异常被捕获后返回 400 下载失败
+		return "", ServiceError(err)
 	}
 	if stat, err := os.Stat(logBack); err != nil || !stat.IsDir() {
-		return "", fmt.Errorf("没有对应文件:%s", logBack)
+		return "", BusinessKeySuffix(keyNoCorrespondingFileColon, logBack)
 	}
 	target, err := safeJoin(logBack, name)
 	if err != nil {
-		return "", err
+		return "", ServiceError(err)
 	}
-	if stat, err := os.Stat(target); err != nil || stat.IsDir() {
-		return "", fmt.Errorf("下载失败。请刷新页面后重试%s", "文件不存在")
+	stat, err := os.Stat(target)
+	if err != nil || stat.IsDir() {
+		return "", ServiceError(Validationf(tr(r.Lang(), keyFileNotFound)))
 	}
 	return target, nil
 }
@@ -249,7 +264,7 @@ func (r *Runtime) ExportLogFile(info map[string]any) (string, error) {
 		return "", err
 	}
 	if stat, err := os.Stat(file); err != nil || stat.IsDir() {
-		return "", fmt.Errorf("没有日志文件:%s", file)
+		return "", BusinessKeySuffix(keyLogFileNotFound, file)
 	}
 	return filepath.Abs(file)
 }
@@ -260,17 +275,17 @@ func safeJoin(baseDir, name string) (string, error) {
 	sub = strings.TrimPrefix(sub, "/")
 	sub = strings.TrimPrefix(sub, "\\")
 	if sub == "" || filepath.IsAbs(sub) {
-		return "", fmt.Errorf("非法的文件路径")
+		return "", ValidationKey(keyProjectPathPromotion)
 	}
 	target := filepath.Join(baseDir, sub)
 	if !isSubPath(baseDir, target) {
-		return "", fmt.Errorf("非法的文件路径")
+		return "", ValidationKey(keyProjectPathPromotion)
 	}
 	// 防符号链接逃逸：存在时比较真实路径
 	if realBase, err := filepath.EvalSymlinks(baseDir); err == nil {
 		if realTarget, err := filepath.EvalSymlinks(target); err == nil {
 			if !isSubPath(realBase, realTarget) {
-				return "", fmt.Errorf("非法的文件路径")
+				return "", ValidationKey(keyProjectPathPromotion)
 			}
 		}
 	}

@@ -33,7 +33,7 @@ func secureJoin(base string, parts ...string) (string, error) {
 	target := baseAbs
 	for _, part := range parts {
 		if strings.IndexByte(part, 0) >= 0 {
-			return "", invalidf("非法的文件路径")
+			return "", invalidMessage("Illegal path")
 		}
 		cleaned := strings.TrimLeft(strings.ReplaceAll(part, "\\", "/"), "/")
 		if cleaned == "" {
@@ -42,13 +42,13 @@ func secureJoin(base string, parts ...string) (string, error) {
 		target = filepath.Join(target, cleaned)
 	}
 	if !isSubPath(baseAbs, target) {
-		return "", invalidf("非法的文件路径,超出项目目录")
+		return "", invalidMessage("Illegal path outside the project directory")
 	}
 	// Reject symlinks (including symlinked parents) that point outside base.
 	baseReal := resolveRealPath(baseAbs)
 	targetReal := resolveRealPath(target)
 	if !isSubPath(baseReal, targetReal) {
-		return "", invalidf("非法的文件路径,符号链接超出项目目录")
+		return "", invalidMessage("Illegal path: symbolic link escapes the project directory")
 	}
 	return target, nil
 }

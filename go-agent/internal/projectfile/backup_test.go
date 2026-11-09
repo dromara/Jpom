@@ -12,6 +12,7 @@ package projectfile
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -120,8 +121,10 @@ func TestBackupDiffAndList(t *testing.T) {
 		t.Fatal("backup file should be deleted")
 	}
 
-	if _, err := service.BackupItemFiles("P1", "", ""); err == nil || HTTPCodeOf(err) != 405 {
-		t.Fatalf("missing backupId must be a 405 validation error, got %v", err)
+	// live Java 2.11.13: @ValidatorItem(msg=备份id缺失) -> code 400 备份id缺失.
+	if _, err := service.BackupItemFiles("P1", "", ""); err == nil || HTTPCodeOf(err) != 400 ||
+		!strings.Contains(err.Error(), "备份id缺失") {
+		t.Fatalf("missing backupId must be a 400 备份id缺失 error, got %v", err)
 	}
 }
 
@@ -180,4 +183,145 @@ func TestMergeBackupPathFromLegacyDirectory(t *testing.T) {
 	if _, err := project.ReadWhitelist(base); err != nil {
 		t.Fatalf("whitelist should stay readable: %v", err)
 	}
+}
+func TestMatchBackupSuffixDefaults(t *testing.T) {
+	// Default agent configuration (jpom.project.file-backup-suffix).
+	patterns := []string{".jar", ".html", `^.+\.(?i)(txt)$`}
+	cases := map[string]bool{
+		"config.txt": true,
+		"a.TXT":      true,
+		"e2eapp.jar": true,
+		"index.html": true,
+		"run.sh":     false,
+		"app.log":    false,
+	}
+	for name, want := range cases {
+		if got := matchBackupSuffix(patterns, name); got != want {
+			t.Fatalf("matchBackupSuffix(%q) = %v, want %v", name, got, want)
+		}
+	}
+}
+
+func TestBackupMatchesE2EScenario(t *testing.T) {
+	service, base := testService(t)
+	// file-backup-count=3 in conf/application.yml (E2E configuration).
+	service.app.Config.Jpom.Project.FileBackupCount = 3
+	lib := createProject(t, service, base, "P1", "proj", nil)
+	writeFile(t, filepath.Join(lib, "config.txt"), "hello e2e\n")
+	writeFile(t, filepath.Join(lib, "run.sh"), "#!/bin/sh\n")
+	writeFile(t, filepath.Join(lib, "e2eapp.jar"), "jar")
+	writeFile(t, filepath.Join(lib, "sub", "x.txt"), "x")
+
+	info, err := service.Project("P1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	settings, err := service.backupSettings(info)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if settings.Count != 3 {
+		t.Fatalf("file-backup-count should be read from the config, got %d", settings.Count)
+	}
+
+	// update_config_file: backup first, then the file content changes.
+	backupID, err := service.Backup(info)
+	if err != nil || backupID == "" {
+		t.Fatalf("backup: %q %v", backupID, err)
+	}
+	writeFile(t, filepath.Join(lib, "config.txt"), "hello e2e updated\n")
+	if err := service.checkDiff(info, backupID); err != nil {
+		t.Fatalf("check diff: %v", err)
+	}
+
+	itemPath := filepath.Join(service.backupRoot(settings), backupID)
+	if !exists(filepath.Join(itemPath, "config.txt")) {
+		t.Fatalf("changed config.txt must be kept in the snapshot, tree=%v", snapshotNames(t, itemPath))
+	}
+	list, err := service.ListBackup("P1")
+	if err != nil || list == nil || len(list.List) == 0 {
+		t.Fatalf("list-backup must not be empty after file write: %+v %v", list, err)
+	}
+	files, err := service.BackupItemFiles("P1", "", backupID)
+	if err != nil || len(files) == 0 {
+		t.Fatalf("backup-item-files must return the kept file: %+v %v", files, err)
+	}
+
+	// backup-recover restores the old content.
+	writeFile(t, filepath.Join(lib, "config.txt"), "corrupted")
+	if err := service.BackupRecover("P1", backupID, "", "", "config.txt"); err != nil {
+		t.Fatalf("backup recover: %v", err)
+	}
+	if raw, err := os.ReadFile(filepath.Join(lib, "config.txt")); err != nil || string(raw) != "hello e2e\n" {
+		t.Fatalf("recovered content: %q %v", raw, err)
+	}
+}
+
+// snapshotNames lists the relative file names inside a snapshot for failure output.
+func snapshotNames(t *testing.T, root string) []string {
+	t.Helper()
+	var names []string
+	_ = filepath.WalkDir(root, func(path string, entry os.DirEntry, err error) error {
+		if err != nil || entry.IsDir() {
+			return nil
+		}
+		rel, relErr := filepath.Rel(root, path)
+		if relErr == nil {
+			names = append(names, rel)
+		}
+		return nil
+	})
+	return names
+}
+func TestBackupDiffKeySemantics(t *testing.T) {
+	service, base := testService(t)
+	// Java listFiles keys files by sha1 + "-" + relative path, so a file whose
+	// path is unchanged but whose content changed must stay in the snapshot,
+	// while unchanged files (same sha1 + path) are removed.
+	service.app.Config.Jpom.Project.FileBackupCount = 3
+	service.app.Config.Jpom.Project.FileBackupSuffix = []string{".jar"}
+	lib := createProject(t, service, base, "P1", "proj", nil)
+	writeFile(t, filepath.Join(lib, "changed.jar"), "one")
+	writeFile(t, filepath.Join(lib, "same.jar"), "same")
+
+	info, err := service.Project("P1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	backupID, err := service.Backup(info)
+	if err != nil || backupID == "" {
+		t.Fatalf("backup: %q %v", backupID, err)
+	}
+	writeFile(t, filepath.Join(lib, "changed.jar"), "two")
+	if err := service.checkDiff(info, backupID); err != nil {
+		t.Fatalf("checkDiff: %v", err)
+	}
+	settings, err := service.backupSettings(info)
+	if err != nil {
+		t.Fatal(err)
+	}
+	itemPath := filepath.Join(service.backupRoot(settings), backupID)
+	if !exists(filepath.Join(itemPath, "changed.jar")) {
+		t.Fatalf("changed file must be kept, tree=%v", snapshotNames(t, itemPath))
+	}
+	if exists(filepath.Join(itemPath, "same.jar")) {
+		t.Fatalf("unchanged file must be removed, tree=%v", snapshotNames(t, itemPath))
+	}
+}
+
+func TestBackupSuffixFromJavaStyleConfig(t *testing.T) {
+	// The production application.yml uses single quotes:
+	//   file-backup-suffix: [ '.jar','.html','^.+\.(?i)(txt)$' ]
+	// YAML keeps both backslashes, so this regex does NOT match *.txt (the same
+	// is true for the Java agent). Only the plain ".jar"/".html" suffixes match.
+	service, base := testService(t)
+	service.app.Config.Jpom.Project.FileBackupCount = 3
+	service.app.Config.Jpom.Project.FileBackupSuffix = []string{".jar", ".html", `^.+.\\.(?i)(txt)$`}
+	if matchBackupSuffix(service.app.Config.Jpom.Project.FileBackupSuffix, "config.txt") {
+		t.Fatal("java style double-escaped regex must not match txt (parity with Java)")
+	}
+	if !matchBackupSuffix(service.app.Config.Jpom.Project.FileBackupSuffix, "e2eapp.jar") {
+		t.Fatal(".jar suffix must match")
+	}
+	_ = base
 }

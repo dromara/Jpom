@@ -32,16 +32,18 @@ func Start(a *app.App) {
 	if err := manager.Upsert("system_cache", "0 0/10 * * * ?", func() {
 		refreshCacheSizes(a)
 	}); err != nil {
-		a.Log().Warn("注册缓存刷新任务失败", "error", err)
+		a.Log().Warn("register cache refresh task failed", "error", err)
 	}
 	SetGlobalCron(manager)
 	manager.Start()
 
 	go func() {
+		// G7：先做升级恢复检查（新版本启动失败自动回滚/健康确认）。
+		StartUpgradeRecovery(a)
 		refreshCacheSizes(a)
 		// AgentStartInit.executeTask：启动加载远程版本信息、清理临时文件、清理脚本执行缓存。
 		if _, err := LoadRemoteInfo(a); err != nil {
-			a.Log().Warn("刷新远程版本信息失败", "error", err)
+			a.Log().Warn("refresh remote version failed", "error", err)
 		}
 		CleanTempFiles(a)
 		CleanScriptRunCache(a)
@@ -53,7 +55,7 @@ func CleanTempFiles(a *app.App) {
 	entries, err := os.ReadDir(a.TempRoot())
 	if err != nil {
 		if !os.IsNotExist(err) {
-			a.Log().Warn("读取临时目录失败", "error", err)
+			a.Log().Warn("read temp directory failed", "error", err)
 		}
 		return
 	}
@@ -66,7 +68,7 @@ func CleanTempFiles(a *app.App) {
 		if int(now.Sub(dateTime).Hours()/24) > 1 {
 			target := filepath.Join(a.TempRoot(), entry.Name())
 			if err := os.RemoveAll(target); err != nil {
-				a.Log().Warn("清除临时文件失败,请检查目录", "path", target, "error", err)
+				a.Log().Warn("clear temp files failed, please check the directory", "path", target, "error", err)
 			}
 		}
 	}

@@ -11,12 +11,15 @@
 package ws
 
 import (
-	"fmt"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 	"time"
+
+	"jpom.io/go-agent/internal/i18n"
+	"jpom.io/go-agent/internal/sysinfo"
 )
 
 const tailPollInterval = time.Second
@@ -40,10 +43,11 @@ func NewTailManager(initReadLine int) *TailManager {
 	return &TailManager{initReadLine: initReadLine, watchers: make(map[string]*tailWatcher)}
 }
 
-// Attach starts tailing path for the session. It reports false when the file
-// does not exist or is not a regular file (the caller decides which message to
-// send, exactly like the Java endpoints).
-func (m *TailManager) Attach(path string, session *Session) (bool, error) {
+// Attach starts tailing path for the session. charset is the file charset used
+// to decode the log lines (Java AgentFileTailWatcher charset);
+// it reports false when the file does not exist or is not a regular file (the
+// caller decides which message to send, exactly like the Java endpoints).
+func (m *TailManager) Attach(path string, session *Session, charset string) (bool, error) {
 	info, err := os.Stat(path)
 	if err != nil || info.IsDir() {
 		return false, nil
@@ -54,13 +58,18 @@ func (m *TailManager) Attach(path string, session *Session) (bool, error) {
 		watcher = &tailWatcher{
 			manager:  m,
 			path:     path,
+			charset:  charset,
 			sessions: make(map[string]*Session),
 			recent:   make([]string, 0, m.initReadLine),
 			stop:     make(chan struct{}),
 		}
 		m.watchers[path] = watcher
 	}
+	count := int64(len(m.watchers))
 	m.mu.Unlock()
+	// /system/cache 的 readFileOnLineCount = 当前正在 tail 的文件数
+	// （Java AgentFileTailWatcher.getOneLineCount）
+	sysinfo.SetFileTailLineCount(count)
 	if err := watcher.add(session); err != nil {
 		return true, err
 	}
@@ -110,6 +119,7 @@ func (m *TailManager) CloseAll() {
 type tailWatcher struct {
 	manager *TailManager
 	path    string
+	charset string
 
 	mu       sync.Mutex
 	sessions map[string]*Session
@@ -132,7 +142,7 @@ func (w *tailWatcher) add(session *Session) error {
 		return nil
 	}
 	w.sessions[session.ID] = session
-	banner := fmt.Sprintf("监听%s日志成功,目前共有%d个会话正在查看", filepath.Base(w.path), len(w.sessions))
+	banner := i18n.T(session.Lang, "i18n.listen_log_success_currently_sessions_viewing.a74a", filepath.Base(w.path), len(w.sessions))
 	recent := make([]string, len(w.recent))
 	copy(recent, w.recent)
 	w.mu.Unlock()
@@ -149,7 +159,7 @@ func (w *tailWatcher) add(session *Session) error {
 	return nil
 }
 
-var errTailClosed = fmt.Errorf("文件监听已关闭")
+var errTailClosed = errors.New("file tail watcher is closed")
 
 // remove unregisters a session and closes the watcher when it becomes empty.
 func (w *tailWatcher) remove(sessionID string) {
@@ -181,7 +191,9 @@ func (w *tailWatcher) close() {
 	if current, ok := w.manager.watchers[w.path]; ok && current == w {
 		delete(w.manager.watchers, w.path)
 	}
+	count := int64(len(w.manager.watchers))
 	w.manager.mu.Unlock()
+	sysinfo.SetFileTailLineCount(count)
 }
 
 // sendAll writes a line to every session; sessions that fail are removed.
@@ -281,7 +293,7 @@ func (w *tailWatcher) replayTail() {
 		lines = lines[len(lines)-limit:]
 	}
 	for _, line := range lines {
-		w.remember(strings.TrimSuffix(line, "\r"))
+		w.remember(decodeLine([]byte(strings.TrimSuffix(line, "\r")), w.charset))
 	}
 	w.mu.Lock()
 	w.offset = info.Size()
@@ -332,7 +344,7 @@ func (w *tailWatcher) poll() {
 	completed := string(data[:lastNewline])
 	rest := append([]byte{}, data[lastNewline+1:]...)
 	for _, line := range strings.Split(completed, "\n") {
-		w.remember(strings.TrimSuffix(line, "\r"))
+		w.remember(decodeLine([]byte(strings.TrimSuffix(line, "\r")), w.charset))
 	}
 	w.mu.Lock()
 	w.offset = offset + int64(lastNewline+1)

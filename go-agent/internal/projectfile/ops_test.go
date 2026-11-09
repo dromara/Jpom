@@ -114,8 +114,8 @@ func TestCopyCompressNewFolderRenameDelete(t *testing.T) {
 		t.Fatal("clear should remove directory content")
 	}
 	message, err := service.DeleteFile("P1", DeleteOptions{Filename: "main.txt"})
-	if err != nil || message != "删除成功" {
-		t.Fatalf("delete file: %q %v", message, err)
+	if err != nil || message.Key != "i18n.delete_success.0007" {
+		t.Fatalf("delete file: %+v %v", message, err)
 	}
 	if exists(filepath.Join(lib, "main.txt")) {
 		t.Fatal("file should be deleted")
@@ -160,8 +160,8 @@ func TestRemoteDownload(t *testing.T) {
 	defer server.Close()
 
 	message, err := service.RemoteDownload("P1", server.URL+"/files/report.txt", "", "false", 0)
-	if err != nil || message == "" {
-		t.Fatalf("remote download: %q %v", message, err)
+	if err != nil || message.Key != "i18n.download_file_size.d4de" || message.Suffix == "" {
+		t.Fatalf("remote download: %+v %v", message, err)
 	}
 	content, err := os.ReadFile(filepath.Join(lib, "report.txt"))
 	if err != nil || string(content) != "report" {
@@ -238,18 +238,18 @@ func TestUploadProjectFileAndHooks(t *testing.T) {
 	if !exists(filepath.Join(targetDir, "release.bin")) {
 		t.Fatal("file2 upload should move the file into the destination directory")
 	}
-	if err := service.UploadToPath("", merged2, "", 0); err == nil || HTTPCodeOf(err) != 405 {
-		t.Fatalf("missing path should be a 405: %v", err)
+	if err := service.UploadToPath("", merged2, "", 0); err == nil || HTTPCodeOf(err) != 400 {
+		t.Fatalf("missing path should be a 400 (@ValidatorItem): %v", err)
 	}
 }
 
 func TestDownloadPathValidation(t *testing.T) {
 	service, base := testService(t)
 	createProject(t, service, base, "P1", "proj", nil)
-	if _, err := service.DownloadPath("P1", "", ""); err == nil || HTTPCodeOf(err) != 405 {
+	if _, _, err := service.DownloadPath("P1", "", ""); err == nil || HTTPCodeOf(err) != 405 {
 		t.Fatalf("missing filename should be a 405: %v", err)
 	}
-	if _, err := service.DownloadPath("P1", "", "../secret"); err == nil {
+	if _, _, err := service.DownloadPath("P1", "", "../secret"); err == nil {
 		t.Fatal("expected traversal to be rejected")
 	}
 	if _, err := service.Project("missing"); err == nil || HTTPCodeOf(err) != 405 {
@@ -276,8 +276,10 @@ func TestValidateUploadPathAndPreflight(t *testing.T) {
 	service, base := testService(t)
 	createProject(t, service, base, "P1", "proj", nil)
 	for _, candidate := range []string{"", "relative/dir", "bad\x00path"} {
-		if _, err := ValidateUploadPath(candidate); err == nil || HTTPCodeOf(err) != 405 {
-			t.Fatalf("path %q must be a 405 validation error: %v", candidate, err)
+		// @ValidatorItem(msg=文件目录缺失) -> code 400 in the live Java agent.
+		if _, err := ValidateUploadPath(candidate); err == nil || HTTPCodeOf(err) != 400 ||
+			!strings.Contains(err.Error(), "文件目录缺失") {
+			t.Fatalf("path %q must be a 400 文件目录缺失 validation error: %v", candidate, err)
 		}
 	}
 	if abs, err := ValidateUploadPath("/tmp/some-dir"); err != nil || abs != "/tmp/some-dir" {
@@ -294,5 +296,76 @@ func TestValidateUploadPathAndPreflight(t *testing.T) {
 	}
 	if err := service.PreflightProjectUpload("P1", "../../"); err == nil {
 		t.Fatalf("traversal levelName must be rejected: %v", err)
+	}
+}
+
+func TestParameterValidationCodes(t *testing.T) {
+	service, base := testService(t)
+	createProject(t, service, base, "P1", "proj", nil)
+
+	assertCode := func(name string, err error, code int, contains string) {
+		t.Helper()
+		if err == nil || HTTPCodeOf(err) != code {
+			t.Fatalf("%s: want code %d, got %v", name, code, err)
+		}
+		if contains != "" && !strings.Contains(err.Error(), contains) {
+			t.Fatalf("%s: want message containing %q, got %v", name, contains, err)
+		}
+	}
+
+	// @ValidatorItem validations: code 400 with the annotation message.
+	_, err := service.BackupDownloadPath("P1", "", "", "a.txt")
+	assertCode("backup-download backupId", err, 400, "备份id缺失")
+	_, err = service.BackupDownloadPath("P1", "20260101000000001", "", "")
+	assertCode("backup-download filename", err, 400, "参数验证失败")
+	assertCode("backup-delete backupId", service.BackupDelete("P1", "", "", "a.txt"), 400, "备份id缺失")
+	assertCode("backup-delete filename", service.BackupDelete("P1", "20260101000000001", "", ""), 400, "参数验证失败")
+	assertCode("backup-recover backupId", service.BackupRecover("P1", "", "", "", ""), 400, "参数验证失败")
+	assertCode("new-file-folder filename", service.NewFileFolder("P1", "", "", ""), 400, "参数验证失败")
+	assertCode("rename filename", service.Rename("P1", "", "", "x"), 400, "参数验证失败")
+	_, err = ValidateUploadPath("")
+	assertCode("file2 path", err, 400, "文件目录缺失")
+
+	// backup-item-files: @ValidatorItem(msg=备份id缺失) -> 400 before project lookup.
+	_, err = service.BackupItemFiles("P1", "", "")
+	assertCode("backup-item-files backupId", err, 400, "备份id缺失")
+	// Missing project id alone still validates the annotated backupId first.
+	_, err = service.BackupItemFiles("NOPE", "", "")
+	assertCode("backup-item-files backupId precedence", err, 400, "备份id缺失")
+
+	// Business Assert validations stay 405.
+	assertCode("missing project", service.NewFileFolder("NOPE", "", "x", ""), 405, "获取项目信息失败")
+	_, _, err = service.DownloadPath("P1", "", "")
+	assertCode("download filename", err, 405, "请选择文件")
+	if _, err := service.MergeSharding("", "", "1"); err == nil || HTTPCodeOf(err) != 405 {
+		t.Fatalf("sharding validation must stay 405, got %v", err)
+	}
+}
+
+func TestJavaStyleErrorPaths(t *testing.T) {
+	service, base := testService(t)
+	lib := createProject(t, service, base, "P1", "proj", nil)
+
+	// Java: FileUtil.file(lib, "/", filename) keeps a double slash.
+	if got, want := javaFilePath(lib, "", "nope.txt"), lib+"//nope.txt"; got != want {
+		t.Fatalf("root path: want %q got %q", want, got)
+	}
+	if got, want := javaFilePath(lib, "sub", "nope.txt"), lib+"/sub/nope.txt"; got != want {
+		t.Fatalf("sub path: want %q got %q", want, got)
+	}
+
+	// read_file missing file: the Java message contains lib//filename.
+	_, err := service.ReadFile("P1", "", "nope.txt")
+	if err == nil || !strings.Contains(err.Error(), lib+"//nope.txt") {
+		t.Fatalf("read_file message should contain the Java style path: %v", err)
+	}
+
+	// download missing file: displayPath is the Java style path used in the data field.
+	_, display, err := service.DownloadPath("P1", "", "nope.txt")
+	if err != nil {
+		t.Fatalf("download path resolution: %v", err)
+	}
+	if want := lib + "//nope.txt"; display != want {
+		t.Fatalf("download display path: want %q got %q", want, display)
 	}
 }

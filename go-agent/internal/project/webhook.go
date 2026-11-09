@@ -49,7 +49,7 @@ func (r *Runtime) WebHooks(info map[string]any, eventType string, params map[str
 	response, err := webhookClient.Get(target.String())
 	if err != nil {
 		if r.Log != nil {
-			r.Log.Warn("调用项目 WebHooks 失败", "id", GetString(info, "id"), "type", eventType, "error", err)
+			r.Log.Warn("failed to call project webhooks", "id", GetString(info, "id"), "type", eventType, "error", err)
 		}
 		return "WebHooks error:" + err.Error()
 	}
@@ -57,7 +57,7 @@ func (r *Runtime) WebHooks(info map[string]any, eventType string, params map[str
 	body, _ := io.ReadAll(io.LimitReader(response.Body, 64*1024))
 	result := strings.TrimSpace(string(body))
 	if r.Log != nil {
-		r.Log.Info("项目 WebHooks 通知完成", "id", GetString(info, "id"), "type", eventType, "body", result)
+		r.Log.Info("project webhooks notified", "id", GetString(info, "id"), "type", eventType, "body", result)
 	}
 	return result
 }
@@ -93,10 +93,10 @@ func (r *Runtime) WebhookFileChange(info map[string]any, params map[string]any) 
 		defer func() { _ = recover() }()
 		if result, err := r.reload(info, original); err != nil {
 			if r.Log != nil {
-				r.Log.Warn("文件变动触发 DSL reload 失败", "id", GetString(info, "id"), "error", err)
+				r.Log.Warn("file change trigger dsl reload failed", "id", GetString(info, "id"), "error", err)
 			}
 		} else if r.Log != nil {
-			r.Log.Info("文件变动触发 DSL reload", "id", GetString(info, "id"), "result", result.MsgStr())
+			r.Log.Info("file change trigger dsl reload", "id", GetString(info, "id"), "result", result.MsgStr())
 		}
 	}()
 }
