@@ -9,6 +9,14 @@
 
 1. 【all】修复 项目/节点脚本控制台、系统日志等日志监听在频繁打开关闭时，WebSocket 会话与文件监听 Tailer 线程可能未被释放、持续占用内存的问题：会话集合改为并发安全并按会话 ID 去重，watcher 的 add/close/restart 原子化且关闭幂等，关闭后不再接收新会话；发送失败立即移除并关闭会话；切换日志文件时先离线上一个监听；服务端 WebSocket 装饰器缓存与传输层代理缓冲在关闭/发送失败时即时释放
 2. 【agent】优化 控制台 WebSocket 会话增加空闲超时（依赖前端 5s 心跳），异常断开（未收到 close 帧）的会话由容器回收；脚本执行会话与执行中缓存增加异常路径兜底清理，避免长期运行后堆内存持续增长导致进程假死/OOM
+3. 【server】修复 重装/迁移服务端后“同步节点项目（脚本）”只提示拉取到 N 个、实际更新 0 个的问题：插件端项目/脚本仍带已不存在的旧工作空间时，现在会回退到节点当前工作空间再同步；工作空间仍然存在但不同（共享机器多空间）与 GLOBAL 数据保持原逻辑（[Gitee issues ICH1VK](https://gitee.com/dromara/Jpom/issues/ICH1VK)）
+4. 【server】优化 严格构建下 sh 脚本在环境模板之后、用户命令之前注入 `set -e`（bash 下同时 `set -o pipefail`），中间命令或管道失败立即中断构建，不再继续执行后续命令；非严格构建与 Windows 批处理语义保持不变（[Gitee issues ICW9KZ](https://gitee.com/dromara/Jpom/issues/ICW9KZ)）
+5. 【server】修复 Gitea/Gogs 的 GET webhook 把 push JSON 作为 `payload` 查询串携带、超过 Tomcat 默认请求行/请求头上限（8KB）导致接口直接返回 400 的问题：放宽 `server.max-http-header-size` 到 64KB（[Gitee issues IDG4PT](https://gitee.com/dromara/Jpom/issues/IDG4PT)）
+
+### ⚠️ 升级说明
+
+1. **严格构建语义变化**：开启【严格构建】后，sh 构建脚本会在环境模板之后、用户命令之前注入 `set -e`（bash 同时 `set -o pipefail`），中间命令或管道中任一命令失败会立即中断，不再继续执行后续命令（此前仅在脚本整体退出码非 0 时才判定失败）。依赖“某条命令失败后继续执行”的严格构建脚本，请在脚本开头显式 `set +e` 自行管理；非严格构建（推荐用于允许中间命令失败的场景）与 Windows 批处理不受影响。
+2. **Gitea/Gogs GET webhook 请求头上限**：新安装包默认 `server.max-http-header-size: 65536`（64KB）。**已安装实例的外部配置文件 `conf/application.yml` 不会随升级自动覆盖**，如仍遇到 Gitea/Gogs GET webhook 400，请在该文件 `server:` 下增加 `max-http-header-size: 65536`（或在【系统管理 → 外部配置文件】中重置为默认配置后按需调整），再重启服务端。该配置仅放宽单个请求行/请求头的大小上限，普通请求行为不变；使用反向代理时建议在代理侧同步限制请求头大小。
 
 
 ------

@@ -57,6 +57,10 @@ DEFAULT_TESTS=(
 	BaseFileTailWatcherTest
 	# 全局异常响应脱敏：数据库异常不再回显 SQL/列/表/驱动信息
 	BaseExceptionHandlerTest
+	# 节点数据同步：旧工作空间不存在时回退到节点当前工作空间（重装服务端后“同步 0 个”回归守卫，Gitee ICH1VK）
+	BaseNodeServiceSyncWorkspaceTest
+	# 严格构建：中间命令失败立即中断（仅严格 + sh 注入 set -e/pipefail，Gitee ICW9KZ）
+	BuildExecuteManageScriptTest
 	# 安全修复的既有单测（文件中心 SQL 注入 / 查询值绑定 / 日志路径穿越 / token 等）
 	FileStorageApiControllerSortTest
 	BaseDbCommonServiceQueryEntityTest
