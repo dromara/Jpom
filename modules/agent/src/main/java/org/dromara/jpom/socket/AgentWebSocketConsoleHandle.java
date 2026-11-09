@@ -12,6 +12,7 @@ package org.dromara.jpom.socket;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
@@ -37,6 +38,7 @@ import javax.websocket.server.ServerEndpoint;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Map;
 
 /**
  * 插件端,控制台socket
@@ -51,6 +53,10 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
 
     private static ProjectInfoService projectInfoService;
     private static ProjectCommander projectCommander;
+    /**
+     * 会话当前监听的文件，用于切换日志文件时先摘除旧监听，避免一个会话长期挂着多个 Tailer
+     */
+    private static final Map<String, File> CACHE_FILE = new SafeConcurrentHashMap<>();
 
     @Autowired
     public void init(ProjectInfoService projectInfoService,
@@ -68,6 +74,9 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
             if (super.checkAuthorize(session)) {
                 return;
             }
+            // 控制台前端会每 5s 发送一次 heart；设置空闲超时，异常断开（未收到 close 帧）时
+            // 由容器回收会话，避免半开会话与文件监听器长期占用内存
+            session.setMaxIdleTimeout(180_000L);
             String projectId = super.getParameters(session, "projectId");
             // 判断项目
             if (!Const.SYSTEM_ID.equals(projectId)) {
@@ -292,11 +301,18 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
             }
         }
         try {
+            File oldFile = CACHE_FILE.get(session.getId());
+            if (oldFile != null && !oldFile.equals(file)) {
+                // 切换日志文件时先离线上一个监听，避免同一会话同时挂多个 Tailer
+                AgentFileTailWatcher.offlineFile(oldFile, session);
+            }
             NodeProjectInfoModel originalModel = projectInfoService.resolveModel(nodeProjectInfoModel);
             Charset charset = projectInfoService.resolveLogCharset(nodeProjectInfoModel, originalModel);
             boolean watcher = AgentFileTailWatcher.addWatcher(file, charset, session);
             if (!watcher) {
                 SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.listen_file_failed_may_not_exist.fd56"));
+            } else {
+                CACHE_FILE.put(session.getId(), file);
             }
         } catch (Exception io) {
             log.error(I18nMessageUtil.get("i18n.listen_log_changes.9081"), io);
@@ -307,13 +323,18 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
     @Override
     @OnClose
     public void onClose(Session session, CloseReason closeReason) {
+        // super.onClose() 已统一清理 AgentFileTailWatcher/USER 缓存
         super.onClose(session, closeReason);
-        AgentFileTailWatcher.offline(session);
+        CACHE_FILE.remove(session.getId());
     }
 
     @OnError
     @Override
     public void onError(Session session, Throwable thr) {
-        super.onError(session, thr);
+        try {
+            super.onError(session, thr);
+        } finally {
+            CACHE_FILE.remove(session.getId());
+        }
     }
 }

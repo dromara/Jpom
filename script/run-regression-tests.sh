@@ -53,6 +53,8 @@ DEFAULT_TESTS=(
 	PermissionInterceptorNodeDataTest
 	# WebSocket 握手鉴权（Origin / 会话 / 禁用账号）
 	ServerWebSocketInterceptorTest
+	# 文件日志监听器会话/Tailer 生命周期（agent 控制台 OOM 回归守卫）
+	BaseFileTailWatcherTest
 	# 全局异常响应脱敏：数据库异常不再回显 SQL/列/表/驱动信息
 	BaseExceptionHandlerTest
 	# 安全修复的既有单测（文件中心 SQL 注入 / 查询值绑定 / 日志路径穿越 / token 等）
