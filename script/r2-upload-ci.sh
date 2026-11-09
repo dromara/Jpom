@@ -13,8 +13,11 @@
 # GitHub Actions 专用：把已构建的 Jpom 发布包上传到 Cloudflare R2 并回验。
 #
 # 上传内容：
-#   - Java：modules/{server,agent}/target/<kind>-<version>-release.{zip,tar.gz,sha1} + 合并包 jpom-<version>.zip
-#   - Go  ：go-agent/dist 下 5 平台安装包 agent-go-<version>-release-<os>-<arch>.{zip,tar.gz,sha1}
+#   - Java：modules/{server,agent}/target/<kind>-<version>-release.tar.gz(.sha1)
+#            （--legacy-zip 过渡期额外上传 <kind>-<version>-release.zip(.sha1)，供旧客户端在线升级）
+#            + 合并包 jpom-<version>.tar.gz(.sha1)（内含 server/agent 的 tar.gz+sha1，legacy 时含 zip）
+#   - Go  ：go-agent/dist 下 5 平台安装包 agent-go-<version>-release-<os>-<arch>.tar.gz(.sha1)
+#            （5 平台统一 tar.gz，Windows 也是 tar.gz）
 #            + 5 平台升级容器 agent-go-<version>-upgrade-<os>-<arch>.jar(.sha1)
 #            + linux/amd64 兼容别名 agent-go-<version>-upgrade.jar(.sha1)
 #            （Server 在线升级按节点平台读取对应容器；别名供旧 Server 手工上传/默认回退）
@@ -25,13 +28,14 @@
 #   - 支持 --prefix（POC/灰度前缀，避免写正式 release|beta 目录）
 #
 # 用法：
-#   bash script/r2-upload-ci.sh --channel release --version 2.11.14 [--prefix ci-test] [--deep-verify] [--dry-run]
+#   bash script/r2-upload-ci.sh --channel release --version 2.11.14 [--prefix ci-test] [--legacy-zip] [--deep-verify] [--dry-run]
 #
 # 环境变量：
 #   R2_BUCKET         默认 jpom-releases-apac
 #   R2_PUBLIC_BASE    回验基址，默认 R2 r2.dev 公开域名（d2 对 GitHub runner 有 Cloudflare challenge）
 #   R2_REMOTE         rclone remote 名称，默认 r2（由 RCLONE_CONFIG_R2_* 环境变量提供）
 #   R2_CHUNK_SIZE / R2_UPLOAD_CONCURRENCY / R2_TRANSFERS  上传调优
+#   JPOM_LEGACY_ZIP    true|false（默认 false；与 --legacy-zip 等价，过渡期额外上传旧客户端升级用 zip）
 #-----------------------------------------------------------
 
 set -euo pipefail
@@ -45,6 +49,7 @@ prefix=""
 deep_verify=0
 skip_verify=0
 dry_run=0
+legacy_zip="${JPOM_LEGACY_ZIP:-false}"
 
 R2_REMOTE="${R2_REMOTE:-r2}"
 R2_BUCKET="${R2_BUCKET:-jpom-releases-apac}"
@@ -79,6 +84,14 @@ while [ $# -gt 0 ]; do
 		repo_dir="${2:?}"
 		shift 2
 		;;
+	--legacy-zip)
+		legacy_zip=true
+		shift
+		;;
+	--no-legacy-zip)
+		legacy_zip=false
+		shift
+		;;
 	--deep-verify)
 		deep_verify=1
 		shift
@@ -101,6 +114,12 @@ while [ $# -gt 0 ]; do
 	esac
 done
 
+case "$legacy_zip" in
+true | TRUE | 1 | yes | on) legacy_zip=1 ;;
+false | FALSE | 0 | no | off | "") legacy_zip=0 ;;
+*) die "JPOM_LEGACY_ZIP 只能是 true/false：${legacy_zip}" ;;
+esac
+
 [ -n "$channel" ] || die "缺少 --channel（release|beta）"
 [ -n "$version" ] || die "缺少 --version"
 case "$channel" in
@@ -120,25 +139,28 @@ fi
 
 modules_dir="${repo_dir}/modules"
 sources=()
+# Java 默认只产 tar.gz；过渡期 --legacy-zip 额外上传旧客户端在线升级需要的 zip
+java_exts=(tar.gz)
+if [ "$legacy_zip" = "1" ]; then
+	java_exts=(tar.gz zip)
+fi
 for kind in agent server; do
-	for ext in tar.gz zip; do
+	for ext in "${java_exts[@]}"; do
 		sources+=("${modules_dir}/${kind}/target/${kind}-${version}-release.${ext}")
 		sources+=("${modules_dir}/${kind}/target/${kind}-${version}-release.${ext}.sha1")
 	done
 done
 
 # Go 插件端产物：与 Java 产物上传到同版本目录（下载中心/Server 在线升级按同目录命名约定读取）
-# 5 平台安装包 + 5 平台升级容器 + linux/amd64 兼容别名（与 verify-release-artifacts.sh 清单保持一致）
+# 5 平台安装包（统一 tar.gz，Windows 也是 tar.gz）+ 5 平台升级容器 + linux/amd64 兼容别名
+# （与 verify-release-artifacts.sh 清单保持一致）
 go_dist="${repo_dir}/go-agent/dist"
 go_artifacts=()
 go_platforms=(linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64)
 for go_platform in "${go_platforms[@]}"; do
 	go_os="${go_platform%/*}"
 	go_arch="${go_platform#*/}"
-	go_artifacts+=("agent-go-${version}-release-${go_os}-${go_arch}.zip")
-	if [ "${go_os}" != "windows" ]; then
-		go_artifacts+=("agent-go-${version}-release-${go_os}-${go_arch}.tar.gz")
-	fi
+	go_artifacts+=("agent-go-${version}-release-${go_os}-${go_arch}.tar.gz")
 	go_artifacts+=("agent-go-${version}-upgrade-${go_os}-${go_arch}.jar")
 done
 go_artifacts+=("agent-go-${version}-upgrade.jar")
@@ -156,10 +178,14 @@ for src in "${sources[@]}"; do
 	[ -s "$src" ] || die "缺少产物：${src}"
 done
 
+command -v tar >/dev/null 2>&1 || die "缺少 tar 命令（合并包固定为 jpom-<version>.tar.gz）"
 if [ "$dry_run" = "0" ]; then
 	command -v rclone >/dev/null 2>&1 || die "缺少 rclone"
-	command -v zip >/dev/null 2>&1 || die "缺少 zip"
 	command -v curl >/dev/null 2>&1 || die "缺少 curl"
+fi
+# 合并包用 tar 生成；只有过渡期 legacy zip 场景才要求 zip 工具
+if [ "$legacy_zip" = "1" ]; then
+	command -v zip >/dev/null 2>&1 || die "缺少 zip 命令（--legacy-zip 过渡期需要）"
 fi
 
 sha1_of() {
@@ -173,11 +199,21 @@ file_size() { stat -c '%s' "$1" 2>/dev/null || stat -f '%z' "$1" 2>/dev/null; }
 
 stage_dir=$(mktemp -d)
 trap 'rm -rf "${stage_dir}"' EXIT
-merged_zip="${stage_dir}/jpom-${version}.zip"
-log "生成合并包 ${merged_zip##*/}"
-zip -j -q "$merged_zip" \
-	"${modules_dir}/server/target/server-${version}-release.zip" \
-	"${modules_dir}/agent/target/agent-${version}-release.zip"
+# 合并包固定为 jpom-<version>.tar.gz：内含 server/agent 的 tar.gz + sha1（legacy 过渡期再含 zip + sha1）
+merged_dir="${stage_dir}/merged"
+merged_tgz="${stage_dir}/jpom-${version}.tar.gz"
+mkdir -p "$merged_dir"
+merged_files=()
+for kind in server agent; do
+	for ext in "${java_exts[@]}"; do
+		cp -f "${modules_dir}/${kind}/target/${kind}-${version}-release.${ext}" \
+			"${modules_dir}/${kind}/target/${kind}-${version}-release.${ext}.sha1" "$merged_dir/"
+		merged_files+=("${kind}-${version}-release.${ext}" "${kind}-${version}-release.${ext}.sha1")
+	done
+done
+log "生成合并包 ${merged_tgz##*/}（含：${merged_files[*]}）"
+tar -czf "$merged_tgz" -C "$merged_dir" "${merged_files[@]}"
+sha1_of "$merged_tgz" >"${merged_tgz}.sha1"
 
 upload_file() {
 	local src=$1 name dest
@@ -204,7 +240,8 @@ upload_file() {
 for src in "${sources[@]}"; do
 	upload_file "$src"
 done
-upload_file "$merged_zip"
+upload_file "$merged_tgz"
+upload_file "${merged_tgz}.sha1"
 
 if [ "$dry_run" = "1" ]; then
 	log "dry-run 结束（未上传）"
@@ -218,7 +255,7 @@ fi
 
 log "开始回验（${public_url}/）"
 fail=0
-uploaded=("${sources[@]}" "$merged_zip")
+uploaded=("${sources[@]}" "$merged_tgz" "${merged_tgz}.sha1")
 for src in "${uploaded[@]}"; do
 	name=$(basename "$src")
 	local_size=$(file_size "$src")

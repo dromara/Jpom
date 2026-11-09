@@ -59,7 +59,7 @@ make build         # 产出 build/agent（本地平台）
 
 ```bash
 VERSION=2.11.13.2 bash script/package.sh   # PLATFORMS 默认 5 平台，可显式覆盖
-# dist/agent-go-<version>-release-<os>-<arch>.{zip,tar.gz,sha1}
+# dist/agent-go-<version>-release-<os>-<arch>.{tar.gz,sha1}（5 平台统一 tar.gz，含 Windows）
 ```
 
 生成在线升级容器包（旧版 Server 的 `checkJpomJar` 兼容，Go Agent 自升级）：

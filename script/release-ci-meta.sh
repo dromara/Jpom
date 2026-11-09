@@ -14,7 +14,7 @@
 #
 # 输出（写入 $GITHUB_OUTPUT；未设置时打印到 stdout）：
 #   channel / version / target_prefix / remote_rel / public_base
-#   server_pkg / agent_pkg / merged_pkg
+#   server_pkg / agent_pkg / merged_pkg（jpom-<version>.tar.gz）/ legacy_zip
 #   dry_run / deep_verify
 #
 # 环境变量：
@@ -23,6 +23,8 @@
 #   INPUT_TARGET_PREFIX  目标路径前缀（POC/灰度用，如 ci-test；空=正式 release|beta 目录）
 #   INPUT_DRY_RUN        true|false（默认 false；只构建不上传）
 #   INPUT_DEEP_VERIFY    true|false（默认 false）
+#   INPUT_LEGACY_ZIP     true|false（默认 true；过渡期同时构建/上传旧客户端在线升级用的 zip）
+#   JPOM_LEGACY_ZIP      INPUT_LEGACY_ZIP 的兜底来源（GitHub 仓库变量，默认 true）
 #   GITHUB_EVENT_NAME    workflow_dispatch|push
 #   GITHUB_REF           refs/tags/v2.11.13 / refs/heads/dev
 #   GITHUB_REF_NAME      v2.11.13 / dev
@@ -50,6 +52,8 @@ version_input="${INPUT_VERSION:-}"
 target_prefix="${INPUT_TARGET_PREFIX:-}"
 dry_run="${INPUT_DRY_RUN:-false}"
 deep_verify="${INPUT_DEEP_VERIFY:-false}"
+# 过渡期（2.12.0 前）默认同时产出 zip，兼容旧客户端在线升级；2.12.0 起可关闭
+legacy_zip_input="${INPUT_LEGACY_ZIP:-${JPOM_LEGACY_ZIP:-true}}"
 public_base="${JPOM_DOWNLOAD_BASE:-https://pub-a46506c7e8ff43fabc4c1ce8e5faffcb.r2.dev}"
 public_base="${public_base%/}"
 
@@ -169,11 +173,17 @@ case "$deep_verify" in
 true | false) ;;
 *) die "INPUT_DEEP_VERIFY 只能是 true/false：${deep_verify}" ;;
 esac
+case "$legacy_zip_input" in
+true | 1 | yes | on) legacy_zip="true" ;;
+false | 0 | no | off | "") legacy_zip="false" ;;
+*) die "INPUT_LEGACY_ZIP/JPOM_LEGACY_ZIP 只能是 true/false：${legacy_zip_input}" ;;
+esac
 
 remote_rel="${target_prefix:+${target_prefix}/}${channel}/${version}"
 server_pkg="server-${version}-release"
 agent_pkg="agent-${version}-release"
-merged_pkg="jpom-${version}.zip"
+# 合并包固定 tar.gz（内含 server/agent 的 tar.gz+sha1，legacy 过渡期再含 zip）
+merged_pkg="jpom-${version}.tar.gz"
 # Go 插件端产物（发布包 + 在线升级容器），与 Java 产物同版本目录
 go_dist_rel="go-agent/dist"
 go_upgrade_pkg="agent-go-${version}-upgrade.jar"
@@ -187,10 +197,11 @@ emit public_base "$public_base"
 emit server_pkg "$server_pkg"
 emit agent_pkg "$agent_pkg"
 emit merged_pkg "$merged_pkg"
+emit legacy_zip "$legacy_zip"
 emit go_dist_rel "$go_dist_rel"
 emit go_upgrade_pkg "$go_upgrade_pkg"
 emit dry_run "$dry_run"
 emit self_test "$self_test"
 emit deep_verify "$deep_verify"
 
-log "解析完成：channel=${channel} version=${version} prefix=${target_prefix:-<无>} remote_rel=${remote_rel} dry_run=${dry_run} self_test=${self_test}"
+log "解析完成：channel=${channel} version=${version} prefix=${target_prefix:-<无>} remote_rel=${remote_rel} legacy_zip=${legacy_zip} dry_run=${dry_run} self_test=${self_test}"

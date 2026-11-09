@@ -10,11 +10,13 @@
 #
 
 #-----------------------------------------------------------
-# Jpom 发布产物完整性校验（release.sh 与 GitHub Actions release-package 工作流共用）
+# Jpom 发布产物完整性校验（release.sh、GitHub Actions release-package/build 工作流共用）
 #
 # 校验项：
-#   1. server/agent 的 zip、tar.gz 及 .sha1 存在且 sha1 一致、压缩包完整
-#   2. 从 zip 中提取 lib/<kind>-<version>.jar，检查 class 魔数/常量池非空/无 Unresolved compilation
+#   1. server/agent 的 tar.gz 及 .sha1 存在且 sha1 一致、压缩包完整
+#      （--legacy-zip：过渡期额外校验 zip 及 .sha1；2.12.0 起发布包只产 tar.gz，不再产出 zip）
+#   2. 提取 lib/<kind>-<version>.jar（优先 target/<kind>-<version>-release/lib/，否则从 tar.gz/zip
+#      内提取，兼容 tar/zip 里的 ./ 前缀），检查 class 魔数/常量池非空/无 Unresolved compilation
 #   3. jar 内 BOOT-INF/classes 与 modules/<kind>/target/classes 逐字节一致（防止打入旧/坏 class）
 #   4. server jar 包含前端产物 BOOT-INF/classes/dist/index.html
 #   5. 解压运行目录存在且含 bin/
@@ -22,9 +24,11 @@
 #      命名、sha1、压缩包完整性、安装包目录结构（bin/agent(.exe)+conf）、升级容器 MANIFEST/
 #      agent.json（platform 必须与文件名平台一致）/容器内对应平台可执行文件 sha256、
 #      别名与 linux/amd64 容器逐字节一致（供旧 Server 手工上传/默认回退）
+#      Go 安装包 5 平台统一为 .tar.gz（Windows 也是 tar.gz，内含 bin/agent.exe）
 #
 # 用法：
 #   bash script/verify-release-artifacts.sh --parent-dir jpom-parent --version 2.11.14 [--log-dir DIR]
+#   bash script/verify-release-artifacts.sh --parent-dir DIR --version V --legacy-zip   # 过渡期同时校验 zip
 #   bash script/verify-release-artifacts.sh --parent-dir DIR --version V --downloaded   # 校验从 R2 下载的产物（无 target/classes）
 #   bash script/verify-release-artifacts.sh --parent-dir DIR --version V --verify-go --go-only   # 只校验 Go 插件端产物
 
@@ -38,6 +42,7 @@ log_dir=""
 skip_target_compare=0
 verify_go=0
 go_only=0
+legacy_zip=0
 
 while [ $# -gt 0 ]; do
 	case "$1" in
@@ -55,6 +60,11 @@ while [ $# -gt 0 ]; do
 		;;
 	--downloaded)
 		skip_target_compare=1
+		shift
+		;;
+	--legacy-zip)
+		# 过渡期（2.12.0 前）发布包同时产出 zip，需一并校验旧版客户端在线升级用的 zip
+		legacy_zip=1
 		shift
 		;;
 	--verify-go)
@@ -108,16 +118,14 @@ verify_go_artifacts() {
 	local go_dist="${parent_dir}/go-agent/dist"
 	[ -d "$go_dist" ] || die "缺少 Go 产物目录：${go_dist}（先执行 go-agent/script/package.sh 与 build-upgrade-container.sh）"
 
-	# 平台清单：安装包与升级容器同为 5 平台；linux/amd64 另有兼容别名 upgrade.jar
+	# 平台清单：安装包与升级容器同为 5 平台（安装包 5 平台统一 tar.gz，Windows 也是 tar.gz）；
+	# linux/amd64 另有兼容别名 upgrade.jar
 	local go_platforms=("linux/amd64" "linux/arm64" "darwin/amd64" "darwin/arm64" "windows/amd64")
 	local go_packages=() go_containers=() go_platform go_os go_arch
 	for go_platform in "${go_platforms[@]}"; do
 		go_os="${go_platform%/*}"
 		go_arch="${go_platform#*/}"
-		go_packages+=("agent-go-${version}-release-${go_os}-${go_arch}.zip")
-		if [ "${go_os}" != "windows" ]; then
-			go_packages+=("agent-go-${version}-release-${go_os}-${go_arch}.tar.gz")
-		fi
+		go_packages+=("agent-go-${version}-release-${go_os}-${go_arch}.tar.gz")
 		go_containers+=("agent-go-${version}-upgrade-${go_os}-${go_arch}.jar")
 	done
 	local go_alias="agent-go-${version}-upgrade.jar"
@@ -242,7 +250,10 @@ main() {
 verify_java_artifacts() {
 
 	local kinds=(server agent)
-	local exts=(zip tar.gz)
+	local exts=(tar.gz)
+	if [ "${legacy_zip}" = "1" ]; then
+		exts=(tar.gz zip)
+	fi
 	local kind ext file sha file_sha expected
 
 	for kind in "${kinds[@]}"; do
@@ -265,8 +276,25 @@ verify_java_artifacts() {
 	mkdir -p "${log_dir}/artifacts"
 	for kind in "${kinds[@]}"; do
 		local jar="${log_dir}/artifacts/${kind}.jar"
-		unzip -p "${parent_dir}/modules/${kind}/target/${kind}-${version}-release.zip" "lib/${kind}-${version}.jar" >"$jar" ||
-			die "无法从 ${kind} zip 中提取 lib/${kind}-${version}.jar"
+		local run_dir="${parent_dir}/modules/${kind}/target/${kind}-${version}-release"
+		local tgz="${parent_dir}/modules/${kind}/target/${kind}-${version}-release.tar.gz"
+		local zip_pkg="${parent_dir}/modules/${kind}/target/${kind}-${version}-release.zip"
+		local member=""
+		# 优先使用 Assembly 解压出的运行目录（mvn package 后存在），避免重复解压大包；
+		# 否则从 tar.gz 内提取（--downloaded 下载校验场景一致）；tar/zip 内条目可能带 ./ 前缀。
+		if [ -s "${run_dir}/lib/${kind}-${version}.jar" ]; then
+			cp "${run_dir}/lib/${kind}-${version}.jar" "$jar"
+		elif [ -s "$tgz" ]; then
+			member=$(tar -tzf "$tgz" | grep -E "(^|/)lib/${kind}-${version}\.jar$" | head -n 1 || true)
+			[ -n "$member" ] || die "${tgz##*/} 中缺少 lib/${kind}-${version}.jar"
+			tar -xzf "$tgz" -O "$member" >"$jar" || die "无法从 ${tgz##*/} 中提取 $member"
+		elif [ "${legacy_zip}" = "1" ] && [ -s "$zip_pkg" ]; then
+			member=$(unzip -Z1 "$zip_pkg" | grep -E "(^|/)lib/${kind}-${version}\.jar$" | head -n 1 || true)
+			[ -n "$member" ] || die "${zip_pkg##*/} 中缺少 lib/${kind}-${version}.jar"
+			unzip -p "$zip_pkg" "$member" >"$jar" || die "无法从 ${zip_pkg##*/} 中提取 $member"
+		else
+			die "缺少 ${kind} 的 tar.gz 发布包，无法提取 lib/${kind}-${version}.jar"
+		fi
 		[ -s "$jar" ] || die "提取出的 ${kind} jar 为空"
 		if ! python3 - "$jar" "$kind" "${parent_dir}/modules/${kind}/target/classes" "$skip_target_compare" <<'PY'
 import io

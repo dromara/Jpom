@@ -18,28 +18,43 @@ jpom_tag=$2
 #Mirror_Host=hub.fastgit.xyz
 #Mirror_Host=github.com
 
+# 校验单个产物：tar.gz 为默认产物（必选）；zip 为过渡期兼容产物（可选，该版本未发布时跳过）
+# 用法：checkItem <server|agent> <tar.gz|zip> [required|optional]
 function checkItem()
 {
-rm -f $1-${jpom_version}-release.$2.sha1 $1-${jpom_version}-release.$2
+local kind=$1
+local ext=$2
+local required=${3:-required}
+local name="$kind-${jpom_version}-release.$ext"
 
-curl -LfsSo $1-${jpom_version}-release.$2.sha1 https://d2.jpom.download/${jpom_tag}/${jpom_version}/$1-${jpom_version}-release.$2.sha1
+rm -f "$name.sha1" "$name"
 
-ESUM=`cat $1-${jpom_version}-release.$2.sha1`
+if ! curl -LfsSo "$name.sha1" "https://d2.jpom.download/${jpom_tag}/${jpom_version}/$name.sha1"; then
+	if [ "$required" = "optional" ]; then
+		echo "跳过 $name（该版本未发布）"
+		rm -f "$name.sha1"
+		return 0
+	fi
+	echo "错误：$name.sha1 下载失败" >&2
+	rm -f "$name.sha1"
+	return 1
+fi
 
-echo "$1-${jpom_version}-release.$2 => ${ESUM}"
+ESUM=`cat "$name.sha1"`
 
-curl -LfsSo $1-${jpom_version}-release.$2 https://d2.jpom.download/${jpom_tag}/${jpom_version}/$1-${jpom_version}-release.$2
+echo "$name => ${ESUM}"
 
-echo "${ESUM} $1-${jpom_version}-release.$2" | sha1sum -c -;
+curl -LfsSo "$name" "https://d2.jpom.download/${jpom_tag}/${jpom_version}/$name"
 
-rm -f $1-${jpom_version}-release.$2.sha1 $1-${jpom_version}-release.$2
+echo "${ESUM} $name" | sha1sum -c -;
+
+rm -f "$name.sha1" "$name"
 }
 
-# check agent
-checkItem agent tar.gz
-checkItem agent zip
+# check agent：tar.gz 必选；zip 为过渡期兼容（2.12.0 起不再产出）
+checkItem agent tar.gz required
+checkItem agent zip optional
 
-# check server
-checkItem server tar.gz
-checkItem server zip
-
+# check server：tar.gz 必选；zip 为过渡期兼容
+checkItem server tar.gz required
+checkItem server zip optional

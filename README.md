@@ -292,8 +292,8 @@ docker run -d --name jpom-server --restart=always -p 2122:2122 \
 <a name="install-download"></a>
 ### 方式三：💾 下载安装包
 
-1. 从 [下载中心](https://jpom.top/pages/all-downloads/) 下载对应的 `server-x.x.x-release`、`agent-x.x.x-release` 安装包（zip 或 tar.gz）及 `.sha1` 校验文件。
-2. 校验安装包完整性（推荐），例如 `sha1sum server-x.x.x-release.zip`，与下载的 `.sha1` 文件内容比对。
+1. 从 [下载中心](https://jpom.top/pages/all-downloads/) 下载对应的 `server-x.x.x-release`、`agent-x.x.x-release` 安装包（tar.gz；2.11.x 过渡版本也提供 zip）及 `.sha1` 校验文件。
+2. 校验安装包完整性（推荐），例如 `sha1sum server-x.x.x-release.tar.gz`，与下载的 `.sha1` 文件内容比对。
 3. 解压安装包，并将整个目录上传到目标服务器。
 4. 安装插件端
    1. `agent-x.x.x-release` 目录为插件端的全部安装文件

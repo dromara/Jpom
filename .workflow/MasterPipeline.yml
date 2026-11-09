@@ -39,16 +39,16 @@ stages:
           # 根 pom 默认跳过单测，这里显式执行核心回归测试（共享基础类/安全修复的守卫）
           - bash script/run-regression-tests.sh
         artifacts:
-          - name: all_zip
+          - name: all_tar
             path:
-              - modules/server/target/server-2.11.13-release.zip
-              - modules/agent/target/agent-2.11.13-release.zip
-          - name: server_zip
+              - modules/server/target/server-2.11.13-release.tar.gz
+              - modules/agent/target/agent-2.11.13-release.tar.gz
+          - name: server_tar
             path:
-              - modules/server/target/server-2.11.13-release.zip
-          - name: agent_zip
+              - modules/server/target/server-2.11.13-release.tar.gz
+          - name: agent_tar
             path:
-              - modules/agent/target/agent-2.11.13-release.zip
+              - modules/agent/target/agent-2.11.13-release.tar.gz
         settings: []
         strategy:
           retry: '0'
@@ -61,8 +61,9 @@ stages:
       - step: publish@general_artifacts
         name: publish_general_artifacts
         displayName: 合并打包
-        dependArtifact: all_zip
-        artifactName: jpom-2.11.13
+        dependArtifact: all_tar
+        # 合并包统一 tar.gz 命名（正式发布以 GitHub Actions release-package 的 jpom-<version>.tar.gz 为准）
+        artifactName: jpom-2.11.13.tar.gz
         strategy:
           retry: '0'
 strategy:
