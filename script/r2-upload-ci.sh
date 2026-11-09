@@ -12,6 +12,11 @@
 #-----------------------------------------------------------
 # GitHub Actions 专用：把已构建的 Jpom 发布包上传到 Cloudflare R2 并回验。
 #
+# 上传内容：
+#   - Java：modules/{server,agent}/target/<kind>-<version>-release.{zip,tar.gz,sha1} + 合并包 jpom-<version>.zip
+#   - Go  ：go-agent/dist/agent-go-<version>-release-<os>-<arch>.{zip,tar.gz,sha1}
+#            + agent-go-<version>-upgrade.jar(.sha1)（Server 在线升级用 jar 运输容器）
+#
 # 与根仓 script/deploy-release-r2.sh 的区别：
 #   - 本脚本在 jpom-parent 仓库内运行（CI checkout 的是 jpom-parent），路径以本仓库根为基准
 #   - rclone 通过环境变量配置 R2 S3（RCLONE_CONFIG_R2_*），不依赖 ~/.config/rclone/rclone.conf
@@ -118,6 +123,21 @@ for kind in agent server; do
 		sources+=("${modules_dir}/${kind}/target/${kind}-${version}-release.${ext}")
 		sources+=("${modules_dir}/${kind}/target/${kind}-${version}-release.${ext}.sha1")
 	done
+done
+
+# Go 插件端产物：与 Java 产物上传到同版本目录（下载中心/Server 在线升级按同目录命名约定读取）
+go_dist="${repo_dir}/go-agent/dist"
+go_artifacts=(
+	"agent-go-${version}-release-linux-amd64.zip"
+	"agent-go-${version}-release-linux-amd64.tar.gz"
+	"agent-go-${version}-release-linux-arm64.zip"
+	"agent-go-${version}-release-linux-arm64.tar.gz"
+	"agent-go-${version}-release-windows-amd64.zip"
+	"agent-go-${version}-upgrade.jar"
+)
+for name in "${go_artifacts[@]}"; do
+	sources+=("${go_dist}/${name}")
+	sources+=("${go_dist}/${name}.sha1")
 done
 
 remote_rel="${prefix:+${prefix}/}${channel}/${version}"

@@ -144,6 +144,9 @@ remote_rel="${target_prefix:+${target_prefix}/}${channel}/${version}"
 server_pkg="server-${version}-release"
 agent_pkg="agent-${version}-release"
 merged_pkg="jpom-${version}.zip"
+# Go 插件端产物（发布包 + 在线升级容器），与 Java 产物同版本目录
+go_dist_rel="go-agent/dist"
+go_upgrade_pkg="agent-go-${version}-upgrade.jar"
 
 # 分支 push 仅做构建自检（不写 R2）
 self_test=0
@@ -165,6 +168,8 @@ emit public_base "$public_base"
 emit server_pkg "$server_pkg"
 emit agent_pkg "$agent_pkg"
 emit merged_pkg "$merged_pkg"
+emit go_dist_rel "$go_dist_rel"
+emit go_upgrade_pkg "$go_upgrade_pkg"
 emit dry_run "$dry_run"
 emit self_test "$self_test"
 emit deep_verify "$deep_verify"

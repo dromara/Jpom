@@ -10,7 +10,9 @@
 package org.dromara.jpom.socket;
 
 import org.dromara.jpom.configuration.NodeConfig;
+import org.dromara.jpom.configuration.SystemConfig;
 import org.dromara.jpom.func.assets.server.MachineNodeServer;
+import org.dromara.jpom.service.system.AgentPackageService;
 import org.dromara.jpom.service.system.SystemParametersServer;
 import org.dromara.jpom.socket.handler.*;
 import org.dromara.jpom.system.ServerConfig;
@@ -31,15 +33,20 @@ public class ServerWebSocketConfig implements WebSocketConfigurer {
     private final SystemParametersServer systemParametersServer;
     private final NodeConfig nodeConfig;
     private final MachineNodeServer machineNodeServer;
+    private final AgentPackageService agentPackageService;
+    private final SystemConfig systemConfig;
 
     public ServerWebSocketConfig(ServerWebSocketInterceptor serverWebSocketInterceptor,
                                  SystemParametersServer systemParametersServer,
                                  ServerConfig serverConfig,
-                                 MachineNodeServer machineNodeServer) {
+                                 MachineNodeServer machineNodeServer,
+                                 AgentPackageService agentPackageService) {
         this.serverWebSocketInterceptor = serverWebSocketInterceptor;
         this.systemParametersServer = systemParametersServer;
         this.nodeConfig = serverConfig.getNode();
         this.machineNodeServer = machineNodeServer;
+        this.agentPackageService = agentPackageService;
+        this.systemConfig = serverConfig.getSystem();
     }
 
     @Override
@@ -59,8 +66,8 @@ public class ServerWebSocketConfig implements WebSocketConfigurer {
         // ssh
         registry.addHandler(new SshHandler(), "/socket/ssh")
             .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
-        // 节点升级
-        registry.addHandler(new NodeUpdateHandler(machineNodeServer, systemParametersServer, nodeConfig), "/socket/node_update")
+        // 节点升级（按节点引擎选择 Java/Go 升级包）
+        registry.addHandler(new NodeUpdateHandler(machineNodeServer, systemParametersServer, nodeConfig, agentPackageService, systemConfig), "/socket/node_update")
             .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
         // 脚本模板
         registry.addHandler(new ServerScriptHandler(), "/socket/script_run")
