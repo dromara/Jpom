@@ -200,7 +200,7 @@ func InstallUploadedPackage(a *app.App, packagePath string) (string, error) {
 	return installAgentPackage(a, packagePath)
 }
 
-// goAgentPackageInfo 描述升级包内的 go-agent 元信息（CONTRACT-UPGRADE 方案 B）。
+// goAgentPackageInfo 描述升级容器 jar 内的 go-agent 元信息（与 Server 侧约定的容器格式）。
 type goAgentPackageInfo struct {
 	Version    string
 	TimeStamp  string

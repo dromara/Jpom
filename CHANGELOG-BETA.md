@@ -4,9 +4,9 @@
 
 ### 🐣 新增功能
 
-1. 【agent-go】新增 Go 语言插件端（实验性）：单个静态二进制、低内存、免 JDK 安装；与 Java 插件端**完全兼容**同一份 `conf/application.yml`、`data/` 数据目录与 HTTP/WebSocket 协议（鉴权、workspace、JSON 包、长连接帧一致），同一节点可在 Java/Go 插件端之间平滑切换并回切；支持 Go 容器升级包在线升级（兼容旧版 Server 的升级入口）。代码位于 `go-agent/`，设计/契约/验证/切换手册见工作区 `archive/2026-11-go-agent/`。
-2. 【server】新增 Go 插件端引擎识别与在线升级：Server 读取节点 `/info.manifest.engine=go`，自动选择对应的 Go 升级容器包（`agent-go-<version>-upgrade.jar`，本地包或下载中心）并复用现有分片上传 / `node_update` 升级链路；Java 节点升级行为保持不变。
-3. 【agent-go】补齐 Go 插件端能力并对齐 Java 行为：四语言国际化（zh-CN/zh-HK/zh-TW/en-US）、Windows/macOS 系统监控、7z 解压、GBK 等日志/控制台编码（`log-charset`/`console-charset`/`file-charset`）、Hutool 兼容 cron（`|` 分组与年份）、升级失败自动回滚、Oshi 硬件细节与破坏性端点参数/错误码对齐。
+1. 【agent-go】新增 Go 语言插件端：单二进制、低内存、免 JDK，兼容 Java 插件端的配置、数据和协议，可在 Java/Go 之间平滑切换，并支持在线升级。
+2. 【server】在线升级支持 Go 插件端：自动识别节点类型并下发对应升级包，Java 节点升级方式不变。
+3. 【agent-go】支持国际化、Windows/macOS 监控、7z 解压、GBK 编码、cron 年份/分组与升级失败自动回滚，并修正请求参数错误码等兼容性问题。
 
 ### 🐞 解决BUG、优化功能
 

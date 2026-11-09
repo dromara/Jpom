@@ -13,7 +13,7 @@
 //
 // The server is the websocket *client* and proxies browser frames verbatim, so
 // every frame written here must stay byte/format compatible with the Java agent
-// (see archive/2026-11-go-agent/CONTRACT-WS.md).
+// (see go-agent/DESIGN.md).
 package ws
 
 import (

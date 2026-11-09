@@ -43,17 +43,17 @@
 cd go-agent
 make build                 # build/agent
 make test                  # go test ./...
-bash script/go.sh build ./...   # 任意 go 命令（自动设置工作区内 GOCACHE）
+bash script/go.sh build ./...   # 任意 go 命令（自动把 GOCACHE 等缓存放到仓库内）
 ```
 
 - 受限环境 HOME 的 Go 缓存只读，**必须**通过 `make` 或 `bash script/go.sh ...` 执行 go 命令。
-- 单元测试与真实 Java agent 的黄金响应比对：黄金响应在 `.tmp/go-agent-ref/golden/`，契约见工作区 `archive/2026-11-go-agent/CONTRACT-*.md`。
+- 单元测试与真实 Java agent 的黄金响应比对：由 `script/capture-golden.sh` 采集/校验（结果样本仅本地保存，不提交仓库）。
 - dev 虚拟机联调由 Lead 统一部署（Go agent 先以 2124 端口 + 数据目录副本运行，不动生产 2123），成员本地自测为主。
 
 ## 5. 验收标准（每个功能域）
 
 1. 端点/WS 行为与契约文档一致（路径、参数、响应字段、错误码）。
 2. `go test ./...`、`go vet ./...`、`gofmt -l .` 干净。
-3. 数据文件回写与 Java 端 schema 一致（可用 dev VM 上真实 `data/` 快照自测：`.tmp/go-agent-ref/data/`）。
+3. 数据文件回写与 Java 端 schema 一致（可用真实 Java 插件端 `data/` 目录副本做自测，副本不入库）。
 4. 不修改其他成员文件；共享包改动先沟通。
 5. 完成后向 Lead 汇报：已实现端点清单、未实现/风险项、测试证据。

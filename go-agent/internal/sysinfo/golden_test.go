@@ -19,7 +19,7 @@ import (
 	"testing"
 )
 
-// findGolden 在工作区 .tmp/go-agent-ref/golden 中查找真实 Java 响应样本；
+// findGolden 在本地黄金样本目录中查找真实 Java 响应样本（样本不提交仓库，可用环境变量覆盖目录）；
 // 仓库内/CI 环境没有该目录时跳过 golden 比对。
 func findGolden(t *testing.T, name string) map[string]any {
 	t.Helper()

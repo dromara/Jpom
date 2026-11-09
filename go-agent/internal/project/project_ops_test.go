@@ -554,13 +554,13 @@ func TestDslProcessInfoAndStatus(t *testing.T) {
 
 // TestGoldenProjectInfo 用 dev 环境 Java 插件端真实抓取的黄金响应校验 /manage/getProjectInfo 数据结构。
 //
-// 参考数据只在工作区 .tmp/go-agent-ref 存在（未入库），缺失时跳过，避免 CI 失败。
+// 参考数据只在本地黄金样本目录存在（未入库），缺失时跳过，避免 CI 失败。
 func TestGoldenProjectInfo(t *testing.T) {
 	refDir := filepath.Join("..", "..", "..", "..", "go-agent-ref")
 	dataFile := filepath.Join(refDir, "data", "project.json")
 	goldenFile := filepath.Join(refDir, "golden", "project-info.json")
 	if _, err := os.Stat(dataFile); err != nil {
-		t.Skip("缺少真实参考数据 .tmp/go-agent-ref，跳过黄金响应校验")
+		t.Skip("缺少本地黄金响应参考数据，跳过校验")
 	}
 	base := t.TempDir()
 	if err := os.MkdirAll(filepath.Join(base, "data"), 0o755); err != nil {

@@ -9,7 +9,7 @@ Jpom 插件端（Agent）的 Go 重写版本：单个静态二进制、低内存
 - 对服务端暴露相同的 HTTP + WebSocket 协议（端口默认 2123、`Jpom-Agent-Authorize` 鉴权、`workspaceId` 头、JSON 响应包 `{code,msg,data}`）；
 - 同一节点可以在 **Java Agent ↔ Go Agent** 之间平滑切换（停止一个、用同一目录启动另一个），数据与配置无需迁移，可随时回切。
 
-> 开发分支：`feature/go-agent`（`jpom-parent`）。兼容契约、验证报告与切换操作手册见工作区 `archive/2026-11-go-agent/`、`runbooks/go-agent-switch.md`。
+> 开发分支：`dev`。设计与兼容说明见 `DESIGN.md`，使用/切换/升级说明见官方文档站。
 
 ## 功能与兼容性（第二轮补齐后）
 
@@ -100,10 +100,10 @@ agent/
 2. 数据文件写入必须原子（`store` 包已处理），避免 Java/Go 切换时读到半个文件。
 3. 所有新增 Go 文件带 Mulan PSL v2 版权头。
 4. 时间格式统一 `yyyy-MM-dd HH:mm:ss`；Jackson（HTTP）long→字符串、WS/数据文件 fastjson2 long→数字。
-5. 端点按功能域分文件实现，避免多人并行开发时冲突；协议契约见工作区 `archive/2026-11-go-agent/CONTRACT-*.md`。
+5. 端点按功能域分文件实现，避免多人并行开发时冲突；协议说明见 `DESIGN.md`。
 
 ## 验证
 
 - 静态黄金结构回归：`bash script/capture-golden.sh --check testdata --agent-url http://127.0.0.1:2124`（0 failure）
 - 切换前后数据兼容：`bash script/verify-switch-data.sh --mode diff --before <java-data> --after <go-data>`
-- 浏览器/接口 E2E 与 Java 对照：见工作区 `archive/2026-11-go-agent/VERIFY-REPORT.md`
+- 浏览器/接口 E2E 与 Java 对照：见 `script/e2e-full.sh`（本地/隔离环境运行，不在仓库保存结果数据）。
