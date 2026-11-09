@@ -2,7 +2,7 @@ name: release-package
 
 # 构建 Jpom 发布包（server/agent 的 zip、tar.gz、sha1 + 合并包）并上传 Cloudflare R2。
 #
-# 设计要点（详见 dev-docs/runbooks/release-package-ci.md）：
+# 设计要点：
 # 1. 稳定版：推 tag `v*` 后自动构建并上传到 R2 `release/<version>/`（与 d2 路径一致，只是上传走 R2 S3 API）。
 # 2. beta：由 `release.sh beta --with-r2-ci`（或手动 dispatch）触发，上传到 `beta/<version>/`。
 # 3. 分支 push（仅 workflow/辅助脚本变更）触发一次 dry_run 自检：只构建+校验，不上传。
@@ -142,7 +142,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${R2_ACCOUNT_ID:-}" ] || [ -z "${R2_ACCESS_KEY_ID:-}" ] || [ -z "${R2_SECRET_ACCESS_KEY:-}" ]; then
-            echo "::error::缺少 R2_ACCOUNT_ID / R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY secrets，见 dev-docs/runbooks/release-package-ci.md"
+            echo "::error::缺少 R2_ACCOUNT_ID / R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY secrets，请由维护者按发布流程配置"
             exit 1
           fi
           args=(--channel "${CHANNEL}" --version "${VERSION}" --prefix "${TARGET_PREFIX}")

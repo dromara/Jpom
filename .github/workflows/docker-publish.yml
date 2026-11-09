@@ -2,7 +2,7 @@ name: docker-publish
 
 # 发布 Jpom 服务端/插件端多架构镜像到 Docker Hub（jpomdocker/jpom、jpomdocker/jpom-agent）。
 #
-# 设计要点（详见 dev-docs/runbooks/docker-publish-ci.md）：
+# 设计要点：
 # 1. 镜像由 modules/*/DockerfileRelease|DockerfileBeta 从 d2.jpom.download 下载对应发布包构建，
 #    所以必须等 R2 上传完成；工作流内置“等待 R2 产物就绪”（prepare 阶段）。
 # 2. 稳定版：release.sh 推送 vX.Y.Z tag 后由 tag push 自动发布（也可手动 dispatch）。
@@ -193,7 +193,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${DOCKERHUB_USERNAME:-}" ] || [ -z "${DOCKERHUB_TOKEN:-}" ]; then
-            echo "::error::缺少仓库 secrets DOCKERHUB_USERNAME / DOCKERHUB_TOKEN，配置步骤见 dev-docs/runbooks/docker-publish-ci.md"
+            echo "::error::缺少仓库 secrets DOCKERHUB_USERNAME / DOCKERHUB_TOKEN，请由维护者按发布流程配置"
             exit 1
           fi
           echo "Docker Hub secrets 已配置（账号：${DOCKERHUB_USERNAME}）"
