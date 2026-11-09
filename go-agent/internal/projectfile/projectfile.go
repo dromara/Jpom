@@ -55,7 +55,7 @@ func (s *Service) App() *app.App { return s.app }
 func (s *Service) Log() *slog.Logger { return s.app.Log() }
 
 // errComparisonDataMissing mirrors i18n.comparison_data_not_found.
-var errComparisonDataMissing = &ValidationError{Message: "没有要对比的数据"}
+var errComparisonDataMissing = invalidf("i18n.comparison_data_not_found.413e")
 
 // Project returns the raw project data by id, mirroring
 // BaseAgentController#getProjectInfoModel(String).
@@ -66,13 +66,13 @@ func (s *Service) Project(id string) (map[string]any, error) {
 		if err != nil {
 			// project.json is corrupt or unreadable: a server side failure (500),
 			// not a validation error.
-			return nil, fmt.Errorf("获取项目信息失败:%s %w", id, err)
+			return nil, failSuffix("i18n.service_exception.3821", err.Error())
 		}
 		if ok {
 			return info, nil
 		}
 	}
-	return nil, invalidf("获取项目信息失败:%s", id)
+	return nil, invalidSuffix("i18n.get_project_info_failure.ddff", id)
 }
 
 // ResolveModel follows a runMode=Link project to the real project, same as
@@ -84,10 +84,10 @@ func (s *Service) ResolveModel(info map[string]any) (map[string]any, error) {
 	linkID := project.String(info, "linkId")
 	linked, ok, err := s.projects.Get(linkID)
 	if err != nil {
-		return nil, invalidf("软链项目已经不存在啦: %v", err)
+		return nil, failSuffix("i18n.service_exception.3821", err.Error())
 	}
 	if !ok || linked == nil {
-		return nil, invalidf("软链项目已经不存在啦")
+		return nil, invalidf("i18n.soft_link_project_does_not_exist.4e4f")
 	}
 	return linked, nil
 }
@@ -148,7 +148,7 @@ func (s *Service) checkLibAllowed(lib string) error {
 		return nil
 	}
 	if !whitelist.CheckPath(lib) {
-		return invalidf("项目路径不在授权目录中:%s", lib)
+		return invalidMessage(fmt.Sprintf("Project path is not in the authorized directory: %s", lib))
 	}
 	return nil
 }
@@ -173,7 +173,7 @@ func (s *Service) dsl(model map[string]any) (*dslConfig, error) {
 	}
 	config := &dslConfig{}
 	if err := yaml.Unmarshal([]byte(content), config); err != nil {
-		return nil, fmt.Errorf("解析项目 DSL 配置失败:%w", err)
+		return nil, failMessage(fmt.Sprintf("Failed to parse project DSL config: %v", err))
 	}
 	return config, nil
 }

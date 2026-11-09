@@ -205,3 +205,161 @@ func TestUpgradeHandlerRegistered(t *testing.T) {
 		t.Errorf("unexpected error: %v", err)
 	}
 }
+
+// authedRouter 构造带鉴权的 Router（复用 registerSystem 注册全部系统端点）。
+func authedRouter(t *testing.T, a *app.App) *httpx.Router {
+	t.Helper()
+	a.Auth = app.Auth{Name: "jpomAgent", Authorize: "authorized"}
+	r := httpx.New(a)
+	registerSystem(r, a)
+	return r
+}
+
+// doSystemRequest 发送带鉴权的表单请求并返回解析后的响应。
+func doSystemRequest(t *testing.T, r *httpx.Router, method, target, contentType, body string, headers map[string]string) map[string]any {
+	t.Helper()
+	var reader *strings.Reader
+	if body == "" {
+		reader = strings.NewReader("")
+	} else {
+		reader = strings.NewReader(body)
+	}
+	request := httptest.NewRequest(method, target, reader)
+	if contentType != "" {
+		request.Header.Set("Content-Type", contentType)
+	}
+	request.Header.Set("Jpom-Agent-Authorize", "authorized")
+	for key, value := range headers {
+		request.Header.Set(key, value)
+	}
+	recorder := httptest.NewRecorder()
+	r.ServeHTTP(recorder, request)
+	var envelope map[string]any
+	if err := json.Unmarshal(recorder.Body.Bytes(), &envelope); err != nil {
+		t.Fatalf("解析响应失败: %v body=%s", err, recorder.Body.String())
+	}
+	return envelope
+}
+
+// TestSaveConfigParamCodes N1：缺参 -> 500 ...:null；空串 -> 400 内容不能为空。
+func TestSaveConfigParamCodes(t *testing.T) {
+	a := newAPITestApp(t)
+	r := authedRouter(t, a)
+	envelope := doSystemRequest(t, r, http.MethodPost, "/system/save_config.json", "application/x-www-form-urlencoded", "restart=false", nil)
+	if envelope["code"].(float64) != 400 || !strings.Contains(envelope["msg"].(string), "内容不能为空") {
+		t.Errorf("missing content = %v %v", envelope["code"], envelope["msg"])
+	}
+	envelope = doSystemRequest(t, r, http.MethodPost, "/system/save_config.json", "application/x-www-form-urlencoded", "content=&restart=false", nil)
+	if envelope["code"].(float64) != 400 || !strings.Contains(envelope["msg"].(string), "内容不能为空") {
+		t.Errorf("empty content = %v %v", envelope["code"], envelope["msg"])
+	}
+	envelope = doSystemRequest(t, r, http.MethodPost, "/system/save_config.json", "application/x-www-form-urlencoded", "content=a%3A+%5B&restart=false", map[string]string{"Accept-Language": "en-US"})
+	if envelope["code"].(float64) != 500 || !strings.Contains(envelope["msg"].(string), "Content formatting error") {
+		t.Errorf("invalid yaml en = %v %v", envelope["code"], envelope["msg"])
+	}
+}
+
+// TestClearCacheParamCodes N1：缺参 -> 500 NPE 文案；空串 -> 400 类型错误。
+func TestClearCacheParamCodes(t *testing.T) {
+	a := newAPITestApp(t)
+	r := authedRouter(t, a)
+	envelope := doSystemRequest(t, r, http.MethodPost, "/system/clearCache", "application/x-www-form-urlencoded", "", nil)
+	if envelope["code"].(float64) != 400 || envelope["msg"] != "类型错误" {
+		t.Errorf("missing type = %v %v", envelope["code"], envelope["msg"])
+	}
+	envelope = doSystemRequest(t, r, http.MethodPost, "/system/clearCache", "application/x-www-form-urlencoded", "type=", nil)
+	if envelope["code"].(float64) != 400 || envelope["msg"] != "类型错误" {
+		t.Errorf("blank type = %v %v", envelope["code"], envelope["msg"])
+	}
+	envelope = doSystemRequest(t, r, http.MethodPost, "/system/clearCache", "application/x-www-form-urlencoded", "type=pidPort", nil)
+	if envelope["code"].(float64) != 200 {
+		t.Errorf("clear pidPort = %v %v", envelope["code"], envelope["msg"])
+	}
+}
+
+// TestWorkspaceEnvValidatorCodes N1：@ValidatorItem -> 400 自定义文案/缺省文案。
+func TestWorkspaceEnvValidatorCodes(t *testing.T) {
+	a := newAPITestApp(t)
+	r := authedRouter(t, a)
+	envelope := doSystemRequest(t, r, http.MethodPost, "/system/workspace_env/update", "application/x-www-form-urlencoded", "value=v&description=d", nil)
+	if envelope["code"].(float64) != 400 || envelope["msg"] != "请填写名称" {
+		t.Errorf("missing name = %v %v", envelope["code"], envelope["msg"])
+	}
+	envelope = doSystemRequest(t, r, http.MethodPost, "/system/workspace_env/update", "application/x-www-form-urlencoded", "name=n&value=v&description=", map[string]string{"Accept-Language": "en-US"})
+	if envelope["code"].(float64) != 400 || !strings.Contains(envelope["msg"].(string), "description") {
+		t.Errorf("missing description en = %v %v", envelope["code"], envelope["msg"])
+	}
+	envelope = doSystemRequest(t, r, http.MethodPost, "/system/workspace_env/delete", "application/x-www-form-urlencoded", "", nil)
+	if envelope["code"].(float64) != 400 || envelope["msg"] != "参数验证失败" {
+		t.Errorf("delete missing name = %v %v", envelope["code"], envelope["msg"])
+	}
+}
+
+// TestWhitelistPathMessageN2 Java 拼接语义：文案 + 具体路径（4 语言都带值）。
+func TestWhitelistPathMessageN2(t *testing.T) {
+	a := newAPITestApp(t)
+	r := authedRouter(t, a)
+	for lang, wantPrefix := range map[string]string{
+		"zh-CN": "需要配置绝对路径：",
+		"en-US": "You need to configure the absolute path:",
+	} {
+		envelope := doSystemRequest(t, r, http.MethodPost, "/system/whitelistDirectory_submit",
+			"application/x-www-form-urlencoded", "project=relative/path", map[string]string{"Accept-Language": lang})
+		if envelope["code"].(float64) != 405 {
+			t.Errorf("%s code = %v", lang, envelope["code"])
+		}
+		msg, _ := envelope["msg"].(string)
+		if !strings.Contains(msg, wantPrefix) || !strings.Contains(msg, "relative/path") {
+			t.Errorf("%s msg = %q, want prefix %q + value", lang, msg, wantPrefix)
+		}
+	}
+}
+
+// TestLogDownloadBlankPath N1：path 缺失 -> code 400 参数错误path错误（不再空 body）。
+func TestLogDownloadBlankPath(t *testing.T) {
+	a := newAPITestApp(t)
+	r := authedRouter(t, a)
+	envelope := doSystemRequest(t, r, http.MethodGet, "/system/log_download", "", "", nil)
+	if envelope["code"].(float64) != 400 || envelope["msg"] != "参数错误path错误" {
+		t.Errorf("blank path = %v %v", envelope["code"], envelope["msg"])
+	}
+}
+
+// TestUploadJarShardingNoFile N1 #26：无 file 时先按业务 Assert 顺序返回
+// 405「没有文件签名信息」（与 Java 一致，不是「没有上传文件」）。
+func TestUploadJarShardingNoFile(t *testing.T) {
+	a := newAPITestApp(t)
+	r := authedRouter(t, a)
+	envelope := doSystemRequest(t, r, http.MethodPost, "/system/upload-jar-sharding", "application/x-www-form-urlencoded", "", nil)
+	if envelope["code"].(float64) != 405 || envelope["msg"] != "没有文件签名信息" {
+		t.Errorf("no file = %v %v", envelope["code"], envelope["msg"])
+	}
+}
+
+// TestKillNonExistentPid E2E：目标进程不存在时按 Java 语义返回 code=200 + shell 输出文本。
+func TestKillNonExistentPid(t *testing.T) {
+	a := newAPITestApp(t)
+	r := authedRouter(t, a)
+	envelope := doSystemRequest(t, r, http.MethodPost, "/kill.json", "application/x-www-form-urlencoded", "pid=999999", nil)
+	if envelope["code"].(float64) != 200 {
+		t.Fatalf("code = %v msg=%v", envelope["code"], envelope["msg"])
+	}
+	msg, _ := envelope["msg"].(string)
+	if msg == "" {
+		t.Error("kill 不存在的进程应返回 shell 输出文本")
+	}
+}
+
+// TestClearCacheInvalidTypeMessage i18n 拼接：没有对应类型：<type>
+func TestClearCacheInvalidTypeMessage(t *testing.T) {
+	a := newAPITestApp(t)
+	r := authedRouter(t, a)
+	envelope := doSystemRequest(t, r, http.MethodPost, "/system/clearCache", "application/x-www-form-urlencoded", "type=unknownType", nil)
+	if envelope["code"].(float64) != 405 {
+		t.Fatalf("code = %v", envelope["code"])
+	}
+	msg, _ := envelope["msg"].(string)
+	if !strings.Contains(msg, "没有对应类型：") || !strings.Contains(msg, "unknownType") {
+		t.Errorf("msg = %q, 应包含类型值", msg)
+	}
+}

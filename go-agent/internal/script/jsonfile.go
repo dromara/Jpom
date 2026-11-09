@@ -65,28 +65,28 @@ func readRecords(path string) ([]Record, error) {
 	decoder.UseNumber()
 	token, err := decoder.Token()
 	if err != nil {
-		return nil, fmt.Errorf("解析 %s 失败: %w", filepath.Base(path), err)
+		return nil, fmt.Errorf("parse %s failed: %w", filepath.Base(path), err)
 	}
 	if delim, ok := token.(json.Delim); !ok || delim != '{' {
-		return nil, fmt.Errorf("%s 不是合法的 JSON 对象", filepath.Base(path))
+		return nil, fmt.Errorf("%s is not a valid JSON object", filepath.Base(path))
 	}
 	records := make([]Record, 0, 16)
 	for decoder.More() {
 		keyToken, err := decoder.Token()
 		if err != nil {
-			return nil, fmt.Errorf("解析 %s 失败: %w", filepath.Base(path), err)
+			return nil, fmt.Errorf("parse %s failed: %w", filepath.Base(path), err)
 		}
 		key, ok := keyToken.(string)
 		if !ok {
-			return nil, fmt.Errorf("%s 存在非法的 key", filepath.Base(path))
+			return nil, fmt.Errorf("%s contains an invalid key", filepath.Base(path))
 		}
 		var raw json.RawMessage
 		if err := decoder.Decode(&raw); err != nil {
-			return nil, fmt.Errorf("解析 %s 的 %s 失败: %w", filepath.Base(path), key, err)
+			return nil, fmt.Errorf("parse %s entry %s failed: %w", filepath.Base(path), key, err)
 		}
 		value := map[string]any{}
 		if err := decodeJSON(raw, &value); err != nil {
-			return nil, fmt.Errorf("解析 %s 的 %s 失败: %w", filepath.Base(path), key, err)
+			return nil, fmt.Errorf("parse %s entry %s failed: %w", filepath.Base(path), key, err)
 		}
 		records = append(records, Record{Key: key, Value: value})
 	}

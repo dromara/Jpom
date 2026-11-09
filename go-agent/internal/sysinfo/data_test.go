@@ -18,6 +18,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"jpom.io/go-agent/internal/i18n"
 )
 
 func asParamError(t *testing.T, err error) *ParamError {
@@ -129,10 +131,10 @@ func TestSystemConfigReadWrite(t *testing.T) {
 	if data["file"] != a.ConfPath {
 		t.Errorf("file = %v", data["file"])
 	}
-	// 空内容 -> 405
+	// @ValidatorItem(内容不能为空)：缺参/空串均 code=400（Java 实测）
 	if _, err := SaveSystemConfig(a, "  ", ""); err == nil {
 		t.Error("empty content should be rejected")
-	} else if paramError := asParamError(t, err); paramError.Code != 405 {
+	} else if paramError := asParamError(t, err); paramError.Code != 400 {
 		t.Errorf("code = %d", paramError.Code)
 	}
 	// 非法 YAML -> 500
@@ -145,8 +147,10 @@ func TestSystemConfigReadWrite(t *testing.T) {
 	saved := "server:\n\tport: 2124\n"
 	if msg, err := SaveSystemConfig(a, saved, ""); err != nil {
 		t.Fatalf("SaveSystemConfig: %v", err)
-	} else if msg != "修改成功" {
+	} else if msg != "i18n.modify_success.69be" {
 		t.Errorf("msg = %q", msg)
+	} else if localized := i18n.T(i18n.LangEnUs, msg); localized != "Modified successfully" {
+		t.Logf("en 文案: %q", localized)
 	}
 	after, err := os.ReadFile(a.ConfPath)
 	if err != nil {
@@ -370,5 +374,33 @@ func TestCacheLoadTimeWritesCanonicalFields(t *testing.T) {
 	}
 	if len(auth) != 3 {
 		t.Errorf("auth = %v", auth)
+	}
+}
+
+// TestClearCacheFileSizeKeepsDirectory E2E：fileSize 只清空 data/temp 内容，保留目录。
+func TestClearCacheFileSizeKeepsDirectory(t *testing.T) {
+	a := newTestApp(t)
+	if err := os.MkdirAll(a.TempRoot(), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	file := filepath.Join(a.TempRoot(), "cache.txt")
+	if err := os.WriteFile(file, []byte("x"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(a.TempRoot(), "slice", "id"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := ClearCache(a, "fileSize"); err != nil {
+		t.Fatalf("ClearCache: %v", err)
+	}
+	if _, err := os.Stat(a.TempRoot()); err != nil {
+		t.Errorf("data/temp 目录应保留: %v", err)
+	}
+	entries, err := os.ReadDir(a.TempRoot())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 0 {
+		t.Errorf("data/temp 应被清空, 仍有 %d 项", len(entries))
 	}
 }

@@ -15,8 +15,9 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"sort"
 	"strings"
+
+	"jpom.io/go-agent/internal/i18n"
 )
 
 // referencePattern matches the script library reference G@("tag") used inside
@@ -35,24 +36,32 @@ func (m *Manager) LibraryPath(id string) string {
 // returned (Java sets script to null before serializing).
 func (m *Manager) LibraryList() ([]map[string]any, error) {
 	dir := m.GlobalScriptDir()
-	entries, err := os.ReadDir(dir)
+	// Java FileUtil.loopFiles 使用 File.listFiles()（文件系统遍历序），
+	// 这里用 os.Open + Readdirnames 保持同样的目录顺序（os.ReadDir 会按文件名排序）。
+	handle, err := os.Open(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return []map[string]any{}, nil
 		}
 		return nil, err
 	}
-	names := make([]string, 0, len(entries))
-	for _, entry := range entries {
-		if entry.IsDir() {
-			continue
-		}
-		if !strings.EqualFold(filepath.Ext(entry.Name()), ".json") {
-			continue
-		}
-		names = append(names, entry.Name())
+	defer func() { _ = handle.Close() }()
+	names, err := handle.Readdirnames(-1)
+	if err != nil {
+		return nil, err
 	}
-	sort.Strings(names)
+	filtered := make([]string, 0, len(names))
+	for _, name := range names {
+		info, statErr := os.Stat(filepath.Join(dir, name))
+		if statErr != nil || info.IsDir() {
+			continue
+		}
+		if !strings.EqualFold(filepath.Ext(name), ".json") {
+			continue
+		}
+		filtered = append(filtered, name)
+	}
+	names = filtered
 	list := make([]map[string]any, 0, len(names))
 	for _, name := range names {
 		value := map[string]any{}
@@ -97,7 +106,7 @@ func (m *Manager) LibraryGet(id string) (map[string]any, bool, error) {
 func (m *Manager) LibrarySave(id, content, description, version string) error {
 	id = strings.TrimSpace(id)
 	if id == "" {
-		return fmt.Errorf("脚本库 id 不能为空")
+		return fmt.Errorf("%s", i18n.T(i18n.DefaultLang(), "i18n.id_cannot_be_empty.8f2c"))
 	}
 	value := map[string]any{"id": id, "script": content}
 	if description != "" {
@@ -147,7 +156,7 @@ func (m *Manager) ReferenceReplace(context string) (string, error) {
 				return "", err
 			}
 			if !exists {
-				return "", fmt.Errorf("对应的脚本库不存在：%s", tag)
+				return "", fmt.Errorf("%s%s", i18n.T(i18n.DefaultLang(), "i18n.missing_script_library_message.be9a"), tag)
 			}
 			script = stringField(item, "script")
 			cache[tag] = script

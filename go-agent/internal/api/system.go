@@ -38,7 +38,7 @@ func registerSystem(r *httpx.Router, a *app.App) {
 	r.Handle(http.MethodPost, "/disk-info", func(c *httpx.Context) {
 		list, err := sysinfo.FileStoresJSON()
 		if err != nil {
-			c.FailCode(405, "文件系统监控异常："+err.Error())
+			c.FailCode(405, c.T("i18n.file_system_monitoring_exception.d4c0")+err.Error())
 			return
 		}
 		c.OK(list)
@@ -46,7 +46,7 @@ func registerSystem(r *httpx.Router, a *app.App) {
 	r.Handle(http.MethodPost, "/hw-disk--info", func(c *httpx.Context) {
 		list, err := sysinfo.DiskStoresJSON()
 		if err != nil {
-			c.FailCode(405, "硬盘资源监控异常："+err.Error())
+			c.FailCode(405, c.T("i18n.hard_drive_monitoring_error.43e7")+err.Error())
 			return
 		}
 		c.OK(list)
@@ -54,7 +54,7 @@ func registerSystem(r *httpx.Router, a *app.App) {
 	r.Handle(http.MethodPost, "/network-interfaces", func(c *httpx.Context) {
 		list, err := sysinfo.NetworkInterfacesJSON()
 		if err != nil {
-			c.FailCode(405, "网卡资源监控异常："+err.Error())
+			c.FailCode(405, c.T("i18n.network_resource_monitoring_error.4ede")+err.Error())
 			return
 		}
 		c.OK(list)
@@ -75,7 +75,7 @@ func registerSystem(r *httpx.Router, a *app.App) {
 			writeError(c, err)
 			return
 		}
-		c.OKMsg(msg, nil)
+		c.OKMsg(localize(c, msg), nil)
 	})
 
 	// 白名单
@@ -87,38 +87,50 @@ func registerSystem(r *httpx.Router, a *app.App) {
 			writeError(c, err)
 			return
 		}
-		c.OKMsg("保存成功", nil)
+		c.OKMsg(c.T("i18n.save_succeeded.3b10"), nil)
 	})
 
 	// 工作空间环境变量
 	r.Handle(http.MethodPost, "/system/workspace_env/update", func(c *httpx.Context) {
+		// 按 Java 方法参数顺序校验：name -> value -> description（@ValidatorItem -> 400）。
+		name, ok := c.RequireRaw("name", "i18n.name_required.856d")
+		if !ok {
+			return
+		}
+		value, ok := c.RequireRaw("value", "i18n.value.2e81")
+		if !ok {
+			return
+		}
+		description, ok := c.RequireRaw("description", "i18n.description.615e")
+		if !ok {
+			return
+		}
 		var privacy *int
-		if value := strings.TrimSpace(c.Form("privacy")); value != "" {
-			parsed, err := strconv.Atoi(value)
+		if raw := strings.TrimSpace(c.Form("privacy")); raw != "" {
+			parsed, err := strconv.Atoi(raw)
 			if err != nil {
-				c.FailCode(405, "参数验证失败")
+				c.FailCode(400, c.T("i18n.parameter_validation_failed.f0a1"))
 				return
 			}
 			privacy = &parsed
 		}
-		err := sysinfo.UpdateWorkspaceEnv(a, c.Workspace, c.Form("name"), c.Form("value"), c.Form("description"), privacy)
+		err := sysinfo.UpdateWorkspaceEnv(a, c.Workspace, name, value, description, privacy)
 		if err != nil {
 			writeError(c, err)
 			return
 		}
-		c.OKMsg("更新成功", nil)
+		c.OKMsg(c.T("i18n.update_success.55aa"), nil)
 	})
 	r.Handle(http.MethodPost, "/system/workspace_env/delete", func(c *httpx.Context) {
-		name := c.Form("name")
-		if strings.TrimSpace(name) == "" {
-			c.FailCode(405, "参数验证失败")
+		name, ok := c.RequireRaw("name", "i18n.parameter_validation_failed.f0a1")
+		if !ok {
 			return
 		}
 		if err := sysinfo.DeleteWorkspaceEnv(a, c.Workspace, name); err != nil {
 			writeError(c, err)
 			return
 		}
-		c.OKMsg("删除成功", nil)
+		c.OKMsg(c.T("i18n.delete_success.0007"), nil)
 	})
 
 	// 缓存
@@ -126,16 +138,16 @@ func registerSystem(r *httpx.Router, a *app.App) {
 		c.OK(sysinfo.CacheJSON(a, c.Workspace))
 	})
 	r.Handle(http.MethodPost, "/system/clearCache", func(c *httpx.Context) {
-		cacheType := strings.TrimSpace(c.Form("type"))
-		if cacheType == "" {
-			c.FailCode(405, "类型错误")
+		// @ValidatorItem(value=NOT_BLANK, msg=类型错误)：缺参与空串都返回 400。
+		cacheType, ok := c.Require("type", "i18n.type_error.395f")
+		if !ok {
 			return
 		}
 		if err := sysinfo.ClearCache(a, cacheType); err != nil {
 			writeError(c, err)
 			return
 		}
-		c.OKMsg("清空成功", nil)
+		c.OKMsg(c.T("i18n.clear_success.2685"), nil)
 	})
 
 	// 系统日志
@@ -148,20 +160,28 @@ func registerSystem(r *httpx.Router, a *app.App) {
 		c.OK(data)
 	})
 	r.Handle(http.MethodPost, "/system/log_del.json", func(c *httpx.Context) {
-		if err := sysinfo.DeleteLog(a, c.Form("path")); err != nil {
+		path, ok := c.RequireRaw("path", "i18n.parameter_error_path_error.f482")
+		if !ok {
+			return
+		}
+		if err := sysinfo.DeleteLog(a, path); err != nil {
 			writeError(c, err)
 			return
 		}
-		c.OKMsg("删除成功", nil)
+		c.OKMsg(c.T("i18n.delete_success.0007"), nil)
 	})
 	r.Handle(http.MethodGet, "/system/log_download", func(c *httpx.Context) {
-		path, err := sysinfo.LogDownloadPath(a, c.Form("path"))
+		relative, ok := c.RequireRaw("path", "i18n.parameter_error_path_error.f482")
+		if !ok {
+			return
+		}
+		path, err := sysinfo.LogDownloadPath(a, relative)
 		if err != nil {
 			// 与 Java 一致：文件不存在时 HTTP 200 且 body 为空。
 			return
 		}
 		if err := c.ServeFile(path, ""); err != nil {
-			a.Log().Warn("下载系统日志失败", "path", path, "error", err)
+			a.Log().Warn("download system log failed", "path", path, "error", err)
 		}
 	})
 
@@ -169,7 +189,7 @@ func registerSystem(r *httpx.Router, a *app.App) {
 	r.Handle(http.MethodPost, "/system/check_version.json", func(c *httpx.Context) {
 		remote, err := sysinfo.LoadRemoteInfo(a)
 		if err != nil {
-			a.Log().Warn("获取远程版本信息失败", "error", err)
+			a.Log().Warn("load remote version failed", "error", err)
 			remote = sysinfo.CacheInfo(a)
 		}
 		if remote == nil {
@@ -187,7 +207,7 @@ func registerSystem(r *httpx.Router, a *app.App) {
 			writeError(c, err)
 			return
 		}
-		c.OKMsg(msg, nil)
+		c.OKMsg(localize(c, msg), nil)
 	})
 	r.Handle(http.MethodPost, "/system/upload-jar-sharding", func(c *httpx.Context) {
 		handleUploadJarSharding(c, a)
@@ -195,7 +215,7 @@ func registerSystem(r *httpx.Router, a *app.App) {
 	r.Handle(http.MethodPost, "/system/upload-jar-sharding-merge", func(c *httpx.Context) {
 		totalSlice, err := strconv.Atoi(strings.TrimSpace(c.Form("totalSlice")))
 		if err != nil {
-			c.FailCode(405, "上传信息不完整：totalSlice")
+			c.FailCode(405, c.T("i18n.incomplete_upload_info_total_slice.7e85"))
 			return
 		}
 		msg, mergeErr := sysinfo.MergeJarSharding(a, c.Form("sliceId"), totalSlice, c.Form("fileSumMd5"))
@@ -203,7 +223,7 @@ func registerSystem(r *httpx.Router, a *app.App) {
 			writeError(c, mergeErr)
 			return
 		}
-		c.OKMsg(msg, nil)
+		c.OKMsg(localize(c, msg), nil)
 	})
 }
 
@@ -226,7 +246,7 @@ func (h upgradeHandler) Restart(uploadedFile string) (string, error) {
 func handleInfo(c *httpx.Context, a *app.App) {
 	data := map[string]any{
 		"manifest":        a.Manifest(),
-		"pluginSize":      0,
+		"pluginSize":      sysinfo.AgentPluginSize,
 		"joinBetaRelease": sysinfo.JoinBetaRelease(),
 	}
 	if remote := sysinfo.CacheInfo(a); remote != nil {
@@ -268,15 +288,16 @@ func normalizeRemoteVersion(value map[string]any) map[string]any {
 // handleStatInfo 对应 POST /get-stat-info：oshi 采集异常时返回 oshiError 而不是 5xx。
 func handleStatInfo(c *httpx.Context, a *app.App) {
 	data := map[string]any{}
-	collectMonitor(a, data)
+	collectMonitor(c, a, data)
 	data["jpomInfo"] = sysinfo.JpomInfo(a)
 	c.OK(data)
 }
 
-func collectMonitor(a *app.App, data map[string]any) {
+func collectMonitor(c *httpx.Context, a *app.App, data map[string]any) {
 	defer func() {
 		if recovered := recover(); recovered != nil {
-			data["oshiError"] = errString(recovered)
+			c.App.Log().Error("oshi monitor panic", "panic", recovered)
+			data["oshiError"] = c.T("i18n.oshi_system_monitoring_exception.5c1c")
 		}
 	}()
 	status, err := sysinfo.SimpleStatus(a.Config.Jpom.Monitor)
@@ -294,23 +315,13 @@ func collectMonitor(a *app.App, data map[string]any) {
 	data["systemInfo"] = systemInfo
 }
 
-func errString(value any) string {
-	if err, ok := value.(error); ok {
-		return err.Error()
-	}
-	if text, ok := value.(string); ok {
-		return text
-	}
-	return "系统监控异常"
-}
-
 // handleProcessList 对应 POST /processList。
 func handleProcessList(c *httpx.Context, a *app.App) {
 	processName := c.FormDefault("processName", "java")
 	count := c.FormInt("count", 20)
 	list, err := sysinfo.ProcessListJSON(processName, count)
 	if err != nil {
-		c.FailCode(405, "系统进程监控异常："+err.Error())
+		c.FailCode(405, c.T("i18n.system_process_monitoring_error.fe1d")+err.Error())
 		return
 	}
 	c.OK(list)
@@ -321,31 +332,43 @@ func handleKill(c *httpx.Context, a *app.App) {
 	pid := c.FormInt("pid", 0)
 	if pid <= 0 {
 		// 防止 kill 0/负数 误伤进程组（Java 端未做该保护，这里按参数错误处理）。
-		c.FailCode(405, "参数验证失败")
+		c.FailCode(405, c.T("i18n.parameter_validation_failed.f0a1"))
 		return
 	}
 	if pid == a.Pid {
-		c.FailCode(405, "不支持在线关闭 Agent 进程")
+		c.FailCode(405, c.T("i18n.online_agent_close_not_supported.d81d"))
 		return
 	}
 	result, err := sysinfo.KillProcess(pid)
 	if err != nil {
-		c.Fail("kill 进程失败：" + err.Error())
+		c.Fail(c.T("i18n.service_exception.3821") + err.Error())
 		return
 	}
 	if strings.TrimSpace(result) == "" {
-		result = "成功kill"
+		result = c.T("i18n.process_killed_successfully.a4c3")
 	}
 	c.OKMsg(result, nil)
 }
 
 // handleUploadJarSharding 对应 POST /system/upload-jar-sharding（multipart）。
 func handleUploadJarSharding(c *httpx.Context, a *app.App) {
+	// 先解析 multipart（只为读取表单字段；非 multipart 请求也继续，参数校验优先）。
 	if c.R.MultipartForm == nil {
-		if err := c.R.ParseMultipartForm(64 << 20); err != nil {
-			c.FailCode(405, "没有上传文件")
-			return
-		}
+		_ = c.R.ParseMultipartForm(64 << 20)
+	}
+	// Java 业务 Assert 顺序：fileSumMd5 -> sliceId -> totalSlice -> nowSlice -> 范围。
+	// 因此「无 file 且无参数」时先返回 没有文件签名信息（N1 #26）。
+	totalSlice := -1
+	if parsed, err := strconv.Atoi(strings.TrimSpace(c.Form("totalSlice"))); err == nil {
+		totalSlice = parsed
+	}
+	nowSlice := -1
+	if parsed, err := strconv.Atoi(strings.TrimSpace(c.Form("nowSlice"))); err == nil {
+		nowSlice = parsed
+	}
+	if err := sysinfo.ValidateShardingMeta(c.Form("fileSumMd5"), c.Form("sliceId"), totalSlice, nowSlice); err != nil {
+		writeError(c, err)
+		return
 	}
 	file, header, err := c.R.FormFile("file")
 	if err != nil {
@@ -357,42 +380,55 @@ func handleUploadJarSharding(c *httpx.Context, a *app.App) {
 			}
 		}
 		if header == nil {
-			c.FailCode(405, "没有上传文件")
+			c.FailCode(405, c.T("i18n.no_uploaded_file.07ef"))
 			return
 		}
 		file, err = header.Open()
 		if err != nil {
-			c.FailCode(405, "没有上传文件")
+			c.FailCode(405, c.T("i18n.no_uploaded_file.07ef"))
 			return
 		}
 	}
 	defer func() { _ = file.Close() }()
-	totalSlice, err := strconv.Atoi(strings.TrimSpace(c.Form("totalSlice")))
-	if err != nil {
-		c.FailCode(405, "上传信息不完整：totalSlice")
-		return
-	}
-	nowSlice, err := strconv.Atoi(strings.TrimSpace(c.Form("nowSlice")))
-	if err != nil {
-		c.FailCode(405, "上传信息不完整：nowSlice")
-		return
-	}
 	err = sysinfo.SaveJarSharding(a, header.Filename, file, c.Form("sliceId"), totalSlice, nowSlice, c.Form("fileSumMd5"))
 	if err != nil {
 		writeError(c, err)
 		return
 	}
-	c.OKMsg("上传成功", nil)
+	c.OKMsg(c.T("i18n.upload_success.a769"), nil)
 }
 
-// writeError 把 ParamError 转成对应响应码，其它错误按 500 处理。
+// writeError 把 ParamError 转成对应响应码（i18n key 按请求语言渲染），
+// 其它错误按 500 处理。
 func writeError(c *httpx.Context, err error) {
 	var paramError *sysinfo.ParamError
 	if errors.As(err, &paramError) {
+		if paramError.Key != "" {
+			c.FailCode(paramError.Code, c.T(paramError.Key, paramError.Args...)+paramError.Suffix)
+			return
+		}
 		c.FailCode(paramError.Code, paramError.Msg)
 		return
 	}
 	c.Fail(err.Error())
+}
+
+// formValuePresent 判断表单/查询参数是否真实存在（用于区分「缺参」与「空串」，
+// Java 端前者可能是 NPE/校验失败，后者走 @ValidatorItem 文案）。
+func formValuePresent(c *httpx.Context, key string) bool {
+	if c.R.Form == nil {
+		_ = c.R.ParseForm()
+	}
+	values, ok := c.R.Form[key]
+	return ok && len(values) > 0
+}
+
+// localize 把 sysinfo 返回的 i18n key 渲染为当前请求语言（非 key 原样返回）。
+func localize(c *httpx.Context, message string) string {
+	if strings.HasPrefix(message, "i18n.") {
+		return c.T(message)
+	}
+	return message
 }
 
 func parseBoolValue(value string) bool {

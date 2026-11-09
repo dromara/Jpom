@@ -11,6 +11,14 @@ Jpom 插件端（Agent）的 Go 重写版本：单个静态二进制、低内存
 
 > 开发分支：`feature/go-agent`（`jpom-parent`）。兼容契约、验证报告与切换操作手册见工作区 `archive/2026-11-go-agent/`、`runbooks/go-agent-switch.md`。
 
+## 功能与兼容性（第二轮补齐后）
+
+- **协议/数据完全兼容**：同一 `conf/application.yml`、同一 `data/` 目录、同一 HTTP/WebSocket 协议；`/info` 增加 `engine:"go"`（Java 旧服务端忽略），支持 Server 识别 Go 引擎的一键在线升级。
+- **国际化**：HTTP `msg`、WS 文本/控制帧、日志 SYSTEM 行按 `Accept-Language` 输出 zh-CN / zh-HK / zh-TW / en-US（数据源为 Java 插件端 i18n properties，1759 keys，`internal/i18n`）。
+- **跨平台**：Linux（/proc+/sys）、Windows、macOS 系统监控（CPU/内存/磁盘分区/网卡/进程/端口）与项目/脚本执行；发布包覆盖 linux-amd64/arm64、windows-amd64。
+- **编码兼容**：`jpom.system.log-charset`、`console-charset`、`jpom.project.log.file-charset`（Windows 默认 GBK）；文件编辑后缀 `后缀@编码`（GBK）。
+- **文件/脚本能力**：7z 解压（安全条目校验）、Hutool 兼容 cron（`|` 分组、5/6/7 段含年份）、脚本 autoExecCron 定时、升级失败自动回滚。
+
 ## 目录结构
 
 ```text

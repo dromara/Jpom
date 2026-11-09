@@ -8,5 +8,9 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 export GOCACHE="${GOCACHE:-$PWD/.cache/build}"
 export GOTMPDIR="${GOTMPDIR:-$PWD/.cache/tmp}"
-mkdir -p "$GOCACHE" "$GOTMPDIR"
+export GOMODCACHE="${GOMODCACHE:-$PWD/.cache/mod}"
+# 受限沙箱/CI 的全局 module cache 可能只读，统一放到仓库内
+export GOSUMDB="${GOSUMDB:-off}"
+export GOFLAGS="${GOFLAGS:--mod=mod}"
+mkdir -p "$GOCACHE" "$GOTMPDIR" "$GOMODCACHE"
 exec go "$@"

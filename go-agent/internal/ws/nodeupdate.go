@@ -23,8 +23,8 @@ import (
 	"jpom.io/go-agent/internal/httpx"
 )
 
-// upgradeDurationMessage is Const.UPGRADE_MSG.
-const upgradeDurationMessage = "升级(重启)中大约需要30秒～2分钟左右"
+// defaultUpgradeMessage is Const.UPGRADE_MSG fallback (i18n upgrade_duration_message).
+const defaultUpgradeMessage = ""
 
 // UpgradeHandler installs an uploaded agent package and restarts the process.
 // The binary self-upgrade strategy belongs to the platform/upgrade domain and is
@@ -80,8 +80,10 @@ func (u *uploadState) Close() {
 	}
 }
 
-// Progress returns the updateNode progress payload (fastjson2 semantics: long
-// numbers, null fields omitted; UploadFileModel does not set timeStamp).
+// Progress returns the updateNode progress payload. Live Java 2.11.13 capture
+// (.tmp/audit/ws_java.txt) shows size/completeSize are JSON **strings**
+// (fastjson2 long -> string on this endpoint), null fields omitted;
+// UploadFileModel does not set timeStamp.
 //
 // UploadFileModel#getFilePath is a getter, so fastjson2 also serializes it as the
 // "filePath" property (savePath + "/" + name).
@@ -91,8 +93,8 @@ func (u *uploadState) Progress() map[string]any {
 	data := map[string]any{
 		"id":           u.ID,
 		"name":         u.Name,
-		"size":         u.Size,
-		"completeSize": u.CompleteSize,
+		"size":         strconv.FormatInt(u.Size, 10),
+		"completeSize": strconv.FormatInt(u.CompleteSize, 10),
 		"savePath":     u.SavePath,
 		"filePath":     u.SavePath + "/" + u.Name,
 	}
@@ -197,7 +199,7 @@ func (m *Manager) manifestForWebSocket() map[string]any {
 func (m *Manager) prepareUpload(nodeID string, params map[string]any) (*uploadState, error) {
 	name := bodyString(params, "name")
 	if name == "" || filepath.Base(name) != name {
-		return nil, fmt.Errorf("升级包文件名不正确: %s", name)
+		return nil, fmt.Errorf("invalid upgrade package name: %s", name)
 	}
 	// AgentConfig.getTempPath() = JpomApplication.getTempPath() + yyyy-MM-dd
 	savePath, err := filepath.Abs(m.App.TempPath())
@@ -222,18 +224,18 @@ func (m *Manager) prepareUpload(nodeID string, params map[string]any) (*uploadSt
 // restartUpload installs the uploaded package and reports the result message.
 func (m *Manager) restartUpload(upload *uploadState) string {
 	if upload == nil {
-		return "重启失败：没有上传的升级包"
+		return m.translateDefault("i18n.restart_failed.f92a") + "no uploaded package"
 	}
 	upload.Close()
 	if m.Upgrade == nil {
-		return "重启失败：Go agent 自升级尚未实现（等待平台升级域提供 UpgradeHandler）"
+		return m.translateDefault("i18n.restart_failed.f92a") + "go agent self upgrade is not implemented"
 	}
 	message, err := m.Upgrade.Restart(upload.Path())
 	if err != nil {
-		return "重启失败：" + err.Error()
+		return m.translateDefault("i18n.restart_failed.f92a") + err.Error()
 	}
 	if message == "" {
-		return upgradeDurationMessage
+		return m.translateDefault("i18n.upgrade_duration_message.bab4")
 	}
 	return message
 }

@@ -42,6 +42,7 @@ type Options struct {
 	FileBackupCount         int
 	FileBackupSuffix        []string
 	CommandUseSudo          bool
+	ConsoleCharset          string // jpom.system.console-charset（子进程输出解码）
 	ProjectLog              ProjectLogOptions
 }
 
@@ -58,6 +59,25 @@ type Runtime struct {
 	Manager *Manager
 	Options Options
 	Log     *slog.Logger
+
+	// lang 是当前请求语言（zh-CN/zh-HK/zh-TW/en-US）。
+	// HTTP handler 用 WithLang 生成请求级副本，避免并发请求串语言。
+	lang string
+}
+
+// WithLang 返回带指定请求语言的 Runtime 浅拷贝（Manager/Options 共享）。
+func (r *Runtime) WithLang(lang string) *Runtime {
+	copyRuntime := *r
+	copyRuntime.lang = normalizeLang(lang)
+	return &copyRuntime
+}
+
+// Lang 返回当前运行时语言（未设置时为 zh-CN）。
+func (r *Runtime) Lang() string {
+	if r.lang == "" {
+		return DefaultLang
+	}
+	return r.lang
 }
 
 // OpResult 命令操作结果（对应 Java CommandOpResult，JSON 字段/省略规则一致）。
@@ -169,30 +189,49 @@ func splitTrim(value, sep string) []string {
 	return result
 }
 
-// Status 查询项目状态（等价 ProjectCommander.status）。
+// Status 查询项目状态（兼容旧调用：异常转为失败结果）。
 func (r *Runtime) Status(info map[string]any) *OpResult {
-	original, err := r.Manager.ResolveModel(info)
+	result, err := r.StatusE(info)
 	if err != nil {
 		return OpResultSimple(false, err.Error())
+	}
+	return result
+}
+
+// StatusE 查询项目状态并返回异常（软链项目不存在等，Java 会抛异常）。
+func (r *Runtime) StatusE(info map[string]any) (*OpResult, error) {
+	original, err := r.Manager.ResolveModel(info)
+	if err != nil {
+		return nil, err
 	}
 	return r.status(info, original)
 }
 
 // status 查询项目状态。
-func (r *Runtime) status(info, original map[string]any) *OpResult {
+func (r *Runtime) status(info, original map[string]any) (*OpResult, error) {
 	runMode := GetString(original, "runMode")
 	if runMode == RunModeFile {
-		return OpResultSimple(false, "file 类型项目没有运行状态")
+		return OpResultSimple(false, tr(r.Lang(), keyFileTypeNoStatus)), nil
 	}
 	if runMode == RunModeDsl {
 		return r.dslStatus(info, original)
 	}
-	return OpResultOfMsg(proc.Status(GetString(info, "id")))
+	return OpResultOfMsg(proc.Status(GetString(info, "id"))), nil
 }
 
-// IsRun 项目是否正在运行（等价 ProjectCommander.isRun）。
+// IsRun 项目是否正在运行（兼容旧调用：异常视为未运行）。
 func (r *Runtime) IsRun(info map[string]any) bool {
-	return r.Status(info).Success
+	running, _ := r.IsRunE(info)
+	return running
+}
+
+// IsRunE 项目是否正在运行，并返回异常（Java isRun 会抛出）。
+func (r *Runtime) IsRunE(info map[string]any) (bool, error) {
+	result, err := r.StatusE(info)
+	if err != nil {
+		return false, err
+	}
+	return result.Success, nil
 }
 
 // Operate 执行项目操作（对应 ProjectStatusController.operate / ConsoleCommandOp）。
@@ -203,13 +242,17 @@ func (r *Runtime) Operate(op string, info map[string]any) (*OpResult, error) {
 	}
 	switch op {
 	case OpStart:
-		return r.start(info, original, false), nil
+		return r.start(info, original, false)
 	case OpStop:
-		return r.stop(info, original, false), nil
+		return r.stop(info, original, false)
 	case OpRestart:
-		return r.restart(info, original), nil
+		return r.restart(info, original)
 	case OpStatus:
-		return r.status(info, original), nil
+		result, err := r.status(info, original)
+		if err != nil {
+			return nil, err
+		}
+		return result, nil
 	case OpReload:
 		return r.reload(info, original)
 	default:
@@ -221,106 +264,124 @@ func (r *Runtime) Operate(op string, info map[string]any) (*OpResult, error) {
 func NoOpResult() *OpResult { return OpResultSimple(true) }
 
 // checkStart 启动前检查（等价 AbstractProjectCommander.checkStart）。
-func (r *Runtime) checkStart(info, original map[string]any) string {
-	status := r.status(info, original)
+//
+// 返回非空 String 表示业务校验未通过（Java 返回错误文案）；error 表示需要向上抛出的异常。
+func (r *Runtime) checkStart(info, original map[string]any) (string, error) {
+	lang := r.Lang()
+	status, err := r.status(info, original)
+	if err != nil {
+		return "", err
+	}
 	if status.Success {
 		pid := 0
 		if status.Pid != nil {
 			pid = *status.Pid
 		}
-		return fmt.Sprintf("当前程序正在运行中，不能重复启动,PID:%d", pid)
+		return tr(lang, keyProgramAlreadyRunning) + strconv.Itoa(pid), nil
 	}
 	lib, err := r.Manager.ResolveLibFile(info)
 	if err != nil {
-		return err.Error()
+		return "", err
 	}
 	entries, err := os.ReadDir(lib)
 	if err != nil || len(entries) == 0 {
-		return "项目目录没有任何文件,请先到项目文件管理中上传文件"
+		return tr(lang, keyNoFilesInProjectDir), nil
 	}
 	runMode := GetString(original, "runMode")
 	switch runMode {
 	case RunModeDsl:
 		if _, err := parseDslConfig(original); err != nil {
-			return err.Error()
+			return "", err
 		}
 	case RunModeClassPath, RunModeJavaExtDirsCp:
 		// Java 会校验 mainClass 可加载；Go 端无法加载 class，交由 java 进程启动报错
 		if GetString(original, "mainClass") == "" {
-			return "ClassPath、JavaExtDirsCp 模式 MainClass必填"
+			return tr(lang, keyClassPathRequired), nil
 		}
 		if _, err := resolveJavaPath(runtimeGOOSWindows()); err != nil {
-			return err.Error()
+			return "", ServiceError(err)
 		}
 	case RunModeJar, RunModeJarWar:
 		if _, err := resolveJavaPath(runtimeGOOSWindows()); err != nil {
-			return err.Error()
+			return "", ServiceError(err)
 		}
 		files := listJars(runMode, lib)
 		if len(files) == 0 {
-			return fmt.Sprintf("一级目录没有%s包,请先到文件管理中上传程序的%s", runMode, runMode)
+			return trf(lang, keyMissingPackage, runMode, runMode), nil
 		}
-		if msg := checkJar(files[0]); msg != "" {
-			return msg
+		if msg := checkJar(lang, files[0]); msg != "" {
+			return msg, nil
 		}
 	default:
-		return "当前项目类型不支持启动"
+		return tr(lang, keyProjectTypeNotSupported), nil
 	}
 	// 备份日志
-	r.backLog(info, original)
-	return ""
+	if _, err := r.backLog(info, original); err != nil {
+		return "", err
+	}
+	return "", nil
 }
 
 // checkJar 校验 jar/war 的 MANIFEST Main-Class（等价 AbstractProjectCommander.checkJar）。
-func checkJar(jarFile string) string {
+func checkJar(lang, jarFile string) string {
 	reader, err := zip.OpenReader(jarFile)
 	if err != nil {
-		return jarFile + "解析异常:" + err.Error()
+		return jarFile + tr(lang, "i18n.parse_error.da6d") + err.Error()
 	}
 	defer func() { _ = reader.Close() }()
+	mainClassMissing := jarFile + tr(lang, keyMainClassNotExist)
 	for _, file := range reader.File {
 		if !strings.EqualFold(file.Name, "META-INF/MANIFEST.MF") {
 			continue
 		}
 		handle, err := file.Open()
 		if err != nil {
-			return jarFile + "解析异常:" + err.Error()
+			return jarFile + tr(lang, "i18n.parse_error.da6d") + err.Error()
 		}
 		scanner := bufio.NewScanner(handle)
 		for scanner.Scan() {
 			line := strings.TrimSpace(scanner.Text())
 			if strings.HasPrefix(strings.ToLower(line), "main-class:") {
 				mainClass := strings.TrimSpace(line[len("main-class:"):])
-				if mainClass == "" {
-					continue
+				if mainClass != "" {
+					_ = handle.Close()
+					return ""
 				}
-				_ = handle.Close()
-				return ""
 			}
 		}
 		_ = handle.Close()
-		return jarFile + "中没有找到对应的MainClass属性"
+		return mainClassMissing
 	}
-	return jarFile + "中没有找到对应的MainClass属性"
+	return mainClassMissing
 }
 
 // start 启动项目（等价 AbstractProjectCommander.start）。
-func (r *Runtime) start(info, original map[string]any, sync bool) *OpResult {
-	if msg := r.checkStart(info, original); msg != "" {
-		return OpResultSimple(false, msg)
+func (r *Runtime) start(info, original map[string]any, sync bool) (*OpResult, error) {
+	msg, err := r.checkStart(info, original)
+	if err != nil {
+		return nil, err
+	}
+	if msg != "" {
+		return OpResultSimple(false, msg), nil
 	}
 	runMode := GetString(original, "runMode")
 	if runMode == RunModeDsl {
 		if err := r.dslRun(info, original, OpStart, sync); err != nil {
-			return OpResultSimple(false, err.Error())
+			return nil, err
 		}
 	} else if err := r.execStartCommand(info, original); err != nil {
-		return OpResultSimple(false, err.Error())
+		// Java 端异步执行异常只记录日志，不影响 operate 结果
+		if r.Log != nil {
+			r.Log.Error("failed to execute project start command", "id", GetString(info, "id"), "error", err)
+		}
 	}
 	r.loopCheckRun(info, original, true)
-	status := r.status(info, original)
+	status, err := r.status(info, original)
+	if err != nil {
+		return nil, err
+	}
 	r.AsyncWebHooks(info, "start", map[string]any{"result": status.JSON()})
-	return status
+	return status, nil
 }
 
 // execStartCommand 构建并异步执行项目启动命令。
@@ -330,40 +391,38 @@ func (r *Runtime) start(info, original map[string]any, sync bool) *OpResult {
 func (r *Runtime) execStartCommand(info, original map[string]any) error {
 	command := r.buildRunCommand(info, original)
 	if command == "" {
-		return fmt.Errorf("没有需要执行的命令")
+		return ValidationKey(keyNoCommandToExecute)
 	}
 	lib, err := r.Manager.ResolveLibFile(info)
 	if err != nil {
 		return err
 	}
 	env := loadWorkspaceEnv(r.Options.BaseDir, GetString(info, "workspaceId"))
-	if err := asyncExec(lib, env, command, false); err != nil {
-		if r.Log != nil {
-			r.Log.Error("项目启动命令执行失败", "id", GetString(info, "id"), "error", err)
-		}
-		return err
-	}
-	return nil
+	return asyncExec(lib, env, command, false)
 }
 
 // stop 停止项目（等价 AbstractProjectCommander.stop）。
-func (r *Runtime) stop(info, original map[string]any, sync bool) *OpResult {
+func (r *Runtime) stop(info, original map[string]any, sync bool) (*OpResult, error) {
+	lang := r.Lang()
 	nodeRunMode := GetString(info, "runMode")
 	if nodeRunMode == RunModeFile {
-		return OpResultSimple(true, "file 类型项目没有 stop")
+		return OpResultSimple(true, tr(lang, keyFileTypeNoStop)), nil
 	}
 	beforeStopMsg := r.WebHooks(info, "beforeStop", nil)
-	status := r.status(info, original)
+	status, err := r.status(info, original)
+	if err != nil {
+		return nil, err
+	}
 	r.AsyncWebHooks(info, "stop", map[string]any{"result": status.JSON()})
 	if !status.Success {
-		return OpResultSimple(true).Append(status.Msgs...).Append(beforeStopMsg)
+		return OpResultSimple(true).Append(status.Msgs...).Append(beforeStopMsg), nil
 	}
 	if status.Pid != nil {
 		proc.ClearPortCache(*status.Pid)
 	}
 	if nodeRunMode == RunModeDsl {
 		if err := r.dslRun(info, original, OpStop, sync); err != nil {
-			return OpResultSimple(false, err.Error()).Append(status.Msgs...)
+			return nil, err
 		}
 		stopped := r.loopCheckRun(info, original, false)
 		result := OpResultSimple(stopped)
@@ -372,13 +431,13 @@ func (r *Runtime) stop(info, original map[string]any, sync bool) *OpResult {
 		} else {
 			result.Append("stop done,but unsuccessful")
 		}
-		return result.Append(status.Msgs...).Append(beforeStopMsg)
+		return result.Append(status.Msgs...).Append(beforeStopMsg), nil
 	}
 	pid := 0
 	if status.Pid != nil {
 		pid = *status.Pid
 	}
-	return r.stopJava(info, original, pid).Append(status.Msgs...).Append(beforeStopMsg)
+	return r.stopJava(info, original, pid).Append(status.Msgs...).Append(beforeStopMsg), nil
 }
 
 // stopJava 结束 java 进程（等价 BaseUnixProjectCommander.stopJava）。
@@ -407,47 +466,71 @@ func (r *Runtime) stopJava(info, original map[string]any, pid int) *OpResult {
 }
 
 // restart 重启项目（等价 AbstractProjectCommander.restart）。
-func (r *Runtime) restart(info, original map[string]any) *OpResult {
+func (r *Runtime) restart(info, original map[string]any) (*OpResult, error) {
+	lang := r.Lang()
 	runMode := GetString(original, "runMode")
 	if runMode == RunModeFile {
-		return OpResultSimple(true, "file 类型项目没有 restart")
+		return OpResultSimple(true, tr(lang, keyFileTypeNoRestart)), nil
 	}
 	r.AsyncWebHooks(info, "beforeRestart", nil)
 	if runMode == RunModeDsl {
-		if config, err := parseDslConfig(original); err == nil && dslHasProcess(config, OpRestart) {
+		config, err := parseDslConfig(original)
+		if err != nil {
+			return nil, err
+		}
+		if dslHasProcess(config, OpRestart) {
 			if err := r.dslRun(info, original, OpRestart, false); err != nil {
-				return OpResultSimple(false, err.Error())
+				return nil, err
 			}
 			if r.loopCheckRun(info, original, true) {
-				result := r.status(info, original)
+				result, err := r.status(info, original)
+				if err != nil {
+					return nil, err
+				}
 				r.AsyncWebHooks(info, "restart", map[string]any{"result": result.JSON()})
-				return result
+				return result, nil
 			}
 			result := OpResultSimple(false, "restart done,but unsuccessful")
 			r.AsyncWebHooks(info, "restart", map[string]any{"result": result.JSON()})
-			return result
+			return result, nil
 		}
 	}
 	var stopMsg *OpResult
-	if r.IsRun(info) {
-		stopMsg = r.stop(info, original, true)
+	running, err := r.IsRunE(info)
+	if err != nil {
+		return nil, err
 	}
-	startMsg := r.start(info, original, false)
+	if running {
+		stopMsg, err = r.stop(info, original, true)
+		if err != nil {
+			return nil, err
+		}
+	}
+	startMsg, err := r.start(info, original, false)
+	if err != nil {
+		return nil, err
+	}
 	if stopMsg != nil {
 		startMsg.Append(stopMsg.Msgs...)
 	}
-	return startMsg
+	return startMsg, nil
 }
 
 // reload 重新加载 DSL 项目（等价 AbstractProjectCommander.reload）。
 func (r *Runtime) reload(info, original map[string]any) (*OpResult, error) {
+	lang := r.Lang()
 	if GetString(original, "runMode") != RunModeDsl {
-		return nil, fmt.Errorf("非 DSL 项目不支持此操作")
+		return nil, ValidationKey(keyNonDslUnsupported)
 	}
 	code, lines, err := r.dslSyncRun(info, original, OpReload)
 	var result *OpResult
 	if err != nil {
-		result = OpResultSimple(false, err.Error())
+		kind, msg := LocalizeError(lang, err)
+		if kind != ErrValidation {
+			return nil, err
+		}
+		// Java 捕获 IllegalArgument2Exception（脚本/流程配置问题）并转为业务结果
+		result = OpResultSimple(false, msg)
 	} else {
 		result = OpResultSimple(code == 0)
 		result.Append(lines...)
@@ -504,14 +587,14 @@ func (r *Runtime) AutoStartProjects() {
 			func() {
 				defer func() {
 					if recovered := recover(); recovered != nil && r.Log != nil {
-						r.Log.Warn("自动启动项目异常", "id", GetString(info, "id"), "panic", recovered)
+						r.Log.Warn("auto start project panic", "id", GetString(info, "id"), "panic", recovered)
 					}
 				}()
 				if r.IsRun(info) {
 					return
 				}
 				if _, err := r.Operate(OpStart, info); err != nil && r.Log != nil {
-					r.Log.Warn("自动启动项目失败", "id", GetString(info, "id"), "error", err.Error())
+					r.Log.Warn("auto start project failed", "id", GetString(info, "id"), "error", err.Error())
 				}
 			}()
 		}

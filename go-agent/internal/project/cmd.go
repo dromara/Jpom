@@ -122,12 +122,21 @@ func classPathLib(original map[string]any, lib string) string {
 }
 
 // BuildRunCommand 生成项目实际执行的启动命令（等价 ProjectCommander.buildRunCommand）。
+//
+// 解析异常（如软链项目不存在）会被吞掉并返回空串，供 WS 等非严格场景使用；
+// HTTP 端点应使用 RunCommandE 以便按 Java 语义返回 405。
 func (r *Runtime) BuildRunCommand(info map[string]any) string {
+	command, _ := r.RunCommandE(info)
+	return command
+}
+
+// RunCommandE 生成启动命令并返回解析错误（条件不足时返回空串 + nil，与 Java 一致）。
+func (r *Runtime) RunCommandE(info map[string]any) (string, error) {
 	original, err := r.Manager.ResolveModel(info)
 	if err != nil {
-		return ""
+		return "", err
 	}
-	return r.buildRunCommand(info, original)
+	return r.buildRunCommand(info, original), nil
 }
 
 // buildRunCommand 生成启动命令；条件不足时返回空字符串。

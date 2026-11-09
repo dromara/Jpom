@@ -12,7 +12,7 @@ package ws
 
 import (
 	"bufio"
-	"fmt"
+	"bytes"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -35,6 +35,8 @@ type freeScriptProcess struct {
 	writeEnd   *os.File
 	scriptFile string
 	env        *script.EnvBuilder
+	charset    string
+	manager    *Manager
 	done       bool
 }
 
@@ -86,7 +88,7 @@ func (m *Manager) HandleFreeScriptRun(c *httpx.Context) {
 		return
 	}
 	session.SetReadLimit(defaultTextLimit)
-	_ = session.Send("连接成功")
+	_ = session.Send(m.translate(session, "i18n.connection_successful.b331"))
 
 	var (
 		currentMu sync.Mutex
@@ -129,25 +131,25 @@ func (m *Manager) HandleFreeScriptRun(c *httpx.Context) {
 			return
 		}
 		if getCurrent() != nil {
-			_ = session.SendJSON(jsonMessage(500, "不要重复打开"))
+			_ = session.SendJSON(jsonMessage(500, m.translate(session, "i18n.do_not_reopen.f86a")))
 			continue
 		}
 		path := bodyString(request, "path")
 		tag := bodyString(request, "tag")
 		content := bodyString(request, "content")
 		if path == "" || tag == "" || content == "" {
-			_ = session.SendJSON(jsonMessage(500, "参数存在不正确"))
+			_ = session.SendJSON(jsonMessage(500, m.translate(session, "i18n.incorrect_parameter.02ce")))
 			continue
 		}
 		environment, ok := request["environment"].(map[string]any)
 		if !ok {
-			_ = session.SendJSON(jsonMessage(500, "没有环境变量"))
+			_ = session.SendJSON(jsonMessage(500, m.translate(session, "i18n.environment_variables_not_found.dbd4")))
 			continue
 		}
 		process, err := m.prepareFreeScript(content, path, environment)
 		if err != nil {
-			_ = session.Send("执行异常：" + err.Error())
-			_ = session.Send("执行结束:-1")
+			_ = session.Send(m.translate(session, "i18n.general_execution_exception.62e9") + err.Error())
+			_ = session.Send(m.translate(session, "i18n.execution_ended.b793", -1))
 			_ = session.Send("JPOM_SYSTEM_TAG:" + tag)
 			continue
 		}
@@ -201,7 +203,7 @@ func (m *Manager) prepareFreeScript(content, path string, environment map[string
 	}
 	cmd.Stdout = writeEnd
 	cmd.Stderr = writeEnd
-	return &freeScriptProcess{cmd: cmd, pipe: readEnd, writeEnd: writeEnd, scriptFile: scriptFile, env: builder}, nil
+	return &freeScriptProcess{cmd: cmd, pipe: readEnd, writeEnd: writeEnd, scriptFile: scriptFile, env: builder, charset: m.Scripts.ConsoleCharset(), manager: m}, nil
 }
 
 // run executes the process and streams the console to the session.
@@ -209,8 +211,8 @@ func (p *freeScriptProcess) run(session *Session, tag string) {
 	defer p.close()
 	p.env.EachStr(func(line string) { _ = session.Send(line) })
 	if err := p.cmd.Start(); err != nil {
-		_ = session.Send("执行异常：" + err.Error())
-		_ = session.Send("执行结束:-1")
+		_ = session.Send(p.manager.translate(session, "i18n.general_execution_exception.62e9") + err.Error())
+		_ = session.Send(p.manager.translate(session, "i18n.execution_ended.b793", -1))
 		_ = session.Send("JPOM_SYSTEM_TAG:" + tag)
 		return
 	}
@@ -219,7 +221,7 @@ func (p *freeScriptProcess) run(session *Session, tag string) {
 	for {
 		line, err := reader.ReadString('\n')
 		if len(line) > 0 {
-			_ = session.Send(trimLineEnding(line))
+			_ = session.Send(script.DecodeLine(trimLineBytes([]byte(line)), p.charset))
 		}
 		if err != nil {
 			break
@@ -227,7 +229,7 @@ func (p *freeScriptProcess) run(session *Session, tag string) {
 	}
 	_ = p.pipe.Close()
 	waitErr := p.cmd.Wait()
-	_ = session.Send(fmt.Sprintf("执行结束:%d", processExitCode(waitErr)))
+	_ = session.Send(p.manager.translate(session, "i18n.execution_ended.b793", processExitCode(waitErr)))
 	// Server 收到该标记后关闭会话
 	_ = session.Send("JPOM_SYSTEM_TAG:" + tag)
 	p.markDone()
@@ -236,6 +238,12 @@ func (p *freeScriptProcess) run(session *Session, tag string) {
 func trimLineEnding(line string) string {
 	line = strings.TrimSuffix(line, "\n")
 	return strings.TrimSuffix(line, "\r")
+}
+
+// trimLineBytes strips the trailing CR/LF from a raw byte line before decoding.
+func trimLineBytes(line []byte) []byte {
+	line = bytes.TrimSuffix(line, []byte("\n"))
+	return bytes.TrimSuffix(line, []byte("\r"))
 }
 
 func processExitCode(err error) int {

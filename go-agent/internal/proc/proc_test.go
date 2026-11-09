@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"unicode/utf8"
 )
 
 func TestShellQuote(t *testing.T) {
@@ -156,7 +157,7 @@ func TestListProcesses(t *testing.T) {
 func TestJavaCommand(t *testing.T) {
 	path, err := JavaCommand(false)
 	if err != nil {
-		if !strings.Contains(err.Error(), "未找到 java") {
+		if !strings.Contains(err.Error(), "java executable not found") {
 			t.Fatalf("JavaCommand 错误信息不明确: %v", err)
 		}
 		t.Skip("当前测试环境没有 java，回退逻辑按预期返回明确错误")
@@ -166,5 +167,44 @@ func TestJavaCommand(t *testing.T) {
 	}
 	if path != "java" && !isExecutableFile(path) {
 		t.Fatalf("JavaCommand 返回的路径不可执行: %s", path)
+	}
+}
+
+func TestCharsetGBK(t *testing.T) {
+	text := "中文测试GBK"
+	data, err := EncodeString("GBK", text)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if utf8.Valid(data) {
+		t.Fatalf("GBK 编码结果不应是合法 UTF-8: %v", data)
+	}
+	decoded, err := DecodeString("GBK", data)
+	if err != nil || decoded != text {
+		t.Fatalf("GBK 解码失败: %q err=%v", decoded, err)
+	}
+	if got := NormalizeCharset("gb2312", ""); got != "GBK" {
+		t.Fatalf("gb2312 应归一化为 GBK: %s", got)
+	}
+	if got := NormalizeCharset("utf8", ""); got != "UTF-8" {
+		t.Fatalf("utf8 应归一化为 UTF-8: %s", got)
+	}
+	if got := NormalizeCharset("not-exist", "GBK"); got != "GBK" {
+		t.Fatalf("未知字符集应回退 fallback: %s", got)
+	}
+
+	dir := t.TempDir()
+	file := filepath.Join(dir, "gbk.log")
+	content, _ := EncodeString("GBK", "第一行\n第二行\n第三行\n")
+	if err := os.WriteFile(file, content, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	lines, err := TailLinesCharset(file, 2, "GBK")
+	if err != nil || len(lines) != 2 || lines[0] != "第二行" || lines[1] != "第三行" {
+		t.Fatalf("GBK TailLinesCharset 错误: %#v err=%v", lines, err)
+	}
+	all, next, total, err := ReadLinesFromCharset(file, 2, 1000, "GBK")
+	if err != nil || total != 3 || next != 4 || len(all) != 2 || all[0] != "第二行" {
+		t.Fatalf("GBK ReadLinesFromCharset 错误: %#v next=%d total=%d err=%v", all, next, total, err)
 	}
 }

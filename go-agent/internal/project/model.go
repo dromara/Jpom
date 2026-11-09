@@ -12,7 +12,6 @@ package project
 
 import (
 	"encoding/json"
-	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -51,6 +50,16 @@ const (
 func CanOpt(op string) bool {
 	switch op {
 	case OpStart, OpStop, OpRestart, OpReload:
+		return true
+	default:
+		return false
+	}
+}
+
+// ValidOp 判断是否为合法 ConsoleCommandOp 枚举名（等价 Java EnumUtil.fromStringQuietly 非 null）。
+func ValidOp(op string) bool {
+	switch op {
+	case OpStart, OpStop, OpRestart, OpStatus, OpReload, OpShowlog, OpHeart:
 		return true
 	default:
 		return false
@@ -144,7 +153,7 @@ func Clone(info map[string]any) map[string]any {
 // ResolveModel 解析项目原始数据：软链项目返回被软链的项目（等价 ProjectInfoService.resolveModel）。
 func (m *Manager) ResolveModel(info map[string]any) (map[string]any, error) {
 	if info == nil {
-		return nil, fmt.Errorf("项目信息不能为空")
+		return nil, Validationf("project info is empty")
 	}
 	if GetString(info, "runMode") != RunModeLink {
 		return info, nil
@@ -155,7 +164,7 @@ func (m *Manager) ResolveModel(info map[string]any) (map[string]any, error) {
 		return nil, err
 	}
 	if !ok || target == nil {
-		return nil, fmt.Errorf("软链项目已经不存在啦%s", linkID)
+		return nil, ValidationKeySuffix(keySoftLinkNotExist, linkID)
 	}
 	return target, nil
 }
@@ -185,7 +194,7 @@ func (m *Manager) ResolveLibFile(info map[string]any) (string, error) {
 func (m *Manager) ResolveLogDir(info map[string]any) (string, error) {
 	id := GetString(info, "id")
 	if id == "" {
-		return "", fmt.Errorf("没有找到项目id")
+		return "", ValidationKey(keyProjectIDNotFound)
 	}
 	original, err := m.ResolveModel(info)
 	if err != nil {
@@ -239,7 +248,7 @@ func (m *Manager) UpdateByID(id, userName string, patch func(info map[string]any
 	return m.Mutate(func(values map[string]map[string]any) error {
 		item, ok := values[id]
 		if !ok || item == nil {
-			return fmt.Errorf("数据不存在%s", id)
+			return ServiceKeySuffix(keyDataNotExist, id)
 		}
 		patch(item)
 		item["modifyTime"] = Now()
@@ -252,11 +261,11 @@ func (m *Manager) UpdateByID(id, userName string, patch func(info map[string]any
 func (m *Manager) AddItem(info map[string]any, userName string) error {
 	id := GetString(info, "id")
 	if id == "" {
-		return fmt.Errorf("项目id不能为空")
+		return ValidationKey(keyProjectIDNotFound)
 	}
 	return m.Mutate(func(values map[string]map[string]any) error {
 		if _, ok := values[id]; ok {
-			return fmt.Errorf("数据id已经存在：%s", id)
+			return ServiceKeySuffix(keyDataIDAlreadyExists, id)
 		}
 		info["createTime"] = Now()
 		if userName != "-" && userName != "" {
@@ -312,13 +321,13 @@ func (m *Manager) List() ([]map[string]any, error) {
 func ValidateProjectID(id string) error {
 	checkID := strings.ReplaceAll(id, "-", "_")
 	if len(checkID) < 2 || len(checkID) > 50 {
-		return fmt.Errorf("项目id 长度范围2-50（英文字母 、数字和下划线）")
+		return ValidationKey(keyProjectIDLengthRange)
 	}
 	if !projectIDPattern.MatchString(checkID) {
-		return fmt.Errorf("项目id 长度范围2-50（英文字母 、数字和下划线）")
+		return ValidationKey(keyProjectIDLengthRange)
 	}
 	if id == "system" {
-		return fmt.Errorf("项目id system 关键词被系统占用")
+		return ValidationKey(keyProjectIDKeywordUsed, id)
 	}
 	return nil
 }
@@ -410,6 +419,7 @@ func NewRuntime(baseDir string, cfg *config.Config, logger *slog.Logger) *Runtim
 		runtime.Options.FileBackupCount = cfg.Jpom.Project.FileBackupCount
 		runtime.Options.FileBackupSuffix = cfg.Jpom.Project.FileBackupSuffix
 		runtime.Options.CommandUseSudo = cfg.Jpom.System.CommandUseSudo
+		runtime.Options.ConsoleCharset = cfg.Jpom.System.ConsoleCharset
 		runtime.Options.ProjectLog = ProjectLogOptions{
 			AutoBackupConsoleCron: cfg.Jpom.Project.Log.AutoBackupConsoleCron,
 			AutoBackupSize:        ParseDataSize(cfg.Jpom.Project.Log.AutoBackupSize),

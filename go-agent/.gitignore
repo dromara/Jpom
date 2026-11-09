@@ -4,5 +4,7 @@ data/
 logs/
 tmp/
 project-log/
-*.test.cache/__pycache__/
+.cache/
+__pycache__/
 *.pyc
+*.test

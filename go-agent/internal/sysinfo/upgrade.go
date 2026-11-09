@@ -38,24 +38,33 @@ import (
 //     会返回明确的限制说明）。
 
 // SaveJarSharding 对应 /system/upload-jar-sharding 的分片保存逻辑。
-func SaveJarSharding(a *app.App, originalFilename string, content io.Reader, sliceID string, totalSlice, nowSlice int, fileSumMD5 string) error {
+func ValidateShardingMeta(fileSumMD5, sliceID string, totalSlice, nowSlice int) error {
+	// 与 Java BaseJpomController.uploadSharding 的 Assert 顺序保持一致：
+	// fileSumMd5 -> sliceId -> totalSlice -> nowSlice -> 范围。
 	if strings.TrimSpace(fileSumMD5) == "" {
-		return &ParamError{Code: 405, Msg: "没有文件签名信息"}
+		return paramErr(405, "i18n.file_signature_info_not_found.83bf")
 	}
 	if strings.TrimSpace(sliceID) == "" {
-		return &ParamError{Code: 405, Msg: "没有分片 id 信息"}
+		return paramErr(405, "i18n.no_shard_id_info.30f8")
 	}
 	if totalSlice <= 0 {
-		return &ParamError{Code: 405, Msg: "上传信息不完整：totalSlice"}
+		return paramErr(405, "i18n.incomplete_upload_info_total_slice.7e85")
 	}
 	if nowSlice < 0 {
-		return &ParamError{Code: 405, Msg: "上传信息不完整：nowSlice"}
+		return paramErr(405, "i18n.incomplete_upload_info_now_slice.34aa")
 	}
 	if totalSlice < nowSlice {
-		return &ParamError{Code: 405, Msg: "当前上传的分片信息错误"}
+		return paramErr(405, "i18n.current_upload_chunk_info_incorrect.900e")
+	}
+	return nil
+}
+
+func SaveJarSharding(a *app.App, originalFilename string, content io.Reader, sliceID string, totalSlice, nowSlice int, fileSumMD5 string) error {
+	if err := ValidateShardingMeta(fileSumMD5, sliceID, totalSlice, nowSlice); err != nil {
+		return err
 	}
 	if strings.TrimSpace(originalFilename) == "" {
-		return &ParamError{Code: 405, Msg: "没有上传文件"}
+		return paramErr(405, "i18n.no_uploaded_file.07ef")
 	}
 	// Java 端把最后一段分片序号去掉后校验扩展名（jar/zip）。
 	realName := originalFilename
@@ -64,21 +73,21 @@ func SaveJarSharding(a *app.App, originalFilename string, content io.Reader, sli
 	}
 	extName := strings.TrimPrefix(strings.ToLower(filepath.Ext(realName)), ".")
 	if extName != "jar" && extName != "zip" {
-		return &ParamError{Code: 405, Msg: "不支持的文件类型：" + extName}
+		return paramErrAppend(405, "i18n.file_type_not_supported2.d497", extName)
 	}
 	// Java 的分片目录使用 AgentConfig.getFixedTempPathName()（data/temp，不含日期目录）。
 	sliceDir := filepath.Join(a.TempRoot(), "slice", sliceID, "items")
 	if err := os.MkdirAll(sliceDir, 0o755); err != nil {
-		return fmt.Errorf("创建分片目录失败: %w", err)
+		return fmt.Errorf("create sharding directory failed: %w", err)
 	}
 	target := filepath.Join(sliceDir, filepath.Base(originalFilename))
 	output, err := os.Create(target)
 	if err != nil {
-		return fmt.Errorf("保存分片失败: %w", err)
+		return fmt.Errorf("save sharding piece failed: %w", err)
 	}
 	defer func() { _ = output.Close() }()
 	if _, err := io.Copy(output, content); err != nil {
-		return fmt.Errorf("保存分片失败: %w", err)
+		return fmt.Errorf("save sharding piece failed: %w", err)
 	}
 	return nil
 }
@@ -86,19 +95,19 @@ func SaveJarSharding(a *app.App, originalFilename string, content io.Reader, sli
 // MergeJarSharding 对应 /system/upload-jar-sharding-merge。
 func MergeJarSharding(a *app.App, sliceID string, totalSlice int, fileSumMD5 string) (string, error) {
 	if strings.TrimSpace(fileSumMD5) == "" {
-		return "", &ParamError{Code: 405, Msg: "没有文件签名信息"}
+		return "", paramErr(405, "i18n.file_signature_info_not_found.83bf")
 	}
 	if strings.TrimSpace(sliceID) == "" {
-		return "", &ParamError{Code: 405, Msg: "没有分片 id 信息"}
+		return "", paramErr(405, "i18n.no_shard_id_info.30f8")
 	}
 	if totalSlice <= 0 {
-		return "", &ParamError{Code: 405, Msg: "上传信息不完整：totalSlice"}
+		return "", paramErr(405, "i18n.incomplete_upload_info_total_slice.7e85")
 	}
 	slicePath := filepath.Join(a.TempRoot(), "slice", sliceID)
 	itemsDir := filepath.Join(slicePath, "items")
 	entries, err := os.ReadDir(itemsDir)
 	if err != nil {
-		return "", &ParamError{Code: 405, Msg: "文件上传失败,存在分片丢失的情况, 0 != " + strconv.Itoa(totalSlice)}
+		return "", paramErr(405, "i18n.file_upload_failure_due_to_missing_chunks.1865", 0, totalSlice)
 	}
 	names := make([]string, 0, len(entries))
 	for _, entry := range entries {
@@ -108,7 +117,7 @@ func MergeJarSharding(a *app.App, sliceID string, totalSlice int, fileSumMD5 str
 		names = append(names, entry.Name())
 	}
 	if len(names) != totalSlice {
-		return "", &ParamError{Code: 405, Msg: fmt.Sprintf("文件上传失败,存在分片丢失的情况, %d != %d", len(names), totalSlice)}
+		return "", paramErr(405, "i18n.file_upload_failure_due_to_missing_chunks.1865", len(names), totalSlice)
 	}
 	sort.SliceStable(names, func(i, j int) bool {
 		return sliceIndex(names[i]) < sliceIndex(names[j])
@@ -120,19 +129,19 @@ func MergeJarSharding(a *app.App, sliceID string, totalSlice int, fileSumMD5 str
 	merged := filepath.Join(slicePath, baseName)
 	output, err := os.Create(merged)
 	if err != nil {
-		return "", fmt.Errorf("创建合并文件失败: %w", err)
+		return "", fmt.Errorf("create merged file failed: %w", err)
 	}
 	for _, name := range names {
 		input, err := os.Open(filepath.Join(itemsDir, name))
 		if err != nil {
 			_ = output.Close()
-			return "", fmt.Errorf("读取分片失败: %w", err)
+			return "", fmt.Errorf("read sharding piece failed: %w", err)
 		}
 		_, copyErr := io.Copy(output, input)
 		_ = input.Close()
 		if copyErr != nil {
 			_ = output.Close()
-			return "", fmt.Errorf("合并分片失败: %w", copyErr)
+			return "", fmt.Errorf("merge sharding pieces failed: %w", copyErr)
 		}
 	}
 	if err := output.Close(); err != nil {
@@ -144,8 +153,8 @@ func MergeJarSharding(a *app.App, sliceID string, totalSlice int, fileSumMD5 str
 		return "", err
 	}
 	if !strings.EqualFold(newMD5, fileSumMD5) {
-		a.Log().Warn("文件合并异常", "file", merged, "md5", newMD5, "expect", fileSumMD5)
-		return "", &ParamError{Code: 405, Msg: "文件合并后异常,文件不完整可能被损坏"}
+		a.Log().Warn("file merge mismatch", "file", merged, "md5", newMD5, "expect", fileSumMD5)
+		return "", paramErr(405, "i18n.file_merge_error.f32f")
 	}
 	return installAgentPackage(a, merged)
 }
@@ -212,11 +221,11 @@ type goAgentPackageInfo struct {
 func installAgentPackage(a *app.App, packagePath string) (string, error) {
 	ext := strings.ToLower(filepath.Ext(packagePath))
 	if ext != ".zip" && ext != ".jar" {
-		return "", &ParamError{Code: 405, Msg: "此文件不是 jpom 安装包"}
+		return "", paramErr(405, "i18n.not_jpom_install_package.2cca")
 	}
 	reader, err := zip.OpenReader(packagePath)
 	if err != nil {
-		return "", &ParamError{Code: 405, Msg: "此文件不是 jpom 安装包"}
+		return "", paramErr(405, "i18n.not_jpom_install_package.2cca")
 	}
 	defer func() { _ = reader.Close() }()
 	var (
@@ -226,17 +235,17 @@ func installAgentPackage(a *app.App, packagePath string) (string, error) {
 	)
 	if info := inspectGoAgentPackage(reader); info != nil {
 		if info.Platform != "" && !strings.Contains(strings.ToLower(info.Platform), runtime.GOOS) {
-			return "", &ParamError{Code: 405, Msg: "升级包平台不匹配：" + info.Platform}
+			return "", paramErr(405, "i18n.go_upgrade_platform_mismatch", info.Platform)
 		}
 		if info.MinVersion != "" && compareVersion(a.Version, info.MinVersion) < 0 {
-			return "", &ParamError{Code: 405, Msg: fmt.Sprintf("当前程序版本 %s 新版程序最低兼容 %s 不能直接升级", a.Version, info.MinVersion)}
+			return "", paramErr(405, "i18n.incompatible_program_versions.5291", a.Version, info.MinVersion)
 		}
 		entry = info.File
 		version = info.Version
 		sha256 = info.SHA256
 	} else {
 		if ext == ".jar" {
-			return "", &ParamError{Code: 405, Msg: javaPackageLimitMessage}
+			return "", paramErr(405, javaPackageLimitMessage)
 		}
 		entry = findLegacyBinary(reader)
 	}
@@ -250,7 +259,7 @@ func installAgentPackage(a *app.App, packagePath string) (string, error) {
 			return "", err
 		}
 		if !strings.EqualFold(actual, sha256) {
-			return "", &ParamError{Code: 405, Msg: "升级包校验失败，可执行文件 sha256 不一致"}
+			return "", paramErr(405, "i18n.go_upgrade_sha256_mismatch")
 		}
 	}
 	if version == "" {
@@ -269,7 +278,7 @@ func installAgentPackage(a *app.App, packagePath string) (string, error) {
 	return UpgradeMessage, nil
 }
 
-const javaPackageLimitMessage = "Go 插件端不支持 Java 插件端升级包（lib/Agent-*.jar），请上传包含 go-agent/agent.json 与 Go 可执行文件的升级包"
+const javaPackageLimitMessage = "i18n.go_java_package_not_supported"
 
 // inspectGoAgentPackage 读取 go-agent/agent.json 并定位当前平台的可执行文件。
 func inspectGoAgentPackage(reader *zip.ReadCloser) *goAgentPackageInfo {
@@ -351,7 +360,7 @@ func findLegacyBinary(reader *zip.ReadCloser) *zip.File {
 // extractEntry 把 zip 条目解压到临时目录并校验可执行文件头。
 func extractEntry(a *app.App, entry *zip.File) (string, error) {
 	if entry == nil {
-		return "", &ParamError{Code: 405, Msg: javaPackageLimitMessage}
+		return "", paramErr(405, javaPackageLimitMessage)
 	}
 	if err := os.MkdirAll(a.TempPath(), 0o755); err != nil {
 		return "", err
@@ -411,22 +420,22 @@ func verifyExecutable(path string) error {
 	}
 	defer func() { _ = file.Close() }()
 	if _, err := io.ReadFull(file, header); err != nil {
-		return &ParamError{Code: 405, Msg: "升级包不是有效的可执行文件"}
+		return paramErr(405, "i18n.go_upgrade_invalid_executable")
 	}
 	switch runtime.GOOS {
 	case "windows":
 		if header[0] != 'M' || header[1] != 'Z' {
-			return &ParamError{Code: 405, Msg: "升级包不是有效的 Windows 可执行文件"}
+			return paramErr(405, "i18n.go_upgrade_invalid_windows_executable")
 		}
 	case "darwin":
 		if !(header[0] == 0xfe && header[1] == 0xed && header[2] == 0xfa && header[3] == 0xce) &&
 			!(header[0] == 0xfe && header[1] == 0xed && header[2] == 0xfa && header[3] == 0xcf) &&
 			!(header[0] == 0xca && header[1] == 0xfe && header[2] == 0xba && header[3] == 0xbe) {
-			return &ParamError{Code: 405, Msg: "升级包不是有效的 macOS 可执行文件"}
+			return paramErr(405, "i18n.go_upgrade_invalid_macos_executable")
 		}
 	default:
 		if header[0] != 0x7f || header[1] != 'E' || header[2] != 'L' || header[3] != 'F' {
-			return &ParamError{Code: 405, Msg: "升级包不是有效的 Linux 可执行文件"}
+			return paramErr(405, "i18n.go_upgrade_invalid_linux_executable")
 		}
 	}
 	return nil
@@ -438,23 +447,23 @@ func binaryVersion(a *app.App, path string) (string, error) {
 	defer cancel()
 	output, err := exec.CommandContext(ctx, path, "-version").Output()
 	if err != nil {
-		return "", &ParamError{Code: 405, Msg: "升级包无法读取版本信息: " + err.Error()}
+		return "", paramErr(405, "i18n.go_upgrade_read_version_failed", err.Error())
 	}
 	version := strings.TrimSpace(strings.SplitN(strings.TrimSpace(string(output)), "\n", 2)[0])
 	if version == "" || len(version) > 64 {
-		return "", &ParamError{Code: 405, Msg: "升级包版本信息不合法"}
+		return "", paramErr(405, "i18n.go_upgrade_invalid_version")
 	}
-	a.Log().Info("解析升级包版本", "version", version)
+	a.Log().Info("parse upgrade package version", "version", version)
 	return version, nil
 }
 
 // checkUpgradeVersion 与 Java checkJpomJar 的版本检查语义保持一致。
 func checkUpgradeVersion(a *app.App, version string) error {
 	if version == a.Version {
-		return &ParamError{Code: 405, Msg: "新包和正在运行的包一致"}
+		return paramErr(405, "i18n.new_package_same_as_running_package.e25a")
 	}
 	if !a.Config.Jpom.System.AllowedDowngrade && compareVersion(version, a.Version) < 0 {
-		return &ParamError{Code: 405, Msg: "在线升级不能降级操作"}
+		return paramErr(405, "i18n.online_upgrade_cannot_downgrade.d419")
 	}
 	return nil
 }
@@ -473,17 +482,17 @@ func replaceAgentBinary(a *app.App, newBinary, version string) error {
 		time.Now().Format("20060102150405"))
 	backupPath := filepath.Join(oldJars, backupName)
 	if err := copyFile(a.Executable, backupPath); err != nil {
-		a.Log().Warn("备份当前可执行文件失败", "error", err)
+		a.Log().Warn("backup current executable failed", "error", err)
 	}
 	staged := a.Executable + ".upgrade"
 	if err := copyFile(newBinary, staged); err != nil {
-		return fmt.Errorf("写入新版本文件失败: %w", err)
+		return fmt.Errorf("write new version file failed: %w", err)
 	}
 	if err := os.Chmod(staged, 0o755); err != nil {
 		return err
 	}
 	if err := os.Rename(staged, a.Executable); err != nil {
-		return fmt.Errorf("替换可执行文件失败: %w", err)
+		return fmt.Errorf("replace executable failed: %w", err)
 	}
 	upgradeCount := 0
 	upgradeFile := filepath.Join(runDir, "upgrade.json")
@@ -497,15 +506,28 @@ func replaceAgentBinary(a *app.App, newBinary, version string) error {
 	}
 	upgradeCount++
 	upgradeInfo := map[string]any{
-		"beforeJar":    filepath.Base(a.Executable),
-		"newJar":       filepath.Base(a.Executable),
-		"updateTime":   time.Now().Format("2006-01-02 15:04:05"),
-		"upgradeCount": upgradeCount,
+		"beforeJar":     backupName,
+		"newJar":        filepath.Base(a.Executable),
+		"beforeVersion": a.Version,
+		"newVersion":    version,
+		"updateTime":    time.Now().Format("2006-01-02 15:04:05"),
+		"upgradeCount":  upgradeCount,
+		"status":        "installed",
 	}
 	_ = writeJSONAtomic(upgradeFile, upgradeInfo)
 	_ = os.WriteFile(filepath.Join(runDir, "run.bin"), []byte(filepath.Base(a.Executable)), 0o644)
+	// G7：写升级待确认标记；重启后健康检查通过才删除，启动失败则自动回滚。
+	pending := &upgradePending{
+		BeforeJar:     backupName,
+		BeforeVersion: a.Version,
+		NewVersion:    version,
+		UpdateTime:    time.Now().Format("2006-01-02 15:04:05"),
+	}
+	if err := writeUpgradePending(a, pending); err != nil {
+		a.Log().Warn("write upgrade pending marker failed; automatic rollback is unavailable", "error", err)
+	}
 	cleanOldJars(oldJars, a.Config.Jpom.System.OldJarsCount)
-	a.Log().Info("插件端升级包已安装", "version", version, "backup", backupPath)
+	a.Log().Info("agent upgrade package installed", "version", version, "backup", backupPath)
 	return nil
 }
 
@@ -543,11 +565,11 @@ func cleanOldJars(dir string, keep int) {
 func RemoteUpgrade(a *app.App) (string, error) {
 	remote, err := LoadRemoteInfo(a)
 	if err != nil || remote == nil {
-		return "", &ParamError{Code: 405, Msg: "没有可用的新版本升级:-1"}
+		return "", paramErr(405, "i18n.no_available_new_version_upgrade.d8f2")
 	}
 	remoteURL := strings.TrimSpace(toString(remote["agentUrl"]))
 	if remoteURL == "" {
-		return "", &ParamError{Code: 405, Msg: "存在新版本,下载地址不可用"}
+		return "", paramErr(405, "i18n.new_version_exists_download_unavailable.4ba7")
 	}
 	ext := filepath.Ext(remoteURL)
 	if index := strings.Index(ext, "?"); index >= 0 {
@@ -567,14 +589,14 @@ func downloadFile(url, target string) error {
 	client := &http.Client{Timeout: 10 * time.Minute}
 	response, err := client.Get(url)
 	if err != nil {
-		return fmt.Errorf("下载升级包失败: %w", err)
+		return paramErr(405, "i18n.go_upgrade_download_failed", err.Error())
 	}
 	defer func() { _ = response.Body.Close() }()
 	if response.StatusCode != http.StatusOK {
 		if response.StatusCode == http.StatusForbidden {
-			return &ParamError{Code: 405, Msg: "下载升级包失败: HTTP 403（下载地址被拒绝访问）"}
+			return paramErr(405, "i18n.go_upgrade_download_forbidden")
 		}
-		return fmt.Errorf("下载升级包失败: HTTP %d", response.StatusCode)
+		return paramErr(405, "i18n.go_upgrade_download_failed", fmt.Sprintf("HTTP %d", response.StatusCode))
 	}
 	if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
 		return err

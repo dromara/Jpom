@@ -12,6 +12,7 @@ package ws
 
 import (
 	"encoding/json"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -26,6 +27,7 @@ import (
 	"jpom.io/go-agent/internal/config"
 	"jpom.io/go-agent/internal/httpx"
 	"jpom.io/go-agent/internal/script"
+	"jpom.io/go-agent/internal/sysinfo"
 )
 
 const testAuthorize = "test-authorize-digest"
@@ -372,12 +374,12 @@ func TestNodeUpdateProtocol(t *testing.T) {
 		t.Fatal(err)
 	}
 	frame = readText(t, conn, 3*time.Second)
-	if !strings.Contains(frame, "\"command\":\"updateNode\"") || !strings.Contains(frame, "\"completeSize\":4") {
+	if !strings.Contains(frame, "\"command\":\"updateNode\"") || !strings.Contains(frame, "\"completeSize\":\"4\"") {
 		t.Fatalf("unexpected progress frame: %s", frame)
 	}
-	// Java UploadFileModel: size/completeSize are fastjson2 long -> JSON numbers,
-	// savePath is agentConfig.getTempPath() (<data>/temp/<yyyy-MM-dd>) and the
-	// getFilePath() getter is serialized as the filePath property.
+	// Java UploadFileModel: size/completeSize are serialized as JSON strings (live
+	// capture), savePath is agentConfig.getTempPath() (<data>/temp/<yyyy-MM-dd>)
+	// and the getFilePath() getter is serialized as the filePath property.
 	var progress map[string]any
 	if err := json.Unmarshal([]byte(frame), &progress); err != nil {
 		t.Fatalf("progress frame is not json: %s", frame)
@@ -386,11 +388,12 @@ func TestNodeUpdateProtocol(t *testing.T) {
 	if data == nil {
 		t.Fatalf("progress data missing: %s", frame)
 	}
-	if _, ok := data["size"].(float64); !ok {
-		t.Fatalf("size must be a JSON number: %v", data["size"])
+	// Live Java 2.11.13 capture: fastjson2 serializes long as JSON strings here
+	if data["size"] != "4" {
+		t.Fatalf("size must be the JSON string \"4\" (Java live capture), got %v", data["size"])
 	}
-	if _, ok := data["completeSize"].(float64); !ok {
-		t.Fatalf("completeSize must be a JSON number: %v", data["completeSize"])
+	if data["completeSize"] != "4" {
+		t.Fatalf("completeSize must be the JSON string \"4\", got %v", data["completeSize"])
 	}
 	if data["savePath"] != instance.TempPath() {
 		t.Fatalf("savePath must be the day scoped temp dir %q, got %v", instance.TempPath(), data["savePath"])
@@ -412,4 +415,144 @@ func TestNodeUpdateProtocol(t *testing.T) {
 	if !strings.Contains(frame, "\"command\":\"heart\"") || !strings.Contains(frame, "\"data\":\"\"") {
 		t.Fatalf("unexpected heart frame: %s", frame)
 	}
+}
+
+func TestSystemLogGBK(t *testing.T) {
+	instance := testApp(t)
+	instance.Config.Jpom.System.LogCharset = "GBK"
+	manager := testManager(t, instance)
+	gbkContent, err := script.EncodeText("中文日志"+"\n", "GBK")
+	if err != nil {
+		t.Fatal(err)
+	}
+	logFile := filepath.Join(instance.LogsDir, "agent.log")
+	if err := os.WriteFile(logFile, gbkContent, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	server := startServer(t, instance, manager.HandleSystemLog)
+	conn := dial(t, server, "/system_log", "")
+	if hello := readText(t, conn, 3*time.Second); hello != "连接成功：插件端日志" {
+		t.Fatalf("unexpected hello: %s", hello)
+	}
+	sendJSON(t, conn, map[string]any{"op": "showlog", "fileName": "agent.log"})
+	banner := readText(t, conn, 3*time.Second)
+	if !strings.Contains(banner, "监听agent.log日志成功") {
+		t.Fatalf("unexpected banner: %s", banner)
+	}
+	if line := readText(t, conn, 3*time.Second); line != "中文日志" {
+		t.Fatalf("GBK system log must be decoded, got %q", line)
+	}
+}
+
+func TestConsoleLogCharsetAndNoRelisten(t *testing.T) {
+	instance := testApp(t)
+	manager := testManager(t, instance)
+	libDir := filepath.Join(instance.BaseDir, "lib")
+	if err := os.MkdirAll(libDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	projectInfo := map[string]any{
+		"id": "p1", "name": "demo", "workspaceId": "DEFAULT", "runMode": "Java",
+		"whitelistDirectory": instance.BaseDir, "lib": "lib", "logCharset": "GBK",
+	}
+	manager.Console = &fakeConsoleBackend{project: projectInfo, success: true}
+	logFile := filepath.Join(instance.ProjectLogDir, "p1", "p1.log")
+	if err := os.MkdirAll(filepath.Dir(logFile), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	firstLog, err := script.EncodeText("控制台中文"+"\n", "GBK")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(logFile, firstLog, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	secondLog, err := script.EncodeText("第二个日志"+"\n", "GBK")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(libDir, "other.log"), secondLog, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	server := startServer(t, instance, manager.HandleConsole)
+	conn := dial(t, server, "/console", "&projectId=p1")
+	if hello := readText(t, conn, 3*time.Second); hello != "连接成功：demo" {
+		t.Fatalf("unexpected hello: %s", hello)
+	}
+	// 默认控制台日志（GBK 解码）
+	sendJSON(t, conn, map[string]any{"op": "showlog", "projectId": "p1"})
+	_ = readText(t, conn, 3*time.Second) // banner
+	if line := readText(t, conn, 3*time.Second); line != "控制台中文" {
+		t.Fatalf("project log must be decoded with the project charset, got %q", line)
+	}
+	// 切换日志文件：只发新文件 banner，不发 Relisten（仅 reWatcher 才发）
+	sendJSON(t, conn, map[string]any{"op": "showlog", "projectId": "p1", "fileName": "other.log"})
+	frame := readText(t, conn, 3*time.Second)
+	if strings.Contains(frame, "Relisten") {
+		t.Fatalf("file switch must not send Relisten: %s", frame)
+	}
+	if !strings.Contains(frame, "监听other.log日志成功") {
+		t.Fatalf("unexpected switch banner: %s", frame)
+	}
+	if line := readText(t, conn, 3*time.Second); line != "第二个日志" {
+		t.Fatalf("switched log must be decoded, got %q", line)
+	}
+}
+
+func TestScriptRunOpenHintsWithoutClose(t *testing.T) {
+	instance := testApp(t)
+	manager := testManager(t, instance)
+	server := startServer(t, instance, manager.HandleScriptRun)
+	conn := dial(t, server, "/script_run", "")
+	if hint := readText(t, conn, 3*time.Second); hint != "脚本模板或者工作空间未知" {
+		t.Fatalf("unexpected hint: %s", hint)
+	}
+	// Java 只发提示、不主动关闭：连接应保持打开（读取超时而不是 close 帧）
+	_ = conn.SetReadDeadline(time.Now().Add(500 * time.Millisecond))
+	_, _, err := conn.ReadMessage()
+	if err == nil {
+		t.Fatal("expected read timeout (session must stay open)")
+	}
+	if closeError, ok := err.(*websocket.CloseError); ok {
+		t.Fatalf("session must not be closed after open hint, got close %d %q", closeError.Code, closeError.Text)
+	}
+	if netError, ok := err.(net.Error); !ok || !netError.Timeout() {
+		t.Fatalf("expected read timeout, got %v", err)
+	}
+}
+
+func TestSystemLogUpdatesFileTailCount(t *testing.T) {
+	instance := testApp(t)
+	manager := testManager(t, instance)
+	logFile := filepath.Join(instance.LogsDir, "agent.log")
+	if err := os.WriteFile(logFile, []byte("tail-count-line\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	server := startServer(t, instance, manager.HandleSystemLog)
+	conn := dial(t, server, "/system_log", "")
+	if hello := readText(t, conn, 3*time.Second); hello != "连接成功：插件端日志" {
+		t.Fatalf("unexpected hello: %s", hello)
+	}
+	sendJSON(t, conn, map[string]any{"op": "showlog", "fileName": "agent.log"})
+	if banner := readText(t, conn, 3*time.Second); !strings.Contains(banner, "监听agent.log日志成功") {
+		t.Fatalf("unexpected banner: %s", banner)
+	}
+	// /system/cache.readFileOnLineCount 必须反映当前 tail 的文件数
+	cache := sysinfo.CacheJSON(instance, "DEFAULT")
+	if count, ok := cache["readFileOnLineCount"].(int); !ok || count < 1 {
+		t.Fatalf("readFileOnLineCount must be > 0 while tailing, got %v", cache["readFileOnLineCount"])
+	}
+	// 关闭会话后计数归 0
+	if err := conn.Close(); err != nil {
+		t.Fatal(err)
+	}
+	deadline := time.Now().Add(5 * time.Second)
+	for time.Now().Before(deadline) {
+		cache = sysinfo.CacheJSON(instance, "DEFAULT")
+		if count, ok := cache["readFileOnLineCount"].(int); ok && count == 0 {
+			return
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	t.Fatalf("readFileOnLineCount must return to 0 after close, got %v", cache["readFileOnLineCount"])
 }

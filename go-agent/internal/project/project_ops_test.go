@@ -23,6 +23,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"unicode/utf8"
 
 	"jpom.io/go-agent/internal/config"
 	"jpom.io/go-agent/internal/proc"
@@ -388,7 +389,10 @@ func TestProjectLogOperations(t *testing.T) {
 	}
 
 	// logSize：日志文件已被清空
-	logBackExists, size := runtime.LogSize(info)
+	logBackExists, size, err := runtime.LogSize(info)
+	if err != nil {
+		t.Fatalf("logSize 失败: %v", err)
+	}
 	if !logBackExists {
 		t.Fatal("logBack 目录应存在")
 	}
@@ -398,13 +402,16 @@ func TestProjectLogOperations(t *testing.T) {
 	if err := os.WriteFile(logFile, []byte(big), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	_, size = runtime.LogSize(info)
+	_, size, _ = runtime.LogSize(info)
 	if size == "" || !strings.Contains(size, "KB") {
 		t.Fatalf("日志大小格式化错误: %s", size)
 	}
 
 	// logBack 列表（long 字段输出字符串）
-	list := runtime.LogBackList(info)
+	list, err := runtime.LogBackList(info)
+	if err != nil {
+		t.Fatalf("logBack 列表失败: %v", err)
+	}
 	array, ok := list["array"].([]map[string]any)
 	if !ok || len(array) != 1 {
 		t.Fatalf("日志备份列表错误: %+v", list)
@@ -430,7 +437,10 @@ func TestProjectLogOperations(t *testing.T) {
 	}
 
 	// resetLog
-	msg, code := runtime.ResetLog(info)
+	msg, code, err := runtime.ResetLog(info)
+	if err != nil {
+		t.Fatalf("重置日志失败: %v", err)
+	}
 	if code != 200 || msg != "重置成功" {
 		t.Fatalf("重置日志失败: code=%d msg=%s", code, msg)
 	}
@@ -834,5 +844,262 @@ func TestForceKillUsesSudo(t *testing.T) {
 	}
 	if !strings.Contains(commands[len(commands)-1], "kill -9") {
 		t.Fatalf("兜底命令应为 kill -9: %s", commands[len(commands)-1])
+	}
+}
+
+// TestProjectLogGBK 校验项目控制台日志按配置字符集编码写入与读取（G5）。
+func TestProjectLogGBK(t *testing.T) {
+	runtime, base := newTestRuntime(t)
+	runtime.Options.ProjectLog.FileCharset = "GBK"
+	runtime.Options.ConsoleCharset = "GBK"
+	root := filepath.Join(base, "projects")
+	libDir := filepath.Join(root, "gbk-dsl")
+	if err := os.MkdirAll(libDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	// 脚本输出 GBK 编码的“中文”，验证 console charset 解码
+	statusScript := "#!/bin/bash\nprintf '\\xd6\\xd0\\xce\\xc4'\n"
+	if err := os.WriteFile(filepath.Join(libDir, "gbk-status.sh"), []byte(statusScript), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	writeWhitelist(t, runtime, root)
+	dslContent := "run:\n  status:\n    scriptId: gbk-status.sh\n"
+	values := map[string]any{
+		"id":                 "GBK001",
+		"name":               "GBK项目",
+		"runMode":            "Dsl",
+		"whitelistDirectory": root,
+		"lib":                "/gbk-dsl",
+		"dslContent":         dslContent,
+	}
+	if _, err := runtime.SaveProject(SaveParams{Values: values, WorkspaceID: "DEFAULT", UserName: "tester"}); err != nil {
+		t.Fatalf("保存 GBK DSL 项目失败: %v", err)
+	}
+	info, _, _ := runtime.Manager.Get("GBK001")
+	if charset := runtime.ResolveLogCharset(info); charset != "GBK" {
+		t.Fatalf("项目日志字符集应为 GBK: %s", charset)
+	}
+	_ = runtime.Status(info)
+	logFile, err := runtime.Manager.ResolveLogFile(info)
+	if err != nil {
+		t.Fatal(err)
+	}
+	raw, err := os.ReadFile(logFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if utf8.Valid(raw) {
+		t.Fatalf("GBK 日志文件不应是合法 UTF-8: %v", raw)
+	}
+	text, err := proc.DecodeString("GBK", raw)
+	if err != nil || !strings.Contains(text, "[status] - 中文") {
+		t.Fatalf("GBK 日志内容错误: %q err=%v", text, err)
+	}
+	// WS tail 复用的读取方法按 GBK 解码
+	lines, err := runtime.TailLogLines(info, 1)
+	if err != nil || len(lines) != 1 || !strings.Contains(lines[0], "中文") {
+		t.Fatalf("TailLogLines GBK 解码错误: %#v err=%v", lines, err)
+	}
+	// 项目数据 logCharset 覆盖配置
+	info["logCharset"] = "UTF-8"
+	if charset := runtime.ResolveLogCharset(info); charset != "UTF-8" {
+		t.Fatalf("项目 logCharset 应覆盖配置: %s", charset)
+	}
+}
+
+func writeBrokenLinkFixture(t *testing.T, runtime *Runtime, root string) {
+	t.Helper()
+	broken := map[string]any{
+		"id":                 "BROKEN1",
+		"name":               "断链项目",
+		"runMode":            "Link",
+		"linkId":             "MISSING1",
+		"workspaceId":        "DEFAULT",
+		"createTime":         "2024-01-01 00:00:00",
+		"logPath":            "",
+		"mainClass":          "",
+		"token":              "",
+		"outGivingProject":   false,
+		"javaExtDirsCp":      "",
+		"whitelistDirectory": root,
+		"lib":                "/broken",
+	}
+	if err := runtime.Manager.AddItem(broken, "tester"); err != nil {
+		t.Fatalf("写入断链项目失败: %v", err)
+	}
+}
+
+// TestBrokenLinkBoundaries 校验软化链项目不存在时各方法的异常语义（G8，Java 会抛 405）。
+func TestBrokenLinkBoundaries(t *testing.T) {
+	runtime, base := newTestRuntime(t)
+	root := filepath.Join(base, "projects")
+	if err := os.MkdirAll(filepath.Join(root, "app"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	writeWhitelist(t, runtime, root)
+	saveJarProject(t, runtime, root, "TARGET1", "/app")
+	writeBrokenLinkFixture(t, runtime, root)
+	info, _, _ := runtime.Manager.Get("BROKEN1")
+
+	expectValidation := func(name string, err error) {
+		t.Helper()
+		if err == nil {
+			t.Fatalf("%s 应返回错误", name)
+		}
+		if KindOf(err) != ErrValidation {
+			t.Fatalf("%s 应为参数/状态异常(405)，实际 kind=%v err=%v", name, KindOf(err), err)
+		}
+		if !strings.Contains(err.Error(), "被软链的项目已经不存在啦") || !strings.Contains(err.Error(), "MISSING1") {
+			t.Fatalf("%s 文案不符合 Java: %s", name, err.Error())
+		}
+	}
+	expectValidation("StatusE", func() error { _, err := runtime.StatusE(info); return err }())
+	expectValidation("IsRunE", func() error { _, err := runtime.IsRunE(info); return err }())
+	expectValidation("Operate", func() error { _, err := runtime.Operate(OpStart, info); return err }())
+	expectValidation("RunCommandE", func() error { _, err := runtime.RunCommandE(info); return err }())
+	expectValidation("DeleteProject", func() error { _, err := runtime.DeleteProject("BROKEN1", ""); return err }())
+	expectValidation("LogSize", func() error { _, _, err := runtime.LogSize(info); return err }())
+	expectValidation("LogBackList", func() error { _, err := runtime.LogBackList(info); return err }())
+	expectValidation("ExportLogFile", func() error { _, err := runtime.ExportLogFile(info); return err }())
+	expectValidation("LogBackDelete", func() error { return runtime.LogBackDelete(info, "x.log") }())
+
+	// resetLog 内部异常被捕获，返回 500（Java 文案 重置日志失败）
+	msg, code, err := runtime.ResetLog(info)
+	if err == nil || code != 500 || msg != "" {
+		t.Fatalf("ResetLog 断链语义错误: msg=%q code=%d err=%v", msg, code, err)
+	}
+	// logBack_download 在 Java 中被 try/catch 转 400 下载失败
+	// Java 在 try/catch 中调用，任意异常转为 400 下载失败（api 层处理）
+	if _, err := runtime.LogBackDownloadFile(info, "x.log"); err == nil {
+		t.Fatal("LogBackDownloadFile 断链应返回错误")
+	}
+
+	// 英文语言下错误文案应切换
+	enRuntime := runtime.WithLang("en-US")
+	_, enErr := enRuntime.StatusE(info)
+	if enErr == nil {
+		t.Fatal("英文场景应返回错误")
+	}
+	_, enMsg := LocalizeError(enRuntime.Lang(), enErr)
+	if strings.Contains(enMsg, "软链") || !strings.Contains(strings.ToLower(enMsg), "soft-chained") {
+		t.Fatalf("英文错误文案未切换: %s", enMsg)
+	}
+}
+
+// TestSaveProjectErrorKinds 校验 saveProject 内部错误 405/500 分类（G8）。
+func TestSaveProjectErrorKinds(t *testing.T) {
+	runtime, base := newTestRuntime(t)
+	root := filepath.Join(base, "projects")
+	if err := os.MkdirAll(filepath.Join(root, "app"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	writeWhitelist(t, runtime, root)
+
+	baseValues := func(id string) map[string]any {
+		return map[string]any{
+			"id":                 id,
+			"name":               id,
+			"runMode":            "Jar",
+			"whitelistDirectory": root,
+			"lib":                "/app",
+		}
+	}
+	// 参数错误 → 405
+	invalidLib := baseValues("ERR001")
+	invalidLib["lib"] = "../escape"
+	if _, err := runtime.SaveProject(SaveParams{Values: invalidLib, WorkspaceID: "DEFAULT", UserName: "tester"}); err == nil || KindOf(err) != ErrValidation {
+		t.Fatalf("非法路径应为 405: %v", err)
+	}
+	// 非法 WebHooks → 405
+	badToken := baseValues("ERR002")
+	badToken["token"] = "not-a-url"
+	if _, err := runtime.SaveProject(SaveParams{Values: badToken, WorkspaceID: "DEFAULT", UserName: "tester"}); err == nil || KindOf(err) != ErrValidation {
+		t.Fatalf("非法 WebHooks 应为 405: %v", err)
+	}
+	// DSL 缺少内容 → 405；DSL YAML 解析失败 → 500 服务异常
+	dslMissing := baseValues("ERR003")
+	dslMissing["runMode"] = "Dsl"
+	if _, err := runtime.SaveProject(SaveParams{Values: dslMissing, WorkspaceID: "DEFAULT", UserName: "tester"}); err == nil || KindOf(err) != ErrValidation {
+		t.Fatalf("DSL 缺少内容应为 405: %v", err)
+	}
+	dslBroken := baseValues("ERR004")
+	dslBroken["runMode"] = "Dsl"
+	dslBroken["dslContent"] = "run: [invalid"
+	if _, err := runtime.SaveProject(SaveParams{Values: dslBroken, WorkspaceID: "DEFAULT", UserName: "tester"}); err == nil || KindOf(err) != ErrService {
+		t.Fatalf("DSL YAML 解析失败应为 500: %v", err)
+	}
+	// 断链 Link 保存 → 405 且文案匹配 Java
+	linkSave := map[string]any{
+		"id":                 "ERR005",
+		"name":               "ERR005",
+		"runMode":            "Link",
+		"linkId":             "MISSING1",
+		"whitelistDirectory": root,
+		"lib":                "/app",
+	}
+	if _, err := runtime.SaveProject(SaveParams{Values: linkSave, WorkspaceID: "DEFAULT", UserName: "tester"}); err == nil || KindOf(err) != ErrValidation {
+		t.Fatalf("断链 Link 保存应为 405: %v", err)
+	}
+	// 修改已有项目切换工作空间 → 405
+	saveJarProject(t, runtime, root, "ERR006", "/app2")
+	if err := os.MkdirAll(filepath.Join(root, "app2"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	values := baseValues("ERR006")
+	values["lib"] = "/app2"
+	if _, err := runtime.SaveProject(SaveParams{Values: values, WorkspaceID: "OTHER", UserName: "tester"}); err == nil || KindOf(err) != ErrValidation {
+		t.Fatalf("跨工作空间修改应为 405: %v", err)
+	}
+}
+
+// TestOperateI18n 校验 operate 业务结果文案按语言切换（zh-CN 默认与 en-US）。
+func TestOperateI18n(t *testing.T) {
+	runtime, base := newTestRuntime(t)
+	root := filepath.Join(base, "projects")
+	if err := os.MkdirAll(filepath.Join(root, "file-app"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	writeWhitelist(t, runtime, root)
+	values := map[string]any{
+		"id":                 "FILE01",
+		"name":               "文件项目",
+		"runMode":            "File",
+		"whitelistDirectory": root,
+		"lib":                "/file-app",
+	}
+	if _, err := runtime.SaveProject(SaveParams{Values: values, WorkspaceID: "DEFAULT", UserName: "tester"}); err != nil {
+		t.Fatal(err)
+	}
+	info, _, _ := runtime.Manager.Get("FILE01")
+	zhResult, err := runtime.Operate(OpStop, info)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(zhResult.Msgs) == 0 || zhResult.Msgs[0] != "file 类型项目没有 stop" {
+		t.Fatalf("中文 file 类型停止文案错误: %#v", zhResult.Msgs)
+	}
+	enResult, err := runtime.WithLang("en-US").Operate(OpStop, info)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(enResult.Msgs) == 0 || enResult.Msgs[0] == "file 类型项目没有 stop" {
+		t.Fatalf("英文 file 类型停止文案未切换: %#v", enResult.Msgs)
+	}
+}
+
+// TestValidOp 校验 ConsoleCommandOp 枚举名解析（等价 Java EnumUtil.fromStringQuietly）。
+func TestValidOp(t *testing.T) {
+	for _, op := range []string{"start", "stop", "restart", "status", "reload", "showlog", "heart"} {
+		if !ValidOp(op) {
+			t.Fatalf("合法操作 %q 应返回 true", op)
+		}
+	}
+	for _, op := range []string{"", "no-such-opt", "START", "kill"} {
+		if ValidOp(op) {
+			t.Fatalf("非法操作 %q 应返回 false", op)
+		}
+	}
+	if !CanOpt("start") || !CanOpt("reload") || CanOpt("status") || CanOpt("heart") {
+		t.Fatal("CanOpt 语义错误")
 	}
 }

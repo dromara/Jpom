@@ -82,12 +82,18 @@ func TestToCommandList(t *testing.T) {
 }
 
 func TestTriggerParamMapKeepsUpperCase(t *testing.T) {
-	params := TriggerParamMap(mustJSON(t, map[string]string{"BUILD_ID": "12", "buildName": "demo"}))
+	params, err := TriggerParamMap(mustJSON(t, map[string]string{"BUILD_ID": "12", "buildName": "demo"}))
+	if err != nil {
+		t.Fatal(err)
+	}
 	if params["trigger_BUILD_ID"] != "12" {
 		t.Fatalf("upper param lost: %v", params)
 	}
 	if params["trigger_build_name"] != "demo" {
 		t.Fatalf("camel param not underlined: %v", params)
+	}
+	if _, err := TriggerParamMap("{bad"); err == nil {
+		t.Fatal("malformed params must return an error")
 	}
 }
 
@@ -281,5 +287,42 @@ func TestExecutorAttachReceivesLiveOutput(t *testing.T) {
 	}
 	if !strings.Contains(joined, "JPOM_MSG") {
 		t.Fatalf("listener must receive completion message: %s", joined)
+	}
+}
+
+func TestLibraryListDirectoryOrder(t *testing.T) {
+	instance := testApp(t)
+	manager := NewManager(instance)
+	// 创建顺序与文件名排序不同，验证按目录遍历顺序输出（Java File.listFiles 语义）
+	for _, id := range []string{"zzz", "aaa", "mmm"} {
+		if err := manager.LibrarySave(id, "echo "+id, "", ""); err != nil {
+			t.Fatal(err)
+		}
+	}
+	handle, err := os.Open(manager.GlobalScriptDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	names, err := handle.Readdirnames(-1)
+	_ = handle.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected := make([]string, 0, len(names))
+	for _, name := range names {
+		if strings.EqualFold(filepath.Ext(name), ".json") {
+			expected = append(expected, strings.TrimSuffix(name, filepath.Ext(name)))
+		}
+	}
+	list, err := manager.LibraryList()
+	if err != nil {
+		t.Fatal(err)
+	}
+	actual := make([]string, 0, len(list))
+	for _, item := range list {
+		actual = append(actual, stringField(item, "tag"))
+	}
+	if strings.Join(actual, ",") != strings.Join(expected, ",") {
+		t.Fatalf("library list must keep directory order: expected %v, got %v", expected, actual)
 	}
 }

@@ -18,9 +18,13 @@
 package sysinfo
 
 import (
+	"fmt"
 	"math"
+	"os/exec"
+	"runtime"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"jpom.io/go-agent/internal/config"
@@ -503,10 +507,28 @@ func JavaProcessCount() int {
 	return count
 }
 
-// KillProcess 结束指定进程（Linux 为 kill <pid>，与 Java 端一致）。
+// KillProcess 结束指定进程，返回命令输出（与 Java AbstractSystemCommander.kill 的
+// shell 命令语义一致）：Linux/macOS 为 kill <pid>、Windows 为 taskkill。
+// 目标进程不存在时命令会输出 No such process 等文本，此时按 Java 行为作为 msg
+// 返回（code=200）；只有命令本身无法启动才返回错误。
 func KillProcess(pid int) (string, error) {
-	if err := killPID(pid); err != nil {
+	if pid <= 0 {
+		return "", fmt.Errorf("invalid pid: %d", pid)
+	}
+	var command *exec.Cmd
+	if runtime.GOOS == "windows" {
+		command = exec.Command("taskkill", "/PID", strconv.Itoa(pid), "/F")
+	} else {
+		command = exec.Command("kill", strconv.Itoa(pid))
+	}
+	output, err := command.CombinedOutput()
+	text := strings.TrimSpace(string(output))
+	if err != nil {
+		if text != "" {
+			// 命令执行了但返回非 0（如进程不存在），Java 端同样把输出作为 msg。
+			return text, nil
+		}
 		return "", err
 	}
-	return "", nil
+	return text, nil
 }

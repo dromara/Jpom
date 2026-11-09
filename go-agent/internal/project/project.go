@@ -121,11 +121,11 @@ func String(info map[string]any, key string) string {
 func ProjectPath(info map[string]any) (string, error) {
 	whitelistDirectory := strings.TrimSpace(String(info, "whitelistDirectory"))
 	if whitelistDirectory == "" {
-		return "", fmt.Errorf("项目未配置授权目录(whitelistDirectory)")
+		return "", ValidationKey(keyRestoreAuthorize)
 	}
 	lib := String(info, "lib")
 	if lib == "" {
-		return "", fmt.Errorf("项目未配置目录(lib)")
+		return "", ValidationKey(keyInvalidProjectPath)
 	}
 	return filepath.Join(whitelistDirectory, lib), nil
 }
@@ -134,7 +134,7 @@ func ProjectPath(info map[string]any) (string, error) {
 func (m *Manager) LogDir(info map[string]any) (string, error) {
 	id := String(info, "id")
 	if id == "" {
-		return "", fmt.Errorf("项目 id 不能为空")
+		return "", ValidationKey(keyProjectIDNotFound)
 	}
 	if custom := strings.TrimSpace(String(info, "logPath")); custom != "" {
 		return filepath.Join(custom, id), nil

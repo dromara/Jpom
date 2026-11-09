@@ -40,7 +40,7 @@ func ReadWhitelist(a *app.App) whitelistFile {
 		return value
 	}
 	if err := jsonUnmarshal(content, &value); err != nil {
-		a.Log().Warn("读取白名单失败", "error", err)
+		a.Log().Warn("read whitelist failed", "error", err)
 	}
 	return value
 }
@@ -64,7 +64,7 @@ func WhitelistData(a *app.App) map[string]any {
 
 // SaveWhitelist 对应 /system/whitelistDirectory_submit。
 func SaveWhitelist(a *app.App, projectValue, allowEditSuffixValue string) error {
-	projects, err := parseLineList(projectValue, true, "项目路径授权不能为空")
+	projects, err := parseLineList(projectValue, true, "i18n.project_path_auth_required.9e58")
 	if err != nil {
 		return err
 	}
@@ -73,9 +73,9 @@ func SaveWhitelist(a *app.App, projectValue, allowEditSuffixValue string) error 
 		return err
 	}
 	if conflict := findStartsWith(normalized); conflict != "" {
-		return &ParamError{Code: 405, Msg: "授权目录中不能存在包含关系：" + conflict}
+		return paramErrAppend(405, "i18n.auth_directory_cannot_contain_hierarchy.d6ca", conflict)
 	}
-	suffixes, err := parseLineList(allowEditSuffixValue, false, "允许编辑的文件后缀不能为空")
+	suffixes, err := parseLineList(allowEditSuffixValue, false, "i18n.suffix_cannot_be_empty.ec72")
 	if err != nil {
 		return err
 	}
@@ -84,7 +84,7 @@ func SaveWhitelist(a *app.App, projectValue, allowEditSuffixValue string) error 
 		if len(parts) > 1 {
 			charset := strings.TrimSpace(parts[len(parts)-1])
 			if !isValidCharsetName(charset) {
-				return &ParamError{Code: 405, Msg: "配置的字符编码格式不合法：" + suffix}
+				return paramErrAppend(405, "i18n.illegal_character_encoding_format.af7a", suffix)
 			}
 		}
 	}
@@ -95,7 +95,7 @@ func SaveWhitelist(a *app.App, projectValue, allowEditSuffixValue string) error 
 func parseLineList(value string, required bool, errorMsg string) ([]string, error) {
 	if strings.TrimSpace(value) == "" {
 		if required {
-			return nil, &ParamError{Code: 405, Msg: errorMsg}
+			return nil, paramErr(405, errorMsg)
 		}
 		return nil, nil
 	}
@@ -107,7 +107,7 @@ func parseLineList(value string, required bool, errorMsg string) ([]string, erro
 		}
 	}
 	if len(list) == 0 {
-		return nil, &ParamError{Code: 405, Msg: errorMsg}
+		return nil, paramErr(405, errorMsg)
 	}
 	return list, nil
 }
@@ -121,13 +121,13 @@ func covertToArray(a *app.App, list []string) ([]string, error) {
 	for _, item := range list {
 		normalized := filepath.Clean(item)
 		if !filepath.IsAbs(normalized) {
-			return nil, &ParamError{Code: 405, Msg: "需要配置绝对路径：" + normalized}
+			return nil, paramErrAppend(405, "i18n.need_configure_absolute_path.f2e6", normalized)
 		}
 		if parent := filepath.Dir(normalized); parent == normalized {
-			return nil, &ParamError{Code: 405, Msg: "不能配置根路径：" + normalized}
+			return nil, paramErrAppend(405, "i18n.cannot_configure_root_path.d86e", normalized)
 		}
 		if strings.HasPrefix(base, normalized) {
-			return nil, &ParamError{Code: 405, Msg: "项目路径授权不能位于Jpom目录下"}
+			return nil, paramErr(405, "i18n.project_path_auth_not_under_jpom.0e18")
 		}
 		if _, ok := seen[normalized]; ok {
 			continue

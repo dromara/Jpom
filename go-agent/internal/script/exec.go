@@ -12,14 +12,17 @@ package script
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
+
+	"jpom.io/go-agent/internal/i18n"
 )
 
 const (
@@ -40,7 +43,8 @@ type Execution struct {
 	logFile    string
 	scriptFile string
 	env        *EnvBuilder
-	messages   ConsoleMessages
+	lang       string
+	charset    string
 
 	pipe     *os.File
 	writeEnd *os.File
@@ -196,7 +200,7 @@ func (e *Executor) Stop(executeID string) bool {
 	if execution == nil {
 		return false
 	}
-	execution.end(execution.messages.StopRunning)
+	execution.end(i18n.T(execution.lang, "i18n.stop_running.1d4e"))
 	execution.kill()
 	return true
 }
@@ -296,7 +300,8 @@ func (e *Executor) newExecution(item map[string]any, executeID, args string, par
 		logFile:    logFile,
 		scriptFile: scriptPath,
 		env:        environment,
-		messages:   MessagesFor(lang),
+		lang:       lang,
+		charset:    e.manager.ConsoleCharset(),
 		log:        log,
 		listeners:  make(map[string]LineListener),
 	}
@@ -360,8 +365,9 @@ func (e *Executor) run(execution *Execution) {
 	// 输出环境变量（隐私变量以 ****** 显示）
 	execution.env.EachStr(execution.info)
 	if err := execution.cmd.Start(); err != nil {
-		execution.systemError(execution.messages.GeneralExecutionException + err.Error())
-		execution.end(execution.messages.GeneralExecutionException + err.Error())
+		message := i18n.T(execution.lang, "i18n.general_execution_exception.62e9") + err.Error()
+		execution.systemError(message)
+		execution.end(message)
 		return
 	}
 	// 父进程关闭写端，子进程退出后读端才会 EOF
@@ -370,7 +376,8 @@ func (e *Executor) run(execution *Execution) {
 	for {
 		line, err := reader.ReadString('\n')
 		if len(line) > 0 {
-			execution.info(trimLineEnding(line))
+			// 进程输出按 console-charset 解码（Windows 默认 GBK）
+			execution.info(DecodeLine(trimLineBytes([]byte(line)), execution.charset))
 		}
 		if err != nil {
 			break
@@ -379,17 +386,17 @@ func (e *Executor) run(execution *Execution) {
 	_ = execution.pipe.Close()
 	waitErr := execution.cmd.Wait()
 	exitCode := processExitCode(waitErr)
-	execution.system(fmt.Sprintf(execution.messages.ExecutionEnded, exitCode))
+	execution.system(i18n.T(execution.lang, "i18n.execution_ended.b793", exitCode))
 	// 通知前端执行结束（JsonMessage + JPOM_MSG + op）
 	completion := map[string]any{
 		"code":     200,
-		"msg":      fmt.Sprintf(execution.messages.ExecutionCompleted, exitCode),
+		"msg":      i18n.T(execution.lang, "i18n.execution_completed.24a1") + strconv.Itoa(exitCode),
 		"JPOM_MSG": "JPOM_MSG",
 		"op":       "stop",
 	}
 	encoded, err := json.Marshal(completion)
 	if err != nil {
-		execution.end(execution.messages.ExecutionCompleted)
+		execution.end(i18n.T(execution.lang, "i18n.execution_completed.24a1"))
 		return
 	}
 	execution.end(string(encoded))
@@ -423,6 +430,12 @@ func MergeEnvironment(values map[string]string) []string { return mergeEnvironme
 func trimLineEnding(line string) string {
 	line = strings.TrimSuffix(line, "\n")
 	return strings.TrimSuffix(line, "\r")
+}
+
+// trimLineBytes strips the trailing CR/LF from a raw byte line before decoding.
+func trimLineBytes(line []byte) []byte {
+	line = bytes.TrimSuffix(line, []byte("\n"))
+	return bytes.TrimSuffix(line, []byte("\r"))
 }
 
 func processExitCode(err error) int {

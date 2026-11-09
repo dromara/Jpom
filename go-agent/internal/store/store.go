@@ -123,7 +123,7 @@ func Update[T any](s *Store, newValue func() T, fn func(value *T) error) error {
 	defer s.mu.Unlock()
 	value := newValue()
 	if err := s.readLocked(&value); err != nil {
-		return fmt.Errorf("读取 %s 失败: %w", filepath.Base(s.path), err)
+		return fmt.Errorf("read %s failed: %w", filepath.Base(s.path), err)
 	}
 	if err := fn(&value); err != nil {
 		return err

@@ -26,6 +26,27 @@ import (
 	"jpom.io/go-agent/internal/sysinfo"
 )
 
+// 项目域错误/提示文案 key（与 Java i18n 完全一致）。
+const (
+	keyIncorrectProjectID     = "i18n.incorrect_project_id.5f70"
+	keyProjectIDNotExist      = "i18n.project_id_does_not_exist.6b9b"
+	keyInfoToRetrieveNotFound = "i18n.info_to_retrieve_not_found.96d7"
+	keyMissingOperationParam  = "i18n.missing_operation_parameter.b16b"
+	keyNoProjectFound         = "i18n.no_project_found.ef5e"
+	keyOperationNotSupported  = "i18n.current_operation_not_supported.3aec"
+	keySelectOperationType    = "i18n.select_operation_type.63c6"
+	keyOperationSucceeded     = "i18n.operation_succeeded.3313"
+	keyOperationFailedDetails = "i18n.operation_failed_with_details.7280"
+	keyGetProjectInfoFailure  = "i18n.get_project_info_failure.ddff"
+	keyNoFileFound            = "i18n.no_file_found.7d40"
+	keyDeleteSuccess          = "i18n.delete_success.0007"
+	keyDownloadFailedRetry    = "i18n.download_failed_retry.c113"
+	keyResetLogFailure        = "i18n.reset_log_failure.b3d3"
+	keyServiceException       = "i18n.service_exception.3821"
+	keyCorrespondingFileNeed  = "i18n.corresponding_file_required.57b3"
+	keyProjectNotExist        = "i18n.project_does_not_exist.3029"
+)
+
 // registerProject 注册 /manage/* 项目生命周期、状态与日志端点。
 func registerProject(r *httpx.Router, a *app.App) {
 	runtime := project.NewRuntime(a.BaseDir, a.Config, a.Log())
@@ -34,7 +55,7 @@ func registerProject(r *httpx.Router, a *app.App) {
 	// 控制台日志自动备份注册到 sysinfo 统一调度器（/system/cache.taskList 与 Java 一致）
 	if cron := runtime.Options.ProjectLog.AutoBackupConsoleCron; strings.TrimSpace(cron) != "" {
 		if err := sysinfo.RegisterCronTask("auto_back_log", cron, runtime.AutoBackupConsoleLogs); err != nil {
-			a.Log().Warn("注册控制台日志自动备份任务失败", "error", err)
+			a.Log().Warn("failed to register auto_back_log cron", "error", err)
 		}
 	}
 
@@ -57,9 +78,6 @@ func registerProject(r *httpx.Router, a *app.App) {
 }
 
 // projectForm 统一读取 form-urlencoded / JSON 请求参数。
-//
-// 服务端 NodeForward 默认以 form-urlencoded 转发（与 Spring MVC 参数绑定一致），
-// 这里同时兼容 JSON body，便于 curl 自测。
 type projectForm struct {
 	values  map[string]any
 	present map[string]bool
@@ -108,11 +126,6 @@ func (f *projectForm) string(key string) string {
 	}
 }
 
-func (f *projectForm) has(key string) bool {
-	_, ok := f.values[key]
-	return ok
-}
-
 // boolValue 按 Java Boolean.parseBoolean 语义解析（忽略大小写，只有 true 为真）。
 func (f *projectForm) boolValue(key string) bool {
 	return strings.EqualFold(strings.TrimSpace(f.string(key)), "true")
@@ -121,7 +134,7 @@ func (f *projectForm) boolValue(key string) bool {
 // convertBoolValue 按 hutool Convert.toBool 语义解析（true/1/yes/y/on 为真）。
 func (f *projectForm) convertBoolValue(key string) bool {
 	switch strings.ToLower(strings.TrimSpace(f.string(key))) {
-	case "true", "1", "yes", "y", "on", "是", "真":
+	case "true", "1", "yes", "y", "on":
 		return true
 	default:
 		return false
@@ -163,19 +176,36 @@ func respondCode(c *httpx.Context, code int, msg string, data any) {
 	_ = encoder.Encode(payload)
 }
 
-// fail405 输出参数/状态异常（Java IllegalArgumentException/IllegalStateException/ValidateException）。
-func fail405(c *httpx.Context, msg string) {
-	respondCode(c, 405, msg, nil)
+// respondProjectError 按 Java BaseExceptionHandler 语义输出项目域错误：
+// 参数/状态异常 → 405 原文；业务显式 500 → 原文；运行期异常 → 500“服务异常：”+信息。
+func respondProjectError(c *httpx.Context, err error) {
+	if err == nil {
+		return
+	}
+	kind, msg := project.LocalizeError(c.Lang, err)
+	switch kind {
+	case project.ErrValidation:
+		respondCode(c, 405, msg, nil)
+	case project.ErrBusiness:
+		respondCode(c, 500, msg, nil)
+	default:
+		respondCode(c, 500, c.T(keyServiceException)+msg, nil)
+	}
 }
 
-// fail500 输出运行期异常（Java RuntimeException，msg 前缀为 服务异常：）。
-func fail500(c *httpx.Context, msg string) {
-	respondCode(c, 500, "服务异常："+msg, nil)
+// failValidation 输出参数/状态异常（405）。
+func failValidation(c *httpx.Context, err error) {
+	respondProjectError(c, err)
+}
+
+// failParam 输出 Spring @ValidatorItem 参数校验失败（code=400，Java 实测语义）。
+func failParam(c *httpx.Context, msg string) {
+	respondCode(c, 400, msg, nil)
 }
 
 // lookupProject 读取项目，不存在时返回 nil。
-func lookupProject(runtime *project.Runtime, id string) map[string]any {
-	info, ok, err := runtime.Manager.Get(id)
+func lookupProject(rt *project.Runtime, id string) map[string]any {
+	info, ok, err := rt.Manager.Get(id)
 	if err != nil || !ok {
 		return nil
 	}
@@ -184,8 +214,9 @@ func lookupProject(runtime *project.Runtime, id string) map[string]any {
 
 // projectGetItem 获取单个项目信息（等价 ProjectListController.getProjectItem）。
 func projectGetItem(c *httpx.Context, runtime *project.Runtime) {
+	rt := runtime.WithLang(c.Lang)
 	form := readProjectForm(c)
-	info := lookupProject(runtime, form.string("id"))
+	info := lookupProject(rt, form.string("id"))
 	if info == nil {
 		respondOK(c, "", nil)
 		return
@@ -193,15 +224,23 @@ func projectGetItem(c *httpx.Context, runtime *project.Runtime) {
 	result := project.Clone(info)
 	runMode := project.GetString(info, "runMode")
 	if runMode != project.RunModeDsl && runMode != project.RunModeFile {
-		if command := runtime.BuildRunCommand(info); command != "" {
+		command, err := rt.RunCommandE(info)
+		if err != nil {
+			respondProjectError(c, err)
+			return
+		}
+		if command != "" {
 			result["runCommand"] = command
 		}
 	}
 	if runMode == project.RunModeDsl {
-		if canReload, list, err := runtime.DslProcessInfo(info); err == nil {
-			result["canReload"] = canReload
-			result["dslProcessInfo"] = list
+		canReload, list, err := rt.DslProcessInfo(info)
+		if err != nil {
+			respondProjectError(c, err)
+			return
 		}
+		result["canReload"] = canReload
+		result["dslProcessInfo"] = list
 	}
 	respondOK(c, "", result)
 }
@@ -210,7 +249,7 @@ func projectGetItem(c *httpx.Context, runtime *project.Runtime) {
 func projectGetInfo(c *httpx.Context, runtime *project.Runtime) {
 	list, err := runtime.Manager.List()
 	if err != nil {
-		fail405(c, err.Error())
+		respondProjectError(c, project.ServiceError(err))
 		return
 	}
 	respondOK(c, "", list)
@@ -218,8 +257,9 @@ func projectGetInfo(c *httpx.Context, runtime *project.Runtime) {
 
 // projectSave 保存项目（等价 ManageEditProjectController.saveProject）。
 func projectSave(c *httpx.Context, runtime *project.Runtime) {
+	rt := runtime.WithLang(c.Lang)
 	form := readProjectForm(c)
-	msg, err := runtime.SaveProject(project.SaveParams{
+	msg, err := rt.SaveProject(project.SaveParams{
 		Values:      form.values,
 		Preview:     form.convertBoolValue("previewData"),
 		OutGiving:   form.boolValue("outGivingProject"),
@@ -227,7 +267,7 @@ func projectSave(c *httpx.Context, runtime *project.Runtime) {
 		UserName:    projectUser(c),
 	})
 	if err != nil {
-		fail405(c, err.Error())
+		respondProjectError(c, err)
 		return
 	}
 	respondOK(c, msg, nil)
@@ -235,15 +275,12 @@ func projectSave(c *httpx.Context, runtime *project.Runtime) {
 
 // projectDelete 删除项目（等价 ManageEditProjectController.deleteProject）。
 func projectDelete(c *httpx.Context, runtime *project.Runtime) {
+	rt := runtime.WithLang(c.Lang)
 	form := readProjectForm(c)
-	id := form.string("id")
-	if strings.TrimSpace(id) == "" {
-		fail405(c, "项目id 不正确")
-		return
-	}
-	msg, err := runtime.DeleteProject(id, form.string("thorough"))
+	// Java deleteProject 未使用 @ValidatorItem：缺 id 时按“项目不存在”返回成功
+	msg, err := rt.DeleteProject(form.string("id"), form.string("thorough"))
 	if err != nil {
-		fail405(c, err.Error())
+		respondProjectError(c, err)
 		return
 	}
 	respondOK(c, msg, nil)
@@ -251,20 +288,24 @@ func projectDelete(c *httpx.Context, runtime *project.Runtime) {
 
 // projectStatus 获取项目进程状态（等价 ProjectStatusController.getProjectStatus）。
 func projectStatus(c *httpx.Context, runtime *project.Runtime) {
+	rt := runtime.WithLang(c.Lang)
 	form := readProjectForm(c)
 	id := form.string("id")
 	if strings.TrimSpace(id) == "" {
-		fail405(c, "项目id 不正确")
+		// @ValidatorItem 校验失败 -> code=400（自定义文案优先）
+		failParam(c, c.T(keyIncorrectProjectID))
 		return
 	}
-	info := lookupProject(runtime, id)
+	info := lookupProject(rt, id)
 	if info == nil {
-		fail405(c, "项目id不存在")
+		failValidation(c, project.ValidationKey(keyProjectIDNotExist))
 		return
 	}
-	result, err := runtime.Operate(project.OpStatus, info)
+	// Java 端 getProjectStatus 捕获内部异常并返回空对象
+	result, err := rt.StatusE(info)
 	if err != nil {
-		fail405(c, err.Error())
+		c.App.Log().Warn("get project status failed", "id", id, "error", err)
+		respondOK(c, "", map[string]any{})
 		return
 	}
 	data := map[string]any{}
@@ -282,30 +323,32 @@ func projectStatus(c *httpx.Context, runtime *project.Runtime) {
 
 // projectPort 获取项目运行端口（等价 ProjectStatusController.getProjectPort）。
 func projectPort(c *httpx.Context, runtime *project.Runtime) {
+	rt := runtime.WithLang(c.Lang)
 	form := readProjectForm(c)
 	idsText := form.string("ids")
 	if strings.TrimSpace(idsText) == "" {
-		fail405(c, "没有要获取的信息")
+		failValidation(c, project.ValidationKey(keyInfoToRetrieveNotFound))
 		return
 	}
 	var ids []string
 	if err := json.Unmarshal([]byte(idsText), &ids); err != nil {
-		fail405(c, "没有要获取的信息")
+		respondProjectError(c, project.Servicef("invalid ids json: %v", err))
 		return
 	}
 	result := map[string]any{}
 	for _, id := range ids {
 		item := map[string]any{}
-		info := lookupProject(runtime, id)
+		info := lookupProject(rt, id)
 		if info == nil {
-			item["error"] = "项目不存在:" + id
+			item["error"] = c.T(keyProjectNotExist) + ":" + id
 			result[id] = item
 			continue
 		}
 		item["name"] = project.GetString(info, "name")
-		status, err := runtime.Operate(project.OpStatus, info)
+		status, err := rt.StatusE(info)
 		if err != nil {
-			item["error"] = err.Error()
+			_, msg := project.LocalizeError(c.Lang, err)
+			item["error"] = msg
 			result[id] = item
 			continue
 		}
@@ -332,46 +375,55 @@ func projectPort(c *httpx.Context, runtime *project.Runtime) {
 
 // projectOperate 执行项目命令（等价 ProjectStatusController.operate）。
 func projectOperate(c *httpx.Context, runtime *project.Runtime) {
+	rt := runtime.WithLang(c.Lang)
 	form := readProjectForm(c)
 	id := form.string("id")
 	if strings.TrimSpace(id) == "" {
-		fail405(c, "项目id 不正确")
+		// @ValidatorItem 校验失败 -> code=400（自定义文案优先）
+		failParam(c, c.T(keyIncorrectProjectID))
 		return
 	}
 	op := strings.TrimSpace(form.string("opt"))
 	if op == "" {
-		fail405(c, "操作参数缺失")
+		failParam(c, c.T(keyMissingOperationParam))
 		return
 	}
-	info := lookupProject(runtime, id)
+	info := lookupProject(rt, id)
 	if info == nil {
-		fail405(c, "没有找到对应的项目")
+		failValidation(c, project.ValidationKey(keyNoProjectFound))
+		return
+	}
+	// Java：EnumUtil.fromStringQuietly 解析失败 -> Assert「请选择操作类型」；
+	// 枚举存在但 canOpt=false -> Assert「不支持当前操作：<opt>」
+	if !project.ValidOp(op) {
+		failValidation(c, project.ValidationKey(keySelectOperationType))
 		return
 	}
 	if !project.CanOpt(op) {
-		fail405(c, "不支持当前操作："+op)
+		failValidation(c, project.ValidationKeySuffix(keyOperationNotSupported, op))
 		return
 	}
-	result, err := runtime.Operate(op, info)
+	result, err := rt.Operate(op, info)
 	if err != nil {
-		fail405(c, err.Error())
+		respondProjectError(c, err)
 		return
 	}
 	code := 200
-	msg := "操作成功"
+	msg := c.T(keyOperationSucceeded)
 	if !result.Success {
 		code = 201
-		msg = "操作失败：" + result.MsgStr()
+		msg = c.T(keyOperationFailedDetails) + result.MsgStr()
 	}
 	respondCode(c, code, msg, result.JSON())
 }
 
 // projectReleaseOutGiving 释放节点分发（等价 /manage/releaseOutGiving）。
 func projectReleaseOutGiving(c *httpx.Context, runtime *project.Runtime) {
+	rt := runtime.WithLang(c.Lang)
 	form := readProjectForm(c)
-	msg, err := runtime.ReleaseOutGiving(form.string("id"), projectUser(c))
+	msg, err := rt.ReleaseOutGiving(form.string("id"), projectUser(c))
 	if err != nil {
-		fail405(c, err.Error())
+		respondProjectError(c, err)
 		return
 	}
 	respondOK(c, msg, nil)
@@ -379,20 +431,21 @@ func projectReleaseOutGiving(c *httpx.Context, runtime *project.Runtime) {
 
 // projectChangeWorkspaceID 修改项目工作空间（等价 /manage/change-workspace-id）。
 func projectChangeWorkspaceID(c *httpx.Context, runtime *project.Runtime) {
+	rt := runtime.WithLang(c.Lang)
 	form := readProjectForm(c)
-	msg, err := runtime.ChangeWorkspaceID(form.string("id"), form.string("newWorkspaceId"), form.string("newNodeId"), projectUser(c))
+	msg, err := rt.ChangeWorkspaceID(form.string("id"), form.string("newWorkspaceId"), form.string("newNodeId"), projectUser(c))
 	if err != nil {
-		fail405(c, err.Error())
+		respondProjectError(c, err)
 		return
 	}
 	respondOK(c, msg, nil)
 }
 
-// requireProject 读取项目，不存在时写错误响应。
-func requireProject(c *httpx.Context, runtime *project.Runtime, id string) map[string]any {
-	info := lookupProject(runtime, id)
+// requireProject 读取项目，不存在时写 405 错误响应。
+func requireProject(c *httpx.Context, rt *project.Runtime, id string) map[string]any {
+	info := lookupProject(rt, id)
 	if info == nil {
-		fail405(c, "获取项目信息失败:"+id)
+		respondProjectError(c, project.ValidationKeySuffix(keyGetProjectInfoFailure, id))
 		return nil
 	}
 	return info
@@ -400,12 +453,17 @@ func requireProject(c *httpx.Context, runtime *project.Runtime, id string) map[s
 
 // projectLogSize 查看控制台日志大小（等价 ProjectLogBackController.logSize）。
 func projectLogSize(c *httpx.Context, runtime *project.Runtime) {
+	rt := runtime.WithLang(c.Lang)
 	form := readProjectForm(c)
-	info := requireProject(c, runtime, form.string("id"))
+	info := requireProject(c, rt, form.string("id"))
 	if info == nil {
 		return
 	}
-	logBack, size := runtime.LogSize(info)
+	logBack, size, err := rt.LogSize(info)
+	if err != nil {
+		respondProjectError(c, err)
+		return
+	}
 	data := map[string]any{"logBack": logBack}
 	if size != "" {
 		data["logSize"] = size
@@ -415,54 +473,79 @@ func projectLogSize(c *httpx.Context, runtime *project.Runtime) {
 
 // projectResetLog 重置控制台日志（等价 ProjectLogBackController.resetLog）。
 func projectResetLog(c *httpx.Context, runtime *project.Runtime) {
+	rt := runtime.WithLang(c.Lang)
 	form := readProjectForm(c)
-	info := requireProject(c, runtime, form.string("id"))
+	info := requireProject(c, rt, form.string("id"))
 	if info == nil {
 		return
 	}
-	msg, code := runtime.ResetLog(info)
+	msg, code, err := rt.ResetLog(info)
+	if err != nil {
+		// Java resetLog 捕获所有异常并返回 code=500 重置日志失败
+		c.App.Log().Warn("reset project log failed", "id", form.string("id"), "error", err)
+		respondCode(c, 500, c.T(keyResetLogFailure), nil)
+		return
+	}
 	respondCode(c, code, msg, nil)
 }
 
 // projectLogBack 查看控制台日志备份列表（等价 ProjectLogBackController.console）。
 func projectLogBack(c *httpx.Context, runtime *project.Runtime) {
+	rt := runtime.WithLang(c.Lang)
 	form := readProjectForm(c)
-	info := requireProject(c, runtime, form.string("id"))
+	info := requireProject(c, rt, form.string("id"))
 	if info == nil {
 		return
 	}
-	respondOK(c, "", runtime.LogBackList(info))
+	data, err := rt.LogBackList(info)
+	if err != nil {
+		respondProjectError(c, err)
+		return
+	}
+	respondOK(c, "", data)
 }
 
 // projectLogBackDelete 删除日志备份（等价 ProjectLogBackController.clear）。
 func projectLogBackDelete(c *httpx.Context, runtime *project.Runtime) {
+	rt := runtime.WithLang(c.Lang)
 	form := readProjectForm(c)
-	info := requireProject(c, runtime, form.string("id"))
+	info := requireProject(c, rt, form.string("id"))
 	if info == nil {
 		return
 	}
 	name := form.string("name")
 	if strings.TrimSpace(name) == "" {
-		fail405(c, "没有对应到文件")
+		failValidation(c, project.ValidationKey(keyNoFileFound))
 		return
 	}
-	if err := runtime.LogBackDelete(info, name); err != nil {
-		fail500(c, err.Error())
+	if err := rt.LogBackDelete(info, name); err != nil {
+		respondProjectError(c, err)
 		return
 	}
-	respondOK(c, "删除成功", nil)
+	respondOK(c, c.T(keyDeleteSuccess), nil)
 }
 
 // projectLogBackDownload 下载日志备份（等价 ProjectLogBackController.download）。
 func projectLogBackDownload(c *httpx.Context, runtime *project.Runtime) {
+	rt := runtime.WithLang(c.Lang)
 	form := readProjectForm(c)
-	info := requireProject(c, runtime, form.string("id"))
+	info := requireProject(c, rt, form.string("id"))
 	if info == nil {
 		return
 	}
-	file, err := runtime.LogBackDownloadFile(info, form.string("key"))
+	key := form.string("key")
+	if strings.TrimSpace(key) == "" {
+		failValidation(c, project.ValidationKey(keyCorrespondingFileNeed))
+		return
+	}
+	file, err := rt.LogBackDownloadFile(info, key)
 	if err != nil {
-		writeRawJSON(c, 400, err.Error())
+		kind, msg := project.LocalizeError(c.Lang, err)
+		if kind == project.ErrBusiness {
+			writeRawJSON(c, 400, msg)
+		} else {
+			writeRawJSON(c, 400, c.T(keyDownloadFailedRetry)+msg)
+		}
 		return
 	}
 	serveFile(c, file)
@@ -470,14 +553,20 @@ func projectLogBackDownload(c *httpx.Context, runtime *project.Runtime) {
 
 // projectLogExport 导出控制台日志（等价 ProjectLogBackController.export）。
 func projectLogExport(c *httpx.Context, runtime *project.Runtime) {
+	rt := runtime.WithLang(c.Lang)
 	form := readProjectForm(c)
-	info := requireProject(c, runtime, form.string("id"))
+	info := requireProject(c, rt, form.string("id"))
 	if info == nil {
 		return
 	}
-	file, err := runtime.ExportLogFile(info)
+	file, err := rt.ExportLogFile(info)
 	if err != nil {
-		writeRawJSON(c, 400, err.Error())
+		kind, msg := project.LocalizeError(c.Lang, err)
+		if kind == project.ErrBusiness {
+			writeRawJSON(c, 400, msg)
+			return
+		}
+		respondProjectError(c, err)
 		return
 	}
 	serveFile(c, file)
@@ -496,13 +585,13 @@ func writeRawJSON(c *httpx.Context, code int, msg string) {
 func serveFile(c *httpx.Context, path string) {
 	file, err := os.Open(path)
 	if err != nil {
-		writeRawJSON(c, 400, "下载失败。请刷新页面后重试"+err.Error())
+		writeRawJSON(c, 400, c.T(keyDownloadFailedRetry)+err.Error())
 		return
 	}
 	defer func() { _ = file.Close() }()
 	stat, err := file.Stat()
 	if err != nil || stat.IsDir() {
-		writeRawJSON(c, 400, "下载失败。请刷新页面后重试文件不存在")
+		writeRawJSON(c, 400, c.T(keyDownloadFailedRetry))
 		return
 	}
 	c.W.Header().Set("Content-Type", "application/octet-stream")

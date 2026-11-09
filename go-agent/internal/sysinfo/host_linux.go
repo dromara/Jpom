@@ -56,7 +56,7 @@ func readCPUTicks() (CPUTicks, error) {
 			Steal:   values[7],
 		}, nil
 	}
-	return CPUTicks{}, fmt.Errorf("解析 /proc/stat 失败")
+	return CPUTicks{}, fmt.Errorf("parse /proc/stat failed")
 }
 
 // cpuCount 返回逻辑 CPU 个数。
@@ -99,7 +99,8 @@ func cpuModelName() string {
 	return ""
 }
 
-// cpuModel 近似 Oshi CentralProcessor#toString() 的内容。
+// cpuModel 近似 Oshi CentralProcessor#toString() 的内容
+// （型号 + 物理/逻辑核数 + ProcessorIdentifier 的 Family/Model/Stepping）。
 func cpuModel() string {
 	model := cpuModelName()
 	if model == "" {
@@ -107,15 +108,24 @@ func cpuModel() string {
 	}
 	logical := cpuCount()
 	physical := logical
-	content, err := os.ReadFile("/proc/cpuinfo")
-	if err == nil {
+	processorID := map[string]string{}
+	if content, err := os.ReadFile("/proc/cpuinfo"); err == nil {
 		for _, line := range strings.Split(string(content), "\n") {
 			key, value, found := strings.Cut(line, ":")
-			if found && strings.TrimSpace(key) == "cpu cores" {
-				if parsed, err := strconv.Atoi(strings.TrimSpace(value)); err == nil && parsed > 0 {
+			if !found {
+				continue
+			}
+			key = strings.TrimSpace(key)
+			value = strings.TrimSpace(value)
+			switch key {
+			case "cpu cores":
+				if parsed, err := strconv.Atoi(value); err == nil && parsed > 0 {
 					physical = parsed
 				}
-				break
+			case "vendor_id", "cpu family", "model", "stepping":
+				if _, exists := processorID[key]; !exists {
+					processorID[key] = value
+				}
 			}
 		}
 	}
@@ -123,8 +133,22 @@ func cpuModel() string {
 	if physical > 0 && logical%physical == 0 && physical < logical {
 		packages = logical / physical
 	}
-	return fmt.Sprintf("%s\n %d physical CPU package(s)\n %d physical CPU core(s)\n %d logical CPU(s)",
+	result := fmt.Sprintf("%s\n %d physical CPU package(s)\n %d physical CPU core(s)\n %d logical CPU(s)",
 		model, packages, physical, logical)
+	if vendor := processorID["vendor_id"]; vendor != "" {
+		family := valueOrDefault(processorID["cpu family"], "?")
+		modelValue := valueOrDefault(processorID["model"], "?")
+		stepping := valueOrDefault(processorID["stepping"], "?")
+		result += fmt.Sprintf("\nIdentifier: %s Family %s Model %s Stepping %s", vendor, family, modelValue, stepping)
+	}
+	return result
+}
+
+func valueOrDefault(value, fallback string) string {
+	if strings.TrimSpace(value) == "" {
+		return fallback
+	}
+	return strings.TrimSpace(value)
 }
 
 func readMemory() (memoryStat, error) {
@@ -178,7 +202,7 @@ func readUptime() (int64, error) {
 	}
 	fields := strings.Fields(string(content))
 	if len(fields) == 0 {
-		return 0, fmt.Errorf("解析 /proc/uptime 失败")
+		return 0, fmt.Errorf("parse /proc/uptime failed")
 	}
 	value, err := strconv.ParseFloat(fields[0], 64)
 	if err != nil {
@@ -602,7 +626,7 @@ func readDeviceNumbers(path string) (int, int, error) {
 	}
 	majorStr, minorStr, found := strings.Cut(strings.TrimSpace(string(content)), ":")
 	if !found {
-		return 0, 0, fmt.Errorf("解析设备号失败 %s", path)
+		return 0, 0, fmt.Errorf("parse device number failed: %s", path)
 	}
 	major, err := strconv.Atoi(majorStr)
 	if err != nil {
@@ -727,10 +751,8 @@ func listNetworkInterfaces() ([]netIface, error) {
 		if item.MacAddr == "" || item.MacAddr == "00:00:00:00:00:00" {
 			item.MacAddr = "unknown"
 		}
-		if _, err := os.Stat(filepath.Join(sysBase, "device")); err == nil {
-			if driver := readDriverName(filepath.Join(sysBase, "device", "uevent")); driver != "" {
-				item.DisplayName = iface.Name
-			}
+		if displayName := networkDisplayName(sysBase, iface.Name); displayName != "" {
+			item.DisplayName = displayName
 		}
 		item.IPv4, item.IPv6, item.SubnetMasks, item.PrefixLengths = interfaceAddresses(iface)
 		if stat, ok := stats[iface.Name]; ok {
@@ -747,6 +769,36 @@ func listNetworkInterfaces() ([]netIface, error) {
 	}
 	sort.SliceStable(result, func(i, j int) bool { return result[i].Index > result[j].Index })
 	return result, nil
+}
+
+// knownPCINetworkNames 是常见虚拟化网卡 PCI ID -> 描述（对齐 Oshi 的 displayName 展示）。
+var knownPCINetworkNames = map[string]string{
+	"1af4:1000": "Red Hat, Inc. Virtio network device",
+	"1af4:1041": "Red Hat, Inc. Virtio 1.0 network device",
+	"15ad:07b0": "VMware VMXNET3 Ethernet Controller",
+	"8086:100e": "Intel 82540EM Gigabit Ethernet Controller",
+	"8086:10d3": "Intel 82574L Gigabit Network Connection",
+	"10ec:8139": "Realtek RTL-8100/8101L/8139 PCI Fast Ethernet Adapter",
+}
+
+// networkDisplayName 读取 /sys/class/net/<if>/device/uevent 的 PCI_ID/DRIVER，
+// 映射为 Java Oshi NetworkIF.getDisplayName() 类似的描述。
+func networkDisplayName(sysBase, fallback string) string {
+	content, err := os.ReadFile(filepath.Join(sysBase, "device", "uevent"))
+	if err != nil {
+		return fallback
+	}
+	pciID := ""
+	for _, line := range strings.Split(string(content), "\n") {
+		if value, found := strings.CutPrefix(line, "PCI_ID="); found {
+			pciID = strings.ToLower(strings.TrimSpace(value))
+			break
+		}
+	}
+	if name, ok := knownPCINetworkNames[pciID]; ok {
+		return name
+	}
+	return fallback
 }
 
 func readDriverName(ueventPath string) string {

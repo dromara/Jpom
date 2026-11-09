@@ -16,7 +16,9 @@ import (
 	"github.com/gorilla/websocket"
 
 	"jpom.io/go-agent/internal/httpx"
+	"jpom.io/go-agent/internal/i18n"
 	"jpom.io/go-agent/internal/project"
+	"jpom.io/go-agent/internal/script"
 )
 
 // systemProjectID is the pseudo project id used by the index monitor console
@@ -41,11 +43,17 @@ type ConsoleBackend interface {
 // runtime.
 type ProjectConsoleBackend struct {
 	runtime *project.Runtime
+	lang    string
 }
 
 // NewProjectConsoleBackend creates the project console backend.
 func NewProjectConsoleBackend(runtime *project.Runtime) *ProjectConsoleBackend {
-	return &ProjectConsoleBackend{runtime: runtime}
+	return &ProjectConsoleBackend{runtime: runtime, lang: i18n.DefaultLang()}
+}
+
+// translateDefault renders a backend message with the configured agent language.
+func (b *ProjectConsoleBackend) translateDefault(key string, args ...any) string {
+	return i18n.T(b.lang, key, args...)
 }
 
 // Project implements ConsoleBackend.
@@ -64,7 +72,7 @@ func (b *ProjectConsoleBackend) Execute(op string, info map[string]any) (bool, s
 		return false, err.Error(), nil
 	}
 	if result == nil {
-		return false, "操作失败", nil
+		return false, b.translateDefault("i18n.operation_failed.3d94"), nil
 	}
 	if op == "status" {
 		return result.Success, "", result.JSON()
@@ -121,12 +129,12 @@ func (m *Manager) HandleConsole(c *httpx.Context) {
 	if projectID != systemProjectID {
 		info, exists := m.Console.Project(projectID)
 		if !exists {
-			_ = session.Send("没有对应项目：" + projectID)
+			_ = session.Send(m.translate(session, "i18n.no_project_specified2.a7f5") + projectID)
 			session.Close()
 			return
 		}
 		current = info
-		_ = session.Send("连接成功：" + projectName(info))
+		_ = session.Send(m.translate(session, "i18n.connection_successful_with_message.5cf2") + projectName(info))
 	}
 	currentFile := ""
 	for {
@@ -153,7 +161,7 @@ func (m *Manager) HandleConsole(c *httpx.Context) {
 		}
 		info, exists := m.Console.Project(id)
 		if !exists {
-			_ = session.Send("没有对应项目：" + id)
+			_ = session.Send(m.translate(session, "i18n.no_project_specified2.a7f5") + id)
 			session.Close()
 			return
 		}
@@ -166,43 +174,43 @@ func (m *Manager) HandleConsole(c *httpx.Context) {
 			success, message, resultData := m.Console.Execute(operation, info)
 			m.Console.UpdateModifyUser(id, session.OptUser)
 			if success {
-				_ = session.SendJSON(controlFrame(request, 200, "操作成功", resultData))
+				_ = session.SendJSON(controlFrame(request, 200, m.translate(session, "i18n.operation_succeeded.3313"), resultData))
 			} else {
 				_ = session.SendJSON(controlFrame(request, 400, message, nil))
 			}
 		case "status":
 			success, _, resultData := m.Console.Execute(operation, info)
 			if success {
-				_ = session.SendJSON(controlFrame(request, 200, "运行中", resultData))
+				_ = session.SendJSON(controlFrame(request, 200, m.translate(session, "i18n.running_status.d679"), resultData))
 			} else {
-				_ = session.SendJSON(controlFrame(request, 404, "未运行", resultData))
+				_ = session.SendJSON(controlFrame(request, 404, m.translate(session, "i18n.not_running.4f8a"), resultData))
 			}
 		case "showlog":
 			if requestString(request, "search") != "" {
-				m.searchProjectLog(session, current, request)
+				m.searchProjectLog(session, current, request, m.projectLogCharset(current))
 				continue
 			}
 			file, ok := m.projectLogFile(current, bodyString(request, "fileName"))
 			if !ok {
-				_ = session.Send("文件不存在")
+				_ = session.Send(m.translate(session, "i18n.file_not_found.d952"))
 				continue
 			}
 			if currentFile != "" && currentFile != file {
-				// 切换日志文件时先摘除旧监听
+				// 切换日志文件时先摘除旧监听（Java 只离线旧 watcher，不发 Relisten；
+				// Relisten 仅由 reWatcher——日志文件被重置时——发送）
 				m.Tail.DetachFile(currentFile, session.ID)
-				_ = session.Send("Relisten to the file............")
 			}
 			currentFile = file
-			attached, err := m.Tail.Attach(file, session)
+			attached, err := m.Tail.Attach(file, session, m.projectLogCharset(current))
 			if err != nil {
 				_ = session.Send(err.Error())
 				continue
 			}
 			if !attached {
-				_ = session.Send("监听文件失败,可能文件不存在")
+				_ = session.Send(m.translate(session, "i18n.listen_file_failed_may_not_exist.fd56"))
 			}
 		default:
-			_ = session.SendJSON(controlFrame(request, 404, "不支持的方式："+operation, nil))
+			_ = session.SendJSON(controlFrame(request, 404, m.translate(session, "i18n.unsupported_method_with_colon.eae8")+operation, nil))
 		}
 	}
 }
@@ -218,6 +226,22 @@ func projectName(info map[string]any) string {
 // projectLibDir returns the project lib directory (projectPath).
 func (m *Manager) projectLibDir(info map[string]any) (string, error) {
 	return project.ProjectPath(info)
+}
+
+// projectLogCharset resolves the project console log charset. The project
+// runtime owns the Java compatible resolution (linked project logCharset ->
+// jpom.project.log.file-charset -> platform default); the local fallback keeps
+// the websocket usable when no runtime was wired (tests).
+func (m *Manager) projectLogCharset(info map[string]any) string {
+	if m.ProjectRuntime != nil {
+		return m.ProjectRuntime.ResolveLogCharset(info)
+	}
+	projectCharset := project.GetString(info, "logCharset")
+	configured := ""
+	if m.App.Config != nil {
+		configured = m.App.Config.Jpom.Project.Log.FileCharset
+	}
+	return script.ProjectLogCharset(projectCharset, configured)
 }
 
 // projectLogFile resolves the console log file to tail. An empty fileName means

@@ -74,7 +74,7 @@ func CacheInfo(a *app.App) map[string]any {
 	}
 	var value map[string]any
 	if err := json.Unmarshal(content, &value); err != nil {
-		a.Log().Warn("解析远程版本信息失败", "error", err)
+		a.Log().Warn("parse remote version failed", "error", err)
 		return nil
 	}
 	lastTime := toInt64(value["lastTime"])
@@ -96,7 +96,7 @@ func LoadRemoteInfo(a *app.App) (map[string]any, error) {
 		return nil, err
 	}
 	if value == nil || strings.TrimSpace(toString(value["tagName"])) == "" {
-		return nil, fmt.Errorf("没有可用的远程版本信息")
+		return nil, fmt.Errorf("no remote version information available")
 	}
 	cacheLoadTime(a, value)
 	return value, nil
@@ -115,7 +115,7 @@ func loadTransitURL(url string) (map[string]any, error) {
 	}
 	var value map[string]any
 	if err := json.Unmarshal(body, &value); err != nil {
-		return nil, fmt.Errorf("解析远程版本信息失败: %w", err)
+		return nil, fmt.Errorf("parse remote version failed: %w", err)
 	}
 	if value == nil {
 		return nil, nil
@@ -220,7 +220,7 @@ func cacheLoadTime(a *app.App, value map[string]any) {
 		return
 	}
 	if err := store.New(RemoteVersionFile(a)).WriteRaw(content); err != nil {
-		a.Log().Warn("写入远程版本信息缓存失败", "error", err)
+		a.Log().Warn("write remote version cache failed", "error", err)
 	}
 }
 

@@ -22,6 +22,7 @@ package dsl
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"net/url"
 	"os"
@@ -34,6 +35,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"jpom.io/go-agent/internal/i18n"
 	"jpom.io/go-agent/internal/project"
 	"jpom.io/go-agent/internal/script"
 )
@@ -85,11 +87,11 @@ var processNames = []string{"start", "status", "stop", "restart", "reload"}
 // bean field names, historical documents also use snake_case).
 func Parse(content string) (*Content, error) {
 	if strings.TrimSpace(content) == "" {
-		return nil, fmt.Errorf("未配置 dsl 信息")
+		return nil, fmt.Errorf("dsl content is empty")
 	}
 	raw := map[string]any{}
 	if err := yaml.Unmarshal([]byte(content), &raw); err != nil {
-		return nil, fmt.Errorf("解析 dsl 配置失败: %w", err)
+		return nil, fmt.Errorf("parse dsl content failed: %w", err)
 	}
 	parsed := &Content{Description: pickString(raw, "description")}
 	if runRaw := pickMap(raw, "run"); runRaw != nil {
@@ -176,18 +178,25 @@ type Resolved struct {
 // libraries through the script manager.
 type Engine struct {
 	scripts *script.Manager
+	lang    string
 }
 
-// NewEngine creates a DSL engine.
-func NewEngine(scripts *script.Manager) *Engine { return &Engine{scripts: scripts} }
+// NewEngine creates a DSL engine (default language from jpom.system.lang).
+func NewEngine(scripts *script.Manager) *Engine {
+	return &Engine{scripts: scripts, lang: i18n.DefaultLang()}
+}
 
 var registerOnce sync.Once
 
 // Register wires the engine into the project domain (the project package calls
 // it for /manage/operate DSL processes). It is safe to call multiple times.
-func Register(scripts *script.Manager) {
+func Register(scripts *script.Manager, lang ...string) {
 	registerOnce.Do(func() {
-		project.RegisterDslExecutor(NewEngine(scripts))
+		engine := NewEngine(scripts)
+		if len(lang) > 0 && strings.TrimSpace(lang[0]) != "" {
+			engine.lang = lang[0]
+		}
+		project.RegisterDslExecutor(engine)
 	})
 }
 
@@ -197,11 +206,11 @@ func Register(scripts *script.Manager) {
 //   - otherwise a project file relative to the project lib directory
 func (e *Engine) Resolve(original map[string]any, process *Process) (*Resolved, error) {
 	if process == nil {
-		return nil, fmt.Errorf("流程不存在")
+		return nil, fmt.Errorf("%s", i18n.T(e.lang, "i18n.process_does_not_exist.4e39"))
 	}
 	scriptID := strings.TrimSpace(process.ScriptID)
 	if scriptID == "" {
-		return nil, fmt.Errorf("请填写脚本模板id")
+		return nil, fmt.Errorf("%s", i18n.T(e.lang, "i18n.script_template_id_required.f339"))
 	}
 	resolved := &Resolved{ScriptID: scriptID, Args: process.ScriptArgs}
 	resolved.Env = process.ScriptEnv
@@ -213,7 +222,7 @@ func (e *Engine) Resolve(original map[string]any, process *Process) (*Resolved, 
 			return nil, err
 		}
 		if !exists {
-			return nil, fmt.Errorf("对应的脚本库不存在：%s", tag)
+			return nil, fmt.Errorf("%s%s", i18n.T(e.lang, "i18n.missing_script_library_message.be9a"), tag)
 		}
 		path, err := e.scripts.WriteRawScriptFile(stringField(library, "script"))
 		if err != nil {
@@ -245,7 +254,7 @@ func (e *Engine) Resolve(original map[string]any, process *Process) (*Resolved, 
 	file := filepath.Join(libDir, scriptID)
 	info, err := os.Stat(file)
 	if err != nil || info.IsDir() {
-		return nil, fmt.Errorf("脚本模版不存在:%s", scriptID)
+		return nil, fmt.Errorf("%s%s", i18n.T(e.lang, "i18n.script_template_not_exist.e05f"), scriptID)
 	}
 	resolved.Type = "file"
 	resolved.Path = file
@@ -264,11 +273,11 @@ type syncResult struct {
 func (e *Engine) Run(runtime *project.Runtime, info, original map[string]any, op string, sync bool) error {
 	content := e.parse(original)
 	if content == nil {
-		return fmt.Errorf("未配置 dsl 信息（项目信息错误）")
+		return fmt.Errorf("%s", i18n.T(e.lang, "i18n.dsl_info_not_configured.3487"))
 	}
 	process := content.Process(op)
 	if process == nil {
-		return fmt.Errorf("DSL 未配置运行管理或者未配置 %s 流程", op)
+		return fmt.Errorf("%s", i18n.T(e.lang, "i18n.dsl_not_configured.8a57", op))
 	}
 	resolved, err := e.Resolve(original, process)
 	if err != nil {
@@ -289,9 +298,9 @@ func (e *Engine) Run(runtime *project.Runtime, info, original map[string]any, op
 		return result.err
 	}
 	lines := make([]string, 0, len(result.lines)+3)
-	lines = append(lines, "[SYSTEM-INFO] 开始执行:"+op)
+	lines = append(lines, "[SYSTEM-INFO] "+i18n.T(e.lang, "i18n.start_executing.f0b9", op))
 	lines = append(lines, result.lines...)
-	lines = append(lines, fmt.Sprintf("[SYSTEM-INFO] 执行结束: %s %d", op, result.exitCode))
+	lines = append(lines, "[SYSTEM-INFO] "+i18n.T(e.lang, "i18n.execution_ended_with_detail.8f93", op, result.exitCode))
 	return appendLogLines(logFile, lines)
 }
 
@@ -300,11 +309,11 @@ func (e *Engine) Run(runtime *project.Runtime, info, original map[string]any, op
 func (e *Engine) SyncRun(runtime *project.Runtime, info, original map[string]any, op string) (int, []string, error) {
 	content := e.parse(original)
 	if content == nil {
-		return 0, nil, fmt.Errorf("未配置 dsl 信息（项目信息错误）")
+		return 0, nil, fmt.Errorf("%s", i18n.T(e.lang, "i18n.dsl_info_not_configured.3487"))
 	}
 	process := content.Process(op)
 	if process == nil {
-		return 0, nil, fmt.Errorf("DSL 未配置运行管理或者未配置 %s 流程", op)
+		return 0, nil, fmt.Errorf("%s", i18n.T(e.lang, "i18n.dsl_not_configured.8a57", op))
 	}
 	resolved, err := e.Resolve(original, process)
 	if err != nil {
@@ -322,7 +331,7 @@ func (e *Engine) SyncRun(runtime *project.Runtime, info, original map[string]any
 		return result.exitCode, result.lines, result.err
 	}
 	lines := make([]string, 0, len(result.lines)+1)
-	lines = append(lines, formatLine(op, fmt.Sprintf("本次执行退出码: %d", result.exitCode)))
+	lines = append(lines, formatLine(op, i18n.T(e.lang, "i18n.exit_code.3b54", result.exitCode)))
 	lines = append(lines, result.lines...)
 	return result.exitCode, lines, nil
 }
@@ -387,7 +396,7 @@ func (e *Engine) execute(resolved *Resolved, environment *script.EnvBuilder, op 
 	if err := cmd.Start(); err != nil {
 		_ = readEnd.Close()
 		_ = writeEnd.Close()
-		return syncResult{exitCode: -100, lines: []string{formatLine(op, "执行异常："+err.Error())}}
+		return syncResult{exitCode: -100, lines: []string{formatLine(op, i18n.T(e.lang, "i18n.general_execution_exception.62e9")+err.Error())}}
 	}
 	_ = writeEnd.Close()
 	reader := bufio.NewReaderSize(readEnd, 64*1024)
@@ -395,7 +404,8 @@ func (e *Engine) execute(resolved *Resolved, environment *script.EnvBuilder, op 
 	for {
 		line, readErr := reader.ReadString('\n')
 		if len(line) > 0 {
-			lines = append(lines, formatLine(op, trimLineEnding(line)))
+			// DSL 输出按 console-charset 解码（Windows 默认 GBK）
+			lines = append(lines, formatLine(op, script.DecodeLine(trimLineBytes([]byte(line)), e.scripts.ConsoleCharset())))
 		}
 		if readErr != nil {
 			break
@@ -456,6 +466,12 @@ func removeTemp(resolved *Resolved) {
 func trimLineEnding(line string) string {
 	line = strings.TrimSuffix(line, "\n")
 	return strings.TrimSuffix(line, "\r")
+}
+
+// trimLineBytes strips the trailing CR/LF from a raw byte line before decoding.
+func trimLineBytes(line []byte) []byte {
+	line = bytes.TrimSuffix(line, []byte("\n"))
+	return bytes.TrimSuffix(line, []byte("\r"))
 }
 
 func processExitCode(err error) int {

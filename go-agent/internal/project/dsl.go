@@ -57,7 +57,7 @@ func currentDslExecutor() DslExecutor {
 func parseDslConfig(original map[string]any) (map[string]any, error) {
 	content := GetString(original, "dslContent")
 	if strings.TrimSpace(content) == "" {
-		return nil, fmt.Errorf("未配置 dsl 信息（项目信息错误）")
+		return nil, ValidationKey(keyDslInfoNotConfigured)
 	}
 	return parseDslContent(content)
 }
@@ -66,7 +66,7 @@ func parseDslConfig(original map[string]any) (map[string]any, error) {
 func parseDslContent(content string) (map[string]any, error) {
 	var config map[string]any
 	if err := yaml.Unmarshal([]byte(content), &config); err != nil {
-		return nil, fmt.Errorf("解析 dsl 配置失败: %w", err)
+		return nil, Servicef("parse dsl config failed: %v", err)
 	}
 	return config, nil
 }
@@ -138,16 +138,21 @@ type resolvedDslScript struct {
 // resolveDslScript 解析流程脚本（等价 DslScriptServer.resolveProcessScript）。
 //
 // 返回值：响应 JSON（status/msg/type/scriptId）、脚本内容、错误消息。
-func (r *Runtime) resolveDslScript(info map[string]any, process map[string]any) (map[string]any, resolvedDslScript, string) {
+func (r *Runtime) resolveDslScript(info map[string]any, process map[string]any) (map[string]any, resolvedDslScript, error) {
+	lang := r.Lang()
 	result := map[string]any{"status": false}
 	if process == nil {
-		result["msg"] = "流程不存在"
-		return result, resolvedDslScript{}, "流程不存在"
+		err := ValidationKey(keyProcessNotExist)
+		_, msg := LocalizeError(lang, err)
+		result["msg"] = msg
+		return result, resolvedDslScript{}, err
 	}
 	scriptID := GetString(process, "scriptId")
 	if scriptID == "" {
-		result["msg"] = "请填写脚本模板id"
-		return result, resolvedDslScript{}, "请填写脚本模板id"
+		err := ValidationKey(keyScriptTemplateIDNeeded)
+		_, msg := LocalizeError(lang, err)
+		result["msg"] = msg
+		return result, resolvedDslScript{}, err
 	}
 	if strings.HasPrefix(strings.ToLower(scriptID), "g@") {
 		libraryID := scriptID[2:]
@@ -158,19 +163,20 @@ func (r *Runtime) resolveDslScript(info map[string]any, process map[string]any) 
 				result["status"] = true
 				result["type"] = "library"
 				result["scriptId"] = libraryID
-				return result, resolvedDslScript{Kind: "library", Data: GetString(library, "script")}, ""
+				return result, resolvedDslScript{Kind: "library", Data: GetString(library, "script")}, nil
 			}
 		}
-		msg := "对应的脚本库不存在：" + libraryID
+		scriptErr := ValidationKeySuffix(keyScriptLibraryNotExist, libraryID)
+		_, msg := LocalizeError(lang, scriptErr)
 		result["msg"] = msg
-		return result, resolvedDslScript{}, msg
+		return result, resolvedDslScript{}, scriptErr
 	}
 	// 节点脚本
 	if scriptContent, ok := r.loadNodeScript(scriptID); ok {
 		result["status"] = true
 		result["type"] = "script"
 		result["scriptId"] = scriptID
-		return result, resolvedDslScript{Kind: "script", Data: scriptContent}, ""
+		return result, resolvedDslScript{Kind: "script", Data: scriptContent}, nil
 	}
 	// 项目目录下的脚本文件
 	lib, err := r.Manager.ResolveLibPath(info)
@@ -180,12 +186,13 @@ func (r *Runtime) resolveDslScript(info map[string]any, process map[string]any) 
 			result["status"] = true
 			result["type"] = "file"
 			result["scriptId"] = scriptID
-			return result, resolvedDslScript{Kind: "file", Path: scriptFile}, ""
+			return result, resolvedDslScript{Kind: "file", Path: scriptFile}, nil
 		}
 	}
-	msg := "脚本模版不存在：" + scriptID
+	scriptErr := ValidationKeySuffix(keyScriptTemplateNotExist, scriptID)
+	_, msg := LocalizeError(lang, scriptErr)
 	result["msg"] = msg
-	return result, resolvedDslScript{}, msg
+	return result, resolvedDslScript{}, scriptErr
 }
 
 // loadNodeScript 从 data/script.json 读取节点脚本内容。
@@ -226,21 +233,30 @@ func (r *Runtime) DslProcessInfo(info map[string]any) (bool, []map[string]any, e
 }
 
 // dslStatus 执行 DSL 的 status 流程并解析运行状态。
-func (r *Runtime) dslStatus(info, original map[string]any) *OpResult {
+func (r *Runtime) dslStatus(info, original map[string]any) (*OpResult, error) {
+	lang := r.Lang()
+	// mustDslConfig 在 Java 中位于 try 之外，配置缺失直接 405
+	if _, err := parseDslConfig(original); err != nil {
+		return nil, err
+	}
 	_, lines, err := r.dslSyncRun(info, original, OpStatus)
 	if err != nil {
+		kind, msg := LocalizeError(lang, err)
+		if kind != ErrValidation {
+			return nil, err
+		}
 		logFile, logErr := r.Manager.TouchLogFile(info)
 		if logErr == nil {
-			_ = appendLogLines(logFile, []string{err.Error()})
+			_ = appendLogLines(logFile, []string{msg}, r.ResolveLogCharset(info))
 		}
-		return OpResultOfMsg(err.Error())
+		return OpResultOfMsg(msg), nil
 	}
 	logFile, logErr := r.Manager.TouchLogFile(info)
 	if logErr == nil && len(lines) > 0 {
-		_ = appendLogLines(logFile, lines)
+		_ = appendLogLines(logFile, lines, r.ResolveLogCharset(info))
 	}
 	if len(lines) == 0 {
-		return OpResultSimple(false, proc.StoppedTag)
+		return OpResultSimple(false, proc.StoppedTag), nil
 	}
 	last := lines[len(lines)-1]
 	segments := splitTrim(last, "-")
@@ -248,7 +264,7 @@ func (r *Runtime) dslStatus(info, original map[string]any) *OpResult {
 	if len(segments) > 0 {
 		value = segments[len(segments)-1]
 	}
-	return OpResultOfMsg(value)
+	return OpResultOfMsg(value), nil
 }
 
 // dslRun 执行 DSL 流程并写入控制台日志（等价 DslScriptServer.run）。
@@ -283,11 +299,14 @@ func (r *Runtime) dslExecute(info, original map[string]any, op string, writeLog 
 	}
 	process := dslProcess(config, op)
 	if process == nil {
-		return -1, nil, fmt.Errorf("DSL 未配置运行管理或者未配置 %s 流程", op)
+		return -1, nil, ValidationKey(keyDslNotConfigured, op)
 	}
-	result, script, msg := r.resolveDslScript(info, process)
+	result, script, resolveErr := r.resolveDslScript(info, process)
+	if resolveErr != nil {
+		return -1, nil, resolveErr
+	}
 	if !GetBool(result, "status") && result["status"] != true {
-		return -1, nil, fmt.Errorf("%s", msg)
+		return -1, nil, ValidationKey(keyProcessNotExist)
 	}
 	logFile, err := r.Manager.TouchLogFile(info)
 	if err != nil {
@@ -352,11 +371,16 @@ func (r *Runtime) dslExecute(info, original map[string]any, op string, writeLog 
 			code = -1
 		}
 	}
-	outputLines := splitLines(builder.String())
+	outputText, decodeErr := proc.DecodeString(r.ConsoleCharset(), []byte(builder.String()))
+	if decodeErr != nil {
+		outputText = builder.String()
+	}
+	outputLines := splitLines(outputText)
 	formatted := make([]string, 0, len(outputLines)+1)
 	for _, line := range outputLines {
 		formatted = append(formatted, formatDslLine(op, line))
 	}
+	lang := r.Lang()
 	if writeLog {
 		logLines := make([]string, 0, len(formatted)+8)
 		logLines = append(logLines, "##################################################################################")
@@ -365,16 +389,16 @@ func (r *Runtime) dslExecute(info, original map[string]any, op string, writeLog 
 			logLines = append(logLines, key+"="+env[key])
 		}
 		logLines = append(logLines, "##################################################################################")
-		logLines = append(logLines, "[SYSTEM-INFO] 开始执行: "+op)
+		logLines = append(logLines, "[SYSTEM-INFO] "+tr(lang, keyStartExecuting, op))
 		logLines = append(logLines, formatted...)
-		logLines = append(logLines, fmt.Sprintf("[SYSTEM-INFO] 执行结束: %s %d", op, code))
-		_ = appendLogLines(logFile, logLines)
+		logLines = append(logLines, "[SYSTEM-INFO] "+tr(lang, keyExecutionEndedDetail, op, code))
+		_ = appendLogLines(logFile, logLines, r.ResolveLogCharset(info))
 	} else {
 		// 同步执行：首行插入退出码（与 Java DslScriptBuilder.syncExecute 一致）
-		formatted = append([]string{formatDslLine(op, fmt.Sprintf("本次执行退出码: %d", code))}, formatted...)
+		formatted = append([]string{formatDslLine(op, tr(lang, keyExitCode, code))}, formatted...)
 	}
 	if runErr != nil && code < 0 {
-		return code, formatted, runErr
+		return code, formatted, ServiceError(runErr)
 	}
 	return code, formatted, nil
 }
@@ -411,7 +435,7 @@ func formatDslLine(action, line string) string {
 }
 
 // appendLogLines 追加写入日志行。
-func appendLogLines(path string, lines []string) error {
+func appendLogLines(path string, lines []string, charset string) error {
 	file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
 		return err
@@ -422,7 +446,11 @@ func appendLogLines(path string, lines []string) error {
 		builder.WriteString(line)
 		builder.WriteString("\n")
 	}
-	_, err = file.WriteString(builder.String())
+	data, err := proc.EncodeString(charset, builder.String())
+	if err != nil {
+		return err
+	}
+	_, err = file.Write(data)
 	return err
 }
 

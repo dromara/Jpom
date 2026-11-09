@@ -51,6 +51,10 @@ public class JpomAgentApplication {
 EOF
 javac --release 8 -d "$work/classes" "$work/classes/org/dromara/jpom/JpomAgentApplication.java"
 cp "$work/classes/org/dromara/jpom/JpomAgentApplication.class" "$work/root/BOOT-INF/classes/org/dromara/jpom/"
+# 旧版 Server 的 checkJpomJar 用 JarClassLoader.loadClass(Main-Class) 从 jar 根加载，
+# 因此占位类还需放在 jar 根同一路径（BOOT-INF/classes 下保留供“是否 Jpom 包”校验）。
+mkdir -p "$work/root/org/dromara/jpom"
+cp "$work/classes/org/dromara/jpom/JpomAgentApplication.class" "$work/root/org/dromara/jpom/"
 
 # 2) 升级元信息 + 可执行文件
 sha256=$(sha256sum "$BINARY" | cut -d' ' -f1)
@@ -70,7 +74,13 @@ Jpom-Min-Version: $MIN_VERSION
 EOF
 
 # 4) 打成 jar（MANIFEST 作为第一条 entry）
-(cd "$work/root" && jar cfm "$OLDPWD/$OUT" "$work/MANIFEST.MF" .)
+# OUT 可能传入相对或绝对路径，jar 需要在 root 目录内执行，这里先转成绝对路径。
+OUT_ABS="$OUT"
+if [[ "$OUT_ABS" != /* ]]; then
+  OUT_ABS="$PWD/$OUT_ABS"
+fi
+mkdir -p "$(dirname "$OUT_ABS")"
+(cd "$work/root" && jar cfm "$OUT_ABS" "$work/MANIFEST.MF" .)
 
-echo "upgrade container: $OUT"
-unzip -l "$OUT" | head -12
+echo "upgrade container: $OUT_ABS"
+unzip -l "$OUT_ABS" | head -14

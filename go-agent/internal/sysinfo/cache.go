@@ -86,6 +86,11 @@ func currentCacheSizes(a *app.App) sizeCache {
 	return refreshCacheSizes(a)
 }
 
+// AgentPluginSize 是 /info 与 /system/cache 的 pluginSize 值。
+// 与 Java 插件端保持一致（Java PluginFactory.size() 实测为 1：内置 webhook 插件；
+// Server 仅展示该字段，不做逻辑判断）。
+const AgentPluginSize = 1
+
 // CacheJSON 对应 /system/cache 的响应 data。
 func CacheJSON(a *app.App, workspaceID string) map[string]any {
 	sizes := currentCacheSizes(a)
@@ -96,7 +101,7 @@ func CacheJSON(a *app.App, workspaceID string) map[string]any {
 		"pidPort":             pidPortCacheSize(),
 		"readFileOnLineCount": int(atomic.LoadInt64(&fileTailLineCount)),
 		"taskList":            CronList(),
-		"pluginSize":          0,
+		"pluginSize":          AgentPluginSize,
 		"dateTime":            time.Now().Format("2006-01-02 15:04:05"),
 		"timeZoneId":          timeZoneID(),
 		"scriptExecLogSize":   scriptExecLogSize(a),
@@ -118,16 +123,34 @@ func ClearCache(a *app.App, cacheType string) error {
 		ClearPidPortCache()
 	case "oldJarsSize":
 		if err := os.RemoveAll(a.OldJarsPath()); err != nil {
-			return &ParamError{Code: 405, Msg: "清空旧版本重新包失败"}
+			return paramErr(405, "i18n.clear_old_version_package_failed.021c")
 		}
 	case "fileSize":
-		if err := os.RemoveAll(a.TempRoot()); err != nil {
-			return &ParamError{Code: 405, Msg: "清空文件缓存失败"}
+		// Java 仅清空 data/temp 下的内容，保留目录本身（E2E 实测）。
+		if err := clearDirectoryContents(a.TempRoot()); err != nil {
+			return paramErr(405, "i18n.clear_file_cache_failed.5cd1")
 		}
 	default:
-		return &ParamError{Code: 405, Msg: "没有对应类型：" + cacheType}
+		return paramErrAppend(405, "i18n.no_type_specified.8c65", cacheType)
 	}
 	refreshCacheSizes(a)
+	return nil
+}
+
+// clearDirectoryContents 删除目录下的所有内容但保留目录本身。
+func clearDirectoryContents(path string) error {
+	if err := os.MkdirAll(path, 0o755); err != nil {
+		return err
+	}
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		return err
+	}
+	for _, entry := range entries {
+		if err := os.RemoveAll(filepath.Join(path, entry.Name())); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

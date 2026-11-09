@@ -234,7 +234,7 @@ func TestRunWritesProjectLog(t *testing.T) {
 		t.Fatal(err)
 	}
 	text := string(content)
-	if !strings.Contains(text, "[SYSTEM-INFO] 开始执行:start") {
+	if !strings.Contains(text, "[SYSTEM-INFO] 开始执行: start") {
 		t.Fatalf("start line missing: %s", text)
 	}
 	if !strings.Contains(text, "[start] - dsl-hello") {

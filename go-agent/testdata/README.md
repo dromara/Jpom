@@ -34,6 +34,12 @@ cd go-agent
 | 集合 | envVarKeys -> ["<env>"]；数组最多保留 3 个元素（结构比对只看首元素） |
 | 保留 | code（200/405/900）、布尔、枚举名（runMode/type/state）、字段名与类型 |
 
+## Go-only 额外字段（结构比对允许）
+
+| 路径 | 说明 |
+| --- | --- |
+| $.data.manifest.engine | Go 插件端新增 engine=go（Server 识别 Go 引擎；Java/旧 Server 忽略未知字段）。normalize-golden.py 的 ALLOWED_EXTRA_PREFIXES 已放行，check 仍应为 0 failure |
+
 ## 约束
 
 - **禁止**把 raw/ 或含真实值的响应提交进仓库；只提交本目录（testdata）。

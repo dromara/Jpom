@@ -235,6 +235,21 @@ func TestScriptSaveListItemDel(t *testing.T) {
 		}
 		time.Sleep(20 * time.Millisecond)
 	}
+	// line=0 也必须可读（Java 实测允许；getLine 回显 0）
+	logZero := postForm(t, server, "/script/log", url.Values{"id": {id}, "executeId": {executeID}, "line": {"0"}})
+	if logZero.Code != 200 {
+		t.Fatalf("line=0 must be accepted: %+v", logZero)
+	}
+	var zeroData map[string]any
+	if err := json.Unmarshal(logZero.Data, &zeroData); err != nil {
+		t.Fatal(err)
+	}
+	if zeroData["getLine"].(float64) != 0 {
+		t.Fatalf("getLine must echo the requested line 0, got %v", zeroData["getLine"])
+	}
+	if zeroLines, _ := zeroData["dataLines"].([]any); len(zeroLines) == 0 {
+		t.Fatalf("line=0 must return the log lines")
+	}
 	lines, _ := logData["dataLines"].([]any)
 	text := ""
 	for _, line := range lines {
@@ -400,4 +415,221 @@ func TestScriptCronSecondLevel(t *testing.T) {
 	// clean the global scheduler
 	_ = sysinfo.RemoveCronTask("script:cron-int")
 	_ = manager.Delete("cron-int")
+}
+
+// TestScriptCronGroupsAndYear verifies the Hutool cron extensions required by
+// G4: "|" OR groups and the 7 field year expression are registered as-is
+// (taskList keeps the raw expression) and only matching tasks trigger.
+func TestScriptCronGroupsAndYear(t *testing.T) {
+	instance := apiTestApp(t)
+	instance.Config.Jpom.System.TimerMatchSecond = true
+	manager := runtimeFor(instance).manager
+	orExpr := "*/1 * * * * ? | 0 0 0 1 1 ?"
+	yearExpr := "*/1 * * * * ? 2026"
+	staleYearExpr := "*/1 * * * * ? 2025"
+	scripts := []map[string]any{
+		{"id": "cron-g", "name": "g", "context": "echo g", "workspaceId": "DEFAULT", "autoExecCron": orExpr, "defArgs": "[]"},
+		{"id": "cron-y", "name": "y", "context": "echo y", "workspaceId": "DEFAULT", "autoExecCron": yearExpr, "defArgs": "[]"},
+		{"id": "cron-y0", "name": "y0", "context": "echo y0", "workspaceId": "DEFAULT", "autoExecCron": staleYearExpr, "defArgs": "[]"},
+	}
+	for _, item := range scripts {
+		if err := manager.Add(item); err != nil {
+			t.Fatal(err)
+		}
+	}
+	sysinfo.Start(instance)
+	router := httpx.New(instance)
+	registerScript(router, instance)
+	server := httptest.NewServer(router)
+	defer server.Close()
+
+	rawCrons := map[string]string{}
+	for _, task := range sysinfo.CronList() {
+		if taskID, ok := task["taskId"].(string); ok {
+			rawCrons[taskID] = fmt.Sprint(task["cron"])
+		}
+	}
+	if rawCrons["script:cron-g"] != orExpr {
+		t.Fatalf("taskList must keep the raw | expression: %v", rawCrons["script:cron-g"])
+	}
+	if rawCrons["script:cron-y"] != yearExpr {
+		t.Fatalf("taskList must keep the raw 7 field expression: %v", rawCrons["script:cron-y"])
+	}
+
+	deadline := time.Now().Add(10 * time.Second)
+	triggered := map[string]int{}
+	for time.Now().Before(deadline) {
+		list, err := manager.ListExecLogs()
+		if err != nil {
+			t.Fatal(err)
+		}
+		triggered = map[string]int{}
+		for _, record := range list {
+			scriptID := fmt.Sprint(record["scriptId"])
+			triggered[scriptID]++
+		}
+		if triggered["cron-g"] > 0 && triggered["cron-y"] > 0 {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	if triggered["cron-g"] == 0 {
+		t.Fatal("OR group expression did not trigger")
+	}
+	if triggered["cron-y"] == 0 {
+		t.Fatal("7 field year expression did not trigger for the current year")
+	}
+	if triggered["cron-y0"] != 0 {
+		t.Fatalf("expression with a mismatched year must not trigger: %v", triggered["cron-y0"])
+	}
+	for _, id := range []string{"cron-g", "cron-y", "cron-y0"} {
+		_ = sysinfo.RemoveCronTask("script:" + id)
+		_ = manager.Delete(id)
+	}
+}
+
+// TestScriptParamValidationCodes locks the N1 error codes: @ValidatorItem
+// failures are HTTP body code 400 (custom i18n message first), business Assert
+// stays 405, malformed request bodies are 417.
+func TestScriptParamValidationCodes(t *testing.T) {
+	server, _ := scriptTestServer(t)
+	cases := []struct {
+		path string
+		form url.Values
+		code int
+		msg  string
+	}{
+		{"/script/log", url.Values{}, 400, "日志ID缺失"},
+		{"/script/log", url.Values{"id": {"x"}}, 400, "执行ID缺失"},
+		{"/script/log", url.Values{"id": {"x"}, "executeId": {"y"}}, 400, "行号不正确"},
+		{"/script/del_log", url.Values{}, 400, "日志ID缺失"},
+		{"/script/exec", url.Values{}, 400, "参数验证失败"},
+		{"/script/change-workspace-id", url.Values{}, 400, "参数验证失败"},
+		{"/script-library/get", url.Values{}, 400, "参数验证失败"},
+		{"/script-library/save", url.Values{}, 400, "参数验证失败"},
+		{"/script-library/save", url.Values{"id": {"x"}}, 400, "脚本内容不能为空"},
+		{"/script-library/del", url.Values{}, 400, "参数验证失败"},
+		{"/script/pull_exec_log", url.Values{"pullCount": {"abc"}}, 500, "服务异常"},
+		{"/script/pull_exec_log", url.Values{}, 400, "参数验证失败"},
+		{"/script/pull_exec_log", url.Values{"pullCount": {"0"}}, 405, "pull count error"},
+	}
+	for _, item := range cases {
+		envelope := postForm(t, server, item.path, item.form)
+		if envelope.Code != item.code || !strings.Contains(envelope.Msg, item.msg) {
+			t.Fatalf("%s %v: expected code=%d msg contains %q, got code=%d msg=%q", item.path, item.form, item.code, item.msg, envelope.Code, envelope.Msg)
+		}
+	}
+	// malformed JSON request body -> 417 incorrect_parameter_format
+	request, err := http.NewRequest(http.MethodPost, server.URL+"/script/del_exec_log", strings.NewReader("{bad"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Jpom-Agent-Authorize", apiTestAuthorize)
+	response, err := http.DefaultClient.Do(request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = response.Body.Close() }()
+	envelope := apiEnvelope{}
+	if err := json.NewDecoder(response.Body).Decode(&envelope); err != nil {
+		t.Fatal(err)
+	}
+	if envelope.Code != 417 || !strings.Contains(envelope.Msg, "传入的参数格式不正确") {
+		t.Fatalf("malformed JSON must be 417, got code=%d msg=%q", envelope.Code, envelope.Msg)
+	}
+}
+
+// TestScriptExecMalformedParams locks the NPE/运行时分支：params 不是合法 JSON 时
+// Java JSONObject.parseObject 抛 JSONException -> code 500 服务异常。
+func TestScriptExecMalformedParams(t *testing.T) {
+	server, _ := scriptTestServer(t)
+	form := url.Values{"type": {"add"}, "name": {"p"}, "context": {"echo x"}, "autoExecCron": {""}, "defArgs": {"[]"}}
+	if envelope := postForm(t, server, "/script/save.json", form); envelope.Code != 200 {
+		t.Fatalf("add script failed: %+v", envelope)
+	}
+	envelope := postForm(t, server, "/script/list.json", url.Values{})
+	var list []map[string]any
+	if err := json.Unmarshal(envelope.Data, &list); err != nil || len(list) != 1 {
+		t.Fatalf("list script failed: %v %v", err, list)
+	}
+	id, _ := list[0]["id"].(string)
+	envelope = postForm(t, server, "/script/exec", url.Values{"id": {id}, "params": {"{bad"}})
+	if envelope.Code != 500 || !strings.Contains(envelope.Msg, "服务异常") {
+		t.Fatalf("malformed params must be 500 服务异常, got code=%d msg=%q", envelope.Code, envelope.Msg)
+	}
+	// no execution record must be created when params parsing fails
+	envelope = postForm(t, server, "/script/pull_exec_log", url.Values{"pullCount": {"10"}})
+	var records []map[string]any
+	if err := json.Unmarshal(envelope.Data, &records); err != nil {
+		t.Fatal(err)
+	}
+	if len(records) != 0 {
+		t.Fatalf("no execution record expected: %v", records)
+	}
+}
+
+// TestScriptNullFieldSemantics locks the Java Jackson NON_NULL / model defaults
+// observed by the E2E round:
+//   - add 分支不 setAutoExecCron/setDefArgs/setNodeId：缺参字段为 null -> 输出省略
+//   - edit/sync 分支始终 setDefArgs(...)：缺参 -> "[]"；edit 始终 setAutoExecCron -> ""
+func TestScriptNullFieldSemantics(t *testing.T) {
+	server, _ := scriptTestServer(t)
+	// add without autoExecCron/nodeId/defArgs (same payload as the E2E driver)
+	form := url.Values{"type": {"add"}, "name": {"null-semantics"}, "context": {"echo n"}}
+	if envelope := postForm(t, server, "/script/save.json", form); envelope.Code != 200 {
+		t.Fatalf("add failed: %+v", envelope)
+	}
+	envelope := postForm(t, server, "/script/list.json", url.Values{})
+	var list []map[string]any
+	if err := json.Unmarshal(envelope.Data, &list); err != nil || len(list) != 1 {
+		t.Fatalf("list failed: %v %v", err, list)
+	}
+	id, _ := list[0]["id"].(string)
+	item := getScriptItem(t, server, id)
+	for _, key := range []string{"autoExecCron", "nodeId", "defArgs"} {
+		if _, ok := item[key]; ok {
+			t.Fatalf("add must omit null field %q, got %v", key, item[key])
+		}
+	}
+	if item["lastRunUser"] != "-" {
+		t.Fatalf("lastRunUser getter default must be -, got %v", item["lastRunUser"])
+	}
+	if item["workspaceId"] != "DEFAULT" {
+		t.Fatalf("workspaceId must come from the request header, got %v", item["workspaceId"])
+	}
+	// update (edit) without defArgs/autoExecCron -> defArgs [] and autoExecCron ""
+	form = url.Values{"id": {id}, "name": {"null-semantics-2"}, "context": {"echo n2"}}
+	if envelope := postForm(t, server, "/script/save.json", form); envelope.Code != 200 {
+		t.Fatalf("update failed: %+v", envelope)
+	}
+	item = getScriptItem(t, server, id)
+	if item["defArgs"] != "[]" {
+		t.Fatalf("edit must default defArgs to [], got %v", item["defArgs"])
+	}
+	if value, ok := item["autoExecCron"]; !ok || value != "" {
+		t.Fatalf("edit must set autoExecCron to empty string, got %v (present=%v)", value, ok)
+	}
+	if _, ok := item["nodeId"]; ok {
+		t.Fatalf("edit must not invent nodeId: %v", item["nodeId"])
+	}
+	// sync without defArgs -> defArgs [] + scriptType server-sync
+	form = url.Values{"type": {"sync"}, "id": {id}, "name": {"null-semantics-3"}, "context": {"echo n3"}}
+	if envelope := postForm(t, server, "/script/save.json", form); envelope.Code != 200 {
+		t.Fatalf("sync failed: %+v", envelope)
+	}
+	item = getScriptItem(t, server, id)
+	if item["defArgs"] != "[]" || item["scriptType"] != "server-sync" {
+		t.Fatalf("sync must default defArgs [] and scriptType server-sync, got %v / %v", item["defArgs"], item["scriptType"])
+	}
+}
+
+func getScriptItem(t *testing.T, server *httptest.Server, id string) map[string]any {
+	t.Helper()
+	envelope := postForm(t, server, "/script/item.json", url.Values{"id": {id}})
+	item := map[string]any{}
+	if err := json.Unmarshal(envelope.Data, &item); err != nil {
+		t.Fatalf("decode item: %v", err)
+	}
+	return item
 }

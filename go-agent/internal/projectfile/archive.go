@@ -15,10 +15,13 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/bodgit/sevenzip"
 )
 
 // archiveKind detects the archive format from the file extension and the file
@@ -86,7 +89,10 @@ func stripEntryPath(name string, stripComponents int) (string, bool, error) {
 			continue
 		}
 		if part == ".." {
-			return "", false, invalidf("非法的压缩文件路径:%s", name)
+			// Java's hutool checkSlip throws an IllegalArgumentException here, which
+			// the agent renders as code 405; keep the message English like the
+			// underlying library exception.
+			return "", false, invalidMessage(fmt.Sprintf("Illegal archive entry path: %s", name))
 		}
 		parts = append(parts, part)
 	}
@@ -261,7 +267,7 @@ func (s *Service) Uncompress(archivePath, destDir string, stripComponents int) e
 		stripComponents = 0
 	}
 	if err := os.MkdirAll(destDir, 0o755); err != nil {
-		return fmt.Errorf("创建解压目录失败:%w", err)
+		return failMessage(fmt.Sprintf("Create extraction directory failed: %v", err))
 	}
 	switch archiveKind(archivePath) {
 	case "zip":
@@ -273,10 +279,74 @@ func (s *Service) Uncompress(archivePath, destDir string, stripComponents int) e
 	case "gz":
 		return extractGzip(archivePath, destDir, stripComponents)
 	case "7z":
-		return fmt.Errorf("暂不支持解压 7z 文件")
+		return extract7z(archivePath, destDir, stripComponents)
 	default:
-		return fmt.Errorf("不支持的文件类型:%s", filepath.Ext(archivePath))
+		return failSuffix("i18n.file_type_not_supported2.d497", filepath.Ext(archivePath))
 	}
+}
+
+// openSevenZip opens a 7-Zip archive and converts a library panic (bad or
+// truncated archives have crashed older library versions) into a normal error so
+// a malformed upload can never take the agent down.
+func openSevenZip(archivePath string) (reader *sevenzip.ReadCloser, err error) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			reader = nil
+			err = fmt.Errorf("read 7z archive failed: %v", recovered)
+		}
+	}()
+	return sevenzip.OpenReader(archivePath)
+}
+
+// extract7z extracts a 7-Zip archive into destDir. Entry names are decoded
+// defensively (7z stores UTF-16, but archives re-packed on legacy Windows code
+// pages may still contain raw GBK bytes), path traversal is rejected by
+// stripEntryPath/secureJoin, and symbolic links / devices / fifos are skipped so
+// an archive can never create a link that escapes the destination directory.
+func extract7z(archivePath, destDir string, stripComponents int) error {
+	reader, err := openSevenZip(archivePath)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = reader.Close() }()
+	if err := os.MkdirAll(destDir, 0o755); err != nil {
+		return err
+	}
+	for _, file := range reader.File {
+		name := decodeArchiveName(file.Name)
+		relative, keep, err := stripEntryPath(name, stripComponents)
+		if err != nil {
+			return err
+		}
+		if !keep {
+			continue
+		}
+		info := file.FileInfo()
+		if info.IsDir() {
+			target, err := secureJoin(destDir, relative)
+			if err != nil {
+				return err
+			}
+			if err := os.MkdirAll(target, 0o755); err != nil {
+				return err
+			}
+			continue
+		}
+		mode := info.Mode()
+		if mode&fs.ModeSymlink != 0 || !mode.IsRegular() {
+			continue
+		}
+		body, err := file.Open()
+		if err != nil {
+			return err
+		}
+		writeErr := writeArchiveEntry(destDir, relative, mode, body)
+		_ = body.Close()
+		if writeErr != nil {
+			return writeErr
+		}
+	}
+	return nil
 }
 
 // Compress creates a zip/tar/tar.gz archive of sourceDir at targetPath. The
@@ -368,7 +438,7 @@ func Compress(sourceDir, targetPath, kind string) error {
 		return finish(nil)
 	default:
 		_ = out.Close()
-		return invalidf("不支持的压缩类型,%s", kind)
+		return invalidSuffix("i18n.compression_type_not_supported.9dea", kind)
 	}
 }
 

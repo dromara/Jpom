@@ -160,6 +160,13 @@ def normalize(obj, key=None):
     return obj
 
 
+# Go 端允许的额外字段（Java 旧端没有、Server 会忽略的字段）：
+# 只放"Go 新增且 Java 可忽略"的字段，避免结构比对误报。
+ALLOWED_EXTRA_PREFIXES = (
+    "$.data.manifest.engine",              # /info.manifest.engine
+    "$.data.jpomInfo.jpomManifest.engine",  # /get-stat-info.data.jpomInfo.jpomManifest.engine
+)
+
 SHAPE_TYPE = {dict: "object", list: "array", str: "string", bool: "boolean",
               int: "number", float: "number"}
 
@@ -201,7 +208,11 @@ def normalize_file(src, dst):
 
 def compare(norm_live, norm_expect, name):
     a, b = set(shape(norm_live)), set(shape(norm_expect))
-    missing, extra = sorted(b - a), sorted(a - b)
+    missing = sorted(b - a)
+    extra_all = sorted(a - b)
+    extra = [row for row in extra_all
+             if not any(row[0] == prefix or row[0].startswith(prefix + ".") or row[0].startswith(prefix + "[")
+                        for prefix in ALLOWED_EXTRA_PREFIXES)]
     if not missing and not extra:
         return True
     print("[MISMATCH] %s" % name, file=sys.stderr)

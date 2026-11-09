@@ -25,13 +25,7 @@ import (
 	"jpom.io/go-agent/internal/app"
 )
 
-// cronExpression 是 Quartz 风格的 6/7 段 cron 表达式（秒 分 时 日 月 周 [年]）。
-type cronExpression struct {
-	fields        [6][]int
-	domRestricted bool
-	dowRestricted bool
-}
-
+// 月份/星期别名（与 Hutool Month/Week 一致；星期 0=周日 ... 6=周六）。
 var cronMonthNames = map[string]int{
 	"JAN": 1, "FEB": 2, "MAR": 3, "APR": 4, "MAY": 5, "JUN": 6,
 	"JUL": 7, "AUG": 8, "SEP": 9, "OCT": 10, "NOV": 11, "DEC": 12,
@@ -41,27 +35,82 @@ var cronWeekNames = map[string]int{
 	"SUN": 0, "MON": 1, "TUE": 2, "WED": 3, "THU": 4, "FRI": 5, "SAT": 6,
 }
 
+// cronGroup 是一组 cron 字段（Hutool CronPattern 的单个匹配组）。
+// 字段顺序：0 秒、1 分、2 时、3 日、4 月、5 周、6 年（仅 7 段表达式有年）。
+type cronGroup struct {
+	fields        [7][]int
+	hasYear       bool
+	domRestricted bool
+	dowRestricted bool
+}
+
+// cronExpression 支持 Hutool CronPattern 的 | 分组 OR 与 5/6/7 段表达式：
+//   - 5 段：[分 时 日 月 周]（秒固定为 0，Hutool 语义）
+//   - 6 段：[秒 分 时 日 月 周]
+//   - 7 段：[秒 分 时 日 月 周 年]（年 1970-2099）
+//
+// 周字段与 Hutool 一致：0=周日 ... 6=周六（支持 SUN/MON/.../SAT 别名）；
+// "?" 与 "*" 等价；支持 L（按字段最大值处理，与 Hutool PartParser.parseAlias 一致）。
+type cronExpression struct {
+	pattern string
+	groups  []cronGroup
+}
+
+// cronFieldBounds 描述 Hutool Part 的取值范围（与 Java cn.hutool.cron.pattern.Part 一致）。
+var cronFieldBounds = [7][2]int{
+	{0, 59},      // SECOND
+	{0, 59},      // MINUTE
+	{0, 23},      // HOUR
+	{1, 31},      // DAY_OF_MONTH
+	{1, 12},      // MONTH
+	{0, 6},       // DAY_OF_WEEK（0=Sunday）
+	{1970, 2099}, // YEAR
+}
+
 func parseCron(expression string) (*cronExpression, error) {
-	fields := strings.Fields(strings.TrimSpace(expression))
-	if len(fields) == 5 {
-		fields = append([]string{"0"}, fields...)
+	expression = strings.TrimSpace(expression)
+	if expression == "" {
+		return nil, fmt.Errorf("cron expression must not be empty")
 	}
-	if len(fields) < 6 {
-		return nil, fmt.Errorf("cron 表达式错误: %s", expression)
-	}
-	fields = fields[:6]
-	bounds := [6][2]int{{0, 59}, {0, 59}, {0, 23}, {1, 31}, {1, 12}, {0, 7}}
-	result := &cronExpression{}
-	for index, field := range fields {
-		values, err := parseCronField(field, bounds[index][0], bounds[index][1], index)
-		if err != nil {
-			return nil, fmt.Errorf("cron 表达式错误 %q: %w", expression, err)
+	// Hutool CronPattern 用 | 表示多组表达式（OR）。
+	groups := make([]cronGroup, 0, 2)
+	for _, part := range strings.Split(expression, "|") {
+		part = strings.TrimSpace(part)
+		if part == "" {
+			return nil, fmt.Errorf("invalid cron expression: %s", expression)
 		}
-		result.fields[index] = values
+		group, err := parseCronGroup(part)
+		if err != nil {
+			return nil, fmt.Errorf("invalid cron expression %q: %w", expression, err)
+		}
+		groups = append(groups, group)
 	}
-	result.domRestricted = !isWildcard(fields[3])
-	result.dowRestricted = !isWildcard(fields[5])
-	return result, nil
+	return &cronExpression{pattern: expression, groups: groups}, nil
+}
+
+func parseCronGroup(expression string) (cronGroup, error) {
+	fields := strings.Fields(expression)
+	switch len(fields) {
+	case 5:
+		// 5 段没有秒字段，Hutool 会补 "0"。
+		fields = append([]string{"0"}, fields...)
+	case 6:
+	case 7:
+	default:
+		return cronGroup{}, fmt.Errorf("cron expression must have 5-7 fields")
+	}
+	group := cronGroup{hasYear: len(fields) == 7}
+	for index, field := range fields {
+		bounds := cronFieldBounds[index]
+		values, err := parseCronField(field, bounds[0], bounds[1], index)
+		if err != nil {
+			return cronGroup{}, err
+		}
+		group.fields[index] = values
+	}
+	group.domRestricted = !isWildcard(fields[3])
+	group.dowRestricted = !isWildcard(fields[5])
+	return group, nil
 }
 
 func isWildcard(field string) bool {
@@ -71,7 +120,7 @@ func isWildcard(field string) bool {
 func parseCronField(field string, min, max, index int) ([]int, error) {
 	field = strings.TrimSpace(field)
 	if field == "" {
-		return nil, fmt.Errorf("空字段")
+		return nil, fmt.Errorf("empty cron field")
 	}
 	if field == "*" || field == "?" {
 		return rangeInts(min, max), nil
@@ -79,7 +128,7 @@ func parseCronField(field string, min, max, index int) ([]int, error) {
 	seen := map[int]struct{}{}
 	add := func(value int) error {
 		if value < min || value > max {
-			return fmt.Errorf("取值越界: %d", value)
+			return fmt.Errorf("cron field value out of range: %d", value)
 		}
 		seen[value] = struct{}{}
 		return nil
@@ -94,7 +143,7 @@ func parseCronField(field string, min, max, index int) ([]int, error) {
 		if base, stepValue, found := strings.Cut(part, "/"); found {
 			parsed, err := strconv.Atoi(strings.TrimSpace(stepValue))
 			if err != nil || parsed <= 0 {
-				return nil, fmt.Errorf("步长错误: %s", part)
+				return nil, fmt.Errorf("invalid cron step: %s", part)
 			}
 			step = parsed
 			hasStep = true
@@ -103,29 +152,29 @@ func parseCronField(field string, min, max, index int) ([]int, error) {
 		start, end := min, max
 		if part != "*" && part != "?" {
 			if low, high, found := strings.Cut(part, "-"); found {
-				parsedLow, err := cronValue(low, index)
+				parsedLow, err := cronValue(low, index, min, max)
 				if err != nil {
 					return nil, err
 				}
-				parsedHigh, err := cronValue(high, index)
+				parsedHigh, err := cronValue(high, index, min, max)
 				if err != nil {
 					return nil, err
 				}
 				start, end = parsedLow, parsedHigh
 			} else {
-				parsed, err := cronValue(part, index)
+				parsed, err := cronValue(part, index, min, max)
 				if err != nil {
 					return nil, err
 				}
 				start, end = parsed, parsed
 				if hasStep {
-					// Quartz 语义：a/n 表示从 a 开始按步长一直到字段上限。
+					// Hutool/Quartz 语义：a/n 表示从 a 开始按步长到字段上限。
 					end = max
 				}
 			}
 		}
 		if start > end {
-			return nil, fmt.Errorf("范围错误: %s", part)
+			return nil, fmt.Errorf("invalid cron range: %s", part)
 		}
 		for value := start; value <= end; value += step {
 			if err := add(value); err != nil {
@@ -141,25 +190,31 @@ func parseCronField(field string, min, max, index int) ([]int, error) {
 	return values, nil
 }
 
-func cronValue(raw string, index int) (int, error) {
-	raw = strings.TrimSpace(strings.ToUpper(raw))
+// cronValue 解析单个取值：数字、别名（月份 JAN-DEC、星期 SUN-SAT）、L（字段最大值）
+// 以及 Hutool 支持的负数（相对字段最大值，如 -1 表示 max-1）。
+func cronValue(raw string, index, min, max int) (int, error) {
+	raw = strings.TrimSpace(raw)
+	upper := strings.ToUpper(raw)
+	if upper == "L" {
+		return max, nil
+	}
 	if index == 4 {
-		if value, ok := cronMonthNames[raw]; ok {
+		if value, ok := cronMonthNames[upper]; ok {
 			return value, nil
 		}
 	}
 	if index == 5 {
-		if value, ok := cronWeekNames[raw]; ok {
-			// Quartz 中 1=周日 ... 7=周六，这里统一转成 Go 的 0=周日。
-			return (value + 1) % 7, nil
+		if value, ok := cronWeekNames[upper]; ok {
+			return value, nil
 		}
 	}
 	value, err := strconv.Atoi(raw)
 	if err != nil {
-		return 0, fmt.Errorf("非法取值: %s", raw)
+		return 0, fmt.Errorf("invalid cron value: %s", raw)
 	}
-	if index == 5 && value == 7 {
-		value = 0
+	// Hutool parseNumber：负数加上字段最大值。
+	if value < 0 {
+		value += max
 	}
 	return value, nil
 }
@@ -181,28 +236,39 @@ func containsInt(values []int, target int) bool {
 	return false
 }
 
-// Match 判断给定时间是否命中表达式。
+// Match 判断给定时间是否命中表达式（| 分组命中任一组即触发）。
 //
 // matchSecond 对应 Java 的 jpom.system.timer-match-second：为 false 时 Hutool
 // CronTimer 只在每分钟第 0 秒触发并忽略表达式的秒字段（PatternUtil.getFields
 // 传入 -1），这里保持同样语义。
 func (e *cronExpression) Match(now time.Time, matchSecond bool) bool {
-	if matchSecond {
-		if !containsInt(e.fields[0], now.Second()) {
-			return false
+	if !matchSecond && now.Second() != 0 {
+		return false
+	}
+	for _, group := range e.groups {
+		if group.match(now, matchSecond) {
+			return true
 		}
-	} else if now.Second() != 0 {
-		// 未开启秒级匹配时只在分钟边界（第 0 秒）触发。
+	}
+	return false
+}
+
+func (g cronGroup) match(now time.Time, matchSecond bool) bool {
+	if matchSecond && !containsInt(g.fields[0], now.Second()) {
 		return false
 	}
-	if !containsInt(e.fields[1], now.Minute()) ||
-		!containsInt(e.fields[2], now.Hour()) ||
-		!containsInt(e.fields[4], int(now.Month())) {
+	if !containsInt(g.fields[1], now.Minute()) ||
+		!containsInt(g.fields[2], now.Hour()) ||
+		!containsInt(g.fields[4], int(now.Month())) {
 		return false
 	}
-	domMatch := containsInt(e.fields[3], now.Day())
-	dowMatch := containsInt(e.fields[5], int(now.Weekday()))
-	if e.domRestricted && e.dowRestricted {
+	if g.hasYear && !containsInt(g.fields[6], now.Year()) {
+		return false
+	}
+	domMatch := containsInt(g.fields[3], now.Day())
+	dowMatch := containsInt(g.fields[5], int(now.Weekday()))
+	if g.domRestricted && g.dowRestricted {
+		// Hutool PatternMatcher：日与周同时指定时为 OR。
 		return domMatch || dowMatch
 	}
 	return domMatch && dowMatch
@@ -343,7 +409,7 @@ func (m *CronManager) runDue(now time.Time) {
 					current.mu.Lock()
 					current.failed++
 					current.mu.Unlock()
-					m.app.Log().Error("定时任务异常", "taskId", current.id, "panic", recovered)
+					m.app.Log().Error("cron task failed", "taskId", current.id, "panic", recovered)
 				}
 			}()
 			current.fn()
@@ -372,7 +438,7 @@ func SetGlobalCron(manager *CronManager) { globalCron.Store(manager) }
 func RegisterCronTask(id, expression string, fn func()) error {
 	manager := globalCron.Load()
 	if manager == nil {
-		return fmt.Errorf("cron 调度器尚未启动")
+		return fmt.Errorf("cron scheduler is not started")
 	}
 	return manager.Upsert(id, expression, fn)
 }
@@ -382,7 +448,7 @@ func RegisterCronTask(id, expression string, fn func()) error {
 func RemoveCronTask(id string) error {
 	manager := globalCron.Load()
 	if manager == nil {
-		return fmt.Errorf("cron 调度器尚未启动")
+		return fmt.Errorf("cron scheduler is not started")
 	}
 	manager.Remove(id)
 	return nil

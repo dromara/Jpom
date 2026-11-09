@@ -27,6 +27,7 @@ import (
 	"strings"
 
 	"jpom.io/go-agent/internal/app"
+	"jpom.io/go-agent/internal/i18n"
 )
 
 // Message is the response envelope understood by the Jpom server
@@ -42,22 +43,40 @@ type Handler func(*Context)
 
 // Router registers endpoints and applies authorization.
 type Router struct {
-	app    *app.App
-	mux    *http.ServeMux
-	public map[string]struct{}
+	app       *app.App
+	mux       *http.ServeMux
+	public    map[string]struct{}
+	methods   map[string]map[string]struct{}
+	protected map[string]bool
 }
 
 // New creates an empty router.
 func New(a *app.App) *Router {
-	r := &Router{app: a, mux: http.NewServeMux(), public: map[string]struct{}{}}
+	r := &Router{
+		app:       a,
+		mux:       http.NewServeMux(),
+		public:    map[string]struct{}{},
+		methods:   map[string]map[string]struct{}{},
+		protected: map[string]bool{},
+	}
 	r.mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 		c := newContext(r.app, w, req)
-		// 与 Java 兜底页面一致：code=500，data 为请求路径，文案按语言。
-		msg := "No corresponding resource found."
-		if strings.HasPrefix(strings.ToLower(c.Lang), "zh") {
-			msg = "没有找到对应的资源"
+		path := req.URL.Path
+		if _, exists := r.methods[path]; exists {
+			// 路径存在但方法不匹配：Java 抛 HttpRequestMethodNotSupportedException，
+			// 全局异常返回 code=405「不被支持的请求方式」，data 为异常 message。
+			if r.protected[path] && !r.app.CheckAuthorize(req.Header.Get("Jpom-Agent-Authorize")) {
+				r.app.Log().Warn("agent authorization failed", "path", path, "remote", req.RemoteAddr)
+				c.JSONCode(900, c.T("i18n.auth_info_error.c184"), nil)
+				return
+			}
+			c.JSONCode(405, c.T("i18n.unsupported_request_method.45d7"),
+				fmt.Sprintf("Request method '%s' not supported", req.Method))
+			return
 		}
-		c.JSONCode(500, msg, req.URL.Path)
+		// 与 Java 2.11.13.1 实测一致：HTTP 200 + code=500，msg 为 i18n
+		// no_resource_found，data 为请求路径。
+		c.JSONCode(500, c.T("i18n.no_resource_found.dc22"), path)
 	})
 	return r
 }
@@ -77,12 +96,24 @@ func (r *Router) register(method, pattern string, handler Handler, public bool) 
 	if public {
 		r.public[key] = struct{}{}
 	}
+	// 记录路径 -> 方法集合（用于方法不匹配时返回 405 而不是 500）。
+	path := pattern
+	if path == "/{$}" {
+		path = "/"
+	}
+	if r.methods[path] == nil {
+		r.methods[path] = map[string]struct{}{}
+	}
+	r.methods[path][method] = struct{}{}
+	if !public {
+		r.protected[path] = true
+	}
 	r.mux.HandleFunc(key, func(w http.ResponseWriter, req *http.Request) {
 		c := newContext(r.app, w, req)
 		defer func() {
 			if recovered := recover(); recovered != nil {
 				r.app.Log().Error("handler panic", "method", req.Method, "path", req.URL.Path, "panic", recovered, "stack", string(debug.Stack()))
-				c.JSONCode(http.StatusInternalServerError, "程序异常: "+fmt.Sprint(recovered), nil)
+				c.JSONCode(http.StatusOK, c.T("i18n.service_exception.3821")+fmt.Sprint(recovered), nil)
 			}
 		}()
 		r.app.Log().Debug("request", "method", req.Method, "path", req.URL.Path, "remote", req.RemoteAddr, "workspace", req.Header.Get("workspaceId"))
@@ -90,7 +121,7 @@ func (r *Router) register(method, pattern string, handler Handler, public bool) 
 			authorize := req.Header.Get("Jpom-Agent-Authorize")
 			if !r.app.CheckAuthorize(authorize) {
 				r.app.Log().Warn("agent authorization failed", "path", req.URL.Path, "remote", req.RemoteAddr)
-				c.JSONCode(900, "授权信息错误", nil)
+				c.JSONCode(900, c.T("i18n.auth_info_error.c184"), nil)
 				return
 			}
 		}
@@ -129,10 +160,9 @@ func newContext(a *app.App, w http.ResponseWriter, r *http.Request) *Context {
 	if workspace == "" {
 		workspace = "DEFAULT"
 	}
-	lang := strings.TrimSpace(r.Header.Get("Accept-Language"))
-	if lang == "" {
-		lang = a.Config.Jpom.System.Lang
-	}
+	// 语言优先级与 Java I18nMessageUtil 一致：Accept-Language → jpom.system.lang
+	// → JPOM_LANG → zh-CN。
+	lang := i18n.Resolve(r.Header.Get("Accept-Language"), a.Config.Jpom.System.Lang)
 	return &Context{
 		W:          w,
 		R:          r,
@@ -145,6 +175,10 @@ func newContext(a *app.App, w http.ResponseWriter, r *http.Request) *Context {
 
 // Method returns the HTTP method.
 func (c *Context) Method() string { return c.R.Method }
+
+// T 返回当前请求语言下的文案（Java 端 i18n key + {} 占位符）。
+// 面向客户端的 msg/提示都应通过它输出。
+func (c *Context) T(key string, args ...any) string { return i18n.T(c.Lang, key, args...) }
 
 // Form returns a query/form parameter.
 func (c *Context) Form(key string) string { return c.R.FormValue(key) }
@@ -254,6 +288,32 @@ func (c *Context) JSONCode(code int, msg string, data any) {
 	}
 }
 
+// Require reads a form/query parameter and enforces the Java @ValidatorItem
+// semantics: missing or blank -> HTTP 200 + body code=400 with the given i18n
+// key. The boolean result reports whether the handler may continue.
+//
+// 用法（N1 契约）：value, ok := c.Require("type", "i18n.type_error.395f")；
+// 业务 Assert 仍用 c.FailCode(405, ...)，不要混用。
+func (c *Context) Require(name, key string) (string, bool) {
+	value := strings.TrimSpace(c.Form(name))
+	if value == "" {
+		c.FailCode(400, c.T(key))
+		return "", false
+	}
+	return value, true
+}
+
+// RequireRaw 与 Require 相同，但返回未 trim 的原始值（内容/路径/变量值等
+// 需要保留原始空白的参数使用）。
+func (c *Context) RequireRaw(name, key string) (string, bool) {
+	value := c.Form(name)
+	if strings.TrimSpace(value) == "" {
+		c.FailCode(400, c.T(key))
+		return "", false
+	}
+	return value, true
+}
+
 // WriteFileHeaders writes common download headers.
 func (c *Context) WriteFileHeaders(filename, contentType string) {
 	if contentType == "" {
@@ -264,4 +324,4 @@ func (c *Context) WriteFileHeaders(filename, contentType string) {
 }
 
 // ErrNotImplemented is returned by stub handlers until the owning module lands.
-var ErrNotImplemented = errors.New("接口尚未实现")
+var ErrNotImplemented = errors.New("not implemented")
