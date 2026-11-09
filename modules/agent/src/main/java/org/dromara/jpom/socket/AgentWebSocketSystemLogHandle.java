@@ -19,6 +19,7 @@ import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.configuration.SystemConfig;
 import org.dromara.jpom.system.LogbackConfig;
+import org.dromara.jpom.util.FileUtils;
 import org.dromara.jpom.util.SocketSessionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -91,7 +92,12 @@ public class AgentWebSocketSystemLogHandle extends BaseAgentWebSocketHandle {
         try {
             String fileName = reqJson.getString("fileName");
             // 进入管理页面后需要实时加载日志
-            File file = FileUtil.file(LogbackConfig.getPath(), fileName);
+            // 文件名来自服务端转发/客户端，必须限制在日志目录内，避免路径穿越读取任意文件
+            File file = FileUtils.resolveSubFile(FileUtil.file(LogbackConfig.getPath()), fileName);
+            if (file == null) {
+                SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.file_not_found.d952"));
+                return;
+            }
             File file1 = CACHE_FILE.get(session.getId());
             if (file1 != null && !file1.equals(file)) {
                 // 离线上一个日志

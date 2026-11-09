@@ -34,6 +34,7 @@ import org.springframework.util.Assert;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -43,6 +44,15 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class TriggerTokenLogServer extends BaseDbService<TriggerTokenLogBean> implements ISystemTask {
+
+    /**
+     * 触发器 token 格式白名单。
+     * <p>
+     * 新版本 token 为 32 位十六进制（{@code IdUtil.fastSimpleUUID()}），
+     * 兼容历史版本的 10 位字母数字（{@code RandomUtil.randomString(10)}）。
+     * 只允许字母和数字，避免 {@code is not null} 一类的字符串被 Hutool 解析为 SQL 条件表达式。
+     */
+    private static final Pattern TRIGGER_TOKEN_PATTERN = Pattern.compile("[A-Za-z0-9]{6,128}");
 
     private final UserService userService;
     private final List<ITriggerToken> triggerTokens;
@@ -119,6 +129,9 @@ public class TriggerTokenLogServer extends BaseDbService<TriggerTokenLogBean> im
      * @return user
      */
     public UserModel getUserByToken(String token, String type) {
+        if (!isValidToken(token)) {
+            return null;
+        }
         TriggerTokenLogBean tokenLogBean = super.getByKey(token);
         if (tokenLogBean != null) {
             UserModel userModel = userService.getByKey(tokenLogBean.getUserId());
@@ -133,6 +146,16 @@ public class TriggerTokenLogServer extends BaseDbService<TriggerTokenLogBean> im
         }
         //
         return null;
+    }
+
+    /**
+     * 触发器 token 格式是否合法（仅允许字母数字，兼容新版 32 位与历史 10 位 token）
+     *
+     * @param token token
+     * @return true 合法
+     */
+    public static boolean isValidToken(String token) {
+        return StrUtil.isNotEmpty(token) && TRIGGER_TOKEN_PATTERN.matcher(token).matches();
     }
 
     /**

@@ -53,6 +53,7 @@ public class NodeScriptLogController extends BaseServerController {
      *
      * @return json
      */
+    @Feature(method = MethodFeature.LIST)
     @RequestMapping(value = "list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<PageResultDto<NodeScriptExecuteLogCacheModel>> scriptList(HttpServletRequest request) {
         PageResultDto<NodeScriptExecuteLogCacheModel> pageResultDto = nodeScriptExecuteLogServer.listPage(request);

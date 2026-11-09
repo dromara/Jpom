@@ -312,6 +312,7 @@ public class CertificateInfoController extends BaseServerController {
      *
      * @param id 项目id
      */
+    @Feature(method = MethodFeature.DOWNLOAD)
     @GetMapping(value = "export", produces = MediaType.APPLICATION_JSON_VALUE)
     public void export(@ValidatorItem String id, HttpServletRequest request, HttpServletResponse response) {
         CertificateInfoModel model = certificateInfoService.getByKeyAndGlobal(id, request);

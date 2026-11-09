@@ -258,8 +258,8 @@ public class MachineSshController extends BaseGroupNameController {
     @PostMapping(value = "log-list-data", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(cls = ClassFeature.SSH_TERMINAL_LOG, method = MethodFeature.LIST)
     public IJsonMessage<PageResultDto<SshTerminalExecuteLog>> logListData(HttpServletRequest request) {
-        Map<String, String> paramMap = ServletUtil.getParamMap(request);
-        PageResultDto<SshTerminalExecuteLog> pageResult = sshTerminalExecuteLogService.listPage(paramMap);
+        // 与 /node/ssh/log/list 保持一致：走注入工作空间条件的 listPage(request)，避免系统用户跨空间查看终端日志（审计 P3）
+        PageResultDto<SshTerminalExecuteLog> pageResult = sshTerminalExecuteLogService.listPage(request);
         return JsonMessage.success(I18nMessageUtil.get("i18n.get_success.fb55"), pageResult);
     }
 

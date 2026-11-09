@@ -36,6 +36,8 @@ stages:
           - cd web-vue && npm install && npm run build
           - cd ..
           - mvn -B -e clean package -Dmaven.test.skip=true -Dmaven.compile.fork=true -s script/settings.xml
+          # 根 pom 默认跳过单测，这里显式执行核心回归测试（共享基础类/安全修复的守卫）
+          - bash script/run-regression-tests.sh
         artifacts:
           - name: all_zip
             path:

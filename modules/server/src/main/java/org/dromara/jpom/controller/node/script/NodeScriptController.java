@@ -37,6 +37,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
+import org.dromara.jpom.permission.Feature;
+import org.dromara.jpom.permission.MethodFeature;
 
 /**
  * 脚本管理
@@ -69,6 +71,7 @@ public class NodeScriptController extends BaseServerController {
      * @return json
      * @author Hotstrip
      */
+    @Feature(method = MethodFeature.LIST)
     @PostMapping(value = "list_all", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<PageResultDto<NodeScriptCacheModel>> listAll(HttpServletRequest request) {
         PageResultDto<NodeScriptCacheModel> modelPageResultDto = nodeScriptServer.listPage(request);

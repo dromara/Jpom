@@ -49,8 +49,8 @@ public class WorkspaceEnvVarService extends BaseWorkspaceService<WorkspaceEnvVar
         for (String workspaceId : split) {
             checkUserWorkspace(workspaceId);
         }
-        paramMap.remove("workspaceId");
-        paramMap.put("workspaceId:in", workspaceIds);
+        // 强制条件优先：先剔除客户端传入的同字段参数（workspaceId / %workspaceId% 等），再注入校验过的空间集合
+        putForcedFilter(paramMap, "workspaceId:in", workspaceIds);
         return super.listPage(paramMap);
     }
 

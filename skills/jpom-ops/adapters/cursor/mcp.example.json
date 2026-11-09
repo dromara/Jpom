@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "jpom": {
+      "command": "node",
+      "args": ["./mcp-server/dist/index.js"],
+      "env": {
+        "JPOM_BASE_URL": "http://127.0.0.1:2122",
+        "JPOM_TOKEN": "<YOUR_JPOM_LONG_TERM_TOKEN>",
+        "JPOM_WORKSPACE": "DEFAULT",
+        "JPOM_READ_ONLY": "true"
+      }
+    }
+  }
+}

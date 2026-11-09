@@ -34,6 +34,7 @@ import org.yaml.snakeyaml.scanner.ScannerException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.nio.file.AccessDeniedException;
+import java.sql.SQLException;
 
 /**
  * @author bwcx_jzy
@@ -51,6 +52,12 @@ public abstract class BaseExceptionHandler {
     @ExceptionHandler({JpomRuntimeException.class, RuntimeException.class, Exception.class})
     @ResponseBody
     public IJsonMessage<String> defExceptionHandler(HttpServletRequest request, Exception e) {
+        if (isDatabaseException(e)) {
+            // 数据库异常统一脱敏：服务端记录完整堆栈便于排查，客户端只返回通用文案，
+            // 避免响应回显 SQL 语句/列名/表名/驱动信息（列表接口未知字段过滤参数等场景会触发）
+            log.error("global handle database exception: {}", request.getRequestURI(), e);
+            return new JsonMessage<>(500, I18nMessageUtil.get("i18n.service_exception.3821"));
+        }
         if (e instanceof JpomRuntimeException) {
             log.error("global handle exception: {} {}", request.getRequestURI(), e.getMessage(), e.getCause());
             return new JsonMessage<>(500, e.getMessage());
@@ -62,6 +69,45 @@ public abstract class BaseExceptionHandler {
             }
             return new JsonMessage<>(500, I18nMessageUtil.get("i18n.service_exception.3821") + e.getMessage());
         }
+    }
+
+    /**
+     * 判断异常链中是否包含数据库异常（JDBC 的 {@link SQLException} 或 Spring DAO 的
+     * {@code org.springframework.dao.DataAccessException} 及其子类）。
+     * <p>
+     * 用于异常响应的统一脱敏：数据库异常信息（SQL 语句、列名、表名、驱动等）只允许出现在服务端日志，
+     * 不得返回给客户端。Spring DAO 异常按父类名判断，避免 common 模块强依赖 spring-tx。
+     *
+     * @param throwable 异常
+     * @return true 异常链包含数据库异常
+     */
+    static boolean isDatabaseException(Throwable throwable) {
+        Throwable current = throwable;
+        int depth = 0;
+        while (current != null && depth++ < 30) {
+            if (current instanceof SQLException || isSpringDataAccessException(current.getClass())) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
+    }
+
+    /**
+     * 判断异常类是否为 Spring DAO 数据访问异常（通过父类名称判断，避免强依赖 spring-tx）。
+     *
+     * @param exceptionClass 异常类
+     * @return true 是 DataAccessException 及其子类
+     */
+    private static boolean isSpringDataAccessException(Class<?> exceptionClass) {
+        Class<?> current = exceptionClass;
+        while (current != null && current != Object.class) {
+            if ("org.springframework.dao.DataAccessException".equals(current.getName())) {
+                return true;
+            }
+            current = current.getSuperclass();
+        }
+        return false;
     }
 
     @ExceptionHandler({NullPointerException.class})

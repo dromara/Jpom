@@ -87,7 +87,7 @@ export default {
     socketUrl() {
       return getWebSocketUrl(
         '/socket/docker_log',
-        `userId=${this.getLongTermToken()}&id=${this.id}&machineDockerId=${
+        `id=${this.id}&machineDockerId=${
           this.machineDockerId
         }&type=dockerLog&nodeId=system&workspaceId=${this.getWorkspaceId()}`
       )

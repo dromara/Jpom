@@ -95,6 +95,7 @@ public class NodeUpdateController extends BaseServerController {
      * @see RemoteVersion
      * @see AgentFileModel
      */
+    @Feature(method = MethodFeature.LIST)
     @GetMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<JSONObject> checkVersion() {
         cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
@@ -180,6 +181,7 @@ public class NodeUpdateController extends BaseServerController {
         }
     }
 
+    @Feature(method = MethodFeature.EXECUTE)
     @GetMapping(value = "fast_install.json", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<JSONObject> fastInstall(HttpServletRequest request) {
         boolean beta = RemoteVersion.betaRelease();
@@ -203,6 +205,7 @@ public class NodeUpdateController extends BaseServerController {
         return JsonMessage.success("", jsonObject);
     }
 
+    @Feature(method = MethodFeature.LIST)
     @GetMapping(value = "pull_fast_install_result.json", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<Collection<JSONObject>> pullFastInstallResult(String removeId) {
         Collection<JSONObject> jsonObjects = NodeInfoController.listReceiveCache(removeId);
@@ -216,6 +219,7 @@ public class NodeUpdateController extends BaseServerController {
         return JsonMessage.success("", jsonObjects);
     }
 
+    @Feature(method = MethodFeature.EXECUTE)
     @GetMapping(value = "confirm_fast_install.json", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<Collection<JSONObject>> confirmFastInstall(HttpServletRequest request,
                                                                    @ValidatorItem String id,

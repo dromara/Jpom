@@ -67,6 +67,7 @@ public class NodeProjectInfoController extends BaseServerController {
      * @return json
      * @author Hotstrip
      */
+    @Feature(method = MethodFeature.LIST)
     @PostMapping(value = "project_list", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<PageResultDto<ProjectInfoCacheModel>> projectList(HttpServletRequest request) {
         PageResultDto<ProjectInfoCacheModel> resultDto = projectInfoCacheService.listPage(request);
@@ -80,6 +81,7 @@ public class NodeProjectInfoController extends BaseServerController {
      * @return json
      * @author Hotstrip
      */
+    @Feature(method = MethodFeature.LIST)
     @GetMapping(value = "project_list_all", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<List<ProjectInfoCacheModel>> projectListAll(HttpServletRequest request) {
         List<ProjectInfoCacheModel> projectInfoCacheModels = projectInfoCacheService.listByWorkspace(request);

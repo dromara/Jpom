@@ -114,6 +114,7 @@ public class OutGivingProjectController extends BaseServerController {
         this.staticFileStorageService = staticFileStorageService;
     }
 
+    @Feature(method = MethodFeature.LIST)
     @RequestMapping(value = "getItemData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<JSONObject> getItemData(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.parameter_error_id_error.58ce") String id,
                                                 HttpServletRequest request) {

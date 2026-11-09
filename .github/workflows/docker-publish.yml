@@ -1,0 +1,284 @@
+name: docker-publish
+
+# 发布 Jpom 服务端/插件端多架构镜像到 Docker Hub（jpomdocker/jpom、jpomdocker/jpom-agent）。
+#
+# 设计要点：
+# 1. 镜像由 modules/*/DockerfileRelease|DockerfileBeta 从 d2.jpom.download 下载对应发布包构建，
+#    所以必须等 R2 上传完成；工作流内置“等待 R2 产物就绪”（prepare 阶段）。
+# 2. 稳定版：release.sh 推送 vX.Y.Z tag 后由 tag push 自动发布（也可手动 dispatch）。
+# 3. beta：由 release.sh 在 R2 上传完成后手动 dispatch 触发（beta 不打 tag）。
+# 4. 分支 push 仅在 workflow/helper 脚本变更时触发，且强制 dry_run（只构建、不登录、不推送），
+#    用于工作流自检，避免改 CI 后要等下一次发版才能验证。
+#
+# 首次启用限制：GitHub 要求 workflow_dispatch 的工作流先存在于默认分支 master 并运行过；
+# 本工作流在 dev/beta 分支改动时会先触发一次 dry_run 自检（push 事件），自检运行后即可对任意 ref dispatch；
+# 若仓库从未运行过该工作流，需等工作流随发版进入默认分支 master 后的首次运行（tag push 会自动触发）。
+#
+# 需要仓库 secrets：DOCKERHUB_USERNAME（jpomdocker）、DOCKERHUB_TOKEN（Docker Hub 访问令牌/密码）。
+# 可选仓库变量：DOCKERHUB_NAMESPACE（默认 jpomdocker）、DOCKERHUB_SERVER_REPO（默认 jpom）、
+#              DOCKERHUB_AGENT_REPO（默认 jpom-agent）。
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: '发布渠道：auto（tag→release，beta 分支→beta，其余→release）'
+        type: choice
+        options: [auto, release, beta]
+        default: auto
+      version:
+        description: '版本号（留空自动推导：tag / script/tag.release.txt / script/tag.beta.txt）'
+        type: string
+        required: false
+      images:
+        description: '构建哪些镜像'
+        type: choice
+        options: [both, server, agent]
+        default: both
+      platforms:
+        description: '目标平台（逗号分隔）'
+        type: string
+        default: 'linux/amd64,linux/arm64'
+      tags_override:
+        description: '完全覆盖镜像 tag（逗号分隔；留空=自动规则；测试可用 ci-test）'
+        type: string
+        required: false
+      dry_run:
+        description: '只构建不推送（不登录 Docker Hub）'
+        type: boolean
+        default: false
+      wait_r2_minutes:
+        description: '等待 R2 发布包就绪的最长分钟数（0~120）'
+        type: string
+        default: '30'
+  push:
+    tags:
+      - 'v*'
+    branches:
+      - dev
+      - beta
+    # 注意：GitHub 不会对 tag push 评估 paths 过滤（见 workflow-syntax 文档），
+    # 所以 tag push 始终触发；分支 push 只有下列文件变化时触发（自检）。
+    paths:
+      - '.github/workflows/docker-publish.yml'
+      - 'script/docker-ci-meta.sh'
+      - 'script/docker-ci-wait-r2.sh'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docker-publish-${{ github.ref_name }}-${{ inputs.version || 'auto' }}
+  cancel-in-progress: false
+
+env:
+  # GitHub Actions runner 访问 d2.jpom.download 会被 Cloudflare managed challenge 拦截（403），
+  # 因此 CI 从 R2 bucket 的 r2.dev 公开域名下载发布包；如更换域名/桶，改仓库变量 JPOM_DOWNLOAD_BASE 即可。
+  JPOM_DOWNLOAD_BASE: ${{ vars.JPOM_DOWNLOAD_BASE || 'https://pub-a46506c7e8ff43fabc4c1ce8e5faffcb.r2.dev' }}
+  DOCKERHUB_NAMESPACE: ${{ vars.DOCKERHUB_NAMESPACE || 'jpomdocker' }}
+  DOCKERHUB_SERVER_REPO: ${{ vars.DOCKERHUB_SERVER_REPO || 'jpom' }}
+  DOCKERHUB_AGENT_REPO: ${{ vars.DOCKERHUB_AGENT_REPO || 'jpom-agent' }}
+
+jobs:
+  prepare:
+    name: 准备（解析版本 / 等待 R2 产物）
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    outputs:
+      channel: ${{ steps.meta.outputs.channel }}
+      version: ${{ steps.meta.outputs.version }}
+      images: ${{ steps.meta.outputs.images }}
+      images_json: ${{ steps.meta.outputs.images_json }}
+      platforms: ${{ steps.meta.outputs.platforms }}
+      server_dockerfile: ${{ steps.meta.outputs.server_dockerfile }}
+      agent_dockerfile: ${{ steps.meta.outputs.agent_dockerfile }}
+      server_image: ${{ steps.meta.outputs.server_image }}
+      agent_image: ${{ steps.meta.outputs.agent_image }}
+      server_tags: ${{ steps.meta.outputs.server_tags }}
+      agent_tags: ${{ steps.meta.outputs.agent_tags }}
+      dry_run: ${{ steps.meta.outputs.dry_run }}
+      self_test: ${{ steps.meta.outputs.self_test }}
+      wait_r2_minutes: ${{ steps.meta.outputs.wait_r2_minutes }}
+      r2_base: ${{ steps.meta.outputs.r2_base }}
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 解析发布元数据
+        id: meta
+        shell: bash
+        env:
+          INPUT_CHANNEL: ${{ inputs.channel || 'auto' }}
+          INPUT_VERSION: ${{ inputs.version || '' }}
+          INPUT_IMAGES: ${{ inputs.images || 'both' }}
+          INPUT_PLATFORMS: ${{ inputs.platforms || 'linux/amd64,linux/arm64' }}
+          INPUT_TAGS_OVERRIDE: ${{ inputs.tags_override || '' }}
+          INPUT_DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
+          INPUT_WAIT_R2_MINUTES: ${{ inputs.wait_r2_minutes || '30' }}
+          JPOM_DOWNLOAD_BASE: ${{ env.JPOM_DOWNLOAD_BASE }}
+        run: bash script/docker-ci-meta.sh
+
+      - name: 等待 R2 发布包就绪
+        shell: bash
+        env:
+          CHANNEL: ${{ steps.meta.outputs.channel }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          IMAGES: ${{ steps.meta.outputs.images }}
+          WAIT_MINUTES: ${{ steps.meta.outputs.wait_r2_minutes }}
+          R2_BASE: ${{ steps.meta.outputs.r2_base }}
+        run: bash script/docker-ci-wait-r2.sh
+
+      - name: 写入执行摘要
+        shell: bash
+        env:
+          CHANNEL: ${{ steps.meta.outputs.channel }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          IMAGES: ${{ steps.meta.outputs.images }}
+          PLATFORMS: ${{ steps.meta.outputs.platforms }}
+          DRY_RUN: ${{ steps.meta.outputs.dry_run }}
+          SELF_TEST: ${{ steps.meta.outputs.self_test }}
+          SERVER_TAGS: ${{ steps.meta.outputs.server_tags }}
+          AGENT_TAGS: ${{ steps.meta.outputs.agent_tags }}
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## Docker 镜像发布：${VERSION}"
+            echo
+            echo "| 项 | 值 |"
+            echo "| --- | --- |"
+            echo "| 事件 | ${EVENT_NAME} @ ${REF_NAME} |"
+            echo "| 渠道 | ${CHANNEL} |"
+            echo "| 镜像 | ${IMAGES} |"
+            echo "| 平台 | ${PLATFORMS} |"
+            echo "| dry-run | ${DRY_RUN} |"
+            echo "| 分支自检 | ${SELF_TEST} |"
+            echo
+            echo "server tags："
+            echo '```'
+            printf '%s\n' "${SERVER_TAGS}"
+            echo '```'
+            echo "agent tags："
+            echo '```'
+            printf '%s\n' "${AGENT_TAGS}"
+            echo '```'
+          } >>"$GITHUB_STEP_SUMMARY"
+
+  publish:
+    name: ${{ matrix.image }} · ${{ needs.prepare.outputs.version }}${{ needs.prepare.outputs.dry_run == 'true' && ' · dry-run' || '' }}
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJSON(needs.prepare.outputs.images_json) }}
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 QEMU（多架构模拟）
+        uses: docker/setup-qemu-action@v3
+
+      - name: 设置 Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 校验 Docker Hub secrets
+        if: ${{ needs.prepare.outputs.dry_run != 'true' }}
+        shell: bash
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${DOCKERHUB_USERNAME:-}" ] || [ -z "${DOCKERHUB_TOKEN:-}" ]; then
+            echo "::error::缺少仓库 secrets DOCKERHUB_USERNAME / DOCKERHUB_TOKEN，请由维护者按发布流程配置"
+            exit 1
+          fi
+          echo "Docker Hub secrets 已配置（账号：${DOCKERHUB_USERNAME}）"
+
+      - name: 登录 Docker Hub
+        if: ${{ needs.prepare.outputs.dry_run != 'true' }}
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: 构建并推送 ${{ matrix.image }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.image == 'server' && needs.prepare.outputs.server_dockerfile || needs.prepare.outputs.agent_dockerfile }}
+          platforms: ${{ needs.prepare.outputs.platforms }}
+          push: ${{ needs.prepare.outputs.dry_run != 'true' }}
+          provenance: false
+          sbom: false
+          tags: ${{ matrix.image == 'server' && needs.prepare.outputs.server_tags || needs.prepare.outputs.agent_tags }}
+          build-args: |
+            JPOM_DOWNLOAD_BASE=${{ env.JPOM_DOWNLOAD_BASE }}
+          labels: |
+            org.opencontainers.image.title=Jpom ${{ matrix.image }}
+            org.opencontainers.image.source=https://gitee.com/dromara/Jpom
+            org.opencontainers.image.version=${{ needs.prepare.outputs.version }}
+            org.opencontainers.image.licenses=MulanPSL-2.0
+
+      - name: 回验多架构镜像与 digest
+        if: ${{ needs.prepare.outputs.dry_run != 'true' }}
+        shell: bash
+        env:
+          IMAGE: ${{ matrix.image == 'server' && needs.prepare.outputs.server_image || needs.prepare.outputs.agent_image }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+          PLATFORMS: ${{ needs.prepare.outputs.platforms }}
+          TAGS: ${{ matrix.image == 'server' && needs.prepare.outputs.server_tags || needs.prepare.outputs.agent_tags }}
+        run: |
+          set -euo pipefail
+          echo "回验镜像：${IMAGE}:${VERSION}（期望平台：${PLATFORMS}）"
+          inspect_out=$(docker buildx imagetools inspect "${IMAGE}:${VERSION}")
+          printf '%s\n' "$inspect_out"
+          IFS=',' read -r -a platform_list <<<"$PLATFORMS"
+          for platform in "${platform_list[@]}"; do
+            platform=$(printf '%s' "$platform" | tr -d ' ')
+            [ -n "$platform" ] || continue
+            if printf '%s\n' "$inspect_out" | grep -q "$platform"; then
+              echo "OK：包含平台 $platform"
+            else
+              echo "::error::镜像 ${IMAGE}:${VERSION} 缺少平台 $platform"
+              exit 1
+            fi
+          done
+
+          digest=""
+          for tag in $TAGS; do
+            tag_digest=$(docker buildx imagetools inspect "$tag" --format '{{.Manifest.Digest}}')
+            echo "tag=${tag} digest=${tag_digest}"
+            if [ -z "$digest" ]; then
+              digest="$tag_digest"
+            elif [ "$digest" != "$tag_digest" ]; then
+              echo "::error::同一镜像的不同 tag digest 不一致：${digest} vs ${tag_digest}"
+              exit 1
+            fi
+          done
+
+          {
+            echo "### ${IMAGE}:${VERSION}"
+            echo
+            echo "- digest：\`${digest}\`"
+            echo "- tags：$(printf '%s' "$TAGS" | tr '\n' ' ')"
+            echo "- platforms：${PLATFORMS}"
+            echo
+          } >>"$GITHUB_STEP_SUMMARY"
+
+      - name: dry-run 摘要
+        if: ${{ needs.prepare.outputs.dry_run == 'true' }}
+        shell: bash
+        env:
+          IMAGE: ${{ matrix.image == 'server' && needs.prepare.outputs.server_image || needs.prepare.outputs.agent_image }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          {
+            echo "### ${IMAGE}:${VERSION}（dry-run）"
+            echo
+            echo "只构建、未登录 Docker Hub、未推送镜像。"
+            echo
+          } >>"$GITHUB_STEP_SUMMARY"

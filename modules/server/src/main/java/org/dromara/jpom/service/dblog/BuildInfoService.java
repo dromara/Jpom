@@ -70,7 +70,7 @@ public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> imple
         BuildInfoModel buildInfoModel = new BuildInfoModel();
         buildInfoModel.setId(id);
         buildInfoModel.setBuildId(buildNumberId);
-        Entity where = this.dataBeanToEntity(buildInfoModel);
+        Entity where = this.dataBeanToQueryEntity(buildInfoModel);
         //
         BuildInfoModel dataModel = new BuildInfoModel();
         dataModel.setStatus(buildStatus.getCode());

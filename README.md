@@ -553,6 +553,16 @@ Made with [contrib.rocks](https://contrib.rocks).
 <img src="https://jpom.top/images/zsxq.jpg" alt="扫码加入知识星球，了解学习更多知识">
 </p>
 
+
+## 🤖 AI 运维接入（Skill / MCP）
+
+Jpom 提供可移植的 AI 运维 Skill（`jpom-ops`）：通过现有 REST API + 长期 token 覆盖工作空间、节点、项目、构建、脚本、资产、监控、分发、系统与审计日志的查询，并支持显式授权后的受控写操作（触发/取消构建、项目启停重启、杀进程、在线升级）。适配 DeepSeek Harness / Claude / Cursor 等工具；默认只读，写操作需 `JPOM_OPS_ALLOW_WRITE=true` + `--confirm`。
+
+- 源码：[`skills/jpom-ops/`](skills/jpom-ops/)（随代码仓库维护，已在 2.11.13 逐条验证，兼容 2.11.x）
+- 使用说明与下载：请参阅官方文档《AI 运维接入（Skill / MCP）》（https://jpom.top/pages/ai-ops-skill-mcp/）
+
+> 注意：仅在本地安全配置 `JPOM-USER-TOKEN`，不要提交凭据；终端、脚本在线执行等 WebSocket 能力不在 Skill 范围内；MCP Server 规划中。
+
 ## 🔔 精品项目推荐
 
 | 项目名称          | 项目地址                                                                       | 项目介绍                                          |

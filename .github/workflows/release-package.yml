@@ -1,0 +1,190 @@
+name: release-package
+
+# 构建 Jpom 发布包（server/agent 的 zip、tar.gz、sha1 + 合并包）并上传 Cloudflare R2。
+#
+# 设计要点：
+# 1. 稳定版：推 tag `v*` 后自动构建并上传到 R2 `release/<version>/`（与 d2 路径一致，只是上传走 R2 S3 API）。
+# 2. beta：由 `release.sh beta --with-r2-ci`（或手动 dispatch）触发，上传到 `beta/<version>/`。
+# 3. 分支 push（仅 workflow/辅助脚本变更）触发一次 dry_run 自检：只构建+校验，不上传。
+# 4. 校验使用与 release.sh 相同的 `script/verify-release-artifacts.sh`；回验用 r2.dev（runner 访问 d2 会被 Cloudflare challenge）。
+# 5. 需要仓库 secrets：R2_ACCOUNT_ID、R2_ACCESS_KEY_ID、R2_SECRET_ACCESS_KEY（建议只对 jpom-releases-apac bucket 读写的 R2 API Token）。
+# 6. 可选仓库变量：R2_BUCKET（默认 jpom-releases-apac）、JPOM_DOWNLOAD_BASE（回验基址，默认 r2.dev）。
+#
+# 安全：R2 凭据只从 secrets 注入，绝不落盘/打印；POC 用 target_prefix=ci-test（不写正式目录）。
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: '发布渠道：auto（tag→release，beta 分支→beta，其余→release）'
+        type: choice
+        options: [auto, release, beta]
+        default: auto
+      version:
+        description: '版本号（留空自动推导：tag / script/tag.release.txt / tag.beta.txt）'
+        type: string
+        required: false
+      target_prefix:
+        description: '目标路径前缀（POC/灰度；空=正式目录；示例：ci-test）'
+        type: string
+        required: false
+      dry_run:
+        description: '只构建+校验，不上传 R2'
+        type: boolean
+        default: false
+      deep_verify:
+        description: '上传后下载全部对象逐字节比对 sha1（更严格、更慢）'
+        type: boolean
+        default: false
+  push:
+    tags:
+      - 'v*'
+    branches:
+      - dev
+      - beta
+    # tag push 不评估 paths；分支 push 仅当 workflow/辅助脚本变更时触发自检（dry_run）
+    paths:
+      - '.github/workflows/release-package.yml'
+      - 'script/release-ci-meta.sh'
+      - 'script/verify-release-artifacts.sh'
+      - 'script/r2-upload-ci.sh'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-package-${{ github.ref_name }}-${{ inputs.version || 'auto' }}
+  cancel-in-progress: false
+
+env:
+  JPOM_DOWNLOAD_BASE: ${{ vars.JPOM_DOWNLOAD_BASE || 'https://pub-a46506c7e8ff43fabc4c1ce8e5faffcb.r2.dev' }}
+  R2_BUCKET: ${{ vars.R2_BUCKET || 'jpom-releases-apac' }}
+
+jobs:
+  package:
+    name: 构建并上传 R2（${{ github.ref_name }}）
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 解析发布元数据
+        id: meta
+        shell: bash
+        env:
+          INPUT_CHANNEL: ${{ inputs.channel || 'auto' }}
+          INPUT_VERSION: ${{ inputs.version || '' }}
+          INPUT_TARGET_PREFIX: ${{ inputs.target_prefix || '' }}
+          INPUT_DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
+          INPUT_DEEP_VERIFY: ${{ inputs.deep_verify && 'true' || 'false' }}
+        run: bash script/release-ci-meta.sh
+
+      - name: 设置 Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: 设置 JDK 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+
+      - name: 构建前端
+        working-directory: web-vue
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+          npm run build
+
+      - name: 构建后端发布包
+        working-directory: .
+        run: |
+          set -euo pipefail
+          mvn -B -e clean package -Dmaven.test.skip=true -Dmaven.compile.fork=true
+
+      - name: 校验发布产物（与 release.sh 同一套校验）
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash script/verify-release-artifacts.sh \
+            --parent-dir . \
+            --version '${{ steps.meta.outputs.version }}'
+
+      - name: 安装 rclone
+        if: ${{ steps.meta.outputs.dry_run != 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://downloads.rclone.org/rclone-current-linux-amd64.zip -o /tmp/rclone.zip
+          unzip -q -o /tmp/rclone.zip -d /tmp/rclone
+          sudo install -m 755 /tmp/rclone/rclone-*/rclone /usr/local/bin/rclone
+          rclone version | head -n 3
+
+      - name: 上传发布包到 R2
+        if: ${{ steps.meta.outputs.dry_run != 'true' }}
+        shell: bash
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          CHANNEL: ${{ steps.meta.outputs.channel }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          TARGET_PREFIX: ${{ steps.meta.outputs.target_prefix }}
+          DEEP_VERIFY: ${{ steps.meta.outputs.deep_verify }}
+          RCLONE_CONFIG_R2_TYPE: s3
+          RCLONE_CONFIG_R2_PROVIDER: Cloudflare
+          RCLONE_CONFIG_R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          RCLONE_CONFIG_R2_ENDPOINT: https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+          RCLONE_CONFIG_R2_REGION: auto
+        run: |
+          set -euo pipefail
+          if [ -z "${R2_ACCOUNT_ID:-}" ] || [ -z "${R2_ACCESS_KEY_ID:-}" ] || [ -z "${R2_SECRET_ACCESS_KEY:-}" ]; then
+            echo "::error::缺少 R2_ACCOUNT_ID / R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY secrets，请由维护者按发布流程配置"
+            exit 1
+          fi
+          args=(--channel "${CHANNEL}" --version "${VERSION}" --prefix "${TARGET_PREFIX}")
+          [ "${DEEP_VERIFY}" = "true" ] && args+=(--deep-verify)
+          R2_PUBLIC_BASE="${JPOM_DOWNLOAD_BASE}" R2_BUCKET="${R2_BUCKET}" \
+            bash script/r2-upload-ci.sh "${args[@]}"
+
+      - name: 写入执行摘要
+        if: always()
+        shell: bash
+        env:
+          CHANNEL: ${{ steps.meta.outputs.channel }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          REMOTE_REL: ${{ steps.meta.outputs.remote_rel }}
+          PUBLIC_BASE: ${{ steps.meta.outputs.public_base }}
+          DRY_RUN: ${{ steps.meta.outputs.dry_run }}
+          SELF_TEST: ${{ steps.meta.outputs.self_test }}
+          DEEP_VERIFY: ${{ steps.meta.outputs.deep_verify }}
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## Jpom 发布包：${VERSION}"
+            echo
+            echo "| 项 | 值 |"
+            echo "| --- | --- |"
+            echo "| 事件 | ${EVENT_NAME} @ ${REF_NAME} |"
+            echo "| 渠道 | ${CHANNEL} |"
+            echo "| 目标路径 | \`${REMOTE_REL}/\` |"
+            echo "| 下载基址 | ${PUBLIC_BASE}/${REMOTE_REL}/ |"
+            echo "| dry-run | ${DRY_RUN} |"
+            echo "| 分支自检 | ${SELF_TEST} |"
+            echo "| deep-verify | ${DEEP_VERIFY} |"
+            echo
+            echo "产物 sha1（本地计算）："
+            echo '```'
+            for kind in server agent; do
+              for ext in zip tar.gz; do
+                file="modules/${kind}/target/${kind}-${VERSION}-release.${ext}"
+                [ -f "$file" ] && echo "${file##*/}  $(sha1sum "$file" | awk '{print $1}')  $(du -h "$file" | cut -f1)"
+              done
+            done
+            echo '```'
+          } >>"$GITHUB_STEP_SUMMARY"

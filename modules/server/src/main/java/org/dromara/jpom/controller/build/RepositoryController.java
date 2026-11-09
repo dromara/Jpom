@@ -47,6 +47,7 @@ import org.dromara.jpom.permission.SystemPermission;
 import org.dromara.jpom.plugin.PluginFactory;
 import org.dromara.jpom.service.dblog.BuildInfoService;
 import org.dromara.jpom.service.dblog.RepositoryService;
+import org.dromara.jpom.service.h2db.BaseDbService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -102,9 +103,9 @@ public class RepositoryController extends BaseServerController {
      */
     @GetMapping(value = "/build/repository/list-group", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<List<String>> getBuildGroupAll() {
+    public IJsonMessage<List<String>> getBuildGroupAll(HttpServletRequest request) {
         // load list with page
-        List<String> group = repositoryService.listGroup();
+        List<String> group = repositoryService.listGroup(request);
         return JsonMessage.success("", group);
     }
 
@@ -135,6 +136,10 @@ public class RepositoryController extends BaseServerController {
         CsvWriter writer = CsvUtil.getWriter(response.getWriter());
         int pageInt = 0;
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
+        // 强制空间隔离：仅导出「当前空间 + GLOBAL」，并剔除客户端同字段参数（审计 P2-1）
+        String workspace = repositoryService.getCheckUserWorkspace(request);
+        BaseDbService.putForcedFilter(paramMap, "workspaceId:in",
+            workspace + StrUtil.COMMA + ServerConst.WORKSPACE_GLOBAL);
         writer.writeLine("name", "group", "address", "type", "protocol", "private rsa", "username", "password", "timeout(s)");
         while (true) {
             // 下一页

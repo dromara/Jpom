@@ -152,7 +152,7 @@ public class UserService extends BaseDbService<UserModel> {
     public long systemUserCount() {
         UserModel userModel = new UserModel();
         userModel.setSystemUser(1);
-        return super.count(super.dataBeanToEntity(userModel));
+        return super.count(super.dataBeanToQueryEntity(userModel));
     }
 
     /**
@@ -217,7 +217,7 @@ public class UserService extends BaseDbService<UserModel> {
         where.setParent(UserModel.SYSTEM_ADMIN);
         UserModel update = new UserModel();
         update.setTwoFactorAuthKey(StrUtil.EMPTY);
-        int count = super.update(super.dataBeanToEntity(update), super.dataBeanToEntity(where));
+        int count = super.update(super.dataBeanToEntity(update), super.dataBeanToQueryEntity(where));
         return StrUtil.format(I18nMessageUtil.get("i18n.super_admin_mfa_verification_disabled.b97d"), count);
     }
 

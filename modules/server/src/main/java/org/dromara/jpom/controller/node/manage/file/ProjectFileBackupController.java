@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.dromara.jpom.permission.MethodFeature;
 
 /**
  * @author bwcx_jzy
@@ -44,6 +45,7 @@ public class ProjectFileBackupController extends BaseServerController {
      * @param id 项目ID
      * @return list
      */
+    @Feature(method = MethodFeature.LIST)
     @RequestMapping(value = "list-backup", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<Object> listBackup(String id, HttpServletRequest request) {
         return NodeForward.request(getNode(), request, NodeUrl.MANAGE_FILE_BACKUP_LIST_BACKUP);
@@ -57,6 +59,7 @@ public class ProjectFileBackupController extends BaseServerController {
      * @param backupId 备份id
      * @return list
      */
+    @Feature(method = MethodFeature.EDIT)
     @RequestMapping(value = "backup-item-files", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<Object> backupItemFiles(String id, String path, @ValidatorItem String backupId, HttpServletRequest request) {
         return NodeForward.request(getNode(), request, NodeUrl.MANAGE_FILE_BACKUP_LIST_ITEM_FILES);
@@ -70,6 +73,7 @@ public class ProjectFileBackupController extends BaseServerController {
      * @param levelName 文件夹名
      * @param backupId  备份id
      */
+    @Feature(method = MethodFeature.DOWNLOAD)
     @GetMapping(value = "backup-download", produces = MediaType.APPLICATION_JSON_VALUE)
     public void download(String id, @ValidatorItem String backupId, @ValidatorItem String filename, String levelName,
                          HttpServletResponse response,
@@ -86,6 +90,7 @@ public class ProjectFileBackupController extends BaseServerController {
      * @param levelName 层级目录
      * @return msg
      */
+    @Feature(method = MethodFeature.DEL)
     @RequestMapping(value = "backup-delete", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<Object> deleteFile(String id, @ValidatorItem String backupId, @ValidatorItem String filename, String levelName, HttpServletRequest request) {
         return NodeForward.request(getNode(), request, NodeUrl.MANAGE_FILE_BACKUP_DELETE);
@@ -101,6 +106,7 @@ public class ProjectFileBackupController extends BaseServerController {
      * @param levelName 目录
      * @return msg
      */
+    @Feature(method = MethodFeature.EDIT)
     @RequestMapping(value = "backup-recover", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<Object> recoverFile(String id, @ValidatorItem String backupId, String type, String filename, String levelName, HttpServletRequest request) {
         return NodeForward.request(getNode(), request, NodeUrl.MANAGE_FILE_BACKUP_RECOVER);
