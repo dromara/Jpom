@@ -116,6 +116,7 @@ jobs:
           export GOMODCACHE="$RUNNER_TEMP/go-mod-cache"
           export GOCACHE="$RUNNER_TEMP/go-build-cache"
           export GOTMPDIR="$RUNNER_TEMP/go-tmp"
+          mkdir -p "$GOMODCACHE" "$GOCACHE" "$GOTMPDIR"
           unformatted=$(gofmt -l $(find . -path ./.cache -prune -o -name "*.go" -print))
           if [ -n "${unformatted}" ]; then
             echo "以下文件未 gofmt："
@@ -137,6 +138,7 @@ jobs:
           export GOMODCACHE="$RUNNER_TEMP/go-mod-cache"
           export GOCACHE="$RUNNER_TEMP/go-build-cache"
           export GOTMPDIR="$RUNNER_TEMP/go-tmp"
+          mkdir -p "$GOMODCACHE" "$GOCACHE" "$GOTMPDIR"
           export BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           # 构建平台清单（安装包 5 平台；升级容器同 5 平台 + linux/amd64 兼容别名）
           PLATFORMS="linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64"
