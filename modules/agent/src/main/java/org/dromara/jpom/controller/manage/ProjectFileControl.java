@@ -15,6 +15,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.BooleanUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.compress.CompressUtil;
@@ -42,6 +43,7 @@ import org.dromara.jpom.socket.ConsoleCommandOp;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.CompressionFileUtil;
 import org.dromara.jpom.util.FileUtils;
+import org.dromara.jpom.util.RemoteFileNameUtil;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -542,8 +544,14 @@ public class ProjectFileControl extends BaseAgentController {
                     }
                 }
             } else {
-                // 移动文件到对应目录
-                FileUtil.move(downloadFile, file, true);
+                // 移动文件到对应目录，文件名取 URL 中的文件名（与 Go 插件端保持一致）
+                String fileName = RemoteFileNameUtil.resolveFileName(url);
+                File targetFile = FileUtil.file(file, fileName);
+                if (targetFile.isDirectory()) {
+                    // 同名目录已存在时使用随机名称，避免文件被移动到该目录中
+                    targetFile = FileUtil.file(file, IdUtil.fastSimpleUUID());
+                }
+                FileUtil.move(downloadFile, targetFile, true);
             }
             projectCommander.asyncWebHooks(pim, "fileChange", "changeEvent", "remoteDownload", "levelName", levelName, "fileName", file.getName(), "url", url);
             return JsonMessage.success(I18nMessageUtil.get("i18n.download_file_size.d4de") + fileSize);

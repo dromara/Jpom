@@ -435,7 +435,7 @@ export default {
   },
   data() {
     return {
-      loading: true,
+      loading: false,
       list: [],
       temp: {},
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),

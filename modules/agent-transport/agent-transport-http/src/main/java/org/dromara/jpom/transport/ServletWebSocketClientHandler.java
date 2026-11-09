@@ -145,6 +145,9 @@ public class ServletWebSocketClientHandler extends AbstractWebSocketHandler impl
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         this.closeStatus = status;
+        // 释放装饰器引用（ConcurrentWebSocketSessionDecorator 内部可能持有 5MB 消息缓冲），
+        // 避免代理连接已关闭但缓冲一直跟到浏览器会话结束才释放
+        this.session = null;
         log.warn(TransportI18nMessageUtil.get("i18n.connection_closed.6d4e"), status.getCode(), status.getReason());
     }
 

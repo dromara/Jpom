@@ -10,7 +10,6 @@
 package org.dromara.jpom.socket;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
@@ -19,11 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.AgentAuthorize;
-import org.dromara.jpom.util.SocketSessionUtil;
 
 import javax.websocket.CloseReason;
 import javax.websocket.Session;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -110,12 +107,15 @@ public abstract class BaseAgentWebSocketHandle {
     }
 
     public void onError(Session session, Throwable thr) {
-        // java.io.IOException: Broken pipe
-        try {
-            SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.server_exception_occurred.9eb4") + ExceptionUtil.stacktraceToString(thr));
-        } catch (IOException ignored) {
-        }
+        // Broken pipe 等连接异常：不再向已损坏的连接发送堆栈（会长时间重试并放大日志），
+        // 主动关闭会话并清理监听缓存，避免半开会话/文件监听器累积导致内存泄漏。
         log.error("{}{}", session.getId(), I18nMessageUtil.get("i18n.socket_exception.d836"), thr);
+        try {
+            session.close();
+        } catch (Exception e) {
+            log.debug(I18nMessageUtil.get("i18n.socket_error.18c1"), e);
+        }
+        this.cleanup(session);
     }
 
     protected String getOptUserName(Session session) {
@@ -125,6 +125,15 @@ public abstract class BaseAgentWebSocketHandle {
 
     public void onClose(Session session, CloseReason closeReason) {
         log.debug(I18nMessageUtil.get("i18n.session_closed_reason.103a"), session.getId(), closeReason);
+        this.cleanup(session);
+    }
+
+    /**
+     * 清理会话相关缓存（关闭与异常回调都会触发，必须幂等）
+     *
+     * @param session 会话
+     */
+    protected void cleanup(Session session) {
         // 清理日志监听
         try {
             AgentFileTailWatcher.offline(session);

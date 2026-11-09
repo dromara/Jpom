@@ -47,6 +47,11 @@ public class AgentFileModel extends BaseModel {
      * jar 打包时间
      */
     private String timeStamp;
+    /**
+     * Go 版插件端升级包平台（os/arch，例如 linux/amd64），Java 包为空
+     * <p>新增字段（additive），旧版 Server 反序列化时忽略；用于多架构升级时按节点平台选择本地包。</p>
+     */
+    private String platform;
 
     @Override
     public String toString() {

@@ -18,10 +18,15 @@
 #   3. jar 内 BOOT-INF/classes 与 modules/<kind>/target/classes 逐字节一致（防止打入旧/坏 class）
 #   4. server jar 包含前端产物 BOOT-INF/classes/dist/index.html
 #   5. 解压运行目录存在且含 bin/
+#   6. --verify-go：go-agent/dist 下的 Go 插件端产物（5 平台安装包 + 5 平台升级容器 + linux/amd64 兼容别名）：
+#      命名、sha1、压缩包完整性、安装包目录结构（bin/agent(.exe)+conf）、升级容器 MANIFEST/
+#      agent.json（platform 必须与文件名平台一致）/容器内对应平台可执行文件 sha256、
+#      别名与 linux/amd64 容器逐字节一致（供旧 Server 手工上传/默认回退）
 #
 # 用法：
 #   bash script/verify-release-artifacts.sh --parent-dir jpom-parent --version 2.11.14 [--log-dir DIR]
 #   bash script/verify-release-artifacts.sh --parent-dir DIR --version V --downloaded   # 校验从 R2 下载的产物（无 target/classes）
+#   bash script/verify-release-artifacts.sh --parent-dir DIR --version V --verify-go --go-only   # 只校验 Go 插件端产物
 
 #-----------------------------------------------------------
 
@@ -31,6 +36,8 @@ parent_dir="jpom-parent"
 version=""
 log_dir=""
 skip_target_compare=0
+verify_go=0
+go_only=0
 
 while [ $# -gt 0 ]; do
 	case "$1" in
@@ -48,6 +55,15 @@ while [ $# -gt 0 ]; do
 		;;
 	--downloaded)
 		skip_target_compare=1
+		shift
+		;;
+	--verify-go)
+		verify_go=1
+		shift
+		;;
+	--go-only)
+		verify_go=1
+		go_only=1
 		shift
 		;;
 	-h | --help)
@@ -87,8 +103,143 @@ sha1_of() {
 	fi
 }
 
+# 校验 Go 插件端产物（release-package.yml 构建，go-agent/dist）
+verify_go_artifacts() {
+	local go_dist="${parent_dir}/go-agent/dist"
+	[ -d "$go_dist" ] || die "缺少 Go 产物目录：${go_dist}（先执行 go-agent/script/package.sh 与 build-upgrade-container.sh）"
+
+	# 平台清单：安装包与升级容器同为 5 平台；linux/amd64 另有兼容别名 upgrade.jar
+	local go_platforms=("linux/amd64" "linux/arm64" "darwin/amd64" "darwin/arm64" "windows/amd64")
+	local go_packages=() go_containers=() go_platform go_os go_arch
+	for go_platform in "${go_platforms[@]}"; do
+		go_os="${go_platform%/*}"
+		go_arch="${go_platform#*/}"
+		go_packages+=("agent-go-${version}-release-${go_os}-${go_arch}.zip")
+		if [ "${go_os}" != "windows" ]; then
+			go_packages+=("agent-go-${version}-release-${go_os}-${go_arch}.tar.gz")
+		fi
+		go_containers+=("agent-go-${version}-upgrade-${go_os}-${go_arch}.jar")
+	done
+	local go_alias="agent-go-${version}-upgrade.jar"
+	local go_names=("${go_packages[@]}" "${go_containers[@]}" "${go_alias}")
+
+	# 1) 存在性 / sha1 / 压缩包完整性
+	local name file sha file_sha expected
+	for name in "${go_names[@]}"; do
+		file="${go_dist}/${name}"
+		sha="${file}.sha1"
+		[ -s "$file" ] || die "缺少 Go 产物：${file}"
+		[ -s "$sha" ] || die "缺少 Go 产物校验文件：${sha}"
+		file_sha=$(sha1_of "$file")
+		expected=$(tr -d ' \r\n' <"$sha")
+		[ "$file_sha" = "$expected" ] || die "${file} 的 sha1 与 .sha1 不一致"
+		case "$name" in
+		*.zip) unzip -t "$file" >/dev/null || die "${file} zip 完整性校验失败" ;;
+		*.tar.gz) tar -tzf "$file" >/dev/null || die "${file} tar.gz 完整性校验失败" ;;
+		*.jar) unzip -t "$file" >/dev/null || die "${file} jar 完整性校验失败" ;;
+		esac
+		log "OK  ${name}  $(stat -c '%s' "$file" 2>/dev/null || stat -f '%z' "$file") bytes  sha1=${file_sha:0:12}…"
+	done
+
+	# 2) 安装包目录结构：非 Windows 为 bin/agent，Windows 为 bin/agent.exe；都需 conf/application.yml
+	local listing
+	for name in "${go_packages[@]}"; do
+		file="${go_dist}/${name}"
+		case "$name" in
+		*.zip) listing=$(unzip -Z1 "$file") ;;
+		*.tar.gz) listing=$(tar -tzf "$file") ;;
+		esac
+		case "$name" in
+		*-windows-*) grep -qE '(^|/)bin/agent\.exe$' <<<"$listing" || die "${name} 缺少 bin/agent.exe" ;;
+		*) grep -qE '(^|/)bin/agent$' <<<"$listing" || die "${name} 缺少 bin/agent" ;;
+		esac
+		grep -qE '(^|/)conf/application\.yml$' <<<"$listing" || die "${name} 缺少 conf/application.yml"
+		log "OK  ${name} 目录结构含 bin/agent(.exe) 与 conf/application.yml"
+	done
+
+	# 3) 升级容器：逐平台校验命名/元信息/容器内对应平台可执行文件
+	mkdir -p "${log_dir}/go-upgrade"
+	for go_platform in "${go_platforms[@]}"; do
+		go_os="${go_platform%/*}"
+		go_arch="${go_platform#*/}"
+		verify_go_container "${go_dist}/agent-go-${version}-upgrade-${go_os}-${go_arch}.jar" "${go_platform}"
+	done
+
+	# 4) 兼容别名：必须与 linux/amd64 容器逐字节一致（旧 Server 手工上传/默认回退）
+	local linux_jar="${go_dist}/agent-go-${version}-upgrade-linux-amd64.jar"
+	cmp -s "${go_dist}/${go_alias}" "$linux_jar" || die "${go_alias} 必须与 ${linux_jar##*/} 逐字节一致（linux/amd64 兼容别名）"
+	log "OK  ${go_alias} 为 linux/amd64 容器副本（sha1=$(sha1_of "${go_dist}/${go_alias}")）"
+}
+
+# 校验单个 Go 升级容器：命名/平台/可执行文件/MANIFEST/agent.json sha256
+verify_go_container() {
+	local jar=$1 expected_platform=$2
+	local go_os="${expected_platform%/*}" go_arch="${expected_platform#*/}"
+	local expected_bin="go-agent/bin/go-agent-${go_os}-${go_arch}"
+	[ "$go_os" = "windows" ] && expected_bin="${expected_bin}.exe"
+	local jar_dir="${log_dir}/go-upgrade"
+	local entries="${jar_dir}/entries-${go_os}-${go_arch}.txt"
+	local manifest="${jar_dir}/MANIFEST-${go_os}-${go_arch}.MF"
+	local agent_json="${jar_dir}/agent-${go_os}-${go_arch}.json"
+	local agent_bin="${jar_dir}/agent-${go_os}-${go_arch}.bin"
+	[ -s "$jar" ] || die "缺少 Go 升级容器：${jar}"
+	unzip -Z1 "$jar" >"$entries" || die "无法读取 Go 升级容器：${jar}"
+	grep -qx 'META-INF/MANIFEST.MF' "$entries" || die "${jar##*/} 缺少 META-INF/MANIFEST.MF"
+	grep -qx 'go-agent/agent.json' "$entries" || die "${jar##*/} 缺少 go-agent/agent.json"
+	grep -qx 'BOOT-INF/classes/org/dromara/jpom/JpomAgentApplication.class' "$entries" ||
+		die "${jar##*/} 缺少 BOOT-INF/classes 空壳 Main-Class class（旧 Server 的 checkJpomJar 需要）"
+	grep -qx 'org/dromara/jpom/JpomAgentApplication.class' "$entries" ||
+		die "${jar##*/} 缺少 jar 根空壳 Main-Class class（旧 Server 的 loadClass 需要）"
+	grep -qx "$expected_bin" "$entries" || die "${jar##*/} 缺少 ${expected_bin}（平台/命名不一致）"
+	unzip -p "$jar" META-INF/MANIFEST.MF | tr -d '\r' >"$manifest"
+	grep -qx "Implementation-Version: ${version}" "$manifest" || die "${jar##*/} MANIFEST 的 Implementation-Version 与 ${version} 不一致"
+	grep -q '^Jpom-Timestamp: ' "$manifest" || die "${jar##*/} MANIFEST 缺少 Jpom-Timestamp"
+	grep -q '^Jpom-Min-Version: ' "$manifest" || die "${jar##*/} MANIFEST 缺少 Jpom-Min-Version"
+	grep -q '^Main-Class: ' "$manifest" || die "${jar##*/} MANIFEST 缺少 Main-Class"
+	unzip -p "$jar" go-agent/agent.json >"$agent_json"
+	unzip -p "$jar" "$expected_bin" >"$agent_bin"
+	python3 - "$version" "$expected_platform" "$agent_json" "$agent_bin" <<'PY' || die "${jar##*/} 的 agent.json/可执行文件校验失败"
+import hashlib
+import json
+import re
+import sys
+
+version, expected_platform, agent_json, agent_bin = sys.argv[1:5]
+with open(agent_json, encoding="utf-8") as fh:
+    data = json.load(fh)
+if data.get("version") != version:
+    raise SystemExit("agent.json.version != release version: %r" % data.get("version"))
+if not data.get("minVersion"):
+    raise SystemExit("agent.json.minVersion 为空")
+if not data.get("timeStamp"):
+    raise SystemExit("agent.json.timeStamp 为空")
+platform = (data.get("platform") or "").strip().lower()
+if platform != expected_platform:
+    raise SystemExit("agent.json.platform 与容器文件名平台不一致: %r != %r" % (platform, expected_platform))
+expected = (data.get("sha256") or "").lower()
+if not re.fullmatch(r"[0-9a-f]{64}", expected):
+    raise SystemExit("agent.json.sha256 不是合法 sha256: %r" % data.get("sha256"))
+with open(agent_bin, "rb") as fh:
+    actual = hashlib.sha256(fh.read()).hexdigest()
+if actual != expected:
+    raise SystemExit("agent.json.sha256 与容器内可执行文件不一致: %r != %r" % (actual, expected))
+PY
+	log "OK  Go 升级容器 ${jar##*/}（platform=${expected_platform}，MANIFEST/agent.json/可执行文件 sha256）"
+}
+
 main() {
 	log "开始校验产物：version=${version} parent_dir=${parent_dir}"
+	if [ "$go_only" = "0" ]; then
+		verify_java_artifacts
+	fi
+	if [ "$verify_go" = "1" ]; then
+		verify_go_artifacts
+	fi
+	log "校验完成"
+}
+
+# 原有 Java 产物校验（含 target/classes 逐字节比对，--downloaded 时跳过）
+verify_java_artifacts() {
 
 	local kinds=(server agent)
 	local exts=(zip tar.gz)
@@ -225,4 +376,4 @@ PY
 	log "运行目录检查通过"
 }
 
-main
+main "$@"

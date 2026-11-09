@@ -9,8 +9,7 @@
       ref="nodeProjectSearch"
       table-name="nodeProjectSearch"
       is-show-tools
-      default-auto-refresh
-      :auto-refresh-time="5"
+      :auto-refresh-time="30"
       :active-page="activePage"
       :data-source="projList"
       :columns="columns"
@@ -696,7 +695,7 @@ export default {
       noFileModes,
       nodeMap: {},
       drawerTitle: '',
-      loading: true,
+      loading: false,
       temp: {},
       drawerFileVisible: false,
       drawerConsoleVisible: false,
@@ -886,6 +885,10 @@ export default {
   },
   methods: {
     getNodeProjectData(pointerEvent, loading) {
+      // 防重入：上一轮刷新（尤其节点离线时的慢请求）未结束前不再叠加新请求
+      if (this.loading) {
+        return
+      }
       this.loading = true
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page
       this.nodeId && (this.listQuery.nodeId = this.nodeId)

@@ -21,19 +21,23 @@ import java.io.IOException;
 /**
  * socket 会话对象
  *
+ * <p>发送锁直接使用会话对象（所有发送统一走本工具类），避免 KeyLock 在锁释放与删除缓存
+ * 并发时可能出现两个线程同时进入临界区的问题；同时把失败重试从 11 次 × 500ms 收敛到
+ * 2 次 × 100ms，避免对已断开/半开连接长时间持锁阻塞日志 Tailer 线程。
+ *
  * @author bwcx_jzy
  * @since 2018/9/29
  */
 @Slf4j
 public class SocketSessionUtil {
     /**
-     * 锁
+     * 失败重试次数（不含首次）
      */
-    private static final KeyLock<String> LOCK = new KeyLock<>();
+    private static final int ERROR_TRY_COUNT = 2;
     /**
-     * 错误尝试次数
+     * 失败重试休眠时间（毫秒）
      */
-    private static final int ERROR_TRY_COUNT = 10;
+    private static final long ERROR_RETRY_SLEEP = 100;
 
     /**
      * 发送消息
@@ -47,30 +51,24 @@ public class SocketSessionUtil {
             return;
         }
         Assert.state(session.isOpen(), "session close ");
-        try {
-            LOCK.lock(session.getId());
+        synchronized (session) {
             IOException exception = null;
-            int tryCount = 0;
-            do {
-                tryCount++;
-                if (exception != null) {
-                    // 上一次有异常、休眠 500
-                    ThreadUtil.sleep(500);
+            for (int tryCount = 0; tryCount <= ERROR_TRY_COUNT; tryCount++) {
+                if (!session.isOpen()) {
+                    throw exception != null ? exception : new IOException("session close");
                 }
                 try {
                     session.getBasicRemote().sendText(msg);
-                    exception = null;
-                    break;
+                    return;
                 } catch (IOException e) {
-                    log.error("{}{}", I18nMessageUtil.get("i18n.send_message_failure_prefix.6f8c"), tryCount, e);
                     exception = e;
+                    log.warn("{}{}", I18nMessageUtil.get("i18n.send_message_failure_prefix.6f8c"), tryCount + 1, e);
+                    if (tryCount < ERROR_TRY_COUNT) {
+                        ThreadUtil.sleep(ERROR_RETRY_SLEEP);
+                    }
                 }
-            } while (tryCount <= ERROR_TRY_COUNT);
-            if (exception != null) {
-                throw exception;
             }
-        } finally {
-            LOCK.unlock(session.getId());
+            throw exception != null ? exception : new IOException("session close");
         }
     }
 }

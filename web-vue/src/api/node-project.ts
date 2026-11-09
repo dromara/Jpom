@@ -42,7 +42,8 @@ export function getRuningProjectInfo(params, noTip) {
     url: '/node/manage/getProjectPort',
     method: 'post',
     data: params,
-    timeout: 0,
+    // 节点离线时该请求可能长期无响应；设置上限避免自动刷新叠加挂起请求
+    timeout: 15000,
     headers: {
       // loading: 'no',
       tip: noTip ? 'no' : ''

@@ -1,5 +1,36 @@
 # 🚀 版本日志
 
+## 2.11.13.2-beta
+
+### 🐣 新增功能
+
+1. 【agent-go】新增 Go 语言插件端：单二进制、低内存、免 JDK，兼容 Java 插件端的配置、数据和协议，可在 Java/Go 之间平滑切换。
+2. 【server】在线升级支持 Go 插件端：自动识别节点类型与运行平台并下发匹配的升级包，Java 节点升级方式不变。
+3. 【agent-go】提供多平台安装包与在线升级包（Linux/macOS 的 amd64、arm64 与 Windows amd64），升级容器按节点平台精确匹配。
+4. 【agent-go】支持国际化、Windows/macOS 系统监控、7z 解压、GBK 编码、cron 年份/分组，以及升级失败自动回滚。
+
+### 🐞 解决BUG、优化功能
+
+1. 【all】修复 项目/节点脚本控制台、系统日志等日志监听在频繁打开关闭时，WebSocket 会话与文件监听 Tailer 线程可能未被释放、持续占用内存的问题：会话集合改为并发安全并按会话 ID 去重，watcher 的 add/close/restart 原子化且关闭幂等，关闭后不再接收新会话；发送失败立即移除并关闭会话；切换日志文件时先离线上一个监听；服务端 WebSocket 装饰器缓存与传输层代理缓冲在关闭/发送失败时即时释放
+2. 【agent】优化 控制台 WebSocket 会话增加空闲超时（依赖前端 5s 心跳），异常断开（未收到 close 帧）的会话由容器回收；脚本执行会话与执行中缓存增加异常路径兜底清理，避免长期运行后堆内存持续增长导致进程假死/OOM
+3. 【server】修复 重装/迁移服务端后“同步节点项目（脚本）”只提示拉取到 N 个、实际更新 0 个的问题：插件端项目/脚本仍带已不存在的旧工作空间时，现在会回退到节点当前工作空间再同步；工作空间仍然存在但不同（共享机器多空间）与 GLOBAL 数据保持原逻辑（[Gitee issues ICH1VK](https://gitee.com/dromara/Jpom/issues/ICH1VK)）
+4. 【server】优化 严格构建下 sh 脚本在环境模板之后、用户命令之前注入 `set -e`（bash 下同时 `set -o pipefail`），中间命令或管道失败立即中断构建，不再继续执行后续命令；非严格构建与 Windows 批处理语义保持不变（[Gitee issues ICW9KZ](https://gitee.com/dromara/Jpom/issues/ICW9KZ)）
+5. 【server】修复 Gitea/Gogs 的 GET webhook 把 push JSON 作为 `payload` 查询串携带、超过 Tomcat 默认请求行/请求头上限（8KB）导致接口直接返回 400 的问题：放宽 `server.max-http-header-size` 到 64KB（[Gitee issues IDG4PT](https://gitee.com/dromara/Jpom/issues/IDG4PT)）
+6. 【web-vue】优化 逻辑节点、项目列表、分发列表的自动刷新：默认关闭（开关仍按用户+表格持久化在浏览器本地），项目列表/分发列表刷新间隔由 5s 调整为 30s，浏览器标签页不可见时暂停自动刷新；项目列表按节点查询运行状态增加防重入与 15s 超时，避免节点离线时请求长期挂起并随刷新叠加，占满同源连接导致同页/同标签其它列表请求 20s 超时（[Gitee issues ICXOGI](https://gitee.com/dromara/Jpom/issues/ICXOGI)）
+7. 【server】修复 重置超级管理员密码（`--rest:super_user_pwd`）后新密码仅写入 `logs/server.log`、Windows 无控制台导致用户误以为重置失败的问题：命令执行结果同时输出到标准输出（`logs/stdout.log`/控制台）；超级管理员查询统一为 `systemUser=1`（保留 `parent=sys` 回退兼容旧数据），避免历史数据下静默失败（[Gitee issues IJNJZJ](https://gitee.com/dromara/Jpom/issues/IJNZJZ)）
+8. 【agent】优化 远程下载文件保存为 URL 原始文件名（此前保存为随机文件名），Java/Go 插件端行为一致。
+
+### ⚠️ 升级说明
+
+1. **严格构建语义变化**：开启【严格构建】后，sh 构建脚本会在环境模板之后、用户命令之前注入 set -e（bash 同时 set -o pipefail），中间命令或管道中任一命令失败会立即中断，不再继续执行后续命令（此前仅在脚本整体退出码非 0 时才判定失败）。依赖“某条命令失败后继续执行”的严格构建脚本，请在脚本开头显式 set +e 自行管理；非严格构建（推荐用于允许中间命令失败的场景）与 Windows 批处理不受影响。
+2. **Gitea/Gogs GET webhook 请求头上限**：新安装包默认 server.max-http-header-size: 65536（64KB）。已安装实例的外部配置文件 conf/application.yml 不会随升级自动覆盖，如仍遇到 Gitea/Gogs GET webhook 400，请在该文件 server: 下增加 max-http-header-size: 65536（或在【系统管理 → 外部配置文件】中重置为默认配置后按需调整），再重启服务端。
+3. **列表自动刷新默认值变化**：逻辑节点、项目列表、分发列表的自动刷新默认关闭（此前默认开启），仍可在页面右上角手动开启，并按“用户+表格”持久化在浏览器本地；项目列表/分发列表刷新间隔调整为 30 秒，浏览器标签页不可见时暂停自动刷新。此前已手动开启自动刷新的用户不受影响（本地配置优先）。
+4. **Go 插件端（可选新组件）**：安装包与在线升级包按平台区分（linux/darwin 的 amd64、arm64，windows-amd64），升级容器必须与节点平台一致；旧版 Server 手工上传时 linux-amd64 可用 agent-go-<version>-upgrade.jar 兼容别名。Windows 请使用包内 AgentGo.bat，服务托管只保留一种方式（nssm/sc 或手工启动）。
+5. **Go 插件端配置提示**：JPOM_SERVICE 与 Java 的 -D 启动参数对 Go 插件端无效；AES 密钥请用环境变量 JPOM_ENCRYPT_AES_KEY（与服务端一致），升级后拉起由 systemd/nssm 配置负责。
+6. **Java 插件端远程下载文件名变化**：远程下载的文件现在按 URL 原始文件名保存（此前为随机文件名）；如同名文件已存在会使用随机名回退。
+------
+
+
 ## 2.11.13.1-beta (2026-11-09)
 
 ### 🐣 新增功能

@@ -38,6 +38,7 @@ import org.dromara.jpom.service.system.WorkspaceService;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -246,33 +247,24 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
                 .peek(item -> this.fullData(item, nodeModel))
                 // 只保留自己节点的数据
                 .filter(t -> StrUtil.equals(t.getNodeId(), nodeModel.getId()))
-                .filter(item -> {
-                    if (StrUtil.equals(item.getWorkspaceId(), ServerConst.WORKSPACE_GLOBAL)) {
-                        return true;
-                    }
-                    // 检查对应的工作空间 是否存在
-                    return workspaceService.exists(new WorkspaceModel(item.getWorkspaceId()));
-                })
-                .filter(item -> {
-                    if (StrUtil.equals(item.getWorkspaceId(), ServerConst.WORKSPACE_GLOBAL)) {
-                        return true;
-                    }
-                    // 避免重复同步
-                    return StrUtil.equals(nodeModel.getWorkspaceId(), item.getWorkspaceId());
-                })
-                .peek(item -> {
-                    item.setNodeName(nodeModel.getName());
-                    WorkspaceModel workspaceModel = workspaceService.getByKey(nodeModel.getWorkspaceId());
-                    item.setWorkspaceName(Optional.ofNullable(workspaceModel).map(WorkspaceModel::getName).orElse(I18nMessageUtil.get("i18n.data_does_not_exist.b201")));
-                    cacheIds.remove(item.dataId());
-                    // 需要删除相反的工作空间的数据（避免出现一个脚本同步出2条数据的问题）
-                    if (StrUtil.equals(item.getWorkspaceId(), ServerConst.WORKSPACE_GLOBAL)) {
-                        needDelete.add(BaseNodeModel.fullId(nodeModel.getWorkspaceId(), nodeModel.getId(), item.dataId()));
-                    } else {
-                        needDelete.add(BaseNodeModel.fullId(ServerConst.WORKSPACE_GLOBAL, nodeModel.getId(), item.dataId()));
-                    }
-                })
                 .collect(Collectors.toList());
+            // 纠正数据的工作空间归属（Gitee ICH1VK）：重装服务端后插件端数据仍带已不存在的旧 workspaceId，
+            // 此前会被工作空间过滤器直接丢弃，表现为“拉取到 N 个、更新 0 个”。
+            // 现在仅当工作空间已不存在时回退到节点当前工作空间；工作空间存在但不同（共享机器多空间）与 GLOBAL 数据保持原逻辑。
+            projectInfoModels = BaseNodeService.resolveSyncWorkspaceItems(projectInfoModels, nodeModel.getWorkspaceId(),
+                workspaceId -> workspaceService.exists(new WorkspaceModel(workspaceId)));
+            projectInfoModels.forEach(item -> {
+                item.setNodeName(nodeModel.getName());
+                WorkspaceModel workspaceModel = workspaceService.getByKey(nodeModel.getWorkspaceId());
+                item.setWorkspaceName(Optional.ofNullable(workspaceModel).map(WorkspaceModel::getName).orElse(I18nMessageUtil.get("i18n.data_does_not_exist.b201")));
+                cacheIds.remove(item.dataId());
+                // 需要删除相反的工作空间的数据（避免出现一个脚本同步出2条数据的问题）
+                if (StrUtil.equals(item.getWorkspaceId(), ServerConst.WORKSPACE_GLOBAL)) {
+                    needDelete.add(BaseNodeModel.fullId(nodeModel.getWorkspaceId(), nodeModel.getId(), item.dataId()));
+                } else {
+                    needDelete.add(BaseNodeModel.fullId(ServerConst.WORKSPACE_GLOBAL, nodeModel.getId(), item.dataId()));
+                }
+            });
             // 设置 临时缓存，便于放行检查
             BaseServerController.resetInfo(UserModel.EMPTY);
             //
@@ -305,6 +297,59 @@ public abstract class BaseNodeService<T extends BaseNodeModel> extends BaseGloba
         } finally {
             BaseServerController.removeEmpty();
         }
+    }
+
+    /**
+     * 过滤并纠正待同步数据的工作空间归属（Gitee ICH1VK）
+     * <p>
+     * 规则：
+     * <ul>
+     *     <li>GLOBAL 工作空间的数据不受节点工作空间限制，保持原逻辑直接参与同步；</li>
+     *     <li>数据的工作空间仍然存在时，仍只同步与节点相同工作空间的数据（共享机器多工作空间场景避免重复同步）；</li>
+     *     <li>数据的工作空间已不存在（例如重装服务端后插件端仍保留旧 workspaceId）时，回退到节点当前工作空间参与同步，
+     *     避免数据被静默丢弃，出现“拉取到 N 个、更新 0 个”。</li>
+     * </ul>
+     * 工作空间发生回退的数据会按新工作空间重新计算主键（fullId），避免继续写入旧工作空间对应的主键。
+     * <p>
+     * 行为级回归测试见 {@code BaseNodeServiceSyncWorkspaceTest}。
+     *
+     * @param items           待同步数据
+     * @param nodeWorkspaceId 节点当前工作空间 ID
+     * @param workspaceExists 判断工作空间是否仍然存在
+     * @param <T>             节点数据类型
+     * @return 最终参与同步的数据列表（已纠正工作空间与主键），不参与同步的数据会被剔除
+     */
+    static <T extends BaseNodeModel> List<T> resolveSyncWorkspaceItems(List<T> items,
+                                                                      String nodeWorkspaceId,
+                                                                      Predicate<String> workspaceExists) {
+        if (CollUtil.isEmpty(items)) {
+            return new ArrayList<>();
+        }
+        List<T> result = new ArrayList<>(items.size());
+        for (T item : items) {
+            String workspaceId = item.getWorkspaceId();
+            String resolvedWorkspaceId;
+            if (StrUtil.equals(workspaceId, ServerConst.WORKSPACE_GLOBAL)) {
+                // GLOBAL 数据不参与节点工作空间过滤
+                resolvedWorkspaceId = ServerConst.WORKSPACE_GLOBAL;
+            } else if (StrUtil.isNotEmpty(workspaceId) && workspaceExists.test(workspaceId)) {
+                // 工作空间仍然存在：只同步与节点相同工作空间的数据（避免共享机器多空间重复同步）
+                resolvedWorkspaceId = StrUtil.equals(nodeWorkspaceId, workspaceId) ? workspaceId : null;
+            } else {
+                // 工作空间已不存在：回退到节点当前工作空间（节点工作空间为空时保持丢弃，与原逻辑一致）
+                resolvedWorkspaceId = StrUtil.isNotEmpty(nodeWorkspaceId) ? nodeWorkspaceId : null;
+            }
+            if (resolvedWorkspaceId == null) {
+                continue;
+            }
+            if (!StrUtil.equals(resolvedWorkspaceId, workspaceId)) {
+                item.setWorkspaceId(resolvedWorkspaceId);
+                // 工作空间变化后重新计算主键，避免继续使用旧工作空间对应的 fullId
+                item.setId(item.fullId());
+            }
+            result.add(item);
+        }
+        return result;
     }
 
     /**

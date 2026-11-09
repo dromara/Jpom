@@ -1,0 +1,14 @@
+{
+  "code": 200,
+  "msg": "",
+  "data": {
+    "project": [
+      "/home/example/deploy"
+    ],
+    "allowEditSuffix": [
+      "txt",
+      "html",
+      "yml"
+    ]
+  }
+}

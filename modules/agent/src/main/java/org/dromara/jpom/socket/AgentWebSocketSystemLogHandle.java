@@ -100,8 +100,8 @@ public class AgentWebSocketSystemLogHandle extends BaseAgentWebSocketHandle {
             }
             File file1 = CACHE_FILE.get(session.getId());
             if (file1 != null && !file1.equals(file)) {
-                // 离线上一个日志
-                AgentFileTailWatcher.offlineFile(file, session);
+                // 离线上一个日志（注意使用旧文件，不能传新文件）
+                AgentFileTailWatcher.offlineFile(file1, session);
             }
             try {
                 AgentFileTailWatcher.addWatcher(file, systemConfig.getLogCharset(), session);
@@ -121,11 +121,16 @@ public class AgentWebSocketSystemLogHandle extends BaseAgentWebSocketHandle {
     @OnClose
     public void onClose(Session session, CloseReason closeReason) {
         super.onClose(session, closeReason);
+        CACHE_FILE.remove(session.getId());
     }
 
     @OnError
     @Override
     public void onError(Session session, Throwable thr) {
-        super.onError(session, thr);
+        try {
+            super.onError(session, thr);
+        } finally {
+            CACHE_FILE.remove(session.getId());
+        }
     }
 }

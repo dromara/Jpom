@@ -1,0 +1,782 @@
+/*
+ * Copyright (c) 2019 Of Him Code Technology Studio
+ * Jpom is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ * 			http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ */
+package projectfile
+
+import (
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"os"
+	"path"
+	"path/filepath"
+	"strings"
+	"time"
+)
+
+// UploadOptions are the form fields of /manage/file/sharding-merge.
+type UploadOptions struct {
+	// Type is "unzip" when the merged file must be extracted instead of moved.
+	Type string
+	// LevelName is the destination directory relative to the project lib.
+	LevelName string
+	// StripComponents drops leading path levels while extracting.
+	StripComponents int
+	// After requests a project restart after the upload (restart/1/2/3).
+	After string
+	// CloseFirst stops the project before replacing its files.
+	CloseFirst bool
+	// ClearType "clear" empties the destination before writing.
+	ClearType string
+}
+
+// UploadResult describes the optional project side effect of an upload.
+type UploadResult struct {
+	Restarted bool
+	Success   bool
+	Data      any
+}
+
+// isRestartAfter mirrors ProjectFileControl#saveProjectFileAfter.
+func isRestartAfter(after string) bool {
+	value := strings.TrimSpace(after)
+	if value == "" {
+		return false
+	}
+	if strings.EqualFold(value, "restart") {
+		return true
+	}
+	code := 0
+	if _, err := fmt.Sscanf(value, "%d", &code); err != nil {
+		return false
+	}
+	return code >= 1 && code <= 3
+}
+
+// UploadProjectFile places a merged upload into the project directory, mirroring
+// ProjectFileControl#upload.
+func (s *Service) UploadProjectFile(id, mergedPath string, options UploadOptions) (UploadResult, error) {
+	// The merged sharding file is a temporary artefact: the Java agent deletes it
+	// after moving/extracting it.
+	defer func() { _ = os.RemoveAll(mergedPath) }()
+	info, err := s.Project(id)
+	if err != nil {
+		return UploadResult{}, err
+	}
+	_, target, err := s.LibAndTarget(info, options.LevelName)
+	if err != nil {
+		return UploadResult{}, err
+	}
+	backupID, err := s.Backup(info)
+	if err != nil {
+		return UploadResult{}, err
+	}
+	defer s.CheckDiff(info, backupID)
+	// saveProjectFileBefore
+	if options.CloseFirst {
+		if err := s.stopProjectBefore(info); err != nil {
+			return UploadResult{}, invalidSuffix("i18n.close_project_failure.a1d2", err.Error())
+		}
+	}
+	if strings.EqualFold(strings.TrimSpace(options.ClearType), "clear") {
+		if err := cleanDir(target); err != nil {
+			s.Log().Warn("clean project directory failed", "path", target, "error", err)
+		}
+	}
+	fileName := filepath.Base(mergedPath)
+	if strings.EqualFold(strings.TrimSpace(options.Type), "unzip") {
+		if err := s.Uncompress(mergedPath, target, options.StripComponents); err != nil {
+			return UploadResult{}, err
+		}
+	} else {
+		if _, err := moveIntoDir(mergedPath, target); err != nil {
+			return UploadResult{}, err
+		}
+	}
+	s.webhook(info, "fileChange", map[string]any{
+		"changeEvent": "upload",
+		"levelName":   options.LevelName,
+		"fileType":    options.Type,
+		"fileName":    fileName,
+	})
+	result := UploadResult{}
+	if isRestartAfter(options.After) {
+		success, data, restarted := s.restartProjectAfter(info)
+		result = UploadResult{Restarted: restarted, Success: success, Data: data}
+	}
+	return result, nil
+}
+
+// PreflightProjectUpload validates the project id and the destination directory
+// before the sharded upload is merged. The Java agent validates the request in
+// spring before the merge, so a rejected request must not destroy the uploaded
+// chunks (otherwise a retry reports "分片丢失").
+func (s *Service) PreflightProjectUpload(id, levelName string) error {
+	info, err := s.Project(id)
+	if err != nil {
+		return err
+	}
+	_, _, err = s.LibAndTarget(info, levelName)
+	return err
+}
+
+// ValidateUploadPath validates the absolute destination directory used by the
+// file2 sharding-merge endpoint, mirroring the @ValidatorItem check of the Java
+// controller which runs before the merge.
+func ValidateUploadPath(destinationPath string) (string, error) {
+	destinationPath = strings.TrimSpace(destinationPath)
+	if destinationPath == "" || strings.IndexByte(destinationPath, 0) >= 0 {
+		return "", invalidParamf("i18n.file_directory_missing.6b1d")
+	}
+	if !filepath.IsAbs(destinationPath) {
+		return "", invalidParamf("i18n.file_directory_missing.6b1d")
+	}
+	abs, err := filepath.Abs(destinationPath)
+	if err != nil {
+		return "", invalidParamf("i18n.file_directory_missing.6b1d")
+	}
+	return abs, nil
+}
+
+// UploadToPath places a merged upload into an absolute destination directory,
+// used by /manage/file2/sharding-merge (the file release feature). The server
+// validates the release path against the server side authorization before
+// calling the agent, so it is accepted as an absolute directory.
+func (s *Service) UploadToPath(destinationPath, mergedPath, uploadType string, stripComponents int) error {
+	defer func() { _ = os.RemoveAll(mergedPath) }()
+	abs, err := ValidateUploadPath(destinationPath)
+	if err != nil {
+		return err
+	}
+	if strings.EqualFold(strings.TrimSpace(uploadType), "unzip") {
+		return s.Uncompress(mergedPath, abs, stripComponents)
+	}
+	if _, err := moveIntoDir(mergedPath, abs); err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteOptions are the fields of /manage/file/deleteFile.
+type DeleteOptions struct {
+	Filename  string
+	Type      string
+	LevelName string
+}
+
+// DeleteFile removes one file or clears a directory, mirroring
+// ProjectFileControl#deleteFile.
+func (s *Service) DeleteFile(id string, options DeleteOptions) (Message, error) {
+	info, err := s.Project(id)
+	if err != nil {
+		return Message{}, err
+	}
+	_, dir, err := s.LibAndTarget(info, options.LevelName)
+	if err != nil {
+		return Message{}, err
+	}
+	backupID, err := s.Backup(info)
+	if err != nil {
+		return Message{}, err
+	}
+	defer s.CheckDiff(info, backupID)
+	if strings.EqualFold(strings.TrimSpace(options.Type), "clear") {
+		if cleanErr := cleanDir(dir); cleanErr == nil {
+			s.webhook(info, "fileChange", map[string]any{
+				"changeEvent": "delete",
+				"levelName":   options.LevelName,
+				"deleteType":  options.Type,
+				"fileName":    options.Filename,
+			})
+			return Message{Key: "i18n.clear_success_message.51f4"}, nil
+		}
+		if s.projectRunning(info) {
+			return Message{}, invalidf("i18n.file_in_use_stop_project_first.a2c3")
+		}
+		return Message{}, failSuffix("i18n.delete_failure_with_colon_and_full_stop.bc42", dir)
+	}
+	if strings.TrimSpace(options.Filename) == "" {
+		return Message{}, invalidf("i18n.select_file_to_delete.33d6")
+	}
+	target, err := secureJoin(dir, options.Filename)
+	if err != nil {
+		return Message{}, err
+	}
+	if err := os.RemoveAll(target); err != nil {
+		return Message{}, failKey("i18n.delete_failure.acf0")
+	}
+	s.webhook(info, "fileChange", map[string]any{
+		"changeEvent": "delete",
+		"levelName":   options.LevelName,
+		"deleteType":  options.Type,
+		"fileName":    options.Filename,
+	})
+	return Message{Key: "i18n.delete_success.0007"}, nil
+}
+
+// BatchDelete removes the files listed in a DiffFileVo request, mirroring
+// ProjectFileControl#batchDelete.
+func (s *Service) BatchDelete(request DiffFileRequest) error {
+	info, err := s.Project(request.ID)
+	if err != nil {
+		return err
+	}
+	lib, dir, err := s.LibAndTarget(info, request.Dir)
+	if err != nil {
+		return err
+	}
+	if len(request.Data) == 0 {
+		return errComparisonDataMissing
+	}
+	backupID, err := s.Backup(info)
+	if err != nil {
+		return err
+	}
+	defer s.CheckDiff(info, backupID)
+	for _, item := range request.Data {
+		target, err := secureJoin(lib, request.Dir, item.Name)
+		if err != nil {
+			return err
+		}
+		if err := os.RemoveAll(target); err != nil {
+			return failSuffix("i18n.delete_failure_with_colon_and_full_stop.bc42", target)
+		}
+	}
+	_ = dir
+	s.webhook(info, "fileChange", map[string]any{
+		"changeEvent": "batch-delete",
+		"levelName":   request.Dir,
+	})
+	return nil
+}
+
+// javaFilePath renders a project file path exactly like the Java agent does with
+// FileUtil.file(lib, emptyToDefault(levelName, "/"), filename): an empty (or "/")
+// levelName keeps the double slash Java produces (lib//filename). Only used for
+// the messages the Java agent echoes back; filesystem access always uses the
+// cleaned path.
+func javaFilePath(lib, levelName, filename string) string {
+	lib = strings.TrimSuffix(lib, "/")
+	levelName = strings.TrimSpace(levelName)
+	if levelName == "" || levelName == "/" {
+		return lib + "//" + filename
+	}
+	return lib + "/" + strings.Trim(levelName, "/") + "/" + filename
+}
+
+// ReadFile returns the text content of a project file, mirroring
+// ProjectFileControl#readFile.
+func (s *Service) ReadFile(id, filePath, filename string) (string, error) {
+	info, err := s.Project(id)
+	if err != nil {
+		return "", err
+	}
+	charset, err := checkFileSuffix(s.Whitelist().AllowEditSuffix, filename)
+	if err != nil {
+		return "", err
+	}
+	lib, target, err := s.LibAndTarget(info, filePath, filename)
+	if err != nil {
+		return "", err
+	}
+	content, err := os.ReadFile(target)
+	if err != nil {
+		// The Java agent lets hutool/FileReader throw, which Spring's generic
+		// handler renders as "服务异常：File not exist: <path>" (code 500). The
+		// Java path keeps the double slash of lib//filename.
+		s.Log().Warn("read project file failed", "path", target, "error", err)
+		return "", failSuffix("i18n.service_exception.3821", "File not exist: "+javaFilePath(lib, filePath, filename))
+	}
+	return decodeText(content, charset)
+}
+
+// UpdateConfigFile writes the text content of a project file, mirroring
+// ProjectFileControl#updateConfigFile.
+func (s *Service) UpdateConfigFile(id, filePath, filename, fileText string) error {
+	info, err := s.Project(id)
+	if err != nil {
+		return err
+	}
+	charset, err := checkFileSuffix(s.Whitelist().AllowEditSuffix, filename)
+	if err != nil {
+		return err
+	}
+	_, target, err := s.LibAndTarget(info, filePath, filename)
+	if err != nil {
+		return err
+	}
+	backupID, err := s.Backup(info)
+	if err != nil {
+		return err
+	}
+	defer s.CheckDiff(info, backupID)
+	content, err := encodeText(fileText, charset)
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
+		return err
+	}
+	if err := os.WriteFile(target, content, 0o644); err != nil {
+		return failMessage(fmt.Sprintf("Write file failed: %v", err))
+	}
+	s.webhook(info, "fileChange", map[string]any{
+		"changeEvent": "edit",
+		"levelName":   filePath,
+		"fileName":    filename,
+	})
+	return nil
+}
+
+// Copy duplicates a file or directory with a non conflicting name, mirroring
+// ProjectFileControl#copy.
+func (s *Service) Copy(id, filePath, filename string) error {
+	info, err := s.Project(id)
+	if err != nil {
+		return err
+	}
+	lib, source, err := s.LibAndTarget(info, filePath, filename)
+	if err != nil {
+		return err
+	}
+	base := mainName(filename)
+	extension := extName(filename)
+	counter := 1
+	var target string
+	for {
+		var name string
+		if extension != "" {
+			name = fmt.Sprintf("%s(%d).%s", base, counter, extension)
+		} else {
+			name = fmt.Sprintf("%s(%d)", base, counter)
+		}
+		candidate, err := secureJoin(lib, filePath, name)
+		if err != nil {
+			return err
+		}
+		if !exists(candidate) {
+			target = candidate
+			break
+		}
+		counter++
+		if counter > 10000 {
+			return failMessage("Failed to generate a new name for copy")
+		}
+	}
+	if isDir(source) {
+		return copyContent(source, target, false)
+	}
+	return copyFile(source, target, false)
+}
+
+// CompressFileFolder compresses one project directory into a new zip/tar/tar.gz
+// archive next to it, mirroring ProjectFileControl#compress.
+func (s *Service) CompressFileFolder(id, filePath, filename, archiveType string) error {
+	info, err := s.Project(id)
+	if err != nil {
+		return err
+	}
+	lib, source, err := s.LibAndTarget(info, filePath, filename)
+	if err != nil {
+		return err
+	}
+	if !isDir(source) {
+		return invalidf("i18n.select_folder_to_compress.915f")
+	}
+	var extension, kind string
+	switch archiveType {
+	case "zip":
+		extension, kind = ".zip", "zip"
+	case "tar":
+		extension, kind = ".tar", "tar"
+	case "tar.gz":
+		extension, kind = ".tar.gz", "tar.gz"
+	default:
+		return invalidSuffix("i18n.compression_type_not_supported.9dea", archiveType)
+	}
+	base := mainName(filename)
+	counter := 0
+	var target string
+	for {
+		var name string
+		if counter == 0 {
+			name = base + extension
+		} else {
+			name = fmt.Sprintf("%s(%d)%s", base, counter, extension)
+		}
+		candidate, err := secureJoin(lib, filePath, name)
+		if err != nil {
+			return err
+		}
+		if !exists(candidate) {
+			target = candidate
+			break
+		}
+		counter++
+		if counter > 10000 {
+			return failMessage("Failed to generate a new name for compress")
+		}
+	}
+	return Compress(source, target, kind)
+}
+
+// NewFileFolder creates a new file or directory inside the project, mirroring
+// ProjectFileControl#newFileFolder. unFolder uses the same inverted semantics as
+// Convert.toBool: unFolder=true creates a file, unset/false a directory.
+func (s *Service) NewFileFolder(id, levelName, filename, unFolder string) error {
+	if strings.TrimSpace(filename) == "" {
+		return invalidParamf("i18n.parameter_validation_failed.f0a1")
+	}
+	info, err := s.Project(id)
+	if err != nil {
+		return err
+	}
+	_, target, err := s.LibAndTarget(info, levelName, filename)
+	if err != nil {
+		return err
+	}
+	if exists(target) {
+		return invalidf("i18n.folder_or_file_exists.c687")
+	}
+	folder := !toBool(unFolder, false)
+	if folder {
+		if err := os.MkdirAll(target, 0o755); err != nil {
+			return err
+		}
+	} else {
+		if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
+			return err
+		}
+		file, err := os.OpenFile(target, os.O_CREATE|os.O_WRONLY, 0o644)
+		if err != nil {
+			return err
+		}
+		if err := file.Close(); err != nil {
+			return err
+		}
+	}
+	s.webhook(info, "fileChange", map[string]any{
+		"changeEvent": "newFileOrFolder",
+		"levelName":   levelName,
+		"fileName":    filename,
+		"folder":      folder,
+	})
+	return nil
+}
+
+// Rename renames a file or directory inside the project, mirroring
+// ProjectFileControl#rename.
+func (s *Service) Rename(id, levelName, filename, newName string) error {
+	if strings.TrimSpace(filename) == "" {
+		return invalidParamf("i18n.parameter_validation_failed.f0a1")
+	}
+	info, err := s.Project(id)
+	if err != nil {
+		return err
+	}
+	lib, source, err := s.LibAndTarget(info, levelName, filename)
+	if err != nil {
+		return err
+	}
+	target, err := secureJoin(lib, levelName, newName)
+	if err != nil {
+		return err
+	}
+	if !exists(source) {
+		return invalidf("i18n.file_not_found.d952")
+	}
+	if exists(target) {
+		return invalidf("i18n.file_name_already_exists.0d4e")
+	}
+	if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
+		return err
+	}
+	if err := os.Rename(source, target); err != nil {
+		return err
+	}
+	s.webhook(info, "fileChange", map[string]any{
+		"changeEvent": "rename",
+		"levelName":   levelName,
+		"fileName":    filename,
+		"newname":     newName,
+	})
+	return nil
+}
+
+// DownloadPath resolves a project file for /manage/file/download. displayPath is
+// the Java style path (lib//filename for the root directory) used in the
+// FileNotFoundException data field of the error response.
+func (s *Service) DownloadPath(id, levelName, filename string) (string, string, error) {
+	if strings.TrimSpace(filename) == "" {
+		return "", "", invalidf("i18n.select_file.9feb")
+	}
+	info, err := s.Project(id)
+	if err != nil {
+		return "", "", err
+	}
+	lib, target, err := s.LibAndTarget(info, levelName, filename)
+	if err != nil {
+		return "", "", err
+	}
+	return target, javaFilePath(lib, levelName, filename), nil
+}
+
+// RemoteDownload downloads a remote URL into the project, mirroring
+// ProjectFileControl#remoteDownload.
+func (s *Service) RemoteDownload(id, rawURL, levelName, unzip string, stripComponents int) (Message, error) {
+	rawURL = strings.TrimSpace(rawURL)
+	if rawURL == "" {
+		return Message{}, invalidf("i18n.correct_remote_address_required.0ce1")
+	}
+	parsed, err := url.Parse(rawURL)
+	if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Host == "" {
+		return Message{}, invalidf("i18n.correct_remote_address_required.0ce1")
+	}
+	info, err := s.Project(id)
+	if err != nil {
+		return Message{}, err
+	}
+	dateDir, err := s.shardingDateDir()
+	if err != nil {
+		return Message{}, failSuffix("i18n.download_remote_file_failed.fcc3", err.Error())
+	}
+	tempDir := filepath.Join(dateDir, randomHex(16))
+	if err := os.MkdirAll(tempDir, 0o755); err != nil {
+		return Message{}, failSuffix("i18n.download_remote_file_failed.fcc3", err.Error())
+	}
+	downloadFile, size, err := downloadRemote(rawURL, tempDir)
+	if err != nil {
+		return Message{}, failSuffix("i18n.download_remote_file_failed.fcc3", err.Error())
+	}
+	fileSize := readableSize(size)
+	backupID, err := s.Backup(info)
+	if err != nil {
+		return Message{}, err
+	}
+	defer s.CheckDiff(info, backupID)
+	_, target, err := s.LibAndTarget(info, levelName)
+	if err != nil {
+		return Message{}, err
+	}
+	if toBool(unzip, false) {
+		if err := s.Uncompress(downloadFile, target, stripComponents); err != nil {
+			return Message{}, failSuffix("i18n.download_remote_file_failed.fcc3", err.Error())
+		}
+		if err := os.RemoveAll(downloadFile); err != nil {
+			s.Log().Error("delete downloaded temp file failed", "path", downloadFile, "error", err)
+		}
+	} else {
+		if err := os.MkdirAll(target, 0o755); err != nil {
+			return Message{}, failSuffix("i18n.download_remote_file_failed.fcc3", err.Error())
+		}
+		// 最终落盘文件名与 Java RemoteFileNameUtil.resolveFileName 一致：只取
+		// URL basename（Java 不读 Content-Disposition），空/非法 basename 回退
+		// 32 位随机名称；同名目录已存在时同样回退随机名称。
+		name := resolveRemoteFileName(rawURL)
+		destination := filepath.Join(target, name)
+		if stat, statErr := os.Stat(destination); statErr == nil && stat.IsDir() {
+			destination = filepath.Join(target, randomHex(16))
+		}
+		if err := movePath(downloadFile, destination, true); err != nil {
+			return Message{}, failSuffix("i18n.download_remote_file_failed.fcc3", err.Error())
+		}
+	}
+	s.webhook(info, "fileChange", map[string]any{
+		"changeEvent": "remoteDownload",
+		"levelName":   levelName,
+		// The Java agent reports the destination directory name here (it calls
+		// file.getName() on the target dir), not the downloaded file name.
+		"fileName": filepath.Base(target),
+		"url":      rawURL,
+	})
+	return Message{Key: "i18n.download_file_size.d4de", Suffix: fileSize}, nil
+}
+
+// remoteFileNameInvalidChars 与 Java RemoteFileNameUtil 一致：Windows 下不能作为
+// 文件名的字符在所有平台统一拒绝，保证同一 URL 在 Java/Go 保存的文件名一致。
+const remoteFileNameInvalidChars = "<>:\"|?*"
+
+// resolveRemoteFileName 返回远程下载保存到 lib 目录的文件名（URL basename）。
+// URL/路径为空、basename 为空或非法时回退为 32 位随机名称（等价 Java
+// RemoteFileNameUtil.resolveFileName / IdUtil.fastSimpleUUID）。
+func resolveRemoteFileName(rawURL string) string {
+	name := remoteURLBaseName(rawURL)
+	if invalidRemoteFileName(name) {
+		return randomHex(16)
+	}
+	return name
+}
+
+// remoteURLBaseName 取 URL 路径最后一段（parsed.Path 已做一次 URL 解码）。
+func remoteURLBaseName(rawURL string) string {
+	rawURL = strings.TrimSpace(rawURL)
+	if rawURL == "" {
+		return ""
+	}
+	parsed, err := url.Parse(rawURL)
+	if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Host == "" {
+		return ""
+	}
+	urlPath := parsed.Path
+	if strings.TrimSpace(urlPath) == "" {
+		return ""
+	}
+	// Java URL.getPath + FileUtil.getName：末尾是分隔符时名称为空，走随机回退。
+	if strings.HasSuffix(urlPath, "/") || strings.HasSuffix(urlPath, "\\") {
+		return ""
+	}
+	name := path.Base(urlPath)
+	if name == "" || name == "." || name == "/" {
+		return ""
+	}
+	return name
+}
+
+// invalidRemoteFileName 判断文件名是否不能直接落盘（与 Java 判定一致）。
+func invalidRemoteFileName(name string) bool {
+	if strings.TrimSpace(name) == "" || name == "." || name == ".." {
+		return true
+	}
+	if strings.ContainsAny(name, "/\\") {
+		return true
+	}
+	if strings.HasSuffix(name, ".") || strings.HasSuffix(name, " ") {
+		return true
+	}
+	for index := 0; index < len(name); index++ {
+		char := name[index]
+		if char < 0x20 || char == 0x7f {
+			return true
+		}
+		if strings.IndexByte(remoteFileNameInvalidChars, char) >= 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// downloadRemote downloads rawURL into destDir and returns the local path and
+// size. The temp file name honours Content-Disposition, then the URL path
+// (hutool HttpResponse#completeFileNameFromHeader); the final name inside the
+// project lib is resolved by resolveRemoteFileName.
+func downloadRemote(rawURL, destDir string) (string, int64, error) {
+	client := &http.Client{Timeout: 10 * time.Minute}
+	request, err := http.NewRequest(http.MethodGet, rawURL, nil)
+	if err != nil {
+		return "", 0, err
+	}
+	response, err := client.Do(request)
+	if err != nil {
+		return "", 0, err
+	}
+	defer func() { _ = response.Body.Close() }()
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return "", 0, failMessage(fmt.Sprintf("HTTP status %d", response.StatusCode))
+	}
+	name := replyFileName(response)
+	if name == "" {
+		name = "download"
+	}
+	target := filepath.Join(destDir, name)
+	out, err := os.OpenFile(target, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0o644)
+	if err != nil {
+		return "", 0, err
+	}
+	size, err := io.Copy(out, response.Body)
+	if err != nil {
+		_ = out.Close()
+		return "", 0, err
+	}
+	if err := out.Close(); err != nil {
+		return "", 0, err
+	}
+	return target, size, nil
+}
+
+// replyFileName resolves the remote file name from Content-Disposition, falling
+// back to the URL path.
+func replyFileName(response *http.Response) string {
+	if disposition := response.Header.Get("Content-Disposition"); disposition != "" {
+		if name := parseDispositionFileName(disposition); name != "" {
+			return sanitizeRemoteName(name)
+		}
+	}
+	if response.Request != nil && response.Request.URL != nil {
+		urlPath := response.Request.URL.Path
+		name := path.Base(urlPath)
+		name = strings.TrimSpace(name)
+		if name != "" && name != "." && name != "/" {
+			if decoded, err := url.PathUnescape(name); err == nil {
+				name = decoded
+			}
+			return sanitizeRemoteName(name)
+		}
+	}
+	return ""
+}
+
+// parseDispositionFileName extracts filename / filename* from a
+// Content-Disposition header.
+func parseDispositionFileName(disposition string) string {
+	parts := strings.Split(disposition, ";")
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		lower := strings.ToLower(part)
+		if !strings.HasPrefix(lower, "filename") {
+			continue
+		}
+		index := strings.IndexByte(part, '=')
+		if index < 0 {
+			continue
+		}
+		value := strings.Trim(strings.TrimSpace(part[index+1:]), "\"")
+		if strings.HasPrefix(lower, "filename*") {
+			// RFC 5987: charset'lang'value
+			sections := strings.SplitN(value, "'", 3)
+			if len(sections) == 3 {
+				value = sections[2]
+			}
+			if decoded, err := url.PathUnescape(value); err == nil {
+				value = decoded
+			}
+		}
+		value = strings.TrimSpace(value)
+		if value != "" {
+			return value
+		}
+	}
+	return ""
+}
+
+// sanitizeRemoteName reduces a remote supplied name to a safe base name.
+func sanitizeRemoteName(name string) string {
+	name = strings.ReplaceAll(name, "\\", "/")
+	name = path.Base(name)
+	switch name {
+	case "", ".", "..", "/":
+		return ""
+	}
+	return name
+}
+
+// toBool converts an optional form value to a boolean with a default,
+// mirroring cn.hutool.core.convert.Convert#toBool(Object, Boolean).
+func toBool(value string, defaultValue bool) bool {
+	value = strings.TrimSpace(strings.ToLower(value))
+	if value == "" {
+		return defaultValue
+	}
+	switch value {
+	case "true", "1", "yes", "y", "on":
+		return true
+	default:
+		return false
+	}
+}

@@ -1,0 +1,24 @@
+{
+  "code": 200,
+  "msg": "",
+  "data": [
+    {
+      "title": "stdout.log",
+      "path": "stdout.log"
+    },
+    {
+      "title": "agent.log",
+      "path": "agent.log"
+    },
+    {
+      "title": "<date>",
+      "path": "<date>",
+      "children": [
+        {
+          "title": "agent-2026-11-08-0.log",
+          "path": "2026-11-08/agent-2026-11-08-0.log"
+        }
+      ]
+    }
+  ]
+}

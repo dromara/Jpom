@@ -251,6 +251,10 @@
                                 <exclude>**/i18n/*.properties</exclude>
                                 <exclude>**/*.txt</exclude>
                                 <exclude>**/dist/assets/**</exclude>
+                                <!-- Go 插件端构建缓存/产物：由 CI 的 Go 步骤生成，不能参与版权头扫描 -->
+                                <exclude>go-agent/.cache/**</exclude>
+                                <exclude>go-agent/build/**</exclude>
+                                <exclude>go-agent/dist/**</exclude>
                             </excludes>
                         </licenseSet>
                     </licenseSets>

@@ -54,7 +54,7 @@ public class ServerScriptProcessBuilder extends BaseRunScript implements Runnabl
     private static final ConcurrentHashMap<String, ServerScriptProcessBuilder> FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP = new SafeConcurrentHashMap<>();
 
     private final ProcessBuilder processBuilder;
-    private final Set<WebSocketSession> sessions = new HashSet<>();
+    private final Set<WebSocketSession> sessions = ConcurrentHashMap.newKeySet();
     private final String executeId;
     private final File scriptFile;
 
@@ -127,12 +127,16 @@ public class ServerScriptProcessBuilder extends BaseRunScript implements Runnabl
         //
         if (serverScriptProcessBuilder.sessions.add(session)) {
             if (FileUtil.exist(serverScriptProcessBuilder.logFile)) {
-                // 读取之前的信息并发送
+                // 读取之前的信息并发送；发送失败后立即移除会话，避免继续向已断开连接写数据
                 FileUtil.readLines(serverScriptProcessBuilder.logFile, CharsetUtil.CHARSET_UTF_8, (LineHandler) line -> {
+                    if (!serverScriptProcessBuilder.sessions.contains(session)) {
+                        return;
+                    }
                     try {
                         SocketSessionUtil.send(session, line);
                     } catch (IOException e) {
                         log.error(I18nMessageUtil.get("i18n.send_message_failure.9621"), e);
+                        serverScriptProcessBuilder.sessions.remove(session);
                     }
                 });
             }
@@ -199,6 +203,8 @@ public class ServerScriptProcessBuilder extends BaseRunScript implements Runnabl
             this.end(I18nMessageUtil.get("i18n.general_execution_exception.62e9") + e.getMessage());
         } finally {
             this.close();
+            // 兜底清理：end() 抛异常时也不能让执行缓存泄漏
+            FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP.remove(this.executeId, this);
         }
     }
 
@@ -209,31 +215,34 @@ public class ServerScriptProcessBuilder extends BaseRunScript implements Runnabl
      */
     @Override
     protected void end(String msg) {
-        Iterator<WebSocketSession> iterator = sessions.iterator();
-        while (iterator.hasNext()) {
-            WebSocketSession session = iterator.next();
-            try {
-                SocketSessionUtil.send(session, msg);
-            } catch (IOException e) {
-                log.error(I18nMessageUtil.get("i18n.send_message_failure.9621"), e);
+        try {
+            for (WebSocketSession session : new ArrayList<>(sessions)) {
+                if (!sessions.remove(session)) {
+                    continue;
+                }
+                try {
+                    SocketSessionUtil.send(session, msg);
+                } catch (IOException e) {
+                    log.error(I18nMessageUtil.get("i18n.send_message_failure.9621"), e);
+                }
             }
-            iterator.remove();
+        } finally {
+            // 无论发送是否失败都要移除执行缓存，避免 ProcessBuilder/会话被永久持有
+            sessions.clear();
+            ServerScriptProcessBuilder serverScriptProcessBuilder = FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP.remove(this.executeId, this) ? this : null;
+            IoUtil.close(serverScriptProcessBuilder);
         }
-        ServerScriptProcessBuilder serverScriptProcessBuilder = FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP.remove(this.executeId);
-        IoUtil.close(serverScriptProcessBuilder);
     }
 
     @Override
     protected void msgCallback(String info) {
-        //
-        Iterator<WebSocketSession> iterator = sessions.iterator();
-        while (iterator.hasNext()) {
-            WebSocketSession session = iterator.next();
+        // 快照遍历：会话可能被 WebSocket 关闭线程并发移除
+        for (WebSocketSession session : new ArrayList<>(sessions)) {
             try {
                 SocketSessionUtil.send(session, info);
             } catch (IOException e) {
                 log.error(I18nMessageUtil.get("i18n.send_message_failure.9621"), e);
-                iterator.remove();
+                sessions.remove(session);
             }
         }
     }

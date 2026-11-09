@@ -196,9 +196,16 @@ public class UserService extends BaseDbService<UserModel> {
      * @return 新密码
      */
     public String restSuperUserPwd() {
+        // 与系统其余逻辑统一使用 systemUser=1 识别超级管理员，避免历史迁移数据 parent 字段异常时静默失败；
+        // 保留 parent=sys 的回退以兼容旧数据。
         UserModel userModel = new UserModel();
-        userModel.setParent(UserModel.SYSTEM_ADMIN);
+        userModel.setSystemUser(1);
         UserModel queryByBean = super.queryByBean(userModel);
+        if (queryByBean == null) {
+            UserModel legacyModel = new UserModel();
+            legacyModel.setParent(UserModel.SYSTEM_ADMIN);
+            queryByBean = super.queryByBean(legacyModel);
+        }
         if (queryByBean == null) {
             return null;
         }

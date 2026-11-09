@@ -53,8 +53,16 @@ DEFAULT_TESTS=(
 	PermissionInterceptorNodeDataTest
 	# WebSocket 握手鉴权（Origin / 会话 / 禁用账号）
 	ServerWebSocketInterceptorTest
+	# 文件日志监听器会话/Tailer 生命周期（agent 控制台 OOM 回归守卫）
+	BaseFileTailWatcherTest
 	# 全局异常响应脱敏：数据库异常不再回显 SQL/列/表/驱动信息
 	BaseExceptionHandlerTest
+	# 节点数据同步：旧工作空间不存在时回退到节点当前工作空间（重装服务端后“同步 0 个”回归守卫，Gitee ICH1VK）
+	BaseNodeServiceSyncWorkspaceTest
+	# 严格构建：中间命令失败立即中断（仅严格 + sh 注入 set -e/pipefail，Gitee ICW9KZ）
+	BuildExecuteManageScriptTest
+	# 节点在线升级：引擎判定（engine/旧 Go 端 jarFile 兜底）、Go 升级容器解析、下载地址推导、版本/降级/最低兼容
+	AgentPackageResolverTest
 	# 安全修复的既有单测（文件中心 SQL 注入 / 查询值绑定 / 日志路径穿越 / token 等）
 	FileStorageApiControllerSortTest
 	BaseDbCommonServiceQueryEntityTest
