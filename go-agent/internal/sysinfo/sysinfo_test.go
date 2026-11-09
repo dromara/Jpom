@@ -13,6 +13,7 @@ package sysinfo
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 
@@ -72,6 +73,19 @@ func TestManifestFieldTypes(t *testing.T) {
 	}
 	if manifest["type"] != "Agent" {
 		t.Errorf("type = %v", manifest["type"])
+	}
+	// CONTRACT §2：Go Agent manifest 新增 engine/platform/arch，osName 保持 Java 兼容值。
+	if manifest["engine"] != "go" {
+		t.Errorf("engine = %v, want go", manifest["engine"])
+	}
+	if manifest["platform"] != runtime.GOOS+"/"+runtime.GOARCH {
+		t.Errorf("platform = %v, want %s/%s", manifest["platform"], runtime.GOOS, runtime.GOARCH)
+	}
+	if manifest["arch"] != runtime.GOARCH {
+		t.Errorf("arch = %v, want %s", manifest["arch"], runtime.GOARCH)
+	}
+	if manifest["osName"] != a.OsName() {
+		t.Errorf("osName = %v", manifest["osName"])
 	}
 }
 

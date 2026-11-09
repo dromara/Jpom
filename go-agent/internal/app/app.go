@@ -349,6 +349,10 @@ func (a *App) Manifest() map[string]any {
 		// engine 是 Go 版新增字段（G6）：Server 据此判断节点升级通道；
 		// Java 旧服务端/旧 Agent 反序列化时忽略未知字段，保持字节兼容。
 		"engine": "go",
+		// CONTRACT §2：platform/arch 用于 Server 按节点平台选择 Go 升级容器；
+		// osName 继续保持 Java 兼容值（Linux/Windows/Mac OS X）。
+		"platform": runtime.GOOS + "/" + runtime.GOARCH,
+		"arch":     runtime.GOARCH,
 	}
 }
 

@@ -576,7 +576,15 @@ func (s *Service) RemoteDownload(id, rawURL, levelName, unzip string, stripCompo
 		if err := os.MkdirAll(target, 0o755); err != nil {
 			return Message{}, failSuffix("i18n.download_remote_file_failed.fcc3", err.Error())
 		}
-		if _, err := moveIntoDir(downloadFile, target); err != nil {
+		// 最终落盘文件名与 Java RemoteFileNameUtil.resolveFileName 一致：只取
+		// URL basename（Java 不读 Content-Disposition），空/非法 basename 回退
+		// 32 位随机名称；同名目录已存在时同样回退随机名称。
+		name := resolveRemoteFileName(rawURL)
+		destination := filepath.Join(target, name)
+		if stat, statErr := os.Stat(destination); statErr == nil && stat.IsDir() {
+			destination = filepath.Join(target, randomHex(16))
+		}
+		if err := movePath(downloadFile, destination, true); err != nil {
 			return Message{}, failSuffix("i18n.download_remote_file_failed.fcc3", err.Error())
 		}
 	}
@@ -591,9 +599,73 @@ func (s *Service) RemoteDownload(id, rawURL, levelName, unzip string, stripCompo
 	return Message{Key: "i18n.download_file_size.d4de", Suffix: fileSize}, nil
 }
 
+// remoteFileNameInvalidChars 与 Java RemoteFileNameUtil 一致：Windows 下不能作为
+// 文件名的字符在所有平台统一拒绝，保证同一 URL 在 Java/Go 保存的文件名一致。
+const remoteFileNameInvalidChars = "<>:\"|?*"
+
+// resolveRemoteFileName 返回远程下载保存到 lib 目录的文件名（URL basename）。
+// URL/路径为空、basename 为空或非法时回退为 32 位随机名称（等价 Java
+// RemoteFileNameUtil.resolveFileName / IdUtil.fastSimpleUUID）。
+func resolveRemoteFileName(rawURL string) string {
+	name := remoteURLBaseName(rawURL)
+	if invalidRemoteFileName(name) {
+		return randomHex(16)
+	}
+	return name
+}
+
+// remoteURLBaseName 取 URL 路径最后一段（parsed.Path 已做一次 URL 解码）。
+func remoteURLBaseName(rawURL string) string {
+	rawURL = strings.TrimSpace(rawURL)
+	if rawURL == "" {
+		return ""
+	}
+	parsed, err := url.Parse(rawURL)
+	if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Host == "" {
+		return ""
+	}
+	urlPath := parsed.Path
+	if strings.TrimSpace(urlPath) == "" {
+		return ""
+	}
+	// Java URL.getPath + FileUtil.getName：末尾是分隔符时名称为空，走随机回退。
+	if strings.HasSuffix(urlPath, "/") || strings.HasSuffix(urlPath, "\\") {
+		return ""
+	}
+	name := path.Base(urlPath)
+	if name == "" || name == "." || name == "/" {
+		return ""
+	}
+	return name
+}
+
+// invalidRemoteFileName 判断文件名是否不能直接落盘（与 Java 判定一致）。
+func invalidRemoteFileName(name string) bool {
+	if strings.TrimSpace(name) == "" || name == "." || name == ".." {
+		return true
+	}
+	if strings.ContainsAny(name, "/\\") {
+		return true
+	}
+	if strings.HasSuffix(name, ".") || strings.HasSuffix(name, " ") {
+		return true
+	}
+	for index := 0; index < len(name); index++ {
+		char := name[index]
+		if char < 0x20 || char == 0x7f {
+			return true
+		}
+		if strings.IndexByte(remoteFileNameInvalidChars, char) >= 0 {
+			return true
+		}
+	}
+	return false
+}
+
 // downloadRemote downloads rawURL into destDir and returns the local path and
-// size. The file name honours Content-Disposition, then the URL path, like
-// hutool HttpResponse#completeFileNameFromHeader.
+// size. The temp file name honours Content-Disposition, then the URL path
+// (hutool HttpResponse#completeFileNameFromHeader); the final name inside the
+// project lib is resolved by resolveRemoteFileName.
 func downloadRemote(rawURL, destDir string) (string, int64, error) {
 	client := &http.Client{Timeout: 10 * time.Minute}
 	request, err := http.NewRequest(http.MethodGet, rawURL, nil)

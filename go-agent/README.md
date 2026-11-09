@@ -15,7 +15,7 @@ Jpom 插件端（Agent）的 Go 重写版本：单个静态二进制、低内存
 
 - **协议/数据完全兼容**：同一 `conf/application.yml`、同一 `data/` 目录、同一 HTTP/WebSocket 协议；`/info` 增加 `engine:"go"`（Java 旧服务端忽略），支持 Server 识别 Go 引擎的一键在线升级。
 - **国际化**：HTTP `msg`、WS 文本/控制帧、日志 SYSTEM 行按 `Accept-Language` 输出 zh-CN / zh-HK / zh-TW / en-US（数据源为 Java 插件端 i18n properties，1759 keys，`internal/i18n`）。
-- **跨平台**：Linux（/proc+/sys）、Windows、macOS 系统监控（CPU/内存/磁盘分区/网卡/进程/端口）与项目/脚本执行；发布包覆盖 linux-amd64/arm64、windows-amd64。
+- **跨平台**：Linux（/proc+/sys）、Windows、macOS 系统监控（CPU/内存/磁盘分区/网卡/进程/端口）与项目/脚本执行；发布包覆盖 linux-amd64/arm64、darwin-amd64/arm64、windows-amd64，在线升级容器同样提供 5 个平台（`agent-go-<version>-upgrade-<os>-<arch>.jar`，linux-amd64 另保留兼容别名 `agent-go-<version>-upgrade.jar`）。
 - **编码兼容**：`jpom.system.log-charset`、`console-charset`、`jpom.project.log.file-charset`（Windows 默认 GBK）；文件编辑后缀 `后缀@编码`（GBK）。
 - **文件/脚本能力**：7z 解压（安全条目校验）、Hutool 兼容 cron（`|` 分组、5/6/7 段含年份）、脚本 autoExecCron 定时、升级失败自动回滚。
 
@@ -58,15 +58,16 @@ make build         # 产出 build/agent（本地平台）
 打包发布包（多平台 + sha1）：
 
 ```bash
-VERSION=2.11.13.1 PLATFORMS='linux/amd64 linux/arm64 windows/amd64' bash script/package.sh
+VERSION=2.11.13.2 bash script/package.sh   # PLATFORMS 默认 5 平台，可显式覆盖
 # dist/agent-go-<version>-release-<os>-<arch>.{zip,tar.gz,sha1}
 ```
 
 生成在线升级容器包（旧版 Server 的 `checkJpomJar` 兼容，Go Agent 自升级）：
 
 ```bash
-VERSION=2.11.13.1 bash script/build-upgrade-container.sh
-# dist/agent-go-<version>-upgrade.jar
+VERSION=2.11.13.2 bash script/build-upgrade-container.sh
+# dist/agent-go-<version>-upgrade-<os>-<arch>.jar + .sha1（5 平台）
+# dist/agent-go-<version>-upgrade.jar（linux/amd64 兼容别名）
 ```
 
 ## 安装布局
@@ -86,6 +87,7 @@ agent/
 ```
 
 启动：`bin/AgentGo.sh start`（生产环境请把 `JAVA_HOME/PATH` 配好，项目启动依赖 java 可执行文件）。
+插件端启动成功后会写 `bin/agent.pid`，`AgentGo.sh`/`AgentGo.bat` 的 start/stop/status/restart 均以该文件为准；Windows 由服务管理器（nssm/sc）托管时，在线升级按服务配置自动重启，避免手工双实例。
 
 ## 开发约定
 

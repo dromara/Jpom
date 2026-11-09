@@ -16,6 +16,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -25,6 +26,10 @@ import (
 
 // defaultUpgradeMessage is Const.UPGRADE_MSG fallback (i18n upgrade_duration_message).
 const defaultUpgradeMessage = ""
+
+// binaryMessageCap 是 /node_update 二进制帧的硬上限。Java
+// AgentWebSocketUpdateHandle#onOpen 取 min(spring.servlet.multipart.max-request-size, 10MB)。
+const binaryMessageCap = 10 << 20
 
 // UpgradeHandler installs an uploaded agent package and restarts the process.
 // The binary self-upgrade strategy belongs to the platform/upgrade domain and is
@@ -120,10 +125,16 @@ func (m *Manager) HandleNodeUpdate(c *httpx.Context) {
 	if !m.authorized(session, c.R) {
 		return
 	}
-	session.SetReadLimit(defaultTextLimit)
+	// 读取上限（P2-7）：文本 5MB；二进制 min(max-request-size, 10MB)。
+	session.SetReadLimit(m.binaryReadLimit())
 	for {
 		messageType, data, err := session.Read()
 		if err != nil {
+			return
+		}
+		if messageType == websocket.TextMessage && int64(len(data)) > defaultTextLimit {
+			// 文本帧超过 Java @OnMessage 的 5MB 上限，按 Tomcat 语义关闭。
+			session.CloseWithReason(closeTooBig, "")
 			return
 		}
 		switch messageType {
@@ -151,7 +162,7 @@ func (m *Manager) HandleNodeUpdate(c *httpx.Context) {
 					upload = state
 				}
 			case "restart":
-				model["data"] = m.restartUpload(upload)
+				model["data"] = m.restartUpload(session, upload)
 			case "heart":
 				// 回帧保持连接
 			default:
@@ -221,21 +232,43 @@ func (m *Manager) prepareUpload(nodeID string, params map[string]any) (*uploadSt
 	return state, nil
 }
 
+// binaryReadLimit 返回 /node_update 二进制帧上限：
+// min(spring.servlet.multipart.max-request-size, 10MB)（Java onOpen 同语义）。
+func (m *Manager) binaryReadLimit() int64 {
+	limit := int64(0)
+	if m.App != nil && m.App.Config != nil {
+		limit = m.App.Config.MaxRequestSize()
+	}
+	if limit <= 0 || limit > binaryMessageCap {
+		limit = binaryMessageCap
+	}
+	return limit
+}
+
 // restartUpload installs the uploaded package and reports the result message.
-func (m *Manager) restartUpload(upload *uploadState) string {
+// 响应 data 必须按会话语言本地化（不能把 i18n key 原样回给前端，P2-8）。
+func (m *Manager) restartUpload(session *Session, upload *uploadState) string {
 	if upload == nil {
-		return m.translateDefault("i18n.restart_failed.f92a") + "no uploaded package"
+		return m.translate(session, "i18n.restart_failed.f92a") + "no uploaded package"
 	}
 	upload.Close()
 	if m.Upgrade == nil {
-		return m.translateDefault("i18n.restart_failed.f92a") + "go agent self upgrade is not implemented"
+		return m.translate(session, "i18n.restart_failed.f92a") + "go agent self upgrade is not implemented"
 	}
 	message, err := m.Upgrade.Restart(upload.Path())
 	if err != nil {
-		return m.translateDefault("i18n.restart_failed.f92a") + err.Error()
+		return m.translate(session, "i18n.restart_failed.f92a") + err.Error()
 	}
 	if message == "" {
-		return m.translateDefault("i18n.upgrade_duration_message.bab4")
+		return m.translate(session, "i18n.upgrade_duration_message.bab4")
+	}
+	return m.localizeMessage(session, message)
+}
+
+// localizeMessage 把 sysinfo 返回的 i18n key 按会话语言渲染（非 key 原样返回）。
+func (m *Manager) localizeMessage(session *Session, message string) string {
+	if strings.HasPrefix(message, "i18n.") {
+		return m.translate(session, message)
 	}
 	return message
 }

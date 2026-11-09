@@ -16,7 +16,6 @@ import (
 	"mime"
 	"mime/multipart"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -71,9 +70,8 @@ func registerProjectFile(r *httpx.Router, a *app.App) {
 	})
 
 	r.Handle(http.MethodPost, "/manage/file/upload-sharding", func(c *httpx.Context) {
-		filename, body, err := fileMultipartUpload(c)
-		if err != nil {
-			failProjectFile(c, err)
+		filename, body, ok := fileMultipartUpload(c)
+		if !ok {
 			return
 		}
 		if body != nil {
@@ -93,9 +91,8 @@ func registerProjectFile(r *httpx.Router, a *app.App) {
 	})
 
 	r.Handle(http.MethodPost, "/manage/file2/upload-sharding", func(c *httpx.Context) {
-		filename, body, err := fileMultipartUpload(c)
-		if err != nil {
-			failProjectFile(c, err)
+		filename, body, ok := fileMultipartUpload(c)
+		if !ok {
 			return
 		}
 		if body != nil {
@@ -380,15 +377,18 @@ func failProjectFile(c *httpx.Context, err error) {
 // fileMultipartUpload returns the original name and the content of the "file"
 // multipart part. A missing part is not an error here: the service reports the
 // same "没有上传文件" message as the Java agent.
-func fileMultipartUpload(c *httpx.Context) (string, multipart.File, error) {
-	if err := c.R.ParseMultipartForm(32 << 20); err != nil {
-		return "", nil, nil
+//
+// The boolean result is false when the request already got its response
+// (spring.servlet.multipart limit exceeded -> code=406); the caller must return.
+func fileMultipartUpload(c *httpx.Context) (string, multipart.File, bool) {
+	if !c.ParseMultipartForm() {
+		return "", nil, false
 	}
 	file, header, err := c.R.FormFile("file")
 	if err != nil {
-		return "", nil, nil
+		return "", nil, true
 	}
-	return header.Filename, file, nil
+	return header.Filename, file, true
 }
 
 // formInt parses an optional integer form field.
@@ -436,9 +436,7 @@ func serveFileDownload(c *httpx.Context, target string, dirHandler func(), errHa
 		contentType = strings.TrimSpace(contentType[:index])
 	}
 	c.W.Header().Set("Content-Type", contentType)
-	encoded := strings.ReplaceAll(url.QueryEscape(filepath.Base(target)), "+", "%20")
-	encoded = strings.ReplaceAll(encoded, "%2A", "*")
-	c.W.Header().Set("Content-Disposition", "attachment;filename=\""+encoded+"\"")
+	c.W.Header().Set("Content-Disposition", httpx.ContentDisposition(filepath.Base(target)))
 	c.W.Header().Set("Content-Length", strconv.FormatInt(stat.Size(), 10))
 	c.W.WriteHeader(http.StatusOK)
 	file, err := os.Open(target)

@@ -100,7 +100,7 @@ func CacheJSON(a *app.App, workspaceID string) map[string]any {
 		"oldJarsSize":         strconv.FormatInt(sizes.oldJars, 10),
 		"pidPort":             pidPortCacheSize(),
 		"readFileOnLineCount": int(atomic.LoadInt64(&fileTailLineCount)),
-		"taskList":            CronList(),
+		"taskList":            scriptTaskList(),
 		"pluginSize":          AgentPluginSize,
 		"dateTime":            time.Now().Format("2006-01-02 15:04:05"),
 		"timeZoneId":          timeZoneID(),
@@ -110,8 +110,53 @@ func CacheJSON(a *app.App, workspaceID string) map[string]any {
 	if keys := WorkspaceEnvKeys(a, workspaceID); len(keys) > 0 {
 		result["envVarKeys"] = keys
 	}
-	if tags := scriptLibraryTagMap(a); len(tags) > 0 {
-		result["scriptLibraryTagMap"] = tags
+	// Java AgentCacheManageController 无条件 put 该 Map（空时为 {}），确保字段
+	// 始终出现（P3-1）。
+	result["scriptLibraryTagMap"] = scriptLibraryTagMap(a)
+	return result
+}
+
+// internalCronTaskIDs 是 Go 调度器的内部任务。Java 端 /system/cache.taskList
+// 只展示脚本定时任务（E2E 实测 Java 返回 []，Go 多出内部任务 → P2/D4）。
+var internalCronTaskIDs = map[string]struct{}{
+	"system_cache":  {},
+	"auto_back_log": {},
+}
+
+// toInt64Value 兼容 cron 统计值在 map 中的不同数值类型。
+func toInt64Value(value any) int64 {
+	switch typed := value.(type) {
+	case int:
+		return int64(typed)
+	case int32:
+		return int64(typed)
+	case int64:
+		return typed
+	case uint64:
+		return int64(typed)
+	default:
+		return 0
+	}
+}
+
+// scriptTaskList 返回 /system/cache 的 taskList：仅脚本定时任务，排除内部任务。
+func scriptTaskList() []map[string]any {
+	list := CronList()
+	result := make([]map[string]any, 0, len(list))
+	for _, item := range list {
+		if id, ok := item["taskId"].(string); ok {
+			if _, internal := internalCronTaskIDs[id]; internal {
+				continue
+			}
+		}
+		// 对齐 Java CronUtils.list：TASK_STAT 只在任务首次触发（onStart）后才有记录，
+		// 因此尚未执行过的任务不出现在 /system/cache.taskList 中。
+		executeCount := toInt64Value(item["executeCount"])
+		lastExecuteTime, _ := item["lastExecuteTime"].(string)
+		if executeCount == 0 && (lastExecuteTime == "" || lastExecuteTime == "0") {
+			continue
+		}
+		result = append(result, item)
 	}
 	return result
 }
@@ -155,12 +200,13 @@ func clearDirectoryContents(path string) error {
 }
 
 // scriptLibraryTagMap 读取 data/global-script/*.json，返回 脚本库 tag -> version。
+// 无数据时返回空 map（JSON 输出 {} 而不是省略/ null，对齐 Java）。
 func scriptLibraryTagMap(a *app.App) map[string]string {
+	result := map[string]string{}
 	entries, err := os.ReadDir(a.GlobalScriptDir)
 	if err != nil {
-		return nil
+		return result
 	}
-	result := map[string]string{}
 	for _, entry := range entries {
 		if entry.IsDir() || filepath.Ext(entry.Name()) != ".json" {
 			continue

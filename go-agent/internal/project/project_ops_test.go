@@ -1087,6 +1087,36 @@ func TestOperateI18n(t *testing.T) {
 	}
 }
 
+// TestStopResultFieldsMatchJava 校验 /manage/operate stop 的响应字段与 Java
+// CommandOpResult.of(success, status(tag)).appendMsg(...) 一致：只有 success/msgs，
+// 不含 pid/pids/ports/statusMsg（E2E 差异 D5）。
+func TestStopResultFieldsMatchJava(t *testing.T) {
+	runtime, base := newTestRuntime(t)
+	root := filepath.Join(base, "projects")
+	if err := os.MkdirAll(filepath.Join(root, "stop-app"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	writeWhitelist(t, runtime, root)
+	saveJarProject(t, runtime, root, "STOP01", "/stop-app")
+	info, exists, err := runtime.Manager.Get("STOP01")
+	if err != nil || !exists {
+		t.Fatalf("get project: exists=%v err=%v", exists, err)
+	}
+	result := runtime.stopJava(info, info, 999999)
+	data := result.JSON()
+	for _, key := range []string{"pid", "pids", "ports", "statusMsg"} {
+		if _, ok := data[key]; ok {
+			t.Errorf("stop response must not contain %s: %v", key, data)
+		}
+	}
+	if _, ok := data["success"]; !ok {
+		t.Errorf("stop response missing success: %v", data)
+	}
+	if _, ok := data["msgs"]; !ok {
+		t.Errorf("stop response missing msgs: %v", data)
+	}
+}
+
 // TestValidOp 校验 ConsoleCommandOp 枚举名解析（等价 Java EnumUtil.fromStringQuietly）。
 func TestValidOp(t *testing.T) {
 	for _, op := range []string{"start", "stop", "restart", "status", "reload", "showlog", "heart"} {

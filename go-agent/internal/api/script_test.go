@@ -192,6 +192,25 @@ func TestScriptSaveListItemDel(t *testing.T) {
 	if !strings.Contains(defArgs, "参数1") {
 		t.Fatalf("defArgs not normalized: %s", defArgs)
 	}
+	// 落盘数据必须与 Java add 一致：不写 lastRunUser / scriptType（读取时 getter 回退 "-"）。
+	rawData, err := os.ReadFile(filepath.Join(instance.DataDir, "script.json"))
+	if err != nil {
+		t.Fatalf("read script.json: %v", err)
+	}
+	var scriptRecords map[string]map[string]any
+	if err := json.Unmarshal(rawData, &scriptRecords); err != nil {
+		t.Fatalf("decode script.json: %v", err)
+	}
+	record, ok := scriptRecords[id]
+	if !ok {
+		t.Fatalf("script %s not persisted: %v", id, scriptRecords)
+	}
+	if _, exists := record["lastRunUser"]; exists {
+		t.Errorf("add must not persist lastRunUser, got %v", record["lastRunUser"])
+	}
+	if scriptType, exists := record["scriptType"]; exists && scriptType != "" {
+		t.Errorf("add must not persist scriptType, got %v", scriptType)
+	}
 	// item
 	envelope = postForm(t, server, "/script/item.json", url.Values{"id": {id}})
 	var item map[string]any

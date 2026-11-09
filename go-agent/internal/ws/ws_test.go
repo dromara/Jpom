@@ -12,6 +12,7 @@ package ws
 
 import (
 	"encoding/json"
+	"fmt"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -555,4 +556,177 @@ func TestSystemLogUpdatesFileTailCount(t *testing.T) {
 		time.Sleep(50 * time.Millisecond)
 	}
 	t.Fatalf("readFileOnLineCount must return to 0 after close, got %v", cache["readFileOnLineCount"])
+}
+
+// fakeUpgradeHandler 记录 Restart 调用并返回约定 message（模拟 sysinfo 返回 i18n key）。
+type fakeUpgradeHandler struct {
+	message string
+	err     error
+	called  bool
+}
+
+func (h *fakeUpgradeHandler) Restart(string) (string, error) {
+	h.called = true
+	return h.message, h.err
+}
+
+// TestNodeUpdateReadLimitFromConfig 校验二进制帧上限取
+// min(spring.servlet.multipart.max-request-size, 10MB)。
+func TestNodeUpdateReadLimitFromConfig(t *testing.T) {
+	instance := testApp(t)
+	manager := testManager(t, instance)
+	if got := manager.binaryReadLimit(); got != binaryMessageCap {
+		t.Fatalf("default binary read limit = %d, want %d", got, binaryMessageCap)
+	}
+	instance.Config.Spring.Servlet.Multipart.MaxRequestSize = "2MB"
+	if got := manager.binaryReadLimit(); got != 2<<20 {
+		t.Fatalf("configured binary read limit = %d, want %d", got, 2<<20)
+	}
+	instance.Config.Spring.Servlet.Multipart.MaxRequestSize = "50MB"
+	if got := manager.binaryReadLimit(); got != binaryMessageCap {
+		t.Fatalf("capped binary read limit = %d, want %d", got, binaryMessageCap)
+	}
+}
+
+// TestNodeUpdateRestartLocalized 校验 restart 响应 data 按会话语言渲染，
+// 不返回原始 i18n key（P2-8）。
+func TestNodeUpdateRestartLocalized(t *testing.T) {
+	instance := testApp(t)
+	manager := testManager(t, instance)
+	server := startServer(t, instance, manager.HandleNodeUpdate)
+	conn := dial(t, server, "/node_update", "&lang=en-US")
+	sendJSON(t, conn, map[string]any{
+		"command": "upload", "nodeId": "N1",
+		"params": map[string]any{"name": "agent-test.zip", "size": 4, "version": "test-version"},
+	})
+	_ = readText(t, conn, 3*time.Second)
+	if err := conn.WriteMessage(websocket.BinaryMessage, []byte("abcd")); err != nil {
+		t.Fatal(err)
+	}
+	_ = readText(t, conn, 3*time.Second)
+	// Upgrade 未装配时回退「重启失败」，必须为英文且不含原始 key。
+	sendJSON(t, conn, map[string]any{"command": "restart", "nodeId": "N1"})
+	frame := readText(t, conn, 3*time.Second)
+	data := frameData(t, frame)
+	if strings.Contains(data, "i18n.") {
+		t.Fatalf("restart data must be localized, got %q", data)
+	}
+	if !strings.Contains(data, "Restart failed") {
+		t.Fatalf("restart data should be English, got %q", data)
+	}
+}
+
+// TestNodeUpdateRestartUpgradeMessageLocalized 校验升级成功提示（sysinfo 返回
+// i18n.upgrade_duration_message.bab4）在 WS 帧中已本地化。
+func TestNodeUpdateRestartUpgradeMessageLocalized(t *testing.T) {
+	instance := testApp(t)
+	manager := testManager(t, instance)
+	upgrade := &fakeUpgradeHandler{message: "i18n.upgrade_duration_message.bab4"}
+	manager.Upgrade = upgrade
+	server := startServer(t, instance, manager.HandleNodeUpdate)
+	conn := dial(t, server, "/node_update", "&lang=en-US")
+	sendJSON(t, conn, map[string]any{
+		"command": "upload", "nodeId": "N1",
+		"params": map[string]any{"name": "agent-test.zip", "size": 4, "version": "test-version"},
+	})
+	_ = readText(t, conn, 3*time.Second)
+	if err := conn.WriteMessage(websocket.BinaryMessage, []byte("abcd")); err != nil {
+		t.Fatal(err)
+	}
+	_ = readText(t, conn, 3*time.Second)
+	sendJSON(t, conn, map[string]any{"command": "restart", "nodeId": "N1"})
+	frame := readText(t, conn, 3*time.Second)
+	data := frameData(t, frame)
+	if !upgrade.called {
+		t.Fatal("upgrade handler should be called")
+	}
+	if strings.Contains(data, "i18n.") {
+		t.Fatalf("upgrade message must be localized, got %q", data)
+	}
+	if !strings.Contains(data, "It takes about 30 seconds") {
+		t.Fatalf("upgrade message should be English, got %q", data)
+	}
+}
+
+// frameData extracts the string data field of a websocket frame.
+func frameData(t *testing.T, frame string) string {
+	t.Helper()
+	var model map[string]any
+	if err := json.Unmarshal([]byte(frame), &model); err != nil {
+		t.Fatalf("frame is not json: %s", frame)
+	}
+	data, _ := model["data"].(string)
+	return data
+}
+
+// TestConsoleSearchStreamsRangeAndCounts 校验 /console 日志搜索：
+// 只读取区间行，summary 第一个数字=区间行数（Java FileSearchUtil.searchList）。
+func TestConsoleSearchRangeAndCounts(t *testing.T) {
+	instance := testApp(t)
+	manager := testManager(t, instance)
+	libDir := filepath.Join(instance.BaseDir, "lib")
+	if err := os.MkdirAll(libDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	projectInfo := map[string]any{
+		"id": "p1", "name": "demo", "workspaceId": "DEFAULT", "runMode": "Java",
+		"whitelistDirectory": instance.BaseDir, "lib": "lib",
+	}
+	fixture, err := json.Marshal(map[string]any{"p1": projectInfo})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(instance.DataDir, "project.json"), fixture, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	var logBuilder strings.Builder
+	for line := 1; line <= 20; line++ {
+		suffix := ""
+		if line == 3 || line == 15 {
+			suffix = " hit"
+		}
+		fmt.Fprintf(&logBuilder, "line-%02d%s\n", line, suffix)
+	}
+	if err := os.WriteFile(filepath.Join(libDir, "search.log"), []byte(logBuilder.String()), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	backend := &fakeConsoleBackend{project: projectInfo, success: false, message: "未运行"}
+	manager.Console = backend
+	server := startServer(t, instance, manager.HandleConsole)
+	conn := dial(t, server, "/console", "&projectId=p1&lang=zh-CN")
+	if hello := readText(t, conn, 3*time.Second); hello != "连接成功：demo" {
+		t.Fatalf("unexpected hello: %s", hello)
+	}
+
+	// head=10,tail=10,first=false -> 区间 [max(10-10,1),10] = 1..10，仅第 3 行命中。
+	sendJSON(t, conn, map[string]any{
+		"op": "showlog", "projectId": "p1", "search": true, "logFile": "search.log",
+		"keyword": "hit", "head": 10, "tail": 10, "first": false, "beforeCount": 0, "afterCount": 0,
+	})
+	frames := readUntil(t, conn, 5*time.Second, func(frame string) bool {
+		return strings.Contains(frame, "搜索到并显示")
+	})
+	joined := strings.Join(frames, "\n")
+	if !strings.Contains(joined, "line-03 hit") {
+		t.Fatalf("matched line missing: %s", joined)
+	}
+	if strings.Contains(joined, "line-15 hit") {
+		t.Fatalf("search must only read the selected range: %s", joined)
+	}
+	if !strings.Contains(joined, "在 10 行中搜索到并显示 1 行") {
+		t.Fatalf("unexpected search summary: %s", joined)
+	}
+
+	// head=0,tail=5,first=false -> 最后 5 行（16..20），无命中。
+	sendJSON(t, conn, map[string]any{
+		"op": "showlog", "projectId": "p1", "search": true, "logFile": "search.log",
+		"keyword": "no-such-keyword", "head": 0, "tail": 5, "first": false, "beforeCount": 0, "afterCount": 0,
+	})
+	frames = readUntil(t, conn, 5*time.Second, func(frame string) bool {
+		return strings.Contains(frame, "搜索到并显示")
+	})
+	joined = strings.Join(frames, "\n")
+	if !strings.Contains(joined, "在 5 行中搜索到并显示 0 行") {
+		t.Fatalf("unexpected last-lines search summary: %s", joined)
+	}
 }

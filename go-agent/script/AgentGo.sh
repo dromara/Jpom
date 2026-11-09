@@ -12,6 +12,9 @@
 # 用法：AgentGo.sh {start|stop|restart|status|upgrade} [-s]
 #   -s  与 Java 脚本兼容的静默模式（输出重定向到 logs/stdout.log）
 #
+# PID 约定（CONTRACT §4）：Go 进程监听成功后自己原子写入 <base>/bin/agent.pid，
+# 正常退出时删除；本脚本 start 以该文件为准确认启动，$! 仅作回退。
+#
 # 安装布局：
 #   <base>/bin/agent         Go 二进制
 #   <base>/bin/AgentGo.sh    本脚本
@@ -35,7 +38,7 @@ running_pid() {
   if [[ -f "$pidfile" ]]; then
     local pid
     pid=$(cat "$pidfile" 2>/dev/null || true)
-    if [[ -n "${pid}" ]] && kill -0 "$pid" 2>/dev/null; then
+    if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
       echo "$pid"
       return 0
     fi
@@ -57,15 +60,29 @@ start() {
     echo "Jpom Go Agent 已在运行 (pid=$pid)"
     return 0
   fi
+  rm -f "$pidfile"
   nohup "$binary" -base "$base" >>"$stdout" 2>&1 </dev/null &
-  echo $! >"$pidfile"
-  sleep 0.5
-  if pid=$(running_pid); then
-    echo "Jpom Go Agent 启动成功 (pid=$pid)，日志: $stdout"
-  else
-    echo "Jpom Go Agent 启动失败，请查看 $stdout" >&2
-    exit 1
+  local child=$!
+  # Go 进程监听成功后自己写 bin/agent.pid；最多等待 5 秒。
+  for _ in $(seq 1 50); do
+    if pid=$(running_pid); then
+      echo "Jpom Go Agent 启动成功 (pid=$pid)，日志: $stdout"
+      return 0
+    fi
+    if ! kill -0 "$child" 2>/dev/null; then
+      break
+    fi
+    sleep 0.1
+  done
+  if kill -0 "$child" 2>/dev/null; then
+    # 回退：兼容不写 pid 文件的旧版二进制，使用 $! 作为 PID。
+    echo "$child" >"$pidfile"
+    echo "Jpom Go Agent 启动成功 (pid=$child，脚本回退 PID)，日志: $stdout"
+    return 0
   fi
+  rm -f "$pidfile"
+  echo "Jpom Go Agent 启动失败，请查看 $stdout" >&2
+  exit 1
 }
 
 stop() {

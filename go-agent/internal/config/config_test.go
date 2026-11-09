@@ -25,6 +25,8 @@ jpom:
   authorize:
     agent-name: custom
     agent-pwd: secret
+    # Java 插件端不支持该键（getter 恒 null），Go 必须同样忽略。
+    authorize: configured-authorize-string
   project:
     status-wait-time: 3
     file-backup-count: 2
@@ -43,6 +45,11 @@ jpom:
 server:
   port: 2124
   address: 127.0.0.1
+spring:
+  servlet:
+    multipart:
+      max-file-size: 8MB
+      max-request-size: 30MB
 `)
 	if err := os.WriteFile(path, content, 0o644); err != nil {
 		t.Fatal(err)
@@ -85,6 +92,32 @@ server:
 	if cfg.Server.Port != 2124 || cfg.Server.Address != "127.0.0.1" {
 		t.Errorf("server = %+v", cfg.Server)
 	}
+	if cfg.Jpom.Authorize.Authorize != "" {
+		t.Errorf("jpom.authorize.authorize must be ignored like Java, got %q", cfg.Jpom.Authorize.Authorize)
+	}
+	if cfg.MaxFileSize() != 8<<20 || cfg.MaxRequestSize() != 30<<20 {
+		t.Errorf("multipart limits = %d/%d", cfg.MaxFileSize(), cfg.MaxRequestSize())
+	}
+}
+
+// TestParseDataSize 校验 Spring DataSize 风格配置解析。
+func TestParseDataSize(t *testing.T) {
+	cases := map[string]int64{
+		"5MB":   5 << 20,
+		"20MB":  20 << 20,
+		"12KB":  12 << 10,
+		"1GB":   1 << 30,
+		"1024B": 1024,
+		"1024":  1024,
+		"":      7,
+		"bad":   7,
+		"-1MB":  7,
+	}
+	for value, want := range cases {
+		if got := ParseDataSize(value, 7); got != want {
+			t.Errorf("ParseDataSize(%q) = %d, want %d", value, got, want)
+		}
+	}
 }
 
 func TestLoadDefaultsOnMissingKeys(t *testing.T) {
@@ -108,6 +141,12 @@ func TestLoadDefaultsOnMissingKeys(t *testing.T) {
 	}
 	if cfg.Jpom.Monitor != nil {
 		t.Errorf("monitor should be nil when not configured")
+	}
+	if cfg.MaxFileSize() != DefaultMaxFileSize || cfg.MaxRequestSize() != DefaultMaxRequestSize {
+		t.Errorf("default multipart limits = %d/%d", cfg.MaxFileSize(), cfg.MaxRequestSize())
+	}
+	if DefaultMaxFileSize != 5<<20 || DefaultMaxRequestSize != 20<<20 {
+		t.Errorf("default multipart constants = %d/%d", DefaultMaxFileSize, DefaultMaxRequestSize)
 	}
 }
 

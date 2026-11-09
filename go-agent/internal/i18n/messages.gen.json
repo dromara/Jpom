@@ -113,6 +113,36 @@
 "zh-HK": "Agent JAR包不存在",
 "zh-TW": "Agent JAR包不存在"
 },
+"i18n.agent_package_engine_mismatch.6325": {
+"en-US": "The upgrade package does not match the node engine: the node is running the {} agent, but the package is for the {} agent",
+"zh-CN": "升级包与节点运行类型不匹配：节点为 {} 版插件端，升级包为 {} 升级包",
+"zh-HK": "升級包與節點運行類型不匹配：節點為 {} 版插件端，升級包為 {} 升級包",
+"zh-TW": "升級包與節點運行類型不匹配：節點為 {} 版外掛端，升級包為 {} 升級包"
+},
+"i18n.agent_package_platform_invalid.b1fb": {
+"en-US": "Unrecognized platform: {} (expected os/arch, for example linux/amd64)",
+"zh-CN": "无法识别的平台：{}（支持格式 os/arch，例如 linux/amd64）",
+"zh-HK": "無法識別的平台：{}（支持格式 os/arch，例如 linux/amd64）",
+"zh-TW": "無法識別的平台：{}（支援格式 os/arch，例如 linux/amd64）"
+},
+"i18n.agent_package_platform_legacy.229d": {
+"en-US": "The node did not report its runtime platform, so only linux/amd64 upgrade packages are allowed",
+"zh-CN": "节点未上报运行平台信息，仅允许使用 linux/amd64 类型升级包",
+"zh-HK": "節點未上報運行平台信息，僅允許使用 linux/amd64 類型升級包",
+"zh-TW": "節點未上報執行平台資訊，僅允許使用 linux/amd64 類型升級包"
+},
+"i18n.agent_package_platform_mismatch.a42e": {
+"en-US": "The upgrade package platform does not match the node platform: node platform {}, package platform {}",
+"zh-CN": "升级包平台与节点平台不匹配：节点平台 {}，升级包平台 {}",
+"zh-HK": "升級包平台與節點平台不匹配：節點平台 {}，升級包平台 {}",
+"zh-TW": "升級包平台與節點平台不匹配：節點平台 {}，升級包平台 {}"
+},
+"i18n.agent_package_platform_unknown.37a6": {
+"en-US": "Cannot identify the node runtime platform (osName={}, arch={}). Automatic upgrade has been refused; please upload an upgrade package for the matching platform manually",
+"zh-CN": "无法识别节点运行平台（osName={}，arch={}），已拒绝自动升级，请手动上传匹配平台的升级包",
+"zh-HK": "無法識別節點運行平台（osName={}，arch={}），已拒絕自動升級，請手動上傳匹配平台的升級包",
+"zh-TW": "無法識別節點執行平台（osName={}，arch={}），已拒絕自動升級，請手動上傳匹配平台的升級包"
+},
 "i18n.agent_response_empty.cc8e": {
 "en-US": "The agent side response content is empty",
 "zh-CN": "agent 端响应内容为空",
@@ -2831,6 +2861,12 @@
 "zh-HK": "下載成功文件大小：",
 "zh-TW": "下載成功檔案大小："
 },
+"i18n.download_go_agent_package_failed.4d5d": {
+"en-US": "Failed to download the Go agent upgrade container for platform {}: {}",
+"zh-CN": "下载 {} 平台 Go 插件端升级容器失败：{}",
+"zh-HK": "下載 {} 平台 Go 插件端升級容器失敗：{}",
+"zh-TW": "下載 {} 平台 Go 外掛端升級容器失敗：{}"
+},
 "i18n.download_progress.898a": {
 "en-US": "Current progress: {}, Total file size: {}, Downloaded: {}",
 "zh-CN": "当前进度：{} ,文件总大小：{}，已经下载：{}",
@@ -3929,6 +3965,12 @@
 "zh-HK": "全局工作空間變量請到系統管理修改",
 "zh-TW": "全域性工作空間變數請到系統管理修改"
 },
+"i18n.go_agent_package_not_found.e47b": {
+"en-US": "No usable Go agent upgrade container (agent-go-{}-upgrade.jar) found. Please upload it first or make sure this version exists in the download center",
+"zh-CN": "未找到可用的 Go 插件端升级容器（agent-go-{}-upgrade.jar），请先上传或确认下载中心存在该版本",
+"zh-HK": "未找到可用的 Go 插件端升級容器（agent-go-{}-upgrade.jar），請先上傳或確認下載中心存在該版本",
+"zh-TW": "未找到可用的 Go 外掛端升級容器（agent-go-{}-upgrade.jar），請先上傳或確認下載中心存在該版本"
+},
 "i18n.go_install_file_desc": {
 "en-US": "Do not delete this file; the associated id will become invalid after deletion",
 "zh-CN": "请勿删除此文件,删除后关联 id 将失效",
@@ -4486,6 +4528,12 @@
 "zh-CN": "上传的文件不是 zip",
 "zh-HK": "上傳的文件不是 zip",
 "zh-TW": "上傳的檔案不是 zip"
+},
+"i18n.invalid_go_agent_upgrade_container.0755": {
+"en-US": "Not a valid Go agent upgrade container: {}",
+"zh-CN": "不是有效的 Go 插件端升级容器：{}",
+"zh-HK": "不是有效的 Go 插件端升級容器：{}",
+"zh-TW": "不是有效的 Go 外掛端升級容器：{}"
 },
 "i18n.invalid_http_proxy_address.1da1": {
 "en-US": "The HTTP proxy address format is incorrect",

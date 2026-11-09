@@ -43,42 +43,59 @@ type Handler func(*Context)
 
 // Router registers endpoints and applies authorization.
 type Router struct {
-	app       *app.App
-	mux       *http.ServeMux
-	public    map[string]struct{}
-	methods   map[string]map[string]struct{}
-	protected map[string]bool
+	app     *app.App
+	mux     *http.ServeMux
+	public  map[string]struct{}
+	methods map[string]map[string]struct{}
+	// index 是 "/"、"/index"、"/index.html" 的处理器。Java 的 @RequestMapping
+	// 不限制请求方法，因此这里对任意 HTTP 方法都返回该页面。
+	index Handler
 }
 
 // New creates an empty router.
 func New(a *app.App) *Router {
 	r := &Router{
-		app:       a,
-		mux:       http.NewServeMux(),
-		public:    map[string]struct{}{},
-		methods:   map[string]map[string]struct{}{},
-		protected: map[string]bool{},
+		app:     a,
+		mux:     http.NewServeMux(),
+		public:  map[string]struct{}{},
+		methods: map[string]map[string]struct{}{},
 	}
 	r.mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 		c := newContext(r.app, w, req)
 		path := req.URL.Path
-		if _, exists := r.methods[path]; exists {
-			// 路径存在但方法不匹配：Java 抛 HttpRequestMethodNotSupportedException，
-			// 全局异常返回 code=405「不被支持的请求方式」，data 为异常 message。
-			if r.protected[path] && !r.app.CheckAuthorize(req.Header.Get("Jpom-Agent-Authorize")) {
-				r.app.Log().Warn("agent authorization failed", "path", path, "remote", req.RemoteAddr)
-				c.JSONCode(900, c.T("i18n.auth_info_error.c184"), nil)
-				return
-			}
+		// index 页与 Java 一致不限请求方法（GET/POST/HEAD 等）。
+		if r.index != nil && isIndexPath(path) {
+			r.index(c)
+			return
+		}
+		methods, exists := r.methods[path]
+		if !exists {
+			// 与 Java 2.11.13.1 实测一致：HTTP 200 + code=500，msg 为 i18n
+			// no_resource_found，data 为请求路径（Java 404 error controller 语义）。
+			c.JSONCode(500, c.T("i18n.no_resource_found.dc22"), path)
+			return
+		}
+		// 方法不匹配必须在鉴权之前返回 405：Spring 在映射阶段即抛
+		// HttpRequestMethodNotSupportedException，不会执行鉴权拦截器。
+		if _, allowed := methods[req.Method]; !allowed {
 			c.JSONCode(405, c.T("i18n.unsupported_request_method.45d7"),
 				fmt.Sprintf("Request method '%s' not supported", req.Method))
 			return
 		}
-		// 与 Java 2.11.13.1 实测一致：HTTP 200 + code=500，msg 为 i18n
-		// no_resource_found，data 为请求路径。
+		// 路径与方法都已注册却未命中 mux（理论上不可达），按资源不存在处理。
 		c.JSONCode(500, c.T("i18n.no_resource_found.dc22"), path)
 	})
 	return r
+}
+
+// SetIndex registers the index page handler. The Java agent maps "/", "/index"
+// and "/index.html" without a method constraint, so the router serves this
+// handler for every HTTP method (POST/HEAD included).
+func (r *Router) SetIndex(handler Handler) { r.index = handler }
+
+// isIndexPath reports whether path is one of the Java agent index mappings.
+func isIndexPath(path string) bool {
+	return path == "/" || path == "/index" || path == "/index.html"
 }
 
 // Handle registers an endpoint that requires the Jpom-Agent-Authorize header.
@@ -105,15 +122,13 @@ func (r *Router) register(method, pattern string, handler Handler, public bool) 
 		r.methods[path] = map[string]struct{}{}
 	}
 	r.methods[path][method] = struct{}{}
-	if !public {
-		r.protected[path] = true
-	}
 	r.mux.HandleFunc(key, func(w http.ResponseWriter, req *http.Request) {
 		c := newContext(r.app, w, req)
 		defer func() {
 			if recovered := recover(); recovered != nil {
 				r.app.Log().Error("handler panic", "method", req.Method, "path", req.URL.Path, "panic", recovered, "stack", string(debug.Stack()))
-				c.JSONCode(http.StatusOK, c.T("i18n.service_exception.3821")+fmt.Sprint(recovered), nil)
+				// panic 是服务异常，必须返回 code=500（不得伪装成 code=200 成功）。
+				c.JSONCode(500, c.T("i18n.service_exception.3821")+fmt.Sprint(recovered), nil)
 			}
 		}()
 		r.app.Log().Debug("request", "method", req.Method, "path", req.URL.Path, "remote", req.RemoteAddr, "workspace", req.Header.Get("workspaceId"))
@@ -320,7 +335,98 @@ func (c *Context) WriteFileHeaders(filename, contentType string) {
 		contentType = "application/octet-stream"
 	}
 	c.W.Header().Set("Content-Type", contentType)
-	c.W.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%q", filename))
+	c.W.Header().Set("Content-Disposition", ContentDisposition(filename))
+}
+
+// ContentDisposition renders the download header exactly like Hutool 5.8.34
+// (ServletUtil#write(HttpServletResponse, File)):
+//
+//	attachment;filename="<percent-encoded>";filename*=UTF-8''<percent-encoded>
+//
+// Both filename parameters carry the RFC3986 percent-encoded UTF-8 name
+// (Hutool URLUtil.encodeAll), so non-ASCII names decode correctly in browsers
+// while ASCII names stay readable.
+func ContentDisposition(filename string) string {
+	encoded := EncodeRFC3986(filename)
+	return "attachment;filename=\"" + encoded + "\";filename*=UTF-8''" + encoded
+}
+
+// EncodeRFC3986 percent-encodes every UTF-8 byte except the RFC3986 unreserved
+// characters (A-Z a-z 0-9 - . _ ~), matching Hutool URLUtil.encodeAll.
+func EncodeRFC3986(value string) string {
+	var builder strings.Builder
+	builder.Grow(len(value))
+	for index := 0; index < len(value); index++ {
+		char := value[index]
+		switch {
+		case char >= 'A' && char <= 'Z':
+		case char >= 'a' && char <= 'z':
+		case char >= '0' && char <= '9':
+		case char == '-' || char == '.' || char == '_' || char == '~':
+		default:
+			builder.WriteByte('%')
+			builder.WriteString(fmt.Sprintf("%02X", char))
+			continue
+		}
+		builder.WriteByte(char)
+	}
+	return builder.String()
+}
+
+// multipartFormMemory caps how much of a multipart form is kept in memory; the
+// remainder spills to temporary files (same idea as Spring's multipart resolver).
+const multipartFormMemory = 32 << 20
+
+// MaxUploadFileSize returns spring.servlet.multipart.max-file-size.
+func (c *Context) MaxUploadFileSize() int64 { return c.App.Config.MaxFileSize() }
+
+// MaxUploadRequestSize returns spring.servlet.multipart.max-request-size.
+func (c *Context) MaxUploadRequestSize() int64 { return c.App.Config.MaxRequestSize() }
+
+// ParseMultipartForm parses a multipart/form-data request while enforcing the
+// Spring multipart limits (spring.servlet.multipart.max-file-size /
+// max-request-size). Non-multipart requests are treated as "no file": their
+// form is parsed and the handlers answer 没有上传文件 like the Java agent.
+//
+// When a limit is exceeded it writes the Java BaseExceptionHandler response
+// (code 406, i18n.file_too_large.9994) and returns false; the caller must
+// return immediately.
+func (c *Context) ParseMultipartForm() bool {
+	contentType := strings.ToLower(c.R.Header.Get("Content-Type"))
+	if !strings.HasPrefix(contentType, "multipart/") {
+		_ = c.R.ParseForm()
+		return true
+	}
+	requestLimit := c.MaxUploadRequestSize()
+	if requestLimit <= 0 {
+		requestLimit = 20 << 20
+	}
+	if c.R.ContentLength > requestLimit {
+		c.FailCode(http.StatusNotAcceptable, c.T("i18n.file_too_large.9994"))
+		return false
+	}
+	c.R.Body = http.MaxBytesReader(c.W, c.R.Body, requestLimit)
+	if err := c.R.ParseMultipartForm(multipartFormMemory); err != nil {
+		var maxBytesError *http.MaxBytesError
+		if errors.As(err, &maxBytesError) || strings.Contains(err.Error(), "request body too large") {
+			c.FailCode(http.StatusNotAcceptable, c.T("i18n.file_too_large.9994"))
+			return false
+		}
+		// 其它解析失败保持 Java 行为：交给后续「没有上传文件」判断。
+		return true
+	}
+	fileLimit := c.MaxUploadFileSize()
+	if form := c.R.MultipartForm; form != nil && fileLimit > 0 {
+		for _, headers := range form.File {
+			for _, header := range headers {
+				if header.Size > fileLimit {
+					c.FailCode(http.StatusNotAcceptable, c.T("i18n.file_too_large.9994"))
+					return false
+				}
+			}
+		}
+	}
+	return true
 }
 
 // ErrNotImplemented is returned by stub handlers until the owning module lands.

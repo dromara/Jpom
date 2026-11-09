@@ -201,11 +201,41 @@ func MissingKeys(lang string) []string {
 	return result
 }
 
-// DefaultLang 返回配置的默认语言（JPOM_LANG 环境变量，对应 jpom.system.lang），
-// 未配置时返回 zh-CN。
+// DefaultLang 返回配置的默认语言：优先 JPOM_LANG 环境变量（对应
+// jpom.system.lang），其次系统 locale（LC_ALL/LANG），最后 zh-CN。
 func DefaultLang() string {
 	if value := strings.TrimSpace(os.Getenv(LanguageEnv)); value != "" {
 		return NormalizeLang(value)
+	}
+	return SystemLanguage()
+}
+
+// SystemLanguage 把系统 locale（LC_ALL 优先于 LANG）映射为支持的语言：
+// zh_* -> zh-CN/zh-HK/zh-TW，en_* -> en-US，其它/未配置 -> zh-CN。
+// 对应 Java I18nMessageUtil 中 Locale.getDefault() 的回退分支。
+func SystemLanguage() string {
+	for _, name := range []string{"LC_ALL", "LC_MESSAGES", "LANG"} {
+		value := strings.TrimSpace(os.Getenv(name))
+		if value == "" {
+			continue
+		}
+		// 去掉 ".UTF-8" 编码后缀与 "@modifier"。
+		if index := strings.IndexAny(value, ".@"); index > 0 {
+			value = value[:index]
+		}
+		tag := strings.ToLower(strings.ReplaceAll(strings.TrimSpace(value), "_", "-"))
+		switch {
+		case strings.HasPrefix(tag, "zh-hk") || strings.HasPrefix(tag, "zh-hant-hk"):
+			return LangZhHk
+		case strings.HasPrefix(tag, "zh-tw") || strings.HasPrefix(tag, "zh-hant-tw") || strings.HasPrefix(tag, "zh-hant"):
+			return LangZhTw
+		case strings.HasPrefix(tag, "zh"):
+			return LangZhCn
+		case strings.HasPrefix(tag, "en"):
+			return LangEnUs
+		case tag == "c" || tag == "posix":
+			continue
+		}
 	}
 	return LangZhCn
 }
@@ -214,7 +244,8 @@ func DefaultLang() string {
 //  1. Accept-Language（按 q 权重，权重相同取标签字典序最大者）；
 //  2. 显式 fallback（通常是 jpom.system.lang 配置）；
 //  3. JPOM_LANG 环境变量；
-//  4. zh-CN。
+//  4. 系统 locale（LC_ALL/LANG）；
+//  5. zh-CN。
 func Resolve(acceptLanguage, fallback string) string {
 	if best := BestLanguage(acceptLanguage); best != "" {
 		return NormalizeLang(best)

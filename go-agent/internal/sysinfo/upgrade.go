@@ -19,10 +19,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
-	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -219,13 +220,44 @@ type goAgentPackageInfo struct {
 //
 // 兼容旧格式：zip 内直接放 agent / jpom-agent 可执行文件（执行 -version 读取版本）。
 func installAgentPackage(a *app.App, packagePath string) (string, error) {
+	return installAgentPackageFor(a, packagePath, currentPlatform())
+}
+
+// installAgentPackageFor 以指定目标平台校验/安装升级包；正式流程始终使用
+// runtime.GOOS/runtime.GOARCH，显式平台仅用于跨架构单测。
+func installAgentPackageFor(a *app.App, packagePath string, target targetPlatform) (string, error) {
+	plan, err := prepareAgentUpgrade(a, packagePath, target)
+	if err != nil {
+		return "", err
+	}
+	if err := replaceAgentBinary(a, plan.binaryPath, plan.version); err != nil {
+		return "", err
+	}
+	restartAfterUpgrade(a, 2*time.Second)
+	return UpgradeMessage, nil
+}
+
+// restartAfterUpgrade 是重启的注入点，便于单测完整验证“校验-替换-重启”链路
+// 而不真的重启测试进程；正式流程固定调用 App.RestartAfter。
+var restartAfterUpgrade = func(a *app.App, delay time.Duration) { a.RestartAfter(delay) }
+
+// agentUpgradePlan 是已通过全部校验、等待替换的升级包。
+type agentUpgradePlan struct {
+	binaryPath string
+	version    string
+}
+
+// prepareAgentUpgrade 执行升级包的全部校验（平台/版本/容器内文件精确定位/
+// sha256/可执行文件 machine），只有全部通过才返回待替换二进制。
+// 任何失败都不会改动当前二进制，也不会写 upgrade-pending.json（CONTRACT §3.4）。
+func prepareAgentUpgrade(a *app.App, packagePath string, target targetPlatform) (*agentUpgradePlan, error) {
 	ext := strings.ToLower(filepath.Ext(packagePath))
 	if ext != ".zip" && ext != ".jar" {
-		return "", paramErr(405, "i18n.not_jpom_install_package.2cca")
+		return nil, paramErr(405, "i18n.not_jpom_install_package.2cca")
 	}
 	reader, err := zip.OpenReader(packagePath)
 	if err != nil {
-		return "", paramErr(405, "i18n.not_jpom_install_package.2cca")
+		return nil, paramErr(405, "i18n.not_jpom_install_package.2cca")
 	}
 	defer func() { _ = reader.Close() }()
 	var (
@@ -233,55 +265,78 @@ func installAgentPackage(a *app.App, packagePath string) (string, error) {
 		version string
 		sha256  string
 	)
-	if info := inspectGoAgentPackage(reader); info != nil {
-		if info.Platform != "" && !strings.Contains(strings.ToLower(info.Platform), runtime.GOOS) {
-			return "", paramErr(405, "i18n.go_upgrade_platform_mismatch", info.Platform)
+	if info := inspectGoAgentPackage(reader, target); info != nil {
+		if err := checkPackagePlatform(info.Platform, target); err != nil {
+			return nil, err
 		}
 		if info.MinVersion != "" && compareVersion(a.Version, info.MinVersion) < 0 {
-			return "", paramErr(405, "i18n.incompatible_program_versions.5291", a.Version, info.MinVersion)
+			return nil, paramErr(405, "i18n.incompatible_program_versions.5291", a.Version, info.MinVersion)
+		}
+		if info.File == nil {
+			// CONTRACT §3.2：容器内必须精确存在当前平台可执行文件，禁止 fallback。
+			return nil, paramErrAppend(405, "i18n.go_upgrade_missing_binary", " "+target.containerBinaryPath())
 		}
 		entry = info.File
 		version = info.Version
 		sha256 = info.SHA256
 	} else {
 		if ext == ".jar" {
-			return "", paramErr(405, javaPackageLimitMessage)
+			return nil, paramErr(405, javaPackageLimitMessage)
 		}
 		entry = findLegacyBinary(reader)
+		if entry == nil {
+			return nil, paramErr(405, javaPackageLimitMessage)
+		}
 	}
-	binaryPath, err := extractEntry(a, entry)
+	binaryPath, err := extractEntry(a, entry, target)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if sha256 != "" {
 		actual, err := fileSHA256(binaryPath)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 		if !strings.EqualFold(actual, sha256) {
-			return "", paramErr(405, "i18n.go_upgrade_sha256_mismatch")
+			return nil, paramErr(405, "i18n.go_upgrade_sha256_mismatch")
 		}
 	}
 	if version == "" {
 		version, err = binaryVersion(a, binaryPath)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 	}
 	if err := checkUpgradeVersion(a, version); err != nil {
-		return "", err
+		return nil, err
 	}
-	if err := replaceAgentBinary(a, binaryPath, version); err != nil {
-		return "", err
+	return &agentUpgradePlan{binaryPath: binaryPath, version: version}, nil
+}
+
+// checkPackagePlatform 校验 agent.json.platform 与目标平台完全一致（大小写归一化）。
+// platform 为空视为旧格式：仅允许 linux/amd64 节点（CONTRACT §3.1/§3.2）。
+func checkPackagePlatform(packagePlatform string, target targetPlatform) error {
+	if strings.TrimSpace(packagePlatform) == "" {
+		if target.isLegacyLinuxAmd64() {
+			return nil
+		}
+		// 旧格式容器缺少 platform：仅 linux/amd64 允许，其余平台给出明确提示。
+		return paramErr(405, "i18n.go_upgrade_platform_mismatch", fmt.Sprintf("missing platform (expected %s)", target.String()))
 	}
-	a.RestartAfter(2 * time.Second)
-	return UpgradeMessage, nil
+	if !platformEqual(packagePlatform, target.String()) {
+		return paramErr(405, "i18n.go_upgrade_platform_mismatch", fmt.Sprintf("%s (expected %s)", packagePlatform, target.String()))
+	}
+	return nil
 }
 
 const javaPackageLimitMessage = "i18n.go_java_package_not_supported"
 
-// inspectGoAgentPackage 读取 go-agent/agent.json 并定位当前平台的可执行文件。
-func inspectGoAgentPackage(reader *zip.ReadCloser) *goAgentPackageInfo {
+// inspectGoAgentPackage 读取 go-agent/agent.json 并精确定位目标平台的可执行文件。
+//
+// CONTRACT §3.2：容器内必须存在 go-agent/bin/go-agent-<os>-<arch>
+// （windows 为 go-agent-<os>-<arch>.exe），不存在时 File 为 nil，由调用方返回 405；
+// 这里绝不 fallback 到 go-agent/ 下的任意其他文件。
+func inspectGoAgentPackage(reader *zip.ReadCloser, target targetPlatform) *goAgentPackageInfo {
 	var manifestFile *zip.File
 	for _, file := range reader.File {
 		name := strings.ToLower(strings.TrimPrefix(file.Name, "./"))
@@ -315,23 +370,13 @@ func inspectGoAgentPackage(reader *zip.ReadCloser) *goAgentPackageInfo {
 		Platform:   strings.TrimSpace(toString(meta["platform"])),
 		SHA256:     strings.ToLower(strings.TrimSpace(toString(meta["sha256"]))),
 	}
-	wanted := runtime.GOOS + "-" + runtime.GOARCH
+	expected := strings.ToLower(target.containerBinaryPath())
 	for _, file := range reader.File {
 		name := strings.ToLower(strings.TrimPrefix(file.Name, "./"))
 		if file.FileInfo().IsDir() || strings.Contains(name, "..") {
 			continue
 		}
-		if !strings.HasPrefix(name, "go-agent/") {
-			continue
-		}
-		base := strings.ToLower(filepath.Base(name))
-		if strings.HasSuffix(base, ".json") || strings.HasSuffix(base, ".md") || strings.HasSuffix(base, ".txt") {
-			continue
-		}
-		if info.File == nil {
-			info.File = file
-		}
-		if strings.Contains(base, wanted) || (strings.Contains(base, runtime.GOOS) && strings.Contains(base, runtime.GOARCH)) {
+		if name == expected {
 			info.File = file
 			break
 		}
@@ -357,16 +402,16 @@ func findLegacyBinary(reader *zip.ReadCloser) *zip.File {
 	return nil
 }
 
-// extractEntry 把 zip 条目解压到临时目录并校验可执行文件头。
-func extractEntry(a *app.App, entry *zip.File) (string, error) {
+// extractEntry 把 zip 条目解压到临时目录并校验可执行文件头（OS magic + 架构 machine）。
+func extractEntry(a *app.App, entry *zip.File, target targetPlatform) (string, error) {
 	if entry == nil {
 		return "", paramErr(405, javaPackageLimitMessage)
 	}
 	if err := os.MkdirAll(a.TempPath(), 0o755); err != nil {
 		return "", err
 	}
-	target := filepath.Join(a.TempPath(), ".agent-upgrade-binary")
-	output, err := os.Create(target)
+	binaryPath := filepath.Join(a.TempPath(), ".agent-upgrade-binary")
+	output, err := os.Create(binaryPath)
 	if err != nil {
 		return "", err
 	}
@@ -388,13 +433,13 @@ func extractEntry(a *app.App, entry *zip.File) (string, error) {
 	if err := output.Close(); err != nil {
 		return "", err
 	}
-	if err := os.Chmod(target, 0o755); err != nil {
+	if err := os.Chmod(binaryPath, 0o755); err != nil {
 		return "", err
 	}
-	if err := verifyExecutable(target); err != nil {
+	if err := verifyExecutableFor(binaryPath, target); err != nil {
 		return "", err
 	}
-	return target, nil
+	return binaryPath, nil
 }
 
 // fileSHA256 计算文件 sha256（小写 hex）。
@@ -409,36 +454,6 @@ func fileSHA256(path string) (string, error) {
 		return "", err
 	}
 	return hex.EncodeToString(hash.Sum(nil)), nil
-}
-
-// verifyExecutable 校验文件头是否与当前操作系统匹配。
-func verifyExecutable(path string) error {
-	header := make([]byte, 4)
-	file, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = file.Close() }()
-	if _, err := io.ReadFull(file, header); err != nil {
-		return paramErr(405, "i18n.go_upgrade_invalid_executable")
-	}
-	switch runtime.GOOS {
-	case "windows":
-		if header[0] != 'M' || header[1] != 'Z' {
-			return paramErr(405, "i18n.go_upgrade_invalid_windows_executable")
-		}
-	case "darwin":
-		if !(header[0] == 0xfe && header[1] == 0xed && header[2] == 0xfa && header[3] == 0xce) &&
-			!(header[0] == 0xfe && header[1] == 0xed && header[2] == 0xfa && header[3] == 0xcf) &&
-			!(header[0] == 0xca && header[1] == 0xfe && header[2] == 0xba && header[3] == 0xbe) {
-			return paramErr(405, "i18n.go_upgrade_invalid_macos_executable")
-		}
-	default:
-		if header[0] != 0x7f || header[1] != 'E' || header[2] != 'L' || header[3] != 'F' {
-			return paramErr(405, "i18n.go_upgrade_invalid_linux_executable")
-		}
-	}
-	return nil
 }
 
 // binaryVersion 执行可执行文件的 -version 参数读取版本号。
@@ -491,7 +506,7 @@ func replaceAgentBinary(a *app.App, newBinary, version string) error {
 	if err := os.Chmod(staged, 0o755); err != nil {
 		return err
 	}
-	if err := os.Rename(staged, a.Executable); err != nil {
+	if err := replaceExecutable(staged, a.Executable); err != nil {
 		return fmt.Errorf("replace executable failed: %w", err)
 	}
 	upgradeCount := 0
@@ -561,51 +576,110 @@ func cleanOldJars(dir string, keep int) {
 	}
 }
 
-// RemoteUpgrade 对应 /system/remote_upgrade.json。
+// RemoteUpgrade 对应 /system/remote_upgrade.json（节点“远程升级”）。
+//
+// 从 RemoteVersion.agentUrl 推导“同版本 + 当前平台”的 Go 升级容器 URL：
+//
+//	<agentUrl 所在目录>/agent-go-<version>-upgrade-<os>-<arch>.jar
+//
+// linux/amd64 额外回退兼容别名 agent-go-<version>-upgrade.jar（旧命名）。
+// 不再直接下载 agentUrl：那是 Java Agent 包，Go 插件端无法使用（CONTRACT §5.15）。
 func RemoteUpgrade(a *app.App) (string, error) {
 	remote, err := LoadRemoteInfo(a)
 	if err != nil || remote == nil {
 		return "", paramErr(405, "i18n.no_available_new_version_upgrade.d8f2")
 	}
-	remoteURL := strings.TrimSpace(toString(remote["agentUrl"]))
-	if remoteURL == "" {
+	agentURL := strings.TrimSpace(toString(remote["agentUrl"]))
+	if agentURL == "" {
 		return "", paramErr(405, "i18n.new_version_exists_download_unavailable.4ba7")
 	}
-	ext := filepath.Ext(remoteURL)
-	if index := strings.Index(ext, "?"); index >= 0 {
-		ext = ext[:index]
-	}
-	if ext == "" {
-		ext = ".zip"
-	}
-	target := filepath.Join(a.TempPath(), "remote-upgrade"+ext)
-	if err := downloadFile(remoteURL, target); err != nil {
+	platform := currentPlatform()
+	urls, err := goUpgradeContainerURLs(agentURL, toString(remote["tagName"]), platform)
+	if err != nil {
 		return "", err
 	}
-	return installAgentPackage(a, target)
+	targetFile := filepath.Join(a.TempPath(), "remote-upgrade-"+platform.GOOS+"-"+platform.GOARCH+".jar")
+	var lastErr error
+	for _, upgradeURL := range urls {
+		a.Log().Info("download go agent upgrade container", "url", upgradeURL)
+		status, downloadErr := downloadPackageFile(upgradeURL, targetFile)
+		if downloadErr == nil {
+			return installAgentPackage(a, targetFile)
+		}
+		lastErr = downloadErr
+		// 仅“文件不存在/被拒绝”时尝试兼容别名；其他错误（网络/写盘）直接返回。
+		if status != http.StatusNotFound && status != http.StatusForbidden {
+			return "", downloadErr
+		}
+	}
+	if lastErr == nil {
+		lastErr = paramErr(405, "i18n.new_version_exists_download_unavailable.4ba7")
+	}
+	return "", lastErr
 }
 
-func downloadFile(url, target string) error {
+// goUpgradeContainerURLs 按 RemoteVersion.agentUrl 推导当前平台的 Go 升级容器 URL。
+// 返回顺序：精确平台容器 -> linux/amd64 兼容别名（仅 linux/amd64）。
+func goUpgradeContainerURLs(agentURL, tagName string, target targetPlatform) ([]string, error) {
+	parsed, err := url.Parse(strings.TrimSpace(agentURL))
+	if err != nil || parsed.Scheme == "" || parsed.Host == "" {
+		return nil, paramErr(405, "i18n.new_version_exists_download_unavailable.4ba7")
+	}
+	version := agentVersionFromURL(parsed.Path)
+	if version == "" {
+		version = strings.TrimPrefix(strings.TrimSpace(tagName), "v")
+	}
+	if version == "" {
+		return nil, paramErr(405, "i18n.new_version_exists_download_unavailable.4ba7")
+	}
+	base := *parsed
+	base.Path = path.Dir(parsed.Path)
+	base.RawPath = ""
+	base.RawQuery = ""
+	base.Fragment = ""
+	baseURL := strings.TrimSuffix(base.String(), "/")
+	urls := []string{baseURL + "/agent-go-" + version + "-upgrade-" + target.GOOS + "-" + target.GOARCH + ".jar"}
+	if target.isLegacyLinuxAmd64() {
+		urls = append(urls, baseURL+"/agent-go-"+version+"-upgrade.jar")
+	}
+	return urls, nil
+}
+
+// agentVersionFromURL 从 agent-<version>-release.zip 之类的文件名解析版本号。
+func agentVersionFromURL(urlPath string) string {
+	name := path.Base(urlPath)
+	name = strings.TrimPrefix(name, "agent-")
+	index := strings.Index(name, "-release.")
+	if index <= 0 {
+		return ""
+	}
+	return name[:index]
+}
+
+// downloadPackageFile 下载升级包并返回 HTTP 状态码（0 表示未收到响应）。
+func downloadPackageFile(url, target string) (int, error) {
 	client := &http.Client{Timeout: 10 * time.Minute}
 	response, err := client.Get(url)
 	if err != nil {
-		return paramErr(405, "i18n.go_upgrade_download_failed", err.Error())
+		return 0, paramErr(405, "i18n.go_upgrade_download_failed", err.Error())
 	}
 	defer func() { _ = response.Body.Close() }()
 	if response.StatusCode != http.StatusOK {
 		if response.StatusCode == http.StatusForbidden {
-			return paramErr(405, "i18n.go_upgrade_download_forbidden")
+			return response.StatusCode, paramErr(405, "i18n.go_upgrade_download_forbidden")
 		}
-		return paramErr(405, "i18n.go_upgrade_download_failed", fmt.Sprintf("HTTP %d", response.StatusCode))
+		return response.StatusCode, paramErr(405, "i18n.go_upgrade_download_failed", fmt.Sprintf("HTTP %d", response.StatusCode))
 	}
 	if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
-		return err
+		return response.StatusCode, err
 	}
 	output, err := os.Create(target)
 	if err != nil {
-		return err
+		return response.StatusCode, err
 	}
 	defer func() { _ = output.Close() }()
-	_, err = io.Copy(output, response.Body)
-	return err
+	if _, err := io.Copy(output, response.Body); err != nil {
+		return response.StatusCode, err
+	}
+	return response.StatusCode, output.Sync()
 }

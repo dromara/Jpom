@@ -96,6 +96,7 @@ func updateUpgradeStatus(a *app.App, status string, extra map[string]any) {
 // StartUpgradeRecovery 在启动阶段检查是否存在待确认的升级（G7）。
 // 失败回滚会延迟重启；健康检查在后台执行。
 func StartUpgradeRecovery(a *app.App) {
+	cleanupReplacedExecutables(a)
 	action, err := recoverUpgrade(a, a.RestartAfter, defaultHealthyChecker(a), upgradeHealthyTimeout)
 	if err != nil {
 		a.Log().Warn("upgrade recovery check failed", "error", err)

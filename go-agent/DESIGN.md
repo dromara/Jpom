@@ -1,4 +1,4 @@
-# Go Agent 设计说明（开发中）
+# Go Agent 设计说明
 
 > 目标：用 Go 重写 Jpom 插件端（Agent），单二进制、低内存、易安装，且与 Java 插件端**功能、配置、数据、协议完全兼容**，支持同一节点在两者间平滑切换。
 
@@ -11,7 +11,7 @@
 | 鉴权 | 请求头 `Jpom-Agent-Authorize: sha1(agentName+"@"+agentPwd)`；WebSocket 使用 query 参数 `Jpom-Agent-Authorize`；未授权返回 HTTP 200 + body `{code:900,msg:"授权信息错误"}` |
 | 协议 | HTTP 端点与 `modules/server/.../common/forward/NodeUrl.java` 一一对应；JSON 包恒为 `{"code":200,"msg":"","data":...}`，业务错误 code=500 且 HTTP 200；工作空间头 `workspaceId`；下载接口返回文件流 |
 | WebSocket | `/console`、`/script_run`、`/free-script-run`、`/system_log`、`/node_update` 的握手参数、帧格式、命令字、关闭原因与 Java 一致 |
-| manifest | `/info` 的 `manifest` 字段（version/timeStamp/pid/type/port/randomId/dataPath/jarFile/osName/installId/debug/upTime）字段名与类型一致，Go 端 `type` 仍为 `Agent`、`jarFile` 填二进制路径 |
+| manifest | `/info` 的 `manifest` 字段（version/timeStamp/pid/type/port/randomId/dataPath/jarFile/osName/installId/debug/upTime）字段名与类型一致，Go 端 `type` 仍为 `Agent`、`jarFile` 填二进制路径；另新增 `engine=go`、`platform=os/arch`、`arch=GOARCH`（Java/旧 Server 忽略未知字段），供新版 Server 按平台选择升级容器 |
 | 布局 | `agent/{bin,conf,data,logs,project-log,tmp}`；二进制可放 `bin/agent`，base = 二进制所在目录的父级 |
 
 ## 2. 包结构与负责人（写作用域，避免冲突）

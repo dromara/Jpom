@@ -460,8 +460,11 @@ func (r *Runtime) stopJava(info, original map[string]any, pid int) *OpResult {
 			msgs = append(msgs, "Kill -9 not completed, kill -9 failed ")
 		}
 	}
-	result := OpResultOfMsg(proc.Status(GetString(info, "id")))
-	result.Success = success
+	// Java BaseUnixProjectCommander.stopJava 返回
+	// CommandOpResult.of(success, status(tag)).appendMsg(kill 输出)：只带
+	// success/msgs，不含 pid/statusMsg/ports（/manage/operate stop 字段对齐，
+	// E2E 差异 D5）。
+	result := OpResultSimple(success, proc.Status(GetString(info, "id")))
 	return result.Append(msgs...)
 }
 

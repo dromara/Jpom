@@ -595,6 +595,6 @@ func serveFile(c *httpx.Context, path string) {
 		return
 	}
 	c.W.Header().Set("Content-Type", "application/octet-stream")
-	c.W.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%q", stat.Name()))
+	c.W.Header().Set("Content-Disposition", httpx.ContentDisposition(stat.Name()))
 	http.ServeContent(c.W, c.R, stat.Name(), stat.ModTime(), file)
 }

@@ -14,6 +14,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -61,12 +62,32 @@ func main() {
 		ReadHeaderTimeout: 30 * time.Second,
 	}
 
+	// 先成功监听再写 PID 文件（CONTRACT §4）：启停脚本以 bin/agent.pid 为准，
+	// 只有服务真正可接受连接时才认为启动成功。
+	listener, err := net.Listen("tcp", application.ListenAddr())
+	if err != nil {
+		application.Log().Error("jpom go agent listen failed", "listen", application.ListenAddr(), "error", err)
+		os.Exit(1)
+	}
+	pidWritten := false
+	if err := application.WritePidFile(); err != nil {
+		application.Log().Warn("write pid file failed", "path", application.PidFilePath(), "error", err)
+	} else {
+		pidWritten = true
+		application.Log().Info("pid file written", "path", application.PidFilePath(), "pid", application.Pid)
+	}
+	// 正常退出（SIGINT/SIGTERM/服务错误）时删除 PID 文件；自升级重启走
+	// syscall.Exec（Unix）或 os.Exit(0)（Windows），不会执行该 defer。
+	if pidWritten {
+		defer application.RemovePidFile()
+	}
+
 	application.Log().Info("jpom go agent starting",
 		"version", version, "base", application.BaseDir, "listen", application.ListenAddr())
 
 	errCh := make(chan error, 1)
 	go func() {
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := srv.Serve(listener); err != nil && err != http.ErrServerClosed {
 			errCh <- err
 		}
 	}()

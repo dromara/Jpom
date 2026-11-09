@@ -277,7 +277,8 @@ func registerScript(r *httpx.Router, a *app.App) {
 				item["nodeId"] = nodeID
 			}
 			item["createTime"] = nowText()
-			item["lastRunUser"] = "-"
+			// Java ScriptController.add 不写 lastRunUser（NodeScriptModel getter 在
+			// 读取时回退 "-"），Go 不在落盘数据里写该字段（P3-2）。
 			user := serverUser(c)
 			if user != "-" {
 				item["createUser"] = user

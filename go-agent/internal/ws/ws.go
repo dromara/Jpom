@@ -47,6 +47,8 @@ const (
 	closeCannotAccept = 1003
 	// closeNormal is a normal closure.
 	closeNormal = 1000
+	// closeTooBig is the "message too big" close code (CloseCodes.TOO_BIG).
+	closeTooBig = 1009
 	// defaultTextLimit mirrors the 5MB @OnMessage limits.
 	defaultTextLimit = 5 * 1024 * 1024
 	// consoleIdleTimeout mirrors session.setMaxIdleTimeout(180_000).

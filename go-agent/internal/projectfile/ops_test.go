@@ -179,6 +179,146 @@ func TestRemoteDownload(t *testing.T) {
 	}
 }
 
+// isFastUUIDHex reports whether value looks like Hutool IdUtil.fastSimpleUUID()
+// (32 lowercase hex characters, no dashes).
+func isFastUUIDHex(value string) bool {
+	if len(value) != 32 {
+		return false
+	}
+	for index := 0; index < len(value); index++ {
+		char := value[index]
+		if (char >= '0' && char <= '9') || (char >= 'a' && char <= 'f') {
+			continue
+		}
+		return false
+	}
+	return true
+}
+
+// findFastUUIDFile returns the single 32-hex file inside dir (unix + windows
+// style), or "" when not found.
+func findFastUUIDFile(t *testing.T, dir string) string {
+	t.Helper()
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatalf("read dir %s: %v", dir, err)
+	}
+	for _, entry := range entries {
+		if !entry.IsDir() && isFastUUIDHex(entry.Name()) {
+			return filepath.Join(dir, entry.Name())
+		}
+	}
+	return ""
+}
+
+// TestResolveRemoteFileName 校验 remote_download 落盘文件名解析：
+// URL basename（不读 Content-Disposition）；空/非法名回退 32 位随机名称。
+func TestResolveRemoteFileName(t *testing.T) {
+	cases := map[string]string{
+		"https://example.com/path/report.txt":   "report.txt",
+		"https://example.com/a/file%20name.jar": "file name.jar",
+		"https://example.com/a/中文报告.zip":        "中文报告.zip",
+	}
+	for rawURL, want := range cases {
+		if got := resolveRemoteFileName(rawURL); got != want {
+			t.Errorf("resolveRemoteFileName(%q) = %q, want %q", rawURL, got, want)
+		}
+	}
+	invalid := []string{
+		"",
+		"not-a-url",
+		"ftp://example.com/a.txt",
+		"https://example.com",
+		"https://example.com/",
+		"https://example.com/dir/",
+		"https://example.com/a/..",
+		"https://example.com/a/bad:name.txt",
+		"https://example.com/a/bad*.txt",
+		"https://example.com/a/trailing.",
+	}
+	for _, rawURL := range invalid {
+		if got := resolveRemoteFileName(rawURL); !isFastUUIDHex(got) {
+			t.Errorf("resolveRemoteFileName(%q) = %q, want 32 hex uuid", rawURL, got)
+		}
+	}
+}
+
+// TestRemoteDownloadUsesURLBasename 校验最终文件名取 URL basename（忽略
+// Content-Disposition），非法 basename 回退 32 位随机名称，同名目录冲突也回退。
+func TestRemoteDownloadUsesURLBasename(t *testing.T) {
+	service, base := testService(t)
+	lib := createProject(t, service, base, "P1", "proj", nil)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/files/cd-name.bin":
+			w.Header().Set("Content-Disposition", "attachment; filename=\"from-header.bin\"")
+			_, _ = w.Write([]byte("body"))
+		case "/":
+			_, _ = w.Write([]byte("root"))
+		case "/files/report.txt":
+			_, _ = w.Write([]byte("report"))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	if _, err := service.RemoteDownload("P1", server.URL+"/files/cd-name.bin", "", "false", 0); err != nil {
+		t.Fatalf("remote download: %v", err)
+	}
+	if content, err := os.ReadFile(filepath.Join(lib, "cd-name.bin")); err != nil || string(content) != "body" {
+		t.Fatalf("URL basename file missing: %q %v", content, err)
+	}
+	if exists(filepath.Join(lib, "from-header.bin")) {
+		t.Fatal("Content-Disposition filename must not be used")
+	}
+
+	// 非法 basename（URL path 为 /）-> 32 位随机名称。
+	if _, err := service.RemoteDownload("P1", server.URL+"/", "", "false", 0); err != nil {
+		t.Fatalf("remote download fallback: %v", err)
+	}
+	fallbackFile := findFastUUIDFile(t, lib)
+	if fallbackFile == "" {
+		t.Fatalf("invalid basename should fall back to 32 hex uuid, files=%v", listNames(t, lib))
+	}
+	if content, err := os.ReadFile(fallbackFile); err != nil || string(content) != "root" {
+		t.Fatalf("fallback file content: %q %v", content, err)
+	}
+
+	// 同名目录已存在时使用随机名称（Java: targetFile.isDirectory()）。
+	lib2 := createProject(t, service, base, "P2", "proj2", nil)
+	if err := os.MkdirAll(filepath.Join(lib2, "report.txt"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := service.RemoteDownload("P2", server.URL+"/files/report.txt", "", "false", 0); err != nil {
+		t.Fatalf("remote download into collision dir: %v", err)
+	}
+	if stat, err := os.Stat(filepath.Join(lib2, "report.txt")); err != nil || !stat.IsDir() {
+		t.Fatalf("existing directory must be kept: %v", err)
+	}
+	collisionFile := findFastUUIDFile(t, lib2)
+	if collisionFile == "" {
+		t.Fatalf("directory collision should fall back to 32 hex uuid, files=%v", listNames(t, lib2))
+	}
+	if content, err := os.ReadFile(collisionFile); err != nil || string(content) != "report" {
+		t.Fatalf("collision fallback content: %q %v", content, err)
+	}
+}
+
+// listNames returns the entry names of dir for diagnostics.
+func listNames(t *testing.T, dir string) []string {
+	t.Helper()
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil
+	}
+	names := make([]string, 0, len(entries))
+	for _, entry := range entries {
+		names = append(names, entry.Name())
+	}
+	return names
+}
+
 func TestUploadProjectFileAndHooks(t *testing.T) {
 	service, base := testService(t)
 	lib := createProject(t, service, base, "P1", "proj", nil)

@@ -23,10 +23,9 @@ import (
 // RegisterAll builds the HTTP handler tree.
 func RegisterAll(a *app.App) http.Handler {
 	r := httpx.New(a)
-	// The Java agent exposes an unauthenticated index page (and its root path).
-	r.Public(http.MethodGet, "/{$}", index)
-	r.Public(http.MethodGet, "/index", index)
-	r.Public(http.MethodGet, "/index.html", index)
+	// The Java agent exposes an unauthenticated index page (and its root path)
+	// through a method-less @RequestMapping: GET/POST/HEAD 等常见方法都必须可用。
+	r.SetIndex(index)
 
 	registerSystem(r, a)
 	registerProject(r, a)

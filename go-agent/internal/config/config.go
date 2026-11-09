@@ -18,6 +18,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -27,6 +28,7 @@ import (
 type Config struct {
 	Jpom   Jpom   `yaml:"jpom"`
 	Server Server `yaml:"server"`
+	Spring Spring `yaml:"spring"`
 
 	// Source is the file the configuration was loaded from ("" for defaults).
 	Source string `yaml:"-"`
@@ -44,9 +46,10 @@ type Jpom struct {
 type Authorize struct {
 	AgentName string `yaml:"agent-name"`
 	AgentPwd  string `yaml:"agent-pwd"`
-	// Authorize is an explicitly configured authorization string. When set the
-	// agent name/password are ignored (same as the Java implementation).
-	Authorize string `yaml:"authorize"`
+	// Authorize 保留字段仅为兼容旧 Go 实现：Java 插件端不支持
+	// jpom.authorize.authorize（AgentAuthorize getter 恒为 null），因此这里显式
+	// 忽略该配置键，保证同一份配置在 Java/Go 下鉴权行为一致（P2-2）。
+	Authorize string `yaml:"-"`
 }
 
 type Project struct {
@@ -124,6 +127,70 @@ type Server struct {
 	Address string `yaml:"address"`
 }
 
+// Spring mirrors the Spring Boot configuration subset the agent reads.
+type Spring struct {
+	Servlet Servlet `yaml:"servlet"`
+}
+
+// Servlet mirrors spring.servlet.
+type Servlet struct {
+	Multipart Multipart `yaml:"multipart"`
+}
+
+// Multipart mirrors spring.servlet.multipart (upload size limits).
+type Multipart struct {
+	MaxFileSize    string `yaml:"max-file-size"`
+	MaxRequestSize string `yaml:"max-request-size"`
+}
+
+// 上传大小默认值（与 Java 插件端 config_default/application.yml 一致）。
+const (
+	DefaultMaxFileSize    int64 = 5 << 20
+	DefaultMaxRequestSize int64 = 20 << 20
+)
+
+// MaxFileSize returns spring.servlet.multipart.max-file-size (default 5MB).
+func (c *Config) MaxFileSize() int64 {
+	return ParseDataSize(c.Spring.Servlet.Multipart.MaxFileSize, DefaultMaxFileSize)
+}
+
+// MaxRequestSize returns spring.servlet.multipart.max-request-size (default 20MB).
+func (c *Config) MaxRequestSize() int64 {
+	return ParseDataSize(c.Spring.Servlet.Multipart.MaxRequestSize, DefaultMaxRequestSize)
+}
+
+// ParseDataSize parses a Spring DataSize value such as "5MB", "12KB", "20MB",
+// "1GB" or a plain byte count. An empty or invalid value yields fallback.
+func ParseDataSize(value string, fallback int64) int64 {
+	text := strings.ToUpper(strings.TrimSpace(value))
+	if text == "" {
+		return fallback
+	}
+	units := []struct {
+		suffix string
+		scale  int64
+	}{
+		{"TB", 1 << 40},
+		{"GB", 1 << 30},
+		{"MB", 1 << 20},
+		{"KB", 1 << 10},
+		{"B", 1},
+	}
+	scale := int64(1)
+	for _, unit := range units {
+		if strings.HasSuffix(text, unit.suffix) {
+			scale = unit.scale
+			text = strings.TrimSpace(strings.TrimSuffix(text, unit.suffix))
+			break
+		}
+	}
+	parsed, err := strconv.ParseFloat(text, 64)
+	if err != nil || parsed < 0 {
+		return fallback
+	}
+	return int64(parsed * float64(scale))
+}
+
 // StringList accepts both a comma separated scalar and a YAML sequence, because
 // the same option has been documented both ways over the project lifetime.
 type StringList []string
@@ -183,10 +250,18 @@ func Default() *Config {
 			System: System{
 				OldJarsCount: 2,
 				LogCharset:   "UTF-8",
-				Lang:         "zh-CN",
+				Lang:         "",
 			},
 		},
 		Server: Server{Port: 2123},
+		Spring: Spring{
+			Servlet: Servlet{
+				Multipart: Multipart{
+					MaxFileSize:    "5MB",
+					MaxRequestSize: "20MB",
+				},
+			},
+		},
 	}
 }
 

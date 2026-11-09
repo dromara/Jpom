@@ -122,15 +122,66 @@ func TestBestLanguageAndResolve(t *testing.T) {
 	if got := Resolve("", "zh-TW"); got != ZhTW {
 		t.Errorf("Resolve fallback = %q", got)
 	}
+	// 语言回退链：Accept-Language -> jpom.system.lang -> 系统 locale -> zh-CN。
+	t.Setenv(LanguageEnv, "")
+	t.Setenv("LC_ALL", "")
+	t.Setenv("LANG", "")
 	if got := Resolve("", ""); got != ZhCN {
 		t.Errorf("Resolve default = %q", got)
 	}
+	t.Setenv("LANG", "en_US.UTF-8")
+	if got := Resolve("", ""); got != EnUS {
+		t.Errorf("Resolve system en locale = %q", got)
+	}
+	// 配置语言优先于系统 locale。
+	if got := Resolve("", "zh-TW"); got != ZhTW {
+		t.Errorf("Resolve config over system locale = %q", got)
+	}
+	t.Setenv("LANG", "zh_TW.UTF-8")
+	if got := Resolve("", ""); got != ZhTW {
+		t.Errorf("Resolve system zh_TW locale = %q", got)
+	}
+	t.Setenv("LC_ALL", "zh_HK.UTF-8")
+	if got := Resolve("", ""); got != ZhHK {
+		t.Errorf("Resolve LC_ALL priority = %q", got)
+	}
+	t.Setenv("LC_ALL", "")
 	t.Setenv(LanguageEnv, "en_US")
 	if got := DefaultLang(); got != EnUS {
 		t.Errorf("DefaultLang = %q", got)
 	}
 	if got := Resolve("", ""); got != EnUS {
 		t.Errorf("Resolve env = %q", got)
+	}
+}
+
+// TestSystemLanguage 校验系统 locale（LANG/LC_ALL）到支持语言的映射。
+func TestSystemLanguage(t *testing.T) {
+	cases := map[string]string{
+		"":                ZhCN,
+		"C":               ZhCN,
+		"POSIX":           ZhCN,
+		"en_US.UTF-8":     EnUS,
+		"en_US":           EnUS,
+		"zh_CN.UTF-8":     ZhCN,
+		"zh_TW.UTF-8":     ZhTW,
+		"zh_TW.Big5":      ZhTW,
+		"zh_HK.UTF-8":     ZhHK,
+		"fr_FR.UTF-8":     ZhCN,
+		"zh_CN.UTF-8@mod": ZhCN,
+	}
+	for locale, want := range cases {
+		t.Setenv("LC_ALL", "")
+		t.Setenv("LANG", locale)
+		if got := SystemLanguage(); got != want {
+			t.Errorf("SystemLanguage(%q) = %q, want %q", locale, got, want)
+		}
+	}
+	// LC_ALL 优先于 LANG。
+	t.Setenv("LANG", "en_US.UTF-8")
+	t.Setenv("LC_ALL", "zh_CN.UTF-8")
+	if got := SystemLanguage(); got != ZhCN {
+		t.Errorf("LC_ALL should win: %q", got)
 	}
 }
 

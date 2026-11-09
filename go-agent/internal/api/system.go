@@ -352,9 +352,10 @@ func handleKill(c *httpx.Context, a *app.App) {
 
 // handleUploadJarSharding 对应 POST /system/upload-jar-sharding（multipart）。
 func handleUploadJarSharding(c *httpx.Context, a *app.App) {
-	// 先解析 multipart（只为读取表单字段；非 multipart 请求也继续，参数校验优先）。
-	if c.R.MultipartForm == nil {
-		_ = c.R.ParseMultipartForm(64 << 20)
+	// 先解析 multipart 并执行 spring.servlet.multipart 限制（超限 code=417）；
+	// 非 multipart 请求不报大小错误，继续走下面的业务 Assert（与 Java 一致）。
+	if !c.ParseMultipartForm() {
+		return
 	}
 	// Java 业务 Assert 顺序：fileSumMd5 -> sliceId -> totalSlice -> nowSlice -> 范围。
 	// 因此「无 file 且无参数」时先返回 没有文件签名信息（N1 #26）。
@@ -372,11 +373,14 @@ func handleUploadJarSharding(c *httpx.Context, a *app.App) {
 	}
 	file, header, err := c.R.FormFile("file")
 	if err != nil {
-		// 兼容字段名不是 file 的情况：取第一个上传文件。
-		for _, headers := range c.R.MultipartForm.File {
-			if len(headers) > 0 {
-				header = headers[0]
-				break
+		// 兼容字段名不是 file 的情况：取第一个上传文件。非 multipart 请求的
+		// MultipartForm 为 nil，必须判空（否则 nil deref 会被 recover 成 500）。
+		if c.R.MultipartForm != nil {
+			for _, headers := range c.R.MultipartForm.File {
+				if len(headers) > 0 {
+					header = headers[0]
+					break
+				}
 			}
 		}
 		if header == nil {

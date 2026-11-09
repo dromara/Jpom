@@ -11,9 +11,12 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -24,7 +27,33 @@ import (
 	"jpom.io/go-agent/internal/app"
 	"jpom.io/go-agent/internal/config"
 	"jpom.io/go-agent/internal/httpx"
+	"jpom.io/go-agent/internal/sysinfo"
 )
+
+// apiMultipartBody 构造 multipart 请求体（用于上传/升级分片入口测试）。
+func apiMultipartBody(t *testing.T, fields map[string]string, fileName string, content []byte) (string, *bytes.Buffer) {
+	t.Helper()
+	var buffer bytes.Buffer
+	writer := multipart.NewWriter(&buffer)
+	for key, value := range fields {
+		if err := writer.WriteField(key, value); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if fileName != "" {
+		part, err := writer.CreateFormFile("file", fileName)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := part.Write(content); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+	return writer.FormDataContentType(), &buffer
+}
 
 // newAPITestApp 构造 api 层单测使用的 App（临时目录 + 默认配置）。
 func newAPITestApp(t *testing.T) *app.App {
@@ -361,5 +390,140 @@ func TestClearCacheInvalidTypeMessage(t *testing.T) {
 	msg, _ := envelope["msg"].(string)
 	if !strings.Contains(msg, "没有对应类型：") || !strings.Contains(msg, "unknownType") {
 		t.Errorf("msg = %q, 应包含类型值", msg)
+	}
+}
+
+// TestUploadJarShardingNonMultipartWithParams 回归 D1：非 multipart 请求但带齐
+// 分片参数时必须返回 405「没有上传文件」，不能 nil deref 被 recover 成 code=200。
+func TestUploadJarShardingNonMultipartWithParams(t *testing.T) {
+	a := newAPITestApp(t)
+	r := authedRouter(t, a)
+	body := "fileSumMd5=abc&sliceId=s1&totalSlice=1&nowSlice=1"
+	envelope := doSystemRequest(t, r, http.MethodPost, "/system/upload-jar-sharding", "application/x-www-form-urlencoded", body, nil)
+	code := envelope["code"].(float64)
+	if code != 405 {
+		t.Fatalf("non multipart with params code = %v msg=%v", code, envelope["msg"])
+	}
+	if envelope["msg"] != "没有上传文件" {
+		t.Errorf("non multipart msg = %v, want 没有上传文件", envelope["msg"])
+	}
+}
+
+// TestUploadJarShardingMultipartLimits 校验升级分片入口的 multipart 限制：
+// 超过 max-file-size / max-request-size 返回 code=406 与 Java 文案。
+func TestUploadJarShardingMultipartLimits(t *testing.T) {
+	a := newAPITestApp(t)
+	a.Config.Spring.Servlet.Multipart.MaxFileSize = "10B"
+	a.Config.Spring.Servlet.Multipart.MaxRequestSize = "1KB"
+	r := authedRouter(t, a)
+	fields := map[string]string{"fileSumMd5": "abc", "sliceId": "s1", "totalSlice": "1", "nowSlice": "1"}
+
+	do := func(contentType string, body *bytes.Buffer) map[string]any {
+		request := httptest.NewRequest(http.MethodPost, "/system/upload-jar-sharding", body)
+		request.Header.Set("Content-Type", contentType)
+		request.Header.Set("Jpom-Agent-Authorize", "authorized")
+		recorder := httptest.NewRecorder()
+		r.ServeHTTP(recorder, request)
+		return decodeEnvelope(t, recorder)
+	}
+
+	contentType, body := apiMultipartBody(t, fields, "upgrade-package-agent-go-2.11.13-upgrade-linux-amd64.jar", []byte("12345678901234567890"))
+	envelope := do(contentType, body)
+	if envelope["code"].(float64) != 406 {
+		t.Fatalf("file too large code = %v msg=%v", envelope["code"], envelope["msg"])
+	}
+	if msg, _ := envelope["msg"].(string); !strings.Contains(msg, "上传文件太大") {
+		t.Errorf("file too large msg = %q", msg)
+	}
+
+	contentType, body = apiMultipartBody(t, map[string]string{"fileSumMd5": strings.Repeat("x", 2048)}, "", nil)
+	envelope = do(contentType, body)
+	if envelope["code"].(float64) != 406 {
+		t.Fatalf("request too large code = %v msg=%v", envelope["code"], envelope["msg"])
+	}
+
+	// 限制内时正常返回 200（分片文件名为 <name>.<nowSlice>，最后一段是序号）。
+	contentType, body = apiMultipartBody(t, fields, "upgrade-package-agent-go-2.11.13-upgrade-linux-amd64.jar.1", []byte("12345"))
+	envelope = do(contentType, body)
+	if envelope["code"].(float64) != 200 {
+		t.Fatalf("within limits code = %v msg=%v", envelope["code"], envelope["msg"])
+	}
+}
+
+// TestSystemCacheTaskListAndTagMap 校验 /system/cache：
+//   - taskList 只包含脚本定时任务（排除 system_cache/auto_back_log 内部任务）；
+//   - scriptLibraryTagMap 无数据时输出 {}（不省略）。
+func TestSystemCacheTaskListAndTagMap(t *testing.T) {
+	a := newAPITestApp(t)
+	r := authedRouter(t, a)
+	// 注册一个脚本任务 + 一个内部任务，验证过滤逻辑。
+	if err := sysinfo.RegisterCronTask("script-task-test", "0 0/10 * * * ?", func() {}); err != nil {
+		t.Fatalf("register script cron: %v", err)
+	}
+	if err := sysinfo.RegisterCronTask("auto_back_log", "0 0/10 * * * ?", func() {}); err != nil {
+		t.Fatalf("register internal cron: %v", err)
+	}
+	t.Cleanup(func() {
+		_ = sysinfo.RemoveCronTask("script-task-test")
+		_ = sysinfo.RemoveCronTask("auto_back_log")
+	})
+	// 空脚本库 -> {}
+	envelope := doSystemRequest(t, r, http.MethodPost, "/system/cache", "application/x-www-form-urlencoded", "", nil)
+	data := envelope["data"].(map[string]any)
+	tags, ok := data["scriptLibraryTagMap"].(map[string]any)
+	if !ok || len(tags) != 0 {
+		t.Fatalf("scriptLibraryTagMap must be {} when empty, got %#v", data["scriptLibraryTagMap"])
+	}
+	// 对齐 Java CronUtils.list：只有首次触发过的任务才出现在 taskList；
+	// 仅注册未执行时应为空（内部任务也不能被列出）。
+	seen := map[string]bool{}
+	list, _ := data["taskList"].([]any)
+	for _, item := range list {
+		entry, _ := item.(map[string]any)
+		if id, _ := entry["taskId"].(string); id != "" {
+			seen[id] = true
+		}
+	}
+	if len(seen) != 0 {
+		t.Errorf("taskList must be empty before any execution (Java semantics), got %v", seen)
+	}
+	// 有脚本库数据时输出 tag -> version。
+	if err := os.MkdirAll(a.GlobalScriptDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	library := map[string]any{"id": "tag1", "tag": "tag1", "version": "1.2.3", "script": "echo hi", "description": "d"}
+	encoded, _ := json.Marshal(library)
+	if err := os.WriteFile(filepath.Join(a.GlobalScriptDir, "tag1.json"), encoded, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	envelope = doSystemRequest(t, r, http.MethodPost, "/system/cache", "application/x-www-form-urlencoded", "", nil)
+	data = envelope["data"].(map[string]any)
+	tags, ok = data["scriptLibraryTagMap"].(map[string]any)
+	if !ok || tags["tag1"] != "1.2.3" {
+		t.Fatalf("scriptLibraryTagMap = %#v", data["scriptLibraryTagMap"])
+	}
+}
+
+// TestSystemLogDownloadChineseName 校验 /system/log_download 的中文文件名下载头
+// （5 个下载端点统一走 httpx.ContentDisposition）。
+func TestSystemLogDownloadChineseName(t *testing.T) {
+	a := newAPITestApp(t)
+	r := authedRouter(t, a)
+	if err := os.MkdirAll(a.LogsDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(a.LogsDir, "中文日志.log"), []byte("hello"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	request := httptest.NewRequest(http.MethodGet, "/system/log_download?path="+url.QueryEscape("中文日志.log"), nil)
+	request.Header.Set("Jpom-Agent-Authorize", "authorized")
+	recorder := httptest.NewRecorder()
+	r.ServeHTTP(recorder, request)
+	want := httpx.ContentDisposition("中文日志.log")
+	if got := recorder.Header().Get("Content-Disposition"); got != want {
+		t.Errorf("download disposition = %q, want %q", got, want)
+	}
+	if recorder.Body.String() != "hello" {
+		t.Errorf("download body = %q", recorder.Body.String())
 	}
 }
