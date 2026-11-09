@@ -1356,32 +1356,51 @@ def go_only_suite():
         items = (data or {}).get("list") or []
         if not items:
             return ["备份列表为空（file-backup-count 已设为 %d）" % BACKUP_COUNT]
+        candidates = []
         for item in items:
             for key in ("name", "filename", "id"):
                 v = item.get(key)
                 if isinstance(v, str) and re.fullmatch(r"\d{17}", v.strip("/")):
-                    backups["id"] = v.strip("/")
+                    candidates.append(v.strip("/"))
                     break
-            if "id" in backups:
-                break
-        if "id" not in backups and items:
+        if candidates:
+            backups["id"] = max(candidates)  # 取最新快照（17 位时间 id）
+        else:
             backups["id"] = items[0].get("name") or items[0].get("filename") or "x"
+        backups["count"] = len(items)
         return []
     go_check("file/list-backup", "备份-g", "POST", "/manage/file/list-backup",
              form={"id": pid}, code=200, msg="查询成功", data_check=capture_backup,
              note="备份由 saveProject/update_config_file/copy/compress/deleteFile 等写操作自动创建")
     bid = backups.get("id", "no-backup-id")
+    backup_files = {}
+    def capture_item_files(d):
+        names = [x.get("filename") or x.get("name") for x in (d or []) if isinstance(x, dict)]
+        names = sorted(n for n in names if n)
+        backup_files["names"] = names
+        if not names:
+            return ["备份文件列表为空"]
+        return []
     go_check("file/backup-item-files", "备份-g", "POST", "/manage/file/backup-item-files",
              form={"id": pid, "backupId": bid, "path": "/"}, code=200, msg="查询成功",
-             data_check=lambda d: [] if isinstance(d, list) and d else ["备份文件列表为空"])
+             data_check=capture_item_files)
+    # diff-backup（Java 默认开启）会从快照剔除“当前目录仍存在”的未变化文件，
+    # 因此最新快照里保留的是被删除的文件（config(1).txt / e2e-upload.txt）。
+    names = backup_files.get("names") or []
+    pick = next((n for n in ("e2e-upload.txt", "config(1).txt", "config.txt") if n in names),
+                names[0] if names else "no-file")
+    go_observe("最新快照保留被删除文件（diff-backup 语义）", "备份-g",
+               lambda: any(n in (backup_files.get("names") or []) for n in ("e2e-upload.txt", "config(1).txt")), True)
     go_check("file/backup-download", "备份-g", "GET", "/manage/file/backup-download",
-             form={"id": pid, "backupId": bid, "filename": "config.txt"},
+             form={"id": pid, "backupId": bid, "filename": pick},
              http_status=200, data_check=None,
-             note="下载备份内的 config.txt（HTTP 200 + 非空 body 由 http 状态与二进制响应校验）")
+             note="下载备份内 %s（HTTP 200 + 非空 body）" % pick)
     go_check("file/backup-recover", "备份-g", "POST", "/manage/file/backup-recover",
-             form={"id": pid, "backupId": bid, "filename": "config.txt"}, code=200, msg="还原成功")
+             form={"id": pid, "backupId": bid, "filename": pick}, code=200, msg="还原成功")
+    go_observe("backup-recover 还原文件落盘", "备份-g",
+               lambda: os.path.isfile(os.path.join(GO.app, pick)), True)
     go_check("file/backup-delete", "备份-g", "POST", "/manage/file/backup-delete",
-             form={"id": pid, "backupId": bid, "filename": "config.txt"}, code=200, msg="删除成功")
+             form={"id": pid, "backupId": bid, "filename": pick}, code=200, msg="删除成功")
     go_observe("备份目录非空", "备份-g",
                lambda: os.path.isdir(GO.data_path("project_file_backup", pid)), True)
 
