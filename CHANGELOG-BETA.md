@@ -1,5 +1,11 @@
 # 🚀 版本日志
 
+## 2.11.13.2-beta
+
+### 🐣 新增功能
+
+1. 【agent-go】新增 Go 语言插件端（实验性）：单个静态二进制、低内存、免 JDK 安装；与 Java 插件端**完全兼容**同一份 `conf/application.yml`、`data/` 数据目录与 HTTP/WebSocket 协议（鉴权、workspace、JSON 包、长连接帧一致），同一节点可在 Java/Go 插件端之间平滑切换并回切；支持 Go 容器升级包在线升级（兼容旧版 Server 的升级入口）。代码位于 `go-agent/`，设计/契约/验证/切换手册见工作区 `archive/2026-11-go-agent/`。
+
 ## 2.11.13.1-beta (2026-11-09)
 
 ### 🐣 新增功能

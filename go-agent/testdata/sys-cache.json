@@ -1,0 +1,40 @@
+{
+  "code": 200,
+  "msg": "",
+  "data": {
+    "fileSize": "0",
+    "dataSize": "0",
+    "oldJarsSize": "0",
+    "pidPort": 0,
+    "readFileOnLineCount": 0,
+    "taskList": [
+      {
+        "taskId": "auto_back_log",
+        "cron": "0 0/10 * * * ?",
+        "executeCount": 14,
+        "failedCount": 0,
+        "succeedCount": 14,
+        "lastExecuteTime": "0"
+      },
+      {
+        "taskId": "system_cache",
+        "cron": "0 0/10 * * * ?",
+        "executeCount": 14,
+        "failedCount": 0,
+        "succeedCount": 14,
+        "lastExecuteTime": "0"
+      }
+    ],
+    "pluginSize": 1,
+    "envVarKeys": [
+      "<env>"
+    ],
+    "scriptLibraryTagMap": {
+      "test": "1#b7c795"
+    },
+    "dateTime": "<datetime>",
+    "timeZoneId": "<timezone>",
+    "scriptExecLogSize": 0,
+    "timerMatchSecond": false
+  }
+}

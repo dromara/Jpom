@@ -1,0 +1,52 @@
+name: Go Agent Build
+
+# Go 插件端：构建 + 静态检查 + 单测 + 格式检查。
+# 参考 go-agent/README.md。
+
+on:
+  push:
+    branches: [dev, beta, master]
+    paths:
+      - 'go-agent/**'
+      - '.github/workflows/go-agent.yml'
+  pull_request:
+    branches: [dev, master]
+    paths:
+      - 'go-agent/**'
+      - '.github/workflows/go-agent.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache-dependency-path: go-agent/go.sum
+      - name: Build
+        working-directory: go-agent
+        run: go build ./...
+      - name: Vet
+        working-directory: go-agent
+        run: go vet ./...
+      - name: Test
+        working-directory: go-agent
+        run: go test ./...
+      - name: Format check
+        working-directory: go-agent
+        run: |
+          if [ -n "$(gofmt -l .)" ]; then
+            echo "以下文件未 gofmt："
+            gofmt -l .
+            exit 1
+          fi
+      - name: Cross compile (linux amd64/arm64, windows amd64)
+        working-directory: go-agent
+        run: |
+          CGO_ENABLED=0 GOOS=linux  GOARCH=amd64 go build -trimpath -ldflags '-s -w' -o /tmp/agent-linux-amd64 .
+          CGO_ENABLED=0 GOOS=linux  GOARCH=arm64 go build -trimpath -ldflags '-s -w' -o /tmp/agent-linux-arm64 .
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags '-s -w' -o /tmp/agent-windows-amd64.exe .

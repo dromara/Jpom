@@ -1,0 +1,8 @@
+build/
+dist/
+data/
+logs/
+tmp/
+project-log/
+*.test.cache/__pycache__/
+*.pyc

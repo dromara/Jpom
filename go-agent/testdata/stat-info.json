@@ -1,0 +1,84 @@
+{
+  "code": 200,
+  "msg": "",
+  "data": {
+    "simpleStatus": {
+      "time": "0",
+      "cpu": 0.0,
+      "cpuInfo": {
+        "cpuNum": 4,
+        "toTal": 0.0,
+        "sys": 0.0,
+        "user": 0.0,
+        "wait": 0.0,
+        "free": 0.0,
+        "cpuModel": "<cpu-model>",
+        "ticks": {
+          "idle": "0",
+          "nice": "0",
+          "irq": "0",
+          "softIrq": "0",
+          "steal": "0",
+          "cSys": "0",
+          "user": "<user>",
+          "ioWait": "0"
+        },
+        "used": 0.0
+      },
+      "memory": 0.0,
+      "swapMemory": 0.0,
+      "virtualMemory": 0.0,
+      "disk": 0.0,
+      "netTxBytes": "0",
+      "netRxBytes": "0",
+      "monitorIfsNames": "docker_gwbridge,docker0,ens18"
+    },
+    "systemSleep": 2000,
+    "systemInfo": {
+      "systemUptime": "0",
+      "osVersion": "<os-version>",
+      "hostName": "<host-name>",
+      "hardwareVersion": "<hardware>",
+      "hostIpv4s": [
+        "10.0.0.1"
+      ],
+      "osCpuIdentifierName": "<cpu-model>",
+      "osCpuCores": 4,
+      "osMoneyTotal": "0",
+      "osSwapTotal": "0",
+      "osVirtualMax": "0",
+      "osLoadAverage": [
+        0.0
+      ],
+      "osFileStoreTotal": "0"
+    },
+    "jpomInfo": {
+      "javaVirtualCount": 4,
+      "jpomManifest": {
+        "version": "<version>",
+        "timeStamp": "2024-01-01 00:00:00",
+        "pid": "0",
+        "type": "Agent",
+        "port": 0,
+        "randomId": "<uuid>",
+        "dataPath": "/home/example/jpom/agent/data",
+        "jarFile": "/home/example/jpom/agent/lib/Agent-<version>.jar",
+        "osName": "<os-name>",
+        "installId": "<uuid>",
+        "debug": false,
+        "upTime": "0"
+      },
+      "javaVersion": "<version>_402-b06",
+      "totalMemory": "0",
+      "freeMemory": "0",
+      "projectCount": 49,
+      "scriptCount": 11,
+      "workspaceStat": {
+        "DEFAULT": {
+          "projectCount": 49,
+          "scriptCount": 11
+        }
+      }
+    }
+  }
+}
