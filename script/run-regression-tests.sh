@@ -44,8 +44,24 @@ DEFAULT_TESTS=(
 	# 通用分页过滤：字段名白名单/值绑定/`:in` 后缀（2.11.13 工作空间隔离回归的守卫）
 	BaseDbServiceListPageFilterTest
 	BaseDbServiceBuildWhereTest
-	# 权限拦截 fail-closed：权限管理模块的 MVC 处理器必须声明方法级 @Feature
+	# 服务端强制过滤条件 vs 客户端同字段参数冲突（P1-1 / P1-2 / P2-1 的守卫）
+	BaseDbServiceForcedFilterTest
+	ProjectManageControlExportDataTest
+	RepositoryControllerWorkspaceTest
+	# 权限拦截：handler @Feature fail-closed + 节点数据权限 fail-closed
 	HandlerFeatureAnnotationTest
+	PermissionInterceptorNodeDataTest
+	# WebSocket 握手鉴权（Origin / 会话 / 禁用账号）
+	ServerWebSocketInterceptorTest
+	# 安全修复的既有单测（文件中心 SQL 注入 / 查询值绑定 / 日志路径穿越 / token 等）
+	FileStorageApiControllerSortTest
+	BaseDbCommonServiceQueryEntityTest
+	FileUtilsResolveSubFileTest
+	UserServiceCheckUserTest
+	ToolsControllerSecurityTest
+	DockerWorkspaceScopedLookupTest
+	BuildInfoControllerBranchListTest
+	LoginControlCaptchaTest
 )
 
 MVN_BIN=${MVN:-mvn}

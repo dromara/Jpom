@@ -138,6 +138,16 @@ public class BaseDbServiceBuildWhereTest {
     }
 
     /**
+     * 非时间字段带 [0]/[1] 后缀不能生成非法列名（审计 P3）：应被忽略，而不是拼出 `foo[0]` 导致 500。
+     * 时间字段的 [0]/[1] 范围过滤由 {@link #testTimeRangeByBracketSuffix()} 覆盖。
+     */
+    @Test
+    public void testNonTimeBracketSuffixIsIgnored() {
+        Entity where = build(mapOf("foo[0]", "start", "foo[1]", "end"));
+        assertTrue(where.isEmpty(), "非时间字段的 [0]/[1] 后缀应被忽略，实际：" + where);
+    }
+
+    /**
      * 防止后续把 :in 再改回「校验前不剥离后缀」的旧实现：一旦丢弃，下面的断言会失败。
      */
     @Test
