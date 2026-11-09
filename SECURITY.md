@@ -1,23 +1,95 @@
-# Security Policy
+# 安全策略（Security Policy）
 
-## Supported Versions
+> 本文件说明 Jpom 的安全支持范围、漏洞报告渠道与协调披露流程，适用于 Jpom 服务端（Server）与插件端（Agent）。本文档以中文维护；国际用户报告安全问题请发送邮件至 **bwcx_jzy@dromara.org**，主题以 `[SECURITY] Jpom` 开头。
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+## 支持的版本
 
-| Version     | Supported          |
-|-------------|--------------------|
-| 2.11.x      | :white_check_mark: |
-| 2.10.x      | :white_check_mark: |
-| 2.9.x       | :white_check_mark: |
-| 2.8.x       | :x:                |
-| 2.8.1-2.8.6 | :x:                |
-| < 2.7       | :x:                |
+Jpom 自 2026-02-05 起暂停**常规功能迭代**，但**安全维护继续**。安全修复只面向**最新稳定版**：
 
-## Reporting a Vulnerability
+| 版本 | 安全修复 |
+| --- | --- |
+| 最新稳定版（当前为 `2.11.13`，2026-11-07 发布） | ✅ 接收安全修复 |
+| ≤ `2.11.12`（含 `2.10.x` 及更早版本） | ❌ 不再单独修复，请先升级到最新稳定版 |
+| `beta` / `dev` 分支及预发布版本 | ❌ 预发布版本，不作为安全支持基线 |
 
-Use this section to tell people how to report a vulnerability.
+说明：
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+- `2.11.13` 已修复 CVE-2026-120201（CVSS 9.8）、CVE-2026-111605、CVE-2026-91993 以及 fastjson2 相关风险（QVD-2026-45876），详见 [2.11.13 安全公告](https://jpom.top/pages/security/2.11.13/)。
+- 旧版本不会单独回溯补丁；如无法立即升级，请按安全公告中的临时缓解措施降低暴露面，并尽快安排升级。
+- 依赖组件（Spring Boot 2.7 / Spring 5.3、H2 2.1 等）已处于上游 EOL；部分扫描器告警属于“无公开修复版本 / 不可达路径”，我们会在安全公告中逐项说明，不做无依据的“全绿”承诺。
+
+## 报告安全漏洞
+
+**请勿在公开 issue、群聊、社交媒体中披露未修复漏洞或利用细节。**
+
+推荐渠道（按优先级）：
+
+1. 邮件：**bwcx_jzy@dromara.org**，主题以 `[SECURITY] Jpom` 开头。
+2. Gitee 私信：<https://gitee.com/bwcx-jzy>（敏感信息不要走公开 issue）。
+
+报告请尽量包含：
+
+- 受影响版本（系统信息中的版本号）、部署方式（jar / Docker / 集群）、数据库类型；
+- 复现步骤或最小 PoC（可加密或仅维护者可见）、影响面判断（未授权 / 低权限 / 需登录）；
+- 是否已公开、是否观察到在野利用；
+- 你的署名 / 致谢方式（默认使用报告者 ID）。
+
+## 处理时限（best effort）
+
+| 阶段 | 目标 |
+| --- | --- |
+| 确认收到 | 3 个工作日内 |
+| 初步定级与是否受理 | 7 个工作日内 |
+| 高危 / 严重问题修复 | 14 个工作日内发布修复版本（视依赖与验证情况可能延长） |
+| 中低危问题 | 纳入最近一次安全 / 常规修复批次，不单独承诺时间 |
+| 披露 | 修复版本发布后公开公告；或报告者同意的最早时间 |
+
+项目为社区维护、无商业 SLA；以上为尽力而为的目标，不是合同承诺。
+
+## 协调披露
+
+- 默认在修复版本发布后公开安全公告，公告只写受影响 / 修复版本、风险与防护建议，不写利用步骤。
+- 如漏洞已被公开或在野利用，我们会优先发布**缓解措施 + 升级指引**，再补完整公告。
+- 如需 CVE，我们可与报告者一起向 CNA / MITRE 申请或更新记录；也欢迎报告者自行申请并在公告中互相引用。
+- 致谢：除非报告者要求匿名，我们会在公告与 Release 中致谢。
+
+## 安全公告与获取更新
+
+- 公告索引：<https://jpom.top/pages/security/>
+- 最新公告：<https://jpom.top/pages/security/2.11.13/>
+- GitHub Security Advisories：<https://github.com/dromara/Jpom/security/advisories>
+- 版本日志：<https://jpom.top/pages/changelog/new/>
+- 下载中心：<https://jpom.top/pages/all-downloads/>（直链域名 `d2.jpom.download`；旧域名 `d.jpom.download` 已停用）
+- Docker 镜像：`jpomdocker/jpom:2.11.13`、`jpomdocker/jpom-agent:2.11.13`（`latest` 自 2026-11-07 起指向 2.11.13）
+
+升级方式：
+
+1. **在线升级（推荐）**：使用系统管理员登录服务端 → 系统管理 → 在线升级，升级服务端后在节点管理中批量升级插件端。
+2. **手动下载**：从下载中心下载对应安装包并校验 `.sha1` 后替换安装。
+3. **Docker**：拉取固定版本标签并重新创建容器，确保数据目录已挂载到宿主机。
+
+升级前请备份 `data/` 与 `conf/` 目录，并阅读对应版本 CHANGELOG 中的 `⚠️ 升级说明`。
+
+## 安全研究的边界（Safe Harbor）
+
+我们欢迎善意的安全研究，并对符合以下条件的研究不予追究：
+
+- 仅针对你自己拥有或已获授权的 Jpom 实例；
+- 不访问、不下载、不修改他人数据；不植入后门、不横向移动；
+- 不做拒绝服务、社会工程、物理入侵、供应链投毒；
+- 发现数据泄露风险时立即停止并仅向维护者报告；
+- 给维护者合理的修复时间，不在修复前公开细节。
+
+## 不在范围内
+
+- 因用户自身错误配置（公网暴露 2122 / 2123、弱口令、未开启 MFA、将 Agent 端口直接暴露）导致的问题；
+- 上游已 EOL 且无公开修复版本的依赖告警（会评估可达性并在公告中说明）；
+- 已明确标注“不修复 / 仅缓解”的低危问题（会给出理由）；
+- 第三方插件 / 镜像 / 非官方分发包的问题（请向对应维护者报告）。
+
+## 联系
+
+- 安全报告：bwcx_jzy@dromara.org
+- 项目主页：<https://jpom.top>
+- 主仓库：<https://gitee.com/dromara/Jpom>
+- 同步仓库：<https://github.com/dromara/Jpom>
