@@ -1,7 +1,31 @@
 # VS Code / MCP 客户端适配
-使用支持 MCP 的客户端配置 stdio 启动 `jpom-mcp-server`，环境变量同 Claude/Cursor 示例，务必设置 `JPOM_READ_ONLY=true`（MVP 阶段）。
 
-> ⚠️ **当前不可用**：`mcp*.json` 示例指向尚未发布的 `jpom-mcp-server`，仅作为未来 MCP 接入的配置参考;
-> MVP 阶段请使用 Skill 方式（`SKILL.md` + `scripts/jpom_api.py`（Linux/macOS 可用 `jpom-api.sh` 包装））。
+推荐用 **MCP 方式**（`jpom-mcp-server` 0.1.0 起可用）。VS Code 使用 `.vscode/mcp.json`（工作区级）或用户设置里的 `mcp.servers`，字段结构与 Claude/Cursor 略有不同：
 
-> 先用 `python scripts/jpom_api.py capabilities`（Linux/macOS 可用 `./scripts/jpom-api.sh capabilities`） 查看完整只读/写命令清单（默认只读）。
+```json
+{
+  "servers": {
+    "jpom": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "jpom-mcp-server"],
+      "env": {
+        "JPOM_BASE_URL": "http://127.0.0.1:2122",
+        "JPOM_TOKEN": "<YOUR_JPOM_LONG_TERM_TOKEN>",
+        "JPOM_WORKSPACE": "DEFAULT",
+        "JPOM_READ_ONLY": "true"
+      }
+    }
+  }
+}
+```
+
+步骤：
+1. 确认本机 Node.js ≥ 18。
+2. 在工作区根目录创建 `.vscode/mcp.json`，内容参考 `mcp.example.json`（把 token 换成自己的值）。
+3. 打开 VS Code 的 MCP 视图/命令面板，启动 `jpom` server；在 Copilot Chat 的 Agent 模式中即可调用 `jpom_*` 工具。
+4. 若团队使用用户级配置，把同样的 server 条目放到用户 `settings.json` 的 `mcp.servers` 下。
+
+安全约定：默认 `JPOM_READ_ONLY=true`；token 不要提交到仓库（`.vscode/mcp.json` 建议加入 `.gitignore` 或改用 `JPOM_TOKEN_FILE`）。写操作需显式关闭只读并确认目标。
+
+自检：`npx -y jpom-mcp-server --version`；连通性 `doctor`。

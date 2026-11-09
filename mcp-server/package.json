@@ -1,0 +1,62 @@
+{
+  "name": "jpom-mcp-server",
+  "version": "0.1.0",
+  "description": "MCP server for Jpom: manage Jpom (projects, builds, nodes, scripts, assets, monitoring, logs) via the Model Context Protocol.",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "jpom",
+    "devops",
+    "ai-ops"
+  ],
+  "license": "MulanPSL-2.0",
+  "author": "Jpom (Dromara)",
+  "homepage": "https://jpom.top",
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitee.com/dromara/Jpom.git",
+    "directory": "mcp-server"
+  },
+  "bugs": {
+    "url": "https://gitee.com/dromara/Jpom/issues"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "jpom-mcp-server": "dist/index.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run --config vitest.config.ts",
+    "test:unit": "vitest run --config vitest.config.ts --dir test/unit",
+    "test:integration": "vitest run --config vitest.config.ts --dir test/integration",
+    "test:watch": "vitest --config vitest.config.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "pack:check": "npm pack --dry-run",
+    "prepack": "npm run build",
+    "e2e:dev": "tsx scripts/e2e-dev.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "ws": "^8.18.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.0",
+    "@types/ws": "^8.5.13",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

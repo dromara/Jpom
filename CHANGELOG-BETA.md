@@ -8,6 +8,7 @@
 2. 【server】在线升级支持 Go 插件端：自动识别节点类型与运行平台并下发匹配的升级包，Java 节点升级方式不变。
 3. 【agent-go】提供多平台安装包与在线升级包（Linux/macOS 的 amd64、arm64 与 Windows amd64），升级容器按节点平台精确匹配。
 4. 【agent-go】支持国际化、Windows/macOS 系统监控、7z 解压、GBK 编码、cron 年份/分组，以及升级失败自动回滚。
+5. 【mcp】新增 npm 包 jpom-mcp-server（MCP stdio Server）：配置 Jpom 地址与长期 token 后，Claude Desktop/Cursor/VS Code/DeepSeek Harness 等 MCP 客户端可查询节点、项目、构建、脚本、资产、监控、分发、系统与审计日志，并支持日志读取/有界实时跟随；默认只读，写操作需显式开启。
 
 ### 🐞 解决BUG、优化功能
 

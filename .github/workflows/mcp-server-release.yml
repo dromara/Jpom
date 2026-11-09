@@ -1,0 +1,168 @@
+name: mcp-server-release
+
+# 发布 jpom-mcp-server 到 npm。
+#
+# 触发方式：
+# 1. 推 tag `mcp-v*`（例如 `mcp-v0.1.0`）：构建 + 测试 + 打包 + 发布（真实发布，必须双推 Gitee/GitHub 后 GitHub 才会触发）。
+# 2. workflow_dispatch：手动构建；`dry_run` 默认 true，只上传 tarball artifact 并打印信息，不发布。
+#    需要补充发布时把 `dry_run` 设为 false（仍使用仓库 secret `NPM_TOKEN`）。
+#
+# 前置条件：
+# - 仓库 secret `NPM_TOKEN`：npm Automation token（维护者个人账号 bwcx-jzy），具备 unscoped `jpom-mcp-server` 的发布权限。
+# - `package.json` 的 version 必须与 tag 一致（tag `mcp-v0.1.0` ↔ version `0.1.0`）；不一致直接失败。
+#
+# 安全：token 只通过 `NODE_AUTH_TOKEN` 注入，不打印、不落盘；日志中不出现真实凭据。
+# 说明：本工作流只负责 npm 包；Jpom 主程序发布仍由 release-package.yml / release.sh 负责，互不影响。
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号（留空使用 package.json 的 version；可带 v 前缀，必须与 package.json 一致）'
+        type: string
+        required: false
+        default: ''
+      dry_run:
+        description: '只构建、测试、打包并上传 artifact，不执行 npm publish'
+        type: boolean
+        default: true
+  push:
+    tags:
+      - 'mcp-v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mcp-server-release-${{ github.ref }}
+  # 发布流程不允许被新的 push 取消，避免只发了一半
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  release:
+    name: 构建与发布
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: mcp-server
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: mcp-server/package-lock.json
+          registry-url: https://registry.npmjs.org
+
+      - name: 校验版本号
+        shell: bash
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          PKG_NAME="$(node -p "require('./package.json').name")"
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          INPUT_VERSION="${INPUT_VERSION#v}"
+          if [ -n "${INPUT_VERSION}" ] && [ "${INPUT_VERSION}" != "${PKG_VERSION}" ]; then
+            echo "::error::输入版本 ${INPUT_VERSION} 与 package.json 版本 ${PKG_VERSION} 不一致"
+            exit 1
+          fi
+          if [ "${EVENT_NAME}" = "push" ]; then
+            TAG_VERSION="${GITHUB_REF_NAME#mcp-v}"
+            if [ "${TAG_VERSION}" != "${PKG_VERSION}" ]; then
+              echo "::error::tag ${GITHUB_REF_NAME} 与 package.json 版本 ${PKG_VERSION} 不一致"
+              exit 1
+            fi
+          fi
+          echo "PKG_NAME=${PKG_NAME}" >> "$GITHUB_ENV"
+          echo "PKG_VERSION=${PKG_VERSION}" >> "$GITHUB_ENV"
+          echo "已确认版本：${PKG_NAME}@${PKG_VERSION}"
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 类型检查与构建
+        run: |
+          npm run typecheck
+          npm run build
+
+      - name: 运行测试
+        run: npm test
+
+      - name: 打包检查
+        run: npm run pack:check
+
+      - name: 生成 tarball
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm pack
+          TARBALL="$(ls -1 ./*.tgz | head -n 1)"
+          SIZE_BYTES="$(wc -c < "${TARBALL}")"
+          SIZE_HUMAN="$(du -h "${TARBALL}" | cut -f1)"
+          echo "TARBALL=${TARBALL}" >> "$GITHUB_ENV"
+          echo "SIZE_BYTES=${SIZE_BYTES}" >> "$GITHUB_ENV"
+          echo "SIZE_HUMAN=${SIZE_HUMAN}" >> "$GITHUB_ENV"
+          if [ "${GITHUB_EVENT_NAME}" = "push" ] || [ "${{ inputs.dry_run }}" = "false" ]; then
+            MODE="发布"
+          else
+            MODE="dry_run（不发布）"
+          fi
+          {
+            echo "## jpom-mcp-server 打包结果"
+            echo ""
+            echo "| 项 | 值 |"
+            echo "| --- | --- |"
+            echo "| 包名 | `${PKG_NAME}` |"
+            echo "| 版本 | `${PKG_VERSION}` |"
+            echo "| 文件 | `${TARBALL}` |"
+            echo "| 大小 | ${SIZE_HUMAN}（${SIZE_BYTES} bytes） |"
+            echo "| 触发 | `${GITHUB_EVENT_NAME}`（`${GITHUB_REF_NAME}`） |"
+            echo "| 模式 | ${MODE} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 上传 tarball artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jpom-mcp-server-${{ env.PKG_VERSION }}
+          path: mcp-server/*.tgz
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: 打印发布信息（dry_run）
+        if: github.event_name == 'workflow_dispatch' && inputs.dry_run
+        shell: bash
+        run: |
+          echo "dry_run=true：未执行 npm publish。"
+          echo "包：${PKG_NAME}@${PKG_VERSION}"
+          echo "tarball：${TARBALL}（${SIZE_HUMAN}）"
+          echo "确认无误后，可用 workflow_dispatch 并把 dry_run 设为 false，或在本地执行 npm publish。"
+
+      - name: 发布到 npm
+        if: github.event_name == 'push' || inputs.dry_run == false
+        shell: bash
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${NODE_AUTH_TOKEN:-}" ]; then
+            echo "::error::未配置仓库 secret NPM_TOKEN，无法发布 npm 包"
+            exit 1
+          fi
+          npm publish
+          {
+            echo ""
+            echo "### 已发布"
+            echo ""
+            echo "`${PKG_NAME}@${PKG_VERSION}` → https://www.npmjs.com/package/${PKG_NAME}/v/${PKG_VERSION}"
+          } >> "$GITHUB_STEP_SUMMARY"
