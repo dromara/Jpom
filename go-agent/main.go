@@ -21,8 +21,8 @@ import (
 	"syscall"
 	"time"
 
-	"jpom.io/go-agent/internal/api"
-	"jpom.io/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/api"
+	"github.com/dromara/Jpom/go-agent/internal/app"
 )
 
 var (

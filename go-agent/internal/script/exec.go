@@ -22,7 +22,7 @@ import (
 	"strings"
 	"sync"
 
-	"jpom.io/go-agent/internal/i18n"
+	"github.com/dromara/Jpom/go-agent/internal/i18n"
 )
 
 const (

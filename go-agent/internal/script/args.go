@@ -16,7 +16,7 @@ import (
 	"strings"
 	"unicode"
 
-	"jpom.io/go-agent/internal/i18n"
+	"github.com/dromara/Jpom/go-agent/internal/i18n"
 )
 
 // CommandParam is one script argument as stored by Jpom

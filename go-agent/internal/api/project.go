@@ -19,11 +19,11 @@ import (
 	"strconv"
 	"strings"
 
-	"jpom.io/go-agent/internal/app"
-	"jpom.io/go-agent/internal/httpx"
-	"jpom.io/go-agent/internal/proc"
-	"jpom.io/go-agent/internal/project"
-	"jpom.io/go-agent/internal/sysinfo"
+	"github.com/dromara/Jpom/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/httpx"
+	"github.com/dromara/Jpom/go-agent/internal/proc"
+	"github.com/dromara/Jpom/go-agent/internal/project"
+	"github.com/dromara/Jpom/go-agent/internal/sysinfo"
 )
 
 // 项目域错误/提示文案 key（与 Java i18n 完全一致）。

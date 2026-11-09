@@ -20,7 +20,7 @@ import (
 	"strings"
 	"time"
 
-	"jpom.io/go-agent/internal/proc"
+	"github.com/dromara/Jpom/go-agent/internal/proc"
 )
 
 // backLogMinSize 小于该大小的日志不做备份（等价 Java BACK_LOG_MIN_SIZE=100KB）。

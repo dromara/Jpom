@@ -13,7 +13,7 @@ package project
 import (
 	"fmt"
 
-	"jpom.io/go-agent/internal/i18n"
+	"github.com/dromara/Jpom/go-agent/internal/i18n"
 )
 
 // DefaultLang 项目域非 HTTP 场景（WS/后台任务）使用的兜底语言。

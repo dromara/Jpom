@@ -15,7 +15,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"jpom.io/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/app"
 )
 
 // cleanupReplacedExecutables 清理 Windows 升级时留下的 <exe>.old 文件

@@ -10,7 +10,7 @@
 package projectfile
 
 import (
-	"jpom.io/go-agent/internal/i18n"
+	"github.com/dromara/Jpom/go-agent/internal/i18n"
 )
 
 // LocalizedError is an error carrying a Java i18n key so the HTTP layer can

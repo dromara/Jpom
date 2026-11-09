@@ -21,8 +21,8 @@ import (
 	"strings"
 	"testing"
 
-	"jpom.io/go-agent/internal/app"
-	"jpom.io/go-agent/internal/config"
+	"github.com/dromara/Jpom/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/config"
 )
 
 func testApp() *app.App {

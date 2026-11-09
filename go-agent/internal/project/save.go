@@ -17,7 +17,7 @@ import (
 	"strings"
 	"sync"
 
-	"jpom.io/go-agent/internal/proc"
+	"github.com/dromara/Jpom/go-agent/internal/proc"
 )
 
 var whitelistMu sync.Mutex

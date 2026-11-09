@@ -26,8 +26,8 @@ import (
 	"strings"
 	"time"
 
-	"jpom.io/go-agent/internal/config"
-	"jpom.io/go-agent/internal/i18n"
+	"github.com/dromara/Jpom/go-agent/internal/config"
+	"github.com/dromara/Jpom/go-agent/internal/i18n"
 )
 
 const (

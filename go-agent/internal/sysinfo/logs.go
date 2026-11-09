@@ -18,7 +18,7 @@ import (
 	"strings"
 	"time"
 
-	"jpom.io/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/app"
 )
 
 // LogTreeData 对应 LogManageController.log_data.json（DirTreeUtil 目录树）。

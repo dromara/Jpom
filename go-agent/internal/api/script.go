@@ -20,12 +20,12 @@ import (
 	"sync"
 	"time"
 
-	"jpom.io/go-agent/internal/app"
-	"jpom.io/go-agent/internal/dsl"
-	"jpom.io/go-agent/internal/httpx"
-	"jpom.io/go-agent/internal/script"
-	"jpom.io/go-agent/internal/sysinfo"
-	"jpom.io/go-agent/internal/ws"
+	"github.com/dromara/Jpom/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/dsl"
+	"github.com/dromara/Jpom/go-agent/internal/httpx"
+	"github.com/dromara/Jpom/go-agent/internal/script"
+	"github.com/dromara/Jpom/go-agent/internal/sysinfo"
+	"github.com/dromara/Jpom/go-agent/internal/ws"
 )
 
 // scriptRuntime holds the process wide script domain singletons. The api

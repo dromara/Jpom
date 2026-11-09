@@ -13,7 +13,7 @@ package ws
 import (
 	"github.com/gorilla/websocket"
 
-	"jpom.io/go-agent/internal/httpx"
+	"github.com/dromara/Jpom/go-agent/internal/httpx"
 )
 
 // HandleScriptRun serves /script_run (AgentWebSocketScriptHandle): it attaches

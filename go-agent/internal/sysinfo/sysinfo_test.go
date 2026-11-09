@@ -17,8 +17,8 @@ import (
 	"testing"
 	"time"
 
-	"jpom.io/go-agent/internal/app"
-	"jpom.io/go-agent/internal/config"
+	"github.com/dromara/Jpom/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/config"
 )
 
 // newTestApp 构造一个只依赖临时目录的 App，供 sysinfo 单测使用。

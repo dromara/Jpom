@@ -21,8 +21,8 @@ import (
 	"strings"
 	"time"
 
-	"jpom.io/go-agent/internal/app"
-	"jpom.io/go-agent/internal/store"
+	"github.com/dromara/Jpom/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/store"
 )
 
 // 远程版本信息接口默认地址（与 cn.keepbx.jpom.RemoteVersion 一致）。

@@ -21,7 +21,7 @@ import (
 	"strings"
 	"sync"
 
-	"jpom.io/go-agent/internal/store"
+	"github.com/dromara/Jpom/go-agent/internal/store"
 )
 
 // FileName is the project data file inside <data>/.

@@ -14,7 +14,7 @@ import (
 	"regexp"
 	"strings"
 
-	"jpom.io/go-agent/internal/config"
+	"github.com/dromara/Jpom/go-agent/internal/config"
 )
 
 // NetworkFilter 对应 jpom.monitor.network：按 Ant 风格通配符过滤网卡名称。

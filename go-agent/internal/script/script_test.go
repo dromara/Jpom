@@ -18,7 +18,7 @@ import (
 	"testing"
 	"time"
 
-	"jpom.io/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/app"
 )
 
 func testApp(t *testing.T) *app.App {

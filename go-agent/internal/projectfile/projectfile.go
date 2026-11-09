@@ -26,8 +26,8 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"jpom.io/go-agent/internal/app"
-	"jpom.io/go-agent/internal/project"
+	"github.com/dromara/Jpom/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/project"
 )
 
 // backupDirName is the default file backup root inside the agent data dir

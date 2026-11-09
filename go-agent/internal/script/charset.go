@@ -13,7 +13,7 @@ package script
 import (
 	"strings"
 
-	"jpom.io/go-agent/internal/proc"
+	"github.com/dromara/Jpom/go-agent/internal/proc"
 )
 
 // Charset names supported by the agent (the Java agent relies on the JVM

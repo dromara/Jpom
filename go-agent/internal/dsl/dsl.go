@@ -35,9 +35,9 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"jpom.io/go-agent/internal/i18n"
-	"jpom.io/go-agent/internal/project"
-	"jpom.io/go-agent/internal/script"
+	"github.com/dromara/Jpom/go-agent/internal/i18n"
+	"github.com/dromara/Jpom/go-agent/internal/project"
+	"github.com/dromara/Jpom/go-agent/internal/script"
 )
 
 // Process is one DSL run process (DslYmlDto.BaseProcess).

@@ -22,8 +22,8 @@ import (
 
 	"github.com/gorilla/websocket"
 
-	"jpom.io/go-agent/internal/httpx"
-	"jpom.io/go-agent/internal/script"
+	"github.com/dromara/Jpom/go-agent/internal/httpx"
+	"github.com/dromara/Jpom/go-agent/internal/script"
 )
 
 // freeScriptProcess is one /free-script-run execution

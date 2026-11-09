@@ -21,7 +21,7 @@ import (
 
 	"github.com/gorilla/websocket"
 
-	"jpom.io/go-agent/internal/httpx"
+	"github.com/dromara/Jpom/go-agent/internal/httpx"
 )
 
 // defaultUpgradeMessage is Const.UPGRADE_MSG fallback (i18n upgrade_duration_message).

@@ -17,7 +17,7 @@ import (
 	"sort"
 	"strings"
 
-	"jpom.io/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/app"
 )
 
 // whitelistFile 与 data/whitelistDirectory.json 的 schema 一致（同

@@ -16,7 +16,7 @@ import (
 	"testing"
 	"time"
 
-	"jpom.io/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/app"
 )
 
 // prepareUpgradeFixture 构造升级回滚单测的基础目录：当前可执行文件 + oldJars 备份。

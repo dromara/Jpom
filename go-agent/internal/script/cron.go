@@ -13,7 +13,7 @@ package script
 import (
 	"fmt"
 
-	"jpom.io/go-agent/internal/i18n"
+	"github.com/dromara/Jpom/go-agent/internal/i18n"
 	"strconv"
 	"strings"
 	"time"

@@ -19,7 +19,7 @@ import (
 	"testing"
 	"time"
 
-	"jpom.io/go-agent/internal/i18n"
+	"github.com/dromara/Jpom/go-agent/internal/i18n"
 )
 
 func asParamError(t *testing.T, err error) *ParamError {

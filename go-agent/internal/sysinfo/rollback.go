@@ -19,7 +19,7 @@ import (
 	"strconv"
 	"time"
 
-	"jpom.io/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/app"
 )
 
 // G7：升级失败自动回滚。

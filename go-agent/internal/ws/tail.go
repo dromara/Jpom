@@ -18,8 +18,8 @@ import (
 	"sync"
 	"time"
 
-	"jpom.io/go-agent/internal/i18n"
-	"jpom.io/go-agent/internal/sysinfo"
+	"github.com/dromara/Jpom/go-agent/internal/i18n"
+	"github.com/dromara/Jpom/go-agent/internal/sysinfo"
 )
 
 const tailPollInterval = time.Second

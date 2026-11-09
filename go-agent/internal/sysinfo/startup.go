@@ -15,7 +15,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"jpom.io/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/app"
 )
 
 // Start 注册启动任务（对应 Java 的 SystemEvent / AgentStartInit）：

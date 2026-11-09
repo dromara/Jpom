@@ -17,8 +17,8 @@ import (
 
 	"github.com/gorilla/websocket"
 
-	"jpom.io/go-agent/internal/httpx"
-	"jpom.io/go-agent/internal/script"
+	"github.com/dromara/Jpom/go-agent/internal/httpx"
+	"github.com/dromara/Jpom/go-agent/internal/script"
 )
 
 // HandleSystemLog serves /system_log (AgentWebSocketSystemLogHandle): tails a

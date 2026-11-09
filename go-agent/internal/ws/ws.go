@@ -28,11 +28,11 @@ import (
 
 	"github.com/gorilla/websocket"
 
-	"jpom.io/go-agent/internal/app"
-	"jpom.io/go-agent/internal/httpx"
-	"jpom.io/go-agent/internal/i18n"
-	"jpom.io/go-agent/internal/project"
-	"jpom.io/go-agent/internal/script"
+	"github.com/dromara/Jpom/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/httpx"
+	"github.com/dromara/Jpom/go-agent/internal/i18n"
+	"github.com/dromara/Jpom/go-agent/internal/project"
+	"github.com/dromara/Jpom/go-agent/internal/script"
 )
 
 const (

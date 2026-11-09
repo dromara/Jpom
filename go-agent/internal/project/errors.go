@@ -14,7 +14,7 @@ import (
 	"errors"
 	"fmt"
 
-	"jpom.io/go-agent/internal/i18n"
+	"github.com/dromara/Jpom/go-agent/internal/i18n"
 )
 
 // ErrorKind 业务错误类型，决定 HTTP 响应业务码（对齐 Java BaseExceptionHandler）。

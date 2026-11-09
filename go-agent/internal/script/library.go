@@ -17,7 +17,7 @@ import (
 	"regexp"
 	"strings"
 
-	"jpom.io/go-agent/internal/i18n"
+	"github.com/dromara/Jpom/go-agent/internal/i18n"
 )
 
 // referencePattern matches the script library reference G@("tag") used inside

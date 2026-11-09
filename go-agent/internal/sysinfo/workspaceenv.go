@@ -18,7 +18,7 @@ import (
 	"strings"
 	"sync"
 
-	"jpom.io/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/app"
 )
 
 // workspaceEnvVarFile 是 data/workspace_env_var.json 的结构：workspaceId -> 变量集。

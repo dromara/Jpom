@@ -13,8 +13,8 @@ package api
 import (
 	"net/http"
 
-	"jpom.io/go-agent/internal/app"
-	"jpom.io/go-agent/internal/httpx"
+	"github.com/dromara/Jpom/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/httpx"
 )
 
 // registerWS owns the websocket endpoints: /console, /script_run,
