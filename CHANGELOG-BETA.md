@@ -13,11 +13,14 @@
 3. 【server】修复 重装/迁移服务端后“同步节点项目（脚本）”只提示拉取到 N 个、实际更新 0 个的问题：插件端项目/脚本仍带已不存在的旧工作空间时，现在会回退到节点当前工作空间再同步；工作空间仍然存在但不同（共享机器多空间）与 GLOBAL 数据保持原逻辑（[Gitee issues ICH1VK](https://gitee.com/dromara/Jpom/issues/ICH1VK)）
 4. 【server】优化 严格构建下 sh 脚本在环境模板之后、用户命令之前注入 `set -e`（bash 下同时 `set -o pipefail`），中间命令或管道失败立即中断构建，不再继续执行后续命令；非严格构建与 Windows 批处理语义保持不变（[Gitee issues ICW9KZ](https://gitee.com/dromara/Jpom/issues/ICW9KZ)）
 5. 【server】修复 Gitea/Gogs 的 GET webhook 把 push JSON 作为 `payload` 查询串携带、超过 Tomcat 默认请求行/请求头上限（8KB）导致接口直接返回 400 的问题：放宽 `server.max-http-header-size` 到 64KB（[Gitee issues IDG4PT](https://gitee.com/dromara/Jpom/issues/IDG4PT)）
+6. 【web-vue】优化 逻辑节点、项目列表、分发列表的自动刷新：默认关闭（开关仍按用户+表格持久化在浏览器本地），项目列表/分发列表刷新间隔由 5s 调整为 30s，浏览器标签页不可见时暂停自动刷新；项目列表按节点查询运行状态增加防重入与 15s 超时，避免节点离线时请求长期挂起并随刷新叠加，占满同源连接导致同页/同标签其它列表请求 20s 超时（[Gitee issues ICXOGI](https://gitee.com/dromara/Jpom/issues/ICXOGI)）
+7. 【server】修复 重置超级管理员密码（`--rest:super_user_pwd`）后新密码仅写入 `logs/server.log`、Windows 无控制台导致用户误以为重置失败的问题：命令执行结果同时输出到标准输出（`logs/stdout.log`/控制台）；超级管理员查询统一为 `systemUser=1`（保留 `parent=sys` 回退兼容旧数据），避免历史数据下静默失败（[Gitee issues IJNJZJ](https://gitee.com/dromara/Jpom/issues/IJNZJZ)）
 
 ### ⚠️ 升级说明
 
 1. **严格构建语义变化**：开启【严格构建】后，sh 构建脚本会在环境模板之后、用户命令之前注入 `set -e`（bash 同时 `set -o pipefail`），中间命令或管道中任一命令失败会立即中断，不再继续执行后续命令（此前仅在脚本整体退出码非 0 时才判定失败）。依赖“某条命令失败后继续执行”的严格构建脚本，请在脚本开头显式 `set +e` 自行管理；非严格构建（推荐用于允许中间命令失败的场景）与 Windows 批处理不受影响。
 2. **Gitea/Gogs GET webhook 请求头上限**：新安装包默认 `server.max-http-header-size: 65536`（64KB）。**已安装实例的外部配置文件 `conf/application.yml` 不会随升级自动覆盖**，如仍遇到 Gitea/Gogs GET webhook 400，请在该文件 `server:` 下增加 `max-http-header-size: 65536`（或在【系统管理 → 外部配置文件】中重置为默认配置后按需调整），再重启服务端。该配置仅放宽单个请求行/请求头的大小上限，普通请求行为不变；使用反向代理时建议在代理侧同步限制请求头大小。
+3. **列表自动刷新默认值变化**：逻辑节点、项目列表、分发列表的自动刷新默认关闭（此前默认开启），仍可在页面右上角手动开启，并按“用户+表格”持久化在浏览器本地；项目列表/分发列表刷新间隔调整为 30 秒，浏览器标签页不可见时暂停自动刷新。此前已手动开启自动刷新的用户不受影响（本地配置优先）。
 
 
 ------

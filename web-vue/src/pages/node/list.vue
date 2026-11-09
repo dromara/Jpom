@@ -23,7 +23,6 @@
       <!-- <a-card :body-style="{ padding: '10px' }"> -->
       <CustomTable
         is-show-tools
-        default-auto-refresh
         :auto-refresh-time="30"
         :active-page="activePage"
         table-name="nodeSearch"
@@ -914,6 +913,10 @@ export default {
     },
     // 加载数据
     loadData(pointerEvent) {
+      // 防重入：上一轮刷新（尤其节点离线时的慢请求）未结束前不再叠加新请求
+      if (this.loading) {
+        return Promise.resolve()
+      }
       return new Promise((resolve) => {
         this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page
         this.loading = true
@@ -938,13 +941,13 @@ export default {
                 }
               })
 
-              resolve()
               // this.refreshInterval = 30
               // this.deadline = Date.now() + this.refreshInterval * 1000
             }
           })
           .finally(() => {
             this.loading = false
+            resolve()
           })
       })
     },

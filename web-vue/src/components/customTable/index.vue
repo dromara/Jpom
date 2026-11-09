@@ -222,8 +222,8 @@ export default defineComponent({
     const countdownSwitch = ref(isAutoRefresh !== -1 ? isAutoRefresh : props.defaultAutoRefresh)
     const countdownNumber = ref(0)
     const countDownFinish = () => {
-      if (props.activePage) {
-        // 仅当页面处于活跃才components.customTable.index.b76d94e0
+      // 仅当页面处于活跃且浏览器标签页可见时才自动刷新，避免后台标签持续请求
+      if (props.activePage && document.visibilityState !== 'hidden') {
         emit('refresh', 'silence')
       }
       countdownNumber.value = getCountdown()

@@ -2,8 +2,7 @@
   <div>
     <CustomTable
       is-show-tools
-      default-auto-refresh
-      :auto-refresh-time="5"
+      :auto-refresh-time="30"
       :active-page="activePage"
       table-name="dispatch"
       :columns="columns"
@@ -1263,21 +1262,28 @@ export default {
     // },
     // 加载数据
     loadData(pointerEvent) {
+      // 防重入：上一轮刷新（尤其节点离线时的慢请求）未结束前不再叠加新请求
+      if (this.loading) {
+        return Promise.resolve()
+      }
       return new Promise((resolve) => {
         this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page
         this.loading = true
 
         // = false;
-        getDishPatchList(this.listQuery).then((res) => {
-          if (res.code === 200) {
-            this.list = res.data.result
-            this.listQuery.total = res.data.total
-            // 重新计算倒计时
-            this.countdownTime = Date.now() + this.refreshInterval * 1000
-          }
-          this.loading = false
-          resolve()
-        })
+        getDishPatchList(this.listQuery)
+          .then((res) => {
+            if (res.code === 200) {
+              this.list = res.data.result
+              this.listQuery.total = res.data.total
+              // 重新计算倒计时
+              this.countdownTime = Date.now() + this.refreshInterval * 1000
+            }
+          })
+          .finally(() => {
+            this.loading = false
+            resolve()
+          })
       })
     },
     // 加载项目授权列表
