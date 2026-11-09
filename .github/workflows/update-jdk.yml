@@ -1,47 +1,80 @@
-## 利用GitHub Actions定时更新 jdk 镜像
+## 利用 GitHub Actions 定时刷新 download_link 分支的 JDK 下载清单
+##
+## 背景：
+##   - 主仓库在 Gitee（dromara/Jpom），GitHub 只是 Gitee→GitHub 的只读镜像；
+##     在 GitHub 上的提交不会回流 Gitee，因此本 workflow 通过 Gitee 私人令牌
+##     直接 push 回 Gitee 的 download_link 分支。
+##   - 需要仓库 Actions secrets：GITEE_USERNAME、GITEE_TOKEN（对 dromara/Jpom 有写权限）。
+##
+## 注意：
+##   - 定时任务只认默认分支（master），本文件必须在 master 上；
+##   - 公共仓库 60 天无仓库活动时，GitHub 会自动禁用定时 workflow，
+##     需定期在 Actions 页面手动 Run workflow（或检查是否被禁用）。
 
-name: Update JDK
+name: Update JDK manifest
 
-# 两种触发方式：一、push代码，二、每天国际标准时间23点（北京时间+8即早上7点）运行
 on:
-  push:
-    branches:
-      - error-understand # 不需要每次推送执行，所以选择error-understand分支
-#  schedule:
-#    - cron: '5 * * * *' # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/events-that-trigger-workflows#scheduled-events-schedule
+  schedule:
+    # UTC 00:00 = 北京时间 08:00
+    - cron: '0 0 * * *'
   workflow_dispatch:
-    inputs:
-      tags:
-        description: 'Test scenario tags'
-        required: true
-        type: string
 
-# on:
-#   schedule:
-#     - cron: '*/5 * * * *' # 每5分钟一次，测试用
+permissions:
+  contents: read
+
+concurrency:
+  group: update-jdk-manifest
+  cancel-in-progress: false
 
 jobs:
-  bot:
-    runs-on: ubuntu-latest # 运行环境为最新版的Ubuntu
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GITEE_USERNAME: ${{ secrets.GITEE_USERNAME }}
+      GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
     steps:
-      - name: 'Checkout codes' # 步骤一，获取仓库代码
-        uses: actions/checkout@v4
-        with:
-          ref: download_link
-      - name: 'Run build' # 步骤二，执行sh命令文件
+      - name: 'Checkout download_link from Gitee'
         run: |
-          set -x
-          ruby -v
-          ls -lR
-          cat jdk.rb
-          bundle install
-          ruby jdk.rb
-          ls -lR jdk/
-      - name: Deploy download_link
-        uses: JamesIves/github-pages-deploy-action@v4
-        if: github.event_name == 'push' && github.ref == 'refs/heads/download_link'
-        with:
-          # This is the branch where the docs are deployed to
-          branch: download_link
-          folder: ./
+          set -euo pipefail
+          ASKPASS="$RUNNER_TEMP/gitee-askpass.sh"
+          cat > "$ASKPASS" <<'EOS'
+          #!/bin/sh
+          case "$1" in
+            *Username*) printf '%s\n' "$GITEE_USERNAME" ;;
+            *) printf '%s\n' "$GITEE_TOKEN" ;;
+          esac
+          EOS
+          chmod 700 "$ASKPASS"
+          REPO_DIR="$RUNNER_TEMP/jpom-download-link"
+          rm -rf "$REPO_DIR"
+          GIT_ASKPASS="$ASKPASS" GIT_TERMINAL_PROMPT=0 \
+            git clone --single-branch --branch download_link https://gitee.com/dromara/Jpom.git "$REPO_DIR"
+          {
+            printf 'GIT_ASKPASS=%s\n' "$ASKPASS"
+            printf 'GIT_TERMINAL_PROMPT=0\n'
+            printf 'REPO_DIR=%s\n' "$REPO_DIR"
+          } >> "$GITHUB_ENV"
 
+      - name: 'Refresh JDK manifest'
+        run: |
+          set -euo pipefail
+          cd "$REPO_DIR"
+          python3 update_manifest.py
+
+      - name: 'Verify Gitee raw entries'
+        run: |
+          set -euo pipefail
+          for version in 8 11 21; do
+            url="https://gitee.com/dromara/Jpom/raw/download_link/jdk/${version}/x64"
+            code=000
+            for _ in 1 2 3; do
+              code=$(curl -sS -o /dev/null -w '%{http_code}' -L --max-time 20 "$url" || true)
+              [ "$code" = "200" ] && break
+              sleep 3
+            done
+            if [ "$code" != "200" ]; then
+              echo "::error::raw jdk/${version}/x64 returned ${code}: ${url}"
+              exit 1
+            fi
+          done
