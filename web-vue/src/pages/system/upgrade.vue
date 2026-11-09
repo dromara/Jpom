@@ -92,6 +92,7 @@
           <template #toolPrefix>
             <a-tooltip :title="`${$t('i18n_3f78f88499')}${agentTimeStamp || $t('i18n_1622dc9b6b')}`">
               Agent{{ $t('i18n_2684c4634d') }}{{ version_filter(agentVersion) }}
+              <span v-if="packageTypeLabel"> · {{ $t('i18n_52d9520ee1') }}: {{ packageTypeLabel }}</span>
               <a-tag v-if="temp.upgrade" color="pink" @click="downloadRemoteEvent">
                 {{ $t('i18n_ac2f4259f1') }}{{ temp.newVersion }} <DownloadOutlined />
               </a-tag>
@@ -116,6 +117,14 @@
               <a-tag :color="text === 1 ? 'green' : 'pink'" style="margin-right: 0">
                 {{ statusMap[text] || $t('i18n_1622dc9b6b') }}
               </a-tag>
+            </template>
+            <template v-else-if="column.dataIndex === 'engine'">
+              <a-tag v-if="text === 'go'" color="blue">Go</a-tag>
+              <a-tag v-else-if="text === 'java'">Java</a-tag>
+              <span v-else>---</span>
+            </template>
+            <template v-else-if="column.dataIndex === 'platform'">
+              {{ record.engine === 'go' ? text || $t('i18n_7daad00d6a') : '---' }}
             </template>
             <template v-else-if="column.dataIndex === 'updateStatus'">
               <div v-if="text && text.type === 'restarting'">
@@ -196,6 +205,18 @@ export default {
           ellipsis: true
         },
         {
+          title: this.$t('i18n_6c1b19dde4'),
+          dataIndex: 'engine',
+          width: '80px',
+          ellipsis: true
+        },
+        {
+          title: this.$t('i18n_4981287fe5'),
+          dataIndex: 'platform',
+          width: '120px',
+          ellipsis: true
+        },
+        {
           title: this.$t('i18n_3b885fca15'),
           dataIndex: 'jpomVersion',
           width: '100px',
@@ -261,6 +282,18 @@ export default {
     },
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
+    },
+    /**
+     * 当前本地升级包的引擎/平台展示（Java 升级包 / Go 升级容器 + 平台）
+     */
+    packageTypeLabel() {
+      const engine = this.temp.packageEngine
+      if (!engine) {
+        return ''
+      }
+      const type = engine === 'go' ? this.$t('i18n_baee195ca8') : this.$t('i18n_6fb5d67e27')
+      const platform = engine === 'go' && this.temp.packagePlatform ? ` (${this.temp.packagePlatform})` : ''
+      return `${type}${platform}`
     }
   },
   mounted() {
@@ -291,12 +324,29 @@ export default {
     updateList() {
       this.list = this.list.map((item) => {
         let itemData = this.nodeVersion[item.id]
+        item.engine = ''
+        item.platform = ''
         if (itemData) {
           try {
             itemData = JSON.parse(itemData)
             item.version = itemData.version
             item.timeStamp = itemData.timeStamp
             item.upTime = itemData.upTime
+            // 引擎：优先 manifest.engine；旧版 Go 插件端没有 engine 时用 jarFile 兜底（Java 运行文件一定是 .jar）
+            if (itemData.engine) {
+              item.engine = itemData.engine === 'go' ? 'go' : 'java'
+            } else if (itemData.jarFile) {
+              item.engine = /\.jar$/i.test(itemData.jarFile) ? 'java' : 'go'
+            }
+            // 平台：优先 manifest.platform；旧版 Go 插件端只有 arch + osName 时按 Server 同口径映射
+            if (item.engine === 'go') {
+              item.platform = itemData.platform || ''
+              if (!item.platform && itemData.arch) {
+                const osMap = { linux: 'linux', windows: 'windows', 'mac os x': 'darwin' }
+                const os = osMap[(itemData.osName || '').toLowerCase()]
+                item.platform = os ? `${os}/${itemData.arch}` : ''
+              }
+            }
           } catch (e) {
             item.version = itemData
           }
@@ -357,6 +407,12 @@ export default {
       checkVersion().then((res) => {
         if (res.code === 200) {
           let upgrade = res.data?.upgrade
+          this.temp = {
+            ...this.temp,
+            // 本地升级包的引擎/平台（Go 集群按平台下载/升级）
+            packageEngine: res.data.engine || '',
+            packagePlatform: res.data.platform || ''
+          }
           if (upgrade) {
             //
             this.temp = {
@@ -447,6 +503,10 @@ export default {
         let newData = JSON.parse(data)
         this.agentVersion = newData.version
         this.agentTimeStamp = newData.timeStamp
+        // 展示本地升级包的引擎/平台/包类型
+        if (newData.engine) {
+          this.temp = { ...this.temp, packageEngine: newData.engine, packagePlatform: newData.platform || '' }
+        }
       } catch (e) {
         this.agentVersion = data || ''
       }
@@ -514,6 +574,7 @@ export default {
         </b>
         ${this.$t('i18n_16f7fa08db')}
         <ul style='color:red;'>
+          <li>${this.$t('i18n_52d9520ee1')}: <b>${this.packageTypeLabel || '--'}</b></li>
           <li>${this.$t('i18n_e8505e27f4')}<b>${this.$t('i18n_ddf0c97bce')}</b></li>
           <li>${this.$t('i18n_a52a10123f')}</li>
           <li>${this.$t('i18n_1c040e6b87')}</li>
@@ -606,13 +667,31 @@ export default {
     },
     // 下载远程最新文件
     downloadRemoteEvent() {
+      // 存在 Go 节点时按 Go 节点平台下载升级容器（纯 Java 集群保持原 Java 包下载行为）
+      const goNode = (this.list || []).find((item) => item.engine === 'go')
+      let engine = 'java'
+      let platform = ''
+      if (goNode) {
+        engine = 'go'
+        platform = goNode.platform || ''
+      } else if (this.temp.packageEngine === 'go') {
+        engine = 'go'
+        platform = this.temp.packagePlatform || ''
+      }
+      const engineText = engine === 'go' ? 'Go' : 'Java'
+      const platformText = engine === 'go' ? platform || this.$t('i18n_2a20de5e5a') : '---'
+      const packageTypeText = engine === 'go' ? this.$t('i18n_baee195ca8') : this.$t('i18n_6fb5d67e27')
       const downloadSource = this.$t('i18n_917381e4a5')
       const html = `
         ${this.$t('i18n_35b89dbc59')}
         <ul style='color:red;'>
+          <li>${this.$t('i18n_6c1b19dde4')}: <b>${engineText}</b></li>
+          <li>${this.$t('i18n_4981287fe5')}: <b>${platformText}</b></li>
+          <li>${this.$t('i18n_52d9520ee1')}: <b>${packageTypeText}</b></li>
+          ${engine === 'go' ? `<li>${this.$t('i18n_f24307b683')}</li>` : ''}
           <li style="display: ${this.temp.downloadSource ? 'revert' : 'none'};">${downloadSource}<b>${
-        this.temp.downloadSource
-      }</b></li>
+            this.temp.downloadSource
+          }</b></li>
           <li>${this.$t('i18n_bb316d9acd')}</li>
           <li>${this.$t('i18n_56bb769354')}<b>${this.$t('i18n_ddf0c97bce')}</b></li>
           <li>${this.$t('i18n_2c74d8485f')}</li>
@@ -627,7 +706,7 @@ export default {
         okText: this.$t('i18n_e83a256e4f'),
         cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
-          return downloadRemote().then((res) => {
+          return downloadRemote({ engine, platform }).then((res) => {
             if (res.code === 200) {
               $notification.success({ message: res.msg })
               this.getNodeList()

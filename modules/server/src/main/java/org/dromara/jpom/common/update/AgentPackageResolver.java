@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
@@ -45,9 +46,17 @@ public final class AgentPackageResolver {
      */
     public static final String GO_UPGRADE_FILE_PREFIX = "agent-go-";
     /**
-     * Go 升级容器文件名后缀
+     * Go 升级容器文件名后缀（linux/amd64 兼容别名；多平台使用 {@code -upgrade-<os>-<arch>.jar}）
      */
     public static final String GO_UPGRADE_FILE_SUFFIX = "-upgrade.jar";
+    /**
+     * 未上报/未指定平台时按 linux/amd64 处理（旧版 Server/旧版 Go 插件端兼容口径）
+     */
+    public static final String DEFAULT_PLATFORM = "linux/amd64";
+    /**
+     * Go 升级容器内可执行文件目录
+     */
+    public static final String GO_BIN_DIR = "go-agent/bin/";
     /**
      * 下载中心 URL 中的版本号片段，例如 /release/2.11.13/ 或 /beta/2.11.13.1/
      */
@@ -118,6 +127,141 @@ public final class AgentPackageResolver {
     }
 
     /**
+     * 解析节点运行平台（os/arch）
+     *
+     * <p>优先取 manifest.platform（Go 2.11.13.2-beta 起上报，如 linux/arm64）；旧版 Go 插件端
+     * 只有 osName 时按 {@code arch + osName} 映射（Linux→linux、Windows→windows、Mac OS X→darwin，
+     * 与 Java 插件端 osName 兼容值一致）。两者都没有时返回 null，由调用方按 legacy 处理
+     * （仅允许 linux/amd64）。</p>
+     *
+     * @param infoData /info 响应的 data
+     * @return 规范化平台（小写 os/arch），无法识别返回 null
+     */
+    public static String resolvePlatform(JSONObject infoData) {
+        JSONObject manifest = manifest(infoData);
+        if (manifest == null) {
+            return null;
+        }
+        String platform = normalizePlatform(manifest.getString("platform"));
+        if (StrUtil.isNotBlank(platform)) {
+            return platform;
+        }
+        String arch = normalizeArch(manifest.getString("arch"));
+        if (StrUtil.isBlank(arch)) {
+            return null;
+        }
+        String os = normalizeOs(manifest.getString("osName"));
+        if (StrUtil.isBlank(os)) {
+            return null;
+        }
+        return os + "/" + arch;
+    }
+
+    /**
+     * 节点 /info 是否上报了平台相关信息（platform 或 arch）
+     *
+     * <p>用于区分“旧版节点未上报平台（legacy，仅允许 linux/amd64）”与“上报了但无法识别
+     * （例如未知 osName/非法 platform，应拒绝并提示手动上传）”。</p>
+     *
+     * @param infoData /info 响应的 data
+     * @return true 表示存在平台相关字段
+     */
+    public static boolean hasPlatformInfo(JSONObject infoData) {
+        JSONObject manifest = manifest(infoData);
+        if (manifest == null) {
+            return false;
+        }
+        return StrUtil.isNotBlank(manifest.getString("platform")) || StrUtil.isNotBlank(manifest.getString("arch"));
+    }
+
+    /**
+     * 规范化平台字符串（os/arch，忽略大小写与首尾空白）
+     *
+     * @param platform 平台，例如 linux/amd64、Linux/ARM64
+     * @return 规范化平台（小写、arch 别名归一），非法格式返回 null
+     */
+    public static String normalizePlatform(String platform) {
+        if (StrUtil.isBlank(platform)) {
+            return null;
+        }
+        String value = StrUtil.trim(platform).toLowerCase(Locale.ROOT);
+        int index = value.indexOf('/');
+        if (index <= 0 || index >= value.length() - 1) {
+            return null;
+        }
+        String os = normalizeOs(value.substring(0, index));
+        String arch = normalizeArch(value.substring(index + 1));
+        if (StrUtil.isBlank(os) || StrUtil.isBlank(arch)) {
+            return null;
+        }
+        return os + "/" + arch;
+    }
+
+    /**
+     * 规范化系统名称（兼容 Java 插件端 osName 与 Go runtime.GOOS）
+     *
+     * @param osName 系统名称
+     * @return 规范化系统名（linux/windows/darwin 等），无法识别返回 null
+     */
+    public static String normalizeOs(String osName) {
+        if (StrUtil.isBlank(osName)) {
+            return null;
+        }
+        String os = StrUtil.trim(osName).toLowerCase(Locale.ROOT);
+        if ("linux".equals(os)) {
+            return "linux";
+        }
+        if ("windows".equals(os) || "win".equals(os) || "win32".equals(os)) {
+            return "windows";
+        }
+        if ("darwin".equals(os) || "mac".equals(os) || "macos".equals(os) || "mac os x".equals(os) || "osx".equals(os)) {
+            return "darwin";
+        }
+        // 其他平台保留小写原值（仍做精确比较，避免把未知系统误判为不支持）
+        return os.matches("[a-z0-9]+") ? os : null;
+    }
+
+    /**
+     * 规范化 CPU 架构（兼容 Go runtime.GOARCH 与常见别名）
+     *
+     * @param arch 架构
+     * @return 规范化架构（amd64/arm64 等），无法识别返回 null
+     */
+    public static String normalizeArch(String arch) {
+        if (StrUtil.isBlank(arch)) {
+            return null;
+        }
+        String value = StrUtil.trim(arch).toLowerCase(Locale.ROOT);
+        if ("x86_64".equals(value) || "x64".equals(value) || "amd64".equals(value)) {
+            return "amd64";
+        }
+        if ("aarch64".equals(value) || "arm64v8".equals(value) || "arm64".equals(value)) {
+            return "arm64";
+        }
+        if ("x86".equals(value) || "i386".equals(value) || "i686".equals(value) || "386".equals(value)) {
+            return "386";
+        }
+        return value.matches("[a-z0-9_]+") ? value : null;
+    }
+
+    /**
+     * Go 升级容器内对应平台的可执行文件路径
+     *
+     * @param platform 平台（os/arch）
+     * @return 容器内路径，例如 go-agent/bin/go-agent-linux-arm64（windows 带 .exe）
+     */
+    public static String platformExecutableName(String platform) {
+        String normalized = normalizePlatform(platform);
+        if (StrUtil.isBlank(normalized)) {
+            return null;
+        }
+        int index = normalized.indexOf('/');
+        String os = normalized.substring(0, index);
+        String arch = normalized.substring(index + 1);
+        return GO_BIN_DIR + "go-agent-" + os + "-" + arch + ("windows".equals(os) ? ".exe" : "");
+    }
+
+    /**
      * 解析升级包信息（jar 或 zip）
      *
      * @param file 升级包文件
@@ -168,19 +312,36 @@ public final class AgentPackageResolver {
     }
 
     /**
+     * 校验升级包与节点是否兼容（无节点平台信息，按 legacy 规则处理）
+     *
+     * @param info             升级包信息
+     * @param nodeEngine       节点引擎
+     * @param nodeVersion      节点当前版本
+     * @param allowedDowngrade 是否允许降级（jpom.system.allowed-downgrade）
+     * @return 检查结果
+     * @see #verify(AgentPackageInfo, AgentEngine, String, String, boolean)
+     */
+    public static PackageCheckResult verify(AgentPackageInfo info, AgentEngine nodeEngine, String nodeVersion, boolean allowedDowngrade) {
+        return verify(info, nodeEngine, null, nodeVersion, allowedDowngrade);
+    }
+
+    /**
      * 校验升级包与节点是否兼容
      *
-     * <p>Go 节点完全对齐 Java 的升级规则：版本相同、最低兼容版本、禁止降级；
-     * Java 节点的版本重复/最低兼容/降级仍由 Agent 端校验（保持原有行为），
-     * 服务端只拦截引擎不匹配（避免把 Go 容器发给 Java 节点、或把 Java 包发给 Go 节点）。</p>
+     * <p>Go 节点：先校验平台（容器 platform 与节点 platform 完全一致；容器/节点未上报平台时
+     * 按 legacy 处理，仅允许 linux/amd64），再对齐 Java 的版本规则：版本相同、最低兼容版本、
+     * 禁止降级。Java 节点完全保持原有行为（平台参数被忽略，版本重复/最低兼容/降级仍由
+     * Agent 端校验），服务端只拦截引擎不匹配（避免把 Go 容器发给 Java 节点、或把 Java 包发给
+     * Go 节点）。</p>
      *
-     * @param info           升级包信息
-     * @param nodeEngine     节点引擎
-     * @param nodeVersion    节点当前版本
+     * @param info             升级包信息
+     * @param nodeEngine       节点引擎
+     * @param nodePlatform     节点平台（os/arch，null/空表示旧版节点未上报，按 linux/amd64 legacy 处理）
+     * @param nodeVersion      节点当前版本
      * @param allowedDowngrade 是否允许降级（jpom.system.allowed-downgrade）
      * @return 检查结果
      */
-    public static PackageCheckResult verify(AgentPackageInfo info, AgentEngine nodeEngine, String nodeVersion, boolean allowedDowngrade) {
+    public static PackageCheckResult verify(AgentPackageInfo info, AgentEngine nodeEngine, String nodePlatform, String nodeVersion, boolean allowedDowngrade) {
         if (info == null || StrUtil.isBlank(info.getVersion())) {
             return PackageCheckResult.INVALID_PACKAGE;
         }
@@ -189,6 +350,21 @@ public final class AgentPackageResolver {
         }
         if (nodeEngine != AgentEngine.GO) {
             return PackageCheckResult.OK;
+        }
+        // 平台校验：节点平台缺失（旧版节点）按 linux/amd64 legacy 处理；容器平台缺失同样视为 legacy 容器
+        String platform = normalizePlatform(nodePlatform);
+        boolean legacyNode = StrUtil.isBlank(platform);
+        if (legacyNode) {
+            platform = DEFAULT_PLATFORM;
+        }
+        String packagePlatform = normalizePlatform(info.getPlatform());
+        if (StrUtil.isBlank(packagePlatform)) {
+            // legacy 容器（未声明 platform）：仅允许 linux/amd64 节点
+            if (!DEFAULT_PLATFORM.equals(platform)) {
+                return PackageCheckResult.PLATFORM_MISMATCH;
+            }
+        } else if (!StrUtil.equals(packagePlatform, platform)) {
+            return PackageCheckResult.PLATFORM_MISMATCH;
         }
         String currentVersion = normalizeVersion(nodeVersion);
         if (StrUtil.isNotBlank(currentVersion) && StrUtil.equals(info.getVersion(), currentVersion)) {
@@ -208,13 +384,32 @@ public final class AgentPackageResolver {
     }
 
     /**
-     * Go 升级容器文件名：agent-go-&lt;version&gt;-upgrade.jar
+     * Go 升级容器兼容别名文件名：agent-go-&lt;version&gt;-upgrade.jar（等价 linux/amd64 容器）
      *
      * @param version 版本号（可带 v 前缀）
      * @return 文件名
      */
     public static String goUpgradeFileName(String version) {
         return StrUtil.format("{}{}{}", GO_UPGRADE_FILE_PREFIX, normalizeVersion(version), GO_UPGRADE_FILE_SUFFIX);
+    }
+
+    /**
+     * Go 升级容器文件名：agent-go-&lt;version&gt;-upgrade-&lt;os&gt;-&lt;arch&gt;.jar
+     *
+     * <p>platform 为空时返回 linux/amd64 兼容别名（agent-go-&lt;version&gt;-upgrade.jar）。</p>
+     *
+     * @param version  版本号（可带 v 前缀）
+     * @param platform 平台（os/arch）
+     * @return 文件名
+     */
+    public static String goUpgradeFileName(String version, String platform) {
+        String normalized = normalizePlatform(platform);
+        if (StrUtil.isBlank(normalized)) {
+            return goUpgradeFileName(version);
+        }
+        int index = normalized.indexOf('/');
+        return StrUtil.format("{}{}-upgrade-{}-{}.jar",
+            GO_UPGRADE_FILE_PREFIX, normalizeVersion(version), normalized.substring(0, index), normalized.substring(index + 1));
     }
 
     /**
@@ -228,10 +423,40 @@ public final class AgentPackageResolver {
      *
      * @param javaAgentUrl Java 插件端下载地址
      * @param version      版本号（可带 v 前缀）
-     * @return Go 升级容器地址，无法推导时返回 null
+     * @return Go 升级容器地址（linux/amd64 兼容别名），无法推导时返回 null
      */
     public static String buildGoUpgradeUrl(String javaAgentUrl, String version) {
-        if (StrUtil.isBlank(javaAgentUrl)) {
+        return buildGoUpgradeAliasUrl(javaAgentUrl, version);
+    }
+
+    /**
+     * 从 Java 插件端下载地址推导同版本目录下指定平台的 Go 升级容器地址。
+     *
+     * <p>platform 为空时回退到 linux/amd64 兼容别名 {@code agent-go-<version>-upgrade.jar}。</p>
+     *
+     * @param javaAgentUrl Java 插件端下载地址
+     * @param version      版本号（可带 v 前缀）
+     * @param platform     节点平台（os/arch）
+     * @return Go 升级容器地址，无法推导时返回 null
+     */
+    public static String buildGoUpgradeUrl(String javaAgentUrl, String version, String platform) {
+        return buildGoUpgradeUrlWithFileName(javaAgentUrl, version, goUpgradeFileName(version, platform));
+    }
+
+    /**
+     * 从 Java 插件端下载地址推导 linux/amd64 兼容别名容器地址
+     * （{@code agent-go-<version>-upgrade.jar}，多平台发布时仍会上传的别名副本）。
+     *
+     * @param javaAgentUrl Java 插件端下载地址
+     * @param version      版本号（可带 v 前缀）
+     * @return 别名容器地址，无法推导时返回 null
+     */
+    public static String buildGoUpgradeAliasUrl(String javaAgentUrl, String version) {
+        return buildGoUpgradeUrlWithFileName(javaAgentUrl, version, goUpgradeFileName(version));
+    }
+
+    private static String buildGoUpgradeUrlWithFileName(String javaAgentUrl, String version, String fileName) {
+        if (StrUtil.isBlank(javaAgentUrl) || StrUtil.isBlank(fileName)) {
             return null;
         }
         String url = StrUtil.trim(javaAgentUrl);
@@ -246,7 +471,7 @@ public final class AgentPackageResolver {
         if (slashIndex < 0) {
             return null;
         }
-        return StrUtil.format("{}{}{}", path.substring(0, slashIndex + 1), goUpgradeFileName(targetVersion), query);
+        return StrUtil.format("{}{}{}", path.substring(0, slashIndex + 1), fileName, query);
     }
 
     /**
@@ -284,6 +509,21 @@ public final class AgentPackageResolver {
      * @return null 表示通过，否则为失败原因（供日志/错误文案拼接）
      */
     public static String validateGoContainer(File file) {
+        return validateGoContainer(file, null);
+    }
+
+    /**
+     * 校验 Go 升级容器结构（含期望平台）
+     *
+     * <p>expectedPlatform 非空时额外要求：容器 agent.json.platform 与期望平台一致，且容器内
+     * 存在该平台的可执行文件 {@code go-agent/bin/go-agent-<os>-<arch>[.exe]}；期望平台为空时
+     * 保持旧行为（仅要求存在任意 go-agent/bin 可执行文件，供旧数据/旧 Server 兼容）。</p>
+     *
+     * @param file             容器文件
+     * @param expectedPlatform 期望平台（os/arch），可为空
+     * @return null 表示通过，否则为失败原因（供日志/错误文案拼接）
+     */
+    public static String validateGoContainer(File file, String expectedPlatform) {
         try (ZipFile zipFile = new ZipFile(file)) {
             ZipEntry manifestEntry = findEntry(zipFile, "META-INF/MANIFEST.MF");
             if (manifestEntry == null) {
@@ -310,14 +550,29 @@ public final class AgentPackageResolver {
             if (StrUtil.isBlank(info.getVersion())) {
                 return "missing go-agent version";
             }
+            String containerPlatform = normalizePlatform(info.getPlatform());
+            String expected = normalizePlatform(expectedPlatform);
+            if (StrUtil.isNotBlank(expected)) {
+                if (StrUtil.isBlank(containerPlatform)) {
+                    return "missing platform in " + GO_CONTAINER_MANIFEST;
+                }
+                if (!StrUtil.equals(expected, containerPlatform)) {
+                    return StrUtil.format("platform mismatch: container {}, expected {}", containerPlatform, expected);
+                }
+            }
+            String expectedBinary = platformExecutableName(containerPlatform);
+            if (StrUtil.isNotBlank(expectedBinary)) {
+                return findEntry(zipFile, expectedBinary) == null ? "missing " + expectedBinary : null;
+            }
+            // legacy 容器（未声明 platform）：保持旧行为，要求存在任意 go-agent/bin 可执行文件
             java.util.Enumeration<? extends ZipEntry> entries = zipFile.entries();
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
                 if (entry.isDirectory()) {
                     continue;
                 }
-                String name = normalizeEntryName(entry.getName()).toLowerCase();
-                if (StrUtil.startWith(name, "go-agent/bin/go-agent")) {
+                String name = normalizeEntryName(entry.getName()).toLowerCase(Locale.ROOT);
+                if (StrUtil.startWith(name, GO_BIN_DIR + "go-agent")) {
                     return null;
                 }
             }

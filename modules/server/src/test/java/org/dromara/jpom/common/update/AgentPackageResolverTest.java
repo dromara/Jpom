@@ -287,26 +287,223 @@ public class AgentPackageResolverTest {
     }
 
     // ------------------------------------------------------------------
+    // 5. 多架构平台解析与校验（P1-1 Server 侧）
+    // ------------------------------------------------------------------
+
+    @Test
+    public void resolvePlatformFromManifest() {
+        // 新版本 Go 插件端直接上报 manifest.platform
+        assertEquals("linux/arm64", AgentPackageResolver.resolvePlatform(info(new JSONObject(), "go", "/opt/agent", "linux/arm64", null)));
+        // 大小写/空白归一
+        assertEquals("linux/amd64", AgentPackageResolver.resolvePlatform(info(new JSONObject(), "go", "/opt/agent", " Linux/AMD64 ", null)));
+
+        // 旧版 Go 插件端只有 arch + osName（与 Java 插件端 osName 兼容值映射）
+        JSONObject linux = info(new JSONObject(), "go", "/opt/agent");
+        linux.getJSONObject("manifest").put("arch", "arm64");
+        linux.getJSONObject("manifest").put("osName", "Linux");
+        assertEquals("linux/arm64", AgentPackageResolver.resolvePlatform(linux));
+
+        JSONObject windows = info(new JSONObject(), "go", "/opt/agent");
+        windows.getJSONObject("manifest").put("arch", "amd64");
+        windows.getJSONObject("manifest").put("osName", "Windows");
+        assertEquals("windows/amd64", AgentPackageResolver.resolvePlatform(windows));
+
+        JSONObject mac = info(new JSONObject(), "go", "/opt/agent");
+        mac.getJSONObject("manifest").put("arch", "arm64");
+        mac.getJSONObject("manifest").put("osName", "Mac OS X");
+        assertEquals("darwin/arm64", AgentPackageResolver.resolvePlatform(mac));
+
+        // 缺少 arch：旧版节点（legacy），无平台信息
+        JSONObject legacy = info(new JSONObject(), "go", "/opt/agent");
+        assertNull(AgentPackageResolver.resolvePlatform(legacy));
+        assertFalse(AgentPackageResolver.hasPlatformInfo(legacy));
+
+        // 上报了无法识别的平台：platform 非法 / osName 未知
+        JSONObject invalidPlatform = info(new JSONObject(), "go", "/opt/agent", "linux", null);
+        assertNull(AgentPackageResolver.resolvePlatform(invalidPlatform));
+        assertTrue(AgentPackageResolver.hasPlatformInfo(invalidPlatform));
+
+        JSONObject unknownOs = info(new JSONObject(), "go", "/opt/agent");
+        unknownOs.getJSONObject("manifest").put("arch", "arm64");
+        unknownOs.getJSONObject("manifest").put("osName", "Some OS");
+        assertNull(AgentPackageResolver.resolvePlatform(unknownOs));
+        assertTrue(AgentPackageResolver.hasPlatformInfo(unknownOs));
+
+        // Java 节点没有 engine/arch 时不参与平台逻辑
+        assertNull(AgentPackageResolver.resolvePlatform(info(new JSONObject(), "java", "/opt/Agent.jar")));
+    }
+
+    @Test
+    public void normalizePlatformAliases() {
+        assertEquals("linux/amd64", AgentPackageResolver.normalizePlatform("Linux/AMD64"));
+        assertEquals("linux/amd64", AgentPackageResolver.normalizePlatform("linux/x86_64"));
+        assertEquals("linux/arm64", AgentPackageResolver.normalizePlatform("linux/aarch64"));
+        assertEquals("darwin/arm64", AgentPackageResolver.normalizePlatform("Mac OS X/arm64"));
+        assertNull(AgentPackageResolver.normalizePlatform(null));
+        assertNull(AgentPackageResolver.normalizePlatform(" "));
+        assertNull(AgentPackageResolver.normalizePlatform("linux"));
+        assertNull(AgentPackageResolver.normalizePlatform("/amd64"));
+        assertNull(AgentPackageResolver.normalizePlatform("linux/"));
+    }
+
+    @Test
+    public void verifyPlatformMismatch() {
+        // 匹配平台正常升级
+        AgentPackageInfo arm64 = goPackage("2.11.13", "2.11.0", "linux/arm64");
+        assertEquals(PackageCheckResult.OK, AgentPackageResolver.verify(arm64, AgentEngine.GO, "linux/arm64", "2.11.12", false));
+        // 跨架构拒绝（arm64 容器发到 amd64 节点 / 反之）
+        assertEquals(PackageCheckResult.PLATFORM_MISMATCH,
+            AgentPackageResolver.verify(arm64, AgentEngine.GO, "linux/amd64", "2.11.12", false));
+        AgentPackageInfo amd64 = goPackage("2.11.13", "2.11.0", "linux/amd64");
+        assertEquals(PackageCheckResult.PLATFORM_MISMATCH,
+            AgentPackageResolver.verify(amd64, AgentEngine.GO, "linux/arm64", "2.11.12", false));
+        // 平台大小写/空白归一
+        assertEquals(PackageCheckResult.OK,
+            AgentPackageResolver.verify(arm64, AgentEngine.GO, " Linux/ARM64 ", "2.11.12", false));
+
+        // legacy 容器（agent.json 未声明 platform）：仅允许 linux/amd64 节点
+        AgentPackageInfo legacyContainer = goPackage("2.11.13", "2.11.0", null);
+        assertEquals(PackageCheckResult.OK,
+            AgentPackageResolver.verify(legacyContainer, AgentEngine.GO, "linux/amd64", "2.11.12", false));
+        assertEquals(PackageCheckResult.PLATFORM_MISMATCH,
+            AgentPackageResolver.verify(legacyContainer, AgentEngine.GO, "linux/arm64", "2.11.12", false));
+
+        // legacy 节点（未上报平台）：仅允许 linux/amd64 容器
+        assertEquals(PackageCheckResult.OK,
+            AgentPackageResolver.verify(amd64, AgentEngine.GO, null, "2.11.12", false));
+        assertEquals(PackageCheckResult.PLATFORM_MISMATCH,
+            AgentPackageResolver.verify(arm64, AgentEngine.GO, null, "2.11.12", false));
+
+        // Java 节点完全忽略平台参数（保持原有行为）
+        AgentPackageInfo javaPackage = new AgentPackageInfo();
+        javaPackage.setEngine(AgentEngine.JAVA);
+        javaPackage.setVersion("2.11.13");
+        javaPackage.setPlatform("linux/arm64");
+        assertEquals(PackageCheckResult.OK,
+            AgentPackageResolver.verify(javaPackage, AgentEngine.JAVA, "linux/amd64", "2.11.12", false));
+    }
+
+    @Test
+    public void goUpgradeFileNamePerPlatform() {
+        assertEquals("agent-go-2.11.13-upgrade-linux-amd64.jar", AgentPackageResolver.goUpgradeFileName("v2.11.13", "linux/amd64"));
+        assertEquals("agent-go-2.11.13-upgrade-linux-arm64.jar", AgentPackageResolver.goUpgradeFileName("2.11.13", "linux/arm64"));
+        assertEquals("agent-go-2.11.13-upgrade-windows-amd64.jar", AgentPackageResolver.goUpgradeFileName("2.11.13", "Windows/AMD64"));
+        assertEquals("agent-go-2.11.13-upgrade-darwin-arm64.jar", AgentPackageResolver.goUpgradeFileName("2.11.13", "darwin/arm64"));
+        // 未指定平台时使用 linux/amd64 兼容别名
+        assertEquals("agent-go-2.11.13-upgrade.jar", AgentPackageResolver.goUpgradeFileName("2.11.13", null));
+        assertEquals("agent-go-2.11.13-upgrade.jar", AgentPackageResolver.goUpgradeFileName("2.11.13", "invalid"));
+    }
+
+    @Test
+    public void buildGoUpgradeUrlPerPlatform() {
+        String javaUrl = "https://d2.jpom.download/beta/2.11.13.2/agent-2.11.13.2-release.zip";
+        assertEquals("https://d2.jpom.download/beta/2.11.13.2/agent-go-2.11.13.2-upgrade-linux-arm64.jar",
+            AgentPackageResolver.buildGoUpgradeUrl(javaUrl, "2.11.13.2", "linux/arm64"));
+        assertEquals("https://d2.jpom.download/beta/2.11.13.2/agent-go-2.11.13.2-upgrade-windows-amd64.jar",
+            AgentPackageResolver.buildGoUpgradeUrl(javaUrl, "v2.11.13.2", "windows/amd64"));
+        // 保留 token query
+        assertEquals("https://download.jpom.top/release/2.11.13/agent-go-2.11.13-upgrade-linux-arm64.jar?token=abc",
+            AgentPackageResolver.buildGoUpgradeUrl("https://download.jpom.top/release/2.11.13/agent-2.11.13-release.zip?token=abc", "2.11.13", "linux/arm64"));
+        // linux/amd64 兼容别名（下载不到平台容器时回退）
+        assertEquals("https://d2.jpom.download/release/2.11.13/agent-go-2.11.13-upgrade.jar",
+            AgentPackageResolver.buildGoUpgradeAliasUrl("https://d2.jpom.download/release/2.11.13/agent-2.11.13-release.zip", "2.11.13"));
+        // 未指定平台等同别名
+        assertEquals(AgentPackageResolver.buildGoUpgradeAliasUrl(javaUrl, "2.11.13.2"),
+            AgentPackageResolver.buildGoUpgradeUrl(javaUrl, "2.11.13.2", null));
+    }
+
+    @Test
+    public void validateGoContainerWithExpectedPlatform() throws IOException {
+        // 匹配平台 + 对应平台二进制
+        Map<String, byte[]> entries = new LinkedHashMap<>();
+        entries.put("META-INF/MANIFEST.MF", manifest("2.11.13.2", "2.11.0"));
+        entries.put("BOOT-INF/classes/org/dromara/jpom/JpomAgentApplication.class", new byte[]{1});
+        entries.put("go-agent/agent.json", goAgentJson("2.11.13.2", "2.11.0", "linux/arm64", "abc").getBytes(StandardCharsets.UTF_8));
+        entries.put("go-agent/bin/go-agent-linux-arm64", new byte[]{2});
+        File arm64 = writeZip("arm64-container.jar", entries);
+        assertNull(AgentPackageResolver.validateGoContainer(arm64, "linux/arm64"));
+        // 期望平台与容器平台不一致
+        String mismatch = AgentPackageResolver.validateGoContainer(arm64, "linux/amd64");
+        assertNotNull(mismatch);
+        assertTrue(mismatch.contains("platform mismatch"));
+
+        // windows 平台二进制带 .exe
+        Map<String, byte[]> windowsEntries = new LinkedHashMap<>();
+        windowsEntries.put("META-INF/MANIFEST.MF", manifest("2.11.13.2", "2.11.0"));
+        windowsEntries.put("BOOT-INF/classes/org/dromara/jpom/JpomAgentApplication.class", new byte[]{1});
+        windowsEntries.put("go-agent/agent.json", goAgentJson("2.11.13.2", "2.11.0", "windows/amd64", "abc").getBytes(StandardCharsets.UTF_8));
+        windowsEntries.put("go-agent/bin/go-agent-windows-amd64.exe", new byte[]{2});
+        assertEquals("go-agent/bin/go-agent-windows-amd64.exe", AgentPackageResolver.platformExecutableName("windows/amd64"));
+        File windows = writeZip("windows-container.jar", windowsEntries);
+        assertNull(AgentPackageResolver.validateGoContainer(windows, "windows/amd64"));
+        assertEquals("missing go-agent/bin/go-agent-windows-amd64.exe",
+            AgentPackageResolver.validateGoContainer(writeZip("windows-no-exe.jar",
+                removeEntry(windowsEntries, "go-agent/bin/go-agent-windows-amd64.exe")), "windows/amd64"));
+
+        // 容器声明平台但缺少对应平台二进制
+        Map<String, byte[]> wrongBinary = new LinkedHashMap<>();
+        wrongBinary.put("META-INF/MANIFEST.MF", manifest("2.11.13.2", "2.11.0"));
+        wrongBinary.put("BOOT-INF/classes/org/dromara/jpom/JpomAgentApplication.class", new byte[]{1});
+        wrongBinary.put("go-agent/agent.json", goAgentJson("2.11.13.2", "2.11.0", "linux/amd64", "abc").getBytes(StandardCharsets.UTF_8));
+        wrongBinary.put("go-agent/bin/go-agent-linux-arm64", new byte[]{2});
+        String missingBinary = AgentPackageResolver.validateGoContainer(writeZip("wrong-binary.jar", wrongBinary), "linux/amd64");
+        assertNotNull(missingBinary);
+        assertTrue(missingBinary.contains("missing go-agent/bin/go-agent-linux-amd64"));
+
+        // 容器未声明 platform：期望平台非空时视为不合法（多平台发布必须声明平台）
+        Map<String, byte[]> legacyEntries = new LinkedHashMap<>();
+        legacyEntries.put("META-INF/MANIFEST.MF", manifest("2.11.13.2", "2.11.0"));
+        legacyEntries.put("BOOT-INF/classes/org/dromara/jpom/JpomAgentApplication.class", new byte[]{1});
+        legacyEntries.put("go-agent/agent.json", goAgentJson("2.11.13.2", "2.11.0", null, "abc").getBytes(StandardCharsets.UTF_8));
+        legacyEntries.put("go-agent/bin/go-agent-linux-amd64", new byte[]{2});
+        File legacy = writeZip("legacy-container.jar", legacyEntries);
+        assertNotNull(AgentPackageResolver.validateGoContainer(legacy, "linux/amd64"));
+        // 但无期望平台时保持旧结构校验（兼容 legacy/旧 Server 数据）
+        assertNull(AgentPackageResolver.validateGoContainer(legacy));
+    }
+
+    // ------------------------------------------------------------------
     // helpers
     // ------------------------------------------------------------------
 
     private JSONObject info(JSONObject manifest, String engine, String jarFile) {
+        return info(manifest, engine, jarFile, null, null);
+    }
+
+    private JSONObject info(JSONObject manifest, String engine, String jarFile, String platform, String arch) {
         manifest.put("version", "2.11.12");
         manifest.put("timeStamp", "2026-11-01 00:00:00");
         manifest.put("engine", engine);
         manifest.put("jarFile", jarFile);
+        if (platform != null) {
+            manifest.put("platform", platform);
+        }
+        if (arch != null) {
+            manifest.put("arch", arch);
+        }
         JSONObject data = new JSONObject();
         data.put("manifest", manifest);
         return data;
     }
 
     private AgentPackageInfo goPackage(String version, String minVersion) {
+        return goPackage(version, minVersion, null);
+    }
+
+    private AgentPackageInfo goPackage(String version, String minVersion, String platform) {
         AgentPackageInfo info = new AgentPackageInfo();
         info.setEngine(AgentEngine.GO);
         info.setVersion(version);
         info.setMinVersion(minVersion);
-        info.setFileName("agent-go-" + version + "-upgrade.jar");
+        info.setPlatform(platform);
+        info.setFileName(AgentPackageResolver.goUpgradeFileName(version, platform));
         return info;
+    }
+
+    private Map<String, byte[]> removeEntry(Map<String, byte[]> entries, String key) {
+        Map<String, byte[]> copy = new LinkedHashMap<>(entries);
+        copy.remove(key);
+        return copy;
     }
 
     private String goAgentJson(String version, String minVersion, String platform, String sha256) {

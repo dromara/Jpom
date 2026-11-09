@@ -83,18 +83,27 @@ public class NodeUpdateController extends BaseServerController {
      * 远程下载
      *
      * <p>默认下载 Java 版插件端发布包（保持原有行为）；engine=go 时从下载中心同版本目录
-     * 下载 Go 版在线升级容器 agent-go-&lt;version&gt;-upgrade.jar。</p>
+     * 按节点平台下载 Go 版在线升级容器 agent-go-&lt;version&gt;-upgrade-&lt;os&gt;-&lt;arch&gt;.jar
+     * （linux/amd64 下载不到时回退兼容别名 agent-go-&lt;version&gt;-upgrade.jar）。</p>
      *
-     * @param engine 引擎：java（默认）/ go
+     * @param engine   引擎：java（默认）/ go
+     * @param platform 节点平台（os/arch，engine=go 时使用；为空按 linux/amd64 legacy 处理）
      * @return json
      * @see RemoteVersion
      */
     @GetMapping(value = "download_remote.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.REMOTE_DOWNLOAD)
-    public IJsonMessage<String> downloadRemote(String engine) throws IOException {
+    public IJsonMessage<String> downloadRemote(String engine, String platform) throws IOException {
         if (AgentEngine.parse(engine) == AgentEngine.GO) {
-            // Go 升级容器（下载中心同版本目录，文件名 agent-go-<version>-upgrade.jar）
-            agentPackageService.downloadGoPackage();
+            String targetPlatform = null;
+            if (StrUtil.isNotBlank(platform)) {
+                targetPlatform = AgentPackageResolver.normalizePlatform(platform);
+                if (StrUtil.isBlank(targetPlatform)) {
+                    return new JsonMessage<>(405, StrUtil.format(I18nMessageUtil.get("i18n.agent_package_platform_invalid.b1fb"), platform));
+                }
+            }
+            // Go 升级容器（下载中心同版本目录，按平台命名，linux/amd64 回退兼容别名）
+            agentPackageService.downloadGoPackage(targetPlatform);
             return JsonMessage.success(I18nMessageUtil.get("i18n.download_success.5094"));
         }
         String saveDir = serverConfig.getAgentPath().getAbsolutePath();
@@ -116,11 +125,16 @@ public class NodeUpdateController extends BaseServerController {
     public IJsonMessage<JSONObject> checkVersion() {
         cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
         AgentFileModel agentFileModel = agentPackageService.get(AgentEngine.JAVA);
+        AgentEngine engine = agentFileModel == null ? null : AgentEngine.JAVA;
         if (agentFileModel == null) {
             // 没有 Java 升级包时使用 Go 升级包版本（纯 Go 集群的版本展示，不影响 Java 集群）
             agentFileModel = agentPackageService.get(AgentEngine.GO);
+            engine = agentFileModel == null ? null : AgentEngine.GO;
         }
         JSONObject jsonObject = new JSONObject();
+        // 升级页展示引擎/平台/包类型（旧前端忽略新增字段；没有本地升级包时 engine/platform 为空）
+        jsonObject.put("engine", engine == null ? null : engine.getName());
+        jsonObject.put("platform", agentFileModel == null ? null : agentFileModel.getPlatform());
         if (remoteVersion == null) {
             jsonObject.put("upgrade", false);
         } else {
@@ -170,11 +184,6 @@ public class NodeUpdateController extends BaseServerController {
         // Go 升级容器：按容器结构校验（旧 Server 的 checkJpomJar 要求 Main-Class 可从 jar 根加载，
         // 容器空壳 class 位于 BOOT-INF/classes 时无法加载，这里不依赖该检查）
         if (AgentPackageResolver.isGoContainer(file)) {
-            String containerError = AgentPackageResolver.validateGoContainer(file);
-            if (containerError != null) {
-                FileUtil.del(path);
-                return new JsonMessage<>(405, StrUtil.format(I18nMessageUtil.get("i18n.invalid_go_agent_upgrade_container.0755"), containerError));
-            }
             AgentPackageInfo packageInfo;
             try {
                 packageInfo = AgentPackageResolver.inspectPackage(file);
@@ -182,7 +191,14 @@ public class NodeUpdateController extends BaseServerController {
                 FileUtil.del(path);
                 return new JsonMessage<>(405, StrUtil.format(I18nMessageUtil.get("i18n.invalid_go_agent_upgrade_container.0755"), e.getMessage()));
             }
-            agentPackageService.save(AgentEngine.GO, file, packageInfo.getVersion(), packageInfo.getTimeStamp());
+            // 升级容器必须声明平台且存在对应平台的可执行文件；旧容器（未声明 platform）保持旧结构校验
+            String expectedPlatform = AgentPackageResolver.normalizePlatform(packageInfo.getPlatform());
+            String containerError = AgentPackageResolver.validateGoContainer(file, expectedPlatform);
+            if (containerError != null) {
+                FileUtil.del(path);
+                return new JsonMessage<>(405, StrUtil.format(I18nMessageUtil.get("i18n.invalid_go_agent_upgrade_container.0755"), containerError));
+            }
+            agentPackageService.save(AgentEngine.GO, file, packageInfo.getVersion(), packageInfo.getTimeStamp(), expectedPlatform);
             return JsonMessage.success(I18nMessageUtil.get("i18n.upload_success.a769"));
         }
         // Java 插件端升级包：保持原有 checkJpomJar 校验与保存行为
@@ -205,8 +221,9 @@ public class NodeUpdateController extends BaseServerController {
             log.warn(I18nMessageUtil.get("i18n.parse_jar.a26e"), e);
         }
         if (packageInfo != null && packageInfo.isGoContainer()) {
-            // Go 升级容器（兼容旧数据：历史上传可能未做分类）：与 Java 升级包分开保存
-            agentPackageService.save(AgentEngine.GO, file, packageInfo.getVersion(), packageInfo.getTimeStamp());
+            // Go 升级容器（兼容旧数据：历史上传可能未做分类）：与 Java 升级包分开保存，记录平台
+            agentPackageService.save(AgentEngine.GO, file, packageInfo.getVersion(), packageInfo.getTimeStamp(),
+                AgentPackageResolver.normalizePlatform(packageInfo.getPlatform()));
             return;
         }
         agentPackageService.save(AgentEngine.JAVA, file, data.get(0), data.get(1));

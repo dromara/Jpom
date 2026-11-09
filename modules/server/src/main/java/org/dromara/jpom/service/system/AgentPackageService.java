@@ -99,7 +99,67 @@ public class AgentPackageService {
     }
 
     /**
-     * 保存升级包信息，并清理同引擎的历史包（保留另一引擎正在使用的包）
+     * 读取已上传的 Go 升级包（按节点平台匹配）
+     *
+     * @param engine   引擎
+     * @param platform 节点平台（os/arch），为空时不筛选（兼容旧调用）
+     * @return 匹配平台的升级包，不存在/平台不匹配返回 null
+     */
+    public AgentFileModel get(AgentEngine engine, String platform) {
+        return this.get(engine, platform, true);
+    }
+
+    /**
+     * 读取已上传的 Go 升级包（按节点平台匹配）
+     *
+     * <p>多架构场景下一个 Server 的 Go 升级包槽位只保存一份；这里按节点平台筛选，平台不匹配时
+     * 返回 null，由调用方按平台重新下载。旧版上传的包没有记录 platform 时读取容器内
+     * agent.json.platform 兜底；仍未声明平台的 legacy 包仅允许 linux/amd64 节点使用。</p>
+     *
+     * @param engine         引擎
+     * @param platform       节点平台（os/arch），为空时不筛选（兼容旧调用）
+     * @param checkFileExist 是否校验文件存在
+     * @return 匹配平台的升级包，不存在/平台不匹配返回 null
+     */
+    public AgentFileModel get(AgentEngine engine, String platform, boolean checkFileExist) {
+        AgentFileModel model = this.get(engine, checkFileExist);
+        if (model == null || engine != AgentEngine.GO) {
+            return model;
+        }
+        String expected = AgentPackageResolver.normalizePlatform(platform);
+        if (StrUtil.isBlank(expected)) {
+            return model;
+        }
+        String actual = AgentPackageResolver.normalizePlatform(model.getPlatform());
+        if (StrUtil.isBlank(actual)) {
+            // 兼容旧数据：早期上传的 Go 升级包没有记录 platform，直接读取容器内 agent.json
+            actual = this.resolvePackagePlatform(model);
+        }
+        if (StrUtil.isBlank(actual)) {
+            // legacy 升级包（未声明平台）：仅 linux/amd64 节点可用
+            return AgentPackageResolver.DEFAULT_PLATFORM.equals(expected) ? model : null;
+        }
+        return StrUtil.equals(expected, actual) ? model : null;
+    }
+
+    /**
+     * 读取升级包文件内声明的平台（兼容没有记录 platform 的旧数据）
+     *
+     * @param model 升级包参数
+     * @return 平台，读取失败返回 null
+     */
+    private String resolvePackagePlatform(AgentFileModel model) {
+        try {
+            AgentPackageInfo info = AgentPackageResolver.inspectPackage(FileUtil.file(model.getSavePath()));
+            return AgentPackageResolver.normalizePlatform(info.getPlatform());
+        } catch (Exception e) {
+            log.warn("{} {}", I18nMessageUtil.get("i18n.parse_jar.a26e"), e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 保存升级包信息（不记录平台，兼容旧调用）
      *
      * @param engine    引擎
      * @param file      升级包文件（已经位于 server 的 agent 目录）
@@ -108,12 +168,27 @@ public class AgentPackageService {
      * @return 升级包参数
      */
     public AgentFileModel save(AgentEngine engine, File file, String version, String timeStamp) {
+        return this.save(engine, file, version, timeStamp, null);
+    }
+
+    /**
+     * 保存升级包信息，并清理同引擎的历史包（保留另一引擎正在使用的包）
+     *
+     * @param engine    引擎
+     * @param file      升级包文件（已经位于 server 的 agent 目录）
+     * @param version   版本号
+     * @param timeStamp 打包时间
+     * @param platform  Go 升级容器平台（os/arch），Java 包忽略
+     * @return 升级包参数
+     */
+    public AgentFileModel save(AgentEngine engine, File file, String version, String timeStamp, String platform) {
         AgentFileModel agentFileModel = new AgentFileModel();
         agentFileModel.setName(file.getName());
         agentFileModel.setSize(file.length());
         agentFileModel.setSavePath(FileUtil.getAbsolutePath(file));
         agentFileModel.setVersion(AgentPackageResolver.normalizeVersion(version));
         agentFileModel.setTimeStamp(timeStamp);
+        agentFileModel.setPlatform(engine == AgentEngine.GO ? AgentPackageResolver.normalizePlatform(platform) : null);
         String id = engine == AgentEngine.GO ? GO_ID : AgentFileModel.ID;
         systemParametersServer.upsert(id, agentFileModel, id);
         this.cleanOldFiles(engine, file);
@@ -121,15 +196,35 @@ public class AgentPackageService {
     }
 
     /**
-     * 从下载中心自动下载官方 Go 升级容器
-     *
-     * <p>下载地址由 Java 插件端下载地址（RemoteVersion.agentUrl，已经过授权 token 替换）
-     * 同目录推导：agent-go-&lt;version&gt;-upgrade.jar；存在 .sha1 时校验完整性。
-     * 同名（同样版本）的本地包已存在时直接复用，避免重复下载。</p>
+     * 从下载中心自动下载官方 Go 升级容器（未指定平台时按 linux/amd64 兼容别名处理）
      *
      * @return Go 升级包参数
      */
     public synchronized AgentFileModel downloadGoPackage() {
+        return this.downloadGoPackage(null);
+    }
+
+    /**
+     * 从下载中心自动下载官方 Go 升级容器（按节点平台）
+     *
+     * <p>下载地址由 Java 插件端下载地址（RemoteVersion.agentUrl，已经过授权 token 替换）
+     * 同目录推导：agent-go-&lt;version&gt;-upgrade-&lt;os&gt;-&lt;arch&gt;.jar；linux/amd64 下载不到时
+     * 回退兼容别名 agent-go-&lt;version&gt;-upgrade.jar。存在 .sha1 时校验完整性，下载后校验容器
+     * 结构与平台是否与节点一致。同版本且同平台的本地包已存在时直接复用，避免重复下载。</p>
+     *
+     * @param platform 节点平台（os/arch），为空按 linux/amd64 处理
+     * @return Go 升级包参数
+     */
+    public synchronized AgentFileModel downloadGoPackage(String platform) {
+        String targetPlatform;
+        if (StrUtil.isBlank(platform)) {
+            targetPlatform = AgentPackageResolver.DEFAULT_PLATFORM;
+        } else {
+            targetPlatform = AgentPackageResolver.normalizePlatform(platform);
+            if (StrUtil.isBlank(targetPlatform)) {
+                throw new IllegalStateException(StrUtil.format(I18nMessageUtil.get("i18n.agent_package_platform_invalid.b1fb"), platform));
+            }
+        }
         cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersion.loadRemoteInfo();
         if (remoteVersion == null) {
             throw new IllegalStateException(I18nMessageUtil.get("i18n.no_available_new_version_upgrade.d8f2"));
@@ -139,12 +234,12 @@ public class AgentPackageService {
         if (StrUtil.isBlank(version)) {
             version = AgentPackageResolver.parseVersionInUrl(agentUrl);
         }
-        String goUrl = AgentPackageResolver.buildGoUpgradeUrl(agentUrl, version);
+        String goUrl = AgentPackageResolver.buildGoUpgradeUrl(agentUrl, version, targetPlatform);
         if (StrUtil.isBlank(goUrl)) {
             throw new IllegalStateException(I18nMessageUtil.get("i18n.new_version_exists_download_unavailable.4ba7"));
         }
-        // 同版本已经下载过则直接复用
-        AgentFileModel exists = this.get(AgentEngine.GO);
+        // 同版本且同平台已经下载过则直接复用（多架构缓存按平台区分）
+        AgentFileModel exists = this.get(AgentEngine.GO, targetPlatform);
         if (exists != null && StrUtil.equals(version, AgentPackageResolver.normalizeVersion(exists.getVersion()))) {
             return exists;
         }
@@ -153,18 +248,31 @@ public class AgentPackageService {
         try {
             downloadFile = HttpUtil.downloadFileFromUrl(goUrl, agentPath);
         } catch (HttpException e) {
-            String message = this.sanitize(e.getMessage());
-            log.error("{}{}", I18nMessageUtil.get("i18n.download_failed.65e2"), message);
-            throw new IllegalStateException(I18nMessageUtil.get("i18n.download_failed.65e2") + message);
+            if (!AgentPackageResolver.DEFAULT_PLATFORM.equals(targetPlatform)) {
+                throw this.downloadFailed(targetPlatform, e);
+            }
+            // linux/amd64 回退兼容别名 agent-go-<version>-upgrade.jar（旧下载中心/手工发布只提供别名）
+            String aliasUrl = AgentPackageResolver.buildGoUpgradeAliasUrl(agentUrl, version);
+            if (StrUtil.isBlank(aliasUrl) || StrUtil.equals(aliasUrl, goUrl)) {
+                throw this.downloadFailed(targetPlatform, e);
+            }
+            log.warn("{} {}", StrUtil.format(I18nMessageUtil.get("i18n.download_go_agent_package_failed.4d5d"), targetPlatform, this.sanitize(e.getMessage())),
+                "fallback to alias " + aliasUrl);
+            try {
+                downloadFile = HttpUtil.downloadFileFromUrl(aliasUrl, agentPath);
+                goUrl = aliasUrl;
+            } catch (HttpException fallbackException) {
+                throw this.downloadFailed(targetPlatform, fallbackException);
+            }
         }
         try {
-            this.verifyDownloaded(version, goUrl, downloadFile);
-            File target = FileUtil.file(agentPath, AgentPackageResolver.goUpgradeFileName(version));
+            this.verifyDownloaded(version, targetPlatform, goUrl, downloadFile);
+            File target = FileUtil.file(agentPath, AgentPackageResolver.goUpgradeFileName(version, targetPlatform));
             if (!FileUtil.equals(target, downloadFile)) {
                 FileUtil.move(downloadFile, target, true);
             }
             AgentPackageInfo info = AgentPackageResolver.inspectPackage(target);
-            return this.save(AgentEngine.GO, target, info.getVersion(), info.getTimeStamp());
+            return this.save(AgentEngine.GO, target, info.getVersion(), info.getTimeStamp(), targetPlatform);
         } catch (RuntimeException | IOException e) {
             FileUtil.del(downloadFile);
             throw e instanceof IllegalStateException ? (IllegalStateException) e
@@ -172,18 +280,25 @@ public class AgentPackageService {
         }
     }
 
+    private IllegalStateException downloadFailed(String platform, Exception e) {
+        String message = this.sanitize(e.getMessage());
+        log.error("{}{}", I18nMessageUtil.get("i18n.download_failed.65e2"), message);
+        return new IllegalStateException(StrUtil.format(I18nMessageUtil.get("i18n.download_go_agent_package_failed.4d5d"), platform, message));
+    }
+
     /**
      * 校验下载的 Go 升级容器
      *
      * @param version      期望版本
+     * @param platform     期望平台（os/arch）
      * @param goUrl        下载地址（用于推导 .sha1）
      * @param downloadFile 下载的文件
      * @throws IOException IO
      */
-    private void verifyDownloaded(String version, String goUrl, File downloadFile) throws IOException {
+    private void verifyDownloaded(String version, String platform, String goUrl, File downloadFile) throws IOException {
         this.verifyRemoteSha1(goUrl, downloadFile);
         // Go 升级容器按容器结构校验（不依赖旧 Server 的 checkJpomJar：容器空壳 Main-Class 位于 BOOT-INF/classes）
-        String containerError = AgentPackageResolver.validateGoContainer(downloadFile);
+        String containerError = AgentPackageResolver.validateGoContainer(downloadFile, platform);
         if (containerError != null) {
             throw new IllegalStateException(StrUtil.format(I18nMessageUtil.get("i18n.invalid_go_agent_upgrade_container.0755"), containerError));
         }
@@ -194,6 +309,11 @@ public class AgentPackageService {
         if (StrUtil.isNotBlank(version) && !StrUtil.equals(version, info.getVersion())) {
             throw new IllegalStateException(StrUtil.format(I18nMessageUtil.get("i18n.invalid_go_agent_upgrade_container.0755"),
                 downloadFile.getName() + " " + info.getVersion() + " != " + version));
+        }
+        String packagePlatform = AgentPackageResolver.normalizePlatform(info.getPlatform());
+        if (!StrUtil.equals(packagePlatform, AgentPackageResolver.normalizePlatform(platform))) {
+            throw new IllegalStateException(StrUtil.format(I18nMessageUtil.get("i18n.invalid_go_agent_upgrade_container.0755"),
+                downloadFile.getName() + " platform " + packagePlatform + " != " + platform));
         }
     }
 

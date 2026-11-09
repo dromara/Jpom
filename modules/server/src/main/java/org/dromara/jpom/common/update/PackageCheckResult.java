@@ -29,6 +29,10 @@ public enum PackageCheckResult {
      */
     ENGINE_MISMATCH,
     /**
+     * 节点平台与升级包平台不匹配（含 legacy 包/旧节点只能使用 linux/amd64 的限制）
+     */
+    PLATFORM_MISMATCH,
+    /**
      * 新包版本和正在运行的版本一致
      */
     SAME_VERSION,
