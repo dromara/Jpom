@@ -64,18 +64,16 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-          cache-dependency-path: web-vue/package-lock.json
+          # package-lock.json 未纳入版本库（.gitignore），用 package.json 作为缓存 key
+          cache-dependency-path: web-vue/package.json
 
       - name: 构建前端
         working-directory: web-vue
         shell: bash
         run: |
           set -euo pipefail
-          # package-lock.json 与 package.json 不同步时 npm ci 会失败：回退 npm install 并给出告警
-          npm ci --no-audit --no-fund || {
-            echo "::warning::npm ci 失败（package-lock.json 可能不同步），回退 npm install"
-            npm install --no-audit --no-fund
-          }
+          # 仓库未提交 package-lock.json（被 .gitignore 忽略），使用 npm install；缓存 key 为 package.json
+          npm install --no-audit --no-fund
           npm run build
 
       - name: 设置 JDK ${{ env.JAVA_VERSION }}
