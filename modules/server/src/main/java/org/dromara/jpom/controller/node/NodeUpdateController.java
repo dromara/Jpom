@@ -23,6 +23,9 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.*;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.update.AgentEngine;
+import org.dromara.jpom.common.update.AgentPackageInfo;
+import org.dromara.jpom.common.update.AgentPackageResolver;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.controller.system.SystemUpdateController;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
@@ -32,6 +35,7 @@ import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.permission.SystemPermission;
+import org.dromara.jpom.service.system.AgentPackageService;
 import org.dromara.jpom.service.system.SystemParametersServer;
 import org.dromara.jpom.system.ServerConfig;
 import org.springframework.http.MediaType;
@@ -65,22 +69,34 @@ public class NodeUpdateController extends BaseServerController {
 
     private final SystemParametersServer systemParametersServer;
     private final ServerConfig serverConfig;
+    private final AgentPackageService agentPackageService;
 
     public NodeUpdateController(SystemParametersServer systemParametersServer,
-                                ServerConfig serverConfig) {
+                                ServerConfig serverConfig,
+                                AgentPackageService agentPackageService) {
         this.systemParametersServer = systemParametersServer;
         this.serverConfig = serverConfig;
+        this.agentPackageService = agentPackageService;
     }
 
     /**
      * 远程下载
      *
+     * <p>默认下载 Java 版插件端发布包（保持原有行为）；engine=go 时从下载中心同版本目录
+     * 下载 Go 版在线升级容器 agent-go-&lt;version&gt;-upgrade.jar。</p>
+     *
+     * @param engine 引擎：java（默认）/ go
      * @return json
      * @see RemoteVersion
      */
     @GetMapping(value = "download_remote.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.REMOTE_DOWNLOAD)
-    public IJsonMessage<String> downloadRemote() throws IOException {
+    public IJsonMessage<String> downloadRemote(String engine) throws IOException {
+        if (AgentEngine.parse(engine) == AgentEngine.GO) {
+            // Go 升级容器（下载中心同版本目录，文件名 agent-go-<version>-upgrade.jar）
+            agentPackageService.downloadGoPackage();
+            return JsonMessage.success(I18nMessageUtil.get("i18n.download_success.5094"));
+        }
         String saveDir = serverConfig.getAgentPath().getAbsolutePath();
         Tuple download = RemoteVersion.download(saveDir, Type.Agent, false);
         // 保存文件
@@ -99,12 +115,11 @@ public class NodeUpdateController extends BaseServerController {
     @GetMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<JSONObject> checkVersion() {
         cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
-        AgentFileModel agentFileModel = systemParametersServer.getConfig(AgentFileModel.ID, AgentFileModel.class, agentFileModel1 -> {
-            if (agentFileModel1 == null || !FileUtil.exist(agentFileModel1.getSavePath())) {
-                return null;
-            }
-            return agentFileModel1;
-        });
+        AgentFileModel agentFileModel = agentPackageService.get(AgentEngine.JAVA);
+        if (agentFileModel == null) {
+            // 没有 Java 升级包时使用 Go 升级包版本（纯 Go 集群的版本展示，不影响 Java 集群）
+            agentFileModel = agentPackageService.get(AgentEngine.GO);
+        }
         JSONObject jsonObject = new JSONObject();
         if (remoteVersion == null) {
             jsonObject.put("upgrade", false);
@@ -152,33 +167,49 @@ public class NodeUpdateController extends BaseServerController {
         // 解析压缩包
         File file = JpomManifest.zipFileFind(path, Type.Agent, agentPath.getAbsolutePath());
         path = FileUtil.getAbsolutePath(file);
-        // 基础检查
+        // Go 升级容器：按容器结构校验（旧 Server 的 checkJpomJar 要求 Main-Class 可从 jar 根加载，
+        // 容器空壳 class 位于 BOOT-INF/classes 时无法加载，这里不依赖该检查）
+        if (AgentPackageResolver.isGoContainer(file)) {
+            String containerError = AgentPackageResolver.validateGoContainer(file);
+            if (containerError != null) {
+                FileUtil.del(path);
+                return new JsonMessage<>(405, StrUtil.format(I18nMessageUtil.get("i18n.invalid_go_agent_upgrade_container.0755"), containerError));
+            }
+            AgentPackageInfo packageInfo;
+            try {
+                packageInfo = AgentPackageResolver.inspectPackage(file);
+            } catch (IOException e) {
+                FileUtil.del(path);
+                return new JsonMessage<>(405, StrUtil.format(I18nMessageUtil.get("i18n.invalid_go_agent_upgrade_container.0755"), e.getMessage()));
+            }
+            agentPackageService.save(AgentEngine.GO, file, packageInfo.getVersion(), packageInfo.getTimeStamp());
+            return JsonMessage.success(I18nMessageUtil.get("i18n.upload_success.a769"));
+        }
+        // Java 插件端升级包：保持原有 checkJpomJar 校验与保存行为
         JsonMessage<Tuple> error = JpomManifest.checkJpomJar(path, Type.Agent, false);
         if (!error.success()) {
             FileUtil.del(path);
             return new JsonMessage<>(error.getCode(), error.getMsg());
         }
-        // 保存文件
+        // 保存文件（按包内容自动区分 Java / Go 升级包）
         this.saveAgentFile(error.getData());
         return JsonMessage.success(I18nMessageUtil.get("i18n.upload_success.a769"));
     }
 
     private void saveAgentFile(Tuple data) {
         File file = data.get(3);
-        AgentFileModel agentFileModel = new AgentFileModel();
-        agentFileModel.setName(file.getName());
-        agentFileModel.setSize(file.length());
-        agentFileModel.setSavePath(FileUtil.getAbsolutePath(file));
-        //
-        agentFileModel.setVersion(data.get(0));
-        agentFileModel.setTimeStamp(data.get(1));
-        systemParametersServer.upsert(AgentFileModel.ID, agentFileModel, AgentFileModel.ID);
-        // 删除历史包  @author jzy 2021-08-03
-        String saveDir = serverConfig.getAgentPath().getAbsolutePath();
-        List<File> files = FileUtil.loopFiles(saveDir, pathname -> !FileUtil.equals(pathname, file));
-        for (File file1 : files) {
-            FileUtil.del(file1);
+        AgentPackageInfo packageInfo = null;
+        try {
+            packageInfo = AgentPackageResolver.inspectPackage(file);
+        } catch (IOException e) {
+            log.warn(I18nMessageUtil.get("i18n.parse_jar.a26e"), e);
         }
+        if (packageInfo != null && packageInfo.isGoContainer()) {
+            // Go 升级容器（兼容旧数据：历史上传可能未做分类）：与 Java 升级包分开保存
+            agentPackageService.save(AgentEngine.GO, file, packageInfo.getVersion(), packageInfo.getTimeStamp());
+            return;
+        }
+        agentPackageService.save(AgentEngine.JAVA, file, data.get(0), data.get(1));
     }
 
     @Feature(method = MethodFeature.EXECUTE)
