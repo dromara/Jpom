@@ -67,7 +67,7 @@ emit() {
 	fi
 }
 
-# 1. 渠道
+# 1. 渠道初值（auto 时先按 ref 推导：tag / beta 分支 / 其它；dev 分支自检会在下面按 pom 版本修正）
 channel="$channel_input"
 if [ "$channel" = "auto" ]; then
 	case "$ref" in
@@ -76,34 +76,20 @@ if [ "$channel" = "auto" ]; then
 	*) channel="release" ;;
 	esac
 fi
-case "$channel" in
-release | beta) ;;
-*) die "不支持的 channel：${channel}（可选 auto/release/beta）" ;;
-esac
 
-# 2. 版本
-version="$version_input"
-if [ -z "$version" ]; then
-	case "$ref" in
-	refs/tags/*) version="${ref_name#v}" ;;
-	*)
-		tag_file="${parent_dir}/script/tag.${channel}.txt"
-		[ -f "$tag_file" ] || die "缺少版本号来源文件：${tag_file}"
-		version=$(tr -d ' \t\r\n' <"$tag_file")
-		;;
-	esac
-fi
-[ -n "$version" ] || die "无法推导版本号，请通过 version 输入或 tag 文件指定"
-case "$channel" in
-release)
-	[[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || die "release 版本号格式不正确：${version}（期望 x.y.z）"
-	;;
-beta)
-	[[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] || die "beta 版本号格式不正确：${version}（期望 x.y.z.N）"
+# 2. 分支 push 仅做构建自检（不写 R2，强制 dry_run）
+self_test=0
+case "$ref" in
+refs/heads/*)
+	if [ "$event" = "push" ]; then
+		self_test=1
+		dry_run="true"
+		log "[WARN] 分支 push 触发，强制 dry_run=true（只构建/校验，不上传 R2）"
+	fi
 	;;
 esac
 
-# 3. pom.xml 版本必须与目标版本一致（发版前应先跑 replaceVersion.sh 并提交）
+# 3. 读取 pom 版本（用于版本推导与一致性校验）
 pom_version=$(python3 - "$parent_dir/pom.xml" <<'PY'
 import sys
 import xml.etree.ElementTree as ET
@@ -115,11 +101,55 @@ print((node.text or "").strip() if node is not None else "")
 PY
 )
 [ -n "$pom_version" ] || die "无法从 jpom-parent/pom.xml 读取项目版本"
+
+# 4. 版本：显式输入 > tag > tag 文件
+#    分支自检（dry_run）时若 tag 文件版本与 pom 实际版本不一致（dev 常态：pom 是下一个 beta 版本），
+#    按 pom 版本构建自检产物，避免“版本不一致”误判导致 workflow 自检必然失败。
+version="$version_input"
+if [ -z "$version" ]; then
+	case "$ref" in
+	refs/tags/*) version="${ref_name#v}" ;;
+	*)
+		tag_file="${parent_dir}/script/tag.${channel}.txt"
+		[ -f "$tag_file" ] || die "缺少版本号来源文件：${tag_file}"
+		version=$(tr -d ' \t\r\n' <"$tag_file")
+		;;
+	esac
+	if [ "$self_test" = "1" ] && [ "$version" != "$pom_version" ]; then
+		log "[WARN] 分支自检：tag.${channel}.txt 版本 ${version} 与 pom 版本 ${pom_version} 不一致，按 pom 版本构建（dry_run，不上传）"
+		version="$pom_version"
+		if [ "$channel_input" = "auto" ]; then
+			if [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+				channel="beta"
+			elif [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+				channel="release"
+			fi
+			log "[WARN] 分支自检：按 pom 版本将自检渠道调整为 ${channel}"
+		fi
+	fi
+fi
+[ -n "$version" ] || die "无法推导版本号，请通过 version 输入或 tag 文件指定"
+case "$channel" in
+release)
+	[[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || die "release 版本号格式不正确：${version}（期望 x.y.z）"
+	;;
+beta)
+	[[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] || die "beta 版本号格式不正确：${version}（期望 x.y.z.N）"
+	;;
+*) die "不支持的 channel：${channel}（可选 auto/release/beta）" ;;
+esac
+
+# 5. pom 版本必须与目标版本一致（正式发布强校验，防止忘替换版本就发版；
+#    分支 push 的 dry-run 自检仅告警，不阻断 workflow 自检）
 if [ "$pom_version" != "$version" ]; then
-	die "版本不一致：jpom-parent/pom.xml 项目版本=${pom_version}，期望 ${version}（请先执行 replaceVersion.sh 并提交/打 tag）"
+	if [ "$self_test" = "1" ]; then
+		log "[WARN] 分支自检：pom 版本 ${pom_version} 与构建版本 ${version} 不一致（dry_run 仅自检，忽略）"
+	else
+		die "版本不一致：jpom-parent/pom.xml 项目版本=${pom_version}，期望 ${version}（请先执行 replaceVersion.sh 并提交/打 tag）"
+	fi
 fi
 
-# 4. 目标路径前缀（POC/灰度），禁止把 POC 前缀写成正式目录的同义路径
+# 6. 目标路径前缀（POC/灰度），禁止把 POC 前缀写成正式目录的同义路径
 target_prefix="${target_prefix#/}"
 target_prefix="${target_prefix%/}"
 if [ -n "$target_prefix" ]; then
@@ -130,7 +160,7 @@ if [ -n "$target_prefix" ]; then
 	log "[WARN] 使用 target_prefix=${target_prefix}，上传到 ${target_prefix}/${channel}/${version}/（非正式目录，验证后请清理）"
 fi
 
-# 5. 布尔与包名
+# 7. 布尔与包名
 case "$dry_run" in
 true | false) ;;
 *) die "INPUT_DRY_RUN 只能是 true/false：${dry_run}" ;;
@@ -148,17 +178,6 @@ merged_pkg="jpom-${version}.zip"
 go_dist_rel="go-agent/dist"
 go_upgrade_pkg="agent-go-${version}-upgrade.jar"
 
-# 分支 push 仅做构建自检（不写 R2）
-self_test=0
-case "$ref" in
-refs/heads/*)
-	if [ "$event" = "push" ]; then
-		self_test=1
-		dry_run="true"
-		log "[WARN] 分支 push 触发，强制 dry_run=true（只构建/校验，不上传 R2）"
-	fi
-	;;
-esac
 
 emit channel "$channel"
 emit version "$version"

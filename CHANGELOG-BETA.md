@@ -7,6 +7,7 @@
 1. 【agent-go】新增 Go 语言插件端：单二进制、低内存、免 JDK，兼容 Java 插件端的配置、数据和协议，可在 Java/Go 之间平滑切换，并支持在线升级。
 2. 【server】在线升级支持 Go 插件端：自动识别节点类型并下发对应升级包，Java 节点升级方式不变。
 3. 【agent-go】支持国际化、Windows/macOS 监控、7z 解压、GBK 编码、cron 年份/分组与升级失败自动回滚，并修正请求参数错误码等兼容性问题。
+4. 【agent-go】新增 Go 插件端多架构安装包与在线升级包（Linux/macOS 的 amd64、arm64 与 Windows amd64），升级包按节点平台精确匹配。
 
 ### 🐞 解决BUG、优化功能
 
@@ -17,12 +18,19 @@
 5. 【server】修复 Gitea/Gogs 的 GET webhook 把 push JSON 作为 `payload` 查询串携带、超过 Tomcat 默认请求行/请求头上限（8KB）导致接口直接返回 400 的问题：放宽 `server.max-http-header-size` 到 64KB（[Gitee issues IDG4PT](https://gitee.com/dromara/Jpom/issues/IDG4PT)）
 6. 【web-vue】优化 逻辑节点、项目列表、分发列表的自动刷新：默认关闭（开关仍按用户+表格持久化在浏览器本地），项目列表/分发列表刷新间隔由 5s 调整为 30s，浏览器标签页不可见时暂停自动刷新；项目列表按节点查询运行状态增加防重入与 15s 超时，避免节点离线时请求长期挂起并随刷新叠加，占满同源连接导致同页/同标签其它列表请求 20s 超时（[Gitee issues ICXOGI](https://gitee.com/dromara/Jpom/issues/ICXOGI)）
 7. 【server】修复 重置超级管理员密码（`--rest:super_user_pwd`）后新密码仅写入 `logs/server.log`、Windows 无控制台导致用户误以为重置失败的问题：命令执行结果同时输出到标准输出（`logs/stdout.log`/控制台）；超级管理员查询统一为 `systemUser=1`（保留 `parent=sys` 回退兼容旧数据），避免历史数据下静默失败（[Gitee issues IJNJZJ](https://gitee.com/dromara/Jpom/issues/IJNZJZ)）
+8. 【agent-go】修复 Windows 下启动/停止/状态脚本把错误码当 PID 的问题，启停与状态检测恢复可用。
+9. 【agent-go】修复部分下载接口的文件名响应头，中文文件名可正确下载与保存。
+10. 【agent-go】修复非 multipart 上传、请求方法不匹配等场景的错误码，与 Java 插件端保持一致。
+11. 【agent-go】修复 macOS 缺少发布包、arm64/Windows 节点无法使用对应平台在线升级包的问题。
 
 ### ⚠️ 升级说明
 
 1. **严格构建语义变化**：开启【严格构建】后，sh 构建脚本会在环境模板之后、用户命令之前注入 `set -e`（bash 同时 `set -o pipefail`），中间命令或管道中任一命令失败会立即中断，不再继续执行后续命令（此前仅在脚本整体退出码非 0 时才判定失败）。依赖“某条命令失败后继续执行”的严格构建脚本，请在脚本开头显式 `set +e` 自行管理；非严格构建（推荐用于允许中间命令失败的场景）与 Windows 批处理不受影响。
 2. **Gitea/Gogs GET webhook 请求头上限**：新安装包默认 `server.max-http-header-size: 65536`（64KB）。**已安装实例的外部配置文件 `conf/application.yml` 不会随升级自动覆盖**，如仍遇到 Gitea/Gogs GET webhook 400，请在该文件 `server:` 下增加 `max-http-header-size: 65536`（或在【系统管理 → 外部配置文件】中重置为默认配置后按需调整），再重启服务端。该配置仅放宽单个请求行/请求头的大小上限，普通请求行为不变；使用反向代理时建议在代理侧同步限制请求头大小。
 3. **列表自动刷新默认值变化**：逻辑节点、项目列表、分发列表的自动刷新默认关闭（此前默认开启），仍可在页面右上角手动开启，并按“用户+表格”持久化在浏览器本地；项目列表/分发列表刷新间隔调整为 30 秒，浏览器标签页不可见时暂停自动刷新。此前已手动开启自动刷新的用户不受影响（本地配置优先）。
+4. **Go 插件端多架构**：安装包与在线升级包按平台区分（linux/darwin 的 amd64、arm64，windows-amd64），升级容器必须与节点平台一致；旧版 Server 手工上传时 linux-amd64 可用 `agent-go-<version>-upgrade.jar` 兼容别名。下载页已补充 Go 包链接。
+5. **Go 插件端 Windows 用户**：请使用新版本包内修复后的 `bin\AgentGo.bat`（旧脚本 status/stop 可能不生效）；服务托管只保留一种方式（nssm/sc 或手工启动）。
+6. **Go 插件端配置提示**：`JPOM_SERVICE` 与 Java 的 `-D` 启动参数对 Go 插件端无效；AES 密钥请用环境变量 `JPOM_ENCRYPT_AES_KEY`（与服务端一致），升级后拉起由 systemd/nssm 配置负责。
 
 
 ------

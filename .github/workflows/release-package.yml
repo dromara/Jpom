@@ -1,23 +1,29 @@
 name: release-package
 
-# 构建 Jpom 发布包（server/agent 的 zip、tar.gz、sha1 + 合并包 + Go 插件端产物）并上传 Cloudflare R2。
+# 构建 Jpom 发布包（server/agent 的 zip、tar.gz、sha1 + 合并包 + Go 插件端多架构产物）并上传 Cloudflare R2。
 #
 # 设计要点：
 # 1. 稳定版：推 tag `v*` 后自动构建并上传到 R2 `release/<version>/`（与 d2 路径一致，只是上传走 R2 S3 API）。
 # 2. beta：由 `release.sh beta`（或手动 dispatch）触发，上传到 `beta/<version>/`。
-# 3. 分支 push（仅 workflow/辅助脚本变更）触发一次 dry_run 自检：只构建+校验，不上传。
+# 3. 分支 push（仅 workflow/辅助脚本变更）触发一次 dry_run 自检：Go 质量门禁（gofmt/build/vet/test）
+#    + 构建 + 校验，不上传。
 # 4. 校验使用与 release.sh 相同的 `script/verify-release-artifacts.sh`；回验用 r2.dev（runner 访问 d2 会被 Cloudflare challenge）。
 # 5. 需要仓库 secrets：R2_ACCOUNT_ID、R2_ACCESS_KEY_ID、R2_SECRET_ACCESS_KEY（建议只对 jpom-releases-apac bucket 读写的 R2 API Token）。
 # 6. 可选仓库变量：R2_BUCKET（默认 jpom-releases-apac）、JPOM_DOWNLOAD_BASE（回验基址，默认 r2.dev）、
 #    GO_AGENT_MIN_VERSION（Go 升级容器 agent.json.minVersion，默认 1.0.0，后续 Go 版本不兼容时提高）。
 #
 # Go 插件端产物（与 Java 产物同版本目录，供 Server 在线升级/下载中心使用）：
-#   agent-go-<version>-release-linux-amd64.{zip,tar.gz} + .sha1
-#   agent-go-<version>-release-linux-arm64.{zip,tar.gz} + .sha1
-#   agent-go-<version>-release-windows-amd64.zip + .sha1      （Windows 只出 zip）
-#   agent-go-<version>-upgrade.jar + .sha1                   （Server 在线升级用 jar 运输容器，linux/amd64）
-# 说明：upgrade.jar 当前只含 linux/amd64 可执行文件（Go Agent 会校验 platform），Windows Go 节点请使用
-#       自建对应对平台的容器包（go-agent/script/build-upgrade-container.sh）走 /node/upload-agent-sharding* 上传。
+#   安装包（5 平台，非 Windows 出 zip+tar.gz，Windows 只出 zip）：
+#     agent-go-<version>-release-linux-amd64.{zip,tar.gz}
+#     agent-go-<version>-release-linux-arm64.{zip,tar.gz}
+#     agent-go-<version>-release-darwin-amd64.{zip,tar.gz}
+#     agent-go-<version>-release-darwin-arm64.{zip,tar.gz}
+#     agent-go-<version>-release-windows-amd64.zip
+#   在线升级容器（5 平台，Server 按节点平台下发）+ linux/amd64 兼容别名：
+#     agent-go-<version>-upgrade-<os>-<arch>.jar
+#     agent-go-<version>-upgrade.jar（= linux/amd64 副本，供旧 Server 手工上传/默认回退）
+# 说明：每个升级容器内含对应平台可执行文件与 go-agent/agent.json（version/timeStamp/minVersion/
+#       platform/sha256），Agent 端会做平台精确匹配，不匹配的容器会被拒绝且不改动现有二进制。
 #
 # 安全：R2 凭据只从 secrets 注入，绝不落盘/打印；POC 用 target_prefix=ci-test（不写正式目录）。
 
@@ -102,7 +108,22 @@ jobs:
           cache: true
           cache-dependency-path: go-agent/go.sum
 
-      - name: 构建 Go 插件端发布包与在线升级容器
+      - name: Go 质量门禁（gofmt/build/vet/test）
+        working-directory: go-agent
+        shell: bash
+        run: |
+          set -euo pipefail
+          unformatted=$(gofmt -l $(find . -path ./.cache -prune -o -name "*.go" -print))
+          if [ -n "${unformatted}" ]; then
+            echo "以下文件未 gofmt："
+            echo "${unformatted}"
+            exit 1
+          fi
+          go build ./...
+          go vet ./...
+          go test ./...
+
+      - name: 构建 Go 插件端多架构发布包与在线升级容器
         working-directory: go-agent
         shell: bash
         env:
@@ -111,25 +132,44 @@ jobs:
         run: |
           set -euo pipefail
           export BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          # 1) 三平台发布包：agent-go-<version>-release-<os>-<arch>.{zip,tar.gz,sha1}
-          bash script/package.sh
-          # 2) 在线升级容器：先构建 linux/amd64 二进制，再打成可过 checkJpomJar 的 jar 运输容器
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 bash script/go.sh build -trimpath \
-            -ldflags "-s -w -X main.version=${VERSION} -X main.buildTime=${BUILD_TIME}" \
-            -o build/agent-linux-amd64 .
-          # build-upgrade-container.sh 用 javac --release 8 编译空壳 Main-Class（JDK9+ 参数）；
-          # 使用 runner 预装的 JDK17/21，避免下一步 setup-java 8 后拿不到 --release 参数。
+          # 构建平台清单（安装包 5 平台；升级容器同 5 平台 + linux/amd64 兼容别名）
+          PLATFORMS="linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64"
+          # 1) 5 平台安装包：agent-go-<version>-release-<os>-<arch>.{zip,tar.gz,sha1}
+          #    （package.sh 要求显式提供 VERSION，避免回退 tag.release.txt 产出错误版本）
+          PLATFORMS="${PLATFORMS}" bash script/package.sh
+          # 2) 逐平台交叉编译二进制并打成可过 checkJpomJar 的 jar 运输容器
+          #    build-upgrade-container.sh 用 javac --release 8 编译空壳 Main-Class（JDK9+ 参数）；
+          #    使用 runner 预装的 JDK17/21，避免下一步 setup-java 8 后拿不到 --release 参数。
           container_java_home="${JAVA_HOME_17_X64:-${JAVA_HOME_21_X64:-${JAVA_HOME:-}}}"
           if [ -z "${container_java_home}" ]; then
             echo "::error::未找到可用 JDK（构建 Go 升级容器需要 javac --release 8 支持的 JDK）"
             exit 1
           fi
-          JAVA_HOME="${container_java_home}" PATH="${container_java_home}/bin:${PATH}" \
-            VERSION="${VERSION}" PLATFORM=linux/amd64 BINARY=build/agent-linux-amd64 \
-            MIN_VERSION="${GO_AGENT_MIN_VERSION}" TIME_STAMP="${BUILD_TIME}" \
-            bash script/build-upgrade-container.sh
-          # 3) 补生成升级容器 sha1（发布包脚本已生成其余产物的 sha1）
-          (cd dist && for f in agent-go-*.jar; do sha1sum "$f" | awk '{print $1}' > "$f.sha1"; done)
+          for platform in ${PLATFORMS}; do
+            os="${platform%/*}"
+            arch="${platform#*/}"
+            suffix=""
+            if [ "${os}" = "windows" ]; then
+              suffix=".exe"
+            fi
+            binary="build/agent-${os}-${arch}${suffix}"
+            CGO_ENABLED=0 GOOS="${os}" GOARCH="${arch}" bash script/go.sh build -trimpath \
+              -ldflags "-s -w -X main.version=${VERSION} -X main.buildTime=${BUILD_TIME}" \
+              -o "${binary}" .
+            JAVA_HOME="${container_java_home}" PATH="${container_java_home}/bin:${PATH}" \
+              VERSION="${VERSION}" PLATFORM="${platform}" BINARY="${binary}" \
+              MIN_VERSION="${GO_AGENT_MIN_VERSION}" TIME_STAMP="${BUILD_TIME}" \
+              bash script/build-upgrade-container.sh
+          done
+          # 3) linux/amd64 兼容别名（旧 Server 手工上传/默认回退用；构建脚本可能已生成，这里保证存在且最新）
+          cp -f "dist/agent-go-${VERSION}-upgrade-linux-amd64.jar" "dist/agent-go-${VERSION}-upgrade.jar"
+          # 4) 为全部 Go 产物生成 sha1（安装包 sha1 由 package.sh 生成，这里补齐升级容器与别名）
+          (cd dist && for f in agent-go-*; do
+            case "$f" in
+            *.sha1) continue ;;
+            esac
+            sha1sum "$f" | awk '{print $1}' > "$f.sha1"
+          done)
           ls -lh dist/
 
       - name: 校验 Go 发布产物（命名/压缩包完整/sha1/升级容器元信息）
