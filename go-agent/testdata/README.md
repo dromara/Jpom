@@ -1,26 +1,18 @@
 # testdata — Java Agent 黄金响应（已脱敏）
 
-本目录由 script/capture-golden.sh 生成，用于 Go Agent 的**结构回归**：
-比对「键集合 + 每个键的 JSON 类型」，不比较值（动态值已替换为占位符）。
-
-文件与端点映射见 _endpoints.json。
+本目录是 Go 插件端**结构回归**用的脱敏样本：比对「键集合 + 每个键的 JSON 类型」，不比较值
+（动态值已替换为占位符）。文件与端点映射见 `_endpoints.json`。
 
 ## 生成/更新
 
-```bash
-# 1) 从 live Java Agent 抓取（默认 127.0.0.1:2123，或 --ssh user@host 走远端）
-#    鉴权：JPOM_AGENT_AUTHORIZE_FILE=.../agent_authorize.json 或 JPOM_AGENT_AUTHORIZE=<sha1>
-cd go-agent
-./script/capture-golden.sh --capture /info /get-stat-info /disk-info
+采集、归一化、结构比对工具由维护者在内部工作区维护，**不随开源仓发布**；本目录只保留
+**已脱敏**的样本。若需重新生成（Java 版本升级、新增端点等），请使用内部工具，并确保：
 
-# 2) 只对已有 raw/ 重新归一化
-./script/capture-golden.sh --normalize-dir raw --out testdata
+1. 抓取/生成过程不把含真实主机名、路径、账号、业务数据的原始响应提交进仓库；
+2. 归一化后核对 `_endpoints.json` 的 slug → endpoint 映射；
+3. 结构变更在 PR/变更说明中写清差异。
 
-# 3) 对 Go Agent（例如 127.0.0.1:2124）做结构比对，退出码 0=一致
-./script/capture-golden.sh --check testdata --agent-url http://127.0.0.1:2124
-```
-
-## 脱敏规则（脚本 normalize-golden.py）
+## 脱敏规则（内部归一化工具）
 
 | 类别 | 处理 |
 | --- | --- |
@@ -38,11 +30,11 @@ cd go-agent
 
 | 路径 | 说明 |
 | --- | --- |
-| $.data.manifest.engine | Go 插件端新增 engine=go（Server 识别 Go 引擎；Java/旧 Server 忽略未知字段）。normalize-golden.py 的 ALLOWED_EXTRA_PREFIXES 已放行，check 仍应为 0 failure |
+| $.data.manifest.engine | Go 插件端新增 engine=go（Server 识别 Go 引擎；Java/旧 Server 忽略未知字段）。内部归一化工具的 ALLOWED_EXTRA_PREFIXES 已放行，结构比对仍应为 0 failure |
 
 ## 约束
 
 - **禁止**把 raw/ 或含真实值的响应提交进仓库；只提交本目录（testdata）。
-- 新增端点：先用 capture-golden.sh 抓取并归一化，再把 slug->endpoint 映射补进 _endpoints.json。
-- 若某端点响应结构变更（Java 版本升级），重新生成 testdata 并在 PR 中说明差异。
+- 新增端点：归一化后把 slug → endpoint 映射补进 `_endpoints.json`。
+- 若某端点响应结构变更（Java 版本升级），重新生成 testdata 并在变更说明中写明差异。
 

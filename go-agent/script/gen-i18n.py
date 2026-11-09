@@ -124,7 +124,7 @@ for filename, lang in LANGS.items():
         RESULT.setdefault(key, {})[lang] = value
 
 # Go 版新增文案（Java properties 中不存在，如升级/回滚提示）叠加进同一份数据，
-# 供 Go 端 embed 与 script/i18n-check.py 统一校验；已有 key 以 Java 为准。
+# 供 Go 端 embed 与 i18n 一致性校验；已有 key 以 Java 为准。
 GO_OVERLAY = os.path.join(ROOT, 'internal', 'i18n', 'messages_go.json')
 if os.path.isfile(GO_OVERLAY):
     with open(GO_OVERLAY, 'r', encoding='utf-8') as overlay_handle:

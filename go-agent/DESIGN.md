@@ -23,7 +23,7 @@
 | `internal/project/`、`internal/proc/`、`internal/api/project.go` | 项目 CRUD、启动/停止/重启/状态/端口、项目日志（tail/backup/export）、`/manage/log/*`、`releaseOutGiving`、`change-workspace-id` | **project-ops** |
 | `internal/projectfile/`、`internal/api/projectfile.go` | `/manage/file/*`、`/manage/file2/*`：列表、分片上传/合并、删除/批量删除、读取、复制、压缩、下载、远程下载、新建/重命名、diff、文件备份 | **file-manage** |
 | `internal/script/`、`internal/dsl/`、`internal/ws/`、`internal/api/script.go`、`internal/api/ws.go` | 脚本/脚本库 CRUD、执行（异步/同步）、执行日志、DSL 脚本、全部 WebSocket | **script-ws** |
-| `script/`、`testdata/`、文档 | 打包/部署/黄金响应比对脚本、契约 testdata | **contract** / Lead |
+| `script/`、`testdata/`、文档 | 打包/升级容器脚本、契约 testdata | **contract** / Lead |
 
 共享包（`app`/`config`/`httpx`/`store`）由 core-platform 维护；其他成员需要新增公共能力时，先在**自己的包**里实现，确有必要再发消息给 Lead 协调，禁止各自平行修改共享包。
 
@@ -47,8 +47,7 @@ bash script/go.sh build ./...   # 任意 go 命令（自动把 GOCACHE 等缓存
 ```
 
 - 受限环境 HOME 的 Go 缓存只读，**必须**通过 `make` 或 `bash script/go.sh ...` 执行 go 命令。
-- 单元测试与真实 Java agent 的黄金响应比对：由 `script/capture-golden.sh` 采集/校验（结果样本仅本地保存，不提交仓库）。
-- dev 虚拟机联调由 Lead 统一部署（Go agent 先以 2124 端口 + 数据目录副本运行，不动生产 2123），成员本地自测为主。
+- 单元测试；与真实 Java agent 的黄金响应比对样本见 `testdata/`（采集/校验工具由维护者内部维护）。
 
 ## 5. 验收标准（每个功能域）
 

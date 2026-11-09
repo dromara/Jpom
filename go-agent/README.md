@@ -38,7 +38,7 @@ go-agent/
 │   ├── dsl/                DSL 脚本解析与执行
 │   ├── ws/                 WebSocket（console/script_run/free-script-run/system_log/node_update）
 │   └── api/                端点装配
-└── script/                 构建/部署/打包/升级容器/切换数据校验/黄金响应抓取
+└── script/                 构建/打包/升级容器（开发/测试工具在维护者内部工作区）
 ```
 
 ## 构建与运行（开发机）
@@ -67,12 +67,6 @@ VERSION=2.11.13.1 PLATFORMS='linux/amd64 linux/arm64 windows/amd64' bash script/
 ```bash
 VERSION=2.11.13.1 bash script/build-upgrade-container.sh
 # dist/agent-go-<version>-upgrade.jar
-```
-
-部署到 dev 虚拟机（独立测试实例，默认端口 2124）：
-
-```bash
-DEV_HOST=user@<dev-host> bash script/dev-deploy.sh
 ```
 
 ## 安装布局
@@ -104,6 +98,5 @@ agent/
 
 ## 验证
 
-- 静态黄金结构回归：`bash script/capture-golden.sh --check testdata --agent-url http://127.0.0.1:2124`（0 failure）
-- 切换前后数据兼容：`bash script/verify-switch-data.sh --mode diff --before <java-data> --after <go-data>`
-- 浏览器/接口 E2E 与 Java 对照：见 `script/e2e-full.sh`（本地/隔离环境运行，不在仓库保存结果数据）。
+- 单元测试：`make test`（构建 `make build`、静态检查 `make vet`）。
+- 与真实 Java 插件端的黄金响应结构对照样本见 `testdata/`；采集/比对等开发工具由维护者内部维护，不随开源仓发布。
