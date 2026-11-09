@@ -712,7 +712,7 @@ export default {
   },
   data() {
     return {
-      loading: true,
+      loading: false,
       Empty,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
       statusMap,

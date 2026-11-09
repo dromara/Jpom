@@ -233,7 +233,7 @@ export default {
   props: {},
   data() {
     return {
-      loading: true,
+      loading: false,
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY),
 
       list: [],

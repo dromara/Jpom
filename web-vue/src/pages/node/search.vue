@@ -695,7 +695,7 @@ export default {
       noFileModes,
       nodeMap: {},
       drawerTitle: '',
-      loading: true,
+      loading: false,
       temp: {},
       drawerFileVisible: false,
       drawerConsoleVisible: false,
