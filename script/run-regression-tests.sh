@@ -8,6 +8,7 @@
 # THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 # See the Mulan PSL v2 for more details.
 #
+
 #-----------------------------------------------------------
 # Jpom 回归单元测试入口
 #
@@ -53,7 +54,8 @@ ALL_TESTS=0
 EXTRA_TESTS=""
 
 usage() {
-	sed -n '14,36p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+	# 按注释块标记提取，避免头部/行号调整后 --help 打印错位（license 插件会重排文件头）
+	awk '/^# Jpom 回归单元测试入口$/{f=1} f{print} f&&/^#-+$/{exit}' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
 }
 
 while [ $# -gt 0 ]; do
