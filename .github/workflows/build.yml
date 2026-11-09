@@ -1,36 +1,113 @@
 name: build
 
+# 日常构建校验（dev/beta/master push、PR、手动）：
+#   static：脚本/工作流/空白等基础静态检查（script/ci-static-checks.sh），不依赖任何 secrets
+#   build ：前端构建 + Maven 打包 + 过渡期兼容 zip + 发布产物校验 + 核心回归单测
+# 缓存：npm（web-vue/package-lock.json）与 Maven（**/pom.xml）由 setup-node/setup-java 管理；
+#      同一 ref 的连续 push 会取消旧运行（concurrency.cancel-in-progress）。
+# 说明：Go 插件端由 go-agent.yml 单独校验；发布打包/R2 上传/启动冒烟由 release-package.yml 负责。
+
 on:
   push:
-    branches: [ master ]
+    branches: [dev, beta, master]
   pull_request:
-    branches: [ master ]
+    branches: [dev, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '18'
+  JAVA_VERSION: '8'
 
 jobs:
+  static:
+    name: 静态检查
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 设置 Python（解析 workflow YAML）
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: 安装 PyYAML
+        shell: bash
+        run: python3 -m pip install --quiet pyyaml
+
+      - name: 基础静态检查（bash -n / shellcheck / workflow YAML / diff 空白）
+        shell: bash
+        env:
+          DIFF_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: bash script/ci-static-checks.sh --diff-base "${DIFF_BASE:-}"
 
   build:
-
+    name: 构建与回归
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [ 18.x ]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+    timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-      - run: cd web-vue && npm i && npm run build
-      - name: Set up JDK 8
-        uses: actions/setup-java@v2
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: web-vue/package-lock.json
+
+      - name: 构建前端
+        working-directory: web-vue
+        shell: bash
+        run: |
+          set -euo pipefail
+          # package-lock.json 与 package.json 不同步时 npm ci 会失败：回退 npm install 并给出告警
+          npm ci --no-audit --no-fund || {
+            echo "::warning::npm ci 失败（package-lock.json 可能不同步），回退 npm install"
+            npm install --no-audit --no-fund
+          }
+          npm run build
+
+      - name: 设置 JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
         with:
-          java-version: '8'
-          distribution: 'temurin'
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
           cache: maven
-      - name: Build with Maven
-        run: mvn -B package
-      # 根 pom 默认 maven.test.skip=true，package 不会执行单测；单独跑核心回归测试，
-      # 防止 2.11.13 那样「共享基础类改动+单测只覆盖工具函数」的回归再次漏出。
-      - name: Run regression unit tests
+          cache-dependency-path: '**/pom.xml'
+
+      # 根 pom 默认 maven.test.skip=true，package 不会执行单测；单测由下面的回归脚本显式执行
+      - name: Maven 打包（跳过单测）
+        shell: bash
+        run: mvn -B -e -Dmaven.test.skip=true -Dmaven.compile.fork=true clean package
+
+      - name: 生成过渡期兼容 zip（2.12.0 前供旧客户端在线升级）
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=$(python3 -c 'import xml.etree.ElementTree as ET;root=ET.parse("pom.xml").getroot();node=root.find("{http://maven.apache.org/POM/4.0.0}version");print((node.text or "").strip() if node is not None else "")')
+          if [ -z "${version}" ]; then
+            echo "::error::无法从 pom.xml 读取项目版本"
+            exit 1
+          fi
+          echo "VERSION=${version}" >> "$GITHUB_ENV"
+          bash script/legacy-zip.sh --parent-dir . --version "${version}"
+
+      - name: 校验发布产物（tar.gz + 过渡期 zip）
+        shell: bash
+        run: bash script/verify-release-artifacts.sh --parent-dir . --version "$VERSION" --legacy-zip
+
+      # 共享基类/安全修复的回归守卫；新增核心用例请加入 script/run-regression-tests.sh 的 DEFAULT_TESTS
+      - name: 核心回归单元测试
+        shell: bash
         run: bash script/run-regression-tests.sh

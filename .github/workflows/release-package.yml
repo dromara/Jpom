@@ -1,24 +1,33 @@
 name: release-package
 
-# 构建 Jpom 发布包（server/agent 的 zip、tar.gz、sha1 + 合并包 + Go 插件端多架构产物）并上传 Cloudflare R2。
+# 构建 Jpom 发布包并上传 Cloudflare R2，可选一键发布后置（GitHub Release + 触发 Docker）。
 #
 # 设计要点：
-# 1. 稳定版：推 tag `v*` 后自动构建并上传到 R2 `release/<version>/`（与 d2 路径一致，只是上传走 R2 S3 API）。
+# 1. 稳定版：推 tag `v*` 后自动构建并上传到 R2 `release/<version>/`（与 d2 路径一致，上传走 R2 S3 API）。
 # 2. beta：由 `release.sh beta`（或手动 dispatch）触发，上传到 `beta/<version>/`。
-# 3. 分支 push（仅 workflow/辅助脚本变更）触发一次 dry_run 自检：Go 质量门禁（gofmt/build/vet/test）
-#    + 构建 + 校验，不上传。
-# 4. 校验使用与 release.sh 相同的 `script/verify-release-artifacts.sh`；回验用 r2.dev（runner 访问 d2 会被 Cloudflare challenge）。
-# 5. 需要仓库 secrets：R2_ACCOUNT_ID、R2_ACCESS_KEY_ID、R2_SECRET_ACCESS_KEY（建议只对 jpom-releases-apac bucket 读写的 R2 API Token）。
-# 6. 可选仓库变量：R2_BUCKET（默认 jpom-releases-apac）、JPOM_DOWNLOAD_BASE（回验基址，默认 r2.dev）、
-#    GO_AGENT_MIN_VERSION（Go 升级容器 agent.json.minVersion，默认 1.0.0，后续 Go 版本不兼容时提高）。
+# 3. 分支 push（仅 workflow/辅助脚本变更）触发一次 dry_run 自检：Go 质量门禁 + 构建 + 校验 + 启动冒烟，不上传。
+# 4. 校验使用 script/verify-release-artifacts.sh；CI 侧启动冒烟由 script/ci-smoke-packages.sh 完成
+#    （解压 tar.gz → 启动 server/agent → 轮询 /check-system、首页、登录验证码接口）。
+# 5. 发布格式（2.12.0 前的过渡期）：
+#    - Java：server/agent 默认只产 tar.gz；`legacy_zip`（默认 true，仓库变量 JPOM_LEGACY_ZIP 可改默认）时
+#      额外用 script/legacy-zip.sh 生成 zip，供旧客户端在线升级；2.12.0 起只产 tar.gz。
+#    - 合并包：jpom-<version>.tar.gz（内含 server/agent 的 tar.gz + sha1，过渡期含 zip）。
+#    - Go 插件端：5 平台安装包全部 tar.gz（含 Windows），升级容器 jar 不变。
+# 6. 一键发布后置（可选，默认关闭）：workflow_dispatch 传 `publish=true` 时，release 渠道额外执行 publish job：
+#    创建/更新 GitHub Release（附 tar.gz/sha1，过渡期附 zip），并用 `gh workflow run` 触发 docker-publish。
+#    注意：Gitee Release 仍由本机 script/release-post.sh 创建（Gitee Release 是平台对象，CI 只做 GitHub 侧），
+#    tag push 自动构建默认不 publish，避免误发布，保持与既有人工发布流程一致。
+# 7. 需要仓库 secrets：R2_ACCOUNT_ID、R2_ACCESS_KEY_ID、R2_SECRET_ACCESS_KEY（建议只对 jpom-releases-apac bucket 读写）。
+# 8. 可选仓库变量：R2_BUCKET（默认 jpom-releases-apac）、JPOM_DOWNLOAD_BASE（回验基址，默认 r2.dev）、
+#    GO_AGENT_MIN_VERSION（Go 升级容器 agent.json.minVersion，默认 1.0.0）、JPOM_LEGACY_ZIP（默认 true）。
 #
 # Go 插件端产物（与 Java 产物同版本目录，供 Server 在线升级/下载中心使用）：
-#   安装包（5 平台，非 Windows 出 zip+tar.gz，Windows 只出 zip）：
-#     agent-go-<version>-release-linux-amd64.{zip,tar.gz}
-#     agent-go-<version>-release-linux-arm64.{zip,tar.gz}
-#     agent-go-<version>-release-darwin-amd64.{zip,tar.gz}
-#     agent-go-<version>-release-darwin-arm64.{zip,tar.gz}
-#     agent-go-<version>-release-windows-amd64.zip
+#   安装包（5 平台，全部 tar.gz）：
+#     agent-go-<version>-release-linux-amd64.tar.gz
+#     agent-go-<version>-release-linux-arm64.tar.gz
+#     agent-go-<version>-release-darwin-amd64.tar.gz
+#     agent-go-<version>-release-darwin-arm64.tar.gz
+#     agent-go-<version>-release-windows-amd64.tar.gz
 #   在线升级容器（5 平台，Server 按节点平台下发）+ linux/amd64 兼容别名：
 #     agent-go-<version>-upgrade-<os>-<arch>.jar
 #     agent-go-<version>-upgrade.jar（= linux/amd64 副本，供旧 Server 手工上传/默认回退）
@@ -44,11 +53,19 @@ on:
         type: string
         required: false
       dry_run:
-        description: '只构建+校验，不上传 R2'
+        description: '只构建+校验+冒烟，不上传 R2'
         type: boolean
         default: false
       deep_verify:
         description: '上传后下载全部对象逐字节比对 sha1（更严格、更慢）'
+        type: boolean
+        default: false
+      legacy_zip:
+        description: '过渡期（2.12.0 前）额外产出 zip 供旧客户端在线升级（仓库变量 JPOM_LEGACY_ZIP 可设默认）'
+        type: boolean
+        default: true
+      publish:
+        description: 'release 渠道构建成功后创建 GitHub Release 并触发 docker-publish（Gitee Release 仍用本机脚本）'
         type: boolean
         default: false
   push:
@@ -63,6 +80,9 @@ on:
       - 'script/release-ci-meta.sh'
       - 'script/verify-release-artifacts.sh'
       - 'script/r2-upload-ci.sh'
+      - 'script/release-sha1sum.sh'
+      - 'script/legacy-zip.sh'
+      - 'script/ci-smoke-packages.sh'
 
 permissions:
   contents: read
@@ -80,7 +100,15 @@ jobs:
   package:
     name: 构建并上传 R2（${{ github.ref_name }}）
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
+    outputs:
+      channel: ${{ steps.meta.outputs.channel }}
+      version: ${{ steps.meta.outputs.version }}
+      remote_rel: ${{ steps.meta.outputs.remote_rel }}
+      public_base: ${{ steps.meta.outputs.public_base }}
+      merged_pkg: ${{ steps.meta.outputs.merged_pkg }}
+      legacy_zip: ${{ steps.meta.outputs.legacy_zip }}
+      dry_run: ${{ steps.meta.outputs.dry_run }}
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
@@ -94,12 +122,19 @@ jobs:
           INPUT_TARGET_PREFIX: ${{ inputs.target_prefix || '' }}
           INPUT_DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
           INPUT_DEEP_VERIFY: ${{ inputs.deep_verify && 'true' || 'false' }}
+          # 过渡期双产物默认值：workflow_dispatch 显式输入优先，push 事件回退仓库变量（默认 true）。
+          # 注意：JPOM_LEGACY_ZIP 只传给 meta 脚本，不要设为 workflow 级 env——否则会被 r2-upload-ci.sh 当作
+          #       隐式开关，导致 legacy_zip=false 时仍上传 zip。
+          INPUT_LEGACY_ZIP: ${{ github.event_name == 'workflow_dispatch' && (inputs.legacy_zip && 'true' || 'false') || '' }}
+          JPOM_LEGACY_ZIP: ${{ vars.JPOM_LEGACY_ZIP || 'true' }}
         run: bash script/release-ci-meta.sh
 
       - name: 设置 Node.js 18
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+          cache: npm
+          cache-dependency-path: web-vue/package-lock.json
 
       - name: 设置 Go 1.22
         uses: actions/setup-go@v5
@@ -140,9 +175,9 @@ jobs:
           export GOTMPDIR="$RUNNER_TEMP/go-tmp"
           mkdir -p "$GOMODCACHE" "$GOCACHE" "$GOTMPDIR"
           export BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          # 构建平台清单（安装包 5 平台；升级容器同 5 平台 + linux/amd64 兼容别名）
+          # 构建平台清单（安装包与升级容器同为 5 平台）
           PLATFORMS="linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64"
-          # 1) 5 平台安装包：agent-go-<version>-release-<os>-<arch>.{zip,tar.gz,sha1}
+          # 1) 5 平台安装包：agent-go-<version>-release-<os>-<arch>.{tar.gz,sha1}
           #    （package.sh 要求显式提供 VERSION，避免回退 tag.release.txt 产出错误版本）
           PLATFORMS="${PLATFORMS}" bash script/package.sh
           # 2) 逐平台交叉编译二进制并打成可过 checkJpomJar 的 jar 运输容器
@@ -199,12 +234,19 @@ jobs:
         with:
           distribution: temurin
           java-version: '8'
+          cache: maven
+          cache-dependency-path: '**/pom.xml'
 
       - name: 构建前端
         working-directory: web-vue
+        shell: bash
         run: |
           set -euo pipefail
-          npm install --no-audit --no-fund
+          # package-lock.json 与 package.json 不同步时 npm ci 会失败：回退 npm install 并给出告警
+          npm ci --no-audit --no-fund || {
+            echo "::warning::npm ci 失败（package-lock.json 可能不同步），回退 npm install"
+            npm install --no-audit --no-fund
+          }
           npm run build
 
       - name: 构建后端发布包
@@ -213,13 +255,73 @@ jobs:
           set -euo pipefail
           mvn -B -e clean package -Dmaven.test.skip=true -Dmaven.compile.fork=true
 
-      - name: 校验发布产物（与 release.sh 同一套校验）
+      - name: 生成过渡期兼容 zip（旧客户端在线升级用，legacy_zip=true 时）
+        if: ${{ steps.meta.outputs.legacy_zip == 'true' }}
         shell: bash
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: bash script/legacy-zip.sh --parent-dir . --version "${VERSION}"
+
+      - name: 校验 Java 发布产物（tar.gz，过渡期含 zip）
+        shell: bash
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+          LEGACY_ZIP: ${{ steps.meta.outputs.legacy_zip }}
         run: |
           set -euo pipefail
-          bash script/verify-release-artifacts.sh \
+          args=(--parent-dir . --version "${VERSION}")
+          if [ "${LEGACY_ZIP}" = "true" ]; then
+            args+=(--legacy-zip)
+          fi
+          bash script/verify-release-artifacts.sh "${args[@]}"
+
+      - name: 启动冒烟（解压 tar.gz 启动 server/agent 并轮询接口）
+        shell: bash
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+          SMOKE_LOG_DIR: ${{ runner.temp }}/ci-smoke-logs
+        run: |
+          set -euo pipefail
+          bash script/ci-smoke-packages.sh \
             --parent-dir . \
-            --version '${{ steps.meta.outputs.version }}'
+            --version "${VERSION}" \
+            --log-dir "${SMOKE_LOG_DIR}"
+
+      - name: 保存冒烟日志（失败时）
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-smoke-logs
+          path: ${{ runner.temp }}/ci-smoke-logs
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: 整理发布产物（供 publish job 下载使用）
+        shell: bash
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+          LEGACY_ZIP: ${{ steps.meta.outputs.legacy_zip }}
+        run: |
+          set -euo pipefail
+          rm -rf release-assets
+          mkdir -p release-assets
+          for kind in server agent; do
+            cp "modules/${kind}/target/${kind}-${VERSION}-release.tar.gz" release-assets/
+            cp "modules/${kind}/target/${kind}-${VERSION}-release.tar.gz.sha1" release-assets/
+            if [ "${LEGACY_ZIP}" = "true" ]; then
+              cp "modules/${kind}/target/${kind}-${VERSION}-release.zip" release-assets/
+              cp "modules/${kind}/target/${kind}-${VERSION}-release.zip.sha1" release-assets/
+            fi
+          done
+          ls -lh release-assets/
+
+      - name: 保存发布产物（actions artifact，保留 14 天）
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-assets
+          path: release-assets/
+          if-no-files-found: error
+          retention-days: 14
 
       - name: 安装 rclone
         if: ${{ steps.meta.outputs.dry_run != 'true' }}
@@ -242,6 +344,7 @@ jobs:
           VERSION: ${{ steps.meta.outputs.version }}
           TARGET_PREFIX: ${{ steps.meta.outputs.target_prefix }}
           DEEP_VERIFY: ${{ steps.meta.outputs.deep_verify }}
+          LEGACY_ZIP: ${{ steps.meta.outputs.legacy_zip }}
           RCLONE_CONFIG_R2_TYPE: s3
           RCLONE_CONFIG_R2_PROVIDER: Cloudflare
           RCLONE_CONFIG_R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
@@ -256,6 +359,7 @@ jobs:
           fi
           args=(--channel "${CHANNEL}" --version "${VERSION}" --prefix "${TARGET_PREFIX}")
           [ "${DEEP_VERIFY}" = "true" ] && args+=(--deep-verify)
+          [ "${LEGACY_ZIP}" = "true" ] && args+=(--legacy-zip)
           R2_PUBLIC_BASE="${JPOM_DOWNLOAD_BASE}" R2_BUCKET="${R2_BUCKET}" \
             bash script/r2-upload-ci.sh "${args[@]}"
 
@@ -270,6 +374,8 @@ jobs:
           DRY_RUN: ${{ steps.meta.outputs.dry_run }}
           SELF_TEST: ${{ steps.meta.outputs.self_test }}
           DEEP_VERIFY: ${{ steps.meta.outputs.deep_verify }}
+          LEGACY_ZIP: ${{ steps.meta.outputs.legacy_zip }}
+          MERGED_PKG: ${{ steps.meta.outputs.merged_pkg }}
           EVENT_NAME: ${{ github.event_name }}
           REF_NAME: ${{ github.ref_name }}
         run: |
@@ -286,11 +392,13 @@ jobs:
             echo "| dry-run | ${DRY_RUN} |"
             echo "| 分支自检 | ${SELF_TEST} |"
             echo "| deep-verify | ${DEEP_VERIFY} |"
+            echo "| 过渡期 zip | ${LEGACY_ZIP} |"
+            echo "| 合并包 | ${MERGED_PKG} |"
             echo
-            echo "Java 产物 sha1（本地计算）："
+            echo "Java 产物 sha1（tar.gz 默认，过渡期含 zip）："
             echo '```'
             for kind in server agent; do
-              for ext in zip tar.gz; do
+              for ext in tar.gz zip; do
                 file="modules/${kind}/target/${kind}-${VERSION}-release.${ext}"
                 [ -f "$file" ] && echo "${file##*/}  $(sha1sum "$file" | awk '{print $1}')  $(du -h "$file" | cut -f1)"
               done
@@ -306,4 +414,107 @@ jobs:
               [ -f "$file" ] && echo "${file##*/}  $(sha1sum "$file" | awk '{print $1}')  $(du -h "$file" | cut -f1)"
             done
             echo '```'
+          } >>"$GITHUB_STEP_SUMMARY"
+
+  # 发布后置（可选）：创建/更新 GitHub Release 并触发 Docker 镜像发布。
+  # - 仅 workflow_dispatch 显式 publish=true、release 渠道、非 dry_run 时执行；
+  # - Gitee Release 不在此实现（继续用本机 script/release-post.sh，Gitee 是权威仓）；
+  # - 需要 contents: write（Release）与 actions: write（gh workflow run 触发 docker-publish）。
+  publish:
+    name: 发布后置（GitHub Release + Docker dispatch）
+    needs: package
+    if: ${{ inputs.publish && needs.package.outputs.channel == 'release' && needs.package.outputs.dry_run != 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 下载构建产物
+        uses: actions/download-artifact@v4
+        with:
+          name: release-assets
+          path: release-assets
+
+      - name: 创建/更新 GitHub Release（tar.gz/sha1，过渡期含 zip）
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.package.outputs.version }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          tag="v${VERSION}"
+          # Release 基于 tag：本地 release.sh 已把 tag 双推到 GitHub；缺失时直接失败，避免创建空 Release
+          if ! gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${tag}" >/dev/null 2>&1; then
+            echo "::error::GitHub 上不存在 tag ${tag}，请先双推 tag 后再创建 Release"
+            exit 1
+          fi
+          shopt -s nullglob
+          assets=(release-assets/*)
+          if [ ${#assets[@]} -eq 0 ]; then
+            echo "::error::没有可上传的 Release 附件（release-assets 为空）"
+            exit 1
+          fi
+          # 发行说明：优先取 CHANGELOG.md 中 “## <version>-release” 段落
+          notes_file="${RUNNER_TEMP}/release-notes.md"
+          awk -v marker="## ${VERSION}-release" '
+            index($0, marker) == 1 { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' CHANGELOG.md >"${notes_file}"
+          if [ ! -s "${notes_file}" ]; then
+            {
+              echo "Jpom ${VERSION}"
+              echo
+              echo "详见仓库 CHANGELOG.md。"
+            } >"${notes_file}"
+          fi
+          if gh release view "${tag}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            echo "Release ${tag} 已存在，补传/覆盖附件"
+            gh release upload "${tag}" "${assets[@]}" --repo "${GITHUB_REPOSITORY}" --clobber
+          else
+            gh release create "${tag}" "${assets[@]}" \
+              --repo "${GITHUB_REPOSITORY}" \
+              --title "Jpom ${VERSION}" \
+              --notes-file "${notes_file}" \
+              --latest
+          fi
+
+      - name: 触发 Docker 镜像发布（docker-publish）
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.package.outputs.version }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          ref="v${VERSION}"
+          if ! gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${ref}" >/dev/null 2>&1; then
+            echo "::error::GitHub 上不存在 tag ${ref}，无法触发 docker-publish"
+            exit 1
+          fi
+          gh workflow run docker-publish.yml --repo "${GITHUB_REPOSITORY}" --ref "${ref}" \
+            -f channel=release -f version="${VERSION}" -f images=both
+          echo "已触发 docker-publish：ref=${ref} version=${VERSION}"
+
+      - name: 写入执行摘要
+        if: always()
+        shell: bash
+        env:
+          VERSION: ${{ needs.package.outputs.version }}
+          PUBLIC_BASE: ${{ needs.package.outputs.public_base }}
+          REMOTE_REL: ${{ needs.package.outputs.remote_rel }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## 发布后置：Jpom ${VERSION}"
+            echo
+            echo "- GitHub Release：v${VERSION}（附件为 tar.gz/sha1，过渡期含 zip）"
+            echo "- 下载基址：${PUBLIC_BASE}/${REMOTE_REL}/"
+            echo "- 已触发 docker-publish（channel=release，images=both）"
+            echo "- Gitee Release 仍由本机 script/release-post.sh 创建"
           } >>"$GITHUB_STEP_SUMMARY"

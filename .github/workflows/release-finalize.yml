@@ -1,0 +1,316 @@
+name: release-finalize
+
+# 发布后置编排（workflow_dispatch）：对“已完成 R2 上传”的版本补做/编排 GitHub Release、Docker、文档站更新。
+#
+# 与 release-package.yml 的关系：
+# - 一键发布：release-package.yml 在构建成功后传 publish=true，由它的 publish job 直接做 GitHub Release + Docker dispatch；
+# - 本工作流：用于事后补发/编排（例如正式发布时漏了 GitHub Release、需要补 Docker、或单独更新文档），
+#   不重新构建发布包，而是从 R2 下载已发布资产后创建 GitHub Release。
+#   （跨 workflow run 无法直接复用 release-package 的 actions artifact，故 GitHub Release 逻辑与 publish job 保持一致。）
+#
+# 各步骤都可以独立关闭：publish_docker / publish_docs；Gitee Release 不在本工作流处理（继续用本机 script/release-post.sh）。
+#
+# 需要 secrets：DOCS_TOKEN（仅 publish_docs=true 时需要；无该 secret 时跳过并提示，不阻塞）。
+# 需要权限：contents: write（GitHub Release）、actions: write（gh workflow run 触发 docker-publish）。
+# 可选仓库变量：JPOM_DOWNLOAD_BASE（R2 公开下载基址，默认 r2.dev）。
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: '发布渠道：auto（按 version 格式推导：x.y.z=>release，x.y.z.N=>beta）'
+        type: choice
+        options: [auto, release, beta]
+        default: auto
+      version:
+        description: '版本号（留空按渠道读取 script/tag.release.txt / script/tag.beta.txt）'
+        type: string
+        required: false
+      publish_docker:
+        description: '触发 docker-publish（release 用 v<version> tag，beta 用 beta 分支）'
+        type: boolean
+        default: true
+      publish_docs:
+        description: '更新文档站（需要 DOCS_TOKEN + docs 仓 script/release-docs-ci.sh；缺失时跳过）'
+        type: boolean
+        default: false
+      online_ext:
+        description: '在线升级 URL 后缀：过渡期用 zip（兼容旧客户端），2.12.0 起用 tar.gz'
+        type: choice
+        options: [zip, tar.gz]
+        default: zip
+      legacy_zip:
+        description: '若 R2 上有过渡期 zip（2.12.0 前）则一并作为 GitHub Release 附件'
+        type: boolean
+        default: true
+      dry_run:
+        description: '只解析并打印计划，不创建 Release/不触发 Docker/不改 docs'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: release-finalize-${{ inputs.channel }}-${{ inputs.version }}
+  cancel-in-progress: false
+
+env:
+  JPOM_DOWNLOAD_BASE: ${{ vars.JPOM_DOWNLOAD_BASE || 'https://pub-a46506c7e8ff43fabc4c1ce8e5faffcb.r2.dev' }}
+
+jobs:
+  finalize:
+    name: 发布后置（${{ inputs.version || 'auto' }}）
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 解析渠道与版本
+        id: meta
+        shell: bash
+        env:
+          INPUT_CHANNEL: ${{ inputs.channel }}
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          channel="${INPUT_CHANNEL:-auto}"
+          version="${INPUT_VERSION:-}"
+          if [ -z "${version}" ]; then
+            case "${channel}" in
+            beta) tag_file="script/tag.beta.txt" ;;
+            *) tag_file="script/tag.release.txt" ;;
+            esac
+            version=$(tr -d ' \r\n' <"${tag_file}")
+            echo "版本号留空，按 ${tag_file} 取 ${version}"
+          fi
+          [ -n "${version}" ] || {
+            echo "::error::无法确定版本号"
+            exit 1
+          }
+          if [ "${channel}" = "auto" ]; then
+            if [[ "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              channel="beta"
+            else
+              channel="release"
+            fi
+          fi
+          case "${channel}" in
+          release)
+            [[ "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+              echo "::error::release 版本号格式不正确：${version}（期望 x.y.z）"
+              exit 1
+            }
+            ;;
+          beta)
+            [[ "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+              echo "::error::beta 版本号格式不正确：${version}（期望 x.y.z.N）"
+              exit 1
+            }
+            ;;
+          *)
+            echo "::error::不支持的 channel：${channel}"
+            exit 1
+            ;;
+          esac
+          remote_rel="${channel}/${version}"
+          echo "channel=${channel}" >>"$GITHUB_OUTPUT"
+          echo "version=${version}" >>"$GITHUB_OUTPUT"
+          echo "remote_rel=${remote_rel}" >>"$GITHUB_OUTPUT"
+          echo "public_url=${JPOM_DOWNLOAD_BASE}/${remote_rel}" >>"$GITHUB_OUTPUT"
+          echo "解析完成：channel=${channel} version=${version} url=${JPOM_DOWNLOAD_BASE}/${remote_rel}/"
+
+      - name: 创建/更新 GitHub Release（从 R2 下载已发布资产）
+        if: ${{ steps.meta.outputs.channel == 'release' && inputs.dry_run != true }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          CHANNEL: ${{ steps.meta.outputs.channel }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          LEGACY_ZIP: ${{ inputs.legacy_zip }}
+        run: |
+          set -euo pipefail
+          tag="v${VERSION}"
+          base="${JPOM_DOWNLOAD_BASE}/${CHANNEL}/${VERSION}"
+          # Release 基于 tag：tag 必须已双推到 GitHub
+          if ! gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${tag}" >/dev/null 2>&1; then
+            echo "::error::GitHub 上不存在 tag ${tag}，无法创建 Release"
+            exit 1
+          fi
+          rm -rf release-assets
+          mkdir -p release-assets
+          # 1) 必选：server/agent 的 tar.gz + sha1
+          for kind in server agent; do
+            for suffix in tar.gz tar.gz.sha1; do
+              name="${kind}-${VERSION}-release.${suffix}"
+              curl -fsSL --retry 3 --retry-delay 2 -o "release-assets/${name}" "${base}/${name}"
+            done
+          done
+          # 2) 可选：过渡期 zip（R2 上不存在时告警跳过，不阻塞；zip 与 sha1 必须成对存在）
+          if [ "${LEGACY_ZIP}" = "true" ]; then
+            for kind in server agent; do
+              zip_name="${kind}-${VERSION}-release.zip"
+              sha_name="${zip_name}.sha1"
+              if curl -fsSL --retry 2 -o "release-assets/${zip_name}" "${base}/${zip_name}" 2>/dev/null \
+                && curl -fsSL --retry 2 -o "release-assets/${sha_name}" "${base}/${sha_name}" 2>/dev/null; then
+                :
+              else
+                rm -f "release-assets/${zip_name}" "release-assets/${sha_name}"
+                echo "::warning::R2 上没有完整的 ${zip_name}(.sha1)（该版本可能已是 tar.gz-only），跳过 zip 附件"
+                break
+              fi
+            done
+          fi
+          # 3) sha1 回验
+          shopt -s nullglob
+          for sha in release-assets/*.sha1; do
+            file="${sha%.sha1}"
+            expected=$(tr -d ' \r\n' <"${sha}")
+            actual=$(sha1sum "${file}" | awk '{print $1}')
+            if [ "${expected}" != "${actual}" ]; then
+              echo "::error::${file##*/} sha1 不一致（期望 ${expected}，实际 ${actual}）"
+              exit 1
+            fi
+          done
+          assets=(release-assets/*)
+          if [ ${#assets[@]} -eq 0 ]; then
+            echo "::error::没有可上传的 Release 附件"
+            exit 1
+          fi
+          # 4) 发行说明：取 CHANGELOG.md 中 “## <version>-release” 段落
+          notes_file="${RUNNER_TEMP}/release-notes.md"
+          awk -v marker="## ${VERSION}-release" '
+            index($0, marker) == 1 { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' CHANGELOG.md >"${notes_file}"
+          if [ ! -s "${notes_file}" ]; then
+            {
+              echo "Jpom ${VERSION}"
+              echo
+              echo "详见仓库 CHANGELOG.md。"
+            } >"${notes_file}"
+          fi
+          # 5) 已存在则补传/覆盖附件，否则创建
+          if gh release view "${tag}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            echo "Release ${tag} 已存在，补传/覆盖附件"
+            gh release upload "${tag}" "${assets[@]}" --repo "${GITHUB_REPOSITORY}" --clobber
+          else
+            gh release create "${tag}" "${assets[@]}" \
+              --repo "${GITHUB_REPOSITORY}" \
+              --title "Jpom ${VERSION}" \
+              --notes-file "${notes_file}" \
+              --latest
+          fi
+
+      - name: beta 渠道跳过 GitHub Release
+        if: ${{ steps.meta.outputs.channel == 'beta' }}
+        shell: bash
+        run: echo "::notice::beta 渠道不打 tag、不创建 Release，跳过 GitHub Release 步骤"
+
+      - name: 触发 Docker 镜像发布（docker-publish）
+        if: ${{ inputs.publish_docker && inputs.dry_run != true }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          CHANNEL: ${{ steps.meta.outputs.channel }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          set -euo pipefail
+          if [ "${CHANNEL}" = "release" ]; then
+            ref="v${VERSION}"
+            ref_path="tags/${ref}"
+          else
+            ref="beta"
+            ref_path="heads/${ref}"
+          fi
+          if ! gh api "repos/${GITHUB_REPOSITORY}/git/ref/${ref_path}" >/dev/null 2>&1; then
+            echo "::error::GitHub 上不存在 ref ${ref_path}，无法触发 docker-publish"
+            exit 1
+          fi
+          gh workflow run docker-publish.yml --repo "${GITHUB_REPOSITORY}" --ref "${ref}" \
+            -f channel="${CHANNEL}" -f version="${VERSION}" -f images=both
+          echo "已触发 docker-publish：ref=${ref} channel=${CHANNEL} version=${VERSION}"
+
+      - name: 更新文档站（DOCS_TOKEN + docs 仓 release-docs-ci.sh）
+        if: ${{ inputs.publish_docs && inputs.dry_run != true }}
+        shell: bash
+        env:
+          DOCS_TOKEN: ${{ secrets.DOCS_TOKEN }}
+          CHANNEL: ${{ steps.meta.outputs.channel }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          LEGACY_ZIP: ${{ inputs.legacy_zip }}
+          ONLINE_EXT: ${{ inputs.online_ext }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          if [ -z "${DOCS_TOKEN:-}" ]; then
+            echo "::warning::未配置 DOCS_TOKEN secret，跳过 docs 更新（不阻塞发布）"
+            exit 0
+          fi
+          docs_dir="${RUNNER_TEMP}/jpom-docs"
+          rm -rf "${docs_dir}"
+          if ! git clone --depth 1 --branch main \
+            "https://${DOCS_TOKEN}@github.com/bwcx-jzy/jpom-docs.git" "${docs_dir}"; then
+            echo "::warning::clone jpom-docs 失败（检查 DOCS_TOKEN 权限），跳过 docs 更新（不阻塞发布）"
+            exit 0
+          fi
+          if [ ! -f "${docs_dir}/script/release-docs-ci.sh" ]; then
+            echo "::notice::docs 仓尚无 script/release-docs-ci.sh，跳过 docs 更新（由文档负责人补齐后重跑本工作流）"
+            exit 0
+          fi
+          # 取已发布版本对应的 CHANGELOG（release 用 tag，beta 用 beta 分支），同步到文档站更新日志
+          changelog_file="${RUNNER_TEMP}/release-changelog.md"
+          if [ "${CHANNEL}" = "release" ]; then
+            curl -fsSL --retry 3 --retry-delay 2 -o "${changelog_file}" \
+              "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/v${VERSION}/CHANGELOG.md" || true
+          else
+            curl -fsSL --retry 3 --retry-delay 2 -o "${changelog_file}" \
+              "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/beta/CHANGELOG-BETA.md" || true
+          fi
+          legacy_arg="--legacy-zip"
+          [ "${LEGACY_ZIP}" = "true" ] || legacy_arg="--no-legacy-zip"
+          git -C "${docs_dir}" config user.name "github-actions[bot]"
+          git -C "${docs_dir}" config user.email "github-actions[bot]@users.noreply.github.com"
+          (
+            cd "${docs_dir}"
+            args=(--channel "${CHANNEL}" --version "${VERSION}" "${legacy_arg}" --online-ext "${ONLINE_EXT}")
+            [ -s "${changelog_file}" ] && args+=(--changelog-file "${changelog_file}")
+            bash script/release-docs-ci.sh "${args[@]}"
+          )
+          git -C "${docs_dir}" add -A
+          if git -C "${docs_dir}" diff --cached --quiet; then
+            echo "::notice::docs 无变更（该版本可能已更新过）"
+            exit 0
+          fi
+          git -C "${docs_dir}" commit -m "docs(release): 更新 ${VERSION} 版本号与下载页"
+          git -C "${docs_dir}" push origin main
+          echo "::notice::docs 已推送 main，GitHub Pages 将自动构建发布"
+
+      - name: 写入执行摘要
+        if: always()
+        shell: bash
+        env:
+          CHANNEL: ${{ inputs.channel }}
+          VERSION_INPUT: ${{ inputs.version }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          PUBLISH_DOCKER: ${{ inputs.publish_docker }}
+          PUBLISH_DOCS: ${{ inputs.publish_docs }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## 发布后置：${VERSION_INPUT:-auto}（channel=${CHANNEL}）"
+            echo
+            echo "| 项 | 值 |"
+            echo "| --- | --- |"
+            echo "| dry-run | ${DRY_RUN} |"
+            echo "| 触发 Docker | ${PUBLISH_DOCKER} |"
+            echo "| 更新 docs | ${PUBLISH_DOCS} |"
+            echo
+            echo "本工作流对已发布版本做后置编排：GitHub Release（release 渠道）、docker-publish dispatch、docs 更新（可选）。"
+            echo "Gitee Release 仍由本机 script/release-post.sh 创建。"
+          } >>"$GITHUB_STEP_SUMMARY"
