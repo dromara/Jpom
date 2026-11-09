@@ -1,0 +1,16 @@
+{
+  "info": "/info",
+  "stat-info": "/get-stat-info",
+  "disk-info": "/disk-info",
+  "hw-disk-info": "/hw-disk--info",
+  "net-interfaces": "/network-interfaces",
+  "processList": "/processList",
+  "project-info": "/manage/getProjectInfo",
+  "project-item": "/manage/getProjectItem",
+  "script-list": "/script/list.json",
+  "script-lib": "/script-library/list",
+  "sys-cache": "/system/cache",
+  "sys-config": "/system/getConfig.json",
+  "syslog": "/system/log_data.json",
+  "whitelist": "/system/whitelistDirectory_data"
+}
