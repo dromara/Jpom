@@ -64,7 +64,8 @@ while [ $# -gt 0 ]; do
 		shift 2
 		;;
 	--prefix)
-		prefix="${2:?}"
+		# prefix 允许为空（正式发布不写前缀），不能用 :? 否则空值会被当成未设置
+		prefix="${2-}"
 		shift 2
 		;;
 	--repo-dir)
