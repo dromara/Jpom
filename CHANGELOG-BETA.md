@@ -12,6 +12,7 @@
 3. 【server】修复 权限拦截器在处理器方法缺少 `@Feature` 时静默放行的问题：属于权限管理模块的控制器改为 fail-closed，并补齐证书导出等接口的方法级权限声明（证书导出需要 `DOWNLOAD` 权限），避免未授权用户直达敏感业务接口
 4. 【server】修复 WebSocket 鉴权降级：握手改用登录会话（HttpOnly Cookie）认证，不再仅凭 URL 中的密码摘要 `userId` 通过校验；补充禁用账号校验、IP 白名单与 Origin 同源校验，避免绕过 HTTP 侧拦截器；同时修复 `system_log` 及项目日志 WebSocket 日志文件名路径穿越（含符号链接逃逸），服务端与插件端同步修复
 5. 【server】加固 工作空间强制过滤与导出范围：客户端伪造 `workspaceId`/`workspaceId:in`/`%workspaceId%` 等同字段参数不再能覆盖服务端强制的工作空间条件；项目导出、仓库导出改为仅导出“当前工作空间 + GLOBAL”，仓库分组下拉与 SSH 终端执行日志列表按工作空间过滤；非时间字段的 `xxx[0]`/`xxx[1]` 过滤参数不再导致 500
+6. 【web-vue】修复 触发器/构建说明文案中的 JSON 大括号被前端国际化组件误判为插值占位符、打开相关弹窗时控制台报 `SyntaxError: Invalid token in placeholder` 的问题（文案改为转义输出大括号，显示内容不变）
 
 
 ### ⚠️ 升级说明
