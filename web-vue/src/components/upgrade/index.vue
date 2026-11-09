@@ -94,7 +94,7 @@
             :file-list="fileList"
             :disabled="!!percentage"
             :before-upload="beforeUpload"
-            accept=".jar,.zip"
+            accept=".jar,.zip,.tar.gz"
             @remove="handleRemove"
           >
             <LoadingOutlined v-if="percentage" />
