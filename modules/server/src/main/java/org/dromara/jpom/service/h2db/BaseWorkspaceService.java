@@ -165,7 +165,8 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
         String workspaceId = this.getCheckUserWorkspace(request);
         //Assert.hasText(workspaceId, "此接口需要传workspaceId！");
-        paramMap.put("workspaceId", workspaceId);
+        // 强制条件优先：先剔除客户端传入的同字段参数（workspaceId:in / %workspaceId% 等），再注入服务端校验过的空间
+        putForcedFilter(paramMap, "workspaceId", workspaceId);
         return super.listPage(paramMap);
     }
 

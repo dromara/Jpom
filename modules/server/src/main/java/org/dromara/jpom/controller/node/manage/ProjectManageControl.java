@@ -29,6 +29,7 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
@@ -47,6 +48,7 @@ import org.dromara.jpom.permission.*;
 import org.dromara.jpom.service.dblog.BuildInfoService;
 import org.dromara.jpom.service.dblog.DbBuildHistoryLogService;
 import org.dromara.jpom.service.dblog.RepositoryService;
+import org.dromara.jpom.service.h2db.BaseDbService;
 import org.dromara.jpom.service.monitor.MonitorService;
 import org.dromara.jpom.service.node.ProjectInfoCacheService;
 import org.dromara.jpom.service.outgiving.LogReadServer;
@@ -483,6 +485,9 @@ public class ProjectManageControl extends BaseServerController {
             "autoStart", "outGivingProject");
         while (true) {
             Map<String, String> paramMap = ServletUtil.getParamMap(request);
+            // 强制空间隔离：与列表语义一致，仅导出「当前空间 + GLOBAL」，并剔除客户端同字段参数（审计 P1-2）
+            BaseDbService.putForcedFilter(paramMap, "workspaceId:in",
+                workspace + StrUtil.COMMA + ServerConst.WORKSPACE_GLOBAL);
             // 下一页
             paramMap.put("page", String.valueOf(++pageInt));
             PageResultDto<ProjectInfoCacheModel> listPage = projectInfoCacheService.listPage(paramMap, false);

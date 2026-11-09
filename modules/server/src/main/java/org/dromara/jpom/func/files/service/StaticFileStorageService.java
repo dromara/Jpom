@@ -101,8 +101,8 @@ public class StaticFileStorageService extends BaseDbService<StaticFileStorageMod
         if (CollUtil.isEmpty(staticDir)) {
             return new PageResultDto<>(1, 1, 0);
         }
-        paramMap.remove("staticDir");
-        paramMap.put("staticDir:in", CollUtil.join(staticDir, ","));
+        // 强制条件优先：剔除客户端传入的 staticDir 同字段参数（staticDir / %staticDir% 等），再注入空间白名单目录
+        putForcedFilter(paramMap, "staticDir:in", CollUtil.join(staticDir, ","));
         return super.listPage(paramMap, true);
     }
 

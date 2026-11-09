@@ -123,8 +123,9 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         // 验证工作空间权限
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
         String workspaceId = this.getCheckUserWorkspace(request);
-        paramMap.put("workspaceId", workspaceId);
-        paramMap.put("taskId", FileReleaseTaskLogModel.TASK_ROOT_ID);
+        // 强制条件优先：剔除客户端同字段参数后再注入空间与根任务条件
+        putForcedFilter(paramMap, "workspaceId", workspaceId);
+        putForcedFilter(paramMap, "taskId", FileReleaseTaskLogModel.TASK_ROOT_ID);
         return super.listPage(paramMap);
     }
 

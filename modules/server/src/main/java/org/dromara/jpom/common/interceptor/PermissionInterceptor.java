@@ -161,17 +161,36 @@ public class PermissionInterceptor implements HandlerMethodInterceptor {
             String dataId = request.getParameter(parameterName);
             if (StrUtil.isNotEmpty(dataId)) {
                 BaseNodeModel data = baseNodeService.getData(node.getId(), dataId);
-                if (data != null) {
-                    UserBindWorkspaceModel.PermissionResult permissionResult = userBindWorkspaceService.checkPermission(userModel, data.getWorkspaceId());
-
-                    if (!permissionResult.isSuccess()) {
+                UserBindWorkspaceModel.PermissionResult permissionResult = data == null ? null
+                    : userBindWorkspaceService.checkPermission(userModel, data.getWorkspaceId());
+                if (!isNodeDataPermissionAllowed(data, permissionResult)) {
+                    if (permissionResult == null) {
+                        // fail-closed：缓存未命中（节点数据未同步/已删除）无法确定数据所属工作空间，按无权限拒绝
+                        log.warn("node data not found for permission check, deny (fail-closed): nodeId={}, dataId={}", node.getId(), dataId);
+                        this.errorMsg(response, I18nMessageUtil.get("i18n.no_current_data_permission.17d7"));
+                    } else {
                         this.errorMsg(response, permissionResult.errorMsg());
-                        return false;
                     }
+                    return false;
                 }
             }
         }
         return true;
+    }
+
+    /**
+     * 节点数据权限判定（fail-closed）。
+     * <p>
+     * 历史实现只在缓存命中时才校验数据所属工作空间，缓存未命中（节点数据未同步/已删除）会直接放行，
+     * 形成“无法确认数据归属即放行”的 fail-open（2026-11-08 审计 P3-4）。现在未命中同样拒绝：
+     * 无法确定数据所属工作空间时按无权限处理，避免借缓存空窗期跨工作空间操作节点数据。
+     *
+     * @param data             节点缓存数据（未命中为 null）
+     * @param permissionResult 数据所属工作空间的权限校验结果（未命中为 null）
+     * @return true 允许执行
+     */
+    static boolean isNodeDataPermissionAllowed(BaseNodeModel data, UserBindWorkspaceModel.PermissionResult permissionResult) {
+        return data != null && permissionResult != null && permissionResult.isSuccess();
     }
 
     /**

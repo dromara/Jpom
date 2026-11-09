@@ -615,6 +615,31 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
     }
 
     /**
+     * 注入服务端强制过滤条件，并先剔除客户端传入的同字段参数。
+     * <p>
+     * 服务端强制条件（工作空间隔离的 {@code workspaceId}/{@code workspaceId:in} 等）与客户端查询参数
+     * 共用同一套 {@code paramMap} 字符串协议：客户端可以构造 {@code workspaceId}、{@code workspaceId:in}、
+     * {@code %workspaceId%} 等「{@link #resolveFilterField(String)} 后同字段」的 key，在
+     * {@link #buildWhere(Map, Function)} 中被映射为同一个数据库字段，从而覆盖服务端注入的强制条件
+     * （2026-11-08 审计 P1-1）。
+     * <p>
+     * 本方法在写入强制条件前先删除所有解析后同字段的客户端 key（忽略大小写，避免 {@code WorkspaceId}
+     * 之类的变体绕过），保证最终查询条件唯一来自服务端。
+     *
+     * @param paramMap 请求参数（会被原地修改）
+     * @param rawKey   服务端强制条件参数名，如 {@code workspaceId}、{@code workspaceId:in}
+     * @param value    强制条件值
+     */
+    public static void putForcedFilter(Map<String, String> paramMap, String rawKey, String value) {
+        String field = resolveFilterField(rawKey);
+        if (field == null) {
+            throw new IllegalArgumentException("invalid forced filter field: " + rawKey);
+        }
+        paramMap.keySet().removeIf(key -> StrUtil.equalsIgnoreCase(field, resolveFilterField(key)));
+        paramMap.put(rawKey, value);
+    }
+
+    /**
      * 根据请求参数构建查询条件
      * <p>
      * 请求参数名会被当作数据库字段名使用，必须先校验为合法标识符、并用 {@link Condition} 绑定值，避免 SQL 注入；
@@ -647,6 +672,11 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
                 continue;
             }
             String timeKey = StrUtil.removeAny(key, "[0]", "[1]");
+            if (!StrUtil.equals(key, timeKey) && !StrUtil.containsIgnoreCase(key, "time")) {
+                // [0]/[1] 只属于时间范围过滤协议；非时间字段带该后缀会生成非法列名（如 `foo[0]`）导致 500
+                log.warn("ignore non-time range filter field: {}", rawKey);
+                continue;
+            }
             String wrapField = fieldWrapper.apply(key);
             if (StrUtil.endWith(key, ":in")) {
                 where.set(fieldWrapper.apply(filterField), StrUtil.split(value, StrUtil.COMMA));
