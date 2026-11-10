@@ -8,4 +8,4 @@
  * See the Mulan PSL v2 for more details.
  */
 export const SERVER_NAME = "jpom-mcp-server";
-export const VERSION = "0.1.0";
+export const VERSION = "0.1.1";

@@ -5,7 +5,7 @@ Jpom 的 [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) 服务
 （Jpom 主程序为 Java 8 / Spring Boot 2.7，MCP 侧独立发版）。
 
 - 包名：`jpom-mcp-server`
-- 版本：`0.1.0`（首个公开版本，见 [CHANGELOG.md](https://gitee.com/dromara/Jpom/blob/dev/mcp-server/CHANGELOG.md)）
+- 版本：`0.1.1`（首个公开版本 0.1.0 的 CLI bin 修复版，见 [CHANGELOG.md](https://gitee.com/dromara/Jpom/blob/dev/mcp-server/CHANGELOG.md)）
 - 运行环境：Node.js >= 18，ESM，Linux / macOS / Windows
 - 协议：MCP stdio（stdio transport），兼容 Claude Desktop、Cursor、VS Code、DeepSeek Harness 等客户端
 - 许可证：Mulan PSL v2
@@ -397,7 +397,7 @@ node dist/index.js doctor   # 用真实 Jpom 自检连通性（需 JPOM_* 环境
 ## 兼容性与限制
 
 - 面向 Jpom 2.11.x 的 REST API；Jpom 主程序升级后若接口变化，以实际返回为准。
-- 0.1.0 仅支持 **stdio** 传输，暂不提供远程 HTTP/SSE transport；一个客户端进程对应一个 Jpom 连接配置。
+- 0.1.x 仅支持 **stdio** 传输，暂不提供远程 HTTP/SSE transport；一个客户端进程对应一个 Jpom 连接配置。
 - 不提供交互式终端、文件上传、脚本在线执行等 WebSocket/高风险管理面；这类操作请使用 Jpom Web UI。
 - 集群/多实例部署下，日志 tail 与部分实时数据依赖具体实例的内存状态，与 Jpom Web 端行为一致。
 

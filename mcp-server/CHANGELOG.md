@@ -5,6 +5,12 @@
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-10
+
+### 修复
+
+- 修复 `dist/index.js` 缺少 `#!/usr/bin/env node` shebang、导致 `npx jpom-mcp-server` 与全局安装后的 `jpom-mcp-server` 命令无法直接执行的问题（0.1.0 的 CLI bin 入口不可用，请升级到 0.1.1）。
+
 ## [0.1.0] - 2026-11-09
 
 首个公开版本。Jpom MCP Server 是一个独立 sidecar：通过 stdio 与 MCP 客户端通信，通过 Jpom REST API

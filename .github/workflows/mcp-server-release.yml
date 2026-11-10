@@ -148,8 +148,27 @@ jobs:
           echo "tarball：${TARBALL}（${SIZE_HUMAN}）"
           echo "确认无误后，可用 workflow_dispatch 并把 dry_run 设为 false，或在本地执行 npm publish。"
 
+      - name: 检查版本是否已发布（幂等）
+        id: check-published
+        shell: bash
+        run: |
+          set -euo pipefail
+          if npm view "${PKG_NAME}@${PKG_VERSION}" version --registry=https://registry.npmjs.org/ >/dev/null 2>&1; then
+            echo "SKIP_PUBLISH=true" >> "$GITHUB_ENV"
+            echo "::notice::${PKG_NAME}@${PKG_VERSION} 已存在于 npm，跳过 publish（幂等；如需重发请提升版本号）"
+          else
+            echo "SKIP_PUBLISH=false" >> "$GITHUB_ENV"
+          fi
+
+      - name: 版本已存在，跳过发布
+        if: (github.event_name == 'push' || inputs.dry_run == false) && env.SKIP_PUBLISH == 'true'
+        shell: bash
+        run: |
+          echo "${PKG_NAME}@${PKG_VERSION} 已发布，跳过 npm publish。"
+          echo "如需重新发布，请提升 package.json / src/version.ts 版本号后重新提交。"
+
       - name: 发布到 npm
-        if: github.event_name == 'push' || inputs.dry_run == false
+        if: (github.event_name == 'push' || inputs.dry_run == false) && env.SKIP_PUBLISH != 'true'
         shell: bash
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

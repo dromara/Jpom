@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /*
  * Copyright (c) 2019 Of Him Code Technology Studio
  * Jpom is licensed under Mulan PSL v2.
