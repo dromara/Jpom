@@ -17,7 +17,7 @@
 #   VERSION=2.11.13.2 bash script/build-upgrade-container.sh
 #
 # 产物：dist/agent-go-<version>-upgrade-<os>-<arch>.jar + .sha1
-#       PLATFORM=linux/amd64 时额外生成兼容别名 dist/agent-go-<version>-upgrade.jar
+#       不再生成 linux/amd64 兼容别名 agent-go-<version>-upgrade.jar（平台容器已覆盖全部平台）
 # 目标平台可执行文件必须能通过 Agent 端 machine 校验（ELF/PE/Mach-O）。
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -131,19 +131,6 @@ EOF
   echo ">>> upgrade container: $out_abs"
 }
 
-# 兼容别名：linux/amd64 旧命名 agent-go-<ver>-upgrade.jar
-add_alias_if_needed() {
-  local platform="$1"
-  local jar_file="$2"
-  if [[ "$platform" == "linux/amd64" ]]; then
-    local alias="$OUT_DIR/agent-go-$VERSION-upgrade.jar"
-    if [[ "$jar_file" != "$alias" ]]; then
-      cp "$jar_file" "$alias"
-    fi
-    echo ">>> compat alias: $alias"
-  fi
-}
-
 build_platform() {
   local platform="$1"
   local os="${platform%/*}"
@@ -160,7 +147,6 @@ build_platform() {
   fi
   build_container "$platform" "$binary" "$out"
   containers+=("$out")
-  add_alias_if_needed "$platform" "$out"
 }
 
 SINGLE_PLATFORM=0
@@ -179,15 +165,8 @@ fi
 for jar_file in "${containers[@]}"; do
   sha1sum "$jar_file" | cut -d" " -f1 > "$jar_file.sha1"
 done
-# 兼容别名也要有 sha1（如果存在）
-if [[ -f "$OUT_DIR/agent-go-$VERSION-upgrade.jar" ]]; then
-  sha1sum "$OUT_DIR/agent-go-$VERSION-upgrade.jar" | cut -d" " -f1 > "$OUT_DIR/agent-go-$VERSION-upgrade.jar.sha1"
-fi
 
 echo "--- Go 升级容器产物 (VERSION=$VERSION) ---"
 for jar_file in "${containers[@]}"; do
   echo "$(cat "$jar_file.sha1")  $(basename "$jar_file")"
 done
-if [[ -f "$OUT_DIR/agent-go-$VERSION-upgrade.jar" ]]; then
-  echo "$(cat "$OUT_DIR/agent-go-$VERSION-upgrade.jar.sha1")  agent-go-$VERSION-upgrade.jar (compat alias)"
-fi

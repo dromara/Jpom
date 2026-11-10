@@ -35,12 +35,12 @@ on:
         type: boolean
         default: false
       online_ext:
-        description: '在线升级 URL 后缀：过渡期用 zip（兼容旧客户端），2.12.0 起用 tar.gz'
+        description: '在线升级 URL 后缀：过渡期用 zip（兼容旧客户端），过渡窗口结束后用 tar.gz'
         type: choice
         options: [zip, tar.gz]
         default: zip
       legacy_zip:
-        description: '若 R2 上有过渡期 zip（2.12.0 前）则一并作为 GitHub Release 附件'
+        description: '若 R2 上有过渡期 zip（过渡窗口内）则一并作为 GitHub Release 附件'
         type: boolean
         default: true
       dry_run:

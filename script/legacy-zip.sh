@@ -12,7 +12,7 @@
 #-----------------------------------------------------------
 # 过渡期兼容：从已解压的运行目录重新生成旧版在线升级需要的 zip 发布包
 #
-# 背景（2.12.0 前的过渡期）：
+# 背景（过渡窗口（桥接稳定版及之前））：
 #   Java 发布包默认只产出 server/agent 的 tar.gz（Maven Assembly 的 dir,tar.gz），
 #   但旧版 Server/Agent 的在线升级只认 <kind>-<version>-release.zip。本脚本从 Assembly
 #   解压出的运行目录 modules/<kind>/target/<kind>-<version>-release/ 重新打包出与旧版

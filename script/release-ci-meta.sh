@@ -14,7 +14,7 @@
 #
 # 输出（写入 $GITHUB_OUTPUT；未设置时打印到 stdout）：
 #   channel / version / target_prefix / remote_rel / public_base
-#   server_pkg / agent_pkg / merged_pkg（jpom-<version>.tar.gz）/ legacy_zip
+#   server_pkg / agent_pkg / legacy_zip
 #   dry_run / deep_verify
 #
 # 环境变量：
@@ -52,7 +52,7 @@ version_input="${INPUT_VERSION:-}"
 target_prefix="${INPUT_TARGET_PREFIX:-}"
 dry_run="${INPUT_DRY_RUN:-false}"
 deep_verify="${INPUT_DEEP_VERIFY:-false}"
-# 过渡期（2.12.0 前）默认同时产出 zip，兼容旧客户端在线升级；2.12.0 起可关闭
+# 过渡窗口内默认同时产出 zip，兼容旧客户端在线升级；过渡窗口结束后可关闭
 legacy_zip_input="${INPUT_LEGACY_ZIP:-${JPOM_LEGACY_ZIP:-true}}"
 public_base="${JPOM_DOWNLOAD_BASE:-https://pub-a46506c7e8ff43fabc4c1ce8e5faffcb.r2.dev}"
 public_base="${public_base%/}"
@@ -182,11 +182,8 @@ esac
 remote_rel="${target_prefix:+${target_prefix}/}${channel}/${version}"
 server_pkg="server-${version}-release"
 agent_pkg="agent-${version}-release"
-# 合并包固定 tar.gz（内含 server/agent 的 tar.gz+sha1，legacy 过渡期再含 zip）
-merged_pkg="jpom-${version}.tar.gz"
 # Go 插件端产物（发布包 + 在线升级容器），与 Java 产物同版本目录
 go_dist_rel="go-agent/dist"
-go_upgrade_pkg="agent-go-${version}-upgrade.jar"
 
 
 emit channel "$channel"
@@ -196,10 +193,8 @@ emit remote_rel "$remote_rel"
 emit public_base "$public_base"
 emit server_pkg "$server_pkg"
 emit agent_pkg "$agent_pkg"
-emit merged_pkg "$merged_pkg"
 emit legacy_zip "$legacy_zip"
 emit go_dist_rel "$go_dist_rel"
-emit go_upgrade_pkg "$go_upgrade_pkg"
 emit dry_run "$dry_run"
 emit self_test "$self_test"
 emit deep_verify "$deep_verify"

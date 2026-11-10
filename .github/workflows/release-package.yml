@@ -8,10 +8,10 @@ name: release-package
 # 3. 分支 push（仅 workflow/辅助脚本变更）触发一次 dry_run 自检：Go 质量门禁 + 构建 + 校验 + 启动冒烟，不上传。
 # 4. 校验使用 script/verify-release-artifacts.sh；CI 侧启动冒烟由 script/ci-smoke-packages.sh 完成
 #    （解压 tar.gz → 启动 server/agent → 轮询 /check-system、首页、登录验证码接口）。
-# 5. 发布格式（2.12.0 前的过渡期）：
+# 5. 发布格式（过渡窗口内，桥接稳定版及之前）：
 #    - Java：server/agent 默认只产 tar.gz；`legacy_zip`（默认 true，仓库变量 JPOM_LEGACY_ZIP 可改默认）时
-#      额外用 script/legacy-zip.sh 生成 zip，供旧客户端在线升级；2.12.0 起只产 tar.gz。
-#    - 合并包：jpom-<version>.tar.gz（内含 server/agent 的 tar.gz + sha1，过渡期含 zip）。
+#      额外用 script/legacy-zip.sh 生成 zip，供旧客户端在线升级；过渡窗口结束后只产 tar.gz。
+#    - 不再提供合并包 jpom-<version>.tar.gz（下载页直接引用 server/agent 安装包）。
 #    - Go 插件端：5 平台安装包全部 tar.gz（含 Windows），升级容器 jar 不变。
 # 6. 一键发布后置（可选，默认关闭）：workflow_dispatch 传 `publish=true` 时，release 渠道额外执行 publish job：
 #    创建/更新 GitHub Release（附 tar.gz/sha1，过渡期附 zip），并用 `gh workflow run` 触发 docker-publish。
@@ -28,9 +28,9 @@ name: release-package
 #     agent-go-<version>-release-darwin-amd64.tar.gz
 #     agent-go-<version>-release-darwin-arm64.tar.gz
 #     agent-go-<version>-release-windows-amd64.tar.gz
-#   在线升级容器（5 平台，Server 按节点平台下发）+ linux/amd64 兼容别名：
+#   在线升级容器（5 平台，Server 按节点平台下发）：
 #     agent-go-<version>-upgrade-<os>-<arch>.jar
-#     agent-go-<version>-upgrade.jar（= linux/amd64 副本，供旧 Server 手工上传/默认回退）
+#   （linux/amd64 兼容别名 agent-go-<version>-upgrade.jar 已下线，平台容器已覆盖全部平台）
 # 说明：每个升级容器内含对应平台可执行文件与 go-agent/agent.json（version/timeStamp/minVersion/
 #       platform/sha256），Agent 端会做平台精确匹配，不匹配的容器会被拒绝且不改动现有二进制。
 #
@@ -61,7 +61,7 @@ on:
         type: boolean
         default: false
       legacy_zip:
-        description: '过渡期（2.12.0 前）额外产出 zip 供旧客户端在线升级（仓库变量 JPOM_LEGACY_ZIP 可设默认）'
+        description: '过渡窗口内额外产出 zip 供旧客户端在线升级（仓库变量 JPOM_LEGACY_ZIP 可设默认）'
         type: boolean
         default: true
       publish:
@@ -106,7 +106,6 @@ jobs:
       version: ${{ steps.meta.outputs.version }}
       remote_rel: ${{ steps.meta.outputs.remote_rel }}
       public_base: ${{ steps.meta.outputs.public_base }}
-      merged_pkg: ${{ steps.meta.outputs.merged_pkg }}
       legacy_zip: ${{ steps.meta.outputs.legacy_zip }}
       dry_run: ${{ steps.meta.outputs.dry_run }}
     steps:
@@ -205,9 +204,7 @@ jobs:
               MIN_VERSION="${GO_AGENT_MIN_VERSION}" TIME_STAMP="${BUILD_TIME}" \
               bash script/build-upgrade-container.sh
           done
-          # 3) linux/amd64 兼容别名（旧 Server 手工上传/默认回退用；构建脚本可能已生成，这里保证存在且最新）
-          cp -f "dist/agent-go-${VERSION}-upgrade-linux-amd64.jar" "dist/agent-go-${VERSION}-upgrade.jar"
-          # 4) 为全部 Go 产物生成 sha1（安装包 sha1 由 package.sh 生成，这里补齐升级容器与别名）
+          # 3) 为全部 Go 产物生成 sha1（安装包 sha1 由 package.sh 生成，这里补齐升级容器）
           (cd dist && for f in agent-go-*; do
             case "$f" in
             *.sha1) continue ;;
@@ -373,7 +370,6 @@ jobs:
           SELF_TEST: ${{ steps.meta.outputs.self_test }}
           DEEP_VERIFY: ${{ steps.meta.outputs.deep_verify }}
           LEGACY_ZIP: ${{ steps.meta.outputs.legacy_zip }}
-          MERGED_PKG: ${{ steps.meta.outputs.merged_pkg }}
           EVENT_NAME: ${{ github.event_name }}
           REF_NAME: ${{ github.ref_name }}
         run: |
@@ -391,7 +387,6 @@ jobs:
             echo "| 分支自检 | ${SELF_TEST} |"
             echo "| deep-verify | ${DEEP_VERIFY} |"
             echo "| 过渡期 zip | ${LEGACY_ZIP} |"
-            echo "| 合并包 | ${MERGED_PKG} |"
             echo
             echo "Java 产物 sha1（tar.gz 默认，过渡期含 zip）："
             echo '```'

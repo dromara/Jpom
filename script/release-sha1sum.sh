@@ -51,7 +51,7 @@ echo "${ESUM} $name" | sha1sum -c -;
 rm -f "$name.sha1" "$name"
 }
 
-# check agent：tar.gz 必选；zip 为过渡期兼容（2.12.0 起不再产出）
+# check agent：tar.gz 必选；zip 为过渡期兼容（过渡窗口结束后不再产出）
 checkItem agent tar.gz required
 checkItem agent zip optional
 

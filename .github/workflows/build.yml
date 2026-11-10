@@ -89,7 +89,7 @@ jobs:
         shell: bash
         run: mvn -B -e -Dmaven.test.skip=true -Dmaven.compile.fork=true clean package
 
-      - name: 生成过渡期兼容 zip（2.12.0 前供旧客户端在线升级）
+      - name: 生成过渡期兼容 zip（过渡窗口内供旧客户端在线升级）
         shell: bash
         run: |
           set -euo pipefail

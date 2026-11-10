@@ -15,12 +15,13 @@
 # 上传内容：
 #   - Java：modules/{server,agent}/target/<kind>-<version>-release.tar.gz(.sha1)
 #            （--legacy-zip 过渡期额外上传 <kind>-<version>-release.zip(.sha1)，供旧客户端在线升级）
-#            + 合并包 jpom-<version>.tar.gz(.sha1)（内含 server/agent 的 tar.gz+sha1，legacy 时含 zip）
 #   - Go  ：go-agent/dist 下 5 平台安装包 agent-go-<version>-release-<os>-<arch>.tar.gz(.sha1)
 #            （5 平台统一 tar.gz，Windows 也是 tar.gz）
 #            + 5 平台升级容器 agent-go-<version>-upgrade-<os>-<arch>.jar(.sha1)
-#            + linux/amd64 兼容别名 agent-go-<version>-upgrade.jar(.sha1)
-#            （Server 在线升级按节点平台读取对应容器；别名供旧 Server 手工上传/默认回退）
+#            （Server 在线升级按节点平台读取对应容器）
+#
+# 说明：合并包 jpom-<version>.tar.gz 与 linux/amd64 兼容别名 agent-go-<version>-upgrade.jar
+#       已下线（下载页改为直接引用 server/agent 安装包；别名可由平台容器替代）。
 #
 # 与根仓 script/deploy-release-r2.sh 的区别：
 #   - 本脚本在 jpom-parent 仓库内运行（CI checkout 的是 jpom-parent），路径以本仓库根为基准
@@ -152,7 +153,7 @@ for kind in agent server; do
 done
 
 # Go 插件端产物：与 Java 产物上传到同版本目录（下载中心/Server 在线升级按同目录命名约定读取）
-# 5 平台安装包（统一 tar.gz，Windows 也是 tar.gz）+ 5 平台升级容器 + linux/amd64 兼容别名
+# 5 平台安装包（统一 tar.gz，Windows 也是 tar.gz）+ 5 平台升级容器
 # （与 verify-release-artifacts.sh 清单保持一致）
 go_dist="${repo_dir}/go-agent/dist"
 go_artifacts=()
@@ -163,7 +164,6 @@ for go_platform in "${go_platforms[@]}"; do
 	go_artifacts+=("agent-go-${version}-release-${go_os}-${go_arch}.tar.gz")
 	go_artifacts+=("agent-go-${version}-upgrade-${go_os}-${go_arch}.jar")
 done
-go_artifacts+=("agent-go-${version}-upgrade.jar")
 for name in "${go_artifacts[@]}"; do
 	sources+=("${go_dist}/${name}")
 	sources+=("${go_dist}/${name}.sha1")
@@ -178,14 +178,9 @@ for src in "${sources[@]}"; do
 	[ -s "$src" ] || die "缺少产物：${src}"
 done
 
-command -v tar >/dev/null 2>&1 || die "缺少 tar 命令（合并包固定为 jpom-<version>.tar.gz）"
 if [ "$dry_run" = "0" ]; then
 	command -v rclone >/dev/null 2>&1 || die "缺少 rclone"
 	command -v curl >/dev/null 2>&1 || die "缺少 curl"
-fi
-# 合并包用 tar 生成；只有过渡期 legacy zip 场景才要求 zip 工具
-if [ "$legacy_zip" = "1" ]; then
-	command -v zip >/dev/null 2>&1 || die "缺少 zip 命令（--legacy-zip 过渡期需要）"
 fi
 
 sha1_of() {
@@ -199,21 +194,6 @@ file_size() { stat -c '%s' "$1" 2>/dev/null || stat -f '%z' "$1" 2>/dev/null; }
 
 stage_dir=$(mktemp -d)
 trap 'rm -rf "${stage_dir}"' EXIT
-# 合并包固定为 jpom-<version>.tar.gz：内含 server/agent 的 tar.gz + sha1（legacy 过渡期再含 zip + sha1）
-merged_dir="${stage_dir}/merged"
-merged_tgz="${stage_dir}/jpom-${version}.tar.gz"
-mkdir -p "$merged_dir"
-merged_files=()
-for kind in server agent; do
-	for ext in "${java_exts[@]}"; do
-		cp -f "${modules_dir}/${kind}/target/${kind}-${version}-release.${ext}" \
-			"${modules_dir}/${kind}/target/${kind}-${version}-release.${ext}.sha1" "$merged_dir/"
-		merged_files+=("${kind}-${version}-release.${ext}" "${kind}-${version}-release.${ext}.sha1")
-	done
-done
-log "生成合并包 ${merged_tgz##*/}（含：${merged_files[*]}）"
-tar -czf "$merged_tgz" -C "$merged_dir" "${merged_files[@]}"
-sha1_of "$merged_tgz" >"${merged_tgz}.sha1"
 
 upload_file() {
 	local src=$1 name dest
@@ -240,8 +220,6 @@ upload_file() {
 for src in "${sources[@]}"; do
 	upload_file "$src"
 done
-upload_file "$merged_tgz"
-upload_file "${merged_tgz}.sha1"
 
 if [ "$dry_run" = "1" ]; then
 	log "dry-run 结束（未上传）"
@@ -255,7 +233,7 @@ fi
 
 log "开始回验（${public_url}/）"
 fail=0
-uploaded=("${sources[@]}" "$merged_tgz" "${merged_tgz}.sha1")
+uploaded=("${sources[@]}")
 for src in "${uploaded[@]}"; do
 	name=$(basename "$src")
 	local_size=$(file_size "$src")
