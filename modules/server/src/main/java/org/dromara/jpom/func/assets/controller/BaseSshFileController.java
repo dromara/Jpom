@@ -38,7 +38,6 @@ import org.dromara.jpom.func.assets.server.MachineSshServer;
 import org.dromara.jpom.model.data.AgentWhitelist;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
-import org.dromara.jpom.plugins.JschUtils;
 import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.system.ServerConfig;
 import org.dromara.jpom.util.CommandUtil;
@@ -53,6 +52,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -596,7 +596,7 @@ public abstract class BaseSshFileController extends BaseServerController {
      * @apiParam {String} id ssh id
      * @apiParam {String} path ssh 选择到目录
      * @apiParam {String} name 文件名
-     * @apiParam {String} unFolder true/1 为文件夹，false/0 为文件
+     * @apiParam {String} unFolder true/1 为文件，false/0 为文件夹
      * @apiSuccess {JSON}  data
      */
     @RequestMapping(value = "new_file_folder.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -605,7 +605,7 @@ public abstract class BaseSshFileController extends BaseServerController {
                                               @ValidatorItem String allowPathParent,
                                               @ValidatorItem String nextPath,
                                               @ValidatorItem String name, String unFolder) {
-        Assert.state(!StrUtil.contains(name, StrUtil.SLASH), I18nMessageUtil.get("i18n.file_name_error_message.7a25"));
+        checkNewFileName(name);
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
             Session session = null;
@@ -618,34 +618,57 @@ public abstract class BaseSshFileController extends BaseServerController {
                     if (sftp.exist(remotePath)) {
                         return new JsonMessage<>(400, I18nMessageUtil.get("i18n.folder_or_file_exists.c687"));
                     }
-                    StringBuilder command = new StringBuilder();
                     if (Convert.toBool(unFolder, false)) {
-                        // 文件
-                        command.append("touch ").append(remotePath);
-                    } else {
-                        // 目录
-                        command.append("mkdir ").append(remotePath);
+                        // 文件：通过 SFTP 创建空文件，禁止把用户输入拼进远程 shell 命令
                         try {
-                            if (sftp.mkdir(remotePath)) {
-                                // 创建成功
-                                return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
-                            }
-                        } catch (Exception e) {
-                            log.error(I18nMessageUtil.get("i18n.ssh_folder_creation_exception.6ed2"), e);
-                            return new JsonMessage<>(500, I18nMessageUtil.get("i18n.create_folder_failure.b632") + e.getMessage());
+                            createEmptyFile(sftp.getClient(), remotePath);
+                        } catch (SftpException e) {
+                            throw Lombok.sneakyThrow(e);
                         }
+                        return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
                     }
-                    List<String> result = new ArrayList<>();
-                    JschUtils.execCallbackLine(session, charset, timeout, command.toString(), StrUtil.EMPTY, result::add);
-
-                    return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded_with_details.c773") + CollUtil.join(result, StrUtil.LF));
-                } catch (IOException e) {
-                    throw Lombok.sneakyThrow(e);
+                    // 目录
+                    try {
+                        if (sftp.mkdir(remotePath)) {
+                            // 创建成功
+                            return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
+                        }
+                    } catch (Exception e) {
+                        log.error(I18nMessageUtil.get("i18n.ssh_folder_creation_exception.6ed2"), e);
+                        return new JsonMessage<>(500, I18nMessageUtil.get("i18n.create_folder_failure.b632") + e.getMessage());
+                    }
+                    return new JsonMessage<>(500, I18nMessageUtil.get("i18n.create_folder_failure.b632"));
                 }
             } finally {
                 JschUtil.close(session);
             }
         });
+    }
+
+    /**
+     * 校验 SSH 文件管理新建文件/文件夹的名称。
+     * <p>
+     * 名称只能是单个路径片段：禁止 /、\（路径分隔符）、回车/换行/NUL（控制字符）以及 . 和 ..（目录越界）。
+     * 创建动作已改为 SFTP 调用，shell 元字符只会作为普通文件名字符，不会被执行。
+     *
+     * @param name 文件/文件夹名称
+     */
+    static void checkNewFileName(String name) {
+        Assert.state(!StrUtil.contains(name, StrUtil.SLASH), I18nMessageUtil.get("i18n.file_name_error_message.7a25"));
+        Assert.state(!StrUtil.contains(name, "\\"), I18nMessageUtil.get("i18n.file_name_invalid.3f7c"));
+        Assert.state(!StrUtil.equalsAny(name, ".", ".."), I18nMessageUtil.get("i18n.file_name_invalid.3f7c"));
+        Assert.state(!StrUtil.containsAny(name, "\r", "\n", "\0"), I18nMessageUtil.get("i18n.file_name_invalid.3f7c"));
+    }
+
+    /**
+     * 通过 SFTP 在远程主机创建空文件（不经过远程 shell）。
+     *
+     * @param client     SFTP 客户端
+     * @param remotePath 远程文件路径
+     * @throws SftpException 创建失败
+     */
+    static void createEmptyFile(ChannelSftp client, String remotePath) throws SftpException {
+        client.put(new ByteArrayInputStream(new byte[0]), remotePath);
     }
 
     /**

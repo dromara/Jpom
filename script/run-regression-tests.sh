@@ -76,6 +76,8 @@ DEFAULT_TESTS=(
 	DockerWorkspaceScopedLookupTest
 	BuildInfoControllerBranchListTest
 	LoginControlCaptchaTest
+	# SSH 文件管理 new_file_folder 命令注入回归（name 不再拼远程 shell，创建走 SFTP）
+	BaseSshFileControllerNewFileFolderTest
 )
 
 MVN_BIN=${MVN:-mvn}
