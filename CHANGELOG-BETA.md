@@ -2,13 +2,22 @@
 
 ## 2.11.13.3-beta
 
+### 🐣 新增功能
+
+1. 【mcp】新增 npm 包 jpom-mcp-server（MCP stdio Server，npm 独立发版，当前 0.1.1）：配置 Jpom 地址与长期 token 后，Claude Desktop/Cursor/VS Code/DeepSeek Harness 等 MCP 客户端可查询节点、项目、构建、脚本、资产、监控、分发、系统与审计日志，并支持日志读取/有界实时跟随；默认只读，写操作需显式开启。
+2. 【server】发布包默认改为 tar.gz 格式（server/agent 各自 tar.gz + sha1），过渡窗口内同时提供 zip 供旧版本客户端在线升级；Go 插件端 5 平台安装包统一 tar.gz（Windows 也是 tar.gz，内含 `bin/agent.exe`），升级容器不变。
+
 ### 🐞 解决BUG、优化功能
 
-1. 【server】修复 SSH 文件管理新建文件/文件夹（`new_file_folder.json`）的命令注入风险：创建动作改为 SFTP 调用（`ChannelSftp.put`/`mkdir`），不再把文件名/路径拼接进远程 shell 命令；文件名同时校验并拒绝 `/`、`\`、`.`、`..` 与 CR/LF/NUL。
+1. 【server】修复 SSH 文件管理新建文件/文件夹（`new_file_folder.json`）的命令注入风险：创建动作改为 SFTP 调用（`ChannelSftp.put`/`mkdir`），不再把文件名/路径拼接进远程 shell 命令；文件名同时校验：不能包含 `/`、`\` 与 CR/LF/NUL，且不能为 `.`、`..`。
+2. 【mcp】修复 jpom-mcp-server 0.1.0 的 CLI bin 缺少 shebang 导致 `npx jpom-mcp-server` 无法执行的问题（0.1.1 已发布，0.1.0 已在 npm 标记废弃，请升级到 0.1.1+）。
 
 ### ⚠️ 升级说明
 
-1. **SSH 文件管理名称校验**：新建文件/文件夹名称不再接受 `/`、`\`、`.`、`..` 及 CR/LF/NUL；包含 `;`、`|`、`&`、`$()` 等字符的名称会按普通文件名创建，不再被 shell 解释。正常的文件创建、上传、重命名不受影响。
+1. **SSH 文件管理名称校验**：新建文件/文件夹名称不能包含 `/`、`\`、CR/LF/NUL，且不能是 `.` 或 `..`（含点号的普通名称如 `.hidden`、`...` 仍可创建）；包含 `;`、`|`、`&`、`$()` 等字符的名称会按普通文件名创建，不再被 shell 解释。正常的文件创建、上传、重命名不受影响。
+2. **发布包格式变化**：server/agent 安装包默认 tar.gz；旧版本（≤ 2.11.13.1）在线升级依赖过渡窗口内的 zip（`legacy_zip` 关闭后仅产 tar.gz）。不再提供合并包 `jpom-<version>.tar.gz`，请分别下载 server/agent 安装包。
+3. **Go 升级容器兼容别名下线**：不再生成 `agent-go-<version>-upgrade.jar`（2.11.13.2-beta 升级说明第 4 条所述 linux-amd64 手工上传别名失效），5 平台容器 `agent-go-<version>-upgrade-<os>-<arch>.jar` 已覆盖全部平台；旧版 Server 手工上传请直接选择与节点平台一致的容器。
+4. **jpom-mcp-server 为 npm 独立发版**：不随 Jpom 安装包分发，通过 `npx -y jpom-mcp-server` 使用；0.1.0 用户请升级到 0.1.1+。
 
 ------
 
@@ -21,7 +30,6 @@
 2. 【server】在线升级支持 Go 插件端：自动识别节点类型与运行平台并下发匹配的升级包，Java 节点升级方式不变。
 3. 【agent-go】提供多平台安装包与在线升级包（Linux/macOS 的 amd64、arm64 与 Windows amd64），升级容器按节点平台精确匹配。
 4. 【agent-go】支持国际化、Windows/macOS 系统监控、7z 解压、GBK 编码、cron 年份/分组，以及升级失败自动回滚。
-5. 【mcp】新增 npm 包 jpom-mcp-server（MCP stdio Server）：配置 Jpom 地址与长期 token 后，Claude Desktop/Cursor/VS Code/DeepSeek Harness 等 MCP 客户端可查询节点、项目、构建、脚本、资产、监控、分发、系统与审计日志，并支持日志读取/有界实时跟随；默认只读，写操作需显式开启。
 
 ### 🐞 解决BUG、优化功能
 
