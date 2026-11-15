@@ -292,8 +292,8 @@ docker run -d --name jpom-server --restart=always -p 2122:2122 \
 <a name="install-download"></a>
 ### Option 3: 💾 Download the installation package
 
-1. Download the corresponding `server-x.x.x-release` and `agent-x.x.x-release` packages (zip or tar.gz) and their `.sha1` checksum files from the [download center](https://jpom.top/pages/all-downloads/).
-2. Verify the integrity of the packages (recommended), for example `sha1sum server-x.x.x-release.zip`, and compare the result with the contents of the downloaded `.sha1` file.
+1. Download the corresponding `server-x.x.x-release` and `agent-x.x.x-release` packages (tar.gz; 2.11.x transitional releases also provide zip) and their `.sha1` checksum files from the [download center](https://jpom.top/pages/all-downloads/).
+2. Verify the integrity of the packages (recommended), for example `sha1sum server-x.x.x-release.tar.gz`, and compare the result with the contents of the downloaded `.sha1` file.
 3. Extract the packages and upload the entire directories to the target servers.
 4. Install the agent
    1. The `agent-x.x.x-release` directory contains all the agent installation files

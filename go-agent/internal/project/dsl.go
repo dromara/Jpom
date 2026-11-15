@@ -22,8 +22,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/dromara/Jpom/go-agent/internal/proc"
 	"gopkg.in/yaml.v3"
-	"jpom.io/go-agent/internal/proc"
 )
 
 // DslExecutor DSL 流程执行器。脚本模块（script-ws）可通过 RegisterDslExecutor 注册，

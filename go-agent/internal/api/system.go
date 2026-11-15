@@ -17,9 +17,9 @@ import (
 	"strings"
 	"sync"
 
-	"jpom.io/go-agent/internal/app"
-	"jpom.io/go-agent/internal/httpx"
-	"jpom.io/go-agent/internal/sysinfo"
+	"github.com/dromara/Jpom/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/httpx"
+	"github.com/dromara/Jpom/go-agent/internal/sysinfo"
 )
 
 var startOnce sync.Once

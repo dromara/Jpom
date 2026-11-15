@@ -71,10 +71,49 @@ public class RemoteVersion extends cn.keepbx.jpom.RemoteVersion {
         // 检查是否存在下载地址
         String remoteUrl = type.getRemoteUrl(remoteVersion);
         Assert.hasText(remoteUrl, I18nMessageUtil.get("i18n.new_version_exists_download_unavailable.4ba7"));
-        // 下载
-        File downloadFileFromUrl;
+        // 下载：2.11.13.2 起发布包同时提供 tar.gz（2.12.0 起仅 tar.gz），优先同目录同名 tar.gz，下载失败回退原 zip 地址
+        File downloadFileFromUrl = downloadPackage(remoteUrl, savePath);
+        // 解析压缩包
+        File file = JpomManifest.zipFileFind(FileUtil.getAbsolutePath(downloadFileFromUrl), type, savePath);
+        // 检查
+        JsonMessage<Tuple> error = JpomManifest.checkJpomJar(FileUtil.getAbsolutePath(file), type, checkRepeat);
+        Assert.state(error.success(), error.getMsg());
+        return error.getData();
+    }
+
+    /**
+     * 下载发布包：优先尝试 tar.gz，失败（404/网络异常等）回退原始下载地址
+     *
+     * @param remoteUrl 原始下载地址（当前下载中心配置为 .zip）
+     * @param savePath  下载文件保存路径
+     * @return 下载保存的文件
+     */
+    private static File downloadPackage(String remoteUrl, String savePath) {
+        String tarGzUrl = tarGzUrlOf(remoteUrl);
+        if (!StrUtil.equals(tarGzUrl, remoteUrl)) {
+            try {
+                log.debug("try download tar.gz package: {}", tarGzUrl);
+                return downloadFileFromUrl(tarGzUrl, savePath);
+            } catch (IllegalStateException e) {
+                // 授权失败（403 等）不降级，直接抛出原有提示
+                throw e;
+            } catch (Exception e) {
+                log.debug("download tar.gz package failed, fallback to original url: {} ({})", tarGzUrl, e.getMessage());
+            }
+        }
+        return downloadFileFromUrl(remoteUrl, savePath);
+    }
+
+    /**
+     * 下载单个文件，保持原有 403 授权错误提示
+     *
+     * @param remoteUrl 下载地址
+     * @param savePath  下载文件保存路径
+     * @return 下载保存的文件
+     */
+    private static File downloadFileFromUrl(String remoteUrl, String savePath) {
         try {
-            downloadFileFromUrl = HttpUtil.downloadFileFromUrl(remoteUrl, savePath);
+            return HttpUtil.downloadFileFromUrl(remoteUrl, savePath);
         } catch (HttpException httpException) {
             String message = httpException.getMessage();
             if (StrUtil.containsAnyIgnoreCase(message, "Server response error with status code: [403]")) {
@@ -83,12 +122,30 @@ public class RemoteVersion extends cn.keepbx.jpom.RemoteVersion {
             }
             throw Lombok.sneakyThrow(httpException);
         }
-        // 解析压缩包
-        File file = JpomManifest.zipFileFind(FileUtil.getAbsolutePath(downloadFileFromUrl), type, savePath);
-        // 检查
-        JsonMessage<Tuple> error = JpomManifest.checkJpomJar(FileUtil.getAbsolutePath(file), type, checkRepeat);
-        Assert.state(error.success(), error.getMsg());
-        return error.getData();
+    }
+
+    /**
+     * 计算 tar.gz 下载地址：把下载地址的 .zip 后缀替换为 .tar.gz（保留 ?token=... 查询串）。
+     * <p>
+     * 地址已经是 .tar.gz/.tgz 或不是 .zip 时原样返回，便于过渡期与 2.12.0 之后统一处理。
+     *
+     * @param remoteUrl 原始下载地址
+     * @return tar.gz 下载地址
+     */
+    static String tarGzUrlOf(String remoteUrl) {
+        if (StrUtil.isBlank(remoteUrl)) {
+            return remoteUrl;
+        }
+        int queryIndex = remoteUrl.indexOf('?');
+        String pathPart = queryIndex >= 0 ? remoteUrl.substring(0, queryIndex) : remoteUrl;
+        String queryPart = queryIndex >= 0 ? remoteUrl.substring(queryIndex) : StrUtil.EMPTY;
+        if (StrUtil.endWithAnyIgnoreCase(pathPart, ".tar.gz", ".tgz")) {
+            return remoteUrl;
+        }
+        if (StrUtil.endWithIgnoreCase(pathPart, ".zip")) {
+            return pathPart.substring(0, pathPart.length() - 4) + ".tar.gz" + queryPart;
+        }
+        return remoteUrl;
     }
 
     /**

@@ -20,7 +20,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"jpom.io/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/app"
 )
 
 // Java 端 AbstractProjectCommander.PID_PORT 缓存：进程 id -> 监听端口。

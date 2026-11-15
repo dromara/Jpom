@@ -29,7 +29,7 @@ import (
 	"strings"
 	"time"
 
-	"jpom.io/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/app"
 )
 
 // 升级包校验/替换说明（与 Java 端 SystemUpdateController 的分片协议一致）：

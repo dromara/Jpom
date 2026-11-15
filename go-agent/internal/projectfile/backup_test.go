@@ -16,7 +16,7 @@ import (
 	"testing"
 	"time"
 
-	"jpom.io/go-agent/internal/project"
+	"github.com/dromara/Jpom/go-agent/internal/project"
 )
 
 func backupProject(t *testing.T, service *Service, base string) string {

@@ -18,7 +18,7 @@ import (
 	"sort"
 	"strings"
 
-	"jpom.io/go-agent/internal/proc"
+	"github.com/dromara/Jpom/go-agent/internal/proc"
 )
 
 // pathSeparator 返回 classpath 分隔符（FileUtil.PATH_SEPARATOR）。

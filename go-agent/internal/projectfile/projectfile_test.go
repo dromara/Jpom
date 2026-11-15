@@ -15,8 +15,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"jpom.io/go-agent/internal/app"
-	"jpom.io/go-agent/internal/project"
+	"github.com/dromara/Jpom/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/project"
 )
 
 // testApp builds an agent runtime in a temporary directory.

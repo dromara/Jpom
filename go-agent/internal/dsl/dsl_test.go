@@ -17,10 +17,10 @@ import (
 	"strings"
 	"testing"
 
-	"jpom.io/go-agent/internal/app"
-	"jpom.io/go-agent/internal/config"
-	"jpom.io/go-agent/internal/project"
-	"jpom.io/go-agent/internal/script"
+	"github.com/dromara/Jpom/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/config"
+	"github.com/dromara/Jpom/go-agent/internal/project"
+	"github.com/dromara/Jpom/go-agent/internal/script"
 )
 
 func yamlText(lines ...string) string { return strings.Join(lines, string(rune(10))) }

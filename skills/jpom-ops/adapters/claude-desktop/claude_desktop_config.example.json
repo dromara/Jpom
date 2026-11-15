@@ -2,12 +2,13 @@
   "mcpServers": {
     "jpom": {
       "command": "npx",
-      "args": ["-y", "@dromara/jpom-mcp-server"],
+      "args": ["-y", "jpom-mcp-server"],
       "env": {
         "JPOM_BASE_URL": "http://127.0.0.1:2122",
         "JPOM_TOKEN": "<YOUR_JPOM_LONG_TERM_TOKEN>",
         "JPOM_WORKSPACE": "DEFAULT",
-        "JPOM_READ_ONLY": "true"
+        "JPOM_READ_ONLY": "true",
+        "JPOM_TIMEOUT_MS": "60000"
       }
     }
   }

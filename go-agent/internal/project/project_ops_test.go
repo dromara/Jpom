@@ -25,8 +25,8 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"jpom.io/go-agent/internal/config"
-	"jpom.io/go-agent/internal/proc"
+	"github.com/dromara/Jpom/go-agent/internal/config"
+	"github.com/dromara/Jpom/go-agent/internal/proc"
 )
 
 func newTestRuntime(t *testing.T) (*Runtime, string) {

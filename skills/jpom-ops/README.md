@@ -3,8 +3,49 @@
 通过 Jpom 现有 REST API + 长期 token（`JPOM-USER-TOKEN`）完成日常巡检与受控操作，**不修改 Jpom 主程序**。
 
 - 默认**只读**；写操作（触发构建、启停项目、杀进程、在线升级）需 `JPOM_OPS_ALLOW_WRITE=true` **且** `--confirm`。
-- 适配：DeepSeek Harness / Claude / Cursor 等（见 `adapters/`；MCP Server 规划中）。
+- 两种接入方式：
+  - **MCP Server（推荐）**：`jpom-mcp-server`（0.1.0 起可用），在 Claude Desktop / Cursor / VS Code / DeepSeek Harness 中通过 stdio 加载，见下方「MCP Server」与 `adapters/`。
+  - **Skill（REST 脚本）**：本文档的 `SKILL.md` + `scripts/jpom_api.py`，适合无法加载 MCP 或只需要只读巡检的环境。
 - 官方文档：《AI 运维接入（Skill / MCP）》<https://jpom.top/pages/ai-ops-skill-mcp/>
+
+## MCP Server（推荐）
+
+`jpom-mcp-server` 是独立 sidecar（Node.js ≥ 18，stdio），通过 Jpom REST API 工作，不修改 Jpom 主程序。无需克隆仓库即可运行：
+
+```bash
+npx -y jpom-mcp-server --version   # 查看版本
+npx -y jpom-mcp-server --help      # 查看参数/环境变量
+```
+
+MCP 客户端配置（Claude Desktop / Cursor 示例，VS Code 见 `adapters/vscode-mcp/`，DSH 用 YAML 插件配置见 `adapters/dsh/`）：
+
+```json
+{
+  "mcpServers": {
+    "jpom": {
+      "command": "npx",
+      "args": ["-y", "jpom-mcp-server"],
+      "env": {
+        "JPOM_BASE_URL": "http://127.0.0.1:2122",
+        "JPOM_TOKEN": "<YOUR_JPOM_LONG_TERM_TOKEN>",
+        "JPOM_WORKSPACE": "DEFAULT",
+        "JPOM_READ_ONLY": "true"
+      }
+    }
+  }
+}
+```
+
+关键环境变量：`JPOM_BASE_URL`（必填）、`JPOM_TOKEN` 或 `JPOM_TOKEN_FILE`（二选一）、`JPOM_WORKSPACE`（默认 `DEFAULT`）、`JPOM_READ_ONLY`（默认 `true`，写工具需显式改为 `false`）。完整说明见 npm 包 README。
+
+连接自检（在配置 MCP 客户端前先验证 token 与地址）：
+
+```bash
+JPOM_BASE_URL=http://127.0.0.1:2122 JPOM_TOKEN_FILE=/path/to/jpom-longterm-token \
+  npx -y jpom-mcp-server doctor
+```
+
+安全约定同 Skill：token 只放环境变量/600 权限文件，默认只读，写操作先回显「环境 / 工作空间 / 对象 / 动作」并获确认。
 
 ## 快速开始
 

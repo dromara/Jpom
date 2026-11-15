@@ -19,8 +19,8 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"jpom.io/go-agent/internal/app"
-	"jpom.io/go-agent/internal/i18n"
+	"github.com/dromara/Jpom/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/i18n"
 )
 
 // UpgradeMessage 返回升级提示的 i18n key（api 层按请求语言渲染）。

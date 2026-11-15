@@ -22,10 +22,10 @@ import (
 	"testing"
 	"time"
 
-	"jpom.io/go-agent/internal/app"
-	"jpom.io/go-agent/internal/config"
-	"jpom.io/go-agent/internal/httpx"
-	"jpom.io/go-agent/internal/sysinfo"
+	"github.com/dromara/Jpom/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/config"
+	"github.com/dromara/Jpom/go-agent/internal/httpx"
+	"github.com/dromara/Jpom/go-agent/internal/sysinfo"
 )
 
 const apiTestAuthorize = "api-test-digest"

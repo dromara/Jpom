@@ -164,7 +164,7 @@ public class SystemUpdateController extends BaseServerController implements ILoa
             return NodeForward.requestMultipart(model, multiRequest, NodeUrl.SystemUploadJar);
         }
         String absolutePath = serverConfig.getUserTempPath().getAbsolutePath();
-        this.uploadSharding(file, absolutePath, sliceId, totalSlice, nowSlice, fileSumMd5, "jar", "zip");
+        this.uploadSharding(file, absolutePath, sliceId, totalSlice, nowSlice, fileSumMd5, "jar", "zip", "tar.gz");
         return JsonMessage.success(I18nMessageUtil.get("i18n.upload_success.a769"));
     }
 

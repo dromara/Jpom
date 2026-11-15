@@ -11,7 +11,7 @@
 # 构建 Go 插件端发布包（多平台静态二进制 + 与 Java 插件端一致的目录布局）。
 # 用法：VERSION=2.11.13.2 bash script/package.sh
 #       VERSION=2.11.13.2 PLATFORMS="linux/amd64 linux/arm64" bash script/package.sh
-# 产物：dist/agent-go-<version>-release-<os>-<arch>.{zip,tar.gz,sha1}（Windows 仅 zip）
+# 产物：dist/agent-go-<version>-release-<os>-<arch>.tar.gz + .sha1（5 平台统一 tar.gz，Windows 也是 tar.gz）
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -65,12 +65,9 @@ for platform in ${PLATFORMS//,/ }; do
     chmod +x "$dir/bin/AgentGo.sh" "$dir/bin/$exe"
   fi
 
-  (cd "$STAGE" && zip -q -r "../$name.zip" "$name")
-  built+=("$OUT/$name.zip")
-  if [[ "$os" != "windows" ]]; then
-    (cd "$STAGE" && tar czf "../$name.tar.gz" "$name")
-    built+=("$OUT/$name.tar.gz")
-  fi
+  # 5 平台统一 tar.gz（含 Windows，内含 bin/agent.exe），不再产出 zip
+  (cd "$STAGE" && tar czf "../${name}.tar.gz" "${name}")
+  built+=("$OUT/${name}.tar.gz")
 done
 
 rm -rf "$STAGE"

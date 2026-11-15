@@ -22,7 +22,7 @@ import (
 	"strings"
 	"time"
 
-	"jpom.io/go-agent/internal/proc"
+	"github.com/dromara/Jpom/go-agent/internal/proc"
 )
 
 // ProjectLogOptions 项目控制台日志配置（jpom.project.log）。

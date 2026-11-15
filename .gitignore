@@ -82,3 +82,6 @@ id_rsa*
 id_ed25519*
 .env.local
 .env.*.local
+
+# mcp-server 是独立 npm 包，需要提交 lockfile 供 CI 使用 npm ci
+!mcp-server/package-lock.json

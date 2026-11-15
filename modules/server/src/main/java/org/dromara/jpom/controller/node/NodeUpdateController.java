@@ -161,7 +161,7 @@ public class NodeUpdateController extends BaseServerController {
                                                     Integer nowSlice,
                                                     String fileSumMd5) throws IOException {
         File userTempPath = serverConfig.getUserTempPath();
-        this.uploadSharding(file, userTempPath.getAbsolutePath(), sliceId, totalSlice, nowSlice, fileSumMd5, "jar", "zip");
+        this.uploadSharding(file, userTempPath.getAbsolutePath(), sliceId, totalSlice, nowSlice, fileSumMd5, "jar", "zip", "tar.gz");
         return JsonMessage.success(I18nMessageUtil.get("i18n.upload_success.a769"));
     }
 

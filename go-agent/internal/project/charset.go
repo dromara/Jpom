@@ -11,7 +11,7 @@
 package project
 
 import (
-	"jpom.io/go-agent/internal/proc"
+	"github.com/dromara/Jpom/go-agent/internal/proc"
 )
 
 // ConsoleCharset 返回子进程/脚本输出解码字符集（jpom.system.console-charset，空则系统默认）。

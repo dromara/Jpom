@@ -1,4 +1,4 @@
-module jpom.io/go-agent
+module github.com/dromara/Jpom/go-agent
 
 go 1.22
 

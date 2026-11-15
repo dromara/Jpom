@@ -75,7 +75,7 @@
               |
               <a-upload
                 name="file"
-                accept=".jar,.zip"
+                accept=".jar,.zip,.tar.gz"
                 action=""
                 :disabled="!!percentage"
                 :show-upload-list="false"

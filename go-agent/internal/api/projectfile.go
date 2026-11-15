@@ -21,10 +21,10 @@ import (
 	"strconv"
 	"strings"
 
-	"jpom.io/go-agent/internal/app"
-	"jpom.io/go-agent/internal/httpx"
-	"jpom.io/go-agent/internal/project"
-	"jpom.io/go-agent/internal/projectfile"
+	"github.com/dromara/Jpom/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/httpx"
+	"github.com/dromara/Jpom/go-agent/internal/project"
+	"github.com/dromara/Jpom/go-agent/internal/projectfile"
 )
 
 // registerProjectFile owns /manage/file/* and /manage/file2/* endpoints.

@@ -292,8 +292,8 @@ docker run -d --name jpom-server --restart=always -p 2122:2122 \
 <a name="install-download"></a>
 ### 方式三：💾 下载安装包
 
-1. 从 [下载中心](https://jpom.top/pages/all-downloads/) 下载对应的 `server-x.x.x-release`、`agent-x.x.x-release` 安装包（zip 或 tar.gz）及 `.sha1` 校验文件。
-2. 校验安装包完整性（推荐），例如 `sha1sum server-x.x.x-release.zip`，与下载的 `.sha1` 文件内容比对。
+1. 从 [下载中心](https://jpom.top/pages/all-downloads/) 下载对应的 `server-x.x.x-release`、`agent-x.x.x-release` 安装包（tar.gz；2.11.x 过渡版本也提供 zip）及 `.sha1` 校验文件。
+2. 校验安装包完整性（推荐），例如 `sha1sum server-x.x.x-release.tar.gz`，与下载的 `.sha1` 文件内容比对。
 3. 解压安装包，并将整个目录上传到目标服务器。
 4. 安装插件端
    1. `agent-x.x.x-release` 目录为插件端的全部安装文件
@@ -579,9 +579,10 @@ Made with [contrib.rocks](https://contrib.rocks).
 Jpom 提供可移植的 AI 运维 Skill（`jpom-ops`）：通过现有 REST API + 长期 token 覆盖工作空间、节点、项目、构建、脚本、资产、监控、分发、系统与审计日志的查询，并支持显式授权后的受控写操作（触发/取消构建、项目启停重启、杀进程、在线升级）。适配 DeepSeek Harness / Claude / Cursor 等工具；默认只读，写操作需 `JPOM_OPS_ALLOW_WRITE=true` + `--confirm`。
 
 - 源码：[`skills/jpom-ops/`](skills/jpom-ops/)（随代码仓库维护，已在 2.11.13 逐条验证，兼容 2.11.x）
-- 使用说明与下载：请参阅官方文档《AI 运维接入（Skill / MCP）》（https://jpom.top/pages/ai-ops-skill-mcp/）
+- MCP Server（npm）：[`mcp-server/`](mcp-server/)，包名 `jpom-mcp-server`；通过 MCP stdio 把 Jpom 全量 REST 能力（节点/项目/构建/脚本/资产/监控/分发/系统/用户审计/日志）暴露给 Claude Desktop、Cursor、VS Code、DeepSeek Harness 等客户端，默认只读，写操作需 `JPOM_READ_ONLY=false`
+- 使用说明与下载：请参阅官方文档《AI 运维接入（Skill / MCP）》（https://jpom.top/pages/ai-ops-skill-mcp/）；MCP 安装与客户端配置见 [`mcp-server/README.md`](mcp-server/README.md)
 
-> 注意：仅在本地安全配置 `JPOM-USER-TOKEN`，不要提交凭据；终端、脚本在线执行等 WebSocket 能力不在 Skill 范围内；MCP Server 规划中。
+> 注意：仅在本地安全配置 `JPOM-USER-TOKEN`，不要提交凭据；终端、脚本在线执行等 WebSocket 能力不在 Skill/MCP 范围内；MCP Server 已提供（`mcp-server/`，npm 包 `jpom-mcp-server`）。
 
 <a name="recommended"></a>
 ## 🔔 精品项目推荐

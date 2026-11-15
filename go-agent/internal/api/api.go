@@ -16,8 +16,8 @@ package api
 import (
 	"net/http"
 
-	"jpom.io/go-agent/internal/app"
-	"jpom.io/go-agent/internal/httpx"
+	"github.com/dromara/Jpom/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/httpx"
 )
 
 // RegisterAll builds the HTTP handler tree.

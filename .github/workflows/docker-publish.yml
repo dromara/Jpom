@@ -9,6 +9,10 @@ name: docker-publish
 # 3. beta：由 release.sh 在 R2 上传完成后手动 dispatch 触发（beta 不打 tag）。
 # 4. 分支 push 仅在 workflow/helper 脚本变更时触发，且强制 dry_run（只构建、不登录、不推送），
 #    用于工作流自检，避免改 CI 后要等下一次发版才能验证。
+# 5. 构建缓存：docker/build-push-action 使用 type=gha 层缓存（cache-from/cache-to，按镜像分 scope），
+#    多平台/重复构建时复用层缓存，减少 Docker Hub 拉取与重复编译耗时。
+# 6. 发布包依赖：DockerfileRelease/DockerfileBeta 只依赖 tar.gz 发布包
+#    （<kind>-<version>-release.tar.gz + .sha1）；过渡期的 zip 不参与镜像构建。
 #
 # 首次启用限制：GitHub 要求 workflow_dispatch 的工作流先存在于默认分支 master 并运行过；
 # 本工作流在 dev/beta 分支改动时会先触发一次 dry_run 自检（push 事件），自检运行后即可对任意 ref dispatch；
@@ -215,6 +219,9 @@ jobs:
           provenance: false
           sbom: false
           tags: ${{ matrix.image == 'server' && needs.prepare.outputs.server_tags || needs.prepare.outputs.agent_tags }}
+          # GitHub Actions 原生层缓存（按镜像分 scope，避免 server/agent 互相覆盖）
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,scope=${{ matrix.image }},mode=max
           build-args: |
             JPOM_DOWNLOAD_BASE=${{ env.JPOM_DOWNLOAD_BASE }}
           labels: |

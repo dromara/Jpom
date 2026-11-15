@@ -16,7 +16,7 @@ import (
 	"runtime"
 	"strconv"
 
-	"jpom.io/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/app"
 )
 
 // readDataMap 读取 data/<file> 的 JSON 对象（不存在或损坏时返回空 map）。

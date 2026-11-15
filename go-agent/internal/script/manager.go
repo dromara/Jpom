@@ -32,7 +32,7 @@ import (
 	"sync"
 	"time"
 
-	"jpom.io/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/app"
 )
 
 const (

@@ -26,8 +26,8 @@ import (
 	"strconv"
 	"strings"
 
-	"jpom.io/go-agent/internal/app"
-	"jpom.io/go-agent/internal/i18n"
+	"github.com/dromara/Jpom/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/i18n"
 )
 
 // Message is the response envelope understood by the Jpom server

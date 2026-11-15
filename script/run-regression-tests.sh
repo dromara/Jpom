@@ -63,6 +63,10 @@ DEFAULT_TESTS=(
 	BuildExecuteManageScriptTest
 	# 节点在线升级：引擎判定（engine/旧 Go 端 jarFile 兜底）、Go 升级容器解析、下载地址推导、版本/降级/最低兼容
 	AgentPackageResolverTest
+	# 在线升级发布包解析：tar.gz/.tgz 提取 lib jar（tar.gz 优先、回退 zip 的下载地址推导），zip/jar 历史行为不回退
+	JpomManifestTarGzTest
+	RemoteVersionUrlTest
+	UploadShardingExtensionTest
 	# 安全修复的既有单测（文件中心 SQL 注入 / 查询值绑定 / 日志路径穿越 / token 等）
 	FileStorageApiControllerSortTest
 	BaseDbCommonServiceQueryEntityTest
@@ -72,6 +76,8 @@ DEFAULT_TESTS=(
 	DockerWorkspaceScopedLookupTest
 	BuildInfoControllerBranchListTest
 	LoginControlCaptchaTest
+	# SSH 文件管理 new_file_folder 命令注入回归（name 不再拼远程 shell，创建走 SFTP）
+	BaseSshFileControllerNewFileFolderTest
 )
 
 MVN_BIN=${MVN:-mvn}

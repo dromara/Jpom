@@ -22,8 +22,8 @@ import (
 	"testing"
 	"time"
 
-	"jpom.io/go-agent/internal/app"
-	"jpom.io/go-agent/internal/i18n"
+	"github.com/dromara/Jpom/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/i18n"
 )
 
 // upgradeTestApp 构造带“当前二进制”的升级测试 App，并禁用真实重启。

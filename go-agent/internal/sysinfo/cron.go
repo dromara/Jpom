@@ -22,7 +22,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"jpom.io/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/app"
 )
 
 // 月份/星期别名（与 Hutool Month/Week 一致；星期 0=周日 ... 6=周六）。

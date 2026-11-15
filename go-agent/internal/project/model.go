@@ -21,7 +21,7 @@ import (
 	"strings"
 	"time"
 
-	"jpom.io/go-agent/internal/config"
+	"github.com/dromara/Jpom/go-agent/internal/config"
 )
 
 // RunMode 取值与 Java org.dromara.jpom.model.RunMode 枚举名一致（数据文件里存字符串）。

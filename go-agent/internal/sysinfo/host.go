@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"jpom.io/go-agent/internal/config"
+	"github.com/dromara/Jpom/go-agent/internal/config"
 )
 
 // 与 OshiUtils 中常量保持一致（毫秒）。

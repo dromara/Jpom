@@ -24,10 +24,10 @@ import (
 	"testing"
 	"time"
 
-	"jpom.io/go-agent/internal/app"
-	"jpom.io/go-agent/internal/config"
-	"jpom.io/go-agent/internal/httpx"
-	"jpom.io/go-agent/internal/sysinfo"
+	"github.com/dromara/Jpom/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/config"
+	"github.com/dromara/Jpom/go-agent/internal/httpx"
+	"github.com/dromara/Jpom/go-agent/internal/sysinfo"
 )
 
 // apiMultipartBody 构造 multipart 请求体（用于上传/升级分片入口测试）。
