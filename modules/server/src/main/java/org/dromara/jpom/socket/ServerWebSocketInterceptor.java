@@ -10,6 +10,7 @@
 package org.dromara.jpom.socket;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.jwt.JWT;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Tuple;
@@ -22,7 +23,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.dromara.jpom.common.ClientIpUtil;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.ServerOpenApi;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.interceptor.IpInterceptor;
+import org.dromara.jpom.common.interceptor.LoginInterceptor;
 import org.dromara.jpom.common.interceptor.PermissionInterceptor;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.assets.server.MachineNodeServer;
@@ -39,6 +43,7 @@ import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.service.user.UserBindWorkspaceService;
 import org.dromara.jpom.service.user.UserService;
+import org.dromara.jpom.util.JwtUtil;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
@@ -48,6 +53,7 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -65,15 +71,91 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
     private final NodeService nodeService;
     private final UserBindWorkspaceService userBindWorkspaceService;
     private final MachineNodeServer machineNodeServer;
+    private final IpInterceptor ipInterceptor;
 
     public ServerWebSocketInterceptor(UserService userService,
                                       NodeService nodeService,
                                       UserBindWorkspaceService userBindWorkspaceService,
-                                      MachineNodeServer machineNodeServer) {
+                                      MachineNodeServer machineNodeServer,
+                                      IpInterceptor ipInterceptor) {
         this.userService = userService;
         this.nodeService = nodeService;
         this.userBindWorkspaceService = userBindWorkspaceService;
         this.machineNodeServer = machineNodeServer;
+        this.ipInterceptor = ipInterceptor;
+    }
+
+    /**
+     * 校验 WebSocket 握手来源，防止跨站 WebSocket 劫持（会话 Cookie 认证场景）
+     *
+     * @param request 请求
+     * @return true 允许
+     */
+    private boolean checkOrigin(HttpServletRequest request) {
+        String origin = ServletUtil.getHeaderIgnoreCase(request, HttpHeaders.ORIGIN);
+        if (StrUtil.isEmpty(origin)) {
+            // 非浏览器客户端可能不带 Origin，仍需要会话 Cookie 才能通过后续校验
+            return true;
+        }
+        if (StrUtil.equalsIgnoreCase("null", origin)) {
+            return false;
+        }
+        String host = ServletUtil.getHeaderIgnoreCase(request, HttpHeaders.HOST);
+        String forwardedHost = ServletUtil.getHeaderIgnoreCase(request, "X-Forwarded-Host");
+        try {
+            java.net.URI uri = new java.net.URI(origin);
+            String scheme = uri.getScheme();
+            if (!StrUtil.equalsIgnoreCase("http", scheme) && !StrUtil.equalsIgnoreCase("https", scheme)) {
+                return false;
+            }
+            String originHost = uri.getHost();
+            if (StrUtil.isEmpty(originHost)) {
+                return false;
+            }
+            int port = uri.getPort();
+            String originAuthority = port > 0 ? originHost + ":" + port : originHost;
+            if (StrUtil.equalsIgnoreCase(originAuthority, host) || StrUtil.equalsIgnoreCase(originAuthority, forwardedHost)) {
+                return true;
+            }
+            // 本机开发调试（Vite 代理等）允许 loopback -> loopback
+            String hostName = StrUtil.subBefore(StrUtil.nullToEmpty(host), ":", false);
+            return this.isLoopbackHost(originHost) && this.isLoopbackHost(hostName);
+        } catch (Exception e) {
+            log.warn("invalid websocket origin: {}", origin);
+            return false;
+        }
+    }
+
+    private boolean isLoopbackHost(String host) {
+        return StrUtil.equalsIgnoreCase("localhost", host)
+            || StrUtil.equals("127.0.0.1", host)
+            || StrUtil.equals("::1", host)
+            || StrUtil.equals("0:0:0:0:0:0:0:1", host);
+    }
+
+    /**
+     * 兼容非浏览器 WebSocket 客户端：使用 Authorization(JWT) 或 JPOM-USER-TOKEN 请求头认证。
+     * 注意：不再接受 URL 中的 userId 密码摘要。
+     *
+     * @param request 请求
+     * @return 用户；无效返回 null
+     */
+    private UserModel checkHeaderUser(HttpServletRequest request) {
+        String authorization = request.getHeader(ServerOpenApi.HTTP_HEAD_AUTHORIZATION);
+        if (StrUtil.isNotEmpty(authorization)) {
+            JWT jwt = JwtUtil.readBody(authorization);
+            if (jwt != null && !JwtUtil.expired(jwt, 0)) {
+                UserModel userModel = userService.checkUser(JwtUtil.getId(jwt));
+                if (userModel != null) {
+                    return userModel;
+                }
+            }
+        }
+        String header = request.getHeader(ServerOpenApi.USER_TOKEN_HEAD);
+        if (StrUtil.isNotEmpty(header)) {
+            return userService.checkUser(header);
+        }
+        return null;
     }
 
     private boolean checkNode(HttpServletRequest httpServletRequest, Map<String, Object> attributes, UserModel userModel) {
@@ -199,15 +281,33 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
         if (request instanceof ServletServerHttpRequest) {
             ServletServerHttpRequest serverHttpRequest = (ServletServerHttpRequest) request;
             HttpServletRequest httpServletRequest = serverHttpRequest.getServletRequest();
-            // 判断用户
-            String userId = httpServletRequest.getParameter("userId");
+            // 校验来源（防跨站 WebSocket 劫持）
+            if (!this.checkOrigin(httpServletRequest)) {
+                attributes.put("permissionMsg", I18nMessageUtil.get("i18n.no_permission.e343"));
+                return true;
+            }
+            // 复用 HTTP 侧 IP 访问限制，避免 WebSocket 绕过 IP 白名单
+            if (!ipInterceptor.checkAccess(httpServletRequest)) {
+                attributes.put("permissionMsg", I18nMessageUtil.get("i18n.no_permission.e343"));
+                return true;
+            }
+            // 认证：浏览器使用登录会话（HttpOnly Cookie）；非浏览器客户端允许 HTTP 请求头
+            // 不再使用 URL 中的密码摘要 userId
+            HttpSession session = httpServletRequest.getSession(false);
+            UserModel sessionUser = session == null ? null : (UserModel) session.getAttribute(LoginInterceptor.SESSION_NAME);
+            UserModel userModel = sessionUser == null ? null : userService.getByKey(sessionUser.getId());
+            if (userModel == null) {
+                userModel = this.checkHeaderUser(httpServletRequest);
+            }
+            if (userModel == null) {
+                attributes.put("permissionMsg", I18nMessageUtil.get("i18n.not_logged_in.c89f"));
+                return true;
+            }
             String workspaceId = httpServletRequest.getParameter(ServerConst.WORKSPACE_ID_REQ_HEADER);
             attributes.put("workspaceId", workspaceId);
             attributes.put("lang", httpServletRequest.getParameter("lang"));
-            UserModel userModel = userService.checkUser(userId);
-            if (userModel == null) {
-                String string = I18nMessageUtil.get("i18n.user_not_exist.4892");
-                attributes.put("permissionMsg", string);
+            if (userModel.getStatus() != null && userModel.getStatus() == 0) {
+                attributes.put("permissionMsg", ServerConst.ACCOUNT_LOCKED_TIP.get());
                 return true;
             }
             HandlerType handlerType = this.fromType(httpServletRequest);

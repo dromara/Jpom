@@ -64,7 +64,7 @@ public class SystemUpdateController extends BaseAgentController {
                                                   String fileSumMd5) throws IOException {
         //
         String tempPathName = agentConfig.getFixedTempPathName();
-        this.uploadSharding(file, tempPathName, sliceId, totalSlice, nowSlice, fileSumMd5, "jar", "zip");
+        this.uploadSharding(file, tempPathName, sliceId, totalSlice, nowSlice, fileSumMd5, "jar", "zip", "tar.gz");
         return JsonMessage.success(I18nMessageUtil.get("i18n.upload_success.a769"));
     }
 

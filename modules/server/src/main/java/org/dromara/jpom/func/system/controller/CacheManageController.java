@@ -194,6 +194,7 @@ public class CacheManageController extends BaseServerController implements ICach
         return JsonMessage.success(I18nMessageUtil.get("i18n.cleanup_succeeded.02ea"));
     }
 
+    @Feature(method = MethodFeature.EDIT)
     @GetMapping(value = "async-refresh-cache", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<String> refresh() {
         Assert.state(!this.refreshCacheIng, I18nMessageUtil.get("i18n.refreshing_cache.c969"));

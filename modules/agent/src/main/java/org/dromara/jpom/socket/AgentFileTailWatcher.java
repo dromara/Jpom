@@ -20,12 +20,19 @@ import javax.websocket.Session;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.Set;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 文件跟随器
+ *
+ * <p>插件端控制台/系统日志的文件监听缓存。修复点：
+ * <ul>
+ *     <li>关闭与新增会话的竞态：watcher 关闭后会话不能再被加入（否则会话与 Tailer 线程
+ *     会挂在已从缓存移除的 watcher 上永久泄漏）；</li>
+ *     <li>缓存摘除使用 {@code computeIfPresent + 实例比对}，避免误删并发重建的新实例；</li>
+ *     <li>离线/关闭只遍历快照并幂等清理，避免并发修改异常。</li>
+ * </ul>
  *
  * @author bwcx_jzy
  * @since 2019/3/16
@@ -33,7 +40,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class AgentFileTailWatcher<T extends AutoCloseable> extends BaseFileTailWatcher<T> {
     private static final ConcurrentHashMap<File, AgentFileTailWatcher<Session>> CONCURRENT_HASH_MAP = new SafeConcurrentHashMap<>();
-
 
     private AgentFileTailWatcher(File logFile, Charset charset) {
         super(logFile, charset);
@@ -56,21 +62,28 @@ public class AgentFileTailWatcher<T extends AutoCloseable> extends BaseFileTailW
             log.warn("{}{}", I18nMessageUtil.get("i18n.file_or_directory_not_found.f03e"), file.getPath());
             return false;
         }
-        AgentFileTailWatcher<Session> agentFileTailWatcher = CONCURRENT_HASH_MAP.computeIfAbsent(file, s -> {
-            try {
-                return new AgentFileTailWatcher<>(file, charset);
-            } catch (Exception e) {
-                log.error(I18nMessageUtil.get("i18n.create_file_watch_failure.bc1a"), e);
-                return null;
+        while (true) {
+            AgentFileTailWatcher<Session> agentFileTailWatcher = CONCURRENT_HASH_MAP.computeIfAbsent(file, s -> {
+                try {
+                    return new AgentFileTailWatcher<>(file, charset);
+                } catch (Exception e) {
+                    log.error(I18nMessageUtil.get("i18n.create_file_watch_failure.bc1a"), e);
+                    return null;
+                }
+            });
+            if (agentFileTailWatcher == null) {
+                throw new IOException(I18nMessageUtil.get("i18n.load_file_failure.86cc") + file.getPath());
             }
-        });
-        if (agentFileTailWatcher == null) {
-            throw new IOException(I18nMessageUtil.get("i18n.load_file_failure.86cc") + file.getPath());
+            if (agentFileTailWatcher.add(session, FileUtil.getName(file))) {
+                return true;
+            }
+            if (!agentFileTailWatcher.isClosed()) {
+                // 同一会话已经在监听该文件
+                return true;
+            }
+            // 与 closeIfEmpty/close 并发：该实例已关闭并从缓存移除，重新获取/创建 watcher 后重试
+            CONCURRENT_HASH_MAP.remove(file, agentFileTailWatcher);
         }
-        if (agentFileTailWatcher.add(session, FileUtil.getName(file))) {
-            agentFileTailWatcher.start();
-        }
-        return true;
     }
 
     /**
@@ -79,11 +92,9 @@ public class AgentFileTailWatcher<T extends AutoCloseable> extends BaseFileTailW
      * @param session 会话
      */
     public static void offline(Session session) {
-        Collection<AgentFileTailWatcher<Session>> collection = CONCURRENT_HASH_MAP.values();
-        for (AgentFileTailWatcher<Session> agentFileTailWatcher : collection) {
-            agentFileTailWatcher.socketSessions.removeIf(session::equals);
-            if (agentFileTailWatcher.socketSessions.isEmpty()) {
-                agentFileTailWatcher.close();
+        for (AgentFileTailWatcher<Session> agentFileTailWatcher : new ArrayList<>(CONCURRENT_HASH_MAP.values())) {
+            if (agentFileTailWatcher.removeSession(session)) {
+                agentFileTailWatcher.closeIfEmpty();
             }
         }
     }
@@ -94,15 +105,10 @@ public class AgentFileTailWatcher<T extends AutoCloseable> extends BaseFileTailW
      * @param fileName 文件名
      */
     public static void offlineFile(File fileName) {
-        AgentFileTailWatcher<Session> agentFileTailWatcher = CONCURRENT_HASH_MAP.get(fileName);
-        if (null == agentFileTailWatcher) {
-            return;
+        AgentFileTailWatcher<Session> agentFileTailWatcher = CONCURRENT_HASH_MAP.remove(fileName);
+        if (agentFileTailWatcher != null) {
+            agentFileTailWatcher.close();
         }
-        Set<Session> socketSessions = agentFileTailWatcher.socketSessions;
-        for (Session socketSession : socketSessions) {
-            offline(socketSession);
-        }
-        agentFileTailWatcher.close();
     }
 
     /**
@@ -112,52 +118,36 @@ public class AgentFileTailWatcher<T extends AutoCloseable> extends BaseFileTailW
      */
     public static void reWatcher(File fileName) {
         AgentFileTailWatcher<Session> agentFileTailWatcher = CONCURRENT_HASH_MAP.get(fileName);
-        if (null == agentFileTailWatcher) {
-            return;
+        if (agentFileTailWatcher != null) {
+            agentFileTailWatcher.restart();
         }
-        agentFileTailWatcher.restart();
     }
 
     /**
-     * 关闭文件读取流
+     * 关闭指定会话对指定文件的监听
      *
      * @param fileName 文件名
+     * @param session  会话
      */
     static void offlineFile(File fileName, Session session) {
         AgentFileTailWatcher<Session> agentFileTailWatcher = CONCURRENT_HASH_MAP.get(fileName);
-        if (null == agentFileTailWatcher) {
+        if (agentFileTailWatcher == null) {
             return;
         }
-        Set<Session> socketSessions = agentFileTailWatcher.socketSessions;
-        for (Session socketSession : socketSessions) {
-            if (socketSession.equals(session)) {
-                offline(socketSession);
-                break;
-            }
+        if (agentFileTailWatcher.removeSession(session)) {
+            agentFileTailWatcher.closeIfEmpty();
         }
-        if (agentFileTailWatcher.socketSessions.isEmpty()) {
-            agentFileTailWatcher.close();
-        }
-
     }
 
     @Override
     protected boolean send(T session, String msg) throws IOException {
-//        try {
         SocketSessionUtil.send((Session) session, msg);
-//        } catch (Exception e) {
-//            log.error("发送消息异常", e);
-//        }
         return true;
     }
 
-    /**
-     * 关闭
-     */
     @Override
-    protected void close() {
-        super.close();
-        // 清理线程记录
-        CONCURRENT_HASH_MAP.remove(this.logFile);
+    protected void onClosed() {
+        // 只摘除当前实例，避免与并发重建的新 watcher 混淆
+        CONCURRENT_HASH_MAP.computeIfPresent(this.logFile, (file, watcher) -> watcher == this ? null : watcher);
     }
 }

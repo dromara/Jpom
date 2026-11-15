@@ -20,8 +20,7 @@ import org.springframework.web.socket.WebSocketSession;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.Set;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -59,19 +58,27 @@ public class ServiceFileTailWatcher<T extends AutoCloseable> extends BaseFileTai
         if (!file.exists() || file.isDirectory()) {
             throw new IOException(I18nMessageUtil.get("i18n.file_or_directory_not_found.f03e") + file.getPath());
         }
-        ServiceFileTailWatcher<WebSocketSession> agentFileTailWatcher = CONCURRENT_HASH_MAP.computeIfAbsent(file, s -> {
-            try {
-                return new ServiceFileTailWatcher<>(file);
-            } catch (Exception e) {
-                log.error(I18nMessageUtil.get("i18n.create_file_watch_failure.bc1a"), e);
-                return null;
+        while (true) {
+            ServiceFileTailWatcher<WebSocketSession> serviceFileTailWatcher = CONCURRENT_HASH_MAP.computeIfAbsent(file, s -> {
+                try {
+                    return new ServiceFileTailWatcher<>(file);
+                } catch (Exception e) {
+                    log.error(I18nMessageUtil.get("i18n.create_file_watch_failure.bc1a"), e);
+                    return null;
+                }
+            });
+            if (serviceFileTailWatcher == null) {
+                throw new IOException(I18nMessageUtil.get("i18n.load_file_failure.86cc") + file.getPath());
             }
-        });
-        if (agentFileTailWatcher == null) {
-            throw new IOException(I18nMessageUtil.get("i18n.load_file_failure.86cc") + file.getPath());
-        }
-        if (agentFileTailWatcher.add(session, FileUtil.getName(file))) {
-            agentFileTailWatcher.start();
+            if (serviceFileTailWatcher.add(session, FileUtil.getName(file))) {
+                return;
+            }
+            if (!serviceFileTailWatcher.isClosed()) {
+                // 同一会话已经在监听该文件
+                return;
+            }
+            // 与关闭并发：重新获取/创建 watcher 后重试
+            CONCURRENT_HASH_MAP.remove(file, serviceFileTailWatcher);
         }
     }
 
@@ -81,11 +88,9 @@ public class ServiceFileTailWatcher<T extends AutoCloseable> extends BaseFileTai
      * @param session 会话
      */
     public static void offline(WebSocketSession session) {
-        Collection<ServiceFileTailWatcher<WebSocketSession>> collection = CONCURRENT_HASH_MAP.values();
-        for (ServiceFileTailWatcher<WebSocketSession> agentFileTailWatcher : collection) {
-            agentFileTailWatcher.socketSessions.removeIf(session::equals);
-            if (agentFileTailWatcher.socketSessions.isEmpty()) {
-                agentFileTailWatcher.close();
+        for (ServiceFileTailWatcher<WebSocketSession> serviceFileTailWatcher : new ArrayList<>(CONCURRENT_HASH_MAP.values())) {
+            if (serviceFileTailWatcher.removeSession(session)) {
+                serviceFileTailWatcher.closeIfEmpty();
             }
         }
     }
@@ -96,15 +101,10 @@ public class ServiceFileTailWatcher<T extends AutoCloseable> extends BaseFileTai
      * @param fileName 文件
      */
     public static void offlineFile(File fileName) {
-        ServiceFileTailWatcher<WebSocketSession> agentFileTailWatcher = CONCURRENT_HASH_MAP.get(fileName);
-        if (null == agentFileTailWatcher) {
-            return;
+        ServiceFileTailWatcher<WebSocketSession> serviceFileTailWatcher = CONCURRENT_HASH_MAP.remove(fileName);
+        if (serviceFileTailWatcher != null) {
+            serviceFileTailWatcher.close();
         }
-        Set<WebSocketSession> socketSessions = agentFileTailWatcher.socketSessions;
-        for (WebSocketSession socketSession : socketSessions) {
-            offline(socketSession);
-        }
-        agentFileTailWatcher.close();
     }
 
     /**
@@ -115,18 +115,11 @@ public class ServiceFileTailWatcher<T extends AutoCloseable> extends BaseFileTai
      */
     public static void offlineFile(File fileName, WebSocketSession session) {
         ServiceFileTailWatcher<WebSocketSession> serviceFileTailWatcher = CONCURRENT_HASH_MAP.get(fileName);
-        if (null == serviceFileTailWatcher) {
+        if (serviceFileTailWatcher == null) {
             return;
         }
-        Set<WebSocketSession> socketSessions = serviceFileTailWatcher.socketSessions;
-        for (WebSocketSession socketSession : socketSessions) {
-            if (socketSession.equals(session)) {
-                offline(socketSession);
-                break;
-            }
-        }
-        if (serviceFileTailWatcher.socketSessions.isEmpty()) {
-            serviceFileTailWatcher.close();
+        if (serviceFileTailWatcher.removeSession(session)) {
+            serviceFileTailWatcher.closeIfEmpty();
         }
     }
 
@@ -135,13 +128,9 @@ public class ServiceFileTailWatcher<T extends AutoCloseable> extends BaseFileTai
         return SocketSessionUtil.send((WebSocketSession) session, msg);
     }
 
-    /**
-     * 关闭
-     */
     @Override
-    protected void close() {
-        super.close();
-        // 清理线程记录
-        CONCURRENT_HASH_MAP.remove(this.logFile);
+    protected void onClosed() {
+        // 只摘除当前实例，避免与并发重建的新 watcher 混淆
+        CONCURRENT_HASH_MAP.computeIfPresent(this.logFile, (file, watcher) -> watcher == this ? null : watcher);
     }
 }

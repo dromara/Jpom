@@ -110,7 +110,7 @@ export default {
     socketUrl() {
       return getWebSocketUrl(
         '/socket/node/script_run',
-        `userId=${this.getLongTermToken()}&id=${this.id}&nodeId=${
+        `id=${this.id}&nodeId=${
           this.nodeId
         }&type=nodeScript&workspaceId=${this.getWorkspaceId()}`
       )

@@ -28,6 +28,9 @@ import cn.keepbx.jpom.Type;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.system.JpomRuntimeException;
@@ -35,6 +38,7 @@ import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.JsonFileUtil;
 import org.springframework.util.Assert;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -475,6 +479,8 @@ public class JpomManifest {
 
     /**
      * 解析 jpom 安装包
+     * <p>
+     * 支持 .zip（历史发布包）、.tar.gz/.tgz（2.11.13.2 起发布包格式）以及直接传入的 .jar
      *
      * @param path     文件路径
      * @param type     查找类型
@@ -482,6 +488,10 @@ public class JpomManifest {
      * @return 结果文件
      */
     public static File zipFileFind(String path, Type type, String savePath) throws IOException {
+        String fileName = FileUtil.getName(path);
+        if (StrUtil.endWithAnyIgnoreCase(fileName, ".tar.gz", ".tgz")) {
+            return tarGzFileFind(path, type, savePath);
+        }
         String extName = FileUtil.extName(path);
         if (StrUtil.endWithIgnoreCase(extName, "zip")) {
             try (ZipFile zipFile = ZipUtil.toZipFile(FileUtil.file(path), CharsetUtil.CHARSET_UTF_8)) {
@@ -502,5 +512,56 @@ public class JpomManifest {
             return FileUtil.file(path);
         }
         throw new IllegalArgumentException(I18nMessageUtil.get("i18n.not_jpom_install_package.2cca"));
+    }
+
+    /**
+     * 从 tar.gz/.tgz 发布包中提取 lib 目录下对应类型的 jar 文件
+     *
+     * @param path     压缩包路径
+     * @param type     查找类型
+     * @param savePath 保存目录
+     * @return 提取到的 jar 文件
+     * @throws IOException 解析异常
+     */
+    private static File tarGzFileFind(String path, Type type, String savePath) throws IOException {
+        String typeName = type.name().toLowerCase();
+        File foundFile = null;
+        try (InputStream fileStream = FileUtil.getInputStream(path);
+             BufferedInputStream bufferedStream = new BufferedInputStream(fileStream);
+             GzipCompressorInputStream gzipStream = new GzipCompressorInputStream(bufferedStream);
+             TarArchiveInputStream tarStream = new TarArchiveInputStream(gzipStream)) {
+            TarArchiveEntry tarEntry;
+            while ((tarEntry = tarStream.getNextTarEntry()) != null) {
+                if (!tarEntry.isFile()) {
+                    continue;
+                }
+                String entryName = normalizePackageEntryName(tarEntry.getName());
+                String lowerEntryName = entryName.toLowerCase();
+                if (StrUtil.startWith(lowerEntryName, "lib/" + typeName) && StrUtil.endWith(lowerEntryName, ".jar")) {
+                    String name = FileUtil.getName(entryName);
+                    foundFile = FileUtil.writeFromStream(tarStream, FileUtil.file(savePath, name));
+                    break;
+                }
+            }
+        }
+        Assert.state(foundFile != null, StrUtil.format(I18nMessageUtil.get("i18n.invalid_zip_file.3092"), type));
+        return foundFile;
+    }
+
+    /**
+     * 归一化压缩包内文件路径：兼容 tar 打包产生的 ./ 前缀与 Windows 反斜杠
+     *
+     * @param entryName 压缩包内路径
+     * @return 归一化后的路径
+     */
+    private static String normalizePackageEntryName(String entryName) {
+        String name = StrUtil.replace(entryName, "\\", "/");
+        while (StrUtil.startWith(name, "./")) {
+            name = StrUtil.subSuf(name, 2);
+        }
+        while (StrUtil.startWith(name, "/")) {
+            name = StrUtil.subSuf(name, 1);
+        }
+        return name;
     }
 }

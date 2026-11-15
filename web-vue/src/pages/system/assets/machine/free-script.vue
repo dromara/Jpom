@@ -70,7 +70,7 @@ const temp = ref({
 const socketUrl = computed(() => {
   return getWebSocketUrl(
     '/socket/free_script',
-    `userId=${userStore_.getLongTermToken()}&machineId=${props.machineId}&nodeId=system&type=freeScript`
+    `machineId=${props.machineId}&nodeId=system&type=freeScript`
   )
 })
 

@@ -743,9 +743,12 @@ public class BuildExecuteManage implements Runnable {
 
         InputStream templateInputStream = ExtConfigBean.getConfigResourceInputStream("/exec/template." + CommandUtil.SUFFIX);
         String s1 = IoUtil.readUtf8(templateInputStream);
+        // 严格构建且为 sh 脚本时，在模板之后、用户脚本之前注入 set -e / set -o pipefail，
+        // 让中间命令失败立即中断，而不是继续执行后续命令、仅按整体退出码判断（Gitee ICW9KZ）。
+        String commandScript = buildScriptContent(s1, script, buildExtraModule.strictlyEnforce(), CommandUtil.SUFFIX);
         try {
             int waitFor = JpomApplication.getInstance()
-                .execScript(s1 + script, file -> {
+                .execScript(commandScript, file -> {
                     try {
                         String execMode = this.buildExtraModule.getCommandExecMode();
                         // ApacheExecUtil.exec
@@ -772,6 +775,35 @@ public class BuildExecuteManage implements Runnable {
             return e.getMessage();
         }
         return null;
+    }
+
+    /**
+     * 组合构建执行脚本内容（Gitee ICW9KZ）
+     * <p>
+     * 严格构建且脚本后缀为 sh 时，在模板（环境初始化，失败不应中断）之后、用户脚本之前注入
+     * {@code set -e} 与 {@code set -o pipefail}，让中间命令失败（或管道中任一命令失败）立即中断，
+     * 而不是继续执行后续命令、仅在最后按整体退出码判断。非严格模式与 Windows 批处理（bat）语义保持不变。
+     * <p>
+     * 行为级回归测试见 {@code BuildExecuteManageScriptTest}。
+     *
+     * @param template        执行模板
+     * @param script          用户脚本
+     * @param strictlyEnforce 是否严格构建
+     * @param suffix          脚本文件后缀（sh/bat）
+     * @return 组合后的脚本内容
+     */
+    static String buildScriptContent(String template, String script, boolean strictlyEnforce, String suffix) {
+        if (!strictlyEnforce || !StrUtil.equals(suffix, CommandUtil.SUFFIX_UNIX)) {
+            return template + script;
+        }
+        StringBuilder builder = new StringBuilder(template);
+        if (!StrUtil.endWith(template, "\n")) {
+            builder.append('\n');
+        }
+        builder.append("set -e").append('\n')
+            .append("set -o pipefail").append('\n')
+            .append(script);
+        return builder.toString();
     }
 
     /**

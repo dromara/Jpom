@@ -42,6 +42,7 @@ import org.springframework.util.Assert;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -291,7 +292,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * @return 影响行数
      */
     public int delByBean(T info) {
-        Entity where = this.dataBeanToEntity(info);
+        Entity where = this.dataBeanToQueryEntity(info);
         Assert.state(!where.isEmpty(), I18nMessageUtil.get("i18n.no_parameters_added_with_minus_two.a7cf"));
         return this.del(where);
     }
@@ -354,7 +355,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * @return true 存在
      */
     public boolean exists(T data) {
-        Entity entity = this.dataBeanToEntity(data);
+        Entity entity = this.dataBeanToQueryEntity(data);
         return this.exists(entity);
     }
 
@@ -428,7 +429,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * @return List
      */
     public List<T> queryList(T data, int count, Order... orders) {
-        Entity where = this.dataBeanToEntity(data);
+        Entity where = this.dataBeanToQueryEntity(data);
         return this.queryList(where, count, orders);
     }
 
@@ -500,7 +501,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * @return data
      */
     public List<T> listByBean(T data, boolean fill) {
-        Entity where = this.dataBeanToEntity(data);
+        Entity where = this.dataBeanToQueryEntity(data);
         List<Entity> entitys = this.queryList(where);
         return this.entityToBeanList(entitys, fill);
     }
@@ -512,7 +513,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * @return data
      */
     public T queryByBean(T data) {
-        Entity where = this.dataBeanToEntity(data);
+        Entity where = this.dataBeanToQueryEntity(data);
         Entity entity = this.query(where);
         return this.entityToBean(entity, true);
     }
@@ -530,7 +531,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
     }
 
     public long count(T data) {
-        return super.count(this.dataBeanToEntity(data));
+        return super.count(this.dataBeanToQueryEntity(data));
     }
 
     /**
@@ -600,6 +601,59 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         String order = paramMap.get("order");
         //
         Page pageReq = this.parsePage(paramMap);
+        Entity where = buildWhere(paramMap, DialectUtil::wrapField);
+        // 排序
+        if (StrUtil.isNotEmpty(orderField)) {
+            orderField = StrUtil.removeAll(orderField, "%");
+            if (isSafeFieldName(orderField)) {
+                pageReq.addOrder(new Order(DialectUtil.wrapField(orderField), StrUtil.equalsIgnoreCase(order, "ascend") ? Direction.ASC : Direction.DESC));
+            } else {
+                log.warn("ignore invalid order field: {}", orderField);
+            }
+        }
+        return this.listPage(where, pageReq, fill);
+    }
+
+    /**
+     * 注入服务端强制过滤条件，并先剔除客户端传入的同字段参数。
+     * <p>
+     * 服务端强制条件（工作空间隔离的 {@code workspaceId}/{@code workspaceId:in} 等）与客户端查询参数
+     * 共用同一套 {@code paramMap} 字符串协议：客户端可以构造 {@code workspaceId}、{@code workspaceId:in}、
+     * {@code %workspaceId%} 等「{@link #resolveFilterField(String)} 后同字段」的 key，在
+     * {@link #buildWhere(Map, Function)} 中被映射为同一个数据库字段，从而覆盖服务端注入的强制条件
+     * （2026-11-08 审计 P1-1）。
+     * <p>
+     * 本方法在写入强制条件前先删除所有解析后同字段的客户端 key（忽略大小写，避免 {@code WorkspaceId}
+     * 之类的变体绕过），保证最终查询条件唯一来自服务端。
+     *
+     * @param paramMap 请求参数（会被原地修改）
+     * @param rawKey   服务端强制条件参数名，如 {@code workspaceId}、{@code workspaceId:in}
+     * @param value    强制条件值
+     */
+    public static void putForcedFilter(Map<String, String> paramMap, String rawKey, String value) {
+        String field = resolveFilterField(rawKey);
+        if (field == null) {
+            throw new IllegalArgumentException("invalid forced filter field: " + rawKey);
+        }
+        paramMap.keySet().removeIf(key -> StrUtil.equalsIgnoreCase(field, resolveFilterField(key)));
+        paramMap.put(rawKey, value);
+    }
+
+    /**
+     * 根据请求参数构建查询条件
+     * <p>
+     * 请求参数名会被当作数据库字段名使用，必须先校验为合法标识符、并用 {@link Condition} 绑定值，避免 SQL 注入；
+     * 同时 {@code %field%}、{@code field:in}、{@code field[0]/field[1]} 等过滤语法必须在字段名校验前剥离后缀。
+     * <p>
+     * 独立成静态包级方法是为了让单元测试能直接断言构建结果：2.11.13 曾因在字段名校验时未先剥离 {@code :in}
+     * 后缀，导致 {@code workspaceId:in} 被静默丢弃、工作空间隔离整体失效。**禁止只测试
+     * {@link #resolveFilterField(String)} 而跳过本方法**，否则同类回归仍会逃逸。
+     *
+     * @param paramMap     请求参数（调用方需已移除 page/limit/order_field/order 等分页参数）
+     * @param fieldWrapper 字段名包裹器（生产为 {@link DialectUtil#wrapField(String)}，单测可注入简单实现）
+     * @return 查询条件
+     */
+    static Entity buildWhere(Map<String, String> paramMap, Function<String, String> fieldWrapper) {
         Entity where = Entity.create();
         List<String> ignoreField = new ArrayList<>(10);
         // 查询条件
@@ -610,14 +664,23 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
                 continue;
             }
             String key = StrUtil.removeAll(rawKey, "%");
-            String timeKey = StrUtil.removeAny(key, "[0]", "[1]");
-            // 请求参数名会被当作数据库字段名使用，必须先校验为合法标识符，避免被拼接为 SQL 片段
-            if (!isSafeFieldName(timeKey)) {
+            // 请求参数名会被当作数据库字段名使用，必须先校验为合法标识符，避免被拼接为 SQL 片段；
+            // 注意 :in 后缀要在校验前剥离，否则 workspaceId:in 这类集合过滤会被误判为非法字段而静默丢弃
+            String filterField = resolveFilterField(rawKey);
+            if (filterField == null) {
                 log.warn("ignore invalid query field name: {}", rawKey);
                 continue;
             }
-            String wrapField = DialectUtil.wrapField(key);
-            if (StrUtil.startWith(rawKey, "%") && StrUtil.endWith(rawKey, "%")) {
+            String timeKey = StrUtil.removeAny(key, "[0]", "[1]");
+            if (!StrUtil.equals(key, timeKey) && !StrUtil.containsIgnoreCase(key, "time")) {
+                // [0]/[1] 只属于时间范围过滤协议；非时间字段带该后缀会生成非法列名（如 `foo[0]`）导致 500
+                log.warn("ignore non-time range filter field: {}", rawKey);
+                continue;
+            }
+            String wrapField = fieldWrapper.apply(key);
+            if (StrUtil.endWith(key, ":in")) {
+                where.set(fieldWrapper.apply(filterField), StrUtil.split(value, StrUtil.COMMA));
+            } else if (StrUtil.startWith(rawKey, "%") && StrUtil.endWith(rawKey, "%")) {
                 where.set(wrapField, new Condition(wrapField, "like", "%" + value + "%"));
             } else if (StrUtil.endWith(rawKey, "%")) {
                 where.set(wrapField, new Condition(wrapField, "like", value + "%"));
@@ -642,7 +705,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
                 if (ignoreField.contains(timeKey)) {
                     continue;
                 }
-                String timeWrapField = DialectUtil.wrapField(timeKey);
+                String timeWrapField = fieldWrapper.apply(timeKey);
                 String startTime = paramMap.get(timeKey + "[0]");
                 String endTime = paramMap.get(timeKey + "[1]");
                 if (StrUtil.isAllNotEmpty(startTime, endTime)) {
@@ -657,27 +720,33 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
                     where.set(timeWrapField + " ", new Condition(timeWrapField, "<=", endDateTime.getTime()));
                 }
                 ignoreField.add(timeKey);
-            } else if (StrUtil.endWith(key, ":in")) {
-                String inKey = StrUtil.removeSuffix(key, ":in");
-                if (!isSafeFieldName(inKey)) {
-                    continue;
-                }
-                where.set(DialectUtil.wrapField(inKey), StrUtil.split(value, StrUtil.COMMA));
             } else {
                 // 使用 Condition 绑定查询值，避免值被 Hutool 解析为条件表达式
                 where.set(wrapField, new Condition(wrapField, "=", value));
             }
         }
-        // 排序
-        if (StrUtil.isNotEmpty(orderField)) {
-            orderField = StrUtil.removeAll(orderField, "%");
-            if (isSafeFieldName(orderField)) {
-                pageReq.addOrder(new Order(DialectUtil.wrapField(orderField), StrUtil.equalsIgnoreCase(order, "ascend") ? Direction.ASC : Direction.DESC));
-            } else {
-                log.warn("ignore invalid order field: {}", orderField);
-            }
+        return where;
+    }
+
+    /**
+     * 解析过滤参数名对应的数据库字段名
+     * <p>
+     * 支持 {@code %field%} 模糊查询、{@code field:in} 集合查询、{@code field[0]/field[1]} 时间范围；
+     * 先剥离这些后缀再校验字段名，避免 {@code workspaceId:in} 被误判为非法字段而丢弃。
+     *
+     * @param rawKey 原始请求参数名
+     * @return 合法字段名；非法返回 null
+     */
+    static String resolveFilterField(String rawKey) {
+        if (StrUtil.isEmpty(rawKey)) {
+            return null;
         }
-        return this.listPage(where, pageReq, fill);
+        String field = StrUtil.removeAll(rawKey, "%");
+        if (StrUtil.endWith(field, ":in")) {
+            field = StrUtil.removeSuffix(field, ":in");
+        }
+        field = StrUtil.removeAny(field, "[0]", "[1]");
+        return isSafeFieldName(field) ? field : null;
     }
 
     /**

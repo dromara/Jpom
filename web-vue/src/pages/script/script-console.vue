@@ -102,7 +102,7 @@ export default {
     socketUrl() {
       return getWebSocketUrl(
         '/socket/script_run',
-        `userId=${this.getLongTermToken()}&id=${this.id}&type=script&nodeId=system&workspaceId=${this.getWorkspaceId()}`
+        `id=${this.id}&type=script&nodeId=system&workspaceId=${this.getWorkspaceId()}`
       )
     }
   },

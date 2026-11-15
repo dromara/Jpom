@@ -84,7 +84,7 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
         // 删除之前的数据
         UserBindWorkspaceModel userBindWorkspaceModel = new UserBindWorkspaceModel();
         userBindWorkspaceModel.setUserId(userId);
-        super.del(super.dataBeanToEntity(userBindWorkspaceModel));
+        super.del(super.dataBeanToQueryEntity(userBindWorkspaceModel));
         // 重新入库
         super.insert(list);
     }
@@ -145,7 +145,7 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
     public void deleteByUserId(String userId) {
         UserBindWorkspaceModel bindWorkspaceModel = new UserBindWorkspaceModel();
         bindWorkspaceModel.setUserId(userId);
-        Entity where = super.dataBeanToEntity(bindWorkspaceModel);
+        Entity where = super.dataBeanToQueryEntity(bindWorkspaceModel);
         super.del(where);
     }
 

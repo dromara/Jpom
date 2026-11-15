@@ -144,6 +144,10 @@ public class AgentWebSocketScriptHandle extends BaseAgentWebSocketHandle {
     @OnError
     @Override
     public void onError(Session session, Throwable thr) {
-        super.onError(session, thr);
+        try {
+            super.onError(session, thr);
+        } finally {
+            NodeScriptProcessBuilder.stopWatcher(session);
+        }
     }
 }

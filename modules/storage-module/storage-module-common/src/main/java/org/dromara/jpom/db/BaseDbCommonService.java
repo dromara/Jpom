@@ -12,6 +12,7 @@ package org.dromara.jpom.db;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.Editor;
 import cn.hutool.core.util.PageUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.TypeUtil;
@@ -136,6 +137,48 @@ public abstract class BaseDbCommonService<T> {
         // 转换为 map
         Map<String, Object> beanToMap = BeanUtil.beanToMap(data, new LinkedHashMap<>(), true, DialectUtil::wrapField);
         entity.putAll(beanToMap);
+        return entity;
+    }
+
+    /**
+     * 实体转查询条件 entity
+     * <p>
+     * 与 {@link #dataBeanToEntity(Object)} 的区别：查询条件的值统一使用占位符
+     * {@link Condition}（{@code new Condition(field, "=", value)}）绑定，
+     * 避免 Hutool 把字符串值解析为 SQL 条件表达式（例如 {@code is not null}、{@code = null}），
+     * 从而防止请求参数被当作 SQL 片段注入（见 issue #121 同类问题）。
+     * <p>
+     * 注意：该方法仅用于查询/删除条件，不能用于 INSERT/UPDATE 需要写入的数据行。
+     *
+     * @param data 实体对象
+     * @return 查询条件 entity
+     */
+    public Entity dataBeanToQueryEntity(T data) {
+        return dataBeanToQueryEntity(tableName, data, DialectUtil::wrapField);
+    }
+
+    /**
+     * 实体转查询条件 entity（可指定表名与字段名处理，便于单元测试）
+     *
+     * @param tableName 表名
+     * @param data      实体对象
+     * @param keyEditor 字段名处理（通常是数据库字段包裹函数）
+     * @return 查询条件 entity
+     */
+    public static Entity dataBeanToQueryEntity(String tableName, Object data, Editor<String> keyEditor) {
+        Entity entity = new Entity(tableName);
+        Map<String, Object> beanToMap = BeanUtil.beanToMap(data, new LinkedHashMap<>(), true, keyEditor);
+        for (Map.Entry<String, Object> entry : beanToMap.entrySet()) {
+            String field = entry.getKey();
+            Object value = entry.getValue();
+            if (value instanceof Condition || value instanceof Collection) {
+                // 调用方显式传入的条件对象或集合（IN 查询）保持原样
+                entity.set(field, value);
+            } else {
+                // 强制使用占位符运算符，值不会再被 Condition#parseValue 解析为 SQL 片段
+                entity.set(field, new Condition(field, "=", value));
+            }
+        }
         return entity;
     }
 

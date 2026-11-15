@@ -52,7 +52,7 @@ public class NodeScriptProcessBuilder extends BaseRunScript implements Runnable 
     private static final ConcurrentHashMap<String, NodeScriptProcessBuilder> FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP = new SafeConcurrentHashMap<>();
 
     private final ProcessBuilder processBuilder;
-    private final Set<Session> sessions = new HashSet<>();
+    private final Set<Session> sessions = ConcurrentHashMap.newKeySet();
     private final String executeId;
     private final File scriptFile;
     private final EnvironmentMapBuilder environmentMapBuilder;
@@ -114,12 +114,16 @@ public class NodeScriptProcessBuilder extends BaseRunScript implements Runnable 
         //
         if (nodeScriptProcessBuilder.sessions.add(session)) {
             if (FileUtil.exist(nodeScriptProcessBuilder.logFile)) {
-                // 读取之前的信息并发送
+                // 读取之前的信息并发送；发送失败后立即移除会话，避免继续向已断开连接写数据
                 FileUtil.readLines(nodeScriptProcessBuilder.logFile, CharsetUtil.CHARSET_UTF_8, (LineHandler) line -> {
+                    if (!nodeScriptProcessBuilder.sessions.contains(session)) {
+                        return;
+                    }
                     try {
                         SocketSessionUtil.send(session, line);
                     } catch (IOException e) {
                         log.error(I18nMessageUtil.get("i18n.send_message_failure.9621"), e);
+                        nodeScriptProcessBuilder.sessions.remove(session);
                     }
                 });
             }
@@ -182,6 +186,8 @@ public class NodeScriptProcessBuilder extends BaseRunScript implements Runnable 
             this.end(I18nMessageUtil.get("i18n.general_execution_exception.62e9") + e.getMessage());
         } finally {
             this.close();
+            // 兜底清理：end() 抛异常时也不能让执行缓存泄漏
+            FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP.remove(this.executeId, this);
         }
     }
 
@@ -192,18 +198,23 @@ public class NodeScriptProcessBuilder extends BaseRunScript implements Runnable 
      */
     @Override
     protected void end(String msg) {
-        Iterator<Session> iterator = sessions.iterator();
-        while (iterator.hasNext()) {
-            Session session = iterator.next();
-            try {
-                SocketSessionUtil.send(session, msg);
-            } catch (IOException e) {
-                log.error(I18nMessageUtil.get("i18n.send_message_failure.9621"), e);
+        try {
+            for (Session session : new ArrayList<>(sessions)) {
+                if (!sessions.remove(session)) {
+                    continue;
+                }
+                try {
+                    SocketSessionUtil.send(session, msg);
+                } catch (IOException e) {
+                    log.error(I18nMessageUtil.get("i18n.send_message_failure.9621"), e);
+                }
             }
-            iterator.remove();
+        } finally {
+            // 无论发送是否失败都要移除执行缓存，避免 ProcessBuilder/会话被永久持有
+            sessions.clear();
+            NodeScriptProcessBuilder nodeScriptProcessBuilder = FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP.remove(this.executeId, this) ? this : null;
+            IoUtil.close(nodeScriptProcessBuilder);
         }
-        NodeScriptProcessBuilder nodeScriptProcessBuilder = FILE_SCRIPT_PROCESS_BUILDER_CONCURRENT_HASH_MAP.remove(this.executeId);
-        IoUtil.close(nodeScriptProcessBuilder);
     }
 
     @Override
@@ -217,15 +228,13 @@ public class NodeScriptProcessBuilder extends BaseRunScript implements Runnable 
 
     @Override
     protected void msgCallback(String info) {
-        //
-        Iterator<Session> iterator = sessions.iterator();
-        while (iterator.hasNext()) {
-            Session session = iterator.next();
+        // 快照遍历：会话可能被 WebSocket 关闭线程并发移除
+        for (Session session : new ArrayList<>(sessions)) {
             try {
                 SocketSessionUtil.send(session, info);
             } catch (IOException e) {
                 log.error(I18nMessageUtil.get("i18n.send_message_failure.9621"), e);
-                iterator.remove();
+                sessions.remove(session);
             }
         }
     }

@@ -84,7 +84,12 @@ public abstract class BaseJpomController {
         String realName = StrUtil.subBefore(originalFilename, StrUtil.DOT, true);
         if (ArrayUtil.isNotEmpty(extNames)) {
             String extName = FileUtil.extName(realName);
-            Assert.state(StrUtil.containsAnyIgnoreCase(extName, extNames), I18nMessageUtil.get("i18n.file_type_not_supported2.d497") + extName);
+            // 复合扩展名（如 xxx.tar.gz）FileUtil.extName 只能取到最后一段，这里再按完整扩展名匹配一次
+            boolean supported = StrUtil.containsAnyIgnoreCase(extName, extNames);
+            if (!supported && StrUtil.endWithIgnoreCase(realName, ".tar." + extName)) {
+                supported = StrUtil.containsAnyIgnoreCase("tar." + extName, extNames);
+            }
+            Assert.state(supported, I18nMessageUtil.get("i18n.file_type_not_supported2.d497") + extName);
         }
         assert originalFilename != null;
         File slice = FileUtil.file(sliceItemPath, originalFilename);

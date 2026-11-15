@@ -318,12 +318,14 @@ export function confirmFastInstall(params) {
 
 /**
  * 下载远程文件
+ * @param params { engine, platform }：Go 节点按平台下载升级容器（engine=go 时生效）
  * @returns json
  */
-export function downloadRemote() {
+export function downloadRemote(params) {
   return axios({
     url: '/node/download_remote.json',
     method: 'get',
+    params: params,
     // 0 表示无超时时间
     timeout: 0,
     data: {}

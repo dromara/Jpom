@@ -26,6 +26,7 @@ import org.dromara.jpom.service.h2db.BaseNodeService;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.service.user.UserBindWorkspaceService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
@@ -42,6 +43,7 @@ import java.util.function.Supplier;
  * @since 2019/03/16.
  */
 @Configuration
+@Slf4j
 public class PermissionInterceptor implements HandlerMethodInterceptor {
 
     @Resource
@@ -94,9 +96,28 @@ public class PermissionInterceptor implements HandlerMethodInterceptor {
         }
         Feature feature = handlerMethod.getMethodAnnotation(Feature.class);
         if (feature == null) {
-            return true;
+            // 公开接口（@NotLogin）直接放行
+            boolean notLogin = handlerMethod.hasMethodAnnotation(NotLogin.class)
+                || handlerMethod.getBeanType().isAnnotationPresent(NotLogin.class);
+            if (notLogin) {
+                return true;
+            }
+            // 权限拦截 fail-closed：属于权限管理模块（类级 @Feature 且 cls 非 NULL）的控制器，
+            // 方法缺少 @Feature 时不再静默放行；未声明类级 @Feature 的控制器属于“登录即可”的公共/自助接口，保持原行为。
+            Feature classFeatureAnnotation = handlerMethod.getBeanType().getAnnotation(Feature.class);
+            if (classFeatureAnnotation == null || classFeatureAnnotation.cls() == ClassFeature.NULL) {
+                return true;
+            }
+            log.warn("handler {}#{} 未声明方法级 @Feature，按无权限拒绝（fail-closed）",
+                handlerMethod.getBeanType().getName(), handlerMethod.getMethod().getName());
+            this.errorMsg(response, I18nMessageUtil.get("i18n.no_permission.e343"));
+            return false;
         }
         MethodFeature method = feature.method();
+        if (method == MethodFeature.NULL) {
+            // 显式声明“无需功能权限”：仍受登录、@SystemPermission、@NodeDataPermission 等约束
+            return true;
+        }
         if (ArrayUtil.contains(DEMO, method) && userModel.isDemoUser()) {
             this.errorMsg(response, DEMO_TIP.get());
             return false;
@@ -140,17 +161,36 @@ public class PermissionInterceptor implements HandlerMethodInterceptor {
             String dataId = request.getParameter(parameterName);
             if (StrUtil.isNotEmpty(dataId)) {
                 BaseNodeModel data = baseNodeService.getData(node.getId(), dataId);
-                if (data != null) {
-                    UserBindWorkspaceModel.PermissionResult permissionResult = userBindWorkspaceService.checkPermission(userModel, data.getWorkspaceId());
-
-                    if (!permissionResult.isSuccess()) {
+                UserBindWorkspaceModel.PermissionResult permissionResult = data == null ? null
+                    : userBindWorkspaceService.checkPermission(userModel, data.getWorkspaceId());
+                if (!isNodeDataPermissionAllowed(data, permissionResult)) {
+                    if (permissionResult == null) {
+                        // fail-closed：缓存未命中（节点数据未同步/已删除）无法确定数据所属工作空间，按无权限拒绝
+                        log.warn("node data not found for permission check, deny (fail-closed): nodeId={}, dataId={}", node.getId(), dataId);
+                        this.errorMsg(response, I18nMessageUtil.get("i18n.no_current_data_permission.17d7"));
+                    } else {
                         this.errorMsg(response, permissionResult.errorMsg());
-                        return false;
                     }
+                    return false;
                 }
             }
         }
         return true;
+    }
+
+    /**
+     * 节点数据权限判定（fail-closed）。
+     * <p>
+     * 历史实现只在缓存命中时才校验数据所属工作空间，缓存未命中（节点数据未同步/已删除）会直接放行，
+     * 形成“无法确认数据归属即放行”的 fail-open（2026-11-08 审计 P3-4）。现在未命中同样拒绝：
+     * 无法确定数据所属工作空间时按无权限处理，避免借缓存空窗期跨工作空间操作节点数据。
+     *
+     * @param data             节点缓存数据（未命中为 null）
+     * @param permissionResult 数据所属工作空间的权限校验结果（未命中为 null）
+     * @return true 允许执行
+     */
+    static boolean isNodeDataPermissionAllowed(BaseNodeModel data, UserBindWorkspaceModel.PermissionResult permissionResult) {
+        return data != null && permissionResult != null && permissionResult.isSuccess();
     }
 
     /**

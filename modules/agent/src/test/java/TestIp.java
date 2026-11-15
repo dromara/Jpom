@@ -20,7 +20,7 @@ public class TestIp {
 
     @Test
     public void test() {
-        String ipByHost = NetUtil.getIpByHost("jpom.io");
+        String ipByHost = NetUtil.getIpByHost("jpom.top");
         System.out.println(ipByHost);
     }
 

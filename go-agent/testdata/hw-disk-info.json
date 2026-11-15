@@ -1,0 +1,76 @@
+{
+  "code": 200,
+  "msg": "",
+  "data": [
+    {
+      "name": "<name>",
+      "model": "QEMU_HARDDISK",
+      "serial": "drive-scsi0",
+      "size": "0",
+      "readBytes": "0",
+      "reads": "0",
+      "writeBytes": "0",
+      "writes": "0",
+      "currentQueueLength": "0",
+      "transferTime": "0",
+      "timeStamp": "0",
+      "partition": [
+        {
+          "identification": "/dev/sda1",
+          "name": "<name>",
+          "type": "partition",
+          "major": 8,
+          "minor": 1,
+          "size": "0",
+          "mountPoint": "",
+          "uuid": ""
+        },
+        {
+          "identification": "/dev/sda2",
+          "name": "<name>",
+          "type": "ext4",
+          "major": 8,
+          "minor": 2,
+          "size": "0",
+          "mountPoint": "/boot",
+          "uuid": "<uuid>"
+        },
+        {
+          "identification": "/dev/sda3",
+          "name": "<name>",
+          "type": "LVM2_member",
+          "major": 8,
+          "minor": 3,
+          "size": "0",
+          "mountPoint": "dm-0",
+          "uuid": "GdJX8S-VOSa-N6pC-X4M6-II2I-sr5d-x2xqGW"
+        }
+      ]
+    },
+    {
+      "name": "<name>",
+      "model": "Logical Volume Group",
+      "serial": "LVM-yEwOLSdHgZeiUR9ZPbA6QfXq3e2jLEeoZlIfpqs3vuo6Z7hfnpcZK0B3CxuYDAFg",
+      "size": "0",
+      "readBytes": "0",
+      "reads": "0",
+      "writeBytes": "0",
+      "writes": "0",
+      "currentQueueLength": "0",
+      "transferTime": "0",
+      "timeStamp": "0",
+      "partition": [
+        {
+          "identification": "/dev/ubuntu-vg/ubuntu-lv",
+          "name": "<name>",
+          "type": "ext4",
+          "major": 253,
+          "minor": 0,
+          "size": "0",
+          "mountPoint": "/dev/mapper/ubuntu-vg-ubuntu-lv",
+          "uuid": "<uuid>"
+        }
+      ]
+    }
+  ]
+}

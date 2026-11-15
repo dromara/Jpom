@@ -10,6 +10,7 @@
 package org.dromara.jpom.socket;
 
 import cn.hutool.core.lang.Tuple;
+import cn.hutool.core.map.SafeConcurrentHashMap;
 import cn.keepbx.jpom.Type;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
@@ -31,7 +32,6 @@ import org.springframework.util.unit.DataSize;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -46,7 +46,7 @@ import java.util.Optional;
 @Slf4j
 public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
 
-    private static final Map<String, UploadFileModel> UPLOAD_FILE_INFO = new HashMap<>();
+    private static final Map<String, UploadFileModel> UPLOAD_FILE_INFO = new SafeConcurrentHashMap<>();
 
     private static AgentConfig agentConfig;
     private static MultipartProperties multipartProperties;
@@ -176,6 +176,10 @@ public class AgentWebSocketUpdateHandle extends BaseAgentWebSocketHandle {
     @OnError
     @Override
     public void onError(Session session, Throwable thr) {
-        super.onError(session, thr);
+        try {
+            super.onError(session, thr);
+        } finally {
+            UPLOAD_FILE_INFO.remove(session.getId());
+        }
     }
 }

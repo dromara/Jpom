@@ -72,6 +72,7 @@ public class OutGivingWhitelistController extends BaseServerController {
      * @return json
      * @author Hotstrip
      */
+    @Feature(method = MethodFeature.LIST)
     @RequestMapping(value = "white-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<Map<String, Object>> whiteList(HttpServletRequest request) {
         ServerWhitelist serverWhitelist = outGivingWhitelistService.getServerWhitelistData(request);

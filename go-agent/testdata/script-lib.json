@@ -1,0 +1,11 @@
+{
+  "code": 200,
+  "msg": "",
+  "data": [
+    {
+      "id": "<id>",
+      "tag": "test",
+      "version": "<version>"
+    }
+  ]
+}

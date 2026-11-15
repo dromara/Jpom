@@ -1,0 +1,37 @@
+{
+  "code": 200,
+  "msg": "",
+  "data": {
+    "manifest": {
+      "version": "<version>",
+      "timeStamp": "2024-01-01 00:00:00",
+      "pid": "0",
+      "type": "Agent",
+      "port": 0,
+      "randomId": "<uuid>",
+      "dataPath": "/home/example/jpom/agent/data",
+      "jarFile": "/home/example/jpom/agent/lib/Agent-<version>.jar",
+      "osName": "<os-name>",
+      "installId": "<uuid>",
+      "debug": false,
+      "upTime": "0"
+    },
+    "remoteVersion": {
+      "tagName": "<tag-name>",
+      "agentUrl": "<url>",
+      "serverUrl": "<url>",
+      "changelogUrl": "<url>",
+      "changelog": "<changelog>",
+      "lastTime": "0",
+      "upgrade": false,
+      "downloadSource": "<download-source>",
+      "auth": {
+        "downloadSource": "<download-source>",
+        "agentUrl": "<url>",
+        "serverUrl": "<url>"
+      }
+    },
+    "pluginSize": 1,
+    "joinBetaRelease": false
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "code": 200,
+  "msg": "",
+  "data": [
+    {
+      "name": "<name>",
+      "displayName": "docker_gwbridge",
+      "index": 4,
+      "macaddr": "02:00:00:00:00:00",
+      "timeStamp": "0",
+      "tnDrops": "0",
+      "inErrors": "0",
+      "bytesRecv": "0",
+      "bytesSent": "0",
+      "packetsRecv": "0",
+      "packetsSent": "0",
+      "collisions": "0",
+      "ifAlias": "",
+      "ifType": 1,
+      "ifOperStatus": "DOWN",
+      "ipv4addr": [
+        "10.0.0.1"
+      ],
+      "ipv6addr": [],
+      "mtu": "0",
+      "outErrors": "0",
+      "speed": "0",
+      "subnetMasks": [
+        0
+      ],
+      "prefixLengths": [],
+      "knownVmMacAddr": true
+    },
+    {
+      "name": "<name>",
+      "displayName": "docker0",
+      "index": 3,
+      "macaddr": "02:00:00:00:00:00",
+      "timeStamp": "0",
+      "tnDrops": "0",
+      "inErrors": "0",
+      "bytesRecv": "0",
+      "bytesSent": "0",
+      "packetsRecv": "0",
+      "packetsSent": "0",
+      "collisions": "0",
+      "ifAlias": "",
+      "ifType": 1,
+      "ifOperStatus": "DOWN",
+      "ipv4addr": [
+        "10.0.0.1"
+      ],
+      "ipv6addr": [],
+      "mtu": "0",
+      "outErrors": "0",
+      "speed": "0",
+      "subnetMasks": [
+        0
+      ],
+      "prefixLengths": [],
+      "knownVmMacAddr": false
+    },
+    {
+      "name": "<name>",
+      "displayName": "Red Hat, Inc. Virtio network device",
+      "index": 2,
+      "macaddr": "02:00:00:00:00:00",
+      "timeStamp": "0",
+      "tnDrops": "0",
+      "inErrors": "0",
+      "bytesRecv": "0",
+      "bytesSent": "0",
+      "packetsRecv": "0",
+      "packetsSent": "0",
+      "collisions": "0",
+      "ifAlias": "",
+      "ifType": 1,
+      "ifOperStatus": "UP",
+      "ipv4addr": [
+        "10.0.0.1"
+      ],
+      "ipv6addr": [],
+      "mtu": "0",
+      "outErrors": "0",
+      "speed": "0",
+      "subnetMasks": [
+        0
+      ],
+      "prefixLengths": [],
+      "knownVmMacAddr": false
+    }
+  ]
+}

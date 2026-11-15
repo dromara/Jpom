@@ -1,5 +1,102 @@
 # 🚀 版本日志
 
+## 2.11.13.3-beta
+
+### 🐣 新增功能
+
+1. 【mcp】新增 npm 包 jpom-mcp-server（MCP stdio Server，npm 独立发版，当前 0.1.1）：配置 Jpom 地址与长期 token 后，Claude Desktop/Cursor/VS Code/DeepSeek Harness 等 MCP 客户端可查询节点、项目、构建、脚本、资产、监控、分发、系统与审计日志，并支持日志读取/有界实时跟随；默认只读，写操作需显式开启。
+2. 【server】发布包默认改为 tar.gz 格式（server/agent 各自 tar.gz + sha1），过渡窗口内同时提供 zip 供旧版本客户端在线升级；Go 插件端 5 平台安装包统一 tar.gz（Windows 也是 tar.gz，内含 `bin/agent.exe`），升级容器不变。
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】修复 SSH 文件管理新建文件/文件夹（`new_file_folder.json`）的命令注入风险：创建动作改为 SFTP 调用（`ChannelSftp.put`/`mkdir`），不再把文件名/路径拼接进远程 shell 命令；文件名同时校验：不能包含 `/`、`\` 与 CR/LF/NUL，且不能为 `.`、`..`。
+2. 【mcp】修复 jpom-mcp-server 0.1.0 的 CLI bin 缺少 shebang 导致 `npx jpom-mcp-server` 无法执行的问题（0.1.1 已发布，0.1.0 已在 npm 标记废弃，请升级到 0.1.1+）。
+
+### ⚠️ 升级说明
+
+1. **SSH 文件管理名称校验**：新建文件/文件夹名称不能包含 `/`、`\`、CR/LF/NUL，且不能是 `.` 或 `..`（含点号的普通名称如 `.hidden`、`...` 仍可创建）；包含 `;`、`|`、`&`、`$()` 等字符的名称会按普通文件名创建，不再被 shell 解释。正常的文件创建、上传、重命名不受影响。
+2. **发布包格式变化**：server/agent 安装包默认 tar.gz；旧版本（≤ 2.11.13.1）在线升级依赖过渡窗口内的 zip（`legacy_zip` 关闭后仅产 tar.gz）。不再提供合并包 `jpom-<version>.tar.gz`，请分别下载 server/agent 安装包。
+3. **Go 升级容器兼容别名下线**：不再生成 `agent-go-<version>-upgrade.jar`（2.11.13.2-beta 升级说明第 4 条所述 linux-amd64 手工上传别名失效），5 平台容器 `agent-go-<version>-upgrade-<os>-<arch>.jar` 已覆盖全部平台；旧版 Server 手工上传请直接选择与节点平台一致的容器。
+4. **jpom-mcp-server 为 npm 独立发版**：不随 Jpom 安装包分发，通过 `npx -y jpom-mcp-server` 使用；0.1.0 用户请升级到 0.1.1+。
+
+------
+
+
+## 2.11.13.2-beta (2026-11-09)
+
+### 🐣 新增功能
+
+1. 【agent-go】新增 Go 语言插件端：单二进制、低内存、免 JDK，兼容 Java 插件端的配置、数据和协议，可在 Java/Go 之间平滑切换。
+2. 【server】在线升级支持 Go 插件端：自动识别节点类型与运行平台并下发匹配的升级包，Java 节点升级方式不变。
+3. 【agent-go】提供多平台安装包与在线升级包（Linux/macOS 的 amd64、arm64 与 Windows amd64），升级容器按节点平台精确匹配。
+4. 【agent-go】支持国际化、Windows/macOS 系统监控、7z 解压、GBK 编码、cron 年份/分组，以及升级失败自动回滚。
+
+### 🐞 解决BUG、优化功能
+
+1. 【all】修复 项目/节点脚本控制台、系统日志等日志监听在频繁打开关闭时，WebSocket 会话与文件监听 Tailer 线程可能未被释放、持续占用内存的问题：会话集合改为并发安全并按会话 ID 去重，watcher 的 add/close/restart 原子化且关闭幂等，关闭后不再接收新会话；发送失败立即移除并关闭会话；切换日志文件时先离线上一个监听；服务端 WebSocket 装饰器缓存与传输层代理缓冲在关闭/发送失败时即时释放
+2. 【agent】优化 控制台 WebSocket 会话增加空闲超时（依赖前端 5s 心跳），异常断开（未收到 close 帧）的会话由容器回收；脚本执行会话与执行中缓存增加异常路径兜底清理，避免长期运行后堆内存持续增长导致进程假死/OOM
+3. 【server】修复 重装/迁移服务端后“同步节点项目（脚本）”只提示拉取到 N 个、实际更新 0 个的问题：插件端项目/脚本仍带已不存在的旧工作空间时，现在会回退到节点当前工作空间再同步；工作空间仍然存在但不同（共享机器多空间）与 GLOBAL 数据保持原逻辑（[Gitee issues ICH1VK](https://gitee.com/dromara/Jpom/issues/ICH1VK)）
+4. 【server】优化 严格构建下 sh 脚本在环境模板之后、用户命令之前注入 `set -e`（bash 下同时 `set -o pipefail`），中间命令或管道失败立即中断构建，不再继续执行后续命令；非严格构建与 Windows 批处理语义保持不变（[Gitee issues ICW9KZ](https://gitee.com/dromara/Jpom/issues/ICW9KZ)）
+5. 【server】修复 Gitea/Gogs 的 GET webhook 把 push JSON 作为 `payload` 查询串携带、超过 Tomcat 默认请求行/请求头上限（8KB）导致接口直接返回 400 的问题：放宽 `server.max-http-header-size` 到 64KB（[Gitee issues IDG4PT](https://gitee.com/dromara/Jpom/issues/IDG4PT)）
+6. 【web-vue】优化 逻辑节点、项目列表、分发列表的自动刷新：默认关闭（开关仍按用户+表格持久化在浏览器本地），项目列表/分发列表刷新间隔由 5s 调整为 30s，浏览器标签页不可见时暂停自动刷新；项目列表按节点查询运行状态增加防重入与 15s 超时，避免节点离线时请求长期挂起并随刷新叠加，占满同源连接导致同页/同标签其它列表请求 20s 超时（[Gitee issues ICXOGI](https://gitee.com/dromara/Jpom/issues/ICXOGI)）
+7. 【server】修复 重置超级管理员密码（`--rest:super_user_pwd`）后新密码仅写入 `logs/server.log`、Windows 无控制台导致用户误以为重置失败的问题：命令执行结果同时输出到标准输出（`logs/stdout.log`/控制台）；超级管理员查询统一为 `systemUser=1`（保留 `parent=sys` 回退兼容旧数据），避免历史数据下静默失败（[Gitee issues IJNJZJ](https://gitee.com/dromara/Jpom/issues/IJNZJZ)）
+8. 【agent】优化 远程下载文件保存为 URL 原始文件名（此前保存为随机文件名），Java/Go 插件端行为一致。
+
+### ⚠️ 升级说明
+
+1. **严格构建语义变化**：开启【严格构建】后，sh 构建脚本会在环境模板之后、用户命令之前注入 set -e（bash 同时 set -o pipefail），中间命令或管道中任一命令失败会立即中断，不再继续执行后续命令（此前仅在脚本整体退出码非 0 时才判定失败）。依赖“某条命令失败后继续执行”的严格构建脚本，请在脚本开头显式 set +e 自行管理；非严格构建（推荐用于允许中间命令失败的场景）与 Windows 批处理不受影响。
+2. **Gitea/Gogs GET webhook 请求头上限**：新安装包默认 server.max-http-header-size: 65536（64KB）。已安装实例的外部配置文件 conf/application.yml 不会随升级自动覆盖，如仍遇到 Gitea/Gogs GET webhook 400，请在该文件 server: 下增加 max-http-header-size: 65536（或在【系统管理 → 外部配置文件】中重置为默认配置后按需调整），再重启服务端。
+3. **列表自动刷新默认值变化**：逻辑节点、项目列表、分发列表的自动刷新默认关闭（此前默认开启），仍可在页面右上角手动开启，并按“用户+表格”持久化在浏览器本地；项目列表/分发列表刷新间隔调整为 30 秒，浏览器标签页不可见时暂停自动刷新。此前已手动开启自动刷新的用户不受影响（本地配置优先）。
+4. **Go 插件端（可选新组件）**：安装包与在线升级包按平台区分（linux/darwin 的 amd64、arm64，windows-amd64），升级容器必须与节点平台一致；旧版 Server 手工上传时 linux-amd64 可用 agent-go-<version>-upgrade.jar 兼容别名。Windows 请使用包内 AgentGo.bat，服务托管只保留一种方式（nssm/sc 或手工启动）。
+5. **Go 插件端配置提示**：JPOM_SERVICE 与 Java 的 -D 启动参数对 Go 插件端无效；AES 密钥请用环境变量 JPOM_ENCRYPT_AES_KEY（与服务端一致），升级后拉起由 systemd/nssm 配置负责。
+6. **Java 插件端远程下载文件名变化**：远程下载的文件现在按 URL 原始文件名保存（此前为随机文件名）；如同名文件已存在会使用随机名回退。
+------
+
+
+## 2.11.13.1-beta (2026-11-09)
+
+### 🐣 新增功能
+
+
+### 🐞 解决BUG、优化功能
+
+1. 【server】修复 文件中心下载接口未认证 SQL 注入风险：Hutool 会把查询参数值解析为 SQL 条件表达式（如 `token=is not null` 绕过别名+token 校验），`sort` 参数可注入原生 ORDER BY，且数据库异常会把完整 SQL 回显给客户端；现在查询 Bean 值统一使用占位符绑定，`sort`/`filter_*` 增加字段白名单，token 增加格式校验，并修复别名下载可跨文件读取的越权问题
+2. 【server】修复 通用分页查询的 `:in` 过滤字段（如 `workspaceId:in`）在字段白名单校验前未剥离后缀而被静默丢弃的问题，避免工作空间隔离条件失效导致项目列表、节点脚本列表、文件中心（含触发器 token）、证书、仓库、环境变量（明文值）等数据跨工作空间串显/泄露
+3. 【server】修复 权限拦截器在处理器方法缺少 `@Feature` 时静默放行的问题：属于权限管理模块的控制器改为 fail-closed，并补齐证书导出等接口的方法级权限声明（证书导出需要 `DOWNLOAD` 权限），避免未授权用户直达敏感业务接口
+4. 【server】修复 WebSocket 鉴权降级：握手改用登录会话（HttpOnly Cookie）认证，不再仅凭 URL 中的密码摘要 `userId` 通过校验；补充禁用账号校验、IP 白名单与 Origin 同源校验，避免绕过 HTTP 侧拦截器；同时修复 `system_log` 及项目日志 WebSocket 日志文件名路径穿越（含符号链接逃逸），服务端与插件端同步修复
+5. 【server】加固 工作空间强制过滤与导出范围：客户端伪造 `workspaceId`/`workspaceId:in`/`%workspaceId%` 等同字段参数不再能覆盖服务端强制的工作空间条件；项目导出、仓库导出改为仅导出“当前工作空间 + GLOBAL”，仓库分组下拉与 SSH 终端执行日志列表按工作空间过滤；非时间字段的 `xxx[0]`/`xxx[1]` 过滤参数不再导致 500
+6. 【web-vue】修复 触发器/构建说明文案中的 JSON 大括号被前端国际化组件误判为插值占位符、打开相关弹窗时控制台报 `SyntaxError: Invalid token in placeholder` 的问题（文案改为转义输出大括号，显示内容不变）
+7. 【all】修复 数据库异常响应回显完整 SQL/列名/表名的信息暴露问题：数据库类异常统一返回通用错误文案，完整异常堆栈仅记录在服务端日志（正常业务/参数/权限异常提示不受影响）
+
+
+### ⚠️ 升级说明
+
+1. **权限收紧（需要管理员确认）**：以下接口现在要求对应工作空间的方法权限（此前仅有登录/节点数据权限即可访问），升级后如提示“没有对应管理权限”，请到【用户管理 → 权限组】为相关用户的工作空间勾选对应权限；超级管理员不受影响：
+   - 证书管理 → 证书导出：需要 `DOWNLOAD`（下载）权限；
+   - 节点项目文件备份：下载需要 `DOWNLOAD`，删除需要 `DEL`，创建/恢复备份需要 `EDIT`。
+2. **列表数据范围恢复**：项目列表、节点脚本列表、文件中心、静态文件存储、证书、仓库、脚本列表/执行记录、环境变量等“全局/工作空间共享”列表恢复为仅展示**当前工作空间 + 全局（GLOBAL）**数据；此前因工作空间过滤条件失效会显示其他工作空间数据（本次为安全修复，非故障）。
+3. **触发器 token 格式校验**：文件下载、构建/脚本/SSH/项目/环境变量等触发器 token 仅接受**字母数字 6~128 位**；标准 32 位十六进制（当前版本）和历史 10 位字母数字 token 兼容。若仍在使用更早期非标准格式 token 且升级后提示无效，请重置该触发器 token。
+4. **文件中心下载接口参数语义**：
+   - `sort` 仅接受文件记录的真实字段（如 `createTimeMillis:desc`），非法字段会被忽略；
+   - `filter_*` 仅接受真实字段，非法字段/非法值会被忽略（不再返回 500）；
+   - 按别名下载时按“别名 + token”精确匹配；同一别名对应多个文件时，以 token 实际绑定的记录为准。
+5. **错误提示变化**：非法或无权限 token 会提前返回“token 错误或已失效”；按别名下载且过滤条件无匹配时，当前也会提示“token 错误或已失效”（已记录为后续体验优化项，不影响功能）。
+6. **无数据库表结构/字段变更**，无需手工迁移；升级前仍建议按惯例备份 `data`/`conf`。
+7. **WebSocket 鉴权与日志安全收紧**：
+   - WebSocket 改用登录会话（HttpOnly Cookie）认证，不再支持在 URL 中传 `userId=密码摘要`；前端已同步适配，升级后建议刷新页面；**自定义 WebSocket 客户端**需先登录或调用任意接口获取会话 Cookie，并按与页面同源的 `Origin` 连接；非浏览器客户端也可改用 `Authorization`（JWT）或 `JPOM-USER-TOKEN`（长期 token）请求头认证。
+   - WebSocket 现在同样受 IP 访问限制；**禁用账号无法建立新的 WebSocket 连接**；已经建立的连接不会因账号随后被禁用而立即断开（重连时会校验）。
+   - 系统日志、插件端日志、项目日志的 WebSocket 日志文件名限制在日志/项目目录内，防止路径穿越与符号链接逃逸；若自定义日志文件不在默认日志/项目目录，可能无法通过 WebSocket 实时查看（安全收紧）。
+   - 反向代理需保留 `Host`（或设置 `X-Forwarded-Host`）并允许 WebSocket Upgrade；否则同源校验可能拒绝连接（浏览器直连/常规 Nginx 反代无需额外配置）。
+8. **导出与空间过滤范围变化（需要管理员确认）**：
+   - 【节点&项目 → 项目列表】导出、【在线构建 → 仓库信息】导出：仅导出**当前工作空间 + GLOBAL**数据（此前不受当前空间限制）；需要其它空间数据时请切换工作空间后分别导出；
+   - 仓库分组下拉、SSH 终端执行日志列表现在按当前工作空间过滤（系统管理员同样受当前空间约束）；
+   - 节点数据权限校验在服务端缓存未同步/数据不存在时由“放行”改为“拒绝”（fail-closed）：刚创建或同步数据后立即操作如提示无对应权限，请稍后重试或刷新页面；
+   - 非时间字段带 `[0]`/`[1]` 的过滤参数将被忽略（不再返回 500）。
+9. **数据库异常提示变化**：数据库类异常统一返回通用错误提示，不再在接口响应中展示 SQL/列名/表名等细节；排查时请查看服务端日志（完整堆栈仍会记录）。正常业务/参数/权限异常提示不变。
+
+
+------
+
 ## 2.11.12.3-beta (2026-11-07)
 
 ### 🐣 新增功能
@@ -19,7 +116,6 @@
 8. 【server】优化 构建记录仓库提交说明字段长度加宽至 1000，避免较长提交信息写入失败（[Gitee issues ID35HQ](https://gitee.com/dromara/Jpom/issues/ID35HQ)）
 9. 【server】修复 构建配置别名缺少规则校验提示的问题（[Gitee issues IBI5AF](https://gitee.com/dromara/Jpom/issues/IBI5AF)）
 10. 【server】修复 权限组工作空间穿梭窗勾选计数错误的问题（[Gitee issues IBHK0I](https://gitee.com/dromara/Jpom/issues/IBHK0I)）
-
 
 ------
 

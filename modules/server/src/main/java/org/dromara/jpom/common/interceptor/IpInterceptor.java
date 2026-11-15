@@ -44,8 +44,13 @@ public class IpInterceptor implements HandlerMethodInterceptor {
     private SystemParametersServer systemParametersServer;
 
 
-    @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
+    /**
+     * 当前请求 IP 是否允许访问（不写响应，供 WebSocket 握手等非 MVC 场景复用）
+     *
+     * @param request 请求
+     * @return true 允许
+     */
+    public boolean checkAccess(HttpServletRequest request) {
         String clientIp = ClientIpUtil.resolve(request);
         if (this.isLoopback(clientIp)) {
             // 本地回环请求始终放行（保留原有行为）
@@ -57,7 +62,6 @@ public class IpInterceptor implements HandlerMethodInterceptor {
         } catch (Exception e) {
             // 配置读取异常：无法确认访问限制，按 fail-closed 处理
             log.error(I18nMessageUtil.get("i18n.ip_authorization_interception_exception.8130"), e);
-            this.writeProhibition(response);
             return false;
         }
         if (config == null) {
@@ -75,12 +79,10 @@ public class IpInterceptor implements HandlerMethodInterceptor {
                     return true;
                 }
                 log.warn("ip access denied, non-ipv4 client ip: {}", clientIp);
-                this.writeProhibition(response);
-                return false;
+                    return false;
             }
             if (StrUtil.isNotEmpty(prohibited) && this.checkIp(prohibited, clientIp, false)) {
-                this.writeProhibition(response);
-                return false;
+                    return false;
             }
             if (StrUtil.isEmpty(allowed) || this.checkIp(allowed, clientIp, true)) {
                 return true;
@@ -88,8 +90,15 @@ public class IpInterceptor implements HandlerMethodInterceptor {
         } catch (Exception e) {
             // 配置解析异常：存在访问限制配置时按 fail-closed 处理
             log.error(I18nMessageUtil.get("i18n.ip_authorization_interception_exception.8130"), e);
-            this.writeProhibition(response);
             return false;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
+        if (this.checkAccess(request)) {
+            return true;
         }
         this.writeProhibition(response);
         return false;

@@ -1,0 +1,38 @@
+{
+  "code": 200,
+  "msg": "",
+  "data": [
+    {
+      "name": "<name>",
+      "volume": "/dev/mapper/ubuntu--vg-ubuntu--lv",
+      "logicalVolume": "/dev/dm-0",
+      "mount": "/",
+      "label": "",
+      "description": "<description>",
+      "type": "ext4",
+      "options": "rw,relatime",
+      "uuid": "<uuid>",
+      "freeInodes": "0",
+      "totalInodes": "0",
+      "freeSpace": "0",
+      "totalSpace": "0",
+      "usableSpace": "0"
+    },
+    {
+      "name": "<name>",
+      "volume": "/dev/sda2",
+      "logicalVolume": "",
+      "mount": "/boot",
+      "label": "",
+      "description": "<description>",
+      "type": "ext4",
+      "options": "rw,relatime",
+      "uuid": "<uuid>",
+      "freeInodes": "0",
+      "totalInodes": "0",
+      "freeSpace": "0",
+      "totalSpace": "0",
+      "usableSpace": "0"
+    }
+  ]
+}

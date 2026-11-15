@@ -72,6 +72,7 @@
 - [Contributing guide](#contributing)
   - [Contributors](#contributors)
 - [Knowledge Planet](#planet)
+- [AI Ops integration (Skill / MCP)](#ai-ops)
 - [Recommended projects](#recommended)
 - [License](#license)
 - [Acknowledgements](#thanks)
@@ -291,8 +292,8 @@ docker run -d --name jpom-server --restart=always -p 2122:2122 \
 <a name="install-download"></a>
 ### Option 3: 💾 Download the installation package
 
-1. Download the corresponding `server-x.x.x-release` and `agent-x.x.x-release` packages (zip or tar.gz) and their `.sha1` checksum files from the [download center](https://jpom.top/pages/all-downloads/).
-2. Verify the integrity of the packages (recommended), for example `sha1sum server-x.x.x-release.zip`, and compare the result with the contents of the downloaded `.sha1` file.
+1. Download the corresponding `server-x.x.x-release` and `agent-x.x.x-release` packages (tar.gz; 2.11.x transitional releases also provide zip) and their `.sha1` checksum files from the [download center](https://jpom.top/pages/all-downloads/).
+2. Verify the integrity of the packages (recommended), for example `sha1sum server-x.x.x-release.tar.gz`, and compare the result with the contents of the downloaded `.sha1` file.
 3. Extract the packages and upload the entire directories to the target servers.
 4. Install the agent
    1. The `agent-x.x.x-release` directory contains all the agent installation files
@@ -571,6 +572,16 @@ Made with [contrib.rocks](https://contrib.rocks).
 <p align="center">
 <img src="https://jpom.top/images/zsxq.jpg" alt="Scan to join Knowledge Planet and learn more">
 </p>
+
+<a name="ai-ops"></a>
+## 🤖 AI Ops integration (Skill / MCP)
+
+Jpom provides a portable AI ops Skill (`jpom-ops`): it uses the existing REST API and a long-term token to cover queries for workspaces, nodes, projects, builds, scripts, assets, monitoring, distribution, system settings, and audit logs, and supports controlled write operations after explicit authorization (trigger/cancel builds, start/stop/restart projects, kill processes, online upgrades). It works with DeepSeek Harness, Claude, Cursor, and similar tools; it is read-only by default, and write operations require `JPOM_OPS_ALLOW_WRITE=true` plus `--confirm`.
+
+- Source: [`skills/jpom-ops/`](skills/jpom-ops/) (maintained in this repository; verified item by item in 2.11.13 and compatible with 2.11.x)
+- Usage and download: see the official documentation "AI Ops Integration (Skill / MCP)" (https://jpom.top/pages/ai-ops-skill-mcp/)
+
+> Note: configure `JPOM-USER-TOKEN` securely in your local environment only, and never commit credentials. WebSocket capabilities such as terminals and online script execution are outside the Skill's scope; an MCP Server is planned.
 
 <a name="recommended"></a>
 ## 🔔 Recommended projects

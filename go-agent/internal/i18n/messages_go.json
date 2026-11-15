@@ -1,0 +1,80 @@
+{
+"i18n.go_install_file_desc": {
+"en-US": "Do not delete this file; the associated id will become invalid after deletion",
+"zh-CN": "请勿删除此文件,删除后关联 id 将失效",
+"zh-HK": "請勿刪除此文件,刪除後關聯 id 將失效",
+"zh-TW": "請勿刪除此檔案,刪除後關聯 id 將失效"
+},
+"i18n.go_java_package_not_supported": {
+"en-US": "The Go agent does not support a Java agent upgrade package (lib/Agent-*.jar); upload a package containing go-agent/agent.json and the Go executable",
+"zh-CN": "Go 插件端不支持 Java 插件端升级包（lib/Agent-*.jar），请上传包含 go-agent/agent.json 与 Go 可执行文件的升级包",
+"zh-HK": "Go 插件端不支持 Java 插件端升級包（lib/Agent-*.jar），請上傳包含 go-agent/agent.json 與 Go 可執行文件的升級包",
+"zh-TW": "Go 插件端不支援 Java 插件端升級包（lib/Agent-*.jar），請上傳包含 go-agent/agent.json 與 Go 可執行檔的升級包"
+},
+"i18n.go_upgrade_download_failed": {
+"en-US": "Failed to download upgrade package: {}",
+"zh-CN": "下载升级包失败: {}",
+"zh-HK": "下載升級包失敗: {}",
+"zh-TW": "下載升級包失敗: {}"
+},
+"i18n.go_upgrade_download_forbidden": {
+"en-US": "Failed to download upgrade package: HTTP 403 (access denied)",
+"zh-CN": "下载升级包失败: HTTP 403（下载地址被拒绝访问）",
+"zh-HK": "下載升級包失敗: HTTP 403（下載地址被拒絕訪問）",
+"zh-TW": "下載升級包失敗: HTTP 403（下載位址被拒絕存取）"
+},
+"i18n.go_upgrade_invalid_executable": {
+"en-US": "Upgrade package is not a valid executable",
+"zh-CN": "升级包不是有效的可执行文件",
+"zh-HK": "升級包不是有效的可執行文件",
+"zh-TW": "升級包不是有效的可執行檔"
+},
+"i18n.go_upgrade_invalid_linux_executable": {
+"en-US": "Upgrade package is not a valid Linux executable",
+"zh-CN": "升级包不是有效的 Linux 可执行文件",
+"zh-HK": "升級包不是有效的 Linux 可執行文件",
+"zh-TW": "升級包不是有效的 Linux 可執行檔"
+},
+"i18n.go_upgrade_invalid_macos_executable": {
+"en-US": "Upgrade package is not a valid macOS executable",
+"zh-CN": "升级包不是有效的 macOS 可执行文件",
+"zh-HK": "升級包不是有效的 macOS 可執行文件",
+"zh-TW": "升級包不是有效的 macOS 可執行檔"
+},
+"i18n.go_upgrade_invalid_version": {
+"en-US": "Upgrade package version is invalid",
+"zh-CN": "升级包版本信息不合法",
+"zh-HK": "升級包版本信息不合法",
+"zh-TW": "升級包版本資訊不合法"
+},
+"i18n.go_upgrade_invalid_windows_executable": {
+"en-US": "Upgrade package is not a valid Windows executable",
+"zh-CN": "升级包不是有效的 Windows 可执行文件",
+"zh-HK": "升級包不是有效的 Windows 可執行文件",
+"zh-TW": "升級包不是有效的 Windows 可執行檔"
+},
+"i18n.go_upgrade_missing_binary": {
+"en-US": "Upgrade package is missing the executable",
+"zh-CN": "升级包缺少可执行文件",
+"zh-HK": "升級包缺少可執行文件",
+"zh-TW": "升級包缺少可執行檔"
+},
+"i18n.go_upgrade_platform_mismatch": {
+"en-US": "Upgrade package platform mismatch: {}",
+"zh-CN": "升级包平台不匹配：{}",
+"zh-HK": "升級包平台不匹配：{}",
+"zh-TW": "升級包平台不匹配：{}"
+},
+"i18n.go_upgrade_read_version_failed": {
+"en-US": "Upgrade package version cannot be read: {}",
+"zh-CN": "升级包无法读取版本信息: {}",
+"zh-HK": "升級包無法讀取版本信息: {}",
+"zh-TW": "升級包無法讀取版本資訊: {}"
+},
+"i18n.go_upgrade_sha256_mismatch": {
+"en-US": "Upgrade package verification failed: executable sha256 mismatch",
+"zh-CN": "升级包校验失败，可执行文件 sha256 不一致",
+"zh-HK": "升級包校驗失敗，可執行文件 sha256 不一致",
+"zh-TW": "升級包校驗失敗，可執行檔 sha256 不一致"
+}
+}

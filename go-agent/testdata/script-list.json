@@ -1,0 +1,50 @@
+{
+  "code": 200,
+  "msg": "",
+  "data": [
+    {
+      "id": "<id>",
+      "name": "<name>",
+      "workspaceId": "<workspace-id>",
+      "nodeId": "<node-id>",
+      "modifyUser": "<user>",
+      "createTime": "2024-01-01 00:00:00",
+      "modifyTime": "2024-01-01 00:00:00",
+      "lastRunUser": "<user>",
+      "context": "<script-content>",
+      "autoExecCron": "",
+      "defArgs": "<def-args>"
+    },
+    {
+      "id": "<id>",
+      "name": "<name>",
+      "workspaceId": "<workspace-id>",
+      "nodeId": "<node-id>",
+      "modifyUser": "<user>",
+      "createTime": "2024-01-01 00:00:00",
+      "modifyTime": "2024-01-01 00:00:00",
+      "createUser": "<user>",
+      "lastRunUser": "<user>",
+      "context": "<script-content>",
+      "autoExecCron": "",
+      "defArgs": "<def-args>",
+      "scriptType": "server-sync"
+    },
+    {
+      "id": "<id>",
+      "name": "<name>",
+      "workspaceId": "<workspace-id>",
+      "nodeId": "<node-id>",
+      "modifyUser": "<user>",
+      "createTime": "2024-01-01 00:00:00",
+      "modifyTime": "2024-01-01 00:00:00",
+      "createUser": "<user>",
+      "lastRunUser": "<user>",
+      "context": "<script-content>",
+      "autoExecCron": "",
+      "defArgs": "<def-args>",
+      "description": "<description>",
+      "scriptType": "server-sync"
+    }
+  ]
+}

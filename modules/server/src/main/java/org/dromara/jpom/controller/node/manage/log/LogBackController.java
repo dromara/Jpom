@@ -83,6 +83,7 @@ public class LogBackController extends BaseServerController {
         return NodeForward.request(getNode(), request, NodeUrl.Manage_Log_logBack_delete);
     }
 
+    @Feature(method = MethodFeature.LIST)
     @RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public IJsonMessage<JSONObject> logSize(String id) {

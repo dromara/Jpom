@@ -27,7 +27,12 @@ import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.i18n.I18nThreadUtil;
+import org.dromara.jpom.common.update.AgentEngine;
+import org.dromara.jpom.common.update.AgentPackageInfo;
+import org.dromara.jpom.common.update.AgentPackageResolver;
+import org.dromara.jpom.common.update.PackageCheckResult;
 import org.dromara.jpom.configuration.NodeConfig;
+import org.dromara.jpom.configuration.SystemConfig;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.assets.server.MachineNodeServer;
 import org.dromara.jpom.model.AgentFileModel;
@@ -37,6 +42,7 @@ import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.permission.SystemPermission;
+import org.dromara.jpom.service.system.AgentPackageService;
 import org.dromara.jpom.service.system.SystemParametersServer;
 import org.dromara.jpom.socket.BaseProxyHandler;
 import org.dromara.jpom.socket.ConsoleCommandOp;
@@ -53,6 +59,11 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * 节点管理控制器
+ *
+ * <p>在线升级时会先探测节点运行引擎（Agent /info manifest.engine）：Java 节点继续使用
+ * 系统参数 AgentFileModel.ID 中上传的 Java 升级包；Go 节点使用 Go 升级容器
+ * （agent-go-&lt;version&gt;-upgrade.jar，来源为上传包或下载中心自动下载），
+ * 上传链路复用 /system/upload-jar-sharding* 与 /node_update。</p>
  *
  * @author lf
  */
@@ -73,16 +84,20 @@ public class NodeUpdateHandler extends BaseProxyHandler {
     private final SystemParametersServer systemParametersServer;
     private final MachineNodeServer machineNodeServer;
     private final NodeConfig nodeConfig;
+    private final AgentPackageService agentPackageService;
+    private final SystemConfig systemConfig;
 
     public NodeUpdateHandler(MachineNodeServer machineNodeServer,
                              SystemParametersServer systemParametersServer,
-                             NodeConfig nodeConfig) {
+                             NodeConfig nodeConfig,
+                             AgentPackageService agentPackageService,
+                             SystemConfig systemConfig) {
         super(null);
         this.machineNodeServer = machineNodeServer;
         this.systemParametersServer = systemParametersServer;
         this.nodeConfig = nodeConfig;
-        //systemParametersServer = SpringUtil.getBean(SystemParametersServer.class);
-//        nodeService = SpringUtil.getBean(NodeService.class);
+        this.agentPackageService = agentPackageService;
+        this.systemConfig = systemConfig;
     }
 
     @Override
@@ -215,17 +230,17 @@ public class NodeUpdateHandler extends BaseProxyHandler {
         String protocol = params.getString("protocol");
         boolean http = StrUtil.equalsIgnoreCase(protocol, "http");
         try {
-            AgentFileModel agentFileModel = systemParametersServer.getConfig(AgentFileModel.ID, AgentFileModel.class);
-            //
-            if (agentFileModel == null || !FileUtil.exist(agentFileModel.getSavePath())) {
-                this.onError(session, I18nMessageUtil.get("i18n.agent_jar_not_exist.28ac"));
-                return;
+            // Java 节点升级包保持原有来源（AgentFileModel.ID），Go 节点使用独立的 Go 升级包
+            AgentFileModel javaPackage = agentPackageService.get(AgentEngine.JAVA);
+            // 兼容旧数据：早期手工上传的 Go 容器可能仍保存在 AgentFileModel.ID 中
+            AgentFileModel legacyGoPackage = null;
+            if (javaPackage != null && AgentPackageResolver.isGoContainer(FileUtil.file(javaPackage.getSavePath()))) {
+                legacyGoPackage = javaPackage;
+                javaPackage = null;
             }
-            JsonMessage<Tuple> error = JpomManifest.checkJpomJar(agentFileModel.getSavePath(), Type.Agent, false);
-            if (!error.success()) {
-                this.onError(session, I18nMessageUtil.get("i18n.agent_jar_damaged.74a8") + error.getMsg());
-                return;
-            }
+            // Go 升级包在节点维度按平台选择/自动下载，这里不能提前判定为不存在
+            final AgentFileModel javaPackageFinal = javaPackage;
+            final AgentFileModel legacyGoPackageFinal = legacyGoPackage;
             for (int i = 0; i < ids.size(); i++) {
                 String id = ids.getString(i);
                 MachineNodeModel node = machineNodeServer.getByKey(id);
@@ -233,7 +248,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                     this.onError(session, I18nMessageUtil.get("i18n.no_node_specified.fa3d") + id);
                     continue;
                 }
-                I18nThreadUtil.execute(() -> this.updateNodeItem(id, node, session, agentFileModel, http));
+                I18nThreadUtil.execute(() -> this.updateNodeItem(id, node, session, javaPackageFinal, legacyGoPackageFinal, http));
             }
         } catch (Exception e) {
             log.error(I18nMessageUtil.get("i18n.upgrade_failure.4ae2"), e);
@@ -334,26 +349,214 @@ public class NodeUpdateHandler extends BaseProxyHandler {
         return false;
     }
 
-    private void updateNodeItem(String id, MachineNodeModel node, WebSocketSession session, AgentFileModel agentFileModel, boolean http) {
+    private void updateNodeItem(String id, MachineNodeModel node, WebSocketSession session, AgentFileModel javaPackage, AgentFileModel goPackage, boolean http) {
         try {
             IProxyWebSocket client = clientMap.get(node.getId());
             if (client == null) {
                 this.onError(session, I18nMessageUtil.get("i18n.plugin_not_initialized.3ea9"), id);
                 return;
             }
-            if (client.isConnected()) {
-                boolean result = http ? this.updateNodeItemHttp(node, session, agentFileModel) : this.updateNodeItemWebSocket(client, id, session, agentFileModel);
-                if (result) {
-                    //
-                    WebSocketMessageModel command = new WebSocketMessageModel("getVersion", node.getId());
-                    client.send(command.toString());
-                }
-            } else {
+            if (!client.isConnected()) {
                 this.onError(session, I18nMessageUtil.get("i18n.node_connection_lost.b6c7"), id);
+                return;
+            }
+            // 探测节点运行引擎、当前版本与运行平台（engine=go 时使用 Go 升级容器）
+            AgentEngine engine;
+            String nodeVersion;
+            String nodePlatform = null;
+            try {
+                JsonMessage<Object> infoMessage = NodeForward.request(node, StrUtil.EMPTY, NodeUrl.Info, "nodeId", id);
+                if (!infoMessage.success()) {
+                    this.onError(session, I18nMessageUtil.get("i18n.node_connection_failure.896d") + infoMessage.getMsg(), id);
+                    return;
+                }
+                JSONObject infoData = JSONObject.from(infoMessage.getData());
+                engine = AgentPackageResolver.resolveEngine(infoData);
+                nodeVersion = AgentPackageResolver.resolveVersion(infoData);
+                if (engine == AgentEngine.GO) {
+                    nodePlatform = AgentPackageResolver.resolvePlatform(infoData);
+                    if (StrUtil.isBlank(nodePlatform) && AgentPackageResolver.hasPlatformInfo(infoData)) {
+                        // 节点上报了平台字段但无法识别（非法 platform/未知 osName）：拒绝自动升级，提示手动上传
+                        JSONObject manifest = AgentPackageResolver.manifest(infoData);
+                        String osName = manifest == null ? StrUtil.EMPTY : StrUtil.nullToEmpty(manifest.getString("osName"));
+                        String arch = manifest == null ? StrUtil.EMPTY : StrUtil.nullToEmpty(manifest.getString("arch"));
+                        this.onError(session, StrUtil.format(I18nMessageUtil.get("i18n.agent_package_platform_unknown.37a6"), osName, arch), id);
+                        return;
+                    }
+                }
+            } catch (Exception e) {
+                log.error(I18nMessageUtil.get("i18n.node_connection_failed.8497"), id, e.getMessage());
+                this.onError(session, I18nMessageUtil.get("i18n.node_connection_failure.896d") + e.getMessage(), id);
+                return;
+            }
+            AgentFileModel packageModel;
+            try {
+                packageModel = this.selectPackageForNode(engine, nodePlatform, nodeVersion, javaPackage, goPackage);
+            } catch (PackageSelectionException e) {
+                this.onError(session, e.getMessage(), id);
+                return;
+            }
+            boolean result = http ? this.updateNodeItemHttp(node, session, packageModel) : this.updateNodeItemWebSocket(client, id, session, packageModel);
+            if (result) {
+                //
+                WebSocketMessageModel command = new WebSocketMessageModel("getVersion", node.getId());
+                client.send(command.toString());
             }
         } catch (Exception e) {
             log.error("{}{}", I18nMessageUtil.get("i18n.upgrade_failure_with_colon.59f1"), id, e);
             this.onError(session, I18nMessageUtil.get("i18n.node_upgrade_failed.4493") + e.getMessage(), id);
+        }
+    }
+
+    /**
+     * 为节点选择升级包
+     *
+     * <p>Java 节点：保持原有行为，只用 AgentFileModel.ID 中上传的 Java 包（仅额外拦截引擎不匹配）。
+     * Go 节点：按节点平台选择本地 Go 升级容器（同版本但不同平台的包不会被误用），本地包不存在/
+     * 平台不匹配/版本不适用时从下载中心按平台自动下载官方 Go 容器；旧版节点未上报平台时按
+     * linux/amd64 legacy 处理（仅允许 linux/amd64 包，并给出明确提示）。</p>
+     *
+     * @param engine       节点引擎
+     * @param nodePlatform 节点平台（os/arch，null 表示旧版节点未上报）
+     * @param nodeVersion  节点当前版本
+     * @param javaPackage  Java 升级包
+     * @param goPackage    兼容旧数据：早期保存到 Java 槽位的 Go 升级包
+     * @return 选中的升级包
+     */
+    private AgentFileModel selectPackageForNode(AgentEngine engine, String nodePlatform, String nodeVersion, AgentFileModel javaPackage, AgentFileModel goPackage) {
+        if (engine == AgentEngine.JAVA) {
+            String error = this.verifyPackage(javaPackage, engine, null, nodeVersion);
+            if (error != null) {
+                throw new PackageSelectionException(error);
+            }
+            return javaPackage;
+        }
+        String effectivePlatform = AgentPackageResolver.normalizePlatform(nodePlatform);
+        boolean legacyNode = StrUtil.isBlank(effectivePlatform);
+        if (legacyNode) {
+            // 旧版 Go 节点未上报平台：仅允许 linux/amd64（legacy）
+            effectivePlatform = AgentPackageResolver.DEFAULT_PLATFORM;
+            log.warn(I18nMessageUtil.get("i18n.agent_package_platform_legacy.229d"));
+        }
+        // 本地 Go 升级包优先：按节点平台匹配（多架构缓存按平台区分）
+        AgentFileModel localPackage = agentPackageService.get(AgentEngine.GO, effectivePlatform);
+        String localError = null;
+        if (localPackage != null) {
+            localError = this.verifyPackage(localPackage, engine, effectivePlatform, nodeVersion);
+            if (localError == null) {
+                return localPackage;
+            }
+        }
+        // 兼容旧数据：早期手工上传的 Go 容器可能仍保存在 Java 槽位，按平台校验后使用
+        if (goPackage != null) {
+            String legacyError = this.verifyPackage(goPackage, engine, effectivePlatform, nodeVersion);
+            if (legacyError == null) {
+                return goPackage;
+            }
+            if (localError == null) {
+                localError = legacyError;
+            }
+        }
+        // 本地包不存在或版本/平台不适用时，尝试从下载中心按平台下载官方 Go 升级容器
+        try {
+            AgentFileModel remotePackage = agentPackageService.downloadGoPackage(effectivePlatform);
+            String remoteError = this.verifyPackage(remotePackage, engine, effectivePlatform, nodeVersion);
+            if (remoteError != null) {
+                throw new PackageSelectionException(remoteError);
+            }
+            return remotePackage;
+        } catch (PackageSelectionException e) {
+            throw e;
+        } catch (Exception e) {
+            if (localError != null) {
+                throw new PackageSelectionException(localError);
+            }
+            String message = legacyNode
+                ? I18nMessageUtil.get("i18n.agent_package_platform_legacy.229d")
+                : StrUtil.format(I18nMessageUtil.get("i18n.go_agent_package_not_found.e47b"), "<version>");
+            throw new PackageSelectionException(message + "：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 校验升级包（先按旧逻辑 checkJpomJar，再做引擎/平台/版本兼容校验）
+     *
+     * @param packageModel 升级包
+     * @param engine       节点引擎
+     * @param nodePlatform 节点平台（Go 节点使用；Java 节点忽略）
+     * @param nodeVersion  节点当前版本
+     * @return null 表示通过，否则为错误文案
+     */
+    private String verifyPackage(AgentFileModel packageModel, AgentEngine engine, String nodePlatform, String nodeVersion) {
+        if (packageModel == null || StrUtil.isBlank(packageModel.getSavePath()) || !FileUtil.exist(packageModel.getSavePath())) {
+            return I18nMessageUtil.get("i18n.agent_jar_not_exist.28ac");
+        }
+        File file = FileUtil.file(packageModel.getSavePath());
+        AgentPackageInfo packageInfo;
+        try {
+            packageInfo = AgentPackageResolver.inspectPackage(file);
+        } catch (IOException e) {
+            return I18nMessageUtil.get("i18n.agent_jar_damaged.74a8") + e.getMessage();
+        }
+        if (engine == AgentEngine.GO) {
+            // Go 节点：升级包必须是 Go 升级容器，按容器结构校验（不依赖旧 Server 的 Main-Class 加载检查）
+            if (!packageInfo.isGoContainer()) {
+                return this.buildCheckMessage(PackageCheckResult.ENGINE_MISMATCH, packageInfo, engine, nodePlatform, nodeVersion);
+            }
+            PackageCheckResult result = AgentPackageResolver.verify(packageInfo, engine, nodePlatform, nodeVersion, systemConfig.isAllowedDowngrade());
+            if (result != PackageCheckResult.OK) {
+                return this.buildCheckMessage(result, packageInfo, engine, nodePlatform, nodeVersion);
+            }
+            // 平台已匹配：要求容器内存在该平台的可执行文件；legacy 容器（未声明 platform）保持旧结构校验
+            String containerError = StrUtil.isBlank(AgentPackageResolver.normalizePlatform(packageInfo.getPlatform()))
+                ? AgentPackageResolver.validateGoContainer(file)
+                : AgentPackageResolver.validateGoContainer(file, nodePlatform);
+            if (containerError != null) {
+                return StrUtil.format(I18nMessageUtil.get("i18n.invalid_go_agent_upgrade_container.0755"), containerError);
+            }
+            return null;
+        }
+        // Java 节点保持原有行为；额外拦截误上传的 Go 容器（避免 Java Agent 安装成坏包）
+        if (packageInfo.isGoContainer()) {
+            return this.buildCheckMessage(PackageCheckResult.ENGINE_MISMATCH, packageInfo, engine, nodePlatform, nodeVersion);
+        }
+        JsonMessage<Tuple> error = JpomManifest.checkJpomJar(file.getAbsolutePath(), Type.Agent, false);
+        if (!error.success()) {
+            return I18nMessageUtil.get("i18n.agent_jar_damaged.74a8") + error.getMsg();
+        }
+        return null;
+    }
+
+    private String buildCheckMessage(PackageCheckResult result, AgentPackageInfo packageInfo, AgentEngine engine, String nodePlatform, String nodeVersion) {
+        switch (result) {
+            case OK:
+                return null;
+            case ENGINE_MISMATCH:
+                return StrUtil.format(I18nMessageUtil.get("i18n.agent_package_engine_mismatch.6325"),
+                    engine.getDisplay(), packageInfo.getEngine().getDisplay());
+            case PLATFORM_MISMATCH: {
+                String nodePlatformDisplay = StrUtil.blankToDefault(AgentPackageResolver.normalizePlatform(nodePlatform),
+                    AgentPackageResolver.DEFAULT_PLATFORM);
+                String packagePlatformDisplay = StrUtil.blankToDefault(AgentPackageResolver.normalizePlatform(packageInfo.getPlatform()), "legacy");
+                String message = StrUtil.format(I18nMessageUtil.get("i18n.agent_package_platform_mismatch.a42e"),
+                    nodePlatformDisplay, packagePlatformDisplay);
+                if (StrUtil.isBlank(nodePlatform)) {
+                    // 旧版节点未上报平台：补充 legacy 限制提示
+                    message = I18nMessageUtil.get("i18n.agent_package_platform_legacy.229d") + "；" + message;
+                }
+                return message;
+            }
+            case SAME_VERSION:
+                return I18nMessageUtil.get("i18n.new_package_same_as_running_package.e25a");
+            case MIN_VERSION:
+                return StrUtil.format(I18nMessageUtil.get("i18n.incompatible_program_versions.5291"),
+                    nodeVersion, packageInfo.getMinVersion());
+            case DOWNGRADE:
+                return I18nMessageUtil.get("i18n.online_upgrade_cannot_downgrade.d419");
+            case INVALID_PACKAGE:
+            default:
+                return StrUtil.format(I18nMessageUtil.get("i18n.invalid_go_agent_upgrade_container.0755"),
+                    packageInfo.getFileName());
         }
     }
 
@@ -367,12 +570,28 @@ public class NodeUpdateHandler extends BaseProxyHandler {
      * @return json
      */
     private String getAgentVersion() {
-        AgentFileModel agentFileModel = systemParametersServer.getConfig(AgentFileModel.ID, AgentFileModel.class, agentFileModel1 -> {
-            if (agentFileModel1 == null || !FileUtil.exist(agentFileModel1.getSavePath())) {
-                return AgentFileModel.EMPTY;
-            }
-            return agentFileModel1;
-        });
-        return agentFileModel == null ? null : JSONObject.toJSONString(agentFileModel);
+        AgentFileModel agentFileModel = agentPackageService.get(AgentEngine.JAVA);
+        AgentEngine engine = AgentEngine.JAVA;
+        if (agentFileModel == null) {
+            // 没有 Java 包时展示 Go 升级包版本（混合集群/纯 Go 集群的界面提示）
+            agentFileModel = agentPackageService.get(AgentEngine.GO);
+            engine = AgentEngine.GO;
+        }
+        if (agentFileModel == null) {
+            return null;
+        }
+        JSONObject jsonObject = JSONObject.from(agentFileModel);
+        // 升级页需要展示引擎/平台/包类型（AgentFileModel 本身没有 engine 字段，这里补充）
+        jsonObject.put("engine", engine.getName());
+        return jsonObject.toJSONString();
+    }
+
+    /**
+     * 升级包选择失败（错误文案已经国际化）
+     */
+    private static class PackageSelectionException extends RuntimeException {
+        PackageSelectionException(String message) {
+            super(message);
+        }
     }
 }

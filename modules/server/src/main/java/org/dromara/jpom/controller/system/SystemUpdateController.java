@@ -131,6 +131,7 @@ public class SystemUpdateController extends BaseServerController implements ILoa
      *
      * @return changelog md
      */
+    @Feature(method = MethodFeature.LIST)
     @PostMapping(value = "change_log", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<String> changeLog(HttpServletRequest request, String machineId) {
         boolean betaRelease = RemoteVersion.betaRelease();
@@ -163,7 +164,7 @@ public class SystemUpdateController extends BaseServerController implements ILoa
             return NodeForward.requestMultipart(model, multiRequest, NodeUrl.SystemUploadJar);
         }
         String absolutePath = serverConfig.getUserTempPath().getAbsolutePath();
-        this.uploadSharding(file, absolutePath, sliceId, totalSlice, nowSlice, fileSumMd5, "jar", "zip");
+        this.uploadSharding(file, absolutePath, sliceId, totalSlice, nowSlice, fileSumMd5, "jar", "zip", "tar.gz");
         return JsonMessage.success(I18nMessageUtil.get("i18n.upload_success.a769"));
     }
 
@@ -209,6 +210,7 @@ public class SystemUpdateController extends BaseServerController implements ILoa
      * @return json
      * @see RemoteVersion
      */
+    @Feature(method = MethodFeature.LIST)
     @PostMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<cn.keepbx.jpom.RemoteVersion> checkVersion(HttpServletRequest request,
                                                                    String machineId) {

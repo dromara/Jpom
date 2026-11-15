@@ -29,6 +29,7 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
@@ -47,6 +48,7 @@ import org.dromara.jpom.permission.*;
 import org.dromara.jpom.service.dblog.BuildInfoService;
 import org.dromara.jpom.service.dblog.DbBuildHistoryLogService;
 import org.dromara.jpom.service.dblog.RepositoryService;
+import org.dromara.jpom.service.h2db.BaseDbService;
 import org.dromara.jpom.service.monitor.MonitorService;
 import org.dromara.jpom.service.node.ProjectInfoCacheService;
 import org.dromara.jpom.service.outgiving.LogReadServer;
@@ -67,6 +69,8 @@ import java.nio.charset.Charset;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.dromara.jpom.permission.Feature;
+import org.dromara.jpom.permission.MethodFeature;
 
 /**
  * 项目管理
@@ -133,6 +137,7 @@ public class ProjectManageControl extends BaseServerController {
         Assert.state(exists, I18nMessageUtil.get("i18n.no_corresponding_data_or_permission.1291"));
     }
 
+    @Feature(method = MethodFeature.LIST)
     @RequestMapping(value = "getProjectData.json", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<JSONObject> getProjectData(@ValidatorItem String id, HttpServletRequest request) {
         NodeModel node = getNode();
@@ -148,6 +153,7 @@ public class ProjectManageControl extends BaseServerController {
      * @return json
      * @author Hotstrip
      */
+    @Feature(method = MethodFeature.LIST)
     @RequestMapping(value = "project-access-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<List<String>> projectAccessList() {
         List<String> jsonArray = whitelistDirectoryService.getProjectDirectory(getNode());
@@ -196,6 +202,7 @@ public class ProjectManageControl extends BaseServerController {
      *
      * @return json
      */
+    @Feature(method = MethodFeature.LIST)
     @RequestMapping(value = "getProjectPort", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<JSONObject> getProjectPort(HttpServletRequest request) {
         return NodeForward.request(getNode(), request, NodeUrl.Manage_GetProjectPort);
@@ -478,6 +485,9 @@ public class ProjectManageControl extends BaseServerController {
             "autoStart", "outGivingProject");
         while (true) {
             Map<String, String> paramMap = ServletUtil.getParamMap(request);
+            // 强制空间隔离：与列表语义一致，仅导出「当前空间 + GLOBAL」，并剔除客户端同字段参数（审计 P1-2）
+            BaseDbService.putForcedFilter(paramMap, "workspaceId:in",
+                workspace + StrUtil.COMMA + ServerConst.WORKSPACE_GLOBAL);
             // 下一页
             paramMap.put("page", String.valueOf(++pageInt));
             PageResultDto<ProjectInfoCacheModel> listPage = projectInfoCacheService.listPage(paramMap, false);

@@ -146,6 +146,13 @@ server:
   #运行端口号
   port: 2122
   #  address: 127.0.0.1
+  # Gitea/Gogs 的 GET webhook 会把 push JSON 作为 ?payload= 拼进 URL，超过 Tomcat 默认请求行/请求头
+  # 上限（8KB）时会在进入 Spring 之前直接返回 400（Gitee IDG4PT），这里放宽到 64KB。
+  # 注意：Spring Boot 2.7 的属性名是根级 server.max-http-header-size（默认 8KB），不是 server.tomcat.*，
+  # 放到 server.tomcat 下会被静默忽略；升级 Boot 3.x 后改名为 server.max-http-request-header-size。
+  # 安全边界：仅放宽单个请求行/请求头的大小上限，不影响业务鉴权与参数校验；普通请求行为不变。
+  # 反向代理场景请在代理侧同步限制请求头大小，避免把头大小上限放大成攻击面。
+  max-http-header-size: 65536
   servlet:
     session:
       cookie:

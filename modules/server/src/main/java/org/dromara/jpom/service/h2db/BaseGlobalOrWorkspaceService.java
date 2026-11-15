@@ -52,7 +52,9 @@ public abstract class BaseGlobalOrWorkspaceService<T extends BaseWorkspaceModel>
         // 验证工作空间权限
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
         String workspaceId = this.getCheckUserWorkspace(request);
-        paramMap.put("workspaceId:in", workspaceId + StrUtil.COMMA + ServerConst.WORKSPACE_GLOBAL);
+        // 强制条件优先：先剔除客户端传入的同字段参数（workspaceId / workspaceId:in / %workspaceId% 等），
+        // 再注入「当前空间 + GLOBAL」，避免客户端合成参数覆盖服务端硬性隔离条件（审计 P1-1）
+        putForcedFilter(paramMap, "workspaceId:in", workspaceId + StrUtil.COMMA + ServerConst.WORKSPACE_GLOBAL);
         return super.listPage(paramMap);
     }
 

@@ -24,6 +24,15 @@ import java.util.Map;
 /**
  * socket 会话对象
  *
+ * <p>装饰器缓存只在会话关闭时清理，若关闭与发送并发（例如文件监听 Tailer 在会话销毁后
+ * 继续发送），旧的 computeIfAbsent 会把已关闭会话重新放回缓存且不再有第二次关闭回调，
+ * 装饰器（含 5MB 消息缓冲）会一直常驻。这里改为：
+ * <ul>
+ *     <li>计算缓存时检查会话状态，已关闭直接返回 null 不缓存；</li>
+ *     <li>发送失败立即按“键+实例”精确移除；</li>
+ *     <li>发送前再确认一次装饰器状态，避免向已关闭会话写入。</li>
+ * </ul>
+ *
  * @author bwcx_jzy
  * @since 2018/9/29
  */
@@ -56,11 +65,32 @@ public class SocketSessionUtil {
         if (!session.isOpen()) {
             // 会话关闭不能发送消息 @author jzy 21-08-04
             log.warn(I18nMessageUtil.get("i18n.session_already_closed.8dcc"), message.getPayload());
+            SOCKET_MAP.remove(session.getId());
             return false;
         }
-        WebSocketSession webSocketSession = SOCKET_MAP.computeIfAbsent(session.getId(), s -> new ConcurrentWebSocketSessionDecorator(session, 60 * 1000, (int) DataSize.ofMegabytes(5).toBytes()));
-        webSocketSession.sendMessage(message);
-        return true;
+        String sessionId = session.getId();
+        WebSocketSession webSocketSession = SOCKET_MAP.compute(sessionId, (key, oldSession) -> {
+            if (!session.isOpen()) {
+                // 构造缓存期间会话被关闭，不写入缓存
+                return null;
+            }
+            if (oldSession != null && oldSession.isOpen()) {
+                return oldSession;
+            }
+            return new ConcurrentWebSocketSessionDecorator(session, 60 * 1000, (int) DataSize.ofMegabytes(5).toBytes());
+        });
+        if (webSocketSession == null || !webSocketSession.isOpen()) {
+            SOCKET_MAP.remove(sessionId, webSocketSession);
+            return false;
+        }
+        try {
+            webSocketSession.sendMessage(message);
+            return true;
+        } catch (IOException e) {
+            // 发送失败说明连接已不可用，及时移除装饰器缓存，避免 5MB 缓冲随会话常驻
+            SOCKET_MAP.remove(sessionId, webSocketSession);
+            throw e;
+        }
     }
 
     public static void close(WebSocketSession session) {

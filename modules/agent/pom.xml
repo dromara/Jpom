@@ -195,8 +195,9 @@
                                     <directory>${project.build.directory}</directory>
                                     <includes>
                                         <include>*.jar</include>
-                                        <include>*.zip</include>
                                         <include>*.tar.gz</include>
+                                        <!-- *.zip 仅过渡期兼容（2.12.0 起发布包只产 tar.gz，旧版客户端在线升级需要 zip 时由 legacy-zip.sh 生成） -->
+                                        <include>*.zip</include>
                                     </includes>
                                 </fileSet>
                             </fileSets>

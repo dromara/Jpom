@@ -41,6 +41,44 @@ import java.util.stream.Collectors;
  */
 public class FileUtils {
 
+    /**
+     * 解析必须位于指定目录内的子文件，拒绝绝对路径与 .. 越界（含符号链接逃逸）
+     * <p>
+     * 用于 WebSocket 等客户端可控的文件名参数，避免路径穿越读取非预期文件。
+     * 兼容项目日志等以 "/" 开头的相对路径写法（会先去掉开头 "/"）。
+     *
+     * @param baseDir 基础目录
+     * @param path    客户端传入的相对路径
+     * @return 合法文件（不保证存在）；非法返回 null
+     */
+    public static File resolveSubFile(File baseDir, String path) {
+        if (baseDir == null || StrUtil.isEmpty(path)) {
+            return null;
+        }
+        String subPath = StrUtil.removePrefix(StrUtil.trim(path), "/");
+        subPath = StrUtil.removePrefix(subPath, "\\");
+        if (StrUtil.isEmpty(subPath) || FileUtil.isAbsolutePath(subPath)) {
+            return null;
+        }
+        File file;
+        try {
+            file = FileUtil.file(baseDir, subPath);
+        } catch (IllegalArgumentException e) {
+            // Hutool 的 checkSlip 会拒绝 .. 越界
+            return null;
+        }
+        try {
+            String basePath = baseDir.getCanonicalPath();
+            String filePath = file.getCanonicalPath();
+            if (!filePath.equals(basePath) && !filePath.startsWith(basePath + File.separator)) {
+                return null;
+            }
+            return file;
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
     private static JSONObject fileToJson(File file, boolean disableScanDir) {
         JSONObject jsonObject = new JSONObject(6);
         boolean directory = file.isDirectory();

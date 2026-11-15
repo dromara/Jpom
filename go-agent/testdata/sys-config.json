@@ -1,0 +1,8 @@
+{
+  "code": 200,
+  "msg": "",
+  "data": {
+    "content": "<file-content>",
+    "file": "/home/example/jpom/agent/conf/application.yml"
+  }
+}

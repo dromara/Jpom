@@ -36,8 +36,13 @@ public class ResetSuperUserPasswordCommand implements StartupCommand {
         String restResult = userService.restSuperUserPwd();
         if (restResult != null) {
             log.info(restResult);
+            // 发布包 conf/logback.xml 未挂 STDOUT，Windows 下 Server.bat 用 javaw 启动也没有控制台，
+            // 只写日志文件会导致用户看不到随机生成的新密码（Gitee IJNJZJ）；这里再输出一份到标准输出。
+            System.out.println(restResult);
         } else {
-            log.error(I18nMessageUtil.get("i18n.no_super_admin_account.538d"));
+            String message = I18nMessageUtil.get("i18n.no_super_admin_account.538d");
+            log.error(message);
+            System.out.println(message);
         }
     }
 }
