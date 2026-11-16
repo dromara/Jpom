@@ -49,6 +49,31 @@ fi
 
 echo "替换配置文件版本号 $new_version"
 
+# beta 基线文件里可能残留比 tag.beta.txt 更早的版本号（如 DockerfileBeta/env-beta.env 仍是 2.11.12.3），
+# 这里按字段精确替换，避免版本号漏替换导致 beta 镜像/包引用旧版本
+beta_replace_pkg_version() {
+	local file="$1"
+	[ -f "$file" ] || return 0
+	sed -i.bak -E "s/^([[:space:]]*ENV[[:space:]]+JPOM_PKG_VERSION[[:space:]=]+).*/\1${new_version}/" "$file"
+}
+
+# 前端 <meta name="jpom-version"> 来自 web-vue/package.json，只替换第一个 version 字段
+beta_replace_web_version() {
+	local file="$1"
+	[ -f "$file" ] || return 0
+	local tmp="${file}.tmp.$$"
+	awk -v v="$new_version" '
+		BEGIN { replaced = 0 }
+		{
+			if (!replaced && $0 ~ /"version"[[:space:]]*:[[:space:]]*"/) {
+				sub(/"version"[[:space:]]*:[[:space:]]*"[^"]*"/, "\"version\": \"" v "\"")
+				replaced = 1
+			}
+			print
+		}
+	' "$file" >"$tmp" && mv "$tmp" "$file"
+}
+
 if [ "$tag" == "release" ]; then
 	# 替换 Dockerfile 中的版本
 	sed -i.bak "s/${old_version}/${new_version}/g" "$base/modules/server/Dockerfile"
@@ -57,16 +82,19 @@ if [ "$tag" == "release" ]; then
 	sed -i.bak "s/${old_version}/${new_version}/g" "$base/modules/server/DockerfileRelease"
 	sed -i.bak "s/${old_version}/${new_version}/g" "$base/modules/server/DockerfileReleaseJdk17"
 	sed -i.bak "s/${old_version}/${new_version}/g" "$base/modules/agent/DockerfileRelease"
-	# vue version
-	sed -i.bak "s/${old_version}/${new_version}/g" "$base/web-vue/package.json"
+	# vue version（兼容上次 beta 留下的 x.y.z.N 后缀，避免替换成 x.y.(z+1).N）
+	sed -i.bak -E "s/${old_version}(\.[0-9]+)?/${new_version}/g" "$base/web-vue/package.json"
 	# 替换 docker 中的版本
 	sed -i.bak "s/${old_version}/${new_version}/g" "$base/.env"
 	# gitee go
 	sed -i.bak "s/${old_version}/${new_version}/g" "$base/.workflow/MasterPipeline.yml"
 elif [ "$tag" == "beta" ]; then
-	sed -i.bak "s/${old_version}/${new_version}/g" "$base/modules/server/DockerfileBeta"
-	sed -i.bak "s/${old_version}/${new_version}/g" "$base/modules/server/DockerfileBetaJdk17"
-	sed -i.bak "s/${old_version}/${new_version}/g" "$base/modules/agent/DockerfileBeta"
+	beta_replace_pkg_version "$base/modules/server/DockerfileBeta"
+	beta_replace_pkg_version "$base/modules/server/DockerfileBetaJdk17"
+	beta_replace_pkg_version "$base/modules/agent/DockerfileBeta"
+	sed -i.bak -E "s/^JPOM_VERSION=.*/JPOM_VERSION=${new_version}/" "$base/env-beta.env"
+	# 前端版本号：beta 也要替换，否则候选/正式 beta 的页面 meta 与「关于」仍显示稳定版版本号
+	beta_replace_web_version "$base/web-vue/package.json"
 else
 	echo "不支持的模式 $tag" 2>&2
 	exit 2
