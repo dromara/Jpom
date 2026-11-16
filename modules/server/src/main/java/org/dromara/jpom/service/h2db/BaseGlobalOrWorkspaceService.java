@@ -37,8 +37,24 @@ public abstract class BaseGlobalOrWorkspaceService<T extends BaseWorkspaceModel>
 
     @Override
     public T getByKey(String keyValue, HttpServletRequest request) {
+        return this.getByKey(keyValue, request, true);
+    }
+
+    /**
+     * 按「当前工作空间 + GLOBAL」查询数据
+     * <p>fill=false 时不会走 {@code fillSelectResult}，会保留密码、私钥等敏感字段，
+     * 仅供内部需要原始凭证的场景使用（例如构建「获取分支」要把仓库凭证交给 git 插件）；
+     * 返回给前端的接口必须保持 fill=true，避免敏感字段泄露。</p>
+     *
+     * @param keyValue 主键
+     * @param request  请求信息
+     * @param fill     是否填充（脱敏）查询结果
+     * @return data
+     */
+    @Override
+    public T getByKey(String keyValue, HttpServletRequest request, boolean fill) {
         String workspace = this.getCheckUserWorkspace(request);
-        return super.getByKey(keyValue, true, entity -> entity.set("workspaceId", CollUtil.newArrayList(workspace, ServerConst.WORKSPACE_GLOBAL)));
+        return super.getByKey(keyValue, fill, entity -> entity.set("workspaceId", CollUtil.newArrayList(workspace, ServerConst.WORKSPACE_GLOBAL)));
     }
 
     /**

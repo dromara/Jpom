@@ -48,6 +48,9 @@ DEFAULT_TESTS=(
 	BaseDbServiceForcedFilterTest
 	ProjectManageControlExportDataTest
 	RepositoryControllerWorkspaceTest
+	# 构建「获取分支」必须用 fill=false 取仓库凭证（2.11.13 起仓库密码/私钥被脱敏导致 git 认证失败的守卫）
+	BuildInfoControllerBranchListTest
+	RepositoryServiceFillSelectResultTest
 	# 权限拦截：handler @Feature fail-closed + 节点数据权限 fail-closed
 	HandlerFeatureAnnotationTest
 	PermissionInterceptorNodeDataTest
