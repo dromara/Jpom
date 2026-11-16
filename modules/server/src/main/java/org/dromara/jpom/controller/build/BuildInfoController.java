@@ -482,7 +482,9 @@ public class BuildInfoController extends BaseServerController {
         @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.repository_id_cannot_be_empty.a42c") String repositoryId,
         HttpServletRequest request) throws Exception {
         // 根据 repositoryId 查询仓库信息（按当前工作空间校验仓库归属，避免跨工作空间访问）
-        RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, request);
+        // 注意：这里必须 fill=false，RepositoryService.fillSelectResult 会把密码/私钥脱敏置空，
+        // 传给 git 插件后就是空凭证，表现为 HTTP 账号密码认证失败、SSH Auth fail for methods 'publickey'
+        RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, request, false);
         Assert.notNull(repositoryModel, I18nMessageUtil.get("i18n.invalid_repository_info.b4ad"));
         //
         Assert.state(repositoryModel.getRepoType() == 0, I18nMessageUtil.get("i18n.only_git_repositories_have_branch_info.d7f7"));
