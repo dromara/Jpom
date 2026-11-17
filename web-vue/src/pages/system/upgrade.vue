@@ -366,10 +366,11 @@ export default {
       })
     },
     initWebsocket(ids) {
-      if (this.socket) {
+      if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)) {
         this.initHeart(ids)
         return
       }
+      this.socket = null
       // if (!this.socket || this.socket.readyState !== this.socket.OPEN || this.socket.readyState !== this.socket.CONNECTING) {
       this.socket = new WebSocket(this.socketUrl)
       // }
@@ -430,7 +431,7 @@ export default {
       })
     },
     initHeart(ids) {
-      this.sendMsg('getNodeList:' + ids.join(','))
+      this.sendMsg('getNodeList:' + ids.join(','), undefined, true)
       this.getAgentVersion()
       // 创建心跳，防止掉线
       this.heart && clearInterval(this.heart)
@@ -462,13 +463,28 @@ export default {
     tableSelectionChange(selectedRowKeys) {
       this.tableSelections = selectedRowKeys
     },
-    sendMsg(command, params) {
-      this.socket.send(
+    sendMsg(command, params, silent = false) {
+      const socket = this.socket
+      if (!socket || socket.readyState !== WebSocket.OPEN) {
+        // 连接未建立/已断开时直接 send 会抛异常，用户点「更新」后没有任何反馈，这里显式提示并尝试重连
+        if (!silent) {
+          $notification.error({
+            message: `${this.$t('i18n_7030ff6470')}: ${this.$t('i18n_226a6f9cdd')}`
+          })
+        }
+        if (!socket || socket.readyState !== WebSocket.CONNECTING) {
+          this.socket = null
+          this.initWebsocket(this.list.map((item) => item.id))
+        }
+        return false
+      }
+      socket.send(
         JSON.stringify({
           command,
           params
         })
       )
+      return true
     },
     getNodeList() {
       this.loading = true
@@ -496,7 +512,7 @@ export default {
     //   this.updateList();
     // },
     getAgentVersion() {
-      this.sendMsg('getAgentVersion')
+      this.sendMsg('getAgentVersion', undefined, true)
     },
     getAgentVersionResult(data) {
       try {
@@ -587,11 +603,14 @@ export default {
         okText: this.$t('i18n_e83a256e4f'),
         cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
-          this.sendMsg('updateNode', {
-            ids: this.tableSelections,
-            protocol: this.temp.protocol
-          })
-          this.tableSelections = []
+          if (
+            this.sendMsg('updateNode', {
+              ids: this.tableSelections,
+              protocol: this.temp.protocol
+            })
+          ) {
+            this.tableSelections = []
+          }
         }
       })
     },
@@ -631,6 +650,9 @@ export default {
                 ...uploadData[0]
               }).then((res) => {
                 if (res.code === 200) {
+                  $notification.success({
+                    message: res.msg || this.$t('i18n_a7699ba731')
+                  })
                   this.getNodeList()
                 }
                 setTimeout(() => {
