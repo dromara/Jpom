@@ -67,6 +67,9 @@ jpom:
     # 受信任的反向代理地址（IP 或 CIDR，逗号分隔）。只有来源地址命中此列表时才读取 X-Forwarded-For/X-Real-IP；
     # 默认仅信任本机回环（127.0.0.1/32、::1/128）。反向代理在其他机器时请配置为代理地址。
     trusted-proxies: 127.0.0.1/32,::1/128
+    # WebSocket 允许的来源（Origin）白名单，可填完整 origin 或主机名，例如：https://jpom.example.com,jpom.example.com
+    # 反向代理改写 Host 且未透传 X-Forwarded-Host 时，浏览器 Origin 与 Host 不匹配会导致「在线升级」等 WS 被拒绝
+    allowed-origins:
     # 前端接口 超时时间 单位秒(最小 5 秒)
     api-timeout: 20
     # 禁用登录图形验证码 （一般用于服务器没有字体或者开启了两步验证后才关闭图形验证码）

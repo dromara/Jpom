@@ -89,6 +89,18 @@ public class WebConfig {
     private List<String> trustedProxies;
 
     /**
+     * WebSocket 允许的来源（Origin）白名单，可填完整 origin（https://jpom.example.com）或主机名（jpom.example.com）。
+     * <p>
+     * 反向代理改写了 Host 且未透传 X-Forwarded-Host 时，浏览器 Origin 无法与 Host 匹配，
+     * WebSocket 握手会被判定为跨站而拒绝（表现为“您没有对应权限”）；把对外域名配置到此处即可放行。
+     */
+    private List<String> allowedOrigins;
+
+    public List<String> getAllowedOrigins() {
+        return this.allowedOrigins == null ? Collections.emptyList() : this.allowedOrigins;
+    }
+
+    /**
      * 默认可信代理：本机回环（同机 nginx 等反向代理场景）
      */
     private static final List<String> DEFAULT_TRUSTED_PROXIES = Collections.unmodifiableList(

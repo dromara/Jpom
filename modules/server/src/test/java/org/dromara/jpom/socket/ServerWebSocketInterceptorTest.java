@@ -17,6 +17,8 @@ import org.dromara.jpom.func.assets.server.MachineNodeServer;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.service.user.UserBindWorkspaceService;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.configuration.WebConfig;
 import org.dromara.jpom.service.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -68,7 +71,8 @@ public class ServerWebSocketInterceptorTest {
             mock(NodeService.class),
             mock(UserBindWorkspaceService.class),
             mock(MachineNodeServer.class),
-            ipInterceptor);
+            ipInterceptor,
+            new WebConfig());
     }
 
     private MockHttpServletRequest request(String origin) {
@@ -159,5 +163,52 @@ public class ServerWebSocketInterceptorTest {
         Map<String, Object> attributes = this.handshake(request);
         assertNotNull(attributes.get("permissionMsg"), "缺省 Origin 且无认证信息必须拒绝握手");
         assertNull(attributes.get("userInfo"));
+    }
+
+    /**
+     * 反向代理改写 Host（未透传 X-Forwarded-Host）时，jpom.web.allowed-origins 里的域名必须放行，
+     * 否则管理员也会被判定为跨站（表现为“您没有对应权限”，在线升级等 WS 全部不可用）。
+     */
+    @Test
+    public void testAllowedOriginsPassesOriginCheck() throws Exception {
+        WebConfig webConfig = new WebConfig();
+        webConfig.setAllowedOrigins(java.util.Collections.singletonList("jpom.example.com"));
+        ServerWebSocketInterceptor custom = new ServerWebSocketInterceptor(userService,
+            mock(NodeService.class),
+            mock(UserBindWorkspaceService.class),
+            mock(MachineNodeServer.class),
+            ipInterceptor,
+            webConfig);
+        when(userService.getByKey("u1")).thenReturn(enabledUser());
+
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/socket");
+        request.addHeader("Host", "10.0.0.5:2122");
+        request.addHeader("Origin", "https://jpom.example.com");
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(LoginInterceptor.SESSION_NAME, enabledUser());
+        request.setSession(session);
+
+        Map<String, Object> attributes = new HashMap<>();
+        custom.beforeHandshake(new ServletServerHttpRequest(request),
+            mock(ServerHttpResponse.class), mock(WebSocketHandler.class), attributes);
+        // 来源校验已通过，进入认证阶段（后续因缺少 type 参数被拒，属于本用例预期之外的分支）
+        verify(userService).getByKey("u1");
+        assertNotEquals(I18nMessageUtil.get("i18n.websocket_origin_rejected.5c7a"), attributes.get("permissionMsg"), "白名单来源不应被来源校验拒绝");
+    }
+
+    /**
+     * 未命中白名单的跨站来源必须继续拒绝，且提示可操作的排查信息。
+     */
+    @Test
+    public void testCrossSiteOriginRejectedWithHint() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/socket");
+        request.addHeader("Host", "10.0.0.5:2122");
+        request.addHeader("Origin", "https://evil.example.com");
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(LoginInterceptor.SESSION_NAME, enabledUser());
+        request.setSession(session);
+
+        Map<String, Object> attributes = this.handshake(request);
+        assertEquals(I18nMessageUtil.get("i18n.websocket_origin_rejected.5c7a"), attributes.get("permissionMsg"));
     }
 }
