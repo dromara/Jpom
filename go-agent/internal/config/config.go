@@ -44,7 +44,7 @@ type Jpom struct {
 	InitReadLine int       `yaml:"init-read-line"`
 }
 
-// Tunnel mirrors jpom.agent.tunnel (agent initiated reverse tunnel).
+// Tunnel mirrors jpom.tunnel (agent initiated reverse tunnel).
 type Tunnel struct {
 	ServerURL      string `yaml:"server-url"`
 	Key            string `yaml:"key"`

@@ -15,8 +15,12 @@ import org.dromara.jpom.common.interceptor.PermissionInterceptor;
 import org.dromara.jpom.common.validator.ParameterInterceptor;
 import org.springframework.boot.web.server.MimeMappings;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -61,5 +65,20 @@ public class WebConfigurer implements WebMvcConfigurer, WebServerFactoryCustomiz
         MimeMappings mappings = new MimeMappings(MimeMappings.DEFAULT);
         mappings.add("js", "application/javascript;charset=utf-8");
         factory.setMimeMappings(mappings);
+    }
+
+    /**
+     * 强制请求/响应使用 UTF-8。拦截器与部分控制器直接手写 JSON 提示（登录失效、权限拦截、
+     * 构建记录不存在等），contentType 未带 charset 时容器默认按 ISO-8859-1 输出，中文会变问号。
+     * 默认配置的 server.servlet.encoding.force-response 依赖安装目录配置文件存在该配置块，
+     * 老安装实例与裸 jar 运行可能缺失，这里代码级兜底（与自动配置的过滤器幂等）。
+     */
+    @Bean
+    public FilterRegistrationBean<CharacterEncodingFilter> forcedResponseEncodingFilter() {
+        CharacterEncodingFilter filter = new CharacterEncodingFilter("UTF-8", true);
+        FilterRegistrationBean<CharacterEncodingFilter> registration = new FilterRegistrationBean<>(filter);
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        registration.setName("forcedResponseEncodingFilter");
+        return registration;
     }
 }

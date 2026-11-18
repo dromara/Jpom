@@ -55,7 +55,7 @@ public class TunnelAgentRunner implements ApplicationRunner, DisposableBean {
     @Override
     public void run(ApplicationArguments args) {
         if (!properties.enabled()) {
-            log.info("未完整配置 jpom.agent.tunnel.server-url/key/machine-id，反向隧道未启用（保持仅监听本机端口）");
+            log.info("未完整配置 jpom.tunnel.server-url/key/machine-id，反向隧道未启用（保持仅监听本机端口）");
             return;
         }
         int port = jpomApplication.getPort();
