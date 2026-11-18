@@ -34,6 +34,17 @@ import java.util.List;
     nameKey = "i18n.machine_node_info.6a75")
 @Data
 public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
+
+    /**
+     * 节点标识：反向建连隧道按该主键路由请求
+     *
+     * @return 机器节点主键
+     */
+    @Override
+    public String id() {
+        return this.getId();
+    }
+
     /**
      * 机器主机名
      */

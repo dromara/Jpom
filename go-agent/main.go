@@ -18,11 +18,13 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 	"time"
 
 	"github.com/dromara/Jpom/go-agent/internal/api"
 	"github.com/dromara/Jpom/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/tunnel"
 )
 
 var (
@@ -89,6 +91,43 @@ func main() {
 	go func() {
 		if err := srv.Serve(listener); err != nil && err != http.ErrServerClosed {
 			errCh <- err
+		}
+	}()
+
+	// 反向建连隧道：插件端主动连接服务端，服务端不需要能直连插件端端口
+	var tunnelClient *tunnel.Client
+	if settings := application.Config.Jpom.Tunnel; settings.Enabled() {
+		timeout := time.Duration(settings.TimeoutSeconds) * time.Second
+		if timeout <= 0 {
+			timeout = 30 * time.Second
+		}
+		local := tunnel.LoopbackAddr(application.ListenAddr())
+		client, tunnelErr := tunnel.New(tunnel.Options{
+			ServerURL:      settings.ServerURL,
+			MachineID:      settings.MachineID,
+			Key:            settings.Key,
+			AgentVersion:   version,
+			OS:             application.OsName(),
+			Arch:           runtime.GOARCH,
+			LocalHTTPBase:  "http://" + local,
+			LocalWSBase:    "ws://" + local,
+			Authorize:      application.Auth.Authorize,
+			MaxConcurrency: settings.MaxConcurrency,
+			Timeout:        timeout,
+			Logger:         application.Log(),
+		})
+		if tunnelErr != nil {
+			application.Log().Error("reverse tunnel disabled", "error", tunnelErr)
+		} else {
+			client.Start()
+			tunnelClient = client
+			application.Log().Info("reverse tunnel starting",
+				"server", settings.ServerURL, "machine", settings.MachineID, "local", local)
+		}
+	}
+	defer func() {
+		if tunnelClient != nil {
+			tunnelClient.Stop()
 		}
 	}()
 

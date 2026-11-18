@@ -37,7 +37,7 @@ import java.util.Optional;
 @Configuration
 @ConfigurationProperties("jpom")
 @Data
-@EnableConfigurationProperties({ProjectConfig.class, ProjectLogConfig.class, SystemConfig.class, AgentAuthorize.class, MonitorConfig.class, MonitorConfig.NetworkConfig.class})
+@EnableConfigurationProperties({ProjectConfig.class, ProjectLogConfig.class, SystemConfig.class, AgentAuthorize.class, MonitorConfig.class, MonitorConfig.NetworkConfig.class, org.dromara.jpom.common.tunnel.TunnelAgentProperties.class})
 public class AgentConfig implements ILoadEvent, InitializingBean {
 
     private final JpomApplication jpomApplication;

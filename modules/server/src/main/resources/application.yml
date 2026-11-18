@@ -31,6 +31,21 @@ jpom:
     upload-file-concurrent: 2
     # web socket 消息最大长度
     web-socket-message-size-limit: 5MB
+  agent:
+    # 反向连接隧道：插件端主动连接服务端（服务端无需能直连插件端）
+    tunnel:
+      # 连接密钥，配置后启用 /agent/tunnel 端点；留空则保持正向拉取模式
+      key:
+      # 未注册节点是否允许自动注册（默认 false：直接拒绝）
+      allow-auto-register: false
+      # 心跳间隔（秒）
+      heartbeat-seconds: 5
+      # 连续未收到 PONG 的次数上限
+      max-missed-pong: 3
+      # 下发插件端的并发处理上限
+      max-concurrency: 16
+      # 建连后等待 HELLO 的超时（秒）
+      hello-timeout-seconds: 30
   system:
     # cron 定时器是否开启匹配秒
     timer-match-second: false

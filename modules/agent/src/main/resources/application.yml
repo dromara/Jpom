@@ -17,6 +17,17 @@ jpom:
     agent-name: jpomAgent
     # agent 端管理密码，非必填，如果为空Jpom 会自动生成一串随机字符串当密码
     agent-pwd:
+  tunnel:
+    # 服务端反向隧道地址，支持 ws:// 与 wss://（可只写到主机，自动补 /agent/tunnel）
+    server-url:
+    # 连接密钥，需与服务端 jpom.agent.tunnel.key 一致
+    key:
+    # 本插件端在服务端“机器节点资产”中的标识（machineId）
+    machine-id:
+    # 回环请求超时（秒）
+    timeout-seconds: 30
+    # 并发处理上限
+    max-concurrency: 16
   project:
     # 停止、启动项目(项目状态检测)等待的时长 单位秒
     status-wait-time: 10

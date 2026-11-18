@@ -40,7 +40,22 @@ type Jpom struct {
 	Project      Project   `yaml:"project"`
 	System       System    `yaml:"system"`
 	Monitor      *Monitor  `yaml:"monitor"`
+	Tunnel       Tunnel    `yaml:"tunnel"`
 	InitReadLine int       `yaml:"init-read-line"`
+}
+
+// Tunnel mirrors jpom.agent.tunnel (agent initiated reverse tunnel).
+type Tunnel struct {
+	ServerURL      string `yaml:"server-url"`
+	Key            string `yaml:"key"`
+	MachineID      string `yaml:"machine-id"`
+	TimeoutSeconds int    `yaml:"timeout-seconds"`
+	MaxConcurrency int    `yaml:"max-concurrency"`
+}
+
+// Enabled reports whether all three required tunnel settings are present.
+func (t Tunnel) Enabled() bool {
+	return strings.TrimSpace(t.ServerURL) != "" && strings.TrimSpace(t.Key) != "" && strings.TrimSpace(t.MachineID) != ""
 }
 
 type Authorize struct {
@@ -234,6 +249,7 @@ func Default() *Config {
 	return &Config{
 		Jpom: Jpom{
 			Authorize: Authorize{AgentName: "jpomAgent"},
+			Tunnel:    Tunnel{TimeoutSeconds: 30, MaxConcurrency: 16},
 			Project: Project{
 				StatusWaitTime:          10,
 				FileBackupCount:         0,
