@@ -10,6 +10,7 @@
 package i8n;
 
 import lombok.Lombok;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.BufferedReader;
@@ -22,6 +23,8 @@ import java.util.regex.Pattern;
  * @author bwcx_jzy
  * @since 2024/6/14
  */
+@Deprecated
+@Ignore("i18n 工具链已弃用（2026-11-18）：只读扫描脚本，随工具链一并停用")
 public class ScanOmissionsTest {
 
     @Test
