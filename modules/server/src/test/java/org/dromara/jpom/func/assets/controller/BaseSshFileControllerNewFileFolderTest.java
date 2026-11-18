@@ -37,25 +37,25 @@ public class BaseSshFileControllerNewFileFolderTest {
 
     @Test
     public void testRejectPathSeparator() {
-        Assertions.assertThrows(IllegalStateException.class, () -> BaseSshFileController.checkNewFileName("a/b"));
-        Assertions.assertThrows(IllegalStateException.class, () -> BaseSshFileController.checkNewFileName("/etc/passwd"));
-        Assertions.assertThrows(IllegalStateException.class, () -> BaseSshFileController.checkNewFileName("a/"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BaseSshFileController.checkNewFileName("a/b"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BaseSshFileController.checkNewFileName("/etc/passwd"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BaseSshFileController.checkNewFileName("a/"));
         // Hutool FileUtil.normalize 同时把 \\ 当作分隔符，Windows 部署的 Server 也不能放过
-        Assertions.assertThrows(IllegalStateException.class, () -> BaseSshFileController.checkNewFileName("a\\b"));
-        Assertions.assertThrows(IllegalStateException.class, () -> BaseSshFileController.checkNewFileName("..\\.."));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BaseSshFileController.checkNewFileName("a\\b"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BaseSshFileController.checkNewFileName("..\\.."));
     }
 
     @Test
     public void testRejectDirectoryTraversal() {
-        Assertions.assertThrows(IllegalStateException.class, () -> BaseSshFileController.checkNewFileName("."));
-        Assertions.assertThrows(IllegalStateException.class, () -> BaseSshFileController.checkNewFileName(".."));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BaseSshFileController.checkNewFileName("."));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BaseSshFileController.checkNewFileName(".."));
     }
 
     @Test
     public void testRejectControlCharacters() {
-        Assertions.assertThrows(IllegalStateException.class, () -> BaseSshFileController.checkNewFileName("a\rb"));
-        Assertions.assertThrows(IllegalStateException.class, () -> BaseSshFileController.checkNewFileName("a\nb"));
-        Assertions.assertThrows(IllegalStateException.class, () -> BaseSshFileController.checkNewFileName("a\0b"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BaseSshFileController.checkNewFileName("a\rb"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BaseSshFileController.checkNewFileName("a\nb"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BaseSshFileController.checkNewFileName("a\0b"));
     }
 
     @Test

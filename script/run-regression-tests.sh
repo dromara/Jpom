@@ -84,6 +84,8 @@ DEFAULT_TESTS=(
 	LoginControlCaptchaTest
 	# SSH 文件管理 new_file_folder 命令注入回归（name 不再拼远程 shell，创建走 SFTP）
 	BaseSshFileControllerNewFileFolderTest
+	# SSH/FTP 文件管理路径穿越回归（name/newname/fileName 不得穿越 fileDirs 白名单，2026-11-17 安全报告）
+	FileUtilsResolveChildPathTest
 )
 
 MVN_BIN=${MVN:-mvn}

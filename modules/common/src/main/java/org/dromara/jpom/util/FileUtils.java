@@ -79,6 +79,114 @@ public class FileUtils {
         }
     }
 
+    /**
+     * 校验文件管理中的单个路径片段（文件名/目录名）。
+     * <p>
+     * 名称只能是单个片段：禁止路径分隔符（{@code /}、{@code \}）、控制字符（CR/LF/NUL），
+     * 且不能是 {@code .} 或 {@code ..}。shell 元字符按普通文件名处理，不做限制。
+     *
+     * @param name 文件/目录名称
+     */
+    public static void checkPathItemName(String name) {
+        if (StrUtil.isEmpty(name)) {
+            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.file_name_error_message.7a25"));
+        }
+        if (StrUtil.containsAny(name, "/", "\\", "\0", "\r", "\n")) {
+            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.file_name_error_message.7a25"));
+        }
+        if (StrUtil.equalsAny(name, ".", "..")) {
+            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.file_name_invalid.ecc7"));
+        }
+    }
+
+    /**
+     * 校验由客户端传入的多级相对目录（nextPath）。
+     * <p>
+     * 允许为空、{@code /} 与 {@code sub/dir} 形式（{@code /} 表示白名单根目录）；
+     * 逐段禁止 {@code .}、{@code ..}、反斜杠与控制字符。
+     *
+     * @param path 相对目录
+     */
+    public static void checkRelativePath(String path) {
+        if (StrUtil.isBlank(path)) {
+            return;
+        }
+        for (String segment : StrUtil.split(path, '/')) {
+            if (StrUtil.isEmpty(segment)) {
+                continue;
+            }
+            if (StrUtil.equalsAny(segment, ".", "..")) {
+                throw new IllegalArgumentException(I18nMessageUtil.get("i18n.directory_cannot_skip_levels.179e"));
+            }
+            if (StrUtil.containsAny(segment, "\\", "\0", "\r", "\n")) {
+                throw new IllegalArgumentException(I18nMessageUtil.get("i18n.directory_cannot_skip_levels.179e"));
+            }
+        }
+    }
+
+    /**
+     * 解析文件管理的目标目录：{@code parent} 为白名单根目录，{@code nextPath} 为多级子目录。
+     * <p>
+     * 结果允许等于白名单根目录本身（例如向根目录上传文件、列出根目录），但必须始终位于
+     * {@code parent} 之内。
+     *
+     * @param parent   白名单根目录
+     * @param nextPath 客户端传入的多级子目录
+     * @return 规范化后的绝对路径
+     */
+    public static String resolveChildDir(String parent, String nextPath) {
+        checkRelativePath(nextPath);
+        String base = FileUtil.normalize(parent);
+        String target = FileUtil.normalize(base + StrUtil.SLASH + StrUtil.emptyToDefault(nextPath, StrUtil.EMPTY));
+        // 去掉多余的结尾分隔符（保留根目录 "/"），避免调用方比较时出现 "/home/app" 与 "/home/app/" 不一致
+        if (StrUtil.length(target) > 1) {
+            target = StrUtil.removeSuffix(target, StrUtil.SLASH);
+            target = StrUtil.removeSuffix(target, "\\");
+        }
+        assertInside(base, target);
+        return target;
+    }
+
+    /**
+     * 解析文件管理的目标文件：{@code parent} 为白名单根目录，{@code nextPath} 为多级子目录，
+     * {@code name} 为单个文件名。
+     * <p>
+     * 名称与子目录逐段校验后再 normalize，并要求结果严格位于 {@code parent} 之内，
+     * 避免 {@code ../} 折叠、绝对路径、反斜杠等手段穿越白名单目录。
+     *
+     * @param parent   白名单根目录
+     * @param nextPath 客户端传入的多级子目录
+     * @param name     客户端传入的文件名
+     * @return 规范化后的绝对路径
+     */
+    public static String resolveChildPath(String parent, String nextPath, String name) {
+        checkPathItemName(name);
+        String base = FileUtil.normalize(parent);
+        String dir = resolveChildDir(base, nextPath);
+        String target = FileUtil.normalize(dir + StrUtil.SLASH + name);
+        assertInside(base, target);
+        // 目标必须严格在根目录之下：不允许把白名单根目录本身当成文件操作
+        if (StrUtil.equals(StrUtil.removeSuffix(target, StrUtil.SLASH), StrUtil.removeSuffix(base, StrUtil.SLASH))) {
+            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.cannot_operate_current_directory.aa3d"));
+        }
+        return target;
+    }
+
+    /**
+     * 断言目标路径位于基础目录之内（按分隔符归一后做前缀比较）。
+     *
+     * @param base   基础目录
+     * @param target 目标路径
+     */
+    private static void assertInside(String base, String target) {
+        String basePath = StrUtil.removeSuffix(StrUtil.replace(base, "\\", "/"), "/");
+        String targetPath = StrUtil.replace(target, "\\", "/");
+        String basePrefix = StrUtil.isEmpty(basePath) ? "/" : basePath + "/";
+        if (!StrUtil.equals(targetPath, basePath) && !StrUtil.startWith(targetPath, basePrefix)) {
+            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.path_out_of_allowed_directory.ddc5"));
+        }
+    }
+
     private static JSONObject fileToJson(File file, boolean disableScanDir) {
         JSONObject jsonObject = new JSONObject(6);
         boolean directory = file.isDirectory();

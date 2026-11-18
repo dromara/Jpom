@@ -11,7 +11,6 @@ package org.dromara.jpom.controller.ftp;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.StrUtil;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -51,7 +50,7 @@ public class FtpFileController extends BaseFtpFileController {
     @Override
     protected <T> T checkConfigPathChildren(String id, String path, String children, BiFunction<MachineFtpModel, ItemConfig, T> function) {
         FileUtils.checkSlip(path);
-        Opt.ofBlankAble(children).ifPresent(FileUtils::checkSlip);
+        FileUtils.checkRelativePath(children);
 
         FtpModel ftpModel = ftpService.getByKey(id, getRequest());
         Assert.notNull(ftpModel, I18nMessageUtil.get("i18n.no_corresponding_ssh.aa68"));
