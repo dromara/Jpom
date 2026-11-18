@@ -8,6 +8,7 @@
 # See the Mulan PSL v2 for more details.
 #
 
+
 # 与 Java 插件端完全相同的配置格式，Go 插件端直接读取本文件。
 jpom:
   # jpom 数据存储路径, 如果调试模式运行默认路径为【${user.home}/jpom/】,安装运行默认为jar包文件的父级

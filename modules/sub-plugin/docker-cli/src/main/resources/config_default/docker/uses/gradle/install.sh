@@ -8,6 +8,7 @@
 # See the Mulan PSL v2 for more details.
 #
 
+
 if [ $GRADLE_VERSION ]; then
 	echo "GRADLE_VERSION ${GRADLE_VERSION}"
 else

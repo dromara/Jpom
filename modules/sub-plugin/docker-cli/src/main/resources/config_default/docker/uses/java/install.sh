@@ -9,6 +9,7 @@
 # See the Mulan PSL v2 for more details.
 #
 
+
 if [ $JAVA_VERSION ]; then
 	echo "JAVA_VERSION ${JAVA_VERSION}"
 else

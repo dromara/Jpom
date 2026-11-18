@@ -8,6 +8,7 @@
 # See the Mulan PSL v2 for more details.
 #
 
+
 baseUrl: https://try.gitea.io
 authType: 1
 authKey: Authorization

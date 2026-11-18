@@ -8,6 +8,7 @@
 # THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 # See the Mulan PSL v2 for more details.
 #
+
 # 构建 Go 插件端发布包（多平台静态二进制 + 与 Java 插件端一致的目录布局）。
 # 用法：VERSION=2.11.13.2 bash script/package.sh
 #       VERSION=2.11.13.2 PLATFORMS="linux/amd64 linux/arm64" bash script/package.sh
