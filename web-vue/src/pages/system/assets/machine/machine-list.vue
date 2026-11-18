@@ -141,7 +141,7 @@
               record.statusMsg ? $t('i18n_8d13037eb7') + record.statusMsg : $t('i18n_77e100e462')
             } `"
           >
-            <a-tag :color="record.status === 1 ? 'green' : 'pink'" style="margin-right: 0">
+            <a-tag :color="statusTagColor(record.status)" style="margin-right: 0">
               {{ statusMap[record.status] }}
             </a-tag>
           </a-tooltip>
@@ -196,7 +196,7 @@
                     item.statusMsg ? $t('i18n_8d13037eb7') + item.statusMsg : $t('i18n_77e100e462')
                   } `"
                 >
-                  <a-tag :color="item.status === 1 ? 'green' : 'pink'" style="margin-right: 0">
+                  <a-tag :color="statusTagColor(item.status)" style="margin-right: 0">
                     {{ statusMap[item.status] }}</a-tag
                   >
                 </a-tooltip>
@@ -849,6 +849,12 @@ export default {
     parseTime,
     formatDuration,
     formatPercent2Number,
+    // 状态标签颜色：正常绿色、检测超时橙色、其它异常粉色
+    statusTagColor(status) {
+      if (status === 1) return 'green'
+      if (status === 5) return 'orange'
+      return 'pink'
+    },
     CHANGE_PAGE,
     // PAGE_DEFAULT_SHOW_TOTAL,
     // getCachePageLimit,

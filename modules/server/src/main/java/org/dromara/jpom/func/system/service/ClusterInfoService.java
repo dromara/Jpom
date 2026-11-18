@@ -90,14 +90,44 @@ public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implemen
         return multiServer;
     }
 
+    /**
+     * 当前服务需要管理的资产分组
+     * <p>
+     * 读取失败（记录不存在）时返回空集合，调用方应退化为监控全部分组，不能直接跳过监控
+     *
+     * @return 分组名集合
+     */
+    public List<String> currentLinkGroups() {
+        ClusterInfoModel clusterInfoModel = this.getByKey(JpomManifest.getInstance().getInstallId(), false);
+        if (clusterInfoModel == null) {
+            return new ArrayList<>();
+        }
+        return StrUtil.splitTrim(clusterInfoModel.getLinkGroup(), StrUtil.COMMA);
+    }
+
+    /**
+     * 统计心跳活跃的服务数量
+     * <p>
+     * 历史残留（已经下线的服务）的集群记录不参与统计，避免把单机部署误判成集群模式
+     *
+     * @param heartSecond 心跳间隔（秒）
+     * @return 活跃服务数量
+     */
+    private long countActiveServer(int heartSecond) {
+        long activeMillis = SystemClock.now() - TimeUnit.SECONDS.toMillis(Math.max(heartSecond, 5)) * 3;
+        Entity where = Entity.create();
+        where.set("lastHeartbeat", StrUtil.format(" >= {}", activeMillis));
+        return this.count(where);
+    }
+
     @Override
     public void startLoad() {
         // 启动心跳检测
         int heartSecond = clusterConfig.getHeartSecond();
         ScheduledExecutorService scheduler = JpomApplication.getScheduledExecutorService();
         scheduler.scheduleWithFixedDelay(this, 0, heartSecond, TimeUnit.SECONDS);
-        // 判断是否为多集群模式
-        this.multiServer = this.count() > 1;
+        // 判断是否为多集群模式（仅统计心跳活跃的服务，历史残留记录不算）
+        this.multiServer = this.countActiveServer(heartSecond) > 1;
     }
 
     @Override
@@ -106,8 +136,8 @@ public class ClusterInfoService extends BaseDbService<ClusterInfoModel> implemen
         try {
             CronUtils.TaskStat taskStat = CronUtils.getTaskStat(TASK_ID, StrUtil.format(I18nMessageUtil.get("i18n.execution_frequency.d014"), heartSecond));
             taskStat.onStart();
-            // 判断是否为多集群模式
-            this.multiServer = this.count() > 1;
+            // 判断是否为多集群模式（仅统计心跳活跃的服务，历史残留记录不算）
+            this.multiServer = this.countActiveServer(heartSecond) > 1;
             //
             JpomManifest jpomManifest = JpomManifest.getInstance();
             String installId = jpomManifest.getInstallId();

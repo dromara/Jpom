@@ -19,7 +19,7 @@
           <template #extra>
             <a-tag
               v-if="machineInfo"
-              :color="machineInfo && machineInfo.status === 1 ? 'green' : 'pink'"
+              :color="statusTagColor(machineInfo && machineInfo.status)"
               style="margin-right: 0"
             >
               {{ statusMap[machineInfo && machineInfo.status] || $t('i18n_1622dc9b6b') }}
@@ -835,6 +835,12 @@ export default {
   methods: {
     formatPercent,
     parseTime,
+    // 状态标签颜色：正常绿色、检测超时橙色、其它异常粉色
+    statusTagColor(status) {
+      if (status === 1) return 'green'
+      if (status === 5) return 'orange'
+      return 'pink'
+    },
     formatDuration,
     renderSize,
     formatPercent2Number,

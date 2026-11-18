@@ -221,6 +221,7 @@
 	"i18n.cluster_name_required.5ca6":"请填写集群名称",
 	"i18n.cluster_node_not_in_system.0645":"当前集群对应的节点，不在本系统中无法退出集群",
 	"i18n.cluster_not_bound_to_group_for_docker_monitoring.3926":"当前集群还未绑定分组,不能监控 Docker 资产信息",
+	"i18n.cluster_not_bound_group_monitor_all_assets.b885":"当前集群还未绑定分组,已退化为监控全部分组的资产信息",
 	"i18n.cluster_not_bound_to_group_for_node_monitoring.1586":"当前集群还未绑定分组,不能监控集群节点资产信息",
 	"i18n.cluster_not_bound_to_group_for_ssh_monitoring.c894":"当前集群还未绑定分组,不能监控 SSH 资产信息",
 	"i18n.cluster_not_exist.4098":"对应的集群不存在",

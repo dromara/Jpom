@@ -192,28 +192,29 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
 
     @Override
     public void run() {
-        Entity entity = new Entity();
-        if (clusterInfoService.isMultiServer()) {
-            String linkGroup = clusterInfoService.getCurrent().getLinkGroup();
-            List<String> linkGroups = StrUtil.splitTrim(linkGroup, StrUtil.COMMA);
-            if (CollUtil.isEmpty(linkGroups)) {
-                log.warn(I18nMessageUtil.get("i18n.cluster_not_bound_to_group_for_node_monitoring.1586"));
-                return;
-            }
-            entity.set("groupName", linkGroups);
-        }
-        entity.set("transportMode", 0);
         int heartSecond = nodeConfig.getHeartSecond();
+        // 任务统计放在最前面：即使下面因为配置/数据问题提前结束，也能在任务统计中看到该任务在跑
+        CronUtils.TaskStat taskStat = CronUtils.getTaskStat(TASK_ID, StrUtil.format(I18nMessageUtil.get("i18n.execution_frequency.d014"), heartSecond));
+        taskStat.onStart();
         try {
-            CronUtils.TaskStat taskStat = CronUtils.getTaskStat(TASK_ID, StrUtil.format(I18nMessageUtil.get("i18n.execution_frequency.d014"), heartSecond));
-            taskStat.onStart();
-            //MachineNodeModel machineNodeModel = new MachineNodeModel();
-            //machineNodeModel.setTransportMode(0);
-            List<MachineNodeModel> machineNodeModels = this.listByEntity(entity);
+            Entity entity = new Entity();
+            if (clusterInfoService.isMultiServer()) {
+                List<String> linkGroups = clusterInfoService.currentLinkGroups();
+                if (CollUtil.isEmpty(linkGroups)) {
+                    // 未绑定分组时退化为监控全部分组，不能整轮跳过（否则节点状态会永久停在旧值）
+                    log.warn(I18nMessageUtil.get("i18n.cluster_not_bound_group_monitor_all_assets.b885"));
+                } else {
+                    entity.set("groupName", linkGroups);
+                }
+            }
+            List<MachineNodeModel> machineNodeModels = Optional.ofNullable(this.listByEntity(entity)).orElseGet(ArrayList::new);
+            // 兼容历史数据、手工迁库：transportMode 可能为空，不能因此永久跳过该机器
+            machineNodeModels = machineNodeModels.stream()
+                .filter(machineNodeModel -> isPollTransportMode(machineNodeModel.getTransportMode()))
+                .collect(Collectors.toList());
             this.checkList(machineNodeModels);
             taskStat.onSucceeded();
         } catch (Throwable throwable) {
-            CronUtils.TaskStat taskStat = CronUtils.getTaskStat(TASK_ID, StrUtil.format(I18nMessageUtil.get("i18n.execution_frequency.d014"), heartSecond));
             taskStat.onFailed(TASK_ID, throwable);
         }
     }
@@ -367,6 +368,73 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
                 nodeService.update(entity, where);
             }
         });
+    }
+
+    /**
+     * 节点状态：检测超时（超过指定心跳周期没有刷新检测结果）
+     */
+    public static final int STATUS_CHECK_TIMEOUT = 5;
+
+    /**
+     * 折算节点状态：长时间没有刷新检测结果时，不能继续沿用"正常"
+     *
+     * @param machineNodeModels 机器列表
+     */
+    public void fillTimeoutStatus(List<MachineNodeModel> machineNodeModels) {
+        if (CollUtil.isEmpty(machineNodeModels)) {
+            return;
+        }
+        long timeoutMillis = TimeUnit.SECONDS.toMillis(nodeConfig.getHeartSecond()) * 3;
+        long now = SystemClock.now();
+        machineNodeModels.forEach(machineNodeModel -> this.fillTimeoutStatus(machineNodeModel, timeoutMillis, now));
+    }
+
+    /**
+     * 折算单个节点的状态
+     *
+     * @param machineNodeModel 机器信息
+     */
+    public void fillTimeoutStatus(MachineNodeModel machineNodeModel) {
+        long timeoutMillis = TimeUnit.SECONDS.toMillis(nodeConfig.getHeartSecond()) * 3;
+        this.fillTimeoutStatus(machineNodeModel, timeoutMillis, SystemClock.now());
+    }
+
+    private void fillTimeoutStatus(MachineNodeModel machineNodeModel, long timeoutMillis, long now) {
+        if (machineNodeModel == null) {
+            return;
+        }
+        if (checkStatusTimeout(machineNodeModel.getStatus(), machineNodeModel.getModifyTimeMillis(), timeoutMillis, now)) {
+            machineNodeModel.setStatus(STATUS_CHECK_TIMEOUT);
+        }
+    }
+
+    /**
+     * 是否由服务端拉取检测（transportMode 为空视为拉取，兼容历史数据/手工迁移的库）
+     *
+     * @param transportMode 传输方式
+     * @return true 需要检测
+     */
+    public static boolean isPollTransportMode(Integer transportMode) {
+        return transportMode == null || transportMode == 0;
+    }
+
+    /**
+     * 节点状态是否已经超时（长时间没有刷新检测结果）
+     *
+     * @param status           当前状态
+     * @param modifyTimeMillis 最后刷新时间
+     * @param timeoutMillis    超时时间
+     * @param now              当前时间
+     * @return true 已经超时
+     */
+    public static boolean checkStatusTimeout(Integer status, Long modifyTimeMillis, long timeoutMillis, long now) {
+        if (!ObjectUtil.equal(status, 1)) {
+            return false;
+        }
+        if (modifyTimeMillis == null || modifyTimeMillis <= 0) {
+            return false;
+        }
+        return now - modifyTimeMillis > timeoutMillis;
     }
 
     /**

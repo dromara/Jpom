@@ -60,7 +60,9 @@ export const statusMap = {
   1: t('i18n_fd6e80f1e0'),
   2: t('i18n_c18455fbe3'),
   3: t('i18n_c5bbaed670'),
-  4: t('i18n_a14da34559')
+  4: t('i18n_a14da34559'),
+  // 超过 3 个心跳周期没有刷新检测结果
+  5: t('i18n_863e74ad72')
 }
 
 // 查看机器关联节点

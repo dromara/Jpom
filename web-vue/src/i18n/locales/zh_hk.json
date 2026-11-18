@@ -119,6 +119,7 @@
 	"i18n_6c1b19dde4":"引擎",
 	"i18n_6fb5d67e27":"Java 升級包",
 	"i18n_7daad00d6a":"未上報",
+	"i18n_863e74ad72": "檢測超時",
 	"i18n_baee195ca8":"Go 升級容器",
 	"i18n_diff_include_desc":"支援目錄路徑或 Ant 風格通配符，以逗號分隔多個。僅當變更檔案符合時才觸發構建。留空 = 全部監聽",
 	"i18n_diff_include_ph":"例如: /modules/server,/modules/common,/pom.xml",

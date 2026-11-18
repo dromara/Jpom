@@ -62,6 +62,8 @@ DEFAULT_TESTS=(
 	BaseExceptionHandlerTest
 	# 节点数据同步：旧工作空间不存在时回退到节点当前工作空间（重装服务端后“同步 0 个”回归守卫，Gitee ICH1VK）
 	BaseNodeServiceSyncWorkspaceTest
+	# 节点状态时效：集群未绑定分组/transportMode 为空时不能永久停在“正常”（2026-11-18 群反馈回归守卫）
+	MachineNodeStatusTimeoutTest
 	# 严格构建：中间命令失败立即中断（仅严格 + sh 注入 set -e/pipefail，Gitee ICW9KZ）
 	BuildExecuteManageScriptTest
 	# 节点在线升级：引擎判定（engine/旧 Go 端 jarFile 兜底）、Go 升级容器解析、下载地址推导、版本/降级/最低兼容

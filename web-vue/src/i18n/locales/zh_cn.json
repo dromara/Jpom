@@ -119,6 +119,7 @@
   "i18n_6c1b19dde4": "引擎",
   "i18n_6fb5d67e27": "Java 升级包",
   "i18n_7daad00d6a": "未上报",
+  "i18n_863e74ad72": "检测超时",
   "i18n_baee195ca8": "Go 升级容器",
   "i18n_diff_include_desc": "支持目录路径或Ant风格通配，逗号分隔多个。仅当变更文件匹配时才触发构建。为空=全部监听",
   "i18n_diff_include_ph": "如: /modules/server,/modules/common,/pom.xml",
