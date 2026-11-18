@@ -77,7 +77,7 @@ JPOM_BASE_URL=http://127.0.0.1:2122 JPOM_TOKEN_FILE=/path/to/jpom-longterm-token
 ## MCP 客户端配置
 
 所有客户端都需要通过配置里的 `env` 注入 `JPOM_*` 环境变量（客户端启动 server 进程时不会继承你终端里的全部变量）。
-把 `JPOM_TOKEN` 换成自己的 Jpom 长期 token，或改用 `JPOM_TOKEN_FILE` 指向权限 600 的本地文件。
+把 `JPOM_TOKEN` 换成自己的 Jpom 长期 token（登录 Jpom → 右上角头像 →「用户资料」→ 复制「长期token」；别用旁边的「临时token」，它会过期），或改用 `JPOM_TOKEN_FILE` 指向权限 600 的本地文件。
 
 ### Claude Desktop
 
@@ -197,7 +197,7 @@ DSH 的 MCP 配置是插件配置树（YAML），不是 `mcpServers` JSON。在 
 | 变量 | 必填 | 默认 | 说明 |
 | --- | --- | --- | --- |
 | `JPOM_BASE_URL` | 是 | — | Jpom Server 地址，必须以 `http://` 或 `https://` 开头，例如 `http://127.0.0.1:2122`；末尾斜杠会被去掉。若 Jpom 配置了 context-path 需一并带上。 |
-| `JPOM_TOKEN` | 二选一 | — | Jpom 长期用户 token（请求头 `JPOM-USER-TOKEN`）。建议为 AI 单独创建最小权限 token。 |
+| `JPOM_TOKEN` | 二选一 | — | Jpom 长期 token（请求头 `JPOM-USER-TOKEN`）：登录 Jpom → 右上角头像 →「用户资料」→ 复制「长期token」。建议给 AI 单独建一个只授权所需工作空间的用户，用它登录后复制。 |
 | `JPOM_TOKEN_FILE` | 二选一 | — | 存放 token 的文件路径；读取后会去掉所有空白字符。建议 `chmod 600`，不要把 token 提交到仓库。 |
 | `JPOM_WORKSPACE` | 否 | `DEFAULT` | 操作的工作空间 id；会作为 `workspaceId` 请求头发送，影响所有工具可见的数据范围。 |
 | `JPOM_READ_ONLY` | 否 | `true` | `true`（默认）只启用只读工具；仅当值为 `false` / `0` / `no` / `off` 时才启用写工具，其它值（含 `true`/`1`/`yes`/`on`）均表示只读。 |
@@ -346,7 +346,7 @@ AI/LLM 的上下文有限，MCP 客户端对单次工具结果也有上限。日
 
 ## 安全
 
-- **最小权限 token**：在 Jpom 中为 AI 单独创建长期 token，只授予需要的工作空间与权限组；不要复用管理员 token。
+- **最小权限 token**：给 AI 单独建一个用户，只授权需要的工作空间与权限组，用它登录后按上面的步骤复制长期 token；不要复用管理员账号。改密码后 token 会变，需要重新复制。
 - **默认只读**：`JPOM_READ_ONLY` 默认 `true`；只有明确需要变更时才设为 `false`，并在会话结束后改回。
 - **写操作二次确认**：类型化写工具在只读模式下直接拒绝；开启写之后，执行前应回显「环境 / 工作空间 / 对象 / 动作」，
   得到用户明确同意再执行，优先选择最小、可回滚的动作。`jpom_api_call` 对非白名单 POST 还要求 `confirm:true`。
@@ -385,7 +385,7 @@ node dist/index.js doctor   # 用真实 Jpom 自检连通性（需 JPOM_* 环境
 
 | 现象 | 可能原因与处理 |
 | --- | --- |
-| Jpom API 返回 `code=800` | token 无效或已过期（修改密码/重新生成长期 token 后旧 token 失效）。重新在 Jpom「用户 → 长期 token」生成，更新 `JPOM_TOKEN` / `JPOM_TOKEN_FILE`；`doctor` 可快速验证。 |
+| Jpom API 返回 `code=800` | token 失效了（改过密码也会失效）。回右上角头像 →「用户资料」重新复制一次「长期token」，更新 `JPOM_TOKEN` / `JPOM_TOKEN_FILE`；`doctor` 可快速验证。 |
 | Jpom API 返回 `code=999` | 权限不足。检查 token 所属用户的工作空间与权限组、`JPOM_WORKSPACE` 是否指向正确工作空间，以及对应功能是否有权限；先用 `jpom_workspaces` 确认可访问范围。 |
 | 连接失败 / `ECONNREFUSED` / `ENOTFOUND` / 超时 | 检查 `JPOM_BASE_URL`（协议、主机、端口，默认 2122）、Jpom 是否启动、context-path 是否一致、本机网络/代理/防火墙；`JPOM_TIMEOUT_MS` 过小也会导致超时。 |
 | TLS 证书错误 | 自签名或证书链不完整。测试环境可临时 `JPOM_VERIFY_SSL=false`；生产环境应修复证书，不要关闭校验。 |

@@ -2,6 +2,8 @@
 
 通过 Jpom 现有 REST API + 长期 token（`JPOM-USER-TOKEN`）完成日常巡检与受控操作，**不修改 Jpom 主程序**。
 
+长期 token 获取：登录 Jpom → 右上角头像 →「用户资料」→ 复制「长期token」（别用旁边的「临时token」，它会过期）；改密码后需重新复制。
+
 - 默认**只读**；写操作（触发构建、启停项目、杀进程、在线升级）需 `JPOM_OPS_ALLOW_WRITE=true` **且** `--confirm`。
 - 两种接入方式：
   - **MCP Server（推荐）**：`jpom-mcp-server`（0.1.0 起可用），在 Claude Desktop / Cursor / VS Code / DeepSeek Harness 中通过 stdio 加载，见下方「MCP Server」与 `adapters/`。
