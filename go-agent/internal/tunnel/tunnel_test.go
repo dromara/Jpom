@@ -12,6 +12,7 @@ package tunnel
 
 import (
 	"bytes"
+	"encoding/json"
 	"testing"
 )
 
@@ -96,6 +97,63 @@ func TestSplitAndReassemble(t *testing.T) {
 	}
 }
 
+// TestPushFrameRoundTrip 锁定 PUSH 帧字段名与 Java 端一致（topic/seq/body），
+// 否则 Go 插件端推送会被 Java 服务端丢弃或解析为空。
+func TestPushFrameRoundTrip(t *testing.T) {
+	frame := NewPush(TopicNodeStat, 7, `{"simpleStatus":{"cpu":1.5}}`)
+	raw, err := EncodeControl(frame)
+	if err != nil {
+		t.Fatalf("encode push: %v", err)
+	}
+	var fields map[string]any
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		t.Fatalf("decode json: %v", err)
+	}
+	if fields["type"] != TypePush {
+		t.Fatalf("type = %v, want %s", fields["type"], TypePush)
+	}
+	if fields["topic"] != TopicNodeStat {
+		t.Fatalf("topic = %v, want %s", fields["topic"], TopicNodeStat)
+	}
+	if fields["seq"] != float64(7) {
+		t.Fatalf("seq = %v, want 7", fields["seq"])
+	}
+	if fields["body"] != `{"simpleStatus":{"cpu":1.5}}` {
+		t.Fatalf("body = %v", fields["body"])
+	}
+	if _, ok := fields["sid"]; ok {
+		t.Fatal("push frame must not carry sid")
+	}
+
+	decoded, err := DecodeControl(raw)
+	if err != nil {
+		t.Fatalf("decode control: %v", err)
+	}
+	if decoded.Type != TypePush || decoded.Topic != TopicNodeStat || decoded.Seq != 7 {
+		t.Fatalf("decoded push mismatch: %+v", decoded)
+	}
+}
+
+// TestHelloAckPushCapability 锁定能力位解析：老服务端（不声明 push）必须解析成 nil，
+// 插件端据此不发送 PUSH 帧，否则老服务端会把未知帧当非法帧断开连接。
+func TestHelloAckPushCapability(t *testing.T) {
+	withCapability, err := DecodeControl([]byte(`{"type":"HELLO_ACK","sessionId":"s-1","push":true}`))
+	if err != nil {
+		t.Fatalf("decode ack: %v", err)
+	}
+	if withCapability.Push == nil || !*withCapability.Push {
+		t.Fatalf("push capability = %v, want true", withCapability.Push)
+	}
+
+	legacy, err := DecodeControl([]byte(`{"type":"HELLO_ACK","sessionId":"s-1"}`))
+	if err != nil {
+		t.Fatalf("decode legacy ack: %v", err)
+	}
+	if legacy.Push != nil {
+		t.Fatalf("legacy ack must not advertise push, got %v", *legacy.Push)
+	}
+}
+
 func TestNormalizeURL(t *testing.T) {
 	cases := map[string]string{
 		"ws://127.0.0.1:2122":            "ws://127.0.0.1:2122/agent/tunnel",
@@ -121,9 +179,9 @@ func TestNormalizeURL(t *testing.T) {
 
 func TestLoopbackAddr(t *testing.T) {
 	cases := map[string]string{
-		":2123":            "127.0.0.1:2123",
-		"0.0.0.0:2123":     "127.0.0.1:2123",
-		"127.0.0.1:2123":   "127.0.0.1:2123",
+		":2123":           "127.0.0.1:2123",
+		"0.0.0.0:2123":    "127.0.0.1:2123",
+		"127.0.0.1:2123":  "127.0.0.1:2123",
 		"agent-host:2123": "agent-host:2123",
 	}
 	for input, want := range cases {

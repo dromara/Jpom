@@ -10,6 +10,7 @@
 package org.dromara.jpom.transport.tunnel.ws;
 
 import cn.hutool.core.util.StrUtil;
+import org.dromara.jpom.transport.tunnel.TunnelFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +35,7 @@ public class TunnelChannelRegistry {
 
     private final Map<String, TunnelChannel> channels = new ConcurrentHashMap<>();
     private final CopyOnWriteArrayList<TunnelConnectionListener> listeners = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<TunnelPushListener> pushListeners = new CopyOnWriteArrayList<>();
     private final TunnelServerOptions options;
     private ScheduledExecutorService scheduler;
 
@@ -76,6 +78,33 @@ public class TunnelChannelRegistry {
     public void addListener(TunnelConnectionListener listener) {
         if (listener != null) {
             listeners.add(listener);
+        }
+    }
+
+    /**
+     * 注册主动推送监听器（插件端 {@code PUSH} 帧由这里分发）
+     *
+     * @param listener 监听器
+     */
+    public void addPushListener(TunnelPushListener listener) {
+        if (listener != null) {
+            pushListeners.add(listener);
+        }
+    }
+
+    /**
+     * 分发一条插件端推送（单个监听器抛异常不影响其它监听器）
+     *
+     * @param channel 来源通道
+     * @param frame   推送帧
+     */
+    public void dispatchPush(TunnelChannel channel, TunnelFrame frame) {
+        for (TunnelPushListener listener : pushListeners) {
+            try {
+                listener.onPush(channel, frame);
+            } catch (Exception e) {
+                log.warn("节点[{}]推送处理失败 topic={}", channel.machineId(), frame.getTopic(), e);
+            }
         }
     }
 

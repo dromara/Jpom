@@ -51,6 +51,23 @@ type Tunnel struct {
 	MachineID      string `yaml:"machine-id"`
 	TimeoutSeconds int    `yaml:"timeout-seconds"`
 	MaxConcurrency int    `yaml:"max-concurrency"`
+	// PushEnabled 主动推送节点状态，缺省 true（与 Java 插件端一致）
+	PushEnabled *bool `yaml:"push-enabled"`
+	// PushInterval 主动推送间隔（秒），缺省 30
+	PushInterval int `yaml:"push-interval"`
+}
+
+// PushOn reports whether node status push is enabled (default true).
+func (t Tunnel) PushOn() bool {
+	return t.PushEnabled == nil || *t.PushEnabled
+}
+
+// PushIntervalSeconds returns the push interval in seconds (default 30).
+func (t Tunnel) PushIntervalSeconds() int {
+	if t.PushInterval <= 0 {
+		return 30
+	}
+	return t.PushInterval
 }
 
 // Enabled reports whether all three required tunnel settings are present.

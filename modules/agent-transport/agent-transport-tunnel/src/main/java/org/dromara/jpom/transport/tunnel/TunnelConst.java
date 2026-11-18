@@ -72,6 +72,26 @@ public final class TunnelConst {
     public static final long DEFAULT_AUTH_SKEW_SECONDS = 300;
 
     /**
+     * 插件端主动推送节点状态的主题
+     */
+    public static final String TOPIC_NODE_STAT = "node-stat";
+
+    /**
+     * 插件端主动推送的默认间隔（秒）
+     */
+    public static final int DEFAULT_PUSH_INTERVAL_SECONDS = 30;
+
+    /**
+     * 单条推送内容（JSON 文本）允许的最大字节数，超过即丢弃（防止慢速大包顶住心跳）
+     */
+    public static final int MAX_PUSH_BODY_BYTES = 256 * 1024;
+
+    /**
+     * 服务端：推送数据允许的最大年龄（秒），超过即视为节点不再上报（默认 3 个心跳周期）
+     */
+    public static final int DEFAULT_PUSH_MAX_AGE_SECONDS = 90;
+
+    /**
      * 服务端连接密钥配置项
      */
     public static final String CONFIG_KEY = "jpom.agent.tunnel.key";
@@ -90,6 +110,24 @@ public final class TunnelConst {
      * 插件端连接密钥配置项
      */
     public static final String CONFIG_AGENT_KEY = "jpom.agent.tunnel.key";
+
+    /**
+     * 插件端：是否启用主动推送（默认 true，且仅在隧道在线时生效）
+     * <p>
+     * 插件端配置前缀是 {@code jpom.tunnel}（{@code TunnelAgentProperties}），与服务端的
+     * {@code jpom.agent.tunnel} 不是同一层，别写错。
+     */
+    public static final String CONFIG_AGENT_PUSH_ENABLED = "jpom.tunnel.push-enabled";
+
+    /**
+     * 插件端：主动推送间隔（秒）
+     */
+    public static final String CONFIG_AGENT_PUSH_INTERVAL = "jpom.tunnel.push-interval";
+
+    /**
+     * 服务端：推送数据最大年龄（秒），超过即判定节点不再上报
+     */
+    public static final String CONFIG_PUSH_MAX_AGE = "jpom.agent.tunnel.push-max-age-seconds";
 
     /**
      * 与正向传输保持一致的授权 header，插件端回环调用本机 HTTP 时必须带上

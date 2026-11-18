@@ -22,6 +22,7 @@ import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.keepbx.jpom.event.IAsyncLoad;
 import cn.keepbx.jpom.model.JsonMessage;
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
@@ -40,6 +41,7 @@ import org.dromara.jpom.func.assets.AssetsExecutorPoolService;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.assets.model.MachineNodeStatLogModel;
 import org.dromara.jpom.func.system.service.ClusterInfoService;
+import org.dromara.jpom.func.tunnel.TunnelPushService;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.h2db.BaseDbService;
@@ -55,6 +57,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -72,19 +75,35 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
     private final MachineNodeStatLogServer machineNodeStatLogServer;
     private final ClusterInfoService clusterInfoService;
     private final AssetsExecutorPoolService assetsExecutorPoolService;
+    private final TunnelPushService tunnelPushService;
+    /**
+     * 推送模式节点连续未上报状态的次数（达到阈值自动回退拉取，避免插件端回退版本后永久异常）
+     */
+    private final Map<String, Integer> pushMissCount = new java.util.concurrent.ConcurrentHashMap<>();
+    /**
+     * 每个节点最近一次已落库的推送：避免同一份推送在多个心跳周期里重复写统计日志
+     */
+    private final PushSnapshotTracker pushSnapshotTracker = new PushSnapshotTracker();
 
     private static final String TASK_ID = "system_monitor_node";
+
+    /**
+     * 连续多少个心跳周期没有推送即回退拉取
+     */
+    private static final int PUSH_MISS_LIMIT = 3;
 
     public MachineNodeServer(NodeService nodeService,
                              ServerConfig serverConfig,
                              MachineNodeStatLogServer machineNodeStatLogServer,
                              ClusterInfoService clusterInfoService,
-                             AssetsExecutorPoolService assetsExecutorPoolService) {
+                             AssetsExecutorPoolService assetsExecutorPoolService,
+                             TunnelPushService tunnelPushService) {
         this.nodeService = nodeService;
         this.nodeConfig = serverConfig.getNode();
         this.machineNodeStatLogServer = machineNodeStatLogServer;
         this.clusterInfoService = clusterInfoService;
         this.assetsExecutorPoolService = assetsExecutorPoolService;
+        this.tunnelPushService = tunnelPushService;
     }
 
     @Override
@@ -208,17 +227,147 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
                 }
             }
             List<MachineNodeModel> machineNodeModels = Optional.ofNullable(this.listByEntity(entity)).orElseGet(ArrayList::new);
-            // 兼容历史数据、手工迁库：transportMode 可能为空，不能因此永久跳过该机器
-            machineNodeModels = machineNodeModels.stream()
-                .filter(machineNodeModel -> isPollTransportMode(machineNodeModel.getTransportMode()))
-                .collect(Collectors.toList());
-            this.checkList(machineNodeModels);
+            List<MachineNodeModel> pollMachines = new ArrayList<>();
+            List<MachineNodeModel> pushMachines = new ArrayList<>();
+            for (MachineNodeModel machineNodeModel : machineNodeModels) {
+                if (isPushTransportMode(machineNodeModel.getTransportMode())) {
+                    pushMachines.add(machineNodeModel);
+                } else {
+                    // transportMode 为空视为拉取，兼容历史数据、手工迁库
+                    pollMachines.add(machineNodeModel);
+                }
+            }
+            // 已收到主动推送的节点切到推送模式；多服务端部署时各实例只持有自己那条隧道的推送数据，
+            // 切换会导致其它实例误判节点离线，因此多服务端保持拉取
+            if (!this.clusterInfoService.isMultiServer()) {
+                pollMachines.removeIf(this::switchToPushIfFresh);
+            }
+            // 清理已删除节点残留的推送状态，避免 Map 无界增长
+            this.prunePushState(machineNodeModels);
+            this.checkList(pollMachines);
+            this.checkPushList(pushMachines);
             taskStat.onSucceeded();
         } catch (Throwable throwable) {
             taskStat.onFailed(TASK_ID, throwable);
         }
     }
 
+
+    /**
+     * 拉取模式下，如果该节点已经通过隧道主动上报了新鲜数据，则切换为推送模式
+     * <p>
+     * 只有真正收到推送的节点才会切换（老版本插件端不会推送，保持拉取），
+     * 切换后由 {@link #checkPushList(List)} 消费推送快照，不再发起拉取请求。
+     *
+     * @param machineNodeModel 机器节点（transportMode 为空或 0）
+     * @return true 已切换（本轮不再拉取）
+     */
+    private boolean switchToPushIfFresh(MachineNodeModel machineNodeModel) {
+        TunnelPushService.Snapshot snapshot = this.tunnelPushService.fresh(machineNodeModel.getId());
+        if (snapshot == null) {
+            return false;
+        }
+        MachineNodeModel update = new MachineNodeModel();
+        update.setId(machineNodeModel.getId());
+        update.setTransportMode(1);
+        this.updateById(update);
+        log.info("节点[{}]已收到主动推送数据，传输方式切换为推送模式", machineNodeModel.getName());
+        return true;
+    }
+
+    /**
+     * 推送模式的节点状态刷新：消费插件端主动上报的最新快照
+     * <p>
+     * 推送数据过期（超过 {@code jpom.agent.tunnel.push-max-age-seconds}）按无法连接处理，
+     * 与拉取模式请求失败的口径一致，不自动回退拉取（避免同一节点两种数据源来回抖动）。
+     *
+     * @param machineNodeModels 推送模式的机器列表
+     */
+    private void checkPushList(List<MachineNodeModel> machineNodeModels) {
+        if (CollUtil.isEmpty(machineNodeModels)) {
+            return;
+        }
+        machineNodeModels.forEach(machineNodeModel -> this.assetsExecutorPoolService.execute(() -> {
+            try {
+                TunnelPushService.Snapshot snapshot = this.tunnelPushService.fresh(machineNodeModel.getId());
+                if (snapshot == null) {
+                    this.updateStatus(machineNodeModel, 0, I18nMessageUtil.get("i18n.tunnel_push_data_timeout.7c1a"));
+                    this.fallbackToPollIfMissed(machineNodeModel);
+                    return;
+                }
+                this.pushMissCount.remove(machineNodeModel.getId());
+                if (!this.pushSnapshotTracker.firstConsume(machineNodeModel.getId(), snapshot.getReceivedAt())) {
+                    // 同一份推送不重复落库：只刷新“最后检测时间”，避免统计日志里出现同一 monitorTime 的重复行
+                    MachineNodeModel touch = new MachineNodeModel();
+                    touch.setId(machineNodeModel.getId());
+                    this.updateById(touch);
+                    return;
+                }
+                JSONObject jsonObject = JSON.parseObject(snapshot.getBody());
+                if (jsonObject == null) {
+                    this.updateStatus(machineNodeModel, 0, I18nMessageUtil.get("i18n.tunnel_push_data_invalid.2f5b"));
+                    return;
+                }
+                fillPushNetworkDelay(jsonObject);
+                this.saveStatInfo(machineNodeModel, jsonObject);
+            } catch (Exception e) {
+                this.updateStatus(machineNodeModel, 0, I18nMessageUtil.get("i18n.tunnel_push_data_invalid.2f5b"));
+                log.warn("节点[{}]推送数据解析失败", machineNodeModel.getName(), e);
+            }
+        }));
+    }
+
+    /**
+     * 推送模式的网络延迟口径：没有“服务端到节点”的请求往返，落库值为 0。
+     * <p>
+     * {@link #saveStatInfo(MachineNodeModel, JSONObject)} 会减去插件端上报的 {@code systemSleep}
+     * （采集时的固定休眠 {@code NET_STAT_SLEEP + CPU_STAT_SLEEP}），这里必须填入同样的休眠时间，
+     * 否则推送节点的 networkDelay 会变成负数（页面显示 -2000ms、监控曲线为负值）。
+     *
+     * @param jsonObject 推送数据（与 {@code /get-stat-info} 同构）
+     */
+    static void fillPushNetworkDelay(JSONObject jsonObject) {
+        jsonObject.put("networkDelay", jsonObject.getIntValue("systemSleep"));
+    }
+
+    /**
+     * 清理已不在当前监控范围（节点被删除）时残留的推送状态
+     *
+     * @param machineNodeModels 本轮机器列表
+     */
+    private void prunePushState(List<MachineNodeModel> machineNodeModels) {
+        if (CollUtil.isEmpty(machineNodeModels)) {
+            this.pushMissCount.clear();
+            this.pushSnapshotTracker.retain(null);
+            return;
+        }
+        Set<String> ids = machineNodeModels.stream().map(MachineNodeModel::getId).collect(Collectors.toSet());
+        this.pushMissCount.keySet().retainAll(ids);
+        this.pushSnapshotTracker.retain(ids);
+    }
+
+    /**
+     * 推送连续中断达到阈值后回退为拉取模式
+     * <p>
+     * 用于插件端被回退到不支持推送的版本、或推送配置被关闭的场景：否则节点会永久停留在
+     * “未上报状态”，只能改库恢复。回退后若再次收到推送，{@link #switchToPushIfFresh(MachineNodeModel)}
+     * 会重新切回推送模式。
+     *
+     * @param machineNodeModel 推送模式的机器
+     */
+    private void fallbackToPollIfMissed(MachineNodeModel machineNodeModel) {
+        int missed = this.pushMissCount.merge(machineNodeModel.getId(), 1, Integer::sum);
+        if (missed < PUSH_MISS_LIMIT) {
+            return;
+        }
+        MachineNodeModel update = new MachineNodeModel();
+        update.setId(machineNodeModel.getId());
+        update.setTransportMode(0);
+        this.updateById(update);
+        this.pushMissCount.remove(machineNodeModel.getId());
+        this.pushSnapshotTracker.clear(machineNodeModel.getId());
+        log.warn("节点[{}]连续 {} 个周期未收到主动推送，回退为服务端拉取模式", machineNodeModel.getName(), missed);
+    }
 
     private void checkList(List<MachineNodeModel> machineNodeModels) {
         if (CollUtil.isEmpty(machineNodeModels)) {
@@ -416,6 +565,16 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
      */
     public static boolean isPollTransportMode(Integer transportMode) {
         return transportMode == null || transportMode == 0;
+    }
+
+    /**
+     * 是否由节点主动推送状态
+     *
+     * @param transportMode 传输方式
+     * @return true 推送模式
+     */
+    public static boolean isPushTransportMode(Integer transportMode) {
+        return transportMode != null && transportMode == 1;
     }
 
     /**

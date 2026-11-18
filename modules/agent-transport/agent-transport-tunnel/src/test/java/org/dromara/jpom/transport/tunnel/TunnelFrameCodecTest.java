@@ -56,6 +56,37 @@ public class TunnelFrameCodecTest {
     }
 
     @Test
+    public void testPushFrameRoundTrip() {
+        // PUSH 是插件端 -> 服务端的单向帧：不占用 sid，靠 topic/seq/body 承载内容
+        TunnelFrame frame = TunnelFrame.push(TunnelConst.TOPIC_NODE_STAT, 7L, "{\"simpleStatus\":{\"cpu\":1.5}}");
+
+        String text = TunnelFrameCodec.encodeControl(frame);
+        Assertions.assertFalse(text.contains("null"), "推送帧不应输出 null 字段: " + text);
+
+        TunnelFrame decoded = TunnelFrameCodec.decodeControl(text);
+        Assertions.assertEquals(TunnelFrameType.PUSH, decoded.frameType());
+        Assertions.assertEquals(TunnelConst.TOPIC_NODE_STAT, decoded.getTopic());
+        Assertions.assertEquals(7L, decoded.getSeq().longValue());
+        Assertions.assertTrue(decoded.getBody().contains("simpleStatus"));
+        Assertions.assertNull(decoded.getSid(), "推送帧不需要 sid");
+    }
+
+    @Test
+    public void testHelloAckPushCapability() {
+        // 服务端声明支持推送
+        TunnelFrame ack = TunnelFrame.of(TunnelFrameType.HELLO_ACK, null);
+        ack.setPush(Boolean.TRUE);
+        TunnelFrame decoded = TunnelFrameCodec.decodeControl(TunnelFrameCodec.encodeControl(ack));
+        Assertions.assertEquals(Boolean.TRUE, decoded.getPush());
+        Assertions.assertEquals(TunnelFrameType.HELLO_ACK, decoded.frameType());
+
+        // 老服务端不带该字段：插件端必须视为“不支持”，不能默认推送
+        TunnelFrame legacy = TunnelFrame.of(TunnelFrameType.HELLO_ACK, null);
+        TunnelFrame legacyDecoded = TunnelFrameCodec.decodeControl(TunnelFrameCodec.encodeControl(legacy));
+        Assertions.assertNull(legacyDecoded.getPush(), "缺少能力位必须解析为 null");
+    }
+
+    @Test
     public void testDecodeControlRejectsUnknownType() {
         Assertions.assertThrows(TunnelProtocolException.class, () -> TunnelFrameCodec.decodeControl("{\"type\":\"NOPE\"}"));
         Assertions.assertThrows(TunnelProtocolException.class, () -> TunnelFrameCodec.decodeControl(""));

@@ -28,6 +28,10 @@ jpom:
     timeout-seconds: 30
     # 并发处理上限
     max-concurrency: 16
+    # 是否主动推送节点状态（服务端据此切换为推送模式，缺省 true）
+    push-enabled: true
+    # 主动推送间隔（秒）
+    push-interval: 30
   project:
     # 停止、启动项目(项目状态检测)等待的时长 单位秒
     status-wait-time: 10

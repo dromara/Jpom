@@ -65,6 +65,14 @@ DEFAULT_TESTS=(
 	BaseNodeServiceSyncWorkspaceTest
 	# 节点状态时效：集群未绑定分组/transportMode 为空时不能永久停在“正常”（2026-11-18 群反馈回归守卫）
 	MachineNodeStatusTimeoutTest
+	# 插件端主动推送（PUSH）：服务端只接受节点状态主题、校验大小、按最大年龄判定新鲜度（建议三补推送）
+	TunnelPushServiceTest
+	# 推送快照去重：同一份推送不得重复落库（否则统计日志出现相同 monitorTime 的重复行）
+	PushSnapshotTrackerTest
+	# 推送节点下线清理：被新连接顶替时保留快照、真正下线才清理（避免监控闪成无法连接）
+	TunnelPushSnapshotCleanerTest
+	# 推送模式网络延迟口径：落库必须是 0，不能是负数
+	MachineNodePushNetworkDelayTest
 	# 严格构建：中间命令失败立即中断（仅严格 + sh 注入 set -e/pipefail，Gitee ICW9KZ）
 	BuildExecuteManageScriptTest
 	# 节点在线升级：引擎判定（engine/旧 Go 端 jarFile 兜底）、Go 升级容器解析、下载地址推导、版本/降级/最低兼容

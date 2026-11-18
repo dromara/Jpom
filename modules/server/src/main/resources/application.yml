@@ -46,6 +46,8 @@ jpom:
       max-concurrency: 16
       # 建连后等待 HELLO 的超时（秒）
       hello-timeout-seconds: 30
+      # 插件端主动推送的节点状态允许的最大年龄（秒），超过视为节点不再上报
+      push-max-age-seconds: 90
   system:
     # cron 定时器是否开启匹配秒
     timer-match-second: false

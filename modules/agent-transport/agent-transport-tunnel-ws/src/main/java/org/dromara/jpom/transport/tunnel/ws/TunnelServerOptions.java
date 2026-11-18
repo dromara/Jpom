@@ -39,6 +39,12 @@ public class TunnelServerOptions {
      * 流控窗口（字节）
      */
     private long windowBytes = TunnelConst.DEFAULT_WINDOW_BYTES;
+    /**
+     * 是否在 HELLO_ACK 中声明支持插件端主动推送（{@code PUSH}）
+     * <p>
+     * 关掉后插件端不会发送推送帧（节点状态回到服务端拉取），可用于应急停止推送。
+     */
+    private boolean pushSupported = true;
 
     public int getHeartbeatSeconds() {
         return Math.max(heartbeatSeconds, 1);
@@ -78,5 +84,13 @@ public class TunnelServerOptions {
 
     public void setWindowBytes(long windowBytes) {
         this.windowBytes = windowBytes;
+    }
+
+    public boolean isPushSupported() {
+        return pushSupported;
+    }
+
+    public void setPushSupported(boolean pushSupported) {
+        this.pushSupported = pushSupported;
     }
 }

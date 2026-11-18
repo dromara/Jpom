@@ -9,6 +9,8 @@
  */
 package org.dromara.jpom.transport.tunnel.ws;
 
+import org.dromara.jpom.transport.tunnel.TunnelConst;
+import org.dromara.jpom.transport.tunnel.TunnelFrame;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.socket.WebSocketSession;
@@ -89,6 +91,28 @@ public class TunnelChannelRegistryTest {
         session.open = false;
         Assertions.assertNull(registry.get("m-3"), "底层连接已关闭时应视为离线");
         Assertions.assertFalse(registry.isOnline("m-3"));
+    }
+
+    @Test
+    public void testDispatchPushToListeners() {
+        TunnelChannelRegistry registry = new TunnelChannelRegistry(new TunnelServerOptions());
+        List<String> received = new ArrayList<>();
+        registry.addPushListener((channel, frame) -> {
+            received.add(channel.machineId() + ":" + frame.getTopic() + ":" + frame.getSeq());
+        });
+        // 单个监听器抛异常不能影响其它监听器
+        registry.addPushListener((channel, frame) -> {
+            throw new IllegalStateException("boom");
+        });
+        registry.addPushListener((channel, frame) -> received.add("second:" + frame.getTopic()));
+
+        TunnelChannel channel = new TunnelChannel(new StubSession(), new TunnelServerOptions());
+        channel.setMachineId("m-9");
+        registry.dispatchPush(channel, TunnelFrame.push(TunnelConst.TOPIC_NODE_STAT, 3L, "{}"));
+
+        Assertions.assertEquals(2, received.size(), "异常监听器不应中断分发");
+        Assertions.assertEquals("m-9:" + TunnelConst.TOPIC_NODE_STAT + ":3", received.get(0));
+        Assertions.assertEquals("second:" + TunnelConst.TOPIC_NODE_STAT, received.get(1));
     }
 
     private static class StubSession implements WebSocketSession {

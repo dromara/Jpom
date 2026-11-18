@@ -53,7 +53,13 @@ const (
 	TypeOpenAck    = "OPEN_ACK"
 	TypeClose      = "CLOSE"
 	TypeAck        = "ACK"
+	// TypePush is an agent -> server one way push (node status, metrics).
+	TypePush = "PUSH"
 )
+
+// TopicNodeStat mirrors TunnelConst.TOPIC_NODE_STAT: the pushed body is the
+// same JSON shape as the /get-stat-info data field.
+const TopicNodeStat = "node-stat"
 
 // Frame is one control frame (JSON text frame on the tunnel).
 type Frame struct {
@@ -99,6 +105,21 @@ type Frame struct {
 
 	// ACK
 	N int64 `json:"n,omitempty"`
+
+	// PUSH
+	Topic string `json:"topic,omitempty"`
+	Seq   int64  `json:"seq,omitempty"`
+	Body  string `json:"body,omitempty"`
+
+	// HELLO_ACK capability: server supports agent -> server PUSH frames.
+	// An older server does not know PUSH and closes the connection on an
+	// unknown control frame, so the agent only pushes when this is true.
+	Push *bool `json:"push,omitempty"`
+}
+
+// NewPush builds an agent -> server push frame.
+func NewPush(topic string, seq int64, body string) *Frame {
+	return &Frame{Type: TypePush, Topic: topic, Seq: seq, Body: body}
 }
 
 // EncodeControl marshals a control frame.

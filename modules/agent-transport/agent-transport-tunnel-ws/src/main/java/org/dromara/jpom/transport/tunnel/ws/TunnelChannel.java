@@ -76,6 +76,8 @@ public class TunnelChannel implements TunnelSession {
     private final Map<String, Pending> pending = new ConcurrentHashMap<>();
     private final Map<String, ServerStream> streams = new ConcurrentHashMap<>();
 
+    private volatile java.util.function.Consumer<TunnelFrame> pushHandler;
+
     private volatile String machineId;
     private volatile String agentVersion;
     private volatile String remoteAddress;
@@ -116,6 +118,15 @@ public class TunnelChannel implements TunnelSession {
 
     public void setRemoteAddress(String remoteAddress) {
         this.remoteAddress = remoteAddress;
+    }
+
+    /**
+     * 绑定插件端主动推送的处理器（由端点处理器在连接建立时注册，转发给注册表内的监听器）
+     *
+     * @param pushHandler 处理器
+     */
+    public void setPushHandler(java.util.function.Consumer<TunnelFrame> pushHandler) {
+        this.pushHandler = pushHandler;
     }
 
     public boolean isHelloPassed() {
@@ -471,6 +482,19 @@ public class TunnelChannel implements TunnelSession {
                 ServerStream stream = streams.remove(frame.getSid());
                 if (stream != null) {
                     stream.peerClosed(frame.getCode() == null ? CLOSE_NORMAL : frame.getCode());
+                }
+                break;
+            }
+            case PUSH: {
+                java.util.function.Consumer<TunnelFrame> handler = this.pushHandler;
+                if (handler == null) {
+                    log.debug("隧道[{}]收到推送但未注册处理器，丢弃 topic={}", machineId, frame.getTopic());
+                    break;
+                }
+                try {
+                    handler.accept(frame);
+                } catch (Exception e) {
+                    log.warn("隧道[{}]处理推送异常 topic={}", machineId, frame.getTopic(), e);
                 }
                 break;
             }

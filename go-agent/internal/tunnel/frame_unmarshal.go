@@ -119,10 +119,16 @@ func (f *Frame) UnmarshalJSON(data []byte) error {
 	f.Timeout, _ = intOrZero(num("timeout"))
 	f.Status, _ = intOrZero(num("status"))
 	f.N, _ = num("n")
+	f.Topic = str("topic")
+	f.Body = str("body")
+	f.Seq, _ = num("seq")
 	f.Headers = stringMap("headers")
 	f.Query = stringMap("query")
 	if ok, present := boolean("ok"); present {
 		f.Ok = ok
+	}
+	if push, present := boolean("push"); present {
+		f.Push = push
 	}
 	return nil
 }

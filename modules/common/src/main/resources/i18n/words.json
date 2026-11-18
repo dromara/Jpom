@@ -1638,6 +1638,8 @@
 	"i18n.trigger_token_error_or_expired_with_code.393b":"触发token错误,或者已经失效:-1",
 	"i18n.trim_completed_with_recovered_space.0463":"修剪完成,总回收空间：",
 	"i18n.trusted_proxies_config_invalid.d9d6":"jpom.web.trusted-proxies 配置项非法，已忽略：{}",
+	"i18n.tunnel_push_data_invalid.2f5b":"节点主动上报的状态数据无法解析，请检查插件端版本与日志",
+	"i18n.tunnel_push_data_timeout.7c1a":"节点长时间未主动上报状态，请检查插件端隧道与主动推送配置",
 	"i18n.two_step_verification_code_required.7e86":"请输入两步验证码",
 	"i18n.type_error.395f":"类型错误",
 	"i18n.type_field_required.7637":"第 {} 行 type 字段不能位空",

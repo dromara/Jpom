@@ -73,6 +73,10 @@ public class TunnelClient {
     private volatile WebSocketSession session;
     private volatile boolean running;
     private volatile boolean connected;
+    /**
+     * 服务端是否在 HELLO_ACK 中声明支持主动推送（{@code PUSH}），未声明时不发送推送帧
+     */
+    private volatile boolean pushSupported;
     private volatile boolean connecting;
     private volatile long lastReceived = System.currentTimeMillis();
     private volatile long nextAttemptAt;
@@ -132,6 +136,15 @@ public class TunnelClient {
      */
     public boolean isConnected() {
         return connected && session != null && session.isOpen();
+    }
+
+    /**
+     * 服务端是否声明支持主动推送（{@code HELLO_ACK.push=true}）
+     *
+     * @return true 可以发送 {@code PUSH} 帧
+     */
+    public boolean isPushSupported() {
+        return pushSupported;
     }
 
     /**
@@ -238,6 +251,8 @@ public class TunnelClient {
 
     private void closeSession(int code, String reason) {
         connected = false;
+        // 重连后需重新等新服务端声明能力位，不能沿用上一条连接的结果
+        pushSupported = false;
         requestFrames.clear();
         requestBodies.clear();
         for (ClientStream stream : streams.values()) {
@@ -283,6 +298,30 @@ public class TunnelClient {
         }
     }
 
+    /**
+     * 主动推送一条数据（插件端 -> 服务端，单向）
+     * <p>
+     * 仅在隧道已连接时发送；未连接返回 {@code false}，调用方下一轮再试，不做缓存重放。
+     *
+     * @param topic 主题（见 {@code TunnelConst#TOPIC_NODE_STAT}）
+     * @param seq   序号（可空）
+     * @param body  推送内容（JSON 文本）
+     * @return true 已提交发送
+     */
+    public boolean sendPush(String topic, Long seq, String body) {
+        if (!this.pushSupported) {
+            // 老服务端把未知帧当作非法帧直接断开，能力位未声明时宁可不推
+            log.debug("服务端未支持主动推送，跳过 topic={}", topic);
+            return false;
+        }
+        if (!this.isConnected()) {
+            log.debug("反向隧道未连接，跳过推送 topic={}", topic);
+            return false;
+        }
+        this.sendControl(TunnelFrame.push(topic, seq, body));
+        return true;
+    }
+
     private void sendControl(TunnelFrame frame) {
         if (!this.isConnected() && frame.frameType() != TunnelFrameType.HELLO) {
             log.debug("反向隧道未连接，跳过发送 {}", frame.frameType());
@@ -316,6 +355,11 @@ public class TunnelClient {
                     heartbeatSeconds = frame.getHeartbeat();
                 }
                 connected = true;
+                // 服务端能力位：老服务端不认识 PUSH 帧（收到会按非法帧断开连接），未声明时插件端不推送
+                this.pushSupported = Boolean.TRUE.equals(frame.getPush());
+                if (!this.pushSupported) {
+                    log.info("服务端未声明支持主动推送（老版本服务端），插件端不发送 PUSH 帧");
+                }
                 CountDownLatch latch = helloLatch;
                 if (latch != null) {
                     latch.countDown();

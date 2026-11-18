@@ -50,6 +50,16 @@ public class TunnelAgentProperties {
     private int maxConcurrency = TunnelConst.DEFAULT_MAX_CONCURRENCY;
 
     /**
+     * 是否主动推送节点状态（服务端据此切换到推送模式，见 {@code jpom.agent.tunnel.push-max-age-seconds}）
+     */
+    private boolean pushEnabled = true;
+
+    /**
+     * 主动推送间隔（秒）
+     */
+    private int pushInterval = TunnelConst.DEFAULT_PUSH_INTERVAL_SECONDS;
+
+    /**
      * 是否启用（三项配置齐全才启用）
      *
      * @return true 启用

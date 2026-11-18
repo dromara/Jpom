@@ -55,6 +55,13 @@ public class TunnelConfig {
     private int helloTimeoutSeconds = 30;
 
     /**
+     * 插件端主动推送的数据允许的最大年龄（秒）
+     * <p>
+     * 超过该年龄仍未收到新的推送，视为节点不再上报，节点状态按无法连接处理。
+     */
+    private int pushMaxAgeSeconds = TunnelConst.DEFAULT_PUSH_MAX_AGE_SECONDS;
+
+    /**
      * 是否启用
      *
      * @return true 已配置连接密钥

@@ -121,6 +121,9 @@ func main() {
 		} else {
 			client.Start()
 			tunnelClient = client
+			pushCtx, pushCancel := context.WithCancel(context.Background())
+			defer pushCancel()
+			go runPushLoop(pushCtx, application, client, settings)
 			application.Log().Info("reverse tunnel starting",
 				"server", settings.ServerURL, "machine", settings.MachineID, "local", local)
 		}

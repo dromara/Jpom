@@ -11,11 +11,14 @@ package org.dromara.jpom.common.tunnel;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
+import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.configuration.AgentConfig;
+import org.dromara.jpom.service.AgentStatInfoService;
+import org.dromara.jpom.transport.tunnel.TunnelConst;
 import org.dromara.jpom.transport.tunnel.ws.LocalHttpTunnelHandler;
 import org.dromara.jpom.transport.tunnel.ws.LocalWebSocketTunnelHandler;
 import org.dromara.jpom.transport.tunnel.ws.TunnelClient;
@@ -27,6 +30,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 插件端反向隧道启动器：配置齐全时主动连接服务端，并把请求转发到本机接口。
@@ -43,13 +50,19 @@ public class TunnelAgentRunner implements ApplicationRunner, DisposableBean {
     private final TunnelAgentProperties properties;
     private final AgentConfig agentConfig;
     private final JpomApplication jpomApplication;
+    private final AgentStatInfoService agentStatInfoService;
 
     private volatile TunnelClient tunnelClient;
+    private volatile ScheduledExecutorService pushScheduler;
+    private final AtomicLong pushSeq = new AtomicLong();
+    private volatile boolean pushUnsupportedLogged;
 
-    public TunnelAgentRunner(TunnelAgentProperties properties, AgentConfig agentConfig, JpomApplication jpomApplication) {
+    public TunnelAgentRunner(TunnelAgentProperties properties, AgentConfig agentConfig, JpomApplication jpomApplication,
+                             AgentStatInfoService agentStatInfoService) {
         this.properties = properties;
         this.agentConfig = agentConfig;
         this.jpomApplication = jpomApplication;
+        this.agentStatInfoService = agentStatInfoService;
     }
 
     @Override
@@ -78,7 +91,54 @@ public class TunnelAgentRunner implements ApplicationRunner, DisposableBean {
         options.setStreamHandler(new LocalWebSocketTunnelHandler(options.getLocalWsBase(), authorize, properties.getTimeoutSeconds()));
         this.tunnelClient = new TunnelClient(options);
         this.tunnelClient.start();
-        log.info("反向隧道已启动，服务端 {} 节点 {}", properties.getServerUrl(), properties.getMachineId());
+        this.startPushLoop();
+        log.info("反向隧道已启动，服务端 {} 节点 {}，主动推送={}（间隔 {} 秒）", properties.getServerUrl(),
+            properties.getMachineId(), properties.isPushEnabled() ? "开启" : "关闭", Math.max(properties.getPushInterval(), 5));
+    }
+
+    /**
+     * 启动节点状态主动推送循环
+     * <p>
+     * 只有隧道在线时才采集与发送：采集本身有固定休眠（系统监控统计），离线时不做无用功。
+     * 推送失败不缓存重放，下一轮重新采集，避免服务端收到过期的历史数据。
+     */
+    private void startPushLoop() {
+        if (!properties.isPushEnabled()) {
+            return;
+        }
+        int interval = Math.max(properties.getPushInterval(), 5);
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(runnable -> {
+            Thread thread = new Thread(runnable, "jpom-tunnel-push");
+            thread.setDaemon(true);
+            return thread;
+        });
+        this.pushScheduler = scheduler;
+        // 首次延迟 3 秒，避开启动阶段的监控初始化
+        scheduler.scheduleWithFixedDelay(this::pushStatOnce, 3, interval, TimeUnit.SECONDS);
+    }
+
+    private void pushStatOnce() {
+        TunnelClient client = this.tunnelClient;
+        if (client == null || !client.isConnected()) {
+            return;
+        }
+        if (!client.isPushSupported()) {
+            // 老服务端不认识 PUSH 帧（收到会按非法帧断开连接），能力位未声明时宁可只拉取
+            if (!this.pushUnsupportedLogged) {
+                log.info("服务端未声明支持主动推送（老版本服务端），插件端保持拉取模式、不发送推送帧");
+                this.pushUnsupportedLogged = true;
+            }
+            return;
+        }
+        this.pushUnsupportedLogged = false;
+        try {
+            JSONObject statInfo = this.agentStatInfoService.statInfo();
+            if (client.sendPush(TunnelConst.TOPIC_NODE_STAT, this.pushSeq.incrementAndGet(), statInfo.toJSONString())) {
+                log.debug("节点状态已推送，seq={}", this.pushSeq.get());
+            }
+        } catch (Throwable throwable) {
+            log.warn("节点状态推送失败", throwable);
+        }
     }
 
     /**
@@ -93,6 +153,11 @@ public class TunnelAgentRunner implements ApplicationRunner, DisposableBean {
 
     @Override
     public void destroy() {
+        ScheduledExecutorService scheduler = this.pushScheduler;
+        if (scheduler != null) {
+            scheduler.shutdownNow();
+            this.pushScheduler = null;
+        }
         TunnelClient client = this.tunnelClient;
         if (client != null) {
             client.stop();

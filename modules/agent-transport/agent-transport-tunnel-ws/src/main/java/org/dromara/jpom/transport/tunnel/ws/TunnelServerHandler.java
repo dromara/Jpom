@@ -63,6 +63,7 @@ public class TunnelServerHandler extends AbstractWebSocketHandler {
         WebSocketSession decorator = new ConcurrentWebSocketSessionDecorator(session, SEND_TIME_LIMIT, SEND_BUFFER_SIZE_LIMIT);
         TunnelChannel channel = new TunnelChannel(decorator, options);
         channel.setRemoteAddress(remoteAddress(session));
+        channel.setPushHandler(frame -> registry.dispatchPush(channel, frame));
         session.getAttributes().put(CHANNEL_KEY, channel);
         log.debug("反向隧道连接建立 session={} ip={}", channel.sessionId(), channel.getRemoteAddress());
     }
@@ -154,6 +155,9 @@ public class TunnelServerHandler extends AbstractWebSocketHandler {
         ack.setHeartbeat(options.getHeartbeatSeconds());
         ack.setMaxConcurrency(options.getMaxConcurrency());
         ack.setServerVersion(serverVersion);
+        // 能力位：只有本服务端声明支持后，插件端才会发送 PUSH 帧
+        // （老服务端不认识 PUSH，收到会按非法帧断开连接，所以插件端不能默认发送）
+        ack.setPush(options.isPushSupported());
         ack.setLen((long) options.getWindowBytes());
         channel.sendControl(ack);
     }

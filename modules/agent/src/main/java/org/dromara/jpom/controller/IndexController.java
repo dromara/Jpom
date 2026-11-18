@@ -9,7 +9,6 @@
  */
 package org.dromara.jpom.controller;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
@@ -25,13 +24,8 @@ import org.dromara.jpom.common.commander.SystemCommander;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.interceptor.NotAuthorize;
 import org.dromara.jpom.configuration.AgentConfig;
-import org.dromara.jpom.configuration.MonitorConfig;
-import org.dromara.jpom.model.data.NodeProjectInfoModel;
-import org.dromara.jpom.model.data.NodeScriptModel;
 import org.dromara.jpom.plugin.PluginFactory;
-import org.dromara.jpom.service.manage.ProjectInfoService;
-import org.dromara.jpom.service.script.NodeScriptServer;
-import org.dromara.jpom.util.JvmUtil;
+import org.dromara.jpom.service.AgentStatInfoService;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,10 +33,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -55,22 +46,19 @@ import java.util.stream.Collectors;
 @Slf4j
 public class IndexController extends BaseAgentController {
 
-    private final ProjectInfoService projectInfoService;
-    private final NodeScriptServer nodeScriptServer;
     private final SystemCommander systemCommander;
     private final ProjectCommander projectCommander;
     private final AgentConfig agentConfig;
+    private final AgentStatInfoService agentStatInfoService;
 
-    public IndexController(ProjectInfoService projectInfoService,
-                           NodeScriptServer nodeScriptServer,
-                           SystemCommander systemCommander,
+    public IndexController(SystemCommander systemCommander,
                            ProjectCommander projectCommander,
-                           AgentConfig agentConfig) {
-        this.projectInfoService = projectInfoService;
-        this.nodeScriptServer = nodeScriptServer;
+                           AgentConfig agentConfig,
+                           AgentStatInfoService agentStatInfoService) {
         this.systemCommander = systemCommander;
         this.projectCommander = projectCommander;
         this.agentConfig = agentConfig;
+        this.agentStatInfoService = agentStatInfoService;
     }
 
     @RequestMapping(value = {"index", "", "index.html", "/"}, produces = MediaType.TEXT_PLAIN_VALUE)
@@ -101,68 +89,8 @@ public class IndexController extends BaseAgentController {
      */
     @PostMapping(value = "get-stat-info", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<JSONObject> getDirectTop() {
-        JSONObject jsonObject = new JSONObject();
-        try {
-            Optional<MonitorConfig> monitorConfig = Optional.ofNullable(agentConfig).map(AgentConfig::getMonitor);
-
-            JSONObject topInfo = org.dromara.jpom.util.OshiUtils.getSimpleInfo(monitorConfig.orElse(null));
-            jsonObject.put("simpleStatus", topInfo);
-            // 系统固定休眠时间
-            jsonObject.put("systemSleep", org.dromara.jpom.util.OshiUtils.NET_STAT_SLEEP + org.dromara.jpom.util.OshiUtils.CPU_STAT_SLEEP);
-
-            JSONObject systemInfo = org.dromara.jpom.util.OshiUtils.getSystemInfo();
-            jsonObject.put("systemInfo", systemInfo);
-            //jsonObject.put("oshiError", "测试异常");
-        } catch (Throwable e) {
-            log.error(I18nMessageUtil.get("i18n.oshi_system_monitoring_exception.5c1c"), e);
-            jsonObject.put("oshiError", e.getMessage());
-        }
-
-        JSONObject jpomInfo = this.getJpomInfo();
-        jsonObject.put("jpomInfo", jpomInfo);
-        return JsonMessage.success("", jsonObject);
-    }
-
-    private JSONObject getJpomInfo() {
-        List<NodeProjectInfoModel> nodeProjectInfoModels = projectInfoService.list();
-        List<NodeScriptModel> list = nodeScriptServer.list();
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("javaVirtualCount", JvmUtil.getJavaVirtualCount());
-        JpomManifest instance = JpomManifest.getInstance();
-        jsonObject.put("jpomManifest", instance);
-        jsonObject.put("javaVersion", SystemUtil.getJavaRuntimeInfo().getVersion());
-        //  获取JVM中内存总大小
-        jsonObject.put("totalMemory", SystemUtil.getTotalMemory());
-        //
-        jsonObject.put("freeMemory", SystemUtil.getFreeMemory());
-        Map<String, JSONObject> workspaceMap = new HashMap<>(4);
-        //
-        {
-            for (NodeProjectInfoModel model : nodeProjectInfoModels) {
-                JSONObject jsonObject1 = workspaceMap.computeIfAbsent(model.getWorkspaceId(), s -> {
-                    JSONObject jsonObject11 = new JSONObject();
-                    jsonObject11.put("projectCount", 0);
-                    jsonObject11.put("scriptCount", 0);
-                    return jsonObject11;
-                });
-                jsonObject1.merge("projectCount", 1, (v1, v2) -> Integer.sum((Integer) v1, (Integer) v2));
-            }
-            jsonObject.put("projectCount", CollUtil.size(nodeProjectInfoModels));
-        }
-        {
-            for (NodeScriptModel model : list) {
-                JSONObject jsonObject1 = workspaceMap.computeIfAbsent(model.getWorkspaceId(), s -> {
-                    JSONObject jsonObject11 = new JSONObject();
-                    jsonObject11.put("projectCount", 0);
-                    jsonObject11.put("scriptCount", 0);
-                    return jsonObject11;
-                });
-                jsonObject1.merge("scriptCount", 1, (v1, v2) -> Integer.sum((Integer) v1, (Integer) v2));
-            }
-            jsonObject.put("scriptCount", CollUtil.size(list));
-        }
-        jsonObject.put("workspaceStat", workspaceMap);
-        return jsonObject;
+        // 采集逻辑抽到 AgentStatInfoService：推送模式（反向隧道 PUSH）复用同一份结构
+        return JsonMessage.success("", this.agentStatInfoService.statInfo());
     }
 
 

@@ -93,6 +93,16 @@ public class MachineNodeStatusTimeoutTest {
     }
 
     /**
+     * 推送模式（transportMode=1）与拉取模式互斥：推送节点不再由服务端发起请求
+     */
+    @Test
+    public void pushTransportMode() {
+        Assertions.assertTrue(MachineNodeServer.isPushTransportMode(1), "transportMode=1 为推送模式");
+        Assertions.assertFalse(MachineNodeServer.isPushTransportMode(null), "transportMode 为空是拉取模式");
+        Assertions.assertFalse(MachineNodeServer.isPushTransportMode(0), "transportMode=0 是拉取模式");
+    }
+
+    /**
      * 检测超时状态值不能与既有状态冲突（0 无法连接、1 正常、2 授权错误、3 状态码错误、4 资源监控异常）
      */
     @Test

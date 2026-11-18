@@ -13,6 +13,8 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import org.dromara.jpom.transport.DataContentType;
 import org.dromara.jpom.transport.IUrlItem;
+import org.dromara.jpom.transport.tunnel.TunnelConst;
+import org.dromara.jpom.transport.tunnel.TunnelFrame;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -136,6 +138,60 @@ public class TunnelEndToEndTest {
         proxy.close();
     }
 
+    /**
+     * 插件端主动推送（PUSH）：客户端主动发、服务端监听器收到，不经过请求/响应往返
+     */
+    @Test
+    public void testPushEndToEnd() throws Exception {
+        TunnelClient client = startClient(TunnelTestApplication.KEY);
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<TunnelFrame> received = new AtomicReference<>();
+        AtomicReference<String> from = new AtomicReference<>();
+        registry.addPushListener((channel, frame) -> {
+            if ("push-e2e".equals(frame.getBody())) {
+                received.set(frame);
+                from.set(channel.machineId());
+                latch.countDown();
+            }
+        });
+        try {
+            Assertions.assertTrue(waitOnline(20_000), "隧道应上线：" + client.getLastError());
+            Assertions.assertTrue(waitClientConnected(client, 20_000), "客户端应完成握手：" + client.getLastError());
+            Assertions.assertTrue(client.isPushSupported(), "服务端必须在 HELLO_ACK 中声明支持推送");
+            Assertions.assertTrue(client.sendPush(TunnelConst.TOPIC_NODE_STAT, 9L, "push-e2e"), "推送应提交发送");
+            Assertions.assertTrue(latch.await(10, TimeUnit.SECONDS), "服务端应在 10 秒内收到推送");
+            Assertions.assertEquals(TunnelConst.TOPIC_NODE_STAT, received.get().getTopic());
+            Assertions.assertEquals(9L, received.get().getSeq().longValue());
+            Assertions.assertEquals(TunnelTestApplication.MACHINE_ID, from.get(), "推送应携带机器节点标识");
+        } finally {
+            client.stop();
+        }
+    }
+
+    /**
+     * 老服务端兼容：服务端没声明推送能力时，插件端既不推送也不能被“未知帧”断开连接。
+     * <p>
+     * 老服务端没有 {@code PUSH} 帧类型，收到 {@code PUSH} 会走 decodeControl 的未知类型分支直接断开，
+     * 所以插件端必须以 HELLO_ACK 能力位为准（此用例锁定该约定）。
+     */
+    @Test
+    public void testPushSkippedWhenServerNotAdvertise() throws Exception {
+        TunnelTestApplication.options().setPushSupported(false);
+        TunnelClient client = startClient(TunnelTestApplication.KEY);
+        try {
+            Assertions.assertTrue(waitOnline(20_000), "隧道应上线：" + client.getLastError());
+            Assertions.assertTrue(waitClientConnected(client, 20_000), "客户端应完成握手：" + client.getLastError());
+            Assertions.assertFalse(client.isPushSupported(), "服务端未声明能力位时插件端必须视为不支持");
+            Assertions.assertFalse(client.sendPush(TunnelConst.TOPIC_NODE_STAT, 1L, "{}"), "不支持时不得发送推送帧");
+            Thread.sleep(1_000);
+            Assertions.assertTrue(client.isConnected(), "不推送时连接必须保持，否则老服务端会被推挂");
+            Assertions.assertTrue(registry.isOnline(TunnelTestApplication.MACHINE_ID));
+        } finally {
+            client.stop();
+            TunnelTestApplication.options().setPushSupported(true);
+        }
+    }
+
     @Test
     public void testRequestTimeoutAborts() throws Exception {
         TunnelClient client = startClient(TunnelTestApplication.KEY);
@@ -187,6 +243,17 @@ public class TunnelEndToEndTest {
         TunnelClient client = new TunnelClient(options);
         client.start();
         return client;
+    }
+
+    private boolean waitClientConnected(TunnelClient client, long timeout) throws InterruptedException {
+        long deadline = System.currentTimeMillis() + timeout;
+        while (System.currentTimeMillis() < deadline) {
+            if (client.isConnected()) {
+                return true;
+            }
+            Thread.sleep(100);
+        }
+        return false;
     }
 
     private boolean waitOnline(long timeout) throws InterruptedException {

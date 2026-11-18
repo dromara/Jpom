@@ -9,8 +9,10 @@
  */
 package org.dromara.jpom.func.tunnel;
 
+import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
+import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
@@ -35,9 +37,11 @@ import java.util.List;
 public class TunnelStatusController extends BaseServerController {
 
     private final TunnelChannelRegistry tunnelChannelRegistry;
+    private final TunnelPushService tunnelPushService;
 
-    public TunnelStatusController(TunnelChannelRegistry tunnelChannelRegistry) {
+    public TunnelStatusController(TunnelChannelRegistry tunnelChannelRegistry, TunnelPushService tunnelPushService) {
         this.tunnelChannelRegistry = tunnelChannelRegistry;
+        this.tunnelPushService = tunnelPushService;
     }
 
     /**
@@ -61,5 +65,28 @@ public class TunnelStatusController extends BaseServerController {
     @Feature(cls = ClassFeature.SYSTEM_ASSETS_MACHINE, method = MethodFeature.LIST)
     public IJsonMessage<Boolean> status(@RequestParam String machineId) {
         return JsonMessage.success("", this.tunnelChannelRegistry.isOnline(machineId));
+    }
+
+    /**
+     * 插件端主动推送的接收情况（排障用）
+     *
+     * @param machineId 可选：指定机器节点时返回其最新推送时间与新鲜度
+     * @return 统计信息
+     */
+    @GetMapping("/push")
+    @Feature(cls = ClassFeature.SYSTEM_ASSETS_MACHINE, method = MethodFeature.LIST)
+    public IJsonMessage<JSONObject> push(@RequestParam(required = false) String machineId) {
+        JSONObject data = new JSONObject();
+        data.put("received", this.tunnelPushService.receivedCount());
+        data.put("nodes", this.tunnelPushService.snapshotSize());
+        data.put("maxAgeSeconds", this.tunnelPushService.maxAgeSeconds());
+        if (StrUtil.isNotEmpty(machineId)) {
+            TunnelPushService.Snapshot snapshot = this.tunnelPushService.latest(machineId);
+            data.put("machineId", machineId);
+            data.put("receivedAt", snapshot == null ? null : snapshot.getReceivedAt());
+            data.put("seq", snapshot == null ? null : snapshot.getSeq());
+            data.put("fresh", this.tunnelPushService.fresh(machineId) != null);
+        }
+        return JsonMessage.success("", data);
     }
 }

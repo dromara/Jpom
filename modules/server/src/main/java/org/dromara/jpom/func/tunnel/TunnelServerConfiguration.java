@@ -14,9 +14,7 @@ import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.transport.TransportServer;
 import org.dromara.jpom.transport.TransportServerFactory;
 import org.dromara.jpom.transport.tunnel.TunnelConst;
-import org.dromara.jpom.transport.tunnel.ws.TunnelChannel;
 import org.dromara.jpom.transport.tunnel.ws.TunnelChannelRegistry;
-import org.dromara.jpom.transport.tunnel.ws.TunnelConnectionListener;
 import org.dromara.jpom.transport.tunnel.ws.TunnelServerHandler;
 import org.dromara.jpom.transport.tunnel.ws.TunnelServerOptions;
 import org.dromara.jpom.transport.tunnel.ws.TunnelWsContainer;
@@ -45,13 +43,16 @@ public class TunnelServerConfiguration implements WebSocketConfigurer {
 
     private final TunnelConfig tunnelConfig;
     private final TunnelServerAuth tunnelServerAuth;
+    private final TunnelPushService tunnelPushService;
     private final TunnelServerOptions serverOptions = new TunnelServerOptions();
     private final TunnelChannelRegistry registry;
     private final TransportServer forwardTransport;
 
-    public TunnelServerConfiguration(TunnelConfig tunnelConfig, TunnelServerAuth tunnelServerAuth) {
+    public TunnelServerConfiguration(TunnelConfig tunnelConfig, TunnelServerAuth tunnelServerAuth,
+                                     TunnelPushService tunnelPushService) {
         this.tunnelConfig = tunnelConfig;
         this.tunnelServerAuth = tunnelServerAuth;
+        this.tunnelPushService = tunnelPushService;
         this.serverOptions.setHeartbeatSeconds(tunnelConfig.getHeartbeatSeconds());
         this.serverOptions.setMaxMissedPong(tunnelConfig.getMaxMissedPong());
         this.serverOptions.setMaxConcurrency(tunnelConfig.getMaxConcurrency());
@@ -79,17 +80,8 @@ public class TunnelServerConfiguration implements WebSocketConfigurer {
             log.info("未配置 {}，反向连接隧道未启用（保持正向拉取模式）", TunnelConst.CONFIG_KEY);
             return;
         }
-        this.registry.addListener(new TunnelConnectionListener() {
-            @Override
-            public void online(TunnelChannel channel) {
-                log.info("节点 {} 反向隧道上线（agent={}, ip={}）", channel.machineId(), channel.getAgentVersion(), channel.getRemoteAddress());
-            }
-
-            @Override
-            public void offline(String machineId, int code, String reason) {
-                log.info("节点 {} 反向隧道下线（code={}, reason={}）", machineId, code, reason);
-            }
-        });
+        this.registry.addPushListener(this.tunnelPushService);
+        this.registry.addListener(new TunnelPushSnapshotCleaner(this.registry, this.tunnelPushService));
         this.registry.start();
         TransportServerFactory.set(new RoutingTransportServer(this.registry, this.forwardTransport));
         log.info("反向连接隧道已启用，端点 {}，自动注册={}", TunnelConst.ENDPOINT_PATH, tunnelConfig.isAllowAutoRegister());

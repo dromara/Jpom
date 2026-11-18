@@ -48,6 +48,15 @@ public class TunnelFrame {
     private Integer heartbeat;
     private Integer maxConcurrency;
     private String serverVersion;
+    /**
+     * 服务端是否支持插件端主动推送（{@link TunnelFrameType#PUSH}）
+     * <p>
+     * 老服务端不认识 {@code PUSH} 帧，收到后会按「非法帧格式」直接断开连接；
+     * 因此插件端必须以该能力位为准，服务端未声明（缺省 / false）时不推送。
+     *
+     * @see TunnelConst#TOPIC_NODE_STAT
+     */
+    private Boolean push;
 
     // ---------- REJECT / ABORT / CLOSE ----------
     private Integer code;
@@ -72,6 +81,22 @@ public class TunnelFrame {
 
     // ---------- ACK ----------
     private Long n;
+
+    // ---------- PUSH ----------
+    /**
+     * 推送主题，例如 {@code node-stat}
+     *
+     * @see TunnelConst#TOPIC_NODE_STAT
+     */
+    private String topic;
+    /**
+     * 推送序号（插件端自增，仅用于服务端判断是否乱序/重复，可缺省）
+     */
+    private Long seq;
+    /**
+     * 推送内容（JSON 文本，由主题约定结构）
+     */
+    private String body;
 
     public TunnelFrame() {
     }
@@ -113,6 +138,22 @@ public class TunnelFrame {
         TunnelFrame frame = of(TunnelFrameType.CLOSE, sid);
         frame.setCode(code);
         frame.setMsg(msg);
+        return frame;
+    }
+
+    /**
+     * 构造一条插件端主动推送帧
+     *
+     * @param topic 主题
+     * @param seq   序号（可空）
+     * @param body  推送内容（JSON 文本）
+     * @return 推送帧
+     */
+    public static TunnelFrame push(String topic, Long seq, String body) {
+        TunnelFrame frame = new TunnelFrame(TunnelFrameType.PUSH);
+        frame.setTopic(topic);
+        frame.setSeq(seq);
+        frame.setBody(body);
         return frame;
     }
 
@@ -331,8 +372,40 @@ public class TunnelFrame {
         this.n = n;
     }
 
+    public String getTopic() {
+        return topic;
+    }
+
+    public void setTopic(String topic) {
+        this.topic = topic;
+    }
+
+    public Long getSeq() {
+        return seq;
+    }
+
+    public void setSeq(Long seq) {
+        this.seq = seq;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
+
+    public Boolean getPush() {
+        return push;
+    }
+
+    public void setPush(Boolean push) {
+        this.push = push;
+    }
+
     @Override
     public String toString() {
-        return "TunnelFrame{" + type + ", sid=" + sid + ", code=" + code + ", msg=" + msg + "}";
+        return "TunnelFrame{" + type + ", sid=" + sid + ", topic=" + topic + ", code=" + code + ", msg=" + msg + "}";
     }
 }

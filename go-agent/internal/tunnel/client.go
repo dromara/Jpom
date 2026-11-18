@@ -98,9 +98,12 @@ type Client struct {
 
 	heartbeat int32
 	connected atomic.Bool
-	stopped   atomic.Bool
-	stop      chan struct{}
-	wg        sync.WaitGroup
+	// pushSupported mirrors HELLO_ACK.push: never push to a server that did not
+	// advertise PUSH support (an older server closes the tunnel on unknown frames).
+	pushSupported atomic.Bool
+	stopped       atomic.Bool
+	stop          chan struct{}
+	wg            sync.WaitGroup
 }
 
 // New creates a tunnel client.
@@ -198,6 +201,8 @@ func (c *Client) serve() error {
 	c.connMu.Lock()
 	c.conn = conn
 	c.connMu.Unlock()
+	// 每条新连接都要重新等 HELLO_ACK 声明能力位，不能沿用上一条连接的结果
+	c.pushSupported.Store(false)
 
 	if err := c.handshake(conn); err != nil {
 		return err
@@ -246,6 +251,7 @@ func (c *Client) handshake(conn *websocket.Conn) error {
 		switch frame.Type {
 		case TypeHelloAck:
 			_ = conn.SetReadDeadline(time.Time{})
+			c.pushSupported.Store(frame.Push != nil && *frame.Push)
 			if frame.Heartbeat > 0 {
 				atomic.StoreInt32(&c.heartbeat, int32(frame.Heartbeat))
 			}
@@ -533,6 +539,29 @@ func (c *Client) closeConn(code int, reason string) {
 	}
 	_ = conn.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(code, reason), time.Now().Add(writeTimeout))
 	_ = conn.Close()
+}
+
+// PushSupported reports whether the server advertised PUSH support in HELLO_ACK.
+func (c *Client) PushSupported() bool {
+	return c.pushSupported.Load()
+}
+
+// SendPush pushes one one-way message to the server. It returns an error when
+// the tunnel is offline; callers retry on the next tick instead of buffering.
+func (c *Client) SendPush(topic string, seq int64, body []byte) error {
+	if !c.PushSupported() {
+		return fmt.Errorf("server does not support push")
+	}
+	if !c.Connected() {
+		return fmt.Errorf("tunnel not connected")
+	}
+	c.connMu.RLock()
+	conn := c.conn
+	c.connMu.RUnlock()
+	if conn == nil {
+		return fmt.Errorf("tunnel not connected")
+	}
+	return c.writeControl(conn, NewPush(topic, seq, string(body)))
 }
 
 func (c *Client) writeControl(conn *websocket.Conn, frame *Frame) error {

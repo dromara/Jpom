@@ -90,6 +90,15 @@ public class TunnelTestApplication implements WebSocketConfigurer {
     }
 
     /**
+     * 服务端参数（测试里可动态改能力位，例如模拟不支持推送的老服务端）
+     *
+     * @return 参数
+     */
+    public static TunnelServerOptions options() {
+        return OPTIONS;
+    }
+
+    /**
      * 回显端点：验证反向模式下的双向流
      */
     public static class EchoHandler extends TextWebSocketHandler {
