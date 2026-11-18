@@ -11,11 +11,7 @@ package org.dromara.jpom.common;
 
 import org.dromara.jpom.common.interceptor.AuthorizeInterceptor;
 import org.dromara.jpom.common.validator.ParameterInterceptor;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -41,18 +37,5 @@ public class WebConfigurer implements WebMvcConfigurer {
 
         registry.addInterceptor(parameterInterceptor).addPathPatterns("/**");
         registry.addInterceptor(authorizeInterceptor).addPathPatterns("/**");
-    }
-
-    /**
-     * 强制请求/响应使用 UTF-8：插件端手写 JSON 提示（授权错误、下载失败等）在 contentType
-     * 未带 charset 时按容器默认 ISO-8859-1 输出，中文会变问号；与服务端保持一致，代码级兜底。
-     */
-    @Bean
-    public FilterRegistrationBean<CharacterEncodingFilter> forcedResponseEncodingFilter() {
-        CharacterEncodingFilter filter = new CharacterEncodingFilter("UTF-8", true);
-        FilterRegistrationBean<CharacterEncodingFilter> registration = new FilterRegistrationBean<>(filter);
-        registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
-        registration.setName("forcedResponseEncodingFilter");
-        return registration;
     }
 }

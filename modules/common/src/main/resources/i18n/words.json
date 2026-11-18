@@ -1742,6 +1742,7 @@
 	"i18n.waiting_to_start.b267":"等待开始:",
 	"i18n.webhooks_invocation_error.9792":"WebHooks 调用错误",
 	"i18n.websocket_error.2bb4":"websocket出现错误：{}",
+	"i18n.websocket_origin_rejected.5c7a":"WebSocket 来源校验失败：请把当前访问域名加入配置 jpom.web.allowed-origins，或让反向代理透传 Host/X-Forwarded-Host",
 	"i18n.week_day_range_format.ebec":"周{} 的 {} 至 {}",
 	"i18n.welcome_join_session.1c16":"欢迎加入:{} 会话id:{} ",
 	"i18n.workspace_env_vars.f7e8":"工作空间环境变量",

@@ -86,6 +86,10 @@ DEFAULT_TESTS=(
 	BaseSshFileControllerNewFileFolderTest
 	# SSH/FTP 文件管理路径穿越回归（name/newname/fileName 不得穿越 fileDirs 白名单，2026-11-17 安全报告）
 	FileUtilsResolveChildPathTest
+	# i18n 语言包完整性：代码引用的 key 必须在四个语言包齐全、四包 key 集合一致（2026-11-18 误删约 1000 条的守卫）
+	I18nBundleConsistencyTest
+	# 响应编码兜底：未配置时 UTF-8、显式配置优先、不覆盖请求编码（老安装实例 ??? 乱码的守卫）
+	EncodingConfigurationTest
 )
 
 MVN_BIN=${MVN:-mvn}
