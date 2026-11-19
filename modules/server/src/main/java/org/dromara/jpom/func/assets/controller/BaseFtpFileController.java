@@ -55,6 +55,7 @@ import org.dromara.jpom.service.node.ftp.FtpService;
 import org.dromara.jpom.system.ServerConfig;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.CompressionFileUtil;
+import org.dromara.jpom.util.FileUtils;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -126,7 +127,8 @@ public abstract class BaseFtpFileController extends BaseServerController {
             ServletUtil.write(response, I18nMessageUtil.get("i18n.ssh_error_or_folder_not_configured.c087"), MediaType.TEXT_HTML_VALUE);
             return;
         }
-        this.downloadFile(machineFtpModel, allowPathParent, nextPath, name, response);
+        String remotePath = FileUtils.resolveChildPath(allowPathParent, nextPath, name);
+        this.downloadFile(machineFtpModel, remotePath, response);
     }
 
     /**
@@ -174,7 +176,8 @@ public abstract class BaseFtpFileController extends BaseServerController {
             List<String> allowEditSuffix = itemConfig.allowEditSuffix();
             Charset charset = AgentWhitelist.checkFileSuffix(allowEditSuffix, name);
             //
-            String content = this.readFile(machineFtpModel, allowPathParent, nextPath, name, charset);
+            String remotePath = FileUtils.resolveChildPath(allowPathParent, nextPath, name);
+            String content = this.readFile(machineFtpModel, remotePath, charset);
             return JsonMessage.success("", content);
         });
     }
@@ -190,15 +193,19 @@ public abstract class BaseFtpFileController extends BaseServerController {
             //
             List<String> allowEditSuffix = itemConfig.allowEditSuffix();
             Charset charset = AgentWhitelist.checkFileSuffix(allowEditSuffix, name);
-            // 缓存到本地
-            File file = FileUtil.file(serverConfig.getUserTempPath(), machineFtpModel.getId(), allowPathParent, nextPath, name);
+            String remoteDir = FileUtils.resolveChildDir(allowPathParent, nextPath);
+            FileUtils.resolveChildPath(allowPathParent, nextPath, name);
+            // 缓存到本地：目录名使用随机值，禁止客户端传入的路径参与本地文件路径拼接
+            File tempDir = FileUtil.file(serverConfig.getUserTempPath(), "ftp", machineFtpModel.getId(), IdUtil.fastSimpleUUID());
+            File file = FileUtil.file(tempDir, name);
             try {
+                FileUtil.mkParentDirs(file);
                 FileUtil.writeString(content, file, charset);
-                // 上传
-                this.syncFile(machineFtpModel, allowPathParent, nextPath, name, file);
+                // 上传（FTP 以上传文件的文件名作为远端文件名）
+                this.syncFile(machineFtpModel, remoteDir, file);
             } finally {
                 //
-                FileUtil.del(file);
+                FileUtil.del(tempDir);
             }
             //
             return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
@@ -209,13 +216,11 @@ public abstract class BaseFtpFileController extends BaseServerController {
      * 读取文件
      *
      * @param machineFtpModel ftp
-     * @param allowPathParent 路径
-     * @param nextPath        二级路径
-     * @param name            文件
+     * @param remotePath      已经过白名单校验的远端文件路径
      * @param charset         编码格式
      */
-    private String readFile(MachineFtpModel machineFtpModel, String allowPathParent, String nextPath, String name, Charset charset) {
-        String normalize = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name);
+    private String readFile(MachineFtpModel machineFtpModel, String remotePath, Charset charset) {
+        String normalize = remotePath;
 
         try (Ftp ftp = machineFtpServer.getFtpClient(machineFtpModel);
              InputStream inputStream = ftp.getClient().retrieveFileStream(normalize);
@@ -239,17 +244,13 @@ public abstract class BaseFtpFileController extends BaseServerController {
      * 上传文件
      *
      * @param machineFtpModel ftp
-     * @param allowPathParent 路径
-     * @param nextPath        二级路径
-     * @param name            文件
-     * @param file            同步上传文件
+     * @param remoteDir       已经过白名单校验的远端目录
+     * @param file            同步上传文件（文件名即远端文件名）
      */
     private void syncFile(MachineFtpModel machineFtpModel,
-                          String allowPathParent,
-                          String nextPath,
-                          String name,
+                          String remoteDir,
                           File file) {
-        String normalizeDir = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath);
+        String normalizeDir = remoteDir;
 
         try (Ftp ftp = machineFtpServer.getFtpClient(machineFtpModel)) {
             // 直接upload到原来目录 会覆盖更新文件
@@ -266,20 +267,18 @@ public abstract class BaseFtpFileController extends BaseServerController {
      * 下载文件
      *
      * @param machineFtpModel ftp
-     * @param allowPathParent 路径
-     * @param name            文件
+     * @param remotePath      已经过白名单校验的远端文件路径
      * @param response        响应
-     * @throws IOException   io
-     * @throws SftpException sftp
+     * @throws IOException io
      */
-    private void downloadFile(MachineFtpModel machineFtpModel, String allowPathParent, String nextPath, String name, HttpServletResponse response) throws IOException {
+    private void downloadFile(MachineFtpModel machineFtpModel, String remotePath, HttpServletResponse response) throws IOException {
         final String charset = ObjectUtil.defaultIfNull(response.getCharacterEncoding(), CharsetUtil.UTF_8);
-        String fileName = FileUtil.getName(name);
+        String fileName = FileUtil.getName(remotePath);
 
         response.setHeader("Content-Disposition", StrUtil.format("attachment;filename={}", URLUtil.encode(fileName, Charset.forName(charset))));
         response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
 
-        String normalize = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name);
+        String normalize = remotePath;
 
         InputStream inputStream = null;
         try (Ftp ftp = machineFtpServer.getFtpClient(machineFtpModel)) {
@@ -314,8 +313,7 @@ public abstract class BaseFtpFileController extends BaseServerController {
         List<String> allowEditSuffix = itemConfig.allowEditSuffix();
         try (Ftp ftp = machineFtpServer.getFtpClient(ftpModel)) {
             String children2 = StrUtil.emptyToDefault(nextPath, StrUtil.SLASH);
-            String allPath = StrUtil.format("{}/{}", allowPathParent, children2);
-            allPath = FileUtil.normalize(allPath);
+            String allPath = FileUtils.resolveChildDir(allowPathParent, children2);
             JSONArray jsonArray = new JSONArray();
             FTPFile[] ftpFiles;
             try {
@@ -397,8 +395,10 @@ public abstract class BaseFtpFileController extends BaseServerController {
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineFtpModel, itemConfig) -> {
 
             try (Ftp ftp = machineFtpServer.getFtpClient(machineFtpModel)) {
-                String normalize = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name2);
-                Assert.state(!StrUtil.equals(normalize, StrUtil.SLASH), I18nMessageUtil.get("i18n.cannot_delete_root_dir.fcdc"));
+                String normalize = StrUtil.isEmpty(name2)
+                        ? FileUtils.resolveChildDir(allowPathParent, nextPath)
+                        : FileUtils.resolveChildPath(allowPathParent, nextPath, name2);
+                Assert.state(!StrUtil.equals(normalize, FileUtils.resolveChildDir(allowPathParent, StrUtil.EMPTY)), I18nMessageUtil.get("i18n.cannot_delete_root_dir.fcdc"));
                 // 尝试删除
                 boolean dirOrFile = this.tryDelDirOrFile(ftp, normalize);
                 if (dirOrFile) {
@@ -424,8 +424,8 @@ public abstract class BaseFtpFileController extends BaseServerController {
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineFtpModel, itemConfig) -> {
 
             try (Ftp ftp = machineFtpServer.getFtpClient(machineFtpModel)) {
-                String oldPath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name);
-                String newPath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + newname);
+                String oldPath = FileUtils.resolveChildPath(allowPathParent, nextPath, name);
+                String newPath = FileUtils.resolveChildPath(allowPathParent, nextPath, newname);
                 ftp.getClient().rename(oldPath, newPath);
             } catch (Exception e) {
                 log.error(I18nMessageUtil.get("i18n.ftp_rename_failed_exception.0fcc"), e);
@@ -510,23 +510,26 @@ public abstract class BaseFtpFileController extends BaseServerController {
                                        MultipartFile file) {
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineFtpModel, itemConfig) -> {
 
-            String remotePath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath);
+            String remotePath = FileUtils.resolveChildDir(allowPathParent, nextPath);
+            String originalFilename = file.getOriginalFilename();
+            // multipart 的文件名同样按单段名称校验，禁止把 ../ 拼进远端/本地路径
+            FileUtils.checkPathItemName(originalFilename);
+            FileUtils.resolveChildPath(allowPathParent, nextPath, originalFilename);
             File filePath = null;
             File tempUnzipPath = null;
+            // 本地缓存目录使用随机值，文件名只取单段名称
+            File tempDir = FileUtil.file(serverConfig.getUserTempPath(), "ftp", machineFtpModel.getId(), IdUtil.fastSimpleUUID());
             try (Ftp ftp = machineFtpServer.getFtpClient(machineFtpModel)) {
                 // 保存路径
-                File tempPath = serverConfig.getUserTempPath();
-                File savePath = FileUtil.file(tempPath, "ftp", machineFtpModel.getId());
-                FileUtil.mkdir(savePath);
-                String originalFilename = file.getOriginalFilename();
-                filePath = FileUtil.file(savePath, originalFilename);
+                FileUtil.mkdir(tempDir);
+                filePath = FileUtil.file(tempDir, originalFilename);
                 //
                 if (Convert.toBool(unzip, false)) {
                     String extName = FileUtil.extName(originalFilename);
                     Assert.state(StrUtil.containsAnyIgnoreCase(extName, StringUtil.PACKAGE_EXT), I18nMessageUtil.get("i18n.file_type_not_supported2.d497") + extName);
                     file.transferTo(filePath);
                     // 解压
-                    tempUnzipPath = FileUtil.file(savePath, IdUtil.fastSimpleUUID());
+                    tempUnzipPath = FileUtil.file(tempDir, "unzip");
 
                     FileUtil.mkdir(tempUnzipPath);
                     CompressionFileUtil.unCompress(filePath, tempUnzipPath);
@@ -539,8 +542,7 @@ public abstract class BaseFtpFileController extends BaseServerController {
                 log.error(I18nMessageUtil.get("i18n.ftp_upload_file_exception.118c"), e);
                 return new JsonMessage<>(400, I18nMessageUtil.get("i18n.ftp_upload_file_exception.118c") + e.getMessage());
             } finally {
-                CommandUtil.systemFastDel(filePath);
-                CommandUtil.systemFastDel(tempUnzipPath);
+                CommandUtil.systemFastDel(tempDir);
             }
             return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
         });
@@ -563,11 +565,11 @@ public abstract class BaseFtpFileController extends BaseServerController {
                                               @ValidatorItem String allowPathParent,
                                               @ValidatorItem String nextPath,
                                               @ValidatorItem String name, String unFolder) {
-        Assert.state(!StrUtil.contains(name, StrUtil.SLASH), I18nMessageUtil.get("i18n.file_name_error_message.7a25"));
+        FileUtils.checkPathItemName(name);
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineFtpModel, itemConfig) -> {
 
             try (Ftp ftp = machineFtpServer.getFtpClient(machineFtpModel)) {
-                String remotePath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name);
+                String remotePath = FileUtils.resolveChildPath(allowPathParent, nextPath, name);
 
                 File filePath = null;
                 try {

@@ -1,12 +1,12 @@
-/*
- * Copyright (c) 2019 Of Him Code Technology Studio
- * Jpom is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- * 			http://license.coscl.org.cn/MulanPSL2
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- */
+//
+// Copyright (c) 2019 Of Him Code Technology Studio
+// Jpom is licensed under Mulan PSL v2.
+// You can use this software according to the terms and conditions of the Mulan PSL v2.
+// You may obtain a copy of Mulan PSL v2 at:
+// 			http://license.coscl.org.cn/MulanPSL2
+// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+// See the Mulan PSL v2 for more details.
+//
 
 // Package config loads the Jpom agent configuration.
 //
@@ -40,7 +40,39 @@ type Jpom struct {
 	Project      Project   `yaml:"project"`
 	System       System    `yaml:"system"`
 	Monitor      *Monitor  `yaml:"monitor"`
+	Tunnel       Tunnel    `yaml:"tunnel"`
 	InitReadLine int       `yaml:"init-read-line"`
+}
+
+// Tunnel mirrors jpom.tunnel (agent initiated reverse tunnel).
+type Tunnel struct {
+	ServerURL      string `yaml:"server-url"`
+	Key            string `yaml:"key"`
+	MachineID      string `yaml:"machine-id"`
+	TimeoutSeconds int    `yaml:"timeout-seconds"`
+	MaxConcurrency int    `yaml:"max-concurrency"`
+	// PushEnabled 主动推送节点状态，缺省 true（与 Java 插件端一致）
+	PushEnabled *bool `yaml:"push-enabled"`
+	// PushInterval 主动推送间隔（秒），缺省 30
+	PushInterval int `yaml:"push-interval"`
+}
+
+// PushOn reports whether node status push is enabled (default true).
+func (t Tunnel) PushOn() bool {
+	return t.PushEnabled == nil || *t.PushEnabled
+}
+
+// PushIntervalSeconds returns the push interval in seconds (default 30).
+func (t Tunnel) PushIntervalSeconds() int {
+	if t.PushInterval <= 0 {
+		return 30
+	}
+	return t.PushInterval
+}
+
+// Enabled reports whether all three required tunnel settings are present.
+func (t Tunnel) Enabled() bool {
+	return strings.TrimSpace(t.ServerURL) != "" && strings.TrimSpace(t.Key) != "" && strings.TrimSpace(t.MachineID) != ""
 }
 
 type Authorize struct {
@@ -53,9 +85,13 @@ type Authorize struct {
 }
 
 type Project struct {
-	StatusWaitTime          int        `yaml:"status-wait-time"`
-	FileBackupCount         int        `yaml:"file-backup-count"`
-	FileBackupSuffix        []string   `yaml:"file-backup-suffix"`
+	StatusWaitTime   int      `yaml:"status-wait-time"`
+	FileBackupCount  int      `yaml:"file-backup-count"`
+	FileBackupSuffix []string `yaml:"file-backup-suffix"`
+	// VersionCount 是构建发布后保留的完整版本快照个数，0 表示关闭。
+	VersionCount int `yaml:"version-count"`
+	// VersionPath 是版本快照存储根目录，为空时使用 data/project_file_version。
+	VersionPath             string     `yaml:"version-path"`
 	StatusDetectionInterval int        `yaml:"status-detection-interval"`
 	Log                     ProjectLog `yaml:"log"`
 }
@@ -234,10 +270,13 @@ func Default() *Config {
 	return &Config{
 		Jpom: Jpom{
 			Authorize: Authorize{AgentName: "jpomAgent"},
+			Tunnel:    Tunnel{TimeoutSeconds: 30, MaxConcurrency: 16},
 			Project: Project{
 				StatusWaitTime:          10,
 				FileBackupCount:         0,
 				FileBackupSuffix:        []string{".jar", ".html", `^.+\.(?i)(txt)$`},
+				VersionCount:            0,
+				VersionPath:             "",
 				StatusDetectionInterval: 500,
 				Log: ProjectLog{
 					AutoBackupConsoleCron: "0 0/10 * * * ?",

@@ -18,6 +18,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
 import lombok.Lombok;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.BufferedReader;
@@ -34,6 +35,8 @@ import java.util.regex.Pattern;
  * @author bwcx_jzy
  * @since 2024/6/18
  */
+@Deprecated
+@Ignore("i18n 工具链已弃用（2026-11-18）：前端 i18n 差异生成脚本，随工具链一并停用")
 public class DiffWebI18nTest {
 
     public static final Pattern pattern = Pattern.compile("t\\('(.*?)'.*?\\)");

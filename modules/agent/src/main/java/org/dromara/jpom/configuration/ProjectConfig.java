@@ -46,6 +46,16 @@ public class ProjectConfig {
      */
     private String[] fileBackupSuffix;
 
+    /**
+     * 构建发布时保留的完整版本快照个数，大于 0 才会开启版本快照（0 关闭）
+     */
+    private int versionCount;
+
+    /**
+     * 版本快照存储路径，为空则使用 data/project_file_version
+     */
+    private String versionPath;
+
     public ProjectLogConfig getLog() {
         return Optional.ofNullable(this.log).orElseGet(() -> {
             this.log = new ProjectLogConfig();

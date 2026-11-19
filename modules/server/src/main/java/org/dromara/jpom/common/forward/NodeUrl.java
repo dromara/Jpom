@@ -118,6 +118,15 @@ public enum NodeUrl {
     MANAGE_FILE_COMPRESS("/manage/file/compress"),
 
     Manage_File_Download("/manage/file/download", true),
+    /**
+     * 项目文件版本快照
+     */
+    Manage_File_Version_Capability("/manage/file/version-capability"),
+    Manage_File_Version_Begin("/manage/file/version-begin"),
+    Manage_File_Version_Commit("/manage/file/version-commit"),
+    Manage_File_Version_List("/manage/file/version-list"),
+    Manage_File_Version_Switch("/manage/file/version-switch"),
+    Manage_File_Version_Delete("/manage/file/version-delete"),
 
 
     Manage_Log_LogSize("/manage/log/logSize"),

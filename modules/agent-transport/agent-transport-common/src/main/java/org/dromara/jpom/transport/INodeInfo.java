@@ -20,6 +20,18 @@ import java.net.Proxy;
 public interface INodeInfo {
 
     /**
+     * 节点标识（主键）
+     * <p>
+     * 反向建连隧道需要按节点路由请求，因此节点实现必须返回稳定主键；
+     * 未实现时返回 {@code null}，路由层会自动回退到正向（HTTP 拉取）传输。
+     *
+     * @return 节点标识
+     */
+    default String id() {
+        return null;
+    }
+
+    /**
      * 节点名称
      *
      * @return 名称

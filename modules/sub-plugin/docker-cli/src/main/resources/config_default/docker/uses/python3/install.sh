@@ -10,6 +10,7 @@
 #
 
 
+
 if [ $PYTHON3_VERSION ]; then
 	echo "PYTHON3_VERSION ${PYTHON3_VERSION}"
 else

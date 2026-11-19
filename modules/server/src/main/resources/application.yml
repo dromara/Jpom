@@ -8,6 +8,7 @@
 # See the Mulan PSL v2 for more details.
 #
 
+
 jpom:
   # jpom 数据存储路径, 如果调试模式运行默认路径为【${user.home}/jpom/】,安装运行默认为jar包文件的父级
   path:
@@ -30,6 +31,23 @@ jpom:
     upload-file-concurrent: 2
     # web socket 消息最大长度
     web-socket-message-size-limit: 5MB
+  agent:
+    # 反向连接隧道：插件端主动连接服务端（服务端无需能直连插件端）
+    tunnel:
+      # 连接密钥，配置后启用 /agent/tunnel 端点；留空则保持正向拉取模式
+      key:
+      # 未注册节点是否允许自动注册（默认 false：直接拒绝）
+      allow-auto-register: false
+      # 心跳间隔（秒）
+      heartbeat-seconds: 5
+      # 连续未收到 PONG 的次数上限
+      max-missed-pong: 3
+      # 下发插件端的并发处理上限
+      max-concurrency: 16
+      # 建连后等待 HELLO 的超时（秒）
+      hello-timeout-seconds: 30
+      # 插件端主动推送的节点状态允许的最大年龄（秒），超过视为节点不再上报
+      push-max-age-seconds: 90
   system:
     # cron 定时器是否开启匹配秒
     timer-match-second: false
@@ -67,6 +85,9 @@ jpom:
     # 受信任的反向代理地址（IP 或 CIDR，逗号分隔）。只有来源地址命中此列表时才读取 X-Forwarded-For/X-Real-IP；
     # 默认仅信任本机回环（127.0.0.1/32、::1/128）。反向代理在其他机器时请配置为代理地址。
     trusted-proxies: 127.0.0.1/32,::1/128
+    # WebSocket 允许的来源（Origin）白名单，可填完整 origin 或主机名，例如：https://jpom.example.com,jpom.example.com
+    # 反向代理改写 Host 且未透传 X-Forwarded-Host 时，浏览器 Origin 与 Host 不匹配会导致「在线升级」等 WS 被拒绝
+    allowed-origins:
     # 前端接口 超时时间 单位秒(最小 5 秒)
     api-timeout: 20
     # 禁用登录图形验证码 （一般用于服务器没有字体或者开启了两步验证后才关闭图形验证码）

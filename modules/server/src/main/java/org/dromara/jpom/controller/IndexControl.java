@@ -40,6 +40,7 @@ import org.dromara.jpom.db.DbExtConfig;
 import org.dromara.jpom.func.user.controller.UserNotificationController;
 import org.dromara.jpom.func.user.dto.UserNotificationDto;
 import org.dromara.jpom.model.user.UserModel;
+import org.dromara.jpom.oauth2.Oauth2Factory;
 import org.dromara.jpom.permission.SystemPermission;
 import org.dromara.jpom.plugin.PluginFactory;
 import org.dromara.jpom.service.system.SystemParametersServer;
@@ -60,6 +61,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -71,6 +73,16 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/")
 @Slf4j
 public class IndexControl extends BaseServerController {
+
+    /**
+     * oauth2 平台标识白名单：只允许字母、数字、下划线、中划线
+     */
+    private static final Pattern OAUTH2_PROVIDE_PATTERN = Pattern.compile("^[A-Za-z0-9_-]{1,32}$");
+
+    /**
+     * 二级代理路径白名单：只允许路径安全字符，禁止引号/尖括号/反斜杠等可跳出 HTML 上下文的字符
+     */
+    private static final Pattern PROXY_PATH_PATTERN = Pattern.compile("^[A-Za-z0-9._~!$&()*+,;=:@%/-]*$");
 
     private final UserService userService;
     private final SystemParametersServer systemParametersServer;
@@ -106,7 +118,52 @@ public class IndexControl extends BaseServerController {
     @GetMapping(value = "oauth2-{provide}", produces = MediaType.TEXT_HTML_VALUE)
     @NotLogin
     public void oauth2(HttpServletResponse response, HttpServletRequest request, @PathVariable String provide) {
-        this.toIndex(response, request, provide);
+        this.toIndex(response, request, this.safeOauth2Provide(provide));
+    }
+
+    /**
+     * 校验 oauth2 平台标识
+     * <p>
+     * 平台标识会写入首页 HTML 的 script 上下文，必须是字符白名单 + 已启用平台，否则回退为空（VL-002 反射型 XSS 修复）
+     *
+     * @param provide 平台标识
+     * @return 安全的平台标识，非法时为空串
+     */
+    private String safeOauth2Provide(String provide) {
+        if (StrUtil.isEmpty(provide)) {
+            return StrUtil.EMPTY;
+        }
+        String trimProvide = provide.trim();
+        if (!OAUTH2_PROVIDE_PATTERN.matcher(trimProvide).matches()) {
+            log.warn("ignore invalid oauth2 provide: {}", trimProvide);
+            return StrUtil.EMPTY;
+        }
+        if (!Oauth2Factory.provides().contains(trimProvide)) {
+            log.warn("ignore oauth2 provide not enabled: {}", trimProvide);
+            return StrUtil.EMPTY;
+        }
+        return trimProvide;
+    }
+
+    /**
+     * 校验二级代理路径
+     * <p>
+     * 代理路径来自请求头，会写入首页 HTML 的 script/属性上下文；非法值回退为空串（前端按根路径处理）
+     *
+     * @param proxyPath 代理路径
+     * @return 安全的代理路径
+     */
+    private String safeProxyPath(String proxyPath) {
+        // 未配置二级路径时保持原行为（空串），前端按根路径处理；非法值同样回退为空串
+        if (StrUtil.isEmpty(proxyPath)) {
+            return StrUtil.EMPTY;
+        }
+        // 必须是以 / 开头的 path，且只允许路径安全字符
+        if (!StrUtil.startWith(proxyPath, StrUtil.SLASH) || !PROXY_PATH_PATTERN.matcher(proxyPath).matches()) {
+            log.warn("ignore invalid proxy path: {}", proxyPath);
+            return StrUtil.EMPTY;
+        }
+        return proxyPath;
     }
 
     private void toIndex(HttpServletResponse response, HttpServletRequest request, String oauth2Provide) {
@@ -125,7 +182,7 @@ public class IndexControl extends BaseServerController {
         }
         String language = I18nMessageUtil.tryGetSystemLanguage();
         // <routerBase>
-        String proxyPath = UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH);
+        String proxyPath = this.safeProxyPath(UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH));
         html = StrUtil.replace(html, "<routerBase>", proxyPath);
         //
         html = StrUtil.replace(html, "<link rel=\"icon\" href=\"favicon.ico\">", "<link rel=\"icon\" href=\"" + proxyPath + "favicon.ico\">");

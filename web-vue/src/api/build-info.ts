@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2019 Of Him Code Technology Studio
+ * Jpom is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ * 			http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ */
 ///
 /// Copyright (c) 2019 Of Him Code Technology Studio
 /// Jpom is licensed under Mulan PSL v2.
@@ -282,6 +291,35 @@ export function rollback(logId) {
     url: '/build/manage/reRelease',
     method: 'post',
     data: { logId }
+  })
+}
+
+/**
+ * 查询构建历史在节点的版本快照
+ * @param {
+ *  logId: 构建历史 ID
+ * } params
+ */
+export function getBuildVersionList(params) {
+  return axios({
+    url: '/build/manage/version-list',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * 快速回滚（切换节点本地版本，不重新传输产物）
+ * @param {
+ *  logId: 构建历史 ID
+ *  restart: 切换后是否重启项目
+ * } params
+ */
+export function rollbackBuildVersion(params) {
+  return axios({
+    url: '/build/manage/rollback-version',
+    method: 'post',
+    data: params
   })
 }
 

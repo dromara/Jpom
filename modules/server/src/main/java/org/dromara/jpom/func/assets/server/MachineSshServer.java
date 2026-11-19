@@ -185,13 +185,13 @@ public class MachineSshServer extends BaseDbService<MachineSshModel> implements 
     public void execute() {
         Entity entity = new Entity();
         if (clusterInfoService.isMultiServer()) {
-            String linkGroup = clusterInfoService.getCurrent().getLinkGroup();
-            List<String> linkGroups = StrUtil.splitTrim(linkGroup, StrUtil.COMMA);
+            List<String> linkGroups = clusterInfoService.currentLinkGroups();
             if (CollUtil.isEmpty(linkGroups)) {
-                log.warn(I18nMessageUtil.get("i18n.cluster_not_bound_to_group_for_ssh_monitoring.c894"));
-                return;
+                // 未绑定分组时退化为监控全部分组，不能整轮跳过
+                log.warn(I18nMessageUtil.get("i18n.cluster_not_bound_group_monitor_all_assets.b885"));
+            } else {
+                entity.set("groupName", linkGroups);
             }
-            entity.set("groupName", linkGroups);
         }
         List<MachineSshModel> list = this.listByEntity(entity, false);
         if (CollUtil.isEmpty(list)) {

@@ -9,6 +9,7 @@
 # See the Mulan PSL v2 for more details.
 #
 
+
 #-----------------------------------------------------------
 # Jpom 回归单元测试入口
 #
@@ -50,6 +51,8 @@ DEFAULT_TESTS=(
 	RepositoryControllerWorkspaceTest
 	# 构建「获取分支」必须用 fill=false 取仓库凭证（2.11.13 起仓库密码/私钥被脱敏导致 git 认证失败的守卫）
 	BuildInfoControllerBranchListTest
+	# 仓库编辑凭据回填必须走 scoped 查询：跨工作空间仓库 id 不得把别的仓库密码交给调用者的 gitUrl（2026-11-19 安全报告）
+	RepositoryControllerEditCredentialTest
 	RepositoryServiceFillSelectResultTest
 	# 权限拦截：handler @Feature fail-closed + 节点数据权限 fail-closed
 	HandlerFeatureAnnotationTest
@@ -62,6 +65,18 @@ DEFAULT_TESTS=(
 	BaseExceptionHandlerTest
 	# 节点数据同步：旧工作空间不存在时回退到节点当前工作空间（重装服务端后“同步 0 个”回归守卫，Gitee ICH1VK）
 	BaseNodeServiceSyncWorkspaceTest
+	# 节点状态时效：集群未绑定分组/transportMode 为空时不能永久停在“正常”（2026-11-18 群反馈回归守卫）
+	MachineNodeStatusTimeoutTest
+	# 插件端主动推送（PUSH）：服务端只接受节点状态主题、校验大小、按最大年龄判定新鲜度（建议三补推送）
+	TunnelPushServiceTest
+	# 推送快照去重：同一份推送不得重复落库（否则统计日志出现相同 monitorTime 的重复行）
+	PushSnapshotTrackerTest
+	# 推送节点下线清理：被新连接顶替时保留快照、真正下线才清理（避免监控闪成无法连接）
+	TunnelPushSnapshotCleanerTest
+	# 推送模式网络延迟口径：落库必须是 0，不能是负数
+	MachineNodePushNetworkDelayTest
+	# 反向隧道表单请求体必须 URL 编码：值里的 & = + % 不得把参数截断（2.11.14.2 候选验证发现的文件内容截断回归守卫）
+	TunnelRequestBodyTest
 	# 严格构建：中间命令失败立即中断（仅严格 + sh 注入 set -e/pipefail，Gitee ICW9KZ）
 	BuildExecuteManageScriptTest
 	# 节点在线升级：引擎判定（engine/旧 Go 端 jarFile 兜底）、Go 升级容器解析、下载地址推导、版本/降级/最低兼容
@@ -81,6 +96,20 @@ DEFAULT_TESTS=(
 	LoginControlCaptchaTest
 	# SSH 文件管理 new_file_folder 命令注入回归（name 不再拼远程 shell，创建走 SFTP）
 	BaseSshFileControllerNewFileFolderTest
+	# SSH/FTP 文件管理路径穿越回归（name/newname/fileName 不得穿越 fileDirs 白名单，2026-11-17 安全报告）
+	FileUtilsResolveChildPathTest
+	# docker 构建 fromTag SQL 注入（VL-001）与 /oauth2-{provide} 反射型 XSS（VL-002）回归（2026-11-18 安全报告）
+	DockerInfoServiceQueryByTagTest
+	DockerYmlDslFromTagTest
+	IndexControlOauth2XssTest
+	# i18n 语言包完整性：代码引用的 key 必须在四个语言包齐全、四包 key 集合一致（2026-11-18 误删约 1000 条的守卫）
+	I18nBundleConsistencyTest
+	# 响应编码兜底：未配置时 UTF-8、显式配置优先、不覆盖请求编码（老安装实例 ??? 乱码的守卫）
+	EncodingConfigurationTest
+	# 构建版本快照（快速回滚）：忽略目录/临时文件不参与版本内容与指纹、复制不嵌套、清空保留 logs/temp
+	ProjectFileVersionUtilTest
+	# 版本快照资源开关默认关闭（避免升级后所有项目发布额外占用磁盘）
+	AgentDefaultVersionConfigTest
 )
 
 MVN_BIN=${MVN:-mvn}
@@ -131,7 +160,7 @@ if ! command -v "$MVN_BIN" >/dev/null 2>&1; then
 	exit 2
 fi
 
-mvn_args=(-B -pl modules/server -am -Dlicense.skip=true)
+mvn_args=(-B -pl modules/server,modules/agent -am -Dlicense.skip=true)
 # 必须同时覆盖两个属性：根 pom 同时设置了 skipTests=true 与 maven.test.skip=true
 if [ "$ALL_TESTS" = "1" ]; then
 	mvn_args+=(-Dmaven.test.skip=false -DskipTests=false)

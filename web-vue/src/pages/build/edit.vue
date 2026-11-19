@@ -1,3 +1,14 @@
+<!--
+
+    Copyright (c) 2019 Of Him Code Technology Studio
+    Jpom is licensed under Mulan PSL v2.
+    You can use this software according to the terms and conditions of the Mulan PSL v2.
+    You may obtain a copy of Mulan PSL v2 at:
+    			http://license.coscl.org.cn/MulanPSL2
+    THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+    See the Mulan PSL v2 for more details.
+
+-->
 <template>
   <div>
     <a-spin :tip="$t('i18n_bebcd7388f')" :spinning="loading">
@@ -1254,6 +1265,16 @@
                 </a-col>
               </a-row>
             </a-form-item>
+            <a-form-item name="versionSnapshot" :label="$t('i18n_387b56ef22')" :help="$t('i18n_ddf32c340f')">
+              <a-switch v-model:checked="tempExtraData.versionSnapshot" />
+            </a-form-item>
+            <a-form-item name="versionKeepCount" :label="$t('i18n_fbf8959896')">
+              <a-input-number
+                v-model:value="tempExtraData.versionKeepCount"
+                :min="0"
+                :placeholder="$t('i18n_fbf8959896')"
+              />
+            </a-form-item>
             <a-form-item :label="$t('i18n_2f5e828ecd')" name="aliasCode" :help="$t('i18n_8c67370ee5')">
               <a-row>
                 <a-col :span="10">
@@ -1874,7 +1895,9 @@ export default {
         cacheBuild: true,
         saveBuildFile: true,
         resultKeepCount: 0,
-        fileStorageKeepDay: 0
+        fileStorageKeepDay: 0,
+        versionSnapshot: false,
+        versionKeepCount: 0
       }
       this.$refs['editBuildForm']?.resetFields()
     },
@@ -1902,6 +1925,12 @@ export default {
       }
       if (this.tempExtraData.fileStorageKeepDay === undefined) {
         this.tempExtraData.fileStorageKeepDay = 0
+      }
+      if (this.tempExtraData.versionSnapshot === undefined) {
+        this.tempExtraData.versionSnapshot = false
+      }
+      if (this.tempExtraData.versionKeepCount === undefined) {
+        this.tempExtraData.versionKeepCount = 0
       }
 
       // 设置发布方式的数据

@@ -214,6 +214,14 @@ public class BuildExtraModule extends BaseModel {
      */
     private Integer fileStorageKeepDay;
     /**
+     * 发布时是否生成完整版本快照（用于快速回滚，不重新传输产物）
+     */
+    private Boolean versionSnapshot;
+    /**
+     * 版本快照保留个数，为空跟随插件端配置
+     */
+    private Integer versionKeepCount;
+    /**
      * 本地构建执行命令方式
      */
     private String commandExecMode;

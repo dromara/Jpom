@@ -182,6 +182,16 @@ public class DslYmlDto extends BaseJsonModel {
          * 是否开启差异备份，默认使用差异备份
          */
         private Boolean diffBackup;
+
+        /**
+         * 构建发布时保留的完整版本快照个数，0 关闭，未配置则使用全局配置
+         */
+        private Integer versionCount;
+
+        /**
+         * 版本快照存储路径，未配置则使用全局配置
+         */
+        private String versionPath;
     }
 
     @Data

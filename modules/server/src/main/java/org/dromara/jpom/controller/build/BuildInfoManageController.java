@@ -17,6 +17,7 @@ import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.build.*;
+import org.dromara.jpom.build.version.BuildVersionService;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
@@ -65,15 +66,18 @@ public class BuildInfoManageController extends BaseServerController {
     private final DbBuildHistoryLogService dbBuildHistoryLogService;
     private final BuildExecuteService buildExecuteService;
     private final WorkspaceEnvVarService workspaceEnvVarService;
+    private final BuildVersionService buildVersionService;
 
     public BuildInfoManageController(BuildInfoService buildInfoService,
                                      DbBuildHistoryLogService dbBuildHistoryLogService,
                                      BuildExecuteService buildExecuteService,
-                                     WorkspaceEnvVarService workspaceEnvVarService) {
+                                     WorkspaceEnvVarService workspaceEnvVarService,
+                                     BuildVersionService buildVersionService) {
         this.buildInfoService = buildInfoService;
         this.dbBuildHistoryLogService = dbBuildHistoryLogService;
         this.buildExecuteService = buildExecuteService;
         this.workspaceEnvVarService = workspaceEnvVarService;
+        this.buildVersionService = buildVersionService;
     }
 
     /**
@@ -209,6 +213,53 @@ public class BuildInfoManageController extends BaseServerController {
         Objects.requireNonNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
         int buildId = buildExecuteService.rollback(buildHistoryLog, item, getUser());
         return JsonMessage.success(I18nMessageUtil.get("i18n.republishing.131d"), buildId);
+    }
+
+    /**
+     * 查询构建历史在各节点的版本快照（快速回滚用）
+     *
+     * @param logId 构建历史ID
+     * @return json
+     */
+    @RequestMapping(value = "/build/manage/version-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public IJsonMessage<JSONObject> versionList(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.no_data.1ac0") String logId,
+                                                HttpServletRequest request) {
+        BuildHistoryLog buildHistoryLog = this.getBuildHistoryLog(logId, request);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.query_success.d72b"), buildVersionService.listByLog(buildHistoryLog));
+    }
+
+    /**
+     * 快速回滚：切换节点本地版本（不重新传输产物）
+     *
+     * @param logId   构建历史ID
+     * @param restart 是否重启项目
+     * @return json
+     */
+    @RequestMapping(value = "/build/manage/rollback-version", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
+    public IJsonMessage<Integer> rollbackVersion(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.no_data.1ac0") String logId,
+                                                 Boolean restart,
+                                                 HttpServletRequest request) {
+        BuildHistoryLog buildHistoryLog = this.getBuildHistoryLog(logId, request);
+        BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId(), request);
+        Objects.requireNonNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
+        int buildId = buildExecuteService.quickRollback(buildHistoryLog, item, getUser(), !Boolean.FALSE.equals(restart));
+        return JsonMessage.success(I18nMessageUtil.get("i18n.quick_rollback_started.5e04"), buildId);
+    }
+
+    /**
+     * 获取构建历史（校验工作空间）
+     *
+     * @param logId   构建历史ID
+     * @param request 请求
+     * @return log
+     */
+    private BuildHistoryLog getBuildHistoryLog(String logId, HttpServletRequest request) {
+        String workspaceId = dbBuildHistoryLogService.getCheckUserWorkspace(request);
+        BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, false, entity -> entity.set("workspaceId", workspaceId));
+        Objects.requireNonNull(buildHistoryLog, I18nMessageUtil.get("i18n.no_corresponding_build_record.b3b2"));
+        return buildHistoryLog;
     }
 
     /**

@@ -1,12 +1,13 @@
-/*
- * Copyright (c) 2019 Of Him Code Technology Studio
- * Jpom is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- * 			http://license.coscl.org.cn/MulanPSL2
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- */
+//
+// Copyright (c) 2019 Of Him Code Technology Studio
+// Jpom is licensed under Mulan PSL v2.
+// You can use this software according to the terms and conditions of the Mulan PSL v2.
+// You may obtain a copy of Mulan PSL v2 at:
+// 			http://license.coscl.org.cn/MulanPSL2
+// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+// See the Mulan PSL v2 for more details.
+//
+
 package api
 
 import (
@@ -308,6 +309,74 @@ func registerProjectFile(r *httpx.Router, a *app.App) {
 		}
 		c.OKMsg(c.T("i18n.restore_success.4c7f"), nil)
 	})
+
+	// file version snapshot endpoints (build release triggered, fast rollback)
+	r.Handle(http.MethodPost, "/manage/file/version-capability", func(c *httpx.Context) {
+		result, err := service.VersionCapability(c.Form("id"))
+		if err != nil {
+			failProjectFile(c, err)
+			return
+		}
+		c.OKMsg(c.T("i18n.query_success.d72b"), result)
+	})
+
+	r.Handle(http.MethodPost, "/manage/file/version-begin", func(c *httpx.Context) {
+		result, err := service.VersionBegin(c.Form("id"),
+			fileFormIntPtr(c.Form("buildNumberId")), fileFormIntPtr(c.Form("keepCount")))
+		if err != nil {
+			failProjectFile(c, err)
+			return
+		}
+		c.OKMsg(c.T("i18n.query_success.d72b"), result)
+	})
+
+	r.Handle(http.MethodPost, "/manage/file/version-commit", func(c *httpx.Context) {
+		result, err := service.VersionCommit(c.Form("id"),
+			fileFormIntPtr(c.Form("buildNumberId")), c.Form("buildDataId"), fileFormIntPtr(c.Form("keepCount")))
+		if err != nil {
+			failProjectFile(c, err)
+			return
+		}
+		c.OKMsg(c.T("i18n.operation_succeeded.3313"), result)
+	})
+
+	r.Handle(http.MethodPost, "/manage/file/version-list", func(c *httpx.Context) {
+		result, err := service.VersionList(c.Form("id"))
+		if err != nil {
+			failProjectFile(c, err)
+			return
+		}
+		c.OKMsg(c.T("i18n.query_success.d72b"), result)
+	})
+
+	r.Handle(http.MethodPost, "/manage/file/version-switch", func(c *httpx.Context) {
+		// @ValidatorItem(msg = i18n.version_id_required.0a3e): the live Java agent
+		// validates the required versionId before resolving the project.
+		versionID, ok := c.Require("versionId", "i18n.version_id_required.0a3e")
+		if !ok {
+			return
+		}
+		result, err := service.VersionSwitch(c.Form("id"), versionID,
+			fileFormInt(c.Form("after"), 0), fileFormBoolPtr(c.Form("snapshotCurrent")),
+			fileFormIntPtr(c.Form("keepCount")))
+		if err != nil {
+			failProjectFile(c, err)
+			return
+		}
+		c.OKMsg(c.T("i18n.version_switch_success.2f70"), result)
+	})
+
+	r.Handle(http.MethodPost, "/manage/file/version-delete", func(c *httpx.Context) {
+		versionID, ok := c.Require("versionId", "i18n.version_id_required.0a3e")
+		if !ok {
+			return
+		}
+		if err := service.VersionDelete(c.Form("id"), versionID); err != nil {
+			failProjectFile(c, err)
+			return
+		}
+		c.OKMsg(c.T("i18n.delete_success.0007"), nil)
+	})
 }
 
 // wireProjectFileHooks injects the project lifecycle and webhook capabilities
@@ -402,6 +471,31 @@ func fileFormInt(value string, defaultValue int) int {
 		return defaultValue
 	}
 	return parsed
+}
+
+// fileFormIntPtr parses an optional integer form field; a missing or invalid
+// value yields nil, the way Spring binds an empty parameter to a null Integer.
+func fileFormIntPtr(value string) *int {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return nil
+	}
+	parsed, err := strconv.Atoi(value)
+	if err != nil {
+		return nil
+	}
+	return &parsed
+}
+
+// fileFormBoolPtr parses an optional nullable boolean (Boolean parameter): an
+// empty value stays nil so the service can apply the Java default (true), every
+// other value follows BooleanUtil.toBoolean.
+func fileFormBoolPtr(value string) *bool {
+	if strings.TrimSpace(value) == "" {
+		return nil
+	}
+	parsed := fileFormBool(value)
+	return &parsed
 }
 
 // formBool parses an optional boolean form field the way BooleanUtil.toBoolean

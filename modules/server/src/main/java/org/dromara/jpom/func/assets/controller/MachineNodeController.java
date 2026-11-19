@@ -77,6 +77,8 @@ public class MachineNodeController extends BaseGroupNameController {
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<PageResultDto<MachineNodeModel>> listJson(HttpServletRequest request) {
         PageResultDto<MachineNodeModel> pageResultDto = machineNodeServer.listPage(request);
+        // 长时间没有刷新检测结果的机器不能继续显示"正常"
+        machineNodeServer.fillTimeoutStatus(pageResultDto.getResult());
         return JsonMessage.success("", pageResultDto);
     }
 

@@ -1,3 +1,14 @@
+<!--
+
+    Copyright (c) 2019 Of Him Code Technology Studio
+    Jpom is licensed under Mulan PSL v2.
+    You can use this software according to the terms and conditions of the Mulan PSL v2.
+    You may obtain a copy of Mulan PSL v2 at:
+    			http://license.coscl.org.cn/MulanPSL2
+    THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+    See the Mulan PSL v2 for more details.
+
+-->
 <template>
   <div>
     <a-tabs tab-position="left" @change="changeTabs">
@@ -19,7 +30,7 @@
           <template #extra>
             <a-tag
               v-if="machineInfo"
-              :color="machineInfo && machineInfo.status === 1 ? 'green' : 'pink'"
+              :color="statusTagColor(machineInfo && machineInfo.status)"
               style="margin-right: 0"
             >
               {{ statusMap[machineInfo && machineInfo.status] || $t('i18n_1622dc9b6b') }}
@@ -835,6 +846,12 @@ export default {
   methods: {
     formatPercent,
     parseTime,
+    // 状态标签颜色：正常绿色、检测超时橙色、其它异常粉色
+    statusTagColor(status) {
+      if (status === 1) return 'green'
+      if (status === 5) return 'orange'
+      return 'pink'
+    },
     formatDuration,
     renderSize,
     formatPercent2Number,

@@ -1,3 +1,14 @@
+<!--
+
+    Copyright (c) 2019 Of Him Code Technology Studio
+    Jpom is licensed under Mulan PSL v2.
+    You can use this software according to the terms and conditions of the Mulan PSL v2.
+    You may obtain a copy of Mulan PSL v2 at:
+    			http://license.coscl.org.cn/MulanPSL2
+    THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+    See the Mulan PSL v2 for more details.
+
+-->
 <template>
   <div class="">
     <!-- 数据表格 -->
@@ -176,16 +187,23 @@
                         type="primary"
                         danger
                         @click="handleRollback(record)"
-                        >{{ $t('i18n_d00b485b26') }}
+                        >{{ $t('i18n_61fc0c2a2c') }}
                       </a-button>
                     </template>
                     <template v-else>
                       <a-tooltip :title="$t('i18n_2d94b9cf0e')">
                         <a-button size="small" :disabled="true" type="primary" danger
-                          >{{ $t('i18n_d00b485b26') }}
+                          >{{ $t('i18n_61fc0c2a2c') }}
                         </a-button>
                       </a-tooltip>
                     </template>
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-tooltip :title="$t('i18n_1f63281a79')">
+                      <a-button size="small" type="primary" @click="handleQuickRollback(record)"
+                        >{{ $t('i18n_c845ff5941') }}
+                      </a-button>
+                    </a-tooltip>
                   </a-menu-item>
                   <a-menu-item>
                     <a-button size="small" type="primary" danger @click="handleDelete(record)">{{
@@ -210,6 +228,53 @@
         }
       "
     />
+    <!-- 快速回滚：节点版本快照 -->
+    <a-modal
+      v-model:open="versionVisible"
+      :title="$t('i18n_1f63281a79')"
+      :width="'70vw'"
+      :ok-text="$t('i18n_757d7164bb')"
+      :ok-button-props="{ disabled: !selectedVersion }"
+      :confirm-loading="versionLoading"
+      @ok="handleSwitchVersion"
+    >
+      <a-empty v-if="!versionLoading && versionList.length === 0" :description="$t('i18n_4807c5a15f')" />
+      <a-table
+        v-else
+        size="small"
+        bordered
+        :data-source="versionList"
+        :columns="versionColumns"
+        :loading="versionLoading"
+        :row-key="versionRowKey"
+        :row-selection="versionRowSelection"
+        :pagination="false"
+        :scroll="{ x: 'max-content' }"
+      >
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.dataIndex === 'nodeId'">
+            <a-tooltip :title="`${record.projectId} / ${record.nodeId}`">
+              <span>{{ record.projectId }} / {{ record.nodeId }}</span>
+            </a-tooltip>
+          </template>
+          <template v-else-if="column.dataIndex === 'status'">
+            <a-tag :color="versionStatusColor(record.status)">{{ versionStatusText(record.status) }}</a-tag>
+          </template>
+          <template v-else-if="column.dataIndex === 'exist'">
+            <a-tooltip :title="versionBlockedReason(record)">
+              <CheckOutlined v-if="record.exist !== false" style="color: #52c41a" />
+              <CloseOutlined v-else style="color: #ff4d4f" />
+            </a-tooltip>
+          </template>
+          <template v-else-if="column.dataIndex === 'fileSize'">
+            <span>{{ renderSize(record.fileSize) }}</span>
+          </template>
+          <template v-else-if="column.dataIndex === 'createTime'">
+            <span>{{ parseTime(record.createTime) }}</span>
+          </template>
+        </template>
+      </a-table>
+    </a-modal>
     <!-- 选择确认区域
     <div style="padding-top: 50px" v-if="this.choose">
       <div
@@ -248,8 +313,10 @@ import {
   downloadBuildFile,
   downloadBuildLog,
   geteBuildHistory,
+  getBuildVersionList,
   releaseMethodMap,
   rollback,
+  rollbackBuildVersion,
   statusMap,
   statusColor,
   triggerBuildTypeMap
@@ -292,6 +359,55 @@ export default {
       temp: {},
       buildLogVisible: 0,
       tableSelections: [],
+      // 快速回滚：节点版本快照
+      versionVisible: false,
+      versionLoading: false,
+      versionLogId: '',
+      versionList: [],
+      versionSelections: [],
+      versionColumns: [
+        {
+          title: this.$t('i18n_3bf3c0a8d6'),
+          dataIndex: 'nodeId',
+          width: '220px',
+          ellipsis: true
+        },
+        {
+          title: this.$t('i18n_31ecc0e65b'),
+          dataIndex: 'projectId',
+          width: '140px',
+          ellipsis: true
+        },
+        {
+          title: this.$t('i18n_fe2df04a16'),
+          dataIndex: 'versionId',
+          width: '160px',
+          ellipsis: true
+        },
+        {
+          title: this.$t('i18n_3fea7ca76c'),
+          dataIndex: 'status',
+          width: '100px',
+          align: 'center'
+        },
+        {
+          title: this.$t('i18n_6f28517a5c'),
+          dataIndex: 'exist',
+          width: '90px',
+          align: 'center'
+        },
+        {
+          title: this.$t('i18n_ad35f58fb3'),
+          dataIndex: 'fileSize',
+          width: '100px',
+          align: 'center'
+        },
+        {
+          title: this.$t('i18n_eca37cb072'),
+          dataIndex: 'createTime',
+          width: '170px'
+        }
+      ],
       columns: [
         {
           title: this.$t('i18n_50a299c847'),
@@ -394,6 +510,27 @@ export default {
         selectedRowKeys: this.tableSelections,
         type: this.choose || 'checkbox'
       }
+    },
+    // 快速回滚：选中的版本快照
+    selectedVersion() {
+      const key = this.versionSelections && this.versionSelections[0]
+      if (!key) {
+        return null
+      }
+      return this.versionList.find((item) => this.versionRowKey(item) === key) || null
+    },
+    // 快速回滚：行选择（不可切换的行禁用勾选）
+    versionRowSelection() {
+      return {
+        type: 'radio',
+        selectedRowKeys: this.versionSelections,
+        onChange: (selectedRowKeys) => {
+          this.versionSelections = selectedRowKeys
+        },
+        getCheckboxProps: (record) => ({
+          disabled: !this.versionSwitchable(record)
+        })
+      }
     }
   },
   created() {
@@ -466,6 +603,98 @@ export default {
               this.buildLogVisible = new Date() * Math.random()
             }
           })
+        }
+      })
+    },
+    // 快速回滚：版本快照行 key
+    versionRowKey(record) {
+      return `${record.projectId}_${record.nodeId}_${record.versionId}`
+    },
+    // 快速回滚：状态文案
+    versionStatusText(status) {
+      const map = {
+        1: this.$t('i18n_49799437d0'),
+        2: this.$t('i18n_34601006f4'),
+        3: this.$t('i18n_b7dad624f2')
+      }
+      return map[status] || '-'
+    },
+    // 快速回滚：状态颜色
+    versionStatusColor(status) {
+      const map = {
+        1: 'blue',
+        2: 'green',
+        3: 'default'
+      }
+      return map[status] || 'default'
+    },
+    // 快速回滚：该版本是否可以切换
+    versionSwitchable(record) {
+      return record.exist !== false && record.reachable !== false
+    },
+    // 快速回滚：不可切换的原因
+    versionBlockedReason(record) {
+      if (record.reachable === false) {
+        return this.$t('i18n_6e36069fab')
+      }
+      if (record.exist === false) {
+        return this.$t('i18n_67c59b0ded')
+      }
+      return ''
+    },
+    // 快速回滚：打开版本快照弹窗
+    handleQuickRollback(record) {
+      this.versionLogId = record.id
+      this.versionList = []
+      this.versionSelections = []
+      this.versionVisible = true
+      this.loadBuildVersionList()
+    },
+    // 快速回滚：加载节点版本快照
+    loadBuildVersionList() {
+      this.versionLoading = true
+      getBuildVersionList({
+        logId: this.versionLogId
+      })
+        .then((res) => {
+          if (res.code === 200) {
+            this.versionList = (res.data && res.data.list) || []
+          }
+        })
+        .finally(() => {
+          this.versionLoading = false
+        })
+    },
+    // 快速回滚：切换到选中版本
+    handleSwitchVersion() {
+      const versionRecord = this.selectedVersion
+      if (!versionRecord) {
+        return
+      }
+      $confirm({
+        title: this.$t('i18n_c4535759ee'),
+        zIndex: 1010,
+        content: this.$t('i18n_45813c1bef', { v: versionRecord.versionId }),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
+        onOk: () => {
+          this.versionLoading = true
+          return rollbackBuildVersion({
+            logId: this.versionLogId,
+            restart: true
+          })
+            .then((res) => {
+              if (res.code === 200) {
+                $notification.success({
+                  message: res.msg
+                })
+                this.versionVisible = false
+                this.loadData()
+              }
+            })
+            .finally(() => {
+              this.versionLoading = false
+            })
         }
       })
     },

@@ -1,3 +1,14 @@
+<!--
+
+    Copyright (c) 2019 Of Him Code Technology Studio
+    Jpom is licensed under Mulan PSL v2.
+    You can use this software according to the terms and conditions of the Mulan PSL v2.
+    You may obtain a copy of Mulan PSL v2 at:
+    			http://license.coscl.org.cn/MulanPSL2
+    THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+    See the Mulan PSL v2 for more details.
+
+-->
 <template>
   <div class="">
     <template v-if="useSuggestions">
@@ -153,7 +164,7 @@
             >
               <template v-if="record.openStatus === 1">
                 <a-tag
-                  :color="record.machineNodeData && record.machineNodeData.status === 1 ? 'green' : 'pink'"
+                  :color="statusTagColor(record.machineNodeData && record.machineNodeData.status)"
                   style="margin-right: 0"
                 >
                   {{ statusMap[record.machineNodeData && record.machineNodeData.status] || $t('i18n_1622dc9b6b') }}
@@ -333,7 +344,7 @@
                       </div>
                     </template>
                     <a-tag
-                      :color="item.machineNodeData && item.machineNodeData.status === 1 ? 'green' : 'pink'"
+                      :color="statusTagColor(item.machineNodeData && item.machineNodeData.status)"
                       style="margin-right: 0"
                     >
                       {{ statusMap[item.machineNodeData && item.machineNodeData.status] }}
@@ -892,6 +903,12 @@ export default {
   methods: {
     formatDuration,
     renderSize,
+    // 状态标签颜色：正常绿色、检测超时橙色、其它异常粉色
+    statusTagColor(status) {
+      if (status === 1) return 'green'
+      if (status === 5) return 'orange'
+      return 'pink'
+    },
     // PAGE_DEFAULT_SHOW_TOTAL,
     parseTime,
     CHANGE_PAGE,

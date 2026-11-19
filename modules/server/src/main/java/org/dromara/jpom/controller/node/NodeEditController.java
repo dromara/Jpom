@@ -15,6 +15,7 @@ import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
+import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.node.NodeScriptCacheModel;
@@ -80,7 +81,12 @@ public class NodeEditController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<PageResultDto<NodeModel>> listJson(HttpServletRequest request) {
         PageResultDto<NodeModel> nodeModelPageResultDto = nodeService.listPage(request);
-        nodeModelPageResultDto.each(nodeModel -> nodeModel.setMachineNodeData(machineNodeServer.getByKey(nodeModel.getMachineId())));
+        nodeModelPageResultDto.each(nodeModel -> {
+            MachineNodeModel machineNodeData = machineNodeServer.getByKey(nodeModel.getMachineId());
+            // 长时间没有刷新检测结果的机器不能继续显示"正常"
+            machineNodeServer.fillTimeoutStatus(machineNodeData);
+            nodeModel.setMachineNodeData(machineNodeData);
+        });
         return JsonMessage.success("", nodeModelPageResultDto);
     }
 

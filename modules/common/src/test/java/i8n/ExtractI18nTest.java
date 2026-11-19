@@ -26,6 +26,7 @@ import lombok.Lombok;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
@@ -60,10 +61,19 @@ import java.util.stream.Collectors;
  *   ======================================
  * <p>
  *  扫描代码中的中文关键词：\"[\u4e00-\u9fa5]+\"
+ * <p>
+ * <b>已弃用，禁止运行。</b>generateZhPropertiesAndReplace_Second2 的 prune 清理步骤依赖
+ * words.json 与 4 个正则的关联扫描，扫描不全时会误删仍在使用的 i18n 条目
+ * （2026-11-18 c4d09c43a 曾因此误删约 1000 条，导致大量接口返回裸 key）。
+ * 语言包改为手工维护：新增/修改提示直接改四个 messages_*.properties；
+ * 恢复历史条目请从发布版合并并按代码引用逐键核对，不要再跑本生成器。
  *
  * @author bwcx_jzy
  * @since 2024/6/11
+ * @deprecated 2026-11-18 弃用：prune 清理步骤会误删在用条目；已加 @Ignore，禁止再运行
  */
+@Deprecated
+@Ignore("i18n 生成器已弃用（2026-11-18）：prune 清理步骤会误删在用条目，语言包改为手工维护，禁止再运行")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ExtractI18nTest {
 

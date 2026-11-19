@@ -8,6 +8,7 @@
 # THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 # See the Mulan PSL v2 for more details.
 #
+
 # 构建 Go 插件端在线升级容器包（jar 仅作为运输容器，让旧版 Server 的
 # checkJpomJar 校验通过；Go 插件端识别 go-agent/agent.json 后自升级）。
 #
