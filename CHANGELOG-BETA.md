@@ -9,7 +9,8 @@
 3. 【server】未注册节点默认拒绝接入反向隧道；开启 `jpom.agent.tunnel.allow-auto-register` 后可按连接上报的节点标识自动创建机器节点资产
 4. 【server】【agent】【agent-go】新增 插件端主动推送节点状态（反向隧道 `PUSH` 帧）：服务端首次收到推送后把该机器切换为推送模式（`transportMode=1`），不再按心跳周期轮询 `/get-stat-info`；推送数据超过 `jpom.agent.tunnel.push-max-age-seconds`（默认 90 秒）未更新按无法连接处理，连续 3 个心跳周期没有推送会自动回退拉取。服务端需先升级：握手时声明推送能力，未声明的老服务端下插件端保持拉取、不发送推送帧
 5. 【server】【agent】【agent-go】新增 构建发布版本快照与快速回滚：构建配置可开启「保留版本快照」，每次发布成功后把完整版本保留在节点本地，回滚时只切换节点本地版本并重启项目，不再重新传输产物；构建历史新增「快速回滚」入口，原「重新发布」（重新传输产物）保留为兜底
-6. 【server】【agent】【agent-go】新增 版本快照的资源开关：插件端 `jpom.project.version-count`（默认 0 关闭）与 `jpom.project.version-path` 控制是否开启及存放位置，项目 dsl 的 `file.versionCount`/`file.versionPath` 可按项目覆盖；未开启的项目发布行为与升级前完全一致
+6. 【web-vue】新增 项目文件页「版本」入口：可直接查看节点上的版本快照（首次基线/构建发布/切换前快照）、切换回任意版本并选择是否重启项目、删除非当前版本，无需再回到构建历史
+7. 【server】【agent】【agent-go】新增 版本快照的资源开关：插件端 `jpom.project.version-count`（默认 0 关闭）与 `jpom.project.version-path` 控制是否开启及存放位置，项目 dsl 的 `file.versionCount`/`file.versionPath` 可按项目覆盖；未开启的项目发布行为与升级前完全一致
 
 ### 🐞 解决BUG、优化功能
 

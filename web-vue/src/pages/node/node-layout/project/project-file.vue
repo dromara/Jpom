@@ -25,6 +25,9 @@
               <a-button size="small" type="primary" @click="backupList">
                 {{ $t('i18n_9014d6d289') }}
               </a-button>
+              <a-button size="small" type="primary" @click="versionList">
+                {{ $t('i18n_fe86275d4d') }}
+              </a-button>
             </a-space>
           </div>
           <a-spin :tip="$t('i18n_f013ea9dcb')" :spinning="loading">
@@ -499,6 +502,24 @@
     >
       <projectFileBackup v-if="backupListVisible" :node-id="nodeId" :project-id="projectId"></projectFileBackup>
     </CustomModal>
+    <!-- 版本快照（构建发布生成，支持直接回滚） -->
+    <CustomModal
+      v-if="versionListVisible"
+      v-model:open="versionListVisible"
+      destroy-on-close
+      width="80vw"
+      height="80vh"
+      :title="$t('i18n_fe86275d4d')"
+      :footer="null"
+      :mask-closable="true"
+      @cancel="
+        () => {
+          loadData()
+        }
+      "
+    >
+      <projectFileVersion v-if="versionListVisible" :node-id="nodeId" :project-id="projectId"></projectFileVersion>
+    </CustomModal>
   </div>
 </template>
 <script>
@@ -527,12 +548,14 @@ import {
 } from '@/utils/const'
 import codeEditor from '@/components/codeEditor'
 import projectFileBackup from './project-file-backup.vue'
+import projectFileVersion from './project-file-version.vue'
 import { uploadPieces } from '@/utils/upload-pieces'
 
 export default {
   components: {
     codeEditor,
-    projectFileBackup
+    projectFileBackup,
+    projectFileVersion
   },
   inject: ['globalLoading'],
   props: {
@@ -571,6 +594,7 @@ export default {
       uploadRemoteFileVisible: false,
       editFileVisible: false,
       backupListVisible: false,
+      versionListVisible: false,
       successSize: 0,
       fileContent: '',
       treeReplaceFields: {
@@ -1294,6 +1318,9 @@ export default {
       })
     },
     // 查看备份列表
+    versionList() {
+      this.versionListVisible = true
+    },
     backupList() {
       this.backupListVisible = true
     },

@@ -2922,5 +2922,18 @@
 	"i18n_ffa9fd37b5":"Workspace management",
 	"i18n_ffaf95f0ef":"Startup container, you can see many devices on the host, you can perform mount. You can start the docker container in the docker container.",
 	"i18n_ffd67549cf":": Range: 1~ 12, also supports case-insensitive aliases: \"jan\",\"feb\",\"mar\",\"apr\",\"may\",\"jun\",\"jul\",\"aug\",\"sep\",\"oct\",\"nov\",\"dec\"",
-	"i18n_fffd3ce745":"share"
+	"i18n_fffd3ce745":"share",
+	"i18n_fe86275d4d":"Version management",
+	"i18n_835b950031":"Version directory",
+	"i18n_0e9a916105":"Keep versions",
+	"i18n_f971771775":"Version snapshots are disabled; set jpom.project.version-count on the agent or file.versionCount in the project DSL",
+	"i18n_ac6f69a7e9":"Baseline",
+	"i18n_f826a97a56":"Build release",
+	"i18n_8f0fecf967":"Auto snapshot",
+	"i18n_eac2e936c1":"Restart the project after switching",
+	"i18n_d85262b6f5":"Switch to version {v}?",
+	"i18n_8052cf3aee":"No version snapshots yet; they appear after a release",
+	"i18n_f2da3dad73":"Delete this version",
+	"i18n_b904ab3dc3":"Build number",
+	"i18n_665c2431e8":"Switched successfully"
 }

@@ -51,6 +51,32 @@ public class ProjectFileVersionController extends BaseServerController {
     }
 
     /**
+     * 发布前准备（首次开启时生成基线版本）
+     *
+     * @param id      项目ID
+     * @param request 请求
+     * @return json
+     */
+    @Feature(method = MethodFeature.EDIT)
+    @RequestMapping(value = "version-begin", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public IJsonMessage<Object> versionBegin(String id, HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.Manage_File_Version_Begin);
+    }
+
+    /**
+     * 生成版本快照（手动/构建登记）
+     *
+     * @param id      项目ID
+     * @param request 请求
+     * @return json
+     */
+    @Feature(method = MethodFeature.EDIT)
+    @RequestMapping(value = "version-commit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public IJsonMessage<Object> versionCommit(String id, HttpServletRequest request) {
+        return NodeForward.request(getNode(), request, NodeUrl.Manage_File_Version_Commit);
+    }
+
+    /**
      * 版本列表
      *
      * @param id      项目ID
