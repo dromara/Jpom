@@ -151,7 +151,7 @@ export default {
     handleSwitch(record) {
       $confirm({
         title: this.$t('i18n_c4535759ee'),
-        content: this.$t('i18n_d85262b6f5').replace('{v}', record.versionId),
+        content: this.$t('i18n_d85262b6f5', { v: record.versionId }),
         okText: this.$t('i18n_38cf16f220'),
         cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
