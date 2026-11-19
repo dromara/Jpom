@@ -75,6 +75,8 @@ DEFAULT_TESTS=(
 	TunnelPushSnapshotCleanerTest
 	# 推送模式网络延迟口径：落库必须是 0，不能是负数
 	MachineNodePushNetworkDelayTest
+	# 反向隧道表单请求体必须 URL 编码：值里的 & = + % 不得把参数截断（2.11.14.2 候选验证发现的文件内容截断回归守卫）
+	TunnelRequestBodyTest
 	# 严格构建：中间命令失败立即中断（仅严格 + sh 注入 set -e/pipefail，Gitee ICW9KZ）
 	BuildExecuteManageScriptTest
 	# 节点在线升级：引擎判定（engine/旧 Go 端 jarFile 兜底）、Go 升级容器解析、下载地址推导、版本/降级/最低兼容

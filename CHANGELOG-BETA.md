@@ -13,6 +13,7 @@
 7. 【server】【agent】【agent-go】新增 版本快照的资源开关：插件端 `jpom.project.version-count`（默认 0 关闭）与 `jpom.project.version-path` 控制是否开启及存放位置，项目 dsl 的 `file.versionCount`/`file.versionPath` 可按项目覆盖；未开启的项目发布行为与升级前完全一致
 
 ### 🐞 解决BUG、优化功能
+1. 【web-vue】修复 新增构建弹窗底部「保存/保存并构建」点击后没有任何反应（无请求、无提示）的问题：改为显式方法调用，编辑器未就绪时给出可见提示
 
 1. 【server】修复 反向代理改写 Host 时在线升级页 WebSocket 被误判为跨站、提示“您没有对应权限”且无法更新节点的问题；新增配置 `jpom.web.allowed-origins` 可指定对外域名放行
 2. 【server】优化 WebSocket 来源校验失败的提示：明确告知需配置 `jpom.web.allowed-origins` 或让反向代理透传 `Host`/`X-Forwarded-Host`
@@ -23,7 +24,8 @@
 7. 【agent】修正 反向隧道未启用时日志提示的配置键前缀（实际配置项为 `jpom.tunnel.server-url`/`key`/`machine-id`）
 8. 【server】修复 docker 构建 DSL 的 `fromTag` SQL 注入（VL-001）：按标签查询 docker 节点改为参数绑定，并限制 `fromTag` 只能包含镜像名/标签常见字符；具备工作空间构建权限的用户不再能通过标签绕过工作空间条件读取业务库
 9. 【server】修复 `/oauth2-{provide}` 未授权反射型 XSS（VL-002）：平台标识只接受已启用平台的字符白名单值，非法值回退为空；同时校验 `Jpom-ProxyPath` 请求头（二级代理路径），不再把请求头原样写入首页 HTML
-10. 【server】修复 编辑构建仓库时把其他工作空间仓库凭据发到调用者地址的问题：仓库编辑改为先按「当前工作空间 + GLOBAL」确认仓库归属、再用未脱敏的 scoped 查询回填密码/私钥，仓库 id 不属于当前空间时直接拒绝，不再用调用者填写的仓库地址执行 `git ls-remote`（2026-11-19 外部安全报告；此前非隔离查询会把其他工作空间仓库的 git 密码以 HTTP Basic 发到外部）
+10. 【server】修复 开启反向隧道后，在节点上编辑项目文件/脚本时内容里含 `&`（如 shell 的 `&&`、URL、HTML 属性）会被截断保存的问题：隧道转发的表单参数改为 URL 编码，不再把值拆成多个参数（候选验证发现，影响 2.11.14.2 自身引入的隧道；未开启隧道不受影响）
+11. 【server】修复 编辑构建仓库时把其他工作空间仓库凭据发到调用者地址的问题：仓库编辑改为先按「当前工作空间 + GLOBAL」确认仓库归属、再用未脱敏的 scoped 查询回填密码/私钥，仓库 id 不属于当前空间时直接拒绝，不再用调用者填写的仓库地址执行 `git ls-remote`（2026-11-19 外部安全报告；此前非隔离查询会把其他工作空间仓库的 git 密码以 HTTP Basic 发到外部）
 
 ### ⚠️ 升级说明
 

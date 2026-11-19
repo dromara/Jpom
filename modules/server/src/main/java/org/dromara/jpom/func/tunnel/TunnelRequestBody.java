@@ -25,6 +25,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
@@ -120,7 +122,23 @@ public class TunnelRequestBody {
         if (builder.length() > 0) {
             builder.append('&');
         }
-        builder.append(name).append('=').append(value);
+        // 必须做 URL 编码：参数值里出现 & = + % 等字符时（文件内容、脚本、命令、路径），
+        // 不编码会把值截断成多个参数，插件端只能读到第一个 & 之前的内容（文件被写坏）。
+        builder.append(encodeForm(name)).append('=').append(encodeForm(value));
+    }
+
+    /**
+     * 表单值编码：{@code application/x-www-form-urlencoded} 语义（空格编码为 {@code +}）。
+     *
+     * @param value 原始值
+     * @return 编码后的值
+     */
+    private static String encodeForm(String value) {
+        try {
+            return URLEncoder.encode(StrUtil.nullToEmpty(value), StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private static boolean isFileValue(Object value) {
