@@ -10,6 +10,7 @@
 package org.dromara.jpom.controller.manage;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
@@ -19,6 +20,8 @@ import org.dromara.jpom.common.BaseAgentController;
 import org.dromara.jpom.common.commander.ProjectCommander;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
+import org.dromara.jpom.model.data.ProjectLogFileItem;
+import org.dromara.jpom.service.log.ProjectLogFileService;
 import org.dromara.jpom.util.FileUtils;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -41,13 +44,31 @@ import java.util.List;
 public class ProjectLogBackController extends BaseAgentController {
 
     private final ProjectCommander projectCommander;
+    private final ProjectLogFileService projectLogFileService;
 
-    public ProjectLogBackController(ProjectCommander projectCommander) {
+    public ProjectLogBackController(ProjectCommander projectCommander, ProjectLogFileService projectLogFileService) {
         this.projectCommander = projectCommander;
+        this.projectLogFileService = projectLogFileService;
+    }
+
+    /**
+     * 项目可查看的运行日志文件列表
+     * <p>
+     * 当前只有 DSL 项目会返回配置的日志文件（config.log），其它运行方式返回空列表。
+     *
+     * @return json
+     */
+    @RequestMapping(value = "logList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public IJsonMessage<JSONObject> logList() {
+        NodeProjectInfoModel nodeProjectInfoModel = getProjectInfoModel();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("array", projectLogFileService.list(nodeProjectInfoModel));
+        jsonObject.put("runMode", nodeProjectInfoModel.getRunMode());
+        return JsonMessage.success("", jsonObject);
     }
 
     @RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public IJsonMessage<JSONObject> logSize(String id) {
+    public IJsonMessage<JSONObject> logSize(String id, String logKey) {
         NodeProjectInfoModel nodeProjectInfoModel = getProjectInfoModel();
         JSONObject jsonObject = new JSONObject();
         //
@@ -55,7 +76,7 @@ public class ProjectLogBackController extends BaseAgentController {
         File logBack = projectInfoService.resolveLogBack(nodeProjectInfoModel);
         boolean logBackBool = logBack.exists() && logBack.isDirectory();
         jsonObject.put("logBack", logBackBool);
-        String info = this.getLogSize(nodeProjectInfoModel);
+        String info = this.getLogSize(nodeProjectInfoModel, logKey);
         jsonObject.put("logSize", info);
         return JsonMessage.success("", jsonObject);
     }
@@ -64,13 +85,23 @@ public class ProjectLogBackController extends BaseAgentController {
      * 查看项目控制台日志文件大小
      *
      * @param nodeProjectInfoModel 项目
+     * @param logKey               项目配置的日志文件标识，为空表示默认的控制台日志
      * @return 文件大小
      */
-    private String getLogSize(NodeProjectInfoModel nodeProjectInfoModel) {
+    private String getLogSize(NodeProjectInfoModel nodeProjectInfoModel, String logKey) {
         if (nodeProjectInfoModel == null) {
             return null;
         }
-        File file = projectInfoService.resolveAbsoluteLogFile(nodeProjectInfoModel);
+        File file;
+        if (StrUtil.isNotEmpty(logKey)) {
+            ProjectLogFileItem logFile = projectLogFileService.resolve(nodeProjectInfoModel, logKey);
+            if (logFile == null) {
+                return null;
+            }
+            file = FileUtil.file(logFile.getPath());
+        } else {
+            file = projectInfoService.resolveAbsoluteLogFile(nodeProjectInfoModel);
+        }
         if (file.exists()) {
             long fileSize = file.length();
             if (fileSize <= 0) {

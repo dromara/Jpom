@@ -314,6 +314,24 @@ export function getProjectLogSize(params) {
 }
 
 /**
+ * 项目可查看的运行日志文件列表（DSL 项目 config.log 配置）
+ * @param {
+ *  nodeId: 节点 ID
+ *  id: 项目 ID
+ * } params
+ */
+export function getProjectLogList(params) {
+  return axios({
+    url: '/node/manage/log/logList',
+    method: 'post',
+    data: params,
+    headers: {
+      loading: 'no'
+    }
+  })
+}
+
+/**
  * 下载项目日志文件
  * @param {
  *  nodeId: 节点 ID

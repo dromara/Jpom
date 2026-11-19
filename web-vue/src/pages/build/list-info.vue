@@ -249,6 +249,12 @@
             </a-col>
           </a-row>
           <a-row class="item-info">
+            <a-col :span="6" class="title text-overflow-hidden">{{ $t('i18n_1eb1c081f0') }}:</a-col>
+            <a-col :span="18" class="content text-overflow-hidden">
+              {{ item.buildNodeName || item.buildNodeId || $t('i18n_4d1636e43f') }}
+            </a-col>
+          </a-row>
+          <a-row class="item-info">
             <a-col :span="6" class="title text-overflow-hidden">{{ $t('i18n_65894da683') }}</a-col>
             <a-col :span="18" class="content text-overflow-hidden">
               {{ releaseMethodMap[item.releaseMethod] }}
@@ -355,6 +361,11 @@
           <a-tooltip placement="topLeft" :title="text === 1 ? $t('i18n_685e5de706') : $t('i18n_69c3b873c1')">
             <CloudOutlined v-if="text === 1" />
             <CodeOutlined v-else />
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'buildNodeName'">
+          <a-tooltip placement="topLeft" :title="record.buildNodeName || record.buildNodeId || $t('i18n_4d1636e43f')">
+            <span>{{ record.buildNodeName || record.buildNodeId || $t('i18n_4d1636e43f') }}</span>
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'releaseMethod'">
@@ -821,6 +832,12 @@ export default {
           align: 'center',
           width: '80px',
           sorter: true,
+          ellipsis: true
+        },
+        {
+          title: this.$t('i18n_1eb1c081f0'),
+          dataIndex: 'buildNodeName',
+          width: '120px',
           ellipsis: true
         },
         {

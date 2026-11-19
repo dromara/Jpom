@@ -42,6 +42,33 @@ type Jpom struct {
 	Monitor      *Monitor  `yaml:"monitor"`
 	Tunnel       Tunnel    `yaml:"tunnel"`
 	InitReadLine int       `yaml:"init-read-line"`
+	// Build 是「构建执行下沉到 Go 插件端」新增的配置段（只增不改：
+	// 老配置没有该段时走默认值，行为与之前一致）。
+	Build Build `yaml:"build"`
+}
+
+// Build mirrors jpom.build（构建节点相关配置）。
+type Build struct {
+	// MaxConcurrency 是节点同时执行的构建 job 数上限，默认 1（打包机 CPU/内存有限）。
+	MaxConcurrency int `yaml:"max-concurrency"`
+	// KeepLogDays 是节点侧构建日志/历史产物的保留天数，默认 7 天。
+	KeepLogDays int `yaml:"keep-log-days"`
+}
+
+// BuildMaxConcurrency 返回节点构建并发上限（默认 1）。
+func (c *Config) BuildMaxConcurrency() int {
+	if c == nil || c.Jpom.Build.MaxConcurrency <= 0 {
+		return 1
+	}
+	return c.Jpom.Build.MaxConcurrency
+}
+
+// BuildKeepLogDays 返回节点侧日志/产物保留天数（默认 7）。
+func (c *Config) BuildKeepLogDays() int {
+	if c == nil || c.Jpom.Build.KeepLogDays <= 0 {
+		return 7
+	}
+	return c.Jpom.Build.KeepLogDays
 }
 
 // Tunnel mirrors jpom.tunnel (agent initiated reverse tunnel).
@@ -286,6 +313,10 @@ func Default() *Config {
 				},
 			},
 			InitReadLine: 10,
+			Build: Build{
+				MaxConcurrency: 1,
+				KeepLogDays:    7,
+			},
 			System: System{
 				OldJarsCount: 2,
 				LogCharset:   "UTF-8",

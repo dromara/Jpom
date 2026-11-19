@@ -353,6 +353,10 @@ func (a *App) Manifest() map[string]any {
 		// osName 继续保持 Java 兼容值（Linux/Windows/Mac OS X）。
 		"platform": runtime.GOOS + "/" + runtime.GOARCH,
 		"arch":     runtime.GOARCH,
+		// capabilities 声明本插件端能承担的能力（构建执行下沉到 Go 插件端）：
+		// Server 侧 AgentPackageResolver 据此判断节点能否被选为构建节点；老 agent
+		// 没有该字段 → 自动排除，不需要版本号比较。旧字段保持不变（只增）。
+		"capabilities": []string{"build"},
 	}
 }
 

@@ -30,16 +30,31 @@ type lineTuple struct {
 // matched lines are sent one by one, then a summary line whose two counts are
 // exactly the Java FileSearchUtil values (interval line count, echoed count).
 func (m *Manager) searchProjectLog(session *Session, project map[string]any, request map[string]any, charset string) {
-	libDir, err := m.projectLibDir(project)
-	if err != nil {
-		_ = session.Send(m.translate(session, "i18n.command_execution_failed_details.77ed"))
-		_ = session.Send(err.Error())
-		return
-	}
-	file, ok := resolveSubFile(libDir, bodyString(request, "logFile"))
-	if !ok {
-		_ = session.Send(m.translate(session, "i18n.file_not_found.d952"))
-		return
+	var file string
+	if logKey := bodyString(request, "logKey"); strings.TrimSpace(logKey) != "" && m.ProjectRuntime != nil {
+		// 项目配置的日志文件：客户端只回传标识，路径由插件端解析
+		item, ok := m.ProjectRuntime.ResolveDslLogFile(project, logKey)
+		if !ok {
+			_ = session.Send(m.translate(session, "i18n.file_not_found.d952"))
+			return
+		}
+		file = item.Path
+		if item.Charset != "" {
+			charset = item.Charset
+		}
+	} else {
+		libDir, err := m.projectLibDir(project)
+		if err != nil {
+			_ = session.Send(m.translate(session, "i18n.command_execution_failed_details.77ed"))
+			_ = session.Send(err.Error())
+			return
+		}
+		var ok bool
+		file, ok = resolveSubFile(libDir, bodyString(request, "logFile"))
+		if !ok {
+			_ = session.Send(m.translate(session, "i18n.file_not_found.d952"))
+			return
+		}
 	}
 	keyword := bodyString(request, "keyword")
 	beforeCount := bodyInt(request, "beforeCount")

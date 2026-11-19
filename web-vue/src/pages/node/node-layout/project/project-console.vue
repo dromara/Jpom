@@ -107,6 +107,19 @@
             </template>
             <a-button size="small" type="primary"> {{ $t('i18n_ce40cd6390') }} <DownOutlined /> </a-button>
           </a-dropdown>
+          <template v-if="project.runMode === 'Dsl' && logFiles.length">
+            <a-select
+              v-model:value="currentLogKey"
+              size="small"
+              style="width: 160px"
+              :options="logFileOptions"
+              :placeholder="$t('i18n_ed0c53adf2')"
+              @change="switchLog"
+            />
+            <a-tooltip :title="$t('i18n_9320f3fe01')">
+              <a-button size="small" @click="loadLogList"><ReloadOutlined /></a-button>
+            </a-tooltip>
+          </template>
           <a-button
             size="small"
             @click="
@@ -153,7 +166,7 @@
   </div>
 </template>
 <script>
-import { getProjectData, getProjectLogSize } from '@/api/node-project'
+import { getProjectData, getProjectLogList, getProjectLogSize } from '@/api/node-project'
 import { getWebSocketUrl } from '@/api/config'
 import { mapState } from 'pinia'
 import { useUserStore } from '@/stores/user'
@@ -192,7 +205,10 @@ export default {
       lobbackVisible: false,
       canReload: false,
       heart: null,
-      editScriptVisible: false
+      editScriptVisible: false,
+      // 项目配置的日志文件（DSL config.log），空表示只显示控制台日志
+      logFiles: [],
+      currentLogKey: ''
     }
   },
   computed: {
@@ -205,6 +221,17 @@ export default {
           this.nodeId
         }&type=console&workspaceId=${this.getWorkspaceId()}`
       )
+    },
+    // 日志文件下拉列表：默认控制台日志 + 项目配置的日志文件
+    logFileOptions() {
+      const options = [{ label: this.$t('i18n_b5c3770699'), value: '' }]
+      this.logFiles.forEach((item) => {
+        options.push({
+          label: item.exists ? item.name : `${item.name} (${this.$t('i18n_f6c60e12d6')})`,
+          value: item.key
+        })
+      })
+      return options
     }
   },
   mounted() {
@@ -236,8 +263,37 @@ export default {
 
           // 加载日志文件大小
           this.loadFileSize()
+          // DSL 项目加载可查看的日志文件（config.log）
+          if (res.data.runMode === 'Dsl') {
+            this.loadLogList()
+          }
         }
       })
+    },
+    // 加载项目配置的日志文件
+    loadLogList() {
+      const params = {
+        nodeId: this.nodeId,
+        id: this.projectId
+      }
+      getProjectLogList(params).then((res) => {
+        if (res.code === 200) {
+          this.logFiles = res.data?.array || []
+          // 当前选择的日志文件已不存在（配置变化）时回退到控制台日志
+          if (this.currentLogKey && !this.logFiles.some((item) => item.key === this.currentLogKey)) {
+            this.currentLogKey = ''
+            this.switchLog()
+          }
+        }
+      })
+    },
+    // 切换查看的日志文件
+    switchLog() {
+      this.$refs.logView?.clearLogCache()
+      // 主动切换监听，避免 loadFileSize 再重复触发一次 showlog
+      this.logExist = true
+      this.sendMsg('showlog')
+      this.loadFileSize()
     },
     // 初始化
     initWebSocket() {
@@ -328,6 +384,10 @@ export default {
         op: op,
         projectId: this.projectId
       }
+      if (this.currentLogKey) {
+        // 项目配置的日志文件只回传标识，由插件端解析真实路径
+        data.logKey = this.currentLogKey
+      }
       this.socket.send(JSON.stringify(data))
       if (op === 'stop' || op === 'start' || op === 'restart') {
         this.optButtonLoading = true
@@ -338,7 +398,8 @@ export default {
     loadFileSize() {
       const params = {
         nodeId: this.nodeId,
-        id: this.projectId
+        id: this.projectId,
+        logKey: this.currentLogKey
       }
       getProjectLogSize(params).then((res) => {
         if (res.code === 200) {

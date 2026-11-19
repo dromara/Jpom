@@ -393,7 +393,10 @@ func (c *Client) executeRequest(frame *Frame, body []byte) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.opts.Timeout)
 	defer cancel()
 	var reader io.Reader
-	if len(body) > 0 && method != http.MethodGet {
+	if len(body) > 0 {
+		// GET 也要转发 body：服务端到插件端的「参数全部走表单 body」（隧道 TunnelRequestBody），
+		// 例如 /build/download 的 jobId/buildModelId 就是这种形态；丢掉 body 会让 GET 请求丢参数
+		// （2026-11-19 真机验证：产物下载一直 404）。本机 handler 通过 query+body 双读兼容。
 		reader = bytes.NewReader(body)
 	}
 	request, err := http.NewRequestWithContext(ctx, method, target, reader)

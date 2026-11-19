@@ -28,6 +28,13 @@ const backLogMinSize = 100 * 1024
 
 // LogSize 返回日志备份目录是否存在与当前日志文件可读大小（等价 /manage/log/logSize）。
 func (r *Runtime) LogSize(info map[string]any) (bool, string, error) {
+	return r.LogSizeOf(info, "")
+}
+
+// LogSizeOf 返回日志备份目录是否存在与指定日志文件的可读大小。
+//
+// logKey 为空表示控制台日志；否则为项目配置的日志文件标识（DSL config.log）。
+func (r *Runtime) LogSizeOf(info map[string]any, logKey string) (bool, string, error) {
 	logBack, err := r.Manager.ResolveLogBack(info)
 	if err != nil {
 		return false, "", err
@@ -36,9 +43,18 @@ func (r *Runtime) LogSize(info map[string]any) (bool, string, error) {
 	if stat, err := os.Stat(logBack); err == nil && stat.IsDir() {
 		logBackExists = true
 	}
-	file, err := r.Manager.ResolveLogFile(info)
-	if err != nil {
-		return logBackExists, "", err
+	var file string
+	if strings.TrimSpace(logKey) != "" {
+		item, ok := r.ResolveDslLogFile(info, logKey)
+		if !ok {
+			return logBackExists, "", nil
+		}
+		file = item.Path
+	} else {
+		file, err = r.Manager.ResolveLogFile(info)
+		if err != nil {
+			return logBackExists, "", err
+		}
 	}
 	stat, err := os.Stat(file)
 	if err != nil || stat.Size() <= 0 {

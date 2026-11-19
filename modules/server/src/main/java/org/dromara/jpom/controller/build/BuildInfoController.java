@@ -19,27 +19,34 @@ import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.IJsonMessage;
+import lombok.extern.slf4j.Slf4j;
 import cn.keepbx.jpom.model.JsonMessage;
 import cn.keepbx.jpom.plugins.IPlugin;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.IDockerConfigPlugin;
 import org.dromara.jpom.build.BuildExecuteService;
+import org.dromara.jpom.build.BuildNodeClient;
 import org.dromara.jpom.build.BuildUtil;
 import org.dromara.jpom.build.DockerYmlDsl;
 import org.dromara.jpom.build.ResultDirFileAction;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.update.AgentEngine;
+import org.dromara.jpom.common.update.AgentPackageResolver;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.configuration.BuildExtConfig;
+import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
+import org.dromara.jpom.func.assets.server.MachineNodeServer;
 import org.dromara.jpom.model.AfterOpt;
 import org.dromara.jpom.model.BaseEnum;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.data.FtpModel;
+import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.data.RepositoryModel;
 import org.dromara.jpom.model.data.SshModel;
 import org.dromara.jpom.model.enums.BuildReleaseMethod;
@@ -52,6 +59,7 @@ import org.dromara.jpom.service.dblog.BuildInfoService;
 import org.dromara.jpom.service.dblog.DbBuildHistoryLogService;
 import org.dromara.jpom.service.dblog.RepositoryService;
 import org.dromara.jpom.service.docker.DockerInfoService;
+import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.service.node.ftp.FtpService;
 import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.service.script.ScriptServer;
@@ -63,6 +71,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -74,6 +84,7 @@ import java.util.Objects;
  * @author Hotstrip
  * @since 2021-08-09
  */
+@Slf4j
 @RestController
 @Feature(cls = ClassFeature.BUILD)
 public class BuildInfoController extends BaseServerController {
@@ -88,6 +99,8 @@ public class BuildInfoController extends BaseServerController {
     private final ScriptServer scriptServer;
     private final BuildExtConfig buildExtConfig;
     protected final MachineDockerServer machineDockerServer;
+    private final NodeService nodeService;
+    private final MachineNodeServer machineNodeServer;
 
     public BuildInfoController(DbBuildHistoryLogService dbBuildHistoryLogService,
                                SshService sshService, FtpService ftpService,
@@ -97,7 +110,9 @@ public class BuildInfoController extends BaseServerController {
                                DockerInfoService dockerInfoService,
                                ScriptServer scriptServer,
                                BuildExtConfig buildExtConfig,
-                               MachineDockerServer machineDockerServer) {
+                               MachineDockerServer machineDockerServer,
+                               NodeService nodeService,
+                               MachineNodeServer machineNodeServer) {
         this.dbBuildHistoryLogService = dbBuildHistoryLogService;
         this.sshService = sshService;
         this.ftpService = ftpService;
@@ -108,6 +123,8 @@ public class BuildInfoController extends BaseServerController {
         this.scriptServer = scriptServer;
         this.buildExtConfig = buildExtConfig;
         this.machineDockerServer = machineDockerServer;
+        this.nodeService = nodeService;
+        this.machineNodeServer = machineNodeServer;
     }
 
     /**
@@ -120,13 +137,23 @@ public class BuildInfoController extends BaseServerController {
     public IJsonMessage<PageResultDto<BuildInfoModel>> getBuildList(HttpServletRequest request) {
         // load list with page
         PageResultDto<BuildInfoModel> page = buildInfoService.listPage(request);
+        Map<String, Boolean> remoteSourceExists = this.queryRemoteSourceExists(page.getResult());
         page.each(buildInfoModel -> {
-            // 获取源码目录是否存在
-            File source = BuildUtil.getSourceById(buildInfoModel.getId());
-            buildInfoModel.setSourceDirExist(FileUtil.exist(source));
+            // 获取源码目录是否存在（远程构建节点上的源码目录 Server 本地看不到）
+            if (StrUtil.isNotEmpty(buildInfoModel.getBuildNodeId())) {
+                buildInfoModel.setSourceDirExist(remoteSourceExists.get(buildInfoModel.getId()));
+            } else {
+                File source = BuildUtil.getSourceById(buildInfoModel.getId());
+                buildInfoModel.setSourceDirExist(FileUtil.exist(source));
+            }
             //
             File file = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), buildInfoModel.getResultDirFile());
             buildInfoModel.setResultHasFile(FileUtil.exist(file));
+            // 列表展示构建节点名称（节点被删除时留空，前端回退显示 id/本机）
+            if (StrUtil.isNotEmpty(buildInfoModel.getBuildNodeId())) {
+                NodeModel buildNode = nodeService.getByKey(buildInfoModel.getBuildNodeId(), false);
+                buildInfoModel.setBuildNodeName(buildNode == null ? null : buildNode.getName());
+            }
         });
         return JsonMessage.success("", page);
     }
@@ -142,13 +169,134 @@ public class BuildInfoController extends BaseServerController {
         // load list with page
         BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);
         Assert.notNull(buildInfoModel, I18nMessageUtil.get("i18n.build_not_exist.c2ac"));
-        // 获取源码目录是否存在
-        File source = BuildUtil.getSourceById(buildInfoModel.getId());
-        buildInfoModel.setSourceDirExist(FileUtil.exist(source));
+        // 获取源码目录是否存在（远程构建节点上的源码目录 Server 本地看不到）
+        if (StrUtil.isNotEmpty(buildInfoModel.getBuildNodeId())) {
+            Map<String, Boolean> remoteSourceExists = this.queryRemoteSourceExists(java.util.Collections.singletonList(buildInfoModel));
+            buildInfoModel.setSourceDirExist(remoteSourceExists.get(buildInfoModel.getId()));
+        } else {
+            File source = BuildUtil.getSourceById(buildInfoModel.getId());
+            buildInfoModel.setSourceDirExist(FileUtil.exist(source));
+        }
         //
         File file = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), buildInfoModel.getResultDirFile());
         buildInfoModel.setResultHasFile(FileUtil.exist(file));
+        if (StrUtil.isNotEmpty(buildInfoModel.getBuildNodeId())) {
+            NodeModel buildNode = nodeService.getByKey(buildInfoModel.getBuildNodeId(), false);
+            buildInfoModel.setBuildNodeName(buildNode == null ? null : buildNode.getName());
+        }
         return JsonMessage.success("", buildInfoModel);
+    }
+
+    /**
+     * 校验构建节点是否可用
+     *
+     * @param buildNodeId     构建节点 ID（空表示 Server 本机）
+     * @param buildMode       构建方式（0 普通、1 容器）
+     * @param repositoryModel 仓库
+     * @param request         请求（用于工作空间隔离校验）
+     */
+    private void checkBuildNode(String buildNodeId, int buildMode, RepositoryModel repositoryModel, HttpServletRequest request) {
+        if (StrUtil.isEmpty(buildNodeId)) {
+            return;
+        }
+        Assert.state(buildMode == 0, I18nMessageUtil.get("i18n.build_node_container_build_unsupported.2e6c"));
+        Assert.state(RepositoryModel.RepoType.Git.getCode() == repositoryModel.getRepoType(),
+            I18nMessageUtil.get("i18n.build_node_repo_type_unsupported.4b18"));
+        NodeModel nodeModel = nodeService.getByKey(buildNodeId, request);
+        Assert.notNull(nodeModel, I18nMessageUtil.get("i18n.build_node_invalid.7f3a"));
+        Assert.state(nodeModel.getOpenStatus() != null && nodeModel.getOpenStatus() == 1,
+            I18nMessageUtil.get("i18n.build_node_disabled.2a77"));
+        MachineNodeModel machineNodeModel = machineNodeServer.getByKey(nodeModel.getMachineId(), false);
+        Assert.state(machineNodeModel != null && machineNodeModel.getBuildEnabled() != null && machineNodeModel.getBuildEnabled() == 1,
+            I18nMessageUtil.get("i18n.build_node_disabled.2a77"));
+        // 能力校验：节点此刻离线时不阻断保存（运行时仍会再校验一次）；
+        // 能连上但不满足能力时直接拒绝，避免用户配好等到构建时才失败。
+        JSONObject info = null;
+        try {
+            info = new BuildNodeClient(nodeModel).info();
+        } catch (Exception e) {
+            log.warn("build node info query failed when saving: {}", buildNodeId, e);
+        }
+        if (info != null) {
+            AgentEngine agentEngine = AgentPackageResolver.resolveEngine(info);
+            Assert.state(agentEngine == AgentEngine.GO, I18nMessageUtil.get("i18n.build_node_not_go_agent.8e4b"));
+            Assert.state(AgentPackageResolver.hasCapability(info, AgentPackageResolver.CAPABILITY_BUILD),
+                I18nMessageUtil.get("i18n.build_node_unsupported_capability.6b02"));
+        }
+    }
+
+    /**
+     * 批量探测远程构建节点上的源码目录是否存在
+     * <p>
+     * 每个节点一次请求，避免列表逐行发请求；节点不可达时按 false 处理（与本地目录不可用语义一致）。
+     *
+     * @param buildInfoModels 当前页的构建配置
+     * @return 构建 ID -&gt; 源码目录是否存在
+     */
+    private Map<String, Boolean> queryRemoteSourceExists(List<BuildInfoModel> buildInfoModels) {
+        Map<String, Boolean> result = new HashMap<>(CollUtil.size(buildInfoModels));
+        Map<String, List<String>> grouped = new HashMap<>(4);
+        for (BuildInfoModel buildInfoModel : buildInfoModels) {
+            if (StrUtil.isEmpty(buildInfoModel.getBuildNodeId())) {
+                continue;
+            }
+            grouped.computeIfAbsent(buildInfoModel.getBuildNodeId(), key -> new ArrayList<>()).add(buildInfoModel.getId());
+        }
+        grouped.forEach((nodeId, ids) -> {
+            NodeModel nodeModel = nodeService.getByKey(nodeId, false);
+            if (nodeModel == null) {
+                ids.forEach(id -> result.put(id, false));
+                return;
+            }
+            try {
+                result.putAll(new BuildNodeClient(nodeModel).sourceExists(ids));
+            } catch (Exception e) {
+                log.warn("query build node source dir failed: {}", nodeId, e);
+                ids.forEach(id -> result.put(id, false));
+            }
+        });
+        return result;
+    }
+
+    /**
+     * 可选的构建节点列表（当前工作空间 + 已开启构建能力 + 在线）
+     *
+     * @return 节点列表
+     */
+    @GetMapping(value = "/build/node/list", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public IJsonMessage<List<JSONObject>> listBuildNode(HttpServletRequest request) {
+        List<NodeModel> nodeList = nodeService.listByWorkspace(request);
+        List<JSONObject> result = new ArrayList<>();
+        for (NodeModel nodeModel : nodeList) {
+            if (nodeModel.getOpenStatus() == null || nodeModel.getOpenStatus() != 1) {
+                continue;
+            }
+            MachineNodeModel machineNodeModel = machineNodeServer.getByKey(nodeModel.getMachineId(), false);
+            if (machineNodeModel == null || machineNodeModel.getBuildEnabled() == null || machineNodeModel.getBuildEnabled() != 1) {
+                continue;
+            }
+            JSONObject item = new JSONObject();
+            item.put("id", nodeModel.getId());
+            item.put("name", nodeModel.getName());
+            item.put("machineId", nodeModel.getMachineId());
+            item.put("buildMaxConcurrency", machineNodeModel.getBuildMaxConcurrency() == null ? 1 : machineNodeModel.getBuildMaxConcurrency());
+            String engine = null;
+            boolean supportBuild = false;
+            try {
+                JSONObject info = new BuildNodeClient(nodeModel).info();
+                AgentEngine agentEngine = AgentPackageResolver.resolveEngine(info);
+                engine = agentEngine.getName();
+                supportBuild = agentEngine == AgentEngine.GO
+                    && AgentPackageResolver.hasCapability(info, AgentPackageResolver.CAPABILITY_BUILD);
+            } catch (Exception e) {
+                log.warn("query build node info failed: {}", nodeModel.getId(), e);
+            }
+            item.put("engine", engine);
+            item.put("online", supportBuild);
+            result.add(item);
+        }
+        return JsonMessage.success("", result);
     }
 
     /**
@@ -194,6 +342,7 @@ public class BuildInfoController extends BaseServerController {
                                             String aliasCode,
                                             @ValidatorItem(value = ValidatorRule.NUMBERS, msg = "i18n.correct_retention_days_required.d542") Integer resultKeepDay,
                                             String buildEnvParameter,
+                                            String buildNodeId,
                                             HttpServletRequest request) {
         // 根据 repositoryId 查询仓库信息
         RepositoryModel repositoryModel = repositoryService.getByKey(repositoryId, request);
@@ -225,6 +374,8 @@ public class BuildInfoController extends BaseServerController {
             // 判断删除命令
             Assert.state(!CommandUtil.checkContainsDel(script), I18nMessageUtil.get("i18n.build_command_no_delete.df52"));
         }
+        // 构建节点校验（为空表示仍在 Server 本机构建，历史行为不变）
+        this.checkBuildNode(buildNodeId, buildMode, repositoryModel, request);
         // 查询构建信息
         BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);
         buildInfoModel = ObjectUtil.defaultIfNull(buildInfoModel, new BuildInfoModel());
@@ -245,6 +396,7 @@ public class BuildInfoController extends BaseServerController {
         buildInfoModel.setResultKeepDay(resultKeepDay);
         buildInfoModel.setBuildMode(buildMode);
         buildInfoModel.setBuildEnvParameter(buildEnvParameter);
+        buildInfoModel.setBuildNodeId(StrUtil.emptyToDefault(buildNodeId, null));
         // 发布方式
         BuildReleaseMethod releaseMethod1 = BaseEnum.getEnum(BuildReleaseMethod.class, releaseMethod);
         Assert.notNull(releaseMethod1, I18nMessageUtil.get("i18n.incorrect_publish_method.e095"));

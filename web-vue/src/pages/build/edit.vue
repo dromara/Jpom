@@ -222,6 +222,54 @@
 
           <!-- 构建流程 -->
           <div v-show="stepsCurrent === 2">
+            <a-form-item :label="$t('i18n_1eb1c081f0')" name="buildNodeId">
+              <a-select
+                v-model:value="temp.buildNodeId"
+                show-search
+                allow-clear
+                :loading="buildNodeLoading"
+                :options="buildNodeOptions"
+                :placeholder="$t('i18n_d355cedabf')"
+                style="width: 100%"
+                @change="changeBuildNode"
+              />
+              <template #help>{{ $t('i18n_df2bfdd78c') }}</template>
+            </a-form-item>
+            <a-alert
+              v-if="buildNodeLoadError"
+              :message="$t('i18n_1fea4ba832')"
+              type="warning"
+              show-icon
+              style="margin-bottom: 16px"
+            />
+            <a-alert
+              v-else-if="!buildNodeLoading && buildNodeList.length === 0"
+              :message="$t('i18n_a9d91ff2a0')"
+              type="info"
+              show-icon
+              style="margin-bottom: 16px"
+            />
+            <a-alert
+              v-if="buildNodeUnavailable"
+              :message="$t('i18n_84890974d0')"
+              type="warning"
+              show-icon
+              style="margin-bottom: 16px"
+            />
+            <a-alert
+              v-if="temp.buildMode === 1"
+              :message="$t('i18n_fe2a08b7df')"
+              type="info"
+              show-icon
+              style="margin-bottom: 16px"
+            />
+            <a-alert
+              v-else-if="temp.buildNodeId"
+              :message="$t('i18n_16b4eedf2f')"
+              type="info"
+              show-icon
+              style="margin-bottom: 16px"
+            />
             <a-form-item v-if="temp.buildMode === 0" name="script">
               <template #label>
                 <a-tooltip>
@@ -1529,7 +1577,8 @@ import {
   getBranchList,
   buildModeMap,
   releaseMethodMap,
-  getBuildGet
+  getBuildGet,
+  getBuildNodeList
 } from '@/api/build-info'
 import { getSshListAll } from '@/api/ssh'
 import { getFtpListAll } from '@/api/ftp'
@@ -1579,6 +1628,10 @@ export default {
       chooseScriptVisible: 0,
       // 当前构建信息的 extraData 属性
       tempExtraData: {},
+      // 可作为构建节点的节点列表（后端失败时降级为「本机（Server）」，不阻塞页面）
+      buildNodeList: [],
+      buildNodeLoading: false,
+      buildNodeLoadError: false,
       viewScriptTemplVisible: false,
       buildScipts: [
         {
@@ -1835,10 +1888,41 @@ export default {
       return Object.keys(this.buildModeMap).map((item) => {
         return {
           value: parseInt(item),
-          disabled: parseInt(item) === 0 && this.getExtendPlugins.indexOf('inDocker') > -1,
+          disabled:
+            (parseInt(item) === 0 && this.getExtendPlugins.indexOf('inDocker') > -1) ||
+            // 远程构建节点只支持本地构建（容器构建依赖 Server 本机 docker 资产）
+            (parseInt(item) === 1 && !!this.temp.buildNodeId),
           name: this.buildModeMap[item]
         }
       })
+    },
+    // 构建节点下拉：首项固定为本机（Server），空值即本机构建
+    buildNodeOptions() {
+      const options = [{ value: '', label: this.$t('i18n_d355cedabf') }]
+      this.buildNodeList.forEach((item) => {
+        const offline = item.online === false
+        options.push({
+          value: item.id,
+          label: offline ? `${item.name} (${this.$t('i18n_50d4a8502e')})` : item.name,
+          // 容器构建只能在 Server 本机执行
+          disabled: this.temp.buildMode === 1
+        })
+      })
+      return options
+    },
+    // 当前选中的构建节点（用于回显校验）
+    selectedBuildNode() {
+      if (!this.temp.buildNodeId) {
+        return null
+      }
+      return this.buildNodeList.find((item) => item.id === this.temp.buildNodeId) || null
+    },
+    // 已选的构建节点不可用（被删除 / 离线 / 关闭了构建能力）
+    buildNodeUnavailable() {
+      if (this.buildNodeLoading || this.buildNodeLoadError) {
+        return false
+      }
+      return !!this.temp.buildNodeId && !this.selectedBuildNode && this.buildNodeList.length > 0
     }
   },
   watch: {
@@ -1861,6 +1945,7 @@ export default {
       }
     }
     this.loadGroupList()
+    this.loadBuildNodeList()
   },
   methods: {
     randomStr,
@@ -1880,7 +1965,9 @@ export default {
     },
     // 新增
     handleAdd() {
-      this.temp = { resultKeepDay: 0 }
+      // releaseMethodDataIdList 必须是数组：发布方式选「项目」后 handleEditBuildOk 会直接读 .length
+      // buildNodeId 为空 = Server 本机构建（默认，老行为）
+      this.temp = { resultKeepDay: 0, releaseMethodDataIdList: [], buildNodeId: '' }
       this.branchList = []
       // this.tempRepository = {};
       // this.loadRepositoryList();
@@ -1906,6 +1993,8 @@ export default {
       this.$refs['editBuildForm']?.resetFields()
       this.temp = Object.assign({}, record)
       this.temp.buildMode = this.temp.buildMode || 0
+      // 构建节点回显：空/未返回时按本机构建处理（兼容老服务端无此字段）
+      this.temp.buildNodeId = this.temp.buildNodeId || ''
       if (this.temp.buildMode === 1) {
         this.loadDockerAllTag()
       }
@@ -2007,6 +2096,34 @@ export default {
     //     }
     //   });
     // },
+    // 加载可作为构建节点的节点列表
+    loadBuildNodeList() {
+      this.buildNodeLoading = true
+      this.buildNodeLoadError = false
+      return getBuildNodeList()
+        .then((res) => {
+          if (res && res.code === 200) {
+            this.buildNodeList = Array.isArray(res.data) ? res.data : []
+          } else {
+            // 后端未就绪 / 无权限：降级为本机构建，不阻塞页面
+            this.buildNodeList = []
+            this.buildNodeLoadError = true
+            console.warn('[build-edit] 构建节点列表加载失败', res)
+          }
+        })
+        .catch((e) => {
+          this.buildNodeList = []
+          this.buildNodeLoadError = true
+          console.warn('[build-edit] 构建节点列表加载失败', e)
+        })
+        .finally(() => {
+          this.buildNodeLoading = false
+        })
+    },
+    // 切换构建节点：清空时回到本机（Server）
+    changeBuildNode(value) {
+      this.temp = { ...this.temp, buildNodeId: value || '' }
+    },
     // 加载节点分发列表
     loadDispatchList() {
       this.dispatchList = []
@@ -2072,14 +2189,31 @@ export default {
     // 提交节点数据
     handleEditBuildOk(build) {
       this.$emit('saveChange', true)
+      const buildForm = this.$refs['editBuildForm']
+      if (!buildForm) {
+        // 组件未挂载/已被销毁时静默返回会让用户以为「点了没反应」，必须可见提示
+        this.$emit('saveChange', false)
+        console.warn('[build-edit] 表单未就绪，保存已取消')
+        $notification.error({
+          message: this.$t('i18n_de928c32b3')
+        })
+        return
+      }
       // 检验表单
-      this.$refs['editBuildForm']
+      buildForm
         .validate()
         .then(() => {
+          // 远程构建节点不支持容器构建（容器构建依赖 Server 本机的 docker 资产）
+          if (this.temp.buildNodeId && this.temp.buildMode === 1) {
+            $notification.warn({
+              message: this.$t('i18n_fe2a08b7df')
+            })
+            return false
+          }
           const tempExtraData = Object.assign({}, this.tempExtraData)
           // 设置参数
           if (this.temp.releaseMethod === 2) {
-            if (this.temp.releaseMethodDataIdList.length < 2) {
+            if ((this.temp.releaseMethodDataIdList || []).length < 2) {
               $notification.warn({
                 message: this.$t('i18n_8309cec640')
               })
@@ -2124,13 +2258,30 @@ export default {
                 this.$emit('confirm', build, res.data, this.temp.buildEnvParameter)
               }
             })
+            .catch((e) => {
+              // 接口层失败（网络/服务端异常）同样必须可见，不能只转个 loading
+              console.error('[build-edit] 保存接口失败', e)
+              $notification.error({
+                message: (e && e.message) || this.$t('i18n_de928c32b3')
+              })
+            })
             .finally(() => {
               this.$emit('saveChange', false)
             })
         })
-        .catch(({ errorFields }) => {
+        .catch((e) => {
           this.$emit('saveChange', false)
-          if (errorFields && errorFields[0]) {
+          const errorFields = e && e.errorFields
+          if (!errorFields) {
+            // 不是表单校验不通过，而是保存过程自身抛错（例如某个字段是 undefined）。
+            // 这类异常原先被这里吞掉：用户点「保存」毫无反应、无请求、无提示，输入全部白填。
+            console.error('[build-edit] 保存失败', e)
+            $notification.error({
+              message: this.$t('i18n_de928c32b3')
+            })
+            return
+          }
+          if (errorFields[0]) {
             // console.log(errorFields[0])
             const msg = errorFields[0].errors && errorFields[0].errors[0]
             if (msg) {

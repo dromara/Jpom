@@ -99,6 +99,11 @@ export const PROJECT_DSL_DEFATUL =
   'config:\r\n' +
   t('i18n_0d467f7889') +
   '\n#  autoBackToFile: true\r\n' +
+  t('i18n_8774cbfd76') +
+  '\n#  log:\r\n' +
+  '#    - name: app\r\n' +
+  '#      path: logs/app.log\r\n' +
+  '#      charset: UTF-8\r\n' +
   '\r\n'
 
 /**
