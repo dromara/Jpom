@@ -51,6 +51,8 @@ DEFAULT_TESTS=(
 	RepositoryControllerWorkspaceTest
 	# 构建「获取分支」必须用 fill=false 取仓库凭证（2.11.13 起仓库密码/私钥被脱敏导致 git 认证失败的守卫）
 	BuildInfoControllerBranchListTest
+	# 仓库编辑凭据回填必须走 scoped 查询：跨工作空间仓库 id 不得把别的仓库密码交给调用者的 gitUrl（2026-11-19 安全报告）
+	RepositoryControllerEditCredentialTest
 	RepositoryServiceFillSelectResultTest
 	# 权限拦截：handler @Feature fail-closed + 节点数据权限 fail-closed
 	HandlerFeatureAnnotationTest
