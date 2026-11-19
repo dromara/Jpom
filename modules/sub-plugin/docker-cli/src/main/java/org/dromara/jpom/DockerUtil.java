@@ -51,6 +51,15 @@ public class DockerUtil {
         JSON.config(JSONWriter.Feature.WriteEnumsUsingName);
     }
 
+    /**
+     * Docker Hub 的统一标识
+     */
+    private static final String DOCKER_HUB_REGISTRY = "docker.io";
+    /**
+     * Docker Hub 的等价域名
+     */
+    private static final String[] DOCKER_HUB_HOST_ALIASES = {"docker.io", "index.docker.io", "registry-1.docker.io", "registry.hub.docker.com"};
+
     private static final Map<String, DockerClient> DOCKER_CLIENT_MAP = new SafeConcurrentHashMap<>();
     private static final Map<String, AutoCloseable> CACHE_CLOSET = new SafeConcurrentHashMap<>();
 
@@ -133,6 +142,92 @@ public class DockerUtil {
             log.debug("auth cmd:{}", JSONObject.toJSONString(authResponse));
         }
         return dockerClient;
+    }
+
+    /**
+     * 判断镜像名是否指向资产配置的镜像仓库
+     * <p>
+     * 用于决定拉取镜像时是否附加资产里保存的仓库账号密码：只有镜像来自资产配置的同一个仓库时才附带，
+     * 否则调用者指定的第三方仓库会收到该资产的仓库凭据（2026-11-19 外部安全报告）。
+     * 资产没有配置仓库地址时一律不附带凭据（按匿名拉取处理）。
+     *
+     * @param repository  镜像名（可能带仓库前缀）
+     * @param registryUrl 资产配置的仓库地址
+     * @return true 表示同一个仓库，可以使用资产配置的仓库凭据
+     */
+    public static boolean registryMatches(String repository, String registryUrl) {
+        String repositoryHost = repositoryRegistryHost(repository);
+        String configuredHost = normalizeRegistryHost(registryUrl);
+        if (StrUtil.isEmpty(repositoryHost) || StrUtil.isEmpty(configuredHost)) {
+            return false;
+        }
+        return StrUtil.equalsIgnoreCase(repositoryHost, configuredHost);
+    }
+
+    /**
+     * 解析镜像名里的仓库域名
+     * <p>
+     * 规则与 docker 一致：第一个 `/` 之前包含 `.` 或 `:`（或为 localhost）才认为是仓库域名，
+     * 否则是 Docker Hub 上的命名空间（如 `library/nginx`）。
+     *
+     * @param repository 镜像名
+     * @return 仓库域名（小写），无法解析时返回空字符串
+     */
+    static String repositoryRegistryHost(String repository) {
+        if (StrUtil.isBlank(repository)) {
+            return StrUtil.EMPTY;
+        }
+        // 去掉 digest 与可能的协议前缀（用户可能直接粘贴完整地址）
+        String repo = StrUtil.subBefore(repository.trim(), "@", false);
+        repo = removeScheme(repo);
+        int slash = repo.indexOf('/');
+        if (slash < 0) {
+            // `nginx`、`nginx:1.25` 都属于 Docker Hub 官方镜像
+            return DOCKER_HUB_REGISTRY;
+        }
+        String first = repo.substring(0, slash);
+        if (StrUtil.containsAny(first, ".", ":") || StrUtil.equalsIgnoreCase(first, "localhost")) {
+            return normalizeDockerHub(first.toLowerCase());
+        }
+        return DOCKER_HUB_REGISTRY;
+    }
+
+    /**
+     * 归一化资产配置的仓库地址，取出仓库域名
+     *
+     * @param registryUrl 仓库地址
+     * @return 仓库域名（小写），无法解析时返回空字符串
+     */
+    static String normalizeRegistryHost(String registryUrl) {
+        if (StrUtil.isBlank(registryUrl)) {
+            return StrUtil.EMPTY;
+        }
+        String url = removeScheme(registryUrl.trim());
+        int slash = url.indexOf('/');
+        if (slash >= 0) {
+            url = url.substring(0, slash);
+        }
+        url = StrUtil.removeSuffix(url, "/");
+        if (StrUtil.isEmpty(url)) {
+            return StrUtil.EMPTY;
+        }
+        return normalizeDockerHub(url.toLowerCase());
+    }
+
+    private static String removeScheme(String url) {
+        String result = StrUtil.removePrefixIgnoreCase(url, "https://");
+        result = StrUtil.removePrefixIgnoreCase(result, "http://");
+        result = StrUtil.removePrefixIgnoreCase(result, "//");
+        return result;
+    }
+
+    private static String normalizeDockerHub(String host) {
+        for (String alias : DOCKER_HUB_HOST_ALIASES) {
+            if (StrUtil.equalsIgnoreCase(alias, host)) {
+                return DOCKER_HUB_REGISTRY;
+            }
+        }
+        return host;
     }
 
     /**

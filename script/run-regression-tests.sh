@@ -102,6 +102,9 @@ DEFAULT_TESTS=(
 	DockerInfoServiceQueryByTagTest
 	DockerYmlDslFromTagTest
 	IndexControlOauth2XssTest
+	# docker 资产控制台越权（六个 /system/assets/docker/* 控制器缺 @SystemPermission）与 pull-image 把资产仓库凭据外发到第三方 registry 的回归（2026-11-19 安全报告）
+	AssetsDockerConsolePermissionTest
+	MachineDockerRegistryCredentialTest
 	# i18n 语言包完整性：代码引用的 key 必须在四个语言包齐全、四包 key 集合一致（2026-11-18 误删约 1000 条的守卫）
 	I18nBundleConsistencyTest
 	# 响应编码兜底：未配置时 UTF-8、显式配置优先、不覆盖请求编码（老安装实例 ??? 乱码的守卫）
