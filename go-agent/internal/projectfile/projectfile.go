@@ -164,6 +164,12 @@ type dslFile struct {
 	BackupSuffix []string `yaml:"backupSuffix"`
 	BackupPath   string   `yaml:"backupPath"`
 	DiffBackup   *bool    `yaml:"diffBackup"`
+	// VersionCount is the number of version snapshots to keep (0 disables the
+	// feature), overriding jpom.project.version-count.
+	VersionCount *int `yaml:"versionCount"`
+	// VersionPath is the version snapshot root, overriding
+	// jpom.project.version-path.
+	VersionPath string `yaml:"versionPath"`
 }
 
 // dsl parses the project dslContent (a YAML document stored inside project.json).

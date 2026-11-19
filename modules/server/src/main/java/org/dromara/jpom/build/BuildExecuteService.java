@@ -11,20 +11,26 @@ package org.dromara.jpom.build;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.SystemClock;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
+import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.build.version.BuildVersionService;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.BaseEnum;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.data.BuildInfoModel;
+import org.dromara.jpom.model.data.NodeBuildVersionModel;
+import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.data.RepositoryModel;
 import org.dromara.jpom.model.enums.BuildStatus;
 import org.dromara.jpom.model.log.BuildHistoryLog;
 import org.dromara.jpom.model.user.UserModel;
+import org.dromara.jpom.service.build.NodeBuildVersionService;
 import org.dromara.jpom.service.dblog.BuildInfoService;
 import org.dromara.jpom.service.dblog.DbBuildHistoryLogService;
 import org.dromara.jpom.service.dblog.RepositoryService;
@@ -35,6 +41,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.io.File;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -51,17 +58,23 @@ public class BuildExecuteService {
     private final RepositoryService repositoryService;
     private final WorkspaceEnvVarService workspaceEnvVarService;
     private final BuildExecutorPoolService buildExecutorPoolService;
+    private final BuildVersionService buildVersionService;
+    private final NodeBuildVersionService nodeBuildVersionService;
 
     public BuildExecuteService(BuildInfoService buildService,
                                DbBuildHistoryLogService dbBuildHistoryLogService,
                                RepositoryService repositoryService,
                                WorkspaceEnvVarService workspaceEnvVarService,
-                               BuildExecutorPoolService buildExecutorPoolService) {
+                               BuildExecutorPoolService buildExecutorPoolService,
+                               BuildVersionService buildVersionService,
+                               NodeBuildVersionService nodeBuildVersionService) {
         this.buildService = buildService;
         this.dbBuildHistoryLogService = dbBuildHistoryLogService;
         this.repositoryService = repositoryService;
         this.workspaceEnvVarService = workspaceEnvVarService;
         this.buildExecutorPoolService = buildExecutorPoolService;
+        this.buildVersionService = buildVersionService;
+        this.nodeBuildVersionService = nodeBuildVersionService;
     }
 
 
@@ -210,7 +223,94 @@ public class BuildExecuteService {
         }
     }
 
-    private int nextBuildId(BuildInfoModel buildInfoModel) {
+    /**
+     * 快速回滚：把节点上的历史版本切换为当前版本（不重新传输产物）
+     *
+     * @param oldLog    目标构建历史
+     * @param item      构建配置
+     * @param userModel 操作人
+     * @param restart   切换后是否重启项目
+     * @return 新的构建编号
+     */
+    public int quickRollback(BuildHistoryLog oldLog, BuildInfoModel item, UserModel userModel, boolean restart) {
+        synchronized (item.getId().intern()) {
+            String e = this.checkStatus(item);
+            Assert.isNull(e, () -> e);
+            Integer fromBuildNumberId = ObjectUtil.defaultIfNull(oldLog.getFromBuildNumberId(), oldLog.getBuildNumberId());
+            List<NodeBuildVersionModel> targets = nodeBuildVersionService.listByBuild(oldLog.getBuildDataId(), fromBuildNumberId);
+            Assert.notEmpty(targets, I18nMessageUtil.get("i18n.no_node_version_for_build.3d18"));
+            int buildId = this.nextBuildId(item);
+            item.setBuildId(buildId);
+            BuildHistoryLog buildHistoryLog = oldLog.toJson().to(BuildHistoryLog.class);
+            buildHistoryLog.setId(null);
+            buildHistoryLog.setCreateUser(null);
+            buildHistoryLog.setCreateTimeMillis(null);
+            buildHistoryLog.setModifyUser(null);
+            buildHistoryLog.setModifyTimeMillis(null);
+            buildHistoryLog.setBuildNumberId(buildId);
+            buildHistoryLog.setFromBuildNumberId(fromBuildNumberId);
+            buildHistoryLog.setTriggerBuildType(3);
+            buildHistoryLog.setStartTime(SystemClock.now());
+            buildHistoryLog.setEndTime(SystemClock.now());
+            //
+            File logFile = BuildUtil.getLogFile(item.getId(), buildId);
+            LogRecorder logRecorder = LogRecorder.builder().file(logFile).build();
+            int success = 0;
+            int fail = 0;
+            try {
+                logRecorder.system(I18nMessageUtil.get("i18n.start_quick_rollback.7a41"), oldLog.getBuildNumberId(), fromBuildNumberId);
+                for (NodeBuildVersionModel target : targets) {
+                    NodeModel nodeModel = buildVersionService.resolveNode(target.getNodeId());
+                    if (nodeModel == null) {
+                        fail++;
+                        logRecorder.systemError(I18nMessageUtil.get("i18n.quick_rollback_node_missing.b6e2"), target.getNodeId(), target.getProjectId());
+                        continue;
+                    }
+                    try {
+                        JsonMessage<JSONObject> jsonMessage = buildVersionService.switchVersion(nodeModel, target.getProjectId(),
+                            target.getVersionId(), restart, null);
+                        if (jsonMessage.success()) {
+                            success++;
+                            nodeBuildVersionService.markCurrent(target.getNodeId(), target.getProjectId(), target.getVersionId());
+                            NodeBuildVersionModel update = new NodeBuildVersionModel();
+                            update.setId(target.getId());
+                            update.setStatus(BuildVersionService.STATUS_CURRENT);
+                            update.setMessage(I18nMessageUtil.get("i18n.quick_rollback_success.9c15"));
+                            nodeBuildVersionService.updateById(update);
+                            logRecorder.system(I18nMessageUtil.get("i18n.quick_rollback_node_success.2f83"),
+                                nodeModel.getName(), target.getProjectId(), target.getVersionId());
+                        } else {
+                            fail++;
+                            logRecorder.systemError(I18nMessageUtil.get("i18n.quick_rollback_node_failed.4b97"),
+                                nodeModel.getName(), target.getProjectId(), target.getVersionId(), jsonMessage);
+                        }
+                    } catch (Exception exception) {
+                        fail++;
+                        logRecorder.systemError(I18nMessageUtil.get("i18n.quick_rollback_node_exception.8e26"),
+                            nodeModel.getName(), target.getProjectId(), exception.getMessage());
+                    }
+                }
+            } finally {
+                String msg = StrUtil.format("{}: {} / {}", I18nMessageUtil.get("i18n.quick_rollback_result.c1d4"), success, fail);
+                buildHistoryLog.setStatus(success > 0 ? BuildStatus.PubSuccess.getCode() : BuildStatus.PubError.getCode());
+                buildHistoryLog.setStatusMsg(msg);
+                buildHistoryLog.setReleaseMethod(oldLog.getReleaseMethod());
+                dbBuildHistoryLogService.insert(buildHistoryLog);
+                buildService.updateStatus(buildHistoryLog.getBuildDataId(),
+                    success > 0 ? BuildStatus.PubSuccess : BuildStatus.PubError, msg);
+                IoUtil.close(logRecorder);
+            }
+            return buildId;
+        }
+    }
+
+    /**
+     * 分配下一个构建编号
+     *
+     * @param buildInfoModel 构建信息
+     * @return 新的构建编号
+     */
+    public int nextBuildId(BuildInfoModel buildInfoModel) {
         // set buildId field
         int buildId = ObjectUtil.defaultIfNull(buildInfoModel.getBuildId(), 0);
         BuildInfoModel update = new BuildInfoModel();

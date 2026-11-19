@@ -20,6 +20,7 @@ import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.build.version.BuildVersionService;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.AfterOpt;
 import org.dromara.jpom.model.data.NodeModel;
@@ -53,6 +54,22 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
     private final Boolean closeFirst;
     private int stripComponents;
     private String fileName;
+    /**
+     * 构建编号（构建触发分发时按节点登记版本快照）
+     */
+    private Integer buildNumberId;
+    /**
+     * 构建配置ID
+     */
+    private String buildDataId;
+    /**
+     * 是否生成完整版本快照
+     */
+    private Boolean versionSnapshot;
+    /**
+     * 版本快照保留个数
+     */
+    private Integer versionKeepCount;
 
     public OutGivingItemRun(OutGivingModel item,
                             OutGivingNodeProject outGivingNodeProject,
@@ -88,6 +105,12 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
             }
             this.updateStatus(this.outGivingId, OutGivingNodeProject.Status.Ing, I18nMessageUtil.get("i18n.start_distribution.bce5"));
             //
+            BuildVersionService buildVersionService = SpringUtil.getBean(BuildVersionService.class);
+            boolean versionEnabled = this.versionEnabled();
+            if (versionEnabled) {
+                this.versionBegin(buildVersionService);
+            }
+            //
             JsonMessage<String> jsonMessage = OutGivingRun.fileUpload(file, this.fileName, this.secondaryDirectory,
                 this.outGivingNodeProject.getProjectId(),
                 unzip,
@@ -106,6 +129,9 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
                     dbOutGivingLogService.updateById(outGivingLog);
                 });
             result = jsonMessage.success() ? OutGivingNodeProject.Status.Ok : OutGivingNodeProject.Status.Fail;
+            if (versionEnabled && jsonMessage.success()) {
+                this.versionCommit(buildVersionService);
+            }
 
             JSONObject jsonObject = jsonMessage.toJson();
             jsonObject.put("upload_duration", StringUtil.formatBetween(SystemClock.now() - time, BetweenFormatter.Level.MILLISECOND, 2));
@@ -120,6 +146,50 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
             this.updateStatus(this.outGivingId, result, jsonObject.toString());
         }
         return result;
+    }
+
+    /**
+     * 是否开启版本快照
+     *
+     * @return true 开启
+     */
+    private boolean versionEnabled() {
+        return Boolean.TRUE.equals(this.versionSnapshot) && this.buildNumberId != null && this.nodeModel != null;
+    }
+
+    /**
+     * 分发前准备版本快照（失败只告警）
+     *
+     * @param buildVersionService 版本服务
+     */
+    private void versionBegin(BuildVersionService buildVersionService) {
+        try {
+            JsonMessage<JSONObject> jsonMessage = buildVersionService.begin(this.nodeModel,
+                this.outGivingNodeProject.getProjectId(), this.buildNumberId, this.versionKeepCount);
+            if (!jsonMessage.success()) {
+                log.warn("{} {}", I18nMessageUtil.get("i18n.version_snapshot_prepare_failed.b8d2"), jsonMessage);
+            }
+        } catch (Exception e) {
+            log.warn(I18nMessageUtil.get("i18n.version_snapshot_prepare_exception.c3e5"), e);
+        }
+    }
+
+    /**
+     * 分发成功后登记版本（失败只告警）
+     *
+     * @param buildVersionService 版本服务
+     */
+    private void versionCommit(BuildVersionService buildVersionService) {
+        try {
+            JsonMessage<JSONObject> jsonMessage = buildVersionService.commit(this.nodeModel,
+                this.outGivingNodeProject.getProjectId(), this.buildNumberId, this.buildDataId,
+                this.versionKeepCount, FileUtil.getAbsolutePath(this.file));
+            if (!jsonMessage.success()) {
+                log.warn("{} {}", I18nMessageUtil.get("i18n.version_snapshot_commit_failed.e4c1"), jsonMessage);
+            }
+        } catch (Exception e) {
+            log.warn(I18nMessageUtil.get("i18n.version_snapshot_commit_exception.f5b3"), e);
+        }
     }
 
     /**

@@ -295,6 +295,35 @@ export function rollback(logId) {
 }
 
 /**
+ * 查询构建历史在节点的版本快照
+ * @param {
+ *  logId: 构建历史 ID
+ * } params
+ */
+export function getBuildVersionList(params) {
+  return axios({
+    url: '/build/manage/version-list',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * 快速回滚（切换节点本地版本，不重新传输产物）
+ * @param {
+ *  logId: 构建历史 ID
+ *  restart: 切换后是否重启项目
+ * } params
+ */
+export function rollbackBuildVersion(params) {
+  return axios({
+    url: '/build/manage/rollback-version',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
  * 删除构建历史记录
  * @param {*} logId
  */

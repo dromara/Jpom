@@ -53,6 +53,7 @@ import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.build.version.BuildVersionService;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.func.assets.model.MachineFtpModel;
@@ -670,33 +671,96 @@ public class ReleaseManage {
         NodeModel nodeModel = nodeService.getByKey(strings[0]);
         Objects.requireNonNull(nodeModel, I18nMessageUtil.get("i18n.node_does_not_exist.4ce4"));
         String projectId = strings[1];
-        if (diffSync) {
-            this.diffSyncProject(nodeModel, projectId, afterOpt, clearOld);
-            return;
+        BuildVersionService buildVersionService = SpringUtil.getBean(BuildVersionService.class);
+        boolean versionEnabled = buildVersionService.enabled(this.buildExtraModule);
+        boolean versionBegun = false;
+        boolean publishSuccess = false;
+        if (versionEnabled) {
+            versionBegun = this.versionBegin(buildVersionService, nodeModel, projectId);
         }
-        boolean tarGz = this.buildEnv.getBool(BuildUtil.USE_TAR_GZ, false);
-        JsonMessage<String> jsonMessage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, tarGz, (unZip, zipFile) -> {
-            String name = zipFile.getName();
-            Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / buildExtConfig.getLogReduceProgressRatio()));
-            return OutGivingRun.fileUpload(zipFile, zipFile.getName(),
-                this.buildExtraModule.getProjectSecondaryDirectory(),
-                projectId,
-                unZip,
-                afterOpt,
-                nodeModel, clearOld, this.buildExtraModule.getProjectUploadCloseFirst(), (total, progressSize) -> {
-                    double progressPercentage = Math.floor(((float) progressSize / total) * 100);
-                    int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
-                    if (progressRangeList.add(progressRange)) {
-                        logRecorder.system(I18nMessageUtil.get("i18n.upload_progress_with_colon.dd5b"), name,
-                            FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
-                            NumberUtil.formatPercent(((float) progressSize / total), 0));
-                    }
-                });
-        });
-        if (jsonMessage.success()) {
-            logRecorder.system(I18nMessageUtil.get("i18n.publish_project_package_success.b0ce"), jsonMessage);
-        } else {
-            throw new JpomRuntimeException(I18nMessageUtil.get("i18n.publish_project_package_failed.9514") + jsonMessage);
+        try {
+            if (diffSync) {
+                this.diffSyncProject(nodeModel, projectId, afterOpt, clearOld);
+                publishSuccess = true;
+                return;
+            }
+            boolean tarGz = this.buildEnv.getBool(BuildUtil.USE_TAR_GZ, false);
+            JsonMessage<String> jsonMessage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, tarGz, (unZip, zipFile) -> {
+                String name = zipFile.getName();
+                Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / buildExtConfig.getLogReduceProgressRatio()));
+                return OutGivingRun.fileUpload(zipFile, zipFile.getName(),
+                    this.buildExtraModule.getProjectSecondaryDirectory(),
+                    projectId,
+                    unZip,
+                    afterOpt,
+                    nodeModel, clearOld, this.buildExtraModule.getProjectUploadCloseFirst(), (total, progressSize) -> {
+                        double progressPercentage = Math.floor(((float) progressSize / total) * 100);
+                        int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
+                        if (progressRangeList.add(progressRange)) {
+                            logRecorder.system(I18nMessageUtil.get("i18n.upload_progress_with_colon.dd5b"), name,
+                                FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
+                                NumberUtil.formatPercent(((float) progressSize / total), 0));
+                        }
+                    });
+            });
+            if (jsonMessage.success()) {
+                logRecorder.system(I18nMessageUtil.get("i18n.publish_project_package_success.b0ce"), jsonMessage);
+                publishSuccess = true;
+            } else {
+                throw new JpomRuntimeException(I18nMessageUtil.get("i18n.publish_project_package_failed.9514") + jsonMessage);
+            }
+        } finally {
+            if (versionBegun && publishSuccess) {
+                this.versionCommit(buildVersionService, nodeModel, projectId);
+            }
+        }
+    }
+
+    /**
+     * 发布前准备版本快照（失败只告警，不阻断发布）
+     *
+     * @param buildVersionService 版本服务
+     * @param nodeModel           节点
+     * @param projectId           项目ID
+     * @return 是否准备成功
+     */
+    private boolean versionBegin(BuildVersionService buildVersionService, NodeModel nodeModel, String projectId) {
+        try {
+            JsonMessage<JSONObject> beginMessage = buildVersionService.begin(nodeModel, projectId,
+                this.getRealBuildNumberId(), this.buildExtraModule.getVersionKeepCount());
+            if (beginMessage.success()) {
+                logRecorder.system(I18nMessageUtil.get("i18n.version_snapshot_prepare_success.a1f7"));
+                return true;
+            }
+            logRecorder.systemWarning(I18nMessageUtil.get("i18n.version_snapshot_prepare_failed.b8d2"), beginMessage);
+        } catch (Exception e) {
+            log.warn(I18nMessageUtil.get("i18n.version_snapshot_prepare_exception.c3e5"), e);
+            logRecorder.systemWarning(I18nMessageUtil.get("i18n.version_snapshot_prepare_exception.c3e5"));
+        }
+        return false;
+    }
+
+    /**
+     * 发布成功后登记版本（失败只告警，不阻断发布）
+     *
+     * @param buildVersionService 版本服务
+     * @param nodeModel           节点
+     * @param projectId           项目ID
+     */
+    private void versionCommit(BuildVersionService buildVersionService, NodeModel nodeModel, String projectId) {
+        try {
+            JsonMessage<JSONObject> commitMessage = buildVersionService.commit(nodeModel, projectId,
+                this.getRealBuildNumberId(), this.buildExtraModule.getId(),
+                this.buildExtraModule.getVersionKeepCount(),
+                this.resultFile == null ? null : FileUtil.getAbsolutePath(this.resultFile));
+            if (commitMessage.success()) {
+                logRecorder.system(I18nMessageUtil.get("i18n.version_snapshot_commit_success.d2a8"));
+            } else {
+                logRecorder.systemWarning(I18nMessageUtil.get("i18n.version_snapshot_commit_failed.e4c1"), commitMessage);
+            }
+        } catch (Exception e) {
+            log.warn(I18nMessageUtil.get("i18n.version_snapshot_commit_exception.f5b3"), e);
+            logRecorder.systemWarning(I18nMessageUtil.get("i18n.version_snapshot_commit_exception.f5b3"));
         }
     }
 
@@ -717,6 +781,11 @@ public class ReleaseManage {
                 .userModel(userModel)
                 .mode("build-trigger")
                 .modeData(buildExtraModule.getId())
+                // 版本快照：按节点登记构建版本，失败只告警不阻断分发
+                .buildNumberId(getRealBuildNumberId())
+                .buildDataId(buildExtraModule.getId())
+                .versionSnapshot(buildExtraModule.getVersionSnapshot())
+                .versionKeepCount(buildExtraModule.getVersionKeepCount())
                 .unzip(unZip)
                 // 由构建配置决定是否删除
                 .doneDeleteFile(false)

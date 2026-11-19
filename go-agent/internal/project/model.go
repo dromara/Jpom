@@ -418,6 +418,8 @@ func NewRuntime(baseDir string, cfg *config.Config, logger *slog.Logger) *Runtim
 		runtime.Options.StatusDetectionInterval = cfg.Jpom.Project.StatusDetectionInterval
 		runtime.Options.FileBackupCount = cfg.Jpom.Project.FileBackupCount
 		runtime.Options.FileBackupSuffix = cfg.Jpom.Project.FileBackupSuffix
+		runtime.Options.VersionCount = cfg.Jpom.Project.VersionCount
+		runtime.Options.VersionPath = cfg.Jpom.Project.VersionPath
 		runtime.Options.CommandUseSudo = cfg.Jpom.System.CommandUseSudo
 		runtime.Options.ConsoleCharset = cfg.Jpom.System.ConsoleCharset
 		runtime.Options.ProjectLog = ProjectLogOptions{

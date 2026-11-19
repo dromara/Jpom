@@ -41,9 +41,13 @@ type Options struct {
 	StatusDetectionInterval int // 毫秒
 	FileBackupCount         int
 	FileBackupSuffix        []string
-	CommandUseSudo          bool
-	ConsoleCharset          string // jpom.system.console-charset（子进程输出解码）
-	ProjectLog              ProjectLogOptions
+	// VersionCount/VersionPath 是项目文件版本快照配置（jpom.project.version-count /
+	// version-path），0 / 空表示关闭或使用默认目录。
+	VersionCount   int
+	VersionPath    string
+	CommandUseSudo bool
+	ConsoleCharset string // jpom.system.console-charset（子进程输出解码）
+	ProjectLog     ProjectLogOptions
 }
 
 // asyncExec 项目启动命令异步执行入口（单测可替换，生产为 proc.AsyncExe）。

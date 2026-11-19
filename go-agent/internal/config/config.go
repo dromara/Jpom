@@ -85,9 +85,13 @@ type Authorize struct {
 }
 
 type Project struct {
-	StatusWaitTime          int        `yaml:"status-wait-time"`
-	FileBackupCount         int        `yaml:"file-backup-count"`
-	FileBackupSuffix        []string   `yaml:"file-backup-suffix"`
+	StatusWaitTime   int      `yaml:"status-wait-time"`
+	FileBackupCount  int      `yaml:"file-backup-count"`
+	FileBackupSuffix []string `yaml:"file-backup-suffix"`
+	// VersionCount 是构建发布后保留的完整版本快照个数，0 表示关闭。
+	VersionCount int `yaml:"version-count"`
+	// VersionPath 是版本快照存储根目录，为空时使用 data/project_file_version。
+	VersionPath             string     `yaml:"version-path"`
 	StatusDetectionInterval int        `yaml:"status-detection-interval"`
 	Log                     ProjectLog `yaml:"log"`
 }
@@ -271,6 +275,8 @@ func Default() *Config {
 				StatusWaitTime:          10,
 				FileBackupCount:         0,
 				FileBackupSuffix:        []string{".jar", ".html", `^.+\.(?i)(txt)$`},
+				VersionCount:            0,
+				VersionPath:             "",
 				StatusDetectionInterval: 500,
 				Log: ProjectLog{
 					AutoBackupConsoleCron: "0 0/10 * * * ?",

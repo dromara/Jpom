@@ -94,10 +94,18 @@ DEFAULT_TESTS=(
 	BaseSshFileControllerNewFileFolderTest
 	# SSH/FTP 文件管理路径穿越回归（name/newname/fileName 不得穿越 fileDirs 白名单，2026-11-17 安全报告）
 	FileUtilsResolveChildPathTest
+	# docker 构建 fromTag SQL 注入（VL-001）与 /oauth2-{provide} 反射型 XSS（VL-002）回归（2026-11-18 安全报告）
+	DockerInfoServiceQueryByTagTest
+	DockerYmlDslFromTagTest
+	IndexControlOauth2XssTest
 	# i18n 语言包完整性：代码引用的 key 必须在四个语言包齐全、四包 key 集合一致（2026-11-18 误删约 1000 条的守卫）
 	I18nBundleConsistencyTest
 	# 响应编码兜底：未配置时 UTF-8、显式配置优先、不覆盖请求编码（老安装实例 ??? 乱码的守卫）
 	EncodingConfigurationTest
+	# 构建版本快照（快速回滚）：忽略目录/临时文件不参与版本内容与指纹、复制不嵌套、清空保留 logs/temp
+	ProjectFileVersionUtilTest
+	# 版本快照资源开关默认关闭（避免升级后所有项目发布额外占用磁盘）
+	AgentDefaultVersionConfigTest
 )
 
 MVN_BIN=${MVN:-mvn}
@@ -148,7 +156,7 @@ if ! command -v "$MVN_BIN" >/dev/null 2>&1; then
 	exit 2
 fi
 
-mvn_args=(-B -pl modules/server -am -Dlicense.skip=true)
+mvn_args=(-B -pl modules/server,modules/agent -am -Dlicense.skip=true)
 # 必须同时覆盖两个属性：根 pom 同时设置了 skipTests=true 与 maven.test.skip=true
 if [ "$ALL_TESTS" = "1" ]; then
 	mvn_args+=(-Dmaven.test.skip=false -DskipTests=false)
