@@ -53,6 +53,13 @@ import java.util.stream.Collectors;
 public class DockerYmlDsl extends BaseJsonModel {
 
     /**
+     * fromTag 允许的字符白名单（docker 镜像名/标签常见字符）
+     * <p>
+     * 只做格式约束，禁止出现引号、括号、注释符等可被拼接进 SQL 的字符
+     */
+    public static final String FROM_TAG_REGEX = "^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,191}$";
+
+    /**
      * 基础镜像
      */
     private String runsOn;
@@ -116,8 +123,22 @@ public class DockerYmlDsl extends BaseJsonModel {
                       IDockerConfigPlugin plugin) {
         Assert.hasText(runsOn, I18nMessageUtil.get("i18n.please_fill_in_runs_on.c2ff"));
         Validator.validateMatchRegex(StringUtil.GENERAL_STR, runsOn, I18nMessageUtil.get("i18n.invalid_runs_on_image_name.4b96"));
+        if (StrUtil.isNotEmpty(fromTag)) {
+            validateFromTag(fromTag);
+        }
         Assert.state(CollUtil.isNotEmpty(steps), I18nMessageUtil.get("i18n.please_fill_in_steps.229d"));
         this.stepsCheck(dockerInfoService, machineDockerServer, workspaceId, plugin);
+    }
+
+    /**
+     * 校验 docker 构建的 fromTag
+     * <p>
+     * fromTag 会参与按标签查询 docker 节点，必须限制字符集合，避免被当作 SQL/表达式片段使用
+     *
+     * @param fromTag 镜像 tag
+     */
+    public static void validateFromTag(String fromTag) {
+        Validator.validateMatchRegex(FROM_TAG_REGEX, fromTag, I18nMessageUtil.get("i18n.invalid_docker_from_tag.7ac1"));
     }
 
     /**
