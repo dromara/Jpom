@@ -98,7 +98,7 @@ func TestNetworkFilterAntPatterns(t *testing.T) {
 	cases := map[string]bool{
 		"lo":              false,
 		"docker0":         false,
-		"ens18":           true,
+		"ens3":            true,
 		"eth0":            true,
 		"eth10":           false,
 		"docker_gwbridge": false,

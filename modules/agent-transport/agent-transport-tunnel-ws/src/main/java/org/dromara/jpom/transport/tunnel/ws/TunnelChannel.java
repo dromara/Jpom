@@ -184,7 +184,18 @@ public class TunnelChannel implements TunnelSession {
     }
 
     private void sendBody(String sid, byte[] body) {
-        for (byte[] frame : TunnelFrameCodec.split(sid, body)) {
+        this.sendBody(sid, body, true);
+    }
+
+    /**
+     * 发送数据帧
+     *
+     * @param sid     逻辑请求 / 流标识
+     * @param body    数据
+     * @param lastFin 最后一帧是否携带 FIN
+     */
+    private void sendBody(String sid, byte[] body, boolean lastFin) {
+        for (byte[] frame : TunnelFrameCodec.split(sid, body, lastFin)) {
             if (!isOpen()) {
                 return;
             }
@@ -711,7 +722,9 @@ public class TunnelChannel implements TunnelSession {
             if (streamClosed) {
                 return;
             }
-            sendBody(sid, payload);
+            // 双向流的每条消息都不能带 FIN：FIN 表示该方向结束，插件端收到 FIN 会关闭本机
+            // WebSocket（Go 插件端 onBinary 即如此），导致 getVersion 等请求刚发出流就断掉
+            sendBody(sid, payload, false);
         }
 
         @Override

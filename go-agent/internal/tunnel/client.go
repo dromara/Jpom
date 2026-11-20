@@ -505,7 +505,16 @@ func (c *Client) handleOpen(frame *Frame) {
 			if messageType != websocket.TextMessage && messageType != websocket.BinaryMessage {
 				continue
 			}
-			_ = c.writeBody(frame.Sid, data)
+			// 双向流的消息帧不带 FIN：FIN 会让对端关闭本机连接
+			frames, err := SplitStream(frame.Sid, data)
+			if err != nil {
+				continue
+			}
+			for _, bodyFrame := range frames {
+				if err := c.writeBodyFrameBytes(bodyFrame); err != nil {
+					return
+				}
+			}
 		}
 	}()
 }

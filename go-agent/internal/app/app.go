@@ -345,7 +345,9 @@ func (a *App) Manifest() map[string]any {
 		"osName":    a.OsName(),
 		"installId": a.InstallID,
 		"debug":     a.Version == "dev",
-		"upTime":    fmt.Sprintf("%d", int64(time.Since(a.StartAt).Seconds())),
+		// upTime 与服务端契约一致用毫秒：Java 插件端取 RuntimeMXBean#getUptime()（毫秒），
+		// 在线升级页「运行时间」列与机器详情都按毫秒渲染，之前用秒会让 Go 节点显示被缩小 1000 倍
+		"upTime": fmt.Sprintf("%d", time.Since(a.StartAt).Milliseconds()),
 		// engine 是 Go 版新增字段（G6）：Server 据此判断节点升级通道；
 		// Java 旧服务端/旧 Agent 反序列化时忽略未知字段，保持字节兼容。
 		"engine": "go",

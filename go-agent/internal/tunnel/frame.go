@@ -193,6 +193,31 @@ func DecodeData(raw []byte) (sid string, payload []byte, fin bool, err error) {
 	return sid, payload, flags&FlagFin != 0, nil
 }
 
+// SplitStream cuts one duplex-stream message into data frames that never carry
+// FIN. FIN means "this direction is finished": the peer closes its local
+// websocket as soon as it sees FIN (see onBinary), so per-message writes on a
+// stream must not set it — otherwise the very first getVersion message would
+// tear the /node_update stream down before the agent can answer.
+func SplitStream(sid string, payload []byte) ([][]byte, error) {
+	if len(payload) == 0 {
+		return nil, nil
+	}
+	var frames [][]byte
+	for offset := 0; offset < len(payload); {
+		end := offset + MaxDataFrameSize
+		if end > len(payload) {
+			end = len(payload)
+		}
+		frame, err := EncodeData(sid, payload[offset:end], false)
+		if err != nil {
+			return nil, err
+		}
+		frames = append(frames, frame)
+		offset = end
+	}
+	return frames, nil
+}
+
 // Split cuts body into data frames, the last one carries FIN.
 func Split(sid string, body []byte) ([][]byte, error) {
 	if len(body) == 0 {

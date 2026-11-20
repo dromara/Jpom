@@ -110,6 +110,26 @@ public class TunnelFrameCodecTest {
         Assertions.assertArrayEquals(payload, frame.getPayload());
     }
 
+    /**
+     * 双向流（/node_update、/console 等 /socket 通道）的每条消息都不能携带 FIN：
+     * FIN 表示“该方向结束”，Go 插件端收到 FIN 会立刻关闭本机 WebSocket，
+     * 导致 getVersion 一发出流就断（在线升级页引擎/平台/实时版本/打包时间/运行时间全空）。
+     */
+    @Test
+    public void testSplitStreamNeverFinishesDirection() {
+        byte[] payload = new byte[TunnelConst.MAX_DATA_FRAME_SIZE + 16];
+        List<byte[]> frames = TunnelFrameCodec.split("s-stream", payload, false);
+        Assertions.assertTrue(frames.size() >= 2, "超长消息应分片: " + frames.size());
+        for (byte[] raw : frames) {
+            TunnelDataFrame frame = TunnelFrameCodec.decodeData(raw);
+            Assertions.assertEquals("s-stream", frame.getSid());
+            Assertions.assertFalse(frame.isFin(), "流消息的每一帧都不能带 FIN");
+        }
+        // HTTP 请求体仍保持“最后一帧带 FIN”的旧语义
+        List<byte[]> bodyFrames = TunnelFrameCodec.split("s-req", "body".getBytes(StandardCharsets.UTF_8));
+        Assertions.assertTrue(TunnelFrameCodec.decodeData(bodyFrames.get(bodyFrames.size() - 1)).isFin());
+    }
+
     @Test
     public void testDataFrameWithoutPayloadAndFin() {
         byte[] raw = TunnelFrameCodec.encodeData("s-1", null, false);

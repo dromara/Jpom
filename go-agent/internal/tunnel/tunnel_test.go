@@ -26,6 +26,46 @@ func TestSignMatchesJavaVector(t *testing.T) {
 	}
 }
 
+// TestSplitStreamNeverSetsFin 锁定双向流协议：流上的每条消息都不能带 FIN，
+// 否则对端（Go 插件端 onBinary / 服务端 ServerStream）会把“消息结束”当成“方向结束”并关闭本机连接，
+// 2026-11-20 /node_update 的 getVersion 就是这样一发出就把流关掉的。
+func TestSplitStreamNeverSetsFin(t *testing.T) {
+	payload := bytes.Repeat([]byte("x"), MaxDataFrameSize+16)
+	frames, err := SplitStream("sid-stream", payload)
+	if err != nil {
+		t.Fatalf("SplitStream error: %v", err)
+	}
+	if len(frames) < 2 {
+		t.Fatalf("frames = %d, want at least 2", len(frames))
+	}
+	total := 0
+	for i, raw := range frames {
+		sid, chunk, fin, err := DecodeData(raw)
+		if err != nil {
+			t.Fatalf("decode frame %d: %v", i, err)
+		}
+		if sid != "sid-stream" {
+			t.Fatalf("frame %d sid = %s", i, sid)
+		}
+		if fin {
+			t.Fatalf("frame %d of a stream message must not carry FIN", i)
+		}
+		total += len(chunk)
+	}
+	if total != len(payload) {
+		t.Fatalf("payload reassembled = %d, want %d", total, len(payload))
+	}
+	// HTTP 请求体仍按旧语义在最后一帧带 FIN
+	bodyFrames, err := Split("sid-req", []byte("body"))
+	if err != nil {
+		t.Fatalf("Split error: %v", err)
+	}
+	_, _, fin, err := DecodeData(bodyFrames[len(bodyFrames)-1])
+	if err != nil || !fin {
+		t.Fatalf("request body last frame must carry FIN, err=%v fin=%v", err, fin)
+	}
+}
+
 func TestDataFrameRoundTrip(t *testing.T) {
 	payload := []byte("hello 插件端")
 	raw, err := EncodeData("s-42", payload, true)

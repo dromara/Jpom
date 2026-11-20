@@ -31,8 +31,9 @@ import (
 //     ANT_PATH_MATCHER.matchStart(antSubMatch+"**", path)，
 //     并额外用 ANT_PATH_MATCHER.match(antSubMatch, "/a/b/") 逐级定位。
 //
-// 因此两端必须**逐条一致**：本文件的实现由 go-agent/internal/build/testdata/antpath_parity.tsv
-// 与 Java 输出对齐（生成器见 dev-scripts/antpath-parity/），任何语义改动都必须重新生成基线。
+// 因此两端必须**逐条一致**：本文件的实现由 go-agent/internal/builder/testdata/antpath_parity.tsv
+// 与 Java 输出对齐（基线由维护者用 Spring AntPathMatcher 生成，生成器不随仓库发布），
+// 任何语义改动都必须重新生成基线。
 
 // AntMatch 等价于 AntPathMatcher#match(pattern, path)（全匹配）。
 func AntMatch(pattern, path string) bool {
