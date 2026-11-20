@@ -420,23 +420,19 @@
         </a-form-item>
 
         <a-form-item :label="$t('i18n_4a172c87cb')" name="buildEnabled">
-          <a-space direction="vertical" style="display: block">
-            <a-space>
-              <a-switch
-                :checked="temp.buildEnabled === 1"
-                :checked-children="$t('i18n_0a60ac8f02')"
-                :un-checked-children="$t('i18n_c9744f45e7')"
-                :disabled="buildEngineUnsupported"
-                @change="changeBuildEnabled"
-              />
-              <!-- 新建时还没有连过机器，类型未知没有参考价值：只在编辑已有机器时展示 -->
-              <a-tag v-if="temp.id" :color="engineTagColor(temp.jpomEngine)">{{ engineLabel(temp.jpomEngine) }}</a-tag>
-              <a-tooltip :title="$t('i18n_df2bfdd78c')">
-                <QuestionCircleOutlined />
-              </a-tooltip>
-            </a-space>
-            <div style="color: rgba(0, 0, 0, 0.45); font-size: 12px">{{ $t('i18n_df2bfdd78c') }}</div>
+          <a-space>
+            <a-switch
+              :checked="temp.buildEnabled === 1"
+              :checked-children="$t('i18n_0a60ac8f02')"
+              :un-checked-children="$t('i18n_c9744f45e7')"
+              :disabled="buildEngineUnsupported"
+              @change="changeBuildEnabled"
+            />
+            <!-- 新建时还没有连过机器，类型未知没有参考价值：只在编辑已有机器时展示 -->
+            <a-tag v-if="temp.id" :color="engineTagColor(temp.jpomEngine)">{{ engineLabel(temp.jpomEngine) }}</a-tag>
           </a-space>
+          <!-- 说明统一走 form-item 的 help 槽：与同表单其它项同一套字号/颜色/间距（由主题 token 决定，不写死内联样式） -->
+          <template #help>{{ $t('i18n_df2bfdd78c') }}</template>
         </a-form-item>
         <a-form-item v-if="temp.buildEnabled === 1" :label="$t('i18n_25b560dd87')" name="buildMaxConcurrency">
           <a-input-number
