@@ -180,7 +180,7 @@ export default {
           dataIndex: 'operation',
           align: 'center',
           fixed: 'right',
-          width: '80px'
+          width: '1%'
         }
       ]
     }

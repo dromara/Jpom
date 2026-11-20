@@ -308,7 +308,7 @@ export default {
           align: 'center',
 
           fixed: 'right',
-          width: '200px'
+          width: '1%'
         }
       ],
 

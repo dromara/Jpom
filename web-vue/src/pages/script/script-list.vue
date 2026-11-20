@@ -630,7 +630,7 @@ export default {
               align: 'center',
 
               fixed: 'right',
-              width: '240px'
+              width: '1%'
             }
           : {
               title: this.$t('i18n_2b6bc0f293'),
@@ -638,7 +638,7 @@ export default {
               align: 'center',
 
               fixed: 'right',
-              width: '100px'
+              width: '1%'
             }
       ],
 

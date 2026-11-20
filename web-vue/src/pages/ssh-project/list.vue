@@ -346,7 +346,7 @@ export default {
           title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
           fixed: 'right',
-          width: '400px'
+          width: '1%'
         }
       ]
     }
@@ -426,7 +426,10 @@ export default {
     // 机器 SSH 展示（名称优先，tooltip 补充 id 便于排查）
     sshTooltip(record) {
       const name = record.sshName || record.sshId || record.machineSshId || '-'
-      const ids = [record.sshId ? 'sshId=' + record.sshId : '', record.machineSshId ? 'machineSshId=' + record.machineSshId : '']
+      const ids = [
+        record.sshId ? 'sshId=' + record.sshId : '',
+        record.machineSshId ? 'machineSshId=' + record.machineSshId : ''
+      ]
         .filter(Boolean)
         .join(' / ')
       return ids ? name + ' (' + ids + ')' : name

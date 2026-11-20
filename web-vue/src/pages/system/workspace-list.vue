@@ -435,7 +435,7 @@ export default {
           fixed: 'right',
           align: 'center',
 
-          width: '320px'
+          width: '1%'
         }
       ],
 

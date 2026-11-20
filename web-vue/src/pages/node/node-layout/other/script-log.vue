@@ -204,7 +204,7 @@ export default {
           align: 'center',
 
           fixed: 'right',
-          width: '100px'
+          width: '1%'
         }
       ]
     }

@@ -246,7 +246,7 @@ export default {
           fixed: 'right',
           align: 'center',
 
-          width: '120px'
+          width: '1%'
         }
       ],
 

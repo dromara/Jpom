@@ -233,7 +233,7 @@ export default {
           ellipsis: true,
 
           fixed: 'right',
-          width: 180,
+          width: '1%',
           align: 'center'
         }
       ],

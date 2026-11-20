@@ -602,7 +602,7 @@ export default {
           align: 'center',
           fixed: 'right',
 
-          width: '220px'
+          width: '1%'
         }
       ],
 

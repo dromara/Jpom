@@ -921,7 +921,7 @@ export default {
         {
           title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
-          width: '120px',
+          width: '1%',
           fixed: 'right',
           align: 'center'
         }

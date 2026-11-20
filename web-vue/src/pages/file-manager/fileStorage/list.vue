@@ -587,7 +587,7 @@ export default {
           ellipsis: true,
 
           fixed: 'right',
-          width: '170px'
+          width: '1%'
         }
       ],
 

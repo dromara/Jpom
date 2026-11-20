@@ -332,7 +332,7 @@ export default {
           align: 'center',
           fixed: 'right',
 
-          width: '180px'
+          width: '1%'
         }
       ],
 

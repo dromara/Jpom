@@ -243,7 +243,7 @@ export default {
           align: 'center',
           fixed: 'right',
 
-          width: '150px'
+          width: '1%'
         }
       ],
       tableSelections: []
