@@ -19,7 +19,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.JSONWriter;
 import i8n.api.BaiduBceRpcTexttransTest;
 import i8n.api.VolcTranslateApiTest;
 import lombok.Lombok;
@@ -46,11 +45,11 @@ import java.util.stream.Collectors;
  *     <li>提取代码中的所有关联的中文</li>
  *     <li>将提取到的中文使用千帆大模型（百度）进行语意化翻译</li>
  *     <li>将翻译结果进行拼接成 key = i18n.xxxx.md5('原始中文')[4+]</li>
- *     <li>将结果缓存至 words.json (如果缓存中存在不会进行重复翻译)</li>
+ *     <li>单词缓存 words.json 已于 2026-11-19 删除（历史遗留，从未打包进 jar），本流程不再读写该文件</li>
  *     <li>----------------------------</li>
- *     <li>将 words.json 转换为 zh_CN.properties</li>
+ *     <li>将翻译结果直接写入 zh_CN.properties</li>
  *     <li>扫描代码中所有关联中文并根据 zh_CN.properties 进行替换</li>
- *     <li>对比扫描结果中使用到的 i18n key，删除 zh_CN.properties 、words.json 中未关联的 key</li>
+ *     <li>对比扫描结果中使用到的 i18n key，删除 zh_CN.properties 中未关联的 key</li>
  *     <li>对应扫描结果中的 i18n key 但是 zh_CN.properties 中不存在的 key，进行提示</li>
  *     <li>----------------------------</li>
  *     <li>将 zh_CN.properties 使用火山翻译（字节跳动）转换为 en_US.properties</li>
@@ -63,7 +62,7 @@ import java.util.stream.Collectors;
  *  扫描代码中的中文关键词：\"[\u4e00-\u9fa5]+\"
  * <p>
  * <b>已弃用，禁止运行。</b>generateZhPropertiesAndReplace_Second2 的 prune 清理步骤依赖
- * words.json 与 4 个正则的关联扫描，扫描不全时会误删仍在使用的 i18n 条目
+ * 全量扫描与 4 个正则的关联，扫描不全时会误删仍在使用的 i18n 条目
  * （2026-11-18 c4d09c43a 曾因此误删约 1000 条，导致大量接口返回裸 key）。
  * 语言包改为手工维护：新增/修改提示直接改四个 messages_*.properties；
  * 恢复历史条目请从发布版合并并按代码引用逐键核对，不要再跑本生成器。
@@ -162,7 +161,7 @@ public class ExtractI18nTest {
         // 语意化中文存储为 key（排序）
         Collection<String> wordsSetSort = CollUtil.sort(wordsSet, String::compareTo);
         //
-        JSONObject cacheWords = this.loadCacheWords();
+        JSONObject cacheWords = new JSONObject();
 
         int pageSize = 50;
         int total = CollUtil.size(wordsSet);
@@ -195,7 +194,6 @@ public class ExtractI18nTest {
                     break;
                 }
             }
-            saveWords(allResult, true);
         }
     }
 
@@ -209,7 +207,7 @@ public class ExtractI18nTest {
      */
     @Test
     public void generateZhPropertiesAndReplace_Second2() throws Exception {
-        JSONObject cacheWords = this.loadCacheWords();
+        JSONObject cacheWords = new JSONObject();
         TreeMap<String, Object> sort = MapUtil.sort(cacheWords);
         Properties zhProperties = new Properties();
         zhProperties.putAll(sort);
@@ -255,13 +253,12 @@ public class ExtractI18nTest {
             if (useKeys.contains(key)) {
                 continue;
             }
-            System.err.println("配置中存在未关联的key（将自动删除 zhProperties、words.json）:" + key);
+            System.err.println("配置中存在未关联的key（将自动删除 zhProperties）:" + key);
             zhProperties.remove(key);
             cacheWords.remove(key);
             isChange = true;
         }
         if (isChange) {
-            saveWords(cacheWords, false);
             try (BufferedWriter writer = FileUtil.getWriter(zhPropertiesFile, charset, false)) {
                 zhProperties.store(writer, "i18n zh");
             }
@@ -397,38 +394,6 @@ public class ExtractI18nTest {
             }
         }
         return null;
-    }
-
-    /**
-     * 增量更新缓存的 words
-     *
-     * @param jsonObject 需要更新的信息
-     * @param append     是否增量更新
-     */
-    private void saveWords(JSONObject jsonObject, boolean append) {
-        File wordsFile = FileUtil.file(rootFile, "common/src/main/resources/i18n/words.json");
-        if (append) {
-            JSONObject cacheWords = this.loadCacheWords();
-            JSONObject updateAfter = cacheWords.clone();
-            updateAfter.putAll(jsonObject);
-            if (!ObjectUtil.equals(MapUtil.sort(updateAfter), MapUtil.sort(cacheWords))) {
-                // 变动才保存
-                // 根据 key 排序
-                TreeMap<String, Object> sort = MapUtil.sort(updateAfter);
-                FileUtil.writeString(JSONArray.toJSONString(sort, JSONWriter.Feature.PrettyFormat), wordsFile, charset);
-            }
-        } else {
-            TreeMap<String, Object> sort = MapUtil.sort(jsonObject);
-            FileUtil.writeString(JSONArray.toJSONString(sort, JSONWriter.Feature.PrettyFormat), wordsFile, charset);
-        }
-    }
-
-    private JSONObject loadCacheWords() {
-        File wordsFile = FileUtil.file(rootFile, "common/src/main/resources/i18n/words.json");
-        if (wordsFile.exists()) {
-            return JSONObject.parseObject(FileUtil.readUtf8String(wordsFile));
-        }
-        return new JSONObject();
     }
 
     /**
