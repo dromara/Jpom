@@ -699,10 +699,11 @@ func javaStringLess(left, right string) bool {
 // clearOldVersion removes the versions beyond the keep count, always keeping the
 // active version and keepAliveID (ProjectFileVersionService#clearOldVersion).
 func (s *Service) clearOldVersion(root, keepAliveID string, versionCount int) {
-	count := versionCount
-	if count < 1 {
-		count = 1
+	if versionCount <= 0 {
+		// 未启用（或调用方没有指定保留个数）时不清理，避免把历史版本误删成只剩当前版本
+		return
 	}
+	count := versionCount
 	metas := s.listVersionMeta(root)
 	current := s.readVersionCurrent(root)
 	for index := count; index < len(metas); index++ {

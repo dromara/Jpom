@@ -49,6 +49,7 @@ import org.dromara.jpom.model.data.FtpModel;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.data.RepositoryModel;
 import org.dromara.jpom.model.data.SshModel;
+import org.dromara.jpom.model.enums.BuildMode;
 import org.dromara.jpom.model.enums.BuildReleaseMethod;
 import org.dromara.jpom.model.script.ScriptModel;
 import org.dromara.jpom.permission.ClassFeature;
@@ -139,8 +140,10 @@ public class BuildInfoController extends BaseServerController {
         PageResultDto<BuildInfoModel> page = buildInfoService.listPage(request);
         Map<String, Boolean> remoteSourceExists = this.queryRemoteSourceExists(page.getResult());
         page.each(buildInfoModel -> {
-            // 获取源码目录是否存在（远程构建节点上的源码目录 Server 本地看不到）
-            if (StrUtil.isNotEmpty(buildInfoModel.getBuildNodeId())) {
+            // 构建方式是「节点构建」时源码目录在节点上，Server 本地看不到
+            int buildMode = BuildMode.normalize(buildInfoModel.getBuildMode(), buildInfoModel.getBuildNodeId());
+            buildInfoModel.setBuildMode(buildMode);
+            if (BuildMode.isNode(buildMode)) {
                 buildInfoModel.setSourceDirExist(remoteSourceExists.get(buildInfoModel.getId()));
             } else {
                 File source = BuildUtil.getSourceById(buildInfoModel.getId());
@@ -169,8 +172,10 @@ public class BuildInfoController extends BaseServerController {
         // load list with page
         BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);
         Assert.notNull(buildInfoModel, I18nMessageUtil.get("i18n.build_not_exist.c2ac"));
-        // 获取源码目录是否存在（远程构建节点上的源码目录 Server 本地看不到）
-        if (StrUtil.isNotEmpty(buildInfoModel.getBuildNodeId())) {
+        // 构建方式是「节点构建」时源码目录在节点上，Server 本地看不到
+        int buildMode = BuildMode.normalize(buildInfoModel.getBuildMode(), buildInfoModel.getBuildNodeId());
+        buildInfoModel.setBuildMode(buildMode);
+        if (BuildMode.isNode(buildMode)) {
             Map<String, Boolean> remoteSourceExists = this.queryRemoteSourceExists(java.util.Collections.singletonList(buildInfoModel));
             buildInfoModel.setSourceDirExist(remoteSourceExists.get(buildInfoModel.getId()));
         } else {
@@ -188,18 +193,14 @@ public class BuildInfoController extends BaseServerController {
     }
 
     /**
-     * 校验构建节点是否可用
+     * 校验构建节点是否可用（只对「节点构建」生效）
      *
-     * @param buildNodeId     构建节点 ID（空表示 Server 本机）
-     * @param buildMode       构建方式（0 普通、1 容器）
+     * @param buildNodeId     构建节点 ID
      * @param repositoryModel 仓库
      * @param request         请求（用于工作空间隔离校验）
      */
-    private void checkBuildNode(String buildNodeId, int buildMode, RepositoryModel repositoryModel, HttpServletRequest request) {
-        if (StrUtil.isEmpty(buildNodeId)) {
-            return;
-        }
-        Assert.state(buildMode == 0, I18nMessageUtil.get("i18n.build_node_container_build_unsupported.2e6c"));
+    private void checkBuildNode(String buildNodeId, RepositoryModel repositoryModel, HttpServletRequest request) {
+        Assert.hasText(buildNodeId, I18nMessageUtil.get("i18n.build_node_required.5d9c"));
         Assert.state(RepositoryModel.RepoType.Git.getCode() == repositoryModel.getRepoType(),
             I18nMessageUtil.get("i18n.build_node_repo_type_unsupported.4b18"));
         NodeModel nodeModel = nodeService.getByKey(buildNodeId, request);
@@ -357,8 +358,9 @@ public class BuildInfoController extends BaseServerController {
         ResultDirFileAction resultDirFileAction = ResultDirFileAction.parse(resultDirFile);
         resultDirFileAction.check();
         //
-        Assert.state(buildMode == 0 || buildMode == 1, I18nMessageUtil.get("i18n.select_correct_build_method.84c4"));
-        if (buildMode == 1) {
+        Assert.state(buildMode == BuildMode.Local.getCode() || buildMode == BuildMode.Container.getCode() || buildMode == BuildMode.Node.getCode(),
+            I18nMessageUtil.get("i18n.select_correct_build_method.84c4"));
+        if (buildMode == BuildMode.Container.getCode()) {
             // 验证 dsl 内容
             this.checkDocker(script, request);
             // 容器构建不能使用 ant 模式
@@ -374,8 +376,10 @@ public class BuildInfoController extends BaseServerController {
             // 判断删除命令
             Assert.state(!CommandUtil.checkContainsDel(script), I18nMessageUtil.get("i18n.build_command_no_delete.df52"));
         }
-        // 构建节点校验（为空表示仍在 Server 本机构建，历史行为不变）
-        this.checkBuildNode(buildNodeId, buildMode, repositoryModel, request);
+        // 构建节点校验：只有「节点构建」才有构建节点，本地构建/容器构建一律不使用节点
+        if (buildMode == BuildMode.Node.getCode()) {
+            this.checkBuildNode(buildNodeId, repositoryModel, request);
+        }
         // 查询构建信息
         BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);
         buildInfoModel = ObjectUtil.defaultIfNull(buildInfoModel, new BuildInfoModel());
@@ -396,7 +400,8 @@ public class BuildInfoController extends BaseServerController {
         buildInfoModel.setResultKeepDay(resultKeepDay);
         buildInfoModel.setBuildMode(buildMode);
         buildInfoModel.setBuildEnvParameter(buildEnvParameter);
-        buildInfoModel.setBuildNodeId(StrUtil.emptyToDefault(buildNodeId, null));
+        // 只有「节点构建」保存构建节点，其它构建方式清空，避免切换构建方式后残留脏数据
+        buildInfoModel.setBuildNodeId(buildMode == BuildMode.Node.getCode() ? StrUtil.emptyToDefault(buildNodeId, null) : null);
         // 发布方式
         BuildReleaseMethod releaseMethod1 = BaseEnum.getEnum(BuildReleaseMethod.class, releaseMethod);
         Assert.notNull(releaseMethod1, I18nMessageUtil.get("i18n.incorrect_publish_method.e095"));

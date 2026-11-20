@@ -10,13 +10,16 @@
 package org.dromara.jpom.build;
 
 import cn.hutool.core.util.StrUtil;
+import org.dromara.jpom.model.enums.BuildMode;
 import org.dromara.jpom.util.LogRecorder;
 
 /**
  * 构建执行器装配点。
  * <p>
- * 唯一决定「这次构建在哪里执行」的地方：构建配置了 buildNodeId 就走远程节点，
- * 否则仍是 Server 本机执行（历史行为不变）。
+ * 唯一决定「这次构建在哪里执行」的地方：构建方式为「节点构建」（{@link BuildMode#Node}）走远程节点执行器，
+ * 其余构建方式（本地构建、容器构建）仍由 Server 本机执行（历史行为不变）。
+ * <p>
+ * 新增一种构建方式时只需在此注册一个执行器分支，调用方（{@code BuildExecuteManage}）零改动。
  *
  * @author jpom
  * @since 2.11.15
@@ -39,7 +42,10 @@ public final class BuildRunnerFactory {
     public static BuildRunner create(BuildExecuteManage owner, TaskData taskData,
                                      BuildExtraModule buildExtraModule, LogRecorder logRecorder, String logId) {
         String buildNodeId = taskData.buildInfoModel.getBuildNodeId();
-        if (StrUtil.isEmpty(buildNodeId)) {
+        // 「节点构建」是构建方式的一类；buildMode=0 + buildNodeId 非空 是 2.11.14.3 之前（该 beta 未发布）的旧表达，
+        // 这里一并按节点构建处理，保证已存在的测试数据不需要先迁移就能继续构建。
+        int buildMode = BuildMode.normalize(taskData.buildInfoModel.getBuildMode(), buildNodeId);
+        if (!BuildMode.isNode(buildMode) || StrUtil.isEmpty(buildNodeId)) {
             return new LocalBuildRunner(owner);
         }
         return new RemoteBuildRunner(owner, taskData, buildExtraModule, logRecorder, logId, buildNodeId);

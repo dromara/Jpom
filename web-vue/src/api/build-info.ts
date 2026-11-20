@@ -401,5 +401,6 @@ export const triggerBuildTypeMap = {
 
 export const buildModeMap = {
   0: t('i18n_69c3b873c1'),
-  1: t('i18n_685e5de706')
+  1: t('i18n_685e5de706'),
+  2: t('i18n_c6f399f36c')
 }

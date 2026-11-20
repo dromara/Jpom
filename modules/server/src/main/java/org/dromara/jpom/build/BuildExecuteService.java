@@ -239,6 +239,9 @@ public class BuildExecuteService {
             Integer fromBuildNumberId = ObjectUtil.defaultIfNull(oldLog.getFromBuildNumberId(), oldLog.getBuildNumberId());
             List<NodeBuildVersionModel> targets = nodeBuildVersionService.listByBuild(oldLog.getBuildDataId(), fromBuildNumberId);
             Assert.notEmpty(targets, I18nMessageUtil.get("i18n.no_node_version_for_build.3d18"));
+            // 历史记录可能没有 extraData（老数据），这里不能直接 Assert，取不到就按默认保留个数处理
+            BuildExtraModule oldExtra = StringUtil.jsonConvert(oldLog.getExtraData(), BuildExtraModule.class);
+            int versionKeepCount = BuildVersionService.resolveKeepCount(oldExtra == null ? null : oldExtra.getVersionKeepCount());
             int buildId = this.nextBuildId(item);
             item.setBuildId(buildId);
             BuildHistoryLog buildHistoryLog = oldLog.toJson().to(BuildHistoryLog.class);
@@ -267,8 +270,9 @@ public class BuildExecuteService {
                         continue;
                     }
                     try {
+                        // 切换时显式带上构建配置的保留个数（0/空归一为默认值），否则插件端会按「未启用」清理到只剩当前版本
                         JsonMessage<JSONObject> jsonMessage = buildVersionService.switchVersion(nodeModel, target.getProjectId(),
-                            target.getVersionId(), restart, null);
+                            target.getVersionId(), restart, versionKeepCount);
                         if (jsonMessage.success()) {
                             success++;
                             nodeBuildVersionService.markCurrent(target.getNodeId(), target.getProjectId(), target.getVersionId());

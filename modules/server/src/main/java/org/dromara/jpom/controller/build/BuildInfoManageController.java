@@ -27,6 +27,7 @@ import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.BaseEnum;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.data.BuildInfoModel;
+import org.dromara.jpom.model.enums.BuildMode;
 import org.dromara.jpom.model.enums.BuildStatus;
 import org.dromara.jpom.model.log.BuildHistoryLog;
 import org.dromara.jpom.model.user.UserModel;
@@ -170,7 +171,7 @@ public class BuildInfoManageController extends BaseServerController {
             environmentMapBuilder.putStr(StringUtil.parseEnvStr(item.getBuildEnvParameter()));
             //
             buildMode = item.getBuildMode();
-            if (buildMode != null && buildMode == 1) {
+            if (BuildMode.isContainer(buildMode)) {
                 // 容器中的环境变量
                 String script = item.getScript();
                 DockerYmlDsl dockerYmlDsl = DockerYmlDsl.build(script);
@@ -183,8 +184,8 @@ public class BuildInfoManageController extends BaseServerController {
             String workspace = buildInfoService.getCheckUserWorkspace(request);
             environmentMapBuilder = workspaceEnvVarService.getEnv(workspace);
         }
-        // 获取系统变量
-        if (buildMode != null && buildMode == 0) {
+        // 获取系统变量（本地构建与节点构建都执行真实命令；节点构建的系统变量以节点为准，这里展示 Server 侧可读部分）
+        if (!BuildMode.isContainer(buildMode)) {
             ProcessBuilder processBuilder = new ProcessBuilder();
             Map<String, String> environment = processBuilder.environment();
             environment.forEach(environmentMapBuilder::putSystem);

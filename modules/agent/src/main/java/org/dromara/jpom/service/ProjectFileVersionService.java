@@ -371,7 +371,11 @@ public class ProjectFileVersionService {
      * @param versionCount 保留个数
      */
     private void clearOldVersion(File root, String keepAliveId, int versionCount) {
-        int count = Math.max(versionCount, 1);
+        if (versionCount <= 0) {
+            // 未启用（或调用方没有指定保留个数）：不清理，避免把历史版本误删成只剩当前版本
+            return;
+        }
+        int count = versionCount;
         List<JSONObject> metas = this.listMeta(root);
         String current = this.readCurrent(root);
         for (int i = count; i < metas.size(); i++) {

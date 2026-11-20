@@ -113,6 +113,8 @@ DEFAULT_TESTS=(
 	ProjectFileVersionUtilTest
 	# 版本快照资源开关默认关闭（避免升级后所有项目发布额外占用磁盘）
 	AgentDefaultVersionConfigTest
+	# 版本快照保留个数 0/空必须回落到默认值（否则插件端判「未启用」，发布成功却没有版本记录 → 快速回滚空列表，2026-11-19 群反馈）
+	BuildVersionServiceKeepCountTest
 )
 
 MVN_BIN=${MVN:-mvn}
