@@ -378,6 +378,16 @@ public class BuildInfoController extends BaseServerController {
         // 构建节点校验：只有「节点构建」才有构建节点，本地构建/容器构建一律不使用节点
         if (buildMode == BuildMode.Node.getCode()) {
             this.checkBuildNode(buildNodeId, repositoryModel, request);
+            // 节点构建与容器构建是互斥的两种方式：接口直传容器专属参数（runsOn/dockerFile/fromTag 等）时直接拒绝，
+            // 否则这些字段会被静默落库但不生效，用户在页面上看不到原因。
+            JSONObject nodeBuildExtra = StrUtil.isBlank(extraData) ? null : JSON.parseObject(extraData);
+            if (nodeBuildExtra != null) {
+                boolean containerField = StrUtil.isNotBlank(nodeBuildExtra.getString("runsOn"))
+                    || StrUtil.isNotBlank(nodeBuildExtra.getString("dockerFile"))
+                    || StrUtil.isNotBlank(nodeBuildExtra.getString("fromTag"))
+                    || StrUtil.isNotBlank(nodeBuildExtra.getString("contextDir"));
+                Assert.state(!containerField, I18nMessageUtil.get("i18n.build_node_container_build_unsupported.2e6c"));
+            }
         }
         // 查询构建信息
         BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);

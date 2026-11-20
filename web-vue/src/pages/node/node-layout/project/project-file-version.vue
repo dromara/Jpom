@@ -12,7 +12,7 @@
 <template>
   <div>
     <a-alert
-      v-if="!loading && !enabled"
+      v-if="!loading && !enabled && !hasVersions"
       type="warning"
       show-icon
       :message="$t('i18n_f971771775')"
@@ -21,7 +21,7 @@
     <template v-else>
       <a-space wrap style="margin-bottom: 12px">
         <a-tag v-if="path">{{ $t('i18n_835b950031') }}：{{ path }}</a-tag>
-        <a-tag>{{ $t('i18n_0e9a916105') }}：{{ versionCount }}</a-tag>
+        <a-tag>{{ $t('i18n_0e9a916105') }}：{{ versionCount > 0 ? versionCount : '—' }}</a-tag>
         <a-checkbox v-model:checked="restart">{{ $t('i18n_eac2e936c1') }}</a-checkbox>
         <a-button size="small" type="primary" @click="loadData">{{ $t('i18n_90b5a467c1') }}</a-button>
       </a-space>
@@ -104,6 +104,7 @@ export default {
       switchLoading: false,
       restart: false,
       enabled: true,
+      hasVersions: false,
       versionCount: 0,
       path: '',
       current: null,
@@ -138,6 +139,8 @@ export default {
           if (res.code === 200) {
             const data = res.data || {}
             this.enabled = data.enabled !== false
+            // 插件端配置为 0 但磁盘上已有版本（构建按默认 3 生成）时，仍然要展示并允许切换/删除
+            this.hasVersions = data.hasVersions === true || (data.list || []).length > 0
             this.versionCount = data.versionCount || 0
             this.path = data.path || ''
             this.current = data.current

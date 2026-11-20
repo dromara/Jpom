@@ -242,6 +242,10 @@
                 <CloudOutlined />
                 {{ $t('i18n_685e5de706') }}
               </template>
+              <template v-else-if="item.buildMode === 2">
+                <ApartmentOutlined />
+                {{ $t('i18n_c6f399f36c') }}
+              </template>
               <template v-else>
                 <CodeOutlined />
                 {{ $t('i18n_69c3b873c1') }}
@@ -358,8 +362,12 @@
         </template>
 
         <template v-else-if="column.dataIndex === 'buildMode'">
-          <a-tooltip placement="topLeft" :title="text === 1 ? $t('i18n_685e5de706') : $t('i18n_69c3b873c1')">
+          <a-tooltip
+            placement="topLeft"
+            :title="text === 1 ? $t('i18n_685e5de706') : text === 2 ? $t('i18n_c6f399f36c') : $t('i18n_69c3b873c1')"
+          >
             <CloudOutlined v-if="text === 1" />
+            <ApartmentOutlined v-else-if="text === 2" />
             <CodeOutlined v-else />
           </a-tooltip>
         </template>

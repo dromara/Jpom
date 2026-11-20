@@ -390,3 +390,41 @@ func assertFileContent(t *testing.T, path, want string) {
 func boolPointer(value bool) *bool { return &value }
 
 func intPointer(value int) *int { return &value }
+
+// TestVersionListEnabledWhenVersionsExistButConfigZero 守护「构建按默认保留个数生成版本、
+// 插件端配置仍为 0」时的口径：只要磁盘上已有版本，list/capability 必须报告 enabled 且
+// 带 hasVersions，否则前端会把已有版本藏起来并且无法切换（2.11.14.3 候选验收发现）。
+func TestVersionListEnabledWhenVersionsExistButConfigZero(t *testing.T) {
+	service, _, lib := versionTestSetup(t, 5)
+	writeFile(t, filepath.Join(lib, "app.jar"), "v1")
+	if _, err := service.VersionBegin("P1", nil, nil); err != nil {
+		t.Fatalf("begin: %v", err)
+	}
+	versionSleep()
+	buildNumberID := 11
+	if _, err := service.VersionCommit("P1", &buildNumberID, "", nil); err != nil {
+		t.Fatalf("commit: %v", err)
+	}
+
+	// 模拟：插件端配置为 0（默认），但版本已由构建按默认保留个数生成
+	service.app.Config.Jpom.Project.VersionCount = 0
+
+	list, err := service.VersionList("P1")
+	if err != nil {
+		t.Fatalf("list: %v", err)
+	}
+	if !list.Enabled || !list.HasVersions || len(list.List) == 0 {
+		t.Fatalf("已有版本时 list 必须 enabled 且 hasVersions=true：%+v", list)
+	}
+	if list.VersionCount != 0 {
+		t.Fatalf("versionCount 应如实反映配置值 0：%+v", list)
+	}
+
+	capability, err := service.VersionCapability("P1")
+	if err != nil {
+		t.Fatalf("capability: %v", err)
+	}
+	if !capability.Enabled || !capability.HasVersions {
+		t.Fatalf("已有版本时 capability 必须 enabled 且 hasVersions=true：%+v", capability)
+	}
+}

@@ -116,11 +116,16 @@ public class ProjectFileVersionService {
      */
     public JSONObject capability(NodeProjectInfoModel projectInfoModel) {
         int versionCount = this.resolveVersionCount(projectInfoModel);
+        File root = this.pathProjectVersion(projectInfoModel);
+        boolean hasVersions = !this.listMeta(root).isEmpty();
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("support", true);
-        jsonObject.put("enabled", versionCount > 0);
+        // 构建配置按「保留个数默认 3」生成过版本时，插件端配置可能仍为 0：
+        // 只要磁盘上已有版本，就不能报告为「未开启」，否则前端会把已有版本藏起来且无法切换。
+        jsonObject.put("enabled", versionCount > 0 || hasVersions);
+        jsonObject.put("hasVersions", hasVersions);
         jsonObject.put("versionCount", versionCount);
-        jsonObject.put("path", FileUtil.getAbsolutePath(this.pathProjectVersion(projectInfoModel)));
+        jsonObject.put("path", FileUtil.getAbsolutePath(root));
         return jsonObject;
     }
 
@@ -201,12 +206,16 @@ public class ProjectFileVersionService {
     public JSONObject list(NodeProjectInfoModel projectInfoModel) {
         File root = this.pathProjectVersion(projectInfoModel);
         int versionCount = this.resolveVersionCount(projectInfoModel);
+        List<JSONObject> metaList = this.listMeta(root);
+        boolean hasVersions = !metaList.isEmpty();
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("path", FileUtil.getAbsolutePath(root));
-        jsonObject.put("enabled", versionCount > 0);
+        // 与 capability 同口径：已有版本（例如按构建配置默认 3 生成的）视为可用，不因插件端配置为 0 而隐藏
+        jsonObject.put("enabled", versionCount > 0 || hasVersions);
+        jsonObject.put("hasVersions", hasVersions);
         jsonObject.put("versionCount", versionCount);
         jsonObject.put("current", this.readCurrent(root));
-        jsonObject.put("list", this.listMeta(root));
+        jsonObject.put("list", metaList);
         return jsonObject;
     }
 
