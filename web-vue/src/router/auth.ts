@@ -21,7 +21,7 @@ import { RouteLocationNormalized, NavigationGuardNext } from 'vue-router'
 
 // 不需要鉴权的名单
 const whiteList: string[] = ['/login', '/install', '/prohibit-access', '/404']
-const noTabs: string[] = ['/full-terminal', '/ssh-tabs']
+const noTabs: string[] = ['/full-terminal', '/ssh-tabs', '/ssh-project/console']
 
 router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
   const useAppStore = appStore()

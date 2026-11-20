@@ -68,6 +68,13 @@ import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.data.FtpModel;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.data.SshModel;
+import org.dromara.jpom.model.data.SshProjectModel;
+import org.dromara.jpom.model.sshproject.SshProjectExecuteResult;
+import org.dromara.jpom.service.sshproject.SshProjectMachineResolver;
+import org.dromara.jpom.service.sshproject.SshProjectService;
+import org.dromara.jpom.func.assets.model.MachineSshModel;
+import org.dromara.jpom.func.assets.server.MachineSshServer;
+import org.dromara.jpom.socket.ConsoleCommandOp;
 import org.dromara.jpom.model.docker.DockerInfoModel;
 import org.dromara.jpom.model.enums.BuildReleaseMethod;
 import org.dromara.jpom.model.enums.BuildStatus;
@@ -210,6 +217,8 @@ public class ReleaseManage {
             return this.localCommand();
         } else if (releaseMethod == BuildReleaseMethod.DockerImage.getCode()) {
             return this.doDockerImage();
+        } else if (releaseMethod == BuildReleaseMethod.SshProject.getCode()) {
+            this.doSshProject();
         } else if (releaseMethod == BuildReleaseMethod.Ftp.getCode()) {
             this.doFtp();
         } else if (releaseMethod == BuildReleaseMethod.No.getCode()) {
@@ -518,6 +527,55 @@ public class ReleaseManage {
         }
     }
 
+
+    /**
+     * 发布到 SSH 项目：产物直接落到项目目录，然后按项目生命周期脚本重启
+     */
+    private void doSshProject() throws IOException {
+        String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
+        SshProjectService sshProjectService = SpringUtil.getBean(SshProjectService.class);
+        SshProjectModel project = sshProjectService.getByKey(releaseMethodDataId);
+        if (project == null) {
+            logRecorder.systemError(I18nMessageUtil.get("i18n.ssh_project_not_exist.5d18") + releaseMethodDataId);
+            return;
+        }
+        SshProjectMachineResolver machineResolver = SpringUtil.getBean(SshProjectMachineResolver.class);
+        MachineSshModel machineSshModel = machineResolver.resolve(project);
+        Session session = null;
+        ChannelSftp channelSftp = null;
+        try {
+            session = SpringUtil.getBean(MachineSshServer.class).getSessionByModel(machineSshModel);
+            Charset charset = machineSshModel.charset();
+            int timeout = machineSshModel.timeout();
+            MySftp sftp = new MySftp(session, charset, timeout, SpringUtil.getBean(SshService.class).createProgressMonitor(logRecorder));
+            channelSftp = sftp.getClient();
+            String normalizePath = FileUtil.normalize(StrUtil.nullToEmpty(project.getPath()));
+            if (this.buildExtraModule.isClearOld() && sftp.exist(normalizePath)) {
+                try {
+                    sftp.delDir(normalizePath);
+                } catch (Exception e) {
+                    logRecorder.error(I18nMessageUtil.get("i18n.clear_build_product_failed.edd4"), e);
+                }
+            }
+            sftp.syncUpload(this.resultFile, normalizePath);
+            logRecorder.system("ssh project upload done: {}", project.getName());
+        } finally {
+            JschUtil.close(channelSftp);
+            JschUtil.close(session);
+        }
+        // 发布完成后按项目自身脚本重启（没有 restart 钩子时执行器会退化为 stop + start）
+        try {
+            SshProjectExecuteResult result = sshProjectService.execute(project, ConsoleCommandOp.restart.name(), line -> logRecorder.info(line));
+            if (result.isSuccess()) {
+                logRecorder.system("ssh project restart done: {}", project.getName());
+            } else {
+                logRecorder.systemError("ssh project restart failed: {}", StrUtil.emptyToDefault(result.getMessage(), String.valueOf(result.getExitCode())));
+            }
+        } catch (Exception e) {
+            // 项目没有配置任何生命周期脚本时不影响产物发布结果，只提示
+            logRecorder.systemWarning("ssh project has no lifecycle script, skip restart: {}", e.getMessage());
+        }
+    }
 
     /**
      * ftp发布

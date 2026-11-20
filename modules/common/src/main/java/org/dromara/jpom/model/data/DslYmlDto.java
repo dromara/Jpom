@@ -18,8 +18,7 @@ import lombok.EqualsAndHashCode;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.springframework.util.Assert;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -75,8 +74,11 @@ public class DslYmlDto extends BaseJsonModel {
      * @return DslYmlDto
      */
     public static DslYmlDto build(String yml) {
-        InputStream inputStream = new ByteArrayInputStream(yml.getBytes());
-        return YamlUtil.load(inputStream, DslYmlDto.class);
+        // 必须用 Reader（字符流）解析：InputStream 会按 JVM 默认编码解码，默认编码为 ASCII/POSIX 时
+        // YAML 里的中文会被解成非法字符，直接报 "special characters are not allowed"
+        try (StringReader reader = new StringReader(yml)) {
+            return YamlUtil.load(reader, DslYmlDto.class);
+        }
     }
 
     /**
@@ -160,6 +162,14 @@ public class DslYmlDto extends BaseJsonModel {
          * 执行脚本的环境变量
          */
         private Map<String, String> scriptEnv;
+        /**
+         * 内联脚本正文（SSH 项目主用法；为空时按 scriptId 解析脚本来源）
+         */
+        private String script;
+        /**
+         * 该流程脚本的执行超时时间（秒），为空时使用默认值
+         */
+        private Integer timeout;
     }
 
     @Data

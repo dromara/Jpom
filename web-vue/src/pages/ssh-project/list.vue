@@ -1,0 +1,431 @@
+<!--
+
+    Copyright (c) 2019 Of Him Code Technology Studio
+    Jpom is licensed under Mulan PSL v2.
+    You can use this software according to the terms and conditions of the Mulan PSL v2.
+    You may obtain a copy of Mulan PSL v2 at:
+    			http://license.coscl.org.cn/MulanPSL2
+    THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+    See the Mulan PSL v2 for more details.
+
+-->
+<template>
+  <div>
+    <!-- 数据表格 -->
+    <CustomTable
+      is-show-tools
+      default-auto-refresh
+      :auto-refresh-time="30"
+      table-name="ssh-project-list"
+      :active-page="activePage"
+      :data-source="list"
+      size="middle"
+      :columns="columns"
+      :pagination="pagination"
+      bordered
+      row-key="id"
+      :scroll="{
+        x: 'max-content'
+      }"
+      @change="changePage"
+      @refresh="loadData"
+    >
+      <template #title>
+        <a-space wrap class="search-box">
+          <a-input
+            v-model:value="listQuery.name"
+            :placeholder="$t('i18n_47d26a4994')"
+            class="search-input-item"
+            allow-clear
+            @press-enter="loadData"
+          />
+          <a-input
+            v-model:value="listQuery.group"
+            :placeholder="$t('i18n_0a52738bb5')"
+            class="search-input-item"
+            allow-clear
+            @press-enter="loadData"
+          />
+          <a-tooltip :title="$t('i18n_4838a3bd20')">
+            <a-button type="primary" :loading="loading" @click="loadData">{{ $t('i18n_e5f71fc31e') }}</a-button>
+          </a-tooltip>
+          <a-button type="primary" @click="handleAdd">{{ $t('i18n_66ab5e9f24') }}</a-button>
+        </a-space>
+      </template>
+      <template #tableBodyCell="{ column, text, record }">
+        <template v-if="column.dataIndex === 'name'">
+          <a-tooltip placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'group'">
+          <a-tooltip placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'sshId'">
+          <a-tooltip placement="topLeft" :title="record.machineSshId ? `${text} / ${record.machineSshId}` : text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'status'">
+          <a-tooltip :title="statusTooltip(record)">
+            <a-tag :color="isRunning(record) ? 'green' : 'default'">
+              {{ isRunning(record) ? $t('i18n_d679aea3aa') : $t('i18n_607ce7db25') }}
+            </a-tag>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'path'">
+          <a-tooltip placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'operation'">
+          <a-space>
+            <router-link :to="{ path: '/ssh-project/console', query: { id: record.id } }" target="_blank">
+              <a-button type="primary" size="small">{{ $t('i18n_b5c3770699') }}</a-button>
+            </router-link>
+            <a-tooltip :title="isRunning(record) ? $t('i18n_55ec2b5767') : ''">
+              <span>
+                <a-button
+                  size="small"
+                  :disabled="isRunning(record)"
+                  :loading="optLoading[record.id] === 'start'"
+                  @click="handleOperate(record, 'start')"
+                  >{{ $t('i18n_8e54ddfe24') }}</a-button
+                >
+              </span>
+            </a-tooltip>
+            <a-tooltip :title="!isRunning(record) ? $t('i18n_cccefb2c86') : ''">
+              <span>
+                <a-button
+                  size="small"
+                  :disabled="!isRunning(record)"
+                  :loading="optLoading[record.id] === 'stop'"
+                  @click="handleOperate(record, 'stop')"
+                  >{{ $t('i18n_095e938e2a') }}</a-button
+                >
+              </span>
+            </a-tooltip>
+            <a-button
+              size="small"
+              :loading="optLoading[record.id] === 'restart'"
+              @click="handleOperate(record, 'restart')"
+              >{{ $t('i18n_01b4e06f39') }}</a-button
+            >
+            <a-dropdown>
+              <a @click="(e) => e.preventDefault()">
+                {{ $t('i18n_0ec9eaf9c3') }}
+                <DownOutlined />
+              </a>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item>
+                    <a-button type="primary" size="small" @click="handleFile(record)">{{
+                      $t('i18n_2a0c4740f1')
+                    }}</a-button>
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-button type="primary" size="small" @click="handleEdit(record)">{{
+                      $t('i18n_95b351c862')
+                    }}</a-button>
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a-button type="primary" danger size="small" @click="handleDelete(record)">{{
+                      $t('i18n_2f4aaddde3')
+                    }}</a-button>
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
+          </a-space>
+        </template>
+      </template>
+    </CustomTable>
+    <!-- 文件管理 -->
+    <CustomDrawer
+      v-if="fileVisible"
+      destroy-on-close
+      :open="fileVisible"
+      :title="`${temp.name} ${$t('i18n_8780e6b3d1')}`"
+      placement="right"
+      width="90vw"
+      @close="
+        () => {
+          fileVisible = false
+        }
+      "
+    >
+      <ssh-file v-if="fileVisible" :data-id="temp.id" api-base="/node/ssh-project/file/" />
+    </CustomDrawer>
+    <!-- 编辑区 -->
+    <edit-ssh-project v-if="editVisible" :data="temp" @cancel="handleEditCancel"></edit-ssh-project>
+  </div>
+</template>
+<script>
+import { deleteSshProject, getSshProjectList, getSshProjectStatus, operateSshProject } from '@/api/ssh-project'
+import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
+import SshFile from '@/pages/ssh/ssh-file'
+import editSshProject from './edit.vue'
+export default {
+  components: {
+    editSshProject,
+    SshFile
+  },
+  data() {
+    return {
+      loading: false,
+      listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY, { name: '', group: '' }),
+      list: [],
+      /**
+       * 实时状态：key 为项目 id，value 为 status 接口返回的状态对象
+       */
+      statusMap: {},
+      /**
+       * 行内操作 loading：key 为项目 id，value 为正在执行的操作
+       */
+      optLoading: {},
+      temp: {},
+      editVisible: false,
+      fileVisible: false,
+      columns: [
+        {
+          title: this.$t('i18n_d7ec2d3fea'),
+          dataIndex: 'name',
+          ellipsis: true
+        },
+        {
+          title: this.$t('i18n_829abe5a8d'),
+          dataIndex: 'group',
+          ellipsis: true,
+          width: 150
+        },
+        {
+          title: this.$t('i18n_1030348573'),
+          dataIndex: 'sshId',
+          ellipsis: true,
+          width: 220
+        },
+        {
+          title: this.$t('i18n_3fea7ca76c'),
+          dataIndex: 'status',
+          align: 'center',
+          width: 110
+        },
+        {
+          title: this.$t('i18n_4f35e80da6'),
+          dataIndex: 'path',
+          ellipsis: true
+        },
+        {
+          title: this.$t('i18n_1303e638b5'),
+          dataIndex: 'modifyTime',
+          customRender: ({ text }) => {
+            if (!text) {
+              return ''
+            }
+            return parseTime(text)
+          },
+          width: 180
+        },
+        {
+          title: this.$t('i18n_2b6bc0f293'),
+          dataIndex: 'operation',
+          fixed: 'right',
+          width: '400px'
+        }
+      ]
+    }
+  },
+  computed: {
+    pagination() {
+      return COMPUTED_PAGINATION(this.listQuery)
+    },
+    activePage() {
+      return this.$attrs.routerUrl === this.$route.path
+    }
+  },
+  created() {
+    // 批量状态请求可能较慢，用非响应式属性做并发保护（避免自动刷新叠加请求）
+    this.statusPending = null
+    this.loadData()
+  },
+  methods: {
+    // 加载数据（列表 + 实时状态）
+    loadData(pointerEvent) {
+      this.loading = true
+      this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page
+      getSshProjectList({
+        page: this.listQuery.page,
+        limit: this.listQuery.limit,
+        name: this.listQuery.name,
+        group: this.listQuery.group
+      })
+        .then((res) => {
+          if (res.code === 200 && res.data) {
+            this.list = res.data.result || []
+            this.listQuery.total = res.data.total
+            return this.loadStatus()
+          }
+        })
+        .finally(() => {
+          this.loading = false
+        })
+    },
+    // 批量刷新当前页的实时状态
+    loadStatus() {
+      if (this.statusPending) {
+        return this.statusPending
+      }
+      const ids = this.list.map((item) => item.id).filter((id) => !!id)
+      if (!ids.length) {
+        this.statusMap = {}
+        return Promise.resolve()
+      }
+      this.statusPending = getSshProjectStatus({ ids })
+        .then((res) => {
+          if (res.code === 200 && res.data) {
+            this.statusMap = res.data
+          }
+        })
+        .catch(() => {
+          $notification.warn({ message: this.$t('i18n_6a8bc730ef') })
+        })
+        .finally(() => {
+          this.statusPending = null
+        })
+      return this.statusPending
+    },
+    // 状态来源：优先实时接口，其次列表里的 lastStatus
+    statusInfo(record) {
+      const item = this.statusMap[record.id]
+      if (item) {
+        return item
+      }
+      return {
+        status: record.lastStatus,
+        pid: record.lastPid,
+        port: record.lastPort,
+        message: record.lastStatusMsg
+      }
+    },
+    // 状态占位：running 表示运行中，其他均为已停止
+    isRunning(record) {
+      const info = this.statusInfo(record)
+      return typeof info.status === 'string' && info.status.toLowerCase() === 'running'
+    },
+    statusTooltip(record) {
+      const info = this.statusInfo(record)
+      const messages = []
+      if (info.pid) {
+        messages.push(`PID: ${info.pid}`)
+      }
+      if (info.port && info.port !== '-') {
+        messages.push(`${this.$t('i18n_c76cfefe72')}: ${info.port}`)
+      }
+      if (info.message) {
+        messages.push(info.message)
+      }
+      return messages.join(' | ')
+    },
+    // 启动/停止/重启
+    handleOperate(record, opt) {
+      if (opt === 'stop') {
+        $confirm({
+          title: this.$t('i18n_c4535759ee'),
+          zIndex: 1009,
+          content: this.$t('i18n_010865ca50'),
+          okText: this.$t('i18n_e83a256e4f'),
+          cancelText: this.$t('i18n_625fb26b4b'),
+          onOk: () => this.doOperate(record, opt)
+        })
+        return
+      }
+      if (opt === 'restart') {
+        $confirm({
+          title: this.$t('i18n_c4535759ee'),
+          zIndex: 1009,
+          content: this.$t('i18n_989f1f2b61'),
+          okText: this.$t('i18n_e83a256e4f'),
+          cancelText: this.$t('i18n_625fb26b4b'),
+          onOk: () => this.doOperate(record, opt)
+        })
+        return
+      }
+      this.doOperate(record, opt)
+    },
+    doOperate(record, opt) {
+      this.optLoading[record.id] = opt
+      return operateSshProject({ id: record.id, opt })
+        .then((res) => {
+          if (res.code === 200) {
+            $notification.success({
+              message: res.msg
+            })
+          }
+          // 失败由 request 封装统一提示，这里只刷新当前行状态
+          return this.refreshRowStatus(record.id)
+        })
+        .finally(() => {
+          delete this.optLoading[record.id]
+        })
+    },
+    // 刷新单行状态（操作完成后只刷该行，避免整页重新执行 status 脚本）
+    refreshRowStatus(id) {
+      return getSshProjectStatus({ id })
+        .then((res) => {
+          if (res.code === 200 && res.data) {
+            this.statusMap = { ...this.statusMap, ...res.data }
+          }
+        })
+        .catch(() => {
+          $notification.warn({ message: this.$t('i18n_6a8bc730ef') })
+        })
+    },
+    // 新增
+    handleAdd() {
+      this.temp = {}
+      this.editVisible = true
+    },
+    // 文件管理（复用 SSH 资产的文件管理组件，接口前缀换成 SSH 项目）
+    handleFile(record) {
+      this.temp = Object.assign({}, record)
+      this.fileVisible = true
+    },
+    // 修改
+    handleEdit(record) {
+      this.temp = Object.assign({}, record)
+      this.editVisible = true
+    },
+    handleEditCancel() {
+      this.editVisible = false
+      this.loadData()
+    },
+    // 删除
+    handleDelete(record) {
+      $confirm({
+        title: this.$t('i18n_c4535759ee'),
+        zIndex: 1009,
+        content: this.$t('i18n_8026b4ff6c'),
+        okText: this.$t('i18n_e83a256e4f'),
+        cancelText: this.$t('i18n_625fb26b4b'),
+        onOk: () => {
+          return deleteSshProject(record.id).then((res) => {
+            if (res.code === 200) {
+              $notification.success({
+                message: res.msg
+              })
+              this.loadData()
+            }
+          })
+        }
+      })
+    },
+    // 分页、排序、筛选变化时触发
+    changePage(pagination, filters, sorter) {
+      this.listQuery = CHANGE_PAGE(this.listQuery, { pagination, sorter })
+      this.loadData()
+    }
+  }
+}
+</script>

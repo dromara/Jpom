@@ -14,6 +14,10 @@
         "id": "nodeList"
       },
       {
+        "title": "SSH 項目",
+        "id": "sshProjectList"
+      },
+      {
         "title": "項目列表",
         "id": "projectSearch"
       },

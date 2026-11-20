@@ -440,6 +440,9 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         Optional.ofNullable(jpomInfo).ifPresent(jsonObject -> {
             Optional.ofNullable(jsonObject.getJSONObject("jpomManifest"))
                 .ifPresent(jsonObject1 -> {
+                    // 心跳里的 manifest 与 /info 同一份数据：就地识别插件端引擎（java/go）落库，
+                    // 机器列表与「可作为构建节点」开关据此判断，不需要每次刷新都探测
+                    machineNodeModel.setJpomEngine(AgentPackageResolver.resolveEngine(jsonObject1).getName());
                     machineNodeModel.setJpomVersion(jsonObject1.getString("version"));
                     machineNodeModel.setJpomBuildTime(jsonObject1.getString("timeStamp"));
                     machineNodeModel.setOsName(jsonObject1.getString("osName"));
@@ -687,15 +690,21 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         MachineNodeModel machineNodeModel = this.resolveMachineData(request);
         boolean exists = this.existsByUrl(machineNodeModel.getJpomUrl(), machineNodeModel.getId());
         Assert.state(!exists, I18nMessageUtil.get("i18n.node_already_exists.28ea"));
-        this.testNode(machineNodeModel);
+        JpomManifest jpomManifest = this.testNode(machineNodeModel);
+        // 保存时就把引擎识别并落库，机器列表与「可作为构建节点」开关不用等心跳
+        JSONObject manifestJson = JSONObject.from(jpomManifest);
+        AgentEngine agentEngine = AgentPackageResolver.resolveEngine(manifestJson);
+        machineNodeModel.setJpomEngine(agentEngine.getName());
+        if (agentEngine == AgentEngine.GO) {
+            // Go 插件端没有 TLS 监听（只有 http 监听）：协议只能是 HTTP，避免保存出连不上的配置
+            machineNodeModel.setJpomProtocol("Http");
+        }
         // 开启构建能力前校验引擎与能力：只有 Go 插件端（/info 声明 capabilities 含 build）才能承担构建
         if (machineNodeModel.getBuildEnabled() != null && machineNodeModel.getBuildEnabled() == 1) {
             Assert.state(machineNodeModel.getBuildMaxConcurrency() == null || machineNodeModel.getBuildMaxConcurrency() > 0,
                 I18nMessageUtil.get("i18n.build_node_concurrency_invalid.5d18"));
-            JSONObject info = this.queryInfo(machineNodeModel);
-            AgentEngine agentEngine = AgentPackageResolver.resolveEngine(info);
             Assert.state(agentEngine == AgentEngine.GO, I18nMessageUtil.get("i18n.build_node_not_go_agent.8e4b"));
-            Assert.state(AgentPackageResolver.hasCapability(info, AgentPackageResolver.CAPABILITY_BUILD),
+            Assert.state(AgentPackageResolver.hasCapability(manifestJson, AgentPackageResolver.CAPABILITY_BUILD),
                 I18nMessageUtil.get("i18n.build_node_unsupported_capability.6b02"));
         }
         // 更新状态
@@ -715,22 +724,24 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
      *
      * @param nodeModel 节点信息
      */
-    public void testNode(MachineNodeModel nodeModel) {
+    public JpomManifest testNode(MachineNodeModel nodeModel) {
         //
         int timeout = ObjectUtil.defaultIfNull(nodeModel.getJpomTimeout(), 0);
         // 检查是否可用默认为5秒，避免太长时间无法连接一直等待
         nodeModel.setJpomTimeout(5);
         //
         JsonMessage<JpomManifest> objectJsonMessage = NodeForward.request(nodeModel, StrUtil.EMPTY, NodeUrl.Info, "nodeId", nodeModel.getId());
+        JpomManifest jpomManifest;
         try {
-            JpomManifest jpomManifest = objectJsonMessage.getData(JpomManifest.class);
+            jpomManifest = objectJsonMessage.getData(JpomManifest.class);
             Assert.notNull(jpomManifest, I18nMessageUtil.get("i18n.node_connection_failure.896d"));
         } catch (Exception e) {
             log.error(I18nMessageUtil.get("i18n.node_connection_failure.896d"), e);
             throw new IllegalStateException(I18nMessageUtil.get("i18n.node_return_info_exception.0961"));
+        } finally {
+            nodeModel.setJpomTimeout(timeout);
         }
-        //
-        nodeModel.setJpomTimeout(timeout);
+        return jpomManifest;
     }
 
     /**

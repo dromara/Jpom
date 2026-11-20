@@ -146,6 +146,14 @@ public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
     private Integer buildMaxConcurrency;
 
     /**
+     * 插件端引擎（java / go），由保存资产与心跳采集时根据 /info manifest 自动识别后落库。
+     * <p>
+     * 引擎不会频繁变化，存下来供机器列表、「可作为构建节点」开关与构建节点选择直接使用，
+     * 不再每次打开页面都去探测节点。空表示尚未识别（老数据升级后第一次心跳前）。
+     */
+    private String jpomEngine;
+
+    /**
      * 传输方式。0 服务器拉取，1 节点机器推送
      */
     private Integer transportMode;

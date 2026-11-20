@@ -60,8 +60,8 @@
       <a-spin v-else :tip="$t('i18n_f013ea9dcb')" :spinning="loading">
         <div class="tree-container">
           <a-directory-tree
-            v-model:selectedKeys="selectedKeys"
-            v-model:expandedKeys="expandedKeys"
+            v-model:selected-keys="selectedKeys"
+            v-model:expanded-keys="expandedKeys"
             :tree-data="treeList"
             :field-names="replaceFields"
             @select="onSelect"
@@ -515,6 +515,20 @@ export default {
     machineSshId: {
       type: String,
       default: ''
+    },
+    /**
+     * 自定义接口前缀（默认为空：按 sshId/machineSshId 推导，SSH 项目文件管理传入项目前缀）
+     */
+    apiBase: {
+      type: String,
+      default: ''
+    },
+    /**
+     * 自定义数据 id（默认为空：按 sshId/machineSshId 推导）
+     */
+    dataId: {
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -631,13 +645,16 @@ export default {
       )
     },
     baseUrl() {
+      if (this.apiBase) {
+        return this.apiBase
+      }
       if (this.sshId) {
         return '/node/ssh/'
       }
       return '/system/assets/ssh-file/'
     },
     reqDataId() {
-      return this.sshId || this.machineSshId
+      return this.dataId || this.sshId || this.machineSshId
     },
     sortFileList() {
       return this.fileList.slice(0).sort((a, b) => {

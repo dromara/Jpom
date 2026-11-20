@@ -173,6 +173,9 @@
           </a-tooltip>
         </template>
 
+        <template v-else-if="column.dataIndex === 'jpomEngine'">
+          <a-tag :color="engineTagColor(record.jpomEngine)">{{ engineLabel(record.jpomEngine) }}</a-tag>
+        </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button type="primary" size="small" @click="handleEdit(record)">{{ $t('i18n_95b351c862') }}</a-button>
@@ -361,10 +364,19 @@
               <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
-          <template #help>{{ $t('i18n_6f8da7dcca') }}</template>
+          <template #help>
+            <div>{{ $t('i18n_6f8da7dcca') }}</div>
+            <div v-if="buildEngine === 'go'">{{ $t('i18n_674455bc2a') }}</div>
+          </template>
           <a-input v-model:value="temp.jpomUrl" :placeholder="$t('i18n_1235b052ff')">
             <template #addonBefore>
-              <a-select v-model:value="temp.jpomProtocol" :placeholder="$t('i18n_e825ec7800')" style="width: 160px">
+              <!-- Go 插件端没有 TLS 监听：协议只能是 HTTP，避免"选了 Https 但连不上" -->
+              <a-select
+                v-model:value="temp.jpomProtocol"
+                :placeholder="$t('i18n_e825ec7800')"
+                :disabled="buildEngine === 'go'"
+                style="width: 160px"
+              >
                 <a-select-option value="Http"> Http:// </a-select-option>
                 <a-select-option value="Https"> Https:// </a-select-option>
               </a-select>
@@ -400,6 +412,8 @@
                 :disabled="buildEngineUnsupported"
                 @change="changeBuildEnabled"
               />
+              <!-- 新建时还没有连过机器，类型未知没有参考价值：只在编辑已有机器时展示 -->
+              <a-tag v-if="temp.id" :color="engineTagColor(temp.jpomEngine)">{{ engineLabel(temp.jpomEngine) }}</a-tag>
               <a-tooltip :title="$t('i18n_df2bfdd78c')">
                 <QuestionCircleOutlined />
               </a-tooltip>
@@ -421,6 +435,13 @@
           v-if="buildEngineUnsupported"
           :message="$t('i18n_0f58cfb453')"
           type="warning"
+          show-icon
+          style="margin-bottom: 16px"
+        />
+        <a-alert
+          v-else-if="buildEngineUnknown && temp.id"
+          :message="$t('i18n_13b64702c8')"
+          type="info"
           show-icon
           style="margin-bottom: 16px"
         />
@@ -829,6 +850,14 @@ export default {
           tooltip: true
         },
         {
+          title: this.$t('i18n_084fca46ee'),
+          // 引擎由服务端按需查询 /info 后回填（带 60 秒缓存），不落库
+          dataIndex: 'jpomEngine',
+          width: '110px',
+          align: 'center',
+          ellipsis: true
+        },
+        {
           title: this.$t('i18n_04edc35414'),
           dataIndex: 'templateNode',
           width: '90px',
@@ -881,13 +910,18 @@ export default {
   },
   computed: {
     ...mapState(useAppStore, ['getCollapsed']),
-    // 机器引擎：后端控制返回 engine 字段时据此禁用「可作为构建节点」，未返回则不据此禁用（由服务端校验）
+    // 机器引擎：由服务端回填（java/go），空表示暂时无法识别（离线/超时）
     buildEngine() {
-      const engine = this.temp && (this.temp.engine || this.temp.jpomEngine || this.temp.executorEngine)
+      const engine = this.temp && this.temp.jpomEngine
       return engine ? String(engine).toLowerCase() : ''
     },
+    // Java 插件端不能承担构建：开关必须禁用，不能让用户打开后保存才被拒绝
     buildEngineUnsupported() {
-      return !!this.buildEngine && this.buildEngine !== 'go'
+      return this.buildEngine === 'java'
+    },
+    // 已连通过但尚未识别的机器（升级前的老数据）：不禁用，但要说清"保存时服务端还会校验"
+    buildEngineUnknown() {
+      return !this.buildEngine
     },
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
@@ -910,6 +944,19 @@ export default {
   },
   methods: {
     parseTime,
+    // 引擎展示文案：go/go 插件端、java/Java 插件端、空=未知
+    engineLabel(engine) {
+      const value = engine ? String(engine).toLowerCase() : ''
+      if (value === 'go') return this.$t('i18n_11b8cdd4a6')
+      if (value === 'java') return this.$t('i18n_ac0399d13b')
+      return this.$t('i18n_1622dc9b6b')
+    },
+    engineTagColor(engine) {
+      const value = engine ? String(engine).toLowerCase() : ''
+      if (value === 'go') return 'green'
+      if (value === 'java') return 'blue'
+      return 'default'
+    },
     formatDuration,
     formatPercent2Number,
     // 状态标签颜色：正常绿色、检测超时橙色、其它异常粉色

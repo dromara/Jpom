@@ -104,6 +104,11 @@
               <a-descriptions-item :label="$t('i18n_a912a83e6f')"
                 >{{ machineInfo && machineInfo.jpomVersion }}
               </a-descriptions-item>
+              <a-descriptions-item :label="$t('i18n_084fca46ee')">
+                <a-tag :color="engineTagColor(machineInfo && machineInfo.jpomEngine)">{{
+                  engineLabel(machineInfo && machineInfo.jpomEngine)
+                }}</a-tag>
+              </a-descriptions-item>
               <a-descriptions-item :label="$t('i18n_04a8742dd7')"
                 >{{ formatDuration(machineInfo && machineInfo.jpomUptime, '', 3) }}
               </a-descriptions-item>
@@ -190,7 +195,7 @@
                 <template v-if="monitorConfig?.network?.statExcludeNames">
                   <span>
                     {{ $t('i18n_503660aa89') }}
-                    <a-tag v-for="item in monitorConfig?.network?.statExcludeNames?.split(',')">
+                    <a-tag v-for="item in monitorConfig?.network?.statExcludeNames?.split(',')" :key="item">
                       {{ item }}
                     </a-tag>
                   </span>
@@ -198,7 +203,7 @@
                 <template v-if="monitorConfig?.network?.statContainsOnlyNames">
                   <span>
                     {{ $t('i18n_bb7eeae618') }}
-                    <a-tag v-for="item in monitorConfig?.network?.statContainsOnlyNames?.split(',')">
+                    <a-tag v-for="item in monitorConfig?.network?.statContainsOnlyNames?.split(',')" :key="item">
                       {{ item }}
                     </a-tag>
                   </span>
@@ -209,7 +214,10 @@
                     <b>{{ $t('i18n_13f7bb78ef') }}</b>
                     <div>
                       {{ $t('i18n_475cd76aec') }}
-                      <a-tag v-for="item in JSON.parse(machineInfo?.extendInfo || '{}')?.monitorIfsNames?.split(',')">
+                      <a-tag
+                        v-for="item in JSON.parse(machineInfo?.extendInfo || '{}')?.monitorIfsNames?.split(',')"
+                        :key="item"
+                      >
                         {{ item }}
                       </a-tag>
                     </div>
@@ -864,6 +872,19 @@ export default {
     renderSize,
     formatPercent2Number,
     renderBpsSize,
+    // 插件端引擎（java/go）：由服务端查询 /info 后回填，空表示暂时无法识别（离线/超时）
+    engineLabel(engine) {
+      const value = engine ? String(engine).toLowerCase() : ''
+      if (value === 'go') return this.$t('i18n_11b8cdd4a6')
+      if (value === 'java') return this.$t('i18n_ac0399d13b')
+      return this.$t('i18n_1622dc9b6b')
+    },
+    engineTagColor(engine) {
+      const value = engine ? String(engine).toLowerCase() : ''
+      if (value === 'go') return 'green'
+      if (value === 'java') return 'blue'
+      return 'default'
+    },
     getMachineInfo() {
       machineInfo({ ...this.idInfo }).then((res) => {
         //

@@ -126,6 +126,9 @@ public enum ClassFeature {
     SCRIPT_LOG(() -> I18nMessageUtil.get("i18n.script_template_log.30cb"), ScriptExecuteLogServer.class),
 
     //******************************************     节点管理功能
+    SSH_PROJECT(() -> I18nMessageUtil.get("i18n.ssh_project_management.3c7d"), ClassFeature.NODE),
+    SSH_PROJECT_FILE(() -> I18nMessageUtil.get("i18n.ssh_project_file.8b2e"), ClassFeature.NODE),
+    SSH_PROJECT_CONSOLE(() -> I18nMessageUtil.get("i18n.ssh_project_console.5d94"), ClassFeature.NODE),
     PROJECT(() -> I18nMessageUtil.get("i18n.project_management.4363"), ClassFeature.NODE, ProjectInfoCacheService.class),
     PROJECT_FILE(() -> I18nMessageUtil.get("i18n.project_file_manager.c8cb"), ClassFeature.NODE, ProjectInfoCacheService.class),
     PROJECT_LOG(() -> I18nMessageUtil.get("i18n.project_log.2926"), ClassFeature.NODE, ProjectInfoCacheService.class),

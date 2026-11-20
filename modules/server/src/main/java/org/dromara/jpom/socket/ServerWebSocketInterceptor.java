@@ -243,6 +243,16 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
                 attributes.put("dataItem", dataItem);
                 break;
             }
+            case sshProject: {
+                // SSH 项目控制台
+                Object dataItem = this.checkData(handlerType, userModel, httpServletRequest);
+                if (dataItem == null) {
+                    return false;
+                }
+                attributes.put("dataItem", dataItem);
+                attributes.put("projectId", BeanUtil.getProperty(dataItem, "id"));
+                break;
+            }
             case nodeScript: {
                 // 节点脚本模板
                 Object dataItem = this.checkData(handlerType, userModel, httpServletRequest);

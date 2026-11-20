@@ -22,6 +22,7 @@
       :columns="columns"
       size="middle"
       :pagination="pagination"
+      bordered
       row-key="id"
       :row-selection="rowSelection"
       :scroll="{
