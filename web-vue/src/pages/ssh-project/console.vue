@@ -138,15 +138,25 @@ export default {
       optLoading: ''
     }
   },
+  props: {
+    /**
+     * 项目 id：列表页抽屉内嵌时由父组件传入；独立页面（/ssh-project/console）回退到路由 query
+     */
+    projectId: {
+      type: String,
+      default: ''
+    }
+  },
   computed: {
     ...mapState(useAppStore, ['getWorkspaceId']),
-    projectId() {
-      return this.$route.query.id || ''
+    dataId() {
+      return this.projectId || this.$route.query.id || ''
     },
     socketUrl() {
+      // nodeId 是 websocket 握手校验的必传项，SSH 项目与节点无关，按脚本控制台口径传 system
       return getWebSocketUrl(
         '/socket/ssh-project',
-        `id=${this.projectId}&type=sshProject&workspaceId=${this.getWorkspaceId()}`
+        `id=${this.dataId}&type=sshProject&nodeId=system&workspaceId=${this.getWorkspaceId()}`
       )
     },
     isRunning() {
@@ -166,7 +176,7 @@ export default {
     }
   },
   watch: {
-    projectId() {
+    dataId() {
       this.loadProject()
       this.loadLogList()
       this.initWebSocket()
@@ -178,20 +188,23 @@ export default {
     this.loadBackups()
     this.initWebSocket()
     // 关闭页面前主动断开，避免服务端残留 tailer
-    window.onbeforeunload = () => {
-      this.destroySocket()
-    }
+    window.addEventListener('beforeunload', this.handleBeforeUnload)
   },
   beforeUnmount() {
+    // 抽屉关闭 / 路由离开时同样要移除监听，避免组件销毁后仍持有实例
+    window.removeEventListener('beforeunload', this.handleBeforeUnload)
     this.destroySocket()
   },
   methods: {
+    handleBeforeUnload() {
+      this.destroySocket()
+    },
     // 加载项目信息
     loadProject() {
-      if (!this.projectId) {
+      if (!this.dataId) {
         return
       }
-      getSshProjectItem(this.projectId).then((res) => {
+      getSshProjectItem(this.dataId).then((res) => {
         if (res.code === 200 && res.data) {
           this.project = res.data
           this.statusInfo = {
@@ -205,10 +218,10 @@ export default {
     },
     // 加载可查看的日志文件
     loadLogList() {
-      if (!this.projectId) {
+      if (!this.dataId) {
         return
       }
-      getSshProjectLogList(this.projectId)
+      getSshProjectLogList(this.dataId)
         .then((res) => {
           if (res.code === 200 && res.data) {
             this.logList = res.data
@@ -223,7 +236,7 @@ export default {
     },
     // 建立 websocket 连接
     initWebSocket() {
-      if (!this.projectId) {
+      if (!this.dataId) {
         return
       }
       this.destroySocket()
@@ -297,7 +310,7 @@ export default {
       if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
         return false
       }
-      const data = { op: op, projectId: this.projectId }
+      const data = { op: op, projectId: this.dataId }
       if (extra && extra.logKey) {
         data.logKey = extra.logKey
       }
@@ -376,11 +389,11 @@ export default {
     },
     // 加载日志备份列表
     loadBackups() {
-      if (!this.projectId) {
+      if (!this.dataId) {
         return
       }
       this.backupListLoading = true
-      getSshProjectLogBackupList(this.projectId)
+      getSshProjectLogBackupList(this.dataId)
         .then((res) => {
           if (res.code === 200 && res.data) {
             this.backups = res.data
@@ -396,7 +409,7 @@ export default {
     // 备份当前控制台日志
     backupLog() {
       this.backupLoading = true
-      backupSshProjectLog(this.projectId)
+      backupSshProjectLog(this.dataId)
         .then((res) => {
           if (res.code === 200) {
             $notification.success({
@@ -423,7 +436,7 @@ export default {
     },
     doClearLog() {
       this.clearLoading = true
-      return resetSshProjectLog(this.projectId)
+      return resetSshProjectLog(this.dataId)
         .then((res) => {
           if (res.code === 200) {
             $notification.success({
@@ -447,9 +460,9 @@ export default {
     },
     // 下载日志（console 表示当前日志，其他为备份文件名）
     downloadLog(name) {
-      const fileName = name === 'console' ? `${this.project.name || this.projectId}.log` : name
+      const fileName = name === 'console' ? `${this.project.name || this.dataId}.log` : name
       this.downloadLoading = true
-      return downloadSshProjectLog({ id: this.projectId, name })
+      return downloadSshProjectLog({ id: this.dataId, name })
         .then(async (blob) => {
           if (!(blob instanceof Blob)) {
             $notification.error({ message: this.$t('i18n_95c7b741ef') })

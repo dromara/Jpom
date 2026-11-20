@@ -529,6 +529,13 @@ export default {
     dataId: {
       type: String,
       default: ''
+    },
+    /**
+     * 是否自动进入第一个可用目录（SSH 项目只有一个项目目录，避免打开后是空表）
+     */
+    autoSelectFirst: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -711,8 +718,28 @@ export default {
               return this.sortMethod.asc ? bV.localeCompare(aV) : aV.localeCompare(bV)
             })
         }
-        this.loading = false
+        if (this.autoSelectFirst) {
+          this.selectFirstDir()
+        } else {
+          this.loading = false
+        }
       })
+    },
+    /**
+     * 自动进入第一个可用目录：SSH 项目的授权目录就是项目目录，只有一个
+     * <p>
+     * 不自动进入时表格是空的，用户会误以为目录里没有文件。
+     */
+    selectFirstDir() {
+      const first = this.treeList.find((node) => !node.disabled)
+      if (!first) {
+        this.loading = false
+        return
+      }
+      this.selectedKeys = [first.key]
+      this.expandedKeys = [first.key]
+      this.tempNode = first
+      this.loadTreeNode()
     },
     /**
      * 根据key获取树节点

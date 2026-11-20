@@ -2947,6 +2947,12 @@
 	"i18n_fe86275d4d":"Version management",
 	"i18n_835b950031":"Version directory",
 	"i18n_0e9a916105":"Keep versions",
+	"i18n_5b8e2d7a13": "SSH project versions are unavailable (target machine unreachable): ",
+	"i18n_7c1d5a9e42": "No SSH project version snapshot for this build: enable \"Version snapshot\" in the build config; a successful publish creates a version in the SSH project directory",
+	"i18n_9f2b7c4ad1": "Create snapshot",
+	"i18n_3c7f9d1a52": "Version snapshot {v} created",
+	"i18n_9a4c8b7e51": "Version directory is missing",
+	"i18n_4e8a1c6b73": "Manual",
 	"i18n_f971771775":"Version snapshots are disabled; set jpom.project.version-count on the agent or file.versionCount in the project DSL",
 	"i18n_ac6f69a7e9":"Baseline",
 	"i18n_f826a97a56":"Build release",
@@ -3015,5 +3021,8 @@
 	"i18n_7bba17e190":"Select the SSH project to release to; the artifact is uploaded to the project directory and the project lifecycle script restarts it",
 	"i18n_ab38038377":"Please select an SSH project",
 	"i18n_a2d654831b":"The SSH project is released to its own project directory; no release directory is required",
-	"i18n_8a8e690119":"Please select the SSH project to release"
+	"i18n_8a8e690119":"Please select the SSH project to release",
+  "i18n_ssh_project_ssh_empty_help_9f31": "No machine SSH in this workspace. Add one in \"SSH management\" and distribute it to this workspace first",
+  "i18n_ssh_project_ssh_missing_d2a8": "(this machine SSH is not in the current workspace, please choose again)",
+  "i18n_ssh_project_token_placeholder_7c42": "Enter access token"
 }

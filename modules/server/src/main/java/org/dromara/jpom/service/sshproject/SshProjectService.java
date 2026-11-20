@@ -9,18 +9,29 @@
  */
 package org.dromara.jpom.service.sshproject;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.LineHandler;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.func.assets.model.MachineSshModel;
+import org.dromara.jpom.func.assets.server.MachineSshServer;
 import org.dromara.jpom.model.data.DslYmlDto;
+import org.dromara.jpom.model.data.SshModel;
 import org.dromara.jpom.model.data.SshProjectModel;
+import org.dromara.jpom.model.enums.BuildReleaseMethod;
 import org.dromara.jpom.model.sshproject.SshProjectExecuteResult;
 import org.dromara.jpom.model.sshproject.SshProjectStatus;
+import org.dromara.jpom.service.dblog.BuildInfoService;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
+import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.socket.ConsoleCommandOp;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -35,14 +46,20 @@ public class SshProjectService extends BaseWorkspaceService<SshProjectModel> {
 
     private final SshProjectExecutor sshProjectExecutor;
     private final SshProjectExecLogService sshProjectExecLogService;
-    private final org.dromara.jpom.service.dblog.BuildInfoService buildInfoService;
+    private final BuildInfoService buildInfoService;
+    private final MachineSshServer machineSshServer;
+    private final SshService sshService;
 
     public SshProjectService(SshProjectExecutor sshProjectExecutor,
                              SshProjectExecLogService sshProjectExecLogService,
-                             org.dromara.jpom.service.dblog.BuildInfoService buildInfoService) {
+                             BuildInfoService buildInfoService,
+                             MachineSshServer machineSshServer,
+                             SshService sshService) {
         this.sshProjectExecutor = sshProjectExecutor;
         this.sshProjectExecLogService = sshProjectExecLogService;
         this.buildInfoService = buildInfoService;
+        this.machineSshServer = machineSshServer;
+        this.sshService = sshService;
     }
 
     /**
@@ -158,11 +175,40 @@ public class SshProjectService extends BaseWorkspaceService<SshProjectModel> {
     }
 
     /**
+     * 填充「机器 SSH」展示名：优先资产名，其次工作空间 SSH 记录名
+     *
+     * @param list 列表
+     */
+    public void fillSshName(List<SshProjectModel> list) {
+        if (CollUtil.isEmpty(list)) {
+            return;
+        }
+        Map<String, String> cache = new HashMap<>();
+        for (SshProjectModel project : list) {
+            String name = null;
+            String machineSshId = project.getMachineSshId();
+            if (StrUtil.isNotEmpty(machineSshId)) {
+                name = cache.computeIfAbsent("m:" + machineSshId, key -> {
+                    MachineSshModel machine = machineSshServer.getByKey(machineSshId, false);
+                    return machine == null ? "" : machine.getName();
+                });
+            }
+            if (StrUtil.isEmpty(name) && StrUtil.isNotEmpty(project.getSshId())) {
+                name = cache.computeIfAbsent("s:" + project.getSshId(), key -> {
+                    SshModel sshModel = sshService.getByKey(project.getSshId());
+                    return sshModel == null ? "" : sshModel.getName();
+                });
+            }
+            project.setSshName(StrUtil.emptyToNull(name));
+        }
+    }
+
+    /**
      * 查询需要自动启动的项目
      *
      * @return list
      */
-    public java.util.List<SshProjectModel> listAutoStart() {
+    public List<SshProjectModel> listAutoStart() {
         SshProjectModel query = new SshProjectModel();
         query.setAutoStart(true);
         return this.listByBean(query, false);
@@ -178,7 +224,7 @@ public class SshProjectService extends BaseWorkspaceService<SshProjectModel> {
         SshProjectModel item = this.getItem(id, request);
         Assert.state(!item.running(), I18nMessageUtil.get("i18n.ssh_project_running_cannot_delete.6c07"));
         // 被在线构建引用时不允许删除（与 agent 项目一致）
-        boolean releaseMethod = buildInfoService.checkReleaseMethod(id, request, org.dromara.jpom.model.enums.BuildReleaseMethod.SshProject);
+        boolean releaseMethod = buildInfoService.checkReleaseMethod(id, request, BuildReleaseMethod.SshProject);
         Assert.state(!releaseMethod, I18nMessageUtil.get("i18n.ssh_project_has_build_items_cannot_delete.4f73"));
         this.delByKey(id, request);
     }

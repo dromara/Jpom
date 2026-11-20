@@ -361,7 +361,9 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
                 attributes.put("permissionMsg", string);
                 return true;
             }
-            boolean checkNode = this.checkNode(httpServletRequest, attributes, userModel);
+            // SSH 项目不依赖插件端节点，没有必要传 nodeId，也不能因为没有 nodeId 就拒绝握手
+            boolean checkNode = handlerType == HandlerType.sshProject
+                || this.checkNode(httpServletRequest, attributes, userModel);
             if (!checkNode) {
                 String string = I18nMessageUtil.get("i18n.no_matching_permission.09cf");
                 attributes.put("permissionMsg", string);

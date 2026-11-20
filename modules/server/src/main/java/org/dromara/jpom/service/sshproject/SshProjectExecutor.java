@@ -193,6 +193,30 @@ public class SshProjectExecutor {
     }
 
     /**
+     * 远端用户 HOME 目录（结尾不带斜杠，取不到返回 null）
+     * <p>
+     * 控制台日志内部路径是 {@code $HOME/.jpom/logs/{id}.log}，但 {@code tail} 等命令里的
+     * {@code $HOME} 必须由远端 shell 展开；统一在这里展开成绝对路径，调用方再做单引号引用即可。
+     *
+     * @param machine 资产
+     * @return HOME 目录
+     */
+    public String homeDir(MachineSshModel machine) {
+        Session session = null;
+        try {
+            session = machineSshServer.getSessionByModel(machine);
+            try (Sftp sftp = new Sftp(session, machine.charset(), Math.max(machine.timeout(), 5000))) {
+                return StrUtil.removeSuffix(sftp.home(), StrUtil.SLASH);
+            }
+        } catch (Exception e) {
+            log.warn("ssh project resolve home dir fail: {}", machine.getId(), e);
+            return null;
+        } finally {
+            JschUtil.close(session);
+        }
+    }
+
+    /**
      * 下载项目控制台日志/备份到输出流（文件名已由调用方校验，只允许 {id}.log*）
      *
      * @param project      项目

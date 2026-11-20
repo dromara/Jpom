@@ -9,13 +9,18 @@
  */
 package org.dromara.jpom.socket.handler;
 
+import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.func.assets.model.MachineSshModel;
+import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.SshProjectModel;
+import org.dromara.jpom.model.sshproject.SshProjectExecuteResult;
+import org.dromara.jpom.model.sshproject.SshProjectStatus;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
@@ -23,6 +28,8 @@ import org.dromara.jpom.service.sshproject.SshProjectExecutor;
 import org.dromara.jpom.service.sshproject.SshProjectLogTailer;
 import org.dromara.jpom.service.sshproject.SshProjectMachineResolver;
 import org.dromara.jpom.service.sshproject.SshProjectService;
+import org.dromara.jpom.service.sshproject.SshProjectShell;
+import org.dromara.jpom.system.ServerConfig;
 import org.dromara.jpom.socket.BaseHandler;
 import org.dromara.jpom.socket.ConsoleCommandOp;
 import org.springframework.web.socket.TextMessage;
@@ -58,7 +65,7 @@ public class SshProjectConsoleHandler extends BaseHandler {
         if (json == null) {
             return;
         }
-        ConsoleCommandOp op = cn.hutool.core.util.EnumUtil.fromStringQuietly(ConsoleCommandOp.class, json.getString("op"));
+        ConsoleCommandOp op = EnumUtil.fromStringQuietly(ConsoleCommandOp.class, json.getString("op"));
         if (op == null) {
             return;
         }
@@ -74,7 +81,7 @@ public class SshProjectConsoleHandler extends BaseHandler {
                     break;
                 case status: {
                     SshProjectExecutor executor = SpringUtil.getBean(SshProjectExecutor.class);
-                    org.dromara.jpom.model.sshproject.SshProjectStatus status = executor.status(project);
+                    SshProjectStatus status = executor.status(project);
                     JSONObject data = new JSONObject();
                     data.put("status", status.isRunning() ? "running" : "stopped");
                     data.put("pid", status.getPid());
@@ -92,7 +99,7 @@ public class SshProjectConsoleHandler extends BaseHandler {
                 case reload: {
                     super.logOpt(this.getClass(), session.getAttributes(), json);
                     SshProjectService service = SpringUtil.getBean(SshProjectService.class);
-                    org.dromara.jpom.model.sshproject.SshProjectExecuteResult result = service.operate(project.getId(), op.name(), line -> {
+                    SshProjectExecuteResult result = service.operate(project.getId(), op.name(), line -> {
                         JSONObject lineJson = new JSONObject();
                         lineJson.put("op", op.name());
                         lineJson.put(Const.SOCKET_MSG_TAG, Const.SOCKET_MSG_TAG);
@@ -120,15 +127,19 @@ public class SshProjectConsoleHandler extends BaseHandler {
     private void showLog(WebSocketSession session, JSONObject json, SshProjectModel project) {
         this.closeTailer(session);
         String logKey = json.getString("logKey");
-        String path = this.resolveLogPath(project, logKey);
+        SshProjectMachineResolver resolver = SpringUtil.getBean(SshProjectMachineResolver.class);
+        SshProjectExecutor executor = SpringUtil.getBean(SshProjectExecutor.class);
+        MachineSshModel machine = resolver.resolve(project);
+        String path = this.resolveLogPath(project, logKey, machine, executor);
         if (path == null) {
             this.sendMsg(session, I18nMessageUtil.get("i18n.file_not_found.d952"));
             return;
         }
+        // 文件还不存在 / 为空时先给一条提示：否则控制台只剩欢迎语，用户会以为日志坏了
+        this.notifyLogState(session, project, path, executor);
         try {
-            int initLines = SpringUtil.getBean(org.dromara.jpom.system.ServerConfig.class).getInitReadLine();
-            SshProjectMachineResolver resolver = SpringUtil.getBean(SshProjectMachineResolver.class);
-            SshProjectLogTailer tailer = SshProjectLogTailer.start(resolver.resolve(project), path, initLines, line -> {
+            int initLines = SpringUtil.getBean(ServerConfig.class).getInitReadLine();
+            SshProjectLogTailer tailer = SshProjectLogTailer.start(machine, path, initLines, line -> {
                 JSONObject lineJson = new JSONObject();
                 lineJson.put("op", ConsoleCommandOp.showlog.name());
                 lineJson.put(Const.SOCKET_MSG_TAG, Const.SOCKET_MSG_TAG);
@@ -143,13 +154,34 @@ public class SshProjectConsoleHandler extends BaseHandler {
     }
 
     /**
-     * 解析要跟随的日志文件：只能来自控制台日志或项目 dsl 声明的日志
+     * 探测日志文件状态，为空/不存在时在控制台给出一条可读提示
      */
-    private String resolveLogPath(SshProjectModel project, String logKey) {
-        if (StrUtil.isEmpty(logKey) || "console".equals(logKey)) {
-            return "$HOME/.jpom/logs/" + project.getId() + ".log";
+    private void notifyLogState(WebSocketSession session, SshProjectModel project, String path, SshProjectExecutor executor) {
+        String quoted = SshProjectShell.quote(path);
+        String script = StrUtil.format("if [ -s {} ]; then echo exists; elif [ -f {} ]; then echo empty; else echo missing; fi", quoted, quoted);
+        SshProjectExecuteResult result = executor.runScript(project, script, 15);
+        String state = StrUtil.trimToEmpty(result.getOutput());
+        if (StrUtil.equals(state, "missing")) {
+            this.sendMsg(session, I18nMessageUtil.get("i18n.ssh_project_log_missing.4c7d"));
+        } else if (StrUtil.equals(state, "empty")) {
+            this.sendMsg(session, I18nMessageUtil.get("i18n.ssh_project_log_empty.9a52"));
         }
-        org.dromara.jpom.model.data.DslYmlDto dsl = org.dromara.jpom.model.data.DslYmlDto.build(project.getDslContent());
+    }
+
+    /**
+     * 解析要跟随的日志文件：只能来自控制台日志或项目 dsl 声明的日志
+     * <p>
+     * 返回的必须是远端绝对路径：{@code tail} 里用单引号引用文件路径，{@code $HOME} 不会展开。
+     */
+    private String resolveLogPath(SshProjectModel project, String logKey, MachineSshModel machine, SshProjectExecutor executor) {
+        if (StrUtil.isEmpty(logKey) || "console".equals(logKey)) {
+            String home = executor.homeDir(machine);
+            if (StrUtil.isEmpty(home)) {
+                return null;
+            }
+            return StrUtil.removeSuffix(home, "/") + "/.jpom/logs/" + project.getId() + ".log";
+        }
+        DslYmlDto dsl = DslYmlDto.build(project.getDslContent());
         if (dsl.getConfig() == null || dsl.getConfig().getLog() == null) {
             return null;
         }

@@ -64,8 +64,8 @@
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'sshId'">
-          <a-tooltip placement="topLeft" :title="record.machineSshId ? `${text} / ${record.machineSshId}` : text">
-            <span>{{ text }}</span>
+          <a-tooltip placement="topLeft" :title="sshTooltip(record)">
+            <span>{{ record.sshName || text || '-' }}</span>
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'status'">
@@ -82,9 +82,7 @@
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
-            <router-link :to="{ path: '/ssh-project/console', query: { id: record.id } }" target="_blank">
-              <a-button type="primary" size="small">{{ $t('i18n_b5c3770699') }}</a-button>
-            </router-link>
+            <a-button type="primary" size="small" @click="handleConsole(record)">{{ $t('i18n_b5c3770699') }}</a-button>
             <a-tooltip :title="isRunning(record) ? $t('i18n_55ec2b5767') : ''">
               <span>
                 <a-button
@@ -126,6 +124,11 @@
                     }}</a-button>
                   </a-menu-item>
                   <a-menu-item>
+                    <a-button type="primary" size="small" @click="handleVersion(record)">{{
+                      $t('i18n_fe2df04a16')
+                    }}</a-button>
+                  </a-menu-item>
+                  <a-menu-item>
                     <a-button type="primary" size="small" @click="handleEdit(record)">{{
                       $t('i18n_95b351c862')
                     }}</a-button>
@@ -156,7 +159,39 @@
         }
       "
     >
-      <ssh-file v-if="fileVisible" :data-id="temp.id" api-base="/node/ssh-project/file/" />
+      <ssh-file v-if="fileVisible" :data-id="temp.id" api-base="/node/ssh-project/file/" auto-select-first />
+    </CustomDrawer>
+    <!-- 版本快照（构建发布自动登记 + 人工快照，支持快速回滚） -->
+    <CustomDrawer
+      v-if="versionVisible"
+      destroy-on-close
+      :open="versionVisible"
+      :title="`${temp.name} ${$t('i18n_fe2df04a16')}`"
+      placement="right"
+      width="80vw"
+      @close="
+        () => {
+          versionVisible = false
+        }
+      "
+    >
+      <ssh-project-version v-if="versionVisible" :project-id="temp.id" />
+    </CustomDrawer>
+    <!-- 控制台（与项目控制台一致：抽屉内嵌，不再新标签打开） -->
+    <CustomDrawer
+      v-if="consoleVisible"
+      destroy-on-close
+      :open="consoleVisible"
+      :title="`${temp.name} ${$t('i18n_b5c3770699')}`"
+      placement="right"
+      width="85vw"
+      @close="
+        () => {
+          consoleVisible = false
+        }
+      "
+    >
+      <ssh-project-console v-if="consoleVisible" :project-id="temp.id" />
     </CustomDrawer>
     <!-- 编辑区 -->
     <edit-ssh-project v-if="editVisible" :data="temp" @cancel="handleEditCancel"></edit-ssh-project>
@@ -167,10 +202,14 @@ import { deleteSshProject, getSshProjectList, getSshProjectStatus, operateSshPro
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 import SshFile from '@/pages/ssh/ssh-file'
 import editSshProject from './edit.vue'
+import SshProjectConsole from './console.vue'
+import SshProjectVersion from './version.vue'
 export default {
   components: {
     editSshProject,
-    SshFile
+    SshFile,
+    SshProjectConsole,
+    SshProjectVersion
   },
   data() {
     return {
@@ -188,6 +227,8 @@ export default {
       temp: {},
       editVisible: false,
       fileVisible: false,
+      consoleVisible: false,
+      versionVisible: false,
       columns: [
         {
           title: this.$t('i18n_d7ec2d3fea'),
@@ -309,6 +350,14 @@ export default {
         message: record.lastStatusMsg
       }
     },
+    // 机器 SSH 展示（名称优先，tooltip 补充 id 便于排查）
+    sshTooltip(record) {
+      const name = record.sshName || record.sshId || record.machineSshId || '-'
+      const ids = [record.sshId ? 'sshId=' + record.sshId : '', record.machineSshId ? 'machineSshId=' + record.machineSshId : '']
+        .filter(Boolean)
+        .join(' / ')
+      return ids ? name + ' (' + ids + ')' : name
+    },
     // 状态占位：running 表示运行中，其他均为已停止
     isRunning(record) {
       const info = this.statusInfo(record)
@@ -391,6 +440,16 @@ export default {
     handleFile(record) {
       this.temp = Object.assign({}, record)
       this.fileVisible = true
+    },
+    // 版本快照（构建发布自动登记、人工创建，支持快速回滚）
+    handleVersion(record) {
+      this.temp = Object.assign({}, record)
+      this.versionVisible = true
+    },
+    // 控制台（抽屉内嵌，交互与普通项目控制台保持一致）
+    handleConsole(record) {
+      this.temp = Object.assign({}, record)
+      this.consoleVisible = true
     },
     // 修改
     handleEdit(record) {

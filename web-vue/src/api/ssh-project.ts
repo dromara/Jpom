@@ -396,3 +396,94 @@ export function renderSshProjectTemplate(params: {
     data: params
   })
 }
+/**
+ * SSH 项目版本快照行
+ */
+export interface SshProjectVersionItem {
+  versionId: string
+  source: string
+  buildNumberId?: number
+  createTime?: number
+  fileCount?: number
+  fileSize?: number
+  manifest?: string
+  exist?: boolean
+}
+
+/**
+ * 版本列表返回
+ */
+export interface SshProjectVersionResult {
+  path?: string
+  current?: string
+  enabled?: boolean
+  hasVersions?: boolean
+  versionCount?: number
+  projectFiles?: number
+  list: SshProjectVersionItem[]
+}
+
+/**
+ * 版本能力探测（是否支持版本快照、当前版本、版本目录）
+ */
+export function getSshProjectVersionCapability(id: string): Promise<IResponse<SshProjectVersionResult>> {
+  return axios({
+    url: '/node/ssh-project/version-capability',
+    method: 'post',
+    data: { id }
+  })
+}
+
+/**
+ * 版本列表
+ */
+export function getSshProjectVersionList(id: string): Promise<IResponse<SshProjectVersionResult>> {
+  return axios({
+    url: '/node/ssh-project/version-list',
+    method: 'post',
+    data: { id }
+  })
+}
+
+/**
+ * 人工创建版本快照
+ */
+export function commitSshProjectVersion(params: {
+  id: string
+  keepCount?: number
+}): Promise<IResponse<SshProjectVersionItem>> {
+  return axios({
+    url: '/node/ssh-project/version-commit',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * 切换版本（快速回滚，不重新传输产物）
+ */
+export function switchSshProjectVersion(params: {
+  id: string
+  versionId: string
+  after?: number
+  snapshotCurrent?: boolean
+  keepCount?: number
+}): Promise<IResponse<{ versionId: string; restarted?: boolean }>> {
+  return axios({
+    url: '/node/ssh-project/version-switch',
+    method: 'post',
+    data: params,
+    timeout: 0
+  })
+}
+
+/**
+ * 删除版本
+ */
+export function deleteSshProjectVersion(params: { id: string; versionId: string }): Promise<IResponse<string>> {
+  return axios({
+    url: '/node/ssh-project/version-delete',
+    method: 'post',
+    data: params
+  })
+}

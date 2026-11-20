@@ -9,6 +9,7 @@
  */
 package org.dromara.jpom.controller.sshproject;
 
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.keepbx.jpom.IJsonMessage;
@@ -20,6 +21,7 @@ import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.PageResultDto;
+import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.SshProjectModel;
 import org.dromara.jpom.model.sshproject.SshProjectExecuteResult;
 import org.dromara.jpom.model.sshproject.SshProjectStatus;
@@ -31,6 +33,7 @@ import org.dromara.jpom.service.h2db.BaseDbService;
 import org.dromara.jpom.service.sshproject.SshProjectLogService;
 import org.dromara.jpom.service.sshproject.SshProjectService;
 import org.dromara.jpom.service.sshproject.SshProjectTemplateService;
+import org.dromara.jpom.service.sshproject.SshProjectVersionService;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,6 +43,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -57,13 +63,16 @@ public class SshProjectController extends BaseServerController {
     private final SshProjectService sshProjectService;
     private final SshProjectTemplateService sshProjectTemplateService;
     private final SshProjectLogService sshProjectLogService;
+    private final SshProjectVersionService sshProjectVersionService;
 
     public SshProjectController(SshProjectService sshProjectService,
                                 SshProjectTemplateService sshProjectTemplateService,
-                                SshProjectLogService sshProjectLogService) {
+                                SshProjectLogService sshProjectLogService,
+                                SshProjectVersionService sshProjectVersionService) {
         this.sshProjectService = sshProjectService;
         this.sshProjectTemplateService = sshProjectTemplateService;
         this.sshProjectLogService = sshProjectLogService;
+        this.sshProjectVersionService = sshProjectVersionService;
     }
 
     /**
@@ -86,6 +95,7 @@ public class SshProjectController extends BaseServerController {
         String workspaceId = sshProjectService.getCheckUserWorkspace(request);
         BaseDbService.putForcedFilter(paramMap, "workspaceId", workspaceId);
         PageResultDto<SshProjectModel> page = sshProjectService.listPage(paramMap);
+        sshProjectService.fillSshName(page.getResult());
         return JsonMessage.success("", page);
     }
 
@@ -101,6 +111,7 @@ public class SshProjectController extends BaseServerController {
     public IJsonMessage<SshProjectModel> item(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.ssh_project_not_exist.5d18") String id,
                                               HttpServletRequest request) {
         SshProjectModel item = sshProjectService.getItem(id, request);
+        sshProjectService.fillSshName(Collections.singletonList(item));
         return JsonMessage.success("", item);
     }
 
@@ -228,17 +239,17 @@ public class SshProjectController extends BaseServerController {
      */
     @PostMapping(value = "log-list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<java.util.List<JSONObject>> logList(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.ssh_project_not_exist.5d18") String id,
+    public IJsonMessage<List<JSONObject>> logList(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.ssh_project_not_exist.5d18") String id,
                                                             HttpServletRequest request) {
         SshProjectModel project = sshProjectService.getItem(id, request);
-        java.util.List<JSONObject> list = new java.util.ArrayList<>();
+        List<JSONObject> list = new ArrayList<>();
         JSONObject console = new JSONObject();
         console.put("name", "console");
         console.put("label", I18nMessageUtil.get("i18n.ssh_project_console_log.2e81"));
         list.add(console);
-        org.dromara.jpom.model.data.DslYmlDto dsl = org.dromara.jpom.model.data.DslYmlDto.build(project.getDslContent());
+        DslYmlDto dsl = DslYmlDto.build(project.getDslContent());
         if (dsl.getConfig() != null && dsl.getConfig().getLog() != null) {
-            for (org.dromara.jpom.model.data.DslYmlDto.LogFile logFile : dsl.getConfig().getLog()) {
+            for (DslYmlDto.LogFile logFile : dsl.getConfig().getLog()) {
                 JSONObject item = new JSONObject();
                 item.put("name", logFile.getName());
                 item.put("label", logFile.getName());
@@ -259,7 +270,7 @@ public class SshProjectController extends BaseServerController {
      */
     @PostMapping(value = "log/list-backup", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.LIST)
-    public IJsonMessage<java.util.List<JSONObject>> logBackupList(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.ssh_project_not_exist.5d18") String id,
+    public IJsonMessage<List<JSONObject>> logBackupList(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.ssh_project_not_exist.5d18") String id,
                                                                   HttpServletRequest request) {
         SshProjectModel project = sshProjectService.getItem(id, request);
         return JsonMessage.success("", sshProjectLogService.listBackup(project));
@@ -312,7 +323,7 @@ public class SshProjectController extends BaseServerController {
                             HttpServletRequest request) throws Exception {
         SshProjectModel project = sshProjectService.getItem(id, request);
         response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
-        response.setHeader("Content-Disposition", "attachment;filename=" + java.net.URLEncoder.encode(name, "UTF-8"));
+        response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(name, "UTF-8"));
         sshProjectLogService.download(project, name, response.getOutputStream());
     }
 
@@ -331,7 +342,7 @@ public class SshProjectController extends BaseServerController {
         SshProjectModel project = sshProjectService.getItem(id, request);
         String token = project.getToken();
         if (StrUtil.isEmpty(token)) {
-            token = cn.hutool.core.util.IdUtil.fastSimpleUUID();
+            token = IdUtil.fastSimpleUUID();
             SshProjectModel update = new SshProjectModel();
             update.setId(project.getId());
             update.setToken(token);
@@ -342,6 +353,98 @@ public class SshProjectController extends BaseServerController {
         jsonObject.put("token", token);
         jsonObject.put("url", StrUtil.format("/openapi/ssh-project/{}/{}/", project.getId(), token));
         return JsonMessage.success("", jsonObject);
+    }
+
+    /**
+     * 版本能力探测（是否支持版本快照、当前版本、版本目录）
+     *
+     * @param id      id
+     * @param request 请求
+     * @return json
+     */
+    @PostMapping(value = "version-capability", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public IJsonMessage<JSONObject> versionCapability(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.ssh_project_not_exist.5d18") String id,
+                                                      HttpServletRequest request) {
+        SshProjectModel project = sshProjectService.getItem(id, request);
+        return JsonMessage.success("", sshProjectVersionService.capability(project));
+    }
+
+    /**
+     * 版本列表
+     *
+     * @param id      id
+     * @param request 请求
+     * @return json
+     */
+    @PostMapping(value = "version-list", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public IJsonMessage<JSONObject> versionList(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.ssh_project_not_exist.5d18") String id,
+                                                HttpServletRequest request) {
+        SshProjectModel project = sshProjectService.getItem(id, request);
+        return JsonMessage.success("", sshProjectVersionService.list(project));
+    }
+
+    /**
+     * 人工创建版本快照（构建发布会自动登记，这里用于「先存一版再改」的运维场景）
+     *
+     * @param id      id
+     * @param request 请求
+     * @return json
+     */
+    @PostMapping(value = "version-commit", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public IJsonMessage<JSONObject> versionCommit(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.ssh_project_not_exist.5d18") String id,
+                                                  Integer keepCount,
+                                                  HttpServletRequest request) {
+        SshProjectModel project = sshProjectService.getItem(id, request);
+        return JsonMessage.success("", sshProjectVersionService.commit(project, null,
+            SshProjectVersionService.SOURCE_MANUAL, null, null, keepCount));
+    }
+
+    /**
+     * 切换版本（快速回滚）
+     *
+     * @param id      id
+     * @param versionId 目标版本
+     * @param after   切换后操作（大于 0 重启）
+     * @param snapshotCurrent 切换前是否快照当前目录
+     * @param keepCount 保留个数
+     * @param request 请求
+     * @return json
+     */
+    @PostMapping(value = "version-switch", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public IJsonMessage<JSONObject> versionSwitch(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.ssh_project_not_exist.5d18") String id,
+                                                  @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.version_id_required.0a3e") String versionId,
+                                                  Integer after,
+                                                  Boolean snapshotCurrent,
+                                                  Integer keepCount,
+                                                  HttpServletRequest request) {
+        SshProjectModel project = sshProjectService.getItem(id, request);
+        JSONObject result = sshProjectVersionService.switchVersion(project, versionId, after,
+            snapshotCurrent, keepCount);
+        // 切换会改动项目目录，状态可能已变（例如带重启），回写一次缓存
+        sshProjectService.refreshStatus(project, true);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.version_switch_success.2f70"), result);
+    }
+
+    /**
+     * 删除版本
+     *
+     * @param id      id
+     * @param versionId 版本
+     * @param request 请求
+     * @return json
+     */
+    @PostMapping(value = "version-delete", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.DEL)
+    public IJsonMessage<String> versionDelete(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.ssh_project_not_exist.5d18") String id,
+                                              @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.version_id_required.0a3e") String versionId,
+                                              HttpServletRequest request) {
+        SshProjectModel project = sshProjectService.getItem(id, request);
+        sshProjectVersionService.deleteVersion(project, versionId);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.delete_success.0007"));
     }
 
     /**

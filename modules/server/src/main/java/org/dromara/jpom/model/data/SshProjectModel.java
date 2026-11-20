@@ -9,6 +9,7 @@
  */
 package org.dromara.jpom.model.data;
 
+import cn.hutool.core.annotation.PropIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.jpom.db.TableName;
@@ -72,6 +73,11 @@ public class SshProjectModel extends BaseWorkspaceModel {
      * 排序
      */
     private Float sortValue;
+    /**
+     * 机器 SSH 展示名（关联资产/工作空间 SSH 记录的名称，不落库）
+     */
+    @PropIgnore
+    private String sshName;
     /**
      * 最近一次状态：running / stopped / error
      */

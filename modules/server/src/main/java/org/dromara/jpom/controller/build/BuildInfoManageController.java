@@ -236,19 +236,21 @@ public class BuildInfoManageController extends BaseServerController {
     /**
      * 快速回滚：切换节点本地版本（不重新传输产物）
      *
-     * @param logId   构建历史ID
-     * @param restart 是否重启项目
+     * @param logId     构建历史ID
+     * @param restart   是否重启项目
+     * @param versionId 指定版本（SSH 项目可选，为空按构建编号自动定位）
      * @return json
      */
     @RequestMapping(value = "/build/manage/rollback-version", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EXECUTE)
     public IJsonMessage<Integer> rollbackVersion(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.no_data.1ac0") String logId,
                                                  Boolean restart,
+                                                 String versionId,
                                                  HttpServletRequest request) {
         BuildHistoryLog buildHistoryLog = this.getBuildHistoryLog(logId, request);
         BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId(), request);
         Assert.notNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
-        int buildId = buildExecuteService.quickRollback(buildHistoryLog, item, getUser(), !Boolean.FALSE.equals(restart));
+        int buildId = buildExecuteService.quickRollback(buildHistoryLog, item, getUser(), !Boolean.FALSE.equals(restart), versionId);
         return JsonMessage.success(I18nMessageUtil.get("i18n.quick_rollback_started.5e04"), buildId);
     }
 

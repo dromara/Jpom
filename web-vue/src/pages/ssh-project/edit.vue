@@ -52,6 +52,9 @@
               {{ item.name }}
             </a-select-option>
           </a-select>
+          <template #help v-if="!sshList.length">
+            {{ $t('i18n_ssh_project_ssh_empty_help_9f31') }}
+          </template>
         </a-form-item>
         <a-form-item :label="$t('i18n_33d1f73e42')" name="path">
           <a-input v-model:value="temp.path" :placeholder="$t('i18n_4abb143437')" />
@@ -67,7 +70,7 @@
           />
         </a-form-item>
         <a-form-item :label="$t('i18n_93da367db1')" name="token">
-          <a-input v-model:value="temp.token" :placeholder="$t('i18n_93da367db1')" />
+          <a-input v-model:value="temp.token" :placeholder="$t('i18n_ssh_project_token_placeholder_7c42')" />
         </a-form-item>
         <a-divider orientation="left">{{ $t('i18n_ec0dd46b3e') }}</a-divider>
         <a-form-item :label="$t('i18n_59cf15fe6b')" name="templateKey">
@@ -108,7 +111,7 @@
               {{ optionLabel(option) }}
             </a-select-option>
           </a-select>
-          <a-input v-else v-model:value="templateForm[field.key]" :placeholder="field.placeholder" />
+          <a-input v-else v-model:value="templateForm[field.key]" :placeholder="field.placeholder || field.label" />
         </a-form-item>
         <a-form-item :label="$t('i18n_1ae3d38e69')" name="dslContent">
           <a-form-item-rest>
@@ -150,14 +153,16 @@ export default {
       templateFields: [],
       templateForm: {},
       currentTemplate: {},
+      // 注意：a-select 只有值为 undefined 时才显示 placeholder，
+      // 这里 sshId / templateKey 不能初始化为空字符串，否则下拉会是一片空白（无 placeholder）
       temp: {
         name: '',
         group: '',
         machineSshId: '',
-        sshId: '',
+        sshId: undefined,
         path: '',
         dslContent: '',
-        templateKey: '',
+        templateKey: undefined,
         logCharset: '',
         autoStart: true,
         token: ''
@@ -224,13 +229,36 @@ export default {
         }
       })
     },
-    // 编辑态补齐 machineSshId
+    // 编辑态补齐 machineSshId / 反查工作空间 SSH 记录
     syncMachineSshId() {
-      if (!this.temp.sshId || this.temp.machineSshId) {
+      if (!this.sshList.length) {
         return
       }
-      const sshItem = this.sshList.find((item) => item.id === this.temp.sshId)
-      this.temp.machineSshId = sshItem ? sshItem.machineSshId : ''
+      // 1) 已有 sshId 且能在列表里找到：只补 machineSshId
+      if (this.temp.sshId) {
+        const sshItem = this.sshList.find((item) => item.id === this.temp.sshId)
+        if (sshItem) {
+          this.temp.machineSshId = sshItem.machineSshId
+          return
+        }
+      }
+      // 2) 只有 machineSshId（如通过接口创建）：按资产反查工作空间记录
+      if (this.temp.machineSshId) {
+        const byMachine = this.sshList.find((item) => item.machineSshId === this.temp.machineSshId)
+        if (byMachine) {
+          this.temp.sshId = byMachine.id
+          return
+        }
+      }
+      // 3) 都匹配不到：保留一个可读的兜底选项，避免下拉显示空白、也避免看起来没有 placeholder
+      if (this.temp.sshId || this.temp.machineSshId) {
+        this.sshList.push({
+          id: this.temp.sshId || this.temp.machineSshId,
+          machineSshId: this.temp.machineSshId,
+          name: (this.temp.sshName || this.temp.machineSshId || this.temp.sshId) + ' ' + this.$t('i18n_ssh_project_ssh_missing_d2a8')
+        })
+        this.temp.sshId = this.temp.sshId || this.temp.machineSshId
+      }
     },
     // 选择 ssh 时带出机器 ssh id
     handleSshChange(sshId) {

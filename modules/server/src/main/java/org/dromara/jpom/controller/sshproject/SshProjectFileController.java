@@ -75,16 +75,18 @@ public class SshProjectFileController extends BaseSshFileController {
         Assert.notNull(project, I18nMessageUtil.get("i18n.ssh_project_not_exist.5d18"));
         MachineSshModel machine = machineResolver.resolve(project);
         ItemConfig itemConfig = this.itemConfig(project, machine);
-        String normalize = FileUtil.normalize(StrUtil.SLASH + path + StrUtil.SLASH);
+        // 授权目录统一不带结尾斜杠，前端传回的目录可能带斜杠，比较前先归一化
+        String normalize = StrUtil.removeSuffix(FileUtil.normalize(StrUtil.SLASH + path + StrUtil.SLASH), StrUtil.SLASH);
         Assert.state(CollUtil.contains(itemConfig.fileDirs(), normalize), I18nMessageUtil.get("i18n.cannot_operate_current_directory.aa3d"));
         return function.apply(machine, itemConfig);
     }
 
     private ItemConfig itemConfig(SshProjectModel project, MachineSshModel machine) {
         String path = StrUtil.removeSuffix(StrUtil.nullToEmpty(project.getPath()), "/");
+        // 与 SSH 资产的授权目录写法保持一致：不带结尾斜杠（前端目录树直接展示该值）
         List<String> fileDirs = StrUtil.isEmpty(path)
             ? Collections.emptyList()
-            : Collections.singletonList(FileUtil.normalize(StrUtil.SLASH + path + StrUtil.SLASH));
+            : Collections.singletonList(StrUtil.removeSuffix(FileUtil.normalize(StrUtil.SLASH + path), StrUtil.SLASH));
         List<String> editSuffix = cn.hutool.core.util.StrUtil.isEmpty(machine.getAllowEditSuffix())
             ? null
             : com.alibaba.fastjson2.JSON.parseArray(machine.getAllowEditSuffix(), String.class);

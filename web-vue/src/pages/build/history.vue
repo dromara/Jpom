@@ -243,7 +243,17 @@
       :confirm-loading="versionLoading"
       @ok="handleSwitchVersion"
     >
-      <a-empty v-if="!versionLoading && versionList.length === 0" :description="$t('i18n_4807c5a15f')" />
+      <a-alert
+        v-if="versionReachable === false"
+        type="error"
+        show-icon
+        :message="versionMessage || $t('i18n_5b8e2d7a13')"
+        style="margin-bottom: 12px"
+      />
+      <a-empty
+        v-if="!versionLoading && versionList.length === 0"
+        :description="versionTargetType === 'sshProject' ? $t('i18n_7c1d5a9e42') : $t('i18n_4807c5a15f')"
+      />
       <a-table
         v-else
         size="small"
@@ -260,6 +270,11 @@
           <template v-if="column.dataIndex === 'nodeId'">
             <a-tooltip :title="`${record.projectId} / ${record.nodeId}`">
               <span>{{ record.projectId }} / {{ record.nodeId }}</span>
+            </a-tooltip>
+          </template>
+          <template v-else-if="column.dataIndex === 'projectId'">
+            <a-tooltip :title="record.projectName || record.projectId">
+              <span>{{ record.projectName || record.projectId }}</span>
             </a-tooltip>
           </template>
           <template v-else-if="column.dataIndex === 'status'">
@@ -370,7 +385,11 @@ export default {
       versionLogId: '',
       versionList: [],
       versionSelections: [],
-      versionColumns: [
+      // 版本快照的目标类型：node（插件端项目） / sshProject（SSH 项目）
+      versionTargetType: 'node',
+      versionReachable: true,
+      versionMessage: '',
+      versionBaseColumns: [
         {
           title: this.$t('i18n_3bf3c0a8d6'),
           dataIndex: 'nodeId',
@@ -509,6 +528,13 @@ export default {
     }
   },
   computed: {
+    // 版本快照列：SSH 项目没有节点维度，不展示「节点」列（项目列显示 SSH 项目名称）
+    versionColumns() {
+      if (this.versionTargetType === 'sshProject') {
+        return this.versionBaseColumns.filter((column) => column.dataIndex !== 'nodeId')
+      }
+      return this.versionBaseColumns
+    },
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
     },
@@ -617,9 +643,9 @@ export default {
         }
       })
     },
-    // 快速回滚：版本快照行 key
+    // 快速回滚：版本快照行 key（SSH 项目没有节点维度）
     versionRowKey(record) {
-      return `${record.projectId}_${record.nodeId}_${record.versionId}`
+      return `${record.targetType || 'node'}_${record.projectId}_${record.nodeId || ''}_${record.versionId}`
     },
     // 快速回滚：状态文案
     versionStatusText(status) {
@@ -658,6 +684,10 @@ export default {
       this.versionLogId = record.id
       this.versionList = []
       this.versionSelections = []
+      // SSH 项目的版本快照在目标机器目录上，列结构不同；发布方式 7 = SSH 项目
+      this.versionTargetType = record.releaseMethod === 7 ? 'sshProject' : 'node'
+      this.versionReachable = true
+      this.versionMessage = ''
       this.versionVisible = true
       this.loadBuildVersionList()
     },
@@ -669,7 +699,13 @@ export default {
       })
         .then((res) => {
           if (res.code === 200) {
-            this.versionList = (res.data && res.data.list) || []
+            const data = res.data || {}
+            this.versionList = data.list || []
+            if (data.targetType) {
+              this.versionTargetType = data.targetType
+            }
+            this.versionReachable = data.reachable !== false
+            this.versionMessage = data.message || ''
           }
         })
         .finally(() => {
@@ -692,7 +728,9 @@ export default {
           this.versionLoading = true
           return rollbackBuildVersion({
             logId: this.versionLogId,
-            restart: true
+            restart: true,
+            // SSH 项目按版本唯一切换；插件端项目由后端按构建编号切换全部节点
+            versionId: versionRecord.versionId
           })
             .then((res) => {
               if (res.code === 200) {
