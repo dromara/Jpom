@@ -102,6 +102,42 @@ public class TunnelRequestBody {
         return new TunnelRequestBody(builder.toString().getBytes(StandardCharsets.UTF_8), "application/x-www-form-urlencoded");
     }
 
+    /**
+     * 把参数编码成 URL query（与 {@link #build} 的表单编码、加密规则完全一致）
+     * <p>
+     * 下载类请求在插件端是 {@code @GetMapping}，GET 不解析请求体；反向隧道原实现一律把参数塞进
+     * body，插件端收不到（下载/备份下载返回「请选择文件」/「备份id缺失」，BUGS B-007 / B-018）。
+     * 这里生成与表单同源的 query，由 {@link TunnelQueryUrlItem} 拼到请求路径上。
+     * </p>
+     *
+     * @param nodeInfo 节点信息（取传输加密方式）
+     * @param data     参数（一般为 ServletUtil.getParamMap 的结果）
+     * @return 编码后的 query（不含前导 ?），参数为空返回空串
+     */
+    @SuppressWarnings("unchecked")
+    public static String buildQuery(INodeInfo nodeInfo, Object data) {
+        if (!(data instanceof Map)) {
+            return StrUtil.EMPTY;
+        }
+        Map<String, Object> map = (Map<String, Object>) data;
+        if (map.isEmpty()) {
+            return StrUtil.EMPTY;
+        }
+        Encryptor encryptor = createEncryptor(nodeInfo);
+        StringBuilder builder = new StringBuilder();
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            Object value = entry.getValue();
+            if (value instanceof String[]) {
+                for (String item : (String[]) value) {
+                    appendFormItem(builder, entry.getKey(), encrypt(encryptor, item));
+                }
+                continue;
+            }
+            appendFormItem(builder, entry.getKey(), value == null ? StrUtil.EMPTY : encrypt(encryptor, StrUtil.toStringOrNull(value)));
+        }
+        return builder.toString();
+    }
+
     private static Encryptor createEncryptor(INodeInfo nodeInfo) {
         try {
             return EncryptFactory.createEncryptor(nodeInfo.transportEncryption());

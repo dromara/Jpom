@@ -38,8 +38,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
@@ -186,12 +189,32 @@ public abstract class BaseDockerImagesController extends BaseDockerController {
         String extName = FileUtil.extName(originalFilename);
         boolean expression = StrUtil.equalsIgnoreCase(extName, "tar");
         Assert.state(expression, I18nMessageUtil.get("i18n.only_tar_files_supported.dcc4"));
+        // 只校验扩展名会把任意内容都当成镜像包（导入返回「导入成功」而实际没导入，BUGS B-017）：
+        // 这里按 tar 归档格式做一次结构校验，失败回 405
+        this.checkTarArchive(file);
         IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
         Map<String, Object> parameter = this.toDockerParameter(id);
         parameter.put("stream", file.getInputStream());
         //
         plugin.execute("loadImage", parameter);
         return new JsonMessage<>(200, I18nMessageUtil.get("i18n.import_success.b6d1"));
+    }
+
+    /**
+     * 校验上传内容是否是合法的 tar 归档（docker save 产物都是 tar）
+     *
+     * @param file 上传文件
+     */
+    private void checkTarArchive(MultipartFile file) {
+        try (InputStream inputStream = file.getInputStream();
+             TarArchiveInputStream tar = new TarArchiveInputStream(inputStream)) {
+            boolean hasEntry = tar.getNextTarEntry() != null;
+            if (!hasEntry) {
+                throw new IllegalArgumentException(I18nMessageUtil.get("i18n.invalid_image_tar_package.a4c1"));
+            }
+        } catch (IOException e) {
+            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.invalid_image_tar_package.a4c1"));
+        }
     }
 
     /**

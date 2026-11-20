@@ -122,6 +122,8 @@ public class DockerYmlDsl extends BaseJsonModel {
                       String workspaceId,
                       IDockerConfigPlugin plugin) {
         Assert.hasText(runsOn, I18nMessageUtil.get("i18n.please_fill_in_runs_on.c2ff"));
+        // runsOn 不是 docker 镜像引用，而是「镜像后缀」：插件端会拼成 jpomdocker/runs_<runsOn>（如 ubuntu-latest）
+        // 或去找内置资源 runs/<runsOn>/Dockerfile；因此这里仍只允许字母数字下划线横线
         Validator.validateMatchRegex(StringUtil.GENERAL_STR, runsOn, I18nMessageUtil.get("i18n.invalid_runs_on_image_name.4b96"));
         if (StrUtil.isNotEmpty(fromTag)) {
             validateFromTag(fromTag);

@@ -53,6 +53,7 @@ import org.dromara.jpom.service.script.ScriptServer;
 import org.dromara.jpom.service.system.WorkspaceEnvVarService;
 import org.dromara.jpom.system.ServerConfig;
 import org.dromara.jpom.transport.*;
+import org.dromara.jpom.util.FileUtils;
 import org.dromara.jpom.util.LogRecorder;
 import org.dromara.jpom.util.MySftp;
 import org.dromara.jpom.util.StrictSyncFinisher;
@@ -87,6 +88,11 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
     private final StaticFileStorageService staticFileStorageService;
     private final ScriptServer scriptServer;
     private final FileReleaseTaskTemplateService fileReleaseTaskTemplateService;
+
+    /**
+     * 路径段：上级目录
+     */
+    private static final String PATH_PARENT = "..";
 
     private final Map<String, String> cancelTag = new SafeConcurrentHashMap<>();
 
@@ -164,6 +170,106 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
     }
 
     /**
+     * 解析发布目录：二级目录必须落在已授权的父目录内
+     * <p>
+     * 父目录由调用方先做白名单校验（{@code AgentWhitelist.checkPath}），这里负责二级目录的包含校验：
+     * 只做字符串拼装 + normalize 时 {@code ..} 会把发布目录写到父目录之外（2026-11-20 外部安全报告）。
+     * </p>
+     *
+     * @param releasePathParent    发布父目录（已通过白名单校验）
+     * @param releasePathSecondary 发布二级目录
+     * @return 规范化后的绝对/相对发布目录
+     */
+    public static String resolveReleasePath(String releasePathParent, String releasePathSecondary) {
+        Assert.hasText(releasePathParent, I18nMessageUtil.get("i18n.select_correct_project_path_or_no_auth_configured.366a"));
+        Assert.hasText(releasePathSecondary, I18nMessageUtil.get("i18n.publish_file_second_level_directory_required.2f65"));
+        File releasePathFile = FileUtils.resolveSubFile(FileUtil.file(releasePathParent), releasePathSecondary);
+        Assert.notNull(releasePathFile, I18nMessageUtil.get("i18n.release_path_out_of_authorized_dir.7c1d"));
+        return FileUtil.normalize(releasePathFile.getPath());
+    }
+
+    /**
+     * 判断发布目录是否落在分发授权目录内
+     * <p>
+     * 用于复用落库发布目录的入口（重新发布）：修复前创建的任务可能把目录写到授权目录之外，
+     * 再次发布时不能继续沿用。
+     * </p>
+     *
+     * @param authorizedDirs 分发授权目录
+     * @param releasePath    发布目录
+     * @return true 在授权目录内
+     */
+    public static boolean isUnderAuthorizedDir(List<String> authorizedDirs, String releasePath) {
+        if (CollUtil.isEmpty(authorizedDirs) || StrUtil.isEmpty(releasePath)) {
+            return false;
+        }
+        try {
+            String releaseDirPath = FileUtil.file(releasePath).getCanonicalPath();
+            for (String authorizedDir : authorizedDirs) {
+                String authorizedDirPath = FileUtil.file(authorizedDir).getCanonicalPath();
+                if (StrUtil.equals(releaseDirPath, authorizedDirPath)
+                    || StrUtil.startWith(releaseDirPath, authorizedDirPath + File.separator)) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            log.warn(I18nMessageUtil.get("i18n.release_path_out_of_authorized_dir.7c1d") + releasePath, e);
+        }
+        return false;
+    }
+
+    /**
+     * 校验已经拼装好的发布目录
+     * <p>
+     * 用于不经过二级目录拼装的入口（重新发布使用父任务落库的完整路径），拒绝包含 {@code ..} 路径段的目录，
+     * 避免历史脏数据或直接调用 service 时把文件写到父目录之外。
+     * </p>
+     *
+     * @param releasePath 发布目录
+     */
+    static void assertReleasePath(String releasePath) {
+        Assert.hasText(releasePath, I18nMessageUtil.get("i18n.select_correct_project_path_or_no_auth_configured.366a"));
+        boolean traversal = StrUtil.split(releasePath.replace('\\', '/'), StrUtil.C_SLASH)
+            .stream()
+            .anyMatch(PATH_PARENT::equals);
+        Assert.state(!traversal, I18nMessageUtil.get("i18n.release_path_out_of_authorized_dir.7c1d"));
+    }
+
+    /**
+     * 解析发布目标：只保留属于指定工作空间的 SSH/节点 id
+     * <p>
+     * 目标 id 只做存在性校验（{@code exists}）时没有工作空间条件，工作空间 A 的用户可以指定工作空间 B 的
+     * node/SSH 主机 id，让 before/after 脚本在 B 的主机上执行、文件落到 B 的发布目录（2026-11-20 外部安全报告）。
+     * 这里用工作空间条件查询过滤，查不到的目标一律剔除。
+     * </p>
+     *
+     * @param taskType    任务类型：0 SSH，1 节点
+     * @param taskDataIds 目标 id 列表（逗号分隔）
+     * @param workspaceId 工作空间ID
+     * @return 属于该工作空间的目标 id
+     */
+    public List<String> resolveTaskTargetIds(int taskType, String taskDataIds, String workspaceId) {
+        List<String> ids = StrUtil.splitTrim(taskDataIds, StrUtil.COMMA);
+        List<String> list;
+        switch (taskType) {
+            case 0:
+                list = ids.stream().filter(id -> sshService.getByKeyAndWorkspace(id, workspaceId) != null).collect(Collectors.toList());
+                break;
+            case 1:
+                list = ids.stream().filter(id -> nodeService.getByKeyAndWorkspace(id, workspaceId) != null).collect(Collectors.toList());
+                break;
+            default:
+                throw new IllegalArgumentException(I18nMessageUtil.get("i18n.unsupported_method.a1de"));
+        }
+        if (list.size() != ids.size()) {
+            List<String> rejected = new ArrayList<>(ids);
+            rejected.removeAll(list);
+            log.warn(StrUtil.format(I18nMessageUtil.get("i18n.file_release_target_out_of_workspace.4f2b"), rejected));
+        }
+        return list;
+    }
+
+    /**
      * 创建任务
      *
      * @param fileId       文件id
@@ -186,6 +292,17 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                                 String afterScript,
                                 Map<String, String> env,
                                 HttpServletRequest request) {
+        // 发布目标必须先按请求工作空间解析：只做存在性校验会让 A 空间的任务落到 B 空间的主机执行脚本、写文件
+        String workspaceId = this.getCheckUserWorkspace(request);
+        List<String> list = this.resolveTaskTargetIds(taskType, taskDataIds, workspaceId);
+        if (taskType == 0) {
+            Assert.notEmpty(list, I18nMessageUtil.get("i18n.select_correct_ssh.aa93"));
+        } else {
+            Assert.notEmpty(list, I18nMessageUtil.get("i18n.select_correct_node.1b4e"));
+        }
+        // 发布目录：只接受落在发布父目录内的二级目录（重新发布等入口传入的是已落库的完整路径）
+        this.assertReleasePath(releasePath);
+        //
         Tuple tuple;
         switch (fileType) {
             case 1:
@@ -199,19 +316,6 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         }
         File file = tuple.get(0);
         IFileStorage storageModel = tuple.get(1);
-        //
-        List<String> list;
-        if (taskType == 0) {
-            list = StrUtil.splitTrim(taskDataIds, StrUtil.COMMA);
-            list = list.stream().filter(s -> sshService.exists(new SshModel(s))).collect(Collectors.toList());
-            Assert.notEmpty(list, I18nMessageUtil.get("i18n.select_correct_ssh.aa93"));
-        } else if (taskType == 1) {
-            list = StrUtil.splitTrim(taskDataIds, StrUtil.COMMA);
-            list = list.stream().filter(s -> nodeService.exists(new NodeModel(s))).collect(Collectors.toList());
-            Assert.notEmpty(list, I18nMessageUtil.get("i18n.select_correct_node.1b4e"));
-        } else {
-            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.unsupported_method.a1de"));
-        }
         // 生成任务id
         FileReleaseTaskLogModel taskRoot = new FileReleaseTaskLogModel();
         taskRoot.setId(IdUtil.fastSimpleUUID());
@@ -222,6 +326,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
         taskRoot.setFileType(fileType);
         taskRoot.setStatus(0);
         taskRoot.setTaskType(taskType);
+        taskRoot.setWorkspaceId(workspaceId);
         taskRoot.setReleasePath(releasePath);
         taskRoot.setAfterScript(afterScript);
         taskRoot.setBeforeScript(beforeScript);
@@ -236,6 +341,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
             releaseTaskLogModel.setFileType(fileType);
             releaseTaskLogModel.setStatus(0);
             releaseTaskLogModel.setTaskType(taskType);
+            releaseTaskLogModel.setWorkspaceId(workspaceId);
             releaseTaskLogModel.setReleasePath(taskRoot.getReleasePath());
             this.insert(releaseTaskLogModel);
         }
@@ -346,7 +452,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                     this.updateStatus(taskId, modelId, 1, I18nMessageUtil.get("i18n.start_publishing_file.a14e"));
                     File logFile = logFile(model);
                     logRecorder = LogRecorder.builder().file(logFile).charset(CharsetUtil.CHARSET_UTF_8).build();
-                    NodeModel item = nodeService.getByKey(model.getTaskDataId());
+                    NodeModel item = nodeService.getByKeyAndWorkspace(model.getTaskDataId(), taskRoot.getWorkspaceId());
                     if (item == null) {
                         logRecorder.systemError(I18nMessageUtil.get("i18n.no_node_entry_found.b1ef"), model.getTaskDataId());
                         this.updateStatus(taskId, modelId, 3, StrUtil.format(I18nMessageUtil.get("i18n.no_node_entry_found.b1ef"), model.getTaskDataId()));
@@ -488,7 +594,7 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                     this.updateStatus(taskId, modelId, 1, I18nMessageUtil.get("i18n.start_publishing_file.a14e"));
                     File logFile = logFile(model);
                     logRecorder = LogRecorder.builder().file(logFile).charset(CharsetUtil.CHARSET_UTF_8).build();
-                    SshModel item = sshService.getByKey(model.getTaskDataId());
+                    SshModel item = sshService.getByKeyAndWorkspace(model.getTaskDataId(), taskRoot.getWorkspaceId());
                     if (item == null) {
                         logRecorder.systemError(I18nMessageUtil.get("i18n.no_ssh_entry_found.d0e1"), model.getTaskDataId());
                         this.updateStatus(taskId, modelId, 3, StrUtil.format(I18nMessageUtil.get("i18n.no_ssh_entry_found.d0e1"), model.getTaskDataId()));

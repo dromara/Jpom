@@ -116,6 +116,25 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
     }
 
     /**
+     * 根据主键ID + 工作空间ID查询
+     * <p>
+     * 供脱离请求上下文的后台线程（发布任务执行、定时任务恢复等）复用请求期已经校验过的工作空间：
+     * 只按主键查询会把其他工作空间的数据一并返回，调用方无法判断归属，因此这里强制带上工作空间条件。
+     * 工作空间为空时直接返回 null，避免退化成无条件的全表查询。
+     * </p>
+     *
+     * @param keyValue    主键ID
+     * @param workspaceId 工作空间ID
+     * @return data
+     */
+    public T getByKeyAndWorkspace(String keyValue, String workspaceId) {
+        if (StrUtil.hasEmpty(keyValue, workspaceId)) {
+            return null;
+        }
+        return super.getByKey(keyValue, true, entity -> entity.set("workspaceId", workspaceId));
+    }
+
+    /**
      * 根据主键ID + 用户ID
      *
      * @param keyValue  ID

@@ -76,7 +76,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * 构建列表，新版本，数据存放到数据库，不再是文件了
@@ -382,6 +381,11 @@ public class BuildInfoController extends BaseServerController {
         }
         // 查询构建信息
         BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);
+        if (StrUtil.isNotEmpty(id)) {
+            // 带不存在的 id 走 updateById → 影响 0 行并抛 cannot_execute_error（文案只有「不能执行：error」），
+            // 这里提前给出「数据不存在」的 405 提示（BUGS B-025）
+            Assert.notNull(buildInfoModel, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
+        }
         buildInfoModel = ObjectUtil.defaultIfNull(buildInfoModel, new BuildInfoModel());
         // 设置参数
         Opt.ofBlankAble(webhook).ifPresent(s -> Validator.validateMatchRegex(RegexPool.URL_HTTP, s, I18nMessageUtil.get("i18n.invalid_webhooks_address.d836")));
@@ -674,7 +678,7 @@ public class BuildInfoController extends BaseServerController {
     private void delById(String id, HttpServletRequest request) {
         // 查询构建信息
         BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);
-        Objects.requireNonNull(buildInfoModel, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
+        Assert.notNull(buildInfoModel, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
         //
         String e = buildExecuteService.checkStatus(buildInfoModel);
         Assert.isNull(e, () -> e);
@@ -718,7 +722,7 @@ public class BuildInfoController extends BaseServerController {
     public IJsonMessage<Object> cleanSource(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.data_id_not_found.1b0a") String id, HttpServletRequest request) {
         // 查询构建信息
         BuildInfoModel buildInfoModel = buildInfoService.getByKey(id, request);
-        Objects.requireNonNull(buildInfoModel, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
+        Assert.notNull(buildInfoModel, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
         File source = BuildUtil.getSourceById(buildInfoModel.getId());
         // 快速删除
         boolean fastDel = CommandUtil.systemFastDel(source);

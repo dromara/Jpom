@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -135,26 +136,24 @@ public class MonitorUserOptListController extends BaseServerController {
 
         String status = getParameter("status");
 
-        JSONArray jsonArray = JSONArray.parseArray(notifyUser);
-        List<String> notifyUsers = jsonArray.toJavaList(String.class)
-            .stream()
+        // notifyUser / monitorUser / monitorOpt / monitorFeature 都是可空参数：
+        // 原实现直接 JSONArray.parseArray(null) 得到 null 再 .toJavaList() → NPE（500 空指针），
+        // 这里统一按“空数组”处理，让后面的 Assert.notEmpty 给出 405 友好提示（BUGS B-026）
+        List<String> notifyUsers = this.parseStringArray(notifyUser).stream()
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
         Assert.notEmpty(notifyUsers, I18nMessageUtil.get("i18n.select_alarm_contact.d02a"));
 
 
-        JSONArray monitorUserArray = JSONArray.parseArray(monitorUser);
-        List<String> monitorUserArrays = monitorUserArray.toJavaList(String.class)
-            .stream()
+        List<String> monitorUserArrays = this.parseStringArray(monitorUser).stream()
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
         Assert.notEmpty(monitorUserArrays, I18nMessageUtil.get("i18n.select_monitoring_person.0756"));
 
 
-        JSONArray monitorOptArray = JSONArray.parseArray(monitorOpt);
-        List<MethodFeature> monitorOptArrays = monitorOptArray
+        List<MethodFeature> monitorOptArrays = this.parseStringArray(monitorOpt)
             .stream()
             .map(o -> EnumUtil.fromString(MethodFeature.class, StrUtil.toString(o), null))
             .filter(Objects::nonNull)
@@ -162,8 +161,7 @@ public class MonitorUserOptListController extends BaseServerController {
 
         Assert.notEmpty(monitorOptArrays, I18nMessageUtil.get("i18n.select_monitoring_operation.3057"));
 
-        JSONArray monitorFeatureArray = JSONArray.parseArray(monitorFeature);
-        List<ClassFeature> monitorFeatureArrays = monitorFeatureArray
+        List<ClassFeature> monitorFeatureArrays = this.parseStringArray(monitorFeature)
             .stream()
             .map(o -> EnumUtil.fromString(ClassFeature.class, StrUtil.toString(o), null))
             .filter(Objects::nonNull)
@@ -195,6 +193,27 @@ public class MonitorUserOptListController extends BaseServerController {
         }
         monitorUserOptService.updateById(monitorModel, request);
         return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
+    }
+
+    /**
+     * 解析前端传来的 JSON 数组参数（null / 空串 / 非法内容一律按空数组处理）
+     * <p>
+     * 监控的四个多选参数都是可空的，缺省时应走到 Assert.notEmpty 的 405 文案，
+     * 而不是在 JSONArray 解析阶段抛 NPE（500 空指针）。
+     * </p>
+     *
+     * @param json 前端参数
+     * @return 字符串列表（不会为 null）
+     */
+    private List<String> parseStringArray(String json) {
+        if (StrUtil.isBlank(json)) {
+            return new ArrayList<>();
+        }
+        JSONArray jsonArray = JSONArray.parseArray(json);
+        if (jsonArray == null) {
+            return new ArrayList<>();
+        }
+        return jsonArray.toJavaList(String.class);
     }
 
     /**

@@ -84,6 +84,9 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
             // 由容器回收会话，避免半开会话与文件监听器长期占用内存
             session.setMaxIdleTimeout(180_000L);
             String projectId = super.getParameters(session, "projectId");
+            // 连接期记住 projectId：消息体里的 projectId 是前端自己带的，第三方客户端/老版本前端可能不带，
+            // 缺省时回退到连接期参数，避免「连接成功但每条指令都报没有对应项目」（BUGS B-029）
+            session.getUserProperties().put("projectId", projectId);
             // 判断项目
             if (!Const.SYSTEM_ID.equals(projectId)) {
                 NodeProjectInfoModel nodeProjectInfoModel = this.checkProject(projectId, session);
@@ -145,6 +148,10 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                 return;
             }
             String projectId = json.getString("projectId");
+            if (StrUtil.isEmpty(projectId)) {
+                // 兼容不带 projectId 的指令：回退到连接期参数（BUGS B-029）
+                projectId = (String) session.getUserProperties().get("projectId");
+            }
             NodeProjectInfoModel nodeProjectInfoModel = this.checkProject(projectId, session);
             if (nodeProjectInfoModel == null) {
                 return;

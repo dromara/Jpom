@@ -139,13 +139,16 @@ public class BuildInfoManageController extends BaseServerController {
     @Feature(method = MethodFeature.EXECUTE)
     public IJsonMessage<String> cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.no_data.1ac0")) String id, HttpServletRequest request) {
         BuildInfoModel item = buildInfoService.getByKey(id, request);
-        Objects.requireNonNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
+        Assert.notNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
         String checkStatus = buildExecuteService.checkStatus(item);
         BuildStatus nowStatus = BaseEnum.getEnum(BuildStatus.class, item.getStatus());
         Objects.requireNonNull(nowStatus);
         if (checkStatus == null) {
             return JsonMessage.success(I18nMessageUtil.get("i18n.status_not_in_progress.f410") + nowStatus.getDesc());
         }
+        // 先登记「取消意图」：节点构建被取消后节点会回报 cancelled、构建线程可能把终态写成 Error，
+        // 由 BuildExecuteService.updateStatus 归一为 Cancel（BUGS B-001）
+        BuildExecuteService.markCancelRequested(id);
         boolean status = BuildExecuteManage.cancelTaskById(item.getId());
         if (!status) {
             // 缓存中可能不存在数据,还是需要执行取消
@@ -209,9 +212,9 @@ public class BuildInfoManageController extends BaseServerController {
                                            HttpServletRequest request) {
         String workspaceId = dbBuildHistoryLogService.getCheckUserWorkspace(request);
         BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, false, entity -> entity.set("workspaceId", workspaceId));
-        Objects.requireNonNull(buildHistoryLog, I18nMessageUtil.get("i18n.no_corresponding_build_record.b3b2"));
+        Assert.notNull(buildHistoryLog, I18nMessageUtil.get("i18n.no_corresponding_build_record.b3b2"));
         BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId(), request);
-        Objects.requireNonNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
+        Assert.notNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
         int buildId = buildExecuteService.rollback(buildHistoryLog, item, getUser());
         return JsonMessage.success(I18nMessageUtil.get("i18n.republishing.131d"), buildId);
     }
@@ -244,7 +247,7 @@ public class BuildInfoManageController extends BaseServerController {
                                                  HttpServletRequest request) {
         BuildHistoryLog buildHistoryLog = this.getBuildHistoryLog(logId, request);
         BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId(), request);
-        Objects.requireNonNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
+        Assert.notNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
         int buildId = buildExecuteService.quickRollback(buildHistoryLog, item, getUser(), !Boolean.FALSE.equals(restart));
         return JsonMessage.success(I18nMessageUtil.get("i18n.quick_rollback_started.5e04"), buildId);
     }
@@ -259,7 +262,7 @@ public class BuildInfoManageController extends BaseServerController {
     private BuildHistoryLog getBuildHistoryLog(String logId, HttpServletRequest request) {
         String workspaceId = dbBuildHistoryLogService.getCheckUserWorkspace(request);
         BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, false, entity -> entity.set("workspaceId", workspaceId));
-        Objects.requireNonNull(buildHistoryLog, I18nMessageUtil.get("i18n.no_corresponding_build_record.b3b2"));
+        Assert.notNull(buildHistoryLog, I18nMessageUtil.get("i18n.no_corresponding_build_record.b3b2"));
         return buildHistoryLog;
     }
 

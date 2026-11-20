@@ -383,13 +383,15 @@ export default {
             targetKeys: res.data.map((element) => {
               return element.workspaceId
             }),
-            prohibitExecuteArray: JSON.parse(record.prohibitExecute).map((item) => {
+            // 老数据可能是空字符串（服务端曾把空配置存成 ""），JSON.parse("") 会抛
+            // Unexpected end of JSON input 让整个编辑弹窗打不开（BUGS B-024）
+            prohibitExecuteArray: JSON.parse(record.prohibitExecute || '[]').map((item) => {
               return {
                 reason: item.reason,
                 moments: [item.startTime, item.endTime]
               }
             }),
-            allowExecuteArray: JSON.parse(record.allowExecute)
+            allowExecuteArray: JSON.parse(record.allowExecute || '[]')
           }
           delete this.temp.prohibitExecute, delete this.temp.allowExecute
           this.editVisible = true

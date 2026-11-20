@@ -96,7 +96,6 @@ public class FileReleaseTaskController extends BaseServerController {
         ServerWhitelist configDeNewInstance = outGivingWhitelistService.getServerWhitelistData(request);
         List<String> whitelistServerOutGiving = configDeNewInstance.getOutGiving();
         Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, releasePathParent), I18nMessageUtil.get("i18n.select_correct_project_path_or_no_auth_configured.366a"));
-        Assert.hasText(releasePathSecondary, I18nMessageUtil.get("i18n.publish_file_second_level_directory_required.2f65"));
 
         if (StrUtil.startWith(beforeScript, ServerConst.REF_SCRIPT)) {
             String scriptId = StrUtil.removePrefix(beforeScript, ServerConst.REF_SCRIPT);
@@ -109,7 +108,8 @@ public class FileReleaseTaskController extends BaseServerController {
             Assert.notNull(keyAndGlobal, I18nMessageUtil.get("i18n.select_correct_post_publish_script.49d2"));
         }
 
-        String releasePath = FileUtil.normalize(releasePathParent + StrUtil.SLASH + releasePathSecondary);
+        // 二级目录必须落在已授权的父目录内（.. / 绝对路径直接拒绝），与服务端其他入口共用同一处解析
+        String releasePath = FileReleaseTaskService.resolveReleasePath(releasePathParent, releasePathSecondary);
 
         IFileStorage storageModel = fileReleaseTaskService.addTask(fileId, fileType, name, taskType, taskDataIds, releasePath, beforeScript, afterScript, null, request);
         // 判断是否需要存储为模板
@@ -156,6 +156,10 @@ public class FileReleaseTaskController extends BaseServerController {
                                        HttpServletRequest request) {
         FileReleaseTaskLogModel parentTask = fileReleaseTaskService.getByKey(parentTaskId, request);
         Assert.notNull(parentTask, I18nMessageUtil.get("i18n.parent_task_not_exist.ca1b"));
+        // 复用父任务落库的发布目录，但必须仍落在当前分发授权目录内（修复前创建的任务可能落在授权目录之外）
+        ServerWhitelist configDeNewInstance = outGivingWhitelistService.getServerWhitelistData(request);
+        Assert.state(FileReleaseTaskService.isUnderAuthorizedDir(configDeNewInstance.getOutGiving(), parentTask.getReleasePath()),
+            I18nMessageUtil.get("i18n.select_correct_project_path_or_no_auth_configured.366a"));
         Integer fileType = parentTask.getFileType();
         fileType = ObjectUtil.defaultIfNull(fileType, 1);
         fileReleaseTaskService.addTask(fileId, fileType, name, taskType, taskDataIds, parentTask.getReleasePath(), beforeScript, afterScript, null, request);

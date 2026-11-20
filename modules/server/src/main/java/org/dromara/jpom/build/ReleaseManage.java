@@ -38,7 +38,6 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -669,7 +668,7 @@ public class ReleaseManage {
         }
         NodeService nodeService = SpringUtil.getBean(NodeService.class);
         NodeModel nodeModel = nodeService.getByKey(strings[0]);
-        Objects.requireNonNull(nodeModel, I18nMessageUtil.get("i18n.node_does_not_exist.4ce4"));
+        Assert.notNull(nodeModel, I18nMessageUtil.get("i18n.node_does_not_exist.4ce4"));
         String projectId = strings[1];
         BuildVersionService buildVersionService = SpringUtil.getBean(BuildVersionService.class);
         boolean versionEnabled = buildVersionService.enabled(this.buildExtraModule);

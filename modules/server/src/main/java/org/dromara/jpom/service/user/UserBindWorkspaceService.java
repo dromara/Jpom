@@ -17,6 +17,8 @@ import cn.hutool.core.date.Week;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
+import cn.hutool.extra.spring.SpringUtil;
+import lombok.extern.slf4j.Slf4j;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
@@ -39,6 +41,7 @@ import java.util.stream.Collectors;
  * @since 2021/12/4
  */
 @Service
+@Slf4j
 public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceModel> {
 
     private final WorkspaceService workspaceService;
@@ -96,9 +99,33 @@ public class UserBindWorkspaceService extends BaseDbService<UserBindWorkspaceMod
      * @return list
      */
     public List<UserBindWorkspaceModel> listUserWorkspace(String userId) {
-        UserBindWorkspaceModel userBindWorkspaceModel = new UserBindWorkspaceModel();
-        userBindWorkspaceModel.setUserId(userId);
-        return super.listByBean(userBindWorkspaceModel);
+        // 工作空间绑定实际挂在「权限组」上（userBindWorkspace.userId 存的是权限组 id，兼容历史用户 id），
+        // 只按用户 id 查会永远为空 —— 表现为「用户空间绑定查询对所有人返回 []」（BUGS B-021）。
+        // 这里按「用户 id + 该用户所属权限组」一起查，返回用户实际可用的空间绑定。
+        List<String> ownerIds = new ArrayList<>();
+        ownerIds.add(userId);
+        try {
+            UserModel userModel = SpringUtil.getBean(UserService.class).getByKey(userId);
+            if (userModel != null) {
+                if (userModel.isSuperSystemUser()) {
+                    // 超级管理员拥有全部工作空间（与 listUserWorkspaceInfo 口径一致），
+                    // 不会存在绑定记录，直接按全部空间返回
+                    return workspaceService.list().stream().map(workspaceModel -> {
+                        UserBindWorkspaceModel bind = new UserBindWorkspaceModel();
+                        bind.setUserId(userId);
+                        bind.setWorkspaceId(workspaceModel.getId());
+                        return bind;
+                    }).collect(Collectors.toList());
+                }
+                List<String> groups = StrUtil.splitTrim(userModel.getPermissionGroup(), StrUtil.AT);
+                ownerIds.addAll(groups);
+            }
+        } catch (Exception e) {
+            log.warn("解析用户权限组失败：{}", userId, e);
+        }
+        Entity entity = Entity.create();
+        entity.set("userId", ownerIds);
+        return super.listByEntity(entity);
     }
 
     /**
