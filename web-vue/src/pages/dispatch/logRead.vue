@@ -232,6 +232,7 @@ export default {
           dataIndex: 'operation',
           ellipsis: true,
 
+          fixed: 'right',
           width: 180,
           align: 'center'
         }

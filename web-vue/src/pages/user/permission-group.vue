@@ -287,6 +287,7 @@ export default {
           align: 'center',
           dataIndex: 'operation',
 
+          fixed: 'right',
           width: 120
         }
       ],

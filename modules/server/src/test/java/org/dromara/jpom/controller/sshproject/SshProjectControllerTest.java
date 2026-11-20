@@ -21,6 +21,7 @@ import org.dromara.jpom.service.sshproject.SshProjectLogService;
 import org.dromara.jpom.service.sshproject.SshProjectService;
 import org.dromara.jpom.service.sshproject.SshProjectTemplateService;
 import org.dromara.jpom.service.sshproject.SshProjectVersionService;
+import org.dromara.jpom.service.user.TriggerTokenLogServer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -75,7 +76,8 @@ public class SshProjectControllerTest {
         sshProjectTemplateService = mock(SshProjectTemplateService.class);
         sshProjectVersionService = mock(SshProjectVersionService.class);
         mockMvc = MockMvcBuilders.standaloneSetup(new SshProjectController(sshProjectService, sshProjectTemplateService,
-            mock(SshProjectLogService.class), sshProjectVersionService)).build();
+            mock(SshProjectLogService.class), sshProjectVersionService,
+            mock(TriggerTokenLogServer.class))).build();
     }
 
     @Test

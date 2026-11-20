@@ -69,9 +69,6 @@
             :un-checked-children="$t('i18n_d58a55bcee')"
           />
         </a-form-item>
-        <a-form-item :label="$t('i18n_93da367db1')" name="token">
-          <a-input v-model:value="temp.token" :placeholder="$t('i18n_ssh_project_token_placeholder_7c42')" />
-        </a-form-item>
         <a-divider orientation="left">{{ $t('i18n_ec0dd46b3e') }}</a-divider>
         <a-form-item :label="$t('i18n_59cf15fe6b')" name="templateKey">
           <a-space wrap>
@@ -164,8 +161,7 @@ export default {
         dslContent: '',
         templateKey: undefined,
         logCharset: '',
-        autoStart: true,
-        token: ''
+        autoStart: true
       },
       rules: {
         name: [
@@ -376,8 +372,7 @@ export default {
           dslContent: this.temp.dslContent,
           templateKey: this.temp.templateKey,
           logCharset: this.temp.logCharset,
-          autoStart: !!this.temp.autoStart,
-          token: this.temp.token
+          autoStart: !!this.temp.autoStart
         }
         this.confirmLoading = true
         saveSshProject(params)

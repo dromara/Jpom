@@ -50,7 +50,10 @@ export interface SshProjectModel {
   templateKey: string
   logCharset: string
   autoStart: boolean
-  token: string
+  /**
+   * 触发器 token（由触发器地址接口生成/重置，保存时不会写入）
+   */
+  triggerToken: string
   sortValue: number
   /**
    * 最近一次状态：running | stopped
@@ -143,7 +146,6 @@ export interface SshProjectSaveParams {
   templateKey: string
   logCharset?: string
   autoStart?: boolean
-  token?: string
 }
 
 /**
@@ -474,6 +476,20 @@ export function switchSshProjectVersion(params: {
     method: 'post',
     data: params,
     timeout: 0
+  })
+}
+
+/**
+ * 获取触发器地址（rest 非空时重置 token，旧地址立即失效）
+ */
+export function getSshProjectTriggerUrl(params: {
+  id: string
+  rest?: string
+}): Promise<IResponse<{ triggerUrl: string; batchTriggerUrl: string; id: string; token: string }>> {
+  return axios({
+    url: '/node/ssh-project/trigger-url',
+    method: 'post',
+    data: params
   })
 }
 

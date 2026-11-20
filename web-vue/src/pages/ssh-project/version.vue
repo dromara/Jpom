@@ -106,7 +106,7 @@ export default {
         { title: this.$t('i18n_b904ab3dc3'), dataIndex: 'buildNumberId', width: 100 },
         { title: this.$t('i18n_ad35f58fb3'), dataIndex: 'fileSize', width: 120 },
         { title: this.$t('i18n_eca37cb072'), dataIndex: 'createTime', width: 180 },
-        { title: this.$t('i18n_2b6bc0f293'), dataIndex: 'operation', width: 260 }
+        { title: this.$t('i18n_2b6bc0f293'), dataIndex: 'operation', width: 260, fixed: 'right' }
       ]
     }
   },

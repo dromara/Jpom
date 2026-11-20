@@ -129,6 +129,11 @@
                     }}</a-button>
                   </a-menu-item>
                   <a-menu-item>
+                    <a-button type="primary" size="small" @click="handleTrigger(record)">{{
+                      $t('i18n_4696724ed3')
+                    }}</a-button>
+                  </a-menu-item>
+                  <a-menu-item>
                     <a-button type="primary" size="small" @click="handleEdit(record)">{{
                       $t('i18n_95b351c862')
                     }}</a-button>
@@ -193,12 +198,69 @@
     >
       <ssh-project-console v-if="consoleVisible" :project-id="temp.id" />
     </CustomDrawer>
+    <!-- 触发器（与项目/脚本触发器一致：地址 + 批量地址 + 重置 token） -->
+    <CustomModal
+      v-if="triggerVisible"
+      v-model:open="triggerVisible"
+      destroy-on-close
+      :title="$t('i18n_4696724ed3')"
+      width="50%"
+      :footer="null"
+      :mask-closable="false"
+    >
+      <a-tabs default-active-key="1">
+        <template #rightExtra>
+          <a-tooltip :title="$t('i18n_01ad26f4a9')">
+            <a-button type="primary" size="small" @click="resetTrigger">{{ $t('i18n_4b9c3271dc') }}</a-button>
+          </a-tooltip>
+        </template>
+        <a-tab-pane key="1" :tab="$t('i18n_1a6aa24e76')">
+          <a-space direction="vertical" style="width: 100%">
+            <a-alert :message="$t('i18n_947d983961')" type="warning">
+              <template #description>
+                <ul>
+                  <li>{{ $t('i18n_9a00e13160') }}</li>
+                  <li>{{ $t('i18n_632a907224') }}</li>
+                  <li>{{ $t('i18n_cb9b3ec760') }}</li>
+                </ul>
+              </template>
+            </a-alert>
+            <a-alert
+              v-for="item in triggerUses"
+              :key="item.value"
+              type="info"
+              :message="`${item.desc}${$t('i18n_b9a4098131')}(${$t('i18n_00a070c696')})`"
+            >
+              <template #description>
+                <a-typography-paragraph :copyable="{ tooltip: false, text: `${temp.triggerUrl}?action=${item.value}` }">
+                  <a-tag>GET</a-tag>
+                  <span>{{ `${temp.triggerUrl}?action=${item.value}` }} </span>
+                </a-typography-paragraph>
+              </template>
+            </a-alert>
+            <a-alert type="info" :message="`${$t('i18n_8d202b890c')}(${$t('i18n_00a070c696')})`">
+              <template #description>
+                <a-typography-paragraph :copyable="{ tooltip: false, text: temp.batchTriggerUrl }">
+                  <a-tag>POST</a-tag> <span>{{ temp.batchTriggerUrl }} </span>
+                </a-typography-paragraph>
+              </template>
+            </a-alert>
+          </a-space>
+        </a-tab-pane>
+      </a-tabs>
+    </CustomModal>
     <!-- 编辑区 -->
     <edit-ssh-project v-if="editVisible" :data="temp" @cancel="handleEditCancel"></edit-ssh-project>
   </div>
 </template>
 <script>
-import { deleteSshProject, getSshProjectList, getSshProjectStatus, operateSshProject } from '@/api/ssh-project'
+import {
+  deleteSshProject,
+  getSshProjectList,
+  getSshProjectStatus,
+  getSshProjectTriggerUrl,
+  operateSshProject
+} from '@/api/ssh-project'
 import { CHANGE_PAGE, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, parseTime } from '@/utils/const'
 import SshFile from '@/pages/ssh/ssh-file'
 import editSshProject from './edit.vue'
@@ -229,6 +291,17 @@ export default {
       fileVisible: false,
       consoleVisible: false,
       versionVisible: false,
+      triggerVisible: false,
+      /**
+       * 触发器可执行动作（与生命周期脚本一致）
+       */
+      triggerUses: [
+        { desc: this.$t('i18n_0e16902c1e'), value: 'status' },
+        { desc: this.$t('i18n_6b29a6e523'), value: 'start' },
+        { desc: this.$t('i18n_d75c02d050'), value: 'stop' },
+        { desc: this.$t('i18n_f3e93355ee'), value: 'restart' },
+        { desc: this.$t('i18n_aaeb54633e'), value: 'reload' }
+      ],
       columns: [
         {
           title: this.$t('i18n_d7ec2d3fea'),
@@ -450,6 +523,30 @@ export default {
     handleConsole(record) {
       this.temp = Object.assign({}, record)
       this.consoleVisible = true
+    },
+    // 触发器（首次打开自动生成 token，重置后旧地址失效）
+    handleTrigger(record) {
+      this.temp = Object.assign({}, record)
+      getSshProjectTriggerUrl({ id: record.id }).then((res) => {
+        if (res.code === 200) {
+          this.fillTriggerResult(res)
+          this.triggerVisible = true
+        }
+      })
+    },
+    // 重置触发器 token
+    resetTrigger() {
+      getSshProjectTriggerUrl({ id: this.temp.id, rest: 'rest' }).then((res) => {
+        if (res.code === 200) {
+          $notification.success({ message: res.msg })
+          this.fillTriggerResult(res)
+        }
+      })
+    },
+    fillTriggerResult(res) {
+      this.temp.triggerUrl = `${location.protocol}//${location.host}${res.data.triggerUrl}`
+      this.temp.batchTriggerUrl = `${location.protocol}//${location.host}${res.data.batchTriggerUrl}`
+      this.temp = { ...this.temp }
     },
     // 修改
     handleEdit(record) {

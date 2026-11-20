@@ -467,6 +467,9 @@
         :data-source="repos"
         bordered
         row-key="full_name"
+        :scroll="{
+          x: 'max-content'
+        }"
         :pagination="reposPagination"
         @change="reposChange"
       >
@@ -734,7 +737,8 @@ export default {
           dataIndex: 'operation',
           width: 100,
 
-          align: 'left'
+          align: 'left',
+          fixed: 'right'
         }
       ],
 

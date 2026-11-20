@@ -9,7 +9,7 @@
  */
 package org.dromara.jpom.controller.sshproject;
 
-import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.keepbx.jpom.IJsonMessage;
@@ -17,6 +17,9 @@ import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.ServerConst;
+import org.dromara.jpom.common.ServerOpenApi;
+import org.dromara.jpom.common.UrlRedirectUtil;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
@@ -26,6 +29,7 @@ import org.dromara.jpom.model.data.SshProjectModel;
 import org.dromara.jpom.model.sshproject.SshProjectExecuteResult;
 import org.dromara.jpom.model.sshproject.SshProjectStatus;
 import org.dromara.jpom.model.sshproject.SshProjectTemplate;
+import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
@@ -34,6 +38,7 @@ import org.dromara.jpom.service.sshproject.SshProjectLogService;
 import org.dromara.jpom.service.sshproject.SshProjectService;
 import org.dromara.jpom.service.sshproject.SshProjectTemplateService;
 import org.dromara.jpom.service.sshproject.SshProjectVersionService;
+import org.dromara.jpom.service.user.TriggerTokenLogServer;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,6 +51,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -64,15 +70,18 @@ public class SshProjectController extends BaseServerController {
     private final SshProjectTemplateService sshProjectTemplateService;
     private final SshProjectLogService sshProjectLogService;
     private final SshProjectVersionService sshProjectVersionService;
+    private final TriggerTokenLogServer triggerTokenLogServer;
 
     public SshProjectController(SshProjectService sshProjectService,
                                 SshProjectTemplateService sshProjectTemplateService,
                                 SshProjectLogService sshProjectLogService,
-                                SshProjectVersionService sshProjectVersionService) {
+                                SshProjectVersionService sshProjectVersionService,
+                                TriggerTokenLogServer triggerTokenLogServer) {
         this.sshProjectService = sshProjectService;
         this.sshProjectTemplateService = sshProjectTemplateService;
         this.sshProjectLogService = sshProjectLogService;
         this.sshProjectVersionService = sshProjectVersionService;
+        this.triggerTokenLogServer = triggerTokenLogServer;
     }
 
     /**
@@ -330,29 +339,57 @@ public class SshProjectController extends BaseServerController {
 
     /**
      * 生成/查看触发器地址
+     * <p>
+     * 与项目、脚本、SSH 脚本等触发器保持一致：token 统一由 {@link TriggerTokenLogServer} 生成/重置并登记，
+     * 触发器绑定到操作人，重置后旧地址立即失效。
      *
      * @param id      id
+     * @param rest    是否重置（非空即重置）
      * @param request 请求
      * @return 地址
      */
     @PostMapping(value = "trigger-url", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
-    public IJsonMessage<JSONObject> triggerUrl(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.ssh_project_not_exist.5d18") String id,
-                                               HttpServletRequest request) {
+    public IJsonMessage<Map<String, String>> triggerUrl(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.ssh_project_not_exist.5d18") String id,
+                                                        String rest,
+                                                        HttpServletRequest request) {
         SshProjectModel project = sshProjectService.getItem(id, request);
-        String token = project.getToken();
-        if (StrUtil.isEmpty(token)) {
-            token = IdUtil.fastSimpleUUID();
-            SshProjectModel update = new SshProjectModel();
-            update.setId(project.getId());
-            update.setToken(token);
-            sshProjectService.updateById(update);
-            project.setToken(token);
+        UserModel user = getUser();
+        SshProjectModel updateItem;
+        if (StrUtil.isEmpty(project.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {
+            updateItem = new SshProjectModel();
+            updateItem.setId(id);
+            updateItem.setTriggerToken(triggerTokenLogServer.restToken(project.getTriggerToken(), sshProjectService.typeName(),
+                project.getId(), user.getId()));
+            sshProjectService.updateById(updateItem);
+        } else {
+            updateItem = project;
         }
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("token", token);
-        jsonObject.put("url", StrUtil.format("/openapi/ssh-project/{}/{}/", project.getId(), token));
-        return JsonMessage.success("", jsonObject);
+        Map<String, String> map = this.getTriggerToken(updateItem, request);
+        String string = I18nMessageUtil.get("i18n.reset_success.faa3");
+        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : string, map);
+    }
+
+    /**
+     * 组装触发器地址（带代理 contextPath，与其他触发器一致）
+     *
+     * @param item    项目
+     * @param request 请求
+     * @return 地址集合
+     */
+    private Map<String, String> getTriggerToken(SshProjectModel item, HttpServletRequest request) {
+        String contextPath = UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH);
+        String url = ServerOpenApi.SSH_PROJECT_TRIGGER_URL.
+            replace("{id}", item.getId()).
+            replace("{token}", item.getTriggerToken());
+        String triggerUrl = String.format("/%s/%s", contextPath, url);
+        Map<String, String> map = new HashMap<>(10);
+        map.put("triggerUrl", FileUtil.normalize(triggerUrl));
+        String batchTriggerUrl = String.format("/%s/%s", contextPath, ServerOpenApi.SSH_PROJECT_TRIGGER_BATCH);
+        map.put("batchTriggerUrl", FileUtil.normalize(batchTriggerUrl));
+        map.put("id", item.getId());
+        map.put("token", item.getTriggerToken());
+        return map;
     }
 
     /**

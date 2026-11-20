@@ -23,6 +23,7 @@ import org.dromara.jpom.model.enums.BuildReleaseMethod;
 import org.dromara.jpom.model.sshproject.SshProjectExecuteResult;
 import org.dromara.jpom.model.sshproject.SshProjectStatus;
 import org.dromara.jpom.service.dblog.BuildInfoService;
+import org.dromara.jpom.service.ITriggerToken;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.socket.ConsoleCommandOp;
@@ -42,7 +43,7 @@ import javax.servlet.http.HttpServletRequest;
  * @since 2026/11/20
  */
 @Service
-public class SshProjectService extends BaseWorkspaceService<SshProjectModel> {
+public class SshProjectService extends BaseWorkspaceService<SshProjectModel> implements ITriggerToken {
 
     private final SshProjectExecutor sshProjectExecutor;
     private final SshProjectExecLogService sshProjectExecLogService;
@@ -100,6 +101,8 @@ public class SshProjectService extends BaseWorkspaceService<SshProjectModel> {
         model.setPath(path);
         model.setDslContent(dslContent);
         model.setName(StrUtil.trim(model.getName()));
+        // 触发器 token 只允许通过触发器地址接口生成/重置（与项目、脚本、SSH 脚本等保持一致）
+        model.setTriggerToken(null);
         String id = model.getId();
         if (StrUtil.isEmpty(id)) {
             this.insert(model);
@@ -212,6 +215,11 @@ public class SshProjectService extends BaseWorkspaceService<SshProjectModel> {
         SshProjectModel query = new SshProjectModel();
         query.setAutoStart(true);
         return this.listByBean(query, false);
+    }
+
+    @Override
+    public String typeName() {
+        return getTableName();
     }
 
     /**

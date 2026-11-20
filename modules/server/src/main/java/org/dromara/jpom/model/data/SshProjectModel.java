@@ -68,7 +68,7 @@ public class SshProjectModel extends BaseWorkspaceModel {
     /**
      * 触发器 token
      */
-    private String token;
+    private String triggerToken;
     /**
      * 排序
      */

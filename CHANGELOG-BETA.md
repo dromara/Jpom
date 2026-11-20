@@ -4,11 +4,11 @@
 
 ### 🐣 新增功能
 
-1. 【server】【web-vue】新增 **SSH 项目**：不安装插件端，只靠一台 SSH 机器 + 一个工作目录 + 一段生命周期脚本（`run.start/status/stop/restart/reload` + `config.log`）管理项目，配置沿用 DSL 的 YAML 语义（新增可选字段 `script` 内联脚本与 `timeout` 执行超时，均可被项目内脚本文件或服务端脚本库 `G@` 引用替代）。内置 9 个模板（Spring Boot Jar、通用 Java classpath、Docker Compose、systemd、Node.js、Python、Go/二进制、Nginx 静态站、纯文件）按字段表单渲染成可读可改的 YAML，保存后与模板解耦；提供启动/停止/重启/重载、状态（脚本自证 + PID 文件回退）与端口探测，执行统一带超时、输出落控制台日志文件；菜单入口在「节点&项目 → SSH 项目」，独立表 `SSH_PROJECT_INFO`、独立接口与列表，不与现有项目列表混搜；SSH 项目不做进程守护（需要守护请用 systemd 模板），控制台（WS 实时日志 + 应用日志切换 + 启停按钮）、自动启动（每分钟扫描，多实例靠脚本幂等兜底）、执行审计（`SSH_PROJECT_EXEC_LOG`：谁/哪台机/哪个钩子/退出码/耗时）一并提供；项目文件管理（直接复用 SSH 资产文件管理实现，按项目目录限定授权路径）、日志备份/清空/下载一并提供；触发器（`/openapi/ssh-project/{id}/{token}/?action=start|stop|restart|reload|status`，无需登录、校验项目 token）一并提供；在线构建「发布方式」新增「SSH 项目」（产物直接上传到项目目录，clearOld 时先清空，完成后按项目生命周期脚本重启；被构建引用的项目禁止删除）
+1. 【server】【web-vue】新增 **SSH 项目**：不安装插件端，只靠一台 SSH 机器 + 一个工作目录 + 一段生命周期脚本（`run.start/status/stop/restart/reload` + `config.log`）管理项目，配置沿用 DSL 的 YAML 语义（新增可选字段 `script` 内联脚本与 `timeout` 执行超时，均可被项目内脚本文件或服务端脚本库 `G@` 引用替代）。内置 9 个模板（Spring Boot Jar、通用 Java classpath、Docker Compose、systemd、Node.js、Python、Go/二进制、Nginx 静态站、纯文件）按字段表单渲染成可读可改的 YAML，保存后与模板解耦；提供启动/停止/重启/重载、状态（脚本自证 + PID 文件回退）与端口探测，执行统一带超时、输出落控制台日志文件；菜单入口在「节点&项目 → SSH 项目」，独立表 `SSH_PROJECT_INFO`、独立接口与列表，不与现有项目列表混搜；SSH 项目不做进程守护（需要守护请用 systemd 模板），控制台（WS 实时日志 + 应用日志切换 + 启停按钮）、自动启动（每分钟扫描，多实例靠脚本幂等兜底）、执行审计（`SSH_PROJECT_EXEC_LOG`：谁/哪台机/哪个钩子/退出码/耗时）一并提供；项目文件管理（直接复用 SSH 资产文件管理实现，按项目目录限定授权路径）、日志备份/清空/下载一并提供；触发器（`/api/ssh-project/{id}/{token}?action=start|stop|restart|reload|status`，无需登录、校验项目 token；token 由触发器地址接口生成/重置，与项目、脚本触发器同一套生成、调用统计与「系统 → 触发器」统一管理，重置后旧地址立即失效）一并提供；在线构建「发布方式」新增「SSH 项目」（产物直接上传到项目目录，clearOld 时先清空，完成后按项目生命周期脚本重启；被构建引用的项目禁止删除）
 
 ### 🐞 解决BUG、优化功能
 
-1. 【server】【web-vue】修复 SSH 项目「机器 SSH」列与编辑弹窗显示为空、下拉没有 placeholder：列表改为展示机器/资产名称（tooltip 保留 id 便于排查），编辑回显按 `machineSshId` 反查工作空间记录、匹配不到时给出可读兜底项；同时修正所有 `a-select` 初始值为空字符串导致 placeholder 不显示的问题（Ant Design Vue 只有值为 undefined 时才渲染 placeholder），并给访问令牌等输入补上占位文案
+1. 【server】【web-vue】修复 SSH 项目「机器 SSH」列与编辑弹窗显示为空、下拉没有 placeholder：列表改为展示机器/资产名称（tooltip 保留 id 便于排查），编辑回显按 `machineSshId` 反查工作空间记录、匹配不到时给出可读兜底项；同时修正所有 `a-select` 初始值为空字符串导致 placeholder 不显示的问题（Ant Design Vue 只有值为 undefined 时才渲染 placeholder），并给相关输入补上占位文案
 2. 【server】【agent-java】【agent-go】修复 项目 DSL 配置里包含中文时解析失败（`special characters are not allowed`）：YAML 解析改为字符流（`Reader`），不再依赖 JVM 默认编码——默认编码为 ASCII/POSIX 的机器上，含中文的 DSL 配置此前无法保存
 3. 【server】【agent-go】修复 反向隧道下 Go 插件端的 WebSocket 通道（在线升级、项目控制台、脚本执行）建连后立即断开；Java 插件端不受影响
 4. 【server】修复 在线升级「所有节点」页的引擎、平台、实时版本号、打包时间、运行时间刷新页面或换标签页后全部为空（Go 节点必现）；现在通道异常时会给出提示
@@ -23,6 +23,8 @@
 13. 【server】修复 SSH 项目控制台看不到日志（只有「欢迎加入」一行）：日志跟随命令是 `tail -n N -F '$HOME/.jpom/logs/{id}.log'`，单引号里 `$HOME` 不展开，tail 每次都报文件不存在，而 stderr 被丢弃，于是控制台永远只剩欢迎语；现在先把 HOME 展开成远端绝对路径再跟随，并在日志文件不存在/为空时给出明确提示（项目还没通过 Jpom 启动过 / 日志当前为空），不再让人误以为日志功能坏了
 14. 【server】【web-vue】新增 **SSH 项目版本快照与快速回滚**（与插件端项目的版本快照同语义）：构建配置打开「版本快照」后，发布到 SSH 项目时先在目标机器登记基线、发布成功再把项目目录登记成本次构建的版本（`$HOME/.jpom/versions/<项目ID>/`，含来源、构建号、文件数与内容指纹，按「版本保留个数」自动清理旧版本）；「构建历史 → 快速回滚」对 SSH 项目按构建号列出该次构建产生的版本，可直接切回（先把当前目录做成安全快照，再覆盖版本内容并做内容指纹校验，校验失败自动回到安全快照，可选切换后重启），不再需要重新传输产物；SSH 项目列表「更多 → 版本」提供版本列表、人工创建快照、切换与删除（当前运行版本不可删除），与节点项目的「版本」页交互一致
 15. 【server】【web-vue】修复 **SSH 项目「文件」抽屉打开后一直「暂无数据」**：文件授权的项目目录带结尾斜杠（`…/probe/`），与 SSH 资产的目录写法不一致，目录树节点也显示成带斜杠的怪路径；现在统一不带结尾斜杠，并让文件管理在只有一个授权目录（即项目目录）时自动进入并列出文件，不再需要先点目录树
+16. 【server】【web-vue】修复 **SSH 项目触发器自成一套规则**（手工填「访问令牌」、地址前缀 `/openapi`、不参与统一触发器管理）：改为与项目、脚本、SSH 脚本等既有触发器完全一致——字段统一为 `triggerToken`，「更多 → 触发器」里查看/复制单条与批量地址、需要时「重置」，token 由服务端生成并登记到「系统 → 触发器」（记录生成人、调用次数，可在统一列表删除），openapi 地址统一为 `/api/ssh-project/{id}/{token}?action=...`（带代理 contextPath），调用时按 token 绑定人记账；编辑弹窗不再提供手工填写 token，保存时也不会写入客户端传入的 token
+17. 【web-vue】优化 **列表「操作」列统一固定到最右侧**：调度日志详情、项目文件「版本」、SSH 项目「版本」、仓库导入、工作空间「环境变量」、用户「权限组」6 个列表的操作列此前没写 `fixed: 'right'`，列一多就得横向滚动才找得到按钮，现在与其余列表统一固定到右侧；仓库导入弹窗同时补上横向滚动（没有 `scroll.x` 时 Ant Design Vue 会直接忽略 `fixed`，只写 fixed 仍不生效）。另把这条约定做成机械门禁 `dev-scripts/check-table-action-column.py`（漏 `fixed`、漏 `scroll.x`、操作列不是最后一列直接阻断提交）与浏览器契约场景 `table-action`（缩窄视口把表格滚到尽头，量操作列是否仍贴右），新增列表页不再靠人记
 
 ------
 
