@@ -16,19 +16,27 @@ import com.alibaba.fastjson2.TypeReference;
 import lombok.Getter;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.transport.DataContentType;
 import org.dromara.jpom.transport.DownloadCallback;
 import org.dromara.jpom.transport.INodeInfo;
 import org.dromara.jpom.transport.IProxyWebSocket;
 import org.dromara.jpom.transport.IUrlItem;
+import org.dromara.jpom.transport.TransportServer;
 import org.dromara.jpom.transport.TransportServerFactory;
 import org.springframework.util.Assert;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 构建节点（Go 插件端）请求客户端。
@@ -41,6 +49,15 @@ import java.util.Map;
  */
 @Getter
 public class BuildNodeClient {
+
+    /**
+     * 全量响应
+     */
+    private static final int STATUS_OK = 200;
+    /**
+     * 分片（断点续传）响应
+     */
+    private static final int STATUS_PARTIAL_CONTENT = 206;
 
     private final NodeModel nodeModel;
     private final INodeInfo nodeInfo;
@@ -147,24 +164,102 @@ public class BuildNodeClient {
     }
 
     /**
-     * 拉取产物 zip
+     * 拉取产物 zip（支持断点续传）
+     * <p>
+     * 断点续传靠 HTTP {@code Range: bytes=N-}：节点支持时返回 206 并只发送剩余字节，服务端追加写入；
+     * 老版本节点忽略 Range 返回 200 全量，由调用方清空重来（见 {@link ArtifactDownloader}）。
      *
-     * @param jobId  任务 ID
-     * @param target 落地文件（父目录需已存在）
+     * @param jobId         任务 ID
+     * @param buildModelId  构建配置 ID（jobId 丢失时节点按构建 id + 构建号兜底定位）
+     * @param buildNumberId 构建号
+     * @param target        落地文件（父目录需已存在）
+     * @param offset        已落盘字节数，大于 0 时声明 Range 并追加写入
+     * @return 本次拉取结果（状态码、响应声明长度、实际写入字节）
      */
-    public void download(String jobId, String buildModelId, int buildNumberId, File target) {
+    public ArtifactDownloader.Chunk download(String jobId, String buildModelId, int buildNumberId, File target, long offset) {
         Map<String, Object> params = new HashMap<>(4);
         params.put("jobId", jobId);
         // 兜底定位：jobId 丢失/丢失查询参数时，节点也能按构建 id + 构建号直接找到产物 zip
         params.put("buildModelId", buildModelId);
         params.put("buildNumberId", String.valueOf(buildNumberId));
-        TransportServerFactory.get().download(this.nodeInfo,
-            this.urlItem(NodeUrl.Build_Download, DataContentType.FORM_URLENCODED), params, (DownloadCallback callback) -> {
-                try (java.io.InputStream inputStream = callback.getInputStream()) {
-                    cn.hutool.core.io.FileUtil.writeFromStream(inputStream, target, true);
-                } catch (java.io.IOException e) {
-                    throw new IllegalStateException(e.getMessage(), e);
+        IUrlItem urlItem = this.urlItem(NodeUrl.Build_Download, DataContentType.FORM_URLENCODED);
+        if (offset > 0) {
+            Map<String, String> header = urlItem.header();
+            if (header != null) {
+                header.put("Range", "bytes=" + offset + "-");
+            }
+        }
+        return fetch(TransportServerFactory.get(), this.nodeInfo, urlItem, params, target, offset);
+    }
+
+    /**
+     * 通过指定传输实现拉取一片产物（把「写文件 + 字节对账 + 状态校验」收敛在一处，便于换实现与单测）
+     *
+     * @param transport 传输实现（正向 HTTP / 反向隧道或其路由门面）
+     * @param nodeInfo  节点信息
+     * @param urlItem   请求地址（调用方需已按 offset 附加 {@code Range} 头）
+     * @param params    请求参数
+     * @param target    落地文件
+     * @param offset    已落盘字节数，大于 0 时追加写入
+     * @return 本次拉取结果
+     */
+    static ArtifactDownloader.Chunk fetch(TransportServer transport,
+                                          INodeInfo nodeInfo, IUrlItem urlItem, Object params,
+                                          File target, long offset) {
+        AtomicReference<ArtifactDownloader.Chunk> chunkRef = new AtomicReference<>();
+        AtomicReference<Exception> errorRef = new AtomicReference<>();
+        transport.download(nodeInfo, urlItem, params, (DownloadCallback callback) -> {
+            int status = callback.getStatus();
+            if (status != STATUS_OK && status != STATUS_PARTIAL_CONTENT) {
+                errorRef.set(new IllegalStateException(StrUtil.format(
+                    I18nMessageUtil.get("i18n.build_node_download_status.7f21"), status)));
+                return;
+            }
+            long received = 0;
+            try (InputStream inputStream = callback.getInputStream()) {
+                received = copy(inputStream, target, offset > 0);
+            } catch (Exception e) {
+                // 传输中途失败：已写入的字节保留，由下载器从断点继续
+                errorRef.set(e);
+            }
+            chunkRef.set(new ArtifactDownloader.Chunk(status, callback.getContentLength(), received));
+        });
+        Exception error = errorRef.get();
+        if (error != null) {
+            throw new IllegalStateException(error.getMessage(), error);
+        }
+        ArtifactDownloader.Chunk chunk = chunkRef.get();
+        if (chunk == null) {
+            throw new IllegalStateException(I18nMessageUtil.get("i18n.build_node_result_missing.9e0f"));
+        }
+        return chunk;
+    }
+
+    /**
+     * 把响应流写入产物文件
+     *
+     * @param inputStream 响应流
+     * @param target      目标文件
+     * @param append      是否追加（断点续传）
+     * @return 本次写入字节数
+     * @throws IOException 读写失败
+     */
+    private static long copy(InputStream inputStream, File target, boolean append) throws IOException {
+        StandardOpenOption[] options = append
+            ? new StandardOpenOption[]{StandardOpenOption.CREATE, StandardOpenOption.APPEND, StandardOpenOption.WRITE}
+            : new StandardOpenOption[]{StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE};
+        long total = 0;
+        try (OutputStream outputStream = Files.newOutputStream(target.toPath(), options)) {
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = inputStream.read(buffer)) != -1) {
+                if (read == 0) {
+                    continue;
                 }
-            });
+                outputStream.write(buffer, 0, read);
+                total += read;
+            }
+        }
+        return total;
     }
 }

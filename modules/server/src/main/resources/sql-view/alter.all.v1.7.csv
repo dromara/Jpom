@@ -5,3 +5,4 @@ ADD,BUILD_INFO,buildNodeId,String,50,,构建节点 ID（空为 Server 本机构�
 ADD,BUILDHISTORYLOG,buildNodeId,String,50,,本次构建实际执行节点 ID,false
 ADD,BUILDHISTORYLOG,buildNodeName,String,100,,本次构建实际执行节点名称,false
 ADD,MACHINE_NODE_INFO,jpomEngine,String,10,,插件端引擎（java/go），保存资产与心跳时自动识别,false
+ADD,MACHINE_NODE_INFO,connectMode,Integer,11,,通讯方式（0 自动 1 仅反向隧道 2 仅正向拉取）,false

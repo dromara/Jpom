@@ -135,3 +135,20 @@ export function machineSearch(data) {
     params: data
   })
 }
+
+// 反向隧道在线机器（机器 ID 集合）：用于列表展示通讯方式
+export function tunnelOnlineMachines() {
+  return axios({
+    url: '/tunnel/online',
+    method: 'get'
+  })
+}
+
+// 指定机器是否通过反向隧道在线
+export function tunnelMachineStatus(params) {
+  return axios({
+    url: '/tunnel/status',
+    method: 'get',
+    params: params
+  })
+}

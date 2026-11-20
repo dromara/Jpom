@@ -14,7 +14,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.SecureUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
@@ -81,9 +80,9 @@ class RemoteBuildRunner implements BuildRunner {
     private static final int BUSY_RETRY_COUNT = 60;
     private static final long BUSY_RETRY_INTERVAL_MS = TimeUnit.SECONDS.toMillis(2);
     /**
-     * 产物拉取重试次数
+     * 产物拉取重试次数（大产物在抖动链路上首轮被截断很常见，配合断点续传重试成本很低）
      */
-    private static final int DOWNLOAD_RETRY_COUNT = 3;
+    private static final int DOWNLOAD_RETRY_COUNT = 5;
     /**
      * 传给节点的默认任务超时（秒），节点侧 watchdog 用
      */
@@ -543,33 +542,16 @@ class RemoteBuildRunner implements BuildRunner {
         File zipFile = BuildUtil.getHistoryPackageZipFile(buildInfoModel.getId(), buildId);
         Assert.notNull(zipFile, I18nMessageUtil.get("i18n.build_node_result_missing.9e0f"));
         FileUtil.mkParentDirs(zipFile);
-        FileUtil.del(zipFile);
         //
         long expectSize = this.artifact.getLongValue("size");
         String expectSha1 = this.artifact.getString("sha1");
-        Exception last = null;
-        for (int i = 0; i < DOWNLOAD_RETRY_COUNT; i++) {
-            try {
-                client.download(this.logId, buildInfoModel.getId(), buildId, zipFile);
-                long size = FileUtil.size(zipFile);
-                Assert.state(expectSize <= 0 || size == expectSize,
-                    StrUtil.format(I18nMessageUtil.get("i18n.build_node_result_size_mismatch.2f68"), expectSize, size));
-                if (StrUtil.isNotEmpty(expectSha1)) {
-                    String sha1 = SecureUtil.sha1(zipFile);
-                    Assert.state(StrUtil.equalsIgnoreCase(sha1, expectSha1),
-                        StrUtil.format(I18nMessageUtil.get("i18n.build_node_result_sha1_mismatch.8d27"), expectSha1, sha1));
-                }
-                break;
-            } catch (Exception e) {
-                last = e;
-                logRecorder.systemError(I18nMessageUtil.get("i18n.build_node_pull_artifact_retry.5a29"), i + 1, e.getMessage());
-                TimeUnit.SECONDS.sleep(2L * (i + 1));
-            }
-        }
-        if (last != null) {
-            // 重试耗尽必须失败退出：否则会用 404 响应体去解压，产物目录为空、错误信息还会漂到发布阶段
-            throw last;
-        }
+        // 重试 + 断点续传 + 字节对账都在下载器里：重试耗尽必须失败退出，
+        // 否则会用 404 响应体或残缺 zip 去解压（产物目录为空、错误信息还会漂到发布阶段）
+        ArtifactDownloader downloader = new ArtifactDownloader(zipFile, expectSize, expectSha1,
+            (offset, target) -> client.download(this.logId, buildInfoModel.getId(), buildId, target, offset),
+            logRecorder, DOWNLOAD_RETRY_COUNT);
+        long size = downloader.download();
+        log.debug("节点构建产物拉取完成 size={} expected={}", size, expectSize);
         long extractedSize = this.unzipSafe(zipFile, this.resultDir(buildInfoModel, buildId));
         taskData.resultFileSize = extractedSize;
         logRecorder.system(I18nMessageUtil.get("i18n.backup_product.53c0"), StrUtil.SLASH, buildId);

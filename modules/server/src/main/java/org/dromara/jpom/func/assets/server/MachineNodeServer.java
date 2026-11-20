@@ -41,6 +41,7 @@ import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.exception.AgentAuthorizeException;
 import org.dromara.jpom.exception.AgentException;
 import org.dromara.jpom.func.assets.AssetsExecutorPoolService;
+import org.dromara.jpom.func.assets.model.MachineConnectMode;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.assets.model.MachineNodeStatLogModel;
 import org.dromara.jpom.func.system.service.ClusterInfoService;
@@ -629,15 +630,24 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         // 创建对象
         MachineNodeModel machineNodeModel = ServletUtil.toBean(request, MachineNodeModel.class, true);
         Assert.hasText(machineNodeModel.getName(), I18nMessageUtil.get("i18n.machine_name_required.e8cf"));
-        Assert.hasText(machineNodeModel.getJpomUrl(), I18nMessageUtil.get("i18n.please_fill_in_node_address.e77e"));
-        Assert.hasText(machineNodeModel.getJpomUsername(), I18nMessageUtil.get("i18n.node_account_required.2d90"));
-
-        Assert.hasText(machineNodeModel.getJpomProtocol(), I18nMessageUtil.get("i18n.protocol_required.b4f8"));
+        // 通讯方式显式从请求读取：不同构建/参数绑定下 toBean 对新增 Integer 字段的绑定时有差异
+        String connectModeParam = request.getParameter("connectMode");
+        if (StrUtil.isNotEmpty(connectModeParam)) {
+            machineNodeModel.setConnectMode(Convert.toInt(connectModeParam, 0));
+        }
+        // 通讯方式决定正向连接配置是否必填：仅反向隧道时由插件端主动连服务端，不需要地址/账号/协议
+        int connectMode = MachineConnectMode.normalize(machineNodeModel.getConnectMode());
+        if (!MachineConnectMode.isTunnelOnly(connectMode)) {
+            Assert.hasText(machineNodeModel.getJpomUrl(), I18nMessageUtil.get("i18n.please_fill_in_node_address.e77e"));
+            Assert.hasText(machineNodeModel.getJpomUsername(), I18nMessageUtil.get("i18n.node_account_required.2d90"));
+            Assert.hasText(machineNodeModel.getJpomProtocol(), I18nMessageUtil.get("i18n.protocol_required.b4f8"));
+        }
         //
         MachineNodeModel update = new MachineNodeModel();
         update.setId(machineNodeModel.getId());
         update.setGroupName(machineNodeModel.getGroupName());
         update.setName(machineNodeModel.getName());
+        update.setConnectMode(connectMode);
         update.setJpomHttpProxy(machineNodeModel.getJpomHttpProxy());
         update.setJpomHttpProxyType(machineNodeModel.getJpomHttpProxyType());
         update.setJpomUrl(machineNodeModel.getJpomUrl());
@@ -688,29 +698,38 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
 
     public void update(HttpServletRequest request) {
         MachineNodeModel machineNodeModel = this.resolveMachineData(request);
-        boolean exists = this.existsByUrl(machineNodeModel.getJpomUrl(), machineNodeModel.getId());
-        Assert.state(!exists, I18nMessageUtil.get("i18n.node_already_exists.28ea"));
-        JpomManifest jpomManifest = this.testNode(machineNodeModel);
-        // 保存时就把引擎识别并落库，机器列表与「可作为构建节点」开关不用等心跳
-        JSONObject manifestJson = JSONObject.from(jpomManifest);
-        AgentEngine agentEngine = AgentPackageResolver.resolveEngine(manifestJson);
-        machineNodeModel.setJpomEngine(agentEngine.getName());
-        if (agentEngine == AgentEngine.GO) {
-            // Go 插件端没有 TLS 监听（只有 http 监听）：协议只能是 HTTP，避免保存出连不上的配置
-            machineNodeModel.setJpomProtocol("Http");
+        boolean tunnelOnly = MachineConnectMode.isTunnelOnly(machineNodeModel.getConnectMode());
+        if (!tunnelOnly) {
+            // 仅反向隧道没有节点地址，跳过地址重复校验（existsByUrl 内部要求地址非空）
+            boolean exists = this.existsByUrl(machineNodeModel.getJpomUrl(), machineNodeModel.getId());
+            Assert.state(!exists, I18nMessageUtil.get("i18n.node_already_exists.28ea"));
         }
-        // 开启构建能力前校验引擎与能力：只有 Go 插件端（/info 声明 capabilities 含 build）才能承担构建
-        if (machineNodeModel.getBuildEnabled() != null && machineNodeModel.getBuildEnabled() == 1) {
-            Assert.state(machineNodeModel.getBuildMaxConcurrency() == null || machineNodeModel.getBuildMaxConcurrency() > 0,
-                I18nMessageUtil.get("i18n.build_node_concurrency_invalid.5d18"));
-            Assert.state(agentEngine == AgentEngine.GO, I18nMessageUtil.get("i18n.build_node_not_go_agent.8e4b"));
-            Assert.state(AgentPackageResolver.hasCapability(manifestJson, AgentPackageResolver.CAPABILITY_BUILD),
-                I18nMessageUtil.get("i18n.build_node_unsupported_capability.6b02"));
+        if (tunnelOnly) {
+            // 仅反向隧道：不访问节点地址（本来也不要求填），引擎由心跳识别，构建能力由运行时校验
+            if (machineNodeModel.getBuildEnabled() != null && machineNodeModel.getBuildEnabled() == 1) {
+                Assert.state(machineNodeModel.getBuildMaxConcurrency() == null || machineNodeModel.getBuildMaxConcurrency() > 0,
+                    I18nMessageUtil.get("i18n.build_node_concurrency_invalid.5d18"));
+            }
+        } else {
+            this.testNode(machineNodeModel);
+            // 保存时就把引擎识别并落库，机器列表与「可作为构建节点」开关不用等心跳。
+            // 必须用 /info 的原始 data（含 manifest.engine/capabilities），不能只转换成 JpomManifest 对象：
+            // 那个类没有 engine/jarFile 兼容字段，转换后会丢失引擎信息（曾导致 Go 节点被误判为 Java）。
+            JSONObject info = this.queryInfo(machineNodeModel);
+            AgentEngine agentEngine = AgentPackageResolver.resolveEngine(info);
+            machineNodeModel.setJpomEngine(agentEngine.getName());
+            // 开启构建能力前校验引擎与能力：只有 Go 插件端（/info 声明 capabilities 含 build）才能承担构建
+            if (machineNodeModel.getBuildEnabled() != null && machineNodeModel.getBuildEnabled() == 1) {
+                Assert.state(machineNodeModel.getBuildMaxConcurrency() == null || machineNodeModel.getBuildMaxConcurrency() > 0,
+                    I18nMessageUtil.get("i18n.build_node_concurrency_invalid.5d18"));
+                Assert.state(agentEngine == AgentEngine.GO, I18nMessageUtil.get("i18n.build_node_not_go_agent.8e4b"));
+                Assert.state(AgentPackageResolver.hasCapability(info, AgentPackageResolver.CAPABILITY_BUILD),
+                    I18nMessageUtil.get("i18n.build_node_unsupported_capability.6b02"));
+            }
+            this.testHttpProxy(machineNodeModel.getJpomHttpProxy());
         }
         // 更新状态
         machineNodeModel.setStatus(1);
-        //
-        this.testHttpProxy(machineNodeModel.getJpomHttpProxy());
         //
         if (StrUtil.isNotEmpty(machineNodeModel.getId())) {
             this.updateById(machineNodeModel);

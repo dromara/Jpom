@@ -354,7 +354,7 @@ public class TunnelChannel implements TunnelSession {
         }
         TunnelFrame head = item.head;
         return new TunnelDownload(head == null ? 0 : (head.getStatus() == null ? 0 : head.getStatus()),
-            item.contentDisposition, item.contentType, item.inputStream);
+            item.contentDisposition, item.contentType, item.contentLength, item.inputStream);
     }
 
     private void writeRequest(IUrlItem urlItem, String sid, byte[] body, String requestContentType, String method,
@@ -617,6 +617,7 @@ public class TunnelChannel implements TunnelSession {
         private final CountDownLatch headLatch = new CountDownLatch(1);
         private volatile String contentDisposition;
         private volatile String contentType;
+        private volatile long contentLength = -1L;
         private volatile boolean aborted;
 
         DownloadPending(String sid) {
@@ -628,6 +629,7 @@ public class TunnelChannel implements TunnelSession {
             super.head(frame);
             this.contentDisposition = header(frame, "Content-Disposition");
             this.contentType = header(frame, "Content-Type");
+            this.contentLength = parseLength(header(frame, "Content-Length"));
             headLatch.countDown();
         }
 
@@ -647,6 +649,17 @@ public class TunnelChannel implements TunnelSession {
             aborted = true;
             headLatch.countDown();
             inputStream.fail(new TunnelException(code, msg));
+        }
+
+        private long parseLength(String value) {
+            if (StrUtil.isBlank(value)) {
+                return -1L;
+            }
+            try {
+                return Long.parseLong(value.trim());
+            } catch (NumberFormatException e) {
+                return -1L;
+            }
         }
 
         private String header(TunnelFrame frame, String name) {

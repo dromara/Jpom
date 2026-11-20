@@ -12,6 +12,8 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -109,6 +111,94 @@ func TestBuildDownloadNotReady(t *testing.T) {
 	defer func() { _ = response.Body.Close() }()
 	if response.StatusCode != http.StatusNotFound {
 		t.Fatalf("status = %d, want 404", response.StatusCode)
+	}
+}
+
+// TestBuildDownloadRangeResume 覆盖断点续传：Range 请求返回 206 且只发送剩余字节（PROTOCOL §6）。
+// 2026-11-20 真机事故：Server 侧在网络中断后必须能从断点继续，节点不支持 Range 时会重下全量。
+func TestBuildDownloadRangeResume(t *testing.T) {
+	server, instance := buildTestServer(t)
+	payload := []byte("0123456789abcdefghij")
+	zipPath := filepath.Join(instance.DataDir, "build", "model-range", "history", "#7", "zip")
+	if err := os.MkdirAll(filepath.Dir(zipPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(zipPath, payload, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	do := func(rangeHeader string) (*http.Response, []byte) {
+		request, err := http.NewRequest(http.MethodGet,
+			server.URL+"/build/download?buildModelId=model-range&buildNumberId=7", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if rangeHeader != "" {
+			request.Header.Set("Range", rangeHeader)
+		}
+		request.Header.Set("Jpom-Agent-Authorize", apiTestAuthorize)
+		response, err := http.DefaultClient.Do(request)
+		if err != nil {
+			t.Fatal(err)
+		}
+		body, readErr := io.ReadAll(response.Body)
+		_ = response.Body.Close()
+		if readErr != nil {
+			t.Fatal(readErr)
+		}
+		return response, body
+	}
+
+	response, body := do("")
+	if response.StatusCode != http.StatusOK {
+		t.Fatalf("全量下载 status = %d, want 200", response.StatusCode)
+	}
+	if string(body) != string(payload) {
+		t.Fatalf("全量下载内容 = %q", string(body))
+	}
+	if response.Header.Get("Accept-Ranges") != "bytes" {
+		t.Fatalf("Accept-Ranges = %q, want bytes", response.Header.Get("Accept-Ranges"))
+	}
+
+	response, body = do("bytes=5-")
+	if response.StatusCode != http.StatusPartialContent {
+		t.Fatalf("续传 status = %d, want 206", response.StatusCode)
+	}
+	if string(body) != string(payload[5:]) {
+		t.Fatalf("续传内容 = %q, want %q", string(body), string(payload[5:]))
+	}
+	wantRange := fmt.Sprintf("bytes %d-%d/%d", 5, len(payload)-1, len(payload))
+	if got := response.Header.Get("Content-Range"); got != wantRange {
+		t.Fatalf("Content-Range = %q, want %q", got, wantRange)
+	}
+
+	if response, _ = do("bytes=20-"); response.StatusCode != http.StatusRequestedRangeNotSatisfiable {
+		t.Fatalf("越界 Range status = %d, want 416", response.StatusCode)
+	}
+	if response, _ = do("bytes=-5"); response.StatusCode != http.StatusRequestedRangeNotSatisfiable {
+		t.Fatalf("后缀 Range status = %d, want 416", response.StatusCode)
+	}
+}
+
+// TestParseRangeStart 覆盖 Range 头解析（仅支持单一区间 bytes=N- / bytes=N-M）。
+func TestParseRangeStart(t *testing.T) {
+	cases := []struct {
+		raw    string
+		offset int64
+		ok     bool
+	}{
+		{"bytes=0-", 0, true},
+		{"bytes=1024-", 1024, true},
+		{"bytes=100-200", 100, true},
+		{"bytes=-500", 0, false},
+		{"bytes=0-10,20-30", 0, false},
+		{"items=0-", 0, false},
+		{"", 0, false},
+	}
+	for _, item := range cases {
+		offset, ok := parseRangeStart(item.raw)
+		if ok != item.ok || (ok && offset != item.offset) {
+			t.Fatalf("parseRangeStart(%q) = (%d,%v), want (%d,%v)", item.raw, offset, ok, item.offset, item.ok)
+		}
 	}
 }
 

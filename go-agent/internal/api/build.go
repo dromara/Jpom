@@ -135,13 +135,65 @@ func handleBuildDownload(c *httpx.Context, manager *builder.Manager) {
 		c.W.WriteHeader(http.StatusNotFound)
 		return
 	}
+	size := info.Size()
 	c.W.Header().Set("Content-Type", "application/zip")
-	c.W.Header().Set("Content-Length", strconv.FormatInt(info.Size(), 10))
+	c.W.Header().Set("Accept-Ranges", "bytes")
 	c.W.Header().Set("Content-Disposition", httpx.ContentDisposition("zip"))
-	c.W.WriteHeader(http.StatusOK)
-	if _, err := io.Copy(c.W, file); err != nil {
-		c.App.Log().Warn("stream build product failed", "jobId", jobID, "error", err)
+	// 断点续传：Server 在传输被中断后带 Range 重试，这里只发送剩余字节（PROTOCOL §6）
+	start := int64(0)
+	if raw := strings.TrimSpace(c.R.Header.Get("Range")); raw != "" {
+		offset, ok := parseRangeStart(raw)
+		if !ok || offset <= 0 || offset >= size {
+			// 偏移不可用（含 offset == size：已无剩余字节）时明确拒绝，Server 会从头重新拉取
+			c.W.Header().Set("Content-Range", "bytes */"+strconv.FormatInt(size, 10))
+			c.W.WriteHeader(http.StatusRequestedRangeNotSatisfiable)
+			return
+		}
+		start = offset
 	}
+	c.W.Header().Set("Content-Length", strconv.FormatInt(size-start, 10))
+	if start > 0 {
+		if _, err := file.Seek(start, io.SeekStart); err != nil {
+			c.W.Header().Set("Content-Range", "bytes */"+strconv.FormatInt(size, 10))
+			c.W.WriteHeader(http.StatusRequestedRangeNotSatisfiable)
+			return
+		}
+		c.W.Header().Set("Content-Range", "bytes "+strconv.FormatInt(start, 10)+"-"+
+			strconv.FormatInt(size-1, 10)+"/"+strconv.FormatInt(size, 10))
+		c.W.WriteHeader(http.StatusPartialContent)
+	} else {
+		c.W.WriteHeader(http.StatusOK)
+	}
+	copied, err := io.Copy(c.W, file)
+	if err != nil {
+		// 对端提前断开必须留痕：否则 Server 侧只会看到「少收了字节」，无法判断是链路问题
+		c.App.Log().Warn("stream build product failed", "jobId", jobID,
+			"sent", copied, "total", size-start, "start", start, "error", err)
+	}
+}
+
+// parseRangeStart 解析 Range 头中的起始偏移，仅支持单一区间 bytes=N- 与 bytes=N-M。
+// 后缀区间（bytes=-N）语义是「最后 N 字节」，不能用于续传，按不支持处理。
+func parseRangeStart(raw string) (int64, bool) {
+	if !strings.HasPrefix(raw, "bytes=") {
+		return 0, false
+	}
+	spec := strings.TrimSpace(strings.TrimPrefix(raw, "bytes="))
+	if spec == "" || strings.Contains(spec, ",") {
+		return 0, false
+	}
+	startPart := spec
+	if idx := strings.Index(spec, "-"); idx >= 0 {
+		startPart = strings.TrimSpace(spec[:idx])
+	}
+	if startPart == "" {
+		return 0, false
+	}
+	offset, err := strconv.ParseInt(startPart, 10, 64)
+	if err != nil || offset < 0 {
+		return 0, false
+	}
+	return offset, true
 }
 
 // downloadParams 汇总下载参数：query + 表单 body（隧道转发走 body）。

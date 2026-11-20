@@ -142,11 +142,32 @@ public class HttpTransportServer implements TransportServer {
             String contentDisposition = response1.header(Header.CONTENT_DISPOSITION);
             String contentType = response1.header(Header.CONTENT_TYPE);
             DownloadCallback build = DownloadCallback.builder()
-                .contentDisposition(contentDisposition).contentType(contentType).inputStream(response1.bodyStream())
+                .contentDisposition(contentDisposition).contentType(contentType)
+                .status(response1.getStatus())
+                .contentLength(parseContentLength(response1.header(Header.CONTENT_LENGTH)))
+                .inputStream(response1.bodyStream())
                 .build();
             consumer.accept(build);
         } catch (Exception e) {
             throw Lombok.sneakyThrow(TransformServerFactory.get().transformException(e, nodeInfo));
+        }
+    }
+
+    /**
+     * 解析响应头里的内容长度
+     *
+     * @param header Content-Length 原始值
+     * @return 长度，解析失败或不存在返回 -1
+     */
+    private static long parseContentLength(String header) {
+        if (StrUtil.isBlank(header)) {
+            return -1L;
+        }
+        try {
+            return Long.parseLong(header.trim());
+        } catch (NumberFormatException e) {
+            log.debug("无法解析 Content-Length: {}", header);
+            return -1L;
         }
     }
 

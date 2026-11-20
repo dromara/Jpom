@@ -155,8 +155,19 @@ public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
 
     /**
      * 传输方式。0 服务器拉取，1 节点机器推送
+     * <p>
+     * 注意：这是「状态采集方式」，不是通讯通道；通讯方式见 {@link #connectMode}。
      */
     private Integer transportMode;
+
+    /**
+     * 通讯方式（{@link MachineConnectMode}）：0 自动（默认，隧道优先、离线回退正向）、
+     * 1 仅反向隧道、2 仅正向拉取。
+     * <p>
+     * 只有「仅反向隧道」时，节点地址/账号/密码/协议/代理/超时这些正向配置不参与通信
+     * （界面禁用、保存不再强制校验），其它方式仍按正向配置连接。
+     */
+    private Integer connectMode;
     /**
      * jpom 通讯地址
      */

@@ -11,6 +11,8 @@ package org.dromara.jpom.func.tunnel;
 
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.func.assets.model.MachineConnectMode;
+import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.transport.DownloadCallback;
 import org.dromara.jpom.transport.INodeInfo;
 import org.dromara.jpom.transport.IProxyWebSocket;
@@ -89,6 +91,8 @@ public class RoutingTransportServer implements TransportServer {
         DownloadCallback callback = DownloadCallback.builder()
             .contentDisposition(download.getContentDisposition())
             .contentType(download.getContentType())
+            .status(download.getStatus())
+            .contentLength(download.getContentLength())
             .inputStream(download.getInputStream())
             .build();
         consumer.accept(callback);
@@ -122,11 +126,43 @@ public class RoutingTransportServer implements TransportServer {
         return headers;
     }
 
+    /**
+     * 解析本次请求的通道：
+     * <ul>
+     *     <li>仅正向拉取：始终返回 null（忽略在线隧道，走正向实现）</li>
+     *     <li>仅反向隧道：必须命中在线通道，否则直接报错，不静默回退正向</li>
+     *     <li>自动（默认）：命中走隧道，未命中回退正向</li>
+     * </ul>
+     *
+     * @param nodeInfo 节点信息
+     * @return 隧道通道，null 表示走正向
+     */
     private TunnelChannel channel(INodeInfo nodeInfo) {
         if (nodeInfo == null) {
             return null;
         }
-        return registry.get(nodeInfo.id());
+        int connectMode = this.connectMode(nodeInfo);
+        if (MachineConnectMode.isForwardOnly(connectMode)) {
+            return null;
+        }
+        TunnelChannel channel = registry.get(nodeInfo.id());
+        if (channel == null && MachineConnectMode.isTunnelOnly(connectMode)) {
+            throw new TransportAgentException(nodeInfo.name() + " 未通过反向隧道连接（当前通讯方式为「仅反向隧道」，不会回退正向拉取）");
+        }
+        return channel;
+    }
+
+    /**
+     * 读取机器资产的通讯方式；节点级（NodeModel）或老数据按「自动」处理
+     *
+     * @param nodeInfo 节点信息
+     * @return 通讯方式编码
+     */
+    private int connectMode(INodeInfo nodeInfo) {
+        if (nodeInfo instanceof MachineNodeModel) {
+            return MachineConnectMode.normalize(((MachineNodeModel) nodeInfo).getConnectMode());
+        }
+        return MachineConnectMode.normalize(null);
     }
 
     private static int timeout(IUrlItem urlItem) {
