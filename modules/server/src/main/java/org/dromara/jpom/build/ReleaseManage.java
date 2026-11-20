@@ -38,7 +38,6 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -669,7 +668,7 @@ public class ReleaseManage {
         }
         NodeService nodeService = SpringUtil.getBean(NodeService.class);
         NodeModel nodeModel = nodeService.getByKey(strings[0]);
-        Objects.requireNonNull(nodeModel, I18nMessageUtil.get("i18n.node_does_not_exist.4ce4"));
+        Assert.notNull(nodeModel, I18nMessageUtil.get("i18n.node_does_not_exist.4ce4"));
         String projectId = strings[1];
         BuildVersionService buildVersionService = SpringUtil.getBean(BuildVersionService.class);
         boolean versionEnabled = buildVersionService.enabled(this.buildExtraModule);
@@ -728,11 +727,17 @@ public class ReleaseManage {
         try {
             JsonMessage<JSONObject> beginMessage = buildVersionService.begin(nodeModel, projectId,
                 this.getRealBuildNumberId(), this.buildExtraModule.getVersionKeepCount());
-            if (beginMessage.success()) {
-                logRecorder.system(I18nMessageUtil.get("i18n.version_snapshot_prepare_success.a1f7"));
-                return true;
+            if (!beginMessage.success()) {
+                logRecorder.systemWarning(I18nMessageUtil.get("i18n.version_snapshot_prepare_failed.b8d2"), beginMessage);
+                return false;
             }
-            logRecorder.systemWarning(I18nMessageUtil.get("i18n.version_snapshot_prepare_failed.b8d2"), beginMessage);
+            if (!BuildVersionService.effective(beginMessage)) {
+                // 插件端未启用版本快照：返回的是 success + enabled=false，不能当成功
+                logRecorder.systemWarning(I18nMessageUtil.get("i18n.version_snapshot_not_effective.4c7a"));
+                return false;
+            }
+            logRecorder.system(I18nMessageUtil.get("i18n.version_snapshot_prepare_success.a1f7"));
+            return true;
         } catch (Exception e) {
             log.warn(I18nMessageUtil.get("i18n.version_snapshot_prepare_exception.c3e5"), e);
             logRecorder.systemWarning(I18nMessageUtil.get("i18n.version_snapshot_prepare_exception.c3e5"));
@@ -753,11 +758,16 @@ public class ReleaseManage {
                 this.getRealBuildNumberId(), this.buildExtraModule.getId(),
                 this.buildExtraModule.getVersionKeepCount(),
                 this.resultFile == null ? null : FileUtil.getAbsolutePath(this.resultFile));
-            if (commitMessage.success()) {
-                logRecorder.system(I18nMessageUtil.get("i18n.version_snapshot_commit_success.d2a8"));
-            } else {
+            if (!commitMessage.success()) {
                 logRecorder.systemWarning(I18nMessageUtil.get("i18n.version_snapshot_commit_failed.e4c1"), commitMessage);
+                return;
             }
+            if (!BuildVersionService.effective(commitMessage)) {
+                // 插件端未启用版本快照：success 但没有登记任何版本，快速回滚会「没有记录」
+                logRecorder.systemWarning(I18nMessageUtil.get("i18n.version_snapshot_not_effective.4c7a"));
+                return;
+            }
+            logRecorder.system(I18nMessageUtil.get("i18n.version_snapshot_commit_success.d2a8"));
         } catch (Exception e) {
             log.warn(I18nMessageUtil.get("i18n.version_snapshot_commit_exception.f5b3"), e);
             logRecorder.systemWarning(I18nMessageUtil.get("i18n.version_snapshot_commit_exception.f5b3"));

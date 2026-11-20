@@ -23,6 +23,7 @@ import org.dromara.jpom.service.h2db.BaseNodeService;
 import org.dromara.jpom.service.system.WorkspaceService;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -35,6 +36,35 @@ public class ProjectInfoCacheService extends BaseNodeService<ProjectInfoCacheMod
     public ProjectInfoCacheService(NodeService nodeService,
                                    WorkspaceService workspaceService) {
         super(nodeService, workspaceService, I18nMessageUtil.get("i18n.project_name.31ec"));
+    }
+
+    /**
+     * 清理节点项目缓存（供「同步节点项目」使用）
+     * <p>
+     * 同步语义是「以节点实际项目为准重建缓存」，但**节点分发项目**（`outGivingProject=true`）是服务端虚拟项目，
+     * 节点上并不存在，按整表删除后就再也同步不回来（表现为同步一次分发项目就从列表消失，BUGS B-023）。
+     * 这里只清理节点侧真实存在的项目缓存，分发项目保留。
+     * </p>
+     *
+     * @param nodeId  节点ID
+     * @param request 请求
+     * @return 清理条数
+     */
+    @Override
+    public int delCache(String nodeId, HttpServletRequest request) {
+        String workspaceId = this.getCheckUserWorkspace(request);
+        ProjectInfoCacheModel where = new ProjectInfoCacheModel();
+        where.setNodeId(nodeId);
+        where.setWorkspaceId(workspaceId);
+        List<ProjectInfoCacheModel> list = this.listByBean(where, false);
+        int count = 0;
+        for (ProjectInfoCacheModel item : list) {
+            if (item.getOutGivingProject() != null && item.getOutGivingProject()) {
+                continue;
+            }
+            count += super.delByKey(item.getId());
+        }
+        return count;
     }
 
     /**

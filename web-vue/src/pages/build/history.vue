@@ -131,6 +131,11 @@
             <span>{{ triggerBuildTypeMap[text] }}</span>
           </a-tooltip>
         </template>
+        <template v-else-if="column.dataIndex === 'buildNodeName'">
+          <a-tooltip placement="topLeft" :title="record.buildNodeName || $t('i18n_4d1636e43f')">
+            <span>{{ record.buildNodeName || $t('i18n_4d1636e43f') }}</span>
+          </a-tooltip>
+        </template>
 
         <template v-else-if="column.dataIndex === 'resultFileSize'">
           <a-tooltip
@@ -443,6 +448,12 @@ export default {
           dataIndex: 'triggerBuildType',
           align: 'center',
           width: '100px',
+          ellipsis: true
+        },
+        {
+          title: this.$t('i18n_1eb1c081f0'),
+          dataIndex: 'buildNodeName',
+          width: '120px',
           ellipsis: true
         },
         {

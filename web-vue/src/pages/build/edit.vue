@@ -43,15 +43,11 @@
                 </ul>
               </template>
             </a-alert>
+            <!-- 构建方式是一级选择：节点构建作为第三种方式，展开区里再选具体节点 -->
             <a-form-item :name="['buildMode']">
               <template #label> {{ $t('i18n_17a74824de') }} </template>
               <a-space>
-                <a-radio-group
-                  v-model:value="temp.buildMode"
-                  :disabled="temp.id ? true : false"
-                  name="buildMode"
-                  @change="changeBuildMode"
-                >
+                <a-radio-group v-model:value="temp.buildMode" name="buildMode" @change="changeBuildMode">
                   <a-radio
                     v-for="item in buildModeArray"
                     :key="item.value"
@@ -96,6 +92,51 @@
                   </ul>
                 </template>
               </a-alert>
+            </template>
+            <!-- 节点构建：与容器构建同级的一种构建方式，展开区选择由哪台构建节点执行 -->
+            <template v-if="temp.buildMode === 2">
+              <!-- build-node-item：给浏览器 E2E 一个稳定的定位钩子（构建方式里也有「容器构建/节点构建」文本，按文本定位会串到单选组） -->
+              <a-form-item class="build-node-item" :label="$t('i18n_1eb1c081f0')" name="buildNodeId" required>
+                <a-select
+                  v-model:value="temp.buildNodeId"
+                  show-search
+                  allow-clear
+                  :loading="buildNodeLoading"
+                  :options="buildNodeOptions"
+                  :placeholder="$t('i18n_d355cedabf')"
+                  style="width: 100%"
+                  @change="changeBuildNode"
+                />
+                <template #help>{{ $t('i18n_df2bfdd78c') }}</template>
+              </a-form-item>
+              <a-alert
+                v-if="buildNodeLoadError"
+                :message="$t('i18n_1fea4ba832')"
+                type="warning"
+                show-icon
+                style="margin-bottom: 16px"
+              />
+              <a-alert
+                v-else-if="!buildNodeLoading && buildNodeList.length === 0"
+                :message="$t('i18n_a9d91ff2a0')"
+                type="info"
+                show-icon
+                style="margin-bottom: 16px"
+              />
+              <a-alert
+                v-if="buildNodeUnavailable"
+                :message="$t('i18n_84890974d0')"
+                type="warning"
+                show-icon
+                style="margin-bottom: 16px"
+              />
+              <a-alert
+                v-else-if="temp.buildNodeId"
+                :message="$t('i18n_68a638ab32')"
+                type="info"
+                show-icon
+                style="margin-bottom: 16px"
+              />
             </template>
           </div>
           <div v-show="stepsCurrent === 1">
@@ -222,7 +263,16 @@
 
           <!-- 构建流程 -->
           <div v-show="stepsCurrent === 2">
-            <a-form-item v-if="temp.buildMode === 0" name="script">
+            <!-- 节点构建的节点已在「构建方式」步骤选定：这里只读回显 + 一键回去修改，同一字段不在两处重复出现 -->
+            <a-form-item v-if="temp.buildMode === 2" :label="$t('i18n_1eb1c081f0')">
+              <a-space :size="8">
+                <a-tag color="blue">{{ currentBuildNodeLabel }}</a-tag>
+                <a-button type="link" size="small" style="padding: 0" @click="stepsChange(0)">
+                  {{ $t('i18n_53e7f5513b') }}
+                </a-button>
+              </a-space>
+            </a-form-item>
+            <a-form-item v-if="temp.buildMode !== 1" name="script">
               <template #label>
                 <a-tooltip>
                   {{ $t('i18n_c2ee58c247') }}
@@ -383,8 +433,8 @@
                       <b> modules/server/target/server-2.4.2-release</b>
                     </div>
                     <div><br /></div>
-                    <!-- 只有本地构建支持 模糊匹配 -->
-                    <div v-if="temp.buildMode === 0">
+                    <!-- 本地构建与节点构建都支持模糊匹配（容器构建不支持） -->
+                    <div v-if="temp.buildMode !== 1">
                       {{ $t('i18n_89f5ca6928') }}(AntPathMatcher){{ $t('i18n_35cb4b85a9') }}
                       <ul>
                         <li>? {{ $t('i18n_9973159a4d') }}</li>
@@ -1266,7 +1316,7 @@
               </a-row>
             </a-form-item>
             <a-form-item name="versionSnapshot" :label="$t('i18n_387b56ef22')" :help="$t('i18n_ddf32c340f')">
-              <a-switch v-model:checked="tempExtraData.versionSnapshot" />
+              <a-switch v-model:checked="tempExtraData.versionSnapshot" @change="onVersionSnapshotChange" />
             </a-form-item>
             <a-form-item name="versionKeepCount" :label="$t('i18n_fbf8959896')">
               <a-input-number
@@ -1529,7 +1579,8 @@ import {
   getBranchList,
   buildModeMap,
   releaseMethodMap,
-  getBuildGet
+  getBuildGet,
+  getBuildNodeList
 } from '@/api/build-info'
 import { getSshListAll } from '@/api/ssh'
 import { getFtpListAll } from '@/api/ftp'
@@ -1579,6 +1630,10 @@ export default {
       chooseScriptVisible: 0,
       // 当前构建信息的 extraData 属性
       tempExtraData: {},
+      // 可作为构建节点的节点列表（后端失败时降级为「本机（Server）」，不阻塞页面）
+      buildNodeList: [],
+      buildNodeLoading: false,
+      buildNodeLoadError: false,
       viewScriptTemplVisible: false,
       buildScipts: [
         {
@@ -1833,12 +1888,62 @@ export default {
     },
     buildModeArray() {
       return Object.keys(this.buildModeMap).map((item) => {
+        const value = parseInt(item)
+        // 编辑已有构建：容器构建与其它构建方式脚本结构不同（DSL vs shell），创建后不允许互切；
+        // 本地构建 ↔ 节点构建 只是执行位置不同、脚本一致，可以随时切换
+        const editing = !!this.temp.id
+        const editingContainer = this.temp.buildMode === 1
         return {
-          value: parseInt(item),
-          disabled: parseInt(item) === 0 && this.getExtendPlugins.indexOf('inDocker') > -1,
+          value,
+          disabled:
+            // Server 自身运行在容器里时，本地构建无法在宿主机执行
+            (value === 0 && this.getExtendPlugins.indexOf('inDocker') > -1) ||
+            // 一个可用的构建节点都没有时，节点构建选了也无法执行
+            (value === 2 && this.buildNodeNoAvailable) ||
+            // 容器构建与其它方式互斥（仅编辑态）
+            (editing && ((value === 1 && !editingContainer) || (value !== 1 && editingContainer))),
           name: this.buildModeMap[item]
         }
       })
+    },
+    // 构建节点下拉：只列可作为构建节点的节点（离线节点追加标注，仍可回显）
+    buildNodeOptions() {
+      return this.buildNodeList.map((item) => {
+        const offline = item.online === false
+        return {
+          value: item.id,
+          label: offline ? `${item.name} (${this.$t('i18n_50d4a8502e')})` : item.name
+        }
+      })
+    },
+    // 没有任何可用构建节点（节点列表加载成功但为空，且当前也没选中节点）
+    buildNodeNoAvailable() {
+      if (this.buildNodeLoading || this.buildNodeLoadError || this.temp.buildNodeId) {
+        return false
+      }
+      return this.buildNodeList.length === 0
+    },
+    // 构建节点的可读名称：节点被删除时回退显示 id
+    currentBuildNodeLabel() {
+      if (!this.temp.buildNodeId) {
+        return this.$t('i18n_d355cedabf')
+      }
+      const node = this.selectedBuildNode
+      return node && node.name ? node.name : this.temp.buildNodeId
+    },
+    // 当前选中的构建节点（用于回显校验）
+    selectedBuildNode() {
+      if (!this.temp.buildNodeId) {
+        return null
+      }
+      return this.buildNodeList.find((item) => item.id === this.temp.buildNodeId) || null
+    },
+    // 已选的构建节点不可用（被删除 / 离线 / 关闭了构建能力）
+    buildNodeUnavailable() {
+      if (this.buildNodeLoading || this.buildNodeLoadError) {
+        return false
+      }
+      return !!this.temp.buildNodeId && !this.selectedBuildNode && this.buildNodeList.length > 0
     }
   },
   watch: {
@@ -1861,9 +1966,17 @@ export default {
       }
     }
     this.loadGroupList()
+    this.loadBuildNodeList()
   },
   methods: {
     randomStr,
+    // 版本快照：打开开关时若保留个数没填（默认 0），自动补默认值
+    // 历史上 0 会被插件端当成「未启用」，发布成功但一条版本记录都不写，快速回滚进去永远是空列表
+    onVersionSnapshotChange(checked) {
+      if (checked && !(this.tempExtraData.versionKeepCount > 0)) {
+        this.tempExtraData.versionKeepCount = 3
+      }
+    },
     refresh() {
       this.loading = true
       getBuildGet({
@@ -1880,7 +1993,9 @@ export default {
     },
     // 新增
     handleAdd() {
-      this.temp = { resultKeepDay: 0 }
+      // releaseMethodDataIdList 必须是数组：发布方式选「项目」后 handleEditBuildOk 会直接读 .length
+      // 构建方式默认本地构建；buildNodeId 只在选择「节点构建」后才需要
+      this.temp = { resultKeepDay: 0, releaseMethodDataIdList: [], buildMode: 0, buildNodeId: '' }
       this.branchList = []
       // this.tempRepository = {};
       // this.loadRepositoryList();
@@ -1906,6 +2021,8 @@ export default {
       this.$refs['editBuildForm']?.resetFields()
       this.temp = Object.assign({}, record)
       this.temp.buildMode = this.temp.buildMode || 0
+      // 构建节点回显：只有「节点构建」才有节点；老服务端无此字段时按空处理
+      this.temp.buildNodeId = this.temp.buildNodeId || ''
       if (this.temp.buildMode === 1) {
         this.loadDockerAllTag()
       }
@@ -2007,6 +2124,34 @@ export default {
     //     }
     //   });
     // },
+    // 加载可作为构建节点的节点列表
+    loadBuildNodeList() {
+      this.buildNodeLoading = true
+      this.buildNodeLoadError = false
+      return getBuildNodeList()
+        .then((res) => {
+          if (res && res.code === 200) {
+            this.buildNodeList = Array.isArray(res.data) ? res.data : []
+          } else {
+            // 后端未就绪 / 无权限：降级为本机构建，不阻塞页面
+            this.buildNodeList = []
+            this.buildNodeLoadError = true
+            console.warn('[build-edit] 构建节点列表加载失败', res)
+          }
+        })
+        .catch((e) => {
+          this.buildNodeList = []
+          this.buildNodeLoadError = true
+          console.warn('[build-edit] 构建节点列表加载失败', e)
+        })
+        .finally(() => {
+          this.buildNodeLoading = false
+        })
+    },
+    // 切换构建节点（仅「节点构建」方式下可选）
+    changeBuildNode(value) {
+      this.temp = { ...this.temp, buildNodeId: value || '' }
+    },
     // 加载节点分发列表
     loadDispatchList() {
       this.dispatchList = []
@@ -2072,14 +2217,31 @@ export default {
     // 提交节点数据
     handleEditBuildOk(build) {
       this.$emit('saveChange', true)
+      const buildForm = this.$refs['editBuildForm']
+      if (!buildForm) {
+        // 组件未挂载/已被销毁时静默返回会让用户以为「点了没反应」，必须可见提示
+        this.$emit('saveChange', false)
+        console.warn('[build-edit] 表单未就绪，保存已取消')
+        $notification.error({
+          message: this.$t('i18n_de928c32b3')
+        })
+        return
+      }
       // 检验表单
-      this.$refs['editBuildForm']
+      buildForm
         .validate()
         .then(() => {
+          // 节点构建必须指定执行节点（构建方式选对了但没选节点时，保存前明确提示）
+          if (this.temp.buildMode === 2 && !this.temp.buildNodeId) {
+            $notification.warn({
+              message: this.$t('i18n_d1d1fbf1dd')
+            })
+            return false
+          }
           const tempExtraData = Object.assign({}, this.tempExtraData)
           // 设置参数
           if (this.temp.releaseMethod === 2) {
-            if (this.temp.releaseMethodDataIdList.length < 2) {
+            if ((this.temp.releaseMethodDataIdList || []).length < 2) {
               $notification.warn({
                 message: this.$t('i18n_8309cec640')
               })
@@ -2124,13 +2286,30 @@ export default {
                 this.$emit('confirm', build, res.data, this.temp.buildEnvParameter)
               }
             })
+            .catch((e) => {
+              // 接口层失败（网络/服务端异常）同样必须可见，不能只转个 loading
+              console.error('[build-edit] 保存接口失败', e)
+              $notification.error({
+                message: (e && e.message) || this.$t('i18n_de928c32b3')
+              })
+            })
             .finally(() => {
               this.$emit('saveChange', false)
             })
         })
-        .catch(({ errorFields }) => {
+        .catch((e) => {
           this.$emit('saveChange', false)
-          if (errorFields && errorFields[0]) {
+          const errorFields = e && e.errorFields
+          if (!errorFields) {
+            // 不是表单校验不通过，而是保存过程自身抛错（例如某个字段是 undefined）。
+            // 这类异常原先被这里吞掉：用户点「保存」毫无反应、无请求、无提示，输入全部白填。
+            console.error('[build-edit] 保存失败', e)
+            $notification.error({
+              message: this.$t('i18n_de928c32b3')
+            })
+            return
+          }
+          if (errorFields[0]) {
             // console.log(errorFields[0])
             const msg = errorFields[0].errors && errorFields[0].errors[0]
             if (msg) {
@@ -2235,11 +2414,20 @@ export default {
       })
     },
     changeBuildMode(e) {
-      if (e.target.value === 1) {
+      const buildMode = e.target.value
+      if (buildMode === 1) {
         this.loadDockerAllTag()
       }
-      this.temp = { ...this.temp, script: '' }
-      this.$emit('changeBuildMode', e.target.value)
+      // 本地构建 ↔ 节点构建脚本一致，切换时保留脚本；容器构建脚本是 DSL，与其它方式互切时清空
+      const script = (buildMode === 1) !== (this.temp.buildMode === 1) ? '' : this.temp.script
+      // 构建节点只属于「节点构建」方式：切走时清空，避免切换方式后残留脏数据；
+      // 首次切到节点构建且只有一个可选节点时直接带上，少点一次
+      const buildNodeId =
+        buildMode === 2
+          ? this.temp.buildNodeId || (this.buildNodeList.length === 1 ? this.buildNodeList[0].id : '')
+          : ''
+      this.temp = { ...this.temp, script, buildMode, buildNodeId }
+      this.$emit('changeBuildMode', buildMode)
     },
     // 查询 docker tag
     loadDockerAllTag() {

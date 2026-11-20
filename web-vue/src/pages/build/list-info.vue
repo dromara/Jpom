@@ -242,10 +242,20 @@
                 <CloudOutlined />
                 {{ $t('i18n_685e5de706') }}
               </template>
+              <template v-else-if="item.buildMode === 2">
+                <ApartmentOutlined />
+                {{ $t('i18n_c6f399f36c') }}
+              </template>
               <template v-else>
                 <CodeOutlined />
                 {{ $t('i18n_69c3b873c1') }}
               </template>
+            </a-col>
+          </a-row>
+          <a-row class="item-info">
+            <a-col :span="6" class="title text-overflow-hidden">{{ $t('i18n_1eb1c081f0') }}:</a-col>
+            <a-col :span="18" class="content text-overflow-hidden">
+              {{ item.buildNodeName || item.buildNodeId || $t('i18n_4d1636e43f') }}
             </a-col>
           </a-row>
           <a-row class="item-info">
@@ -352,9 +362,18 @@
         </template>
 
         <template v-else-if="column.dataIndex === 'buildMode'">
-          <a-tooltip placement="topLeft" :title="text === 1 ? $t('i18n_685e5de706') : $t('i18n_69c3b873c1')">
+          <a-tooltip
+            placement="topLeft"
+            :title="text === 1 ? $t('i18n_685e5de706') : text === 2 ? $t('i18n_c6f399f36c') : $t('i18n_69c3b873c1')"
+          >
             <CloudOutlined v-if="text === 1" />
+            <ApartmentOutlined v-else-if="text === 2" />
             <CodeOutlined v-else />
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'buildNodeName'">
+          <a-tooltip placement="topLeft" :title="record.buildNodeName || record.buildNodeId || $t('i18n_4d1636e43f')">
+            <span>{{ record.buildNodeName || record.buildNodeId || $t('i18n_4d1636e43f') }}</span>
           </a-tooltip>
         </template>
         <template v-else-if="column.dataIndex === 'releaseMethod'">
@@ -821,6 +840,12 @@ export default {
           align: 'center',
           width: '80px',
           sorter: true,
+          ellipsis: true
+        },
+        {
+          title: this.$t('i18n_1eb1c081f0'),
+          dataIndex: 'buildNodeName',
+          width: '120px',
           ellipsis: true
         },
         {

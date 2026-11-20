@@ -126,6 +126,14 @@
               <a-descriptions-item :label="$t('i18n_e39f4a69f4')"
                 >{{ machineInfo && machineInfo.jpomScriptCount }}
               </a-descriptions-item>
+              <a-descriptions-item :label="$t('i18n_4a172c87cb')">
+                <a-tag :color="machineInfo && machineInfo.buildEnabled === 1 ? 'green' : 'default'">
+                  {{ machineInfo && machineInfo.buildEnabled === 1 ? $t('i18n_0a60ac8f02') : $t('i18n_c9744f45e7') }}
+                </a-tag>
+              </a-descriptions-item>
+              <a-descriptions-item :label="$t('i18n_25b560dd87')">
+                {{ (machineInfo && machineInfo.buildMaxConcurrency) || 1 }}
+              </a-descriptions-item>
               <a-descriptions-item :label="$t('i18n_204222d167')"
                 >{{ formatDuration(machineInfo && machineInfo.networkDelay) }}
               </a-descriptions-item>

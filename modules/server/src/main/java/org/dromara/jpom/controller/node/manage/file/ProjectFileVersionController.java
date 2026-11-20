@@ -9,6 +9,8 @@
  */
 package org.dromara.jpom.controller.node.manage.file;
 
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.forward.NodeForward;
@@ -99,6 +101,11 @@ public class ProjectFileVersionController extends BaseServerController {
     @Feature(method = MethodFeature.EDIT)
     @RequestMapping(value = "version-switch", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<Object> versionSwitch(String id, HttpServletRequest request) {
+        String keepCount = request.getParameter("keepCount");
+        if (StrUtil.isBlank(keepCount) || Convert.toInt(keepCount, 0) <= 0) {
+            // 与构建发布侧同口径：未显式指定时按默认 3 保留，避免插件端按「未启用」把历史版本清理到只剩当前版本
+            return NodeForward.request(getNode(), request, NodeUrl.Manage_File_Version_Switch, new String[0], "keepCount", "3");
+        }
         return NodeForward.request(getNode(), request, NodeUrl.Manage_File_Version_Switch);
     }
 

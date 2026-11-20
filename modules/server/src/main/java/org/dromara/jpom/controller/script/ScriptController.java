@@ -128,6 +128,14 @@ public class ScriptController extends BaseServerController {
         //
         String oldNodeIds = null;
         if (StrUtil.isEmpty(id)) {
+            // 同一工作空间内脚本名称唯一：原来重复添加同名脚本会插入新 id，
+            // 旧 id 变孤儿，DSL 项目 dslContent 里的 scriptId 仍指向旧 id（表现为「启动脚本不生效」，BUGS B-002）
+            String targetWorkspace = StrUtil.emptyToDefault(scriptModel.getWorkspaceId(), ServerConst.WORKSPACE_GLOBAL);
+            List<ScriptModel> sameName = scriptServer.listByWorkspace(request).stream()
+                .filter(item -> StrUtil.equals(item.getName(), scriptModel.getName()))
+                .filter(item -> StrUtil.equals(StrUtil.emptyToDefault(item.getWorkspaceId(), ServerConst.WORKSPACE_GLOBAL), targetWorkspace))
+                .collect(Collectors.toList());
+            Assert.state(CollUtil.isEmpty(sameName), I18nMessageUtil.get("i18n.mark_already_exists.0ccc"));
             scriptServer.insert(scriptModel);
         } else {
             ScriptModel byKey = scriptServer.getByKeyAndGlobal(id, request);

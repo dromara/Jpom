@@ -43,6 +43,8 @@ import org.springframework.util.Assert;
 import java.io.File;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author bwcx_jzy
@@ -239,6 +241,9 @@ public class BuildExecuteService {
             Integer fromBuildNumberId = ObjectUtil.defaultIfNull(oldLog.getFromBuildNumberId(), oldLog.getBuildNumberId());
             List<NodeBuildVersionModel> targets = nodeBuildVersionService.listByBuild(oldLog.getBuildDataId(), fromBuildNumberId);
             Assert.notEmpty(targets, I18nMessageUtil.get("i18n.no_node_version_for_build.3d18"));
+            // 历史记录可能没有 extraData（老数据），这里不能直接 Assert，取不到就按默认保留个数处理
+            BuildExtraModule oldExtra = StringUtil.jsonConvert(oldLog.getExtraData(), BuildExtraModule.class);
+            int versionKeepCount = BuildVersionService.resolveKeepCount(oldExtra == null ? null : oldExtra.getVersionKeepCount());
             int buildId = this.nextBuildId(item);
             item.setBuildId(buildId);
             BuildHistoryLog buildHistoryLog = oldLog.toJson().to(BuildHistoryLog.class);
@@ -267,8 +272,9 @@ public class BuildExecuteService {
                         continue;
                     }
                     try {
+                        // 切换时显式带上构建配置的保留个数（0/空归一为默认值），否则插件端会按「未启用」清理到只剩当前版本
                         JsonMessage<JSONObject> jsonMessage = buildVersionService.switchVersion(nodeModel, target.getProjectId(),
-                            target.getVersionId(), restart, null);
+                            target.getVersionId(), restart, versionKeepCount);
                         if (jsonMessage.success()) {
                             success++;
                             nodeBuildVersionService.markCurrent(target.getNodeId(), target.getProjectId(), target.getVersionId());
@@ -342,6 +348,8 @@ public class BuildExecuteService {
      */
     private String insertLog(BuildExtraModule buildExtraModule, TaskData taskData) {
         BuildInfoModel buildInfoModel = taskData.buildInfoModel;
+        // 新一轮构建开始：清掉上一次遗留的「取消意图」
+        CANCEL_REQUESTED.remove(buildInfoModel.getId());
         buildExtraModule.updateValue(buildInfoModel);
         BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
         // 更新其他配置字段
@@ -374,7 +382,41 @@ public class BuildExecuteService {
      * @param logId       记录ID
      * @param buildStatus to status
      */
+    /**
+     * 已请求取消的构建：取消可能先于/晚于构建线程的失败写入，用一个标记把「取消意图」传到状态写入处，
+     * 避免「节点构建」被取消后节点回报 cancelled、构建线程把终态写成 Error（BUGS B-001）
+     */
+    private static final Set<String> CANCEL_REQUESTED = ConcurrentHashMap.newKeySet();
+
+    /**
+     * 标记该构建已被要求取消
+     *
+     * @param buildId 构建ID
+     */
+    public static void markCancelRequested(String buildId) {
+        if (StrUtil.isNotEmpty(buildId)) {
+            CANCEL_REQUESTED.add(buildId);
+        }
+    }
+
     public void updateStatus(String buildId, String logId, int buildNumberId, BuildStatus buildStatus, String msg) {
+        if (buildStatus != BuildStatus.Cancel && !buildStatus.isProgress() && CANCEL_REQUESTED.contains(buildId)) {
+            // 取消后构建线程/节点回报的任何终态都归一为「已取消」
+            buildStatus = BuildStatus.Cancel;
+            msg = I18nMessageUtil.get("i18n.manual_cancel.8464");
+        }
+        // 注意：这里不能清除取消标记——取消先落库、构建线程随后才把失败写回来，
+        // 提前清除会让「取消意图」丢失（BUGS B-001 复现两次的根本原因）。
+        // 标记在下一次构建开始时清除（见 insertLog）。
+        // 「已取消」是终态：取消要先杀进程再落库，被杀进程的退出码会被构建线程写成「执行命令退出码非0」，
+        // 把 Cancel(7) 盖成 Error(3)（BUGS B-001）。这里保护取消终态，后续任何非取消状态写入都忽略。
+        if (buildStatus != BuildStatus.Cancel) {
+            BuildHistoryLog current = dbBuildHistoryLogService.getByKey(logId);
+            if (current != null && current.getStatus() != null && current.getStatus() == BuildStatus.Cancel.getCode()) {
+                log.info("构建已取消，忽略后续状态覆盖：logId={} status={} msg={}", logId, buildStatus, msg);
+                return;
+            }
+        }
         BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
         buildHistoryLog.setId(logId);
         buildHistoryLog.setStatusMsg(msg);

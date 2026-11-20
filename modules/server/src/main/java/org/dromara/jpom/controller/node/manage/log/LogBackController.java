@@ -9,6 +9,7 @@
  */
 package org.dromara.jpom.controller.node.manage.log;
 
+import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
@@ -83,12 +84,27 @@ public class LogBackController extends BaseServerController {
         return NodeForward.request(getNode(), request, NodeUrl.Manage_Log_logBack_delete);
     }
 
+    /**
+     * 项目可查看的运行日志文件列表（当前为 DSL 项目配置的日志文件）
+     *
+     * @param id 项目 id
+     * @return json
+     */
+    @Feature(method = MethodFeature.LIST)
+    @RequestMapping(value = "logList", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public IJsonMessage<JSONObject> logList(String id) {
+        return NodeForward.request(getNode(), NodeUrl.Manage_Log_LogList, "id", id);
+    }
+
     @Feature(method = MethodFeature.LIST)
     @RequestMapping(value = "logSize", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public IJsonMessage<JSONObject> logSize(String id) {
-
-        return NodeForward.request(getNode(), NodeUrl.Manage_Log_LogSize, "id", id);
+    public IJsonMessage<JSONObject> logSize(String id, String logKey) {
+        if (StrUtil.isEmpty(logKey)) {
+            return NodeForward.request(getNode(), NodeUrl.Manage_Log_LogSize, "id", id);
+        }
+        return NodeForward.request(getNode(), NodeUrl.Manage_Log_LogSize, "id", id, "logKey", logKey);
     }
 
     /**

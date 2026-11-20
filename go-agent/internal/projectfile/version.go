@@ -82,6 +82,7 @@ type VersionMeta struct {
 type VersionCapability struct {
 	Support      bool   `json:"support"`
 	Enabled      bool   `json:"enabled"`
+	HasVersions  bool   `json:"hasVersions"`
 	VersionCount int    `json:"versionCount"`
 	Path         string `json:"path"`
 }
@@ -135,6 +136,7 @@ type VersionCommitResult struct {
 type VersionListResult struct {
 	Path         string         `json:"path"`
 	Enabled      bool           `json:"enabled"`
+	HasVersions  bool           `json:"hasVersions"`
 	VersionCount int            `json:"versionCount"`
 	Current      *string        `json:"current"`
 	List         []*VersionMeta `json:"list"`
@@ -216,11 +218,14 @@ func (s *Service) VersionCapability(id string) (*VersionCapability, error) {
 	if err != nil {
 		return nil, err
 	}
+	root := absolutePath(s.versionRoot(settings))
+	hasVersions := len(s.listVersionMeta(root)) > 0
 	return &VersionCapability{
 		Support:      true,
-		Enabled:      settings.Count > 0,
+		Enabled:      settings.Count > 0 || hasVersions,
+		HasVersions:  hasVersions,
 		VersionCount: settings.Count,
-		Path:         absolutePath(s.versionRoot(settings)),
+		Path:         root,
 	}, nil
 }
 
@@ -335,12 +340,16 @@ func (s *Service) VersionList(id string) (*VersionListResult, error) {
 		return nil, err
 	}
 	root := absolutePath(s.versionRoot(settings))
+	list := s.listVersionMeta(root)
+	// 与 capability 同口径：磁盘上已有版本（例如构建按默认 3 生成）即视为可用
+	hasVersions := len(list) > 0
 	return &VersionListResult{
 		Path:         root,
-		Enabled:      settings.Count > 0,
+		Enabled:      settings.Count > 0 || hasVersions,
+		HasVersions:  hasVersions,
 		VersionCount: settings.Count,
 		Current:      s.readVersionCurrent(root),
-		List:         s.listVersionMeta(root),
+		List:         list,
 	}, nil
 }
 
@@ -699,10 +708,11 @@ func javaStringLess(left, right string) bool {
 // clearOldVersion removes the versions beyond the keep count, always keeping the
 // active version and keepAliveID (ProjectFileVersionService#clearOldVersion).
 func (s *Service) clearOldVersion(root, keepAliveID string, versionCount int) {
-	count := versionCount
-	if count < 1 {
-		count = 1
+	if versionCount <= 0 {
+		// 未启用（或调用方没有指定保留个数）时不清理，避免把历史版本误删成只剩当前版本
+		return
 	}
+	count := versionCount
 	metas := s.listVersionMeta(root)
 	current := s.readVersionCurrent(root)
 	for index := count; index < len(metas); index++ {

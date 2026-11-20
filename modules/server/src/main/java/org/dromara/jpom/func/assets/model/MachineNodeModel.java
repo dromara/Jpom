@@ -131,6 +131,21 @@ public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
      */
     private String statusMsg;
     /**
+     * 是否允许该机器承担构建任务（0 否，1 是）。
+     * <p>
+     * 只有 Go 插件端（manifest.capabilities 含 build）才能开启；开启后绑定到该机器的节点
+     * 才可以被构建配置选为「构建节点」。默认 0，老数据不受影响。
+     */
+    private Integer buildEnabled;
+
+    /**
+     * 允许同时执行的构建任务数（&lt;=0 或空按 1 处理）。
+     * <p>
+     * 打包机 CPU/内存有限，默认 1 个并发，避免多个 mvn/xcodebuild 互相抢资源。
+     */
+    private Integer buildMaxConcurrency;
+
+    /**
      * 传输方式。0 服务器拉取，1 节点机器推送
      */
     private Integer transportMode;

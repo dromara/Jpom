@@ -93,6 +93,10 @@ public class BuildExecuteManage implements Runnable {
     private File gitFile;
     private Thread currentThread;
     private ReleaseManage releaseManage;
+    /**
+     * 执行器：Server 本机或远程构建节点（由 {@link BuildRunnerFactory} 装配）
+     */
+    private BuildRunner runner;
     private String language;
 
     /**
@@ -151,6 +155,8 @@ public class BuildExecuteManage implements Runnable {
         BuildInfoModel buildInfoModel = taskData.buildInfoModel;
         File logFile = BuildUtil.getLogFile(buildInfoModel.getId(), buildInfoModel.getBuildId());
         this.logRecorder = LogRecorder.builder().file(logFile).build();
+        // 执行地点在这里装配：未配置构建节点 -> 本机执行器（历史行为），否则 -> 远程节点执行器
+        this.runner = BuildRunnerFactory.create(this, taskData, buildExtraModule, this.logRecorder, logId);
         //
         int queueSize = threadPoolExecutor.getQueue().size();
         int size = BUILD_MANAGE_MAP.size();
@@ -178,8 +184,11 @@ public class BuildExecuteManage implements Runnable {
      * 取消任务
      */
     private void cancelTask(String desc) {
-        CommandUtil.kill(process);
-        ApacheExecUtil.kill(this.logId);
+        if (this.runner != null) {
+            this.runner.cancel(desc);
+        } else {
+            this.localCancel(desc);
+        }
         Integer buildMode = taskData.buildInfoModel.getBuildMode();
         if (buildMode != null && buildMode == 1) {
             // 容器构建 删除容器
@@ -208,7 +217,7 @@ public class BuildExecuteManage implements Runnable {
     /**
      * 打包构建产物
      */
-    private String packageFile() {
+    String localPackageFile() {
         BuildInfoModel buildInfoModel = taskData.buildInfoModel;
         Integer buildMode = taskData.buildInfoModel.getBuildMode();
         String resultDirFile = buildInfoModel.getResultDirFile();
@@ -351,7 +360,7 @@ public class BuildExecuteManage implements Runnable {
      *
      * @return false 执行异常需要结束
      */
-    private String startReady() {
+    String localStartReady() {
         BuildInfoModel buildInfoModel = taskData.buildInfoModel;
         this.gitFile = BuildUtil.getSourceById(buildInfoModel.getId());
 
@@ -392,7 +401,7 @@ public class BuildExecuteManage implements Runnable {
      * @return pull 的结果
      */
     private String pullAndCacheBuildEnv() {
-        String pull = this.pull();
+        String pull = this.runner.pull();
         if (pull == null) {
             BuildHistoryLog buildInfoModel = new BuildHistoryLog();
             buildInfoModel.setId(logId);
@@ -410,7 +419,7 @@ public class BuildExecuteManage implements Runnable {
      *
      * @return false 执行异常需要结束
      */
-    private String pull() {
+    String localPull() {
         RepositoryModel repositoryModel = taskData.repositoryModel;
         BuildInfoModel buildInfoModel = taskData.buildInfoModel;
         try {
@@ -717,35 +726,20 @@ public class BuildExecuteManage implements Runnable {
      *
      * @return false 执行异常需要结束
      */
-    private String executeCommand() {
+    String localExecuteCommand() {
         BuildInfoModel buildInfoModel = taskData.buildInfoModel;
         Integer buildMode = buildInfoModel.getBuildMode();
         if (buildMode != null && buildMode == 1) {
             // 容器构建
             return this.dockerCommand();
         }
-        String script = buildInfoModel.getScript();
-        if (StrUtil.isEmpty(script)) {
+        String commandScript = this.preparedScript();
+        if (commandScript == null) {
             String info = I18nMessageUtil.get("i18n.no_command_to_execute.340b");
             logRecorder.systemError(info);
             return info;
         }
-        if (StrUtil.startWith(script, ServerConst.REF_SCRIPT)) {
-            String scriptId = StrUtil.removePrefix(script, ServerConst.REF_SCRIPT);
-            ScriptModel keyAndGlobal = scriptServer.getByKey(scriptId);
-            Assert.notNull(keyAndGlobal, I18nMessageUtil.get("i18n.select_correct_script.ff2d"));
-            script = keyAndGlobal.getContext();
-            logRecorder.system(I18nMessageUtil.get("i18n.introducing_script_content.a55b"), keyAndGlobal.getName(), scriptId);
-        }
-        // 替换脚本库 // 替换全局变量
-        script = scriptLibraryServer.referenceReplace(script);
         Map<String, String> environment = taskData.environmentMapBuilder.environment();
-
-        InputStream templateInputStream = ExtConfigBean.getConfigResourceInputStream("/exec/template." + CommandUtil.SUFFIX);
-        String s1 = IoUtil.readUtf8(templateInputStream);
-        // 严格构建且为 sh 脚本时，在模板之后、用户脚本之前注入 set -e / set -o pipefail，
-        // 让中间命令失败立即中断，而不是继续执行后续命令、仅按整体退出码判断（Gitee ICW9KZ）。
-        String commandScript = buildScriptContent(s1, script, buildExtraModule.strictlyEnforce(), CommandUtil.SUFFIX);
         try {
             int waitFor = JpomApplication.getInstance()
                 .execScript(commandScript, file -> {
@@ -775,6 +769,55 @@ public class BuildExecuteManage implements Runnable {
             return e.getMessage();
         }
         return null;
+    }
+
+    /**
+     * 组装最终要执行的构建脚本内容（脚本库引用替换、脚本库变量替换、模板拼接、严格模式注入）。
+     * <p>
+     * 本地构建与远程构建节点共用同一份组装逻辑：远程节点只负责「原样执行字符串」，
+     * 避免两端对脚本语义产生漂移。
+     *
+     * @return 最终脚本内容；未配置构建命令时返回 null
+     */
+    String preparedScript() {
+        BuildInfoModel buildInfoModel = taskData.buildInfoModel;
+        String script = buildInfoModel.getScript();
+        if (StrUtil.isEmpty(script)) {
+            return null;
+        }
+        if (StrUtil.startWith(script, ServerConst.REF_SCRIPT)) {
+            String scriptId = StrUtil.removePrefix(script, ServerConst.REF_SCRIPT);
+            ScriptModel keyAndGlobal = scriptServer.getByKey(scriptId);
+            Assert.notNull(keyAndGlobal, I18nMessageUtil.get("i18n.select_correct_script.ff2d"));
+            script = keyAndGlobal.getContext();
+            logRecorder.system(I18nMessageUtil.get("i18n.introducing_script_content.a55b"), keyAndGlobal.getName(), scriptId);
+        }
+        // 替换脚本库 // 替换全局变量
+        script = scriptLibraryServer.referenceReplace(script);
+        InputStream templateInputStream = ExtConfigBean.getConfigResourceInputStream("/exec/template." + CommandUtil.SUFFIX);
+        String template = IoUtil.readUtf8(templateInputStream);
+        // 严格构建且为 sh 脚本时，在模板之后、用户脚本之前注入 set -e / set -o pipefail，
+        // 让中间命令失败立即中断，而不是继续执行后续命令、仅按整体退出码判断（Gitee ICW9KZ）。
+        return buildScriptContent(template, script, buildExtraModule.strictlyEnforce(), CommandUtil.SUFFIX);
+    }
+
+    /**
+     * 本机执行器的取消实现（保留原有行为）
+     *
+     * @param desc 取消原因
+     */
+    void localCancel(String desc) {
+        CommandUtil.kill(process);
+        ApacheExecUtil.kill(this.logId);
+    }
+
+    /**
+     * 产物为 ant 通配模式时，历史记录与本地构建保持一致，把结果目录改写为根目录
+     */
+    void updateResultDirToRoot() {
+        dbBuildHistoryLogService.updateResultDirFile(this.logId, StrUtil.SLASH);
+        taskData.buildInfoModel.setResultDirFile(StrUtil.SLASH);
+        this.buildExtraModule.setResultDirFile(StrUtil.SLASH);
     }
 
     /**
@@ -869,7 +912,7 @@ public class BuildExecuteManage implements Runnable {
 
             @Override
             public String execute() {
-                return BuildExecuteManage.this.startReady();
+                return BuildExecuteManage.this.runner.startReady();
             }
         });
         suppliers.put("pull", new IProcessItem() {
@@ -891,7 +934,7 @@ public class BuildExecuteManage implements Runnable {
 
             @Override
             public String execute() {
-                return BuildExecuteManage.this.executeCommand();
+                return BuildExecuteManage.this.runner.executeCommand();
             }
         });
         suppliers.put("packageFile", new IProcessItem() {
@@ -902,7 +945,7 @@ public class BuildExecuteManage implements Runnable {
 
             @Override
             public String execute() {
-                return BuildExecuteManage.this.packageFile();
+                return BuildExecuteManage.this.runner.packageFile();
             }
         });
         suppliers.put("release", new IProcessItem() {

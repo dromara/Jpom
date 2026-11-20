@@ -35,6 +35,12 @@ public class FileReleaseTaskTemplateService extends BaseWorkspaceService<FileRel
      * @param workspaceId 工作空间id
      */
     public void add(String type, String workspaceId, IFileStorage storage, Integer fileType, JSONObject data) {
+        // save2Template 是可选参数：未选择“保存为模板”时为 null。
+        // 原实现直接 switch (type)，JDK 8 的 switch(String) 对 null 抛 NPE —— 发布任务已落库后才炸，
+        // 表现为接口 500「空指针」而任务无法执行（BUGS B-009，fileType=1/2 同一条码）。
+        if (StrUtil.isEmpty(type)) {
+            return;
+        }
         String templateTag;
         String nameTag;
         switch (type) {

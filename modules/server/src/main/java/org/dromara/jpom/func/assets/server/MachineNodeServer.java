@@ -24,6 +24,7 @@ import cn.keepbx.jpom.event.IAsyncLoad;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseServerController;
@@ -33,6 +34,8 @@ import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.update.AgentEngine;
+import org.dromara.jpom.common.update.AgentPackageResolver;
 import org.dromara.jpom.configuration.NodeConfig;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.exception.AgentAuthorizeException;
@@ -47,6 +50,9 @@ import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.h2db.BaseDbService;
 import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.system.ServerConfig;
+import org.dromara.jpom.transport.INodeInfo;
+import org.dromara.jpom.transport.IUrlItem;
+import org.dromara.jpom.transport.TransportServerFactory;
 import org.dromara.jpom.system.db.InitDb;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -638,7 +644,25 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         update.setJpomTimeout(machineNodeModel.getJpomTimeout());
         update.setTemplateNode(machineNodeModel.getTemplateNode());
         update.setTransportEncryption(machineNodeModel.getTransportEncryption());
+        // 构建节点能力：机器资产层的开关与并发上限（只增字段，老数据为空即不承担构建）
+        update.setBuildEnabled(machineNodeModel.getBuildEnabled());
+        update.setBuildMaxConcurrency(machineNodeModel.getBuildMaxConcurrency());
         return update;
+    }
+
+    /**
+     * 查询机器上运行的插件端 /info（不落库，仅用于能力校验）
+     *
+     * @param machineNodeModel 机器
+     * @return /info 的 data
+     */
+    private JSONObject queryInfo(MachineNodeModel machineNodeModel) {
+        INodeInfo nodeInfo = NodeForward.coverNodeInfo(machineNodeModel);
+        IUrlItem urlItem = NodeForward.parseUrlItem(nodeInfo, StrUtil.EMPTY, NodeUrl.Info);
+        String body = TransportServerFactory.get().execute(nodeInfo, urlItem, null);
+        JsonMessage<JSONObject> message = NodeForward.toJsonMessage(body, new TypeReference<JsonMessage<JSONObject>>() {
+        });
+        return message.getData();
     }
 
     public boolean existsByUrl(String jpomUrl, String id) {
@@ -664,6 +688,16 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         boolean exists = this.existsByUrl(machineNodeModel.getJpomUrl(), machineNodeModel.getId());
         Assert.state(!exists, I18nMessageUtil.get("i18n.node_already_exists.28ea"));
         this.testNode(machineNodeModel);
+        // 开启构建能力前校验引擎与能力：只有 Go 插件端（/info 声明 capabilities 含 build）才能承担构建
+        if (machineNodeModel.getBuildEnabled() != null && machineNodeModel.getBuildEnabled() == 1) {
+            Assert.state(machineNodeModel.getBuildMaxConcurrency() == null || machineNodeModel.getBuildMaxConcurrency() > 0,
+                I18nMessageUtil.get("i18n.build_node_concurrency_invalid.5d18"));
+            JSONObject info = this.queryInfo(machineNodeModel);
+            AgentEngine agentEngine = AgentPackageResolver.resolveEngine(info);
+            Assert.state(agentEngine == AgentEngine.GO, I18nMessageUtil.get("i18n.build_node_not_go_agent.8e4b"));
+            Assert.state(AgentPackageResolver.hasCapability(info, AgentPackageResolver.CAPABILITY_BUILD),
+                I18nMessageUtil.get("i18n.build_node_unsupported_capability.6b02"));
+        }
         // 更新状态
         machineNodeModel.setStatus(1);
         //

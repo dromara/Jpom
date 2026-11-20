@@ -73,6 +73,14 @@ public class BuildHistoryLog extends BaseWorkspaceModel {
      */
     private Integer buildNumberId;
     /**
+     * 本次构建实际执行节点 ID（空表示 Server 本机）
+     */
+    private String buildNodeId;
+    /**
+     * 本次构建实际执行节点名称（展示用，节点删除后仍可追溯）
+     */
+    private String buildNodeName;
+    /**
      * 来自的构建编号，回滚时存在
      */
     private Integer fromBuildNumberId;

@@ -116,11 +116,16 @@ public class ProjectFileVersionService {
      */
     public JSONObject capability(NodeProjectInfoModel projectInfoModel) {
         int versionCount = this.resolveVersionCount(projectInfoModel);
+        File root = this.pathProjectVersion(projectInfoModel);
+        boolean hasVersions = !this.listMeta(root).isEmpty();
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("support", true);
-        jsonObject.put("enabled", versionCount > 0);
+        // 构建配置按「保留个数默认 3」生成过版本时，插件端配置可能仍为 0：
+        // 只要磁盘上已有版本，就不能报告为「未开启」，否则前端会把已有版本藏起来且无法切换。
+        jsonObject.put("enabled", versionCount > 0 || hasVersions);
+        jsonObject.put("hasVersions", hasVersions);
         jsonObject.put("versionCount", versionCount);
-        jsonObject.put("path", FileUtil.getAbsolutePath(this.pathProjectVersion(projectInfoModel)));
+        jsonObject.put("path", FileUtil.getAbsolutePath(root));
         return jsonObject;
     }
 
@@ -201,12 +206,16 @@ public class ProjectFileVersionService {
     public JSONObject list(NodeProjectInfoModel projectInfoModel) {
         File root = this.pathProjectVersion(projectInfoModel);
         int versionCount = this.resolveVersionCount(projectInfoModel);
+        List<JSONObject> metaList = this.listMeta(root);
+        boolean hasVersions = !metaList.isEmpty();
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("path", FileUtil.getAbsolutePath(root));
-        jsonObject.put("enabled", versionCount > 0);
+        // 与 capability 同口径：已有版本（例如按构建配置默认 3 生成的）视为可用，不因插件端配置为 0 而隐藏
+        jsonObject.put("enabled", versionCount > 0 || hasVersions);
+        jsonObject.put("hasVersions", hasVersions);
         jsonObject.put("versionCount", versionCount);
         jsonObject.put("current", this.readCurrent(root));
-        jsonObject.put("list", this.listMeta(root));
+        jsonObject.put("list", metaList);
         return jsonObject;
     }
 
@@ -371,7 +380,11 @@ public class ProjectFileVersionService {
      * @param versionCount 保留个数
      */
     private void clearOldVersion(File root, String keepAliveId, int versionCount) {
-        int count = Math.max(versionCount, 1);
+        if (versionCount <= 0) {
+            // 未启用（或调用方没有指定保留个数）：不清理，避免把历史版本误删成只剩当前版本
+            return;
+        }
+        int count = versionCount;
         List<JSONObject> metas = this.listMeta(root);
         String current = this.readCurrent(root);
         for (int i = count; i < metas.size(); i++) {

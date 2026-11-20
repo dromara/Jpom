@@ -390,6 +390,40 @@
           <a-input-password v-model:value="temp.jpomPassword" :placeholder="$t('i18n_e5a63852fd')" />
         </a-form-item>
 
+        <a-form-item :label="$t('i18n_4a172c87cb')" name="buildEnabled">
+          <a-space direction="vertical" style="display: block">
+            <a-space>
+              <a-switch
+                :checked="temp.buildEnabled === 1"
+                :checked-children="$t('i18n_0a60ac8f02')"
+                :un-checked-children="$t('i18n_c9744f45e7')"
+                :disabled="buildEngineUnsupported"
+                @change="changeBuildEnabled"
+              />
+              <a-tooltip :title="$t('i18n_df2bfdd78c')">
+                <QuestionCircleOutlined />
+              </a-tooltip>
+            </a-space>
+            <div style="color: rgba(0, 0, 0, 0.45); font-size: 12px">{{ $t('i18n_df2bfdd78c') }}</div>
+          </a-space>
+        </a-form-item>
+        <a-form-item v-if="temp.buildEnabled === 1" :label="$t('i18n_25b560dd87')" name="buildMaxConcurrency">
+          <a-input-number
+            v-model:value="temp.buildMaxConcurrency"
+            :min="1"
+            :precision="0"
+            placeholder="1"
+            style="width: 100%"
+          />
+          <template #help>{{ $t('i18n_5f8392cca2') }}</template>
+        </a-form-item>
+        <a-alert
+          v-if="buildEngineUnsupported"
+          :message="$t('i18n_0f58cfb453')"
+          type="warning"
+          show-icon
+          style="margin-bottom: 16px"
+        />
         <a-collapse>
           <a-collapse-panel key="1" :header="$t('i18n_9ab433e930')">
             <a-form-item :label="$t('i18n_04edc35414')" name="templateNode" help="">
@@ -805,6 +839,16 @@ export default {
           }
         },
         {
+          title: this.$t('i18n_4a172c87cb'),
+          dataIndex: 'buildEnabled',
+          width: '110px',
+          align: 'center',
+          ellipsis: true,
+          customRender: ({ text }) => {
+            return text === 1 ? this.$t('i18n_0a60ac8f02') : this.$t('i18n_c9744f45e7')
+          }
+        },
+        {
           title: this.$t('i18n_eca37cb072'),
           dataIndex: 'createTimeMillis',
           ellipsis: true,
@@ -837,6 +881,14 @@ export default {
   },
   computed: {
     ...mapState(useAppStore, ['getCollapsed']),
+    // 机器引擎：后端控制返回 engine 字段时据此禁用「可作为构建节点」，未返回则不据此禁用（由服务端校验）
+    buildEngine() {
+      const engine = this.temp && (this.temp.engine || this.temp.jpomEngine || this.temp.executorEngine)
+      return engine ? String(engine).toLowerCase() : ''
+    },
+    buildEngineUnsupported() {
+      return !!this.buildEngine && this.buildEngine !== 'go'
+    },
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
     },
@@ -896,7 +948,10 @@ export default {
     addMachine() {
       this.temp = {
         // 默认设置节点地址协议
-        jpomProtocol: 'Http'
+        jpomProtocol: 'Http',
+        // 构建节点开关默认关闭，并发上限默认 1（保持老行为）
+        buildEnabled: 0,
+        buildMaxConcurrency: 1
       }
       this.editVisible = true
     },
@@ -904,7 +959,20 @@ export default {
     handleEdit(record) {
       this.temp = Object.assign({}, record)
       delete this.temp.statusMsg
+      // 构建配置回显：老数据无此字段时按「不可作为构建节点 / 并发 1」处理
+      this.temp.buildEnabled = this.temp.buildEnabled === 1 ? 1 : 0
+      this.temp.buildMaxConcurrency =
+        this.temp.buildMaxConcurrency && this.temp.buildMaxConcurrency > 0 ? this.temp.buildMaxConcurrency : 1
       this.editVisible = true
+    },
+    // 切换「可作为构建节点」：打开时补齐并发上限默认值
+    changeBuildEnabled(checked) {
+      const buildEnabled = checked ? 1 : 0
+      const buildMaxConcurrency =
+        buildEnabled === 1 && (!this.temp.buildMaxConcurrency || this.temp.buildMaxConcurrency < 1)
+          ? 1
+          : this.temp.buildMaxConcurrency
+      this.temp = { ...this.temp, buildEnabled, buildMaxConcurrency }
     },
     // 提交节点数据
     handleEditOk() {

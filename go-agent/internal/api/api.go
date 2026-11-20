@@ -31,6 +31,7 @@ func RegisterAll(a *app.App) http.Handler {
 	registerProject(r, a)
 	registerProjectFile(r, a)
 	registerScript(r, a)
+	registerBuild(r, a)
 	registerWS(r, a)
 	return r
 }

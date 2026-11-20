@@ -110,7 +110,24 @@ public class BuildInfoModel extends BaseGroupModel {
     @PropIgnore
     private Boolean resultHasFile;
     /**
-     * 构建方式 0 本地构建 1 docker 构建
+     * 构建节点 ID（NODE_INFO 主键）。
+     * <p>
+     * 只在构建方式为「节点构建」（{@code buildMode=2}）时有值：把「拉取代码 + 执行构建命令 + 收集产物」
+     * 下发给该 Go 插件端节点执行，见 {@code org.dromara.jpom.build.RemoteBuildRunner}。
+     * 本地构建/容器构建一律为空。
+     */
+    private String buildNodeId;
+
+    /**
+     * 构建节点名称（仅列表展示用，不落库）
+     */
+    @PropIgnore
+    private String buildNodeName;
+
+    /**
+     * 构建方式 0 本地构建 1 docker（容器）构建 2 节点构建
+     *
+     * @see org.dromara.jpom.model.enums.BuildMode
      */
     private Integer buildMode;
     /**

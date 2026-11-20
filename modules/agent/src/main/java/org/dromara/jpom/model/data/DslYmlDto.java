@@ -20,6 +20,7 @@ import org.springframework.util.Assert;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -200,6 +201,33 @@ public class DslYmlDto extends BaseJsonModel {
          * 是否自动将控制台日志文件备份
          */
         private Boolean autoBackToFile;
+
+        /**
+         * 项目运行日志文件列表
+         * <p>
+         * 配置后项目控制台可以直接选择并实时查看这些日志文件（DSL 项目启动的应用通常自己管理日志文件，
+         * 不写入 Jpom 控制台日志）
+         */
+        private List<LogFile> log;
+    }
+
+    /**
+     * 项目运行日志文件配置
+     */
+    @Data
+    public static class LogFile {
+        /**
+         * 显示名称（控制台下拉框中的名称），未配置时使用文件名
+         */
+        private String name;
+        /**
+         * 日志文件路径，相对项目路径或绝对路径，支持 ${PROJECT_PATH}、${PROJECT_ID}、${PROJECT_NAME} 变量
+         */
+        private String path;
+        /**
+         * 文件编码，未配置时使用项目配置的日志编码（再回退到全局配置）
+         */
+        private String charset;
     }
 
 

@@ -9,6 +9,7 @@
  */
 package org.dromara.jpom.func.tunnel;
 
+import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.transport.DownloadCallback;
 import org.dromara.jpom.transport.INodeInfo;
@@ -73,9 +74,18 @@ public class RoutingTransportServer implements TransportServer {
             forward.download(nodeInfo, urlItem, data, consumer);
             return;
         }
-        TunnelRequestBody requestBody = TunnelRequestBody.build(nodeInfo, urlItem, data);
-        TunnelDownload download = channel.download(urlItem, requestBody.getBody(), requestBody.getContentType(), timeout(urlItem),
-            this.extraHeaders(nodeInfo, urlItem));
+        // 下载类接口在插件端是 @GetMapping，GET 不解析请求体：
+        // 必须把参数放到 query 上，否则插件端收到空参数（「请选择文件」/「备份id缺失」，BUGS B-007 / B-018）
+        Object bodyData = data;
+        IUrlItem targetItem = urlItem;
+        String query = TunnelRequestBody.buildQuery(nodeInfo, data);
+        if (StrUtil.isNotEmpty(query)) {
+            targetItem = new TunnelQueryUrlItem(urlItem, query);
+            bodyData = null;
+        }
+        TunnelRequestBody requestBody = TunnelRequestBody.build(nodeInfo, targetItem, bodyData);
+        TunnelDownload download = channel.download(targetItem, requestBody.getBody(), requestBody.getContentType(), timeout(targetItem),
+            this.extraHeaders(nodeInfo, targetItem));
         DownloadCallback callback = DownloadCallback.builder()
             .contentDisposition(download.getContentDisposition())
             .contentType(download.getContentType())

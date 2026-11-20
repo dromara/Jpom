@@ -168,6 +168,8 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
                 this.outGivingNodeProject.getProjectId(), this.buildNumberId, this.versionKeepCount);
             if (!jsonMessage.success()) {
                 log.warn("{} {}", I18nMessageUtil.get("i18n.version_snapshot_prepare_failed.b8d2"), jsonMessage);
+            } else if (!BuildVersionService.effective(jsonMessage)) {
+                log.warn(I18nMessageUtil.get("i18n.version_snapshot_not_effective.4c7a"));
             }
         } catch (Exception e) {
             log.warn(I18nMessageUtil.get("i18n.version_snapshot_prepare_exception.c3e5"), e);
@@ -186,6 +188,8 @@ public class OutGivingItemRun implements Callable<OutGivingNodeProject.Status> {
                 this.versionKeepCount, FileUtil.getAbsolutePath(this.file));
             if (!jsonMessage.success()) {
                 log.warn("{} {}", I18nMessageUtil.get("i18n.version_snapshot_commit_failed.e4c1"), jsonMessage);
+            } else if (!BuildVersionService.effective(jsonMessage)) {
+                log.warn(I18nMessageUtil.get("i18n.version_snapshot_not_effective.4c7a"));
             }
         } catch (Exception e) {
             log.warn(I18nMessageUtil.get("i18n.version_snapshot_commit_exception.f5b3"), e);

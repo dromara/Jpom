@@ -10,6 +10,7 @@
 package org.dromara.jpom.controller.node.manage;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.CharsetDetector;
@@ -171,6 +172,10 @@ public class ProjectManageControl extends BaseServerController {
     public IJsonMessage<String> saveProject(String id, HttpServletRequest request) {
         NodeModel node = getNode();
         this.checkProjectPermission(id, request, node);
+        // 分发标记只能由「节点分发」流程设置：原来把该字段透传给插件端，插件端不认，
+        // 保存后仍同步回 false，调用方却拿到「修改成功」（BUGS B-003）
+        Assert.state(!Convert.toBool(request.getParameter("outGivingProject"), false),
+            I18nMessageUtil.get("i18n.outgiving_project_flag_not_editable.b7d1"));
         //
         JsonMessage<String> jsonMessage = NodeForward.request(node, request, NodeUrl.Manage_SaveProject, "outGivingProject");
         if (jsonMessage.success()) {

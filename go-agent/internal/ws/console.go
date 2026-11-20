@@ -11,6 +11,7 @@
 package ws
 
 import (
+	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -190,7 +191,7 @@ func (m *Manager) HandleConsole(c *httpx.Context) {
 				m.searchProjectLog(session, current, request, m.projectLogCharset(current))
 				continue
 			}
-			file, ok := m.projectLogFile(current, bodyString(request, "fileName"))
+			file, charset, ok := m.projectLogFile(current, bodyString(request, "fileName"), bodyString(request, "logKey"))
 			if !ok {
 				_ = session.Send(m.translate(session, "i18n.file_not_found.d952"))
 				continue
@@ -201,7 +202,10 @@ func (m *Manager) HandleConsole(c *httpx.Context) {
 				m.Tail.DetachFile(currentFile, session.ID)
 			}
 			currentFile = file
-			attached, err := m.Tail.Attach(file, session, m.projectLogCharset(current))
+			if charset == "" {
+				charset = m.projectLogCharset(current)
+			}
+			attached, err := m.Tail.Attach(file, session, charset)
 			if err != nil {
 				_ = session.Send(err.Error())
 				continue
@@ -244,21 +248,34 @@ func (m *Manager) projectLogCharset(info map[string]any) string {
 	return script.ProjectLogCharset(projectCharset, configured)
 }
 
-// projectLogFile resolves the console log file to tail. An empty fileName means
-// the default <project-log-dir>/<projectId>.log; otherwise the file is resolved
-// inside the project lib directory (Java resolveAbsoluteLogFile / resolveSubFile).
-func (m *Manager) projectLogFile(info map[string]any, fileName string) (string, bool) {
+// projectLogFile resolves the console log file to tail.
+//
+// logKey: 项目配置的日志文件标识（DSL config.log），客户端只回传标识，路径由插件端解析；
+// fileName: 项目目录内的文件（Java resolveSubFile）；
+// 两者都为空：默认 <project-log-dir>/<projectId>.log（Link 项目解析到被软链项目）。
+func (m *Manager) projectLogFile(info map[string]any, fileName, logKey string) (string, string, bool) {
+	if strings.TrimSpace(logKey) != "" {
+		if m.ProjectRuntime == nil {
+			return "", "", false
+		}
+		item, ok := m.ProjectRuntime.ResolveDslLogFile(info, logKey)
+		if !ok {
+			return "", "", false
+		}
+		return item.Path, item.Charset, true
+	}
 	if fileName == "" {
 		// 默认控制台日志：<project-log>/<id>/<id>.log（Link 项目解析到被软链项目）
 		file, err := m.Projects.ResolveLogFile(info)
 		if err != nil {
-			return "", false
+			return "", "", false
 		}
-		return file, true
+		return file, "", true
 	}
 	libDir, err := project.ProjectPath(info)
 	if err != nil {
-		return "", false
+		return "", "", false
 	}
-	return resolveSubFile(libDir, fileName)
+	file, ok := resolveSubFile(libDir, fileName)
+	return file, "", ok
 }

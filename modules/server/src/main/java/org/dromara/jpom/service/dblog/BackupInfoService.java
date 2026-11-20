@@ -41,7 +41,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -266,7 +265,7 @@ public class BackupInfoService extends BaseDbService<BackupInfoModel> implements
     public int delByKey(String keyValue) {
         // 根据 id 查询备份信息
         BackupInfoModel backupInfoModel = super.getByKey(keyValue);
-        Objects.requireNonNull(backupInfoModel, I18nMessageUtil.get("i18n.backup_data_not_exist.f88c"));
+        Assert.notNull(backupInfoModel, I18nMessageUtil.get("i18n.backup_data_not_exist.f88c"));
 
         // 删除对应的文件
         boolean del = FileUtil.del(backupInfoModel.getFilePath());

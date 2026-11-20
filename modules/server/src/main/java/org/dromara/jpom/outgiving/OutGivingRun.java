@@ -199,7 +199,7 @@ public class OutGivingRun {
     public Future<OutGivingModel.Status> startRun(String select) {
         OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
         OutGivingModel item = outGivingServer.getByKey(id);
-        Objects.requireNonNull(item, I18nMessageUtil.get("i18n.no_distribution_exists.4425"));
+        Assert.notNull(item, I18nMessageUtil.get("i18n.no_distribution_exists.4425"));
         // 更新二级目录
         Opt.ofBlankAble(this.projectSecondaryDirectory).ifPresent(item::setSecondaryDirectory);
         //

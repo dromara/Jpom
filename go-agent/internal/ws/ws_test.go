@@ -317,6 +317,52 @@ func TestConsoleProtocol(t *testing.T) {
 	}
 }
 
+func TestConsoleProjectLogKey(t *testing.T) {
+	instance := testApp(t)
+	manager := testManager(t, instance)
+	libDir := filepath.Join(instance.BaseDir, "lib")
+	if err := os.MkdirAll(filepath.Join(libDir, "logs"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	appLog := filepath.Join(libDir, "logs", "app.log")
+	dslContent := "run:\n  start:\n    scriptId: a.sh\nconfig:\n  log:\n    - name: app\n      path: logs/app.log\n"
+	projectInfo := map[string]any{
+		"id": "p1", "name": "demo", "workspaceId": "DEFAULT", "runMode": "Dsl",
+		"whitelistDirectory": instance.BaseDir, "lib": "lib", "dslContent": dslContent,
+	}
+	fixture, err := json.Marshal(map[string]any{"p1": projectInfo})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(instance.DataDir, "project.json"), fixture, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	manager.Console = &fakeConsoleBackend{project: projectInfo, success: true}
+	server := startServer(t, instance, manager.HandleConsole)
+	conn := dial(t, server, "/console", "&projectId=p1&optUser=devadmin&lang=zh-CN")
+	_ = readText(t, conn, 3*time.Second)
+	if err := os.WriteFile(appLog, []byte("dsl-app-line-1\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	items := manager.ProjectRuntime.DslLogFiles(projectInfo)
+	if len(items) != 1 {
+		t.Fatalf("unexpected dsl log items: %+v", items)
+	}
+	// 控制台按配置的日志标识实时跟踪 DSL 应用日志
+	sendJSON(t, conn, map[string]any{"op": "showlog", "projectId": "p1", "logKey": items[0].Key})
+	if banner := readText(t, conn, 3*time.Second); !strings.Contains(banner, "监听app.log日志成功") {
+		t.Fatalf("unexpected dsl log banner: %s", banner)
+	}
+	if line := readText(t, conn, 3*time.Second); line != "dsl-app-line-1" {
+		t.Fatalf("unexpected dsl log line: %s", line)
+	}
+	// 未配置的标识直接提示文件不存在
+	sendJSON(t, conn, map[string]any{"op": "showlog", "projectId": "p1", "logKey": "not-exists-key"})
+	if msg := readText(t, conn, 3*time.Second); msg != "文件不存在" {
+		t.Fatalf("unexpected missing log message: %s", msg)
+	}
+}
+
 func TestFreeScriptRun(t *testing.T) {
 	instance := testApp(t)
 	manager := testManager(t, instance)

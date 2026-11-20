@@ -401,7 +401,11 @@
             <a-form-item :label="$t('i18n_b4c83b0b56')" name="registryUsername">
               <a-input v-model:value="temp.registryUsername" :placeholder="$t('i18n_b4c83b0b56')" />
             </a-form-item>
-            <a-form-item :label="$t('i18n_791870de48')" name="registryPassword">
+            <a-form-item
+              :label="$t('i18n_791870de48')"
+              name="registryPassword"
+              :extra="$t('i18n_5c1f0a9b2d')"
+            >
               <a-input-password v-model:value="temp.registryPassword" :placeholder="$t('i18n_791870de48')" />
             </a-form-item>
             <a-form-item :label="$t('i18n_feda0df7ef')" name="registryEmail">

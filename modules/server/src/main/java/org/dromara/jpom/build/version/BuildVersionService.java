@@ -52,6 +52,15 @@ public class BuildVersionService {
      */
     public static final int STATUS_DISCARD = 3;
 
+    /**
+     * 版本快照默认保留个数
+     * <p>
+     * 构建配置只打开「版本快照」开关、保留个数留空（默认 0）时使用。
+     * 历史上把 0 直接透传给插件端，插件端据此判定为「未启用」，于是发布成功但一条版本记录都不写，
+     * 快速回滚入口点进去永远是「没有记录」（2026-11-19 群反馈）。
+     */
+    public static final int DEFAULT_VERSION_KEEP_COUNT = 3;
+
     private final NodeBuildVersionService nodeBuildVersionService;
     private final NodeService nodeService;
 
@@ -69,6 +78,33 @@ public class BuildVersionService {
      */
     public boolean enabled(BuildExtraModule buildExtraModule) {
         return buildExtraModule != null && Boolean.TRUE.equals(buildExtraModule.getVersionSnapshot());
+    }
+
+    /**
+     * 归一版本保留个数：0 / 空一律按默认值处理，避免「开关已开但保留个数为 0」时静默不生效
+     *
+     * @param keepCount 构建配置里的保留个数
+     * @return 实际生效的保留个数
+     */
+    public static int resolveKeepCount(Integer keepCount) {
+        return (keepCount == null || keepCount <= 0) ? DEFAULT_VERSION_KEEP_COUNT : keepCount;
+    }
+
+    /**
+     * 插件端返回体是否真正启用了版本快照
+     * <p>
+     * 插件端在 {@code jpom.project.version-count <= 0}（或老版本没有该能力）时返回 success + enabled=false，
+     * 只看 success 会打印「已登记版本快照」但实际上既没有快照也没有索引记录，必须同时校验 enabled。
+     *
+     * @param jsonMessage 插件端返回
+     * @return true 真正生效
+     */
+    public static boolean effective(JsonMessage<JSONObject> jsonMessage) {
+        if (jsonMessage == null || !jsonMessage.success()) {
+            return false;
+        }
+        JSONObject data = jsonMessage.getData();
+        return data != null && Boolean.TRUE.equals(data.getBoolean("enabled"));
     }
 
     /**
@@ -94,7 +130,7 @@ public class BuildVersionService {
         JSONObject data = new JSONObject();
         data.put("id", projectId);
         data.put("buildNumberId", buildNumberId);
-        data.put("keepCount", keepCount);
+        data.put("keepCount", resolveKeepCount(keepCount));
         return NodeForward.request(nodeModel, NodeUrl.Manage_File_Version_Begin, data);
     }
 
@@ -115,7 +151,7 @@ public class BuildVersionService {
         data.put("id", projectId);
         data.put("buildNumberId", buildNumberId);
         data.put("buildDataId", buildDataId);
-        data.put("keepCount", keepCount);
+        data.put("keepCount", resolveKeepCount(keepCount));
         JsonMessage<JSONObject> jsonMessage = NodeForward.request(nodeModel, NodeUrl.Manage_File_Version_Commit, data);
         if (!jsonMessage.success()) {
             return jsonMessage;

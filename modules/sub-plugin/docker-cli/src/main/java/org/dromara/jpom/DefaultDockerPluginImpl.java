@@ -220,9 +220,17 @@ public class DefaultDockerPluginImpl implements IDockerConfigPlugin {
         String tag = reposTag.tag;
         tag = StrUtil.emptyToDefault(tag, "latest");
         logConsumer.accept(StrUtil.format("start pull {}:{}", reposTag.repos, tag));
-        PullImageCmd pullImageCmd = dockerClient.pullImageCmd(reposTag.repos)
-            .withTag(tag)
-            .withAuthConfig(dockerClient.authConfig());
+        PullImageCmd pullImageCmd = dockerClient.pullImageCmd(reposTag.repos).withTag(tag);
+        // 只有镜像来自资产配置的同一个仓库时才附带资产仓库凭据，避免把凭据发给调用者指定的第三方仓库
+        // （2026-11-19 外部安全报告：工作空间用户可以指定自己的 registry 拿到资产存储的仓库登录）
+        String registryUrl = (String) parameter.get("registryUrl");
+        if (DockerUtil.registryMatches(repositoryStr, registryUrl)) {
+            pullImageCmd.withAuthConfig(dockerClient.authConfig());
+        } else {
+            String message = StrUtil.format(I18nMessageUtil.get("i18n.pull_image_registry_credential_skipped.9d3c"), reposTag.repos, StrUtil.emptyToDefault(registryUrl, StrUtil.EMPTY));
+            log.info(message);
+            logConsumer.accept(message);
+        }
         pullImageCmd.exec(new InvocationBuilder.AsyncResultCallback<PullResponseItem>() {
             @Override
             public void onNext(PullResponseItem object) {

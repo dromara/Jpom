@@ -15,6 +15,7 @@ import (
 
 	"github.com/dromara/Jpom/go-agent/internal/app"
 	"github.com/dromara/Jpom/go-agent/internal/httpx"
+	"github.com/dromara/Jpom/go-agent/internal/ws"
 )
 
 // registerWS owns the websocket endpoints: /console, /script_run,
@@ -28,4 +29,6 @@ func registerWS(r *httpx.Router, a *app.App) {
 	r.Public(http.MethodGet, "/free-script-run", manager.HandleFreeScriptRun)
 	r.Public(http.MethodGet, "/system_log", manager.HandleSystemLog)
 	r.Public(http.MethodGet, "/node_update", manager.HandleNodeUpdate)
+	// 构建日志/事件流（PROTOCOL §3）：只读流，鉴权同样走握手查询参数。
+	r.Public(http.MethodGet, "/build-log", ws.HandleBuildLog(a, buildManagerFor(a)))
 }

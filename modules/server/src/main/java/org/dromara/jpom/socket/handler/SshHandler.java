@@ -105,7 +105,11 @@ public class SshHandler extends BaseTerminalHandler {
         } catch (Exception e) {
             // 输出超时日志 @author jzy
             log.error(I18nMessageUtil.get("i18n.ssh_console_connection_timeout.8eb3"), e);
-            sendBinary(session, I18nMessageUtil.get("i18n.ssh_console_connection_timeout.8eb3"));
+            // 原来无论什么原因都只回「SSH console connection timed out」，用户看不出是资产没分配、
+            // 认证失败还是网络不通（BUGS B-031）。这里把真实异常信息一并回显。
+            String reason = StrUtil.emptyToDefault(e.getMessage(), e.getClass().getSimpleName());
+            sendBinary(session, I18nMessageUtil.get("i18n.ssh_console_connection_timeout.8eb3")
+                + I18nMessageUtil.get("i18n.ssh_console_connection_reason.6f2a") + reason);
             this.destroy(session);
             return;
         }

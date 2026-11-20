@@ -60,6 +60,13 @@ jpom:
       file-charset:
   # 查看日志时初始读取最后多少行（默认10，0不读取）
   init-read-line: 10
+  # 构建执行（构建节点）：构建任务在本插件端执行时的节点侧配置
+  # 只增不改：不配置时全部走默认值，服务端本机构建行为不受影响
+  build:
+    # 同时执行的构建任务上限，超出时 /build/start 返回业务码 409（服务端排队重试）
+    max-concurrency: 1
+    # 节点侧构建日志与历史产物保留天数（<= 0 关闭自动清理）
+    keep-log-days: 7
   system:
     # cron 定时器是否开启匹配秒
     timer-match-second: false
