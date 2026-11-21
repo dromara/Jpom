@@ -243,6 +243,9 @@ public class TunnelClient {
         hello.setAgentVersion(options.getAgentVersion());
         hello.setOs(options.getOs());
         hello.setArch(options.getArch());
+        // 可选字段：服务端自动注册机器资产时用它补齐通讯账号/授权摘要（旧服务端忽略）
+        hello.setAuthUser(options.getAuthUser());
+        hello.setAuthToken(options.getAuthToken());
         hello.setTs(ts);
         hello.setNonce(nonce);
         hello.setSign(TunnelAuth.sign(options.getKey(), options.getMachineId(), ts, nonce));

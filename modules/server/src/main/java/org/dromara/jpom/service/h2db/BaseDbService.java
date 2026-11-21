@@ -601,6 +601,7 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
         String order = paramMap.get("order");
         //
         Page pageReq = this.parsePage(paramMap);
+        this.removeNotExistWorkspaceParam(paramMap);
         Entity where = buildWhere(paramMap, DialectUtil::wrapField);
         // 排序
         if (StrUtil.isNotEmpty(orderField)) {
@@ -653,6 +654,42 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
      * @param fieldWrapper 字段名包裹器（生产为 {@link DialectUtil#wrapField(String)}，单测可注入简单实现）
      * @return 查询条件
      */
+    /**
+     * 剔除「实体表里没有 workspaceId 列」时客户端仍携带的工作空间参数。
+     * <p>
+     * 客户端（含旧脚本、统一封装的请求头/参数）习惯给所有列表接口都带上 {@code workspaceId}，
+     * 但机器资产（{@code MACHINE_NODE_INFO}）、集群等实体并不属于工作空间。这类参数如果直接进
+     * {@link #buildWhere}，会被当成列名拼进 SQL，报 {@code Column "WORKSPACEID" not found} 并 500。
+     * 只对「非工作空间实体」生效，工作空间实体的隔离条件（{@code injectWorkspaceParam}）不受影响。
+     *
+     * @param paramMap 请求参数（会被就地修改）
+     */
+    private void removeNotExistWorkspaceParam(Map<String, String> paramMap) {
+        if (CollUtil.isEmpty(paramMap) || this.tClass == null) {
+            return;
+        }
+        if (removeNotExistWorkspaceParam(this.tClass, paramMap)) {
+            log.debug("ignore workspaceId filter for non-workspace entity: {}", this.tClass.getSimpleName());
+        }
+    }
+
+    /**
+     * 非工作空间实体剔除 workspaceId 过滤参数（可单测的纯函数版本）
+     *
+     * @param entityClass 实体类型
+     * @param paramMap    请求参数（就地修改）
+     * @return true 确实剔除了参数
+     */
+    static boolean removeNotExistWorkspaceParam(Class<?> entityClass, Map<String, String> paramMap) {
+        if (CollUtil.isEmpty(paramMap) || entityClass == null) {
+            return false;
+        }
+        if (ReflectUtil.getField(entityClass, "workspaceId") != null) {
+            return false;
+        }
+        return paramMap.keySet().removeIf(key -> StrUtil.equalsIgnoreCase("workspaceId", resolveFilterField(key)));
+    }
+
     static Entity buildWhere(Map<String, String> paramMap, Function<String, String> fieldWrapper) {
         Entity where = Entity.create();
         List<String> ignoreField = new ArrayList<>(10);

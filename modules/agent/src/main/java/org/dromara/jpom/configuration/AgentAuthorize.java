@@ -65,6 +65,22 @@ public class AgentAuthorize {
         return null;
     }
 
+    /**
+     * 反向隧道握手时上报给服务端的授权摘要（sha1(账号@密码)）。
+     * <p>
+     * 与 {@link #getAuthorize()} 的「不对外暴露」约定区分：这里只交给**已通过全局连接密钥 + HMAC 校验**
+     * 的服务端，用于自动注册机器资产时补齐通讯凭据摘要，不包含明文密码；本地任何接口都不会返回该值。
+     *
+     * @return 授权摘要，未初始化时返回 null
+     */
+    public String tunnelAuthToken() {
+        if (StrUtil.isEmpty(this.authorize) && StrUtil.isNotEmpty(this.agentName) && StrUtil.isNotEmpty(this.agentPwd)) {
+            // 兜底：隧道启动早于 AgentConfig#afterPropertiesSet 时也能给出摘要（同一算法，纯派生值）
+            this.authorize = SecureUtil.sha1(this.agentName + "@" + this.agentPwd);
+        }
+        return this.authorize;
+    }
+
 
     /**
      * 判断授权是否正确

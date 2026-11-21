@@ -9,6 +9,7 @@
  */
 package org.dromara.jpom.func.tunnel;
 
+import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.transport.TransportServer;
@@ -84,7 +85,9 @@ public class TunnelServerConfiguration implements WebSocketConfigurer {
         this.registry.addListener(new TunnelPushSnapshotCleaner(this.registry, this.tunnelPushService));
         this.registry.start();
         TransportServerFactory.set(new RoutingTransportServer(this.registry, this.forwardTransport));
-        log.info("反向连接隧道已启用，端点 {}，自动注册={}", TunnelConst.ENDPOINT_PATH, tunnelConfig.isAllowAutoRegister());
+        log.info("反向连接隧道已启用，端点 {}，自动注册={}{}", TunnelConst.ENDPOINT_PATH, tunnelConfig.isAllowAutoRegister(),
+            StrUtil.isNotEmpty(tunnelConfig.getAutoRegisterWorkspace())
+                ? "，自动分配到工作空间 " + tunnelConfig.getAutoRegisterWorkspace() : "");
     }
 
     @PreDestroy

@@ -185,6 +185,13 @@ public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
      */
     private String jpomPassword;
     /**
+     * 通讯授权摘要（sha1(账号@密码)），由插件端在反向隧道 HELLO 中上报后落库。
+     * <p>
+     * 只增字段：老数据为空时仍按 {@code jpomUsername/jpomPassword} 计算，行为不变；
+     * 自动注册的机器资产靠它直接可用，不必再让运维手工补密码。
+     */
+    private String authorizeToken;
+    /**
      * 超时时间
      */
     private Integer jpomTimeout;
@@ -271,6 +278,10 @@ public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
      */
     @Override
     public String authorize() {
+        if (StrUtil.isNotEmpty(this.authorizeToken)) {
+            // 插件端在隧道 HELLO 中上报的摘要优先（自动注册/隧道部署场景）
+            return this.authorizeToken;
+        }
         return SecureUtil.sha1(this.jpomUsername + "@" + this.jpomPassword);
     }
 

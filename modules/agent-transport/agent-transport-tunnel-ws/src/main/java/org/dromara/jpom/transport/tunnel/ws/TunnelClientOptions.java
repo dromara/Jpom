@@ -45,6 +45,14 @@ public class TunnelClientOptions {
      */
     private String arch;
     /**
+     * 本机授权账号（HELLO 上报，供服务端自动注册机器资产时补齐通讯账号）
+     */
+    private String authUser;
+    /**
+     * 本机授权摘要 sha1(name@pwd)（HELLO 上报，不含明文密码）
+     */
+    private String authToken;
+    /**
      * 本机 HTTP 基础地址（如 {@code http://127.0.0.1:2123}）
      */
     private String localHttpBase;
@@ -94,6 +102,22 @@ public class TunnelClientOptions {
 
     public void setKey(String key) {
         this.key = key;
+    }
+
+    public String getAuthUser() {
+        return authUser;
+    }
+
+    public void setAuthUser(String authUser) {
+        this.authUser = authUser;
+    }
+
+    public String getAuthToken() {
+        return authToken;
+    }
+
+    public void setAuthToken(String authToken) {
+        this.authToken = authToken;
     }
 
     public String getAgentVersion() {

@@ -52,12 +52,30 @@ public class ServerExceptionHandler extends BaseExceptionHandler {
      * @author jzy
      * @since 2021-08-01
      */
-    @ExceptionHandler({AgentException.class, TransportAgentException.class})
+    @ExceptionHandler({AgentException.class})
     public IJsonMessage<String> agentExceptionHandler(HttpServletRequest request, AgentException e) {
         Throwable cause = e.getCause();
         if (cause != null) {
             log.error("controller {}", request.getRequestURI(), cause);
         }
+        return new JsonMessage<>(405, e.getMessage());
+    }
+
+    /**
+     * 传输层异常（含反向隧道离线/超时、节点未通过隧道连接）
+     * <p>
+     * {@link TransportAgentException} 与 {@link AgentException} 是两套独立异常（都直接继承 RuntimeException），
+     * 不能共用同一个参数类型为 {@code AgentException} 的处理方法：Spring 在解析方法参数时会因类型不匹配抛错，
+     * 最终退化成通用「服务异常」文案，用户看不到「节点未通过反向隧道连接」这类真正原因。
+     *
+     * @param request 请求
+     * @param e       异常
+     * @return json
+     */
+    @ExceptionHandler({TransportAgentException.class})
+    public IJsonMessage<String> transportAgentExceptionHandler(HttpServletRequest request, TransportAgentException e) {
+        // 传输层异常多为链路状态问题（隧道离线、超时），只记一行 warn，避免刷堆栈
+        log.warn("controller {} transport error: {}", request.getRequestURI(), e.getMessage());
         return new JsonMessage<>(405, e.getMessage());
     }
 

@@ -52,7 +52,19 @@ public class SystemConfigController extends BaseAgentController {
         String content = IoUtil.read(resource.getInputStream(), CharsetUtil.CHARSET_UTF_8);
         JSONObject json = new JSONObject();
         json.put("content", content);
-        json.put("file", FileUtil.getAbsolutePath(resource.getFile()));
+        // 资源可能位于嵌套 jar 内（未按 bin/Agent.sh 传 -Dspring.config.location 启动时回退到 classpath），
+        // getFile() 会直接抛异常并把整页打成 500。此时内容仍可读，只是不能就地保存，返回 readonly 让前端禁用保存。
+        String file = null;
+        try {
+            file = FileUtil.getAbsolutePath(resource.getFile());
+        } catch (Exception e) {
+            log.warn("插件端配置不在文件系统内，配置页按只读返回：{}", e.getMessage());
+        }
+        json.put("file", file);
+        json.put("readonly", file == null);
+        if (file == null) {
+            json.put("readonlyMsg", I18nMessageUtil.get("i18n.agent_config_readonly_by_launch.9f21"));
+        }
         return JsonMessage.success("", json);
     }
 

@@ -43,15 +43,18 @@ var fatalCodes = map[int]bool{4001: true, 4002: true, 4003: true}
 
 // Options configures the agent side tunnel client.
 type Options struct {
-	ServerURL      string
-	MachineID      string
-	Key            string
-	AgentVersion   string
-	OS             string
-	Arch           string
-	LocalHTTPBase  string
-	LocalWSBase    string
-	Authorize      string
+	ServerURL     string
+	MachineID     string
+	Key           string
+	AgentVersion  string
+	OS            string
+	Arch          string
+	LocalHTTPBase string
+	LocalWSBase   string
+	Authorize     string
+	// AuthUser/AuthToken 随 HELLO 上报（服务端自动注册机器资产时补齐通讯账号与授权摘要）
+	AuthUser       string
+	AuthToken      string
 	MaxConcurrency int
 	Timeout        time.Duration
 	Logger         *slog.Logger
@@ -227,6 +230,8 @@ func (c *Client) handshake(conn *websocket.Conn) error {
 		AgentVersion: c.opts.AgentVersion,
 		OS:           c.opts.OS,
 		Arch:         c.opts.Arch,
+		AuthUser:     c.opts.AuthUser,
+		AuthToken:    c.opts.AuthToken,
 		Ts:           ts,
 		Nonce:        nonce,
 		Sign:         Sign(c.opts.Key, c.opts.MachineID, ts, nonce),

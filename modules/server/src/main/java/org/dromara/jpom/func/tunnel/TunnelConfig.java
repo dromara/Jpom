@@ -62,6 +62,14 @@ public class TunnelConfig {
     private int pushMaxAgeSeconds = TunnelConst.DEFAULT_PUSH_MAX_AGE_SECONDS;
 
     /**
+     * 自动注册的机器资产默认分配到哪个工作空间（工作空间 id）。
+     * <p>
+     * 为空（默认）表示只建机器资产、不分配，保持历史行为；配置后握手自动注册时会同时生成节点，
+     * 让「插件端配好 key 即可用」，不需要人工到机器资产页再点「分配」。
+     */
+    private String autoRegisterWorkspace;
+
+    /**
      * 是否启用
      *
      * @return true 已配置连接密钥

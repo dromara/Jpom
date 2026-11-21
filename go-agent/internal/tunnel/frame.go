@@ -72,9 +72,13 @@ type Frame struct {
 	AgentVersion string `json:"agentVersion,omitempty"`
 	OS           string `json:"os,omitempty"`
 	Arch         string `json:"arch,omitempty"`
-	Ts           int64  `json:"ts,omitempty"`
-	Nonce        string `json:"nonce,omitempty"`
-	Sign         string `json:"sign,omitempty"`
+	// AuthUser/AuthToken 为 HELLO 可选字段：服务端自动注册机器资产时补齐通讯账号与授权摘要。
+	// 旧服务端会忽略未知字段、旧插件端不会发送，双向兼容。
+	AuthUser  string `json:"authUser,omitempty"`
+	AuthToken string `json:"authToken,omitempty"`
+	Ts        int64  `json:"ts,omitempty"`
+	Nonce     string `json:"nonce,omitempty"`
+	Sign      string `json:"sign,omitempty"`
 
 	// HELLO_ACK
 	SessionID      string `json:"sessionId,omitempty"`

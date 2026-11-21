@@ -46,6 +46,8 @@ import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.assets.model.MachineNodeStatLogModel;
 import org.dromara.jpom.func.system.service.ClusterInfoService;
 import org.dromara.jpom.func.tunnel.TunnelPushService;
+import org.dromara.jpom.transport.tunnel.ws.TunnelChannelRegistry;
+import org.springframework.beans.factory.ObjectProvider;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.h2db.BaseDbService;
@@ -63,6 +65,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
@@ -84,9 +87,13 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
     private final AssetsExecutorPoolService assetsExecutorPoolService;
     private final TunnelPushService tunnelPushService;
     /**
+     * 反向隧道在线注册表（延迟获取：TunnelChannelRegistry 与本服务存在装配先后关系，直接注入会形成循环依赖）
+     */
+    private final ObjectProvider<TunnelChannelRegistry> tunnelChannelRegistryProvider;
+    /**
      * 推送模式节点连续未上报状态的次数（达到阈值自动回退拉取，避免插件端回退版本后永久异常）
      */
-    private final Map<String, Integer> pushMissCount = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<String, Integer> pushMissCount = new ConcurrentHashMap<>();
     /**
      * 每个节点最近一次已落库的推送：避免同一份推送在多个心跳周期里重复写统计日志
      */
@@ -104,13 +111,27 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
                              MachineNodeStatLogServer machineNodeStatLogServer,
                              ClusterInfoService clusterInfoService,
                              AssetsExecutorPoolService assetsExecutorPoolService,
-                             TunnelPushService tunnelPushService) {
+                             TunnelPushService tunnelPushService,
+                             ObjectProvider<TunnelChannelRegistry> tunnelChannelRegistryProvider) {
         this.nodeService = nodeService;
         this.nodeConfig = serverConfig.getNode();
         this.machineNodeStatLogServer = machineNodeStatLogServer;
         this.clusterInfoService = clusterInfoService;
         this.assetsExecutorPoolService = assetsExecutorPoolService;
         this.tunnelPushService = tunnelPushService;
+        this.tunnelChannelRegistryProvider = tunnelChannelRegistryProvider;
+    }
+
+    /**
+     * 清理不应回显给客户端的敏感字段（授权摘要）
+     *
+     * @param list 机器列表
+     */
+    public void clearSensitive(java.util.List<MachineNodeModel> list) {
+        if (CollUtil.isEmpty(list)) {
+            return;
+        }
+        list.forEach(item -> item.setAuthorizeToken(null));
     }
 
     @Override
@@ -283,6 +304,17 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
     }
 
     /**
+     * 节点当前是否还有在线的反向隧道通道
+     *
+     * @param machineId 机器标识
+     * @return true 在线
+     */
+    private boolean tunnelOnline(String machineId) {
+        TunnelChannelRegistry registry = this.tunnelChannelRegistryProvider.getIfAvailable();
+        return registry != null && registry.isOnline(machineId);
+    }
+
+    /**
      * 推送模式的节点状态刷新：消费插件端主动上报的最新快照
      * <p>
      * 推送数据过期（超过 {@code jpom.agent.tunnel.push-max-age-seconds}）按无法连接处理，
@@ -298,6 +330,12 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
             try {
                 TunnelPushService.Snapshot snapshot = this.tunnelPushService.fresh(machineNodeModel.getId());
                 if (snapshot == null) {
+                    if (this.tunnelOnline(machineNodeModel.getId())) {
+                        // 通道仍在线只是首帧推送还没到（插件端首次状态采集/oshi 初始化可能要几十秒），
+                        // 不能据此判定节点不可用：离线由隧道心跳（通道关闭）负责判定。
+                        log.debug("节点[{}]反向隧道在线但暂未收到推送，保持上一状态", machineNodeModel.getName());
+                        return;
+                    }
                     this.updateStatus(machineNodeModel, 0, I18nMessageUtil.get("i18n.tunnel_push_data_timeout.7c1a"));
                     this.fallbackToPollIfMissed(machineNodeModel);
                     return;
