@@ -57,6 +57,8 @@ DEFAULT_TESTS=(
 	# 权限拦截：handler @Feature fail-closed + 节点数据权限 fail-closed
 	HandlerFeatureAnnotationTest
 	PermissionInterceptorNodeDataTest
+	# IP 访问判定：读不到 IP 配置必须回「配置读取失败」而不是 999 IP 拒绝（2026-11-21 重启计划群反馈）
+	IpInterceptorAccessTest
 	# WebSocket 握手鉴权（Origin / 会话 / 禁用账号）
 	ServerWebSocketInterceptorTest
 	# 文件日志监听器会话/Tailer 生命周期（agent 控制台 OOM 回归守卫）

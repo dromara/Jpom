@@ -163,7 +163,7 @@ public class PermissionInterceptor implements HandlerMethodInterceptor {
                 BaseNodeModel data = baseNodeService.getData(node.getId(), dataId);
                 UserBindWorkspaceModel.PermissionResult permissionResult = data == null ? null
                     : userBindWorkspaceService.checkPermission(userModel, data.getWorkspaceId());
-                if (!isNodeDataPermissionAllowed(data, permissionResult)) {
+                if (!isNodeDataPermissionAllowed(data, permissionResult, nodeDataPermission.allowMissingData())) {
                     if (permissionResult == null) {
                         // fail-closed：缓存未命中（节点数据未同步/已删除）无法确定数据所属工作空间，按无权限拒绝
                         log.warn("node data not found for permission check, deny (fail-closed): nodeId={}, dataId={}", node.getId(), dataId);
@@ -190,6 +190,23 @@ public class PermissionInterceptor implements HandlerMethodInterceptor {
      * @return true 允许执行
      */
     static boolean isNodeDataPermissionAllowed(BaseNodeModel data, UserBindWorkspaceModel.PermissionResult permissionResult) {
+        return isNodeDataPermissionAllowed(data, permissionResult, false);
+    }
+
+    /**
+     * 节点数据权限判定（含「新增」语义）。
+     *
+     * @param data              节点缓存数据（未命中为 null）
+     * @param permissionResult  数据所属工作空间的权限校验结果（未命中为 null）
+     * @param allowMissingData  方法是否显式声明允许「数据尚未入库」（新增场景）
+     * @return true 允许执行
+     */
+    static boolean isNodeDataPermissionAllowed(BaseNodeModel data, UserBindWorkspaceModel.PermissionResult permissionResult, boolean allowMissingData) {
+        if (data == null && permissionResult == null) {
+            // 新增语义：数据本来就还不存在（如新增项目时必填的项目 ID），
+            // 放行到方法内部继续校验工作空间（@Feature）与数据归属
+            return allowMissingData;
+        }
         return data != null && permissionResult != null && permissionResult.isSuccess();
     }
 

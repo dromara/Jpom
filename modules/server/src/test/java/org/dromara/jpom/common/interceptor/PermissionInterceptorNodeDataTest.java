@@ -72,6 +72,37 @@ public class PermissionInterceptorNodeDataTest {
     }
 
     /**
+     * 新增语义：方法显式声明 allowMissingData 时，数据尚未入库（data == null）应放行到方法内部继续校验。
+     * <p>
+     * 回归背景（2026-11-21 重启计划群反馈）：新增项目时前端必填的项目 ID 还没入库，节点项目缓存必然查不到，
+     * 非超级管理员被 fail-closed 误判为越权，只有 `sys` 账号能建项目。
+     */
+    @Test
+    public void testMissingDataAllowedWhenDeclared() {
+        assertTrue(PermissionInterceptor.isNodeDataPermissionAllowed(null, null, true),
+            "声明 allowMissingData（新增场景）时，数据不存在应放行到方法内部校验");
+    }
+
+    /**
+     * 未声明 allowMissingData 的方法行为不变：缓存未命中仍然 fail-closed。
+     */
+    @Test
+    public void testMissingDataDeniedByDefaultOverload() {
+        assertFalse(PermissionInterceptor.isNodeDataPermissionAllowed(null, null, false),
+            "未声明新增语义时，缓存未命中必须继续拒绝");
+    }
+
+    /**
+     * 新增语义不得成为越权后门：数据存在但无权访问时，即使声明了 allowMissingData 也必须拒绝。
+     */
+    @Test
+    public void testAllowMissingDataDoesNotBypassDeniedPermission() {
+        BaseNodeModel data = mock(BaseNodeModel.class);
+        assertFalse(PermissionInterceptor.isNodeDataPermissionAllowed(data, permission(false), true),
+            "数据存在但无权限时，新增语义不得放行");
+    }
+
+    /**
      * 权限结果成功但 data 为 null（理论上不会同时出现）也必须拒绝，避免调用方错误组合导致放行。
      */
     @Test
