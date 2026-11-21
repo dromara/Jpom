@@ -21,15 +21,16 @@
         >
           <template #tool_before>
             <a-alert v-if="temp.file" show-icon :message="`${$t('i18n_37c1eb9b23')}:${temp.file}`" />
+            <a-alert v-else-if="temp.readonly" type="warning" show-icon :message="temp.readonlyMsg" />
           </template>
         </code-editor>
       </a-form-item>
       <a-form-item :wrapper-col="{ span: 14, offset: 2 }">
         <a-space>
-          <a-button type="primary" :disabled="submitAble" @click="onSubmit(false)">{{
+          <a-button type="primary" :disabled="submitAble || temp.readonly" @click="onSubmit(false)">{{
             $t('i18n_be5fbbe34c')
           }}</a-button>
-          <a-button type="primary" danger :disabled="submitAble" @click="onSubmit(true)">{{
+          <a-button type="primary" danger :disabled="submitAble || temp.readonly" @click="onSubmit(true)">{{
             $t('i18n_6aab88d6a3')
           }}</a-button>
         </a-space>
@@ -71,9 +72,11 @@ export default {
     loadData() {
       getConfigData({ machineId: this.machineId }).then((res) => {
         if (res.code === 200) {
-          this.temp.content = res.data
           this.temp.content = res.data.content
           this.temp.file = res.data.file
+          // 配置文件在程序包内（未按 bin/Agent.sh 启动）时后端返回 readonly，前端同步禁用保存
+          this.temp.readonly = res.data.readonly === true
+          this.temp.readonlyMsg = res.data.readonlyMsg
         }
       })
     },

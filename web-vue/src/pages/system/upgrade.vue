@@ -130,12 +130,12 @@
               </a-tag>
             </template>
             <template v-else-if="column.dataIndex === 'engine'">
-              <a-tag v-if="text === 'go'" color="blue">Go</a-tag>
-              <a-tag v-else-if="text === 'java'">Java</a-tag>
-              <span v-else>---</span>
+              <a-tag v-if="text === 'go'" color="green">{{ $t('i18n_11b8cdd4a6') }}</a-tag>
+              <a-tag v-else-if="text === 'java'" color="blue">{{ $t('i18n_ac0399d13b') }}</a-tag>
+              <span v-else>{{ $t('i18n_1622dc9b6b') }}</span>
             </template>
             <template v-else-if="column.dataIndex === 'platform'">
-              {{ record.engine === 'go' ? text || $t('i18n_7daad00d6a') : '---' }}
+              {{ text || $t('i18n_7daad00d6a') }}
             </template>
             <template v-else-if="column.dataIndex === 'updateStatus'">
               <div v-if="text && text.type === 'restarting'">
@@ -216,7 +216,8 @@ export default {
           ellipsis: true
         },
         {
-          title: this.$t('i18n_6c1b19dde4'),
+          // 与机器管理同一概念同一叫法：引擎（agent engine）统一展示为「插件端类型」
+          title: this.$t('i18n_084fca46ee'),
           dataIndex: 'engine',
           width: '80px',
           ellipsis: true
@@ -261,7 +262,7 @@ export default {
         {
           title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
-          width: '80px',
+          width: '1%',
 
           align: 'center',
           fixed: 'right'
@@ -349,14 +350,12 @@ export default {
             } else if (itemData.jarFile) {
               item.engine = /\.jar$/i.test(itemData.jarFile) ? 'java' : 'go'
             }
-            // 平台：优先 manifest.platform；旧版 Go 插件端只有 arch + osName 时按 Server 同口径映射
-            if (item.engine === 'go') {
-              item.platform = itemData.platform || ''
-              if (!item.platform && itemData.arch) {
-                const osMap = { linux: 'linux', windows: 'windows', 'mac os x': 'darwin' }
-                const os = osMap[(itemData.osName || '').toLowerCase()]
-                item.platform = os ? `${os}/${itemData.arch}` : ''
-              }
+            // 平台：优先 manifest.platform（Java/Go 插件端都上报）；旧版插件端只有 arch + osName 时按 Server 同口径映射
+            item.platform = itemData.platform || ''
+            if (!item.platform && itemData.arch) {
+              const osMap = { linux: 'linux', windows: 'windows', 'mac os x': 'darwin' }
+              const os = osMap[(itemData.osName || '').toLowerCase()]
+              item.platform = os ? `${os}/${itemData.arch}` : ''
             }
           } catch (e) {
             item.version = itemData
@@ -377,7 +376,10 @@ export default {
       })
     },
     initWebsocket(ids) {
-      if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)) {
+      if (
+        this.socket &&
+        (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)
+      ) {
         this.initHeart(ids)
         return
       }
@@ -711,7 +713,7 @@ export default {
         engine = 'go'
         platform = this.temp.packagePlatform || ''
       }
-      const engineText = engine === 'go' ? 'Go' : 'Java'
+      const engineText = engine === 'go' ? this.$t('i18n_11b8cdd4a6') : this.$t('i18n_ac0399d13b')
       const platformText = engine === 'go' ? platform || this.$t('i18n_2a20de5e5a') : '---'
       const packageTypeText = engine === 'go' ? this.$t('i18n_baee195ca8') : this.$t('i18n_6fb5d67e27')
       const downloadSource = this.$t('i18n_917381e4a5')

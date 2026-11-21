@@ -38,9 +38,20 @@ func parseEditSuffix(suffixes []string) []editSuffixRule {
 			continue
 		}
 		rule := editSuffixRule{}
-		if index := strings.IndexByte(item, '@'); index >= 0 {
-			rule.pattern = item[:index]
-			rule.charset = item[index+1:]
+		// 与 Java AgentWhitelist#parserFileSuffixMap 对齐：pattern 取第一个 '@' 之前，
+		// charset 取**最后一个** '@' 之后。历史数据/脚本里如果一条里塞了多个
+		// "suffix@charset"（用逗号等分隔），只有最后一个 @ 后面才是真正的字体名，
+		// 取第一段会把 "UTF-8,.txt@UTF-8" 这种串当成字体名而报错。
+		firstAt := strings.IndexByte(item, '@')
+		lastAt := strings.LastIndexByte(item, '@')
+		if firstAt >= 0 {
+			rule.pattern = item[:firstAt]
+			if lastAt >= 0 {
+				charset := strings.TrimSpace(item[lastAt+1:])
+				if isKnownCharsetName(charset) {
+					rule.charset = charset
+				}
+			}
 		} else {
 			rule.pattern = item
 		}
@@ -50,6 +61,24 @@ func parseEditSuffix(suffixes []string) []editSuffixRule {
 		rules = append(rules, rule)
 	}
 	return rules
+}
+
+// isKnownCharsetName reports whether value looks like a charset name (letters,
+// digits, '-' and '_' only). Unknown-but-well-formed names are kept as-is so the
+// decoder can report them precisely; malformed values (e.g. a concatenated list
+// like "UTF-8,.txt@UTF-8") fall back to the default charset instead of failing.
+func isKnownCharsetName(value string) bool {
+	if value == "" {
+		return false
+	}
+	for _, r := range value {
+		switch {
+		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9', r == '-', r == '_':
+		default:
+			return false
+		}
+	}
+	return true
 }
 
 // editCharset returns the charset configured for filename, or nil when the file

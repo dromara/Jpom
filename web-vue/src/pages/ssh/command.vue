@@ -555,7 +555,7 @@ export default {
           align: 'center',
 
           fixed: 'right',
-          width: '240px'
+          width: '1%'
         }
       ],
 

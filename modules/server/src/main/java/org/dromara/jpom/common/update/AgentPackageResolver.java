@@ -13,6 +13,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import org.dromara.jpom.util.PlatformUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -232,20 +233,7 @@ public final class AgentPackageResolver {
      * @return 规范化平台（小写、arch 别名归一），非法格式返回 null
      */
     public static String normalizePlatform(String platform) {
-        if (StrUtil.isBlank(platform)) {
-            return null;
-        }
-        String value = StrUtil.trim(platform).toLowerCase(Locale.ROOT);
-        int index = value.indexOf('/');
-        if (index <= 0 || index >= value.length() - 1) {
-            return null;
-        }
-        String os = normalizeOs(value.substring(0, index));
-        String arch = normalizeArch(value.substring(index + 1));
-        if (StrUtil.isBlank(os) || StrUtil.isBlank(arch)) {
-            return null;
-        }
-        return os + "/" + arch;
+        return PlatformUtil.normalizePlatform(platform);
     }
 
     /**
@@ -255,21 +243,7 @@ public final class AgentPackageResolver {
      * @return 规范化系统名（linux/windows/darwin 等），无法识别返回 null
      */
     public static String normalizeOs(String osName) {
-        if (StrUtil.isBlank(osName)) {
-            return null;
-        }
-        String os = StrUtil.trim(osName).toLowerCase(Locale.ROOT);
-        if ("linux".equals(os)) {
-            return "linux";
-        }
-        if ("windows".equals(os) || "win".equals(os) || "win32".equals(os)) {
-            return "windows";
-        }
-        if ("darwin".equals(os) || "mac".equals(os) || "macos".equals(os) || "mac os x".equals(os) || "osx".equals(os)) {
-            return "darwin";
-        }
-        // 其他平台保留小写原值（仍做精确比较，避免把未知系统误判为不支持）
-        return os.matches("[a-z0-9]+") ? os : null;
+        return PlatformUtil.normalizeOs(osName);
     }
 
     /**
@@ -279,20 +253,7 @@ public final class AgentPackageResolver {
      * @return 规范化架构（amd64/arm64 等），无法识别返回 null
      */
     public static String normalizeArch(String arch) {
-        if (StrUtil.isBlank(arch)) {
-            return null;
-        }
-        String value = StrUtil.trim(arch).toLowerCase(Locale.ROOT);
-        if ("x86_64".equals(value) || "x64".equals(value) || "amd64".equals(value)) {
-            return "amd64";
-        }
-        if ("aarch64".equals(value) || "arm64v8".equals(value) || "arm64".equals(value)) {
-            return "arm64";
-        }
-        if ("x86".equals(value) || "i386".equals(value) || "i686".equals(value) || "386".equals(value)) {
-            return "386";
-        }
-        return value.matches("[a-z0-9_]+") ? value : null;
+        return PlatformUtil.normalizeArch(arch);
     }
 
     /**

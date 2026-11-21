@@ -288,7 +288,7 @@ export default {
           dataIndex: 'operation',
           fixed: 'right',
           align: 'center',
-          width: '80px'
+          width: '1%'
         }
       ],
 

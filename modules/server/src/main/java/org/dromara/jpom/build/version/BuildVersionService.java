@@ -22,8 +22,10 @@ import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.data.NodeBuildVersionModel;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.log.BuildHistoryLog;
+import org.dromara.jpom.model.enums.BuildReleaseMethod;
 import org.dromara.jpom.service.build.NodeBuildVersionService;
 import org.dromara.jpom.service.node.NodeService;
+import org.dromara.jpom.service.sshproject.SshProjectVersionService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -63,11 +65,26 @@ public class BuildVersionService {
 
     private final NodeBuildVersionService nodeBuildVersionService;
     private final NodeService nodeService;
+    private final SshProjectVersionService sshProjectVersionService;
 
     public BuildVersionService(NodeBuildVersionService nodeBuildVersionService,
-                               NodeService nodeService) {
+                               NodeService nodeService,
+                               SshProjectVersionService sshProjectVersionService) {
         this.nodeBuildVersionService = nodeBuildVersionService;
         this.nodeService = nodeService;
+        this.sshProjectVersionService = sshProjectVersionService;
+    }
+
+    /**
+     * 该构建历史是否发布到 SSH 项目（SSH 项目的版本快照在远端目录，与插件端项目是两套落地方式）
+     *
+     * @param buildHistoryLog 构建历史
+     * @return true 是 SSH 项目
+     */
+    public static boolean isSshProject(BuildHistoryLog buildHistoryLog) {
+        return buildHistoryLog != null
+            && buildHistoryLog.getReleaseMethod() != null
+            && buildHistoryLog.getReleaseMethod() == BuildReleaseMethod.SshProject.getCode();
     }
 
     /**
@@ -219,6 +236,10 @@ public class BuildVersionService {
      * @return json
      */
     public JSONObject listByLog(BuildHistoryLog buildHistoryLog) {
+        if (isSshProject(buildHistoryLog)) {
+            // SSH 项目：版本快照在目标机器上，直接按构建编号过滤远端版本
+            return sshProjectVersionService.listByBuildLog(buildHistoryLog);
+        }
         Integer buildNumberId = ObjectUtil.defaultIfNull(buildHistoryLog.getFromBuildNumberId(), buildHistoryLog.getBuildNumberId());
         List<NodeBuildVersionModel> list = nodeBuildVersionService.listByBuild(buildHistoryLog.getBuildDataId(), buildNumberId);
         JSONArray array = new JSONArray();

@@ -272,7 +272,7 @@ export default {
           align: 'center',
           dataIndex: 'operation',
           fixed: 'right',
-          width: '80px'
+          width: '1%'
         }
       ]
     }

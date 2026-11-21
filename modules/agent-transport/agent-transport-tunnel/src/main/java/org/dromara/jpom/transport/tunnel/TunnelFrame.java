@@ -39,6 +39,17 @@ public class TunnelFrame {
     private String agentVersion;
     private String os;
     private String arch;
+    /**
+     * 插件端自身的授权账号（HELLO 可选字段，用于服务端自动注册时补齐机器资产通讯账号）
+     */
+    private String authUser;
+    /**
+     * 插件端自身的授权摘要 sha1(name@pwd)（HELLO 可选字段，不含明文密码）
+     * <p>
+     * 服务端落库到 {@code MachineNodeModel.authorizeToken}，只对通过 HMAC 握手校验的连接生效；
+     * 旧服务端会忽略该字段，旧插件端不会发送，故双向兼容。
+     */
+    private String authToken;
     private Long ts;
     private String nonce;
     private String sign;
@@ -202,6 +213,22 @@ public class TunnelFrame {
 
     public void setAgentVersion(String agentVersion) {
         this.agentVersion = agentVersion;
+    }
+
+    public String getAuthUser() {
+        return authUser;
+    }
+
+    public void setAuthUser(String authUser) {
+        this.authUser = authUser;
+    }
+
+    public String getAuthToken() {
+        return authToken;
+    }
+
+    public void setAuthToken(String authToken) {
+        this.authToken = authToken;
     }
 
     public String getOs() {

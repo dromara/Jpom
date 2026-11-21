@@ -467,6 +467,9 @@
         :data-source="repos"
         bordered
         row-key="full_name"
+        :scroll="{
+          x: 'max-content'
+        }"
         :pagination="reposPagination"
         @change="reposChange"
       >
@@ -696,7 +699,7 @@ export default {
           dataIndex: 'operation',
           fixed: 'right',
           align: 'center',
-          width: this.global ? '240px' : '180px'
+          width: '1%'
         }
       ],
 
@@ -732,9 +735,10 @@ export default {
         {
           title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
-          width: 100,
+          width: '1%',
 
-          align: 'left'
+          align: 'left',
+          fixed: 'right'
         }
       ],
 

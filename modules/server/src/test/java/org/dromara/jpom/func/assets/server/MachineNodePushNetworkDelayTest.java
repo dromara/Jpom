@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
  * <p>
  * 插件端上报 {@code systemSleep}（采集固定休眠，{@code NET_STAT_SLEEP + CPU_STAT_SLEEP = 2000ms}），
  * {@code saveStatInfo} 会执行 {@code networkDelay - systemSleep}；如果推送时把 networkDelay 写成 0，
- * 节点详情会显示 -2000ms、监控曲线出现负值（实测 2026-11-18 jpom-dev 环境）。
+ * 节点详情会显示 -2000ms、监控曲线出现负值（开发环境实测现象）。
  *
  * @author jpom
  * @since 2026/11/18

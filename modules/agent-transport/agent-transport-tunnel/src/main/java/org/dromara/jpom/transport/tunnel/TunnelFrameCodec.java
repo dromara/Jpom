@@ -127,17 +127,32 @@ public final class TunnelFrameCodec {
      * @return 帧列表
      */
     public static List<byte[]> split(String sid, byte[] body) {
+        return split(sid, body, true);
+    }
+
+    /**
+     * 把一段数据切成多个数据帧
+     *
+     * @param sid      逻辑请求 / 流标识
+     * @param body     数据
+     * @param lastFin  最后一帧是否携带 FIN（结束该方向）
+     * @return 帧列表
+     */
+    public static List<byte[]> split(String sid, byte[] body, boolean lastFin) {
         List<byte[]> frames = new ArrayList<>();
         int length = body == null ? 0 : body.length;
         if (length == 0) {
-            frames.add(encodeData(sid, null, true));
+            // 空数据只在需要结束方向时才发一个仅带 FIN 的帧；双向流的消息不得携带 FIN
+            if (lastFin) {
+                frames.add(encodeData(sid, null, true));
+            }
             return frames;
         }
         int offset = 0;
         while (offset < length) {
             int end = Math.min(offset + TunnelConst.MAX_DATA_FRAME_SIZE, length);
             byte[] slice = Arrays.copyOfRange(body, offset, end);
-            frames.add(encodeData(sid, slice, end >= length));
+            frames.add(encodeData(sid, slice, lastFin && end >= length));
             offset = end;
         }
         return frames;

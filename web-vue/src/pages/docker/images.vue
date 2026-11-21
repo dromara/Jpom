@@ -267,7 +267,7 @@ export default {
           title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
           fixed: 'right',
-          width: '160px'
+          width: '1%'
         }
       ],
 

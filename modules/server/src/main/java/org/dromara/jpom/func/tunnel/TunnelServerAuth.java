@@ -11,9 +11,11 @@ package org.dromara.jpom.func.tunnel;
 
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.assets.server.MachineNodeServer;
 import org.dromara.jpom.transport.tunnel.TunnelAuth;
+import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.transport.tunnel.TunnelConst;
 import org.dromara.jpom.transport.tunnel.TunnelFrame;
 import org.dromara.jpom.transport.tunnel.ws.TunnelAuthResult;
@@ -60,6 +62,8 @@ public class TunnelServerAuth implements TunnelAuthenticator {
         }
         MachineNodeModel machineNodeModel = machineNodeServer.getByKey(machineId);
         if (machineNodeModel != null) {
+            // 老数据/自动注册时缺授权信息：用插件端上报的摘要补齐，避免节点一直「授权信息错误」
+            this.fillAuthorize(machineNodeModel, hello);
             return TunnelAuthResult.ok(machineId);
         }
         if (!tunnelConfig.isAllowAutoRegister()) {
@@ -81,8 +85,62 @@ public class TunnelServerAuth implements TunnelAuthenticator {
         model.setHostName(hello.getMachineId());
         model.setHostIpv4s(remoteAddress);
         model.setOsName(hello.getOs());
+        // 插件端在 HELLO 里上报的授权账号/摘要：落库后该节点无需人工补密码即可被服务端调用
+        model.setJpomUsername(hello.getAuthUser());
+        model.setAuthorizeToken(hello.getAuthToken());
         machineNodeServer.insert(model);
-        log.info("反向隧道自动注册节点 {}（ip={}, agent={}, os={}/{})", hello.getMachineId(), remoteAddress,
-            hello.getAgentVersion(), hello.getOs(), hello.getArch());
+        log.info("反向隧道自动注册节点 {}（ip={}, agent={}, os={}/{}, 授权信息={}）", hello.getMachineId(), remoteAddress,
+            hello.getAgentVersion(), hello.getOs(), hello.getArch(), StrUtil.isNotEmpty(hello.getAuthToken()) ? "已自动绑定" : "缺失，需手工补充");
+        this.assignWorkspace(model);
+    }
+
+    /**
+     * 已有机器资产但缺授权信息时，用握手上报的摘要补齐（不覆盖人工配置）
+     *
+     * @param machineNodeModel 机器资产
+     * @param hello            握手帧
+     */
+    private void fillAuthorize(MachineNodeModel machineNodeModel, TunnelFrame hello) {
+        if (StrUtil.isEmpty(hello.getAuthToken())) {
+            return;
+        }
+        boolean needToken = StrUtil.isEmpty(machineNodeModel.getAuthorizeToken());
+        boolean needUser = StrUtil.isEmpty(machineNodeModel.getJpomUsername()) && StrUtil.isNotEmpty(hello.getAuthUser());
+        if (!needToken && !needUser) {
+            return;
+        }
+        MachineNodeModel update = new MachineNodeModel();
+        update.setId(machineNodeModel.getId());
+        if (needUser) {
+            update.setJpomUsername(hello.getAuthUser());
+        }
+        if (needToken) {
+            update.setAuthorizeToken(hello.getAuthToken());
+        }
+        machineNodeServer.updateById(update);
+        log.info("反向隧道节点 {} 已用插件端上报的授权信息自动补齐", machineNodeModel.getId());
+    }
+
+    /**
+     * 按配置把自动注册的机器分配到工作空间（未配置则跳过，保持「只建档」行为）
+     *
+     * @param machineNodeModel 机器资产
+     */
+    private void assignWorkspace(MachineNodeModel machineNodeModel) {
+        String workspaceId = tunnelConfig.getAutoRegisterWorkspace();
+        if (StrUtil.isEmpty(workspaceId)) {
+            return;
+        }
+        try {
+            // 握手线程没有登录用户上下文，插入节点需要系统用户（否则报「没有对应的用户」）
+            BaseServerController.resetInfo(UserModel.EMPTY);
+            machineNodeServer.insertNode(machineNodeModel, workspaceId);
+            log.info("反向隧道自动注册节点 {} 已分配到工作空间 {}", machineNodeModel.getId(), workspaceId);
+        } catch (Exception e) {
+            // 分配失败不影响握手（机器资产已建，人工可再分配）
+            log.warn("反向隧道自动注册节点 {} 分配到工作空间 {} 失败：{}", machineNodeModel.getId(), workspaceId, e.getMessage());
+        } finally {
+            BaseServerController.removeEmpty();
+        }
     }
 }

@@ -79,6 +79,8 @@ public class MachineNodeController extends BaseGroupNameController {
         PageResultDto<MachineNodeModel> pageResultDto = machineNodeServer.listPage(request);
         // 长时间没有刷新检测结果的机器不能继续显示"正常"
         machineNodeServer.fillTimeoutStatus(pageResultDto.getResult());
+        // 授权摘要等价于通讯凭据：列表接口不回显（密码已由 fillSelectResult 置空）
+        machineNodeServer.clearSensitive(pageResultDto.getResult());
         return JsonMessage.success("", pageResultDto);
     }
 

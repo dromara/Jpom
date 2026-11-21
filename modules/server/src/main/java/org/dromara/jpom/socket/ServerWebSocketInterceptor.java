@@ -243,6 +243,16 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
                 attributes.put("dataItem", dataItem);
                 break;
             }
+            case sshProject: {
+                // SSH 项目控制台
+                Object dataItem = this.checkData(handlerType, userModel, httpServletRequest);
+                if (dataItem == null) {
+                    return false;
+                }
+                attributes.put("dataItem", dataItem);
+                attributes.put("projectId", BeanUtil.getProperty(dataItem, "id"));
+                break;
+            }
             case nodeScript: {
                 // 节点脚本模板
                 Object dataItem = this.checkData(handlerType, userModel, httpServletRequest);
@@ -351,7 +361,9 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
                 attributes.put("permissionMsg", string);
                 return true;
             }
-            boolean checkNode = this.checkNode(httpServletRequest, attributes, userModel);
+            // SSH 项目不依赖插件端节点，没有必要传 nodeId，也不能因为没有 nodeId 就拒绝握手
+            boolean checkNode = handlerType == HandlerType.sshProject
+                || this.checkNode(httpServletRequest, attributes, userModel);
             if (!checkNode) {
                 String string = I18nMessageUtil.get("i18n.no_matching_permission.09cf");
                 attributes.put("permissionMsg", string);

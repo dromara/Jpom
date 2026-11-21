@@ -14,6 +14,7 @@ import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
+import org.dromara.jpom.configuration.AgentAuthorize;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.configuration.AgentConfig;
@@ -28,6 +29,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -51,6 +53,7 @@ public class TunnelAgentRunner implements ApplicationRunner, DisposableBean {
     private final AgentConfig agentConfig;
     private final JpomApplication jpomApplication;
     private final AgentStatInfoService agentStatInfoService;
+    private final AgentAuthorize agentAuthorize;
 
     private volatile TunnelClient tunnelClient;
     private volatile ScheduledExecutorService pushScheduler;
@@ -58,11 +61,13 @@ public class TunnelAgentRunner implements ApplicationRunner, DisposableBean {
     private volatile boolean pushUnsupportedLogged;
 
     public TunnelAgentRunner(TunnelAgentProperties properties, AgentConfig agentConfig, JpomApplication jpomApplication,
-                             AgentStatInfoService agentStatInfoService) {
+                             AgentStatInfoService agentStatInfoService,
+                             AgentAuthorize agentAuthorize) {
         this.properties = properties;
         this.agentConfig = agentConfig;
         this.jpomApplication = jpomApplication;
         this.agentStatInfoService = agentStatInfoService;
+        this.agentAuthorize = agentAuthorize;
     }
 
     @Override
@@ -73,12 +78,15 @@ public class TunnelAgentRunner implements ApplicationRunner, DisposableBean {
         }
         int port = jpomApplication.getPort();
         // 授权头由服务端随请求/流打开参数转发（插件端不读取自身授权摘要，AgentAuthorize#getAuthorize 亦不对外暴露）
-        Map<String, String> authorize = java.util.Collections.emptyMap();
+        Map<String, String> authorize = Collections.emptyMap();
         TunnelClientOptions options = new TunnelClientOptions();
         options.setServerUrl(properties.getServerUrl());
         options.setMachineId(properties.getMachineId());
         options.setKey(properties.getKey());
         options.setAgentVersion(JpomManifest.getInstance().getVersion());
+        // 服务端自动注册时需要：账号 + 授权摘要（不含明文密码）
+        options.setAuthUser(agentAuthorize == null ? null : agentAuthorize.getAgentName());
+        options.setAuthToken(agentAuthorize == null ? null : agentAuthorize.tunnelAuthToken());
         options.setOs(SystemUtil.getOsInfo().getName());
         options.setArch(SystemUtil.getOsInfo().getArch());
         options.setLocalHttpBase("http://127.0.0.1:" + port);
@@ -113,8 +121,18 @@ public class TunnelAgentRunner implements ApplicationRunner, DisposableBean {
             return thread;
         });
         this.pushScheduler = scheduler;
-        // 首次延迟 3 秒，避开启动阶段的监控初始化
-        scheduler.scheduleWithFixedDelay(this::pushStatOnce, 3, interval, TimeUnit.SECONDS);
+        // 立即执行首轮（未连上时内部会直接返回），并把首次状态采集提前预热：
+        // oshi 首次采集可能要几十秒，预热后首帧推送才不会被拖到 1 分钟以后。
+        Thread warmUp = new Thread(() -> {
+            try {
+                this.agentStatInfoService.statInfo();
+            } catch (Throwable throwable) {
+                log.debug("节点状态采集预热失败：{}", throwable.getMessage());
+            }
+        }, "jpom-tunnel-push-warmup");
+        warmUp.setDaemon(true);
+        warmUp.start();
+        scheduler.scheduleWithFixedDelay(this::pushStatOnce, 0, interval, TimeUnit.SECONDS);
     }
 
     private void pushStatOnce() {

@@ -406,7 +406,7 @@ export default {
           dataIndex: 'child-operation',
           fixed: 'right',
 
-          width: '140px',
+          width: '1%',
           align: 'center'
         }
       ],

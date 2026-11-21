@@ -549,7 +549,7 @@ export default {
           title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
 
-          width: '200px',
+          width: '1%',
           align: 'center',
           // ellipsis: true,
           fixed: 'right'

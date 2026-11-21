@@ -134,23 +134,36 @@ public class TunnelProxyWebSocket implements IProxyWebSocket {
     }
 
     @Override
-    public void send(String msg) {
-        TunnelStream tunnelStream = this.stream;
-        if (tunnelStream == null || closed) {
-            return;
-        }
+    public void send(String msg) throws IOException {
+        TunnelStream tunnelStream = this.requireStream();
         tunnelStream.write(msg == null ? new byte[0] : msg.getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
-    public void send(ByteBuffer bytes) {
-        TunnelStream tunnelStream = this.stream;
-        if (tunnelStream == null || closed || bytes == null) {
+    public void send(ByteBuffer bytes) throws IOException {
+        TunnelStream tunnelStream = this.requireStream();
+        if (bytes == null) {
             return;
         }
         byte[] payload = new byte[bytes.remaining()];
         bytes.get(payload);
         tunnelStream.write(payload);
+    }
+
+    /**
+     * 取可写的双向流；不可写时抛出异常而不是静默丢弃。
+     * <p>静默丢弃会让调用方（例如在线升级的 getVersion）以为请求已经发出，页面上的
+     * 引擎/平台/实时版本等列长期为空又没有任何错误提示，问题完全不可诊断。</p>
+     *
+     * @return 可写的隧道流
+     * @throws IOException 流已关闭/未建立
+     */
+    private TunnelStream requireStream() throws IOException {
+        TunnelStream tunnelStream = this.stream;
+        if (closed || tunnelStream == null || tunnelStream.isClosed()) {
+            throw new IOException(StrUtil.emptyToDefault(closeStatusMsg, "tunnel websocket stream is closed"));
+        }
+        return tunnelStream;
     }
 
     @Override

@@ -158,7 +158,7 @@ export default {
           align: 'center',
 
           fixed: 'right',
-          width: '130px'
+          width: '1%'
         }
       ]
     }

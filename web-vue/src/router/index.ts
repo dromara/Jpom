@@ -64,6 +64,16 @@ const children = [
     component: () => import('../pages/ssh/ssh.vue')
   },
   {
+    path: '/ssh-project',
+    name: 'ssh-project-list',
+    component: () => import('../pages/ssh-project/list.vue')
+  },
+  {
+    path: '/ssh-project/console',
+    name: 'ssh-project-console',
+    component: () => import('../pages/ssh-project/console.vue')
+  },
+  {
     path: '/ssh/command',
     name: 'node-command',
     component: () => import('../pages/ssh/command.vue')

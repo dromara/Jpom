@@ -36,8 +36,14 @@ public class LocalHttpTunnelHandler implements TunnelRequestHandler {
     private static final Set<String> SKIP_REQUEST_HEADERS = new java.util.HashSet<>(java.util.Arrays.asList(
         "host", "connection", "content-length", "transfer-encoding", "accept-encoding", "keep-alive", "upgrade"
     ));
+    /**
+     * 回传服务端时丢弃的响应头。
+     * <p>
+     * 注意：{@code Content-Length} 不能丢弃——服务端要靠它把「响应被中断（少收字节）」和
+     * 「产物本身大小不对」区分开，隧道帧自带长度前缀，回传该头不会影响分帧。
+     */
     private static final Set<String> SKIP_RESPONSE_HEADERS = new java.util.HashSet<>(java.util.Arrays.asList(
-        "content-length", "transfer-encoding", "connection", "keep-alive", "server", "date"
+        "transfer-encoding", "connection", "keep-alive", "server", "date"
     ));
     private static final int BUFFER_SIZE = 32 * 1024;
 

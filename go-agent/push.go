@@ -49,6 +49,13 @@ func runPushLoop(ctx context.Context, application *app.App, client *tunnel.Clien
 	defer ticker.Stop()
 	var seq int64
 	unsupportedLogged := false
+	// 预热：启动时先异步采集一次，把指标库（CPU/内存）初始化成本提前付掉，
+	// 否则「隧道刚连上」那一次采集可能要几十秒，节点在服务端会短暂显示未上报。
+	go func() {
+		if _, err := collectStatInfo(httpClient, statURL, authorize); err != nil {
+			application.Log().Debug("warm up node stat collection failed", "error", err)
+		}
+	}()
 	for {
 		if client.Connected() && client.PushSupported() {
 			unsupportedLogged = false

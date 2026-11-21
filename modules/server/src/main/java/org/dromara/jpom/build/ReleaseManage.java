@@ -68,6 +68,14 @@ import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.data.FtpModel;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.data.SshModel;
+import org.dromara.jpom.model.data.SshProjectModel;
+import org.dromara.jpom.model.sshproject.SshProjectExecuteResult;
+import org.dromara.jpom.service.sshproject.SshProjectMachineResolver;
+import org.dromara.jpom.service.sshproject.SshProjectService;
+import org.dromara.jpom.service.sshproject.SshProjectVersionService;
+import org.dromara.jpom.func.assets.model.MachineSshModel;
+import org.dromara.jpom.func.assets.server.MachineSshServer;
+import org.dromara.jpom.socket.ConsoleCommandOp;
 import org.dromara.jpom.model.docker.DockerInfoModel;
 import org.dromara.jpom.model.enums.BuildReleaseMethod;
 import org.dromara.jpom.model.enums.BuildStatus;
@@ -210,6 +218,8 @@ public class ReleaseManage {
             return this.localCommand();
         } else if (releaseMethod == BuildReleaseMethod.DockerImage.getCode()) {
             return this.doDockerImage();
+        } else if (releaseMethod == BuildReleaseMethod.SshProject.getCode()) {
+            this.doSshProject();
         } else if (releaseMethod == BuildReleaseMethod.Ftp.getCode()) {
             this.doFtp();
         } else if (releaseMethod == BuildReleaseMethod.No.getCode()) {
@@ -518,6 +528,112 @@ public class ReleaseManage {
         }
     }
 
+
+    /**
+     * 发布到 SSH 项目：产物直接落到项目目录，然后按项目生命周期脚本重启
+     * <p>
+     * 与「发布到项目」一致支持版本快照：发布前登记基线、发布成功后登记本次版本，
+     * 构建历史里的「快速回滚」据此把远端目录切回历史版本（不重新传输产物）。
+     */
+    private void doSshProject() throws IOException {
+        String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
+        SshProjectService sshProjectService = SpringUtil.getBean(SshProjectService.class);
+        SshProjectModel project = sshProjectService.getByKey(releaseMethodDataId);
+        if (project == null) {
+            logRecorder.systemError(I18nMessageUtil.get("i18n.ssh_project_not_exist.5d18") + releaseMethodDataId);
+            return;
+        }
+        SshProjectMachineResolver machineResolver = SpringUtil.getBean(SshProjectMachineResolver.class);
+        MachineSshModel machineSshModel = machineResolver.resolve(project);
+        // 版本快照：只按构建配置的开关决定，失败只告警不阻断发布
+        SshProjectVersionService sshProjectVersionService = SpringUtil.getBean(SshProjectVersionService.class);
+        boolean versionEnabled = SpringUtil.getBean(BuildVersionService.class).enabled(this.buildExtraModule);
+        boolean versionBegun = versionEnabled && this.sshProjectVersionBegin(sshProjectVersionService, project);
+        boolean publishSuccess = false;
+        try {
+            Session session = null;
+            ChannelSftp channelSftp = null;
+            try {
+                session = SpringUtil.getBean(MachineSshServer.class).getSessionByModel(machineSshModel);
+                Charset charset = machineSshModel.charset();
+                int timeout = machineSshModel.timeout();
+                MySftp sftp = new MySftp(session, charset, timeout, SpringUtil.getBean(SshService.class).createProgressMonitor(logRecorder));
+                channelSftp = sftp.getClient();
+                String normalizePath = FileUtil.normalize(StrUtil.nullToEmpty(project.getPath()));
+                if (this.buildExtraModule.isClearOld() && sftp.exist(normalizePath)) {
+                    try {
+                        sftp.delDir(normalizePath);
+                    } catch (Exception e) {
+                        logRecorder.error(I18nMessageUtil.get("i18n.clear_build_product_failed.edd4"), e);
+                    }
+                }
+                sftp.syncUpload(this.resultFile, normalizePath);
+                logRecorder.system("ssh project upload done: {}", project.getName());
+            } finally {
+                JschUtil.close(channelSftp);
+                JschUtil.close(session);
+            }
+            publishSuccess = true;
+            // 发布完成后按项目自身脚本重启（没有 restart 钩子时执行器会退化为 stop + start）
+            try {
+                SshProjectExecuteResult result = sshProjectService.execute(project, ConsoleCommandOp.restart.name(), line -> logRecorder.info(line));
+                if (result.isSuccess()) {
+                    logRecorder.system("ssh project restart done: {}", project.getName());
+                } else {
+                    logRecorder.systemError("ssh project restart failed: {}", StrUtil.emptyToDefault(result.getMessage(), String.valueOf(result.getExitCode())));
+                }
+            } catch (Exception e) {
+                // 项目没有配置任何生命周期脚本时不影响产物发布结果，只提示
+                logRecorder.systemWarning("ssh project has no lifecycle script, skip restart: {}", e.getMessage());
+            }
+        } finally {
+            if (versionBegun && publishSuccess) {
+                this.sshProjectVersionCommit(sshProjectVersionService, project);
+            }
+        }
+    }
+
+    /**
+     * SSH 项目：发布前准备版本快照（失败只告警，不阻断发布）
+     *
+     * @param versionService 版本服务
+     * @param project        项目
+     * @return 是否准备成功
+     */
+    private boolean sshProjectVersionBegin(SshProjectVersionService versionService, SshProjectModel project) {
+        try {
+            JSONObject begin = versionService.begin(project, this.getRealBuildNumberId(), this.buildExtraModule.getVersionKeepCount());
+            if (begin.getJSONObject("baseline") != null) {
+                logRecorder.system(I18nMessageUtil.get("i18n.version_baseline_created.2b6c"), project.getName(),
+                    begin.getJSONObject("baseline").getString("versionId"));
+            }
+            logRecorder.system(I18nMessageUtil.get("i18n.version_snapshot_prepare_success.a1f7"));
+            return true;
+        } catch (Exception e) {
+            log.warn(I18nMessageUtil.get("i18n.version_snapshot_prepare_exception.c3e5"), e);
+            logRecorder.systemWarning(I18nMessageUtil.get("i18n.version_snapshot_prepare_exception.c3e5"));
+        }
+        return false;
+    }
+
+    /**
+     * SSH 项目：发布成功后登记版本（失败只告警，不阻断发布）
+     *
+     * @param versionService 版本服务
+     * @param project        项目
+     */
+    private void sshProjectVersionCommit(SshProjectVersionService versionService, SshProjectModel project) {
+        try {
+            JSONObject commit = versionService.commit(project, String.valueOf(this.getRealBuildNumberId()),
+                SshProjectVersionService.SOURCE_BUILD, this.getRealBuildNumberId(), this.buildExtraModule.getId(),
+                this.buildExtraModule.getVersionKeepCount());
+            logRecorder.system(I18nMessageUtil.get("i18n.ssh_project_version_commit_success.2c85"),
+                commit.getString("versionId"), commit.getIntValue("fileCount"), FileUtil.readableFileSize(commit.getLongValue("fileSize")));
+        } catch (Exception e) {
+            log.warn(I18nMessageUtil.get("i18n.version_snapshot_commit_exception.f5b3"), e);
+            logRecorder.systemWarning(I18nMessageUtil.get("i18n.version_snapshot_commit_exception.f5b3"));
+        }
+    }
 
     /**
      * ftp发布

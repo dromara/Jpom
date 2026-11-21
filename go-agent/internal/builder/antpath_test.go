@@ -20,7 +20,8 @@ import (
 
 // TestAntPathParity 校验 Go 侧 Ant 通配与 Spring AntPathMatcher 逐条一致。
 //
-// 基线文件由 dev-scripts/antpath-parity/ 生成（Java + spring-core 5.3.39）：
+// 基线文件由维护者私有的 parity 工具（不随仓库发布）生成，
+// 纯合成用例、不含环境数据，故随仓库提交以保证 CI 可回归（Java + spring-core 5.3.39）：
 //
 //	AntMatchGen < cases.tsv > java.out.tsv
 //

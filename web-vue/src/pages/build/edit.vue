@@ -631,6 +631,55 @@
                 </a-form-item>
               </template>
 
+              <!-- SSH 项目 -->
+              <template v-if="temp.releaseMethod === 7">
+                <a-form-item name="releaseMethodDataId" :help="$t('i18n_7bba17e190')">
+                  <template #label>
+                    <a-tooltip>
+                      {{ $t('i18n_8215da30b4') }}
+                      <template #title>{{ $t('i18n_7bba17e190') }}</template>
+                      <QuestionCircleOutlined v-if="!temp.id" />
+                    </a-tooltip>
+                  </template>
+                  <a-row>
+                    <a-col :span="22">
+                      <a-select
+                        v-model:value="tempExtraData.releaseMethodDataId_7"
+                        show-search
+                        allow-clear
+                        :filter-option="
+                          (input, option) => {
+                            const children = option.children && option.children()
+                            return (
+                              children &&
+                              children[0].children &&
+                              children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                            )
+                          }
+                        "
+                        :placeholder="$t('i18n_ab38038377')"
+                      >
+                        <a-select-option v-for="project in sshProjectList" :key="project.id" :value="project.id">
+                          {{ project.name }}
+                        </a-select-option>
+                      </a-select>
+                    </a-col>
+                    <a-col :span="1" style="margin-left: 10px">
+                      <ReloadOutlined @click="loadSshProjectList" />
+                    </a-col>
+                  </a-row>
+                </a-form-item>
+                <a-form-item :label="$t('i18n_dbb2df00cf')">
+                  <a-alert type="info" show-icon :message="$t('i18n_a2d654831b')">
+                    <template #description>
+                      <span v-if="selectedSshProject"
+                        >{{ selectedSshProject.name }}: {{ selectedSshProject.path }}</span
+                      >
+                    </template>
+                  </a-alert>
+                </a-form-item>
+              </template>
+
               <a-form-item v-if="temp.releaseMethod === 3" name="releaseBeforeCommand">
                 <!-- sshCommand -->
                 <template #label>
@@ -703,7 +752,10 @@
                 </a-form-item-rest>
               </a-form-item>
 
-              <a-form-item v-if="temp.releaseMethod === 2 || temp.releaseMethod === 3" name="clearOld">
+              <a-form-item
+                v-if="temp.releaseMethod === 2 || temp.releaseMethod === 3 || temp.releaseMethod === 7"
+                name="clearOld"
+              >
                 <template #label>
                   <a-tooltip>
                     {{ $t('i18n_2223ff647d') }}
@@ -1583,6 +1635,7 @@ import {
   getBuildNodeList
 } from '@/api/build-info'
 import { getSshListAll } from '@/api/ssh'
+import { getSshProjectList } from '@/api/ssh-project'
 import { getFtpListAll } from '@/api/ftp'
 import { getRepositoryInfo } from '@/api/repository'
 import { getNodeListAll, getProjectListAll } from '@/api/node'
@@ -1701,6 +1754,7 @@ export default {
       dispatchList: [],
       cascaderList: [],
       sshList: [],
+      sshProjectList: [],
       ftpList: [],
       dockerSwarmList: [],
       //集群下 服务下拉数据
@@ -1944,6 +1998,14 @@ export default {
         return false
       }
       return !!this.temp.buildNodeId && !this.selectedBuildNode && this.buildNodeList.length > 0
+    },
+    // 当前选中的 SSH 项目（用于展示「发布目录」即项目目录）
+    selectedSshProject() {
+      const id = this.tempExtraData.releaseMethodDataId_7
+      if (!id) {
+        return null
+      }
+      return this.sshProjectList.find((item) => item.id === id) || null
     }
   },
   watch: {
@@ -1952,6 +2014,17 @@ export default {
         this.stepsCurrent = v
       },
       immediate: true
+    },
+    // 切换发布方式时清理其它分支的临时值，避免脏数据随 extraData 一起提交
+    'temp.releaseMethod'(val) {
+      if (!this.tempExtraData) {
+        return
+      }
+      if (val !== 7) {
+        delete this.tempExtraData.releaseMethodDataId_7
+        // 「SSH 项目」用 releaseMethodDataId 直接提交，其余分支由后端按各自的 *_N 重新写入
+        delete this.tempExtraData.releaseMethodDataId
+      }
     }
   },
   created() {
@@ -2002,6 +2075,7 @@ export default {
       this.loadDispatchList()
       this.loadNodeProjectList()
       this.loadSshList()
+      this.loadSshProjectList()
       this.loadFtpList()
       this.loadDockerSwarmListAll()
       // this.loadScriptListList();
@@ -2068,6 +2142,10 @@ export default {
         if (record.releaseMethod === 6) {
           this.tempExtraData.releaseMethodDataId_6 = this.tempExtraData.releaseMethodDataId.split(',')
         }
+        if (record.releaseMethod === 7) {
+          // SSH 项目：releaseMethodDataId 就是项目 id（单选）
+          this.tempExtraData.releaseMethodDataId_7 = this.tempExtraData.releaseMethodDataId
+        }
       }
       this.tempExtraData = { ...this.tempExtraData }
       this.changeRepositpry(true)
@@ -2075,6 +2153,7 @@ export default {
       this.loadDispatchList()
       this.loadDockerSwarmListAll()
       this.loadNodeProjectList()
+      this.loadSshProjectList()
       // this.loadScriptListList();
       this.loadSshList().then(() => {
         if (this.tempExtraData.releaseMethodDataId_3) {
@@ -2266,6 +2345,19 @@ export default {
               (tempExtraData.releasePath3 || '')
             ).replace(new RegExp('//', 'gm'), '/')
             tempExtraData.releaseMethodDataId_6 = (tempExtraData.releaseMethodDataId_6 || []).join(',')
+          } else if (this.temp.releaseMethod === 7) {
+            // SSH 项目：releaseMethodDataId 直接放项目 id，后端 doSshProject 只读该字段与项目自身目录，不读 releasePath
+            const sshProjectId = tempExtraData.releaseMethodDataId_7
+            if (!sshProjectId) {
+              $notification.warn({
+                message: this.$t('i18n_8a8e690119')
+              })
+              return false
+            }
+            tempExtraData.releaseMethodDataId = sshProjectId
+          } else {
+            // 其它发布方式不使用该字段，清掉历史残留（后端会按各自分支重写）
+            delete tempExtraData.releaseMethodDataId
           }
 
           this.temp = {
@@ -2354,6 +2446,17 @@ export default {
           }
         }
       })
+    },
+    // 加载 SSH 项目列表（发布方式 =「SSH 项目」）
+    loadSshProjectList() {
+      return getSshProjectList({ page: 1, limit: 100 })
+        .then((res) => {
+          this.sshProjectList = res.code === 200 && res.data ? res.data.result || [] : []
+        })
+        .catch(() => {
+          // 接口层已统一提示，这里只保证下拉不为 undefined
+          this.sshProjectList = []
+        })
     },
     // 加载 SSH 列表
     loadSshList() {

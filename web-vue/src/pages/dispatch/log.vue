@@ -280,7 +280,7 @@ export default {
           title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
           align: 'center',
-          width: '100px',
+          width: '1%',
           fixed: 'right'
         }
       ]

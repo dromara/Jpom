@@ -173,6 +173,14 @@
           </a-tooltip>
         </template>
 
+        <template v-else-if="column.dataIndex === 'connectMode'">
+          <a-tooltip :title="tunnelOnlineIds.includes(record.id) ? $t('i18n_7a4035c86d') : $t('i18n_129eab9ee2')">
+            <a-tag :color="connectModeColor(record.connectMode)">{{ connectModeLabel(record.connectMode) }}</a-tag>
+          </a-tooltip>
+        </template>
+        <template v-else-if="column.dataIndex === 'jpomEngine'">
+          <a-tag :color="engineTagColor(record.jpomEngine)">{{ engineLabel(record.jpomEngine) }}</a-tag>
+        </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <a-space>
             <a-button type="primary" size="small" @click="handleEdit(record)">{{ $t('i18n_95b351c862') }}</a-button>
@@ -327,6 +335,18 @@
         <a-form-item :label="$t('i18n_e4013f8b81')" name="name">
           <a-input v-model:value="temp.name" :max-length="50" :placeholder="$t('i18n_e4013f8b81')" />
         </a-form-item>
+        <a-form-item :label="$t('i18n_625879b030')" name="connectMode">
+          <a-radio-group v-model:value="temp.connectMode">
+            <a-radio :value="0">{{ $t('i18n_c422b80952') }}</a-radio>
+            <a-radio :value="1">{{ $t('i18n_d9beaa96e5') }}</a-radio>
+            <a-radio :value="2">{{ $t('i18n_091e506843') }}</a-radio>
+          </a-radio-group>
+          <template v-if="temp.id" #help>
+            <span v-if="tunnelOnline">{{ $t('i18n_7a4035c86d') }}</span>
+            <span v-else>{{ $t('i18n_129eab9ee2') }}</span>
+          </template>
+          <a-alert v-if="tunnelOnly" :message="$t('i18n_865eb07f1e')" type="info" show-icon style="margin-top: 8px" />
+        </a-form-item>
         <a-form-item :label="$t('i18n_93e1df604a')" name="groupName">
           <custom-select
             v-model:value="temp.groupName"
@@ -362,9 +382,14 @@
             </a-tooltip>
           </template>
           <template #help>{{ $t('i18n_6f8da7dcca') }}</template>
-          <a-input v-model:value="temp.jpomUrl" :placeholder="$t('i18n_1235b052ff')">
+          <a-input v-model:value="temp.jpomUrl" :disabled="tunnelOnly" :placeholder="$t('i18n_1235b052ff')">
             <template #addonBefore>
-              <a-select v-model:value="temp.jpomProtocol" :placeholder="$t('i18n_e825ec7800')" style="width: 160px">
+              <a-select
+                v-model:value="temp.jpomProtocol"
+                :placeholder="$t('i18n_e825ec7800')"
+                :disabled="tunnelOnly"
+                style="width: 160px"
+              >
                 <a-select-option value="Http"> Http:// </a-select-option>
                 <a-select-option value="Https"> Https:// </a-select-option>
               </a-select>
@@ -373,7 +398,7 @@
         </a-form-item>
 
         <a-form-item :label="$t('i18n_86fb7b5421')" name="loginName">
-          <a-input v-model:value="temp.jpomUsername" :placeholder="$t('i18n_f8460626f0')" />
+          <a-input v-model:value="temp.jpomUsername" :disabled="tunnelOnly" :placeholder="$t('i18n_f8460626f0')" />
           <template #help>{{ $t('i18n_eec342f34e') }}</template>
         </a-form-item>
         <a-form-item :name="`${temp.id ? 'loginPwd-update' : 'loginPwd'}`">
@@ -387,25 +412,27 @@
               <QuestionCircleOutlined v-show="!temp.id" />
             </a-tooltip>
           </template>
-          <a-input-password v-model:value="temp.jpomPassword" :placeholder="$t('i18n_e5a63852fd')" />
+          <a-input-password
+            v-model:value="temp.jpomPassword"
+            :disabled="tunnelOnly"
+            :placeholder="$t('i18n_e5a63852fd')"
+          />
         </a-form-item>
 
         <a-form-item :label="$t('i18n_4a172c87cb')" name="buildEnabled">
-          <a-space direction="vertical" style="display: block">
-            <a-space>
-              <a-switch
-                :checked="temp.buildEnabled === 1"
-                :checked-children="$t('i18n_0a60ac8f02')"
-                :un-checked-children="$t('i18n_c9744f45e7')"
-                :disabled="buildEngineUnsupported"
-                @change="changeBuildEnabled"
-              />
-              <a-tooltip :title="$t('i18n_df2bfdd78c')">
-                <QuestionCircleOutlined />
-              </a-tooltip>
-            </a-space>
-            <div style="color: rgba(0, 0, 0, 0.45); font-size: 12px">{{ $t('i18n_df2bfdd78c') }}</div>
+          <a-space>
+            <a-switch
+              :checked="temp.buildEnabled === 1"
+              :checked-children="$t('i18n_0a60ac8f02')"
+              :un-checked-children="$t('i18n_c9744f45e7')"
+              :disabled="buildEngineUnsupported"
+              @change="changeBuildEnabled"
+            />
+            <!-- 新建时还没有连过机器，类型未知没有参考价值：只在编辑已有机器时展示 -->
+            <a-tag v-if="temp.id" :color="engineTagColor(temp.jpomEngine)">{{ engineLabel(temp.jpomEngine) }}</a-tag>
           </a-space>
+          <!-- 说明统一走 form-item 的 help 槽：与同表单其它项同一套字号/颜色/间距（由主题 token 决定，不写死内联样式） -->
+          <template #help>{{ $t('i18n_df2bfdd78c') }}</template>
         </a-form-item>
         <a-form-item v-if="temp.buildEnabled === 1" :label="$t('i18n_25b560dd87')" name="buildMaxConcurrency">
           <a-input-number
@@ -424,6 +451,13 @@
           show-icon
           style="margin-bottom: 16px"
         />
+        <a-alert
+          v-else-if="buildEngineUnknown && temp.id"
+          :message="$t('i18n_13b64702c8')"
+          type="info"
+          show-icon
+          style="margin-bottom: 16px"
+        />
         <a-collapse>
           <a-collapse-panel key="1" :header="$t('i18n_9ab433e930')">
             <a-form-item :label="$t('i18n_04edc35414')" name="templateNode" help="">
@@ -439,6 +473,7 @@
             <a-form-item :label="$t('i18n_67425c29a5')" name="timeOut">
               <a-input-number
                 v-model:value="temp.jpomTimeout"
+                :disabled="tunnelOnly"
                 :min="0"
                 :placeholder="$t('i18n_84d331a137')"
                 style="width: 100%"
@@ -446,7 +481,7 @@
             </a-form-item>
 
             <a-form-item :label="$t('i18n_fc954d25ec')" name="jpomHttpProxy">
-              <a-input v-model:value="temp.jpomHttpProxy" :placeholder="$t('i18n_dcf14deb0e')">
+              <a-input v-model:value="temp.jpomHttpProxy" :disabled="tunnelOnly" :placeholder="$t('i18n_dcf14deb0e')">
                 <template #addonBefore>
                   <a-select
                     v-model:value="temp.jpomHttpProxyType"
@@ -693,7 +728,9 @@ import {
   machineListNode,
   machineListTemplateNode,
   saveWhitelist,
-  saveNodeConfig
+  saveNodeConfig,
+  tunnelOnlineMachines,
+  tunnelMachineStatus
 } from '@/api/system/assets-machine'
 import {
   CHANGE_PAGE,
@@ -732,6 +769,10 @@ export default {
       groupList: [],
       loading: true,
       editVisible: false,
+      // 当前编辑机器是否通过反向隧道在线（决定「通讯方式」旁的提示）
+      tunnelOnline: false,
+      // 列表用的反向隧道在线机器 ID 集合
+      tunnelOnlineIds: [],
       syncToWorkspaceVisible: false,
       temp: {},
       rules: {
@@ -829,6 +870,20 @@ export default {
           tooltip: true
         },
         {
+          title: this.$t('i18n_084fca46ee'),
+          dataIndex: 'jpomEngine',
+          width: '110px',
+          align: 'center',
+          ellipsis: true
+        },
+        {
+          title: this.$t('i18n_625879b030'),
+          dataIndex: 'connectMode',
+          width: '110px',
+          align: 'center',
+          ellipsis: true
+        },
+        {
           title: this.$t('i18n_04edc35414'),
           dataIndex: 'templateNode',
           width: '90px',
@@ -866,7 +921,7 @@ export default {
         {
           title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
-          width: '120px',
+          width: '1%',
           fixed: 'right',
           align: 'center'
         }
@@ -881,13 +936,27 @@ export default {
   },
   computed: {
     ...mapState(useAppStore, ['getCollapsed']),
-    // 机器引擎：后端控制返回 engine 字段时据此禁用「可作为构建节点」，未返回则不据此禁用（由服务端校验）
+    // 通讯方式（0 自动 / 1 仅反向隧道 / 2 仅正向拉取）
+    connectModeValue() {
+      const mode = this.temp && this.temp.connectMode
+      return mode === 1 || mode === 2 ? mode : 0
+    },
+    // 仅反向隧道：地址/账号/密码/协议/代理/超时都不参与通信
+    tunnelOnly() {
+      return this.connectModeValue === 1
+    },
+    // 机器引擎：由服务端回填（java/go），空表示暂时无法识别（离线/超时）
     buildEngine() {
-      const engine = this.temp && (this.temp.engine || this.temp.jpomEngine || this.temp.executorEngine)
+      const engine = this.temp && this.temp.jpomEngine
       return engine ? String(engine).toLowerCase() : ''
     },
+    // Java 插件端不能承担构建：开关必须禁用，不能让用户打开后保存才被拒绝
     buildEngineUnsupported() {
-      return !!this.buildEngine && this.buildEngine !== 'go'
+      return this.buildEngine === 'java'
+    },
+    // 已连通过但尚未识别的机器（升级前的老数据）：不禁用，但要说清"保存时服务端还会校验"
+    buildEngineUnknown() {
+      return !this.buildEngine
     },
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
@@ -910,6 +979,30 @@ export default {
   },
   methods: {
     parseTime,
+    // 通讯方式展示
+    connectModeLabel(mode) {
+      return mode === 1
+        ? this.$t('i18n_d9beaa96e5')
+        : mode === 2
+          ? this.$t('i18n_091e506843')
+          : this.$t('i18n_c422b80952')
+    },
+    connectModeColor(mode) {
+      return mode === 1 ? 'blue' : mode === 2 ? 'orange' : 'default'
+    },
+    // 引擎展示文案：go/go 插件端、java/Java 插件端，空=未知
+    engineLabel(engine) {
+      const value = engine ? String(engine).toLowerCase() : ''
+      if (value === 'go') return this.$t('i18n_11b8cdd4a6')
+      if (value === 'java') return this.$t('i18n_ac0399d13b')
+      return this.$t('i18n_1622dc9b6b')
+    },
+    engineTagColor(engine) {
+      const value = engine ? String(engine).toLowerCase() : ''
+      if (value === 'go') return 'green'
+      if (value === 'java') return 'blue'
+      return 'default'
+    },
     formatDuration,
     formatPercent2Number,
     // 状态标签颜色：正常绿色、检测超时橙色、其它异常粉色
@@ -931,6 +1024,14 @@ export default {
     },
     getMachineList(pointerEvent) {
       this.loading = true
+      // 反向隧道在线集合：列表「通讯方式」列据此提示当前走哪条通道（不影响保存）
+      tunnelOnlineMachines()
+        .then((res) => {
+          this.tunnelOnlineIds = res.code === 200 && Array.isArray(res.data) ? res.data : []
+        })
+        .catch(() => {
+          this.tunnelOnlineIds = []
+        })
       this.listQuery.page = pointerEvent?.altKey || pointerEvent?.ctrlKey ? 1 : this.listQuery.page
       machineListData(this.listQuery).then((res) => {
         if (res.code === 200) {
@@ -949,15 +1050,32 @@ export default {
       this.temp = {
         // 默认设置节点地址协议
         jpomProtocol: 'Http',
+        // 通讯方式默认「自动」：隧道优先、离线回退正向（历史行为）
+        connectMode: 0,
         // 构建节点开关默认关闭，并发上限默认 1（保持老行为）
         buildEnabled: 0,
         buildMaxConcurrency: 1
       }
+      this.tunnelOnline = false
       this.editVisible = true
     },
     // 修改
     handleEdit(record) {
       this.temp = Object.assign({}, record)
+      this.temp.connectMode = this.temp.connectMode === 1 || this.temp.connectMode === 2 ? this.temp.connectMode : 0
+      // 读取当前机器的反向隧道在线状态（只影响提示文案，不影响保存）
+      this.tunnelOnline = false
+      if (record.id) {
+        tunnelMachineStatus({ machineId: record.id })
+          .then((res) => {
+            if (res.code === 200) {
+              this.tunnelOnline = !!res.data
+            }
+          })
+          .catch(() => {
+            this.tunnelOnline = false
+          })
+      }
       delete this.temp.statusMsg
       // 构建配置回显：老数据无此字段时按「不可作为构建节点 / 并发 1」处理
       this.temp.buildEnabled = this.temp.buildEnabled === 1 ? 1 : 0

@@ -832,7 +832,7 @@ export default {
           dataIndex: 'operation',
           key: 'operation',
           fixed: 'right',
-          width: '200px',
+          width: '1%',
 
           align: 'center'
         }
@@ -1092,7 +1092,7 @@ export default {
     onClose() {
       this.drawerVisible = false
       let query = Object.assign({}, this.$route.query)
-      delete query.nodeId, delete query.id, delete query.pId
+      ;(delete query.nodeId, delete query.id, delete query.pId)
       this.$router.replace({
         query: query
       })

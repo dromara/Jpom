@@ -184,7 +184,18 @@ public class TunnelChannel implements TunnelSession {
     }
 
     private void sendBody(String sid, byte[] body) {
-        for (byte[] frame : TunnelFrameCodec.split(sid, body)) {
+        this.sendBody(sid, body, true);
+    }
+
+    /**
+     * 发送数据帧
+     *
+     * @param sid     逻辑请求 / 流标识
+     * @param body    数据
+     * @param lastFin 最后一帧是否携带 FIN
+     */
+    private void sendBody(String sid, byte[] body, boolean lastFin) {
+        for (byte[] frame : TunnelFrameCodec.split(sid, body, lastFin)) {
             if (!isOpen()) {
                 return;
             }
@@ -343,7 +354,7 @@ public class TunnelChannel implements TunnelSession {
         }
         TunnelFrame head = item.head;
         return new TunnelDownload(head == null ? 0 : (head.getStatus() == null ? 0 : head.getStatus()),
-            item.contentDisposition, item.contentType, item.inputStream);
+            item.contentDisposition, item.contentType, item.contentLength, item.inputStream);
     }
 
     private void writeRequest(IUrlItem urlItem, String sid, byte[] body, String requestContentType, String method,
@@ -606,6 +617,7 @@ public class TunnelChannel implements TunnelSession {
         private final CountDownLatch headLatch = new CountDownLatch(1);
         private volatile String contentDisposition;
         private volatile String contentType;
+        private volatile long contentLength = -1L;
         private volatile boolean aborted;
 
         DownloadPending(String sid) {
@@ -617,6 +629,7 @@ public class TunnelChannel implements TunnelSession {
             super.head(frame);
             this.contentDisposition = header(frame, "Content-Disposition");
             this.contentType = header(frame, "Content-Type");
+            this.contentLength = parseLength(header(frame, "Content-Length"));
             headLatch.countDown();
         }
 
@@ -636,6 +649,17 @@ public class TunnelChannel implements TunnelSession {
             aborted = true;
             headLatch.countDown();
             inputStream.fail(new TunnelException(code, msg));
+        }
+
+        private long parseLength(String value) {
+            if (StrUtil.isBlank(value)) {
+                return -1L;
+            }
+            try {
+                return Long.parseLong(value.trim());
+            } catch (NumberFormatException e) {
+                return -1L;
+            }
         }
 
         private String header(TunnelFrame frame, String name) {
@@ -711,7 +735,9 @@ public class TunnelChannel implements TunnelSession {
             if (streamClosed) {
                 return;
             }
-            sendBody(sid, payload);
+            // 双向流的每条消息都不能带 FIN：FIN 表示该方向结束，插件端收到 FIN 会关闭本机
+            // WebSocket（Go 插件端 onBinary 即如此），导致 getVersion 等请求刚发出流就断掉
+            sendBody(sid, payload, false);
         }
 
         @Override

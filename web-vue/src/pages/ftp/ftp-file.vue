@@ -108,7 +108,7 @@
                 </a-menu>
               </template>
             </a-dropdown>
-<!--            <a-button
+            <!--            <a-button
               size="small"
               :disabled="!tempNode.nextPath"
               type="primary"
@@ -207,7 +207,7 @@
                   $t('i18n_95b351c862')
                 }}</a-button>
               </a-tooltip>
-<!--              <a-tooltip :title="$t('i18n_5cc7e8e30a')">
+              <!--              <a-tooltip :title="$t('i18n_5cc7e8e30a')">
                 <a-button size="small" type="primary" @click="handleFilePermission(record)">{{
                   $t('i18n_ba6e91fa9e')
                 }}</a-button>
@@ -581,7 +581,7 @@ export default {
           align: 'center',
           fixed: 'right',
 
-          width: '220px'
+          width: '1%'
         }
       ],
 

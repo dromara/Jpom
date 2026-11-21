@@ -80,10 +80,12 @@ func SaveWhitelist(a *app.App, projectValue, allowEditSuffixValue string) error 
 		return err
 	}
 	for _, suffix := range suffixes {
+		// 与 Java AgentWhitelist 对齐：charset 取最后一个 '@' 之后；坏值（例如一条里
+		// 塞了多个 "suffix@charset"）不再直接报错，交给读取时回退默认编码。
 		parts := strings.Split(suffix, "@")
 		if len(parts) > 1 {
 			charset := strings.TrimSpace(parts[len(parts)-1])
-			if !isValidCharsetName(charset) {
+			if charset != "" && !isValidCharsetName(charset) {
 				return paramErrAppend(405, "i18n.illegal_character_encoding_format.af7a", suffix)
 			}
 		}

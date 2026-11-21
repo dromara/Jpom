@@ -72,9 +72,13 @@ type Frame struct {
 	AgentVersion string `json:"agentVersion,omitempty"`
 	OS           string `json:"os,omitempty"`
 	Arch         string `json:"arch,omitempty"`
-	Ts           int64  `json:"ts,omitempty"`
-	Nonce        string `json:"nonce,omitempty"`
-	Sign         string `json:"sign,omitempty"`
+	// AuthUser/AuthToken 为 HELLO 可选字段：服务端自动注册机器资产时补齐通讯账号与授权摘要。
+	// 旧服务端会忽略未知字段、旧插件端不会发送，双向兼容。
+	AuthUser  string `json:"authUser,omitempty"`
+	AuthToken string `json:"authToken,omitempty"`
+	Ts        int64  `json:"ts,omitempty"`
+	Nonce     string `json:"nonce,omitempty"`
+	Sign      string `json:"sign,omitempty"`
 
 	// HELLO_ACK
 	SessionID      string `json:"sessionId,omitempty"`
@@ -191,6 +195,31 @@ func DecodeData(raw []byte) (sid string, payload []byte, fin bool, err error) {
 		return "", nil, false, fmt.Errorf("data frame payload too large: %d", len(payload))
 	}
 	return sid, payload, flags&FlagFin != 0, nil
+}
+
+// SplitStream cuts one duplex-stream message into data frames that never carry
+// FIN. FIN means "this direction is finished": the peer closes its local
+// websocket as soon as it sees FIN (see onBinary), so per-message writes on a
+// stream must not set it — otherwise the very first getVersion message would
+// tear the /node_update stream down before the agent can answer.
+func SplitStream(sid string, payload []byte) ([][]byte, error) {
+	if len(payload) == 0 {
+		return nil, nil
+	}
+	var frames [][]byte
+	for offset := 0; offset < len(payload); {
+		end := offset + MaxDataFrameSize
+		if end > len(payload) {
+			end = len(payload)
+		}
+		frame, err := EncodeData(sid, payload[offset:end], false)
+		if err != nil {
+			return nil, err
+		}
+		frames = append(frames, frame)
+		offset = end
+	}
+	return frames, nil
 }
 
 // Split cuts body into data frames, the last one carries FIN.

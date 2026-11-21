@@ -36,6 +36,7 @@ import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.system.JpomRuntimeException;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.JsonFileUtil;
+import org.dromara.jpom.util.PlatformUtil;
 import org.springframework.util.Assert;
 
 import java.io.BufferedInputStream;
@@ -103,6 +104,15 @@ public class JpomManifest {
      */
     private final String osName = SystemUtil.getOsInfo().getName();
     /**
+     * 系统架构（规范化后的值，如 amd64、arm64），与 Go 插件端 {@code arch} 口径一致
+     */
+    private final String arch = PlatformUtil.normalizeArch(SystemUtil.getOsInfo().getArch());
+    /**
+     * 运行平台（os/arch，如 linux/amd64），与 Go 插件端 {@code platform} 口径一致。
+     * <p>Java 升级包与平台无关，该字段只用于界面展示（在线升级页「平台」列）。</p>
+     */
+    private final String platform = buildPlatform();
+    /**
      * 安装id
      */
     private String installId;
@@ -119,6 +129,32 @@ public class JpomManifest {
         //
         jpomManifest.randomId = IdUtil.fastSimpleUUID();
         return jpomManifest;
+    }
+
+    /**
+     * 计算规范化运行平台（os/arch）。
+     * <p>osName 里带版本号（"Windows 10"、"Mac OS X"、"Ubuntu 22.04"），不能直接规范化，
+     * 因此优先用 hutool 的系统判定布尔值，只有都判不出来时才退回 osName 文本。</p>
+     *
+     * @return 平台（如 linux/amd64），无法识别返回 null
+     */
+    private static String buildPlatform() {
+        OsInfo osInfo = SystemUtil.getOsInfo();
+        String arch = PlatformUtil.normalizeArch(osInfo.getArch());
+        if (StrUtil.isBlank(arch)) {
+            return null;
+        }
+        String os;
+        if (osInfo.isWindows()) {
+            os = "windows";
+        } else if (osInfo.isLinux()) {
+            os = "linux";
+        } else if (osInfo.isMac() || osInfo.isMacOsX()) {
+            os = "darwin";
+        } else {
+            os = PlatformUtil.normalizeOs(osInfo.getName());
+        }
+        return StrUtil.isBlank(os) ? null : os + "/" + arch;
     }
 
     private static String buildOsInfo() {
@@ -184,6 +220,24 @@ public class JpomManifest {
 
     public Type getType() {
         return type;
+    }
+
+    /**
+     * 系统架构（如 amd64、arm64）
+     *
+     * @return 规范化架构，无法识别时返回 null
+     */
+    public String getArch() {
+        return arch;
+    }
+
+    /**
+     * 运行平台（os/arch，如 linux/amd64）
+     *
+     * @return 规范化平台，无法识别时返回 null
+     */
+    public String getPlatform() {
+        return platform;
     }
 
     public long getPid() {

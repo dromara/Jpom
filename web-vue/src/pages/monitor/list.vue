@@ -374,7 +374,7 @@ export default {
           dataIndex: 'operation',
           ellipsis: true,
           fixed: 'right',
-          width: '120px'
+          width: '1%'
         }
       ],
 

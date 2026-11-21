@@ -11,7 +11,6 @@ package org.dromara.jpom.socket.handler;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.unit.DataSize;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.map.SafeConcurrentHashMap;
@@ -72,7 +71,14 @@ import java.util.concurrent.ConcurrentMap;
 @Slf4j
 public class NodeUpdateHandler extends BaseProxyHandler {
 
-    private final ConcurrentMap<String, IProxyWebSocket> clientMap = new SafeConcurrentHashMap<>();
+    /**
+     * 浏览器会话 id -> (节点 id -> 节点侧 WS 代理)。
+     * <p>必须按会话隔离：代理的回调闭包绑定了建立它时的浏览器 {@link WebSocketSession}，按节点 id 全局缓存会让
+     * 刷新/重连后的新会话永远收不到节点回包（回包被投递到已关闭的旧会话，日志表现为
+     * “The session has been closed and messages cannot be sent”，在线升级页的实时版本/引擎/平台/打包时间/运行时间
+     * 因此长期为空）。</p>
+     */
+    private final ConcurrentMap<String, ConcurrentMap<String, IProxyWebSocket>> sessionClientMap = new SafeConcurrentHashMap<>();
 
     private static final int CHECK_COUNT = 120;
 
@@ -116,53 +122,104 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 
     }
 
+    /**
+     * 获取当前浏览器会话持有的节点代理容器（按会话隔离，多个标签页互不影响）
+     *
+     * @param session 浏览器会话
+     * @return 节点 id -> 节点代理
+     */
+    private ConcurrentMap<String, IProxyWebSocket> clientMap(WebSocketSession session) {
+        return sessionClientMap.computeIfAbsent(session.getId(), key -> new SafeConcurrentHashMap<>());
+    }
+
+    /**
+     * 释放一个浏览器会话持有的全部节点代理（只影响当前会话）
+     *
+     * @param sessionId 浏览器会话 id
+     */
+    private void releaseSession(String sessionId) {
+        ConcurrentMap<String, IProxyWebSocket> proxyMap = sessionClientMap.remove(sessionId);
+        if (proxyMap == null) {
+            return;
+        }
+        proxyMap.values().forEach(proxy -> {
+            try {
+                proxy.close();
+            } catch (Exception e) {
+                log.error(I18nMessageUtil.get("i18n.close_connection_exception.c855"), e);
+            }
+        });
+    }
+
     private void pullNodeList(WebSocketSession session, String ids) {
         List<String> split = StrUtil.split(ids, StrUtil.COMMA);
         List<MachineNodeModel> nodeModelList = machineNodeServer.listById(split);
-        if (nodeModelList == null) {
+        if (CollUtil.isEmpty(nodeModelList)) {
             this.onError(session, I18nMessageUtil.get("i18n.node_info_not_found.2c8c") + ids);
             return;
         }
+        ConcurrentMap<String, IProxyWebSocket> clientMap = this.clientMap(session);
         for (MachineNodeModel model : nodeModelList) {
-            IProxyWebSocket nodeClient = clientMap.computeIfAbsent(model.getId(), s -> {
+            // 连接节点（连接可能阻塞，放到线程池；回包通过代理回调投递给当前会话）
+            I18nThreadUtil.execute(() -> this.pullVersion(clientMap, session, model));
+        }
+    }
+
+    /**
+     * 建立（或复用）当前会话到节点的 WS 代理，并向节点请求一次实时信息（manifest：引擎/平台/版本/打包时间/运行时间）
+     *
+     * @param clientMap 当前会话的节点代理容器
+     * @param session   浏览器会话
+     * @param model     机器节点
+     */
+    private void pullVersion(ConcurrentMap<String, IProxyWebSocket> clientMap, WebSocketSession session, MachineNodeModel model) {
+        IProxyWebSocket nodeClient;
+        try {
+            nodeClient = clientMap.compute(model.getId(), (key, exist) -> {
+                if (exist != null && exist.isConnected()) {
+                    return exist;
+                }
+                if (exist != null) {
+                    // 已断开（节点重启/隧道重建）：先关闭再重建，避免把后续消息写进死连接
+                    try {
+                        exist.close();
+                    } catch (Exception e) {
+                        log.debug(I18nMessageUtil.get("i18n.close_connection_exception.c855"), e.getMessage());
+                    }
+                }
                 INodeInfo nodeInfo = NodeForward.coverNodeInfo(model);
                 IUrlItem urlItem = NodeForward.parseUrlItem(model, StrUtil.EMPTY, NodeUrl.NodeUpdate, DataContentType.FORM_URLENCODED);
-
                 IProxyWebSocket proxySession = TransportServerFactory.get().websocket(nodeInfo, urlItem);
+                // 回调闭包绑定当前浏览器会话：容器已按会话隔离，不会串到其它标签页
                 proxySession.onMessage(msg -> sendMsg(session, msg));
                 return proxySession;
             });
-            // 连接节点
-            I18nThreadUtil.execute(() -> {
-                try {
-                    if (!nodeClient.isConnected()) {
-                        nodeClient.reconnectBlocking();
-                    }
-                    WebSocketMessageModel command = new WebSocketMessageModel("getVersion", model.getId());
-                    nodeClient.send(command.toString());
-                } catch (Exception e) {
-                    String closeStatusMsg = nodeClient.getCloseStatusMsg();
-                    log.error(I18nMessageUtil.get("i18n.create_plugin_endpoint_connection_failure.30f8"), closeStatusMsg, e);
-                    IProxyWebSocket webSocket = clientMap.remove(model.getId());
-                    IoUtil.close(webSocket);
-                    this.onError(session, StrUtil.format(I18nMessageUtil.get("i18n.connect_plugin_failed.e492"), closeStatusMsg, e.getMessage(), model.getId()));
-                }
-            });
+        } catch (Exception e) {
+            log.error(I18nMessageUtil.get("i18n.create_plugin_endpoint_connection_failure.30f8"), model.getName(), e.getMessage(), e);
+            this.onError(session, StrUtil.format(I18nMessageUtil.get("i18n.node_live_channel_failed.4f1d"), model.getName(), StrUtil.toStringOrNull(e.getMessage())), model.getId());
+            return;
+        }
+        try {
+            if (!nodeClient.isConnected() && !nodeClient.connectBlocking()) {
+                clientMap.remove(model.getId(), nodeClient);
+                String closeStatusMsg = StrUtil.emptyToDefault(nodeClient.getCloseStatusMsg(), I18nMessageUtil.get("i18n.node_connection_lost.b6c7"));
+                log.error(I18nMessageUtil.get("i18n.create_plugin_endpoint_connection_failure.30f8"), model.getName(), closeStatusMsg);
+                this.onError(session, StrUtil.format(I18nMessageUtil.get("i18n.node_live_channel_failed.4f1d"), model.getName(), closeStatusMsg), model.getId());
+                return;
+            }
+            WebSocketMessageModel command = new WebSocketMessageModel("getVersion", model.getId());
+            nodeClient.send(command.toString());
+        } catch (Exception e) {
+            clientMap.remove(model.getId(), nodeClient);
+            log.error(I18nMessageUtil.get("i18n.create_plugin_endpoint_connection_failure.30f8"), model.getName(), e.getMessage(), e);
+            this.onError(session, StrUtil.format(I18nMessageUtil.get("i18n.node_live_channel_failed.4f1d"), model.getName(), StrUtil.toStringOrNull(e.getMessage())), model.getId());
         }
     }
 
     @Override
     public void destroy(WebSocketSession session) {
-        clientMap.values().forEach(iProxyWebSocket -> {
-            if (iProxyWebSocket.isConnected()) {
-                try {
-                    iProxyWebSocket.close();
-                } catch (Exception e) {
-                    log.error(I18nMessageUtil.get("i18n.close_connection_exception.c855"), e);
-                }
-            }
-        });
-        clientMap.clear();
+        // 只清理当前会话的节点代理：清空全部会连带断开其它标签页/页面的实时信息通道
+        this.releaseSession(session.getId());
         //
         super.destroy(session);
     }
@@ -180,13 +237,18 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                 updateNode(model, session);
                 break;
             case "heart":
-                for (Map.Entry<String, IProxyWebSocket> entry : clientMap.entrySet()) {
-                    String key = entry.getKey();
-                    IProxyWebSocket iProxyWebSocket = entry.getValue();
-                    try {
-                        iProxyWebSocket.send(model.toString());
-                    } catch (Exception e) {
-                        log.error(I18nMessageUtil.get("i18n.heartbeat_message_forwarding_failed.89cc"), key, e.getMessage());
+                ConcurrentMap<String, IProxyWebSocket> heartbeatMap = this.sessionClientMap.get(session.getId());
+                if (heartbeatMap != null) {
+                    for (Map.Entry<String, IProxyWebSocket> entry : heartbeatMap.entrySet()) {
+                        String key = entry.getKey();
+                        IProxyWebSocket iProxyWebSocket = entry.getValue();
+                        try {
+                            iProxyWebSocket.send(model.toString());
+                        } catch (Exception e) {
+                            // 连接已断开：移除该代理，下一次 getNodeList 会重建，避免心跳一直写死连接
+                            heartbeatMap.remove(key, iProxyWebSocket);
+                            log.warn(I18nMessageUtil.get("i18n.heartbeat_message_forwarding_failed.89cc"), key, e.getMessage());
+                        }
                     }
                 }
                 break;
@@ -351,13 +413,14 @@ public class NodeUpdateHandler extends BaseProxyHandler {
 
     private void updateNodeItem(String id, MachineNodeModel node, WebSocketSession session, AgentFileModel javaPackage, AgentFileModel goPackage, boolean http) {
         try {
-            IProxyWebSocket client = clientMap.get(node.getId());
+            IProxyWebSocket client = this.clientMap(session).get(node.getId());
             if (client == null) {
                 this.onError(session, I18nMessageUtil.get("i18n.plugin_not_initialized.3ea9"), id);
                 return;
             }
-            if (!client.isConnected()) {
-                this.onError(session, I18nMessageUtil.get("i18n.node_connection_lost.b6c7"), id);
+            if (!client.isConnected() && !client.reconnectBlocking()) {
+                this.onError(session, StrUtil.format(I18nMessageUtil.get("i18n.node_live_channel_failed.4f1d"), node.getName(),
+                    StrUtil.emptyToDefault(client.getCloseStatusMsg(), I18nMessageUtil.get("i18n.node_connection_lost.b6c7"))), id);
                 return;
             }
             // 探测节点运行引擎、当前版本与运行平台（engine=go 时使用 Go 升级容器）

@@ -259,7 +259,7 @@ export default {
           align: 'center',
 
           fixed: 'right',
-          width: '140px'
+          width: '1%'
         }
       ],
 

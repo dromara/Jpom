@@ -22,12 +22,18 @@ public class TunnelDownload {
     private final int status;
     private final String contentDisposition;
     private final String contentType;
+    private final long contentLength;
     private final InputStream inputStream;
 
     public TunnelDownload(int status, String contentDisposition, String contentType, InputStream inputStream) {
+        this(status, contentDisposition, contentType, -1L, inputStream);
+    }
+
+    public TunnelDownload(int status, String contentDisposition, String contentType, long contentLength, InputStream inputStream) {
         this.status = status;
         this.contentDisposition = contentDisposition;
         this.contentType = contentType;
+        this.contentLength = contentLength;
         this.inputStream = inputStream;
     }
 
@@ -41,6 +47,15 @@ public class TunnelDownload {
 
     public String getContentType() {
         return contentType;
+    }
+
+    /**
+     * 响应声明的内容长度（-1 表示未知）
+     *
+     * @return 字节数
+     */
+    public long getContentLength() {
+        return contentLength;
     }
 
     public InputStream getInputStream() {

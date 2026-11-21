@@ -316,7 +316,7 @@ export default {
 
           fixed: 'right',
           align: 'center',
-          width: '190px'
+          width: '1%'
         }
       ],
 

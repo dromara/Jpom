@@ -86,7 +86,7 @@ func (u *uploadState) Close() {
 }
 
 // Progress returns the updateNode progress payload. Live Java 2.11.13 capture
-// (.tmp/audit/ws_java.txt) shows size/completeSize are JSON **strings**
+// shows size/completeSize are JSON **strings**
 // (fastjson2 long -> string on this endpoint), null fields omitted;
 // UploadFileModel does not set timeStamp.
 //

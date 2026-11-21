@@ -1209,7 +1209,7 @@ export default {
           dataIndex: 'operation',
 
           fixed: 'right',
-          width: '210px',
+          width: '1%',
           align: 'center'
         }
       ],

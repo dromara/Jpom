@@ -34,6 +34,7 @@ import org.dromara.jpom.service.build.NodeBuildVersionService;
 import org.dromara.jpom.service.dblog.BuildInfoService;
 import org.dromara.jpom.service.dblog.DbBuildHistoryLogService;
 import org.dromara.jpom.service.dblog.RepositoryService;
+import org.dromara.jpom.service.sshproject.SshProjectVersionService;
 import org.dromara.jpom.service.system.WorkspaceEnvVarService;
 import org.dromara.jpom.util.LogRecorder;
 import org.dromara.jpom.util.StringUtil;
@@ -62,6 +63,7 @@ public class BuildExecuteService {
     private final BuildExecutorPoolService buildExecutorPoolService;
     private final BuildVersionService buildVersionService;
     private final NodeBuildVersionService nodeBuildVersionService;
+    private final SshProjectVersionService sshProjectVersionService;
 
     public BuildExecuteService(BuildInfoService buildService,
                                DbBuildHistoryLogService dbBuildHistoryLogService,
@@ -69,7 +71,8 @@ public class BuildExecuteService {
                                WorkspaceEnvVarService workspaceEnvVarService,
                                BuildExecutorPoolService buildExecutorPoolService,
                                BuildVersionService buildVersionService,
-                               NodeBuildVersionService nodeBuildVersionService) {
+                               NodeBuildVersionService nodeBuildVersionService,
+                               SshProjectVersionService sshProjectVersionService) {
         this.buildService = buildService;
         this.dbBuildHistoryLogService = dbBuildHistoryLogService;
         this.repositoryService = repositoryService;
@@ -77,6 +80,7 @@ public class BuildExecuteService {
         this.buildExecutorPoolService = buildExecutorPoolService;
         this.buildVersionService = buildVersionService;
         this.nodeBuildVersionService = nodeBuildVersionService;
+        this.sshProjectVersionService = sshProjectVersionService;
     }
 
 
@@ -235,12 +239,29 @@ public class BuildExecuteService {
      * @return 新的构建编号
      */
     public int quickRollback(BuildHistoryLog oldLog, BuildInfoModel item, UserModel userModel, boolean restart) {
+        return this.quickRollback(oldLog, item, userModel, restart, null);
+    }
+
+    /**
+     * 快速回滚：把发布目标的本地版本切换为当前版本（不重新传输产物）
+     * <p>
+     * 插件端项目按索引表逐个节点切换；SSH 项目的版本快照在目标机器目录上，按构建编号或指定版本切换。
+     *
+     * @param oldLog    目标构建历史
+     * @param item      构建配置
+     * @param userModel 操作人
+     * @param restart   切换后是否重启项目
+     * @param versionId 指定版本（SSH 项目可选，为空按构建编号自动定位）
+     * @return 新的构建编号
+     */
+    public int quickRollback(BuildHistoryLog oldLog, BuildInfoModel item, UserModel userModel, boolean restart, String versionId) {
         synchronized (item.getId().intern()) {
             String e = this.checkStatus(item);
             Assert.isNull(e, () -> e);
             Integer fromBuildNumberId = ObjectUtil.defaultIfNull(oldLog.getFromBuildNumberId(), oldLog.getBuildNumberId());
-            List<NodeBuildVersionModel> targets = nodeBuildVersionService.listByBuild(oldLog.getBuildDataId(), fromBuildNumberId);
-            Assert.notEmpty(targets, I18nMessageUtil.get("i18n.no_node_version_for_build.3d18"));
+            boolean sshProject = BuildVersionService.isSshProject(oldLog);
+            List<NodeBuildVersionModel> targets = sshProject ? null : nodeBuildVersionService.listByBuild(oldLog.getBuildDataId(), fromBuildNumberId);
+            Assert.state(sshProject || !targets.isEmpty(), I18nMessageUtil.get("i18n.no_node_version_for_build.3d18"));
             // 历史记录可能没有 extraData（老数据），这里不能直接 Assert，取不到就按默认保留个数处理
             BuildExtraModule oldExtra = StringUtil.jsonConvert(oldLog.getExtraData(), BuildExtraModule.class);
             int versionKeepCount = BuildVersionService.resolveKeepCount(oldExtra == null ? null : oldExtra.getVersionKeepCount());
@@ -264,36 +285,47 @@ public class BuildExecuteService {
             int fail = 0;
             try {
                 logRecorder.system(I18nMessageUtil.get("i18n.start_quick_rollback.7a41"), oldLog.getBuildNumberId(), fromBuildNumberId);
-                for (NodeBuildVersionModel target : targets) {
-                    NodeModel nodeModel = buildVersionService.resolveNode(target.getNodeId());
-                    if (nodeModel == null) {
-                        fail++;
-                        logRecorder.systemError(I18nMessageUtil.get("i18n.quick_rollback_node_missing.b6e2"), target.getNodeId(), target.getProjectId());
-                        continue;
-                    }
+                if (sshProject) {
                     try {
-                        // 切换时显式带上构建配置的保留个数（0/空归一为默认值），否则插件端会按「未启用」清理到只剩当前版本
-                        JsonMessage<JSONObject> jsonMessage = buildVersionService.switchVersion(nodeModel, target.getProjectId(),
-                            target.getVersionId(), restart, versionKeepCount);
-                        if (jsonMessage.success()) {
-                            success++;
-                            nodeBuildVersionService.markCurrent(target.getNodeId(), target.getProjectId(), target.getVersionId());
-                            NodeBuildVersionModel update = new NodeBuildVersionModel();
-                            update.setId(target.getId());
-                            update.setStatus(BuildVersionService.STATUS_CURRENT);
-                            update.setMessage(I18nMessageUtil.get("i18n.quick_rollback_success.9c15"));
-                            nodeBuildVersionService.updateById(update);
-                            logRecorder.system(I18nMessageUtil.get("i18n.quick_rollback_node_success.2f83"),
-                                nodeModel.getName(), target.getProjectId(), target.getVersionId());
-                        } else {
-                            fail++;
-                            logRecorder.systemError(I18nMessageUtil.get("i18n.quick_rollback_node_failed.4b97"),
-                                nodeModel.getName(), target.getProjectId(), target.getVersionId(), jsonMessage);
-                        }
+                        this.sshProjectVersionService.quickRollback(oldLog, versionId, restart, logRecorder);
+                        success++;
                     } catch (Exception exception) {
                         fail++;
-                        logRecorder.systemError(I18nMessageUtil.get("i18n.quick_rollback_node_exception.8e26"),
-                            nodeModel.getName(), target.getProjectId(), exception.getMessage());
+                        logRecorder.systemError(I18nMessageUtil.get("i18n.quick_rollback_ssh_project_failed.c4d2"),
+                            oldLog.getBuildName(), exception.getMessage());
+                    }
+                } else {
+                    for (NodeBuildVersionModel target : targets) {
+                        NodeModel nodeModel = buildVersionService.resolveNode(target.getNodeId());
+                        if (nodeModel == null) {
+                            fail++;
+                            logRecorder.systemError(I18nMessageUtil.get("i18n.quick_rollback_node_missing.b6e2"), target.getNodeId(), target.getProjectId());
+                            continue;
+                        }
+                        try {
+                            // 切换时显式带上构建配置的保留个数（0/空归一为默认值），否则插件端会按「未启用」清理到只剩当前版本
+                            JsonMessage<JSONObject> jsonMessage = buildVersionService.switchVersion(nodeModel, target.getProjectId(),
+                                target.getVersionId(), restart, versionKeepCount);
+                            if (jsonMessage.success()) {
+                                success++;
+                                nodeBuildVersionService.markCurrent(target.getNodeId(), target.getProjectId(), target.getVersionId());
+                                NodeBuildVersionModel update = new NodeBuildVersionModel();
+                                update.setId(target.getId());
+                                update.setStatus(BuildVersionService.STATUS_CURRENT);
+                                update.setMessage(I18nMessageUtil.get("i18n.quick_rollback_success.9c15"));
+                                nodeBuildVersionService.updateById(update);
+                                logRecorder.system(I18nMessageUtil.get("i18n.quick_rollback_node_success.2f83"),
+                                    nodeModel.getName(), target.getProjectId(), target.getVersionId());
+                            } else {
+                                fail++;
+                                logRecorder.systemError(I18nMessageUtil.get("i18n.quick_rollback_node_failed.4b97"),
+                                    nodeModel.getName(), target.getProjectId(), target.getVersionId(), jsonMessage);
+                            }
+                        } catch (Exception exception) {
+                            fail++;
+                            logRecorder.systemError(I18nMessageUtil.get("i18n.quick_rollback_node_exception.8e26"),
+                                nodeModel.getName(), target.getProjectId(), exception.getMessage());
+                        }
                     }
                 }
             } finally {

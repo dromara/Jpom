@@ -1,0 +1,320 @@
+{
+  "templates": [
+    {
+      "key": "spring-boot-jar",
+      "name": "Spring Boot Jar",
+      "description": "单个可执行 jar，nohup 启动、PID 文件判活、自动探测端口",
+      "order": 10,
+      "fields": [
+        {
+          "key": "javaBin",
+          "label": "Java 可执行文件",
+          "type": "text",
+          "defaultValue": "java",
+          "required": false,
+          "placeholder": "java 或 /usr/local/jdk8/bin/java"
+        },
+        {
+          "key": "jvm",
+          "label": "JVM 参数",
+          "type": "text",
+          "defaultValue": "-Xms256m -Xmx512m",
+          "required": false,
+          "placeholder": "-Xms256m -Xmx512m"
+        },
+        {
+          "key": "args",
+          "label": "程序参数",
+          "type": "text",
+          "defaultValue": "",
+          "required": false,
+          "placeholder": "--server.port=8080"
+        }
+      ],
+      "hooks": {
+        "start": "set -e\ncd \"$PROJECT_PATH\"\nJAR=$(ls -1 *.jar 2>/dev/null | head -n1)\nif [ -z \"$JAR\" ]; then echo \"no jar found in $PROJECT_PATH\"; exit 2; fi\nPID=$(cat \"$JPOM_PID_FILE\" 2>/dev/null)\nif [ -n \"$PID\" ] && kill -0 \"$PID\" 2>/dev/null; then echo \"already running: $PID\"; exit 0; fi\nsetsid sh -c 'echo $$ > \"$JPOM_PID_FILE\"; exec \"{{javaBin}}\" {{jvm}} -DJpom.application.ssh=\"$PROJECT_ID\" -DJpom.basedir=\"$PROJECT_PATH\" -jar \"$JAR\" {{args}} >> \"$JPOM_LOG_FILE\" 2>&1' < /dev/null > /dev/null 2>&1 &\nsleep 1\nPID=$(cat \"$JPOM_PID_FILE\" 2>/dev/null)\nif [ -n \"$PID\" ] && kill -0 \"$PID\" 2>/dev/null; then echo \"started: $PID\"; else echo \"start failed\"; exit 3; fi",
+        "status": "PID=$(cat \"$JPOM_PID_FILE\" 2>/dev/null)\nif [ -n \"$PID\" ] && kill -0 \"$PID\" 2>/dev/null; then\n  if command -v ss >/dev/null 2>&1; then\n    PORT=$(ss -lntp 2>/dev/null | grep -F \"pid=$PID,\" | awk '{print $4}' | awk -F: '{print $NF}' | sort -n | head -n1)\n  else\n    PORT=$(netstat -lntp 2>/dev/null | grep -F \"$PID/\" | awk '{print $4}' | awk -F: '{print $NF}' | sort -n | head -n1)\n  fi\n  if [ -n \"$PORT\" ]; then echo \"running:$PID:$PORT\"; else echo \"running:$PID\"; fi\nelse\n  echo stopped\nfi",
+        "stop": "PID=$(cat \"$JPOM_PID_FILE\" 2>/dev/null)\nif [ -z \"$PID\" ]; then echo \"no pid file\"; exit 0; fi\nkill \"$PID\" 2>/dev/null\ni=0\nwhile [ $i -lt 30 ]; do\n  if ! kill -0 \"$PID\" 2>/dev/null; then rm -f \"$JPOM_PID_FILE\"; echo stopped; exit 0; fi\n  sleep 1; i=$((i+1))\ndone\nkill -9 \"$PID\" 2>/dev/null\nrm -f \"$JPOM_PID_FILE\"\necho stopped"
+      },
+      "logFiles": [
+        {
+          "name": "应用日志",
+          "path": "logs/app.log"
+        }
+      ]
+    },
+    {
+      "key": "java-classpath",
+      "name": "通用 Java（classpath）",
+      "description": "lib 目录下 jar 拼 classpath 启动，适合非 Spring Boot 的传统 Java 应用",
+      "order": 15,
+      "fields": [
+        {
+          "key": "javaBin",
+          "label": "Java 可执行文件",
+          "type": "text",
+          "defaultValue": "java",
+          "required": false,
+          "placeholder": "java"
+        },
+        {
+          "key": "mainClass",
+          "label": "启动类",
+          "type": "text",
+          "defaultValue": "",
+          "required": true,
+          "placeholder": "com.example.Main"
+        },
+        {
+          "key": "libDir",
+          "label": "lib 目录",
+          "type": "text",
+          "defaultValue": "lib",
+          "required": true,
+          "placeholder": "lib"
+        },
+        {
+          "key": "jvm",
+          "label": "JVM 参数",
+          "type": "text",
+          "defaultValue": "-Xms256m -Xmx512m",
+          "required": false,
+          "placeholder": "-Xms256m -Xmx512m"
+        },
+        {
+          "key": "args",
+          "label": "程序参数",
+          "type": "text",
+          "defaultValue": "",
+          "required": false,
+          "placeholder": ""
+        }
+      ],
+      "hooks": {
+        "start": "set -e\ncd \"$PROJECT_PATH\"\nCP=$(find {{libDir}} -maxdepth 1 -name \"*.jar\" | sort | tr \"\\n\" \":\")\nif [ -z \"$CP\" ]; then echo \"no jar found in {{libDir}}\"; exit 2; fi\nexport CP\nPID=$(cat \"$JPOM_PID_FILE\" 2>/dev/null)\nif [ -n \"$PID\" ] && kill -0 \"$PID\" 2>/dev/null; then echo \"already running: $PID\"; exit 0; fi\nsetsid sh -c 'echo $$ > \"$JPOM_PID_FILE\"; exec \"{{javaBin}}\" {{jvm}} -DJpom.application.ssh=\"$PROJECT_ID\" -DJpom.basedir=\"$PROJECT_PATH\" -cp \"$CP:conf\" {{mainClass}} {{args}} >> \"$JPOM_LOG_FILE\" 2>&1' < /dev/null > /dev/null 2>&1 &\nsleep 1\nPID=$(cat \"$JPOM_PID_FILE\" 2>/dev/null)\nif [ -n \"$PID\" ] && kill -0 \"$PID\" 2>/dev/null; then echo \"started: $PID\"; else echo \"start failed\"; exit 3; fi",
+        "status": "PID=$(cat \"$JPOM_PID_FILE\" 2>/dev/null)\nif [ -n \"$PID\" ] && kill -0 \"$PID\" 2>/dev/null; then\n  if command -v ss >/dev/null 2>&1; then\n    PORT=$(ss -lntp 2>/dev/null | grep -F \"pid=$PID,\" | awk '{print $4}' | awk -F: '{print $NF}' | sort -n | head -n1)\n  else\n    PORT=$(netstat -lntp 2>/dev/null | grep -F \"$PID/\" | awk '{print $4}' | awk -F: '{print $NF}' | sort -n | head -n1)\n  fi\n  if [ -n \"$PORT\" ]; then echo \"running:$PID:$PORT\"; else echo \"running:$PID\"; fi\nelse\n  echo stopped\nfi",
+        "stop": "PID=$(cat \"$JPOM_PID_FILE\" 2>/dev/null)\nif [ -z \"$PID\" ]; then echo \"no pid file\"; exit 0; fi\nkill \"$PID\" 2>/dev/null\ni=0\nwhile [ $i -lt 30 ]; do\n  if ! kill -0 \"$PID\" 2>/dev/null; then rm -f \"$JPOM_PID_FILE\"; echo stopped; exit 0; fi\n  sleep 1; i=$((i+1))\ndone\nkill -9 \"$PID\" 2>/dev/null\nrm -f \"$JPOM_PID_FILE\"\necho stopped"
+      },
+      "logFiles": [
+        {
+          "name": "应用日志",
+          "path": "logs/app.log"
+        }
+      ]
+    },
+    {
+      "key": "docker-compose",
+      "name": "Docker Compose",
+      "description": "compose 文件管理服务，up/down 映射启动停止，按运行容器数判活",
+      "order": 20,
+      "fields": [
+        {
+          "key": "composeFile",
+          "label": "compose 文件",
+          "type": "text",
+          "defaultValue": "docker-compose.yml",
+          "required": true,
+          "placeholder": "docker-compose.yml"
+        }
+      ],
+      "hooks": {
+        "start": "cd \"$PROJECT_PATH\"\ndocker compose -f {{composeFile}} up -d\necho \"compose up done\"",
+        "status": "cd \"$PROJECT_PATH\"\nCOUNT=$(docker compose -f {{composeFile}} ps --status running -q 2>/dev/null | wc -l | tr -d \" \")\nif [ \"$COUNT\" -gt 0 ]; then echo \"running:0\"; else echo stopped; fi",
+        "stop": "cd \"$PROJECT_PATH\"\ndocker compose -f {{composeFile}} down\necho stopped"
+      },
+      "logFiles": []
+    },
+    {
+      "key": "systemd",
+      "name": "systemd 服务",
+      "description": "托管给 systemd 的服务，start/stop/is-active 映射生命周期（守护由 systemd 负责）",
+      "order": 30,
+      "fields": [
+        {
+          "key": "unitName",
+          "label": "unit 名称",
+          "type": "text",
+          "defaultValue": "",
+          "required": true,
+          "placeholder": "my-app.service"
+        }
+      ],
+      "hooks": {
+        "start": "systemctl start {{unitName}}\nsystemctl is-active {{unitName}}",
+        "status": "STATUS=$(systemctl is-active {{unitName}} 2>/dev/null)\nif [ \"$STATUS\" = \"active\" ]; then echo \"running:0\"; else echo stopped; fi",
+        "stop": "systemctl stop {{unitName}}\necho stopped"
+      },
+      "logFiles": [
+        {
+          "name": "服务日志",
+          "path": "logs/app.log"
+        }
+      ]
+    },
+    {
+      "key": "file-only",
+      "name": "纯文件项目",
+      "description": "只做文件管理，不定义任何进程生命周期",
+      "order": 40,
+      "fields": [],
+      "hooks": {},
+      "logFiles": []
+    },
+    {
+      "key": "nodejs",
+      "name": "Node.js",
+      "description": "node 直接拉起入口文件，PID 文件判活；用 pm2 的请改用 systemd 或自定义脚本",
+      "order": 50,
+      "fields": [
+        {
+          "key": "nodeBin",
+          "label": "node 可执行文件",
+          "type": "text",
+          "defaultValue": "node",
+          "required": false,
+          "placeholder": "node"
+        },
+        {
+          "key": "entry",
+          "label": "入口文件",
+          "type": "text",
+          "defaultValue": "index.js",
+          "required": true,
+          "placeholder": "index.js"
+        },
+        {
+          "key": "args",
+          "label": "启动参数",
+          "type": "text",
+          "defaultValue": "",
+          "required": false,
+          "placeholder": "--port=3000"
+        }
+      ],
+      "hooks": {
+        "start": "set -e\ncd \"$PROJECT_PATH\"\nPID=$(cat \"$JPOM_PID_FILE\" 2>/dev/null)\nif [ -n \"$PID\" ] && kill -0 \"$PID\" 2>/dev/null; then echo \"already running: $PID\"; exit 0; fi\nsetsid sh -c 'echo $$ > \"$JPOM_PID_FILE\"; exec \"{{nodeBin}}\" \"{{entry}}\" {{args}} >> \"$JPOM_LOG_FILE\" 2>&1' < /dev/null > /dev/null 2>&1 &\nsleep 1\nPID=$(cat \"$JPOM_PID_FILE\" 2>/dev/null)\nif [ -n \"$PID\" ] && kill -0 \"$PID\" 2>/dev/null; then echo \"started: $PID\"; else echo \"start failed\"; exit 3; fi",
+        "status": "PID=$(cat \"$JPOM_PID_FILE\" 2>/dev/null)\nif [ -n \"$PID\" ] && kill -0 \"$PID\" 2>/dev/null; then\n  if command -v ss >/dev/null 2>&1; then\n    PORT=$(ss -lntp 2>/dev/null | grep -F \"pid=$PID,\" | awk '{print $4}' | awk -F: '{print $NF}' | sort -n | head -n1)\n  else\n    PORT=$(netstat -lntp 2>/dev/null | grep -F \"$PID/\" | awk '{print $4}' | awk -F: '{print $NF}' | sort -n | head -n1)\n  fi\n  if [ -n \"$PORT\" ]; then echo \"running:$PID:$PORT\"; else echo \"running:$PID\"; fi\nelse\n  echo stopped\nfi",
+        "stop": "PID=$(cat \"$JPOM_PID_FILE\" 2>/dev/null)\nif [ -z \"$PID\" ]; then echo \"no pid file\"; exit 0; fi\nkill \"$PID\" 2>/dev/null\ni=0\nwhile [ $i -lt 30 ]; do\n  if ! kill -0 \"$PID\" 2>/dev/null; then rm -f \"$JPOM_PID_FILE\"; echo stopped; exit 0; fi\n  sleep 1; i=$((i+1))\ndone\nkill -9 \"$PID\" 2>/dev/null\nrm -f \"$JPOM_PID_FILE\"\necho stopped"
+      },
+      "logFiles": [
+        {
+          "name": "应用日志",
+          "path": "logs/app.log"
+        }
+      ]
+    },
+    {
+      "key": "python",
+      "name": "Python 服务",
+      "description": "python 解释器拉起模块/入口，适合 uvicorn、gunicorn 或普通脚本",
+      "order": 60,
+      "fields": [
+        {
+          "key": "pythonBin",
+          "label": "python 可执行文件",
+          "type": "text",
+          "defaultValue": "python3",
+          "required": false,
+          "placeholder": "python3 或 venv/bin/python"
+        },
+        {
+          "key": "entry",
+          "label": "启动命令",
+          "type": "text",
+          "defaultValue": "-m uvicorn app:app --host 0.0.0.0 --port 8000",
+          "required": true,
+          "placeholder": "-m uvicorn app:app --port 8000"
+        },
+        {
+          "key": "args",
+          "label": "追加参数",
+          "type": "text",
+          "defaultValue": "",
+          "required": false,
+          "placeholder": ""
+        }
+      ],
+      "hooks": {
+        "start": "set -e\ncd \"$PROJECT_PATH\"\nPID=$(cat \"$JPOM_PID_FILE\" 2>/dev/null)\nif [ -n \"$PID\" ] && kill -0 \"$PID\" 2>/dev/null; then echo \"already running: $PID\"; exit 0; fi\nsetsid sh -c 'echo $$ > \"$JPOM_PID_FILE\"; exec \"{{pythonBin}}\" {{entry}} {{args}} >> \"$JPOM_LOG_FILE\" 2>&1' < /dev/null > /dev/null 2>&1 &\nsleep 1\nPID=$(cat \"$JPOM_PID_FILE\" 2>/dev/null)\nif [ -n \"$PID\" ] && kill -0 \"$PID\" 2>/dev/null; then echo \"started: $PID\"; else echo \"start failed\"; exit 3; fi",
+        "status": "PID=$(cat \"$JPOM_PID_FILE\" 2>/dev/null)\nif [ -n \"$PID\" ] && kill -0 \"$PID\" 2>/dev/null; then\n  if command -v ss >/dev/null 2>&1; then\n    PORT=$(ss -lntp 2>/dev/null | grep -F \"pid=$PID,\" | awk '{print $4}' | awk -F: '{print $NF}' | sort -n | head -n1)\n  else\n    PORT=$(netstat -lntp 2>/dev/null | grep -F \"$PID/\" | awk '{print $4}' | awk -F: '{print $NF}' | sort -n | head -n1)\n  fi\n  if [ -n \"$PORT\" ]; then echo \"running:$PID:$PORT\"; else echo \"running:$PID\"; fi\nelse\n  echo stopped\nfi",
+        "stop": "PID=$(cat \"$JPOM_PID_FILE\" 2>/dev/null)\nif [ -z \"$PID\" ]; then echo \"no pid file\"; exit 0; fi\nkill \"$PID\" 2>/dev/null\ni=0\nwhile [ $i -lt 30 ]; do\n  if ! kill -0 \"$PID\" 2>/dev/null; then rm -f \"$JPOM_PID_FILE\"; echo stopped; exit 0; fi\n  sleep 1; i=$((i+1))\ndone\nkill -9 \"$PID\" 2>/dev/null\nrm -f \"$JPOM_PID_FILE\"\necho stopped"
+      },
+      "logFiles": [
+        {
+          "name": "应用日志",
+          "path": "logs/app.log"
+        }
+      ]
+    },
+    {
+      "key": "go-binary",
+      "name": "Go / 二进制",
+      "description": "直接运行编译好的可执行文件，适用于 Go、Rust、C++ 等单体二进制",
+      "order": 70,
+      "fields": [
+        {
+          "key": "binPath",
+          "label": "可执行文件",
+          "type": "text",
+          "defaultValue": "./app",
+          "required": true,
+          "placeholder": "./app"
+        },
+        {
+          "key": "args",
+          "label": "启动参数",
+          "type": "text",
+          "defaultValue": "",
+          "required": false,
+          "placeholder": "-config conf/app.yml"
+        }
+      ],
+      "hooks": {
+        "start": "set -e\ncd \"$PROJECT_PATH\"\nPID=$(cat \"$JPOM_PID_FILE\" 2>/dev/null)\nif [ -n \"$PID\" ] && kill -0 \"$PID\" 2>/dev/null; then echo \"already running: $PID\"; exit 0; fi\nsetsid sh -c 'echo $$ > \"$JPOM_PID_FILE\"; exec \"{{binPath}}\" {{args}} >> \"$JPOM_LOG_FILE\" 2>&1' < /dev/null > /dev/null 2>&1 &\nsleep 1\nPID=$(cat \"$JPOM_PID_FILE\" 2>/dev/null)\nif [ -n \"$PID\" ] && kill -0 \"$PID\" 2>/dev/null; then echo \"started: $PID\"; else echo \"start failed\"; exit 3; fi",
+        "status": "PID=$(cat \"$JPOM_PID_FILE\" 2>/dev/null)\nif [ -n \"$PID\" ] && kill -0 \"$PID\" 2>/dev/null; then\n  if command -v ss >/dev/null 2>&1; then\n    PORT=$(ss -lntp 2>/dev/null | grep -F \"pid=$PID,\" | awk '{print $4}' | awk -F: '{print $NF}' | sort -n | head -n1)\n  else\n    PORT=$(netstat -lntp 2>/dev/null | grep -F \"$PID/\" | awk '{print $4}' | awk -F: '{print $NF}' | sort -n | head -n1)\n  fi\n  if [ -n \"$PORT\" ]; then echo \"running:$PID:$PORT\"; else echo \"running:$PID\"; fi\nelse\n  echo stopped\nfi",
+        "stop": "PID=$(cat \"$JPOM_PID_FILE\" 2>/dev/null)\nif [ -z \"$PID\" ]; then echo \"no pid file\"; exit 0; fi\nkill \"$PID\" 2>/dev/null\ni=0\nwhile [ $i -lt 30 ]; do\n  if ! kill -0 \"$PID\" 2>/dev/null; then rm -f \"$JPOM_PID_FILE\"; echo stopped; exit 0; fi\n  sleep 1; i=$((i+1))\ndone\nkill -9 \"$PID\" 2>/dev/null\nrm -f \"$JPOM_PID_FILE\"\necho stopped"
+      },
+      "logFiles": [
+        {
+          "name": "应用日志",
+          "path": "logs/app.log"
+        }
+      ]
+    },
+    {
+      "key": "nginx-static",
+      "name": "Nginx 静态站",
+      "description": "管理已有 nginx 配置的 reload/停止，配置校验失败会直接报错",
+      "order": 80,
+      "fields": [
+        {
+          "key": "nginxBin",
+          "label": "nginx 可执行文件",
+          "type": "text",
+          "defaultValue": "nginx",
+          "required": false,
+          "placeholder": "nginx 或 /usr/sbin/nginx"
+        },
+        {
+          "key": "confPath",
+          "label": "配置文件",
+          "type": "text",
+          "defaultValue": "/etc/nginx/nginx.conf",
+          "required": true,
+          "placeholder": "/etc/nginx/nginx.conf"
+        }
+      ],
+      "hooks": {
+        "start": "set -e\n\"{{nginxBin}}\" -t -c \"{{confPath}}\"\nif pgrep -f \"nginx: master process\" >/dev/null 2>&1; then\n  \"{{nginxBin}}\" -c \"{{confPath}}\" -s reload\nelse\n  \"{{nginxBin}}\" -c \"{{confPath}}\"\nfi\nsleep 1\nif pgrep -f \"nginx: master process\" >/dev/null 2>&1; then echo \"started: 0\"; else echo \"start failed\"; exit 3; fi",
+        "status": "if pgrep -f \"nginx: master process\" >/dev/null 2>&1; then echo \"running:0\"; else echo stopped; fi",
+        "stop": "\"{{nginxBin}}\" -c \"{{confPath}}\" -s quit\necho stopped"
+      },
+      "logFiles": [
+        {
+          "name": "访问日志",
+          "path": "/var/log/nginx/access.log"
+        }
+      ]
+    }
+  ]
+}

@@ -287,7 +287,8 @@ export default {
           align: 'center',
           dataIndex: 'operation',
 
-          width: 120
+          fixed: 'right',
+          width: '1%'
         }
       ],
 
@@ -393,7 +394,7 @@ export default {
             }),
             allowExecuteArray: JSON.parse(record.allowExecute || '[]')
           }
-          delete this.temp.prohibitExecute, delete this.temp.allowExecute
+          ;(delete this.temp.prohibitExecute, delete this.temp.allowExecute)
           this.editVisible = true
         })
       })
