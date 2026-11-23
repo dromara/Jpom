@@ -164,14 +164,16 @@ func TestScriptRunStreamsExecution(t *testing.T) {
 		t.Fatalf("unexpected hello frame: %s", hello)
 	}
 	sendJSON(t, conn, map[string]any{"scriptId": "script-1", "op": "start", "executeId": "execute-1", "args": "[]"})
-	control := readText(t, conn, 3*time.Second)
-	if !strings.Contains(control, "\"code\":200") || !strings.Contains(control, "执行成功") {
-		t.Fatalf("unexpected control frame: %s", control)
-	}
-	frames := readUntil(t, conn, 5*time.Second, func(frame string) bool {
+	// 控制帧与执行输出帧的先后顺序不保证（CI 负载下输出帧可能先到），
+	// 因此统一用 readUntil 累积所有帧，再在累积结果里断言，避免偶发 "unexpected control frame"。
+	var acc []string
+	acc = append(acc, readUntil(t, conn, 8*time.Second, func(frame string) bool {
+		return strings.Contains(frame, "\"code\":200") && strings.Contains(frame, "执行成功")
+	})...)
+	acc = append(acc, readUntil(t, conn, 8*time.Second, func(frame string) bool {
 		return strings.Contains(frame, "JPOM_MSG") && strings.Contains(frame, "stop")
-	})
-	joined := strings.Join(frames, "\n")
+	})...)
+	joined := strings.Join(acc, "\n")
 	if !strings.Contains(joined, "hello-script") {
 		t.Fatalf("execution output missing: %s", joined)
 	}
