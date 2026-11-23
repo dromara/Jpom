@@ -128,6 +128,8 @@ DEFAULT_TESTS=(
 	BuildInfoReleaseTargetMatcherTest
 	# SSH 项目多选发布保存：目标去重 / 保序 / 忽略空值（接口直传与前端数组 join 同一口径）
 	BuildInfoControllerSshProjectTargetsTest
+	# FTP 资产删除守卫必须查 FTP 发布方式（原复制粘贴成 SSH，被构建引用也删得掉）
+	FtpControllerDeleteGuardTest
 	# SSH 项目（无插件端）接口契约 + 版本快照远端解析/过滤（构建历史快速回滚，2026-11-20）
 	SshProjectControllerTest
 	SshProjectVersionServiceTest

@@ -683,57 +683,58 @@ public class ReleaseManage {
     }
 
     /**
-     * ftp发布
-     *
-     * @throws IOException
+     * ftp 发布（支持多目标；失败策略见 {@link #releaseTargets}）
+     * <p>
+     * 2026-11-23 复测：原来目标已删除只记一条错误日志、发布目录为空只告警，构建仍算成功，
+     * 与 SSH / SSH 项目「目标缺失或上传异常算失败」的口径不一致，这里统一走 releaseTargets。
      */
     private void doFtp() {
-        String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
         FtpService ftpService = SpringUtil.getBean(FtpService.class);
-        List<String> strings = StrUtil.splitTrim(releaseMethodDataId, StrUtil.COMMA);
-        for (String releaseMethodDataIdItem : strings) {
-            FtpModel item = ftpService.getByKey(releaseMethodDataIdItem, false);
+        this.releaseTargets(this.buildExtraModule.getReleaseMethodDataId(), targetId -> {
+            FtpModel item = ftpService.getByKey(targetId, false);
             if (item == null) {
-                logRecorder.systemError(I18nMessageUtil.get("i18n.ftp_item_not_found.60a7"), releaseMethodDataIdItem);
-                continue;
+                throw new JpomRuntimeException(StrUtil.format(I18nMessageUtil.get("i18n.ftp_item_not_found.60a7"), targetId));
             }
+            this.doFtp(item, ftpService);
+        });
+    }
 
-            String releasePath = this.buildExtraModule.getReleaseFtpPath();
-
-            if (StrUtil.isEmpty(releasePath)) {
-                logRecorder.systemWarning(I18nMessageUtil.get("i18n.publish_directory_is_empty.79c6"));
-            } else {
-                logRecorder.system(I18nMessageUtil.get("i18n.start_upload_ftp_file.20be"), DateUtil.now(), item.getName(), System.lineSeparator());
-
-                MachineFtpModel machineFtpModel = ftpService.getMachineFtpModel(item);
-                try (Ftp ftp = machineFtpServer.getFtpClient(machineFtpModel)) {
-
-
-                    String prefix = "";
-                    if (!StrUtil.startWith(releasePath, StrUtil.SLASH)) {
-                        prefix = ftp.pwd();
-                    }
-                    String normalizePath = FileUtil.normalize(prefix + StrUtil.SLASH + releasePath);
-                    if (this.buildExtraModule.isClearOld()) {
-                        try {
-                            if (ftp.exist(normalizePath)) {
-                                ftp.delDir(normalizePath);
-                            }
-                        } catch (Exception e) {
-                            if (!StrUtil.startWithIgnoreCase(e.getMessage(), "No such file")) {
-                                logRecorder.error(I18nMessageUtil.get("i18n.clear_build_product_failed.edd4"), e);
-                            }
-                        }
-                    }
-                    ftpService.uploadWithProgress(ftp, this.resultFile, normalizePath, logRecorder, 5);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-                logRecorder.system(I18nMessageUtil.get("i18n.start_upload_ftp_file.20be"), DateUtil.now(), item.getName(), System.lineSeparator());
-
-                logRecorder.system("{} {} ftp upload done", DateUtil.now(), item.getName());
-            }
+    /**
+     * 发布到单个 FTP 目标
+     *
+     * @param item       ftp 资产
+     * @param ftpService ftp service
+     */
+    private void doFtp(FtpModel item, FtpService ftpService) {
+        String releasePath = this.buildExtraModule.getReleaseFtpPath();
+        if (StrUtil.isEmpty(releasePath)) {
+            // 发布目录为空等于什么都没发出去，不能当作发布成功
+            throw new JpomRuntimeException(I18nMessageUtil.get("i18n.publish_directory_is_empty.79c6"));
         }
+        logRecorder.system(I18nMessageUtil.get("i18n.start_upload_ftp_file.20be"), DateUtil.now(), item.getName(), System.lineSeparator());
+        MachineFtpModel machineFtpModel = ftpService.getMachineFtpModel(item);
+        try (Ftp ftp = machineFtpServer.getFtpClient(machineFtpModel)) {
+            String prefix = "";
+            if (!StrUtil.startWith(releasePath, StrUtil.SLASH)) {
+                prefix = ftp.pwd();
+            }
+            String normalizePath = FileUtil.normalize(prefix + StrUtil.SLASH + releasePath);
+            if (this.buildExtraModule.isClearOld()) {
+                try {
+                    if (ftp.exist(normalizePath)) {
+                        ftp.delDir(normalizePath);
+                    }
+                } catch (Exception e) {
+                    if (!StrUtil.startWithIgnoreCase(e.getMessage(), "No such file")) {
+                        logRecorder.error(I18nMessageUtil.get("i18n.clear_build_product_failed.edd4"), e);
+                    }
+                }
+            }
+            ftpService.uploadWithProgress(ftp, this.resultFile, normalizePath, logRecorder, 5);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        logRecorder.system("{} {} ftp upload done", DateUtil.now(), item.getName());
     }
 
     /**

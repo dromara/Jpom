@@ -303,6 +303,24 @@ public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> imple
     }
 
     /**
+     * 判断是否存在发布关联（系统级，不按工作空间过滤；目标 id 为逗号分隔多值之一）
+     *
+     * @param dataId        数据ID
+     * @param releaseMethod 发布方法
+     * @return true 关联
+     */
+    public boolean checkReleaseMethodTarget(String dataId, BuildReleaseMethod releaseMethod) {
+        if (StrUtil.isBlank(dataId)) {
+            return false;
+        }
+        BuildInfoModel buildInfoModel = new BuildInfoModel();
+        buildInfoModel.setReleaseMethod(releaseMethod.getCode());
+        return super.listByBean(buildInfoModel, false)
+            .stream()
+            .anyMatch(model -> containsReleaseTarget(model.getReleaseMethodDataId(), dataId));
+    }
+
+    /**
      * 查询发布关联的构建
      *
      * @param dataId        数据ID

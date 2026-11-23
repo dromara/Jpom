@@ -412,11 +412,11 @@ docker-compose -f docker-compose.yml up -d
 > systemctl {status | start | stop | restart | enable} jpom-agent
 > ```
 
-> **升级/重启不会停止项目**：生成的 unit 带 `KillMode=process`，`systemctl restart` 只会重启 Jpom 本体，由它启动的项目/脚本进程保持运行并在重启后自动被重新接管。
-> 2.11.14 及更早版本生成的 unit 没有这一项（默认 `KillMode=control-group`），在这类实例上执行 `systemctl stop/restart`（包括「在线升级」）会**连带停止该节点所有项目**；
+> **插件端升级/重启不会停止项目**：插件端生成的 unit 带 `KillMode=process`，`systemctl restart` 只会重启插件端本体，由它启动的项目/脚本进程保持运行并在重启后自动被重新接管。
+> 2.11.14 及更早版本生成的插件端 unit 没有这一项（默认 `KillMode=control-group`），在这类实例上执行 `systemctl stop/restart`（包括「在线升级」）会**连带停止该节点所有项目**；
 > 换 unit 直接执行 `./bin/Service.sh reinstall`：先写新 unit、`daemon-reload`，再 `enable` + `restart`，停止阶段已按新 unit 的 `KillMode=process` 执行，项目不会被停，开机自启也保持不变；
 > 也可以手工在 `/etc/systemd/system/jpom-agent.service` 的 `[Service]` 段加一行 `KillMode=process` 后执行 `systemctl daemon-reload`（下一次 stop/restart 生效）。
-> 服务端同理：`KillMode=process` 让服务端重启不再中断由它启动的构建命令子进程（重启后这些构建按异常关闭处理，不会自动结束进程）。
+> **服务端保持 systemd 默认（不写 `KillMode=`）**：重启时会一并结束由服务端启动的构建命令子进程，避免重启后遗留孤儿构建继续占用工作空间；如确实需要重启后保留构建进程，可手工在 `/etc/systemd/system/jpom-server.service` 的 `[Service]` 段加 `KillMode=process` 后 `systemctl daemon-reload`。
 
 <a name="config"></a>
 ## ⚙️ Jpom 参数配置

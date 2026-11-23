@@ -89,11 +89,10 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-# 项目/脚本/构建进程都是本进程的子进程，和本进程同在一个 systemd cgroup。
-# 默认 KillMode=control-group 会让 systemctl stop/restart 把子进程一起 SIGTERM，
-# 表现为「升级/重启插件端（或服务端）= 该节点所有项目停止」（2026-11-23 重启计划群反馈）。
-# 这里只结束主进程（ExecStop 已按 pidfile 精确停止），子进程保持运行并由 Jpom 重新接管。
-KillMode=process
+# 服务端默认保持 systemd 的 KillMode=control-group（不写该项）：stop/restart 会一并结束
+# 由它启动的构建命令子进程，避免重启后遗留孤儿构建继续占用工作空间（构建本身按异常关闭处理）。
+# 插件端不同：项目/脚本进程需要在本体重启后继续运行，插件端的 unit 才写 KillMode=process。
+# 如确实需要服务端重启后保留构建子进程，可手工在 unit 的 [Service] 段加 KillMode=process 后 daemon-reload。
 Environment="JAVA_HOME=$JAVA_HOME"
 Environment="PATH=$PATH"
 Environment="CLASSPATH=$CLASSPATH"
