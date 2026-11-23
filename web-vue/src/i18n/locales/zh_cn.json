@@ -2896,7 +2896,7 @@
   "i18n_fba5f4f19a": "DSL环境变量",
   "i18n_fbd7ba1d9b": "最后分发时间",
   "i18n_fbee13a873": "工作空间总数：",
-  "i18n_fbf8959896": "版本保留个数（建议 3，留空或 0 时按 3 保留）",
+  "i18n_fbf8959896": "版本保留个数",
   "i18n_fbfa6c18bf": "已分配",
   "i18n_fbfeb76b33": "左边菜单栏主题切换",
   "i18n_fc06c70960": "您确定要删除当前镜像吗？",
@@ -3024,5 +3024,9 @@
   "i18n_8a8e690119": "请选择要发布的 SSH 项目",
   "i18n_ssh_project_ssh_empty_help_9f31": "当前工作空间没有可用的机器 SSH，请先在「SSH管理」添加并分配到本工作空间",
   "i18n_ssh_project_ssh_missing_d2a8": "（该机器 SSH 不在当前工作空间，请重新选择）",
-  "i18n_ssh_project_token_placeholder_7c42": "请输入访问令牌"
+  "i18n_ssh_project_token_placeholder_7c42": "请输入访问令牌",
+  "i18n_build_version_keep_count_help": "建议 3；留空或 0 时按 3 保留",
+  "i18n_build_release_fail_fast": "任一目标失败即终止",
+  "i18n_build_release_fail_fast_help": "开启后逐个目标发布，其中一个失败就跳过剩余目标；关闭则继续发布其余目标（最终只要有目标失败仍标记发布失败）",
+  "i18n_build_ssh_project_missing": "（选中的 SSH 项目不存在或已移出当前工作空间，请重新选择）"
 }

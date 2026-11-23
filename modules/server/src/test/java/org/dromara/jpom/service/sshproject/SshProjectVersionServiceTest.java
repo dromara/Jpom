@@ -155,6 +155,66 @@ public class SshProjectVersionServiceTest {
     }
 
     @Test
+    public void listByBuildLogMergesMultipleProjects() {
+        // 发布方式＝SSH 项目支持多选：构建历史弹窗要把每个项目在该构建产生的版本都列出来
+        SshProjectExecutor executor = mock(SshProjectExecutor.class);
+        SshProjectService sshProjectService = mock(SshProjectService.class);
+        SshProjectModel p2 = project();
+        p2.setId("p2");
+        p2.setName("demo2");
+        when(sshProjectService.getByKey("p1")).thenReturn(project());
+        when(sshProjectService.getByKey("p2")).thenReturn(p2);
+        String output = String.join("\n",
+            "ROOT|/home/u/.jpom/versions/p1",
+            "PROJECT|/data/demo",
+            "PROJECT_FILES|1",
+            "CURRENT|2",
+            "META|1|{\"versionId\":\"2\",\"source\":\"build\",\"buildNumberId\":2,\"buildDataId\":\"b1\",\"createTime\":2000}",
+            "JPOM_OK");
+        when(executor.runScript(any(), anyString(), anyInt())).thenReturn(ok(output));
+        SshProjectVersionService service = new SshProjectVersionService(executor, sshProjectService);
+        BuildHistoryLog log = new BuildHistoryLog();
+        log.setBuildDataId("b1");
+        log.setBuildNumberId(2);
+        log.setReleaseMethod(7);
+        log.setExtraData("{\"releaseMethod\":7,\"releaseMethodDataId\":\"p1,p2\"}");
+        JSONObject result = service.listByBuildLog(log);
+        Assertions.assertTrue(result.getBooleanValue("reachable"));
+        Assertions.assertEquals(2, result.getJSONArray("projects").size());
+        Assertions.assertEquals(2, result.getJSONArray("list").size());
+        Assertions.assertEquals("p1", result.getJSONArray("list").getJSONObject(0).getString("projectId"));
+        Assertions.assertEquals("p2", result.getJSONArray("list").getJSONObject(1).getString("projectId"));
+    }
+
+    @Test
+    public void listByBuildLogSkipsProjectRemovedFromSelection() {
+        // 多选里某个项目已被删除：其余项目照常列出，不因一个目标缺失把整个列表判成不可达
+        SshProjectExecutor executor = mock(SshProjectExecutor.class);
+        SshProjectService sshProjectService = mock(SshProjectService.class);
+        when(sshProjectService.getByKey("p1")).thenReturn(project());
+        when(sshProjectService.getByKey("gone")).thenReturn(null);
+        String output = String.join("\n",
+            "ROOT|/home/u/.jpom/versions/p1",
+            "PROJECT|/data/demo",
+            "PROJECT_FILES|1",
+            "CURRENT|1",
+            "META|1|{\"versionId\":\"1\",\"source\":\"build\",\"buildNumberId\":1,\"buildDataId\":\"b1\",\"createTime\":1000}",
+            "JPOM_OK");
+        when(executor.runScript(any(), anyString(), anyInt())).thenReturn(ok(output));
+        SshProjectVersionService service = new SshProjectVersionService(executor, sshProjectService);
+        BuildHistoryLog log = new BuildHistoryLog();
+        log.setBuildDataId("b1");
+        log.setBuildNumberId(1);
+        log.setReleaseMethod(7);
+        log.setExtraData("{\"releaseMethod\":7,\"releaseMethodDataId\":\"p1,gone\"}");
+        JSONObject result = service.listByBuildLog(log);
+        Assertions.assertTrue(result.getBooleanValue("reachable"));
+        Assertions.assertEquals(1, result.getJSONArray("projects").size());
+        Assertions.assertEquals(1, result.getJSONArray("list").size());
+        Assertions.assertEquals("p1", result.getJSONArray("list").getJSONObject(0).getString("projectId"));
+    }
+
+    @Test
     public void sshProjectReleaseMethodDetection() {
         BuildHistoryLog log = new BuildHistoryLog();
         log.setReleaseMethod(7);

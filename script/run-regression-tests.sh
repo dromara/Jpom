@@ -120,6 +120,8 @@ DEFAULT_TESTS=(
 	AgentDefaultVersionConfigTest
 	# 版本快照保留个数 0/空必须回落到默认值（否则插件端判「未启用」，发布成功却没有版本记录 → 快速回滚空列表，2026-11-19 群反馈）
 	BuildVersionServiceKeepCountTest
+	# 多目标发布失败策略：老配置缺字段按「任一目标失败即终止」，显式关闭才继续剩余目标
+	BuildExtraModuleReleaseFailFastTest
 	# SSH 项目（无插件端）接口契约 + 版本快照远端解析/过滤（构建历史快速回滚，2026-11-20）
 	SshProjectControllerTest
 	SshProjectVersionServiceTest

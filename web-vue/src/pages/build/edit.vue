@@ -645,8 +645,10 @@
                     <a-col :span="22">
                       <a-select
                         v-model:value="tempExtraData.releaseMethodDataId_7"
+                        mode="multiple"
                         show-search
                         allow-clear
+                        :max-tag-count="2"
                         :filter-option="
                           (input, option) => {
                             const children = option.children && option.children()
@@ -672,13 +674,32 @@
                 <a-form-item :label="$t('i18n_dbb2df00cf')">
                   <a-alert type="info" show-icon :message="$t('i18n_a2d654831b')">
                     <template #description>
-                      <span v-if="selectedSshProject"
-                        >{{ selectedSshProject.name }}: {{ selectedSshProject.path }}</span
-                      >
+                      <template v-if="selectedSshProjects.length">
+                        <div v-for="project in selectedSshProjects" :key="project.id">
+                          {{ project.name }}: {{ project.path }}
+                        </div>
+                      </template>
+                      <span v-if="missingSshProjectIds.length" style="color: #ff4d4f">
+                        {{ $t('i18n_build_ssh_project_missing') }}{{ missingSshProjectIds.join(', ') }}
+                      </span>
                     </template>
                   </a-alert>
                 </a-form-item>
               </template>
+
+              <!-- SSH / SSH 项目：多目标发布失败策略 -->
+              <a-form-item
+                v-if="temp.releaseMethod === 3 || temp.releaseMethod === 7"
+                name="releaseFailFast"
+                :label="$t('i18n_build_release_fail_fast')"
+                :help="$t('i18n_build_release_fail_fast_help')"
+              >
+                <a-switch
+                  v-model:checked="tempExtraData.releaseFailFast"
+                  :checked-children="$t('i18n_cc42dd3170')"
+                  :un-checked-children="$t('i18n_b15d91274e')"
+                />
+              </a-form-item>
 
               <a-form-item v-if="temp.releaseMethod === 3" name="releaseBeforeCommand">
                 <!-- sshCommand -->
@@ -1368,13 +1389,18 @@
               </a-row>
             </a-form-item>
             <a-form-item name="versionSnapshot" :label="$t('i18n_387b56ef22')" :help="$t('i18n_ddf32c340f')">
-              <a-switch v-model:checked="tempExtraData.versionSnapshot" @change="onVersionSnapshotChange" />
+              <a-switch
+                v-model:checked="tempExtraData.versionSnapshot"
+                :checked-children="$t('i18n_cc42dd3170')"
+                :un-checked-children="$t('i18n_b15d91274e')"
+                @change="onVersionSnapshotChange"
+              />
             </a-form-item>
-            <a-form-item name="versionKeepCount" :label="$t('i18n_fbf8959896')">
+            <a-form-item name="versionKeepCount" :label="$t('i18n_fbf8959896')" :help="$t('i18n_build_version_keep_count_help')">
               <a-input-number
                 v-model:value="tempExtraData.versionKeepCount"
                 :min="0"
-                :placeholder="$t('i18n_fbf8959896')"
+                placeholder="3"
               />
             </a-form-item>
             <a-form-item :label="$t('i18n_2f5e828ecd')" name="aliasCode" :help="$t('i18n_8c67370ee5')">
@@ -1999,13 +2025,26 @@ export default {
       }
       return !!this.temp.buildNodeId && !this.selectedBuildNode && this.buildNodeList.length > 0
     },
-    // 当前选中的 SSH 项目（用于展示「发布目录」即项目目录）
-    selectedSshProject() {
-      const id = this.tempExtraData.releaseMethodDataId_7
-      if (!id) {
-        return null
+    // 当前选中的 SSH 项目 id（发布方式 =「SSH 项目」支持多选，统一按数组处理）
+    selectedSshProjectIds() {
+      const value = this.tempExtraData.releaseMethodDataId_7
+      if (!value) {
+        return []
       }
-      return this.sshProjectList.find((item) => item.id === id) || null
+      return Array.isArray(value) ? value : String(value).split(',').filter(Boolean)
+    },
+    // 当前选中的 SSH 项目（用于展示「发布目录」即项目目录）
+    selectedSshProjects() {
+      return this.selectedSshProjectIds
+        .map((id) => this.sshProjectList.find((item) => item.id === id))
+        .filter((item) => !!item)
+    },
+    // 已选但已不存在/不在当前工作空间的 SSH 项目（列表加载完成后才提示，避免误报）
+    missingSshProjectIds() {
+      if (!this.sshProjectList.length) {
+        return []
+      }
+      return this.selectedSshProjectIds.filter((id) => !this.sshProjectList.some((item) => item.id === id))
     }
   },
   watch: {
@@ -2086,7 +2125,11 @@ export default {
         resultKeepCount: 0,
         fileStorageKeepDay: 0,
         versionSnapshot: false,
-        versionKeepCount: 0
+        versionKeepCount: 0,
+        // SSH 项目发布支持多选，回显结构固定为数组
+        releaseMethodDataId_7: [],
+        // 多目标发布失败策略：默认「任一目标失败即终止」，避免只发出去一半
+        releaseFailFast: true
       }
       this.$refs['editBuildForm']?.resetFields()
     },
@@ -2123,6 +2166,10 @@ export default {
       if (this.tempExtraData.versionKeepCount === undefined) {
         this.tempExtraData.versionKeepCount = 0
       }
+      if (this.tempExtraData.releaseFailFast === undefined) {
+        // 老配置没有该字段：默认开启，与「异常即中断」的既有发布行为一致
+        this.tempExtraData.releaseFailFast = true
+      }
 
       // 设置发布方式的数据
       if (this.tempExtraData.releaseMethodDataId) {
@@ -2143,8 +2190,10 @@ export default {
           this.tempExtraData.releaseMethodDataId_6 = this.tempExtraData.releaseMethodDataId.split(',')
         }
         if (record.releaseMethod === 7) {
-          // SSH 项目：releaseMethodDataId 就是项目 id（单选）
-          this.tempExtraData.releaseMethodDataId_7 = this.tempExtraData.releaseMethodDataId
+          // SSH 项目：releaseMethodDataId 为逗号分隔的项目 id，回显为多选数组
+          this.tempExtraData.releaseMethodDataId_7 = String(this.tempExtraData.releaseMethodDataId)
+            .split(',')
+            .filter(Boolean)
         }
       }
       this.tempExtraData = { ...this.tempExtraData }
@@ -2318,6 +2367,8 @@ export default {
             return false
           }
           const tempExtraData = Object.assign({}, this.tempExtraData)
+          // 多目标发布失败策略：未显式关闭一律按开启提交，避免老配置缺字段时语义漂移
+          tempExtraData.releaseFailFast = tempExtraData.releaseFailFast !== false
           // 设置参数
           if (this.temp.releaseMethod === 2) {
             if ((this.temp.releaseMethodDataIdList || []).length < 2) {
@@ -2346,15 +2397,18 @@ export default {
             ).replace(new RegExp('//', 'gm'), '/')
             tempExtraData.releaseMethodDataId_6 = (tempExtraData.releaseMethodDataId_6 || []).join(',')
           } else if (this.temp.releaseMethod === 7) {
-            // SSH 项目：releaseMethodDataId 直接放项目 id，后端 doSshProject 只读该字段与项目自身目录，不读 releasePath
-            const sshProjectId = tempExtraData.releaseMethodDataId_7
-            if (!sshProjectId) {
+            // SSH 项目：releaseMethodDataId 放逗号分隔的项目 id（支持多选），后端逐个发布并各自维护版本快照
+            const raw = tempExtraData.releaseMethodDataId_7
+            const sshProjectIds = (Array.isArray(raw) ? raw : String(raw || '').split(',')).filter(Boolean)
+            const uniqueIds = [...new Set(sshProjectIds)]
+            if (!uniqueIds.length) {
               $notification.warn({
                 message: this.$t('i18n_8a8e690119')
               })
               return false
             }
-            tempExtraData.releaseMethodDataId = sshProjectId
+            tempExtraData.releaseMethodDataId_7 = uniqueIds
+            tempExtraData.releaseMethodDataId = uniqueIds.join(',')
           } else {
             // 其它发布方式不使用该字段，清掉历史残留（后端会按各自分支重写）
             delete tempExtraData.releaseMethodDataId

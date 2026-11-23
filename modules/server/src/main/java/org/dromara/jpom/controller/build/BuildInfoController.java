@@ -49,6 +49,7 @@ import org.dromara.jpom.model.data.FtpModel;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.data.RepositoryModel;
 import org.dromara.jpom.model.data.SshModel;
+import org.dromara.jpom.model.data.SshProjectModel;
 import org.dromara.jpom.model.enums.BuildMode;
 import org.dromara.jpom.model.enums.BuildReleaseMethod;
 import org.dromara.jpom.model.script.ScriptModel;
@@ -64,6 +65,7 @@ import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.service.node.ftp.FtpService;
 import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.service.script.ScriptServer;
+import org.dromara.jpom.service.sshproject.SshProjectService;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.FileUtils;
 import org.springframework.http.MediaType;
@@ -74,8 +76,10 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 构建列表，新版本，数据存放到数据库，不再是文件了
@@ -101,6 +105,7 @@ public class BuildInfoController extends BaseServerController {
     protected final MachineDockerServer machineDockerServer;
     private final NodeService nodeService;
     private final MachineNodeServer machineNodeServer;
+    private final SshProjectService sshProjectService;
 
     public BuildInfoController(DbBuildHistoryLogService dbBuildHistoryLogService,
                                SshService sshService, FtpService ftpService,
@@ -112,7 +117,8 @@ public class BuildInfoController extends BaseServerController {
                                BuildExtConfig buildExtConfig,
                                MachineDockerServer machineDockerServer,
                                NodeService nodeService,
-                               MachineNodeServer machineNodeServer) {
+                               MachineNodeServer machineNodeServer,
+                               SshProjectService sshProjectService) {
         this.dbBuildHistoryLogService = dbBuildHistoryLogService;
         this.sshService = sshService;
         this.ftpService = ftpService;
@@ -125,6 +131,7 @@ public class BuildInfoController extends BaseServerController {
         this.machineDockerServer = machineDockerServer;
         this.nodeService = nodeService;
         this.machineNodeServer = machineNodeServer;
+        this.sshProjectService = sshProjectService;
     }
 
     /**
@@ -439,6 +446,8 @@ public class BuildInfoController extends BaseServerController {
             jsonObject.put("releaseMethodDataId", dockerSwarmId);
         } else if (releaseMethod1 == BuildReleaseMethod.Ftp){
             this.formatFtp(jsonObject, request);
+        } else if (releaseMethod1 == BuildReleaseMethod.SshProject) {
+            this.formatSshProject(jsonObject, request);
         }
         // 检查关联数据ID
         buildInfoModel.setReleaseMethodDataId(jsonObject.getString("releaseMethodDataId"));
@@ -567,6 +576,26 @@ public class BuildInfoController extends BaseServerController {
 
         }
         jsonObject.put("releaseMethodDataId", releaseMethodDataId);
+    }
+
+    /**
+     * 验证构建信息
+     * 当发布方式为【SSH 项目】的时候（支持多选，逗号分隔）
+     *
+     * @param jsonObject 配置信息
+     * @param request    请求
+     */
+    private void formatSshProject(JSONObject jsonObject, HttpServletRequest request) {
+        String releaseMethodDataId = jsonObject.getString("releaseMethodDataId");
+        Assert.hasText(releaseMethodDataId, I18nMessageUtil.get("i18n.ssh_project_selection_required.8e2a"));
+        // 前端口径是数组 join，接口直传也要去重并逐个校验工作空间归属
+        Set<String> ids = new LinkedHashSet<>(StrUtil.splitTrim(releaseMethodDataId, StrUtil.COMMA));
+        Assert.notEmpty(ids, I18nMessageUtil.get("i18n.ssh_project_selection_required.8e2a"));
+        for (String id : ids) {
+            SshProjectModel project = this.sshProjectService.getByKey(id, request);
+            Assert.notNull(project, I18nMessageUtil.get("i18n.ssh_project_not_exist.5d18") + id);
+        }
+        jsonObject.put("releaseMethodDataId", String.join(",", ids));
     }
 
     private String formatDocker(JSONObject jsonObject, HttpServletRequest request) {

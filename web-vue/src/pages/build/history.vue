@@ -729,8 +729,9 @@ export default {
           return rollbackBuildVersion({
             logId: this.versionLogId,
             restart: true,
-            // SSH 项目按版本唯一切换；插件端项目由后端按构建编号切换全部节点
-            versionId: versionRecord.versionId
+            // SSH 项目：按版本行定位项目（发布方式支持多选），插件端项目由后端按构建编号切换全部节点
+            versionId: versionRecord.versionId,
+            projectId: versionRecord.projectId
           })
             .then((res) => {
               if (res.code === 200) {

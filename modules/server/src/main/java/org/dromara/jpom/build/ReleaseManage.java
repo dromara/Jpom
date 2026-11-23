@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -454,20 +455,79 @@ public class ReleaseManage {
     }
 
     /**
-     * ssh 发布
+     * 多目标发布的单个目标动作
      */
-    private void doSsh() throws IOException {
-        String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
+    @FunctionalInterface
+    private interface ReleaseTargetAction {
+        /**
+         * 发布一个目标
+         *
+         * @param targetId 目标 id
+         * @throws Exception 发布失败
+         */
+        void release(String targetId) throws Exception;
+    }
+
+    /**
+     * 逐个发布目标，统一「任一目标失败即终止」策略
+     * <p>
+     * SSH 与 SSH 项目共用这一处：失败判定（目标不存在、连接/上传异常）由调用方抛出，
+     * 这里只负责按 {@link BuildExtraModule#failFastOnRelease()} 决定是否继续后面的目标。
+     *
+     * @param targetIds 逗号分隔的目标 id
+     * @param action    单个目标的发布动作
+     * @return 失败目标描述（为空表示全部成功）
+     */
+    private List<String> releaseTargets(String targetIds, ReleaseTargetAction action) {
+        List<String> targets = StrUtil.splitTrim(targetIds, StrUtil.COMMA);
+        List<String> failures = new ArrayList<>();
+        for (int i = 0; i < targets.size(); i++) {
+            String targetId = targets.get(i);
+            try {
+                action.release(targetId);
+            } catch (Exception e) {
+                String message = StrUtil.emptyToDefault(e.getMessage(), e.getClass().getSimpleName());
+                failures.add(targetId + ": " + message);
+                logRecorder.systemError(I18nMessageUtil.get("i18n.release_target_failed.a7c3"), targetId, message);
+                if (this.buildExtraModule.failFastOnRelease()) {
+                    int remaining = targets.size() - i - 1;
+                    if (remaining > 0) {
+                        logRecorder.systemWarning(I18nMessageUtil.get("i18n.release_abort_remaining.b2f1"), remaining);
+                    }
+                    throw new JpomRuntimeException(StrUtil.format(I18nMessageUtil.get("i18n.release_target_failed.a7c3"), targetId, message));
+                }
+            }
+        }
+        return failures;
+    }
+
+    /**
+     * 未开启「失败即终止」时，只要有目标失败，本次发布仍然判定失败
+     *
+     * @param failures 失败目标描述
+     */
+    private void checkReleaseFailures(List<String> failures) {
+        if (CollUtil.isEmpty(failures)) {
+            return;
+        }
+        String message = StrUtil.format(I18nMessageUtil.get("i18n.release_partial_failed.c6d4"), failures.size(), String.join("; ", failures));
+        logRecorder.systemError(message);
+        throw new JpomRuntimeException(message);
+    }
+
+    /**
+     * ssh 发布（支持多目标；失败策略见 {@link #releaseTargets}）
+     */
+    private void doSsh() {
         SshService sshService = SpringUtil.getBean(SshService.class);
-        List<String> strings = StrUtil.splitTrim(releaseMethodDataId, StrUtil.COMMA);
-        for (String releaseMethodDataIdItem : strings) {
-            SshModel item = sshService.getByKey(releaseMethodDataIdItem, false);
+        List<String> failures = this.releaseTargets(this.buildExtraModule.getReleaseMethodDataId(), targetId -> {
+            SshModel item = sshService.getByKey(targetId, false);
             if (item == null) {
-                logRecorder.systemError(I18nMessageUtil.get("i18n.no_ssh_entry_found.d0e1"), releaseMethodDataIdItem);
-                continue;
+                throw new JpomRuntimeException(StrUtil.format(I18nMessageUtil.get("i18n.no_ssh_entry_found.d0e1"), targetId));
             }
             this.doSsh(item, sshService);
-        }
+        });
+        this.checkReleaseFailures(failures);
     }
 
     private void doSsh(SshModel item, SshService sshService) throws IOException {
@@ -535,14 +595,25 @@ public class ReleaseManage {
      * 与「发布到项目」一致支持版本快照：发布前登记基线、发布成功后登记本次版本，
      * 构建历史里的「快速回滚」据此把远端目录切回历史版本（不重新传输产物）。
      */
-    private void doSshProject() throws IOException {
-        String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
+    private void doSshProject() {
         SshProjectService sshProjectService = SpringUtil.getBean(SshProjectService.class);
-        SshProjectModel project = sshProjectService.getByKey(releaseMethodDataId);
-        if (project == null) {
-            logRecorder.systemError(I18nMessageUtil.get("i18n.ssh_project_not_exist.5d18") + releaseMethodDataId);
-            return;
-        }
+        List<String> failures = this.releaseTargets(this.buildExtraModule.getReleaseMethodDataId(), targetId -> {
+            SshProjectModel project = sshProjectService.getByKey(targetId);
+            if (project == null) {
+                throw new JpomRuntimeException(I18nMessageUtil.get("i18n.ssh_project_not_exist.5d18") + targetId);
+            }
+            this.doSshProject(project);
+        });
+        this.checkReleaseFailures(failures);
+    }
+
+    /**
+     * 发布到单个 SSH 项目：产物落到项目目录，然后按项目生命周期脚本重启
+     *
+     * @param project 项目
+     * @throws IOException IO
+     */
+    private void doSshProject(SshProjectModel project) throws IOException {
         SshProjectMachineResolver machineResolver = SpringUtil.getBean(SshProjectMachineResolver.class);
         MachineSshModel machineSshModel = machineResolver.resolve(project);
         // 版本快照：只按构建配置的开关决定，失败只告警不阻断发布
@@ -575,16 +646,24 @@ public class ReleaseManage {
             }
             publishSuccess = true;
             // 发布完成后按项目自身脚本重启（没有 restart 钩子时执行器会退化为 stop + start）
+            SshProjectExecuteResult result = null;
             try {
-                SshProjectExecuteResult result = sshProjectService.execute(project, ConsoleCommandOp.restart.name(), line -> logRecorder.info(line));
-                if (result.isSuccess()) {
-                    logRecorder.system("ssh project restart done: {}", project.getName());
-                } else {
-                    logRecorder.systemError("ssh project restart failed: {}", StrUtil.emptyToDefault(result.getMessage(), String.valueOf(result.getExitCode())));
-                }
+                result = SpringUtil.getBean(SshProjectService.class)
+                    .execute(project, ConsoleCommandOp.restart.name(), line -> logRecorder.info(line));
             } catch (Exception e) {
                 // 项目没有配置任何生命周期脚本时不影响产物发布结果，只提示
                 logRecorder.systemWarning("ssh project has no lifecycle script, skip restart: {}", e.getMessage());
+            }
+            if (result == null) {
+                return;
+            }
+            if (result.isSuccess()) {
+                logRecorder.system("ssh project restart done: {}", project.getName());
+            } else {
+                // 重启失败不改变「产物是否已经发到目标」的判定：与历史行为一致，只记录错误，
+                // 失败即终止策略只针对目标不存在 / 连接与上传异常（否则老配置会因脚本退出码被改判发布失败）
+                logRecorder.systemError("ssh project restart failed: {}",
+                    StrUtil.emptyToDefault(result.getMessage(), String.valueOf(result.getExitCode())));
             }
         } finally {
             if (versionBegun && publishSuccess) {
