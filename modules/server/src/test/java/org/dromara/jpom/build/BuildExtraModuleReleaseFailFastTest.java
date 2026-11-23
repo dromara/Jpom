@@ -9,6 +9,7 @@
  */
 package org.dromara.jpom.build;
 
+import org.dromara.jpom.util.StringUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -38,5 +39,21 @@ public class BuildExtraModuleReleaseFailFastTest {
         BuildExtraModule module = new BuildExtraModule();
         module.setReleaseFailFast(true);
         Assertions.assertTrue(module.failFastOnRelease());
+    }
+
+    @Test
+    public void legacyJsonWithoutFieldIsFailFast() {
+        // 线上老配置（2.11.14.5 及更早）的 extraData 没有 releaseFailFast 字段
+        BuildExtraModule module = StringUtil.jsonConvert("{\"releaseMethod\":7,\"releaseMethodDataId\":\"p1,p2\"}",
+            BuildExtraModule.class);
+        Assertions.assertNotNull(module);
+        Assertions.assertTrue(module.failFastOnRelease());
+    }
+
+    @Test
+    public void jsonExplicitFalseKeepsContinue() {
+        BuildExtraModule module = StringUtil.jsonConvert("{\"releaseFailFast\":false}", BuildExtraModule.class);
+        Assertions.assertNotNull(module);
+        Assertions.assertFalse(module.failFastOnRelease());
     }
 }

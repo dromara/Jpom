@@ -244,8 +244,8 @@
       @ok="handleSwitchVersion"
     >
       <a-alert
-        v-if="versionReachable === false"
-        type="error"
+        v-if="versionReachable === false || versionMessage"
+        :type="versionReachable === false ? 'error' : 'warning'"
         show-icon
         :message="versionMessage || $t('i18n_5b8e2d7a13')"
         style="margin-bottom: 12px"

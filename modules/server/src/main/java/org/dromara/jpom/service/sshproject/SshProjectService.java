@@ -232,7 +232,8 @@ public class SshProjectService extends BaseWorkspaceService<SshProjectModel> imp
         SshProjectModel item = this.getItem(id, request);
         Assert.state(!item.running(), I18nMessageUtil.get("i18n.ssh_project_running_cannot_delete.6c07"));
         // 被在线构建引用时不允许删除（与 agent 项目一致）
-        boolean releaseMethod = buildInfoService.checkReleaseMethod(id, request, BuildReleaseMethod.SshProject);
+        // 发布方式「SSH 项目」支持多选：releaseMethodDataId 是逗号分隔列表，必须按成员精确匹配
+        boolean releaseMethod = buildInfoService.checkReleaseMethodTarget(id, request, BuildReleaseMethod.SshProject);
         Assert.state(!releaseMethod, I18nMessageUtil.get("i18n.ssh_project_has_build_items_cannot_delete.4f73"));
         this.delByKey(id, request);
     }

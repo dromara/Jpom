@@ -3013,6 +3013,6 @@
 	"i18n_fbf8959896": "版本保留個數",
 	"i18n_build_version_keep_count_help": "建議 3；留空或 0 時按 3 保留",
 	"i18n_build_release_fail_fast": "任一目標失敗即終止",
-	"i18n_build_release_fail_fast_help": "開啟後逐個目標發佈，其中一個失敗就跳過剩餘目標；關閉則繼續發佈其餘目標（最終只要有目標失敗仍標記發佈失敗）",
+	"i18n_build_release_fail_fast_help": "開啟後逐個目標發佈，其中一個失敗就跳過剩餘目標；關閉則繼續發佈其餘目標（最終只要有目標失敗仍標記發佈失敗）。目標不存在、連接或上傳異常才算失敗；發佈後的腳本/重啟返回非 0 仍只記錄錯誤",
 	"i18n_build_ssh_project_missing": "（選中的 SSH 項目不存在或已移出當前工作空間，請重新選擇）"
 }

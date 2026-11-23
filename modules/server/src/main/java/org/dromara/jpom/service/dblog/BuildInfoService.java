@@ -265,6 +265,44 @@ public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> imple
     }
 
     /**
+     * releaseMethodDataId 是否包含指定目标
+     * <p>
+     * 多目标发布（SSH 项目多选）把目标存成逗号分隔列表，判断「某目标是否被构建引用」
+     * 必须按成员精确比对：整体等值会把多选构建当成没引用，子串匹配（like '%p1%'）又会让
+     * p1 命中 p11。两者都会让「被构建引用的 SSH 项目禁止删除」失效或误伤。
+     *
+     * @param releaseMethodDataId 发布的关联数据 id（可能是逗号分隔多值）
+     * @param targetId            目标 id
+     * @return true 包含该目标
+     */
+    public static boolean containsReleaseTarget(String releaseMethodDataId, String targetId) {
+        if (StrUtil.isBlank(releaseMethodDataId) || StrUtil.isBlank(targetId)) {
+            return false;
+        }
+        return StrUtil.splitTrim(releaseMethodDataId, StrUtil.COMMA).contains(targetId);
+    }
+
+    /**
+     * 判断是否存在发布关联（目标 id 为逗号分隔多值之一）
+     *
+     * @param dataId        数据ID
+     * @param request       请求对象
+     * @param releaseMethod 发布方法
+     * @return true 关联
+     */
+    public boolean checkReleaseMethodTarget(String dataId, HttpServletRequest request, BuildReleaseMethod releaseMethod) {
+        if (StrUtil.isBlank(dataId)) {
+            return false;
+        }
+        BuildInfoModel buildInfoModel = new BuildInfoModel();
+        buildInfoModel.setWorkspaceId(this.getCheckUserWorkspace(request));
+        buildInfoModel.setReleaseMethod(releaseMethod.getCode());
+        return super.listByBean(buildInfoModel, false)
+            .stream()
+            .anyMatch(model -> containsReleaseTarget(model.getReleaseMethodDataId(), dataId));
+    }
+
+    /**
      * 查询发布关联的构建
      *
      * @param dataId        数据ID

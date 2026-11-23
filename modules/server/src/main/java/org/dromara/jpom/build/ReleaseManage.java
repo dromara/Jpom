@@ -35,7 +35,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -455,61 +454,32 @@ public class ReleaseManage {
     }
 
     /**
-     * 多目标发布的单个目标动作
-     */
-    @FunctionalInterface
-    private interface ReleaseTargetAction {
-        /**
-         * 发布一个目标
-         *
-         * @param targetId 目标 id
-         * @throws Exception 发布失败
-         */
-        void release(String targetId) throws Exception;
-    }
-
-    /**
      * 逐个发布目标，统一「任一目标失败即终止」策略
      * <p>
      * SSH 与 SSH 项目共用这一处：失败判定（目标不存在、连接/上传异常）由调用方抛出，
-     * 这里只负责按 {@link BuildExtraModule#failFastOnRelease()} 决定是否继续后面的目标。
+     * 循环与失败聚合由 {@link MultiTargetRelease} 负责（行为见 MultiTargetReleaseTest）。
      *
      * @param targetIds 逗号分隔的目标 id
      * @param action    单个目标的发布动作
-     * @return 失败目标描述（为空表示全部成功）
      */
-    private List<String> releaseTargets(String targetIds, ReleaseTargetAction action) {
-        List<String> targets = StrUtil.splitTrim(targetIds, StrUtil.COMMA);
-        List<String> failures = new ArrayList<>();
-        for (int i = 0; i < targets.size(); i++) {
-            String targetId = targets.get(i);
-            try {
-                action.release(targetId);
-            } catch (Exception e) {
-                String message = StrUtil.emptyToDefault(e.getMessage(), e.getClass().getSimpleName());
-                failures.add(targetId + ": " + message);
-                logRecorder.systemError(I18nMessageUtil.get("i18n.release_target_failed.a7c3"), targetId, message);
-                if (this.buildExtraModule.failFastOnRelease()) {
-                    int remaining = targets.size() - i - 1;
-                    if (remaining > 0) {
-                        logRecorder.systemWarning(I18nMessageUtil.get("i18n.release_abort_remaining.b2f1"), remaining);
-                    }
-                    throw new JpomRuntimeException(StrUtil.format(I18nMessageUtil.get("i18n.release_target_failed.a7c3"), targetId, message));
-                }
-            }
+    private void releaseTargets(String targetIds, MultiTargetRelease.TargetAction action) {
+        MultiTargetRelease.Outcome outcome = MultiTargetRelease.execute(targetIds, this.buildExtraModule.failFastOnRelease(), action);
+        for (MultiTargetRelease.Failure failure : outcome.getFailures()) {
+            logRecorder.systemError(I18nMessageUtil.get("i18n.release_target_failed.a7c3"), failure.getTargetId(), failure.getMessage());
         }
-        return failures;
-    }
-
-    /**
-     * 未开启「失败即终止」时，只要有目标失败，本次发布仍然判定失败
-     *
-     * @param failures 失败目标描述
-     */
-    private void checkReleaseFailures(List<String> failures) {
-        if (CollUtil.isEmpty(failures)) {
+        if (outcome.getSkipped() > 0) {
+            logRecorder.systemWarning(I18nMessageUtil.get("i18n.release_abort_remaining.b2f1"), outcome.getSkipped());
+        }
+        if (outcome.isAborted()) {
+            // 失败即终止：首个失败已经决定本次发布结果，剩余目标不再发布
+            MultiTargetRelease.Failure first = outcome.getFailures().get(0);
+            throw new JpomRuntimeException(StrUtil.format(I18nMessageUtil.get("i18n.release_target_failed.a7c3"), first.getTargetId(), first.getMessage()));
+        }
+        if (!outcome.hasFailure()) {
             return;
         }
+        // 未开启失败即终止：剩余目标已发布，但只要有目标失败本次发布仍然判定失败
+        List<String> failures = outcome.getFailures().stream().map(MultiTargetRelease.Failure::toString).collect(Collectors.toList());
         String message = StrUtil.format(I18nMessageUtil.get("i18n.release_partial_failed.c6d4"), failures.size(), String.join("; ", failures));
         logRecorder.systemError(message);
         throw new JpomRuntimeException(message);
@@ -520,14 +490,13 @@ public class ReleaseManage {
      */
     private void doSsh() {
         SshService sshService = SpringUtil.getBean(SshService.class);
-        List<String> failures = this.releaseTargets(this.buildExtraModule.getReleaseMethodDataId(), targetId -> {
+        this.releaseTargets(this.buildExtraModule.getReleaseMethodDataId(), targetId -> {
             SshModel item = sshService.getByKey(targetId, false);
             if (item == null) {
                 throw new JpomRuntimeException(StrUtil.format(I18nMessageUtil.get("i18n.no_ssh_entry_found.d0e1"), targetId));
             }
             this.doSsh(item, sshService);
         });
-        this.checkReleaseFailures(failures);
     }
 
     private void doSsh(SshModel item, SshService sshService) throws IOException {
@@ -597,14 +566,13 @@ public class ReleaseManage {
      */
     private void doSshProject() {
         SshProjectService sshProjectService = SpringUtil.getBean(SshProjectService.class);
-        List<String> failures = this.releaseTargets(this.buildExtraModule.getReleaseMethodDataId(), targetId -> {
+        this.releaseTargets(this.buildExtraModule.getReleaseMethodDataId(), targetId -> {
             SshProjectModel project = sshProjectService.getByKey(targetId);
             if (project == null) {
                 throw new JpomRuntimeException(I18nMessageUtil.get("i18n.ssh_project_not_exist.5d18") + targetId);
             }
             this.doSshProject(project);
         });
-        this.checkReleaseFailures(failures);
     }
 
     /**

@@ -1781,6 +1781,8 @@ export default {
       cascaderList: [],
       sshList: [],
       sshProjectList: [],
+      // 服务端返回的 SSH 项目总数：> 当前页条数说明列表没加载全，不能据此判断「项目不存在」
+      sshProjectTotal: 0,
       ftpList: [],
       dockerSwarmList: [],
       //集群下 服务下拉数据
@@ -2042,6 +2044,10 @@ export default {
     // 已选但已不存在/不在当前工作空间的 SSH 项目（列表加载完成后才提示，避免误报）
     missingSshProjectIds() {
       if (!this.sshProjectList.length) {
+        return []
+      }
+      if (this.sshProjectTotal > this.sshProjectList.length) {
+        // 列表只加载了一页：没找到的 id 可能只是没加载进来，不能误报「不存在或已移出工作空间」
         return []
       }
       return this.selectedSshProjectIds.filter((id) => !this.sshProjectList.some((item) => item.id === id))
@@ -2505,11 +2511,14 @@ export default {
     loadSshProjectList() {
       return getSshProjectList({ page: 1, limit: 100 })
         .then((res) => {
-          this.sshProjectList = res.code === 200 && res.data ? res.data.result || [] : []
+          const data = res.code === 200 && res.data ? res.data : {}
+          this.sshProjectList = data.result || []
+          this.sshProjectTotal = Number(data.total || this.sshProjectList.length)
         })
         .catch(() => {
           // 接口层已统一提示，这里只保证下拉不为 undefined
           this.sshProjectList = []
+          this.sshProjectTotal = 0
         })
     },
     // 加载 SSH 列表

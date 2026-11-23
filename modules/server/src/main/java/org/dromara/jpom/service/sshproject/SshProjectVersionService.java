@@ -339,6 +339,12 @@ public class SshProjectVersionService {
             }
         }
         result.put("reachable", reachable);
+        // 多选发布时目标可能已被删除：界面要能看见「少了哪个」，而不是悄悄少一行
+        List<String> missingIds = new ArrayList<>(this.releaseTargetIds(buildHistoryLog));
+        projects.forEach(project -> missingIds.remove(project.getId()));
+        if (!missingIds.isEmpty()) {
+            errors.add(I18nMessageUtil.get("i18n.ssh_project_not_exist.5d18") + String.join(",", missingIds));
+        }
         if (!errors.isEmpty()) {
             result.put("message", String.join("; ", errors));
         }
@@ -457,13 +463,28 @@ public class SshProjectVersionService {
     }
 
     /**
+     * 本次构建选中的目标 id（多选时为逗号分隔列表）
+     *
+     * @param buildHistoryLog 构建历史
+     * @return 目标 id（不会为空集合）
+     */
+    private List<String> releaseTargetIds(BuildHistoryLog buildHistoryLog) {
+        BuildExtraModule extraModule = StringUtil.jsonConvert(buildHistoryLog.getExtraData(), BuildExtraModule.class);
+        if (extraModule == null) {
+            return new ArrayList<>();
+        }
+        String releaseMethodDataId = StrUtil.trimToNull(extraModule.getReleaseMethodDataId());
+        return releaseMethodDataId == null ? new ArrayList<>() : StrUtil.splitTrim(releaseMethodDataId, StrUtil.COMMA);
+    }
+
+    /**
      * 解析本次构建对应的单个 SSH 项目
      *
      * @param buildHistoryLog 构建历史
      * @param projectId       指定项目（为空且只有一个项目时自动定位）
      * @return 项目（可为空）
      */
-    private SshProjectModel resolveProject(BuildHistoryLog buildHistoryLog, String projectId) {
+    SshProjectModel resolveProject(BuildHistoryLog buildHistoryLog, String projectId) {
         List<SshProjectModel> projects = this.resolveProjects(buildHistoryLog);
         if (StrUtil.isNotBlank(projectId)) {
             for (SshProjectModel project : projects) {

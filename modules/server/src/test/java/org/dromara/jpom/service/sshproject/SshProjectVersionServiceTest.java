@@ -214,6 +214,63 @@ public class SshProjectVersionServiceTest {
         Assertions.assertEquals("p1", result.getJSONArray("list").getJSONObject(0).getString("projectId"));
     }
 
+    private static BuildHistoryLog multiTargetLog() {
+        BuildHistoryLog log = new BuildHistoryLog();
+        log.setBuildDataId("b1");
+        log.setBuildNumberId(2);
+        log.setReleaseMethod(7);
+        log.setExtraData("{\"releaseMethod\":7,\"releaseMethodDataId\":\"p1,p2\"}");
+        return log;
+    }
+
+    @Test
+    public void resolveProjectLocatesTargetByProjectId() {
+        // 多选发布时前端按版本行传 projectId：必须定位到该行对应项目，不能切到另一个
+        SshProjectService sshProjectService = mock(SshProjectService.class);
+        when(sshProjectService.getByKey("p1")).thenReturn(project());
+        SshProjectModel p2 = project();
+        p2.setId("p2");
+        p2.setName("demo2");
+        when(sshProjectService.getByKey("p2")).thenReturn(p2);
+        SshProjectVersionService service = new SshProjectVersionService(mock(SshProjectExecutor.class), sshProjectService);
+        SshProjectModel resolved = service.resolveProject(multiTargetLog(), "p2");
+        Assertions.assertNotNull(resolved);
+        Assertions.assertEquals("p2", resolved.getId());
+    }
+
+    @Test
+    public void resolveProjectRejectsTargetOutsideSelection() {
+        SshProjectService sshProjectService = mock(SshProjectService.class);
+        when(sshProjectService.getByKey("p1")).thenReturn(project());
+        when(sshProjectService.getByKey("p2")).thenReturn(project());
+        SshProjectVersionService service = new SshProjectVersionService(mock(SshProjectExecutor.class), sshProjectService);
+        // 传一个不在本次构建选中的项目：必须拒绝，避免把别的项目切回该版本
+        Assertions.assertNull(service.resolveProject(multiTargetLog(), "other"));
+    }
+
+    @Test
+    public void resolveProjectRequiresProjectIdForMultiTarget() {
+        SshProjectService sshProjectService = mock(SshProjectService.class);
+        when(sshProjectService.getByKey("p1")).thenReturn(project());
+        when(sshProjectService.getByKey("p2")).thenReturn(project());
+        SshProjectVersionService service = new SshProjectVersionService(mock(SshProjectExecutor.class), sshProjectService);
+        // 多选却没有 projectId：无法判断目标，宁可报「项目不存在」也不能猜
+        Assertions.assertNull(service.resolveProject(multiTargetLog(), null));
+    }
+
+    @Test
+    public void resolveProjectFallsBackForSingleTarget() {
+        SshProjectService sshProjectService = mock(SshProjectService.class);
+        when(sshProjectService.getByKey("p1")).thenReturn(project());
+        SshProjectVersionService service = new SshProjectVersionService(mock(SshProjectExecutor.class), sshProjectService);
+        BuildHistoryLog log = new BuildHistoryLog();
+        log.setReleaseMethod(7);
+        log.setExtraData("{\"releaseMethod\":7,\"releaseMethodDataId\":\"p1\"}");
+        SshProjectModel resolved = service.resolveProject(log, null);
+        Assertions.assertNotNull(resolved);
+        Assertions.assertEquals("p1", resolved.getId());
+    }
+
     @Test
     public void sshProjectReleaseMethodDetection() {
         BuildHistoryLog log = new BuildHistoryLog();

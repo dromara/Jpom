@@ -589,13 +589,26 @@ public class BuildInfoController extends BaseServerController {
         String releaseMethodDataId = jsonObject.getString("releaseMethodDataId");
         Assert.hasText(releaseMethodDataId, I18nMessageUtil.get("i18n.ssh_project_selection_required.8e2a"));
         // 前端口径是数组 join，接口直传也要去重并逐个校验工作空间归属
-        Set<String> ids = new LinkedHashSet<>(StrUtil.splitTrim(releaseMethodDataId, StrUtil.COMMA));
+        Set<String> ids = parseSshProjectTargets(releaseMethodDataId);
         Assert.notEmpty(ids, I18nMessageUtil.get("i18n.ssh_project_selection_required.8e2a"));
         for (String id : ids) {
             SshProjectModel project = this.sshProjectService.getByKey(id, request);
             Assert.notNull(project, I18nMessageUtil.get("i18n.ssh_project_not_exist.5d18") + id);
         }
         jsonObject.put("releaseMethodDataId", String.join(",", ids));
+    }
+
+    /**
+     * 解析 SSH 项目发布目标（支持多选）：去空白、按选择顺序去重
+     *
+     * @param releaseMethodDataId 逗号分隔的项目 id
+     * @return 目标 id 集合
+     */
+    static Set<String> parseSshProjectTargets(String releaseMethodDataId) {
+        if (StrUtil.isBlank(releaseMethodDataId)) {
+            return new LinkedHashSet<>();
+        }
+        return new LinkedHashSet<>(StrUtil.splitTrim(releaseMethodDataId, StrUtil.COMMA));
     }
 
     private String formatDocker(JSONObject jsonObject, HttpServletRequest request) {

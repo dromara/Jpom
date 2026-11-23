@@ -65,12 +65,8 @@ if [ "$user" != 'root' ]; then
 	exec_user="$user"
 fi
 
-function install() {
-
-	if [ -f "$serviceFile" ]; then
-		echo "service file already exists" 2>&2
-		exit 2
-	fi
+# 写 unit 文件（install / reinstall 共用，reinstall 不再先 uninstall 以免停一次项目）
+function writeService() {
 	if [ ! -f "$binAbsName" ]; then
 		echo "$binAbsName not found" 2>&2
 		exit 2
@@ -121,7 +117,14 @@ EOF
 	fi
 
 	echo "$serviceName write success :$serviceFile"
+}
 
+function install() {
+	if [ -f "$serviceFile" ]; then
+		echo "service file already exists" 2>&2
+		exit 2
+	fi
+	writeService
 	$sh_c 'systemctl daemon-reload'
 
 	cat >&2 <<-EOF
@@ -171,9 +174,14 @@ function action() {
 		uninstall
 		;;
 	reinstall)
-		uninstall
-		echo "--------------------------------------"
-		install
+		# 先写新 unit 再 daemon-reload：随后 restart 的 stop 阶段已经按新 unit 的
+		# KillMode=process 执行，只重启 Jpom 本体，项目进程不会再被一起停掉。
+		# 不再先 uninstall（那会用旧 unit 停一次项目，还会清掉开机自启）。
+		writeService
+		$sh_c 'systemctl daemon-reload'
+		$sh_c "systemctl enable $serviceName"
+		$sh_c "systemctl restart $serviceName"
+		echo "$serviceName reinstalled and restarted (projects keep running)"
 		;;
 	enable)
 		enable
