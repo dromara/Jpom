@@ -412,6 +412,10 @@ docker-compose -f docker-compose.yml up -d
 > systemctl {status | start | stop | restart | enable} jpom-agent
 > ```
 
+> **升级/重启不会停止项目**：生成的 unit 带 `KillMode=process`，`systemctl restart` 只会重启 Jpom 本体，由它启动的项目/脚本进程保持运行并在重启后自动被重新接管。
+> 2.11.14 及更早版本生成的 unit 没有这一项（默认 `KillMode=control-group`），在这类实例上执行 `systemctl stop/restart`（包括「在线升级」）会**连带停止该节点所有项目**；
+> 请执行一次 `./bin/Service.sh reinstall` 重新生成 unit，或手工在 `/etc/systemd/system/jpom-agent.service` 的 `[Service]` 段加一行 `KillMode=process` 后执行 `systemctl daemon-reload`。
+
 <a name="config"></a>
 ## ⚙️ Jpom 参数配置
 

@@ -93,6 +93,11 @@ Wants=network-online.target
 
 [Service]
 Type=simple
+# 项目/脚本/构建进程都是本进程的子进程，和本进程同在一个 systemd cgroup。
+# 默认 KillMode=control-group 会让 systemctl stop/restart 把子进程一起 SIGTERM，
+# 表现为「升级/重启插件端（或服务端）= 该节点所有项目停止」（2026-11-23 重启计划群反馈）。
+# 这里只结束主进程（ExecStop 已按 pidfile 精确停止），子进程保持运行并由 Jpom 重新接管。
+KillMode=process
 Environment="JAVA_HOME=$JAVA_HOME"
 Environment="PATH=$PATH"
 Environment="CLASSPATH=$CLASSPATH"

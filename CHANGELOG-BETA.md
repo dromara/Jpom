@@ -11,6 +11,7 @@
 
 1. 【web-vue】修复 构建配置「版本快照」开关没有开启/关闭状态提示（与同页其它开关不一致）：补上「开启 / 关闭」文案，开关状态一眼可辨
 2. 【web-vue】优化 「版本保留个数（建议 3，留空或 0 时按 3 保留）」不再塞在字段名里：label 精简为「版本保留个数」，建议值与 0/空取值规则移到字段下方说明，四个语言包同步
+3. 【agent】【server】修复 **用 `bin/Service.sh install` 装成系统服务的实例，`systemctl stop/restart`（含「在线升级」）会把该节点上的项目全部停掉**（2026-11-23 重启计划群反馈：更新所有插件端后所有服务都停了，Kylin V10 + Java 插件端）：项目/脚本/构建进程都是 Jpom 本体的子进程、与本体同在一个 systemd cgroup，而生成的 unit 没有写 `KillMode=`，systemd 默认 `KillMode=control-group` 会在重启时把 cgroup 内所有进程一起 SIGTERM，`JpomApplication#restart()` 在存在 `JPOM_SERVICE` 环境变量时又正好走 `systemctl restart`。现在两份 `Service.sh` 生成的 unit 在 `[Service]` 段写明 `KillMode=process`，只结束主进程（`ExecStop` 仍按 pidfile 精确停止），项目进程保持运行并在重启后被重新接管；已安装的老实例执行一次 `./bin/Service.sh reinstall` 即可换成新 unit（README 中英文的 systemd 章节同步说明）
 
 ------
 
