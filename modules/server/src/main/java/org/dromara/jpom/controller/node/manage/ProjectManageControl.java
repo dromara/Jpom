@@ -169,6 +169,7 @@ public class ProjectManageControl extends BaseServerController {
      */
     @RequestMapping(value = "saveProject", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
+    @NodeDataPermission(cls = ProjectInfoCacheService.class, allowMissingData = true)
     public IJsonMessage<String> saveProject(String id, HttpServletRequest request) {
         NodeModel node = getNode();
         this.checkProjectPermission(id, request, node);
