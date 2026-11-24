@@ -42,10 +42,10 @@ stages:
         artifacts:
           - name: server_tar
             path:
-              - modules/server/target/server-2.11.14-release.tar.gz
+              - modules/server/target/server-2.11.15-release.tar.gz
           - name: agent_tar
             path:
-              - modules/agent/target/agent-2.11.14-release.tar.gz
+              - modules/agent/target/agent-2.11.15-release.tar.gz
         settings: []
         strategy:
           retry: '0'
