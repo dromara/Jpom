@@ -307,54 +307,92 @@ public class SshProjectVersionService {
         result.put("targetType", "sshProject");
         JSONArray array = new JSONArray();
         result.put("list", array);
-        SshProjectModel project = this.resolveProject(buildHistoryLog);
-        if (project == null) {
+        List<SshProjectModel> projects = this.resolveProjects(buildHistoryLog);
+        if (projects.isEmpty()) {
             result.put("reachable", false);
             result.put("message", I18nMessageUtil.get("i18n.ssh_project_not_exist.5d18"));
             return result;
         }
-        result.put("projectId", project.getId());
-        result.put("projectName", project.getName());
-        try {
-            JSONObject list = this.list(project);
-            result.put("reachable", true);
-            String current = list.getString("current");
-            for (JSONObject meta : this.metas(list)) {
-                if (!SOURCE_BUILD.equals(meta.getString("source"))) {
-                    // 只有「构建发布」产生的版本属于某次构建；基线/安全快照不参与构建级回滚
-                    continue;
-                }
-                Integer metaBuildNumberId = meta.getInteger("buildNumberId");
-                if (buildNumberId != null && !buildNumberId.equals(metaBuildNumberId)) {
-                    continue;
-                }
-                // 不同构建配置的构建编号会重复（各自从 1 开始），必须同时按构建配置过滤，
-                // 否则 A 构建的弹窗会列出 B 构建同编号的版本（切换时切错内容）
-                String metaBuildDataId = meta.getString("buildDataId");
-                if (StrUtil.isNotBlank(metaBuildDataId) && !StrUtil.equals(metaBuildDataId, buildHistoryLog.getBuildDataId())) {
-                    continue;
-                }
-                JSONObject item = new JSONObject();
-                item.put("projectId", project.getId());
-                item.put("projectName", project.getName());
-                item.put("targetType", "sshProject");
-                item.put("versionId", meta.getString("versionId"));
-                item.put("source", meta.getString("source"));
-                item.put("buildNumberId", metaBuildNumberId);
-                item.put("createTime", meta.getLong("createTime"));
-                item.put("fileSize", meta.getLong("fileSize"));
-                item.put("fileCount", meta.getInteger("fileCount"));
-                item.put("exist", meta.getBoolean("exist"));
-                item.put("reachable", true);
-                item.put("status", StrUtil.equals(meta.getString("versionId"), current) ? 2 : 1);
-                array.add(item);
+        JSONArray projectArray = new JSONArray();
+        for (SshProjectModel project : projects) {
+            JSONObject projectItem = new JSONObject();
+            projectItem.put("projectId", project.getId());
+            projectItem.put("projectName", project.getName());
+            projectArray.add(projectItem);
+        }
+        result.put("projects", projectArray);
+        if (projects.size() == 1) {
+            // 单选是老口径，保留 projectId/projectName 方便旧前端与调用方
+            result.put("projectId", projects.get(0).getId());
+            result.put("projectName", projects.get(0).getName());
+        }
+        boolean reachable = false;
+        List<String> errors = new ArrayList<>();
+        for (SshProjectModel project : projects) {
+            try {
+                JSONObject list = this.list(project);
+                reachable = true;
+                this.appendBuildVersions(array, project, list, buildNumberId, buildHistoryLog.getBuildDataId());
+            } catch (Exception e) {
+                log.warn("ssh project version list error: {} {}", project.getId(), e.getMessage());
+                errors.add(project.getName() + ": " + e.getMessage());
             }
-        } catch (Exception e) {
-            log.warn("ssh project version list error: {} {}", project.getId(), e.getMessage());
-            result.put("reachable", false);
-            result.put("message", e.getMessage());
+        }
+        result.put("reachable", reachable);
+        // 多选发布时目标可能已被删除：界面要能看见「少了哪个」，而不是悄悄少一行
+        List<String> missingIds = new ArrayList<>(this.releaseTargetIds(buildHistoryLog));
+        projects.forEach(project -> missingIds.remove(project.getId()));
+        if (!missingIds.isEmpty()) {
+            errors.add(I18nMessageUtil.get("i18n.ssh_project_not_exist.5d18") + String.join(",", missingIds));
+        }
+        if (!errors.isEmpty()) {
+            result.put("message", String.join("; ", errors));
         }
         return result;
+    }
+
+    /**
+     * 把一个 SSH 项目在该次构建产生的版本追加到列表
+     *
+     * @param array         结果列表
+     * @param project       项目
+     * @param list          远端版本列表
+     * @param buildNumberId 构建编号
+     * @param buildDataId   构建配置 id
+     */
+    private void appendBuildVersions(JSONArray array, SshProjectModel project, JSONObject list,
+                                     Integer buildNumberId, String buildDataId) {
+        String current = list.getString("current");
+        for (JSONObject meta : this.metas(list)) {
+            if (!SOURCE_BUILD.equals(meta.getString("source"))) {
+                // 只有「构建发布」产生的版本属于某次构建；基线/安全快照不参与构建级回滚
+                continue;
+            }
+            Integer metaBuildNumberId = meta.getInteger("buildNumberId");
+            if (buildNumberId != null && !buildNumberId.equals(metaBuildNumberId)) {
+                continue;
+            }
+            // 不同构建配置的构建编号会重复（各自从 1 开始），必须同时按构建配置过滤，
+            // 否则 A 构建的弹窗会列出 B 构建同编号的版本（切换时切错内容）
+            String metaBuildDataId = meta.getString("buildDataId");
+            if (StrUtil.isNotBlank(metaBuildDataId) && !StrUtil.equals(metaBuildDataId, buildDataId)) {
+                continue;
+            }
+            JSONObject item = new JSONObject();
+            item.put("projectId", project.getId());
+            item.put("projectName", project.getName());
+            item.put("targetType", "sshProject");
+            item.put("versionId", meta.getString("versionId"));
+            item.put("source", meta.getString("source"));
+            item.put("buildNumberId", metaBuildNumberId);
+            item.put("createTime", meta.getLong("createTime"));
+            item.put("fileSize", meta.getLong("fileSize"));
+            item.put("fileCount", meta.getInteger("fileCount"));
+            item.put("exist", meta.getBoolean("exist"));
+            item.put("reachable", true);
+            item.put("status", StrUtil.equals(meta.getString("versionId"), current) ? 2 : 1);
+            array.add(item);
+        }
     }
 
     /**
@@ -366,8 +404,9 @@ public class SshProjectVersionService {
      * @param logRecorder     构建日志（可空）
      * @return true 切换成功
      */
-    public boolean quickRollback(BuildHistoryLog buildHistoryLog, String versionId, boolean restart, LogRecorder logRecorder) {
-        SshProjectModel project = this.resolveProject(buildHistoryLog);
+    public boolean quickRollback(BuildHistoryLog buildHistoryLog, String projectId, String versionId, boolean restart, LogRecorder logRecorder) {
+        // 只允许回滚本次构建配置里选中的项目，projectId 由前端按版本行传入（多选时用于定位）
+        SshProjectModel project = this.resolveProject(buildHistoryLog, projectId);
         Assert.notNull(project, I18nMessageUtil.get("i18n.ssh_project_not_exist.5d18"));
         Integer buildNumberId = buildHistoryLog.getFromBuildNumberId() == null
             ? buildHistoryLog.getBuildNumberId() : buildHistoryLog.getFromBuildNumberId();
@@ -399,21 +438,63 @@ public class SshProjectVersionService {
     }
 
     /**
-     * 解析构建历史对应的 SSH 项目
+     * 解析构建历史对应的 SSH 项目（发布方式 =「SSH 项目」支持多选，按逗号拆分）
      *
      * @param buildHistoryLog 构建历史
-     * @return 项目（可为空）
+     * @return 项目列表（不会为空集合）
      */
-    public SshProjectModel resolveProject(BuildHistoryLog buildHistoryLog) {
+    public List<SshProjectModel> resolveProjects(BuildHistoryLog buildHistoryLog) {
         BuildExtraModule extraModule = StringUtil.jsonConvert(buildHistoryLog.getExtraData(), BuildExtraModule.class);
+        List<SshProjectModel> projects = new ArrayList<>();
         if (extraModule == null) {
-            return null;
+            return projects;
         }
         String releaseMethodDataId = StrUtil.trimToNull(extraModule.getReleaseMethodDataId());
         if (releaseMethodDataId == null) {
+            return projects;
+        }
+        for (String id : StrUtil.splitTrim(releaseMethodDataId, StrUtil.COMMA)) {
+            SshProjectModel project = sshProjectService.getByKey(id);
+            if (project != null) {
+                projects.add(project);
+            }
+        }
+        return projects;
+    }
+
+    /**
+     * 本次构建选中的目标 id（多选时为逗号分隔列表）
+     *
+     * @param buildHistoryLog 构建历史
+     * @return 目标 id（不会为空集合）
+     */
+    private List<String> releaseTargetIds(BuildHistoryLog buildHistoryLog) {
+        BuildExtraModule extraModule = StringUtil.jsonConvert(buildHistoryLog.getExtraData(), BuildExtraModule.class);
+        if (extraModule == null) {
+            return new ArrayList<>();
+        }
+        String releaseMethodDataId = StrUtil.trimToNull(extraModule.getReleaseMethodDataId());
+        return releaseMethodDataId == null ? new ArrayList<>() : StrUtil.splitTrim(releaseMethodDataId, StrUtil.COMMA);
+    }
+
+    /**
+     * 解析本次构建对应的单个 SSH 项目
+     *
+     * @param buildHistoryLog 构建历史
+     * @param projectId       指定项目（为空且只有一个项目时自动定位）
+     * @return 项目（可为空）
+     */
+    SshProjectModel resolveProject(BuildHistoryLog buildHistoryLog, String projectId) {
+        List<SshProjectModel> projects = this.resolveProjects(buildHistoryLog);
+        if (StrUtil.isNotBlank(projectId)) {
+            for (SshProjectModel project : projects) {
+                if (StrUtil.equals(project.getId(), projectId)) {
+                    return project;
+                }
+            }
             return null;
         }
-        return sshProjectService.getByKey(releaseMethodDataId);
+        return projects.size() == 1 ? projects.get(0) : null;
     }
 
     /**

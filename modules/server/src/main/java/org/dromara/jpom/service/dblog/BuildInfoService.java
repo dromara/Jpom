@@ -26,6 +26,7 @@ import org.dromara.jpom.model.enums.BuildReleaseMethod;
 import org.dromara.jpom.model.enums.BuildStatus;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.IStatusRecover;
+import org.dromara.jpom.service.build.NodeBuildVersionService;
 import org.dromara.jpom.service.ITriggerToken;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.dromara.jpom.util.StringUtil;
@@ -98,9 +99,14 @@ public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> imple
     @Override
     public int delByKey(String keyValue, HttpServletRequest request) {
         int delByKey = super.delByKey(keyValue, request);
+        // 定时任务 id 是「build:业务主键」（见 checkCron），不能用受影响行数（恒为 0/1），
+        // 否则旧任务残留：删除构建后仍按 cron 触发并持续抛异常，极端情况下还会误删 id=1 的任务
+        CronUtils.remove("build:" + keyValue);
         if (delByKey > 0) {
-            String taskId = "build:" + delByKey;
-            CronUtils.remove(taskId);
+            // 清理该构建留下的节点版本记录（NODE_BUILD_VERSION 没有独立的删除入口）。
+            // 不清理时工作空间预检一直判定「存在关联数据」，该工作空间永远删不掉。
+            NodeBuildVersionService nodeBuildVersionService = SpringUtil.getBean(NodeBuildVersionService.class);
+            nodeBuildVersionService.delByWorkspace(request, entity -> entity.set("buildDataId", keyValue));
         }
         return delByKey;
     }
@@ -262,6 +268,62 @@ public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> imple
         buildInfoModel.setReleaseMethodDataId(dataId);
         buildInfoModel.setReleaseMethod(releaseMethod.getCode());
         return super.exists(buildInfoModel);
+    }
+
+    /**
+     * releaseMethodDataId 是否包含指定目标
+     * <p>
+     * 多目标发布（SSH 项目多选）把目标存成逗号分隔列表，判断「某目标是否被构建引用」
+     * 必须按成员精确比对：整体等值会把多选构建当成没引用，子串匹配（like '%p1%'）又会让
+     * p1 命中 p11。两者都会让「被构建引用的 SSH 项目禁止删除」失效或误伤。
+     *
+     * @param releaseMethodDataId 发布的关联数据 id（可能是逗号分隔多值）
+     * @param targetId            目标 id
+     * @return true 包含该目标
+     */
+    public static boolean containsReleaseTarget(String releaseMethodDataId, String targetId) {
+        if (StrUtil.isBlank(releaseMethodDataId) || StrUtil.isBlank(targetId)) {
+            return false;
+        }
+        return StrUtil.splitTrim(releaseMethodDataId, StrUtil.COMMA).contains(targetId);
+    }
+
+    /**
+     * 判断是否存在发布关联（目标 id 为逗号分隔多值之一）
+     *
+     * @param dataId        数据ID
+     * @param request       请求对象
+     * @param releaseMethod 发布方法
+     * @return true 关联
+     */
+    public boolean checkReleaseMethodTarget(String dataId, HttpServletRequest request, BuildReleaseMethod releaseMethod) {
+        if (StrUtil.isBlank(dataId)) {
+            return false;
+        }
+        BuildInfoModel buildInfoModel = new BuildInfoModel();
+        buildInfoModel.setWorkspaceId(this.getCheckUserWorkspace(request));
+        buildInfoModel.setReleaseMethod(releaseMethod.getCode());
+        return super.listByBean(buildInfoModel, false)
+            .stream()
+            .anyMatch(model -> containsReleaseTarget(model.getReleaseMethodDataId(), dataId));
+    }
+
+    /**
+     * 判断是否存在发布关联（系统级，不按工作空间过滤；目标 id 为逗号分隔多值之一）
+     *
+     * @param dataId        数据ID
+     * @param releaseMethod 发布方法
+     * @return true 关联
+     */
+    public boolean checkReleaseMethodTarget(String dataId, BuildReleaseMethod releaseMethod) {
+        if (StrUtil.isBlank(dataId)) {
+            return false;
+        }
+        BuildInfoModel buildInfoModel = new BuildInfoModel();
+        buildInfoModel.setReleaseMethod(releaseMethod.getCode());
+        return super.listByBean(buildInfoModel, false)
+            .stream()
+            .anyMatch(model -> containsReleaseTarget(model.getReleaseMethodDataId(), dataId));
     }
 
     /**

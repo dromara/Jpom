@@ -105,6 +105,8 @@ public class MachineNodeController extends BaseGroupNameController {
             }
             machineNodeModels.add(nodeModel);
         }
+        // 下拉/搜索同样受「不下发凭据」约束：authorizeToken 等价插件端通讯口令
+        machineNodeServer.clearSensitive(machineNodeModels);
         return JsonMessage.success("", machineNodeModels);
     }
 
@@ -177,6 +179,7 @@ public class MachineNodeController extends BaseGroupNameController {
         MachineNodeModel machineNodeModel = new MachineNodeModel();
         machineNodeModel.setTemplateNode(true);
         List<MachineNodeModel> modelList = machineNodeServer.listByBean(machineNodeModel);
+        machineNodeServer.clearSensitive(modelList);
         return JsonMessage.success("", modelList);
     }
 

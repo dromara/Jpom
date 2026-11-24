@@ -9,6 +9,7 @@
  */
 package org.dromara.jpom.controller.node;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
@@ -83,9 +84,17 @@ public class NodeEditController extends BaseServerController {
         PageResultDto<NodeModel> nodeModelPageResultDto = nodeService.listPage(request);
         nodeModelPageResultDto.each(nodeModel -> {
             MachineNodeModel machineNodeData = machineNodeServer.getByKey(nodeModel.getMachineId());
-            // 长时间没有刷新检测结果的机器不能继续显示"正常"
-            machineNodeServer.fillTimeoutStatus(machineNodeData);
-            nodeModel.setMachineNodeData(machineNodeData);
+            if (machineNodeData != null) {
+                // 机器信息随节点列表下发，必须与 /node/machine-info 同口径脱敏：
+                // authorizeToken 等价插件端通讯口令、jpomPassword 是机器登录口令，不能出现在浏览器响应里。
+                // 先复制再脱敏，避免直接改动服务层实例（可能被后续通讯逻辑复用）。
+                MachineNodeModel safeMachine = new MachineNodeModel();
+                BeanUtil.copyProperties(machineNodeData, safeMachine);
+                // 长时间没有刷新检测结果的机器不能继续显示"正常"
+                machineNodeServer.fillTimeoutStatus(safeMachine);
+                machineNodeServer.clearSensitive(java.util.Collections.singletonList(safeMachine));
+                nodeModel.setMachineNodeData(safeMachine);
+            }
         });
         return JsonMessage.success("", nodeModelPageResultDto);
     }

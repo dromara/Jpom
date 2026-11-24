@@ -9,6 +9,7 @@
  */
 package org.dromara.jpom.controller.node;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
@@ -36,6 +37,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -121,8 +123,14 @@ public class NodeWelcomeController extends BaseServerController {
         String useMachineId = Optional.ofNullable(nodeModel).map(BaseMachineModel::getMachineId).orElse(machineId);
         MachineNodeModel model = machineNodeServer.getByKey(useMachineId);
         Assert.notNull(model, I18nMessageUtil.get("i18n.no_machine_found.c16c"));
+        // 机器资产是系统级数据，机器信息页只展示主机/硬件字段：
+        // authorizeToken 是插件端通讯凭据（等价口令）、jpomPassword 是登录口令，禁止下发到浏览器。
+        // 先复制再脱敏，避免改动服务层返回的实体（同一实例可能被后续逻辑复用）
+        MachineNodeModel safeModel = new MachineNodeModel();
+        BeanUtil.copyProperties(model, safeModel);
+        machineNodeServer.clearSensitive(Collections.singletonList(safeModel));
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("data", model);
+        jsonObject.put("data", safeModel);
         jsonObject.put("heartSecond", nodeConfig.getHeartSecond());
         return JsonMessage.success("", jsonObject);
     }

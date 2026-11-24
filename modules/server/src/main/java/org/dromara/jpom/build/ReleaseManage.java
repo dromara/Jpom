@@ -454,20 +454,49 @@ public class ReleaseManage {
     }
 
     /**
-     * ssh 发布
+     * 逐个发布目标，统一「任一目标失败即终止」策略
+     * <p>
+     * SSH 与 SSH 项目共用这一处：失败判定（目标不存在、连接/上传异常）由调用方抛出，
+     * 循环与失败聚合由 {@link MultiTargetRelease} 负责（行为见 MultiTargetReleaseTest）。
+     *
+     * @param targetIds 逗号分隔的目标 id
+     * @param action    单个目标的发布动作
      */
-    private void doSsh() throws IOException {
-        String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
+    private void releaseTargets(String targetIds, MultiTargetRelease.TargetAction action) {
+        MultiTargetRelease.Outcome outcome = MultiTargetRelease.execute(targetIds, this.buildExtraModule.failFastOnRelease(), action);
+        for (MultiTargetRelease.Failure failure : outcome.getFailures()) {
+            logRecorder.systemError(I18nMessageUtil.get("i18n.release_target_failed.a7c3"), failure.getTargetId(), failure.getMessage());
+        }
+        if (outcome.getSkipped() > 0) {
+            logRecorder.systemWarning(I18nMessageUtil.get("i18n.release_abort_remaining.b2f1"), outcome.getSkipped());
+        }
+        if (outcome.isAborted()) {
+            // 失败即终止：首个失败已经决定本次发布结果，剩余目标不再发布
+            MultiTargetRelease.Failure first = outcome.getFailures().get(0);
+            throw new JpomRuntimeException(StrUtil.format(I18nMessageUtil.get("i18n.release_target_failed.a7c3"), first.getTargetId(), first.getMessage()));
+        }
+        if (!outcome.hasFailure()) {
+            return;
+        }
+        // 未开启失败即终止：剩余目标已发布，但只要有目标失败本次发布仍然判定失败
+        List<String> failures = outcome.getFailures().stream().map(MultiTargetRelease.Failure::toString).collect(Collectors.toList());
+        String message = StrUtil.format(I18nMessageUtil.get("i18n.release_partial_failed.c6d4"), failures.size(), String.join("; ", failures));
+        logRecorder.systemError(message);
+        throw new JpomRuntimeException(message);
+    }
+
+    /**
+     * ssh 发布（支持多目标；失败策略见 {@link #releaseTargets}）
+     */
+    private void doSsh() {
         SshService sshService = SpringUtil.getBean(SshService.class);
-        List<String> strings = StrUtil.splitTrim(releaseMethodDataId, StrUtil.COMMA);
-        for (String releaseMethodDataIdItem : strings) {
-            SshModel item = sshService.getByKey(releaseMethodDataIdItem, false);
+        this.releaseTargets(this.buildExtraModule.getReleaseMethodDataId(), targetId -> {
+            SshModel item = sshService.getByKey(targetId, false);
             if (item == null) {
-                logRecorder.systemError(I18nMessageUtil.get("i18n.no_ssh_entry_found.d0e1"), releaseMethodDataIdItem);
-                continue;
+                throw new JpomRuntimeException(StrUtil.format(I18nMessageUtil.get("i18n.no_ssh_entry_found.d0e1"), targetId));
             }
             this.doSsh(item, sshService);
-        }
+        });
     }
 
     private void doSsh(SshModel item, SshService sshService) throws IOException {
@@ -535,14 +564,24 @@ public class ReleaseManage {
      * 与「发布到项目」一致支持版本快照：发布前登记基线、发布成功后登记本次版本，
      * 构建历史里的「快速回滚」据此把远端目录切回历史版本（不重新传输产物）。
      */
-    private void doSshProject() throws IOException {
-        String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
+    private void doSshProject() {
         SshProjectService sshProjectService = SpringUtil.getBean(SshProjectService.class);
-        SshProjectModel project = sshProjectService.getByKey(releaseMethodDataId);
-        if (project == null) {
-            logRecorder.systemError(I18nMessageUtil.get("i18n.ssh_project_not_exist.5d18") + releaseMethodDataId);
-            return;
-        }
+        this.releaseTargets(this.buildExtraModule.getReleaseMethodDataId(), targetId -> {
+            SshProjectModel project = sshProjectService.getByKey(targetId);
+            if (project == null) {
+                throw new JpomRuntimeException(I18nMessageUtil.get("i18n.ssh_project_not_exist.5d18") + targetId);
+            }
+            this.doSshProject(project);
+        });
+    }
+
+    /**
+     * 发布到单个 SSH 项目：产物落到项目目录，然后按项目生命周期脚本重启
+     *
+     * @param project 项目
+     * @throws IOException IO
+     */
+    private void doSshProject(SshProjectModel project) throws IOException {
         SshProjectMachineResolver machineResolver = SpringUtil.getBean(SshProjectMachineResolver.class);
         MachineSshModel machineSshModel = machineResolver.resolve(project);
         // 版本快照：只按构建配置的开关决定，失败只告警不阻断发布
@@ -575,16 +614,24 @@ public class ReleaseManage {
             }
             publishSuccess = true;
             // 发布完成后按项目自身脚本重启（没有 restart 钩子时执行器会退化为 stop + start）
+            SshProjectExecuteResult result = null;
             try {
-                SshProjectExecuteResult result = sshProjectService.execute(project, ConsoleCommandOp.restart.name(), line -> logRecorder.info(line));
-                if (result.isSuccess()) {
-                    logRecorder.system("ssh project restart done: {}", project.getName());
-                } else {
-                    logRecorder.systemError("ssh project restart failed: {}", StrUtil.emptyToDefault(result.getMessage(), String.valueOf(result.getExitCode())));
-                }
+                result = SpringUtil.getBean(SshProjectService.class)
+                    .execute(project, ConsoleCommandOp.restart.name(), line -> logRecorder.info(line));
             } catch (Exception e) {
                 // 项目没有配置任何生命周期脚本时不影响产物发布结果，只提示
                 logRecorder.systemWarning("ssh project has no lifecycle script, skip restart: {}", e.getMessage());
+            }
+            if (result == null) {
+                return;
+            }
+            if (result.isSuccess()) {
+                logRecorder.system("ssh project restart done: {}", project.getName());
+            } else {
+                // 重启失败不改变「产物是否已经发到目标」的判定：与历史行为一致，只记录错误，
+                // 失败即终止策略只针对目标不存在 / 连接与上传异常（否则老配置会因脚本退出码被改判发布失败）
+                logRecorder.systemError("ssh project restart failed: {}",
+                    StrUtil.emptyToDefault(result.getMessage(), String.valueOf(result.getExitCode())));
             }
         } finally {
             if (versionBegun && publishSuccess) {
@@ -636,57 +683,58 @@ public class ReleaseManage {
     }
 
     /**
-     * ftp发布
-     *
-     * @throws IOException
+     * ftp 发布（支持多目标；失败策略见 {@link #releaseTargets}）
+     * <p>
+     * 2026-11-23 复测：原来目标已删除只记一条错误日志、发布目录为空只告警，构建仍算成功，
+     * 与 SSH / SSH 项目「目标缺失或上传异常算失败」的口径不一致，这里统一走 releaseTargets。
      */
     private void doFtp() {
-        String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
         FtpService ftpService = SpringUtil.getBean(FtpService.class);
-        List<String> strings = StrUtil.splitTrim(releaseMethodDataId, StrUtil.COMMA);
-        for (String releaseMethodDataIdItem : strings) {
-            FtpModel item = ftpService.getByKey(releaseMethodDataIdItem, false);
+        this.releaseTargets(this.buildExtraModule.getReleaseMethodDataId(), targetId -> {
+            FtpModel item = ftpService.getByKey(targetId, false);
             if (item == null) {
-                logRecorder.systemError(I18nMessageUtil.get("i18n.ftp_item_not_found.60a7"), releaseMethodDataIdItem);
-                continue;
+                throw new JpomRuntimeException(StrUtil.format(I18nMessageUtil.get("i18n.ftp_item_not_found.60a7"), targetId));
             }
+            this.doFtp(item, ftpService);
+        });
+    }
 
-            String releasePath = this.buildExtraModule.getReleaseFtpPath();
-
-            if (StrUtil.isEmpty(releasePath)) {
-                logRecorder.systemWarning(I18nMessageUtil.get("i18n.publish_directory_is_empty.79c6"));
-            } else {
-                logRecorder.system(I18nMessageUtil.get("i18n.start_upload_ftp_file.20be"), DateUtil.now(), item.getName(), System.lineSeparator());
-
-                MachineFtpModel machineFtpModel = ftpService.getMachineFtpModel(item);
-                try (Ftp ftp = machineFtpServer.getFtpClient(machineFtpModel)) {
-
-
-                    String prefix = "";
-                    if (!StrUtil.startWith(releasePath, StrUtil.SLASH)) {
-                        prefix = ftp.pwd();
-                    }
-                    String normalizePath = FileUtil.normalize(prefix + StrUtil.SLASH + releasePath);
-                    if (this.buildExtraModule.isClearOld()) {
-                        try {
-                            if (ftp.exist(normalizePath)) {
-                                ftp.delDir(normalizePath);
-                            }
-                        } catch (Exception e) {
-                            if (!StrUtil.startWithIgnoreCase(e.getMessage(), "No such file")) {
-                                logRecorder.error(I18nMessageUtil.get("i18n.clear_build_product_failed.edd4"), e);
-                            }
-                        }
-                    }
-                    ftpService.uploadWithProgress(ftp, this.resultFile, normalizePath, logRecorder, 5);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-                logRecorder.system(I18nMessageUtil.get("i18n.start_upload_ftp_file.20be"), DateUtil.now(), item.getName(), System.lineSeparator());
-
-                logRecorder.system("{} {} ftp upload done", DateUtil.now(), item.getName());
-            }
+    /**
+     * 发布到单个 FTP 目标
+     *
+     * @param item       ftp 资产
+     * @param ftpService ftp service
+     */
+    private void doFtp(FtpModel item, FtpService ftpService) {
+        String releasePath = this.buildExtraModule.getReleaseFtpPath();
+        if (StrUtil.isEmpty(releasePath)) {
+            // 发布目录为空等于什么都没发出去，不能当作发布成功
+            throw new JpomRuntimeException(I18nMessageUtil.get("i18n.publish_directory_is_empty.79c6"));
         }
+        logRecorder.system(I18nMessageUtil.get("i18n.start_upload_ftp_file.20be"), DateUtil.now(), item.getName(), System.lineSeparator());
+        MachineFtpModel machineFtpModel = ftpService.getMachineFtpModel(item);
+        try (Ftp ftp = machineFtpServer.getFtpClient(machineFtpModel)) {
+            String prefix = "";
+            if (!StrUtil.startWith(releasePath, StrUtil.SLASH)) {
+                prefix = ftp.pwd();
+            }
+            String normalizePath = FileUtil.normalize(prefix + StrUtil.SLASH + releasePath);
+            if (this.buildExtraModule.isClearOld()) {
+                try {
+                    if (ftp.exist(normalizePath)) {
+                        ftp.delDir(normalizePath);
+                    }
+                } catch (Exception e) {
+                    if (!StrUtil.startWithIgnoreCase(e.getMessage(), "No such file")) {
+                        logRecorder.error(I18nMessageUtil.get("i18n.clear_build_product_failed.edd4"), e);
+                    }
+                }
+            }
+            ftpService.uploadWithProgress(ftp, this.resultFile, normalizePath, logRecorder, 5);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        logRecorder.system("{} {} ftp upload done", DateUtil.now(), item.getName());
     }
 
     /**
@@ -923,6 +971,12 @@ public class ReleaseManage {
         logRecorder.system(I18nMessageUtil.get("i18n.start_executing_distribution_package.a2cc"));
         OutGivingModel.Status status = statusFuture.get();
         logRecorder.system(I18nMessageUtil.get("i18n.distribute_result.a230"), status.getDesc());
+        if (status == OutGivingModel.Status.FAIL) {
+            // 与 SSH / SSH 项目 / FTP 同口径：分发失败判定本次构建失败，避免「构建成功但产物没发出去」
+            String message = StrUtil.format(I18nMessageUtil.get("i18n.distribute_result.a230"), status.getDesc());
+            logRecorder.systemError(message);
+            throw new JpomRuntimeException(message);
+        }
     }
 
     /**

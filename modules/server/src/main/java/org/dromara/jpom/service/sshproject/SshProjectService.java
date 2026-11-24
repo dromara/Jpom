@@ -33,6 +33,7 @@ import org.springframework.util.Assert;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -44,6 +45,11 @@ import javax.servlet.http.HttpServletRequest;
  */
 @Service
 public class SshProjectService extends BaseWorkspaceService<SshProjectModel> implements ITriggerToken {
+
+    /**
+     * 项目 id 允许的字符集：字母、数字、下划线、中划线（会拼进远端文件路径与 shell 命令）
+     */
+    private static final Pattern SAFE_ID_PATTERN = Pattern.compile("^[A-Za-z0-9_-]{1,64}$");
 
     private final SshProjectExecutor sshProjectExecutor;
     private final SshProjectExecLogService sshProjectExecLogService;
@@ -98,6 +104,22 @@ public class SshProjectService extends BaseWorkspaceService<SshProjectModel> imp
             throw new IllegalArgumentException(I18nMessageUtil.get("i18n.ssh_project_dsl_invalid.7c31") + e.getMessage());
         }
         Assert.notNull(dslYmlDto, I18nMessageUtil.get("i18n.ssh_project_dsl_invalid.7c31"));
+        // id 参与远端日志/pid 文件路径与 shell 命令拼接（SshProjectExecutor.buildScript），
+        // 只允许安全字符：否则 id 里的 $()、../ 会在目标机上被解释（命令注入 / 路径穿越）
+        String checkId = StrUtil.trimToEmpty(model.getId());
+        Assert.state(checkId.isEmpty() || SAFE_ID_PATTERN.matcher(checkId).matches(), I18nMessageUtil.get("i18n.ssh_project_id_invalid.b7c1"));
+        // SSH 资产归属校验：sshId 走当前工作空间，machineSshId 走系统级机器 SSH 资产，
+        // 避免保存成功但运行期报「SSH 不存在」，或跨空间绑定他人的 SSH 记录。
+        // 注意前端在「只有机器 SSH 资产」时会用资产 id 回填 sshId（edit.vue），
+        // 这种组合要按资产校验并清掉 sshId，否则运行期 resolver 会拿资产 id 去查 SSH 记录而失败。
+        if (StrUtil.isNotEmpty(model.getSshId()) && sshService.getByKey(model.getSshId(), request) != null) {
+            model.setMachineSshId(null);
+        } else if (StrUtil.isNotEmpty(model.getMachineSshId())) {
+            Assert.notNull(machineSshServer.getByKey(model.getMachineSshId()), I18nMessageUtil.get("i18n.asset_ssh_not_exist.cd43"));
+            model.setSshId(null);
+        } else {
+            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.ssh_does_not_exist.88d7"));
+        }
         model.setPath(path);
         model.setDslContent(dslContent);
         model.setName(StrUtil.trim(model.getName()));
@@ -232,7 +254,8 @@ public class SshProjectService extends BaseWorkspaceService<SshProjectModel> imp
         SshProjectModel item = this.getItem(id, request);
         Assert.state(!item.running(), I18nMessageUtil.get("i18n.ssh_project_running_cannot_delete.6c07"));
         // 被在线构建引用时不允许删除（与 agent 项目一致）
-        boolean releaseMethod = buildInfoService.checkReleaseMethod(id, request, BuildReleaseMethod.SshProject);
+        // 发布方式「SSH 项目」支持多选：releaseMethodDataId 是逗号分隔列表，必须按成员精确匹配
+        boolean releaseMethod = buildInfoService.checkReleaseMethodTarget(id, request, BuildReleaseMethod.SshProject);
         Assert.state(!releaseMethod, I18nMessageUtil.get("i18n.ssh_project_has_build_items_cannot_delete.4f73"));
         this.delByKey(id, request);
     }

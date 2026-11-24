@@ -39,7 +39,7 @@ public class BuildInfoControllerBranchListTest {
 
     private BuildInfoController createController(RepositoryService repositoryService) {
         TestI18nSupport.init();
-        return new BuildInfoController(null, null, null, null, repositoryService, null, null, null, null, null, null, null);
+        return new BuildInfoController(null, null, null, null, repositoryService, null, null, null, null, null, null, null, null);
     }
 
     @Test

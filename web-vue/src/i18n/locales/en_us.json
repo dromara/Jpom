@@ -2896,7 +2896,7 @@
 	"i18n_fba5f4f19a":"DSL environment variables",
 	"i18n_fbd7ba1d9b":"Last distribution time",
 	"i18n_fbee13a873":"Total number of workspaces:",
-	"i18n_fbf8959896":"Versions to keep (3 recommended; empty or 0 keeps 3)",
+	"i18n_fbf8959896":"Versions to keep",
 	"i18n_fbfa6c18bf":"Allocated",
 	"i18n_fbfeb76b33":"Left menu bar theme switch",
 	"i18n_fc06c70960":"Are you sure you want to delete the current image?",
@@ -3024,5 +3024,10 @@
 	"i18n_8a8e690119":"Please select the SSH project to release",
   "i18n_ssh_project_ssh_empty_help_9f31": "No machine SSH in this workspace. Add one in \"SSH management\" and distribute it to this workspace first",
   "i18n_ssh_project_ssh_missing_d2a8": "(this machine SSH is not in the current workspace, please choose again)",
-  "i18n_ssh_project_token_placeholder_7c42": "Enter access token"
+  "i18n_ssh_project_token_placeholder_7c42": "Enter access token",
+  "i18n_build_version_keep_count_help": "3 recommended; empty or 0 keeps 3",
+  "i18n_build_release_fail_fast": "Abort on target failure",
+  "i18n_build_release_fail_fast_help": "When enabled, publishing stops at the first failed target; when disabled, remaining targets are still published (a failed target still marks the release as failed). Only a missing target, connection or upload error counts as a failure; a non-zero exit code from the post-release script/restart is still only logged.",
+  "i18n_build_ssh_project_missing": "(the selected SSH project no longer exists or is not in the current workspace; please select again)",
+  "i18n_ee992d9744": "Global workspace: "
 }

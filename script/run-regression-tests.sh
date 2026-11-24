@@ -63,6 +63,10 @@ DEFAULT_TESTS=(
 	ServerWebSocketInterceptorTest
 	# 文件日志监听器会话/Tailer 生命周期（agent 控制台 OOM 回归守卫）
 	BaseFileTailWatcherTest
+	# 文件系统统计过滤：macOS APFS 同容器多卷 / Linux tmpfs+网络盘不得重复累加硬盘总量（2026-11-20 重启计划群反馈回归守卫）
+	OshiFileStoreFilterTest
+	# 远程下载白名单：主机边界匹配，禁止子域拼接与 userinfo 绕过（SSRF 回归守卫）
+	ServerWhitelistTest
 	# 全局异常响应脱敏：数据库异常不再回显 SQL/列/表/驱动信息
 	BaseExceptionHandlerTest
 	# 节点数据同步：旧工作空间不存在时回退到节点当前工作空间（重装服务端后“同步 0 个”回归守卫，Gitee ICH1VK）
@@ -120,6 +124,16 @@ DEFAULT_TESTS=(
 	AgentDefaultVersionConfigTest
 	# 版本快照保留个数 0/空必须回落到默认值（否则插件端判「未启用」，发布成功却没有版本记录 → 快速回滚空列表，2026-11-19 群反馈）
 	BuildVersionServiceKeepCountTest
+	# 多目标发布失败策略：老配置缺字段按「任一目标失败即终止」，显式关闭才继续剩余目标
+	BuildExtraModuleReleaseFailFastTest
+	# 多目标发布行为：全部成功 / 首个失败即停并跳过剩余 / 关闭开关继续但仍判失败 / 空目标 / 异常无消息 / 首尾空白
+	MultiTargetReleaseTest
+	# 「被构建引用」匹配：SSH 项目多选后必须按成员精确匹配（整体等值会漏、like 子串会误伤）
+	BuildInfoReleaseTargetMatcherTest
+	# SSH 项目多选发布保存：目标去重 / 保序 / 忽略空值（接口直传与前端数组 join 同一口径）
+	BuildInfoControllerSshProjectTargetsTest
+	# FTP 资产删除守卫必须查 FTP 发布方式（原复制粘贴成 SSH，被构建引用也删得掉）
+	FtpControllerDeleteGuardTest
 	# SSH 项目（无插件端）接口契约 + 版本快照远端解析/过滤（构建历史快速回滚，2026-11-20）
 	SshProjectControllerTest
 	SshProjectVersionServiceTest

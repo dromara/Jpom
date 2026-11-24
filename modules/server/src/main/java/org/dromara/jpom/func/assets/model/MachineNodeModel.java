@@ -314,4 +314,14 @@ public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
         // 需要兼容旧数据
         return ObjectUtil.defaultIfNull(this.getTransportEncryption(), 0);
     }
+
+    /**
+     * 清空不能下发到浏览器的凭据字段：authorizeToken 等价插件端通讯口令、jpomPassword 是机器登录口令。
+     * 单一收口：列表/详情/下拉/节点列表副本等处一律调用本方法。
+     */
+    public void clearSensitive() {
+        this.setAuthorizeToken(null);
+        this.setJpomPassword(null);
+    }
+
 }

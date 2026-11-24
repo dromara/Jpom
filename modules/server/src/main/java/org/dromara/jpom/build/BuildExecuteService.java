@@ -239,7 +239,7 @@ public class BuildExecuteService {
      * @return 新的构建编号
      */
     public int quickRollback(BuildHistoryLog oldLog, BuildInfoModel item, UserModel userModel, boolean restart) {
-        return this.quickRollback(oldLog, item, userModel, restart, null);
+        return this.quickRollback(oldLog, item, userModel, restart, null, null);
     }
 
     /**
@@ -252,9 +252,11 @@ public class BuildExecuteService {
      * @param userModel 操作人
      * @param restart   切换后是否重启项目
      * @param versionId 指定版本（SSH 项目可选，为空按构建编号自动定位）
+     * @param projectId 指定 SSH 项目（多选发布时按版本行定位；其它发布方式忽略）
      * @return 新的构建编号
      */
-    public int quickRollback(BuildHistoryLog oldLog, BuildInfoModel item, UserModel userModel, boolean restart, String versionId) {
+    public int quickRollback(BuildHistoryLog oldLog, BuildInfoModel item, UserModel userModel, boolean restart,
+                             String versionId, String projectId) {
         synchronized (item.getId().intern()) {
             String e = this.checkStatus(item);
             Assert.isNull(e, () -> e);
@@ -287,7 +289,7 @@ public class BuildExecuteService {
                 logRecorder.system(I18nMessageUtil.get("i18n.start_quick_rollback.7a41"), oldLog.getBuildNumberId(), fromBuildNumberId);
                 if (sshProject) {
                     try {
-                        this.sshProjectVersionService.quickRollback(oldLog, versionId, restart, logRecorder);
+                        this.sshProjectVersionService.quickRollback(oldLog, projectId, versionId, restart, logRecorder);
                         success++;
                     } catch (Exception exception) {
                         fail++;

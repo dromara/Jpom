@@ -164,14 +164,23 @@ func TestScriptRunStreamsExecution(t *testing.T) {
 		t.Fatalf("unexpected hello frame: %s", hello)
 	}
 	sendJSON(t, conn, map[string]any{"scriptId": "script-1", "op": "start", "executeId": "execute-1", "args": "[]"})
-	control := readText(t, conn, 3*time.Second)
-	if !strings.Contains(control, "\"code\":200") || !strings.Contains(control, "执行成功") {
-		t.Fatalf("unexpected control frame: %s", control)
+	// 控制帧 / 执行输出帧 / 完成帧的先后顺序都不保证（脚本极快时完成帧会先到），
+	// 因此只用一个循环持续累积帧，直到两个条件都满足；分别 readUntil 会把先到的帧吃掉，
+	// 第二次调用只能等到超时（CI 偶发 "no matching frame"）。
+	var acc []string
+	gotControl, gotStop := false, false
+	deadline := time.Now().Add(8 * time.Second)
+	for !(gotControl && gotStop) {
+		frame := readText(t, conn, time.Until(deadline))
+		acc = append(acc, frame)
+		if !gotControl && strings.Contains(frame, "\"code\":200") && strings.Contains(frame, "执行成功") {
+			gotControl = true
+		}
+		if !gotStop && strings.Contains(frame, "JPOM_MSG") && strings.Contains(frame, "stop") {
+			gotStop = true
+		}
 	}
-	frames := readUntil(t, conn, 5*time.Second, func(frame string) bool {
-		return strings.Contains(frame, "JPOM_MSG") && strings.Contains(frame, "stop")
-	})
-	joined := strings.Join(frames, "\n")
+	joined := strings.Join(acc, "\n")
 	if !strings.Contains(joined, "hello-script") {
 		t.Fatalf("execution output missing: %s", joined)
 	}

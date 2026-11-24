@@ -39,7 +39,8 @@ public class UserLoginLogServer extends BaseDbService<UserLoginLogModel> {
      */
     public PageResultDto<UserLoginLogModel> listPageByUserId(HttpServletRequest request, String userId) {
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
-        paramMap.put("modifyUser", userId);
+        // 与操作日志同口径：强制过滤，客户端不能用 modifyUser:in / %modifyUser% 叠加同字段条件
+        putForcedFilter(paramMap, "modifyUser", userId);
         return super.listPage(paramMap);
     }
 
