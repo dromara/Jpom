@@ -37,6 +37,7 @@ import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.service.dblog.BuildInfoService;
 import org.dromara.jpom.service.dblog.DbBuildHistoryLogService;
 import org.dromara.jpom.service.system.WorkspaceEnvVarService;
+import org.dromara.jpom.util.BuildExtraDataUtil;
 import org.dromara.jpom.util.FileUtils;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
@@ -113,8 +114,9 @@ public class BuildInfoManageController extends BaseServerController {
         Opt.ofBlankAble(projectSecondaryDirectory).ifPresent(s -> {
             FileUtils.checkSlip(s, e -> new IllegalArgumentException(I18nMessageUtil.get("i18n.second_level_directory_cannot_skip_levels.c9fb") + e.getMessage()));
             //
+            // 历史数据的 extra_data 可能为空（早期版本/未发布构建），不能在这里变成空指针
             String extraData = item.getExtraData();
-            JSONObject jsonObject = JSONObject.parseObject(extraData);
+            JSONObject jsonObject = BuildExtraDataUtil.parse(extraData);
             jsonObject.put("projectSecondaryDirectory", s);
             update.setExtraData(jsonObject.toString());
         });

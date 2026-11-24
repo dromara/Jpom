@@ -58,6 +58,11 @@ public class JschUtils {
 
     public final static String HEADER = "-----BEGIN RSA PRIVATE KEY-----";
 
+    /**
+     * 读取退出码前等待通道关闭的最长时间（毫秒）
+     */
+    public static final long EXIT_STATUS_WAIT_MILLIS = 3000L;
+
     public final static String FOOTER = "-----END RSA PRIVATE KEY-----";
 
     /**
@@ -203,6 +208,32 @@ public class JschUtils {
     }
 
     /**
+     * 等待通道关闭（JSch 的退出码只有收到 close 消息后才可用，读流结束立即取可能得到 -1）
+     * <p>
+     * 2026-11-24 群反馈排查：SSH 发布链路读退出码不等通道关闭，可能把非 0 读成 -1。
+     * 三处执行入口（发布命令、文件发布任务脚本、SSH 项目执行器）共用这一处等待逻辑。
+     *
+     * @param channel 通道
+     * @param millis  最长等待毫秒
+     * @return 是否在等待期内关闭
+     */
+    public static boolean waitClosed(Channel channel, long millis) {
+        if (channel == null) {
+            return false;
+        }
+        long deadline = System.currentTimeMillis() + Math.max(millis, 0);
+        while (!channel.isClosed() && System.currentTimeMillis() < deadline) {
+            try {
+                Thread.sleep(30);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return channel.isClosed();
+            }
+        }
+        return channel.isClosed();
+    }
+
+    /**
      * ssh 执行模版命令(并自动删除执行后的命令脚本文件)
      *
      * @param charset  编码格式
@@ -262,9 +293,9 @@ public class JschUtils {
      * @param commandParamsLine 执行参数
      * @throws IOException io
      */
-    public static void execCallbackLine(Session session, Charset charset, int timeout, String command, String commandParamsLine, Map<String, String> env, LineHandler lineHandler) throws IOException {
+    public static int execCallbackLine(Session session, Charset charset, int timeout, String command, String commandParamsLine, Map<String, String> env, LineHandler lineHandler) throws IOException {
         String command2 = StringUtil.formatStrByMap(command, env);
-        execCallbackLine(session, charset, timeout, command2, commandParamsLine, lineHandler);
+        return execCallbackLine(session, charset, timeout, command2, commandParamsLine, lineHandler);
     }
 
     /**
@@ -313,6 +344,8 @@ public class JschUtils {
                 if (size > 0) {
                     error.handle(outputStream.toString(charset.name()));
                 }
+                // 等待通道关闭后再取退出码，否则可能读到 -1
+                waitClosed(channel, EXIT_STATUS_WAIT_MILLIS);
                 return channel.getExitStatus();
             } catch (Exception e) {
                 throw Lombok.sneakyThrow(e);

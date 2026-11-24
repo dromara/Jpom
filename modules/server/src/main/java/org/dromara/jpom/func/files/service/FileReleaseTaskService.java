@@ -616,7 +616,10 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                             beforeScript = keyAndGlobal.getContext();
                             logRecorder.system(I18nMessageUtil.get("i18n.introducing_script_content.a55b"), keyAndGlobal.getName(), scriptId);
                         }
-                        JschUtils.execCallbackLine(session, charset, timeout, beforeScript, StrUtil.EMPTY, environment, logRecorder::info);
+                        int beforeExitCode = JschUtils.execCallbackLine(session, charset, timeout, beforeScript, StrUtil.EMPTY, environment, logRecorder::info);
+                        // 兄弟入口与 SSH 发布对齐：退出码必须可见（判定行为不变，避免改判老任务）
+                        logRecorder.system(I18nMessageUtil.get("i18n.execute_script_exit_code.64a8"),
+                            I18nMessageUtil.get("i18n.release_phase_before_command.a7f1"), beforeExitCode);
                     }
                     logRecorder.system("{} start ftp upload", item.getName());
 
@@ -638,7 +641,9 @@ public class FileReleaseTaskService extends BaseWorkspaceService<FileReleaseTask
                             afterScript = keyAndGlobal.getContext();
                             logRecorder.system(I18nMessageUtil.get("i18n.introducing_script_content.a55b"), keyAndGlobal.getName(), scriptId);
                         }
-                        JschUtils.execCallbackLine(session, charset, timeout, afterScript, StrUtil.EMPTY, environment, logRecorder::info);
+                        int afterExitCode = JschUtils.execCallbackLine(session, charset, timeout, afterScript, StrUtil.EMPTY, environment, logRecorder::info);
+                        logRecorder.system(I18nMessageUtil.get("i18n.execute_script_exit_code.64a8"),
+                            I18nMessageUtil.get("i18n.release_phase_after_command.a7f2"), afterExitCode);
                     }
                     this.updateStatus(taskId, modelId, 2, I18nMessageUtil.get("i18n.publish_success.2fff"));
                 } catch (Exception e) {

@@ -454,6 +454,30 @@ public class ReleaseManage {
     }
 
     /**
+     * 记录发布命令退出码，并按「严格执行」决定是否把该目标判失败
+     * <p>
+     * 收口点：SSH 发布前命令、SSH 发布后命令、SSH 项目重启三处共用，避免各写一套判断。
+     * 口径见 {@link ReleaseCommandExitCode}：未知（-1）只提示；非 0 且开启严格执行才抛错。
+     *
+     * @param phaseLabel 阶段文案
+     * @param exitCode   退出码
+     * @param logRecorder 日志
+     */
+    private void recordReleaseCommandExit(String phaseLabel, int exitCode, LogRecorder logRecorder) {
+        if (ReleaseCommandExitCode.unknown(exitCode)) {
+            logRecorder.systemWarning(I18nMessageUtil.get("i18n.release_command_exit_unknown.a7f6"), phaseLabel);
+            return;
+        }
+        logRecorder.system(I18nMessageUtil.get("i18n.execute_script_exit_code.64a8"), phaseLabel, exitCode);
+        if (!ReleaseCommandExitCode.shouldFailTarget(exitCode, this.buildExtraModule.strictlyEnforce())) {
+            return;
+        }
+        String message = ReleaseCommandExitCode.failureMessage(phaseLabel, exitCode);
+        logRecorder.systemError(message);
+        throw new JpomRuntimeException(message);
+    }
+
+    /**
      * 逐个发布目标，统一「任一目标失败即终止」策略
      * <p>
      * SSH 与 SSH 项目共用这一处：失败判定（目标不存在、连接/上传异常）由调用方抛出，
@@ -514,7 +538,8 @@ public class ReleaseManage {
             if (StrUtil.isNotEmpty(this.buildExtraModule.getReleaseBeforeCommand())) {
                 //
                 logRecorder.system(I18nMessageUtil.get("i18n.start_executing_pre_release_command.6c7e"), item.getName());
-                JschUtils.execCallbackLine(session, charset, timeout, this.buildExtraModule.getReleaseBeforeCommand(), StrUtil.EMPTY, envFileMap, logRecorder::info);
+                int beforeExitCode = JschUtils.execCallbackLine(session, charset, timeout, this.buildExtraModule.getReleaseBeforeCommand(), StrUtil.EMPTY, envFileMap, logRecorder::info);
+                this.recordReleaseCommandExit(I18nMessageUtil.get("i18n.release_phase_before_command.a7f1"), beforeExitCode, logRecorder);
             }
 
             if (StrUtil.isEmpty(releasePath)) {
@@ -550,7 +575,8 @@ public class ReleaseManage {
             }
             //
             logRecorder.system(I18nMessageUtil.get("i18n.start_executing_post_release_command.fd06"), item.getName());
-            JschUtils.execCallbackLine(session, charset, timeout, this.buildExtraModule.getReleaseCommand(), StrUtil.EMPTY, envFileMap, logRecorder::info);
+            int afterExitCode = JschUtils.execCallbackLine(session, charset, timeout, this.buildExtraModule.getReleaseCommand(), StrUtil.EMPTY, envFileMap, logRecorder::info);
+            this.recordReleaseCommandExit(I18nMessageUtil.get("i18n.release_phase_after_command.a7f2"), afterExitCode, logRecorder);
         } finally {
             JschUtil.close(channelSftp);
             JschUtil.close(session);
@@ -607,7 +633,7 @@ public class ReleaseManage {
                     }
                 }
                 sftp.syncUpload(this.resultFile, normalizePath);
-                logRecorder.system("ssh project upload done: {}", project.getName());
+                logRecorder.system(I18nMessageUtil.get("i18n.ssh_project_upload_done.a7fa"), project.getName());
             } finally {
                 JschUtil.close(channelSftp);
                 JschUtil.close(session);
@@ -620,19 +646,21 @@ public class ReleaseManage {
                     .execute(project, ConsoleCommandOp.restart.name(), line -> logRecorder.info(line));
             } catch (Exception e) {
                 // 项目没有配置任何生命周期脚本时不影响产物发布结果，只提示
-                logRecorder.systemWarning("ssh project has no lifecycle script, skip restart: {}", e.getMessage());
+                logRecorder.systemWarning(I18nMessageUtil.get("i18n.ssh_project_no_lifecycle_script.a7f9"), project.getName(), e.getMessage());
             }
             if (result == null) {
                 return;
             }
             if (result.isSuccess()) {
-                logRecorder.system("ssh project restart done: {}", project.getName());
-            } else {
-                // 重启失败不改变「产物是否已经发到目标」的判定：与历史行为一致，只记录错误，
-                // 失败即终止策略只针对目标不存在 / 连接与上传异常（否则老配置会因脚本退出码被改判发布失败）
-                logRecorder.systemError("ssh project restart failed: {}",
-                    StrUtil.emptyToDefault(result.getMessage(), String.valueOf(result.getExitCode())));
+                logRecorder.system(I18nMessageUtil.get("i18n.ssh_project_restart_done.a7f8"), project.getName());
+                return;
             }
+            // 重启失败默认只记录错误（保持 2.11.15 行为，避免老配置被改判）；
+            // 开启「严格执行」时按同一条退出码口径判该目标失败（见 ReleaseCommandExitCode）
+            String restartPhase = I18nMessageUtil.get("i18n.release_phase_ssh_restart.a7f3");
+            logRecorder.systemError(I18nMessageUtil.get("i18n.ssh_project_restart_failed.a7f7"), project.getName(),
+                StrUtil.emptyToDefault(result.getMessage(), String.valueOf(result.getExitCode())));
+            this.recordReleaseCommandExit(restartPhase, result.getExitCode(), logRecorder);
         } finally {
             if (versionBegun && publishSuccess) {
                 this.sshProjectVersionCommit(sshProjectVersionService, project);
