@@ -135,15 +135,15 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         if (CollUtil.isEmpty(list)) {
             return;
         }
-        list.forEach(item -> {
-            item.setAuthorizeToken(null);
-            item.setJpomPassword(null);
-        });
+        list.forEach(MachineNodeModel::clearSensitive);
     }
 
     @Override
     protected void fillSelectResult(MachineNodeModel data) {
-        Optional.ofNullable(data).ifPresent(machineNodeModel -> machineNodeModel.setJpomPassword(null));
+        Optional.ofNullable(data).ifPresent(machineNodeModel -> {
+            machineNodeModel.setJpomPassword(null);
+            machineNodeModel.setAuthorizeToken(null);
+        });
     }
 
     @Override
