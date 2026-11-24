@@ -23,6 +23,7 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.*;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.version.RemoteVersions;
 import org.dromara.jpom.common.update.AgentEngine;
 import org.dromara.jpom.common.update.AgentPackageInfo;
 import org.dromara.jpom.common.update.AgentPackageResolver;
@@ -123,7 +124,8 @@ public class NodeUpdateController extends BaseServerController {
     @Feature(method = MethodFeature.LIST)
     @GetMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<JSONObject> checkVersion() {
-        cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
+        // 显式「检查更新」：在线刷新（失败自动重试）→ 缓存兜底
+        cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersions.infoForRefresh();
         AgentFileModel agentFileModel = agentPackageService.get(AgentEngine.JAVA);
         AgentEngine engine = agentFileModel == null ? null : AgentEngine.JAVA;
         if (agentFileModel == null) {

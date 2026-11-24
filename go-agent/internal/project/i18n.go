@@ -126,3 +126,10 @@ const (
 	keyFileNotFound             = "i18n.file_not_found.d952"
 	keySoftLinkTargetNotExist   = "i18n.soft_link_project_department_exists.fa97"
 )
+
+// 旧版控制台日志迁移文案（复用 Java 端 AgentStartInit 已用的 key，四语言齐全）。
+const (
+	keyAutoMigrateExistBackupLogs   = "i18n.auto_migrate_exist_backup_logs.dc33"
+	keyAutoMigrateExistLogs         = "i18n.auto_migrate_exist_logs.c169"
+	keyOldVersionProjectLogsRunning = "i18n.old_version_project_logs_exist_while_running.75ab"
+)

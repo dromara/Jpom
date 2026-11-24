@@ -24,6 +24,7 @@ import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.update.AgentEngine;
 import org.dromara.jpom.common.update.AgentPackageInfo;
 import org.dromara.jpom.common.update.AgentPackageResolver;
+import org.dromara.jpom.common.version.RemoteVersions;
 import org.dromara.jpom.model.AgentFileModel;
 import org.dromara.jpom.system.ServerConfig;
 import org.springframework.stereotype.Service;
@@ -225,10 +226,8 @@ public class AgentPackageService {
                 throw new IllegalStateException(StrUtil.format(I18nMessageUtil.get("i18n.agent_package_platform_invalid.b1fb"), platform));
             }
         }
-        cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersion.loadRemoteInfo();
-        if (remoteVersion == null) {
-            throw new IllegalStateException(I18nMessageUtil.get("i18n.no_available_new_version_upgrade.d8f2"));
-        }
+        // 远端版本信息带刷新语义：在线刷新失败自动重试，仍失败回退本机缓存，都没有才抛可读异常
+        cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersions.infoForUpgrade();
         String version = AgentPackageResolver.normalizeVersion(remoteVersion.getTagName());
         String agentUrl = this.resolveJavaAgentUrl(remoteVersion);
         if (StrUtil.isBlank(version)) {

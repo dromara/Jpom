@@ -22,6 +22,7 @@ import org.dromara.jpom.common.RemoteVersion;
 import org.dromara.jpom.common.commander.ProjectCommander;
 import org.dromara.jpom.common.commander.SystemCommander;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.version.RemoteVersions;
 import org.dromara.jpom.common.interceptor.NotAuthorize;
 import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.plugin.PluginFactory;
@@ -71,7 +72,8 @@ public class IndexController extends BaseAgentController {
     public IJsonMessage<JSONObject> info() {
 
         JpomManifest instance = JpomManifest.getInstance();
-        cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
+        // 与服务端一致：缓存优先，缓存缺失时在线刷新一次
+        cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersions.infoForDisplay();
         //
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("manifest", instance);

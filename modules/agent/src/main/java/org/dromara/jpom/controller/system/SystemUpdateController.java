@@ -25,6 +25,7 @@ import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.RemoteVersion;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.version.RemoteVersions;
 import org.dromara.jpom.configuration.AgentConfig;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -116,7 +117,8 @@ public class SystemUpdateController extends BaseAgentController {
      */
     @PostMapping(value = "check_version.json", produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<cn.keepbx.jpom.RemoteVersion> checkVersion() {
-        cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersion.loadRemoteInfo();
+        // 显式「检查更新」：在线刷新（失败自动重试）→ 缓存兜底，与服务端同口径
+        cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersions.infoForRefresh();
         return JsonMessage.success("", remoteVersion);
     }
 

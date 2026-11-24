@@ -13,22 +13,22 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpDownloader;
-import cn.hutool.http.HttpException;
 import cn.hutool.http.HttpUtil;
 import cn.keepbx.jpom.Type;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.version.RemoteVersions;
 import org.springframework.util.Assert;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 
 /**
  * 远程的版本信息
@@ -50,6 +50,11 @@ import java.util.function.Consumer;
 @Slf4j
 public class RemoteVersion extends cn.keepbx.jpom.RemoteVersion {
 
+    /**
+     * 下载地址中的授权 token 脱敏规则（与 AgentPackageService 同口径）
+     */
+    private static final Pattern TOKEN_PATTERN = Pattern.compile("([?&](?:token|access_token|auth)=)[^&\\s]+", Pattern.CASE_INSENSITIVE);
+
     @Override
     public String toString() {
         return JSONObject.toJSONString(cn.keepbx.jpom.RemoteVersion.cacheInfo());
@@ -66,8 +71,9 @@ public class RemoteVersion extends cn.keepbx.jpom.RemoteVersion {
      * @see HttpDownloader#requestDownload(String, int)
      */
     public static Tuple download(String savePath, Type type, boolean checkRepeat) throws IOException {
-        cn.keepbx.jpom.RemoteVersion remoteVersion = loadRemoteInfo();
-        Assert.notNull(remoteVersion, I18nMessageUtil.get("i18n.no_available_new_version_upgrade.d8f2"));
+        // 远端版本信息带刷新语义：在线刷新失败自动重试，仍失败回退本机缓存，都没有才抛可读异常
+        //（此前只拉一次，下载中心 TLS 抖动一次就让升级/下载直接 405，且文案是「:-1」）
+        cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersions.infoForUpgrade();
         // 检查是否存在下载地址
         String remoteUrl = type.getRemoteUrl(remoteVersion);
         Assert.hasText(remoteUrl, I18nMessageUtil.get("i18n.new_version_exists_download_unavailable.4ba7"));
@@ -94,7 +100,7 @@ public class RemoteVersion extends cn.keepbx.jpom.RemoteVersion {
             try {
                 log.debug("try download tar.gz package: {}", tarGzUrl);
                 return downloadFileFromUrl(tarGzUrl, savePath);
-            } catch (IllegalStateException e) {
+            } catch (DownloadAuthorizeException e) {
                 // 授权失败（403 等）不降级，直接抛出原有提示
                 throw e;
             } catch (Exception e) {
@@ -114,14 +120,47 @@ public class RemoteVersion extends cn.keepbx.jpom.RemoteVersion {
     private static File downloadFileFromUrl(String remoteUrl, String savePath) {
         try {
             return HttpUtil.downloadFileFromUrl(remoteUrl, savePath);
-        } catch (HttpException httpException) {
-            String message = httpException.getMessage();
+        } catch (RuntimeException e) {
+            // HttpException（非 2xx）与 IORuntimeException（连接失败/超时）都要落到可读提示
+            String message = sanitizeDownloadMessage(e.getMessage());
             if (StrUtil.containsAnyIgnoreCase(message, "Server response error with status code: [403]")) {
                 String msg = I18nMessageUtil.get("i18n.error_message.44ce");
-                throw new IllegalStateException(message + " " + msg);
+                throw new DownloadAuthorizeException(message + " " + msg);
             }
-            throw Lombok.sneakyThrow(httpException);
+            // 此前非 403 走 sneakyThrow，响应只有「服务异常：ConnectException: ...」，用户看不出下一步该做什么
+            throw new DownloadFailedException(I18nMessageUtil.get("i18n.download_failed.65e2") + ": " + message, e);
         }
+    }
+
+    /**
+     * 升级包下载失败（网络不可达、超时、非 2xx）：message 已脱敏，可直接展示给用户
+     */
+    public static class DownloadFailedException extends IllegalStateException {
+        public DownloadFailedException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    /**
+     * 下载授权失败（403 等）：调用方不得再降级到备用下载地址
+     */
+    public static class DownloadAuthorizeException extends IllegalStateException {
+        public DownloadAuthorizeException(String message) {
+            super(message);
+        }
+    }
+
+    /**
+     * 下载地址可能带授权 token，异常信息回显前统一脱敏（§0.27）
+     *
+     * @param message 原始异常信息
+     * @return 脱敏后的信息
+     */
+    static String sanitizeDownloadMessage(String message) {
+        if (StrUtil.isBlank(message)) {
+            return StrUtil.EMPTY;
+        }
+        return TOKEN_PATTERN.matcher(message).replaceAll("$1***");
     }
 
     /**
