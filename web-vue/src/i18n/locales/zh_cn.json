@@ -3028,5 +3028,6 @@
   "i18n_build_version_keep_count_help": "建议 3；留空或 0 时按 3 保留",
   "i18n_build_release_fail_fast": "任一目标失败即终止",
   "i18n_build_release_fail_fast_help": "开启后逐个目标发布，其中一个失败就跳过剩余目标；关闭则继续发布其余目标（最终只要有目标失败仍标记发布失败）。目标不存在、连接或上传异常才算失败；发布后的脚本/重启返回非 0 仍只记录错误",
-  "i18n_build_ssh_project_missing": "（选中的 SSH 项目不存在或已移出当前工作空间，请重新选择）"
+  "i18n_build_ssh_project_missing": "（选中的 SSH 项目不存在或已移出当前工作空间，请重新选择）",
+  "i18n_ee992d9744": "全局工作空间："
 }

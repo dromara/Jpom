@@ -63,6 +63,10 @@ DEFAULT_TESTS=(
 	ServerWebSocketInterceptorTest
 	# 文件日志监听器会话/Tailer 生命周期（agent 控制台 OOM 回归守卫）
 	BaseFileTailWatcherTest
+	# 文件系统统计过滤：macOS APFS 同容器多卷 / Linux tmpfs+网络盘不得重复累加硬盘总量（2026-11-20 重启计划群反馈回归守卫）
+	OshiFileStoreFilterTest
+	# 远程下载白名单：主机边界匹配，禁止子域拼接与 userinfo 绕过（SSRF 回归守卫）
+	ServerWhitelistTest
 	# 全局异常响应脱敏：数据库异常不再回显 SQL/列/表/驱动信息
 	BaseExceptionHandlerTest
 	# 节点数据同步：旧工作空间不存在时回退到节点当前工作空间（重装服务端后“同步 0 个”回归守卫，Gitee ICH1VK）

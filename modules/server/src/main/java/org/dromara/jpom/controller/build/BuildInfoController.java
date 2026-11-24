@@ -432,7 +432,7 @@ public class BuildInfoController extends BaseServerController {
 
         // 验证发布方式 和 extraData 信息
         if (releaseMethod1 == BuildReleaseMethod.Project) {
-            this.formatProject(jsonObject);
+            this.formatProject(jsonObject, request);
         } else if (releaseMethod1 == BuildReleaseMethod.Ssh) {
             this.formatSsh(jsonObject, request);
         } else if (releaseMethod1 == BuildReleaseMethod.Outgiving) {
@@ -552,7 +552,10 @@ public class BuildInfoController extends BaseServerController {
         String releaseMethodDataId = jsonObject.getString("releaseMethodDataId_6");
         Assert.hasText(releaseMethodDataId, I18nMessageUtil.get("i18n.ftp_selection.c903"));
 
-        String releasePath = jsonObject.getString("releasePath");
+        // 前端 FTP 分支写入的是 releaseFtpPath（ReleaseManage.doFtp 也读它），
+        // 这里读 releasePath 会踩到 SSH 分支的残留目录：新建 FTP 构建直接保存失败，
+        // 或复用了 SSH 的目录导致授权目录校验对不上
+        String releasePath = jsonObject.getString("releaseFtpPath");
         Assert.hasText(releasePath, I18nMessageUtil.get("i18n.ftp_directory.a790"));
         releasePath = FileUtil.normalize(releasePath);
         List<String> strings = StrUtil.splitTrim(releaseMethodDataId, StrUtil.COMMA);
@@ -657,11 +660,14 @@ public class BuildInfoController extends BaseServerController {
      *
      * @param jsonObject 配置信息
      */
-    private void formatProject(JSONObject jsonObject) {
+    private void formatProject(JSONObject jsonObject, HttpServletRequest request) {
         String releaseMethodDataId2Node = jsonObject.getString("releaseMethodDataId_2_node");
         String releaseMethodDataId2Project = jsonObject.getString("releaseMethodDataId_2_project");
 
         Assert.state(!StrUtil.hasEmpty(releaseMethodDataId2Node, releaseMethodDataId2Project), I18nMessageUtil.get("i18n.select_node_and_project.6021"));
+        // 发布目标节点必须属于当前工作空间：与 SSH / FTP / SSH 项目一致，
+        // 否则构建可把产物投递到他人工作空间的节点项目（含 clearOld 清空目录）
+        Assert.notNull(nodeService.getByKey(releaseMethodDataId2Node, request), I18nMessageUtil.get("i18n.node_does_not_exist.4ce4"));
         jsonObject.put("releaseMethodDataId", String.format("%s:%s", releaseMethodDataId2Node, releaseMethodDataId2Project));
         //
         String afterOpt = jsonObject.getString("afterOpt");

@@ -97,9 +97,40 @@ public class ServerWhitelist extends BaseJsonModel {
     public void checkAllowRemoteDownloadHost(String url) {
         Set<String> allowRemoteDownloadHost = this.getAllowRemoteDownloadHost();
         Assert.state(CollUtil.isNotEmpty(allowRemoteDownloadHost), I18nMessageUtil.get("i18n.remote_addresses_not_configured.275e"));
-        List<String> collect = allowRemoteDownloadHost.stream()
-            .filter(s -> StrUtil.startWith(url, s))
-            .collect(Collectors.toList());
-        Assert.state(CollUtil.isNotEmpty(collect), I18nMessageUtil.get("i18n.disallowed_download.06a3"));
+        boolean allow = allowRemoteDownloadHost.stream().anyMatch(s -> matchRemoteDownloadHost(url, s));
+        Assert.state(allow, I18nMessageUtil.get("i18n.disallowed_download.06a3"));
+    }
+
+    /**
+     * 判断下载地址是否命中一条白名单。
+     * <p>
+     * 只做字符串前缀匹配会被绕过：白名单 {@code http://allowed.example} 下，
+     * {@code http://allowed.example.evil/}（子域拼接）与 {@code http://allowed.example@evil/}（userinfo）
+     * 都能通过前缀校验却请求到攻击者主机（SSRF）。因此命中后还要求主机部分之后紧跟路径/查询分隔符或结尾。
+     *
+     * @param url   下载地址
+     * @param allow 白名单条目
+     * @return true 表示允许
+     */
+    static boolean matchRemoteDownloadHost(String url, String allow) {
+        String target = StrUtil.trimToEmpty(url);
+        String base = StrUtil.trimToEmpty(allow);
+        if (StrUtil.isEmpty(target) || StrUtil.isEmpty(base)) {
+            return false;
+        }
+        if (!StrUtil.startWithIgnoreCase(target, base)) {
+            return false;
+        }
+        if (StrUtil.endWith(base, StrUtil.SLASH)) {
+            // 白名单已写到路径边界，前缀命中即可
+            return true;
+        }
+        String rest = StrUtil.subSuf(target, base.length());
+        if (StrUtil.isEmpty(rest)) {
+            return true;
+        }
+        // 主机之后必须是路径/查询/锚点分隔符，才算同一个 host
+        char first = rest.charAt(0);
+        return first == '/' || first == '?' || first == '#';
     }
 }

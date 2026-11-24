@@ -21,7 +21,6 @@ import org.dromara.jpom.configuration.MonitorConfig;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import oshi.hardware.*;
-import oshi.software.os.FileSystem;
 import oshi.software.os.NetworkParams;
 import oshi.software.os.OSFileStore;
 import oshi.software.os.OperatingSystem;
@@ -30,8 +29,10 @@ import oshi.util.Util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -50,6 +51,136 @@ public class OshiUtils {
     static {
         // 解决Oshi获取CPU使用率与Windows任务管理器显示不匹配的问题
         GlobalConfig.set(GlobalConfig.OSHI_OS_WINDOWS_CPU_UTILITY, true);
+    }
+
+    /**
+     * 不代表本地存储的伪文件系统（macOS 的 devfs、automount 等），统计时忽略。
+     */
+    private static final List<String> PSEUDO_FILE_STORE_TYPES = Arrays.asList("devfs", "autofs", "nullfs");
+
+    /**
+     * 本地存储文件系统白名单，必须与 Go 插件端 {@code localFilesystemTypes}（host_linux.go）保持一致。
+     * <p>
+     * 用白名单而不是黑名单：tmpfs 是内存、cifs/nfs/smbfs 是远端、squashfs（snap）互相重复，
+     * 逐个累加会让「硬盘」总量远大于真实磁盘（实测 Linux 上 tmpfs + 4 个 cifs 把 1.27 TB 算成 17.65 TB），
+     * 而 Go 插件端一直按白名单统计，双端会给出差一个数量级的数字（AGENTS.md §0.13）。
+     */
+    private static final Set<String> LOCAL_FILE_STORE_TYPES = new HashSet<>(Arrays.asList(
+        "ext2", "ext3", "ext4", "xfs", "btrfs", "zfs", "f2fs", "jfs", "reiserfs",
+        "vfat", "fat", "fat32", "ntfs", "ntfs3", "exfat", "iso9660", "udf",
+        "hfs", "hfsplus", "apfs", "ufs", "zfs_member"));
+
+    /**
+     * 是否为 Windows 家族（OSHI {@link OperatingSystem#getFamily()} 取值为 {@code Windows 10/11} 等）。
+     *
+     * @param osFamily 操作系统家族
+     * @return true 表示 Windows
+     */
+    static boolean isWindowsFamily(String osFamily) {
+        return StrUtil.startWithIgnoreCase(StrUtil.trimToEmpty(osFamily), "win");
+    }
+
+    /**
+     * 是否为 macOS 家族（OSHI 取值为 {@code macOS}，历史版本为 {@code Mac OS X}，统一按前缀判断）。
+     *
+     * @param osFamily 操作系统家族
+     * @return true 表示 macOS
+     */
+    static boolean isMacFamily(String osFamily) {
+        return StrUtil.startWithIgnoreCase(StrUtil.trimToEmpty(osFamily), "mac");
+    }
+
+    /**
+     * 归一挂载点写法：去空白、去尾部多余斜杠（根目录保持 {@code /}）。
+     *
+     * @param mount 挂载点
+     * @return 归一后的挂载点，空值返回空串
+     */
+    static String normalizeMountPoint(String mount) {
+        String mountPoint = StrUtil.trimToEmpty(mount);
+        while (mountPoint.length() > 1 && mountPoint.endsWith("/")) {
+            mountPoint = StrUtil.subPre(mountPoint, mountPoint.length() - 1);
+        }
+        return mountPoint;
+    }
+
+    /**
+     * 判断一个挂载点是否计入文件系统统计（总量、占用率、文件系统列表）。
+     * <p>
+     * 规则（与 Go 插件端同口径）：
+     * <ol>
+     *     <li>Windows：保持历史行为不做类型过滤（RAW、断连映射盘的文件系统类型可能为空）；
+     *     <li>macOS：APFS 同一容器会挂载多个卷（/、/System/Volumes/Data、Preboot、Update、VM 等），
+     *     每个卷 statvfs 返回的都是「容器总容量」，逐个累加会把同一块盘算成好几倍
+     *     （实测 Mac mini M4：实际 494.38 GB 被算成 2.70 TB，即 6 个同容器卷之和），
+     *     因此跳过 /System/Volumes/* 这类同容器伪卷；
+     *     <li>其它平台（Linux 等）：只统计本地存储白名单内的文件系统，排除 tmpfs 与网络盘。
+     * </ol>
+     *
+     * @param osFamily 操作系统家族 {@link OperatingSystem#getFamily()}
+     * @param mount    挂载点
+     * @param type     文件系统类型
+     * @return true 表示计入统计
+     */
+    static boolean shouldCountFileStore(String osFamily, String mount, String type) {
+        String mountPoint = normalizeMountPoint(mount);
+        if (StrUtil.isEmpty(mountPoint)) {
+            return false;
+        }
+        if (isWindowsFamily(osFamily)) {
+            return true;
+        }
+        String fsType = StrUtil.trimToEmpty(type).toLowerCase();
+        if (StrUtil.isEmpty(fsType) || PSEUDO_FILE_STORE_TYPES.contains(fsType)) {
+            return false;
+        }
+        if (isMacFamily(osFamily)
+            && (StrUtil.equals(mountPoint, "/System/Volumes") || StrUtil.startWith(mountPoint, "/System/Volumes/"))) {
+            return false;
+        }
+        return LOCAL_FILE_STORE_TYPES.contains(fsType);
+    }
+
+    /**
+     * 过滤并去重文件系统列表（纯函数，便于单测直接断言真实夹具）。
+     *
+     * @param raw      原始文件系统列表
+     * @param osFamily 操作系统家族
+     * @return 参与统计的文件系统
+     */
+    static List<OSFileStore> filterFileStores(List<OSFileStore> raw, String osFamily) {
+        List<OSFileStore> result = new ArrayList<>();
+        if (raw == null) {
+            return result;
+        }
+        boolean windows = isWindowsFamily(osFamily);
+        Set<String> seen = new HashSet<>();
+        for (OSFileStore fileStore : raw) {
+            if (!shouldCountFileStore(osFamily, fileStore.getMount(), fileStore.getType())) {
+                continue;
+            }
+            String key = normalizeMountPoint(fileStore.getMount());
+            if (windows) {
+                // Windows 挂载点大小写不敏感（C:\ 与 c:\ 是同一个盘）
+                key = StrUtil.replace(key, "\\", "/").toLowerCase();
+            }
+            if (!seen.add(key)) {
+                continue;
+            }
+            result.add(fileStore);
+        }
+        return result;
+    }
+
+    /**
+     * 获取参与统计的文件系统：已剔除伪文件系统、非本地存储与 macOS 同容器伪卷，并按挂载点去重。
+     * 总量、占用率与文件系统列表必须共用本方法，避免三处各算一遍。
+     *
+     * @return 文件系统列表
+     */
+    public static List<OSFileStore> getStatFileStores() {
+        OperatingSystem os = OshiUtil.getOs();
+        return filterFileStores(os.getFileSystem().getFileStores(), os.getFamily());
     }
 
     /**
@@ -90,8 +221,7 @@ public class OshiUtils {
         jsonObject.put("osVirtualMax", virtualMemory.getVirtualMax());
         double[] systemLoadAverage = processor.getSystemLoadAverage(3);
         jsonObject.put("osLoadAverage", systemLoadAverage);
-        FileSystem fileSystem = os.getFileSystem();
-        List<OSFileStore> fileStores = fileSystem.getFileStores();
+        List<OSFileStore> fileStores = getStatFileStores();
         long total = fileStores.stream().mapToLong(OSFileStore::getTotalSpace).sum();
         jsonObject.put("osFileStoreTotal", total);
         //
@@ -127,8 +257,7 @@ public class OshiUtils {
             jsonObject.put("virtualMemory", NumberUtil.div(virtualMemory.getVirtualInUse(), virtualMax, 2) * 100);
         }
         //
-        FileSystem fileSystem = OshiUtil.getOs().getFileSystem();
-        List<OSFileStore> fileStores = fileSystem.getFileStores();
+        List<OSFileStore> fileStores = getStatFileStores();
         long total = 0, used = 0;
         for (OSFileStore fs : fileStores) {
             total += fs.getTotalSpace();
@@ -233,8 +362,7 @@ public class OshiUtils {
      * @return list
      */
     public static List<JSONObject> fileStores() {
-        FileSystem fileSystem = OshiUtil.getOs().getFileSystem();
-        List<OSFileStore> fileStores = fileSystem.getFileStores();
+        List<OSFileStore> fileStores = getStatFileStores();
         return fileStores.stream().map(osFileStore -> {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("name", osFileStore.getName());

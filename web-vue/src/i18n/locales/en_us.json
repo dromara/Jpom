@@ -3028,5 +3028,6 @@
   "i18n_build_version_keep_count_help": "3 recommended; empty or 0 keeps 3",
   "i18n_build_release_fail_fast": "Abort on target failure",
   "i18n_build_release_fail_fast_help": "When enabled, publishing stops at the first failed target; when disabled, remaining targets are still published (a failed target still marks the release as failed). Only a missing target, connection or upload error counts as a failure; a non-zero exit code from the post-release script/restart is still only logged.",
-  "i18n_build_ssh_project_missing": "(the selected SSH project no longer exists or is not in the current workspace; please select again)"
+  "i18n_build_ssh_project_missing": "(the selected SSH project no longer exists or is not in the current workspace; please select again)",
+  "i18n_ee992d9744": "Global workspace: "
 }

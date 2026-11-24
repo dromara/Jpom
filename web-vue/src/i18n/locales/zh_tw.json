@@ -3028,5 +3028,6 @@
 	"i18n_c845ff5941": "快速回滾",
 	"i18n_ddf32c340f": "發佈時保留完整版本快照，支持快速回滾",
 	"i18n_fe86275d4d": "版本管理",
-	"i18n_f971771775": "版本快照未開啟，請在插件端配置 jpom.project.version-count 或專案 dsl 的 file.versionCount"
+	"i18n_f971771775": "版本快照未開啟，請在插件端配置 jpom.project.version-count 或專案 dsl 的 file.versionCount",
+  "i18n_ee992d9744": "全域性工作空間："
 }

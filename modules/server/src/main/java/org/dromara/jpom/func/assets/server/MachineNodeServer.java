@@ -123,7 +123,11 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
     }
 
     /**
-     * 清理不应回显给客户端的敏感字段（授权摘要）
+     * 清理不应回显给客户端的敏感字段（插件端通讯凭据与登录口令）
+     * <p>
+     * 列表页与详情页（{@code /node/machine-info}）必须共用本方法：
+     * {@code authorizeToken} 等价于插件端通讯口令、{@code jpomPassword} 是机器登录口令，
+     * 一旦下发到浏览器，任意登录用户即可直接调用插件端接口。
      *
      * @param list 机器列表
      */
@@ -131,7 +135,10 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         if (CollUtil.isEmpty(list)) {
             return;
         }
-        list.forEach(item -> item.setAuthorizeToken(null));
+        list.forEach(item -> {
+            item.setAuthorizeToken(null);
+            item.setJpomPassword(null);
+        });
     }
 
     @Override

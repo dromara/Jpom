@@ -26,6 +26,7 @@ import org.dromara.jpom.model.enums.BuildReleaseMethod;
 import org.dromara.jpom.model.enums.BuildStatus;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.IStatusRecover;
+import org.dromara.jpom.service.build.NodeBuildVersionService;
 import org.dromara.jpom.service.ITriggerToken;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.dromara.jpom.util.StringUtil;
@@ -98,9 +99,14 @@ public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> imple
     @Override
     public int delByKey(String keyValue, HttpServletRequest request) {
         int delByKey = super.delByKey(keyValue, request);
+        // 定时任务 id 是「build:业务主键」（见 checkCron），不能用受影响行数（恒为 0/1），
+        // 否则旧任务残留：删除构建后仍按 cron 触发并持续抛异常，极端情况下还会误删 id=1 的任务
+        CronUtils.remove("build:" + keyValue);
         if (delByKey > 0) {
-            String taskId = "build:" + delByKey;
-            CronUtils.remove(taskId);
+            // 清理该构建留下的节点版本记录（NODE_BUILD_VERSION 没有独立的删除入口）。
+            // 不清理时工作空间预检一直判定「存在关联数据」，该工作空间永远删不掉。
+            NodeBuildVersionService nodeBuildVersionService = SpringUtil.getBean(NodeBuildVersionService.class);
+            nodeBuildVersionService.delByWorkspace(request, entity -> entity.set("buildDataId", keyValue));
         }
         return delByKey;
     }

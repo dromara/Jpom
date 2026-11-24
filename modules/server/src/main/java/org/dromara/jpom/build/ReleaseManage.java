@@ -971,6 +971,12 @@ public class ReleaseManage {
         logRecorder.system(I18nMessageUtil.get("i18n.start_executing_distribution_package.a2cc"));
         OutGivingModel.Status status = statusFuture.get();
         logRecorder.system(I18nMessageUtil.get("i18n.distribute_result.a230"), status.getDesc());
+        if (status == OutGivingModel.Status.FAIL) {
+            // 与 SSH / SSH 项目 / FTP 同口径：分发失败判定本次构建失败，避免「构建成功但产物没发出去」
+            String message = StrUtil.format(I18nMessageUtil.get("i18n.distribute_result.a230"), status.getDesc());
+            logRecorder.systemError(message);
+            throw new JpomRuntimeException(message);
+        }
     }
 
     /**
