@@ -1,12 +1,12 @@
-///
-/// Copyright (c) 2019 Of Him Code Technology Studio
-/// Jpom is licensed under Mulan PSL v2.
-/// You can use this software according to the terms and conditions of the Mulan PSL v2.
-/// You may obtain a copy of Mulan PSL v2 at:
-/// 			http://license.coscl.org.cn/MulanPSL2
-/// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-/// See the Mulan PSL v2 for more details.
-///
+/*
+ * Copyright (c) 2019 Of Him Code Technology Studio
+ * Jpom is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ * 			http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ */
 
 import { t } from '@/i18n'
 import axios from '@/api/config'
@@ -60,7 +60,9 @@ export const statusMap = {
   1: t('i18n_fd6e80f1e0'),
   2: t('i18n_c18455fbe3'),
   3: t('i18n_c5bbaed670'),
-  4: t('i18n_a14da34559')
+  4: t('i18n_a14da34559'),
+  // 超过 3 个心跳周期没有刷新检测结果
+  5: t('i18n_863e74ad72')
 }
 
 // 查看机器关联节点
@@ -131,5 +133,22 @@ export function machineSearch(data) {
     url: '/system/assets/machine/search',
     method: 'get',
     params: data
+  })
+}
+
+// 反向隧道在线机器（机器 ID 集合）：用于列表展示通讯方式
+export function tunnelOnlineMachines() {
+  return axios({
+    url: '/tunnel/online',
+    method: 'get'
+  })
+}
+
+// 指定机器是否通过反向隧道在线
+export function tunnelMachineStatus(params) {
+  return axios({
+    url: '/tunnel/status',
+    method: 'get',
+    params: params
   })
 }

@@ -20,6 +20,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONWriter;
 import i8n.api.VolcTranslateApiTest;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -30,6 +31,8 @@ import java.util.stream.Collectors;
  * @author bwcx_jzy
  * @since 2024/6/17
  */
+@Deprecated
+@Ignore("i18n 工具链已弃用（2026-11-18）：前端 i18n 翻译脚本（外部 API），禁止再运行")
 public class TranslateWebI18nTest {
 
     Map<String, Object> waitMap = new HashMap<>();

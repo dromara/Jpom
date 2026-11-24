@@ -1,3 +1,14 @@
+<!--
+
+    Copyright (c) 2019 Of Him Code Technology Studio
+    Jpom is licensed under Mulan PSL v2.
+    You can use this software according to the terms and conditions of the Mulan PSL v2.
+    You may obtain a copy of Mulan PSL v2 at:
+    			http://license.coscl.org.cn/MulanPSL2
+    THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+    See the Mulan PSL v2 for more details.
+
+-->
 <template>
   <div>
     <!-- 布局 -->
@@ -13,6 +24,9 @@
               </a-button>
               <a-button size="small" type="primary" @click="backupList">
                 {{ $t('i18n_9014d6d289') }}
+              </a-button>
+              <a-button size="small" type="primary" @click="versionList">
+                {{ $t('i18n_fe86275d4d') }}
               </a-button>
             </a-space>
           </div>
@@ -488,6 +502,24 @@
     >
       <projectFileBackup v-if="backupListVisible" :node-id="nodeId" :project-id="projectId"></projectFileBackup>
     </CustomModal>
+    <!-- 版本快照（构建发布生成，支持直接回滚） -->
+    <CustomModal
+      v-if="versionListVisible"
+      v-model:open="versionListVisible"
+      destroy-on-close
+      width="80vw"
+      height="80vh"
+      :title="$t('i18n_fe86275d4d')"
+      :footer="null"
+      :mask-closable="true"
+      @cancel="
+        () => {
+          loadData()
+        }
+      "
+    >
+      <projectFileVersion v-if="versionListVisible" :node-id="nodeId" :project-id="projectId"></projectFileVersion>
+    </CustomModal>
   </div>
 </template>
 <script>
@@ -516,12 +548,14 @@ import {
 } from '@/utils/const'
 import codeEditor from '@/components/codeEditor'
 import projectFileBackup from './project-file-backup.vue'
+import projectFileVersion from './project-file-version.vue'
 import { uploadPieces } from '@/utils/upload-pieces'
 
 export default {
   components: {
     codeEditor,
-    projectFileBackup
+    projectFileBackup,
+    projectFileVersion
   },
   inject: ['globalLoading'],
   props: {
@@ -560,6 +594,7 @@ export default {
       uploadRemoteFileVisible: false,
       editFileVisible: false,
       backupListVisible: false,
+      versionListVisible: false,
       successSize: 0,
       fileContent: '',
       treeReplaceFields: {
@@ -616,7 +651,7 @@ export default {
         {
           title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
-          width: '180px',
+          width: '1%',
           align: 'center',
           fixed: 'right'
         }
@@ -1283,6 +1318,9 @@ export default {
       })
     },
     // 查看备份列表
+    versionList() {
+      this.versionListVisible = true
+    },
     backupList() {
       this.backupListVisible = true
     },

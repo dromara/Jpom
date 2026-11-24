@@ -11,13 +11,18 @@ package org.dromara.jpom.common.update;
 
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import org.dromara.jpom.util.PlatformUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Locale;
+import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
@@ -105,6 +110,53 @@ public final class AgentPackageResolver {
     }
 
     /**
+     * 构建节点能力标识（Go 插件端 /info manifest.capabilities 中出现）
+     */
+    public static final String CAPABILITY_BUILD = "build";
+
+    /**
+     * 读取节点声明的能力集合
+     * <p>
+     * 老版本插件端没有该字段，返回空集合（等价于不具备任何可选能力），
+     * 避免用版本号比较判断能力。
+     *
+     * @param infoData /info 响应的 data
+     * @return 小写能力集合，永不为 null
+     */
+    public static Set<String> resolveCapabilities(JSONObject infoData) {
+        JSONObject manifest = manifest(infoData);
+        if (manifest == null) {
+            return Collections.emptySet();
+        }
+        JSONArray array = manifest.getJSONArray("capabilities");
+        if (array == null || array.isEmpty()) {
+            return Collections.emptySet();
+        }
+        Set<String> capabilities = new LinkedHashSet<>();
+        array.forEach(item -> {
+            if (item != null) {
+                String value = StrUtil.trim(StrUtil.toStringOrNull(item));
+                if (StrUtil.isNotEmpty(value)) {
+                    capabilities.add(value.toLowerCase(Locale.ROOT));
+                }
+            }
+        });
+        return capabilities;
+    }
+
+    /**
+     * 节点是否具备指定能力
+     *
+     * @param infoData   /info 响应的 data
+     * @param capability 能力标识
+     * @return true 具备
+     */
+    public static boolean hasCapability(JSONObject infoData, String capability) {
+        String value = StrUtil.emptyToDefault(capability, StrUtil.EMPTY).toLowerCase(Locale.ROOT);
+        return resolveCapabilities(infoData).contains(value);
+    }
+
+    /**
      * 节点当前版本号
      *
      * @param infoData /info 响应的 data
@@ -181,20 +233,7 @@ public final class AgentPackageResolver {
      * @return 规范化平台（小写、arch 别名归一），非法格式返回 null
      */
     public static String normalizePlatform(String platform) {
-        if (StrUtil.isBlank(platform)) {
-            return null;
-        }
-        String value = StrUtil.trim(platform).toLowerCase(Locale.ROOT);
-        int index = value.indexOf('/');
-        if (index <= 0 || index >= value.length() - 1) {
-            return null;
-        }
-        String os = normalizeOs(value.substring(0, index));
-        String arch = normalizeArch(value.substring(index + 1));
-        if (StrUtil.isBlank(os) || StrUtil.isBlank(arch)) {
-            return null;
-        }
-        return os + "/" + arch;
+        return PlatformUtil.normalizePlatform(platform);
     }
 
     /**
@@ -204,21 +243,7 @@ public final class AgentPackageResolver {
      * @return 规范化系统名（linux/windows/darwin 等），无法识别返回 null
      */
     public static String normalizeOs(String osName) {
-        if (StrUtil.isBlank(osName)) {
-            return null;
-        }
-        String os = StrUtil.trim(osName).toLowerCase(Locale.ROOT);
-        if ("linux".equals(os)) {
-            return "linux";
-        }
-        if ("windows".equals(os) || "win".equals(os) || "win32".equals(os)) {
-            return "windows";
-        }
-        if ("darwin".equals(os) || "mac".equals(os) || "macos".equals(os) || "mac os x".equals(os) || "osx".equals(os)) {
-            return "darwin";
-        }
-        // 其他平台保留小写原值（仍做精确比较，避免把未知系统误判为不支持）
-        return os.matches("[a-z0-9]+") ? os : null;
+        return PlatformUtil.normalizeOs(osName);
     }
 
     /**
@@ -228,20 +253,7 @@ public final class AgentPackageResolver {
      * @return 规范化架构（amd64/arm64 等），无法识别返回 null
      */
     public static String normalizeArch(String arch) {
-        if (StrUtil.isBlank(arch)) {
-            return null;
-        }
-        String value = StrUtil.trim(arch).toLowerCase(Locale.ROOT);
-        if ("x86_64".equals(value) || "x64".equals(value) || "amd64".equals(value)) {
-            return "amd64";
-        }
-        if ("aarch64".equals(value) || "arm64v8".equals(value) || "arm64".equals(value)) {
-            return "arm64";
-        }
-        if ("x86".equals(value) || "i386".equals(value) || "i686".equals(value) || "386".equals(value)) {
-            return "386";
-        }
-        return value.matches("[a-z0-9_]+") ? value : null;
+        return PlatformUtil.normalizeArch(arch);
     }
 
     /**

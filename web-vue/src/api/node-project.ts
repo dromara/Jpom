@@ -1,12 +1,12 @@
-///
-/// Copyright (c) 2019 Of Him Code Technology Studio
-/// Jpom is licensed under Mulan PSL v2.
-/// You can use this software according to the terms and conditions of the Mulan PSL v2.
-/// You may obtain a copy of Mulan PSL v2 at:
-/// 			http://license.coscl.org.cn/MulanPSL2
-/// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-/// See the Mulan PSL v2 for more details.
-///
+/*
+ * Copyright (c) 2019 Of Him Code Technology Studio
+ * Jpom is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ * 			http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ */
 
 /**
  * 节点管理 api
@@ -296,6 +296,24 @@ export function deleteProjectFile(params) {
 export function getProjectLogSize(params) {
   return axios({
     url: '/node/manage/log/logSize',
+    method: 'post',
+    data: params,
+    headers: {
+      loading: 'no'
+    }
+  })
+}
+
+/**
+ * 项目可查看的运行日志文件列表（DSL 项目 config.log 配置）
+ * @param {
+ *  nodeId: 节点 ID
+ *  id: 项目 ID
+ * } params
+ */
+export function getProjectLogList(params) {
+  return axios({
+    url: '/node/manage/log/logList',
     method: 'post',
     data: params,
     headers: {

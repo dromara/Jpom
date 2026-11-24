@@ -1,0 +1,15 @@
+tableName,name,type,len,defaultValue,notNull,primaryKey,comment,tableComment
+SSH_PROJECT_EXEC_LOG,id,String,50,,true,true,id,SSH 项目执行审计
+SSH_PROJECT_EXEC_LOG,createTimeMillis,Long,,,false,false,数据创建时间,
+SSH_PROJECT_EXEC_LOG,modifyTimeMillis,Long,,,false,false,数据修改时间,
+SSH_PROJECT_EXEC_LOG,createUser,String,50,,false,false,创建人,
+SSH_PROJECT_EXEC_LOG,modifyUser,String,50,,false,false,修改人,
+SSH_PROJECT_EXEC_LOG,workspaceId,String,50,,true,false,所属工作空间,
+SSH_PROJECT_EXEC_LOG,projectId,String,50,,true,false,项目 id,
+SSH_PROJECT_EXEC_LOG,projectName,String,100,,false,false,项目名称,
+SSH_PROJECT_EXEC_LOG,machineSshId,String,50,,false,false,资产 ssh id,
+SSH_PROJECT_EXEC_LOG,hook,String,50,,false,false,执行的钩子,
+SSH_PROJECT_EXEC_LOG,exitCode,Integer,,,false,false,退出码,
+SSH_PROJECT_EXEC_LOG,cost,Long,,,false,false,耗时毫秒,
+SSH_PROJECT_EXEC_LOG,success,TINYINT,,0,false,false,是否成功{1，是，0 否},
+SSH_PROJECT_EXEC_LOG,message,String,500,,false,false,结果摘要,

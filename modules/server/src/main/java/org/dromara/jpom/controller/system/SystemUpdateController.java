@@ -28,6 +28,7 @@ import org.dromara.jpom.common.*;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.version.RemoteVersions;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
@@ -88,7 +89,8 @@ public class SystemUpdateController extends BaseServerController implements ILoa
         IJsonMessage<JSONObject> message = this.tryRequestMachine(machineId, request, NodeUrl.Info);
         return Optional.ofNullable(message).orElseGet(() -> {
             JpomManifest instance = JpomManifest.getInstance();
-            cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersion.cacheInfo();
+            // 展示与实际安装同源：缓存优先，缓存缺失时也会在线刷新一次（此前只读缓存，缓存为空即显示「已是最新版本」）
+            cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersions.infoForDisplay();
             //
             JSONObject jsonObject = new JSONObject();
             String auth = systemParametersServer.getConfig(JPOM_REMOTE_VERSION_AUTH, String.class);
@@ -104,7 +106,8 @@ public class SystemUpdateController extends BaseServerController implements ILoa
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<String> changeBetaRelease(String beta) {
         boolean betaBool = this.changeBetaRelease2(beta);
-        RemoteVersion.loadRemoteInfo();
+        // 切换发布渠道后立即刷新远端信息（失败自动重试 + 缓存兜底）
+        RemoteVersions.infoForRefresh();
         String isBeta = I18nMessageUtil.get("i18n.joined_beta_program.c4e2");
         String closeBeta = I18nMessageUtil.get("i18n.close_beta_plan_success.5a94");
         return JsonMessage.success(betaBool ? isBeta : closeBeta);
@@ -216,7 +219,8 @@ public class SystemUpdateController extends BaseServerController implements ILoa
                                                                    String machineId) {
         IJsonMessage<cn.keepbx.jpom.RemoteVersion> message = this.tryRequestMachine(machineId, request, NodeUrl.CHECK_VERSION);
         return Optional.ofNullable(message).orElseGet(() -> {
-            cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersion.loadRemoteInfo();
+            // 显式「检查更新」：在线刷新（失败自动重试）→ 缓存兜底，保持返回值语义不变
+            cn.keepbx.jpom.RemoteVersion remoteVersion = RemoteVersions.infoForRefresh();
             return JsonMessage.success("", remoteVersion);
         });
     }

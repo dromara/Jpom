@@ -8,6 +8,7 @@
 # See the Mulan PSL v2 for more details.
 #
 
+
 function getPid() {
   cygwin=false
   linux=false
@@ -54,7 +55,10 @@ free -k | grep -iv swap | awk -F ':' '{print $NF}' | awk -F ' ' '{for(i=1;i<=NF;
 export TERM=xterm
 top -b -n 1 -d.2 | grep -i 'cpu' | awk '{for(i=NR;i<=1;i++)print "cpu usage:"$2 }'
 # disk
-df -k | awk 'NR>1' | awk '/^\/dev/{print "disk info:"$1":"$2":"$3}'
+# macOS 的 APFS 同一容器会挂多个卷（/、/System/Volumes/Data、Preboot、VM…），
+# df 每个卷都报「容器总容量」，逐个累加会把同一块盘算成好几倍（实测 494GB 算成 2.70TB）
+# -P（POSIX 输出）：macOS 原生 df -k 会插入 iused/ifree 列，$6 不是挂载点，过滤会失效
+df -kP | awk 'NR>1' | awk '/^\/dev/ && $6 !~ /^\/System\/Volumes/ {print "disk info:"$1":"$2":"$3}'
 # jpom 相关
 jpom_agent_pid=$(getPid "${JPOM_AGENT_PID_TAG}")
 echo "jpom agent pid:$jpom_agent_pid"

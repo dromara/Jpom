@@ -70,6 +70,14 @@ web-vue/stats.html
 # 临时产物可随时删除；需要长期留存的开发文档请放到独立私有文档库（不随本仓提交）
 /.tmp/
 
+# ===== go-agent 黄金响应样本（私有测试资料，不入公开仓）=====
+# 采集设备真实响应并脱敏得到的样本含环境指纹，只放私有工作区 dev-scripts/go-agent/golden/；
+# 仓库内只保留纯合成夹具：internal/builder/testdata 的 AntPath parity 基线、
+# internal/projectfile/testdata 的 7z 穿越/符号链接安全用例。
+/go-agent/testdata/
+**/testdata/raw/
+go-agent-ref/
+
 # ===== 密钥 / 证书 / 本地凭据（开源仓库禁止提交）=====
 # 提交前请同时运行：bash script/check-sensitive.sh --all
 *.pem

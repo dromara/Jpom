@@ -1,3 +1,14 @@
+<!--
+
+    Copyright (c) 2019 Of Him Code Technology Studio
+    Jpom is licensed under Mulan PSL v2.
+    You can use this software according to the terms and conditions of the Mulan PSL v2.
+    You may obtain a copy of Mulan PSL v2 at:
+    			http://license.coscl.org.cn/MulanPSL2
+    THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+    See the Mulan PSL v2 for more details.
+
+-->
 <template>
   <div>
     <a-tabs type="card" default-active-key="1">
@@ -119,12 +130,12 @@
               </a-tag>
             </template>
             <template v-else-if="column.dataIndex === 'engine'">
-              <a-tag v-if="text === 'go'" color="blue">Go</a-tag>
-              <a-tag v-else-if="text === 'java'">Java</a-tag>
-              <span v-else>---</span>
+              <a-tag v-if="text === 'go'" color="green">{{ $t('i18n_11b8cdd4a6') }}</a-tag>
+              <a-tag v-else-if="text === 'java'" color="blue">{{ $t('i18n_ac0399d13b') }}</a-tag>
+              <span v-else>{{ $t('i18n_1622dc9b6b') }}</span>
             </template>
             <template v-else-if="column.dataIndex === 'platform'">
-              {{ record.engine === 'go' ? text || $t('i18n_7daad00d6a') : '---' }}
+              {{ text || $t('i18n_7daad00d6a') }}
             </template>
             <template v-else-if="column.dataIndex === 'updateStatus'">
               <div v-if="text && text.type === 'restarting'">
@@ -205,7 +216,8 @@ export default {
           ellipsis: true
         },
         {
-          title: this.$t('i18n_6c1b19dde4'),
+          // 与机器管理同一概念同一叫法：引擎（agent engine）统一展示为「插件端类型」
+          title: this.$t('i18n_084fca46ee'),
           dataIndex: 'engine',
           width: '80px',
           ellipsis: true
@@ -250,7 +262,7 @@ export default {
         {
           title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
-          width: '80px',
+          width: '1%',
 
           align: 'center',
           fixed: 'right'
@@ -338,14 +350,12 @@ export default {
             } else if (itemData.jarFile) {
               item.engine = /\.jar$/i.test(itemData.jarFile) ? 'java' : 'go'
             }
-            // 平台：优先 manifest.platform；旧版 Go 插件端只有 arch + osName 时按 Server 同口径映射
-            if (item.engine === 'go') {
-              item.platform = itemData.platform || ''
-              if (!item.platform && itemData.arch) {
-                const osMap = { linux: 'linux', windows: 'windows', 'mac os x': 'darwin' }
-                const os = osMap[(itemData.osName || '').toLowerCase()]
-                item.platform = os ? `${os}/${itemData.arch}` : ''
-              }
+            // 平台：优先 manifest.platform（Java/Go 插件端都上报）；旧版插件端只有 arch + osName 时按 Server 同口径映射
+            item.platform = itemData.platform || ''
+            if (!item.platform && itemData.arch) {
+              const osMap = { linux: 'linux', windows: 'windows', 'mac os x': 'darwin' }
+              const os = osMap[(itemData.osName || '').toLowerCase()]
+              item.platform = os ? `${os}/${itemData.arch}` : ''
             }
           } catch (e) {
             item.version = itemData
@@ -366,10 +376,14 @@ export default {
       })
     },
     initWebsocket(ids) {
-      if (this.socket) {
+      if (
+        this.socket &&
+        (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)
+      ) {
         this.initHeart(ids)
         return
       }
+      this.socket = null
       // if (!this.socket || this.socket.readyState !== this.socket.OPEN || this.socket.readyState !== this.socket.CONNECTING) {
       this.socket = new WebSocket(this.socketUrl)
       // }
@@ -430,7 +444,7 @@ export default {
       })
     },
     initHeart(ids) {
-      this.sendMsg('getNodeList:' + ids.join(','))
+      this.sendMsg('getNodeList:' + ids.join(','), undefined, true)
       this.getAgentVersion()
       // 创建心跳，防止掉线
       this.heart && clearInterval(this.heart)
@@ -462,13 +476,28 @@ export default {
     tableSelectionChange(selectedRowKeys) {
       this.tableSelections = selectedRowKeys
     },
-    sendMsg(command, params) {
-      this.socket.send(
+    sendMsg(command, params, silent = false) {
+      const socket = this.socket
+      if (!socket || socket.readyState !== WebSocket.OPEN) {
+        // 连接未建立/已断开时直接 send 会抛异常，用户点「更新」后没有任何反馈，这里显式提示并尝试重连
+        if (!silent) {
+          $notification.error({
+            message: `${this.$t('i18n_7030ff6470')}: ${this.$t('i18n_226a6f9cdd')}`
+          })
+        }
+        if (!socket || socket.readyState !== WebSocket.CONNECTING) {
+          this.socket = null
+          this.initWebsocket(this.list.map((item) => item.id))
+        }
+        return false
+      }
+      socket.send(
         JSON.stringify({
           command,
           params
         })
       )
+      return true
     },
     getNodeList() {
       this.loading = true
@@ -496,7 +525,7 @@ export default {
     //   this.updateList();
     // },
     getAgentVersion() {
-      this.sendMsg('getAgentVersion')
+      this.sendMsg('getAgentVersion', undefined, true)
     },
     getAgentVersionResult(data) {
       try {
@@ -587,11 +616,14 @@ export default {
         okText: this.$t('i18n_e83a256e4f'),
         cancelText: this.$t('i18n_625fb26b4b'),
         onOk: () => {
-          this.sendMsg('updateNode', {
-            ids: this.tableSelections,
-            protocol: this.temp.protocol
-          })
-          this.tableSelections = []
+          if (
+            this.sendMsg('updateNode', {
+              ids: this.tableSelections,
+              protocol: this.temp.protocol
+            })
+          ) {
+            this.tableSelections = []
+          }
         }
       })
     },
@@ -631,6 +663,9 @@ export default {
                 ...uploadData[0]
               }).then((res) => {
                 if (res.code === 200) {
+                  $notification.success({
+                    message: res.msg || this.$t('i18n_a7699ba731')
+                  })
                   this.getNodeList()
                 }
                 setTimeout(() => {
@@ -678,7 +713,7 @@ export default {
         engine = 'go'
         platform = this.temp.packagePlatform || ''
       }
-      const engineText = engine === 'go' ? 'Go' : 'Java'
+      const engineText = engine === 'go' ? this.$t('i18n_11b8cdd4a6') : this.$t('i18n_ac0399d13b')
       const platformText = engine === 'go' ? platform || this.$t('i18n_2a20de5e5a') : '---'
       const packageTypeText = engine === 'go' ? this.$t('i18n_baee195ca8') : this.$t('i18n_6fb5d67e27')
       const downloadSource = this.$t('i18n_917381e4a5')

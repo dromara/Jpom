@@ -1,12 +1,12 @@
-/*
- * Copyright (c) 2019 Of Him Code Technology Studio
- * Jpom is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- * 			http://license.coscl.org.cn/MulanPSL2
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- */
+//
+// Copyright (c) 2019 Of Him Code Technology Studio
+// Jpom is licensed under Mulan PSL v2.
+// You can use this software according to the terms and conditions of the Mulan PSL v2.
+// You may obtain a copy of Mulan PSL v2 at:
+// 			http://license.coscl.org.cn/MulanPSL2
+// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+// See the Mulan PSL v2 for more details.
+//
 
 package main
 
@@ -18,11 +18,13 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 	"time"
 
 	"github.com/dromara/Jpom/go-agent/internal/api"
 	"github.com/dromara/Jpom/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/tunnel"
 )
 
 var (
@@ -89,6 +91,48 @@ func main() {
 	go func() {
 		if err := srv.Serve(listener); err != nil && err != http.ErrServerClosed {
 			errCh <- err
+		}
+	}()
+
+	// 反向建连隧道：插件端主动连接服务端，服务端不需要能直连插件端端口
+	var tunnelClient *tunnel.Client
+	if settings := application.Config.Jpom.Tunnel; settings.Enabled() {
+		timeout := time.Duration(settings.TimeoutSeconds) * time.Second
+		if timeout <= 0 {
+			timeout = 30 * time.Second
+		}
+		local := tunnel.LoopbackAddr(application.ListenAddr())
+		client, tunnelErr := tunnel.New(tunnel.Options{
+			ServerURL:      settings.ServerURL,
+			MachineID:      settings.MachineID,
+			Key:            settings.Key,
+			AgentVersion:   version,
+			OS:             application.OsName(),
+			Arch:           runtime.GOARCH,
+			LocalHTTPBase:  "http://" + local,
+			LocalWSBase:    "ws://" + local,
+			Authorize:      application.Auth.Authorize,
+			AuthUser:       application.Auth.Name,
+			AuthToken:      application.Auth.Authorize,
+			MaxConcurrency: settings.MaxConcurrency,
+			Timeout:        timeout,
+			Logger:         application.Log(),
+		})
+		if tunnelErr != nil {
+			application.Log().Error("reverse tunnel disabled", "error", tunnelErr)
+		} else {
+			client.Start()
+			tunnelClient = client
+			pushCtx, pushCancel := context.WithCancel(context.Background())
+			defer pushCancel()
+			go runPushLoop(pushCtx, application, client, settings)
+			application.Log().Info("reverse tunnel starting",
+				"server", settings.ServerURL, "machine", settings.MachineID, "local", local)
+		}
+	}
+	defer func() {
+		if tunnelClient != nil {
+			tunnelClient.Stop()
 		}
 	}()
 

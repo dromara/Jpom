@@ -1,12 +1,12 @@
-/*
- * Copyright (c) 2019 Of Him Code Technology Studio
- * Jpom is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- * 			http://license.coscl.org.cn/MulanPSL2
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- */
+//
+// Copyright (c) 2019 Of Him Code Technology Studio
+// Jpom is licensed under Mulan PSL v2.
+// You can use this software according to the terms and conditions of the Mulan PSL v2.
+// You may obtain a copy of Mulan PSL v2 at:
+// 			http://license.coscl.org.cn/MulanPSL2
+// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+// See the Mulan PSL v2 for more details.
+//
 
 package sysinfo
 
@@ -41,8 +41,9 @@ func workspaceID(info map[string]any) string {
 
 // JpomInfo 对应 IndexController.getJpomInfo（/get-stat-info 的 jpomInfo 字段）。
 //
-// Go 端无 JVM，javaVersion 返回 Go 运行时版本，totalMemory/freeMemory 返回进程
-// 内存统计（字段名与类型保持与 Java 端一致：long 序列化为字符串）。
+// Go 端无 JVM：javaVersion 保持空（前端「JDK 版本」列只在 Java 节点有值，填 Go 版本会让
+// 那一列显示成 go1.25.x），Go 运行时版本放进新增的 runtimeVersion 字段（只增不改，旧服务端忽略）。
+// totalMemory/freeMemory 返回 Go 进程内存统计（字段名与类型保持与 Java 端一致：long 序列化为字符串）。
 func JpomInfo(a *app.App) map[string]any {
 	projects := readDataMap(a, "project.json")
 	scripts := readDataMap(a, "script.json")
@@ -68,7 +69,8 @@ func JpomInfo(a *app.App) map[string]any {
 	return map[string]any{
 		"javaVirtualCount": JavaProcessCount(),
 		"jpomManifest":     a.Manifest(),
-		"javaVersion":      runtime.Version(),
+		"javaVersion":      "",
+		"runtimeVersion":   runtime.Version(),
 		"totalMemory":      strconv.FormatUint(totalMemory, 10),
 		"freeMemory":       strconv.FormatUint(freeMemory, 10),
 		"projectCount":     len(projects),

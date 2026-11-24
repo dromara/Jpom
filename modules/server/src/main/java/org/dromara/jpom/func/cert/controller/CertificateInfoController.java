@@ -103,6 +103,9 @@ public class CertificateInfoController extends BaseServerController {
         listPage.each(certificateInfoModel -> {
             File file = certificateInfoService.getFilePath(certificateInfoModel);
             certificateInfoModel.setFileExists(!FileUtil.isEmpty(file));
+            // 证书私钥口令属于凭据，不能出现在列表响应里：只要有「证书列表」权限的账号（含只读用户）
+            // 原来都能直接读到明文 certPassword（BUGS B-012）
+            certificateInfoModel.setCertPassword(null);
         });
         return JsonMessage.success("", listPage);
     }
@@ -121,6 +124,8 @@ public class CertificateInfoController extends BaseServerController {
         listPage.each(certificateInfoModel -> {
             File file = certificateInfoService.getFilePath(certificateInfoModel);
             certificateInfoModel.setFileExists(!FileUtil.isEmpty(file));
+            // 同 list：口令不出服务端（BUGS B-012）
+            certificateInfoModel.setCertPassword(null);
         });
         return JsonMessage.success("", listPage);
     }
@@ -346,7 +351,6 @@ public class CertificateInfoController extends BaseServerController {
         ServerWhitelist configDeNewInstance = outGivingWhitelistService.getServerWhitelistData(request);
         List<String> whitelistServerOutGiving = configDeNewInstance.getOutGiving();
         Assert.state(AgentWhitelist.checkPath(whitelistServerOutGiving, releasePathParent), I18nMessageUtil.get("i18n.select_correct_project_path_or_no_auth_configured.366a"));
-        Assert.hasText(releasePathSecondary, I18nMessageUtil.get("i18n.publish_file_second_level_directory_required.2f65"));
         // 判断证书是否存在
         CertificateInfoModel model = certificateInfoService.getByKeyAndGlobal(id, request);
         File file = certificateInfoService.getFilePath(model);
@@ -361,7 +365,8 @@ public class CertificateInfoController extends BaseServerController {
             // 添加到文件中心
             String description = model.getSerialNumberStr() + Optional.ofNullable(model.getDescription()).map(s -> "," + s).orElse(StrUtil.EMPTY);
             String fileId = fileStorageService.addFile(zip, 3, certificateInfoService.getCheckUserWorkspace(request), description, null, 1);
-            String releasePath = FileUtil.normalize(releasePathParent + StrUtil.SLASH + releasePathSecondary);
+            // 与服务端其他发布入口共用同一处解析：二级目录必须落在已授权的父目录内
+            String releasePath = FileReleaseTaskService.resolveReleasePath(releasePathParent, releasePathSecondary);
             // 创建发布任务
             Map<String, String> env = new HashMap<>();
             env.put("CERT_SERIAL_NUMBER_STR", model.getSerialNumberStr());

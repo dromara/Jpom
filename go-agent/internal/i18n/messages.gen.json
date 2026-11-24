@@ -5478,10 +5478,10 @@
 "zh-TW": "maven 映象庫中沒有找到任何可用的 maven 版本"
 },
 "i18n.no_available_new_version_upgrade.d8f2": {
-"en-US": "No new version upgrade available: -1",
-"zh-CN": "没有可用的新版本升级:-1",
-"zh-HK": "沒有可用的新版本升級:-1",
-"zh-TW": "沒有可用的新版本升級:-1"
+"en-US": "No new version upgrade available",
+"zh-CN": "没有可用的新版本升级",
+"zh-HK": "沒有可用的新版本升級",
+"zh-TW": "沒有可用的新版本升級"
 },
 "i18n.no_branch_name.1879": {
 "en-US": "No branch name",
@@ -10475,17 +10475,125 @@
 "zh-HK": "{}未配置驗證方法：{}",
 "zh-TW": "{}未配置驗證方法：{}"
 },
+"i18n.version_baseline_created.2b6c": {
+"en-US": "Version baseline created for {} version {}",
+"zh-CN": "已生成版本基线 {} 版本 {}",
+"zh-HK": "已生成版本基線 {} 版本 {}",
+"zh-TW": "已生成版本基線 {} 版本 {}"
+},
 "i18n.version_config_info.7b29": {
 "en-US": "version configuration information",
 "zh-CN": "版本配置信息",
 "zh-HK": "版本配置信息",
 "zh-TW": "版本配置資訊"
 },
+"i18n.version_current_delete_forbidden.2e84": {
+"en-US": "The current version cannot be deleted",
+"zh-CN": "当前运行版本不能删除",
+"zh-HK": "當前運行版本不能刪除",
+"zh-TW": "當前運行版本不能刪除"
+},
+"i18n.version_id_required.0a3e": {
+"en-US": "Please select a version",
+"zh-CN": "请选择版本",
+"zh-HK": "請選擇版本",
+"zh-TW": "請選擇版本"
+},
 "i18n.version_increment_error.0157": {
 "en-US": "Version number increment error, no digital version number {}",
 "zh-CN": "版本号递增错误，没有数字版本号 {} ",
 "zh-HK": "版本號遞增錯誤，沒有數字版本號 {}",
 "zh-TW": "版本號遞增錯誤，沒有數字版本號 {}"
+},
+"i18n.version_meta_parse_error.6f18": {
+"en-US": "Parse version metadata failed: {}",
+"zh-CN": "版本元数据解析失败：{}",
+"zh-HK": "版本元數據解析失敗：{}",
+"zh-TW": "版本元資料解析失敗：{}"
+},
+"i18n.version_not_exists.5d90": {
+"en-US": "Version does not exist: ",
+"zh-CN": "版本不存在：",
+"zh-HK": "版本不存在：",
+"zh-TW": "版本不存在："
+},
+"i18n.version_project_file_empty.71d4": {
+"en-US": "Project file directory is empty, cannot create version snapshot",
+"zh-CN": "项目文件目录为空，无法生成版本快照",
+"zh-HK": "項目文件目錄為空，無法生成版本快照",
+"zh-TW": "專案檔案目錄為空，無法產生版本快照"
+},
+"i18n.version_restart_failed.6b05": {
+"en-US": "Version switched, but project restart failed: ",
+"zh-CN": "版本已切换，但项目重启失败：",
+"zh-HK": "版本已切換，但項目重啟失敗：",
+"zh-TW": "版本已切換，但專案重啟失敗："
+},
+"i18n.version_snapshot_commit_exception.f5b3": {
+"en-US": "Register version snapshot exception, quick rollback is unavailable for this release",
+"zh-CN": "登记版本快照异常，本次发布不提供快速回滚",
+"zh-HK": "登記版本快照異常，本次發布不提供快速回滾",
+"zh-TW": "登記版本快照異常，本次發布不提供快速回滾"
+},
+"i18n.version_snapshot_commit_failed.e4c1": {
+"en-US": "Register version snapshot failed, quick rollback is unavailable for this release: {}",
+"zh-CN": "登记版本快照失败，本次发布不提供快速回滚：{}",
+"zh-HK": "登記版本快照失敗，本次發布不提供快速回滾：{}",
+"zh-TW": "登記版本快照失敗，本次發布不提供快速回滾：{}"
+},
+"i18n.version_snapshot_commit_success.d2a8": {
+"en-US": "Version snapshot registered",
+"zh-CN": "已登记版本快照",
+"zh-HK": "已登記版本快照",
+"zh-TW": "已登記版本快照"
+},
+"i18n.version_snapshot_failed.7b2c": {
+"en-US": "Create version snapshot failed: ",
+"zh-CN": "版本快照失败：",
+"zh-HK": "版本快照失敗：",
+"zh-TW": "版本快照失敗："
+},
+"i18n.version_snapshot_prepare_exception.c3e5": {
+"en-US": "Prepare version snapshot exception, quick rollback is unavailable for this release",
+"zh-CN": "准备版本快照异常，本次发布不提供快速回滚",
+"zh-HK": "準備版本快照異常，本次發布不提供快速回滾",
+"zh-TW": "準備版本快照異常，本次發布不提供快速回滾"
+},
+"i18n.version_snapshot_prepare_failed.b8d2": {
+"en-US": "Prepare version snapshot failed, quick rollback is unavailable for this release: {}",
+"zh-CN": "准备版本快照失败，本次发布不提供快速回滚：{}",
+"zh-HK": "準備版本快照失敗，本次發布不提供快速回滾：{}",
+"zh-TW": "準備版本快照失敗，本次發布不提供快速回滾：{}"
+},
+"i18n.version_snapshot_prepare_success.a1f7": {
+"en-US": "Version snapshot prepared",
+"zh-CN": "已准备版本快照",
+"zh-HK": "已準備版本快照",
+"zh-TW": "已準備版本快照"
+},
+"i18n.version_switch_failed.9c31": {
+"en-US": "Switch version failed: ",
+"zh-CN": "版本切换失败：",
+"zh-HK": "版本切換失敗：",
+"zh-TW": "版本切換失敗："
+},
+"i18n.version_switch_rollback_failed.4a7e": {
+"en-US": "Switch version failed and restoring the original version also failed",
+"zh-CN": "版本切换失败，恢复原版本也失败",
+"zh-HK": "版本切換失敗，恢復原版本也失敗",
+"zh-TW": "版本切換失敗，恢復原版本也失敗"
+},
+"i18n.version_switch_success.2f70": {
+"en-US": "Version switched successfully",
+"zh-CN": "版本切换成功",
+"zh-HK": "版本切換成功",
+"zh-TW": "版本切換成功"
+},
+"i18n.version_verify_failed.d3a9": {
+"en-US": "File verification failed after switching version: ",
+"zh-CN": "版本切换后文件校验不一致：",
+"zh-HK": "版本切換後文件校驗不一致：",
+"zh-TW": "版本切換後檔案校驗不一致："
 },
 "i18n.wait_for_seconds.ff7b": {
 "en-US": "Execute wait {} seconds",
@@ -10600,5 +10708,12 @@
 "zh-CN": "yml 配置内容错误",
 "zh-HK": "yml 配置內容錯誤",
 "zh-TW": "yml 配置內容錯誤"
+}
+,
+"i18n.remote_version_unavailable.b7e1": {
+"en-US": "Unable to fetch remote version information (the download center is unreachable). Check the server network or proxy settings and retry; clicking \"Check for updates\" first may also refresh it",
+"zh-CN": "无法获取远端版本信息（无法连接下载中心），请检查服务器到下载中心的网络或代理后重试；也可先点「检查更新」刷新远端版本信息",
+"zh-HK": "無法獲取遠端版本資訊（無法連線下載中心），請檢查伺服器到下載中心的網路或代理後重試；也可先點「檢查更新」刷新遠端版本資訊",
+"zh-TW": "無法取得遠端版本資訊（無法連線下載中心），請檢查伺服器到下載中心的網路或代理後重試；也可先點「檢查更新」刷新遠端版本資訊"
 }
 }

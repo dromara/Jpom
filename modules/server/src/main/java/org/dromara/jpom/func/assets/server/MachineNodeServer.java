@@ -22,7 +22,9 @@ import cn.hutool.db.Entity;
 import cn.hutool.extra.servlet.ServletUtil;
 import cn.keepbx.jpom.event.IAsyncLoad;
 import cn.keepbx.jpom.model.JsonMessage;
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseServerController;
@@ -32,19 +34,28 @@ import org.dromara.jpom.common.JpomManifest;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.update.AgentEngine;
+import org.dromara.jpom.common.update.AgentPackageResolver;
 import org.dromara.jpom.configuration.NodeConfig;
 import org.dromara.jpom.cron.CronUtils;
 import org.dromara.jpom.exception.AgentAuthorizeException;
 import org.dromara.jpom.exception.AgentException;
 import org.dromara.jpom.func.assets.AssetsExecutorPoolService;
+import org.dromara.jpom.func.assets.model.MachineConnectMode;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.assets.model.MachineNodeStatLogModel;
 import org.dromara.jpom.func.system.service.ClusterInfoService;
+import org.dromara.jpom.func.tunnel.TunnelPushService;
+import org.dromara.jpom.transport.tunnel.ws.TunnelChannelRegistry;
+import org.springframework.beans.factory.ObjectProvider;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.service.h2db.BaseDbService;
 import org.dromara.jpom.service.node.NodeService;
 import org.dromara.jpom.system.ServerConfig;
+import org.dromara.jpom.transport.INodeInfo;
+import org.dromara.jpom.transport.IUrlItem;
+import org.dromara.jpom.transport.TransportServerFactory;
 import org.dromara.jpom.system.db.InitDb;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -54,7 +65,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -72,24 +85,65 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
     private final MachineNodeStatLogServer machineNodeStatLogServer;
     private final ClusterInfoService clusterInfoService;
     private final AssetsExecutorPoolService assetsExecutorPoolService;
+    private final TunnelPushService tunnelPushService;
+    /**
+     * 反向隧道在线注册表（延迟获取：TunnelChannelRegistry 与本服务存在装配先后关系，直接注入会形成循环依赖）
+     */
+    private final ObjectProvider<TunnelChannelRegistry> tunnelChannelRegistryProvider;
+    /**
+     * 推送模式节点连续未上报状态的次数（达到阈值自动回退拉取，避免插件端回退版本后永久异常）
+     */
+    private final Map<String, Integer> pushMissCount = new ConcurrentHashMap<>();
+    /**
+     * 每个节点最近一次已落库的推送：避免同一份推送在多个心跳周期里重复写统计日志
+     */
+    private final PushSnapshotTracker pushSnapshotTracker = new PushSnapshotTracker();
 
     private static final String TASK_ID = "system_monitor_node";
+
+    /**
+     * 连续多少个心跳周期没有推送即回退拉取
+     */
+    private static final int PUSH_MISS_LIMIT = 3;
 
     public MachineNodeServer(NodeService nodeService,
                              ServerConfig serverConfig,
                              MachineNodeStatLogServer machineNodeStatLogServer,
                              ClusterInfoService clusterInfoService,
-                             AssetsExecutorPoolService assetsExecutorPoolService) {
+                             AssetsExecutorPoolService assetsExecutorPoolService,
+                             TunnelPushService tunnelPushService,
+                             ObjectProvider<TunnelChannelRegistry> tunnelChannelRegistryProvider) {
         this.nodeService = nodeService;
         this.nodeConfig = serverConfig.getNode();
         this.machineNodeStatLogServer = machineNodeStatLogServer;
         this.clusterInfoService = clusterInfoService;
         this.assetsExecutorPoolService = assetsExecutorPoolService;
+        this.tunnelPushService = tunnelPushService;
+        this.tunnelChannelRegistryProvider = tunnelChannelRegistryProvider;
+    }
+
+    /**
+     * 清理不应回显给客户端的敏感字段（插件端通讯凭据与登录口令）
+     * <p>
+     * 列表页与详情页（{@code /node/machine-info}）必须共用本方法：
+     * {@code authorizeToken} 等价于插件端通讯口令、{@code jpomPassword} 是机器登录口令，
+     * 一旦下发到浏览器，任意登录用户即可直接调用插件端接口。
+     *
+     * @param list 机器列表
+     */
+    public void clearSensitive(java.util.List<MachineNodeModel> list) {
+        if (CollUtil.isEmpty(list)) {
+            return;
+        }
+        list.forEach(MachineNodeModel::clearSensitive);
     }
 
     @Override
     protected void fillSelectResult(MachineNodeModel data) {
-        Optional.ofNullable(data).ifPresent(machineNodeModel -> machineNodeModel.setJpomPassword(null));
+        Optional.ofNullable(data).ifPresent(machineNodeModel -> {
+            machineNodeModel.setJpomPassword(null);
+            machineNodeModel.setAuthorizeToken(null);
+        });
     }
 
     @Override
@@ -192,32 +246,180 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
 
     @Override
     public void run() {
-        Entity entity = new Entity();
-        if (clusterInfoService.isMultiServer()) {
-            String linkGroup = clusterInfoService.getCurrent().getLinkGroup();
-            List<String> linkGroups = StrUtil.splitTrim(linkGroup, StrUtil.COMMA);
-            if (CollUtil.isEmpty(linkGroups)) {
-                log.warn(I18nMessageUtil.get("i18n.cluster_not_bound_to_group_for_node_monitoring.1586"));
-                return;
-            }
-            entity.set("groupName", linkGroups);
-        }
-        entity.set("transportMode", 0);
         int heartSecond = nodeConfig.getHeartSecond();
+        // 任务统计放在最前面：即使下面因为配置/数据问题提前结束，也能在任务统计中看到该任务在跑
+        CronUtils.TaskStat taskStat = CronUtils.getTaskStat(TASK_ID, StrUtil.format(I18nMessageUtil.get("i18n.execution_frequency.d014"), heartSecond));
+        taskStat.onStart();
         try {
-            CronUtils.TaskStat taskStat = CronUtils.getTaskStat(TASK_ID, StrUtil.format(I18nMessageUtil.get("i18n.execution_frequency.d014"), heartSecond));
-            taskStat.onStart();
-            //MachineNodeModel machineNodeModel = new MachineNodeModel();
-            //machineNodeModel.setTransportMode(0);
-            List<MachineNodeModel> machineNodeModels = this.listByEntity(entity);
-            this.checkList(machineNodeModels);
+            Entity entity = new Entity();
+            if (clusterInfoService.isMultiServer()) {
+                List<String> linkGroups = clusterInfoService.currentLinkGroups();
+                if (CollUtil.isEmpty(linkGroups)) {
+                    // 未绑定分组时退化为监控全部分组，不能整轮跳过（否则节点状态会永久停在旧值）
+                    log.warn(I18nMessageUtil.get("i18n.cluster_not_bound_group_monitor_all_assets.b885"));
+                } else {
+                    entity.set("groupName", linkGroups);
+                }
+            }
+            List<MachineNodeModel> machineNodeModels = Optional.ofNullable(this.listByEntity(entity)).orElseGet(ArrayList::new);
+            List<MachineNodeModel> pollMachines = new ArrayList<>();
+            List<MachineNodeModel> pushMachines = new ArrayList<>();
+            for (MachineNodeModel machineNodeModel : machineNodeModels) {
+                if (isPushTransportMode(machineNodeModel.getTransportMode())) {
+                    pushMachines.add(machineNodeModel);
+                } else {
+                    // transportMode 为空视为拉取，兼容历史数据、手工迁库
+                    pollMachines.add(machineNodeModel);
+                }
+            }
+            // 已收到主动推送的节点切到推送模式；多服务端部署时各实例只持有自己那条隧道的推送数据，
+            // 切换会导致其它实例误判节点离线，因此多服务端保持拉取
+            if (!this.clusterInfoService.isMultiServer()) {
+                pollMachines.removeIf(this::switchToPushIfFresh);
+            }
+            // 清理已删除节点残留的推送状态，避免 Map 无界增长
+            this.prunePushState(machineNodeModels);
+            this.checkList(pollMachines);
+            this.checkPushList(pushMachines);
             taskStat.onSucceeded();
         } catch (Throwable throwable) {
-            CronUtils.TaskStat taskStat = CronUtils.getTaskStat(TASK_ID, StrUtil.format(I18nMessageUtil.get("i18n.execution_frequency.d014"), heartSecond));
             taskStat.onFailed(TASK_ID, throwable);
         }
     }
 
+
+    /**
+     * 拉取模式下，如果该节点已经通过隧道主动上报了新鲜数据，则切换为推送模式
+     * <p>
+     * 只有真正收到推送的节点才会切换（老版本插件端不会推送，保持拉取），
+     * 切换后由 {@link #checkPushList(List)} 消费推送快照，不再发起拉取请求。
+     *
+     * @param machineNodeModel 机器节点（transportMode 为空或 0）
+     * @return true 已切换（本轮不再拉取）
+     */
+    private boolean switchToPushIfFresh(MachineNodeModel machineNodeModel) {
+        TunnelPushService.Snapshot snapshot = this.tunnelPushService.fresh(machineNodeModel.getId());
+        if (snapshot == null) {
+            return false;
+        }
+        MachineNodeModel update = new MachineNodeModel();
+        update.setId(machineNodeModel.getId());
+        update.setTransportMode(1);
+        this.updateById(update);
+        log.info("节点[{}]已收到主动推送数据，传输方式切换为推送模式", machineNodeModel.getName());
+        return true;
+    }
+
+    /**
+     * 节点当前是否还有在线的反向隧道通道
+     *
+     * @param machineId 机器标识
+     * @return true 在线
+     */
+    private boolean tunnelOnline(String machineId) {
+        TunnelChannelRegistry registry = this.tunnelChannelRegistryProvider.getIfAvailable();
+        return registry != null && registry.isOnline(machineId);
+    }
+
+    /**
+     * 推送模式的节点状态刷新：消费插件端主动上报的最新快照
+     * <p>
+     * 推送数据过期（超过 {@code jpom.agent.tunnel.push-max-age-seconds}）按无法连接处理，
+     * 与拉取模式请求失败的口径一致，不自动回退拉取（避免同一节点两种数据源来回抖动）。
+     *
+     * @param machineNodeModels 推送模式的机器列表
+     */
+    private void checkPushList(List<MachineNodeModel> machineNodeModels) {
+        if (CollUtil.isEmpty(machineNodeModels)) {
+            return;
+        }
+        machineNodeModels.forEach(machineNodeModel -> this.assetsExecutorPoolService.execute(() -> {
+            try {
+                TunnelPushService.Snapshot snapshot = this.tunnelPushService.fresh(machineNodeModel.getId());
+                if (snapshot == null) {
+                    if (this.tunnelOnline(machineNodeModel.getId())) {
+                        // 通道仍在线只是首帧推送还没到（插件端首次状态采集/oshi 初始化可能要几十秒），
+                        // 不能据此判定节点不可用：离线由隧道心跳（通道关闭）负责判定。
+                        log.debug("节点[{}]反向隧道在线但暂未收到推送，保持上一状态", machineNodeModel.getName());
+                        return;
+                    }
+                    this.updateStatus(machineNodeModel, 0, I18nMessageUtil.get("i18n.tunnel_push_data_timeout.7c1a"));
+                    this.fallbackToPollIfMissed(machineNodeModel);
+                    return;
+                }
+                this.pushMissCount.remove(machineNodeModel.getId());
+                if (!this.pushSnapshotTracker.firstConsume(machineNodeModel.getId(), snapshot.getReceivedAt())) {
+                    // 同一份推送不重复落库：只刷新“最后检测时间”，避免统计日志里出现同一 monitorTime 的重复行
+                    MachineNodeModel touch = new MachineNodeModel();
+                    touch.setId(machineNodeModel.getId());
+                    this.updateById(touch);
+                    return;
+                }
+                JSONObject jsonObject = JSON.parseObject(snapshot.getBody());
+                if (jsonObject == null) {
+                    this.updateStatus(machineNodeModel, 0, I18nMessageUtil.get("i18n.tunnel_push_data_invalid.2f5b"));
+                    return;
+                }
+                fillPushNetworkDelay(jsonObject);
+                this.saveStatInfo(machineNodeModel, jsonObject);
+            } catch (Exception e) {
+                this.updateStatus(machineNodeModel, 0, I18nMessageUtil.get("i18n.tunnel_push_data_invalid.2f5b"));
+                log.warn("节点[{}]推送数据解析失败", machineNodeModel.getName(), e);
+            }
+        }));
+    }
+
+    /**
+     * 推送模式的网络延迟口径：没有“服务端到节点”的请求往返，落库值为 0。
+     * <p>
+     * {@link #saveStatInfo(MachineNodeModel, JSONObject)} 会减去插件端上报的 {@code systemSleep}
+     * （采集时的固定休眠 {@code NET_STAT_SLEEP + CPU_STAT_SLEEP}），这里必须填入同样的休眠时间，
+     * 否则推送节点的 networkDelay 会变成负数（页面显示 -2000ms、监控曲线为负值）。
+     *
+     * @param jsonObject 推送数据（与 {@code /get-stat-info} 同构）
+     */
+    static void fillPushNetworkDelay(JSONObject jsonObject) {
+        jsonObject.put("networkDelay", jsonObject.getIntValue("systemSleep"));
+    }
+
+    /**
+     * 清理已不在当前监控范围（节点被删除）时残留的推送状态
+     *
+     * @param machineNodeModels 本轮机器列表
+     */
+    private void prunePushState(List<MachineNodeModel> machineNodeModels) {
+        if (CollUtil.isEmpty(machineNodeModels)) {
+            this.pushMissCount.clear();
+            this.pushSnapshotTracker.retain(null);
+            return;
+        }
+        Set<String> ids = machineNodeModels.stream().map(MachineNodeModel::getId).collect(Collectors.toSet());
+        this.pushMissCount.keySet().retainAll(ids);
+        this.pushSnapshotTracker.retain(ids);
+    }
+
+    /**
+     * 推送连续中断达到阈值后回退为拉取模式
+     * <p>
+     * 用于插件端被回退到不支持推送的版本、或推送配置被关闭的场景：否则节点会永久停留在
+     * “未上报状态”，只能改库恢复。回退后若再次收到推送，{@link #switchToPushIfFresh(MachineNodeModel)}
+     * 会重新切回推送模式。
+     *
+     * @param machineNodeModel 推送模式的机器
+     */
+    private void fallbackToPollIfMissed(MachineNodeModel machineNodeModel) {
+        int missed = this.pushMissCount.merge(machineNodeModel.getId(), 1, Integer::sum);
+        if (missed < PUSH_MISS_LIMIT) {
+            return;
+        }
+        MachineNodeModel update = new MachineNodeModel();
+        update.setId(machineNodeModel.getId());
+        update.setTransportMode(0);
+        this.updateById(update);
+        this.pushMissCount.remove(machineNodeModel.getId());
+        this.pushSnapshotTracker.clear(machineNodeModel.getId());
+        log.warn("节点[{}]连续 {} 个周期未收到主动推送，回退为服务端拉取模式", machineNodeModel.getName(), missed);
+    }
 
     private void checkList(List<MachineNodeModel> machineNodeModels) {
         if (CollUtil.isEmpty(machineNodeModels)) {
@@ -284,6 +486,9 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         Optional.ofNullable(jpomInfo).ifPresent(jsonObject -> {
             Optional.ofNullable(jsonObject.getJSONObject("jpomManifest"))
                 .ifPresent(jsonObject1 -> {
+                    // 心跳里的 manifest 与 /info 同一份数据：就地识别插件端引擎（java/go）落库，
+                    // 机器列表与「可作为构建节点」开关据此判断，不需要每次刷新都探测
+                    machineNodeModel.setJpomEngine(AgentPackageResolver.resolveEngine(jsonObject1).getName());
                     machineNodeModel.setJpomVersion(jsonObject1.getString("version"));
                     machineNodeModel.setJpomBuildTime(jsonObject1.getString("timeStamp"));
                     machineNodeModel.setOsName(jsonObject1.getString("osName"));
@@ -370,6 +575,83 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
     }
 
     /**
+     * 节点状态：检测超时（超过指定心跳周期没有刷新检测结果）
+     */
+    public static final int STATUS_CHECK_TIMEOUT = 5;
+
+    /**
+     * 折算节点状态：长时间没有刷新检测结果时，不能继续沿用"正常"
+     *
+     * @param machineNodeModels 机器列表
+     */
+    public void fillTimeoutStatus(List<MachineNodeModel> machineNodeModels) {
+        if (CollUtil.isEmpty(machineNodeModels)) {
+            return;
+        }
+        long timeoutMillis = TimeUnit.SECONDS.toMillis(nodeConfig.getHeartSecond()) * 3;
+        long now = SystemClock.now();
+        machineNodeModels.forEach(machineNodeModel -> this.fillTimeoutStatus(machineNodeModel, timeoutMillis, now));
+    }
+
+    /**
+     * 折算单个节点的状态
+     *
+     * @param machineNodeModel 机器信息
+     */
+    public void fillTimeoutStatus(MachineNodeModel machineNodeModel) {
+        long timeoutMillis = TimeUnit.SECONDS.toMillis(nodeConfig.getHeartSecond()) * 3;
+        this.fillTimeoutStatus(machineNodeModel, timeoutMillis, SystemClock.now());
+    }
+
+    private void fillTimeoutStatus(MachineNodeModel machineNodeModel, long timeoutMillis, long now) {
+        if (machineNodeModel == null) {
+            return;
+        }
+        if (checkStatusTimeout(machineNodeModel.getStatus(), machineNodeModel.getModifyTimeMillis(), timeoutMillis, now)) {
+            machineNodeModel.setStatus(STATUS_CHECK_TIMEOUT);
+        }
+    }
+
+    /**
+     * 是否由服务端拉取检测（transportMode 为空视为拉取，兼容历史数据/手工迁移的库）
+     *
+     * @param transportMode 传输方式
+     * @return true 需要检测
+     */
+    public static boolean isPollTransportMode(Integer transportMode) {
+        return transportMode == null || transportMode == 0;
+    }
+
+    /**
+     * 是否由节点主动推送状态
+     *
+     * @param transportMode 传输方式
+     * @return true 推送模式
+     */
+    public static boolean isPushTransportMode(Integer transportMode) {
+        return transportMode != null && transportMode == 1;
+    }
+
+    /**
+     * 节点状态是否已经超时（长时间没有刷新检测结果）
+     *
+     * @param status           当前状态
+     * @param modifyTimeMillis 最后刷新时间
+     * @param timeoutMillis    超时时间
+     * @param now              当前时间
+     * @return true 已经超时
+     */
+    public static boolean checkStatusTimeout(Integer status, Long modifyTimeMillis, long timeoutMillis, long now) {
+        if (!ObjectUtil.equal(status, 1)) {
+            return false;
+        }
+        if (modifyTimeMillis == null || modifyTimeMillis <= 0) {
+            return false;
+        }
+        return now - modifyTimeMillis > timeoutMillis;
+    }
+
+    /**
      * 更新机器状态
      *
      * @param machineNode 机器信息
@@ -393,15 +675,24 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         // 创建对象
         MachineNodeModel machineNodeModel = ServletUtil.toBean(request, MachineNodeModel.class, true);
         Assert.hasText(machineNodeModel.getName(), I18nMessageUtil.get("i18n.machine_name_required.e8cf"));
-        Assert.hasText(machineNodeModel.getJpomUrl(), I18nMessageUtil.get("i18n.please_fill_in_node_address.e77e"));
-        Assert.hasText(machineNodeModel.getJpomUsername(), I18nMessageUtil.get("i18n.node_account_required.2d90"));
-
-        Assert.hasText(machineNodeModel.getJpomProtocol(), I18nMessageUtil.get("i18n.protocol_required.b4f8"));
+        // 通讯方式显式从请求读取：不同构建/参数绑定下 toBean 对新增 Integer 字段的绑定时有差异
+        String connectModeParam = request.getParameter("connectMode");
+        if (StrUtil.isNotEmpty(connectModeParam)) {
+            machineNodeModel.setConnectMode(Convert.toInt(connectModeParam, 0));
+        }
+        // 通讯方式决定正向连接配置是否必填：仅反向隧道时由插件端主动连服务端，不需要地址/账号/协议
+        int connectMode = MachineConnectMode.normalize(machineNodeModel.getConnectMode());
+        if (!MachineConnectMode.isTunnelOnly(connectMode)) {
+            Assert.hasText(machineNodeModel.getJpomUrl(), I18nMessageUtil.get("i18n.please_fill_in_node_address.e77e"));
+            Assert.hasText(machineNodeModel.getJpomUsername(), I18nMessageUtil.get("i18n.node_account_required.2d90"));
+            Assert.hasText(machineNodeModel.getJpomProtocol(), I18nMessageUtil.get("i18n.protocol_required.b4f8"));
+        }
         //
         MachineNodeModel update = new MachineNodeModel();
         update.setId(machineNodeModel.getId());
         update.setGroupName(machineNodeModel.getGroupName());
         update.setName(machineNodeModel.getName());
+        update.setConnectMode(connectMode);
         update.setJpomHttpProxy(machineNodeModel.getJpomHttpProxy());
         update.setJpomHttpProxyType(machineNodeModel.getJpomHttpProxyType());
         update.setJpomUrl(machineNodeModel.getJpomUrl());
@@ -411,7 +702,25 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
         update.setJpomTimeout(machineNodeModel.getJpomTimeout());
         update.setTemplateNode(machineNodeModel.getTemplateNode());
         update.setTransportEncryption(machineNodeModel.getTransportEncryption());
+        // 构建节点能力：机器资产层的开关与并发上限（只增字段，老数据为空即不承担构建）
+        update.setBuildEnabled(machineNodeModel.getBuildEnabled());
+        update.setBuildMaxConcurrency(machineNodeModel.getBuildMaxConcurrency());
         return update;
+    }
+
+    /**
+     * 查询机器上运行的插件端 /info（不落库，仅用于能力校验）
+     *
+     * @param machineNodeModel 机器
+     * @return /info 的 data
+     */
+    private JSONObject queryInfo(MachineNodeModel machineNodeModel) {
+        INodeInfo nodeInfo = NodeForward.coverNodeInfo(machineNodeModel);
+        IUrlItem urlItem = NodeForward.parseUrlItem(nodeInfo, StrUtil.EMPTY, NodeUrl.Info);
+        String body = TransportServerFactory.get().execute(nodeInfo, urlItem, null);
+        JsonMessage<JSONObject> message = NodeForward.toJsonMessage(body, new TypeReference<JsonMessage<JSONObject>>() {
+        });
+        return message.getData();
     }
 
     public boolean existsByUrl(String jpomUrl, String id) {
@@ -434,13 +743,38 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
 
     public void update(HttpServletRequest request) {
         MachineNodeModel machineNodeModel = this.resolveMachineData(request);
-        boolean exists = this.existsByUrl(machineNodeModel.getJpomUrl(), machineNodeModel.getId());
-        Assert.state(!exists, I18nMessageUtil.get("i18n.node_already_exists.28ea"));
-        this.testNode(machineNodeModel);
+        boolean tunnelOnly = MachineConnectMode.isTunnelOnly(machineNodeModel.getConnectMode());
+        if (!tunnelOnly) {
+            // 仅反向隧道没有节点地址，跳过地址重复校验（existsByUrl 内部要求地址非空）
+            boolean exists = this.existsByUrl(machineNodeModel.getJpomUrl(), machineNodeModel.getId());
+            Assert.state(!exists, I18nMessageUtil.get("i18n.node_already_exists.28ea"));
+        }
+        if (tunnelOnly) {
+            // 仅反向隧道：不访问节点地址（本来也不要求填），引擎由心跳识别，构建能力由运行时校验
+            if (machineNodeModel.getBuildEnabled() != null && machineNodeModel.getBuildEnabled() == 1) {
+                Assert.state(machineNodeModel.getBuildMaxConcurrency() == null || machineNodeModel.getBuildMaxConcurrency() > 0,
+                    I18nMessageUtil.get("i18n.build_node_concurrency_invalid.5d18"));
+            }
+        } else {
+            this.testNode(machineNodeModel);
+            // 保存时就把引擎识别并落库，机器列表与「可作为构建节点」开关不用等心跳。
+            // 必须用 /info 的原始 data（含 manifest.engine/capabilities），不能只转换成 JpomManifest 对象：
+            // 那个类没有 engine/jarFile 兼容字段，转换后会丢失引擎信息（曾导致 Go 节点被误判为 Java）。
+            JSONObject info = this.queryInfo(machineNodeModel);
+            AgentEngine agentEngine = AgentPackageResolver.resolveEngine(info);
+            machineNodeModel.setJpomEngine(agentEngine.getName());
+            // 开启构建能力前校验引擎与能力：只有 Go 插件端（/info 声明 capabilities 含 build）才能承担构建
+            if (machineNodeModel.getBuildEnabled() != null && machineNodeModel.getBuildEnabled() == 1) {
+                Assert.state(machineNodeModel.getBuildMaxConcurrency() == null || machineNodeModel.getBuildMaxConcurrency() > 0,
+                    I18nMessageUtil.get("i18n.build_node_concurrency_invalid.5d18"));
+                Assert.state(agentEngine == AgentEngine.GO, I18nMessageUtil.get("i18n.build_node_not_go_agent.8e4b"));
+                Assert.state(AgentPackageResolver.hasCapability(info, AgentPackageResolver.CAPABILITY_BUILD),
+                    I18nMessageUtil.get("i18n.build_node_unsupported_capability.6b02"));
+            }
+            this.testHttpProxy(machineNodeModel.getJpomHttpProxy());
+        }
         // 更新状态
         machineNodeModel.setStatus(1);
-        //
-        this.testHttpProxy(machineNodeModel.getJpomHttpProxy());
         //
         if (StrUtil.isNotEmpty(machineNodeModel.getId())) {
             this.updateById(machineNodeModel);
@@ -454,22 +788,24 @@ public class MachineNodeServer extends BaseDbService<MachineNodeModel> implement
      *
      * @param nodeModel 节点信息
      */
-    public void testNode(MachineNodeModel nodeModel) {
+    public JpomManifest testNode(MachineNodeModel nodeModel) {
         //
         int timeout = ObjectUtil.defaultIfNull(nodeModel.getJpomTimeout(), 0);
         // 检查是否可用默认为5秒，避免太长时间无法连接一直等待
         nodeModel.setJpomTimeout(5);
         //
         JsonMessage<JpomManifest> objectJsonMessage = NodeForward.request(nodeModel, StrUtil.EMPTY, NodeUrl.Info, "nodeId", nodeModel.getId());
+        JpomManifest jpomManifest;
         try {
-            JpomManifest jpomManifest = objectJsonMessage.getData(JpomManifest.class);
+            jpomManifest = objectJsonMessage.getData(JpomManifest.class);
             Assert.notNull(jpomManifest, I18nMessageUtil.get("i18n.node_connection_failure.896d"));
         } catch (Exception e) {
             log.error(I18nMessageUtil.get("i18n.node_connection_failure.896d"), e);
             throw new IllegalStateException(I18nMessageUtil.get("i18n.node_return_info_exception.0961"));
+        } finally {
+            nodeModel.setJpomTimeout(timeout);
         }
-        //
-        nodeModel.setJpomTimeout(timeout);
+        return jpomManifest;
     }
 
     /**

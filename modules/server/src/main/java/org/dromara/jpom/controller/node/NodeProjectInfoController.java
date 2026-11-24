@@ -149,6 +149,9 @@ public class NodeProjectInfoController extends BaseServerController {
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<Map<String, String>> getTriggerUrl(String id, String rest, HttpServletRequest request) {
         ProjectInfoCacheModel item = projectInfoCacheService.getByKey(id, request);
+        // 传的是插件端 projectId（而不是服务端缓存 id）时这里会拿到 null，原实现紧接着 item.getTriggerToken() → NPE
+        // 表现为 500「空指针」，看不出是参数问题（BUGS B-020）
+        Assert.notNull(item, I18nMessageUtil.get("i18n.project_does_not_exist.3029"));
         UserModel user = getUser();
         ProjectInfoCacheModel updateItem;
         if (StrUtil.isEmpty(item.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {

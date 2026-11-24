@@ -1,3 +1,14 @@
+<!--
+
+    Copyright (c) 2019 Of Him Code Technology Studio
+    Jpom is licensed under Mulan PSL v2.
+    You can use this software according to the terms and conditions of the Mulan PSL v2.
+    You may obtain a copy of Mulan PSL v2 at:
+    			http://license.coscl.org.cn/MulanPSL2
+    THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+    See the Mulan PSL v2 for more details.
+
+-->
 <template>
   <div>
     <a-space direction="vertical" style="width: 100%">
@@ -26,6 +37,12 @@
             <CodeOutlined />
             {{ $t('i18n_69c3b873c1') }}
           </template>
+        </a-descriptions-item>
+
+        <a-descriptions-item :label="$t('i18n_1eb1c081f0')">
+          <a-tooltip :title="data.buildNodeId || $t('i18n_4d1636e43f')">
+            <span>{{ buildNodeNameText }}</span>
+          </a-tooltip>
         </a-descriptions-item>
 
         <a-descriptions-item :label="$t('i18n_66aafbdb72')">
@@ -211,7 +228,8 @@ import {
   triggerBuildTypeMap,
   downloadBuildFile,
   downloadBuildLog,
-  rollback
+  rollback,
+  getBuildNodeList
 } from '@/api/build-info'
 import {
   parseTime,
@@ -245,10 +263,20 @@ export default {
       listQuery: Object.assign({ buildDataId: this.id }, PAGE_DEFAULT_LIST_QUERY),
       historyList: [],
       tempRepository: null,
-      buildLogVisible: 0
+      buildLogVisible: 0,
+      // 构建节点名称缓存（后端未返回 buildNodeName 时按 buildNodeId 从节点列表补齐）
+      buildNodeNameCache: ''
     }
   },
-  computed: {},
+  computed: {
+    // 构建节点展示：空 = 本机（Server）
+    buildNodeNameText() {
+      if (!this.data || !this.data.buildNodeId) {
+        return this.$t('i18n_4d1636e43f')
+      }
+      return this.data.buildNodeName || this.buildNodeNameCache || this.data.buildNodeId
+    }
+  },
   created() {
     if (this.id) {
       this.refresh()
@@ -282,8 +310,27 @@ export default {
         if (res.data) {
           this.data = res.data
           this.getRepositpry()
+          this.loadBuildNodeName()
         }
       })
+    },
+    // 补齐全构建节点名称（接口不可用时不阻塞详情展示，退化为展示节点 id）
+    loadBuildNodeName() {
+      if (!this.data || !this.data.buildNodeId || this.data.buildNodeName) {
+        return
+      }
+      getBuildNodeList()
+        .then((res) => {
+          if (res && res.code === 200 && Array.isArray(res.data)) {
+            const find = res.data.find((item) => item.id === this.data.buildNodeId)
+            if (find) {
+              this.buildNodeNameCache = find.name
+            }
+          }
+        })
+        .catch((e) => {
+          console.warn('[build-details] 构建节点名称加载失败', e)
+        })
     },
     listHistory() {
       // 构建历史

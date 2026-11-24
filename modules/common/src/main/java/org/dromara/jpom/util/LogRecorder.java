@@ -120,6 +120,24 @@ public class LogRecorder extends OutputStream implements ILogRecorder, AutoClose
     }
 
     /**
+     * 追加一行原始日志（不做 {} 模板替换）
+     * <p>
+     * 远程构建节点的输出行原样落盘，必须走这里：{@link #info(String, Object...)} 会经过
+     * StrUtil.format，日志里出现 {} 或占位符时会被误解甚至抛异常。
+     *
+     * @param line 原始行（不含换行符）
+     * @return 写入内容
+     */
+    public String appendRaw(String line) {
+        if (writer == null) {
+            throw new LogRecorderCloseException();
+        }
+        writer.println(line);
+        writer.flush();
+        return line;
+    }
+
+    /**
      * 记录单行日志
      *
      * @param info 日志

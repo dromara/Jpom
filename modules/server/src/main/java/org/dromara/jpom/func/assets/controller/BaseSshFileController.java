@@ -42,6 +42,7 @@ import org.dromara.jpom.service.node.ssh.SshService;
 import org.dromara.jpom.system.ServerConfig;
 import org.dromara.jpom.util.CommandUtil;
 import org.dromara.jpom.util.CompressionFileUtil;
+import org.dromara.jpom.util.FileUtils;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -127,8 +128,9 @@ public abstract class BaseSshFileController extends BaseServerController {
             ServletUtil.write(response, I18nMessageUtil.get("i18n.ssh_error_or_folder_not_configured.c087"), MediaType.TEXT_HTML_VALUE);
             return;
         }
+        String remotePath = FileUtils.resolveChildPath(allowPathParent, nextPath, name);
         try {
-            this.downloadFile(machineSshModel, allowPathParent, nextPath, name, response);
+            this.downloadFile(machineSshModel, remotePath, response);
         } catch (SftpException e) {
             log.error(I18nMessageUtil.get("i18n.download_failed.65e2"), e);
             ServletUtil.write(response, "download error", MediaType.TEXT_HTML_VALUE);
@@ -181,7 +183,8 @@ public abstract class BaseSshFileController extends BaseServerController {
             List<String> allowEditSuffix = itemConfig.allowEditSuffix();
             Charset charset = AgentWhitelist.checkFileSuffix(allowEditSuffix, name);
             //
-            String content = this.readFile(machineSshModel, allowPathParent, nextPath, name, charset);
+            String remotePath = FileUtils.resolveChildPath(allowPathParent, nextPath, name);
+            String content = this.readFile(machineSshModel, remotePath, charset);
             return JsonMessage.success("", content);
         });
     }
@@ -197,15 +200,18 @@ public abstract class BaseSshFileController extends BaseServerController {
             //
             List<String> allowEditSuffix = itemConfig.allowEditSuffix();
             Charset charset = AgentWhitelist.checkFileSuffix(allowEditSuffix, name);
-            // 缓存到本地
-            File file = FileUtil.file(serverConfig.getUserTempPath(), machineSshModel.getId(), allowPathParent, nextPath, name);
+            String remotePath = FileUtils.resolveChildPath(allowPathParent, nextPath, name);
+            // 缓存到本地：目录名使用随机值，禁止客户端传入的路径参与本地文件路径拼接
+            File tempDir = FileUtil.file(serverConfig.getUserTempPath(), "ssh", machineSshModel.getId(), IdUtil.fastSimpleUUID());
+            File file = FileUtil.file(tempDir, FileUtil.getName(remotePath));
             try {
+                FileUtil.mkParentDirs(file);
                 FileUtil.writeString(content, file, charset);
                 // 上传
-                this.syncFile(machineSshModel, allowPathParent, nextPath, name, file);
+                this.syncFile(machineSshModel, remotePath, file);
             } finally {
                 //
-                FileUtil.del(file);
+                FileUtil.del(tempDir);
             }
             //
             return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));
@@ -216,19 +222,16 @@ public abstract class BaseSshFileController extends BaseServerController {
      * 读取文件
      *
      * @param machineSshModel ssh
-     * @param allowPathParent 路径
-     * @param nextPath        二级路径
-     * @param name            文件
+     * @param remotePath      已经过白名单校验的远端文件路径
      * @param charset         编码格式
      */
-    private String readFile(MachineSshModel machineSshModel, String allowPathParent, String nextPath, String name, Charset charset) {
+    private String readFile(MachineSshModel machineSshModel, String remotePath, Charset charset) {
         Sftp sftp = null;
         try {
             Session session = sshService.getSessionByModel(machineSshModel);
             sftp = new Sftp(session, machineSshModel.charset(), machineSshModel.timeout());
-            String normalize = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name);
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            sftp.download(normalize, byteArrayOutputStream);
+            sftp.download(remotePath, byteArrayOutputStream);
             byte[] bytes = byteArrayOutputStream.toByteArray();
             return new String(bytes, charset);
         } finally {
@@ -240,22 +243,17 @@ public abstract class BaseSshFileController extends BaseServerController {
      * 上传文件
      *
      * @param machineSshModel ssh
-     * @param allowPathParent 路径
-     * @param nextPath        二级路径
-     * @param name            文件
+     * @param remotePath      已经过白名单校验的远端文件路径
      * @param file            同步上传文件
      */
     private void syncFile(MachineSshModel machineSshModel,
-                          String allowPathParent,
-                          String nextPath,
-                          String name,
+                          String remotePath,
                           File file) {
         Sftp sftp = null;
         try {
             Session session = sshService.getSessionByModel(machineSshModel);
             sftp = new Sftp(session, machineSshModel.charset(), machineSshModel.timeout());
-            String normalize = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name);
-            sftp.upload(normalize, file);
+            sftp.upload(remotePath, file);
         } finally {
             IoUtil.close(sftp);
         }
@@ -265,15 +263,14 @@ public abstract class BaseSshFileController extends BaseServerController {
      * 下载文件
      *
      * @param machineSshModel ssh
-     * @param allowPathParent 路径
-     * @param name            文件
+     * @param remotePath      已经过白名单校验的远端文件路径
      * @param response        响应
      * @throws IOException   io
      * @throws SftpException sftp
      */
-    private void downloadFile(MachineSshModel machineSshModel, String allowPathParent, String nextPath, String name, HttpServletResponse response) throws IOException, SftpException {
+    private void downloadFile(MachineSshModel machineSshModel, String remotePath, HttpServletResponse response) throws IOException, SftpException {
         final String charset = ObjectUtil.defaultIfNull(response.getCharacterEncoding(), CharsetUtil.UTF_8);
-        String fileName = FileUtil.getName(name);
+        String fileName = FileUtil.getName(remotePath);
         response.setHeader("Content-Disposition", StrUtil.format("attachment;filename={}", URLUtil.encode(fileName, Charset.forName(charset))));
         response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
         Session session = null;
@@ -281,8 +278,7 @@ public abstract class BaseSshFileController extends BaseServerController {
         try {
             session = sshService.getSessionByModel(machineSshModel);
             channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
-            String normalize = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name);
-            channel.get(normalize, response.getOutputStream());
+            channel.get(remotePath, response.getOutputStream());
         } finally {
             JschUtil.close(channel);
             JschUtil.close(session);
@@ -308,8 +304,7 @@ public abstract class BaseSshFileController extends BaseServerController {
             channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
 
             String children2 = StrUtil.emptyToDefault(nextPath, StrUtil.SLASH);
-            String allPath = StrUtil.format("{}/{}", allowPathParent, children2);
-            allPath = FileUtil.normalize(allPath);
+            String allPath = FileUtils.resolveChildDir(allowPathParent, children2);
             JSONArray jsonArray = new JSONArray();
             Vector<ChannelSftp.LsEntry> vector;
             try {
@@ -412,8 +407,10 @@ public abstract class BaseSshFileController extends BaseServerController {
             Sftp sftp = null;
             try {
                 //
-                String normalize = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name2);
-                Assert.state(!StrUtil.equals(normalize, StrUtil.SLASH), I18nMessageUtil.get("i18n.cannot_delete_root_dir.fcdc"));
+                String normalize = StrUtil.isEmpty(name2)
+                        ? FileUtils.resolveChildDir(allowPathParent, nextPath)
+                        : FileUtils.resolveChildPath(allowPathParent, nextPath, name2);
+                Assert.state(!StrUtil.equals(normalize, FileUtils.resolveChildDir(allowPathParent, StrUtil.EMPTY)), I18nMessageUtil.get("i18n.cannot_delete_root_dir.fcdc"));
                 session = sshService.getSessionByModel(machineSshModel);
                 sftp = new Sftp(session, machineSshModel.charset(), machineSshModel.timeout());
                 // 尝试删除
@@ -449,8 +446,8 @@ public abstract class BaseSshFileController extends BaseServerController {
             try {
                 session = sshService.getSessionByModel(machineSshModel);
                 channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
-                String oldPath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name);
-                String newPath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + newname);
+                String oldPath = FileUtils.resolveChildPath(allowPathParent, nextPath, name);
+                String newPath = FileUtils.resolveChildPath(allowPathParent, nextPath, newname);
                 channel.rename(oldPath, newPath);
             } catch (Exception e) {
                 log.error(I18nMessageUtil.get("i18n.ssh_rename_failed_exception.94aa"), e);
@@ -503,7 +500,7 @@ public abstract class BaseSshFileController extends BaseServerController {
                                                @ValidatorItem String allowPathParent,
                                                @ValidatorItem String nextPath) {
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
-            String remotePath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath);
+            String remotePath = FileUtils.resolveChildDir(allowPathParent, nextPath);
             Session session = null;
             ChannelSftp channel = null;
             try {
@@ -511,12 +508,14 @@ public abstract class BaseSshFileController extends BaseServerController {
                 channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
                 channel.cd(remotePath);
                 String originalFilename = file.getOriginalFilename();
-                // xxxx.txt.1
+                // 分片上传的文件名先按单段名称校验，再按 xxxx.txt.1 规则还原原名
+                FileUtils.checkPathItemName(originalFilename);
                 originalFilename = StrUtil.subBefore(originalFilename, ".", true);
+                String target = FileUtils.resolveChildPath(allowPathParent, nextPath, originalFilename);
                 if (nowSlice == 0) {
-                    channel.put(file.getInputStream(), originalFilename, ChannelSftp.OVERWRITE);
+                    channel.put(file.getInputStream(), target, ChannelSftp.OVERWRITE);
                 } else {
-                    channel.put(file.getInputStream(), originalFilename, ChannelSftp.APPEND);
+                    channel.put(file.getInputStream(), target, ChannelSftp.APPEND);
                 }
             } catch (Exception e) {
                 log.error(I18nMessageUtil.get("i18n.ssh_file_upload_exception.5c1c"), e);
@@ -539,41 +538,41 @@ public abstract class BaseSshFileController extends BaseServerController {
                                        MultipartFile file) {
         return this.checkConfigPathChildren(id, allowPathParent, nextPath, (machineSshModel, itemConfig) -> {
             //
-            String remotePath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath);
+            String remotePath = FileUtils.resolveChildDir(allowPathParent, nextPath);
+            String originalFilename = file.getOriginalFilename();
+            // multipart 的文件名同样按单段名称校验，禁止把 ../ 拼进远端/本地路径
+            FileUtils.checkPathItemName(originalFilename);
+            String remoteFilePath = FileUtils.resolveChildPath(allowPathParent, nextPath, originalFilename);
             Session session = null;
             ChannelSftp channel = null;
+            // 本地缓存目录使用随机值，文件名只取单段名称
+            File tempDir = FileUtil.file(serverConfig.getUserTempPath(), "ssh", machineSshModel.getId(), IdUtil.fastSimpleUUID());
 
             try {
                 session = sshService.getSessionByModel(machineSshModel);
                 channel = (ChannelSftp) JschUtil.openChannel(session, ChannelType.SFTP);
                 // 保存路径
-                File tempPath = serverConfig.getUserTempPath();
-                File savePath = FileUtil.file(tempPath, "ssh", machineSshModel.getId());
-                FileUtil.mkdir(savePath);
-                String originalFilename = file.getOriginalFilename();
-                File filePath = FileUtil.file(savePath, originalFilename);
+                FileUtil.mkdir(tempDir);
+                File filePath = FileUtil.file(tempDir, originalFilename);
                 //
                 if (Convert.toBool(unzip, false)) {
                     String extName = FileUtil.extName(originalFilename);
                     Assert.state(StrUtil.containsAnyIgnoreCase(extName, StringUtil.PACKAGE_EXT), I18nMessageUtil.get("i18n.file_type_not_supported2.d497") + extName);
                     file.transferTo(filePath);
                     // 解压
-                    File tempUnzipPath = FileUtil.file(savePath, IdUtil.fastSimpleUUID());
+                    File tempUnzipPath = FileUtil.file(tempDir, "unzip");
                     try {
                         FileUtil.mkdir(tempUnzipPath);
                         CompressionFileUtil.unCompress(filePath, tempUnzipPath);
                         // 同步上传文件
                         sshService.uploadDir(machineSshModel, remotePath, tempUnzipPath);
                     } finally {
-                        // 删除临时文件
-                        CommandUtil.systemFastDel(filePath);
                         CommandUtil.systemFastDel(tempUnzipPath);
                     }
                 } else {
                     file.transferTo(filePath);
-                    channel.cd(remotePath);
                     try (FileInputStream src = IoUtil.toStream(filePath)) {
-                        channel.put(src, filePath.getName());
+                        channel.put(src, remoteFilePath);
                     }
                 }
 
@@ -583,6 +582,7 @@ public abstract class BaseSshFileController extends BaseServerController {
             } finally {
                 JschUtil.close(channel);
                 JschUtil.close(session);
+                CommandUtil.systemFastDel(tempDir);
             }
             return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
         });
@@ -611,7 +611,7 @@ public abstract class BaseSshFileController extends BaseServerController {
             Session session = null;
             try {
                 session = sshService.getSessionByModel(machineSshModel);
-                String remotePath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + name);
+                String remotePath = FileUtils.resolveChildPath(allowPathParent, nextPath, name);
                 Charset charset = machineSshModel.charset();
                 int timeout = machineSshModel.timeout();
                 try (Sftp sftp = new Sftp(session, charset, timeout)) {
@@ -654,10 +654,7 @@ public abstract class BaseSshFileController extends BaseServerController {
      * @param name 文件/文件夹名称
      */
     static void checkNewFileName(String name) {
-        Assert.state(!StrUtil.contains(name, StrUtil.SLASH), I18nMessageUtil.get("i18n.file_name_error_message.7a25"));
-        Assert.state(!StrUtil.contains(name, "\\"), I18nMessageUtil.get("i18n.file_name_invalid.3f7c"));
-        Assert.state(!StrUtil.equalsAny(name, ".", ".."), I18nMessageUtil.get("i18n.file_name_invalid.3f7c"));
-        Assert.state(!StrUtil.containsAny(name, "\r", "\n", "\0"), I18nMessageUtil.get("i18n.file_name_invalid.3f7c"));
+        FileUtils.checkPathItemName(name);
     }
 
     /**
@@ -695,7 +692,7 @@ public abstract class BaseSshFileController extends BaseServerController {
         Session session = sshService.getSessionByModel(machineSshModel);
         Charset charset = machineSshModel.charset();
         int timeout = machineSshModel.timeout();
-        String remotePath = FileUtil.normalize(allowPathParent + StrUtil.SLASH + nextPath + StrUtil.SLASH + fileName);
+        String remotePath = FileUtils.resolveChildPath(allowPathParent, nextPath, fileName);
         try (Sftp sftp = new Sftp(session, charset, timeout)) {
             ChannelSftp client = sftp.getClient();
             //

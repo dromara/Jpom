@@ -152,16 +152,21 @@ public class CertificateInfoService extends BaseGlobalOrWorkspaceService<Certifi
                 privateKey = PemUtil.readPemPrivateKey(inputStream);
             }
             // 验证证书公钥和私钥
-            PublicKey publicKey = Optional.ofNullable(rootIndex == 0 ? certificate1 : certificate0)
-                .map(Certificate::getPublicKey)
-                .orElse(null);
-            this.testKey(publicKey, privateKey);
-            //
-            X509Certificate pubCert = (rootIndex == 0 ? x509Certificate1 : x509Certificate0);
-            if (certificate1 != null) {
+            PublicKey publicKey;
+            X509Certificate pubCert;
+            if (certificate1 == null) {
+                // 单证书（自签名）包：公钥就是自己，没有证书链可验。
+                // 原实现固定取「另一张证书」的公钥，单证书时拿到 null，于是任何单证书 X.509 包都报
+                // 「公钥或者私钥不存在」（BUGS B-008）
+                publicKey = certificate0.getPublicKey();
+                pubCert = x509Certificate0;
+            } else {
+                publicKey = (rootIndex == 0 ? certificate1 : certificate0).getPublicKey();
+                pubCert = (rootIndex == 0 ? x509Certificate1 : x509Certificate0);
                 // 验证证书链
                 pubCert.verify((rootIndex == 0 ? certificate0 : certificate1).getPublicKey());
             }
+            this.testKey(publicKey, privateKey);
             // 填充
             CertificateInfoModel certificateInfoModel = this.filling(pubCert);
             // 类型已经确定

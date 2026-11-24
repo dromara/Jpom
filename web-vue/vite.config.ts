@@ -1,12 +1,12 @@
-///
-/// Copyright (c) 2019 Of Him Code Technology Studio
-/// Jpom is licensed under Mulan PSL v2.
-/// You can use this software according to the terms and conditions of the Mulan PSL v2.
-/// You may obtain a copy of Mulan PSL v2 at:
-/// 			http://license.coscl.org.cn/MulanPSL2
-/// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-/// See the Mulan PSL v2 for more details.
-///
+/*
+ * Copyright (c) 2019 Of Him Code Technology Studio
+ * Jpom is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ * 			http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ */
 
 import path from 'node:path'
 import { ConfigEnv, defineConfig, loadEnv } from 'vite'
@@ -113,10 +113,13 @@ export default defineConfig(({ mode }: ConfigEnv) => {
           }
         }
       }),
+      // 构建产物分析报告：默认只写入 stats.html，不自动打开浏览器
+      // （此前 open: true 导致每次 npm run build 都新开一个 file:///.../stats.html 标签页）
+      // 需要查看报告时：JPOM_ANALYZE=1 npm run build
       visualizer({
         emitFile: false,
         // file: 'states.html',
-        open: true
+        open: process.env.JPOM_ANALYZE === '1'
       }),
       {
         name: 'vite-plugin-skip-empty-css',

@@ -1,12 +1,12 @@
-/*
- * Copyright (c) 2019 Of Him Code Technology Studio
- * Jpom is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- * 			http://license.coscl.org.cn/MulanPSL2
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- */
+//
+// Copyright (c) 2019 Of Him Code Technology Studio
+// Jpom is licensed under Mulan PSL v2.
+// You can use this software according to the terms and conditions of the Mulan PSL v2.
+// You may obtain a copy of Mulan PSL v2 at:
+// 			http://license.coscl.org.cn/MulanPSL2
+// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+// See the Mulan PSL v2 for more details.
+//
 
 package sysinfo
 
@@ -19,16 +19,15 @@ import (
 	"testing"
 )
 
-// findGolden 在本地黄金样本目录中查找真实 Java 响应样本（样本不提交仓库，可用环境变量覆盖目录）；
-// 仓库内/CI 环境没有该目录时跳过 golden 比对。
+// findGolden 在维护者私有工作区的黄金样本目录中查找 Java 端响应样本。
+//
+// 样本由私有工具采集并按脱敏规则归一化，仍含主机/路径/版本等环境指纹，**不随开源仓库发布**：
+// 仓库内没有样本时跳过 golden 比对（开源 CI 只跑不依赖样本的用例）。
+// 需要结构回归时用 JPOM_GOLDEN_DIR 指向样本目录，见 dev-scripts/go-agent/golden/README.md。
 func findGolden(t *testing.T, name string) map[string]any {
 	t.Helper()
-	candidates := []string{
-		filepath.Join("..", "..", "..", "..", "go-agent-ref", "golden", name),
-		filepath.Join("..", "..", "..", "..", ".tmp", "go-agent-ref", "golden", name),
-		filepath.Join("testdata", name),
-	}
-	for _, candidate := range candidates {
+	for _, dir := range goldenDirs() {
+		candidate := filepath.Join(dir, name)
 		content, err := os.ReadFile(candidate)
 		if err != nil {
 			continue
@@ -39,8 +38,26 @@ func findGolden(t *testing.T, name string) map[string]any {
 		}
 		return value
 	}
-	t.Skipf("golden 样本不存在: %s", name)
+	t.Skipf("golden 样本不存在（私有测试资料，不入开源仓）: %s", name)
 	return nil
+}
+
+// goldenDirs 返回黄金样本候选目录：环境变量优先，其次是私有工作区内的固定位置。
+// 公开仓（含 CI）不存在这些目录，用例会跳过，不产生伪失败。
+func goldenDirs() []string {
+	var dirs []string
+	if dir := os.Getenv("JPOM_GOLDEN_DIR"); dir != "" {
+		dirs = append(dirs, dir)
+	}
+	if _, file, _, ok := runtime.Caller(0); ok {
+		// file = <workspace>/jpom-parent/go-agent/internal/sysinfo/golden_test.go
+		workspace := filepath.Join(filepath.Dir(file), "..", "..", "..", "..")
+		dirs = append(dirs,
+			filepath.Join(workspace, "dev-scripts", "go-agent", "golden"),
+			filepath.Join(workspace, ".tmp", "go-agent-ref", "golden"),
+		)
+	}
+	return dirs
 }
 
 type shapeKind string

@@ -1,12 +1,12 @@
-/*
- * Copyright (c) 2019 Of Him Code Technology Studio
- * Jpom is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- * 			http://license.coscl.org.cn/MulanPSL2
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- */
+//
+// Copyright (c) 2019 Of Him Code Technology Studio
+// Jpom is licensed under Mulan PSL v2.
+// You can use this software according to the terms and conditions of the Mulan PSL v2.
+// You may obtain a copy of Mulan PSL v2 at:
+// 			http://license.coscl.org.cn/MulanPSL2
+// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+// See the Mulan PSL v2 for more details.
+//
 
 package api
 
@@ -70,6 +70,7 @@ func registerProject(r *httpx.Router, a *app.App) {
 	r.Handle(http.MethodPost, "/manage/change-workspace-id", func(c *httpx.Context) { projectChangeWorkspaceID(c, runtime) })
 
 	r.Handle(http.MethodPost, "/manage/log/logSize", func(c *httpx.Context) { projectLogSize(c, runtime) })
+	r.Handle(http.MethodPost, "/manage/log/logList", func(c *httpx.Context) { projectLogList(c, runtime) })
 	r.Handle(http.MethodPost, "/manage/log/resetLog", func(c *httpx.Context) { projectResetLog(c, runtime) })
 	r.Handle(http.MethodPost, "/manage/log/logBack", func(c *httpx.Context) { projectLogBack(c, runtime) })
 	r.Handle(http.MethodPost, "/manage/log/logBack_delete", func(c *httpx.Context) { projectLogBackDelete(c, runtime) })
@@ -459,7 +460,7 @@ func projectLogSize(c *httpx.Context, runtime *project.Runtime) {
 	if info == nil {
 		return
 	}
-	logBack, size, err := rt.LogSize(info)
+	logBack, size, err := rt.LogSizeOf(info, form.string("logKey"))
 	if err != nil {
 		respondProjectError(c, err)
 		return
@@ -469,6 +470,25 @@ func projectLogSize(c *httpx.Context, runtime *project.Runtime) {
 		data["logSize"] = size
 	}
 	respondOK(c, "", data)
+}
+
+// projectLogList 返回项目可查看的运行日志文件列表
+// （等价 ProjectLogBackController.logList；当前只有 DSL 项目会返回 config.log 配置的文件）。
+func projectLogList(c *httpx.Context, runtime *project.Runtime) {
+	rt := runtime.WithLang(c.Lang)
+	form := readProjectForm(c)
+	info := requireProject(c, rt, form.string("id"))
+	if info == nil {
+		return
+	}
+	list := rt.DslLogFiles(info)
+	if list == nil {
+		list = []project.LogFileItem{}
+	}
+	respondOK(c, "", map[string]any{
+		"array":   list,
+		"runMode": project.GetString(info, "runMode"),
+	})
 }
 
 // projectResetLog 重置控制台日志（等价 ProjectLogBackController.resetLog）。

@@ -10,7 +10,6 @@
 package org.dromara.jpom.func.assets.controller;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.StrUtil;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -56,7 +55,7 @@ public class MachineFtpFileController extends BaseFtpFileController {
     @Override
     protected <T> T checkConfigPathChildren(String id, String path, String children, BiFunction<MachineFtpModel, ItemConfig, T> function) {
         FileUtils.checkSlip(path);
-        Opt.ofBlankAble(children).ifPresent(FileUtils::checkSlip);
+        FileUtils.checkRelativePath(children);
         //
         MachineFtpModel machineFtpModel = machineFtpServer.getByKey(id, false);
         return function.apply(machineFtpModel, new ItemConfig() {

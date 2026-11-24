@@ -102,6 +102,9 @@ public class LogReadController extends BaseServerController {
         if (StrUtil.isEmpty(id)) {
             logReadServer.insert(logReadModel);
         } else {
+            // 带不存在的 id 时 updateById 影响 0 行却仍返回“修改成功”（静默丢数据，BUGS B-011）
+            LogReadModel exitModel = logReadServer.getByKey(id, request);
+            Assert.notNull(exitModel, I18nMessageUtil.get("i18n.data_does_not_exist.b201"));
             logReadServer.updateById(logReadModel, request);
         }
         return JsonMessage.success(I18nMessageUtil.get("i18n.modify_success.69be"));

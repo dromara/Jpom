@@ -120,7 +120,7 @@ public class BackupInfoController extends BaseServerController {
     public IJsonMessage<String> restoreBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.data_id_cannot_be_empty.403b") String id) {
         // 根据 id 查询备份信息
         BackupInfoModel backupInfoModel = backupInfoService.getByKey(id);
-        Objects.requireNonNull(backupInfoModel, I18nMessageUtil.get("i18n.backup_data_not_exist.f88c"));
+        Assert.notNull(backupInfoModel, I18nMessageUtil.get("i18n.backup_data_not_exist.f88c"));
 
         // 检查备份文件是否存在
         String filePath = backupInfoModel.getFilePath();
@@ -238,7 +238,7 @@ public class BackupInfoController extends BaseServerController {
     public void downloadBackup(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.data_id_cannot_be_empty.403b") String id, HttpServletResponse response) {
         // 根据 id 查询备份信息
         BackupInfoModel backupInfoModel = backupInfoService.getByKey(id);
-        Objects.requireNonNull(backupInfoModel, I18nMessageUtil.get("i18n.backup_data_not_exist.f88c"));
+        Assert.notNull(backupInfoModel, I18nMessageUtil.get("i18n.backup_data_not_exist.f88c"));
 
         // 检查备份文件是否存在
         File file = new File(backupInfoModel.getFilePath());

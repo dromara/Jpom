@@ -14,6 +14,7 @@ import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.Lombok;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.BufferedReader;
@@ -32,6 +33,8 @@ import java.util.regex.Pattern;
  * @author bwcx_jzy
  * @since 2024/6/13
  */
+@Deprecated
+@Ignore("i18n 工具链已弃用（2026-11-18）：反向还原（key→中文）会改写源码，禁止再运行")
 public class RestoreI18nTest {
     private final Charset charset = CharsetUtil.CHARSET_UTF_8;
     private File rootFile;

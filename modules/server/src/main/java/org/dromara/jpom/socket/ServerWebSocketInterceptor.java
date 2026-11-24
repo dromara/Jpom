@@ -28,6 +28,7 @@ import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.interceptor.IpInterceptor;
 import org.dromara.jpom.common.interceptor.LoginInterceptor;
 import org.dromara.jpom.common.interceptor.PermissionInterceptor;
+import org.dromara.jpom.configuration.WebConfig;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
 import org.dromara.jpom.func.assets.server.MachineNodeServer;
 import org.dromara.jpom.model.BaseWorkspaceModel;
@@ -72,17 +73,20 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
     private final UserBindWorkspaceService userBindWorkspaceService;
     private final MachineNodeServer machineNodeServer;
     private final IpInterceptor ipInterceptor;
+    private final WebConfig webConfig;
 
     public ServerWebSocketInterceptor(UserService userService,
                                       NodeService nodeService,
                                       UserBindWorkspaceService userBindWorkspaceService,
                                       MachineNodeServer machineNodeServer,
-                                      IpInterceptor ipInterceptor) {
+                                      IpInterceptor ipInterceptor,
+                                      WebConfig webConfig) {
         this.userService = userService;
         this.nodeService = nodeService;
         this.userBindWorkspaceService = userBindWorkspaceService;
         this.machineNodeServer = machineNodeServer;
         this.ipInterceptor = ipInterceptor;
+        this.webConfig = webConfig;
     }
 
     /**
@@ -117,6 +121,11 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
             if (StrUtil.equalsIgnoreCase(originAuthority, host) || StrUtil.equalsIgnoreCase(originAuthority, forwardedHost)) {
                 return true;
             }
+            // 反向代理改写 Host 且未透传 X-Forwarded-Host 时，允许通过 jpom.web.allowed-origins 显式放行
+            if (this.matchAllowedOrigin(origin, originAuthority, originHost)) {
+                return true;
+            }
+            log.warn("websocket origin rejected: origin={}, host={}, x-forwarded-host={}", origin, host, forwardedHost);
             // 本机开发调试（Vite 代理等）允许 loopback -> loopback
             String hostName = StrUtil.subBefore(StrUtil.nullToEmpty(host), ":", false);
             return this.isLoopbackHost(originHost) && this.isLoopbackHost(hostName);
@@ -124,6 +133,32 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
             log.warn("invalid websocket origin: {}", origin);
             return false;
         }
+    }
+
+    /**
+     * 判断来源是否命中 jpom.web.allowed-origins 白名单（支持完整 origin 或主机名）
+     *
+     * @param origin          浏览器 Origin 头
+     * @param originAuthority origin 的 host[:port]
+     * @param originHost      origin 的 host
+     * @return true 命中
+     */
+    private boolean matchAllowedOrigin(String origin, String originAuthority, String originHost) {
+        if (this.webConfig == null) {
+            return false;
+        }
+        for (String item : this.webConfig.getAllowedOrigins()) {
+            String allowed = StrUtil.trimToEmpty(item);
+            if (StrUtil.isEmpty(allowed)) {
+                continue;
+            }
+            if (StrUtil.equalsIgnoreCase(allowed, origin)
+                || StrUtil.equalsIgnoreCase(allowed, originAuthority)
+                || StrUtil.equalsIgnoreCase(allowed, originHost)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isLoopbackHost(String host) {
@@ -208,6 +243,16 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
                 attributes.put("dataItem", dataItem);
                 break;
             }
+            case sshProject: {
+                // SSH 项目控制台
+                Object dataItem = this.checkData(handlerType, userModel, httpServletRequest);
+                if (dataItem == null) {
+                    return false;
+                }
+                attributes.put("dataItem", dataItem);
+                attributes.put("projectId", BeanUtil.getProperty(dataItem, "id"));
+                break;
+            }
             case nodeScript: {
                 // 节点脚本模板
                 Object dataItem = this.checkData(handlerType, userModel, httpServletRequest);
@@ -283,7 +328,7 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
             HttpServletRequest httpServletRequest = serverHttpRequest.getServletRequest();
             // 校验来源（防跨站 WebSocket 劫持）
             if (!this.checkOrigin(httpServletRequest)) {
-                attributes.put("permissionMsg", I18nMessageUtil.get("i18n.no_permission.e343"));
+                attributes.put("permissionMsg", I18nMessageUtil.get("i18n.websocket_origin_rejected.5c7a"));
                 return true;
             }
             // 复用 HTTP 侧 IP 访问限制，避免 WebSocket 绕过 IP 白名单
@@ -316,7 +361,9 @@ public class ServerWebSocketInterceptor implements HandshakeInterceptor {
                 attributes.put("permissionMsg", string);
                 return true;
             }
-            boolean checkNode = this.checkNode(httpServletRequest, attributes, userModel);
+            // SSH 项目不依赖插件端节点，没有必要传 nodeId，也不能因为没有 nodeId 就拒绝握手
+            boolean checkNode = handlerType == HandlerType.sshProject
+                || this.checkNode(httpServletRequest, attributes, userModel);
             if (!checkNode) {
                 String string = I18nMessageUtil.get("i18n.no_matching_permission.09cf");
                 attributes.put("permissionMsg", string);

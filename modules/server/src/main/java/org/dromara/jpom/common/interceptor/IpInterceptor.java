@@ -51,21 +51,37 @@ public class IpInterceptor implements HandlerMethodInterceptor {
      * @return true 允许
      */
     public boolean checkAccess(HttpServletRequest request) {
+        return this.checkAccessResult(request) == AccessResult.ALLOW;
+    }
+
+    /**
+     * 当前请求的访问判定结果。
+     * <p>
+     * 与 {@link #checkAccess(HttpServletRequest)} 的区别：把「读不到 IP 配置（服务端故障）」与
+     * 「IP 不在白名单（配置生效）」区分开。两者都拒绝访问，但响应必须不同——以前一律回
+     * {@code 999 Prohibition of access}，前端会跳到 /prohibit-access，把「数据库/系统参数读取异常」
+     * 伪装成「IP 被限制」，用户按 IP 白名单排查永远查不出问题（2026-11-21 重启计划群反馈：
+     * 构建卡住后重新构建全是 999）。
+     *
+     * @param request 请求
+     * @return 判定结果
+     */
+    public AccessResult checkAccessResult(HttpServletRequest request) {
         String clientIp = ClientIpUtil.resolve(request);
         if (this.isLoopback(clientIp)) {
             // 本地回环请求始终放行（保留原有行为）
-            return true;
+            return AccessResult.ALLOW;
         }
         SystemIpConfigModel config;
         try {
             config = systemParametersServer.getConfig(SystemIpConfigModel.ID, SystemIpConfigModel.class);
         } catch (Exception e) {
-            // 配置读取异常：无法确认访问限制，按 fail-closed 处理
+            // 配置读取异常：无法确认访问限制，按 fail-closed 拒绝，但必须回「配置读取失败」而不是 IP 拒绝
             log.error(I18nMessageUtil.get("i18n.ip_authorization_interception_exception.8130"), e);
-            return false;
+            return AccessResult.CONFIG_ERROR;
         }
         if (config == null) {
-            return true;
+            return AccessResult.ALLOW;
         }
         // 判断不允许访问
         String prohibited = config.getProhibited();
@@ -76,32 +92,56 @@ public class IpInterceptor implements HandlerMethodInterceptor {
                 // 为避免“伪造 IPv6/非法 X-Forwarded-For 即整体绕过白名单”，存在白名单限制时直接拒绝；
                 // 仅配置黑名单（allowed 为空）时保持原放行语义，避免锁死 IPv6 部署。
                 if (StrUtil.isEmpty(allowed) || this.isAllowAll(allowed)) {
-                    return true;
+                    return AccessResult.ALLOW;
                 }
                 log.warn("ip access denied, non-ipv4 client ip: {}", clientIp);
-                    return false;
+                return AccessResult.DENY;
             }
             if (StrUtil.isNotEmpty(prohibited) && this.checkIp(prohibited, clientIp, false)) {
-                    return false;
+                return AccessResult.DENY;
             }
             if (StrUtil.isEmpty(allowed) || this.checkIp(allowed, clientIp, true)) {
-                return true;
+                return AccessResult.ALLOW;
             }
         } catch (Exception e) {
-            // 配置解析异常：存在访问限制配置时按 fail-closed 处理
+            // 配置解析异常：无法确认访问限制，按 fail-closed 拒绝，但同样回「配置读取失败」而不是 IP 拒绝
             log.error(I18nMessageUtil.get("i18n.ip_authorization_interception_exception.8130"), e);
-            return false;
+            return AccessResult.CONFIG_ERROR;
         }
-        return false;
+        return AccessResult.DENY;
     }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
-        if (this.checkAccess(request)) {
+        AccessResult accessResult = this.checkAccessResult(request);
+        if (accessResult == AccessResult.ALLOW) {
             return true;
         }
-        this.writeProhibition(response);
+        if (accessResult == AccessResult.CONFIG_ERROR) {
+            // 服务端故障（读不到 IP 配置）不能伪装成 IP 拒绝，否则用户会一直去查白名单
+            this.writeConfigError(response);
+        } else {
+            this.writeProhibition(response);
+        }
         return false;
+    }
+
+    /**
+     * IP 访问判定结果
+     */
+    public enum AccessResult {
+        /**
+         * 允许访问
+         */
+        ALLOW,
+        /**
+         * IP 黑名单命中 / 不在白名单：属于 IP 限制生效
+         */
+        DENY,
+        /**
+         * 服务端读不到或解析不了 IP 授权配置：属于服务端故障，不是 IP 限制
+         */
+        CONFIG_ERROR
     }
 
     private boolean isIpv4(String ip) {
@@ -145,6 +185,10 @@ public class IpInterceptor implements HandlerMethodInterceptor {
 
     private void writeProhibition(HttpServletResponse response) {
         ServletUtil.write(response, JsonMessage.getString(IP_ACCESS_CODE, "Prohibition of access"), MediaType.APPLICATION_JSON_VALUE);
+    }
+
+    private void writeConfigError(HttpServletResponse response) {
+        ServletUtil.write(response, JsonMessage.getString(500, I18nMessageUtil.get("i18n.ip_access_config_read_failed.4b1c")), MediaType.APPLICATION_JSON_VALUE);
     }
 
 

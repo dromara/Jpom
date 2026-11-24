@@ -1,12 +1,12 @@
-/*
- * Copyright (c) 2019 Of Him Code Technology Studio
- * Jpom is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- * 			http://license.coscl.org.cn/MulanPSL2
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- */
+//
+// Copyright (c) 2019 Of Him Code Technology Studio
+// Jpom is licensed under Mulan PSL v2.
+// You can use this software according to the terms and conditions of the Mulan PSL v2.
+// You may obtain a copy of Mulan PSL v2 at:
+// 			http://license.coscl.org.cn/MulanPSL2
+// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+// See the Mulan PSL v2 for more details.
+//
 
 package api
 
@@ -187,10 +187,9 @@ func registerSystem(r *httpx.Router, a *app.App) {
 
 	// 版本与在线升级
 	r.Handle(http.MethodPost, "/system/check_version.json", func(c *httpx.Context) {
-		remote, err := sysinfo.LoadRemoteInfo(a)
+		remote, err := sysinfo.ResolveRemoteInfo(a)
 		if err != nil {
 			a.Log().Warn("load remote version failed", "error", err)
-			remote = sysinfo.CacheInfo(a)
 		}
 		if remote == nil {
 			c.OK(nil)

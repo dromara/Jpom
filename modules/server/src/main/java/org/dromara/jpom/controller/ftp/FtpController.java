@@ -161,11 +161,9 @@ public class FtpController extends BaseServerController {
     @PostMapping(value = "del.json", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.DEL)
     public IJsonMessage<Object> del(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id, HttpServletRequest request) {
-        boolean checkSsh = buildInfoService.checkReleaseMethodByLike(id, request, BuildReleaseMethod.Ssh);
-        Assert.state(!checkSsh, I18nMessageUtil.get("i18n.ssh_with_build_items_message.0f6d"));
-        // 判断是否绑定节点
-        List<NodeModel> nodeBySshId = nodeService.getNodeBySshId(id);
-        Assert.state(CollUtil.isEmpty(nodeBySshId), I18nMessageUtil.get("i18n.ssh_bound_to_node_message.7b64"));
+        // FTP 资产没有节点绑定关系（见 listData 的注释），只需校验是否被构建引用
+        boolean checkBuild = buildInfoService.checkReleaseMethodTarget(id, request, BuildReleaseMethod.Ftp);
+        Assert.state(!checkBuild, I18nMessageUtil.get("i18n.ftp_with_build_items_message.71b3"));
 
         ftpService.delByKey(id, request);
         //
@@ -176,11 +174,8 @@ public class FtpController extends BaseServerController {
     @Feature(method = MethodFeature.DEL)
     @SystemPermission
     public IJsonMessage<Object> delFore(@ValidatorItem(value = ValidatorRule.NOT_BLANK) String id) {
-        boolean checkSsh = buildInfoService.checkReleaseMethodByLike(id, BuildReleaseMethod.Ssh);
-        Assert.state(!checkSsh, I18nMessageUtil.get("i18n.ssh_with_build_items_message.0f6d"));
-        // 判断是否绑定节点
-        List<NodeModel> nodeBySshId = nodeService.getNodeBySshId(id);
-        Assert.state(CollUtil.isEmpty(nodeBySshId), I18nMessageUtil.get("i18n.ssh_bound_to_node_message.7b64"));
+        boolean checkBuild = buildInfoService.checkReleaseMethodTarget(id, BuildReleaseMethod.Ftp);
+        Assert.state(!checkBuild, I18nMessageUtil.get("i18n.ftp_with_build_items_message.71b3"));
 
         ftpService.delByKey(id);
         //

@@ -1,12 +1,12 @@
-///
-/// Copyright (c) 2019 Of Him Code Technology Studio
-/// Jpom is licensed under Mulan PSL v2.
-/// You can use this software according to the terms and conditions of the Mulan PSL v2.
-/// You may obtain a copy of Mulan PSL v2 at:
-/// 			http://license.coscl.org.cn/MulanPSL2
-/// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-/// See the Mulan PSL v2 for more details.
-///
+/*
+ * Copyright (c) 2019 Of Him Code Technology Studio
+ * Jpom is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ * 			http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ */
 
 import { t } from '@/i18n'
 import axios from './config'
@@ -117,12 +117,35 @@ export function editBuild(params) {
     buildMode: params.buildMode,
     aliasCode: params.aliasCode,
     resultKeepDay: params.resultKeepDay,
-    buildEnvParameter: params.buildEnvParameter
+    buildEnvParameter: params.buildEnvParameter,
+    // 构建节点：空表示 Server 本机构建（老行为），新增字段，老服务端忽略此参数
+    buildNodeId: params.buildNodeId || ''
   }
   return axios({
     url: '/build/edit',
     method: 'post',
     data
+  })
+}
+
+/**
+ * 可作为构建节点的节点列表（当前工作空间 + GLOBAL）
+ *
+ * 后端未就绪/接口不可用时由调用方降级为「本机（Server）」，因此这里带上 tip: no，
+ * 避免每次打开构建编辑页都弹一次接口错误提示。
+ *
+ * @returns {Promise<IResponse<Array<{
+ *  id: string, name: string, machineId: string, engine: string,
+ *  online: boolean, buildEnabled: number, buildMaxConcurrency: number
+ * }>>>}
+ */
+export function getBuildNodeList() {
+  return axios({
+    url: '/build/node/list',
+    method: 'get',
+    headers: {
+      tip: 'no'
+    }
   })
 }
 
@@ -286,6 +309,35 @@ export function rollback(logId) {
 }
 
 /**
+ * 查询构建历史在节点的版本快照
+ * @param {
+ *  logId: 构建历史 ID
+ * } params
+ */
+export function getBuildVersionList(params) {
+  return axios({
+    url: '/build/manage/version-list',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * 快速回滚（切换节点本地版本，不重新传输产物）
+ * @param {
+ *  logId: 构建历史 ID
+ *  restart: 切换后是否重启项目
+ * } params
+ */
+export function rollbackBuildVersion(params) {
+  return axios({
+    url: '/build/manage/rollback-version',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
  * 删除构建历史记录
  * @param {*} logId
  */
@@ -337,7 +389,8 @@ export const releaseMethodMap = {
   3: 'SSH',
   4: t('i18n_b71a7e6aab'),
   5: t('i18n_9136e1859a'),
-  6: 'FTP'
+  6: 'FTP',
+  7: t('i18n_8215da30b4')
 }
 
 export const triggerBuildTypeMap = {
@@ -349,5 +402,6 @@ export const triggerBuildTypeMap = {
 
 export const buildModeMap = {
   0: t('i18n_69c3b873c1'),
-  1: t('i18n_685e5de706')
+  1: t('i18n_685e5de706'),
+  2: t('i18n_c6f399f36c')
 }

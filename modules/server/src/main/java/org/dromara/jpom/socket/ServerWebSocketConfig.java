@@ -54,6 +54,9 @@ public class ServerWebSocketConfig implements WebSocketConfigurer {
         // 控制台
         registry.addHandler(new ConsoleHandler(), "/socket/console")
             .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
+        // SSH 项目控制台（不依赖插件端）
+        registry.addHandler(new SshProjectConsoleHandler(), "/socket/ssh-project")
+            .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");
         // 节点脚本模板
         registry.addHandler(new NodeScriptHandler(), "/socket/node/script_run")
             .addInterceptors(serverWebSocketInterceptor).setAllowedOrigins("*");

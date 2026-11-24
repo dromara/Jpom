@@ -1,3 +1,14 @@
+<!--
+
+    Copyright (c) 2019 Of Him Code Technology Studio
+    Jpom is licensed under Mulan PSL v2.
+    You can use this software according to the terms and conditions of the Mulan PSL v2.
+    You may obtain a copy of Mulan PSL v2 at:
+    			http://license.coscl.org.cn/MulanPSL2
+    THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+    See the Mulan PSL v2 for more details.
+
+-->
 <template>
   <div>
     <!-- 数据表格 -->
@@ -276,7 +287,8 @@ export default {
           align: 'center',
           dataIndex: 'operation',
 
-          width: 120
+          fixed: 'right',
+          width: '1%'
         }
       ],
 
@@ -372,15 +384,17 @@ export default {
             targetKeys: res.data.map((element) => {
               return element.workspaceId
             }),
-            prohibitExecuteArray: JSON.parse(record.prohibitExecute).map((item) => {
+            // 老数据可能是空字符串（服务端曾把空配置存成 ""），JSON.parse("") 会抛
+            // Unexpected end of JSON input 让整个编辑弹窗打不开（BUGS B-024）
+            prohibitExecuteArray: JSON.parse(record.prohibitExecute || '[]').map((item) => {
               return {
                 reason: item.reason,
                 moments: [item.startTime, item.endTime]
               }
             }),
-            allowExecuteArray: JSON.parse(record.allowExecute)
+            allowExecuteArray: JSON.parse(record.allowExecute || '[]')
           }
-          delete this.temp.prohibitExecute, delete this.temp.allowExecute
+          ;(delete this.temp.prohibitExecute, delete this.temp.allowExecute)
           this.editVisible = true
         })
       })

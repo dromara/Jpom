@@ -23,6 +23,8 @@
     <modules>
         <module>agent-transport-common</module>
         <module>agent-transport-http</module>
+        <module>agent-transport-tunnel</module>
+        <module>agent-transport-tunnel-ws</module>
     </modules>
     <modelVersion>4.0.0</modelVersion>
     <version>2.11.14</version>

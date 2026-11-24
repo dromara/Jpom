@@ -24,6 +24,7 @@ import cn.hutool.system.SystemUtil;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.*;
@@ -34,6 +35,8 @@ import java.util.*;
  * @author bwcx_jzy
  * @since 2024/6/11
  */
+@Deprecated
+@Ignore("i18n 工具链已弃用（2026-11-18）：火山翻译 API 客户端，禁止再运行")
 public class VolcTranslateApiTest {
 
     private final String region;

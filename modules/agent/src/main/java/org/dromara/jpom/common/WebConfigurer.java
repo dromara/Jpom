@@ -38,6 +38,4 @@ public class WebConfigurer implements WebMvcConfigurer {
         registry.addInterceptor(parameterInterceptor).addPathPatterns("/**");
         registry.addInterceptor(authorizeInterceptor).addPathPatterns("/**");
     }
-
-
 }

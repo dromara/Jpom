@@ -1,12 +1,12 @@
-/*
- * Copyright (c) 2019 Of Him Code Technology Studio
- * Jpom is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- * 			http://license.coscl.org.cn/MulanPSL2
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- */
+//
+// Copyright (c) 2019 Of Him Code Technology Studio
+// Jpom is licensed under Mulan PSL v2.
+// You can use this software according to the terms and conditions of the Mulan PSL v2.
+// You may obtain a copy of Mulan PSL v2 at:
+// 			http://license.coscl.org.cn/MulanPSL2
+// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+// See the Mulan PSL v2 for more details.
+//
 
 package ws
 
@@ -164,14 +164,23 @@ func TestScriptRunStreamsExecution(t *testing.T) {
 		t.Fatalf("unexpected hello frame: %s", hello)
 	}
 	sendJSON(t, conn, map[string]any{"scriptId": "script-1", "op": "start", "executeId": "execute-1", "args": "[]"})
-	control := readText(t, conn, 3*time.Second)
-	if !strings.Contains(control, "\"code\":200") || !strings.Contains(control, "执行成功") {
-		t.Fatalf("unexpected control frame: %s", control)
+	// 控制帧 / 执行输出帧 / 完成帧的先后顺序都不保证（脚本极快时完成帧会先到），
+	// 因此只用一个循环持续累积帧，直到两个条件都满足；分别 readUntil 会把先到的帧吃掉，
+	// 第二次调用只能等到超时（CI 偶发 "no matching frame"）。
+	var acc []string
+	gotControl, gotStop := false, false
+	deadline := time.Now().Add(8 * time.Second)
+	for !(gotControl && gotStop) {
+		frame := readText(t, conn, time.Until(deadline))
+		acc = append(acc, frame)
+		if !gotControl && strings.Contains(frame, "\"code\":200") && strings.Contains(frame, "执行成功") {
+			gotControl = true
+		}
+		if !gotStop && strings.Contains(frame, "JPOM_MSG") && strings.Contains(frame, "stop") {
+			gotStop = true
+		}
 	}
-	frames := readUntil(t, conn, 5*time.Second, func(frame string) bool {
-		return strings.Contains(frame, "JPOM_MSG") && strings.Contains(frame, "stop")
-	})
-	joined := strings.Join(frames, "\n")
+	joined := strings.Join(acc, "\n")
 	if !strings.Contains(joined, "hello-script") {
 		t.Fatalf("execution output missing: %s", joined)
 	}
@@ -314,6 +323,52 @@ func TestConsoleProtocol(t *testing.T) {
 	}
 	if line := readText(t, conn, 3*time.Second); line != "console-line-1" {
 		t.Fatalf("unexpected console log line: %s", line)
+	}
+}
+
+func TestConsoleProjectLogKey(t *testing.T) {
+	instance := testApp(t)
+	manager := testManager(t, instance)
+	libDir := filepath.Join(instance.BaseDir, "lib")
+	if err := os.MkdirAll(filepath.Join(libDir, "logs"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	appLog := filepath.Join(libDir, "logs", "app.log")
+	dslContent := "run:\n  start:\n    scriptId: a.sh\nconfig:\n  log:\n    - name: app\n      path: logs/app.log\n"
+	projectInfo := map[string]any{
+		"id": "p1", "name": "demo", "workspaceId": "DEFAULT", "runMode": "Dsl",
+		"whitelistDirectory": instance.BaseDir, "lib": "lib", "dslContent": dslContent,
+	}
+	fixture, err := json.Marshal(map[string]any{"p1": projectInfo})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(instance.DataDir, "project.json"), fixture, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	manager.Console = &fakeConsoleBackend{project: projectInfo, success: true}
+	server := startServer(t, instance, manager.HandleConsole)
+	conn := dial(t, server, "/console", "&projectId=p1&optUser=devadmin&lang=zh-CN")
+	_ = readText(t, conn, 3*time.Second)
+	if err := os.WriteFile(appLog, []byte("dsl-app-line-1\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	items := manager.ProjectRuntime.DslLogFiles(projectInfo)
+	if len(items) != 1 {
+		t.Fatalf("unexpected dsl log items: %+v", items)
+	}
+	// 控制台按配置的日志标识实时跟踪 DSL 应用日志
+	sendJSON(t, conn, map[string]any{"op": "showlog", "projectId": "p1", "logKey": items[0].Key})
+	if banner := readText(t, conn, 3*time.Second); !strings.Contains(banner, "监听app.log日志成功") {
+		t.Fatalf("unexpected dsl log banner: %s", banner)
+	}
+	if line := readText(t, conn, 3*time.Second); line != "dsl-app-line-1" {
+		t.Fatalf("unexpected dsl log line: %s", line)
+	}
+	// 未配置的标识直接提示文件不存在
+	sendJSON(t, conn, map[string]any{"op": "showlog", "projectId": "p1", "logKey": "not-exists-key"})
+	if msg := readText(t, conn, 3*time.Second); msg != "文件不存在" {
+		t.Fatalf("unexpected missing log message: %s", msg)
 	}
 }
 

@@ -97,6 +97,22 @@ public class OutGivingRun {
     private boolean doneDeleteFile = true;
     private String projectSecondaryDirectory;
     private LogRecorder logRecorder;
+    /**
+     * 构建编号（构建触发分发时按节点登记版本快照）
+     */
+    private Integer buildNumberId;
+    /**
+     * 构建配置ID
+     */
+    private String buildDataId;
+    /**
+     * 是否生成完整版本快照
+     */
+    private Boolean versionSnapshot;
+    /**
+     * 版本快照保留个数
+     */
+    private Integer versionKeepCount;
 
     /**
      * 取消分发
@@ -132,6 +148,18 @@ public class OutGivingRun {
         String logId = map.get(dataId);
         Assert.hasText(logId, I18nMessageUtil.get("i18n.current_distribution_data_lost_record_id_not_exist.ca07"));
         return logId;
+    }
+
+    /**
+     * 把构建版本信息传递给单节点分发任务
+     *
+     * @param outGivingItemRun 单节点任务
+     */
+    private void applyVersion(OutGivingItemRun outGivingItemRun) {
+        outGivingItemRun.setBuildNumberId(this.buildNumberId);
+        outGivingItemRun.setBuildDataId(this.buildDataId);
+        outGivingItemRun.setVersionSnapshot(this.versionSnapshot);
+        outGivingItemRun.setVersionKeepCount(this.versionKeepCount);
     }
 
     private void removeLogId(String outId, OutGivingNodeProject nodeProject) {
@@ -171,7 +199,7 @@ public class OutGivingRun {
     public Future<OutGivingModel.Status> startRun(String select) {
         OutGivingServer outGivingServer = SpringUtil.getBean(OutGivingServer.class);
         OutGivingModel item = outGivingServer.getByKey(id);
-        Objects.requireNonNull(item, I18nMessageUtil.get("i18n.no_distribution_exists.4425"));
+        Assert.notNull(item, I18nMessageUtil.get("i18n.no_distribution_exists.4425"));
         // 更新二级目录
         Opt.ofBlankAble(this.projectSecondaryDirectory).ifPresent(item::setSecondaryDirectory);
         //
@@ -197,6 +225,7 @@ public class OutGivingRun {
                         final OutGivingItemRun outGivingRun = new OutGivingItemRun(item, outGivingNodeProject, file, unzip, sleepTime);
                         outGivingRun.setStripComponents(stripComponents);
                         outGivingRun.setFileName(fileName);
+                        this.applyVersion(outGivingRun);
                         OutGivingNodeProject.Status status = outGivingRun.call();
                         if (status != OutGivingNodeProject.Status.Ok) {
                             if (afterOpt == AfterOpt.Order_Must_Restart) {
@@ -224,6 +253,7 @@ public class OutGivingRun {
                 final OutGivingItemRun outGivingItemRun = new OutGivingItemRun(item, outGivingNodeProject, file, unzip, null);
                 outGivingItemRun.setStripComponents(stripComponents);
                 outGivingItemRun.setFileName(fileName);
+                this.applyVersion(outGivingItemRun);
                 syncFinisher.addWorker(() -> {
                     try {
                         statusList.add(outGivingItemRun.call());

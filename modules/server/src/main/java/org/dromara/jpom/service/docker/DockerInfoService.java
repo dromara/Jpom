@@ -62,12 +62,10 @@ public class DockerInfoService extends BaseWorkspaceService<DockerInfoModel> {
         Condition workspaceIdCondition = new Condition("workspaceId", workspaceId);
         if (StrUtil.isEmpty(tag)) {
             return super.findByCondition(workspaceIdCondition);
-        } else {
-            Condition tagCondition = new Condition(" instr(tags,'" + StrUtil.wrap(tag, StrUtil.COLON) + "')", "");
-            tagCondition.setPlaceHolder(false);
-            tagCondition.setOperator("");
-            return super.findByCondition(workspaceIdCondition, tagCondition);
         }
+        // tag 只作为查询值参与参数绑定，禁止拼接到 SQL 中（VL-001 docker 构建 DSL SQL 注入修复）
+        String sql = StrUtil.format("SELECT * FROM {} WHERE {}=? AND instr(tags,?)", super.getTableName(), DialectUtil.wrapField("workspaceId"));
+        return this.queryList(sql, workspaceId, StrUtil.wrap(tag, StrUtil.COLON));
     }
 
     /**

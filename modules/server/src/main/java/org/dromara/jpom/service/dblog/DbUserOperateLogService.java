@@ -78,7 +78,9 @@ public class DbUserOperateLogService extends BaseWorkspaceService<UserOperateLog
      */
     public PageResultDto<UserOperateLogV1> listPageByUserId(HttpServletRequest request, String userId) {
         Map<String, String> paramMap = ServletUtil.getParamMap(request);
-        paramMap.put("userId", userId);
+        // 强制过滤（不是普通 put）：客户端可附带 userId:in / %userId% 等「同字段」参数，
+        // 普通 put 只覆盖同名 key，同字段的其它写法会一起进 where，导致查询条件被放大/静默空结果
+        putForcedFilter(paramMap, "userId", userId);
         return super.listPage(paramMap);
     }
 

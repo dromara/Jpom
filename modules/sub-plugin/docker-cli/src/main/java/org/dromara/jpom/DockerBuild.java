@@ -421,7 +421,11 @@ public class DockerBuild implements AutoCloseable {
             // 镜像不存在，需要构建
         }
         File file = plugin.getResourceToFile(String.format("runs/%s/" + DockerUtil.DOCKER_FILE, runsOn), tempDir);
-        Assert.notNull(file, I18nMessageUtil.get("i18n.unsupported_prefix.4f8c") + runsOn);
+        // 原来只回「当前还不支持：<runsOn>」，既不说清 runsOn 是什么，也不给可用的取值（BUGS B-030）。
+        // runsOn 是镜像后缀：插件端用 jpomdocker/runs_<runsOn> 作为基础镜像，缺镜像时再找内置 Dockerfile。
+        Assert.notNull(file, I18nMessageUtil.get("i18n.runs_on_image_missing_hint.9c4d")
+            + image + I18nMessageUtil.get("i18n.runs_on_image_missing_hint_tail.2b7a") + runsOn
+            + I18nMessageUtil.get("i18n.runs_on_image_missing_example.5e8f"));
         HashSet<String> tags = new HashSet<>();
         tags.add(image);
         String errorMessage = String.format(I18nMessageUtil.get("i18n.build_runs_on_image_failed.0568"), image);

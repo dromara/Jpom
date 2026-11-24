@@ -34,6 +34,17 @@ import java.util.List;
     nameKey = "i18n.machine_node_info.6a75")
 @Data
 public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
+
+    /**
+     * 节点标识：反向建连隧道按该主键路由请求
+     *
+     * @return 机器节点主键
+     */
+    @Override
+    public String id() {
+        return this.getId();
+    }
+
     /**
      * 机器主机名
      */
@@ -120,9 +131,43 @@ public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
      */
     private String statusMsg;
     /**
+     * 是否允许该机器承担构建任务（0 否，1 是）。
+     * <p>
+     * 只有 Go 插件端（manifest.capabilities 含 build）才能开启；开启后绑定到该机器的节点
+     * 才可以被构建配置选为「构建节点」。默认 0，老数据不受影响。
+     */
+    private Integer buildEnabled;
+
+    /**
+     * 允许同时执行的构建任务数（&lt;=0 或空按 1 处理）。
+     * <p>
+     * 打包机 CPU/内存有限，默认 1 个并发，避免多个 mvn/xcodebuild 互相抢资源。
+     */
+    private Integer buildMaxConcurrency;
+
+    /**
+     * 插件端引擎（java / go），由保存资产与心跳采集时根据 /info manifest 自动识别后落库。
+     * <p>
+     * 引擎不会频繁变化，存下来供机器列表、「可作为构建节点」开关与构建节点选择直接使用，
+     * 不再每次打开页面都去探测节点。空表示尚未识别（老数据升级后第一次心跳前）。
+     */
+    private String jpomEngine;
+
+    /**
      * 传输方式。0 服务器拉取，1 节点机器推送
+     * <p>
+     * 注意：这是「状态采集方式」，不是通讯通道；通讯方式见 {@link #connectMode}。
      */
     private Integer transportMode;
+
+    /**
+     * 通讯方式（{@link MachineConnectMode}）：0 自动（默认，隧道优先、离线回退正向）、
+     * 1 仅反向隧道、2 仅正向拉取。
+     * <p>
+     * 只有「仅反向隧道」时，节点地址/账号/密码/协议/代理/超时这些正向配置不参与通信
+     * （界面禁用、保存不再强制校验），其它方式仍按正向配置连接。
+     */
+    private Integer connectMode;
     /**
      * jpom 通讯地址
      */
@@ -139,6 +184,13 @@ public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
      * 通讯登录密码
      */
     private String jpomPassword;
+    /**
+     * 通讯授权摘要（sha1(账号@密码)），由插件端在反向隧道 HELLO 中上报后落库。
+     * <p>
+     * 只增字段：老数据为空时仍按 {@code jpomUsername/jpomPassword} 计算，行为不变；
+     * 自动注册的机器资产靠它直接可用，不必再让运维手工补密码。
+     */
+    private String authorizeToken;
     /**
      * 超时时间
      */
@@ -226,6 +278,10 @@ public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
      */
     @Override
     public String authorize() {
+        if (StrUtil.isNotEmpty(this.authorizeToken)) {
+            // 插件端在隧道 HELLO 中上报的摘要优先（自动注册/隧道部署场景）
+            return this.authorizeToken;
+        }
         return SecureUtil.sha1(this.jpomUsername + "@" + this.jpomPassword);
     }
 
@@ -258,4 +314,14 @@ public class MachineNodeModel extends BaseGroupNameModel implements INodeInfo {
         // 需要兼容旧数据
         return ObjectUtil.defaultIfNull(this.getTransportEncryption(), 0);
     }
+
+    /**
+     * 清空不能下发到浏览器的凭据字段：authorizeToken 等价插件端通讯口令、jpomPassword 是机器登录口令。
+     * 单一收口：列表/详情/下拉/节点列表副本等处一律调用本方法。
+     */
+    public void clearSensitive() {
+        this.setAuthorizeToken(null);
+        this.setJpomPassword(null);
+    }
+
 }

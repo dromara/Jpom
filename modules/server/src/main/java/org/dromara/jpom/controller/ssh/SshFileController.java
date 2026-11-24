@@ -11,7 +11,6 @@ package org.dromara.jpom.controller.ssh;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
@@ -52,7 +51,7 @@ public class SshFileController extends BaseSshFileController {
     @Override
     protected <T> T checkConfigPathChildren(String id, String path, String children, BiFunction<MachineSshModel, ItemConfig, T> function) {
         FileUtils.checkSlip(path);
-        Opt.ofBlankAble(children).ifPresent(FileUtils::checkSlip);
+        FileUtils.checkRelativePath(children);
 
         SshModel sshModel = sshService.getByKey(id, getRequest());
         Assert.notNull(sshModel, I18nMessageUtil.get("i18n.no_corresponding_ssh.aa68"));

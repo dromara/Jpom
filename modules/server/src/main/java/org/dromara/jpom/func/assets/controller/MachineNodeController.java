@@ -77,6 +77,10 @@ public class MachineNodeController extends BaseGroupNameController {
     @Feature(method = MethodFeature.LIST)
     public IJsonMessage<PageResultDto<MachineNodeModel>> listJson(HttpServletRequest request) {
         PageResultDto<MachineNodeModel> pageResultDto = machineNodeServer.listPage(request);
+        // 长时间没有刷新检测结果的机器不能继续显示"正常"
+        machineNodeServer.fillTimeoutStatus(pageResultDto.getResult());
+        // 授权摘要等价于通讯凭据：列表接口不回显（密码已由 fillSelectResult 置空）
+        machineNodeServer.clearSensitive(pageResultDto.getResult());
         return JsonMessage.success("", pageResultDto);
     }
 
@@ -101,6 +105,8 @@ public class MachineNodeController extends BaseGroupNameController {
             }
             machineNodeModels.add(nodeModel);
         }
+        // 下拉/搜索同样受「不下发凭据」约束：authorizeToken 等价插件端通讯口令
+        machineNodeServer.clearSensitive(machineNodeModels);
         return JsonMessage.success("", machineNodeModels);
     }
 
@@ -173,6 +179,7 @@ public class MachineNodeController extends BaseGroupNameController {
         MachineNodeModel machineNodeModel = new MachineNodeModel();
         machineNodeModel.setTemplateNode(true);
         List<MachineNodeModel> modelList = machineNodeServer.listByBean(machineNodeModel);
+        machineNodeServer.clearSensitive(modelList);
         return JsonMessage.success("", modelList);
     }
 

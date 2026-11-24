@@ -13,6 +13,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.map.SafeConcurrentHashMap;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
@@ -26,6 +27,8 @@ import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.model.RunMode;
 import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.NodeProjectInfoModel;
+import org.dromara.jpom.model.data.ProjectLogFileItem;
+import org.dromara.jpom.service.log.ProjectLogFileService;
 import org.dromara.jpom.service.manage.ProjectInfoService;
 import org.dromara.jpom.util.FileSearchUtil;
 import org.dromara.jpom.util.FileUtils;
@@ -53,6 +56,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
 
     private static ProjectInfoService projectInfoService;
     private static ProjectCommander projectCommander;
+    private static ProjectLogFileService projectLogFileService;
     /**
      * 会话当前监听的文件，用于切换日志文件时先摘除旧监听，避免一个会话长期挂着多个 Tailer
      */
@@ -61,9 +65,11 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
     @Autowired
     public void init(ProjectInfoService projectInfoService,
                      AgentConfig agentConfig,
-                     ProjectCommander projectCommander) {
+                     ProjectCommander projectCommander,
+                     ProjectLogFileService projectLogFileService) {
         AgentWebSocketConsoleHandle.projectInfoService = projectInfoService;
         AgentWebSocketConsoleHandle.projectCommander = projectCommander;
+        AgentWebSocketConsoleHandle.projectLogFileService = projectLogFileService;
         setAgentAuthorize(agentConfig.getAuthorize());
     }
 
@@ -78,6 +84,9 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
             // 由容器回收会话，避免半开会话与文件监听器长期占用内存
             session.setMaxIdleTimeout(180_000L);
             String projectId = super.getParameters(session, "projectId");
+            // 连接期记住 projectId：消息体里的 projectId 是前端自己带的，第三方客户端/老版本前端可能不带，
+            // 缺省时回退到连接期参数，避免「连接成功但每条指令都报没有对应项目」（BUGS B-029）
+            session.getUserProperties().put("projectId", projectId);
             // 判断项目
             if (!Const.SYSTEM_ID.equals(projectId)) {
                 NodeProjectInfoModel nodeProjectInfoModel = this.checkProject(projectId, session);
@@ -139,6 +148,10 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                 return;
             }
             String projectId = json.getString("projectId");
+            if (StrUtil.isEmpty(projectId)) {
+                // 兼容不带 projectId 的指令：回退到连接期参数（BUGS B-029）
+                projectId = (String) session.getUserProperties().get("projectId");
+            }
             NodeProjectInfoModel nodeProjectInfoModel = this.checkProject(projectId, session);
             if (nodeProjectInfoModel == null) {
                 return;
@@ -247,10 +260,8 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
      */
     private JsonMessage<Object> searchLog(Session session, NodeProjectInfoModel nodeProjectInfoModel, JSONObject reqJson) {
         //
-        String fileName = reqJson.getString("logFile");
-        File libFile = projectInfoService.resolveLibFile(nodeProjectInfoModel);
-        // 客户端可控日志文件名，限制在项目目录内，避免路径穿越
-        File file = FileUtils.resolveSubFile(libFile, fileName);
+        ProjectLogFileItem logFile = this.resolveLogFile(nodeProjectInfoModel, reqJson);
+        File file = logFile == null ? null : FileUtil.file(logFile.getPath());
         if (file == null || !FileUtil.isFile(file)) {
             return new JsonMessage<>(404, I18nMessageUtil.get("i18n.file_not_found.d952"));
         }
@@ -263,7 +274,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                 int afterCount = reqJson.getIntValue("afterCount");
                 String keyword = reqJson.getString("keyword");
                 NodeProjectInfoModel originalModel = projectInfoService.resolveModel(nodeProjectInfoModel);
-                Charset charset = projectInfoService.resolveLogCharset(nodeProjectInfoModel, originalModel);
+                Charset charset = CharsetUtil.parse(logFile.getCharset(), projectInfoService.resolveLogCharset(nodeProjectInfoModel, originalModel));
                 //BaseFileTailWatcher.detectorCharset(file);
                 String resultMsg = FileSearchUtil.searchList(file, charset, keyword, beforeCount, afterCount, head, tail, first, objects -> {
                     try {
@@ -285,9 +296,27 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
         return null;
     }
 
-    private void showLog(Session session, NodeProjectInfoModel nodeProjectInfoModel, JSONObject reqJson) throws IOException {
-        //        日志文件路径
+    /**
+     * 解析要查看/搜索的日志文件
+     * <p>
+     * 支持三种来源：项目配置的日志文件（只回传标识 logKey，路径由插件端解析）、
+     * 项目目录内的文件（fileName/logFile，限制在项目目录内避免路径穿越）、
+     * 默认的项目控制台日志。
+     *
+     * @param nodeProjectInfoModel 项目
+     * @param reqJson              请求参数
+     * @return 日志文件信息，未找到返回 null
+     */
+    private ProjectLogFileItem resolveLogFile(NodeProjectInfoModel nodeProjectInfoModel, JSONObject reqJson) {
+        String logKey = reqJson.getString("logKey");
+        if (StrUtil.isNotEmpty(logKey)) {
+            return projectLogFileService.resolve(nodeProjectInfoModel, logKey);
+        }
         String fileName = reqJson.getString("fileName");
+        if (StrUtil.isEmpty(fileName)) {
+            fileName = reqJson.getString("logFile");
+        }
+        NodeProjectInfoModel originalModel = projectInfoService.resolveModel(nodeProjectInfoModel);
         File file;
         if (StrUtil.isEmpty(fileName)) {
             file = projectInfoService.resolveAbsoluteLogFile(nodeProjectInfoModel);
@@ -295,11 +324,25 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
             File libFile = projectInfoService.resolveLibFile(nodeProjectInfoModel);
             // 客户端可控日志文件名，限制在项目目录内，避免路径穿越
             file = FileUtils.resolveSubFile(libFile, fileName);
-            if (file == null) {
-                SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.file_not_found.d952"));
-                return;
-            }
         }
+        if (file == null) {
+            return null;
+        }
+        Charset charset = projectInfoService.resolveLogCharset(nodeProjectInfoModel, originalModel);
+        ProjectLogFileItem logFile = new ProjectLogFileItem();
+        logFile.setPath(FileUtil.getAbsolutePath(file));
+        logFile.setCharset(charset.name());
+        logFile.setExists(FileUtil.isFile(file));
+        return logFile;
+    }
+
+    private void showLog(Session session, NodeProjectInfoModel nodeProjectInfoModel, JSONObject reqJson) throws IOException {
+        ProjectLogFileItem logFile = this.resolveLogFile(nodeProjectInfoModel, reqJson);
+        if (logFile == null) {
+            SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.file_not_found.d952"));
+            return;
+        }
+        File file = FileUtil.file(logFile.getPath());
         try {
             File oldFile = CACHE_FILE.get(session.getId());
             if (oldFile != null && !oldFile.equals(file)) {
@@ -307,7 +350,7 @@ public class AgentWebSocketConsoleHandle extends BaseAgentWebSocketHandle {
                 AgentFileTailWatcher.offlineFile(oldFile, session);
             }
             NodeProjectInfoModel originalModel = projectInfoService.resolveModel(nodeProjectInfoModel);
-            Charset charset = projectInfoService.resolveLogCharset(nodeProjectInfoModel, originalModel);
+            Charset charset = CharsetUtil.parse(logFile.getCharset(), projectInfoService.resolveLogCharset(nodeProjectInfoModel, originalModel));
             boolean watcher = AgentFileTailWatcher.addWatcher(file, charset, session);
             if (!watcher) {
                 SocketSessionUtil.send(session, I18nMessageUtil.get("i18n.listen_file_failed_may_not_exist.fd56"));

@@ -57,6 +57,31 @@ public enum NodeUrl {
      */
     NodeUpdate("/node_update"),
 
+    /**
+     * 构建节点：提交构建任务（JSON body）
+     */
+    Build_Start("/build/start"),
+    /**
+     * 构建节点：日志/阶段/结果事件流（Server 作为 ws 客户端只读）
+     */
+    Build_Log("/build-log"),
+    /**
+     * 构建节点：查询任务状态（断线对账、源码目录探测）
+     */
+    Build_Status("/build/status"),
+    /**
+     * 构建节点：取消任务（kill 整个进程组）
+     */
+    Build_Cancel("/build/cancel"),
+    /**
+     * 构建节点：拉取产物 zip（流式）
+     */
+    Build_Download("/build/download", true),
+    /**
+     * 构建节点：批量探测构建源码目录是否存在
+     */
+    Build_SourceExists("/build/source-exists"),
+
     WhitelistDirectory_Submit("/system/whitelistDirectory_submit"),
 
     WhitelistDirectory_data("/system/whitelistDirectory_data"),
@@ -118,9 +143,23 @@ public enum NodeUrl {
     MANAGE_FILE_COMPRESS("/manage/file/compress"),
 
     Manage_File_Download("/manage/file/download", true),
+    /**
+     * 项目文件版本快照
+     */
+    Manage_File_Version_Capability("/manage/file/version-capability"),
+    Manage_File_Version_Begin("/manage/file/version-begin"),
+    Manage_File_Version_Commit("/manage/file/version-commit"),
+    Manage_File_Version_List("/manage/file/version-list"),
+    Manage_File_Version_Switch("/manage/file/version-switch"),
+    Manage_File_Version_Delete("/manage/file/version-delete"),
 
 
     Manage_Log_LogSize("/manage/log/logSize"),
+
+    /**
+     * 项目可查看的运行日志文件列表
+     */
+    Manage_Log_LogList("/manage/log/logList"),
 
     Manage_Log_ResetLog("/manage/log/resetLog"),
 

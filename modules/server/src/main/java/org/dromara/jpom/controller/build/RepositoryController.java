@@ -326,11 +326,10 @@ public class RepositoryController extends BaseServerController {
         Assert.state(andUpdateSshKey, I18nMessageUtil.get("i18n.rsa_private_key_file_invalid.5f12"));
 
         if (repositoryModelReq.getRepoType() == RepositoryModel.RepoType.Git.getCode()) {
-            RepositoryModel repositoryModel = repositoryService.getByKey(repositoryModelReq.getId(), false);
-            if (repositoryModel != null) {
-                repositoryModelReq.setRsaPrv(StrUtil.emptyToDefault(repositoryModelReq.getRsaPrv(), repositoryModel.getRsaPrv()));
-                repositoryModelReq.setPassword(StrUtil.emptyToDefault(repositoryModelReq.getPassword(), repositoryModel.getPassword()));
-            }
+            // 编辑已有仓库：先按「当前工作空间 + GLOBAL」确认仓库归属，再回填数据库中的凭据
+            // 不能先用非工作空间隔离的查询回填、再在方法末尾校验：回填后的对象会带着调用者提供的
+            // gitUrl 交给 git 插件执行 ls-remote，密码会以 HTTP Basic 发到调用者控制的地址
+            this.applyStoredCredentials(repositoryModelReq, request);
             // 验证 git 仓库信息
             try {
                 IPlugin plugin = PluginFactory.getPlugin("git-clone");
@@ -353,6 +352,34 @@ public class RepositoryController extends BaseServerController {
         }
 
         return new JsonMessage<>(200, I18nMessageUtil.get("i18n.operation_succeeded.3313"));
+    }
+
+    /**
+     * 回填仓库保存的凭据（密码/ssh 私钥）
+     * <p>
+     * 必须先用带工作空间条件的查询（{@code getByKey(id, request, false)}，条件为「当前空间 + GLOBAL」）
+     * 确认仓库归属，再把凭据回填到请求对象；用 {@code getByKey(id, false)} 这类非隔离查询会把其他
+     * 工作空间仓库的密码/私钥回填进本次请求，随后 git 插件会用调用者提供的仓库地址执行 ls-remote，
+     * 导致凭据以 HTTP Basic 外发（跨工作空间凭据泄露）。
+     * </p>
+     * <p>
+     * fill=false 是刻意的：{@link RepositoryService#fillSelectResult} 会把密码/私钥脱敏置空，
+     * 交给 git 插件后就是空凭证（2.11.13 起「获取分支」认证失败的同类问题）。
+     * </p>
+     *
+     * @param repositoryModelReq 请求对象（会被回填）
+     * @param request            请求
+     */
+    void applyStoredCredentials(RepositoryModel repositoryModelReq, HttpServletRequest request) {
+        String id = repositoryModelReq.getId();
+        if (StrUtil.isEmpty(id)) {
+            // 新增仓库没有历史凭据需要回填
+            return;
+        }
+        RepositoryModel repositoryModel = repositoryService.getByKey(id, request, false);
+        Assert.notNull(repositoryModel, I18nMessageUtil.get("i18n.invalid_repository_info.b4ad"));
+        repositoryModelReq.setRsaPrv(StrUtil.emptyToDefault(repositoryModelReq.getRsaPrv(), repositoryModel.getRsaPrv()));
+        repositoryModelReq.setPassword(StrUtil.emptyToDefault(repositoryModelReq.getPassword(), repositoryModel.getPassword()));
     }
 
     /**

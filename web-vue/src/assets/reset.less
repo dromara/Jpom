@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2019 Of Him Code Technology Studio
+ * Jpom is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ * 			http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ */
 /* 全局样式，重置样式 */
 html,
 body {
@@ -18,6 +27,17 @@ body {
 
 .ant-table-body {
   overflow-x: auto !important;
+}
+
+// 操作列（表格最后一列 + 固定在右侧）宽度必须由内容决定：
+//  - 按钮多少、文案长短、theme.compactAlgorithm（个性化 → 紧凑模式）都会改变内容宽度，
+//    写死 px 宽度必然在某种模式/某种数据下「要么留一大片白、要么把按钮挤换行」；
+//  - 列上统一写 width: '1%'（table-layout: auto 下只作为建议宽度，实际被内容撑开、也不会
+//    吸收容器多余空间），再靠这里的 white-space: nowrap 让内容不折行；表格统一
+//    :scroll="{ x: 'max-content' }" + fixed: 'right'，多余空间留给其它列。
+.ant-table-thead th.ant-table-cell-fix-right:last-child,
+.ant-table-tbody td.ant-table-cell-fix-right:last-child {
+  white-space: nowrap;
 }
 
 .search-input-item {

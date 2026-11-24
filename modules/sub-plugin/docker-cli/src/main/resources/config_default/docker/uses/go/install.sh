@@ -10,6 +10,7 @@
 #
 
 
+
 if [ $GO_VERSION ]; then
 	echo "GO_VERSION ${GO_VERSION}"
 else

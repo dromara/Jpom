@@ -1,12 +1,12 @@
-/*
- * Copyright (c) 2019 Of Him Code Technology Studio
- * Jpom is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- * 			http://license.coscl.org.cn/MulanPSL2
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- */
+//
+// Copyright (c) 2019 Of Him Code Technology Studio
+// Jpom is licensed under Mulan PSL v2.
+// You can use this software according to the terms and conditions of the Mulan PSL v2.
+// You may obtain a copy of Mulan PSL v2 at:
+// 			http://license.coscl.org.cn/MulanPSL2
+// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+// See the Mulan PSL v2 for more details.
+//
 
 package project
 
@@ -28,6 +28,13 @@ const backLogMinSize = 100 * 1024
 
 // LogSize 返回日志备份目录是否存在与当前日志文件可读大小（等价 /manage/log/logSize）。
 func (r *Runtime) LogSize(info map[string]any) (bool, string, error) {
+	return r.LogSizeOf(info, "")
+}
+
+// LogSizeOf 返回日志备份目录是否存在与指定日志文件的可读大小。
+//
+// logKey 为空表示控制台日志；否则为项目配置的日志文件标识（DSL config.log）。
+func (r *Runtime) LogSizeOf(info map[string]any, logKey string) (bool, string, error) {
 	logBack, err := r.Manager.ResolveLogBack(info)
 	if err != nil {
 		return false, "", err
@@ -36,9 +43,18 @@ func (r *Runtime) LogSize(info map[string]any) (bool, string, error) {
 	if stat, err := os.Stat(logBack); err == nil && stat.IsDir() {
 		logBackExists = true
 	}
-	file, err := r.Manager.ResolveLogFile(info)
-	if err != nil {
-		return logBackExists, "", err
+	var file string
+	if strings.TrimSpace(logKey) != "" {
+		item, ok := r.ResolveDslLogFile(info, logKey)
+		if !ok {
+			return logBackExists, "", nil
+		}
+		file = item.Path
+	} else {
+		file, err = r.Manager.ResolveLogFile(info)
+		if err != nil {
+			return logBackExists, "", err
+		}
 	}
 	stat, err := os.Stat(file)
 	if err != nil || stat.Size() <= 0 {
@@ -76,11 +92,16 @@ func (r *Runtime) backLog(info, original map[string]any) (string, error) {
 	if r.resolveOpenLogBack(info, original) {
 		backDir, err := r.Manager.ResolveLogBack(info)
 		if err != nil {
-			return "", err
+			return "", ServiceError(err)
 		}
 		backPath := filepath.Join(backDir, time.Now().Format("20060102150405")+".log")
-		if err := copyFileContent(file, backPath); err != nil && r.Log != nil {
-			r.Log.Warn("failed to backup project console log", "file", file, "error", err)
+		if err := copyFileContent(file, backPath); err != nil {
+			// 与 Java 一致：备份失败直接报错返回，不能为了"腾空间"把唯一副本清空
+			// （Java 的 FileUtil.copy 抛异常会中断 checkStart，走不到 emptyLogFile）
+			if r.Log != nil {
+				r.Log.Error("failed to backup project console log, keep log file", "file", file, "error", err)
+			}
+			return "", ServiceError(err)
 		}
 	}
 	if output := proc.EmptyLogFile(file); strings.TrimSpace(output) != "" && r.Log != nil {

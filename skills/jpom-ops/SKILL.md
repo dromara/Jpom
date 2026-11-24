@@ -27,7 +27,7 @@ metadata:
 | 变量 | 说明 |
 |---|---|
 | `JPOM_BASE_URL` | Jpom Server 地址，如 `http://127.0.0.1:2122`（通常无 `/api` 前缀，按部署实际） |
-| `JPOM_TOKEN` 或 `JPOM_TOKEN_FILE` | 长期 token，请求头 `JPOM-USER-TOKEN`；改密码后失效 |
+| `JPOM_TOKEN` 或 `JPOM_TOKEN_FILE` | 长期 token，请求头 `JPOM-USER-TOKEN`；在 Jpom 右上角头像 →「用户资料」里复制「长期token」（别用旁边的「临时token」，它会过期），改密码后需重新复制 |
 | `JPOM_WORKSPACE` | 工作空间 ID，默认 `DEFAULT`（按 token 权限选择） |
 
 **红线**：禁止把 token/URL/密码写入仓库、日志、截图、提交信息。token 文件 `chmod 600`。
@@ -120,7 +120,7 @@ python3 scripts/jpom_api.py capabilities
 
 ## 6. 故障排查
 
-- `401`/`code=800`：token 无效或密码变更后失效，重新生成长期 token。
+- `401`/`code=800`：token 失效了（改过密码也会失效），回右上角头像 →「用户资料」重新复制一次「长期token」。
 - `500 No corresponding resource found`：接口路径与版本/部署（context-path）不匹配，按源码/前端 API 校正。
 - `database exception`：参数/字段不匹配，检查请求参数。
 - 无数据：检查 `JPOM_WORKSPACE` 与 token 权限；分页参数是否过小。

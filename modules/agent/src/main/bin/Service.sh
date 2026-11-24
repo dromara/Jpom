@@ -9,6 +9,7 @@
 # See the Mulan PSL v2 for more details.
 #
 
+
 # 兼容通过 sh xxx.sh 调用（脚本依赖 bash 语法）
 if [ -z "${BASH_VERSION:-}" ]; then
   exec bash "$0" "$@"
@@ -64,12 +65,8 @@ if [ "$user" != 'root' ]; then
 	exec_user="$user"
 fi
 
-function install() {
-
-	if [ -f "$serviceFile" ]; then
-		echo "service file already exists" 2>&2
-		exit 2
-	fi
+# 写 unit 文件（install / reinstall 共用，reinstall 不再先 uninstall 以免停一次项目）
+function writeService() {
 	if [ ! -f "$binAbsName" ]; then
 		echo "$binAbsName not found" 2>&2
 		exit 2
@@ -92,6 +89,12 @@ Wants=network-online.target
 
 [Service]
 Type=simple
+# 项目/脚本进程都是本进程的子进程，和本进程同在一个 systemd cgroup。
+# 默认 KillMode=control-group 会让 systemctl stop/restart 把子进程一起 SIGTERM，
+# 表现为「升级/重启插件端 = 该节点所有项目停止」（2026-11-23 重启计划群反馈）。
+# 这里只结束主进程（ExecStop 已按 pidfile 精确停止），项目进程保持运行并由 Jpom 重新接管。
+# 说明：服务端 unit 默认不写该项（重启需结束构建子进程，避免孤儿构建）。
+KillMode=process
 Environment="JAVA_HOME=$JAVA_HOME"
 Environment="PATH=$PATH"
 Environment="CLASSPATH=$CLASSPATH"
@@ -115,7 +118,14 @@ EOF
 	fi
 
 	echo "$serviceName write success :$serviceFile"
+}
 
+function install() {
+	if [ -f "$serviceFile" ]; then
+		echo "service file already exists" 2>&2
+		exit 2
+	fi
+	writeService
 	$sh_c 'systemctl daemon-reload'
 
 	cat >&2 <<-EOF
@@ -165,9 +175,14 @@ function action() {
 		uninstall
 		;;
 	reinstall)
-		uninstall
-		echo "--------------------------------------"
-		install
+		# 先写新 unit 再 daemon-reload：随后 restart 的 stop 阶段已经按新 unit 的
+		# KillMode=process 执行，只重启 Jpom 本体，项目进程不会再被一起停掉。
+		# 不再先 uninstall（那会用旧 unit 停一次项目，还会清掉开机自启）。
+		writeService
+		$sh_c 'systemctl daemon-reload'
+		$sh_c "systemctl enable $serviceName"
+		$sh_c "systemctl restart $serviceName"
+		echo "$serviceName reinstalled and restarted (projects keep running)"
 		;;
 	enable)
 		enable

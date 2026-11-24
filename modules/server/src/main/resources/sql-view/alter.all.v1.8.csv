@@ -1,0 +1,3 @@
+alterType,tableName,name,type,len,defaultValue,comment,notNull
+ADD,SSH_PROJECT_INFO,triggerToken,String,100,,触发器 token,false
+DROP,SSH_PROJECT_INFO,token

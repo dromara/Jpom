@@ -1,12 +1,12 @@
-/*
- * Copyright (c) 2019 Of Him Code Technology Studio
- * Jpom is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- * 			http://license.coscl.org.cn/MulanPSL2
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- */
+//
+// Copyright (c) 2019 Of Him Code Technology Studio
+// Jpom is licensed under Mulan PSL v2.
+// You can use this software according to the terms and conditions of the Mulan PSL v2.
+// You may obtain a copy of Mulan PSL v2 at:
+// 			http://license.coscl.org.cn/MulanPSL2
+// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+// See the Mulan PSL v2 for more details.
+//
 
 // Package sysinfo collects the system information exposed by the Jpom agent
 // (/info, /get-stat-info, /processList, /disk-info, /hw-disk--info and
@@ -95,6 +95,68 @@ type fileStore struct {
 	FreeSpace     uint64
 	TotalSpace    uint64
 	UsableSpace   uint64
+}
+
+// pseudoFileSystems 是不代表本地存储的伪文件系统，统计时直接忽略。
+var pseudoFileSystems = map[string]bool{
+	"devfs":  true,
+	"autofs": true,
+	"nullfs": true,
+}
+
+// normalizeMount 统一挂载点写法（去掉多余空白与尾部斜杠，根目录保持 "/"）。
+func normalizeMount(mount string) string {
+	mount = strings.TrimSpace(mount)
+	if mount == "" || mount == "/" {
+		return mount
+	}
+	mount = strings.TrimRight(mount, "/")
+	if mount == "" {
+		return "/"
+	}
+	return mount
+}
+
+// shouldCountFileStore 判断一个挂载点是否计入文件系统统计（总量、占用率、文件系统列表）。
+//
+// macOS（darwin）的 APFS 同一容器会挂载多个卷：/、/System/Volumes/Data、Preboot、Update、VM 等，
+// 每个卷的 statfs 返回的都是「容器总容量」而不是该卷自身占用，逐个累加会把同一块盘算成好几倍
+// （实测 Mac mini M4：实际 494.38 GB 被算成 2.70 TB，即 6 个同容器卷之和）。
+// 因此 darwin 只统计根卷与外接卷（/Volumes/*），跳过 /System/Volumes/* 这类同容器伪卷。
+func shouldCountFileStore(goos string, fstype string, mount string) bool {
+	fsType := strings.ToLower(strings.TrimSpace(fstype))
+	if fsType == "" || pseudoFileSystems[fsType] {
+		return false
+	}
+	mountPoint := normalizeMount(mount)
+	if mountPoint == "" {
+		return false
+	}
+	if goos == "darwin" {
+		if mountPoint == "/System/Volumes" || strings.HasPrefix(mountPoint, "/System/Volumes/") {
+			return false
+		}
+	}
+	return true
+}
+
+// filterFileStores 过滤出真正占用本地存储的挂载点，并按挂载点去重
+// （automount/NFS 场景 getfsstat 可能返回重复挂载点，重复挂载点同样会放大总量）。
+func filterFileStores(stores []fileStore, goos string) []fileStore {
+	result := make([]fileStore, 0, len(stores))
+	seen := make(map[string]bool, len(stores))
+	for _, store := range stores {
+		if !shouldCountFileStore(goos, store.Type, store.Mount) {
+			continue
+		}
+		key := strings.ToLower(normalizeMount(store.Mount))
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
+		result = append(result, store)
+	}
+	return result
 }
 
 type diskPartition struct {

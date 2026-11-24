@@ -9,6 +9,7 @@
 # See the Mulan PSL v2 for more details.
 #
 
+
 #-----------------------------------------------------------
 # Jpom 回归单元测试入口
 #
@@ -48,17 +49,40 @@ DEFAULT_TESTS=(
 	BaseDbServiceForcedFilterTest
 	ProjectManageControlExportDataTest
 	RepositoryControllerWorkspaceTest
+	# 构建「获取分支」必须用 fill=false 取仓库凭证（2.11.13 起仓库密码/私钥被脱敏导致 git 认证失败的守卫）
+	BuildInfoControllerBranchListTest
+	# 仓库编辑凭据回填必须走 scoped 查询：跨工作空间仓库 id 不得把别的仓库密码交给调用者的 gitUrl（2026-11-19 安全报告）
+	RepositoryControllerEditCredentialTest
+	RepositoryServiceFillSelectResultTest
 	# 权限拦截：handler @Feature fail-closed + 节点数据权限 fail-closed
 	HandlerFeatureAnnotationTest
 	PermissionInterceptorNodeDataTest
+	# IP 访问判定：读不到 IP 配置必须回「配置读取失败」而不是 999 IP 拒绝（2026-11-21 重启计划群反馈）
+	IpInterceptorAccessTest
 	# WebSocket 握手鉴权（Origin / 会话 / 禁用账号）
 	ServerWebSocketInterceptorTest
 	# 文件日志监听器会话/Tailer 生命周期（agent 控制台 OOM 回归守卫）
 	BaseFileTailWatcherTest
+	# 文件系统统计过滤：macOS APFS 同容器多卷 / Linux tmpfs+网络盘不得重复累加硬盘总量（2026-11-20 重启计划群反馈回归守卫）
+	OshiFileStoreFilterTest
+	# 远程下载白名单：主机边界匹配，禁止子域拼接与 userinfo 绕过（SSRF 回归守卫）
+	ServerWhitelistTest
 	# 全局异常响应脱敏：数据库异常不再回显 SQL/列/表/驱动信息
 	BaseExceptionHandlerTest
 	# 节点数据同步：旧工作空间不存在时回退到节点当前工作空间（重装服务端后“同步 0 个”回归守卫，Gitee ICH1VK）
 	BaseNodeServiceSyncWorkspaceTest
+	# 节点状态时效：集群未绑定分组/transportMode 为空时不能永久停在“正常”（2026-11-18 群反馈回归守卫）
+	MachineNodeStatusTimeoutTest
+	# 插件端主动推送（PUSH）：服务端只接受节点状态主题、校验大小、按最大年龄判定新鲜度（建议三补推送）
+	TunnelPushServiceTest
+	# 推送快照去重：同一份推送不得重复落库（否则统计日志出现相同 monitorTime 的重复行）
+	PushSnapshotTrackerTest
+	# 推送节点下线清理：被新连接顶替时保留快照、真正下线才清理（避免监控闪成无法连接）
+	TunnelPushSnapshotCleanerTest
+	# 推送模式网络延迟口径：落库必须是 0，不能是负数
+	MachineNodePushNetworkDelayTest
+	# 反向隧道表单请求体必须 URL 编码：值里的 & = + % 不得把参数截断（2.11.14.2 候选验证发现的文件内容截断回归守卫）
+	TunnelRequestBodyTest
 	# 严格构建：中间命令失败立即中断（仅严格 + sh 注入 set -e/pipefail，Gitee ICW9KZ）
 	BuildExecuteManageScriptTest
 	# 节点在线升级：引擎判定（engine/旧 Go 端 jarFile 兜底）、Go 升级容器解析、下载地址推导、版本/降级/最低兼容
@@ -66,6 +90,9 @@ DEFAULT_TESTS=(
 	# 在线升级发布包解析：tar.gz/.tgz 提取 lib jar（tar.gz 优先、回退 zip 的下载地址推导），zip/jar 历史行为不回退
 	JpomManifestTarGzTest
 	RemoteVersionUrlTest
+	# 远端版本信息刷新语义：动作侧重试→缓存兜底→可读文案（2.11.14.7 升级/下载链路，共享 common 收口）
+	RemoteVersionResolverTest
+	RemoteVersionDownloadMessageTest
 	UploadShardingExtensionTest
 	# 安全修复的既有单测（文件中心 SQL 注入 / 查询值绑定 / 日志路径穿越 / token 等）
 	FileStorageApiControllerSortTest
@@ -78,6 +105,41 @@ DEFAULT_TESTS=(
 	LoginControlCaptchaTest
 	# SSH 文件管理 new_file_folder 命令注入回归（name 不再拼远程 shell，创建走 SFTP）
 	BaseSshFileControllerNewFileFolderTest
+	# SSH/FTP 文件管理路径穿越回归（name/newname/fileName 不得穿越 fileDirs 白名单，2026-11-17 安全报告）
+	FileUtilsResolveChildPathTest
+	# docker 构建 fromTag SQL 注入（VL-001）与 /oauth2-{provide} 反射型 XSS（VL-002）回归（2026-11-18 安全报告）
+	DockerInfoServiceQueryByTagTest
+	DockerYmlDslFromTagTest
+	IndexControlOauth2XssTest
+	# docker 资产控制台越权（六个 /system/assets/docker/* 控制器缺 @SystemPermission）与 pull-image 把资产仓库凭据外发到第三方 registry 的回归（2026-11-19 安全报告）
+	AssetsDockerConsolePermissionTest
+	MachineDockerRegistryCredentialTest
+	# 文件发布任务跨工作空间目标（node/SSH id 只做存在性校验）与发布子目录穿越（releasePathSecondary=..）的回归（2026-11-20 安全报告 #6）
+	FileReleaseTaskServiceTargetScopeTest
+	FileReleaseTaskControllerReleasePathTest
+	# i18n 语言包完整性：代码引用的 key 必须在四个语言包齐全、四包 key 集合一致（2026-11-18 误删约 1000 条的守卫）
+	I18nBundleConsistencyTest
+	# 响应编码兜底：未配置时 UTF-8、显式配置优先、不覆盖请求编码（老安装实例 ??? 乱码的守卫）
+	EncodingConfigurationTest
+	# 构建版本快照（快速回滚）：忽略目录/临时文件不参与版本内容与指纹、复制不嵌套、清空保留 logs/temp
+	ProjectFileVersionUtilTest
+	# 版本快照资源开关默认关闭（避免升级后所有项目发布额外占用磁盘）
+	AgentDefaultVersionConfigTest
+	# 版本快照保留个数 0/空必须回落到默认值（否则插件端判「未启用」，发布成功却没有版本记录 → 快速回滚空列表，2026-11-19 群反馈）
+	BuildVersionServiceKeepCountTest
+	# 多目标发布失败策略：老配置缺字段按「任一目标失败即终止」，显式关闭才继续剩余目标
+	BuildExtraModuleReleaseFailFastTest
+	# 多目标发布行为：全部成功 / 首个失败即停并跳过剩余 / 关闭开关继续但仍判失败 / 空目标 / 异常无消息 / 首尾空白
+	MultiTargetReleaseTest
+	# 「被构建引用」匹配：SSH 项目多选后必须按成员精确匹配（整体等值会漏、like 子串会误伤）
+	BuildInfoReleaseTargetMatcherTest
+	# SSH 项目多选发布保存：目标去重 / 保序 / 忽略空值（接口直传与前端数组 join 同一口径）
+	BuildInfoControllerSshProjectTargetsTest
+	# FTP 资产删除守卫必须查 FTP 发布方式（原复制粘贴成 SSH，被构建引用也删得掉）
+	FtpControllerDeleteGuardTest
+	# SSH 项目（无插件端）接口契约 + 版本快照远端解析/过滤（构建历史快速回滚，2026-11-20）
+	SshProjectControllerTest
+	SshProjectVersionServiceTest
 )
 
 MVN_BIN=${MVN:-mvn}
@@ -128,7 +190,7 @@ if ! command -v "$MVN_BIN" >/dev/null 2>&1; then
 	exit 2
 fi
 
-mvn_args=(-B -pl modules/server -am -Dlicense.skip=true)
+mvn_args=(-B -pl modules/server,modules/agent -am -Dlicense.skip=true)
 # 必须同时覆盖两个属性：根 pom 同时设置了 skipTests=true 与 maven.test.skip=true
 if [ "$ALL_TESTS" = "1" ]; then
 	mvn_args+=(-Dmaven.test.skip=false -DskipTests=false)

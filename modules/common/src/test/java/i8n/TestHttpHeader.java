@@ -10,6 +10,7 @@
 package i8n;
 
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Locale;
@@ -18,6 +19,8 @@ import java.util.Locale;
  * @author bwcx_jzy
  * @since 2024/7/12
  */
+@Deprecated
+@Ignore("i18n 工具链已弃用（2026-11-18）：Accept-Language 解析的一次性验证脚本，随工具链一并停用")
 public class TestHttpHeader {
 
     @Test

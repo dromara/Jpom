@@ -1,3 +1,14 @@
+<!--
+
+    Copyright (c) 2019 Of Him Code Technology Studio
+    Jpom is licensed under Mulan PSL v2.
+    You can use this software according to the terms and conditions of the Mulan PSL v2.
+    You may obtain a copy of Mulan PSL v2 at:
+    			http://license.coscl.org.cn/MulanPSL2
+    THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+    See the Mulan PSL v2 for more details.
+
+-->
 <template>
   <div>
     <!-- 数据表格 -->
@@ -390,7 +401,7 @@
             <a-form-item :label="$t('i18n_b4c83b0b56')" name="registryUsername">
               <a-input v-model:value="temp.registryUsername" :placeholder="$t('i18n_b4c83b0b56')" />
             </a-form-item>
-            <a-form-item :label="$t('i18n_791870de48')" name="registryPassword">
+            <a-form-item :label="$t('i18n_791870de48')" name="registryPassword" :extra="$t('i18n_5c1f0a9b2d')">
               <a-input-password v-model:value="temp.registryPassword" :placeholder="$t('i18n_791870de48')" />
             </a-form-item>
             <a-form-item :label="$t('i18n_feda0df7ef')" name="registryEmail">
@@ -767,7 +778,7 @@ export default {
 
           fixed: 'right',
           align: 'center',
-          width: '320px'
+          width: '1%'
         }
       ],
 

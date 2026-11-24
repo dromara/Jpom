@@ -10,7 +10,6 @@
 package org.dromara.jpom.func.assets.controller;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
@@ -57,7 +56,7 @@ public class MachineSshFileController extends BaseSshFileController {
     @Override
     protected <T> T checkConfigPathChildren(String id, String path, String children, BiFunction<MachineSshModel, ItemConfig, T> function) {
         FileUtils.checkSlip(path);
-        Opt.ofBlankAble(children).ifPresent(FileUtils::checkSlip);
+        FileUtils.checkRelativePath(children);
         //
         MachineSshModel machineSshModel = machineSshServer.getByKey(id, false);
         return function.apply(machineSshModel, new ItemConfig() {

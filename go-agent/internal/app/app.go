@@ -1,12 +1,12 @@
-/*
- * Copyright (c) 2019 Of Him Code Technology Studio
- * Jpom is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- * 			http://license.coscl.org.cn/MulanPSL2
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- */
+//
+// Copyright (c) 2019 Of Him Code Technology Studio
+// Jpom is licensed under Mulan PSL v2.
+// You can use this software according to the terms and conditions of the Mulan PSL v2.
+// You may obtain a copy of Mulan PSL v2 at:
+// 			http://license.coscl.org.cn/MulanPSL2
+// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+// See the Mulan PSL v2 for more details.
+//
 
 // Package app owns the agent runtime: directories, manifest, authorization and logging.
 package app
@@ -345,7 +345,9 @@ func (a *App) Manifest() map[string]any {
 		"osName":    a.OsName(),
 		"installId": a.InstallID,
 		"debug":     a.Version == "dev",
-		"upTime":    fmt.Sprintf("%d", int64(time.Since(a.StartAt).Seconds())),
+		// upTime 与服务端契约一致用毫秒：Java 插件端取 RuntimeMXBean#getUptime()（毫秒），
+		// 在线升级页「运行时间」列与机器详情都按毫秒渲染，之前用秒会让 Go 节点显示被缩小 1000 倍
+		"upTime": fmt.Sprintf("%d", time.Since(a.StartAt).Milliseconds()),
 		// engine 是 Go 版新增字段（G6）：Server 据此判断节点升级通道；
 		// Java 旧服务端/旧 Agent 反序列化时忽略未知字段，保持字节兼容。
 		"engine": "go",
@@ -353,6 +355,10 @@ func (a *App) Manifest() map[string]any {
 		// osName 继续保持 Java 兼容值（Linux/Windows/Mac OS X）。
 		"platform": runtime.GOOS + "/" + runtime.GOARCH,
 		"arch":     runtime.GOARCH,
+		// capabilities 声明本插件端能承担的能力（构建执行下沉到 Go 插件端）：
+		// Server 侧 AgentPackageResolver 据此判断节点能否被选为构建节点；老 agent
+		// 没有该字段 → 自动排除，不需要版本号比较。旧字段保持不变（只增）。
+		"capabilities": []string{"build"},
 	}
 }
 

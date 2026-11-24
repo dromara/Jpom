@@ -8,6 +8,7 @@
 # THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
 # See the Mulan PSL v2 for more details.
 #
+
 # description: Jpom Go 插件端服务脚本（与 Java 的 Agent.sh 用法保持一致）
 # 用法：AgentGo.sh {start|stop|restart|status|upgrade} [-s]
 #   -s  与 Java 脚本兼容的静默模式（输出重定向到 logs/stdout.log）

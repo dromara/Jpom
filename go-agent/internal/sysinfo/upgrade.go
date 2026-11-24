@@ -1,12 +1,12 @@
-/*
- * Copyright (c) 2019 Of Him Code Technology Studio
- * Jpom is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- * 			http://license.coscl.org.cn/MulanPSL2
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- */
+//
+// Copyright (c) 2019 Of Him Code Technology Studio
+// Jpom is licensed under Mulan PSL v2.
+// You can use this software according to the terms and conditions of the Mulan PSL v2.
+// You may obtain a copy of Mulan PSL v2 at:
+// 			http://license.coscl.org.cn/MulanPSL2
+// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+// See the Mulan PSL v2 for more details.
+//
 
 package sysinfo
 
@@ -186,15 +186,6 @@ func fileMD5(path string) (string, error) {
 }
 
 // installAgentPackage 校验并安装 Go 插件端升级包，返回给服务端的提示语。
-/*
- * Copyright (c) 2019 Of Him Code Technology Studio
- * Jpom is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- * 			http://license.coscl.org.cn/MulanPSL2
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- */
 
 // InstallUploadedPackage 是 ws.UpgradeHandler 的实现入口（/node_update 上传完成后调用）。
 func InstallUploadedPackage(a *app.App, packagePath string) (string, error) {
@@ -585,9 +576,13 @@ func cleanOldJars(dir string, keep int) {
 // linux/amd64 额外回退兼容别名 agent-go-<version>-upgrade.jar（旧命名）。
 // 不再直接下载 agentUrl：那是 Java Agent 包，Go 插件端无法使用（CONTRACT §5.15）。
 func RemoteUpgrade(a *app.App) (string, error) {
-	remote, err := LoadRemoteInfo(a)
+	// 远端版本信息带刷新语义：在线刷新失败自动重试，仍失败回退本机缓存（与 Java 端同口径）
+	remote, err := ResolveRemoteInfo(a)
 	if err != nil || remote == nil {
-		return "", paramErr(405, "i18n.no_available_new_version_upgrade.d8f2")
+		if err != nil {
+			a.Log().Warn("resolve remote version info failed", "error", err)
+		}
+		return "", paramErr(405, "i18n.remote_version_unavailable.b7e1")
 	}
 	agentURL := strings.TrimSpace(toString(remote["agentUrl"]))
 	if agentURL == "" {

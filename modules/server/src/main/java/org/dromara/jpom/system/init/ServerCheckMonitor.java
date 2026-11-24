@@ -14,7 +14,7 @@ import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.ILoadEvent;
-import org.dromara.jpom.common.RemoteVersion;
+import org.dromara.jpom.common.version.RemoteVersions;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
@@ -102,8 +102,8 @@ public class ServerCheckMonitor implements ILoadEvent, ISystemTask {
 
     @Override
     public void executeTask() {
-        // 尝试获取版本更新信息
-        RemoteVersion.loadRemoteInfo();
+        // 尝试获取版本更新信息（在线刷新失败自动重试，仍失败保留既有缓存）
+        RemoteVersions.infoForRefresh();
         // 清空脚本缓存
         BaseRunScript.clearRunScript();
     }

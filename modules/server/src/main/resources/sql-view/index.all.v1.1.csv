@@ -1,0 +1,3 @@
+indexType,tableName,name,field
+ADD,NODE_BUILD_VERSION,BUILD_VERSION_BUILD_INDEX,buildDataId+buildNumberId
+ADD,NODE_BUILD_VERSION,BUILD_VERSION_PROJECT_INDEX,nodeId+projectId

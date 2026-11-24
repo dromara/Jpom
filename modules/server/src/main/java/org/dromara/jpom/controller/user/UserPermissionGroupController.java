@@ -130,7 +130,9 @@ public class UserPermissionGroupController extends BaseServerController {
 
     private String resolveAllowExecute(String allowExecute) {
         if (StrUtil.isEmpty(allowExecute)) {
-            return StrUtil.EMPTY;
+            // 存空字符串会让前端 JSON.parse("") 直接抛 Unexpected end of JSON input，
+            // 权限组编辑弹窗整个打不开（BUGS B-024）：空配置统一存 "[]"。
+            return "[]";
         }
         JSONArray jsonArray = JSONArray.parseArray(allowExecute);
         return JSON.toJSONString(jsonArray.stream().map(o -> {
@@ -160,7 +162,8 @@ public class UserPermissionGroupController extends BaseServerController {
 
     private String resolveProhibitExecute(String prohibitExecute) {
         if (StrUtil.isEmpty(prohibitExecute)) {
-            return StrUtil.EMPTY;
+            // 同 resolveAllowExecute：空配置存 "[]"，避免前端 JSON.parse 崩溃（BUGS B-024）
+            return "[]";
         }
         JSONArray jsonArray = JSONArray.parseArray(prohibitExecute);
         return JSON.toJSONString(jsonArray.stream().map(o -> {

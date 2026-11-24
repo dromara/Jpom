@@ -108,6 +108,8 @@ public class MachineDockerController extends BaseGroupNameController {
             dockerInfoModel.setStatus(1);
             machineDockerServer.insert(dockerInfoModel);
         } else {
+            // 仓库密码不再通过列表接口回显，前端留空表示沿用原密码
+            this.fillOldRegistryPassword(dockerInfoModel);
             this.check(dockerInfoModel);
             machineDockerServer.updateById(dockerInfoModel);
         }
@@ -115,6 +117,39 @@ public class MachineDockerController extends BaseGroupNameController {
         return JsonMessage.success(I18nMessageUtil.get("i18n.operation_succeeded.3313"));
     }
 
+
+    /**
+     * 编辑资产时回填原仓库密码
+     * <p>
+     * 列表接口不再返回 registryPassword（见 {@link MachineDockerModel} 的同名字段注释），
+     * 前端编辑弹窗里密码框为空表示“不修改”，这里沿用数据库中的原值，避免保存一次资产就把仓库凭据清空。
+     *
+     * @param dockerInfoModel 请求构造的资产信息
+     */
+    private void fillOldRegistryPassword(MachineDockerModel dockerInfoModel) {
+        dockerInfoModel.setRegistryPassword(resolveRegistryPassword(dockerInfoModel, machineDockerServer));
+    }
+
+    /**
+     * 计算编辑资产时最终使用的仓库密码（便于单测的纯逻辑）
+     *
+     * @param dockerInfoModel     请求构造的资产信息
+     * @param machineDockerServer 资产服务
+     * @return 最终密码
+     */
+    static String resolveRegistryPassword(MachineDockerModel dockerInfoModel, MachineDockerServer machineDockerServer) {
+        if (StrUtil.isNotEmpty(dockerInfoModel.getRegistryPassword())) {
+            // 填写了新密码，以新密码为准
+            return dockerInfoModel.getRegistryPassword();
+        }
+        if (StrUtil.isEmpty(dockerInfoModel.getRegistryUrl())) {
+            // 没配置仓库地址，不需要仓库密码
+            return dockerInfoModel.getRegistryPassword();
+        }
+        MachineDockerModel oldModel = machineDockerServer.getByKey(dockerInfoModel.getId(), false);
+        String oldPassword = oldModel == null ? null : oldModel.getRegistryPassword();
+        return StrUtil.emptyToDefault(oldPassword, dockerInfoModel.getRegistryPassword());
+    }
 
     /**
      * 接收前端参数

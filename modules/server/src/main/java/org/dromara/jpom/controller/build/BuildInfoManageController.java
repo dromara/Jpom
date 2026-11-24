@@ -17,6 +17,7 @@ import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import com.alibaba.fastjson2.JSONObject;
 import org.dromara.jpom.build.*;
+import org.dromara.jpom.build.version.BuildVersionService;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
@@ -26,6 +27,7 @@ import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.BaseEnum;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.data.BuildInfoModel;
+import org.dromara.jpom.model.enums.BuildMode;
 import org.dromara.jpom.model.enums.BuildStatus;
 import org.dromara.jpom.model.log.BuildHistoryLog;
 import org.dromara.jpom.model.user.UserModel;
@@ -65,15 +67,18 @@ public class BuildInfoManageController extends BaseServerController {
     private final DbBuildHistoryLogService dbBuildHistoryLogService;
     private final BuildExecuteService buildExecuteService;
     private final WorkspaceEnvVarService workspaceEnvVarService;
+    private final BuildVersionService buildVersionService;
 
     public BuildInfoManageController(BuildInfoService buildInfoService,
                                      DbBuildHistoryLogService dbBuildHistoryLogService,
                                      BuildExecuteService buildExecuteService,
-                                     WorkspaceEnvVarService workspaceEnvVarService) {
+                                     WorkspaceEnvVarService workspaceEnvVarService,
+                                     BuildVersionService buildVersionService) {
         this.buildInfoService = buildInfoService;
         this.dbBuildHistoryLogService = dbBuildHistoryLogService;
         this.buildExecuteService = buildExecuteService;
         this.workspaceEnvVarService = workspaceEnvVarService;
+        this.buildVersionService = buildVersionService;
     }
 
     /**
@@ -134,13 +139,16 @@ public class BuildInfoManageController extends BaseServerController {
     @Feature(method = MethodFeature.EXECUTE)
     public IJsonMessage<String> cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.no_data.1ac0")) String id, HttpServletRequest request) {
         BuildInfoModel item = buildInfoService.getByKey(id, request);
-        Objects.requireNonNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
+        Assert.notNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
         String checkStatus = buildExecuteService.checkStatus(item);
         BuildStatus nowStatus = BaseEnum.getEnum(BuildStatus.class, item.getStatus());
         Objects.requireNonNull(nowStatus);
         if (checkStatus == null) {
             return JsonMessage.success(I18nMessageUtil.get("i18n.status_not_in_progress.f410") + nowStatus.getDesc());
         }
+        // 先登记「取消意图」：节点构建被取消后节点会回报 cancelled、构建线程可能把终态写成 Error，
+        // 由 BuildExecuteService.updateStatus 归一为 Cancel（BUGS B-001）
+        BuildExecuteService.markCancelRequested(id);
         boolean status = BuildExecuteManage.cancelTaskById(item.getId());
         if (!status) {
             // 缓存中可能不存在数据,还是需要执行取消
@@ -166,7 +174,7 @@ public class BuildInfoManageController extends BaseServerController {
             environmentMapBuilder.putStr(StringUtil.parseEnvStr(item.getBuildEnvParameter()));
             //
             buildMode = item.getBuildMode();
-            if (buildMode != null && buildMode == 1) {
+            if (BuildMode.isContainer(buildMode)) {
                 // 容器中的环境变量
                 String script = item.getScript();
                 DockerYmlDsl dockerYmlDsl = DockerYmlDsl.build(script);
@@ -179,8 +187,8 @@ public class BuildInfoManageController extends BaseServerController {
             String workspace = buildInfoService.getCheckUserWorkspace(request);
             environmentMapBuilder = workspaceEnvVarService.getEnv(workspace);
         }
-        // 获取系统变量
-        if (buildMode != null && buildMode == 0) {
+        // 获取系统变量（本地构建与节点构建都执行真实命令；节点构建的系统变量以节点为准，这里展示 Server 侧可读部分）
+        if (!BuildMode.isContainer(buildMode)) {
             ProcessBuilder processBuilder = new ProcessBuilder();
             Map<String, String> environment = processBuilder.environment();
             environment.forEach(environmentMapBuilder::putSystem);
@@ -204,11 +212,62 @@ public class BuildInfoManageController extends BaseServerController {
                                            HttpServletRequest request) {
         String workspaceId = dbBuildHistoryLogService.getCheckUserWorkspace(request);
         BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, false, entity -> entity.set("workspaceId", workspaceId));
-        Objects.requireNonNull(buildHistoryLog, I18nMessageUtil.get("i18n.no_corresponding_build_record.b3b2"));
+        Assert.notNull(buildHistoryLog, I18nMessageUtil.get("i18n.no_corresponding_build_record.b3b2"));
         BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId(), request);
-        Objects.requireNonNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
+        Assert.notNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
         int buildId = buildExecuteService.rollback(buildHistoryLog, item, getUser());
         return JsonMessage.success(I18nMessageUtil.get("i18n.republishing.131d"), buildId);
+    }
+
+    /**
+     * 查询构建历史在各节点的版本快照（快速回滚用）
+     *
+     * @param logId 构建历史ID
+     * @return json
+     */
+    @RequestMapping(value = "/build/manage/version-list", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public IJsonMessage<JSONObject> versionList(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.no_data.1ac0") String logId,
+                                                HttpServletRequest request) {
+        BuildHistoryLog buildHistoryLog = this.getBuildHistoryLog(logId, request);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.query_success.d72b"), buildVersionService.listByLog(buildHistoryLog));
+    }
+
+    /**
+     * 快速回滚：切换节点本地版本（不重新传输产物）
+     *
+     * @param logId     构建历史ID
+     * @param restart   是否重启项目
+     * @param versionId 指定版本（SSH 项目可选，为空按构建编号自动定位）
+     * @param projectId 指定 SSH 项目（SSH 项目多选发布时按版本行定位）
+     * @return json
+     */
+    @RequestMapping(value = "/build/manage/rollback-version", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EXECUTE)
+    public IJsonMessage<Integer> rollbackVersion(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.no_data.1ac0") String logId,
+                                                 Boolean restart,
+                                                 String versionId,
+                                                 String projectId,
+                                                 HttpServletRequest request) {
+        BuildHistoryLog buildHistoryLog = this.getBuildHistoryLog(logId, request);
+        BuildInfoModel item = buildInfoService.getByKey(buildHistoryLog.getBuildDataId(), request);
+        Assert.notNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
+        int buildId = buildExecuteService.quickRollback(buildHistoryLog, item, getUser(), !Boolean.FALSE.equals(restart), versionId, projectId);
+        return JsonMessage.success(I18nMessageUtil.get("i18n.quick_rollback_started.5e04"), buildId);
+    }
+
+    /**
+     * 获取构建历史（校验工作空间）
+     *
+     * @param logId   构建历史ID
+     * @param request 请求
+     * @return log
+     */
+    private BuildHistoryLog getBuildHistoryLog(String logId, HttpServletRequest request) {
+        String workspaceId = dbBuildHistoryLogService.getCheckUserWorkspace(request);
+        BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(logId, false, entity -> entity.set("workspaceId", workspaceId));
+        Assert.notNull(buildHistoryLog, I18nMessageUtil.get("i18n.no_corresponding_build_record.b3b2"));
+        return buildHistoryLog;
     }
 
     /**

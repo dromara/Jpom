@@ -58,6 +58,9 @@ public abstract class BaseMyErrorController extends AbstractErrorController {
             log.error(I18nMessageUtil.get("i18n.file_upload_exception.a5f6"), statusCode, requestUri);
         } else if (status == HttpStatus.NOT_FOUND) {
             msg = I18nMessageUtil.get("i18n.no_resource_found.dc22");
+            // 未知路由必须回 code=404：原来一律写 500，导致「地址写错」与「服务端异常」无法区分
+            // （NoHandlerFoundException 那条链路本来就是 404，两条链路口径不一致，BUGS B-028）
+            body.put(JsonMessage.CODE, HttpStatus.NOT_FOUND.value());
             body.put(JsonMessage.DATA, requestUri);
         } else {
             log.error(I18nMessageUtil.get("i18n.unexpected_exception_with_details.247d"), statusCode, requestUri);

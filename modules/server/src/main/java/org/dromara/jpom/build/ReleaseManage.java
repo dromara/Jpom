@@ -38,7 +38,6 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -53,6 +52,7 @@ import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
+import org.dromara.jpom.build.version.BuildVersionService;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.configuration.BuildExtConfig;
 import org.dromara.jpom.func.assets.model.MachineFtpModel;
@@ -68,6 +68,14 @@ import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.data.FtpModel;
 import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.data.SshModel;
+import org.dromara.jpom.model.data.SshProjectModel;
+import org.dromara.jpom.model.sshproject.SshProjectExecuteResult;
+import org.dromara.jpom.service.sshproject.SshProjectMachineResolver;
+import org.dromara.jpom.service.sshproject.SshProjectService;
+import org.dromara.jpom.service.sshproject.SshProjectVersionService;
+import org.dromara.jpom.func.assets.model.MachineSshModel;
+import org.dromara.jpom.func.assets.server.MachineSshServer;
+import org.dromara.jpom.socket.ConsoleCommandOp;
 import org.dromara.jpom.model.docker.DockerInfoModel;
 import org.dromara.jpom.model.enums.BuildReleaseMethod;
 import org.dromara.jpom.model.enums.BuildStatus;
@@ -210,6 +218,8 @@ public class ReleaseManage {
             return this.localCommand();
         } else if (releaseMethod == BuildReleaseMethod.DockerImage.getCode()) {
             return this.doDockerImage();
+        } else if (releaseMethod == BuildReleaseMethod.SshProject.getCode()) {
+            this.doSshProject();
         } else if (releaseMethod == BuildReleaseMethod.Ftp.getCode()) {
             this.doFtp();
         } else if (releaseMethod == BuildReleaseMethod.No.getCode()) {
@@ -444,20 +454,49 @@ public class ReleaseManage {
     }
 
     /**
-     * ssh 发布
+     * 逐个发布目标，统一「任一目标失败即终止」策略
+     * <p>
+     * SSH 与 SSH 项目共用这一处：失败判定（目标不存在、连接/上传异常）由调用方抛出，
+     * 循环与失败聚合由 {@link MultiTargetRelease} 负责（行为见 MultiTargetReleaseTest）。
+     *
+     * @param targetIds 逗号分隔的目标 id
+     * @param action    单个目标的发布动作
      */
-    private void doSsh() throws IOException {
-        String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
+    private void releaseTargets(String targetIds, MultiTargetRelease.TargetAction action) {
+        MultiTargetRelease.Outcome outcome = MultiTargetRelease.execute(targetIds, this.buildExtraModule.failFastOnRelease(), action);
+        for (MultiTargetRelease.Failure failure : outcome.getFailures()) {
+            logRecorder.systemError(I18nMessageUtil.get("i18n.release_target_failed.a7c3"), failure.getTargetId(), failure.getMessage());
+        }
+        if (outcome.getSkipped() > 0) {
+            logRecorder.systemWarning(I18nMessageUtil.get("i18n.release_abort_remaining.b2f1"), outcome.getSkipped());
+        }
+        if (outcome.isAborted()) {
+            // 失败即终止：首个失败已经决定本次发布结果，剩余目标不再发布
+            MultiTargetRelease.Failure first = outcome.getFailures().get(0);
+            throw new JpomRuntimeException(StrUtil.format(I18nMessageUtil.get("i18n.release_target_failed.a7c3"), first.getTargetId(), first.getMessage()));
+        }
+        if (!outcome.hasFailure()) {
+            return;
+        }
+        // 未开启失败即终止：剩余目标已发布，但只要有目标失败本次发布仍然判定失败
+        List<String> failures = outcome.getFailures().stream().map(MultiTargetRelease.Failure::toString).collect(Collectors.toList());
+        String message = StrUtil.format(I18nMessageUtil.get("i18n.release_partial_failed.c6d4"), failures.size(), String.join("; ", failures));
+        logRecorder.systemError(message);
+        throw new JpomRuntimeException(message);
+    }
+
+    /**
+     * ssh 发布（支持多目标；失败策略见 {@link #releaseTargets}）
+     */
+    private void doSsh() {
         SshService sshService = SpringUtil.getBean(SshService.class);
-        List<String> strings = StrUtil.splitTrim(releaseMethodDataId, StrUtil.COMMA);
-        for (String releaseMethodDataIdItem : strings) {
-            SshModel item = sshService.getByKey(releaseMethodDataIdItem, false);
+        this.releaseTargets(this.buildExtraModule.getReleaseMethodDataId(), targetId -> {
+            SshModel item = sshService.getByKey(targetId, false);
             if (item == null) {
-                logRecorder.systemError(I18nMessageUtil.get("i18n.no_ssh_entry_found.d0e1"), releaseMethodDataIdItem);
-                continue;
+                throw new JpomRuntimeException(StrUtil.format(I18nMessageUtil.get("i18n.no_ssh_entry_found.d0e1"), targetId));
             }
             this.doSsh(item, sshService);
-        }
+        });
     }
 
     private void doSsh(SshModel item, SshService sshService) throws IOException {
@@ -520,57 +559,182 @@ public class ReleaseManage {
 
 
     /**
-     * ftp发布
-     *
-     * @throws IOException
+     * 发布到 SSH 项目：产物直接落到项目目录，然后按项目生命周期脚本重启
+     * <p>
+     * 与「发布到项目」一致支持版本快照：发布前登记基线、发布成功后登记本次版本，
+     * 构建历史里的「快速回滚」据此把远端目录切回历史版本（不重新传输产物）。
      */
-    private void doFtp() {
-        String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
-        FtpService ftpService = SpringUtil.getBean(FtpService.class);
-        List<String> strings = StrUtil.splitTrim(releaseMethodDataId, StrUtil.COMMA);
-        for (String releaseMethodDataIdItem : strings) {
-            FtpModel item = ftpService.getByKey(releaseMethodDataIdItem, false);
-            if (item == null) {
-                logRecorder.systemError(I18nMessageUtil.get("i18n.ftp_item_not_found.60a7"), releaseMethodDataIdItem);
-                continue;
+    private void doSshProject() {
+        SshProjectService sshProjectService = SpringUtil.getBean(SshProjectService.class);
+        this.releaseTargets(this.buildExtraModule.getReleaseMethodDataId(), targetId -> {
+            SshProjectModel project = sshProjectService.getByKey(targetId);
+            if (project == null) {
+                throw new JpomRuntimeException(I18nMessageUtil.get("i18n.ssh_project_not_exist.5d18") + targetId);
             }
+            this.doSshProject(project);
+        });
+    }
 
-            String releasePath = this.buildExtraModule.getReleaseFtpPath();
-
-            if (StrUtil.isEmpty(releasePath)) {
-                logRecorder.systemWarning(I18nMessageUtil.get("i18n.publish_directory_is_empty.79c6"));
-            } else {
-                logRecorder.system(I18nMessageUtil.get("i18n.start_upload_ftp_file.20be"), DateUtil.now(), item.getName(), System.lineSeparator());
-
-                MachineFtpModel machineFtpModel = ftpService.getMachineFtpModel(item);
-                try (Ftp ftp = machineFtpServer.getFtpClient(machineFtpModel)) {
-
-
-                    String prefix = "";
-                    if (!StrUtil.startWith(releasePath, StrUtil.SLASH)) {
-                        prefix = ftp.pwd();
+    /**
+     * 发布到单个 SSH 项目：产物落到项目目录，然后按项目生命周期脚本重启
+     *
+     * @param project 项目
+     * @throws IOException IO
+     */
+    private void doSshProject(SshProjectModel project) throws IOException {
+        SshProjectMachineResolver machineResolver = SpringUtil.getBean(SshProjectMachineResolver.class);
+        MachineSshModel machineSshModel = machineResolver.resolve(project);
+        // 版本快照：只按构建配置的开关决定，失败只告警不阻断发布
+        SshProjectVersionService sshProjectVersionService = SpringUtil.getBean(SshProjectVersionService.class);
+        boolean versionEnabled = SpringUtil.getBean(BuildVersionService.class).enabled(this.buildExtraModule);
+        boolean versionBegun = versionEnabled && this.sshProjectVersionBegin(sshProjectVersionService, project);
+        boolean publishSuccess = false;
+        try {
+            Session session = null;
+            ChannelSftp channelSftp = null;
+            try {
+                session = SpringUtil.getBean(MachineSshServer.class).getSessionByModel(machineSshModel);
+                Charset charset = machineSshModel.charset();
+                int timeout = machineSshModel.timeout();
+                MySftp sftp = new MySftp(session, charset, timeout, SpringUtil.getBean(SshService.class).createProgressMonitor(logRecorder));
+                channelSftp = sftp.getClient();
+                String normalizePath = FileUtil.normalize(StrUtil.nullToEmpty(project.getPath()));
+                if (this.buildExtraModule.isClearOld() && sftp.exist(normalizePath)) {
+                    try {
+                        sftp.delDir(normalizePath);
+                    } catch (Exception e) {
+                        logRecorder.error(I18nMessageUtil.get("i18n.clear_build_product_failed.edd4"), e);
                     }
-                    String normalizePath = FileUtil.normalize(prefix + StrUtil.SLASH + releasePath);
-                    if (this.buildExtraModule.isClearOld()) {
-                        try {
-                            if (ftp.exist(normalizePath)) {
-                                ftp.delDir(normalizePath);
-                            }
-                        } catch (Exception e) {
-                            if (!StrUtil.startWithIgnoreCase(e.getMessage(), "No such file")) {
-                                logRecorder.error(I18nMessageUtil.get("i18n.clear_build_product_failed.edd4"), e);
-                            }
-                        }
-                    }
-                    ftpService.uploadWithProgress(ftp, this.resultFile, normalizePath, logRecorder, 5);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
                 }
-                logRecorder.system(I18nMessageUtil.get("i18n.start_upload_ftp_file.20be"), DateUtil.now(), item.getName(), System.lineSeparator());
-
-                logRecorder.system("{} {} ftp upload done", DateUtil.now(), item.getName());
+                sftp.syncUpload(this.resultFile, normalizePath);
+                logRecorder.system("ssh project upload done: {}", project.getName());
+            } finally {
+                JschUtil.close(channelSftp);
+                JschUtil.close(session);
+            }
+            publishSuccess = true;
+            // 发布完成后按项目自身脚本重启（没有 restart 钩子时执行器会退化为 stop + start）
+            SshProjectExecuteResult result = null;
+            try {
+                result = SpringUtil.getBean(SshProjectService.class)
+                    .execute(project, ConsoleCommandOp.restart.name(), line -> logRecorder.info(line));
+            } catch (Exception e) {
+                // 项目没有配置任何生命周期脚本时不影响产物发布结果，只提示
+                logRecorder.systemWarning("ssh project has no lifecycle script, skip restart: {}", e.getMessage());
+            }
+            if (result == null) {
+                return;
+            }
+            if (result.isSuccess()) {
+                logRecorder.system("ssh project restart done: {}", project.getName());
+            } else {
+                // 重启失败不改变「产物是否已经发到目标」的判定：与历史行为一致，只记录错误，
+                // 失败即终止策略只针对目标不存在 / 连接与上传异常（否则老配置会因脚本退出码被改判发布失败）
+                logRecorder.systemError("ssh project restart failed: {}",
+                    StrUtil.emptyToDefault(result.getMessage(), String.valueOf(result.getExitCode())));
+            }
+        } finally {
+            if (versionBegun && publishSuccess) {
+                this.sshProjectVersionCommit(sshProjectVersionService, project);
             }
         }
+    }
+
+    /**
+     * SSH 项目：发布前准备版本快照（失败只告警，不阻断发布）
+     *
+     * @param versionService 版本服务
+     * @param project        项目
+     * @return 是否准备成功
+     */
+    private boolean sshProjectVersionBegin(SshProjectVersionService versionService, SshProjectModel project) {
+        try {
+            JSONObject begin = versionService.begin(project, this.getRealBuildNumberId(), this.buildExtraModule.getVersionKeepCount());
+            if (begin.getJSONObject("baseline") != null) {
+                logRecorder.system(I18nMessageUtil.get("i18n.version_baseline_created.2b6c"), project.getName(),
+                    begin.getJSONObject("baseline").getString("versionId"));
+            }
+            logRecorder.system(I18nMessageUtil.get("i18n.version_snapshot_prepare_success.a1f7"));
+            return true;
+        } catch (Exception e) {
+            log.warn(I18nMessageUtil.get("i18n.version_snapshot_prepare_exception.c3e5"), e);
+            logRecorder.systemWarning(I18nMessageUtil.get("i18n.version_snapshot_prepare_exception.c3e5"));
+        }
+        return false;
+    }
+
+    /**
+     * SSH 项目：发布成功后登记版本（失败只告警，不阻断发布）
+     *
+     * @param versionService 版本服务
+     * @param project        项目
+     */
+    private void sshProjectVersionCommit(SshProjectVersionService versionService, SshProjectModel project) {
+        try {
+            JSONObject commit = versionService.commit(project, String.valueOf(this.getRealBuildNumberId()),
+                SshProjectVersionService.SOURCE_BUILD, this.getRealBuildNumberId(), this.buildExtraModule.getId(),
+                this.buildExtraModule.getVersionKeepCount());
+            logRecorder.system(I18nMessageUtil.get("i18n.ssh_project_version_commit_success.2c85"),
+                commit.getString("versionId"), commit.getIntValue("fileCount"), FileUtil.readableFileSize(commit.getLongValue("fileSize")));
+        } catch (Exception e) {
+            log.warn(I18nMessageUtil.get("i18n.version_snapshot_commit_exception.f5b3"), e);
+            logRecorder.systemWarning(I18nMessageUtil.get("i18n.version_snapshot_commit_exception.f5b3"));
+        }
+    }
+
+    /**
+     * ftp 发布（支持多目标；失败策略见 {@link #releaseTargets}）
+     * <p>
+     * 2026-11-23 复测：原来目标已删除只记一条错误日志、发布目录为空只告警，构建仍算成功，
+     * 与 SSH / SSH 项目「目标缺失或上传异常算失败」的口径不一致，这里统一走 releaseTargets。
+     */
+    private void doFtp() {
+        FtpService ftpService = SpringUtil.getBean(FtpService.class);
+        this.releaseTargets(this.buildExtraModule.getReleaseMethodDataId(), targetId -> {
+            FtpModel item = ftpService.getByKey(targetId, false);
+            if (item == null) {
+                throw new JpomRuntimeException(StrUtil.format(I18nMessageUtil.get("i18n.ftp_item_not_found.60a7"), targetId));
+            }
+            this.doFtp(item, ftpService);
+        });
+    }
+
+    /**
+     * 发布到单个 FTP 目标
+     *
+     * @param item       ftp 资产
+     * @param ftpService ftp service
+     */
+    private void doFtp(FtpModel item, FtpService ftpService) {
+        String releasePath = this.buildExtraModule.getReleaseFtpPath();
+        if (StrUtil.isEmpty(releasePath)) {
+            // 发布目录为空等于什么都没发出去，不能当作发布成功
+            throw new JpomRuntimeException(I18nMessageUtil.get("i18n.publish_directory_is_empty.79c6"));
+        }
+        logRecorder.system(I18nMessageUtil.get("i18n.start_upload_ftp_file.20be"), DateUtil.now(), item.getName(), System.lineSeparator());
+        MachineFtpModel machineFtpModel = ftpService.getMachineFtpModel(item);
+        try (Ftp ftp = machineFtpServer.getFtpClient(machineFtpModel)) {
+            String prefix = "";
+            if (!StrUtil.startWith(releasePath, StrUtil.SLASH)) {
+                prefix = ftp.pwd();
+            }
+            String normalizePath = FileUtil.normalize(prefix + StrUtil.SLASH + releasePath);
+            if (this.buildExtraModule.isClearOld()) {
+                try {
+                    if (ftp.exist(normalizePath)) {
+                        ftp.delDir(normalizePath);
+                    }
+                } catch (Exception e) {
+                    if (!StrUtil.startWithIgnoreCase(e.getMessage(), "No such file")) {
+                        logRecorder.error(I18nMessageUtil.get("i18n.clear_build_product_failed.edd4"), e);
+                    }
+                }
+            }
+            ftpService.uploadWithProgress(ftp, this.resultFile, normalizePath, logRecorder, 5);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        logRecorder.system("{} {} ftp upload done", DateUtil.now(), item.getName());
     }
 
     /**
@@ -668,35 +832,109 @@ public class ReleaseManage {
         }
         NodeService nodeService = SpringUtil.getBean(NodeService.class);
         NodeModel nodeModel = nodeService.getByKey(strings[0]);
-        Objects.requireNonNull(nodeModel, I18nMessageUtil.get("i18n.node_does_not_exist.4ce4"));
+        Assert.notNull(nodeModel, I18nMessageUtil.get("i18n.node_does_not_exist.4ce4"));
         String projectId = strings[1];
-        if (diffSync) {
-            this.diffSyncProject(nodeModel, projectId, afterOpt, clearOld);
-            return;
+        BuildVersionService buildVersionService = SpringUtil.getBean(BuildVersionService.class);
+        boolean versionEnabled = buildVersionService.enabled(this.buildExtraModule);
+        boolean versionBegun = false;
+        boolean publishSuccess = false;
+        if (versionEnabled) {
+            versionBegun = this.versionBegin(buildVersionService, nodeModel, projectId);
         }
-        boolean tarGz = this.buildEnv.getBool(BuildUtil.USE_TAR_GZ, false);
-        JsonMessage<String> jsonMessage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, tarGz, (unZip, zipFile) -> {
-            String name = zipFile.getName();
-            Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / buildExtConfig.getLogReduceProgressRatio()));
-            return OutGivingRun.fileUpload(zipFile, zipFile.getName(),
-                this.buildExtraModule.getProjectSecondaryDirectory(),
-                projectId,
-                unZip,
-                afterOpt,
-                nodeModel, clearOld, this.buildExtraModule.getProjectUploadCloseFirst(), (total, progressSize) -> {
-                    double progressPercentage = Math.floor(((float) progressSize / total) * 100);
-                    int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
-                    if (progressRangeList.add(progressRange)) {
-                        logRecorder.system(I18nMessageUtil.get("i18n.upload_progress_with_colon.dd5b"), name,
-                            FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
-                            NumberUtil.formatPercent(((float) progressSize / total), 0));
-                    }
-                });
-        });
-        if (jsonMessage.success()) {
-            logRecorder.system(I18nMessageUtil.get("i18n.publish_project_package_success.b0ce"), jsonMessage);
-        } else {
-            throw new JpomRuntimeException(I18nMessageUtil.get("i18n.publish_project_package_failed.9514") + jsonMessage);
+        try {
+            if (diffSync) {
+                this.diffSyncProject(nodeModel, projectId, afterOpt, clearOld);
+                publishSuccess = true;
+                return;
+            }
+            boolean tarGz = this.buildEnv.getBool(BuildUtil.USE_TAR_GZ, false);
+            JsonMessage<String> jsonMessage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, tarGz, (unZip, zipFile) -> {
+                String name = zipFile.getName();
+                Set<Integer> progressRangeList = ConcurrentHashMap.newKeySet((int) Math.floor((float) 100 / buildExtConfig.getLogReduceProgressRatio()));
+                return OutGivingRun.fileUpload(zipFile, zipFile.getName(),
+                    this.buildExtraModule.getProjectSecondaryDirectory(),
+                    projectId,
+                    unZip,
+                    afterOpt,
+                    nodeModel, clearOld, this.buildExtraModule.getProjectUploadCloseFirst(), (total, progressSize) -> {
+                        double progressPercentage = Math.floor(((float) progressSize / total) * 100);
+                        int progressRange = (int) Math.floor(progressPercentage / buildExtConfig.getLogReduceProgressRatio());
+                        if (progressRangeList.add(progressRange)) {
+                            logRecorder.system(I18nMessageUtil.get("i18n.upload_progress_with_colon.dd5b"), name,
+                                FileUtil.readableFileSize(progressSize), FileUtil.readableFileSize(total),
+                                NumberUtil.formatPercent(((float) progressSize / total), 0));
+                        }
+                    });
+            });
+            if (jsonMessage.success()) {
+                logRecorder.system(I18nMessageUtil.get("i18n.publish_project_package_success.b0ce"), jsonMessage);
+                publishSuccess = true;
+            } else {
+                throw new JpomRuntimeException(I18nMessageUtil.get("i18n.publish_project_package_failed.9514") + jsonMessage);
+            }
+        } finally {
+            if (versionBegun && publishSuccess) {
+                this.versionCommit(buildVersionService, nodeModel, projectId);
+            }
+        }
+    }
+
+    /**
+     * 发布前准备版本快照（失败只告警，不阻断发布）
+     *
+     * @param buildVersionService 版本服务
+     * @param nodeModel           节点
+     * @param projectId           项目ID
+     * @return 是否准备成功
+     */
+    private boolean versionBegin(BuildVersionService buildVersionService, NodeModel nodeModel, String projectId) {
+        try {
+            JsonMessage<JSONObject> beginMessage = buildVersionService.begin(nodeModel, projectId,
+                this.getRealBuildNumberId(), this.buildExtraModule.getVersionKeepCount());
+            if (!beginMessage.success()) {
+                logRecorder.systemWarning(I18nMessageUtil.get("i18n.version_snapshot_prepare_failed.b8d2"), beginMessage);
+                return false;
+            }
+            if (!BuildVersionService.effective(beginMessage)) {
+                // 插件端未启用版本快照：返回的是 success + enabled=false，不能当成功
+                logRecorder.systemWarning(I18nMessageUtil.get("i18n.version_snapshot_not_effective.4c7a"));
+                return false;
+            }
+            logRecorder.system(I18nMessageUtil.get("i18n.version_snapshot_prepare_success.a1f7"));
+            return true;
+        } catch (Exception e) {
+            log.warn(I18nMessageUtil.get("i18n.version_snapshot_prepare_exception.c3e5"), e);
+            logRecorder.systemWarning(I18nMessageUtil.get("i18n.version_snapshot_prepare_exception.c3e5"));
+        }
+        return false;
+    }
+
+    /**
+     * 发布成功后登记版本（失败只告警，不阻断发布）
+     *
+     * @param buildVersionService 版本服务
+     * @param nodeModel           节点
+     * @param projectId           项目ID
+     */
+    private void versionCommit(BuildVersionService buildVersionService, NodeModel nodeModel, String projectId) {
+        try {
+            JsonMessage<JSONObject> commitMessage = buildVersionService.commit(nodeModel, projectId,
+                this.getRealBuildNumberId(), this.buildExtraModule.getId(),
+                this.buildExtraModule.getVersionKeepCount(),
+                this.resultFile == null ? null : FileUtil.getAbsolutePath(this.resultFile));
+            if (!commitMessage.success()) {
+                logRecorder.systemWarning(I18nMessageUtil.get("i18n.version_snapshot_commit_failed.e4c1"), commitMessage);
+                return;
+            }
+            if (!BuildVersionService.effective(commitMessage)) {
+                // 插件端未启用版本快照：success 但没有登记任何版本，快速回滚会「没有记录」
+                logRecorder.systemWarning(I18nMessageUtil.get("i18n.version_snapshot_not_effective.4c7a"));
+                return;
+            }
+            logRecorder.system(I18nMessageUtil.get("i18n.version_snapshot_commit_success.d2a8"));
+        } catch (Exception e) {
+            log.warn(I18nMessageUtil.get("i18n.version_snapshot_commit_exception.f5b3"), e);
+            logRecorder.systemWarning(I18nMessageUtil.get("i18n.version_snapshot_commit_exception.f5b3"));
         }
     }
 
@@ -717,6 +955,11 @@ public class ReleaseManage {
                 .userModel(userModel)
                 .mode("build-trigger")
                 .modeData(buildExtraModule.getId())
+                // 版本快照：按节点登记构建版本，失败只告警不阻断分发
+                .buildNumberId(getRealBuildNumberId())
+                .buildDataId(buildExtraModule.getId())
+                .versionSnapshot(buildExtraModule.getVersionSnapshot())
+                .versionKeepCount(buildExtraModule.getVersionKeepCount())
                 .unzip(unZip)
                 // 由构建配置决定是否删除
                 .doneDeleteFile(false)
@@ -728,6 +971,12 @@ public class ReleaseManage {
         logRecorder.system(I18nMessageUtil.get("i18n.start_executing_distribution_package.a2cc"));
         OutGivingModel.Status status = statusFuture.get();
         logRecorder.system(I18nMessageUtil.get("i18n.distribute_result.a230"), status.getDesc());
+        if (status == OutGivingModel.Status.FAIL) {
+            // 与 SSH / SSH 项目 / FTP 同口径：分发失败判定本次构建失败，避免「构建成功但产物没发出去」
+            String message = StrUtil.format(I18nMessageUtil.get("i18n.distribute_result.a230"), status.getDesc());
+            logRecorder.systemError(message);
+            throw new JpomRuntimeException(message);
+        }
     }
 
     /**

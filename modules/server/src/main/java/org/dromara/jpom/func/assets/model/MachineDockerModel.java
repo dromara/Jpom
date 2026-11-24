@@ -12,6 +12,8 @@ package org.dromara.jpom.func.assets.model;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
+import com.alibaba.fastjson2.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -75,7 +77,12 @@ public class MachineDockerModel extends BaseGroupNameModel {
 
     /**
      * 仓库密码
+     * <p>
+     * 只用于服务端内部连接仓库，任何接口响应都不允许回显：列表/集群列表接口曾把该字段原样返回
+     * （2026-11-19 外部安全报告）。编辑时前端留空表示沿用原密码，见 MachineDockerController#edit。
      */
+    @JsonIgnore
+    @JSONField(serialize = false)
     private String registryPassword;
 
     /**

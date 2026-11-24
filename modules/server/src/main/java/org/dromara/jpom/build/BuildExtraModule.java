@@ -214,12 +214,35 @@ public class BuildExtraModule extends BaseModel {
      */
     private Integer fileStorageKeepDay;
     /**
+     * 发布时是否生成完整版本快照（用于快速回滚，不重新传输产物）
+     */
+    private Boolean versionSnapshot;
+    /**
+     * 版本快照保留个数，为空跟随插件端配置
+     */
+    private Integer versionKeepCount;
+    /**
+     * 多目标发布（SSH / SSH 项目）时，任一目标失败是否立即终止后续目标
+     * <p>
+     * 为空按开启处理：与「发布过程抛异常即中断」的既有行为一致，避免只发出去一半却继续往下发。
+     */
+    private Boolean releaseFailFast;
+    /**
      * 本地构建执行命令方式
      */
     private String commandExecMode;
 
     public boolean strictlyEnforce() {
         return strictlyEnforce != null && strictlyEnforce;
+    }
+
+    /**
+     * 多目标发布是否「任一目标失败即终止」
+     *
+     * @return true 终止后续目标
+     */
+    public boolean failFastOnRelease() {
+        return releaseFailFast == null || releaseFailFast;
     }
 
     public String getResultDirFile() {

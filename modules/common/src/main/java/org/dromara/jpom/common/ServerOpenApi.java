@@ -111,4 +111,14 @@ public class ServerOpenApi {
      * 备份数据库，触发器
      */
     public static final String BACKUP_TRIGGER_URL = API + "backup-db/{token}";
+
+    /**
+     * SSH 项目触发执行, 第一级项目id,第二级token
+     */
+    public static final String SSH_PROJECT_TRIGGER_URL = API + "ssh-project/{id}/{token}";
+
+    /**
+     * SSH 项目触发执行 批量触发
+     */
+    public static final String SSH_PROJECT_TRIGGER_BATCH = API + "ssh_project_batch";
 }

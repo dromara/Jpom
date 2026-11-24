@@ -21,12 +21,33 @@ import lombok.extern.slf4j.Slf4j;
 public class TransportServerFactory {
 
     /**
+     * 由业务层注册的传输实现（反向建连隧道用）
+     * <p>
+     * SPI（{@code META-INF/services}）只能加载一个全局实现，无法按节点区分正反向传输，
+     * 因此允许服务端在启动时注册一个路由门面：门面内部按节点判断走隧道还是走 SPI 实现。
+     */
+    private static volatile TransportServer delegate;
+
+    /**
      * 获得单例的 TransportServer
      *
      * @return 单例的 TransportServer
      */
     public static TransportServer get() {
+        TransportServer transportServer = delegate;
+        if (transportServer != null) {
+            return transportServer;
+        }
         return Singleton.get(TransportServer.class.getName(), TransportServerFactory::doCreate);
+    }
+
+    /**
+     * 注册传输实现（通常为按节点路由的门面）
+     *
+     * @param transportServer 传输实现，传 {@code null} 恢复 SPI 默认实现
+     */
+    public static void set(TransportServer transportServer) {
+        delegate = transportServer;
     }
 
     /**

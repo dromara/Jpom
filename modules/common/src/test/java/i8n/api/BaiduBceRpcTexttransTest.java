@@ -26,6 +26,7 @@ import com.alibaba.fastjson2.JSONValidator;
 import lombok.Lombok;
 import org.dromara.jpom.util.StringUtil;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -40,6 +41,8 @@ import java.util.regex.Pattern;
  * @author bwcx_jzy1
  * @since 2024/6/12
  */
+@Deprecated
+@Ignore("i18n 工具链已弃用（2026-11-18）：百度翻译 API 客户端，禁止再运行")
 public class BaiduBceRpcTexttransTest {
 
     @Test

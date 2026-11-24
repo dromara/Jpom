@@ -1,12 +1,12 @@
-///
-/// Copyright (c) 2019 Of Him Code Technology Studio
-/// Jpom is licensed under Mulan PSL v2.
-/// You can use this software according to the terms and conditions of the Mulan PSL v2.
-/// You may obtain a copy of Mulan PSL v2 at:
-/// 			http://license.coscl.org.cn/MulanPSL2
-/// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-/// See the Mulan PSL v2 for more details.
-///
+/*
+ * Copyright (c) 2019 Of Him Code Technology Studio
+ * Jpom is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ * 			http://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ */
 
 import { t } from '@/i18n'
 
@@ -90,6 +90,11 @@ export const PROJECT_DSL_DEFATUL =
   'config:\r\n' +
   t('i18n_0d467f7889') +
   '\n#  autoBackToFile: true\r\n' +
+  t('i18n_8774cbfd76') +
+  '\n#  log:\r\n' +
+  '#    - name: app\r\n' +
+  '#      path: logs/app.log\r\n' +
+  '#      charset: UTF-8\r\n' +
   '\r\n'
 
 /**

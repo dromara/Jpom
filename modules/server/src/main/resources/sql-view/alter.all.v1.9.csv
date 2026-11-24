@@ -1,0 +1,2 @@
+alterType,tableName,name,type,len,defaultValue,comment,notNull
+ADD,MACHINE_NODE_INFO,authorizeToken,String,100,,通讯授权摘要（反向隧道 HELLO 上报的 sha1(账号@密码)，为空时回退账号密码计算）,false

@@ -44,6 +44,10 @@ public enum HandlerType {
      */
     console(ConsoleHandler.class, ProjectInfoCacheService.class),
     /**
+     * SSH 项目控制台（不依赖插件端）
+     */
+    sshProject(SshProjectConsoleHandler.class, org.dromara.jpom.service.sshproject.SshProjectService.class),
+    /**
      * ssh
      */
     ssh(SshHandler.class, SshService.class, MachineSshServer.class, "machineSshId"),

@@ -11,23 +11,30 @@ package org.dromara.jpom.build;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.SystemClock;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
+import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.build.version.BuildVersionService;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.BaseEnum;
 import org.dromara.jpom.model.EnvironmentMapBuilder;
 import org.dromara.jpom.model.data.BuildInfoModel;
+import org.dromara.jpom.model.data.NodeBuildVersionModel;
+import org.dromara.jpom.model.data.NodeModel;
 import org.dromara.jpom.model.data.RepositoryModel;
 import org.dromara.jpom.model.enums.BuildStatus;
 import org.dromara.jpom.model.log.BuildHistoryLog;
 import org.dromara.jpom.model.user.UserModel;
+import org.dromara.jpom.service.build.NodeBuildVersionService;
 import org.dromara.jpom.service.dblog.BuildInfoService;
 import org.dromara.jpom.service.dblog.DbBuildHistoryLogService;
 import org.dromara.jpom.service.dblog.RepositoryService;
+import org.dromara.jpom.service.sshproject.SshProjectVersionService;
 import org.dromara.jpom.service.system.WorkspaceEnvVarService;
 import org.dromara.jpom.util.LogRecorder;
 import org.dromara.jpom.util.StringUtil;
@@ -35,7 +42,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.io.File;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author bwcx_jzy
@@ -51,17 +61,26 @@ public class BuildExecuteService {
     private final RepositoryService repositoryService;
     private final WorkspaceEnvVarService workspaceEnvVarService;
     private final BuildExecutorPoolService buildExecutorPoolService;
+    private final BuildVersionService buildVersionService;
+    private final NodeBuildVersionService nodeBuildVersionService;
+    private final SshProjectVersionService sshProjectVersionService;
 
     public BuildExecuteService(BuildInfoService buildService,
                                DbBuildHistoryLogService dbBuildHistoryLogService,
                                RepositoryService repositoryService,
                                WorkspaceEnvVarService workspaceEnvVarService,
-                               BuildExecutorPoolService buildExecutorPoolService) {
+                               BuildExecutorPoolService buildExecutorPoolService,
+                               BuildVersionService buildVersionService,
+                               NodeBuildVersionService nodeBuildVersionService,
+                               SshProjectVersionService sshProjectVersionService) {
         this.buildService = buildService;
         this.dbBuildHistoryLogService = dbBuildHistoryLogService;
         this.repositoryService = repositoryService;
         this.workspaceEnvVarService = workspaceEnvVarService;
         this.buildExecutorPoolService = buildExecutorPoolService;
+        this.buildVersionService = buildVersionService;
+        this.nodeBuildVersionService = nodeBuildVersionService;
+        this.sshProjectVersionService = sshProjectVersionService;
     }
 
 
@@ -210,7 +229,128 @@ public class BuildExecuteService {
         }
     }
 
-    private int nextBuildId(BuildInfoModel buildInfoModel) {
+    /**
+     * 快速回滚：把节点上的历史版本切换为当前版本（不重新传输产物）
+     *
+     * @param oldLog    目标构建历史
+     * @param item      构建配置
+     * @param userModel 操作人
+     * @param restart   切换后是否重启项目
+     * @return 新的构建编号
+     */
+    public int quickRollback(BuildHistoryLog oldLog, BuildInfoModel item, UserModel userModel, boolean restart) {
+        return this.quickRollback(oldLog, item, userModel, restart, null, null);
+    }
+
+    /**
+     * 快速回滚：把发布目标的本地版本切换为当前版本（不重新传输产物）
+     * <p>
+     * 插件端项目按索引表逐个节点切换；SSH 项目的版本快照在目标机器目录上，按构建编号或指定版本切换。
+     *
+     * @param oldLog    目标构建历史
+     * @param item      构建配置
+     * @param userModel 操作人
+     * @param restart   切换后是否重启项目
+     * @param versionId 指定版本（SSH 项目可选，为空按构建编号自动定位）
+     * @param projectId 指定 SSH 项目（多选发布时按版本行定位；其它发布方式忽略）
+     * @return 新的构建编号
+     */
+    public int quickRollback(BuildHistoryLog oldLog, BuildInfoModel item, UserModel userModel, boolean restart,
+                             String versionId, String projectId) {
+        synchronized (item.getId().intern()) {
+            String e = this.checkStatus(item);
+            Assert.isNull(e, () -> e);
+            Integer fromBuildNumberId = ObjectUtil.defaultIfNull(oldLog.getFromBuildNumberId(), oldLog.getBuildNumberId());
+            boolean sshProject = BuildVersionService.isSshProject(oldLog);
+            List<NodeBuildVersionModel> targets = sshProject ? null : nodeBuildVersionService.listByBuild(oldLog.getBuildDataId(), fromBuildNumberId);
+            Assert.state(sshProject || !targets.isEmpty(), I18nMessageUtil.get("i18n.no_node_version_for_build.3d18"));
+            // 历史记录可能没有 extraData（老数据），这里不能直接 Assert，取不到就按默认保留个数处理
+            BuildExtraModule oldExtra = StringUtil.jsonConvert(oldLog.getExtraData(), BuildExtraModule.class);
+            int versionKeepCount = BuildVersionService.resolveKeepCount(oldExtra == null ? null : oldExtra.getVersionKeepCount());
+            int buildId = this.nextBuildId(item);
+            item.setBuildId(buildId);
+            BuildHistoryLog buildHistoryLog = oldLog.toJson().to(BuildHistoryLog.class);
+            buildHistoryLog.setId(null);
+            buildHistoryLog.setCreateUser(null);
+            buildHistoryLog.setCreateTimeMillis(null);
+            buildHistoryLog.setModifyUser(null);
+            buildHistoryLog.setModifyTimeMillis(null);
+            buildHistoryLog.setBuildNumberId(buildId);
+            buildHistoryLog.setFromBuildNumberId(fromBuildNumberId);
+            buildHistoryLog.setTriggerBuildType(3);
+            buildHistoryLog.setStartTime(SystemClock.now());
+            buildHistoryLog.setEndTime(SystemClock.now());
+            //
+            File logFile = BuildUtil.getLogFile(item.getId(), buildId);
+            LogRecorder logRecorder = LogRecorder.builder().file(logFile).build();
+            int success = 0;
+            int fail = 0;
+            try {
+                logRecorder.system(I18nMessageUtil.get("i18n.start_quick_rollback.7a41"), oldLog.getBuildNumberId(), fromBuildNumberId);
+                if (sshProject) {
+                    try {
+                        this.sshProjectVersionService.quickRollback(oldLog, projectId, versionId, restart, logRecorder);
+                        success++;
+                    } catch (Exception exception) {
+                        fail++;
+                        logRecorder.systemError(I18nMessageUtil.get("i18n.quick_rollback_ssh_project_failed.c4d2"),
+                            oldLog.getBuildName(), exception.getMessage());
+                    }
+                } else {
+                    for (NodeBuildVersionModel target : targets) {
+                        NodeModel nodeModel = buildVersionService.resolveNode(target.getNodeId());
+                        if (nodeModel == null) {
+                            fail++;
+                            logRecorder.systemError(I18nMessageUtil.get("i18n.quick_rollback_node_missing.b6e2"), target.getNodeId(), target.getProjectId());
+                            continue;
+                        }
+                        try {
+                            // 切换时显式带上构建配置的保留个数（0/空归一为默认值），否则插件端会按「未启用」清理到只剩当前版本
+                            JsonMessage<JSONObject> jsonMessage = buildVersionService.switchVersion(nodeModel, target.getProjectId(),
+                                target.getVersionId(), restart, versionKeepCount);
+                            if (jsonMessage.success()) {
+                                success++;
+                                nodeBuildVersionService.markCurrent(target.getNodeId(), target.getProjectId(), target.getVersionId());
+                                NodeBuildVersionModel update = new NodeBuildVersionModel();
+                                update.setId(target.getId());
+                                update.setStatus(BuildVersionService.STATUS_CURRENT);
+                                update.setMessage(I18nMessageUtil.get("i18n.quick_rollback_success.9c15"));
+                                nodeBuildVersionService.updateById(update);
+                                logRecorder.system(I18nMessageUtil.get("i18n.quick_rollback_node_success.2f83"),
+                                    nodeModel.getName(), target.getProjectId(), target.getVersionId());
+                            } else {
+                                fail++;
+                                logRecorder.systemError(I18nMessageUtil.get("i18n.quick_rollback_node_failed.4b97"),
+                                    nodeModel.getName(), target.getProjectId(), target.getVersionId(), jsonMessage);
+                            }
+                        } catch (Exception exception) {
+                            fail++;
+                            logRecorder.systemError(I18nMessageUtil.get("i18n.quick_rollback_node_exception.8e26"),
+                                nodeModel.getName(), target.getProjectId(), exception.getMessage());
+                        }
+                    }
+                }
+            } finally {
+                String msg = StrUtil.format("{}: {} / {}", I18nMessageUtil.get("i18n.quick_rollback_result.c1d4"), success, fail);
+                buildHistoryLog.setStatus(success > 0 ? BuildStatus.PubSuccess.getCode() : BuildStatus.PubError.getCode());
+                buildHistoryLog.setStatusMsg(msg);
+                buildHistoryLog.setReleaseMethod(oldLog.getReleaseMethod());
+                dbBuildHistoryLogService.insert(buildHistoryLog);
+                buildService.updateStatus(buildHistoryLog.getBuildDataId(),
+                    success > 0 ? BuildStatus.PubSuccess : BuildStatus.PubError, msg);
+                IoUtil.close(logRecorder);
+            }
+            return buildId;
+        }
+    }
+
+    /**
+     * 分配下一个构建编号
+     *
+     * @param buildInfoModel 构建信息
+     * @return 新的构建编号
+     */
+    public int nextBuildId(BuildInfoModel buildInfoModel) {
         // set buildId field
         int buildId = ObjectUtil.defaultIfNull(buildInfoModel.getBuildId(), 0);
         BuildInfoModel update = new BuildInfoModel();
@@ -242,6 +382,8 @@ public class BuildExecuteService {
      */
     private String insertLog(BuildExtraModule buildExtraModule, TaskData taskData) {
         BuildInfoModel buildInfoModel = taskData.buildInfoModel;
+        // 新一轮构建开始：清掉上一次遗留的「取消意图」
+        CANCEL_REQUESTED.remove(buildInfoModel.getId());
         buildExtraModule.updateValue(buildInfoModel);
         BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
         // 更新其他配置字段
@@ -274,7 +416,41 @@ public class BuildExecuteService {
      * @param logId       记录ID
      * @param buildStatus to status
      */
+    /**
+     * 已请求取消的构建：取消可能先于/晚于构建线程的失败写入，用一个标记把「取消意图」传到状态写入处，
+     * 避免「节点构建」被取消后节点回报 cancelled、构建线程把终态写成 Error（BUGS B-001）
+     */
+    private static final Set<String> CANCEL_REQUESTED = ConcurrentHashMap.newKeySet();
+
+    /**
+     * 标记该构建已被要求取消
+     *
+     * @param buildId 构建ID
+     */
+    public static void markCancelRequested(String buildId) {
+        if (StrUtil.isNotEmpty(buildId)) {
+            CANCEL_REQUESTED.add(buildId);
+        }
+    }
+
     public void updateStatus(String buildId, String logId, int buildNumberId, BuildStatus buildStatus, String msg) {
+        if (buildStatus != BuildStatus.Cancel && !buildStatus.isProgress() && CANCEL_REQUESTED.contains(buildId)) {
+            // 取消后构建线程/节点回报的任何终态都归一为「已取消」
+            buildStatus = BuildStatus.Cancel;
+            msg = I18nMessageUtil.get("i18n.manual_cancel.8464");
+        }
+        // 注意：这里不能清除取消标记——取消先落库、构建线程随后才把失败写回来，
+        // 提前清除会让「取消意图」丢失（BUGS B-001 复现两次的根本原因）。
+        // 标记在下一次构建开始时清除（见 insertLog）。
+        // 「已取消」是终态：取消要先杀进程再落库，被杀进程的退出码会被构建线程写成「执行命令退出码非0」，
+        // 把 Cancel(7) 盖成 Error(3)（BUGS B-001）。这里保护取消终态，后续任何非取消状态写入都忽略。
+        if (buildStatus != BuildStatus.Cancel) {
+            BuildHistoryLog current = dbBuildHistoryLogService.getByKey(logId);
+            if (current != null && current.getStatus() != null && current.getStatus() == BuildStatus.Cancel.getCode()) {
+                log.info("构建已取消，忽略后续状态覆盖：logId={} status={} msg={}", logId, buildStatus, msg);
+                return;
+            }
+        }
         BuildHistoryLog buildHistoryLog = new BuildHistoryLog();
         buildHistoryLog.setId(logId);
         buildHistoryLog.setStatusMsg(msg);

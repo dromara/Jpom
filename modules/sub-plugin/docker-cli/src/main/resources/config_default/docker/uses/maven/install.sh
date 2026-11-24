@@ -9,6 +9,7 @@
 # See the Mulan PSL v2 for more details.
 #
 
+
 if [ $MAVEN_VERSION ]; then
 	echo "MAVEN_VERSION ${MAVEN_VERSION}"
 else

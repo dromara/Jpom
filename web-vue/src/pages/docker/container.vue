@@ -1,3 +1,14 @@
+<!--
+
+    Copyright (c) 2019 Of Him Code Technology Studio
+    Jpom is licensed under Mulan PSL v2.
+    You can use this software according to the terms and conditions of the Mulan PSL v2.
+    You may obtain a copy of Mulan PSL v2 at:
+    			http://license.coscl.org.cn/MulanPSL2
+    THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+    See the Mulan PSL v2 for more details.
+
+-->
 <template>
   <div>
     <template v-if="type === 'container'">
@@ -113,7 +124,7 @@
 
           <template v-else-if="column.showid">
             <a-tooltip placement="topLeft" :title="text">
-              <span style="display: none"> {{ (array = text.split(':')) }}</span>
+              <span style="display: none"> {{ array = text.split(':') }}</span>
               <span>{{ array[array.length - 1].slice(0, 12) }}</span>
             </a-tooltip>
           </template>
@@ -333,18 +344,18 @@
                 <span>
                   <span style="display: none">
                     {{
-                      (array = (item2.child || []).map((item) => {
+                      array = (item2.child || []).map((item) => {
                         return item.state
-                      }))
+                      })
                     }}
                     {{
-                      (runningCount = array
+                      runningCount = array
                         .map((item) => {
                           return item === 'running' ? 1 : 0
                         })
                         .reduce((prev, curr) => {
                           return prev + curr
-                        }, 0))
+                        }, 0)
                     }}</span
                   >
                   <span v-if="runningCount">Running({{ runningCount }}/{{ array.length }})</span>
@@ -425,7 +436,7 @@
 
                 <template v-else-if="column.showid">
                   <a-tooltip placement="topLeft" :title="text">
-                    <span style="display: none"> {{ (array = text.split(':')) }}</span>
+                    <span style="display: none"> {{ array = text.split(':') }}</span>
                     <span>{{ array[array.length - 1].slice(0, 12) }}</span>
                   </a-tooltip>
                 </template>
@@ -841,7 +852,7 @@ export default {
           dataIndex: 'operation',
           fixed: 'right',
 
-          width: '160px'
+          width: '1%'
         }
       ],
 

@@ -1,12 +1,12 @@
-/*
- * Copyright (c) 2019 Of Him Code Technology Studio
- * Jpom is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- * 			http://license.coscl.org.cn/MulanPSL2
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- */
+//
+// Copyright (c) 2019 Of Him Code Technology Studio
+// Jpom is licensed under Mulan PSL v2.
+// You can use this software according to the terms and conditions of the Mulan PSL v2.
+// You may obtain a copy of Mulan PSL v2 at:
+// 			http://license.coscl.org.cn/MulanPSL2
+// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+// See the Mulan PSL v2 for more details.
+//
 
 package project
 
@@ -125,4 +125,11 @@ const (
 	keyProjectPathAuthJpom      = "i18n.project_path_auth_not_under_jpom.0e18"
 	keyFileNotFound             = "i18n.file_not_found.d952"
 	keySoftLinkTargetNotExist   = "i18n.soft_link_project_department_exists.fa97"
+)
+
+// 旧版控制台日志迁移文案（复用 Java 端 AgentStartInit 已用的 key，四语言齐全）。
+const (
+	keyAutoMigrateExistBackupLogs   = "i18n.auto_migrate_exist_backup_logs.dc33"
+	keyAutoMigrateExistLogs         = "i18n.auto_migrate_exist_logs.c169"
+	keyOldVersionProjectLogsRunning = "i18n.old_version_project_logs_exist_while_running.75ab"
 )

@@ -1,3 +1,14 @@
+<!--
+
+    Copyright (c) 2019 Of Him Code Technology Studio
+    Jpom is licensed under Mulan PSL v2.
+    You can use this software according to the terms and conditions of the Mulan PSL v2.
+    You may obtain a copy of Mulan PSL v2 at:
+    			http://license.coscl.org.cn/MulanPSL2
+    THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+    See the Mulan PSL v2 for more details.
+
+-->
 <template>
   <div>
     <a-tabs tab-position="left" @change="changeTabs">
@@ -19,7 +30,7 @@
           <template #extra>
             <a-tag
               v-if="machineInfo"
-              :color="machineInfo && machineInfo.status === 1 ? 'green' : 'pink'"
+              :color="statusTagColor(machineInfo && machineInfo.status)"
               style="margin-right: 0"
             >
               {{ statusMap[machineInfo && machineInfo.status] || $t('i18n_1622dc9b6b') }}
@@ -93,6 +104,11 @@
               <a-descriptions-item :label="$t('i18n_a912a83e6f')"
                 >{{ machineInfo && machineInfo.jpomVersion }}
               </a-descriptions-item>
+              <a-descriptions-item :label="$t('i18n_084fca46ee')">
+                <a-tag :color="engineTagColor(machineInfo && machineInfo.jpomEngine)">{{
+                  engineLabel(machineInfo && machineInfo.jpomEngine)
+                }}</a-tag>
+              </a-descriptions-item>
               <a-descriptions-item :label="$t('i18n_04a8742dd7')"
                 >{{ formatDuration(machineInfo && machineInfo.jpomUptime, '', 3) }}
               </a-descriptions-item>
@@ -114,6 +130,14 @@
               </a-descriptions-item>
               <a-descriptions-item :label="$t('i18n_e39f4a69f4')"
                 >{{ machineInfo && machineInfo.jpomScriptCount }}
+              </a-descriptions-item>
+              <a-descriptions-item :label="$t('i18n_4a172c87cb')">
+                <a-tag :color="machineInfo && machineInfo.buildEnabled === 1 ? 'green' : 'default'">
+                  {{ machineInfo && machineInfo.buildEnabled === 1 ? $t('i18n_0a60ac8f02') : $t('i18n_c9744f45e7') }}
+                </a-tag>
+              </a-descriptions-item>
+              <a-descriptions-item :label="$t('i18n_25b560dd87')">
+                {{ (machineInfo && machineInfo.buildMaxConcurrency) || 1 }}
               </a-descriptions-item>
               <a-descriptions-item :label="$t('i18n_204222d167')"
                 >{{ formatDuration(machineInfo && machineInfo.networkDelay) }}
@@ -171,7 +195,7 @@
                 <template v-if="monitorConfig?.network?.statExcludeNames">
                   <span>
                     {{ $t('i18n_503660aa89') }}
-                    <a-tag v-for="item in monitorConfig?.network?.statExcludeNames?.split(',')">
+                    <a-tag v-for="item in monitorConfig?.network?.statExcludeNames?.split(',')" :key="item">
                       {{ item }}
                     </a-tag>
                   </span>
@@ -179,7 +203,7 @@
                 <template v-if="monitorConfig?.network?.statContainsOnlyNames">
                   <span>
                     {{ $t('i18n_bb7eeae618') }}
-                    <a-tag v-for="item in monitorConfig?.network?.statContainsOnlyNames?.split(',')">
+                    <a-tag v-for="item in monitorConfig?.network?.statContainsOnlyNames?.split(',')" :key="item">
                       {{ item }}
                     </a-tag>
                   </span>
@@ -190,7 +214,10 @@
                     <b>{{ $t('i18n_13f7bb78ef') }}</b>
                     <div>
                       {{ $t('i18n_475cd76aec') }}
-                      <a-tag v-for="item in JSON.parse(machineInfo?.extendInfo || '{}')?.monitorIfsNames?.split(',')">
+                      <a-tag
+                        v-for="item in JSON.parse(machineInfo?.extendInfo || '{}')?.monitorIfsNames?.split(',')"
+                        :key="item"
+                      >
                         {{ item }}
                       </a-tag>
                     </div>
@@ -671,7 +698,7 @@ export default {
           dataIndex: 'operation',
 
           align: 'center',
-          width: '80px',
+          width: '1%',
           fixed: 'right'
         }
       ],
@@ -835,10 +862,29 @@ export default {
   methods: {
     formatPercent,
     parseTime,
+    // 状态标签颜色：正常绿色、检测超时橙色、其它异常粉色
+    statusTagColor(status) {
+      if (status === 1) return 'green'
+      if (status === 5) return 'orange'
+      return 'pink'
+    },
     formatDuration,
     renderSize,
     formatPercent2Number,
     renderBpsSize,
+    // 插件端引擎（java/go）：由服务端查询 /info 后回填，空表示暂时无法识别（离线/超时）
+    engineLabel(engine) {
+      const value = engine ? String(engine).toLowerCase() : ''
+      if (value === 'go') return this.$t('i18n_11b8cdd4a6')
+      if (value === 'java') return this.$t('i18n_ac0399d13b')
+      return this.$t('i18n_1622dc9b6b')
+    },
+    engineTagColor(engine) {
+      const value = engine ? String(engine).toLowerCase() : ''
+      if (value === 'go') return 'green'
+      if (value === 'java') return 'blue'
+      return 'default'
+    },
     getMachineInfo() {
       machineInfo({ ...this.idInfo }).then((res) => {
         //

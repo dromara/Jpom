@@ -219,17 +219,24 @@
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <version>4.3</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>remove</goal>
-                            <goal>format</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <!--
+                  版权头唯一真源是 HEADER.txt，全仓只有一种写法：
+                    - C 系（java/ts/js/less/sql/c）      -> /* * */  （SLASHSTAR_STYLE）
+                    - Go（go）                            -> // 行注释（DOUBLESLASH_STYLE）
+                      Go 的 //go:build 约束要求其前面只允许空行和其他行注释，块注释会使其失效，故不能用 SLASHSTAR。
+                    - 标记语言（vue/html/svg/xml）        -> 尖括号感叹号注释（XML_STYLE）
+                    - 脚本与配置（sh/yml/yaml/py）        -> #         （SCRIPT_STYLE）
+                    - Windows 批处理（bat）               -> REM       （BATCH）
+                  不绑定生命周期：header 不再由 generate-sources 自动改写。
+                    - 本地补齐/重排：mvn -N license:format
+                    - CI 校验：      mvn -N license:check（strictCheck，缺头即失败）
+                  原因：旧的 remove+format 组合会（1）删不掉异格式的旧 header 从而叠成两份，
+                  （2）把 header 后面的注释行当 header 一起删掉，（3）在每次构建时静默改写工作区文件。
+                -->
                 <configuration>
                     <quiet>true</quiet>
+                    <!-- 关闭内置排除表：其中 **/node/** 会跳过本项目所有 node 业务目录，详见下方 excludes 注释 -->
+                    <useDefaultExcludes>false</useDefaultExcludes>
                     <licenseSets>
                         <licenseSet>
                             <!--HEADER文件-->
@@ -237,24 +244,186 @@
                             <includes>
                                 <!--取消默认排除-->
                                 <include>**</include>
-                                <include>web-vue/index.html</include>
-                                <include>**/dist/index.html</include>
                             </includes>
-                            <!--排除文件-->
+                            <!--
+                              内置排除表（useDefaultExcludes）里含有 **/node/**，会把本项目所有名为 node 的
+                              业务目录（节点管理的 controller/service/model/pages）整体跳过，使这些源码永远没有
+                              版权头。因此关闭内置表，把除 **/node/** 之外的全部条目在下面原样列出，再补充
+                              本仓库特有的文本文件和构建产物。
+                            -->
                             <excludes>
-                                <!-- https://github.com/mathieucarbou/license-maven-plugin/blob/master/license-maven-plugin/src/main/java/com/mycila/maven/plugin/license/Default.java-->
-                                <exclude>docs/**</exclude>
-                                <!-- <exclude>web-vue/src/**</exclude>-->
-                                <!-- <exclude>web-vue2/**</exclude>-->
-                                <!-- <exclude>**/*.yml</exclude>-->
+                                <!-- 版本控制与 IDE 元数据 -->
+                                <exclude>**/*~</exclude>
+                                <exclude>**/#*#</exclude>
+                                <exclude>**/.#*</exclude>
+                                <exclude>**/%*%</exclude>
+                                <exclude>**/._*</exclude>
+                                <exclude>**/.repository/**</exclude>
+                                <exclude>**/*.lck</exclude>
+                                <exclude>**/CVS</exclude>
+                                <exclude>**/CVS/**</exclude>
+                                <exclude>**/.cvsignore</exclude>
+                                <exclude>**/RCS</exclude>
+                                <exclude>**/RCS/**</exclude>
+                                <exclude>**/SCCS</exclude>
+                                <exclude>**/SCCS/**</exclude>
+                                <exclude>**/vssver.scc</exclude>
+                                <exclude>**/.svn</exclude>
+                                <exclude>**/.svn/**</exclude>
+                                <exclude>**/.arch-ids</exclude>
+                                <exclude>**/.arch-ids/**</exclude>
+                                <exclude>**/.bzr</exclude>
+                                <exclude>**/.bzr/**</exclude>
+                                <exclude>**/.MySCMServerInfo</exclude>
+                                <exclude>**/.DS_Store</exclude>
+                                <exclude>**/.metadata</exclude>
+                                <exclude>**/.metadata/**</exclude>
+                                <exclude>**/.hg</exclude>
+                                <exclude>**/.hg/**</exclude>
+                                <exclude>**/.hgignore</exclude>
+                                <exclude>**/.git</exclude>
+                                <exclude>**/.git/**</exclude>
+                                <exclude>**/.gitattributes</exclude>
+                                <exclude>**/.gitignore</exclude>
+                                <exclude>**/.gitkeep</exclude>
+                                <exclude>**/.gitmodules</exclude>
+                                <exclude>**/.github</exclude>
+                                <exclude>**/.github/**</exclude>
+                                <exclude>**/BitKeeper</exclude>
+                                <exclude>**/BitKeeper/**</exclude>
+                                <exclude>**/ChangeSet</exclude>
+                                <exclude>**/ChangeSet/**</exclude>
+                                <exclude>**/_darcs</exclude>
+                                <exclude>**/_darcs/**</exclude>
+                                <exclude>**/.darcsrepo</exclude>
+                                <exclude>**/.darcsrepo/**</exclude>
+                                <exclude>**/-darcs-backup*</exclude>
+                                <exclude>**/.darcs-temp-mail</exclude>
+                                <exclude>**/.classpath</exclude>
+                                <exclude>**/.project</exclude>
+                                <exclude>**/.settings/**</exclude>
+                                <exclude>**/*.iml</exclude>
+                                <exclude>**/*.ipr</exclude>
+                                <exclude>**/*.iws</exclude>
+                                <exclude>**/.idea/**</exclude>
+                                <exclude>**/nb-configuration.xml</exclude>
+                                <exclude>**/.factorypath</exclude>
+                                <!-- 构建产物与工具链 -->
+                                <exclude>**/target/**</exclude>
+                                <exclude>**/test-output/**</exclude>
+                                <exclude>**/release.properties</exclude>
+                                <exclude>**/dependency-reduced-pom.xml</exclude>
+                                <exclude>**/release-pom.xml</exclude>
+                                <exclude>**/pom.xml.releaseBackup</exclude>
+                                <exclude>**/pom.xml.versionsBackup</exclude>
+                                <exclude>**/node_modules/**</exclude>
+                                <exclude>**/cobertura.ser</exclude>
+                                <exclude>**/.clover/**</exclude>
+                                <exclude>**/jacoco.exec</exclude>
+                                <exclude>**/MANIFEST.MF</exclude>
+                                <exclude>**/jvm.config</exclude>
+                                <exclude>**/maven.config</exclude>
+                                <exclude>**/gradlew</exclude>
+                                <exclude>**/gradlew.bat</exclude>
+                                <exclude>**/gradle-wrapper.properties</exclude>
+                                <exclude>**/mvnw</exclude>
+                                <exclude>**/mvnw.cmd</exclude>
+                                <exclude>**/maven-wrapper.properties</exclude>
+                                <exclude>**/MavenWrapperDownloader.java</exclude>
+                                <exclude>**/unlicensed/**</exclude>
+                                <exclude>**/META-INF/services/**</exclude>
+                                <exclude>**/.travis.yml</exclude>
+                                <exclude>**/.appveyor.yml</exclude>
+                                <exclude>**/appveyor.yml</exclude>
+                                <exclude>**/.circleci</exclude>
+                                <exclude>**/.circleci/**</exclude>
+                                <exclude>**/.build.yml</exclude>
+                                <!-- 许可证与二进制/资源 -->
+                                <exclude>**/LICENSE</exclude>
+                                <exclude>**/LICENSE_HEADER</exclude>
+                                <exclude>**/*.jpg</exclude>
+                                <exclude>**/*.png</exclude>
+                                <exclude>**/*.gif</exclude>
+                                <exclude>**/*.ico</exclude>
+                                <exclude>**/*.bmp</exclude>
+                                <exclude>**/*.tiff</exclude>
+                                <exclude>**/*.tif</exclude>
+                                <exclude>**/*.cr2</exclude>
+                                <exclude>**/*.xcf</exclude>
+                                <exclude>**/*.class</exclude>
+                                <exclude>**/*.exe</exclude>
+                                <exclude>**/*.dll</exclude>
+                                <exclude>**/*.so</exclude>
+                                <exclude>**/*.md5</exclude>
+                                <exclude>**/*.sha1</exclude>
+                                <exclude>**/*.sha256</exclude>
+                                <exclude>**/*.sha512</exclude>
+                                <exclude>**/*.asc</exclude>
+                                <exclude>**/*.cer</exclude>
+                                <exclude>**/*.der</exclude>
+                                <exclude>**/*.jks</exclude>
+                                <exclude>**/*.keytab</exclude>
+                                <exclude>**/*.lic</exclude>
+                                <exclude>**/*.p12</exclude>
+                                <exclude>**/*.pub</exclude>
+                                <exclude>**/*.ear</exclude>
+                                <exclude>**/*.jar</exclude>
+                                <exclude>**/*.war</exclude>
+                                <exclude>**/*.zip</exclude>
+                                <exclude>**/*.rar</exclude>
+                                <exclude>**/*.tar</exclude>
+                                <exclude>**/*.tar.gz</exclude>
+                                <exclude>**/*.tar.bz2</exclude>
+                                <exclude>**/*.tar.bz3</exclude>
+                                <exclude>**/*.tar.xz</exclude>
+                                <exclude>**/*.gz</exclude>
+                                <exclude>**/*.7z</exclude>
+                                <exclude>**/*.swf</exclude>
+                                <exclude>**/*.svg</exclude>
+                                <exclude>**/*.eot</exclude>
+                                <exclude>**/*.otf</exclude>
+                                <exclude>**/*.ttf</exclude>
+                                <exclude>**/*.woff</exclude>
+                                <exclude>**/*.woff2</exclude>
+                                <exclude>**/*.log</exclude>
+                                <exclude>**/*.xls</exclude>
+                                <exclude>**/*.xlsx</exclude>
+                                <exclude>**/*.doc</exclude>
+                                <exclude>**/*.docx</exclude>
+                                <exclude>**/*.ppt</exclude>
+                                <exclude>**/*.pptx</exclude>
+                                <exclude>**/*.odt</exclude>
+                                <exclude>**/*.ods</exclude>
+                                <exclude>**/*.pdf</exclude>
+                                <exclude>**/*.st</exclude>
+                                <exclude>**/*.stg</exclude>
+                                <!-- 不能或不该加注释的文本文件 -->
                                 <exclude>**/*.md</exclude>
-                                <exclude>**/i18n/*.properties</exclude>
                                 <exclude>**/*.txt</exclude>
-                                <exclude>**/dist/assets/**</exclude>
-                                <!-- Go 插件端构建缓存/产物：由 CI 的 Go 步骤生成，不能参与版权头扫描 -->
-                                <exclude>go-agent/.cache/**</exclude>
-                                <exclude>go-agent/build/**</exclude>
-                                <exclude>go-agent/dist/**</exclude>
+                                <exclude>**/*.properties</exclude>
+                                <exclude>**/*.json</exclude>
+                                <exclude>**/*.lock</exclude>
+                                <exclude>**/*.sum</exclude>
+                                <exclude>**/*.mod</exclude>
+                                <exclude>**/*.csv</exclude>
+                                <!-- 本仓库的构建产物（每次构建重新生成，加头只会让工作区反复变脏） -->
+                                <exclude>**/dist/**</exclude>
+                                <exclude>**/.cache/**</exclude>
+                                <exclude>web-vue/stats.html</exclude>
+                                <!--
+                                  Node CLI 入口：#!/usr/bin/env node 必须留在第一行（npm bin），
+                                  插件会把头插到文件最顶，因此该文件不在扫描范围，头部手工维护，
+                                  内容与 HEADER.txt 保持一致。
+                                -->
+                                <exclude>mcp-server/src/index.ts</exclude>
+                                <!--
+                                  unplugin-auto-import / unplugin-vue-components 每次 npm run build 重写的声明文件，
+                                  生成即覆盖（首行固定 /* eslint-disable */），手工加头每次构建都会丢。
+                                -->
+                                <exclude>web-vue/src/d.ts/auto-import.d.ts</exclude>
+                                <exclude>web-vue/src/d.ts/auto-global-import.d.ts</exclude>
+                                <exclude>web-vue/src/d.ts/components.d.ts</exclude>
+                                <exclude>docs/**</exclude>
                             </excludes>
                         </licenseSet>
                     </licenseSets>
@@ -262,6 +431,22 @@
                     <strictCheck>true</strictCheck>
                     <mapping>
                         <java>SLASHSTAR_STYLE</java>
+                        <ts>SLASHSTAR_STYLE</ts>
+                        <js>SLASHSTAR_STYLE</js>
+                        <cjs>SLASHSTAR_STYLE</cjs>
+                        <less>SLASHSTAR_STYLE</less>
+                        <sql>SLASHSTAR_STYLE</sql>
+                        <c>SLASHSTAR_STYLE</c>
+                        <h>SLASHSTAR_STYLE</h>
+                        <go>DOUBLESLASH_STYLE</go>
+                        <vue>XML_STYLE</vue>
+                        <html>XML_STYLE</html>
+                        <xml>XML_STYLE</xml>
+                        <sh>SCRIPT_STYLE</sh>
+                        <yml>SCRIPT_STYLE</yml>
+                        <yaml>SCRIPT_STYLE</yaml>
+                        <py>SCRIPT_STYLE</py>
+                        <bat>BATCH</bat>
                     </mapping>
                 </configuration>
             </plugin>

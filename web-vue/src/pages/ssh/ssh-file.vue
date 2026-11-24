@@ -1,3 +1,14 @@
+<!--
+
+    Copyright (c) 2019 Of Him Code Technology Studio
+    Jpom is licensed under Mulan PSL v2.
+    You can use this software according to the terms and conditions of the Mulan PSL v2.
+    You may obtain a copy of Mulan PSL v2 at:
+    			http://license.coscl.org.cn/MulanPSL2
+    THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+    See the Mulan PSL v2 for more details.
+
+-->
 <template>
   <!-- 布局 -->
   <a-layout class="ssh-file-layout">
@@ -49,8 +60,8 @@
       <a-spin v-else :tip="$t('i18n_f013ea9dcb')" :spinning="loading">
         <div class="tree-container">
           <a-directory-tree
-            v-model:selectedKeys="selectedKeys"
-            v-model:expandedKeys="expandedKeys"
+            v-model:selected-keys="selectedKeys"
+            v-model:expanded-keys="expandedKeys"
             :tree-data="treeList"
             :field-names="replaceFields"
             @select="onSelect"
@@ -504,6 +515,27 @@ export default {
     machineSshId: {
       type: String,
       default: ''
+    },
+    /**
+     * 自定义接口前缀（默认为空：按 sshId/machineSshId 推导，SSH 项目文件管理传入项目前缀）
+     */
+    apiBase: {
+      type: String,
+      default: ''
+    },
+    /**
+     * 自定义数据 id（默认为空：按 sshId/machineSshId 推导）
+     */
+    dataId: {
+      type: String,
+      default: ''
+    },
+    /**
+     * 是否自动进入第一个可用目录（SSH 项目只有一个项目目录，避免打开后是空表）
+     */
+    autoSelectFirst: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -570,7 +602,7 @@ export default {
           align: 'center',
           fixed: 'right',
 
-          width: '220px'
+          width: '1%'
         }
       ],
 
@@ -620,13 +652,16 @@ export default {
       )
     },
     baseUrl() {
+      if (this.apiBase) {
+        return this.apiBase
+      }
       if (this.sshId) {
         return '/node/ssh/'
       }
       return '/system/assets/ssh-file/'
     },
     reqDataId() {
-      return this.sshId || this.machineSshId
+      return this.dataId || this.sshId || this.machineSshId
     },
     sortFileList() {
       return this.fileList.slice(0).sort((a, b) => {
@@ -683,8 +718,28 @@ export default {
               return this.sortMethod.asc ? bV.localeCompare(aV) : aV.localeCompare(bV)
             })
         }
-        this.loading = false
+        if (this.autoSelectFirst) {
+          this.selectFirstDir()
+        } else {
+          this.loading = false
+        }
       })
+    },
+    /**
+     * 自动进入第一个可用目录：SSH 项目的授权目录就是项目目录，只有一个
+     * <p>
+     * 不自动进入时表格是空的，用户会误以为目录里没有文件。
+     */
+    selectFirstDir() {
+      const first = this.treeList.find((node) => !node.disabled)
+      if (!first) {
+        this.loading = false
+        return
+      }
+      this.selectedKeys = [first.key]
+      this.expandedKeys = [first.key]
+      this.tempNode = first
+      this.loadTreeNode()
     },
     /**
      * 根据key获取树节点

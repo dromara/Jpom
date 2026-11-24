@@ -1,14 +1,14 @@
-//go:build !linux
+//
+// Copyright (c) 2019 Of Him Code Technology Studio
+// Jpom is licensed under Mulan PSL v2.
+// You can use this software according to the terms and conditions of the Mulan PSL v2.
+// You may obtain a copy of Mulan PSL v2 at:
+// 			http://license.coscl.org.cn/MulanPSL2
+// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+// See the Mulan PSL v2 for more details.
+//
 
-/*
- * Copyright (c) 2019 Of Him Code Technology Studio
- * Jpom is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- * 			http://license.coscl.org.cn/MulanPSL2
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- */
+//go:build !linux
 
 package sysinfo
 
@@ -241,7 +241,9 @@ func listFileStores() ([]fileStore, error) {
 			UsableSpace: usage.Free,
 		})
 	}
-	return stores, nil
+	// 非 Linux 平台（Windows/macOS）走 gopsutil：darwin 的 disk.Partitions 会返回同一 APFS
+	// 容器下的所有卷（all 参数在 darwin 上被忽略），必须过滤，否则总量被成倍放大。
+	return filterFileStores(stores, runtime.GOOS), nil
 }
 
 // listDiskStores 在非 Linux 平台用分区信息近似 Java HWDiskStore 的字段结构
@@ -255,6 +257,11 @@ func listDiskStores() ([]diskStore, error) {
 	for _, partition := range partitions {
 		device := strings.TrimSpace(partition.Device)
 		if device == "" {
+			continue
+		}
+		// 与文件系统统计同口径：跳过 /System/Volumes/* 伪卷与伪文件系统，
+		// 否则 macOS 上同一 APFS 容器会被算成多块「磁盘」，容量同样被放大
+		if !shouldCountFileStore(runtime.GOOS, partition.Fstype, partition.Mountpoint) {
 			continue
 		}
 		diskName := physicalDiskName(device)

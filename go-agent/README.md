@@ -101,4 +101,5 @@ agent/
 ## 验证
 
 - 单元测试：`make test`（构建 `make build`、静态检查 `make vet`）。
-- 与真实 Java 插件端的黄金响应结构对照样本见 `testdata/`；采集/比对等开发工具由维护者内部维护，不随开源仓发布。
+- 与真实 Java 插件端的黄金响应结构对照样本属维护者私有测试资料（含环境指纹，不入开源仓），
+  采集/比对工具同样不随仓库发布；仓库内只保留纯合成夹具（`internal/builder/testdata`、`internal/projectfile/testdata`）。

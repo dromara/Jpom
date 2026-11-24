@@ -18,6 +18,7 @@ import org.dromara.jpom.func.assets.model.MachineDockerModel;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
+import org.dromara.jpom.permission.SystemPermission;
 import org.dromara.jpom.permission.MethodFeature;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -34,6 +35,7 @@ import java.util.Map;
  */
 @RestController
 @Feature(cls = ClassFeature.SYSTEM_ASSETS_MACHINE_DOCKER)
+@SystemPermission
 @RequestMapping(value = "/system/assets/docker/swarm")
 @Slf4j
 public class AssetsDockerSwarmInfoController extends BaseDockerSwarmInfoController {

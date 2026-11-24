@@ -15,6 +15,7 @@ import org.dromara.jpom.func.assets.model.MachineDockerModel;
 import org.dromara.jpom.func.assets.server.MachineDockerServer;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
+import org.dromara.jpom.permission.SystemPermission;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,6 +28,7 @@ import java.util.Map;
  */
 @RestController
 @Feature(cls = ClassFeature.SYSTEM_ASSETS_MACHINE_DOCKER)
+@SystemPermission
 @RequestMapping(value = "/system/assets/docker/networks")
 public class AssetsDockerNetworkController extends BaseDockerNetworkController {
 

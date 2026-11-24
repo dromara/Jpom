@@ -1,17 +1,18 @@
-/*
- * Copyright (c) 2019 Of Him Code Technology Studio
- * Jpom is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- * 			http://license.coscl.org.cn/MulanPSL2
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- */
+//
+// Copyright (c) 2019 Of Him Code Technology Studio
+// Jpom is licensed under Mulan PSL v2.
+// You can use this software according to the terms and conditions of the Mulan PSL v2.
+// You may obtain a copy of Mulan PSL v2 at:
+// 			http://license.coscl.org.cn/MulanPSL2
+// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+// See the Mulan PSL v2 for more details.
+//
 
 package sysinfo
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -82,6 +83,61 @@ func CacheInfo(a *app.App) map[string]any {
 		return nil
 	}
 	return value
+}
+
+// remoteVersionFetchAttempts 在线刷新尝试次数：首次失败自动重试，与 Java 端
+// RemoteVersionResolver（DEFAULT_FETCH_ATTEMPTS=3）保持一致。
+const remoteVersionFetchAttempts = 3
+
+// remoteVersionRetryInterval 重试间隔，与 Java 端 DEFAULT_RETRY_INTERVAL_MILLIS=500 一致。
+const remoteVersionRetryInterval = 500 * time.Millisecond
+
+// errNoRemoteVersionInfo 拉取成功但内容不可用（没有 tagName）时的错误。
+var errNoRemoteVersionInfo = errors.New("no remote version information available")
+
+// ResolveRemoteInfo 带刷新语义的远端版本信息解析：在线刷新（失败自动重试）→ 本机缓存兜底。
+//
+// 对应 Java 端 RemoteVersions#infoForUpgrade / infoForRefresh：此前各入口只调一次
+// LoadRemoteInfo，下载中心偶发 TLS 抖动就直接失败（升级/下载返回 405），且没有任何兜底。
+func ResolveRemoteInfo(a *app.App) (map[string]any, error) {
+	return resolveRemoteInfo(
+		func() (map[string]any, error) { return LoadRemoteInfo(a) },
+		func() map[string]any { return CacheInfo(a) },
+		time.Sleep,
+		func(msg string) { a.Log().Warn(msg) },
+	)
+}
+
+// resolveRemoteInfo 是 ResolveRemoteInfo 的策略内核（不依赖 App，便于单测）：
+// 在线刷新最多 remoteVersionFetchAttempts 次 → 本机缓存兜底 → 返回最后一次错误。
+func resolveRemoteInfo(fetch func() (map[string]any, error), cached func() map[string]any,
+	sleep func(time.Duration), log func(msg string)) (map[string]any, error) {
+	var lastErr error
+	for attempt := 0; attempt < remoteVersionFetchAttempts; attempt++ {
+		if attempt > 0 && sleep != nil {
+			sleep(remoteVersionRetryInterval)
+		}
+		value, err := fetch()
+		if err == nil && value != nil && strings.TrimSpace(toString(value["tagName"])) != "" {
+			return value, nil
+		}
+		if err == nil {
+			err = errNoRemoteVersionInfo
+		}
+		lastErr = err
+		if log != nil {
+			log(fmt.Sprintf("fetch remote version info failed, attempt %d/%d: %v", attempt+1, remoteVersionFetchAttempts, err))
+		}
+	}
+	if cached != nil {
+		if value := cached(); value != nil {
+			if log != nil {
+				log(fmt.Sprintf("remote version info unavailable, fallback to local cache: %v", value["tagName"]))
+			}
+			return value, nil
+		}
+	}
+	return nil, lastErr
 }
 
 // LoadRemoteInfo 对应 RemoteVersion.loadRemoteInfo()：拉取远程版本信息、计算

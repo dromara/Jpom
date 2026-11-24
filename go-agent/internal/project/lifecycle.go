@@ -1,12 +1,12 @@
-/*
- * Copyright (c) 2019 Of Him Code Technology Studio
- * Jpom is licensed under Mulan PSL v2.
- * You can use this software according to the terms and conditions of the Mulan PSL v2.
- * You may obtain a copy of Mulan PSL v2 at:
- * 			http://license.coscl.org.cn/MulanPSL2
- * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
- * See the Mulan PSL v2 for more details.
- */
+//
+// Copyright (c) 2019 Of Him Code Technology Studio
+// Jpom is licensed under Mulan PSL v2.
+// You can use this software according to the terms and conditions of the Mulan PSL v2.
+// You may obtain a copy of Mulan PSL v2 at:
+// 			http://license.coscl.org.cn/MulanPSL2
+// THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+// See the Mulan PSL v2 for more details.
+//
 
 package project
 
@@ -41,9 +41,13 @@ type Options struct {
 	StatusDetectionInterval int // 毫秒
 	FileBackupCount         int
 	FileBackupSuffix        []string
-	CommandUseSudo          bool
-	ConsoleCharset          string // jpom.system.console-charset（子进程输出解码）
-	ProjectLog              ProjectLogOptions
+	// VersionCount/VersionPath 是项目文件版本快照配置（jpom.project.version-count /
+	// version-path），0 / 空表示关闭或使用默认目录。
+	VersionCount   int
+	VersionPath    string
+	CommandUseSudo bool
+	ConsoleCharset string // jpom.system.console-charset（子进程输出解码）
+	ProjectLog     ProjectLogOptions
 }
 
 // asyncExec 项目启动命令异步执行入口（单测可替换，生产为 proc.AsyncExe）。
@@ -604,11 +608,15 @@ func (r *Runtime) AutoStartProjects() {
 	}()
 }
 
-// StartBackgroundTasks 启动项目域后台任务（当前仅 autoStart 项目）。
+// StartBackgroundTasks 启动项目域后台任务。
+//
+// 顺序：先迁移旧版布局的控制台日志，再按 autoStart 拉起项目。先迁移可以避免项目刚被
+// 拉起（已在运行）而被迁移逻辑跳过，Java 端是"先拉起再迁移"，结果上等价但存在竞态。
 //
 // 控制台日志自动备份（auto_back_log）由 api 层注册到 sysinfo 统一 cron 调度器，
 // 以便 /system/cache.taskList 与 Java 端一致。
 func (r *Runtime) StartBackgroundTasks() {
+	r.MigrateLegacyProjectLogs()
 	r.AutoStartProjects()
 }
 
