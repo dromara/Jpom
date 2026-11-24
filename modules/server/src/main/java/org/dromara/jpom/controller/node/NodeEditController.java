@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -92,7 +93,7 @@ public class NodeEditController extends BaseServerController {
                 BeanUtil.copyProperties(machineNodeData, safeMachine);
                 // 长时间没有刷新检测结果的机器不能继续显示"正常"
                 machineNodeServer.fillTimeoutStatus(safeMachine);
-                machineNodeServer.clearSensitive(java.util.Collections.singletonList(safeMachine));
+                machineNodeServer.clearSensitive(Collections.singletonList(safeMachine));
                 nodeModel.setMachineNodeData(safeMachine);
             }
         });

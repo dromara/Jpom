@@ -27,9 +27,9 @@ import cn.keepbx.jpom.event.ISystemTask;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.ILoadEvent;
-import org.dromara.jpom.common.RemoteVersion;
 import org.dromara.jpom.common.commander.ProjectCommander;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.common.version.RemoteVersions;
 import org.dromara.jpom.configuration.AgentAuthorize;
 import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.configuration.ProjectLogConfig;
@@ -132,8 +132,8 @@ public class AgentStartInit implements ILoadEvent, ISystemTask {
 
     @Override
     public void executeTask() {
-        // 启动加载
-        RemoteVersion.loadRemoteInfo();
+        // 启动加载（在线刷新失败自动重试，仍失败保留既有缓存）
+        RemoteVersions.infoForRefresh();
         // 清空脚本缓存
         BaseRunScript.clearRunScript();
         // 清理临时文件

@@ -576,9 +576,13 @@ func cleanOldJars(dir string, keep int) {
 // linux/amd64 额外回退兼容别名 agent-go-<version>-upgrade.jar（旧命名）。
 // 不再直接下载 agentUrl：那是 Java Agent 包，Go 插件端无法使用（CONTRACT §5.15）。
 func RemoteUpgrade(a *app.App) (string, error) {
-	remote, err := LoadRemoteInfo(a)
+	// 远端版本信息带刷新语义：在线刷新失败自动重试，仍失败回退本机缓存（与 Java 端同口径）
+	remote, err := ResolveRemoteInfo(a)
 	if err != nil || remote == nil {
-		return "", paramErr(405, "i18n.no_available_new_version_upgrade.d8f2")
+		if err != nil {
+			a.Log().Warn("resolve remote version info failed", "error", err)
+		}
+		return "", paramErr(405, "i18n.remote_version_unavailable.b7e1")
 	}
 	agentURL := strings.TrimSpace(toString(remote["agentUrl"]))
 	if agentURL == "" {

@@ -57,6 +57,32 @@ public class I18nBundleConsistencyTest {
      */
     private static final Pattern KEY_LITERAL = Pattern.compile("\"(i18n\\.[A-Za-z0-9_.]+)\"");
 
+    /**
+     * 文案尾部拼状态码的旧写法（如「没有可用的新版本升级:-1」）
+     */
+    private static final Pattern STATUS_CODE_SUFFIX = Pattern.compile(":-?\\d+\\s*$");
+
+    /**
+     * 历史遗留：这些 key 的文案里拼了状态码（:-1/-2/-3），属于 1.x 时代「文案带码」的写法。
+     * <p>
+     * 本轮只收口在线升级/下载链路（{@code i18n.no_available_new_version_upgrade.d8f2} 已去掉 :-1），
+     * 其余 key 可能被老的对接方按字符串解析，改动需单独评估并公告兼容周期，故先作为锚点放行；
+     * 新增 key 不得再出现该写法。
+     */
+    private static final Set<String> LEGACY_STATUS_CODE_SUFFIX_KEYS = new LinkedHashSet<>(Arrays.asList(
+        "i18n.cluster_info_incomplete_with_code.246b",
+        "i18n.docker_does_not_exist_with_code.689b",
+        "i18n.get_docker_cluster_info_failure_with_code.fa77",
+        "i18n.no_management_permission.fd25",
+        "i18n.no_management_permission2.35d4",
+        "i18n.no_parameters_added_with_minus_one.e47d",
+        "i18n.no_parameters_added_with_minus_two.a7cf",
+        "i18n.no_server_management_permission.ee19",
+        "i18n.not_super_admin.962e",
+        "i18n.token_invalid_or_expired.cb96",
+        "i18n.trigger_token_error_or_expired_with_code.393b"
+    ));
+
     private static final List<String> SKIP_DIRECTORIES = Arrays.asList("target", ".git", "node_modules", "web-vue",
         "go-agent", ".tmp", "dist", "backup");
 
@@ -109,6 +135,34 @@ public class I18nBundleConsistencyTest {
             long declared = declaredEntryCount(bundleFile(root, entry.getKey()));
             Assert.assertEquals(entry.getKey() + " 存在重复 key", entry.getValue().size(), declared);
         }
+    }
+
+    /**
+     * 语言包文案不得把状态码拼进提示
+     * <p>
+     * 背景：2.11.14.6 在线升级失败时用户看到「没有可用的新版本升级:-1」—— 值本身把 {@code :-1} 写死在
+     * {@code i18n.no_available_new_version_upgrade.d8f2} 里，前端没有解析语义，只是把它当文案显示。
+     * 状态码属于响应 {@code code} 字段，不得进入文案。
+     */
+    @Test
+    public void messagesMustNotCarryStatusCodeSuffix() throws IOException {
+        Path root = locateRepositoryRoot();
+        Assume.assumeTrue("未找到完整源码树（仅在仓库内校验），跳过", root != null);
+        List<String> problems = new ArrayList<>();
+        for (String locale : LOCALES) {
+            for (Map.Entry<String, String> entry : loadBundle(root, locale).entrySet()) {
+                String value = entry.getValue();
+                String key = entry.getKey();
+                if (value == null || !STATUS_CODE_SUFFIX.matcher(value).find()) {
+                    continue;
+                }
+                if (LEGACY_STATUS_CODE_SUFFIX_KEYS.contains(key)) {
+                    continue;
+                }
+                problems.add(locale + " " + key + " -> " + value);
+            }
+        }
+        Assert.assertTrue("文案里不允许拼状态码后缀（如 :-1）：" + problems, problems.isEmpty());
     }
 
     private static Map<String, String> loadBundle(Path root, String locale) throws IOException {

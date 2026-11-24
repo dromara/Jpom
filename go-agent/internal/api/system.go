@@ -187,10 +187,9 @@ func registerSystem(r *httpx.Router, a *app.App) {
 
 	// 版本与在线升级
 	r.Handle(http.MethodPost, "/system/check_version.json", func(c *httpx.Context) {
-		remote, err := sysinfo.LoadRemoteInfo(a)
+		remote, err := sysinfo.ResolveRemoteInfo(a)
 		if err != nil {
 			a.Log().Warn("load remote version failed", "error", err)
-			remote = sysinfo.CacheInfo(a)
 		}
 		if remote == nil {
 			c.OK(nil)

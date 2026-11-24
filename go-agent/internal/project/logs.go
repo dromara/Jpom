@@ -92,11 +92,16 @@ func (r *Runtime) backLog(info, original map[string]any) (string, error) {
 	if r.resolveOpenLogBack(info, original) {
 		backDir, err := r.Manager.ResolveLogBack(info)
 		if err != nil {
-			return "", err
+			return "", ServiceError(err)
 		}
 		backPath := filepath.Join(backDir, time.Now().Format("20060102150405")+".log")
-		if err := copyFileContent(file, backPath); err != nil && r.Log != nil {
-			r.Log.Warn("failed to backup project console log", "file", file, "error", err)
+		if err := copyFileContent(file, backPath); err != nil {
+			// 与 Java 一致：备份失败直接报错返回，不能为了"腾空间"把唯一副本清空
+			// （Java 的 FileUtil.copy 抛异常会中断 checkStart，走不到 emptyLogFile）
+			if r.Log != nil {
+				r.Log.Error("failed to backup project console log, keep log file", "file", file, "error", err)
+			}
+			return "", ServiceError(err)
 		}
 	}
 	if output := proc.EmptyLogFile(file); strings.TrimSpace(output) != "" && r.Log != nil {

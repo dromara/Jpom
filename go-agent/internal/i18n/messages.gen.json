@@ -5478,10 +5478,10 @@
 "zh-TW": "maven 映象庫中沒有找到任何可用的 maven 版本"
 },
 "i18n.no_available_new_version_upgrade.d8f2": {
-"en-US": "No new version upgrade available: -1",
-"zh-CN": "没有可用的新版本升级:-1",
-"zh-HK": "沒有可用的新版本升級:-1",
-"zh-TW": "沒有可用的新版本升級:-1"
+"en-US": "No new version upgrade available",
+"zh-CN": "没有可用的新版本升级",
+"zh-HK": "沒有可用的新版本升級",
+"zh-TW": "沒有可用的新版本升級"
 },
 "i18n.no_branch_name.1879": {
 "en-US": "No branch name",
@@ -10708,5 +10708,12 @@
 "zh-CN": "yml 配置内容错误",
 "zh-HK": "yml 配置內容錯誤",
 "zh-TW": "yml 配置內容錯誤"
+}
+,
+"i18n.remote_version_unavailable.b7e1": {
+"en-US": "Unable to fetch remote version information (the download center is unreachable). Check the server network or proxy settings and retry; clicking \"Check for updates\" first may also refresh it",
+"zh-CN": "无法获取远端版本信息（无法连接下载中心），请检查服务器到下载中心的网络或代理后重试；也可先点「检查更新」刷新远端版本信息",
+"zh-HK": "無法獲取遠端版本資訊（無法連線下載中心），請檢查伺服器到下載中心的網路或代理後重試；也可先點「檢查更新」刷新遠端版本資訊",
+"zh-TW": "無法取得遠端版本資訊（無法連線下載中心），請檢查伺服器到下載中心的網路或代理後重試；也可先點「檢查更新」刷新遠端版本資訊"
 }
 }

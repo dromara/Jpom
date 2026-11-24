@@ -90,6 +90,9 @@ DEFAULT_TESTS=(
 	# 在线升级发布包解析：tar.gz/.tgz 提取 lib jar（tar.gz 优先、回退 zip 的下载地址推导），zip/jar 历史行为不回退
 	JpomManifestTarGzTest
 	RemoteVersionUrlTest
+	# 远端版本信息刷新语义：动作侧重试→缓存兜底→可读文案（2.11.14.7 升级/下载链路，共享 common 收口）
+	RemoteVersionResolverTest
+	RemoteVersionDownloadMessageTest
 	UploadShardingExtensionTest
 	# 安全修复的既有单测（文件中心 SQL 注入 / 查询值绑定 / 日志路径穿越 / token 等）
 	FileStorageApiControllerSortTest
