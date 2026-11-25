@@ -3177,5 +3177,21 @@
   "i18n_pipeline_docker_service_placeholder": "集群服务名称（可选）",
   "i18n_pipeline_after_opt_placeholder": "选择发布后操作",
   "i18n_pipeline_notify_event_placeholder": "选择触发事件",
-  "i18n_pipeline_docker_swarm_placeholder": "选择 Docker 集群（可选）"
+  "i18n_pipeline_docker_swarm_placeholder": "选择 Docker 集群（可选）",
+  "i18n_pipeline_source_mount_locked": "挂载目录固定为源标识，避免运行期路径漂移",
+  "i18n_pipeline_work_dir_root": "工作区根目录",
+  "i18n_pipeline_work_dir_custom": "旧配置自定义",
+  "i18n_pipeline_work_dir_tip": "只列出已配置仓库源的目录；目录名由源标识决定",
+  "i18n_pipeline_env_vars": "可用环境变量",
+  "i18n_pipeline_env_vars_view": "查看可用变量",
+  "i18n_pipeline_env_vars_tip": "命令、构建环境变量、发布命令里均可直接使用",
+  "i18n_pipeline_env_var_name": "变量",
+  "i18n_pipeline_env_var_desc": "说明",
+  "i18n_pipeline_var_id": "流水线 ID",
+  "i18n_pipeline_var_run": "本次运行编号",
+  "i18n_pipeline_var_stage": "当前阶段标识",
+  "i18n_pipeline_var_workspace": "本次运行工作区绝对路径",
+  "i18n_pipeline_var_source_dir": "源 {id} 的目录（挂载路径）",
+  "i18n_pipeline_var_source_commit": "源 {id} 的提交号",
+  "i18n_pipeline_var_stage_artifact": "阶段 {name} 的产物目录"
 }

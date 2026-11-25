@@ -12,6 +12,7 @@ package org.dromara.jpom.pipeline.model;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.LinkedHashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -105,6 +106,43 @@ public class PipelineDefinitionTest {
         Assertions.assertThrows(PipelineValidateException.class, () ->
             definition(new PipelineSource[]{source("srv", "repo-a")},
                 new PipelineStageDef[]{stage}).check());
+    }
+
+    @Test
+    public void blankMountDefaultsToSourceId() {
+        PipelineSource source = source("backend", "repo-a");
+        definition(new PipelineSource[]{source},
+            new PipelineStageDef[]{buildStage("b1")}).check();
+        Assertions.assertEquals("backend", source.getMount(), "挂载目录应跟随源标识，避免目录名不可预知");
+    }
+
+    @Test
+    public void duplicatedMountRejected() {
+        PipelineSource first = source("a", "repo-a");
+        first.setMount("shared");
+        PipelineSource second = source("b", "repo-b");
+        second.setMount("shared");
+        PipelineValidateException error = Assertions.assertThrows(PipelineValidateException.class, () ->
+            definition(new PipelineSource[]{first, second},
+                new PipelineStageDef[]{buildStage("b1")}).check());
+        Assertions.assertEquals("i18n.pipeline_source_mount_duplicated.6d21", error.getKey());
+    }
+
+    @Test
+    public void workDirMustBeUnderSourceMount() {
+        PipelineSource source = source("backend", "repo-a");
+        PipelineStageDef stage = buildStage("b1");
+        stage.setConfig(new LinkedHashMap<>());
+        stage.getConfig().put("run", "mvn package");
+        stage.getConfig().put("cwd", "backend/sub");
+        // 源目录的子目录可以
+        definition(new PipelineSource[]{source}, new PipelineStageDef[]{stage}).check();
+
+        stage.getConfig().put("cwd", "outside");
+        PipelineValidateException error = Assertions.assertThrows(PipelineValidateException.class, () ->
+            definition(new PipelineSource[]{source}, new PipelineStageDef[]{stage}).check());
+        Assertions.assertEquals("i18n.pipeline_work_dir_invalid.9c4a", error.getKey());
+        Assertions.assertEquals("outside", error.getDetail());
     }
 
     @Test

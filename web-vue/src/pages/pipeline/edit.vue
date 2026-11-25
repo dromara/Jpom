@@ -69,7 +69,8 @@
               </a-col>
               <a-col :xs="24" :sm="24" :md="6">
                 <a-form-item :label="$t('i18n_pipeline_source_mount')">
-                  <a-input v-model:value="source.mount" :placeholder="$t('i18n_pipeline_source_mount_placeholder')" />
+                  <a-input :value="sourceMount(source)" readonly />
+                  <div class="field-tip">{{ $t('i18n_pipeline_source_mount_locked') }}</div>
                 </a-form-item>
               </a-col>
             </a-row>
@@ -200,6 +201,30 @@
                 </a-col>
               </a-row>
 
+              <a-form-item :label="$t('i18n_pipeline_env_vars')">
+                <a-space wrap>
+                  <a-popover trigger="click" placement="rightTop" :title="$t('i18n_pipeline_env_vars')">
+                    <template #content>
+                      <a-table
+                        size="small"
+                        bordered
+                        :pagination="false"
+                        row-key="name"
+                        :columns="envVarColumns"
+                        :data-source="envVariableList"
+                        :scroll="{ x: 520 }"
+                        class="env-var-table"
+                      />
+                    </template>
+                    <a-button type="link" size="small">
+                      <InfoCircleOutlined />
+                      {{ $t('i18n_pipeline_env_vars_view') }}
+                    </a-button>
+                  </a-popover>
+                  <span class="field-tip">{{ $t('i18n_pipeline_env_vars_tip') }}</span>
+                </a-space>
+              </a-form-item>
+
               <!-- 构建 / 命令 -->
               <template v-if="current.type === 'BUILD' || current.type === 'COMMAND'">
                 <a-divider orientation="left">{{ $t('i18n_17a74824de') }}</a-divider>
@@ -263,7 +288,15 @@
                   </a-form-item>
                 </template>
                 <a-form-item v-else :label="$t('i18n_pipeline_work_dir')">
-                  <a-input v-model:value="current.cwd" :placeholder="$t('i18n_pipeline_work_dir_placeholder')" />
+                  <a-select
+                    v-model:value="current.cwd"
+                    style="width: 100%"
+                    allow-clear
+                    show-search
+                    :options="workDirOptions"
+                    :placeholder="$t('i18n_pipeline_work_dir_placeholder')"
+                  />
+                  <div class="field-tip">{{ $t('i18n_pipeline_work_dir_tip') }}</div>
                 </a-form-item>
                 <a-form-item :label="$t('i18n_c2ee58c247')">
                   <code-editor
@@ -412,16 +445,20 @@
                             />
                           </a-form-item>
                           <a-form-item :label="$t('i18n_e44f59f2d9')">
-                            <a-textarea
-                              v-model:value="target.beforeCommand"
-                              :auto-size="{ minRows: 2, maxRows: 6 }"
+                            <code-editor
+                              v-model:content="target.beforeCommand"
+                              :show-tool="false"
+                              :options="{ mode: 'shell' }"
+                              height="140px"
                               :placeholder="$t('i18n_pipeline_before_command_placeholder')"
                             />
                           </a-form-item>
                           <a-form-item :label="$t('i18n_923f8d2688')">
-                            <a-textarea
-                              v-model:value="target.afterCommand"
-                              :auto-size="{ minRows: 2, maxRows: 6 }"
+                            <code-editor
+                              v-model:content="target.afterCommand"
+                              :show-tool="false"
+                              :options="{ mode: 'shell' }"
+                              height="140px"
                               :placeholder="$t('i18n_pipeline_after_command_placeholder')"
                             />
                           </a-form-item>
@@ -429,9 +466,11 @@
                         <!-- 本地命令 -->
                         <template v-if="target.method === 4">
                           <a-form-item :label="$t('i18n_923f8d2688')">
-                            <a-textarea
-                              v-model:value="target.afterCommand"
-                              :auto-size="{ minRows: 2, maxRows: 6 }"
+                            <code-editor
+                              v-model:content="target.afterCommand"
+                              :show-tool="false"
+                              :options="{ mode: 'shell' }"
+                              height="140px"
                               :placeholder="$t('i18n_pipeline_after_command_placeholder')"
                             />
                           </a-form-item>
@@ -526,9 +565,11 @@
                             />
                           </a-form-item>
                           <a-form-item :label="$t('i18n_923f8d2688')">
-                            <a-textarea
-                              v-model:value="target.afterCommand"
-                              :auto-size="{ minRows: 2, maxRows: 6 }"
+                            <code-editor
+                              v-model:content="target.afterCommand"
+                              :show-tool="false"
+                              :options="{ mode: 'shell' }"
+                              height="140px"
                               :placeholder="$t('i18n_pipeline_after_command_placeholder')"
                             />
                           </a-form-item>
@@ -747,6 +788,52 @@ export default {
     swarmOptions() {
       return this.swarmList.map((item) => ({ value: item.id, label: item.name }))
     },
+    workDirOptions() {
+      const options = [{ value: '', label: this.$t('i18n_pipeline_work_dir_root') }]
+      this.sources
+        .filter((source) => source.id)
+        .forEach((source) => {
+          const dir = this.sourceMount(source)
+          // 目录名与源标识一致时不再重复展示（旧配置的自定义目录才带上源标识）
+          options.push({ value: dir, label: dir === source.id ? dir : dir + ' — ' + source.id })
+        })
+      // 旧配置的 cwd 不在源目录里：保留为一个显式选项，避免静默改成根目录
+      const currentCwd = this.current && this.current.cwd
+      if (currentCwd && !options.some((item) => item.value === currentCwd)) {
+        options.push({ value: currentCwd, label: currentCwd + '（' + this.$t('i18n_pipeline_work_dir_custom') + '）' })
+      }
+      return options
+    },
+    envVariableList() {
+      const list = [
+        { name: 'PIPELINE_ID', desc: this.$t('i18n_pipeline_var_id') },
+        { name: 'PIPELINE_RUN', desc: this.$t('i18n_pipeline_var_run') },
+        { name: 'PIPELINE_STAGE_ID', desc: this.$t('i18n_pipeline_var_stage') },
+        { name: 'PIPELINE_WORKSPACE', desc: this.$t('i18n_pipeline_var_workspace') }
+      ]
+      this.sources
+        .filter((source) => source.id)
+        .forEach((source) => {
+          const prefix = 'PIPELINE_SOURCE_' + source.id.toUpperCase()
+          list.push({ name: prefix + '_DIR', desc: this.$t('i18n_pipeline_var_source_dir', { id: source.id }) })
+          list.push({ name: prefix + '_COMMIT', desc: this.$t('i18n_pipeline_var_source_commit', { id: source.id }) })
+        })
+      this.stages
+        .filter((stage) => stage.id && (stage.type === 'BUILD' || stage.type === 'COMMAND'))
+        .forEach((stage) => {
+          list.push({
+            name: 'PIPELINE_STAGE_' + stage.id.toUpperCase() + '_ARTIFACT',
+            desc: this.$t('i18n_pipeline_var_stage_artifact', { name: stage.name || stage.id })
+          })
+        })
+      return list
+    },
+    envVarColumns() {
+      return [
+        { title: this.$t('i18n_pipeline_env_var_name'), dataIndex: 'name', key: 'name', width: 320 },
+        { title: this.$t('i18n_pipeline_env_var_desc'), dataIndex: 'desc', key: 'desc' }
+      ]
+    },
     artifactStageOptions() {
       return this.stages
         .filter((stage) => (stage.type === 'BUILD' || stage.type === 'COMMAND') && stage.id)
@@ -873,6 +960,11 @@ export default {
         ctx.refName = undefined
       }
     },
+    sourceMount(source) {
+      if (!source) return ''
+      // 挂载目录 = 源标识（旧配置带自定义 mount 时保持原值，避免路径漂移）
+      return source.mount || source.id || ''
+    },
     onRepoChange(ctx) {
       if (!ctx) return
       ctx.refName = undefined
@@ -930,7 +1022,8 @@ export default {
           key: nextKey(),
           id: item.id,
           repoId: item.repoId,
-          mount: item.mount || '',
+          // 旧配置的 mount 原样保留（只读展示）；新源为空表示跟随源标识
+          mount: item.mount || undefined,
           cloneDepth: item.cloneDepth,
           refType: 'branch',
           refName: undefined
@@ -1042,7 +1135,7 @@ export default {
         key: nextKey(),
         id: 'source' + (this.sources.length + 1),
         repoId: undefined,
-        mount: '',
+        mount: undefined,
         cloneDepth: undefined,
         refType: 'branch',
         refName: undefined
@@ -1252,7 +1345,8 @@ export default {
             id: source.id,
             repoId: source.repoId,
             ref: this.composeRef(source),
-            mount: source.mount,
+            // 新源挂载目录跟随源标识；旧配置保留原自定义 mount
+            mount: source.mount || source.id,
             cloneDepth: source.cloneDepth
           }))
       )
@@ -1299,6 +1393,15 @@ export default {
   padding: 12px 0;
   color: #8f959e;
   font-size: 13px;
+}
+.field-tip {
+  color: #8f959e;
+  font-size: 12px;
+  line-height: 18px;
+  margin-top: 2px;
+}
+.env-var-table {
+  max-width: 560px;
 }
 .card-hint {
   color: #8f959e;

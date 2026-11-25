@@ -3177,5 +3177,21 @@
   "i18n_pipeline_docker_service_placeholder": "Swarm service name (optional)",
   "i18n_pipeline_after_opt_placeholder": "Select the post-release action",
   "i18n_pipeline_notify_event_placeholder": "Select the trigger event",
-  "i18n_pipeline_docker_swarm_placeholder": "Select a Docker swarm (optional)"
+  "i18n_pipeline_docker_swarm_placeholder": "Select a Docker swarm (optional)",
+  "i18n_pipeline_source_mount_locked": "Mount dir follows the source key",
+  "i18n_pipeline_work_dir_root": "Workspace root",
+  "i18n_pipeline_work_dir_custom": "legacy custom",
+  "i18n_pipeline_work_dir_tip": "Only configured sources are listed; the dir is derived from the source key",
+  "i18n_pipeline_env_vars": "Available variables",
+  "i18n_pipeline_env_vars_view": "View variables",
+  "i18n_pipeline_env_vars_tip": "Usable in commands, build env and release commands",
+  "i18n_pipeline_env_var_name": "Variable",
+  "i18n_pipeline_env_var_desc": "Description",
+  "i18n_pipeline_var_id": "Pipeline id",
+  "i18n_pipeline_var_run": "Run number",
+  "i18n_pipeline_var_stage": "Current stage key",
+  "i18n_pipeline_var_workspace": "Absolute workspace path of this run",
+  "i18n_pipeline_var_source_dir": "Directory of source {id}",
+  "i18n_pipeline_var_source_commit": "Commit of source {id}",
+  "i18n_pipeline_var_stage_artifact": "Artifact dir of stage {name}"
 }

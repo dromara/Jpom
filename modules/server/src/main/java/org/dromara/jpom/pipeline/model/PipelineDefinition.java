@@ -91,6 +91,7 @@ public class PipelineDefinition {
      */
     public void check() {
         Set<String> sourceIds = new HashSet<>();
+        Set<String> mountDirs = new HashSet<>();
         for (PipelineSource source : sources) {
             if (StrUtil.isBlank(source.getId())) {
                 throw new PipelineValidateException("i18n.pipeline_source_id_required.9a41", null);
@@ -101,8 +102,16 @@ public class PipelineDefinition {
             if (StrUtil.isBlank(source.getRepoId())) {
                 throw new PipelineValidateException("i18n.pipeline_source_repo_required.c5f2", source.getId());
             }
-            if (StrUtil.isNotBlank(source.getMount()) && source.getMount().contains("..")) {
-                throw new PipelineValidateException("i18n.pipeline_source_mount_invalid.7e0d", null);
+            // 挂载目录与源标识绑定：留空时按源标识补齐（新配置一律相等，旧配置的自定义值保留）
+            if (StrUtil.isBlank(source.getMount())) {
+                source.setMount(source.getId());
+            }
+            String mount = source.getMount();
+            if (mount.contains("..") || StrUtil.startWith(mount, StrUtil.SLASH) || mount.contains("\\")) {
+                throw new PipelineValidateException("i18n.pipeline_source_mount_invalid.7e0d", mount);
+            }
+            if (!mountDirs.add(mount)) {
+                throw new PipelineValidateException("i18n.pipeline_source_mount_duplicated.6d21", mount);
             }
         }
         if (CollUtil.isEmpty(stages)) {
@@ -119,9 +128,34 @@ public class PipelineDefinition {
             if (stage.getType() == null) {
                 throw new PipelineValidateException("i18n.pipeline_stage_type_required.6a3c", stage.getId());
             }
+            // 工作目录只允许工作区根或某个源目录（含其子目录），避免用户写出运行期不存在的路径
+            if (stage.getType() == PipelineStageType.BUILD || stage.getType() == PipelineStageType.COMMAND) {
+                Object cwdValue = stage.getConfig() == null ? null : stage.getConfig().get("cwd");
+                String cwd = cwdValue == null ? "" : String.valueOf(cwdValue);
+                if (StrUtil.isNotBlank(cwd) && !this.underMount(cwd, mountDirs)) {
+                    throw new PipelineValidateException("i18n.pipeline_work_dir_invalid.9c4a", cwd);
+                }
+            }
         }
         if (stages.stream().noneMatch(stage -> stage.enabled() && stage.getType() == PipelineStageType.BUILD)) {
             throw new PipelineValidateException("i18n.pipeline_build_stage_required.3e7a", null);
         }
+    }
+
+    /**
+     * 工作目录是否落在某个源目录下
+     *
+     * @param cwd        工作目录（相对工作区）
+     * @param mountDirs  源目录集合
+     * @return true 表示合法
+     */
+    private boolean underMount(String cwd, Set<String> mountDirs) {
+        String normalized = StrUtil.removeSuffix(cwd, StrUtil.SLASH);
+        for (String mount : mountDirs) {
+            if (StrUtil.equals(normalized, mount) || StrUtil.startWith(normalized, mount + StrUtil.SLASH)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
