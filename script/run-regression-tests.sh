@@ -135,6 +135,8 @@ DEFAULT_TESTS=(
 	BuildExtraModuleReleaseFailFastTest
 	# 多目标发布行为：全部成功 / 首个失败即停并跳过剩余 / 关闭开关继续但仍判失败 / 空目标 / 异常无消息 / 首尾空白
 	MultiTargetReleaseTest
+	# 发布命令退出码口径：-1（读不到）在严格执行下判失败、非 0 未开严格只记录（2026-11-25 群反馈）
+	ReleaseCommandExitCodeTest
 	# 「被构建引用」匹配：SSH 项目多选后必须按成员精确匹配（整体等值会漏、like 子串会误伤）
 	BuildInfoReleaseTargetMatcherTest
 	# SSH 项目多选发布保存：目标去重 / 保序 / 忽略空值（接口直传与前端数组 join 同一口径）
