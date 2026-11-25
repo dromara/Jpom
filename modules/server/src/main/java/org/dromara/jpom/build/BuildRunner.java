@@ -54,8 +54,13 @@ public interface BuildRunner {
 
     /**
      * 取消当前构建（幂等）
+     * <p>
+     * 返回值语义是「确认已停止」而不是「发过取消」：本机执行器按进程树是否全部退出判断，
+     * 节点执行器要等节点回报结束（回执）才返回 true。上层据此决定落「已取消」还是「异常关闭」。
+     * </p>
      *
      * @param reason 取消原因
+     * @return true 确认已停止
      */
-    void cancel(String reason);
+    boolean cancel(String reason);
 }

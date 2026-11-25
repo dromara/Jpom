@@ -367,7 +367,9 @@ export const statusMap = {
   7: t('i18n_b4fc1ac02c'),
   8: t('i18n_979b7d10b0'),
   9: t('i18n_81afd9e713'),
-  10: t('i18n_8160b4be4e')
+  10: t('i18n_8160b4be4e'),
+  // 取消中（2.11.16 追加）：已受理取消、等待进程树退出，必须与「已取消」区分展示
+  11: t('i18n_2c7b0a61f3')
 }
 export const statusColor = {
   1: 'orange',
@@ -379,7 +381,8 @@ export const statusColor = {
   7: '',
   8: 'blue',
   9: 'orange',
-  10: 'red'
+  10: 'red',
+  11: 'blue'
 }
 
 export const releaseMethodMap = {

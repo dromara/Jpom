@@ -64,6 +64,11 @@ const children = [
     component: () => import('../pages/ssh/ssh.vue')
   },
   {
+    path: '/pipeline/list',
+    name: 'pipeline-list',
+    component: () => import('../pages/pipeline/list.vue')
+  },
+  {
     path: '/ssh-project',
     name: 'ssh-project-list',
     component: () => import('../pages/ssh-project/list.vue')

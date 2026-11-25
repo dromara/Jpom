@@ -122,7 +122,14 @@
         </a-dropdown>
       </template>
       <template #tableBodyCell="{ column, text, record, index }">
-        <template v-if="column.tooltip">
+        <!-- 仓库名称：全局共享仓库直接带标识，避免「共享」列被列设置隐藏后分不清仓库归属（GitHub #126） -->
+        <template v-if="column.dataIndex === 'name' && column.tooltip">
+          <a-tooltip placement="topLeft" :title="text">
+            <span>{{ text }}</span>
+          </a-tooltip>
+          <a-tag v-if="record.workspaceId === 'GLOBAL'" style="margin-left: 4px">{{ $t('i18n_2be75b1044') }}</a-tag>
+        </template>
+        <template v-else-if="column.tooltip">
           <a-tooltip placement="topLeft" :title="text">
             <span>{{ text }}</span>
           </a-tooltip>

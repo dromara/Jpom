@@ -32,6 +32,14 @@ public enum BuildStatus implements BaseEnum {
     Interrupt(8, "构建中断"),
     WaitExec(9, "队列等待", true),
     AbnormalShutdown(10, "异常关闭"),
+    /**
+     * 已受理取消请求，正在等待进程树退出（此时不能显示「已取消」）
+     * <p>
+     * 追加码（2.11.16）：既有 0–10 的语义不变。终态只有两种：
+     * 进程树确认退出 → {@link #Cancel}；杀不掉/找不到执行体 → {@link #AbnormalShutdown}（附残留 pid）。
+     * </p>
+     */
+    CancelRequested(11, "取消中", true),
     ;
 
     private final int code;

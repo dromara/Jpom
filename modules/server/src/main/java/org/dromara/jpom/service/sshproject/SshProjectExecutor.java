@@ -28,6 +28,7 @@ import org.dromara.jpom.model.data.DslYmlDto;
 import org.dromara.jpom.model.data.SshProjectModel;
 import org.dromara.jpom.model.sshproject.SshProjectExecuteResult;
 import org.dromara.jpom.model.sshproject.SshProjectStatus;
+import org.dromara.jpom.plugins.JschUtils;
 import org.dromara.jpom.socket.ConsoleCommandOp;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -351,11 +352,8 @@ public class SshProjectExecutor {
             if (errorStream.size() > 0) {
                 output.append(errorStream.toString(charset.name()));
             }
-            // 等待通道关闭，否则可能拿到 -1：JSch 的退出码在收到 close 消息后才可用
-            long deadline = System.currentTimeMillis() + 3000;
-            while (!channel.isClosed() && System.currentTimeMillis() < deadline) {
-                Thread.sleep(30);
-            }
+            // 等待通道关闭，否则可能拿到 -1：JSch 的退出码在收到 close 消息后才可用（收口在 JschUtils）
+            JschUtils.waitClosed(channel, JschUtils.EXIT_STATUS_WAIT_MILLIS);
             return new ExecOutput(output.toString(), channel.getExitStatus());
         } finally {
             JschUtil.close(channel);

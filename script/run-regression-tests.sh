@@ -51,6 +51,8 @@ DEFAULT_TESTS=(
 	RepositoryControllerWorkspaceTest
 	# 构建「获取分支」必须用 fill=false 取仓库凭证（2.11.13 起仓库密码/私钥被脱敏导致 git 认证失败的守卫）
 	BuildInfoControllerBranchListTest
+	# 构建扩展数据解析：空/非法 extraData 不得变成 500 空指针（#126 复测发现）
+	BuildExtraDataUtilTest
 	# 仓库编辑凭据回填必须走 scoped 查询：跨工作空间仓库 id 不得把别的仓库密码交给调用者的 gitUrl（2026-11-19 安全报告）
 	RepositoryControllerEditCredentialTest
 	RepositoryServiceFillSelectResultTest
@@ -93,6 +95,8 @@ DEFAULT_TESTS=(
 	# 远端版本信息刷新语义：动作侧重试→缓存兜底→可读文案（2.11.14.7 升级/下载链路，共享 common 收口）
 	RemoteVersionResolverTest
 	RemoteVersionDownloadMessageTest
+	# 流水线运行日志按窗口读取（长日志不再每次整文件进内存）
+	PipelineLogReaderTest
 	UploadShardingExtensionTest
 	# 安全修复的既有单测（文件中心 SQL 注入 / 查询值绑定 / 日志路径穿越 / token 等）
 	FileStorageApiControllerSortTest
@@ -197,9 +201,8 @@ if [ "$ALL_TESTS" = "1" ]; then
 	echo "==> 运行 modules/server 全部单测（--all）"
 else
 	test_filter=$(IFS=,; echo "${DEFAULT_TESTS[*]}")
-	if [ -n "$EXTRA_TESTS" ]; then
-		test_filter="${test_filter},${EXTRA_TESTS}"
-	fi
+	# 额外测试不拼进这条超长 -Dtest（surefire 2.22 在超长列表下会静默跳过尾部类，2026-11-25 实测），
+	# 改为后面单独一条 mvn 命令执行，见文末「运行额外测试」。
 	mvn_args+=(-Dmaven.test.skip=false -DskipTests=false -Dtest="$test_filter" -DfailIfNoTests=false)
 	echo "==> 运行回归测试：${test_filter}"
 fi
@@ -222,5 +225,21 @@ if ! "$MVN_BIN" "${mvn_args[@]}" test; then
 	echo "回归测试失败：请修复后再提交/发版。共享基础类改动必须补行为级单测（不能只测工具函数）。" >&2
 	echo "如需查看已注册的核心测试：bash script/run-regression-tests.sh --list" >&2
 	exit 1
+fi
+if [ "$ALL_TESTS" != "1" ] && [ -n "${EXTRA_TESTS}" ]; then
+	filtered=()
+	for a in "${mvn_args[@]}"; do
+		case "$a" in
+			-Dtest=*) continue ;;
+			*) filtered+=("$a") ;;
+		esac
+	done
+	echo "==> 运行额外测试：${EXTRA_TESTS}"
+	echo "+ mvn ${filtered[*]} -Dtest=${EXTRA_TESTS} -DfailIfNoTests=false test"
+	if ! "$MVN_BIN" "${filtered[@]}" -Dtest="${EXTRA_TESTS}" -DfailIfNoTests=false test; then
+		echo "" >&2
+		echo "额外测试失败：请修复后再提交/发版。" >&2
+		exit 1
+	fi
 fi
 echo "==> 回归测试通过"

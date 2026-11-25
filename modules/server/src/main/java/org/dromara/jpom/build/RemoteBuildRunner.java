@@ -9,6 +9,8 @@
  */
 package org.dromara.jpom.build;
 
+import cn.keepbx.jpom.model.JsonMessage;
+import org.dromara.jpom.util.CommandUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
@@ -60,7 +62,7 @@ import java.util.zip.ZipInputStream;
  * @since 2.11.15
  */
 @Slf4j
-class RemoteBuildRunner implements BuildRunner {
+public class RemoteBuildRunner implements BuildRunner {
 
     /**
      * 拉取代码阶段等待上限
@@ -88,7 +90,7 @@ class RemoteBuildRunner implements BuildRunner {
      */
     private static final long DEFAULT_JOB_TIMEOUT_SEC = TimeUnit.HOURS.toSeconds(2);
 
-    private final BuildExecuteManage owner;
+    private final BuildRunnerOwner owner;
     private final TaskData taskData;
     private final BuildExtraModule buildExtraModule;
     private final LogRecorder logRecorder;
@@ -108,7 +110,7 @@ class RemoteBuildRunner implements BuildRunner {
      */
     private JSONObject artifact;
 
-    RemoteBuildRunner(BuildExecuteManage owner, TaskData taskData, BuildExtraModule buildExtraModule,
+    public RemoteBuildRunner(BuildRunnerOwner owner, TaskData taskData, BuildExtraModule buildExtraModule,
                       LogRecorder logRecorder, String logId, String buildNodeId) {
         this.owner = owner;
         this.taskData = taskData;
@@ -241,20 +243,58 @@ class RemoteBuildRunner implements BuildRunner {
     }
 
     @Override
-    public void cancel(String reason) {
+    public boolean cancel(String reason) {
+        boolean confirmed = false;
         try {
             if (client != null && session != null && !session.isExited()) {
                 client.cancel(logId);
+                // 等节点回执：节点侧对进程组发 TERM → 5s → KILL，等它真正结束再判「已取消」，
+                // 否则就是历史上的「发射后不管」——服务端已放弃，节点进程还在跑。
+                session.awaitExit(NODE_CANCEL_WAIT_MILLIS);
+                confirmed = true;
+            } else if (session != null && session.isExited()) {
+                confirmed = true;
             }
         } catch (Exception e) {
             log.warn(I18nMessageUtil.get("i18n.build_node_cancel_failed.7b52"), e);
+            // 回执超时不等于没取消：节点可能已经杀掉进程但终帧丢在关闭的 WS 里。
+            // 这里再查一次任务状态，终态即视为确认（实测 sleep 600 已被杀，但回执没等到）。
+            confirmed = this.confirmByStatus();
         } finally {
-            if (session != null) {
+            if (session != null && !session.isExited()) {
                 session.markLost(StrUtil.emptyToDefault(reason, I18nMessageUtil.get("i18n.system_interruption.e37c")));
             }
             this.closeSocket();
         }
+        return confirmed;
     }
+
+    /**
+     * 用节点任务状态兜底确认取消结果
+     *
+     * @return true 表示节点任务已处于终态
+     */
+    private boolean confirmByStatus() {
+        if (this.client == null) {
+            return false;
+        }
+        try {
+            JsonMessage<JSONObject> status = this.client.status(this.logId);
+            if (status == null || status.getData() == null) {
+                return false;
+            }
+            Object state = status.getData().get("state");
+            String text = state == null ? StrUtil.EMPTY : String.valueOf(state);
+            return StrUtil.equalsAnyIgnoreCase(text, "success", "failed", "cancelled", "canceled", "lost", "timeout");
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * 等待节点回执的超时时间（节点侧 TERM → 5s → KILL，这里留足余量）
+     */
+    private static final long NODE_CANCEL_WAIT_MILLIS = 15_000L;
 
     // ------------------------------------------------------------------ 内部实现
 
@@ -319,7 +359,7 @@ class RemoteBuildRunner implements BuildRunner {
         job.put("cacheBuild", buildExtraModule.getCacheBuild() == null || buildExtraModule.getCacheBuild());
         job.put("timeoutSec", DEFAULT_JOB_TIMEOUT_SEC);
         job.put("script", script);
-        job.put("shellSuffix", org.dromara.jpom.util.CommandUtil.SUFFIX);
+        job.put("shellSuffix", CommandUtil.SUFFIX);
         job.put("strict", buildExtraModule.strictlyEnforce());
         job.put("resultDirFile", buildInfoModel.getResultDirFile());
         job.put("excludeReleaseAnt", StrUtil.emptyToDefault(buildExtraModule.getExcludeReleaseAnt(), StrUtil.EMPTY));
@@ -375,7 +415,7 @@ class RemoteBuildRunner implements BuildRunner {
 
     private void submitJob(JSONObject job) {
         for (int i = 0; i < BUSY_RETRY_COUNT; i++) {
-            cn.keepbx.jpom.model.JsonMessage<JSONObject> message = client.start(job);
+            JsonMessage<JSONObject> message = client.start(job);
             int code = message.getCode();
             if (code == 200) {
                 return;
@@ -510,7 +550,7 @@ class RemoteBuildRunner implements BuildRunner {
         log.warn(I18nMessageUtil.get("i18n.build_node_stage_exception.1c47"), stage, e.getMessage());
         try {
             if (client != null) {
-                cn.keepbx.jpom.model.JsonMessage<JSONObject> message = client.status(this.logId);
+                JsonMessage<JSONObject> message = client.status(this.logId);
                 JSONObject data = message.getData();
                 if (data != null) {
                     String state = data.getString("state");

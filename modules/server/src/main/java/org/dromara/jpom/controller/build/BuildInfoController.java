@@ -52,6 +52,7 @@ import org.dromara.jpom.model.data.SshModel;
 import org.dromara.jpom.model.data.SshProjectModel;
 import org.dromara.jpom.model.enums.BuildMode;
 import org.dromara.jpom.model.enums.BuildReleaseMethod;
+import org.dromara.jpom.util.BuildExtraDataUtil;
 import org.dromara.jpom.model.script.ScriptModel;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
@@ -428,7 +429,8 @@ public class BuildInfoController extends BaseServerController {
         Assert.notNull(releaseMethod1, I18nMessageUtil.get("i18n.incorrect_publish_method.e095"));
         buildInfoModel.setReleaseMethod(releaseMethod1.getCode());
         // 把 extraData 信息转换成 JSON 字符串 ,不能直接使用 io.jpom.build.BuildExtraModule
-        JSONObject jsonObject = JSON.parseObject(extraData);
+        // extraData 是可选参数：接口直连（脚本/第三方对接）可能不传，历史/异常输入也不能变成 500 空指针
+        JSONObject jsonObject = BuildExtraDataUtil.parse(extraData);
 
         // 验证发布方式 和 extraData 信息
         if (releaseMethod1 == BuildReleaseMethod.Project) {

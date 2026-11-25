@@ -37,6 +37,7 @@ import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.service.dblog.BuildInfoService;
 import org.dromara.jpom.service.dblog.DbBuildHistoryLogService;
 import org.dromara.jpom.service.system.WorkspaceEnvVarService;
+import org.dromara.jpom.util.BuildExtraDataUtil;
 import org.dromara.jpom.util.FileUtils;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.http.MediaType;
@@ -113,8 +114,9 @@ public class BuildInfoManageController extends BaseServerController {
         Opt.ofBlankAble(projectSecondaryDirectory).ifPresent(s -> {
             FileUtils.checkSlip(s, e -> new IllegalArgumentException(I18nMessageUtil.get("i18n.second_level_directory_cannot_skip_levels.c9fb") + e.getMessage()));
             //
+            // 历史数据的 extra_data 可能为空（早期版本/未发布构建），不能在这里变成空指针
             String extraData = item.getExtraData();
-            JSONObject jsonObject = JSONObject.parseObject(extraData);
+            JSONObject jsonObject = BuildExtraDataUtil.parse(extraData);
             jsonObject.put("projectSecondaryDirectory", s);
             update.setExtraData(jsonObject.toString());
         });
@@ -140,21 +142,30 @@ public class BuildInfoManageController extends BaseServerController {
     public IJsonMessage<String> cancel(@ValidatorConfig(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.no_data.1ac0")) String id, HttpServletRequest request) {
         BuildInfoModel item = buildInfoService.getByKey(id, request);
         Assert.notNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
-        String checkStatus = buildExecuteService.checkStatus(item);
         BuildStatus nowStatus = BaseEnum.getEnum(BuildStatus.class, item.getStatus());
         Objects.requireNonNull(nowStatus);
-        if (checkStatus == null) {
+        if (!nowStatus.isProgress()) {
             return JsonMessage.success(I18nMessageUtil.get("i18n.status_not_in_progress.f410") + nowStatus.getDesc());
         }
-        // 先登记「取消意图」：节点构建被取消后节点会回报 cancelled、构建线程可能把终态写成 Error，
-        // 由 BuildExecuteService.updateStatus 归一为 Cancel（BUGS B-001）
+        // 「取消意图」先登记：节点被取消后可能回报 cancelled、构建线程也可能把终态写成 Error，
+        // 由 BuildExecuteService.updateStatus 归一（BUGS B-001）
         BuildExecuteService.markCancelRequested(id);
-        boolean status = BuildExecuteManage.cancelTaskById(item.getId());
-        if (!status) {
-            // 缓存中可能不存在数据,还是需要执行取消
-            buildInfoService.updateStatus(id, BuildStatus.Cancel, I18nMessageUtil.get("i18n.manual_cancel.8464"));
+        if (!ExecutionRegistry.get(id).isPresent()) {
+            // 没有执行体：绝不能再写「已取消」（历史 bug：界面取消成功、进程还在跑）。
+            // 进行中却没有执行体，只能是服务重启残留或已被别的线程收尾，按异常关闭如实记录。
+            buildInfoService.updateStatus(id, BuildStatus.AbnormalShutdown, I18nMessageUtil.get("i18n.cancel_no_executor.c3d4"));
+            return JsonMessage.success(I18nMessageUtil.get("i18n.cancel_no_executor_reply.f7a3"));
         }
-        return JsonMessage.success(I18nMessageUtil.get("i18n.cancel_success.285f"));
+        // 顺序很重要：先落「取消中」（界面立刻可见），再触发取消动作。
+        // 反过来的话，取消动作写下的终态会被这条「取消中」覆盖，界面永远停在取消中。
+        buildInfoService.updateStatus(id, BuildStatus.CancelRequested, I18nMessageUtil.get("i18n.cancel_requested.e0b2"));
+        ExecutionRegistry.CancelOutcome outcome = ExecutionRegistry.requestCancel(id, I18nMessageUtil.get("i18n.manual_cancel_task.e592"));
+        if (outcome == ExecutionRegistry.CancelOutcome.NOT_FOUND) {
+            // 极端竞态：检查通过后执行体刚好结束，按异常关闭收口（不给假成功）
+            buildInfoService.updateStatus(id, BuildStatus.AbnormalShutdown, I18nMessageUtil.get("i18n.cancel_no_executor.c3d4"));
+            return JsonMessage.success(I18nMessageUtil.get("i18n.cancel_no_executor_reply.f7a3"));
+        }
+        return JsonMessage.success(I18nMessageUtil.get("i18n.cancel_requested_reply.d91c"));
     }
 
     /**

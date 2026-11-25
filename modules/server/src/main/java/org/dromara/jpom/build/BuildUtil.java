@@ -21,6 +21,7 @@ import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.data.BuildInfoModel;
 import org.dromara.jpom.model.data.RepositoryModel;
+import org.dromara.jpom.util.LogRecorder;
 import org.springframework.util.Assert;
 
 import java.io.File;
@@ -73,6 +74,15 @@ public class BuildUtil {
      */
     public static File getSourceById(String id) {
         return FileUtil.file(BuildUtil.getBuildDataFile(id), "source");
+    }
+
+    /**
+     * 不落盘的空日志（合成上下文里没有历史记录时使用）
+     *
+     * @return 日志记录器
+     */
+    public static LogRecorder emptyLogRecorder() {
+        return LogRecorder.builder().file(FileUtil.file(FileUtil.getTmpDirPath(), "jpom-empty-build.log")).build();
     }
 
     public static File getBuildDataDir() {

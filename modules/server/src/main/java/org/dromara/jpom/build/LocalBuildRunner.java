@@ -45,7 +45,7 @@ class LocalBuildRunner implements BuildRunner {
     }
 
     @Override
-    public void cancel(String reason) {
-        owner.localCancel(reason);
+    public boolean cancel(String reason) {
+        return owner.localCancel(reason);
     }
 }

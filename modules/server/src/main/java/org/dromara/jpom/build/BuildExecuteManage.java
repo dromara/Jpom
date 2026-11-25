@@ -59,6 +59,8 @@ import org.dromara.jpom.service.script.ScriptExecuteLogServer;
 import org.dromara.jpom.service.script.ScriptServer;
 import org.dromara.jpom.service.system.WorkspaceService;
 import org.dromara.jpom.system.ExtConfigBean;
+import org.dromara.jpom.core.exec.ProcessKillResult;
+import org.dromara.jpom.core.exec.ProcessTree;
 import org.dromara.jpom.util.*;
 import org.dromara.jpom.webhook.DefaultWebhookPluginImpl;
 import org.springframework.util.Assert;
@@ -78,7 +80,7 @@ import java.util.stream.Collectors;
  */
 @Builder
 @Slf4j
-public class BuildExecuteManage implements Runnable {
+public class BuildExecuteManage implements Runnable, BuildRunnerOwner {
     /**
      * 缓存构建中
      */
@@ -93,6 +95,10 @@ public class BuildExecuteManage implements Runnable {
     private File gitFile;
     private Thread currentThread;
     private ReleaseManage releaseManage;
+    /**
+     * 当前任务的执行体登记句柄（取消/阶段/进程），供 {@link ExecutionRegistry} 统一管理
+     */
+    private ExecutionRegistry.Handle executionHandle;
     /**
      * 执行器：Server 本机或远程构建节点（由 {@link BuildRunnerFactory} 装配）
      */
@@ -163,6 +169,10 @@ public class BuildExecuteManage implements Runnable {
         logRecorder.system(I18nMessageUtil.get("i18n.build_task_count_and_queue_count.f0b6"), size, queueSize,
             size > buildExtConfig.getPoolSize() ? I18nMessageUtil.get("i18n.build_task_queue_waiting.5f06") : StrUtil.EMPTY);
         //BuildInfoManage manage = new BuildInfoManage(taskData);
+        // 登记执行体：取消的唯一入口（排队中、构建中、发布中都能定位到）
+        this.executionHandle = ExecutionRegistry.register(buildInfoModel.getId(), buildInfoModel.getName(),
+            reason -> this.cancelTask(reason));
+        this.executionHandle.queued(threadPoolExecutor, this);
         BUILD_MANAGE_MAP.put(buildInfoModel.getId(), this);
         threadPoolExecutor.execute(this);
     }
@@ -183,15 +193,43 @@ public class BuildExecuteManage implements Runnable {
     /**
      * 取消任务
      */
-    private void cancelTask(String desc) {
-        if (this.runner != null) {
-            this.runner.cancel(desc);
-        } else {
-            this.localCancel(desc);
+    private boolean cancelTask(String desc) {
+        // 1) 先尽力终止进程（任何异常都不能挡住后面的状态写入）
+        boolean stopped;
+        try {
+            stopped = this.runner != null ? this.runner.cancel(desc) : this.localCancel(desc);
+        } catch (Throwable e) {
+            log.warn("终止构建进程异常：" + desc, e);
+            stopped = false;
         }
+        // 发布阶段的进程是单独登记的（ReleaseManage 自己的 Process），只杀构建命令进程会漏掉它
+        try {
+            Optional.ofNullable(this.executionHandle)
+                .map(ExecutionRegistry.Handle::getProcess)
+                .ifPresent(process -> {
+                    ProcessKillResult killResult = ProcessTree.kill(process);
+                    if (!killResult.isSuccess()) {
+                        log.warn(I18nMessageUtil.get("i18n.process_tree_residual.d0c1"), killResult.getRemainingPids());
+                    }
+                });
+        } catch (Throwable e) {
+            log.warn("终止发布进程异常：" + desc, e);
+        }
+        String buildId = taskData.buildInfoModel.getId();
+        // 2) 先写终态：容器清理/插件调用可能卡住甚至抛 Error，不能让它把「已取消」拖成永远「取消中」
+        BuildStatus finalStatus = CancelOutcomePolicy.resolve(stopped);
+        String finalMsg;
+        if (finalStatus == BuildStatus.Cancel) {
+            finalMsg = desc;
+        } else {
+            String stage = Optional.ofNullable(this.executionHandle).map(ExecutionRegistry.Handle::getStage).orElse(StrUtil.EMPTY);
+            finalMsg = StrUtil.format(I18nMessageUtil.get("i18n.cancel_not_confirmed.b7f2"), StrUtil.emptyToDefault(stage, "-"));
+        }
+        // 关闭归一：这里就是要如实区分「已取消」与「异常关闭」
+        buildExecuteService.updateStatus(buildId, logId, taskData.buildInfoModel.getBuildId(), finalStatus, finalMsg, false);
+        // 3) 容器构建清理（best-effort，失败只记日志）
         Integer buildMode = taskData.buildInfoModel.getBuildMode();
         if (buildMode != null && buildMode == 1) {
-            // 容器构建 删除容器
             try {
                 Optional.ofNullable(taskData.dockerParameter).ifPresent(parameter -> {
                     IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
@@ -202,16 +240,17 @@ public class BuildExecuteManage implements Runnable {
                         throw Lombok.sneakyThrow(e);
                     }
                 });
-
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 log.warn(I18nMessageUtil.get("i18n.build_resource_cleanup_failed.c4cf"), e);
+                logRecorder.systemWarning("容器清理失败（不影响取消结果）：" + e.getMessage());
             }
         }
-        String buildId = taskData.buildInfoModel.getId();
-        buildExecuteService.updateStatus(buildId, logId, taskData.buildInfoModel.getBuildId(), BuildStatus.Cancel, desc);
         Optional.ofNullable(currentThread).ifPresent(Thread::interrupt);
         BUILD_MANAGE_MAP.remove(buildId);
+        Optional.ofNullable(this.executionHandle).ifPresent(ExecutionRegistry.Handle::stop);
+        ExecutionRegistry.unregister(buildId);
         IoUtil.close(logRecorder);
+        return stopped;
     }
 
     /**
@@ -239,119 +278,171 @@ public class BuildExecuteManage implements Runnable {
             }
             return true;
         };
+        String error;
         if (buildMode != null && buildMode == 1) {
-            // 容器构建直接下载到 结果目录
-            File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), resultDirFileAction.getPath());
-            if (!FileUtil.exist(toFile)) {
-                String format = StrUtil.format(I18nMessageUtil.get("i18n.non_existent_build_product.1df4"), resultDirFileAction.getPath());
-                logRecorder.systemError(format);
-                return format;
-            }
-            logRecorder.system(I18nMessageUtil.get("i18n.backup_product.53c0"), resultDirFileAction.getPath(), buildInfoModel.getBuildId());
-            return null;
-        }
-        if (resultDirFileAction.getType() == ResultDirFileAction.Type.ANT_PATH) {
-            // 通配模式
-            List<String> paths = AntPathUtil.antPathMatcher(this.gitFile, resultDirFileAction.getPath());
-            int matcherSize = CollUtil.size(paths);
-            if (matcherSize <= 0) {
-                String format = StrUtil.format(I18nMessageUtil.get("i18n.no_matching_files.b7a6"), resultDirFileAction.getPath());
-                logRecorder.systemError(format);
-                return format;
-            }
-            logRecorder.system(I18nMessageUtil.get("i18n.fuzzy_match_files.139d"), resultDirFileAction.getPath(), matcherSize);
-            String antSubMatch = resultDirFileAction.antSubMatch();
-            ResultDirFileAction.AntFileUploadMode antFileUploadMode = resultDirFileAction.getAntFileUploadMode();
-            Assert.notNull(antFileUploadMode, I18nMessageUtil.get("i18n.file_upload_mode_not_configured.b3b2"));
-            File historyPackageFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), StrUtil.SLASH);
-            int subMatchCount = paths.stream()
-                .filter(s -> {
-                    // 需要能满足二级匹配
-                    return StrUtil.isEmpty(antSubMatch) || AntPathUtil.ANT_PATH_MATCHER.matchStart(antSubMatch + "**", s);
-                })
-                .filter(predicate)
-                .mapToInt(path -> {
-                    File toFile;
-                    if (antFileUploadMode == ResultDirFileAction.AntFileUploadMode.KEEP_DIR) {
-                        // 剔除文件夹层级
-                        List<String> list = StrUtil.splitTrim(path, StrUtil.SLASH);
-                        int notMathIndex;
-                        int pathItemSize = list.size();
-                        if (StrUtil.isEmpty(antSubMatch) || StrUtil.equals(antSubMatch, StrUtil.SLASH)) {
-                            notMathIndex = 0;
-                        } else {
-                            notMathIndex = ArrayUtil.INDEX_NOT_FOUND;
-                            for (int i = pathItemSize - 1; i >= 0; i--) {
-                                String suffix = i == pathItemSize - 1 ? StrUtil.EMPTY : StrUtil.SLASH;
-                                String itemS = StrUtil.SLASH + CollUtil.join(CollUtil.sub(list, 0, i + 1), StrUtil.SLASH) + suffix;
-                                if (AntPathUtil.ANT_PATH_MATCHER.match(antSubMatch, itemS)) {
-                                    notMathIndex = i + 1;
-                                    // 结束本次循环
-                                    break;
-                                }
-                            }
-                            if (notMathIndex == ArrayUtil.INDEX_NOT_FOUND) {
-                                return 0;
-                            }
-                        }
-                        // 保留文件夹层级
-                        String itemEnd = CollUtil.join(CollUtil.sub(list, notMathIndex, pathItemSize), StrUtil.SLASH);
-                        toFile = FileUtil.file(historyPackageFile, itemEnd);
-                    } else if (antFileUploadMode == ResultDirFileAction.AntFileUploadMode.SAME_DIR) {
-                        toFile = historyPackageFile;
-                    } else {
-                        throw new IllegalStateException(I18nMessageUtil.get("i18n.unsupported_mode.a3d3") + antFileUploadMode);
-                    }
-                    // 创建文件夹，避免出现文件全部为相关文件名（result）
-                    BuildUtil.mkdirHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId());
-                    File srcFile = FileUtil.file(this.gitFile, path);
-                    //
-                    FileCopier.create(srcFile, toFile)
-                        .setCopyContentIfDir(true)
-                        .setOverride(true)
-                        .setCopyAttributes(true)
-                        .setCopyFilter(file -> releaseHideFile || !file.isHidden())
-                        .copy();
-                    return 1;
-                }).sum();
-            if (subMatchCount <= 0) {
-                String format = StrUtil.format(I18nMessageUtil.get("i18n.no_matching_files.b7a6"), antSubMatch);
-                logRecorder.systemError(format);
-                return format;
-            }
-            logRecorder.system(I18nMessageUtil.get("i18n.secondary_directory_match.0aec"), antSubMatch, subMatchCount, antFileUploadMode);
-            // 更新产物路径为普通路径
-            dbBuildHistoryLogService.updateResultDirFile(this.logId, StrUtil.SLASH);
-            buildInfoModel.setResultDirFile(StrUtil.SLASH);
-            this.buildExtraModule.setResultDirFile(StrUtil.SLASH);
+            error = this.packageContainerBuild(buildInfoModel, resultDirFileAction);
+        } else if (resultDirFileAction.getType() == ResultDirFileAction.Type.ANT_PATH) {
+            error = this.packageAntPath(buildInfoModel, resultDirFileAction, predicate, releaseHideFile);
         } else if (resultDirFileAction.getType() == ResultDirFileAction.Type.ORIGINAL) {
-            File file = FileUtil.file(this.gitFile, resultDirFile);
-            if (!file.exists()) {
-                String format = StrUtil.format(I18nMessageUtil.get("i18n.non_existent_build_product.1df4"), resultDirFile);
-                logRecorder.systemError(format);
-                return format;
-            }
-            BuildUtil.mkdirHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId());
-            File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), resultDirFile);
-            //
-            String rootDir = FileUtil.getAbsolutePath(gitFile);
-            FileCopier.create(file, toFile)
-                .setCopyContentIfDir(true)
-                .setOverride(true)
-                .setCopyAttributes(true)
-                .setCopyFilter(file12 -> {
-                    if (!releaseHideFile && file12.isHidden()) {
-                        return false;
-                    }
-                    String subPath = FileUtil.subPath(rootDir, file12);
-                    subPath = FileUtil.normalize(StrUtil.SLASH + subPath);
-                    return predicate.test(subPath);
-                })
-                .copy();
+            error = this.packageOriginal(buildInfoModel, resultDirFile, predicate, releaseHideFile);
+        } else {
+            error = null;
+        }
+        if (error != null) {
+            return error;
         }
         if (CollUtil.isNotEmpty(excludeReleaseAnts)) {
             logRecorder.system(I18nMessageUtil.get("i18n.cumulative_filter_files.448d"), excludeReleaseAnt, excludeReleaseAntCount[0]);
         }
+        return null;
+    }
+
+    /**
+     * 容器构建：产物已经下载到结果目录，只做存在性校验
+     *
+     * @param buildInfoModel     构建信息
+     * @param resultDirFileAction 产物目录解析结果
+     * @return 错误信息；null 表示成功
+     */
+    private String packageContainerBuild(BuildInfoModel buildInfoModel, ResultDirFileAction resultDirFileAction) {
+        File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), resultDirFileAction.getPath());
+        if (!FileUtil.exist(toFile)) {
+            String format = StrUtil.format(I18nMessageUtil.get("i18n.non_existent_build_product.1df4"), resultDirFileAction.getPath());
+            logRecorder.systemError(format);
+            return format;
+        }
+        logRecorder.system(I18nMessageUtil.get("i18n.backup_product.53c0"), resultDirFileAction.getPath(), buildInfoModel.getBuildId());
+        return null;
+    }
+
+    /**
+     * 通配模式：按 ant 规则匹配产物并拷贝（支持保留/扁平目录、二级目录过滤、排除规则）
+     *
+     * @param buildInfoModel      构建信息
+     * @param resultDirFileAction 产物目录解析结果
+     * @param predicate           排除规则判定
+     * @param releaseHideFile     是否发布隐藏文件
+     * @return 错误信息；null 表示成功
+     */
+    private String packageAntPath(BuildInfoModel buildInfoModel, ResultDirFileAction resultDirFileAction,
+                                  Predicate<String> predicate, boolean releaseHideFile) {
+        List<String> paths = AntPathUtil.antPathMatcher(this.gitFile, resultDirFileAction.getPath());
+        int matcherSize = CollUtil.size(paths);
+        if (matcherSize <= 0) {
+            String format = StrUtil.format(I18nMessageUtil.get("i18n.no_matching_files.b7a6"), resultDirFileAction.getPath());
+            logRecorder.systemError(format);
+            return format;
+        }
+        logRecorder.system(I18nMessageUtil.get("i18n.fuzzy_match_files.139d"), resultDirFileAction.getPath(), matcherSize);
+        String antSubMatch = resultDirFileAction.antSubMatch();
+        ResultDirFileAction.AntFileUploadMode antFileUploadMode = resultDirFileAction.getAntFileUploadMode();
+        Assert.notNull(antFileUploadMode, I18nMessageUtil.get("i18n.file_upload_mode_not_configured.b3b2"));
+        File historyPackageFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), StrUtil.SLASH);
+        int subMatchCount = paths.stream()
+            .filter(s -> StrUtil.isEmpty(antSubMatch) || AntPathUtil.ANT_PATH_MATCHER.matchStart(antSubMatch + "**", s))
+            .filter(predicate)
+            .mapToInt(path -> this.copyAntMatchFile(buildInfoModel, historyPackageFile, path, antSubMatch,
+                antFileUploadMode, releaseHideFile))
+            .sum();
+        if (subMatchCount <= 0) {
+            String format = StrUtil.format(I18nMessageUtil.get("i18n.no_matching_files.b7a6"), antSubMatch);
+            logRecorder.systemError(format);
+            return format;
+        }
+        logRecorder.system(I18nMessageUtil.get("i18n.secondary_directory_match.0aec"), antSubMatch, subMatchCount, antFileUploadMode);
+        // 更新产物路径为普通路径
+        dbBuildHistoryLogService.updateResultDirFile(this.logId, StrUtil.SLASH);
+        buildInfoModel.setResultDirFile(StrUtil.SLASH);
+        this.buildExtraModule.setResultDirFile(StrUtil.SLASH);
+        return null;
+    }
+
+    /**
+     * 拷贝单个 ant 匹配到的产物（KEEP_DIR 保留层级、SAME_DIR 扁平放置）
+     *
+     * @return 拷贝成功返回 1，被二级目录规则跳过返回 0
+     */
+    private int copyAntMatchFile(BuildInfoModel buildInfoModel, File historyPackageFile, String path,
+                                 String antSubMatch, ResultDirFileAction.AntFileUploadMode antFileUploadMode,
+                                 boolean releaseHideFile) {
+        File toFile;
+        if (antFileUploadMode == ResultDirFileAction.AntFileUploadMode.KEEP_DIR) {
+            // 剔除文件夹层级
+            List<String> list = StrUtil.splitTrim(path, StrUtil.SLASH);
+            int notMathIndex;
+            int pathItemSize = list.size();
+            if (StrUtil.isEmpty(antSubMatch) || StrUtil.equals(antSubMatch, StrUtil.SLASH)) {
+                notMathIndex = 0;
+            } else {
+                notMathIndex = ArrayUtil.INDEX_NOT_FOUND;
+                for (int i = pathItemSize - 1; i >= 0; i--) {
+                    String suffix = i == pathItemSize - 1 ? StrUtil.EMPTY : StrUtil.SLASH;
+                    String itemS = StrUtil.SLASH + CollUtil.join(CollUtil.sub(list, 0, i + 1), StrUtil.SLASH) + suffix;
+                    if (AntPathUtil.ANT_PATH_MATCHER.match(antSubMatch, itemS)) {
+                        notMathIndex = i + 1;
+                        // 结束本次循环
+                        break;
+                    }
+                }
+                if (notMathIndex == ArrayUtil.INDEX_NOT_FOUND) {
+                    return 0;
+                }
+            }
+            // 保留文件夹层级
+            String itemEnd = CollUtil.join(CollUtil.sub(list, notMathIndex, pathItemSize), StrUtil.SLASH);
+            toFile = FileUtil.file(historyPackageFile, itemEnd);
+        } else if (antFileUploadMode == ResultDirFileAction.AntFileUploadMode.SAME_DIR) {
+            toFile = historyPackageFile;
+        } else {
+            throw new IllegalStateException(I18nMessageUtil.get("i18n.unsupported_mode.a3d3") + antFileUploadMode);
+        }
+        // 创建文件夹，避免出现文件全部为相关文件名（result）
+        BuildUtil.mkdirHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId());
+        File srcFile = FileUtil.file(this.gitFile, path);
+        //
+        FileCopier.create(srcFile, toFile)
+            .setCopyContentIfDir(true)
+            .setOverride(true)
+            .setCopyAttributes(true)
+            .setCopyFilter(file -> releaseHideFile || !file.isHidden())
+            .copy();
+        return 1;
+    }
+
+    /**
+     * 原始目录模式：按原样拷贝整个产物目录
+     *
+     * @param buildInfoModel 构建信息
+     * @param resultDirFile  产物目录
+     * @param predicate      排除规则判定
+     * @param releaseHideFile 是否发布隐藏文件
+     * @return 错误信息；null 表示成功
+     */
+    private String packageOriginal(BuildInfoModel buildInfoModel, String resultDirFile,
+                                   Predicate<String> predicate, boolean releaseHideFile) {
+        File file = FileUtil.file(this.gitFile, resultDirFile);
+        if (!file.exists()) {
+            String format = StrUtil.format(I18nMessageUtil.get("i18n.non_existent_build_product.1df4"), resultDirFile);
+            logRecorder.systemError(format);
+            return format;
+        }
+        BuildUtil.mkdirHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId());
+        File toFile = BuildUtil.getHistoryPackageFile(buildInfoModel.getId(), buildInfoModel.getBuildId(), resultDirFile);
+        //
+        String rootDir = FileUtil.getAbsolutePath(gitFile);
+        FileCopier.create(file, toFile)
+            .setCopyContentIfDir(true)
+            .setOverride(true)
+            .setCopyAttributes(true)
+            .setCopyFilter(file12 -> {
+                if (!releaseHideFile && file12.isHidden()) {
+                    return false;
+                }
+                String subPath = FileUtil.subPath(rootDir, file12);
+                subPath = FileUtil.normalize(StrUtil.SLASH + subPath);
+                return predicate.test(subPath);
+            })
+            .copy();
         return null;
     }
 
@@ -422,168 +513,188 @@ public class BuildExecuteManage implements Runnable {
     String localPull() {
         RepositoryModel repositoryModel = taskData.repositoryModel;
         BuildInfoModel buildInfoModel = taskData.buildInfoModel;
+        Integer repoTypeCode = repositoryModel.getRepoType();
+        RepositoryModel.RepoType repoType = EnumUtil.likeValueOf(RepositoryModel.RepoType.class, repoTypeCode);
+        Boolean checkRepositoryDiff = Optional.ofNullable(taskData.checkRepositoryDiff).orElse(buildExtraModule.getCheckRepositoryDiff());
+        String repositoryLastCommitId = buildInfoModel.getRepositoryLastCommitId();
+        String error;
         try {
-            String msg;
-            Integer repoTypeCode = repositoryModel.getRepoType();
-            RepositoryModel.RepoType repoType = EnumUtil.likeValueOf(RepositoryModel.RepoType.class, repoTypeCode);
-            Boolean checkRepositoryDiff = Optional.ofNullable(taskData.checkRepositoryDiff).orElse(buildExtraModule.getCheckRepositoryDiff());
-            String repositoryLastCommitId = buildInfoModel.getRepositoryLastCommitId();
             if (repoType == RepositoryModel.RepoType.Git) {
-                // git with password
-                IPlugin plugin = PluginFactory.getPlugin("git-clone");
-                Map<String, Object> map = repositoryModel.toMap();
-                // 指定 clone 深度
-                Integer cloneDepth = buildExtraModule.getCloneDepth();
-                map.put("depth", cloneDepth);
-                if (cloneDepth != null) {
-                    // 使用系统
-                    map.put("gitProcessType", "SystemGit");
-                }
-                Tuple tuple = (Tuple) plugin.execute("branchAndTagList", map);
-                //GitUtil.getBranchAndTagList(repositoryModel);
-                Assert.notNull(tuple, I18nMessageUtil.get("i18n.get_repository_branch_failure.37cc"));
-                map.put("reduceProgressRatio", buildExtConfig.getLogReduceProgressRatio());
-                map.put("logWriter", logRecorder.getPrintWriter());
-                map.put("savePath", gitFile);
-                map.put("strictlyEnforce", buildExtraModule.strictlyEnforce());
-                // 模糊匹配 标签
-                String branchTagName = buildInfoModel.getBranchTagName();
-                String[] result;
-                if (StrUtil.isNotEmpty(branchTagName)) {
-                    String newBranchTagName = fuzzyMatch(tuple.get(1), branchTagName);
-                    if (StrUtil.isEmpty(newBranchTagName)) {
-                        String format = StrUtil.format("{} Did not match the corresponding tag", branchTagName);
-                        logRecorder.systemError(format);
-                        return format;
-                    }
-                    // author bwcx_jzy 2022.11.28 map.put("branchName", newBranchName);
-                    map.put("tagName", newBranchTagName);
-                    //author bwcx_jzy 2022.11.28 buildEnv.put("BUILD_BRANCH_NAME", newBranchName);
-                    taskData.environmentMapBuilder.put("BUILD_TAG_NAME", newBranchTagName);
-                    // 标签拉取模式
-                    logRecorder.system("repository tag [{}] clone pull from {}", branchTagName, newBranchTagName);
-                    result = (String[]) plugin.execute("pullByTag", map);
-                } else {
-                    String branchName = buildInfoModel.getBranchName();
-                    // 模糊匹配分支
-                    String newBranchName = fuzzyMatch(tuple.get(0), branchName);
-                    if (StrUtil.isEmpty(newBranchName)) {
-                        String format = StrUtil.format("{} Did not match the corresponding branch", branchName);
-                        logRecorder.systemError(format);
-                        //buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, this.taskData.buildInfoModel.getBuildId(), BuildStatus.Error);
-                        return format;
-                    }
-                    // 分支模式
-                    map.put("branchName", newBranchName);
-                    // 真实使用的分支名
-                    taskData.environmentMapBuilder.put("BUILD_BRANCH_NAME", newBranchName);
-                    logRecorder.system("repository [{}] clone pull from {}", branchName, newBranchName);
-                    result = (String[]) plugin.execute("pull", map);
-                }
-                msg = result[1];
-                // 判断是否执行失败
-                String errorMsg = ArrayUtil.get(result, 2);
-                if (errorMsg != null) {
-                    logRecorder.systemError(I18nMessageUtil.get("i18n.pull_code_failed.70d6"), errorMsg);
-                    return errorMsg;
-                }
-                // 判断hash 码和上次构建是否一致
-                if (checkRepositoryDiff != null && checkRepositoryDiff) {
-                    if (StrUtil.equals(repositoryLastCommitId, result[0])) {
-                        // 如果一致，则不构建
-                        String format = StrUtil.format(I18nMessageUtil.get("i18n.no_changes_in_repository_code_with_details.fd9f"), result[0], msg);
-                        logRecorder.systemError(format);
-                        throw new DiyInterruptException(format);
-                    }
-                    // 文件路径级差异过滤：只有指定路径下的文件变更才触发构建
-                    if (StrUtil.isNotEmpty(repositoryLastCommitId)) {
-                        String includePath = buildExtraModule.getDiffIncludePath();
-                        String excludePath = buildExtraModule.getDiffExcludePath();
-                        if (StrUtil.isNotEmpty(includePath) || StrUtil.isNotEmpty(excludePath)) {
-                            List<String> changedFiles = getGitChangedFiles(repositoryLastCommitId, result[0]);
-                            if (changedFiles == null) {
-                                logRecorder.system(I18nMessageUtil.get("i18n.failed_to_get_changed_file_list_skip_diff.92b7"));
-                            } else if (changedFiles.isEmpty()) {
-                                String format = StrUtil.format(I18nMessageUtil.get("i18n.no_file_changes_between_commits.48ed"), repositoryLastCommitId, result[0]);
-                                logRecorder.systemError(format);
-                                throw new DiyInterruptException(format);
-                            } else {
-                                boolean matched = changedFiles.stream()
-                                    .anyMatch(f -> AntPathUtil.matchDiffPath(f, includePath, excludePath));
-                                if (!matched) {
-                                    String format = StrUtil.format(I18nMessageUtil.get("i18n.changed_files_outside_watch_scope.b21c"),
-                                        includePath, excludePath, CollUtil.join(changedFiles, ", "));
-                                    logRecorder.systemError(format);
-                                    throw new DiyInterruptException(format);
-                                }
-                                logRecorder.system(I18nMessageUtil.get("i18n.changed_files_matching_path_rules.d17c"),
-                                    changedFiles.stream()
-                                        .filter(f -> AntPathUtil.matchDiffPath(f, includePath, excludePath))
-                                        .collect(Collectors.joining(", ")));
-                            }
-                        }
-                    }
-                }
-                taskData.repositoryLastCommitId = result[0];
-                taskData.repositoryLastCommitMsg = msg;
+                error = this.pullGit(repositoryModel, repositoryLastCommitId, checkRepositoryDiff);
             } else if (repoType == RepositoryModel.RepoType.Svn) {
-                // svn
-                Map<String, Object> map = repositoryModel.toMap();
-
-                IPlugin plugin = PluginFactory.getPlugin("svn-clone");
-                String[] result = (String[]) plugin.execute(gitFile, map);
-                //msg = SvnKitUtil.checkOut(repositoryModel, gitFile);
-                msg = ArrayUtil.get(result, 1);
-                // 判断版本号和上次构建是否一致
-                if (checkRepositoryDiff != null && checkRepositoryDiff) {
-                    if (StrUtil.equals(repositoryLastCommitId, result[0])) {
-                        // 如果一致，则不构建
-                        String format = StrUtil.format(I18nMessageUtil.get("i18n.no_changes_in_repository_code.b1aa"), result[0]);
-                        logRecorder.systemError(format);
-                        throw new DiyInterruptException(format);
-                    }
-                    // 文件路径级差异过滤：只有指定路径下的文件变更才触发构建
-                    if (StrUtil.isNotEmpty(repositoryLastCommitId)) {
-                        String includePath = buildExtraModule.getDiffIncludePath();
-                        String excludePath = buildExtraModule.getDiffExcludePath();
-                        if (StrUtil.isNotEmpty(includePath) || StrUtil.isNotEmpty(excludePath)) {
-                            List<String> changedFiles = getSvnChangedFiles(map, repositoryLastCommitId, result[0]);
-                            if (changedFiles == null) {
-                                logRecorder.system(I18nMessageUtil.get("i18n.failed_to_get_svn_changed_file_list_skip_diff.1886"));
-                            } else if (changedFiles.isEmpty()) {
-                                String format = StrUtil.format(I18nMessageUtil.get("i18n.no_file_changes_between_revisions.3aa2"), repositoryLastCommitId, result[0]);
-                                logRecorder.systemError(format);
-                                throw new DiyInterruptException(format);
-                            } else {
-                                boolean matched = changedFiles.stream()
-                                    .anyMatch(f -> AntPathUtil.matchDiffPath(f, includePath, excludePath));
-                                if (!matched) {
-                                    String format = StrUtil.format(I18nMessageUtil.get("i18n.changed_files_outside_watch_scope.b21c"),
-                                        includePath, excludePath, CollUtil.join(changedFiles, ", "));
-                                    logRecorder.systemError(format);
-                                    throw new DiyInterruptException(format);
-                                }
-                                logRecorder.system(I18nMessageUtil.get("i18n.changed_files_matching_path_rules.d17c"),
-                                    changedFiles.stream()
-                                        .filter(f -> AntPathUtil.matchDiffPath(f, includePath, excludePath))
-                                        .collect(Collectors.joining(", ")));
-                            }
-                        }
-                    }
-                }
-                taskData.repositoryLastCommitId = result[0];
-                taskData.repositoryLastCommitMsg = msg;
+                error = this.pullSvn(repositoryModel, repositoryLastCommitId, checkRepositoryDiff);
             } else {
                 String format = StrUtil.format(I18nMessageUtil.get("i18n.unsupported_type_with_placeholder.71a2"), repoType.getDesc());
                 logRecorder.systemError(format);
                 return format;
             }
-            taskData.environmentMapBuilder.put("BUILD_COMMIT_ID", taskData.repositoryLastCommitId);
-            logRecorder.system(msg);
         } catch (Exception e) {
             throw Lombok.sneakyThrow(e);
         }
-        // env file
+        if (error != null) {
+            return error;
+        }
+        taskData.environmentMapBuilder.put("BUILD_COMMIT_ID", taskData.repositoryLastCommitId);
+        this.appendAttachEnv();
+        // 输出环境变量
+        taskData.environmentMapBuilder.eachStr(logRecorder::system);
+        return null;
+    }
+
+    /**
+     * 拉取 git 仓库（分支/标签模糊匹配、深度、差异构建判定）
+     *
+     * @param repositoryModel        仓库配置
+     * @param repositoryLastCommitId 上次构建的 commit
+     * @param checkRepositoryDiff    是否判断代码变动
+     * @return 错误信息；null 表示成功
+     */
+    private String pullGit(RepositoryModel repositoryModel, String repositoryLastCommitId, Boolean checkRepositoryDiff) throws Exception {
+        IPlugin plugin = PluginFactory.getPlugin("git-clone");
+        Map<String, Object> map = repositoryModel.toMap();
+        // 指定 clone 深度
+        Integer cloneDepth = buildExtraModule.getCloneDepth();
+        map.put("depth", cloneDepth);
+        if (cloneDepth != null) {
+            // 使用系统
+            map.put("gitProcessType", "SystemGit");
+        }
+        Tuple tuple = (Tuple) plugin.execute("branchAndTagList", map);
+        Assert.notNull(tuple, I18nMessageUtil.get("i18n.get_repository_branch_failure.37cc"));
+        map.put("reduceProgressRatio", buildExtConfig.getLogReduceProgressRatio());
+        map.put("logWriter", logRecorder.getPrintWriter());
+        map.put("savePath", gitFile);
+        map.put("strictlyEnforce", buildExtraModule.strictlyEnforce());
+        // 模糊匹配 标签（优先）/ 分支
+        String branchTagName = taskData.buildInfoModel.getBranchTagName();
+        String[] result;
+        if (StrUtil.isNotEmpty(branchTagName)) {
+            String newBranchTagName = fuzzyMatch(tuple.get(1), branchTagName);
+            if (StrUtil.isEmpty(newBranchTagName)) {
+                String format = StrUtil.format("{} Did not match the corresponding tag", branchTagName);
+                logRecorder.systemError(format);
+                return format;
+            }
+            map.put("tagName", newBranchTagName);
+            taskData.environmentMapBuilder.put("BUILD_TAG_NAME", newBranchTagName);
+            logRecorder.system("repository tag [{}] clone pull from {}", branchTagName, newBranchTagName);
+            result = (String[]) plugin.execute("pullByTag", map);
+        } else {
+            String branchName = taskData.buildInfoModel.getBranchName();
+            String newBranchName = fuzzyMatch(tuple.get(0), branchName);
+            if (StrUtil.isEmpty(newBranchName)) {
+                String format = StrUtil.format("{} Did not match the corresponding branch", branchName);
+                logRecorder.systemError(format);
+                return format;
+            }
+            map.put("branchName", newBranchName);
+            // 真实使用的分支名
+            taskData.environmentMapBuilder.put("BUILD_BRANCH_NAME", newBranchName);
+            logRecorder.system("repository [{}] clone pull from {}", branchName, newBranchName);
+            result = (String[]) plugin.execute("pull", map);
+        }
+        String msg = result[1];
+        // 判断是否执行失败
+        String errorMsg = ArrayUtil.get(result, 2);
+        if (errorMsg != null) {
+            logRecorder.systemError(I18nMessageUtil.get("i18n.pull_code_failed.70d6"), errorMsg);
+            return errorMsg;
+        }
+        // 判断hash 码和上次构建是否一致
+        if (checkRepositoryDiff != null && checkRepositoryDiff) {
+            if (StrUtil.equals(repositoryLastCommitId, result[0])) {
+                // 如果一致，则不构建
+                String format = StrUtil.format(I18nMessageUtil.get("i18n.no_changes_in_repository_code_with_details.fd9f"), result[0], msg);
+                logRecorder.systemError(format);
+                throw new DiyInterruptException(format);
+            }
+            if (StrUtil.isNotEmpty(repositoryLastCommitId)) {
+                List<String> changedFiles = getGitChangedFiles(repositoryLastCommitId, result[0]);
+                this.applyPathFilters(changedFiles, I18nMessageUtil.get("i18n.failed_to_get_changed_file_list_skip_diff.92b7"),
+                    I18nMessageUtil.get("i18n.no_file_changes_between_commits.48ed"), repositoryLastCommitId, result[0]);
+            }
+        }
+        taskData.repositoryLastCommitId = result[0];
+        taskData.repositoryLastCommitMsg = msg;
+        logRecorder.system(msg);
+        return null;
+    }
+
+    /**
+     * 拉取 svn 仓库（版本号比对、差异构建判定）
+     *
+     * @param repositoryModel        仓库配置
+     * @param repositoryLastCommitId 上次构建的版本号
+     * @param checkRepositoryDiff    是否判断代码变动
+     * @return 错误信息；null 表示成功
+     */
+    private String pullSvn(RepositoryModel repositoryModel, String repositoryLastCommitId, Boolean checkRepositoryDiff) throws Exception {
+        Map<String, Object> map = repositoryModel.toMap();
+        IPlugin plugin = PluginFactory.getPlugin("svn-clone");
+        String[] result = (String[]) plugin.execute(gitFile, map);
+        String msg = ArrayUtil.get(result, 1);
+        // 判断版本号和上次构建是否一致
+        if (checkRepositoryDiff != null && checkRepositoryDiff) {
+            if (StrUtil.equals(repositoryLastCommitId, result[0])) {
+                // 如果一致，则不构建
+                String format = StrUtil.format(I18nMessageUtil.get("i18n.no_changes_in_repository_code.b1aa"), result[0]);
+                logRecorder.systemError(format);
+                throw new DiyInterruptException(format);
+            }
+            if (StrUtil.isNotEmpty(repositoryLastCommitId)) {
+                List<String> changedFiles = getSvnChangedFiles(map, repositoryLastCommitId, result[0]);
+                this.applyPathFilters(changedFiles, I18nMessageUtil.get("i18n.failed_to_get_svn_changed_file_list_skip_diff.1886"),
+                    I18nMessageUtil.get("i18n.no_file_changes_between_revisions.3aa2"), repositoryLastCommitId, result[0]);
+            }
+        }
+        taskData.repositoryLastCommitId = result[0];
+        taskData.repositoryLastCommitMsg = msg;
+        logRecorder.system(msg);
+        return null;
+    }
+
+    /**
+     * 差异构建的路径规则判定（git/svn 共用，避免两份复制逻辑）
+     *
+     * @param changedFiles   变更文件列表（null 表示取不到，跳过判定）
+     * @param fetchFailedMsg 取不到变更列表时的提示
+     * @param noChangeMsg    无任何文件变更时的提示
+     * @param oldRevision    上次版本
+     * @param newRevision    本次版本
+     */
+    private void applyPathFilters(List<String> changedFiles, String fetchFailedMsg, String noChangeMsg,
+                                  String oldRevision, String newRevision) {
+        String includePath = buildExtraModule.getDiffIncludePath();
+        String excludePath = buildExtraModule.getDiffExcludePath();
+        if (StrUtil.isEmpty(includePath) && StrUtil.isEmpty(excludePath)) {
+            return;
+        }
+        if (changedFiles == null) {
+            logRecorder.system(fetchFailedMsg);
+            return;
+        }
+        if (changedFiles.isEmpty()) {
+            String format = StrUtil.format(noChangeMsg, oldRevision, newRevision);
+            logRecorder.systemError(format);
+            throw new DiyInterruptException(format);
+        }
+        boolean matched = changedFiles.stream().anyMatch(f -> AntPathUtil.matchDiffPath(f, includePath, excludePath));
+        if (!matched) {
+            String format = StrUtil.format(I18nMessageUtil.get("i18n.changed_files_outside_watch_scope.b21c"),
+                includePath, excludePath, CollUtil.join(changedFiles, ", "));
+            logRecorder.systemError(format);
+            throw new DiyInterruptException(format);
+        }
+        logRecorder.system(I18nMessageUtil.get("i18n.changed_files_matching_path_rules.d17c"),
+            changedFiles.stream()
+                .filter(f -> AntPathUtil.matchDiffPath(f, includePath, excludePath))
+                .collect(Collectors.joining(", ")));
+    }
+
+    /**
+     * 追加 .env 一类的附加环境变量
+     */
+    private void appendAttachEnv() {
         String attachEnv = this.buildExtraModule.getAttachEnv();
         Opt.ofBlankAble(attachEnv).ifPresent(s -> {
             UrlQuery of = UrlQuery.of(attachEnv, CharsetUtil.CHARSET_UTF_8);
@@ -601,9 +712,6 @@ public class BuildExecuteManage implements Runnable {
             Map<String, String> envFileMap = FileUtils.readEnvFile(this.gitFile, s);
             taskData.environmentMapBuilder.putStr(envFileMap);
         });
-        // 输出环境变量
-        taskData.environmentMapBuilder.eachStr(logRecorder::system);
-        return null;
     }
 
     /**
@@ -749,16 +857,20 @@ public class BuildExecuteManage implements Runnable {
                         if (StrUtil.equals(execMode, "apache_exec")) {
                             return ApacheExecUtil.exec(this.logId, file, this.gitFile, environment, StrUtil.EMPTY, logRecorder);
                         } else {
-                            return CommandUtil.execWaitFor(file, this.gitFile, environment, StrUtil.EMPTY, (s, process) -> {
-                                BuildExecuteManage.this.process = process;
-                                logRecorder.info(s);
-                            });
+                            // 进程启动即登记：无输出命令（sleep 等）也必须能拿到句柄，否则取消杀不到
+                            return CommandUtil.execWaitFor(file, this.gitFile, environment, StrUtil.EMPTY,
+                                (s, process) -> logRecorder.info(s),
+                                process -> {
+                                    BuildExecuteManage.this.process = process;
+                                    Optional.ofNullable(this.executionHandle).ifPresent(handle -> handle.attachProcess(process));
+                                });
                         }
                     } catch (IOException | InterruptedException e) {
                         throw Lombok.sneakyThrow(e);
                     }
                 });
             BuildExecuteManage.this.process = null;
+            Optional.ofNullable(this.executionHandle).ifPresent(ExecutionRegistry.Handle::detachProcess);
             logRecorder.system(I18nMessageUtil.get("i18n.script_exit_code.716e"), waitFor);
             // 判断是否为严格执行
             if (buildExtraModule.strictlyEnforce()) {
@@ -779,7 +891,8 @@ public class BuildExecuteManage implements Runnable {
      *
      * @return 最终脚本内容；未配置构建命令时返回 null
      */
-    String preparedScript() {
+    @Override
+    public String preparedScript() {
         BuildInfoModel buildInfoModel = taskData.buildInfoModel;
         String script = buildInfoModel.getScript();
         if (StrUtil.isEmpty(script)) {
@@ -806,15 +919,21 @@ public class BuildExecuteManage implements Runnable {
      *
      * @param desc 取消原因
      */
-    void localCancel(String desc) {
-        CommandUtil.kill(process);
+    boolean localCancel(String desc) {
+        boolean buildStopped = ProcessTree.kill(process).isSuccess();
         ApacheExecUtil.kill(this.logId);
+        return buildStopped && !isProcessAlive(process);
+    }
+
+    private static boolean isProcessAlive(Process process) {
+        return process != null && process.isAlive();
     }
 
     /**
      * 产物为 ant 通配模式时，历史记录与本地构建保持一致，把结果目录改写为根目录
      */
-    void updateResultDirToRoot() {
+    @Override
+    public void updateResultDirToRoot() {
         dbBuildHistoryLogService.updateResultDirFile(this.logId, StrUtil.SLASH);
         taskData.buildInfoModel.setResultDirFile(StrUtil.SLASH);
         this.buildExtraModule.setResultDirFile(StrUtil.SLASH);
@@ -865,6 +984,8 @@ public class BuildExecuteManage implements Runnable {
             .logId(logId)
             .buildEnv(taskData.environmentMapBuilder)
             .logRecorder(logRecorder)
+            // 发布命令的进程必须登记，否则「发布中」取消不到（历史 bug）
+            .processListener(process -> Optional.ofNullable(this.executionHandle).ifPresent(handle -> handle.attachProcess(process)))
             .build();
         try {
             return releaseManage.start(resultFileSize -> taskData.resultFileSize = resultFileSize, buildInfoModel);
@@ -992,36 +1113,77 @@ public class BuildExecuteManage implements Runnable {
 
     public void runTask() {
         currentThread = Thread.currentThread();
-        logRecorder.system(I18nMessageUtil.get("i18n.start_executing_build_task.a5ac"), StringUtil.formatBetween(SystemClock.now() - submitTaskTime, BetweenFormatter.Level.MILLISECOND));
-
-        // 判断任务是否被取消
-        BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(this.logId);
-        if (buildHistoryLog == null) {
-            logRecorder.systemError(I18nMessageUtil.get("i18n.build_record_lost.f6a2"));
+        String runBuildId = taskData.buildInfoModel.getId();
+        if (cancelledBeforeStart(runBuildId)) {
             return;
         }
-        if (buildHistoryLog.getStatus() == null || buildHistoryLog.getStatus() == BuildStatus.Cancel.getCode()) {
-            logRecorder.systemError(I18nMessageUtil.get("i18n.build_status_abnormal.8ca1"));
+        logRecorder.system(I18nMessageUtil.get("i18n.start_executing_build_task.a5ac"), StringUtil.formatBetween(SystemClock.now() - submitTaskTime, BetweenFormatter.Level.MILLISECOND));
+        if (!historyRecordUsable()) {
             return;
         }
         BuildInfoModel buildInfoModel = this.taskData.buildInfoModel;
         buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Ing, I18nMessageUtil.get("i18n.start_building_with_thread_execution.83cd"));
-        //
-        Map<String, IProcessItem> processItemMap = this.createProcess();
-        // 依次执行流程，发生异常结束整个流程
-        String processName = StrUtil.EMPTY;
+        // 系统触发构建没有登录用户，用空用户上下文（避免取到上一个线程的用户）
+        BaseServerController.resetInfo(taskData.triggerBuildType == 2 ? UserModel.EMPTY : taskData.userModel);
         long startTime = SystemClock.now();
-        if (taskData.triggerBuildType == 2) {
-            // 系统触发构建
-            BaseServerController.resetInfo(UserModel.EMPTY);
-        } else {
-            BaseServerController.resetInfo(taskData.userModel);
+        try {
+            this.executeStages(buildInfoModel);
+        } finally {
+            this.finishRun(startTime);
         }
+    }
 
+    /**
+     * 起跑前二次校验取消意图：排队期间被取消的任务不允许再进入任何阶段
+     *
+     * @param buildId 构建 ID
+     * @return true 表示已取消并已收口（调用方直接返回）
+     */
+    private boolean cancelledBeforeStart(String buildId) {
+        if (!ExecutionRegistry.isCancelRequested(buildId)) {
+            return false;
+        }
+        String msg = I18nMessageUtil.get("i18n.manual_cancel.8464");
+        logRecorder.system(msg);
+        buildExecuteService.updateStatus(buildId, logId, taskData.buildInfoModel.getBuildId(), BuildStatus.Cancel, msg);
+        ExecutionRegistry.unregister(buildId);
+        IoUtil.close(logRecorder);
+        return true;
+    }
+
+    /**
+     * 历史记录可用性校验（记录丢失 / 已被取消时不再执行）
+     *
+     * @return true 可以继续执行
+     */
+    private boolean historyRecordUsable() {
+        BuildHistoryLog buildHistoryLog = dbBuildHistoryLogService.getByKey(this.logId);
+        if (buildHistoryLog == null) {
+            logRecorder.systemError(I18nMessageUtil.get("i18n.build_record_lost.f6a2"));
+            return false;
+        }
+        if (buildHistoryLog.getStatus() == null || buildHistoryLog.getStatus() == BuildStatus.Cancel.getCode()) {
+            logRecorder.systemError(I18nMessageUtil.get("i18n.build_status_abnormal.8ca1"));
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 依次执行各阶段；任一阶段返回错误或抛异常即结束整个流程
+     *
+     * @param buildInfoModel 构建信息
+     */
+    private void executeStages(BuildInfoModel buildInfoModel) {
+        Map<String, IProcessItem> processItemMap = this.createProcess();
+        String processName = StrUtil.EMPTY;
         try {
             boolean stop = false;
             for (Map.Entry<String, IProcessItem> stringSupplierEntry : processItemMap.entrySet()) {
                 processName = stringSupplierEntry.getKey();
+                if (this.executionHandle != null) {
+                    this.executionHandle.stage(processName);
+                }
                 IProcessItem processItem = stringSupplierEntry.getValue();
                 //
                 long processItemStartTime = SystemClock.now();
@@ -1068,13 +1230,22 @@ public class BuildExecuteManage implements Runnable {
             buildExecuteService.updateStatus(buildInfoModel.getId(), this.logId, buildInfoModel.getBuildId(), BuildStatus.Error, e.getMessage());
             logRecorder.error(I18nMessageUtil.get("i18n.build_failed.a79a") + processName, e);
             this.asyncWebHooks("error", "process", processName, "statusMsg", e.getMessage());
-        } finally {
-            this.clearResources();
-            logRecorder.system(I18nMessageUtil.get("i18n.build_finished_duration.7f7c"), StringUtil.formatBetween(SystemClock.now() - startTime, BetweenFormatter.Level.MILLISECOND));
-            this.asyncWebHooks("done");
-            IoUtil.close(logRecorder);
-            BaseServerController.removeAll();
         }
+    }
+
+    /**
+     * 收尾：清理资源、记录耗时、注销执行体登记
+     *
+     * @param startTime 开始时间
+     */
+    private void finishRun(long startTime) {
+        this.clearResources();
+        logRecorder.system(I18nMessageUtil.get("i18n.build_finished_duration.7f7c"), StringUtil.formatBetween(SystemClock.now() - startTime, BetweenFormatter.Level.MILLISECOND));
+        this.asyncWebHooks("done");
+        IoUtil.close(logRecorder);
+        BaseServerController.removeAll();
+        Optional.ofNullable(this.executionHandle).ifPresent(ExecutionRegistry.Handle::stop);
+        ExecutionRegistry.unregister(taskData.buildInfoModel.getId());
     }
 
     public void run() {
