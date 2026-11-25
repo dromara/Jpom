@@ -3077,6 +3077,7 @@
   "i18n_pipeline_stage_title": "階段編排",
   "i18n_pipeline_stage_add": "新增階段",
   "i18n_pipeline_stage_config": "階段配置",
+  "i18n_pipeline_config_splitter_tip": "拖動可調整階段配置寬度，雙擊分割線復位",
   "i18n_pipeline_stage_empty": "還沒有階段",
   "i18n_pipeline_stage_select_tip": "點擊畫布節點後進行配置",
   "i18n_pipeline_stage_collapse": "收起配置",
@@ -3249,5 +3250,7 @@
   "i18n_pipeline_event_script_duration": "耗時 {duration}ms",
   "i18n_pipeline_event_webhook_ok": "成功",
   "i18n_pipeline_event_webhook_fail": "失敗",
-  "i18n_pipeline_hook_event_all": "全部事件（含以後新增）"
+  "i18n_pipeline_hook_event_all": "全部事件（含以後新增）",
+  "i18n_pipeline_canvas_expand": "展開階段編排",
+  "i18n_pipeline_canvas_collapse": "收起階段編排"
 }

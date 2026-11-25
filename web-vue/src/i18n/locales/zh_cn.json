@@ -3077,6 +3077,7 @@
   "i18n_pipeline_stage_title": "阶段编排",
   "i18n_pipeline_stage_add": "添加阶段",
   "i18n_pipeline_stage_config": "阶段配置",
+  "i18n_pipeline_config_splitter_tip": "拖动可调整阶段配置宽度，双击分割线复位",
   "i18n_pipeline_stage_empty": "还没有阶段",
   "i18n_pipeline_stage_select_tip": "点击画布节点后进行配置",
   "i18n_pipeline_stage_collapse": "收起配置",
@@ -3249,5 +3250,7 @@
   "i18n_pipeline_event_script_duration": "耗时 {duration}ms",
   "i18n_pipeline_event_webhook_ok": "成功",
   "i18n_pipeline_event_webhook_fail": "失败",
-  "i18n_pipeline_hook_event_all": "全部事件（含以后新增）"
+  "i18n_pipeline_hook_event_all": "全部事件（含以后新增）",
+  "i18n_pipeline_canvas_expand": "展开阶段编排",
+  "i18n_pipeline_canvas_collapse": "收起阶段编排"
 }

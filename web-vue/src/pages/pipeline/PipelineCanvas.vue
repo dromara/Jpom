@@ -91,6 +91,33 @@ export default {
   },
   mounted() {
     this.render()
+    // 面板折叠、拖拽分割线、改窗口都会让画布尺寸突变：尺寸稳定后重新 fitView，
+    // 否则节点会停在旧视口位置（甚至跑到可视区外）。
+    if (typeof ResizeObserver !== 'undefined') {
+      let timer = null
+      let lastWidth = 0
+      let lastHeight = 0
+      this.resizeObserver = new ResizeObserver((entries) => {
+        const rect = entries[0] && entries[0].contentRect
+        if (!rect) {
+          return
+        }
+        if (Math.abs(rect.width - lastWidth) < 24 && Math.abs(rect.height - lastHeight) < 24) {
+          return
+        }
+        lastWidth = rect.width
+        lastHeight = rect.height
+        clearTimeout(timer)
+        timer = setTimeout(() => this.fitView(), 180)
+      })
+      this.resizeObserver.observe(this.$el)
+    }
+  },
+  beforeUnmount() {
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect()
+      this.resizeObserver = null
+    }
   },
   methods: {
     typeText(type) {

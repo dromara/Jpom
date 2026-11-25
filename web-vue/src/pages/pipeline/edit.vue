@@ -127,8 +127,579 @@
 
       </div>
 
-      <!-- 步骤 2：事件通知（Hooks） -->
-      <div v-show="stepsCurrent === 1" data-testid="pipeline-step-hooks">
+      <!-- 步骤 2：阶段编排 + 配置 -->
+      <div v-show="stepsCurrent === 1" class="step-pane step-pane-stages" data-testid="pipeline-step-stages">
+      <div ref="stageLayout" class="stage-layout block">
+        <a-card
+          v-show="!canvasCollapsed"
+          :title="$t('i18n_pipeline_stage_title')"
+          size="small"
+          class="stage-canvas-card"
+        >
+            <template #extra>
+              <a-space>
+                <a-dropdown trigger="click">
+                  <a-button type="primary" data-testid="pipeline-add-stage">
+                    <PlusOutlined />
+                    {{ $t('i18n_pipeline_stage_add') }}
+                  </a-button>
+                  <template #overlay>
+                    <a-menu @click="({ key }) => addStage(key)">
+                      <a-menu-item key="BUILD">{{ $t('i18n_pipeline_stage_type_build') }}</a-menu-item>
+                      <a-menu-item key="COMMAND">{{ $t('i18n_pipeline_stage_type_command') }}</a-menu-item>
+                      <a-menu-item key="RELEASE">{{ $t('i18n_pipeline_stage_type_release') }}</a-menu-item>
+                      <a-menu-item key="NOTIFY">{{ $t('i18n_pipeline_stage_type_notify') }}</a-menu-item>
+                    </a-menu>
+                  </template>
+                </a-dropdown>
+                <a-tooltip :title="configCollapsed ? $t('i18n_pipeline_stage_expand') : $t('i18n_pipeline_stage_collapse')">
+                  <a-button data-testid="pipeline-config-toggle" @click="configCollapsed = !configCollapsed">
+                    <MenuUnfoldOutlined v-if="configCollapsed" />
+                    <MenuFoldOutlined v-else />
+                  </a-button>
+                </a-tooltip>
+              </a-space>
+            </template>
+            <div class="canvas-wrap">
+              <PipelineCanvas
+                v-if="stages.length"
+                :stages="stages"
+                :selected="selectedIndex"
+                @select="(index) => (selectedIndex = index)"
+                @reorder="onReorder"
+              />
+              <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="$t('i18n_pipeline_stage_empty')">
+                <a-button type="primary" @click="addStage('BUILD')">{{ $t('i18n_pipeline_stage_add') }}</a-button>
+              </a-empty>
+            </div>
+            <div class="canvas-tip">{{ $t('i18n_pipeline_canvas_tip') }}</div>
+          </a-card>
+        <!-- 可拖拽分割线：拖拽改宽、双击复位；两侧按钮分别折叠/展开「阶段编排」「阶段配置」 -->
+        <div
+          class="stage-splitter"
+          :title="$t('i18n_pipeline_config_splitter_tip')"
+          data-testid="pipeline-config-splitter"
+          @mousedown.prevent="startResizeConfig"
+          @dblclick="resetConfigWidth"
+        >
+          <button
+            type="button"
+            class="stage-splitter-btn"
+            :title="canvasCollapsed ? $t('i18n_pipeline_canvas_expand') : $t('i18n_pipeline_canvas_collapse')"
+            data-testid="pipeline-toggle-canvas"
+            @mousedown.stop.prevent
+            @click.stop.prevent="toggleCanvas"
+          >
+            <MenuUnfoldOutlined v-if="canvasCollapsed" />
+            <MenuFoldOutlined v-else />
+          </button>
+          <span class="stage-splitter-bar"></span>
+          <button
+            type="button"
+            class="stage-splitter-btn"
+            :title="configCollapsed ? $t('i18n_pipeline_stage_expand') : $t('i18n_pipeline_stage_collapse')"
+            data-testid="pipeline-toggle-config"
+            @mousedown.stop.prevent
+            @click.stop.prevent="toggleConfig"
+          >
+            <MenuUnfoldOutlined v-if="configCollapsed" />
+            <MenuFoldOutlined v-else />
+          </button>
+        </div>
+        <a-card
+          v-show="!configCollapsed"
+          :title="$t('i18n_pipeline_stage_config')"
+          size="small"
+          class="stage-config-card"
+          :style="configCardStyle"
+        >
+            <template #extra>
+              <a-space v-if="current && current.id">
+                <a-button :disabled="selectedIndex <= 0" @click="moveStage(-1)">{{ $t('i18n_315eacd193') }}</a-button>
+                <a-button :disabled="selectedIndex >= stages.length - 1" @click="moveStage(1)">{{ $t('i18n_17acd250da') }}</a-button>
+                <a-popconfirm :title="$t('i18n_pipeline_stage_remove_confirm')" @confirm="removeStage(selectedIndex)">
+                  <a-button danger>{{ $t('i18n_2f4aaddde3') }}</a-button>
+                </a-popconfirm>
+              </a-space>
+            </template>
+            <a-empty v-if="!current || !current.id" :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="$t('i18n_pipeline_stage_select_tip')" />
+            <a-form v-else layout="horizontal" :label-col="{ span: 7 }" :wrapper-col="{ span: 17 }" class="stage-form">
+              <a-row :gutter="8">
+                <a-col :span="24">
+                  <a-form-item :label="$t('i18n_pipeline_stage_name')">
+                    <a-input
+                      v-model:value="current.name"
+                      data-testid="pipeline-stage-name"
+                      :max-length="50"
+                      :placeholder="$t('i18n_pipeline_stage_name_placeholder')"
+                    />
+                  </a-form-item>
+                </a-col>
+                <a-col :span="24">
+                  <a-form-item :label="$t('i18n_pipeline_stage_key')">
+                    <a-input v-model:value="current.id" :max-length="40" :placeholder="$t('i18n_pipeline_stage_key_placeholder')" />
+                  </a-form-item>
+                </a-col>
+                <a-col :span="24">
+                  <a-form-item :label="$t('i18n_pipeline_stage_enabled')">
+                    <a-switch v-model:checked="current.enabled" />
+                  </a-form-item>
+                </a-col>
+                <a-col :span="24">
+                  <a-form-item :label="$t('i18n_pipeline_stage_fail_fast')">
+                    <a-radio-group v-model:value="current.failFast">
+                      <a-radio :value="true">{{ $t('i18n_pipeline_stage_fail_fast_on') }}</a-radio>
+                      <a-radio :value="false">{{ $t('i18n_pipeline_stage_fail_fast_off') }}</a-radio>
+                    </a-radio-group>
+                  </a-form-item>
+                </a-col>
+              </a-row>
+
+              <a-form-item :label="$t('i18n_pipeline_env_vars')">
+                <a-space wrap>
+                  <a-popover trigger="click" placement="rightTop" :title="$t('i18n_pipeline_env_vars')">
+                    <template #content>
+                      <a-table
+                        size="small"
+                        bordered
+                        :pagination="false"
+                        row-key="name"
+                        :columns="envVarColumns"
+                        :data-source="envVariableList"
+                        :scroll="{ x: 520 }"
+                        class="env-var-table"
+                      />
+                    </template>
+                    <a-button type="link" size="small">
+                      <InfoCircleOutlined />
+                      {{ $t('i18n_pipeline_env_vars_view') }}
+                    </a-button>
+                  </a-popover>
+                  <span class="field-tip">{{ $t('i18n_pipeline_env_vars_tip') }}</span>
+                </a-space>
+              </a-form-item>
+
+              <!-- 构建 / 命令 -->
+              <template v-if="current.type === 'BUILD' || current.type === 'COMMAND'">
+                <a-divider orientation="left">{{ $t('i18n_17a74824de') }}</a-divider>
+                <a-form-item :label="$t('i18n_pipeline_executor')">
+                  <a-radio-group v-model:value="current.executor">
+                    <a-radio value="local">{{ $t('i18n_pipeline_executor_local') }}</a-radio>
+                    <a-radio value="container">{{ $t('i18n_pipeline_executor_container') }}</a-radio>
+                    <a-radio value="node">{{ $t('i18n_pipeline_executor_node') }}</a-radio>
+                  </a-radio-group>
+                </a-form-item>
+                <a-form-item v-if="current.executor === 'container'" :label="$t('i18n_3477228591')">
+                  <a-auto-complete
+                    v-model:value="current.image"
+                    :options="dockerTagOptions"
+                    :placeholder="$t('i18n_pipeline_image_placeholder')"
+                    style="width: 100%"
+                  />
+                </a-form-item>
+                <template v-if="current.executor === 'node'">
+                  <a-form-item :label="$t('i18n_pipeline_build_node')">
+                    <a-select
+                      v-model:value="current.nodeId"
+                      show-search
+                      option-filter-prop="label"
+                      :options="nodeOptions"
+                      :placeholder="$t('i18n_pipeline_build_node')"
+                    />
+                  </a-form-item>
+                  <a-form-item :label="$t('i18n_pipeline_build_repo')">
+                    <a-select
+                      v-model:value="current.repoId"
+                      style="width: 100%"
+                      show-search
+                      option-filter-prop="label"
+                      :options="repoOptions"
+                      :placeholder="$t('i18n_pipeline_repo_placeholder')"
+                      @change="() => onRepoChange(current)"
+                    />
+                  </a-form-item>
+                  <a-form-item :label="$t('i18n_pipeline_ref')">
+                    <a-row :gutter="8">
+                      <a-col :span="9">
+                        <a-select v-model:value="current.refType" style="width: 100%" :options="refTypeOptions" />
+                      </a-col>
+                      <a-col :span="15">
+                        <a-select
+                          v-model:value="current.refName"
+                          style="width: 100%"
+                          show-search
+                          allow-clear
+                          :disabled="!current.repoId"
+                          :options="refOptions(current)"
+                          :loading="!!branchLoading[current.repoId]"
+                          :placeholder="current.repoId ? $t('i18n_pipeline_ref_placeholder') : $t('i18n_pipeline_ref_need_repo')"
+                        />
+                      </a-col>
+                    </a-row>
+                  </a-form-item>
+                  <a-form-item :label="$t('i18n_c972010694')">
+                    <a-input v-model:value="current.resultDirFile" :placeholder="$t('i18n_pipeline_result_dir_placeholder')" />
+                  </a-form-item>
+                </template>
+                <a-form-item v-else :label="$t('i18n_pipeline_work_dir')">
+                  <a-select
+                    v-model:value="current.cwd"
+                    style="width: 100%"
+                    allow-clear
+                    show-search
+                    :options="workDirOptions"
+                    :placeholder="$t('i18n_pipeline_work_dir_placeholder')"
+                  />
+                  <div class="field-tip">{{ $t('i18n_pipeline_work_dir_tip') }}</div>
+                </a-form-item>
+                <a-form-item :label="$t('i18n_c2ee58c247')">
+                  <code-editor
+                    v-model:content="current.run"
+                    :show-tool="false"
+                    :options="{ mode: 'shell' }"
+                    height="clamp(180px, 34vh, 420px)"
+                    :placeholder="$t('i18n_pipeline_command_placeholder')"
+                  />
+                </a-form-item>
+                <a-form-item v-if="current.type === 'BUILD'" :label="$t('i18n_c972010694')">
+                  <a-select
+                    v-model:value="current.outputs"
+                    mode="tags"
+                    :open="false"
+                    :placeholder="$t('i18n_pipeline_outputs_placeholder')"
+                    style="width: 100%"
+                  />
+                </a-form-item>
+                <a-form-item :label="$t('i18n_3867e350eb')">
+                  <a-textarea
+                    v-model:value="current.env"
+                    :auto-size="{ minRows: 3, maxRows: 8 }"
+                    :placeholder="$t('i18n_pipeline_env_placeholder')"
+                  />
+                </a-form-item>
+              </template>
+
+              <!-- 发布 -->
+              <template v-if="current.type === 'RELEASE'">
+                <a-divider orientation="left">{{ $t('i18n_f98994f7ec') }}</a-divider>
+                <a-form-item :label="$t('i18n_pipeline_release_from')">
+                  <a-select
+                    v-model:value="current.from"
+                    allow-clear
+                    :options="artifactStageOptions"
+                    :placeholder="$t('i18n_pipeline_release_from_tip')"
+                  />
+                </a-form-item>
+                <a-form-item :label="$t('i18n_pipeline_release_strategy')">
+                  <a-radio-group v-model:value="current.parallel">
+                    <a-radio :value="false">{{ $t('i18n_pipeline_release_seq') }}</a-radio>
+                    <a-radio :value="true">{{ $t('i18n_pipeline_release_parallel_label') }}</a-radio>
+                  </a-radio-group>
+                </a-form-item>
+                <a-form-item :label="$t('i18n_pipeline_release_strict')">
+                  <a-switch v-model:checked="current.strictlyEnforce" />
+                </a-form-item>
+                <a-form-item :label="$t('i18n_pipeline_release_exclude')">
+                  <a-input
+                    v-model:value="current.excludeReleaseAnt"
+                    :placeholder="$t('i18n_pipeline_release_exclude_tip')"
+                  />
+                </a-form-item>
+                <a-form-item :label="$t('i18n_pipeline_release_targets')">
+                  <div class="target-list">
+                    <div v-for="(target, ti) in current.targets" :key="ti" class="target-card">
+                      <div class="target-head">
+                        <a-select
+                          v-model:value="target.method"
+                          style="width: 160px"
+                          :options="methodOptions"
+                          :data-testid="'pipeline-target-method-' + ti"
+                          @change="() => onTargetMethodChange(target)"
+                        />
+                        <a-button type="text" danger @click="removeTarget(ti)">
+                          <DeleteOutlined />
+                        </a-button>
+                      </div>
+                      <div class="target-form">
+                        <!-- 节点分发 -->
+                        <template v-if="target.method === 1">
+                          <a-form-item :label="$t('i18n_pipeline_target_dispatch')">
+                            <a-select
+                              v-model:value="target.targetId"
+                              show-search
+                              option-filter-prop="label"
+                              :options="dispatchOptions"
+                              :placeholder="$t('i18n_pipeline_target_dispatch')"
+                            />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_pipeline_target_secondary_dir')">
+                            <a-input v-model:value="target.secondaryDirectory" :placeholder="$t('i18n_pipeline_secondary_dir_placeholder')" />
+                          </a-form-item>
+                        </template>
+                        <!-- 项目 -->
+                        <template v-if="target.method === 2">
+                          <a-form-item :label="$t('i18n_3bf3c0a8d6')">
+                            <a-select
+                              v-model:value="target.nodeId"
+                              show-search
+                              option-filter-prop="label"
+                              :options="nodeOptions"
+                              :placeholder="$t('i18n_pipeline_build_node')"
+                              @change="() => loadProjects(target)"
+                            />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_31ecc0e65b')">
+                            <a-select
+                              v-model:value="target.projectId"
+                              show-search
+                              option-filter-prop="label"
+                              :options="projectOptions(target)"
+                              :placeholder="$t('i18n_31ecc0e65b')"
+                              :data-testid="'pipeline-target-project-' + ti"
+                            />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_pipeline_target_project_after_opt')">
+                            <a-select
+                              v-model:value="target.afterOpt"
+                              :options="afterOptOptions"
+                              :placeholder="$t('i18n_pipeline_after_opt_placeholder')"
+                            />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_pipeline_target_secondary_dir')">
+                            <a-input v-model:value="target.secondaryDirectory" :placeholder="$t('i18n_pipeline_secondary_dir_placeholder')" />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_pipeline_target_clear_old')">
+                            <a-switch v-model:checked="target.clearOld" />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_pipeline_target_diff_sync')">
+                            <a-switch v-model:checked="target.diffSync" :disabled="!target.clearOld" />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_pipeline_target_close_first')">
+                            <a-switch v-model:checked="target.closeFirst" />
+                          </a-form-item>
+                        </template>
+                        <!-- SSH -->
+                        <template v-if="target.method === 3">
+                          <a-form-item :label="$t('i18n_pipeline_target_ssh')">
+                            <a-select
+                              v-model:value="target.ids"
+                              mode="multiple"
+                              show-search
+                              option-filter-prop="label"
+                              :options="sshOptions"
+                              :placeholder="$t('i18n_pipeline_target_ssh')"
+                            />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_dbb2df00cf')">
+                            <a-auto-complete
+                              v-model:value="target.releasePath"
+                              :options="sshDirOptions(target)"
+                              :placeholder="$t('i18n_pipeline_target_path_placeholder')"
+                              style="width: 100%"
+                            />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_e44f59f2d9')">
+                            <code-editor
+                              v-model:content="target.beforeCommand"
+                              :show-tool="false"
+                              :options="{ mode: 'shell' }"
+                              height="clamp(120px, 22vh, 260px)"
+                              :placeholder="$t('i18n_pipeline_before_command_placeholder')"
+                            />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_923f8d2688')">
+                            <code-editor
+                              v-model:content="target.afterCommand"
+                              :show-tool="false"
+                              :options="{ mode: 'shell' }"
+                              height="clamp(120px, 22vh, 260px)"
+                              :placeholder="$t('i18n_pipeline_after_command_placeholder')"
+                            />
+                          </a-form-item>
+                        </template>
+                        <!-- 本地命令 -->
+                        <template v-if="target.method === 4">
+                          <a-form-item :label="$t('i18n_923f8d2688')">
+                            <code-editor
+                              v-model:content="target.afterCommand"
+                              :show-tool="false"
+                              :options="{ mode: 'shell' }"
+                              height="clamp(120px, 22vh, 260px)"
+                              :placeholder="$t('i18n_pipeline_after_command_placeholder')"
+                            />
+                          </a-form-item>
+                        </template>
+                        <!-- 容器镜像 -->
+                        <template v-if="target.method === 5">
+                          <a-form-item :label="$t('i18n_pipeline_docker_from_tag')">
+                            <a-input v-model:value="target.docker.fromTag" placeholder="openjdk:8" />
+                          </a-form-item>
+                          <a-form-item label="Dockerfile">
+                            <a-input v-model:value="target.docker.dockerfile" placeholder="Dockerfile" />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_pipeline_docker_tag')">
+                            <a-input v-model:value="target.docker.dockerTag" placeholder="app:latest" />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_pipeline_docker_build_args')">
+                            <a-input v-model:value="target.docker.dockerBuildArgs" placeholder="KEY=VALUE" />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_pipeline_docker_labels')">
+                            <a-input v-model:value="target.docker.dockerImagesLabels" :placeholder="$t('i18n_pipeline_docker_labels_placeholder')" />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_pipeline_docker_network')">
+                            <a-auto-complete
+                              v-model:value="target.docker.dockerImagesNetworkMode"
+                              :options="networkOptions"
+                              :placeholder="$t('i18n_pipeline_docker_network_placeholder')"
+                            />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_pipeline_docker_swarm')">
+                            <a-select
+                              v-model:value="target.docker.dockerSwarmId"
+                              allow-clear
+                              show-search
+                              option-filter-prop="label"
+                              :options="swarmOptions"
+                              :placeholder="$t('i18n_pipeline_docker_swarm_placeholder')"
+                            />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_pipeline_docker_service')">
+                            <a-input v-model:value="target.docker.dockerSwarmServiceName" :placeholder="$t('i18n_pipeline_docker_service_placeholder')" />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_pipeline_docker_push')">
+                            <a-switch v-model:checked="target.docker.pushToRepository" />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_pipeline_docker_push_after_delete')">
+                            <a-switch
+                              v-model:checked="target.docker.pushToRepositoryAfterDelete"
+                              :disabled="!target.docker.pushToRepository"
+                            />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_pipeline_docker_pull')">
+                            <a-switch v-model:checked="target.docker.dockerBuildPull" />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_pipeline_docker_no_cache')">
+                            <a-switch v-model:checked="target.docker.dockerNoCache" />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_pipeline_docker_tag_increment')">
+                            <a-switch v-model:checked="target.docker.dockerTagIncrement" />
+                          </a-form-item>
+                        </template>
+                        <!-- FTP -->
+                        <template v-if="target.method === 6">
+                          <a-form-item :label="$t('i18n_pipeline_target_ftp')">
+                            <a-select
+                              v-model:value="target.ids"
+                              mode="multiple"
+                              show-search
+                              option-filter-prop="label"
+                              :options="ftpOptions"
+                              :placeholder="$t('i18n_pipeline_target_ftp')"
+                            />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_dbb2df00cf')">
+                            <a-auto-complete
+                              v-model:value="target.releaseFtpPath"
+                              :options="ftpDirOptions(target)"
+                              :placeholder="$t('i18n_pipeline_target_path_placeholder')"
+                              style="width: 100%"
+                            />
+                          </a-form-item>
+                        </template>
+                        <!-- SSH 项目 -->
+                        <template v-if="target.method === 7">
+                          <a-form-item :label="$t('i18n_8215da30b4')">
+                            <a-select
+                              v-model:value="target.ids"
+                              mode="multiple"
+                              show-search
+                              option-filter-prop="label"
+                              :options="sshProjectOptions"
+                              :placeholder="$t('i18n_8215da30b4')"
+                            />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_923f8d2688')">
+                            <code-editor
+                              v-model:content="target.afterCommand"
+                              :show-tool="false"
+                              :options="{ mode: 'shell' }"
+                              height="clamp(120px, 22vh, 260px)"
+                              :placeholder="$t('i18n_pipeline_after_command_placeholder')"
+                            />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_pipeline_target_clear_old')">
+                            <a-switch v-model:checked="target.clearOld" />
+                          </a-form-item>
+                        </template>
+                        <!-- 文件中心 -->
+                        <template v-if="target.method === 8">
+                          <a-form-item :label="$t('i18n_pipeline_target_keep_day')">
+                            <a-input-number
+                              v-model:value="target.fileStorageKeepDay"
+                              style="width: 100%"
+                              :min="1"
+                              :precision="0"
+                              allow-clear
+                              :placeholder="$t('i18n_pipeline_target_keep_day_placeholder')"
+                              :data-testid="'pipeline-target-keep-day-' + ti"
+                            />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_pipeline_target_alias_code')">
+                            <a-input
+                              v-model:value="target.aliasCode"
+                              :max-length="50"
+                              :placeholder="$t('i18n_pipeline_target_alias_code_placeholder')"
+                              :data-testid="'pipeline-target-alias-code-' + ti"
+                            />
+                          </a-form-item>
+                          <div class="field-tip">{{ $t('i18n_pipeline_target_file_storage_tip') }}</div>
+                        </template>
+                      </div>
+                    </div>
+                    <a-button type="dashed" block data-testid="pipeline-add-target" @click="addTarget">
+                      <PlusOutlined />
+                      {{ $t('i18n_pipeline_target_add') }}
+                    </a-button>
+                  </div>
+                </a-form-item>
+              </template>
+
+              <!-- 通知 -->
+              <template v-if="current.type === 'NOTIFY'">
+                <a-divider orientation="left">{{ $t('i18n_pipeline_stage_type_notify') }}</a-divider>
+                <a-form-item :label="$t('i18n_pipeline_notify_scripts')">
+                  <a-select
+                    v-model:value="current.scripts"
+                    mode="multiple"
+                    show-search
+                    option-filter-prop="label"
+                    :options="scriptOptions"
+                    :placeholder="$t('i18n_pipeline_notify_scripts')"
+                    :data-testid="'pipeline-notify-scripts'"
+                  />
+                </a-form-item>
+                <a-form-item :label="$t('i18n_pipeline_notify_event')">
+                  <a-select
+                    v-model:value="current.event"
+                    :options="eventOptions"
+                    :placeholder="$t('i18n_pipeline_notify_event_placeholder')"
+                  />
+                </a-form-item>
+              </template>
+
+              <a-alert
+                v-if="!stageValid(current)"
+                type="warning"
+                show-icon
+                class="stage-warning"
+                :message="stageInvalidReason(current)"
+              />
+            </a-form>
+        </a-card>
+      </div>
+      </div>
+      <!-- 步骤 3：事件通知（Hooks） -->
+      <div v-show="stepsCurrent === 2" data-testid="pipeline-step-hooks">
       <a-card :title="$t('i18n_pipeline_hooks_title')" size="small" class="block hooks-card">
         <div class="card-hint">{{ $t('i18n_pipeline_hooks_tip') }}</div>
 
@@ -289,538 +860,6 @@
 
       </div>
 
-      <!-- 步骤 3：阶段编排 + 配置 -->
-      <div v-show="stepsCurrent === 2" data-testid="pipeline-step-stages">
-      <a-row :gutter="8" class="block">
-        <a-col :span="configCollapsed ? 24 : 16">
-          <a-card :title="$t('i18n_pipeline_stage_title')" size="small" class="full-height">
-            <template #extra>
-              <a-space>
-                <a-dropdown trigger="click">
-                  <a-button type="primary" data-testid="pipeline-add-stage">
-                    <PlusOutlined />
-                    {{ $t('i18n_pipeline_stage_add') }}
-                  </a-button>
-                  <template #overlay>
-                    <a-menu @click="({ key }) => addStage(key)">
-                      <a-menu-item key="BUILD">{{ $t('i18n_pipeline_stage_type_build') }}</a-menu-item>
-                      <a-menu-item key="COMMAND">{{ $t('i18n_pipeline_stage_type_command') }}</a-menu-item>
-                      <a-menu-item key="RELEASE">{{ $t('i18n_pipeline_stage_type_release') }}</a-menu-item>
-                      <a-menu-item key="NOTIFY">{{ $t('i18n_pipeline_stage_type_notify') }}</a-menu-item>
-                    </a-menu>
-                  </template>
-                </a-dropdown>
-                <a-tooltip :title="configCollapsed ? $t('i18n_pipeline_stage_expand') : $t('i18n_pipeline_stage_collapse')">
-                  <a-button data-testid="pipeline-config-toggle" @click="configCollapsed = !configCollapsed">
-                    <MenuUnfoldOutlined v-if="configCollapsed" />
-                    <MenuFoldOutlined v-else />
-                  </a-button>
-                </a-tooltip>
-              </a-space>
-            </template>
-            <div class="canvas-wrap">
-              <PipelineCanvas
-                v-if="stages.length"
-                :stages="stages"
-                :selected="selectedIndex"
-                @select="(index) => (selectedIndex = index)"
-                @reorder="onReorder"
-              />
-              <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="$t('i18n_pipeline_stage_empty')">
-                <a-button type="primary" @click="addStage('BUILD')">{{ $t('i18n_pipeline_stage_add') }}</a-button>
-              </a-empty>
-            </div>
-            <div class="canvas-tip">{{ $t('i18n_pipeline_canvas_tip') }}</div>
-          </a-card>
-        </a-col>
-        <a-col v-show="!configCollapsed" :span="8">
-          <a-card :title="$t('i18n_pipeline_stage_config')" size="small" class="full-height">
-            <template #extra>
-              <a-space v-if="current && current.id">
-                <a-button :disabled="selectedIndex <= 0" @click="moveStage(-1)">{{ $t('i18n_315eacd193') }}</a-button>
-                <a-button :disabled="selectedIndex >= stages.length - 1" @click="moveStage(1)">{{ $t('i18n_17acd250da') }}</a-button>
-                <a-popconfirm :title="$t('i18n_pipeline_stage_remove_confirm')" @confirm="removeStage(selectedIndex)">
-                  <a-button danger>{{ $t('i18n_2f4aaddde3') }}</a-button>
-                </a-popconfirm>
-              </a-space>
-            </template>
-            <a-empty v-if="!current || !current.id" :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="$t('i18n_pipeline_stage_select_tip')" />
-            <a-form v-else layout="horizontal" :label-col="{ span: 7 }" :wrapper-col="{ span: 17 }" class="stage-form">
-              <a-row :gutter="8">
-                <a-col :span="24">
-                  <a-form-item :label="$t('i18n_pipeline_stage_name')">
-                    <a-input
-                      v-model:value="current.name"
-                      data-testid="pipeline-stage-name"
-                      :max-length="50"
-                      :placeholder="$t('i18n_pipeline_stage_name_placeholder')"
-                    />
-                  </a-form-item>
-                </a-col>
-                <a-col :span="24">
-                  <a-form-item :label="$t('i18n_pipeline_stage_key')">
-                    <a-input v-model:value="current.id" :max-length="40" :placeholder="$t('i18n_pipeline_stage_key_placeholder')" />
-                  </a-form-item>
-                </a-col>
-                <a-col :span="24">
-                  <a-form-item :label="$t('i18n_pipeline_stage_enabled')">
-                    <a-switch v-model:checked="current.enabled" />
-                  </a-form-item>
-                </a-col>
-                <a-col :span="24">
-                  <a-form-item :label="$t('i18n_pipeline_stage_fail_fast')">
-                    <a-radio-group v-model:value="current.failFast">
-                      <a-radio :value="true">{{ $t('i18n_pipeline_stage_fail_fast_on') }}</a-radio>
-                      <a-radio :value="false">{{ $t('i18n_pipeline_stage_fail_fast_off') }}</a-radio>
-                    </a-radio-group>
-                  </a-form-item>
-                </a-col>
-              </a-row>
-
-              <a-form-item :label="$t('i18n_pipeline_env_vars')">
-                <a-space wrap>
-                  <a-popover trigger="click" placement="rightTop" :title="$t('i18n_pipeline_env_vars')">
-                    <template #content>
-                      <a-table
-                        size="small"
-                        bordered
-                        :pagination="false"
-                        row-key="name"
-                        :columns="envVarColumns"
-                        :data-source="envVariableList"
-                        :scroll="{ x: 520 }"
-                        class="env-var-table"
-                      />
-                    </template>
-                    <a-button type="link" size="small">
-                      <InfoCircleOutlined />
-                      {{ $t('i18n_pipeline_env_vars_view') }}
-                    </a-button>
-                  </a-popover>
-                  <span class="field-tip">{{ $t('i18n_pipeline_env_vars_tip') }}</span>
-                </a-space>
-              </a-form-item>
-
-              <!-- 构建 / 命令 -->
-              <template v-if="current.type === 'BUILD' || current.type === 'COMMAND'">
-                <a-divider orientation="left">{{ $t('i18n_17a74824de') }}</a-divider>
-                <a-form-item :label="$t('i18n_pipeline_executor')">
-                  <a-radio-group v-model:value="current.executor">
-                    <a-radio value="local">{{ $t('i18n_pipeline_executor_local') }}</a-radio>
-                    <a-radio value="container">{{ $t('i18n_pipeline_executor_container') }}</a-radio>
-                    <a-radio value="node">{{ $t('i18n_pipeline_executor_node') }}</a-radio>
-                  </a-radio-group>
-                </a-form-item>
-                <a-form-item v-if="current.executor === 'container'" :label="$t('i18n_3477228591')">
-                  <a-auto-complete
-                    v-model:value="current.image"
-                    :options="dockerTagOptions"
-                    :placeholder="$t('i18n_pipeline_image_placeholder')"
-                    style="width: 100%"
-                  />
-                </a-form-item>
-                <template v-if="current.executor === 'node'">
-                  <a-form-item :label="$t('i18n_pipeline_build_node')">
-                    <a-select
-                      v-model:value="current.nodeId"
-                      show-search
-                      option-filter-prop="label"
-                      :options="nodeOptions"
-                      :placeholder="$t('i18n_pipeline_build_node')"
-                    />
-                  </a-form-item>
-                  <a-form-item :label="$t('i18n_pipeline_build_repo')">
-                    <a-select
-                      v-model:value="current.repoId"
-                      style="width: 100%"
-                      show-search
-                      option-filter-prop="label"
-                      :options="repoOptions"
-                      :placeholder="$t('i18n_pipeline_repo_placeholder')"
-                      @change="() => onRepoChange(current)"
-                    />
-                  </a-form-item>
-                  <a-form-item :label="$t('i18n_pipeline_ref')">
-                    <a-row :gutter="8">
-                      <a-col :span="9">
-                        <a-select v-model:value="current.refType" style="width: 100%" :options="refTypeOptions" />
-                      </a-col>
-                      <a-col :span="15">
-                        <a-select
-                          v-model:value="current.refName"
-                          style="width: 100%"
-                          show-search
-                          allow-clear
-                          :disabled="!current.repoId"
-                          :options="refOptions(current)"
-                          :loading="!!branchLoading[current.repoId]"
-                          :placeholder="current.repoId ? $t('i18n_pipeline_ref_placeholder') : $t('i18n_pipeline_ref_need_repo')"
-                        />
-                      </a-col>
-                    </a-row>
-                  </a-form-item>
-                  <a-form-item :label="$t('i18n_c972010694')">
-                    <a-input v-model:value="current.resultDirFile" :placeholder="$t('i18n_pipeline_result_dir_placeholder')" />
-                  </a-form-item>
-                </template>
-                <a-form-item v-else :label="$t('i18n_pipeline_work_dir')">
-                  <a-select
-                    v-model:value="current.cwd"
-                    style="width: 100%"
-                    allow-clear
-                    show-search
-                    :options="workDirOptions"
-                    :placeholder="$t('i18n_pipeline_work_dir_placeholder')"
-                  />
-                  <div class="field-tip">{{ $t('i18n_pipeline_work_dir_tip') }}</div>
-                </a-form-item>
-                <a-form-item :label="$t('i18n_c2ee58c247')">
-                  <code-editor
-                    v-model:content="current.run"
-                    :show-tool="false"
-                    :options="{ mode: 'shell' }"
-                    height="180px"
-                    :placeholder="$t('i18n_pipeline_command_placeholder')"
-                  />
-                </a-form-item>
-                <a-form-item v-if="current.type === 'BUILD'" :label="$t('i18n_c972010694')">
-                  <a-select
-                    v-model:value="current.outputs"
-                    mode="tags"
-                    :open="false"
-                    :placeholder="$t('i18n_pipeline_outputs_placeholder')"
-                    style="width: 100%"
-                  />
-                </a-form-item>
-                <a-form-item :label="$t('i18n_3867e350eb')">
-                  <a-textarea
-                    v-model:value="current.env"
-                    :auto-size="{ minRows: 3, maxRows: 8 }"
-                    :placeholder="$t('i18n_pipeline_env_placeholder')"
-                  />
-                </a-form-item>
-              </template>
-
-              <!-- 发布 -->
-              <template v-if="current.type === 'RELEASE'">
-                <a-divider orientation="left">{{ $t('i18n_f98994f7ec') }}</a-divider>
-                <a-form-item :label="$t('i18n_pipeline_release_from')">
-                  <a-select
-                    v-model:value="current.from"
-                    allow-clear
-                    :options="artifactStageOptions"
-                    :placeholder="$t('i18n_pipeline_release_from_tip')"
-                  />
-                </a-form-item>
-                <a-form-item :label="$t('i18n_pipeline_release_strategy')">
-                  <a-radio-group v-model:value="current.parallel">
-                    <a-radio :value="false">{{ $t('i18n_pipeline_release_seq') }}</a-radio>
-                    <a-radio :value="true">{{ $t('i18n_pipeline_release_parallel_label') }}</a-radio>
-                  </a-radio-group>
-                </a-form-item>
-                <a-form-item :label="$t('i18n_pipeline_release_strict')">
-                  <a-switch v-model:checked="current.strictlyEnforce" />
-                </a-form-item>
-                <a-form-item :label="$t('i18n_pipeline_release_exclude')">
-                  <a-input
-                    v-model:value="current.excludeReleaseAnt"
-                    :placeholder="$t('i18n_pipeline_release_exclude_tip')"
-                  />
-                </a-form-item>
-                <a-form-item :label="$t('i18n_pipeline_release_targets')">
-                  <div class="target-list">
-                    <div v-for="(target, ti) in current.targets" :key="ti" class="target-card">
-                      <div class="target-head">
-                        <a-select
-                          v-model:value="target.method"
-                          style="width: 160px"
-                          :options="methodOptions"
-                          :data-testid="'pipeline-target-method-' + ti"
-                          @change="() => onTargetMethodChange(target)"
-                        />
-                        <a-button type="text" danger @click="removeTarget(ti)">
-                          <DeleteOutlined />
-                        </a-button>
-                      </div>
-                      <div class="target-form">
-                        <!-- 节点分发 -->
-                        <template v-if="target.method === 1">
-                          <a-form-item :label="$t('i18n_pipeline_target_dispatch')">
-                            <a-select
-                              v-model:value="target.targetId"
-                              show-search
-                              option-filter-prop="label"
-                              :options="dispatchOptions"
-                              :placeholder="$t('i18n_pipeline_target_dispatch')"
-                            />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_pipeline_target_secondary_dir')">
-                            <a-input v-model:value="target.secondaryDirectory" :placeholder="$t('i18n_pipeline_secondary_dir_placeholder')" />
-                          </a-form-item>
-                        </template>
-                        <!-- 项目 -->
-                        <template v-if="target.method === 2">
-                          <a-form-item :label="$t('i18n_3bf3c0a8d6')">
-                            <a-select
-                              v-model:value="target.nodeId"
-                              show-search
-                              option-filter-prop="label"
-                              :options="nodeOptions"
-                              :placeholder="$t('i18n_pipeline_build_node')"
-                              @change="() => loadProjects(target)"
-                            />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_31ecc0e65b')">
-                            <a-select
-                              v-model:value="target.projectId"
-                              show-search
-                              option-filter-prop="label"
-                              :options="projectOptions(target)"
-                              :placeholder="$t('i18n_31ecc0e65b')"
-                              :data-testid="'pipeline-target-project-' + ti"
-                            />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_pipeline_target_project_after_opt')">
-                            <a-select
-                              v-model:value="target.afterOpt"
-                              :options="afterOptOptions"
-                              :placeholder="$t('i18n_pipeline_after_opt_placeholder')"
-                            />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_pipeline_target_secondary_dir')">
-                            <a-input v-model:value="target.secondaryDirectory" :placeholder="$t('i18n_pipeline_secondary_dir_placeholder')" />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_pipeline_target_clear_old')">
-                            <a-switch v-model:checked="target.clearOld" />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_pipeline_target_diff_sync')">
-                            <a-switch v-model:checked="target.diffSync" :disabled="!target.clearOld" />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_pipeline_target_close_first')">
-                            <a-switch v-model:checked="target.closeFirst" />
-                          </a-form-item>
-                        </template>
-                        <!-- SSH -->
-                        <template v-if="target.method === 3">
-                          <a-form-item :label="$t('i18n_pipeline_target_ssh')">
-                            <a-select
-                              v-model:value="target.ids"
-                              mode="multiple"
-                              show-search
-                              option-filter-prop="label"
-                              :options="sshOptions"
-                              :placeholder="$t('i18n_pipeline_target_ssh')"
-                            />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_dbb2df00cf')">
-                            <a-auto-complete
-                              v-model:value="target.releasePath"
-                              :options="sshDirOptions(target)"
-                              :placeholder="$t('i18n_pipeline_target_path_placeholder')"
-                              style="width: 100%"
-                            />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_e44f59f2d9')">
-                            <code-editor
-                              v-model:content="target.beforeCommand"
-                              :show-tool="false"
-                              :options="{ mode: 'shell' }"
-                              height="140px"
-                              :placeholder="$t('i18n_pipeline_before_command_placeholder')"
-                            />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_923f8d2688')">
-                            <code-editor
-                              v-model:content="target.afterCommand"
-                              :show-tool="false"
-                              :options="{ mode: 'shell' }"
-                              height="140px"
-                              :placeholder="$t('i18n_pipeline_after_command_placeholder')"
-                            />
-                          </a-form-item>
-                        </template>
-                        <!-- 本地命令 -->
-                        <template v-if="target.method === 4">
-                          <a-form-item :label="$t('i18n_923f8d2688')">
-                            <code-editor
-                              v-model:content="target.afterCommand"
-                              :show-tool="false"
-                              :options="{ mode: 'shell' }"
-                              height="140px"
-                              :placeholder="$t('i18n_pipeline_after_command_placeholder')"
-                            />
-                          </a-form-item>
-                        </template>
-                        <!-- 容器镜像 -->
-                        <template v-if="target.method === 5">
-                          <a-form-item :label="$t('i18n_pipeline_docker_from_tag')">
-                            <a-input v-model:value="target.docker.fromTag" placeholder="openjdk:8" />
-                          </a-form-item>
-                          <a-form-item label="Dockerfile">
-                            <a-input v-model:value="target.docker.dockerfile" placeholder="Dockerfile" />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_pipeline_docker_tag')">
-                            <a-input v-model:value="target.docker.dockerTag" placeholder="app:latest" />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_pipeline_docker_build_args')">
-                            <a-input v-model:value="target.docker.dockerBuildArgs" placeholder="KEY=VALUE" />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_pipeline_docker_labels')">
-                            <a-input v-model:value="target.docker.dockerImagesLabels" :placeholder="$t('i18n_pipeline_docker_labels_placeholder')" />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_pipeline_docker_network')">
-                            <a-auto-complete
-                              v-model:value="target.docker.dockerImagesNetworkMode"
-                              :options="networkOptions"
-                              :placeholder="$t('i18n_pipeline_docker_network_placeholder')"
-                            />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_pipeline_docker_swarm')">
-                            <a-select
-                              v-model:value="target.docker.dockerSwarmId"
-                              allow-clear
-                              show-search
-                              option-filter-prop="label"
-                              :options="swarmOptions"
-                              :placeholder="$t('i18n_pipeline_docker_swarm_placeholder')"
-                            />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_pipeline_docker_service')">
-                            <a-input v-model:value="target.docker.dockerSwarmServiceName" :placeholder="$t('i18n_pipeline_docker_service_placeholder')" />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_pipeline_docker_push')">
-                            <a-switch v-model:checked="target.docker.pushToRepository" />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_pipeline_docker_push_after_delete')">
-                            <a-switch
-                              v-model:checked="target.docker.pushToRepositoryAfterDelete"
-                              :disabled="!target.docker.pushToRepository"
-                            />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_pipeline_docker_pull')">
-                            <a-switch v-model:checked="target.docker.dockerBuildPull" />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_pipeline_docker_no_cache')">
-                            <a-switch v-model:checked="target.docker.dockerNoCache" />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_pipeline_docker_tag_increment')">
-                            <a-switch v-model:checked="target.docker.dockerTagIncrement" />
-                          </a-form-item>
-                        </template>
-                        <!-- FTP -->
-                        <template v-if="target.method === 6">
-                          <a-form-item :label="$t('i18n_pipeline_target_ftp')">
-                            <a-select
-                              v-model:value="target.ids"
-                              mode="multiple"
-                              show-search
-                              option-filter-prop="label"
-                              :options="ftpOptions"
-                              :placeholder="$t('i18n_pipeline_target_ftp')"
-                            />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_dbb2df00cf')">
-                            <a-auto-complete
-                              v-model:value="target.releaseFtpPath"
-                              :options="ftpDirOptions(target)"
-                              :placeholder="$t('i18n_pipeline_target_path_placeholder')"
-                              style="width: 100%"
-                            />
-                          </a-form-item>
-                        </template>
-                        <!-- SSH 项目 -->
-                        <template v-if="target.method === 7">
-                          <a-form-item :label="$t('i18n_8215da30b4')">
-                            <a-select
-                              v-model:value="target.ids"
-                              mode="multiple"
-                              show-search
-                              option-filter-prop="label"
-                              :options="sshProjectOptions"
-                              :placeholder="$t('i18n_8215da30b4')"
-                            />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_923f8d2688')">
-                            <code-editor
-                              v-model:content="target.afterCommand"
-                              :show-tool="false"
-                              :options="{ mode: 'shell' }"
-                              height="140px"
-                              :placeholder="$t('i18n_pipeline_after_command_placeholder')"
-                            />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_pipeline_target_clear_old')">
-                            <a-switch v-model:checked="target.clearOld" />
-                          </a-form-item>
-                        </template>
-                        <!-- 文件中心 -->
-                        <template v-if="target.method === 8">
-                          <a-form-item :label="$t('i18n_pipeline_target_keep_day')">
-                            <a-input-number
-                              v-model:value="target.fileStorageKeepDay"
-                              style="width: 100%"
-                              :min="1"
-                              :precision="0"
-                              allow-clear
-                              :placeholder="$t('i18n_pipeline_target_keep_day_placeholder')"
-                              :data-testid="'pipeline-target-keep-day-' + ti"
-                            />
-                          </a-form-item>
-                          <a-form-item :label="$t('i18n_pipeline_target_alias_code')">
-                            <a-input
-                              v-model:value="target.aliasCode"
-                              :max-length="50"
-                              :placeholder="$t('i18n_pipeline_target_alias_code_placeholder')"
-                              :data-testid="'pipeline-target-alias-code-' + ti"
-                            />
-                          </a-form-item>
-                          <div class="field-tip">{{ $t('i18n_pipeline_target_file_storage_tip') }}</div>
-                        </template>
-                      </div>
-                    </div>
-                    <a-button type="dashed" block data-testid="pipeline-add-target" @click="addTarget">
-                      <PlusOutlined />
-                      {{ $t('i18n_pipeline_target_add') }}
-                    </a-button>
-                  </div>
-                </a-form-item>
-              </template>
-
-              <!-- 通知 -->
-              <template v-if="current.type === 'NOTIFY'">
-                <a-divider orientation="left">{{ $t('i18n_pipeline_stage_type_notify') }}</a-divider>
-                <a-form-item :label="$t('i18n_pipeline_notify_scripts')">
-                  <a-select
-                    v-model:value="current.scripts"
-                    mode="multiple"
-                    show-search
-                    option-filter-prop="label"
-                    :options="scriptOptions"
-                    :placeholder="$t('i18n_pipeline_notify_scripts')"
-                    :data-testid="'pipeline-notify-scripts'"
-                  />
-                </a-form-item>
-                <a-form-item :label="$t('i18n_pipeline_notify_event')">
-                  <a-select
-                    v-model:value="current.event"
-                    :options="eventOptions"
-                    :placeholder="$t('i18n_pipeline_notify_event_placeholder')"
-                  />
-                </a-form-item>
-              </template>
-
-              <a-alert
-                v-if="!stageValid(current)"
-                type="warning"
-                show-icon
-                class="stage-warning"
-                :message="stageInvalidReason(current)"
-              />
-            </a-form>
-          </a-card>
-        </a-col>
-      </a-row>
-      </div>
     </a-spin>
 
   </div>
@@ -915,10 +954,15 @@ export default {
       saving: false,
       configCollapsed: false,
       stepsCurrent: this.editSteps || 0,
+      // 右侧「阶段配置」宽度（百分比）：可拖拽分割线调整并记住；窄屏可缩到 26%，双击分割线复位
+      configWidth: this.readConfigWidth(),
+      // 左右互斥折叠：canvasCollapsed 隐藏画布把宽度全给配置，configCollapsed 反之
+      canvasCollapsed: false,
       stepsItems: [
         { title: this.$t('i18n_pipeline_source_title') },
-        { title: this.$t('i18n_pipeline_hooks_title') },
-        { title: this.$t('i18n_pipeline_stage_title') }
+        // 阶段编排放中间、事件通知放最后：事件通知是「配置完流程之后」的收尾动作
+        { title: this.$t('i18n_pipeline_stage_title') },
+        { title: this.$t('i18n_pipeline_hooks_title') }
       ],
       form: { id: '', name: '', groupName: '' },
       sources: [],
@@ -944,6 +988,13 @@ export default {
     }
   },
   computed: {
+    configCardStyle() {
+      // 画布收起时，配置面板接管整行宽度（不能只写 width:auto，否则只按内容撑开）
+      if (this.canvasCollapsed) {
+        return { flex: '1 1 auto', width: 'auto' }
+      }
+      return { flex: '0 0 auto', width: this.configWidth + '%' }
+    },
     current() {
       return this.stages[this.selectedIndex] || {}
     },
@@ -1110,6 +1161,49 @@ export default {
     }
   },
   methods: {
+    readConfigWidth() {
+      const v = Number(localStorage.getItem('pipeline-stage-config-width'))
+      return v >= 26 && v <= 62 ? v : 42
+    },
+    toggleCanvas() {
+      this.canvasCollapsed = !this.canvasCollapsed
+      // 两侧不能同时收起：收起画布时确保配置可见
+      if (this.canvasCollapsed) {
+        this.configCollapsed = false
+      }
+    },
+    toggleConfig() {
+      this.configCollapsed = !this.configCollapsed
+      if (this.configCollapsed) {
+        this.canvasCollapsed = false
+      }
+    },
+    resetConfigWidth() {
+      this.configWidth = 42
+      localStorage.setItem('pipeline-stage-config-width', '42')
+    },
+    /** 拖拽分割线调整「阶段配置」宽度：26%~62%，松手后记住 */
+    startResizeConfig(event) {
+      const layout = this.$refs.stageLayout
+      if (!layout) {
+        return
+      }
+      const rect = layout.getBoundingClientRect()
+      const onMove = (ev) => {
+        const percent = ((rect.right - ev.clientX) / rect.width) * 100
+        this.configWidth = Number(Math.min(62, Math.max(26, percent)).toFixed(2))
+      }
+      const onUp = () => {
+        document.removeEventListener('mousemove', onMove)
+        document.removeEventListener('mouseup', onUp)
+        document.body.style.userSelect = ''
+        localStorage.setItem('pipeline-stage-config-width', String(this.configWidth))
+      }
+      document.body.style.userSelect = 'none'
+      document.addEventListener('mousemove', onMove)
+      document.addEventListener('mouseup', onUp)
+      event.preventDefault()
+    },
     /**
      * 事件选择互斥：「全部事件」与具体事件不能同时存在
      * <p>
@@ -1755,13 +1849,13 @@ export default {
         return
       }
       if (!this.stages.length) {
-        this.setStep(2)
+        this.setStep(1)
         message.warning(this.$t('i18n_pipeline_stage_required'))
         return
       }
       const invalid = this.stages.find((stage) => !this.stageValid(stage))
       if (invalid) {
-        this.setStep(2)
+        this.setStep(1)
         message.error(this.$t('i18n_pipeline_stage_invalid') + '：' + (invalid.name || invalid.id) + ' - ' + this.stageInvalidReason(invalid))
         this.selectedIndex = this.stages.indexOf(invalid)
         this.configCollapsed = false
@@ -1770,14 +1864,14 @@ export default {
       const ids = this.stages.map((stage) => stage.id)
       const duplicated = ids.filter((id, index) => ids.indexOf(id) !== index)
       if (duplicated.length) {
-        this.setStep(2)
+        this.setStep(1)
         message.error(this.$t('i18n_pipeline_stage_key_duplicate') + '：' + duplicated.join(','))
         return
       }
       // 事件通知与阶段校验分开：行内标红之外，保存前再指明具体第几行
       const hookError = this.firstHookError()
       if (hookError) {
-        this.setStep(1)
+        this.setStep(2)
         message.error(hookError)
         return
       }
@@ -1924,17 +2018,14 @@ export default {
   padding-bottom: 8px;
 }
 .canvas-wrap {
-  /* 自适应高度：跟随窗口可视高度伸缩，小窗口保底 260px、大窗口最多 720px（不写死 240px） */
-  height: clamp(260px, calc(100vh - 470px), 720px);
+  /* 高度由卡片 flex 分配（见 .stage-canvas-card），不再按视口猜数字 */
+  flex: 1 1 auto;
+  min-height: 240px;
 }
 .canvas-tip {
   color: var(--jp-color-text-tertiary);
   font-size: 12px;
   margin-top: 6px;
-}
-.full-height :deep(.ant-card-body) {
-  height: clamp(280px, calc(100vh - 420px), 720px);
-  overflow-y: auto;
 }
 .target-list {
   width: 100%;
@@ -1960,6 +2051,92 @@ export default {
 }
 .stage-warning {
   margin-top: 8px;
+}
+.pipeline-editor {
+  /* 高度交给抽屉：editor 占满 body，各步骤内用 flex 分配，不再用 100vh-420px 这类魔法数字 */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding-bottom: 0;
+}
+.pipeline-editor :deep(.ant-spin-nested-loading),
+.pipeline-editor :deep(.ant-spin-container) {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.step-pane-stages {
+  /* 阶段编排这一步要吃掉剩余高度，画布与配置卡片才能等高铺满 */
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.stage-layout {
+  display: flex;
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.stage-canvas-card,
+.stage-config-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+.stage-canvas-card {
+  flex: 1 1 auto;
+}
+.stage-config-card {
+  flex: 0 0 auto;
+}
+.stage-canvas-card :deep(.ant-card-body),
+.stage-config-card :deep(.ant-card-body) {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+/* 画布卡片 body 必须是 flex 列，否则 .canvas-wrap 的 flex:1 无处可依 → .vue-flow 高度 0（节点看不见） */
+.stage-canvas-card :deep(.ant-card-body) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+/* 可拖拽分割线：视觉上是一条浅色竖条，hover 变主色，光标为 col-resize */
+.stage-splitter {
+  flex: 0 0 18px;
+  margin-left: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: col-resize;
+}
+.stage-splitter-btn {
+  border: none;
+  background: transparent;
+  color: var(--jp-color-text-tertiary);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  font-size: 12px;
+}
+.stage-splitter-btn:hover {
+  color: var(--jp-color-primary);
+}
+.stage-splitter-bar {
+  width: 4px;
+  height: 46px;
+  border-radius: 2px;
+  background: var(--jp-color-border);
+  transition: background 0.2s;
+}
+.stage-splitter:hover .stage-splitter-bar {
+  background: var(--jp-color-primary);
 }
 .editor-steps {
   /* 步骤条与下方区块留出呼吸感，并随主题色 */

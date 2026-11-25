@@ -3077,6 +3077,7 @@
   "i18n_pipeline_stage_title": "Stage orchestration",
   "i18n_pipeline_stage_add": "Add stage",
   "i18n_pipeline_stage_config": "Stage config",
+  "i18n_pipeline_config_splitter_tip": "Drag to resize the stage config panel, double-click to reset",
   "i18n_pipeline_stage_empty": "No stage yet",
   "i18n_pipeline_stage_select_tip": "Select a node on the canvas",
   "i18n_pipeline_stage_collapse": "Collapse config",
@@ -3249,5 +3250,7 @@
   "i18n_pipeline_event_script_duration": "took {duration}ms",
   "i18n_pipeline_event_webhook_ok": "Success",
   "i18n_pipeline_event_webhook_fail": "Failed",
-  "i18n_pipeline_hook_event_all": "All events (including future ones)"
+  "i18n_pipeline_hook_event_all": "All events (including future ones)",
+  "i18n_pipeline_canvas_expand": "Expand stage canvas",
+  "i18n_pipeline_canvas_collapse": "Collapse stage canvas"
 }

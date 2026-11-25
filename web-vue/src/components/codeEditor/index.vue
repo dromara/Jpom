@@ -428,7 +428,8 @@ export default {
 <style>
 .CodeMirror {
   height: 100%;
-  min-height: 200px;
+  /* 极小视口（如 1600x400）下不再撑破容器：高度由外部容器决定，最小 140px */
+  min-height: 140px;
 }
 </style>
 <style scoped>
