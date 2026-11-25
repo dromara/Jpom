@@ -317,7 +317,8 @@ export default {
     handleCancel(record) {
       cancelPipeline({ id: record.id }).then((res) => {
         if (res.code === 200) {
-          message.info({ message: this.$t('i18n_pipeline_cancel_requested') })
+          // 后端已按三态（已受理/已在取消中/未找到执行体）返回可读文案，直接展示
+          message.info({ message: res.data || this.$t('i18n_pipeline_cancel_requested') })
         } else {
           message.warn({ message: res.msg })
         }

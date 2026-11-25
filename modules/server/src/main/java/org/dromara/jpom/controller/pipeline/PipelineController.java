@@ -18,6 +18,8 @@ import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.PageResultDto;
+import org.dromara.jpom.build.ExecutionRegistry;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
@@ -170,8 +172,21 @@ public class PipelineController extends BaseServerController {
                          HttpServletRequest request) {
         PipelineInfoModel item = pipelineInfoService.getByKey(id, request);
         Assert.notNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
-        Object outcome = pipelineRunner.cancel(id);
-        return JsonMessage.success("", String.valueOf(outcome));
+        ExecutionRegistry.CancelOutcome outcome = pipelineRunner.cancel(id);
+        // 直接把枚举名（REQUESTED/NOT_FOUND）显示给用户既不可读也不便本地化，这里按三态出文案
+        String key;
+        switch (outcome) {
+            case REQUESTED:
+                key = "i18n.pipeline_cancel_requested.3f01";
+                break;
+            case ALREADY_REQUESTED:
+                key = "i18n.pipeline_cancel_already_requested.3f02";
+                break;
+            default:
+                key = "i18n.pipeline_cancel_not_found.3f03";
+                break;
+        }
+        return JsonMessage.success("", I18nMessageUtil.get(key));
     }
 
     /**

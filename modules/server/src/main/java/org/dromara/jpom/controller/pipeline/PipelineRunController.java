@@ -27,6 +27,7 @@ import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.pipeline.PipelineRunner;
 import org.dromara.jpom.pipeline.model.PipelineInfoModel;
 import org.dromara.jpom.pipeline.model.PipelineRunModel;
+import org.dromara.jpom.pipeline.engine.PipelineLogReader;
 import org.dromara.jpom.pipeline.service.PipelineInfoService;
 import org.dromara.jpom.pipeline.service.PipelineRunService;
 import org.dromara.jpom.service.h2db.BaseDbService;
@@ -39,6 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -125,18 +127,21 @@ public class PipelineRunController extends BaseServerController {
         if (!FileUtil.isFile(logFile)) {
             return new JsonMessage<>(300, I18nMessageUtil.get("i18n.log_file_does_not_exist.f6c6"));
         }
-        // 分页读取（每页 1000 行）：在线构建的读取器只保留最后一次范围内的 1000 行，
-        // 长日志会丢头部；这里按行号推进，前端翻页直到 hasMore=false，保证「完整日志」。
+        // 分页读取（每页 1000 行）：按行号推进，前端翻页直到 hasMore=false，保证「完整日志」；
+        // 只读到窗口末尾（见 PipelineLogReader），长日志下不再每次整文件读入内存。
         int start = line == null || line < 1 ? 1 : line;
-        List<String> allLines = FileUtil.readLines(logFile, CharsetUtil.CHARSET_UTF_8);
-        int from = Math.min(Math.max(0, start - 1), allLines.size());
-        int to = Math.min(allLines.size(), from + LOG_PAGE_SIZE);
+        PipelineLogReader.Window window;
+        try {
+            window = PipelineLogReader.read(logFile, start, LOG_PAGE_SIZE);
+        } catch (IOException e) {
+            throw new IllegalStateException(I18nMessageUtil.get("i18n.log_file_does_not_exist.f6c6"), e);
+        }
         JSONObject data = new JSONObject();
-        data.put("dataLines", new ArrayList<>(allLines.subList(from, to)));
-        data.put("line", to + 1);
+        data.put("dataLines", window.getLines());
+        data.put("line", start + window.getLines().size());
         data.put("getLine", start);
-        data.put("totalLine", allLines.size());
-        data.put("hasMore", to < allLines.size());
+        data.put("totalLine", window.getTotalLines());
+        data.put("hasMore", window.isHasMore());
         data.put("run", this.isRunning(run.getStatus()));
         data.put("status", run.getStatus());
         data.put("statusMsg", run.getStatusMsg());

@@ -30,6 +30,7 @@ import org.dromara.jpom.pipeline.engine.PipelineLog;
 import org.dromara.jpom.pipeline.engine.PipelineRunResult;
 import org.dromara.jpom.pipeline.engine.PipelineWorkspace;
 import org.dromara.jpom.pipeline.engine.StageExecutorRegistry;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.pipeline.executor.BuildStageExecutor;
 import org.dromara.jpom.pipeline.executor.CommandStageExecutor;
 import org.dromara.jpom.pipeline.executor.NotifyStageExecutor;
@@ -54,6 +55,8 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -83,6 +86,17 @@ public class PipelineRunner {
     private final PipelineContainerBuildRunner containerBuildRunner;
     private final PipelineNodeBuildRunner nodeBuildRunner;
     private final PipelineEngine engine = new PipelineEngine();
+
+    /**
+     * 正在运行的流水线（pipelineId）。
+     * <p>
+     * 取消登记（{@link ExecutionRegistry}）与流水线状态都以 pipelineId 为键：同一条流水线若允许并发运行，
+     * 后一次登记会覆盖前一次的句柄（取消打到错误的运行），先结束的那次还会把后一次的句柄注销掉。
+     * 因此这里以 pipelineId 做一次性占位，保证「同一条流水线同时只有一个运行」；
+     * 不同流水线之间互不影响（各自独立工作区与日志）。
+     * </p>
+     */
+    private final Set<String> activeRuns = ConcurrentHashMap.newKeySet();
 
     public PipelineRunner(PipelineInfoService pipelineInfoService,
                           PipelineRunService pipelineRunService,
@@ -117,6 +131,24 @@ public class PipelineRunner {
         }
         PipelineDefinition definition = item.definition();
         definition.check();
+        // 先占位再动状态：并发两次点击「运行」时，第二次直接拒绝，避免两次运行互相覆盖取消句柄与状态
+        if (!this.activeRuns.add(pipelineId)) {
+            throw new IllegalArgumentException(I18nMessageUtil.get("i18n.pipeline_already_running.7b31"));
+        }
+        try {
+            return this.startRun(item, definition, remark);
+        } catch (RuntimeException e) {
+            // 启动阶段失败（读配置、建日志、线程池拒绝等）必须归还占位，否则该流水线会一直被判「正在运行」
+            this.activeRuns.remove(pipelineId);
+            throw e;
+        }
+    }
+
+    /**
+     * 真正启动（已持有 {@link #activeRuns} 占位）
+     */
+    private String startRun(PipelineInfoModel item, PipelineDefinition definition, String remark) {
+        String pipelineId = item.getId();
         this.ensureExecutors();
         int runNumber = pipelineInfoService.nextRunNumber(pipelineId);
         PipelineWorkspace workspace = new PipelineWorkspace(new File(JpomApplication.getInstance().getDataPath()));
@@ -294,6 +326,7 @@ public class PipelineRunner {
         } finally {
             handle.stop();
             ExecutionRegistry.unregister(pipelineId);
+            this.activeRuns.remove(pipelineId);
             if (result != null) {
                 run.setStagesResult(JSON.toJSONString(result.getStages()));
             }
