@@ -36,6 +36,14 @@ import java.util.stream.Collectors;
 @Service
 public class NodeScriptServer extends BaseNodeService<NodeScriptCacheModel> implements ITriggerToken {
 
+    @Override
+    public void updateTriggerToken(String id, String triggerToken) {
+        NodeScriptCacheModel update = new NodeScriptCacheModel();
+        update.setId(id);
+        update.setTriggerToken(triggerToken);
+        this.updateById(update);
+    }
+
 
     public NodeScriptServer(NodeService nodeService,
                             WorkspaceService workspaceService) {

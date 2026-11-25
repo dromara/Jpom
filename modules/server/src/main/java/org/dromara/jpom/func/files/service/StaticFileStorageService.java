@@ -61,6 +61,14 @@ import java.util.stream.Collectors;
 @Slf4j
 public class StaticFileStorageService extends BaseDbService<StaticFileStorageModel> implements IAsyncLoad, Task, Watcher, DisposableBean, ITriggerToken {
 
+    @Override
+    public void updateTriggerToken(String id, String triggerToken) {
+        StaticFileStorageModel update = new StaticFileStorageModel();
+        update.setId(id);
+        update.setTriggerToken(triggerToken);
+        this.updateById(update);
+    }
+
     private final FileStorageConfig fileStorageConfig;
     private final WorkspaceService workspaceService;
     private final OutGivingWhitelistService outGivingWhitelistService;

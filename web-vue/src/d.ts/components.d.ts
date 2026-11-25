@@ -176,6 +176,7 @@ declare module 'vue' {
     TagOutlined: typeof import('@ant-design/icons-vue')['TagOutlined']
     TagsOutlined: typeof import('@ant-design/icons-vue')['TagsOutlined']
     Terminal: typeof import('./../components/terminal/index.vue')['default']
+    TriggerUrlDialog: typeof import('./../components/trigger-url-dialog.vue')['default']
     UnorderedListOutlined: typeof import('@ant-design/icons-vue')['UnorderedListOutlined']
     Upgrade: typeof import('./../components/upgrade/index.vue')['default']
     UploadOutlined: typeof import('@ant-design/icons-vue')['UploadOutlined']

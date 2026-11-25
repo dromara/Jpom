@@ -33,6 +33,14 @@ import java.util.Map;
 @Service
 public class WorkspaceEnvVarService extends BaseWorkspaceService<WorkspaceEnvVarModel> implements ITriggerToken {
 
+    @Override
+    public void updateTriggerToken(String id, String triggerToken) {
+        WorkspaceEnvVarModel update = new WorkspaceEnvVarModel();
+        update.setId(id);
+        update.setTriggerToken(triggerToken);
+        this.updateById(update);
+    }
+
 
     /**
      * 获取我所有的空间

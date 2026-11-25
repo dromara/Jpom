@@ -97,6 +97,8 @@ DEFAULT_TESTS=(
 	RemoteVersionDownloadMessageTest
 	# 流水线运行日志按窗口读取（长日志不再每次整文件进内存）
 	PipelineLogReaderTest
+	# 触发器统一收口点：查不到 405 / token 生成与重置唯一路径 / 响应 key 与历史一致（B-041 同类缺陷的守卫）
+	TriggerUrlAssemblerTest
 	UploadShardingExtensionTest
 	# 安全修复的既有单测（文件中心 SQL 注入 / 查询值绑定 / 日志路径穿越 / token 等）
 	FileStorageApiControllerSortTest

@@ -20,6 +20,8 @@ import org.dromara.jpom.common.UrlRedirectUtil;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.service.user.TriggerUrlAssembler;
+import org.dromara.jpom.service.user.TriggerUrls;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.NodeModel;
@@ -29,7 +31,6 @@ import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.permission.*;
 import org.dromara.jpom.service.node.script.NodeScriptExecuteLogServer;
 import org.dromara.jpom.service.node.script.NodeScriptServer;
-import org.dromara.jpom.service.user.TriggerTokenLogServer;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -54,14 +55,14 @@ public class NodeScriptController extends BaseServerController {
 
     private final NodeScriptServer nodeScriptServer;
     private final NodeScriptExecuteLogServer nodeScriptExecuteLogServer;
-    private final TriggerTokenLogServer triggerTokenLogServer;
+    private final TriggerUrlAssembler triggerUrlAssembler;
 
     public NodeScriptController(NodeScriptServer nodeScriptServer,
                                 NodeScriptExecuteLogServer nodeScriptExecuteLogServer,
-                                TriggerTokenLogServer triggerTokenLogServer) {
+                                TriggerUrlAssembler triggerUrlAssembler) {
         this.nodeScriptServer = nodeScriptServer;
         this.nodeScriptExecuteLogServer = nodeScriptExecuteLogServer;
-        this.triggerTokenLogServer = triggerTokenLogServer;
+        this.triggerUrlAssembler = triggerUrlAssembler;
     }
 
     /**
@@ -177,36 +178,14 @@ public class NodeScriptController extends BaseServerController {
     @RequestMapping(value = "trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<Map<String, String>> getTriggerUrl(String id, String rest, HttpServletRequest request) {
-        NodeScriptCacheModel item = nodeScriptServer.getByKeyAndGlobal(id, request);
-        UserModel user = getUser();
-        NodeScriptCacheModel updateInfo;
-        if (StrUtil.isEmpty(item.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {
-            updateInfo = new NodeScriptCacheModel();
-            updateInfo.setId(id);
-            updateInfo.setTriggerToken(triggerTokenLogServer.restToken(item.getTriggerToken(), nodeScriptServer.typeName(),
-                item.getId(), user.getId()));
-            nodeScriptServer.updateById(updateInfo);
-        } else {
-            updateInfo = item;
-        }
-        Map<String, String> map = this.getBuildToken(updateInfo, request);
-        String string = I18nMessageUtil.get("i18n.reset_success.faa3");
-        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : string, map);
+        NodeScriptCacheModel item = triggerUrlAssembler.require(() -> nodeScriptServer.getByKeyAndGlobal(id, request),
+            I18nMessageUtil.get("i18n.data_does_not_exist.b201"));
+        Map<String, String> map = triggerUrlAssembler.issue(nodeScriptServer, item.getId(), item.getTriggerToken(), rest, getUser().getId(),
+            TriggerUrls.builder()
+                .add("triggerUrl", ServerOpenApi.NODE_SCRIPT_TRIGGER_URL)
+                .add("batchTriggerUrl", ServerOpenApi.NODE_SCRIPT_TRIGGER_BATCH)
+                .build(), request);
+        return JsonMessage.success(TriggerUrlAssembler.successMessage(rest), map);
     }
 
-    private Map<String, String> getBuildToken(NodeScriptCacheModel item, HttpServletRequest request) {
-        String contextPath = UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH);
-        String url = ServerOpenApi.NODE_SCRIPT_TRIGGER_URL.
-            replace("{id}", item.getId()).
-            replace("{token}", item.getTriggerToken());
-        String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
-        Map<String, String> map = new HashMap<>(10);
-        map.put("triggerUrl", FileUtil.normalize(triggerBuildUrl));
-        String batchTriggerBuildUrl = String.format("/%s/%s", contextPath, ServerOpenApi.NODE_SCRIPT_TRIGGER_BATCH);
-        map.put("batchTriggerUrl", FileUtil.normalize(batchTriggerBuildUrl));
-
-        map.put("id", item.getId());
-        map.put("token", item.getTriggerToken());
-        return map;
-    }
 }

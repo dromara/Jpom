@@ -22,6 +22,8 @@ import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.ServerOpenApi;
 import org.dromara.jpom.common.UrlRedirectUtil;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.service.user.TriggerUrlAssembler;
+import org.dromara.jpom.service.user.TriggerUrls;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.controller.outgiving.OutGivingWhitelistService;
 import org.dromara.jpom.func.files.model.FileStorageModel;
@@ -32,7 +34,6 @@ import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
-import org.dromara.jpom.service.user.TriggerTokenLogServer;
 import org.dromara.jpom.system.ServerConfig;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -60,16 +61,16 @@ public class FileStorageController extends BaseServerController {
     private final ServerConfig serverConfig;
     private final FileStorageService fileStorageService;
     private final OutGivingWhitelistService outGivingWhitelistService;
-    private final TriggerTokenLogServer triggerTokenLogServer;
+    private final TriggerUrlAssembler triggerUrlAssembler;
 
     public FileStorageController(ServerConfig serverConfig,
                                  FileStorageService fileStorageService,
                                  OutGivingWhitelistService outGivingWhitelistService,
-                                 TriggerTokenLogServer triggerTokenLogServer) {
+                                 TriggerUrlAssembler triggerUrlAssembler) {
         this.serverConfig = serverConfig;
         this.fileStorageService = fileStorageService;
         this.outGivingWhitelistService = outGivingWhitelistService;
-        this.triggerTokenLogServer = triggerTokenLogServer;
+        this.triggerUrlAssembler = triggerUrlAssembler;
     }
 
     /**
@@ -269,47 +270,14 @@ public class FileStorageController extends BaseServerController {
     @GetMapping(value = "trigger-url", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<Map<String, String>> getTriggerUrl(@ValidatorItem String id, String rest, HttpServletRequest request) {
-        UserModel user = getUser();
-        // 查询当前工作空间
-        FileStorageModel item = fileStorageService.getByKey(id, request);
-        Assert.notNull(item, I18nMessageUtil.get("i18n.no_file_info.db01"));
-        //
-        FileStorageModel updateInfo;
-        if (StrUtil.isEmpty(item.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {
-            updateInfo = new FileStorageModel();
-            updateInfo.setId(id);
-            updateInfo.setTriggerToken(triggerTokenLogServer.restToken(item.getTriggerToken(), fileStorageService.typeName(),
-                item.getId(), user.getId()));
-            fileStorageService.updateById(updateInfo);
-            // 避免无法查看发片下载地址
-            updateInfo.setAliasCode(item.getAliasCode());
-        } else {
-            updateInfo = item;
-        }
-        Map<String, String> map = this.getBuildToken(updateInfo, request);
-        String string = I18nMessageUtil.get("i18n.reset_success.faa3");
-        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : string, map);
+        FileStorageModel item = triggerUrlAssembler.require(() -> fileStorageService.getByKey(id, request),
+            I18nMessageUtil.get("i18n.no_file_info.db01"));
+        Map<String, String> map = triggerUrlAssembler.issue(fileStorageService, item.getId(), item.getTriggerToken(), rest, getUser().getId(),
+            TriggerUrls.builder()
+                .add("triggerDownloadUrl", ServerOpenApi.FILE_STORAGE_DOWNLOAD)
+                .addAlias("triggerAliasDownloadUrl", ServerOpenApi.FILE_STORAGE_DOWNLOAD)
+                .build(), request, item.getAliasCode());
+        return JsonMessage.success(TriggerUrlAssembler.successMessage(rest), map);
     }
 
-    private Map<String, String> getBuildToken(FileStorageModel item, HttpServletRequest request) {
-        String contextPath = UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH);
-        Map<String, String> map = new HashMap<>(10);
-        {
-            String url = ServerOpenApi.FILE_STORAGE_DOWNLOAD.
-                replace("{id}", item.getId()).
-                replace("{token}", item.getTriggerToken());
-            String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
-            map.put("triggerDownloadUrl", FileUtil.normalize(triggerBuildUrl));
-        }
-        if (StrUtil.isNotEmpty(item.getAliasCode())) {
-            String url = ServerOpenApi.FILE_STORAGE_DOWNLOAD.
-                replace("{id}", item.getAliasCode()).
-                replace("{token}", item.getTriggerToken());
-            String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
-            map.put("triggerAliasDownloadUrl", FileUtil.normalize(triggerBuildUrl));
-        }
-        map.put("id", item.getId());
-        map.put("token", item.getTriggerToken());
-        return map;
-    }
 }

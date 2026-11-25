@@ -56,6 +56,21 @@ export function deletePipeline(params) {
 }
 
 /**
+ * 流水线触发器地址
+ * <p>
+ * 响应 data：{ triggerUrl, statusUrl, id, token }；triggerUrl 为相对地址，由前端拼绝对地址。
+ * 传 rest='rest' 表示重置（服务端重新生成 token，旧地址立即失效）。
+ * </p>
+ */
+export function getTriggerUrl(params) {
+  return axios({
+    url: '/pipeline/trigger-url',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
  * 运行流水线
  */
 export function runPipeline(params) {

@@ -125,6 +125,19 @@ public class PipelineRunner {
      * @return 运行记录 ID
      */
     public String start(String pipelineId, UserModel user, String remark) {
+        return this.start(pipelineId, user, remark, 0);
+    }
+
+    /**
+     * 启动一次运行（异步，可指定触发方式）
+     *
+     * @param pipelineId  流水线 ID
+     * @param user        操作人
+     * @param remark      备注
+     * @param triggerType 触发方式：0 手动 / 2 系统（开放接口） / 3 重跑
+     * @return 运行记录 ID
+     */
+    public String start(String pipelineId, UserModel user, String remark, int triggerType) {
         PipelineInfoModel item = pipelineInfoService.getByKey(pipelineId);
         if (item == null) {
             throw new IllegalArgumentException("pipeline not found: " + pipelineId);
@@ -136,7 +149,7 @@ public class PipelineRunner {
             throw new IllegalArgumentException(I18nMessageUtil.get("i18n.pipeline_already_running.7b31"));
         }
         try {
-            return this.startRun(item, definition, remark);
+            return this.startRun(item, definition, remark, triggerType);
         } catch (RuntimeException e) {
             // 启动阶段失败（读配置、建日志、线程池拒绝等）必须归还占位，否则该流水线会一直被判「正在运行」
             this.activeRuns.remove(pipelineId);
@@ -147,7 +160,7 @@ public class PipelineRunner {
     /**
      * 真正启动（已持有 {@link #activeRuns} 占位）
      */
-    private String startRun(PipelineInfoModel item, PipelineDefinition definition, String remark) {
+    private String startRun(PipelineInfoModel item, PipelineDefinition definition, String remark, int triggerType) {
         String pipelineId = item.getId();
         this.ensureExecutors();
         int runNumber = pipelineInfoService.nextRunNumber(pipelineId);
@@ -163,7 +176,7 @@ public class PipelineRunner {
         run.setStatus(BuildStatus.Ing.getCode());
         run.setStatusMsg(StrUtil.emptyToDefault(remark, "运行中"));
         run.setSourcesSnapshot(JSON.toJSONString(definition.getSources()));
-        run.setTriggerType(0);
+        run.setTriggerType(triggerType);
         run.setStartTime(System.currentTimeMillis());
         run.setHasLog(true);
         pipelineRunService.insert(run);

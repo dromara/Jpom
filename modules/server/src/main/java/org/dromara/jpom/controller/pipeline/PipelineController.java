@@ -14,6 +14,7 @@ import com.alibaba.fastjson2.JSON;
 import cn.keepbx.jpom.IJsonMessage;
 import cn.keepbx.jpom.model.JsonMessage;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.common.ServerOpenApi;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
@@ -28,6 +29,8 @@ import org.dromara.jpom.pipeline.model.PipelineDefinition;
 import org.dromara.jpom.pipeline.model.PipelineInfoModel;
 import org.dromara.jpom.pipeline.model.PipelineValidateException;
 import org.dromara.jpom.pipeline.service.PipelineInfoService;
+import org.dromara.jpom.service.user.TriggerUrlAssembler;
+import org.dromara.jpom.service.user.TriggerUrls;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 /**
  * 流水线（新模块）：配置的增删改查
@@ -53,11 +57,41 @@ public class PipelineController extends BaseServerController {
 
     private final PipelineInfoService pipelineInfoService;
     private final PipelineRunner pipelineRunner;
+    private final TriggerUrlAssembler triggerUrlAssembler;
 
     public PipelineController(PipelineInfoService pipelineInfoService,
-                              PipelineRunner pipelineRunner) {
+                              PipelineRunner pipelineRunner,
+                              TriggerUrlAssembler triggerUrlAssembler) {
         this.pipelineInfoService = pipelineInfoService;
         this.pipelineRunner = pipelineRunner;
+        this.triggerUrlAssembler = triggerUrlAssembler;
+    }
+
+    /**
+     * 触发器地址（生成/重置）
+     * <p>
+     * 与构建、脚本、SSH 命令等触发器走同一个收口点（{@link TriggerUrlAssembler}）：查不到统一 405、
+     * token 生成/重置与审计落库同一段代码；流水线因此自动出现在「系统管理 → 触发器」的类型与记录列表里。
+     * </p>
+     *
+     * @param id      流水线 ID
+     * @param rest    非空表示重置
+     * @param request 请求
+     * @return 触发地址集合
+     */
+    @RequestMapping(value = "/trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.EDIT)
+    public IJsonMessage<Map<String, String>> getTriggerUrl(@ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.no_data.1ac0") String id,
+                                                           String rest,
+                                                           HttpServletRequest request) {
+        PipelineInfoModel item = triggerUrlAssembler.require(() -> pipelineInfoService.getByKey(id, request),
+            I18nMessageUtil.get("i18n.no_data_found.4ffb"));
+        Map<String, String> map = triggerUrlAssembler.issue(pipelineInfoService, item.getId(), item.getTriggerToken(), rest, getUser().getId(),
+            TriggerUrls.builder()
+                .add("triggerUrl", ServerOpenApi.PIPELINE_TRIGGER_URL)
+                .add("statusUrl", ServerOpenApi.PIPELINE_TRIGGER_STATUS)
+                .build(), request);
+        return JsonMessage.success(TriggerUrlAssembler.successMessage(rest), map);
     }
 
     /**

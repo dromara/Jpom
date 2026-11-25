@@ -121,4 +121,14 @@ public class ServerOpenApi {
      * SSH 项目触发执行 批量触发
      */
     public static final String SSH_PROJECT_TRIGGER_BATCH = API + "ssh_project_batch";
+
+    /**
+     * 触发流水线运行：第一级流水线 id，第二级 token
+     */
+    public static final String PIPELINE_TRIGGER_URL = API + "pipeline/{id}/{token}";
+
+    /**
+     * 流水线最近运行状态（按 id + token 查询）
+     */
+    public static final String PIPELINE_TRIGGER_STATUS = API + "pipeline_status";
 }

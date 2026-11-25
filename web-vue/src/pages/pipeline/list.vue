@@ -53,12 +53,20 @@
             :options="statusOptions"
           />
           <a-button type="primary" :loading="loading" @click="handleSearch">{{ $t('i18n_e5f71fc31e') }}</a-button>
-          <a-button type="primary" data-testid="pipeline-add" @click="handleAdd">{{ $t('i18n_pipeline_add') }}</a-button>
+          <a-button type="primary" data-testid="pipeline-add" @click="handleAdd">{{
+            $t('i18n_pipeline_add')
+          }}</a-button>
         </a-space>
       </template>
       <template #tableBodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'name'">
-          <a-button type="link" size="small" style="padding: 0" data-testid="pipeline-row-edit" @click="handleEdit(record)">
+          <a-button
+            type="link"
+            size="small"
+            style="padding: 0"
+            data-testid="pipeline-row-edit"
+            @click="handleEdit(record)"
+          >
             {{ record.name }}
           </a-button>
         </template>
@@ -98,6 +106,9 @@
             </a-button>
             <a-button size="small" type="primary" data-testid="pipeline-list-runs" @click="handleRuns(record)">
               {{ $t('i18n_pipeline_run_record') }}
+            </a-button>
+            <a-button size="small" type="primary" data-testid="pipeline-list-trigger" @click="handleTrigger(record)">
+              {{ $t('i18n_4696724ed3') }}
             </a-button>
             <a-dropdown>
               <a class="ant-dropdown-link" @click.prevent>
@@ -154,13 +165,31 @@
       @close="runVisible = false"
     >
       <template #title>{{ $t('i18n_pipeline_run_record') }}</template>
-      <PipelineRun
-        v-if="runVisible"
-        :open="runVisible"
-        :pipeline-id="runningId"
-        :pipeline-name="runningName"
-      />
+      <PipelineRun v-if="runVisible" :open="runVisible" :pipeline-id="runningId" :pipeline-name="runningName" />
     </CustomDrawer>
+
+    <!-- 触发器：地址列表 + 复制 + 重置由通用组件负责，调用说明留在本页 -->
+    <CustomModal
+      v-if="triggerVisible"
+      v-model:open="triggerVisible"
+      destroy-on-close
+      :title="$t('i18n_4696724ed3')"
+      width="50%"
+      :footer="null"
+      :mask-closable="false"
+    >
+      <TriggerUrlDialog
+        v-if="triggerVisible"
+        :id="triggerId"
+        :api="triggerApi"
+        :links="triggerLinks"
+        data-testid="pipeline-trigger-dialog"
+      >
+        <a-alert :message="$t('i18n_947d983961')" type="warning" show-icon>
+          <template #description>{{ $t('i18n_pipeline_trigger_tip') }}</template>
+        </a-alert>
+      </TriggerUrlDialog>
+    </CustomModal>
   </div>
 </template>
 
@@ -169,6 +198,7 @@ import { message } from 'ant-design-vue'
 import {
   getPipelineList,
   deletePipeline,
+  getTriggerUrl,
   runPipeline,
   cancelPipeline,
   pipelineStatusMap,
@@ -177,10 +207,11 @@ import {
 import { parseTime, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, CHANGE_PAGE } from '@/utils/const'
 import PipelineEdit from './edit.vue'
 import PipelineRun from './run.vue'
+import TriggerUrlDialog from '@/components/trigger-url-dialog.vue'
 
 export default {
   name: 'PipelineList',
-  components: { PipelineEdit, PipelineRun },
+  components: { PipelineEdit, PipelineRun, TriggerUrlDialog },
   data() {
     return {
       pipelineStatusMap,
@@ -198,15 +229,42 @@ export default {
       runVisible: false,
       runningId: '',
       runningName: '',
+      triggerVisible: false,
+      triggerId: '',
+      // 交给通用组件的取地址接口（组件内部会带 id / rest 参数调用）
+      triggerApi: getTriggerUrl,
       columns: [
         { title: this.$t('i18n_pipeline_name'), dataIndex: 'name', key: 'name', width: 170, ellipsis: true },
         { title: this.$t('i18n_829abe5a8d'), dataIndex: 'groupName', key: 'groupName', width: 110, ellipsis: true },
         { title: this.$t('i18n_3fea7ca76c'), dataIndex: 'status', key: 'status', width: 120, align: 'center' },
         // dataIndex 必须有值：CustomTable 的列设置以 dataIndex 作唯一标识，缺失会被并成一列
-        { title: this.$t('i18n_pipeline_col_stage'), dataIndex: 'stageCount', key: 'stageCount', width: 80, align: 'center' },
-        { title: this.$t('i18n_pipeline_col_source'), dataIndex: 'sourceCount', key: 'sourceCount', width: 90, align: 'center' },
-        { title: this.$t('i18n_pipeline_run_total'), dataIndex: 'runNumber', key: 'runNumber', width: 80, align: 'center' },
-        { title: this.$t('i18n_pipeline_update_time'), dataIndex: 'modifyTimeMillis', key: 'modifyTimeMillis', width: 155 },
+        {
+          title: this.$t('i18n_pipeline_col_stage'),
+          dataIndex: 'stageCount',
+          key: 'stageCount',
+          width: 80,
+          align: 'center'
+        },
+        {
+          title: this.$t('i18n_pipeline_col_source'),
+          dataIndex: 'sourceCount',
+          key: 'sourceCount',
+          width: 90,
+          align: 'center'
+        },
+        {
+          title: this.$t('i18n_pipeline_run_total'),
+          dataIndex: 'runNumber',
+          key: 'runNumber',
+          width: 80,
+          align: 'center'
+        },
+        {
+          title: this.$t('i18n_pipeline_update_time'),
+          dataIndex: 'modifyTimeMillis',
+          key: 'modifyTimeMillis',
+          width: 155
+        },
         {
           title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
@@ -221,6 +279,13 @@ export default {
   computed: {
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
+    },
+    // 触发器地址：触发运行 / 查询状态（都是 GET，地址里已带 id 与 token）
+    triggerLinks() {
+      return [
+        { label: this.$t('i18n_pipeline_trigger_run'), field: 'triggerUrl', method: 'GET' },
+        { label: this.$t('i18n_pipeline_trigger_status'), field: 'statusUrl', method: 'GET' }
+      ]
     },
     statusOptions() {
       const list = []
@@ -302,6 +367,10 @@ export default {
       this.runningId = record.id
       this.runningName = record.name
       this.runVisible = true
+    },
+    handleTrigger(record) {
+      this.triggerId = record.id
+      this.triggerVisible = true
     },
     handleRun(record) {
       runPipeline({ id: record.id }).then((res) => {

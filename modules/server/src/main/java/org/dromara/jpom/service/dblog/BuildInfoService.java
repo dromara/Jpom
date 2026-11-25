@@ -45,6 +45,14 @@ import java.util.List;
 @Slf4j
 public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> implements ICron<BuildInfoModel>, IStatusRecover, ITriggerToken {
 
+    @Override
+    public void updateTriggerToken(String id, String triggerToken) {
+        BuildInfoModel update = new BuildInfoModel();
+        update.setId(id);
+        update.setTriggerToken(triggerToken);
+        this.updateById(update);
+    }
+
     /**
      * 更新状态
      *

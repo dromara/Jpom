@@ -10,6 +10,7 @@
 package org.dromara.jpom.pipeline.service;
 
 import org.dromara.jpom.pipeline.model.PipelineInfoModel;
+import org.dromara.jpom.service.ITriggerToken;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +21,25 @@ import org.springframework.stereotype.Service;
  * @since 2.11.16
  */
 @Service
-public class PipelineInfoService extends BaseWorkspaceService<PipelineInfoModel> {
+public class PipelineInfoService extends BaseWorkspaceService<PipelineInfoModel> implements ITriggerToken {
+
+    @Override
+    public String typeName() {
+        return getTableName();
+    }
+
+    @Override
+    public boolean exists(String dataId) {
+        return this.getByKey(dataId) != null;
+    }
+
+    @Override
+    public void updateTriggerToken(String id, String triggerToken) {
+        PipelineInfoModel update = new PipelineInfoModel();
+        update.setId(id);
+        update.setTriggerToken(triggerToken);
+        this.updateById(update);
+    }
 
     /**
      * 分配下一个运行编号（供产物目录与运行记录使用）
