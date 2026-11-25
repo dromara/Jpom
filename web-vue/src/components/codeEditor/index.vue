@@ -25,28 +25,6 @@
 
         <a-space class="tool-bar-end">
           <div>
-            {{ $t('i18n_08902526f1')
-            }}<a-select
-              v-model:value="cmOptions.theme"
-              show-search
-              :filter-option="
-                (input, option) => {
-                  const children = option.children && option.children()
-                  return (
-                    children &&
-                    children[0].children &&
-                    children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                  )
-                }
-              "
-              :placeholder="$t('i18n_37b30fc862')"
-              style="width: 150px"
-              @select="handleSelectTheme"
-            >
-              <a-select-option v-for="item in themeList" :key="item.theme">{{ item.name }}</a-select-option>
-            </a-select>
-          </div>
-          <div>
             {{ $t('i18n_117a9cbc8d')
             }}<a-select
               v-model:value="cmOptions.mode"
@@ -88,7 +66,9 @@
       </div>
       <div :style="{ height: codeMirrorHeight }">
         <Codemirror
+          ref="cmRef"
           v-model:value="data"
+          v-model:cminstance="cmInstance"
           :options="cmOptions"
           :placeholder="placeholder"
           @change="onCmCodeChanges"
@@ -100,6 +80,7 @@
 </template>
 <script>
 import Codemirror from 'codemirror-editor-vue3'
+import { useGuideStore } from '@/stores/guide'
 import 'codemirror/lib/codemirror.css'
 
 // language
@@ -156,71 +137,8 @@ const modes = [
 //
 
 // theme
-import 'codemirror/theme/3024-day.css'
-import 'codemirror/theme/3024-night.css'
-import 'codemirror/theme/abcdef.css'
-import 'codemirror/theme/ambiance-mobile.css'
-import 'codemirror/theme/ayu-dark.css'
-import 'codemirror/theme/ambiance.css'
-import 'codemirror/theme/ayu-mirage.css'
-import 'codemirror/theme/abbott.css'
-import 'codemirror/theme/base16-dark.css'
-import 'codemirror/theme/base16-light.css'
-import 'codemirror/theme/bespin.css'
-import 'codemirror/theme/blackboard.css'
-import 'codemirror/theme/cobalt.css'
-import 'codemirror/theme/colorforth.css'
-import 'codemirror/theme/darcula.css'
-import 'codemirror/theme/dracula.css'
-import 'codemirror/theme/duotone-dark.css'
-import 'codemirror/theme/duotone-light.css'
-import 'codemirror/theme/eclipse.css'
-import 'codemirror/theme/elegant.css'
-import 'codemirror/theme/erlang-dark.css'
-import 'codemirror/theme/gruvbox-dark.css'
-import 'codemirror/theme/hopscotch.css'
-import 'codemirror/theme/icecoder.css'
 import 'codemirror/theme/idea.css'
-import 'codemirror/theme/isotope.css'
-import 'codemirror/theme/juejin.css'
-import 'codemirror/theme/lesser-dark.css'
-import 'codemirror/theme/liquibyte.css'
-import 'codemirror/theme/lucario.css'
 import 'codemirror/theme/material-darker.css'
-import 'codemirror/theme/material-palenight.css'
-import 'codemirror/theme/material-ocean.css'
-import 'codemirror/theme/material.css'
-import 'codemirror/theme/mbo.css'
-import 'codemirror/theme/mdn-like.css'
-import 'codemirror/theme/midnight.css'
-import 'codemirror/theme/monokai.css'
-import 'codemirror/theme/moxer.css'
-import 'codemirror/theme/neat.css'
-import 'codemirror/theme/neo.css'
-import 'codemirror/theme/night.css'
-import 'codemirror/theme/nord.css'
-import 'codemirror/theme/oceanic-next.css'
-import 'codemirror/theme/panda-syntax.css'
-import 'codemirror/theme/paraiso-dark.css'
-import 'codemirror/theme/paraiso-light.css'
-import 'codemirror/theme/pastel-on-dark.css'
-import 'codemirror/theme/railscasts.css'
-import 'codemirror/theme/rubyblue.css'
-import 'codemirror/theme/seti.css'
-import 'codemirror/theme/shadowfox.css'
-import 'codemirror/theme/solarized.css'
-import 'codemirror/theme/ssms.css'
-import 'codemirror/theme/the-matrix.css'
-import 'codemirror/theme/tomorrow-night-bright.css'
-import 'codemirror/theme/tomorrow-night-eighties.css'
-import 'codemirror/theme/ttcn.css'
-import 'codemirror/theme/twilight.css'
-import 'codemirror/theme/vibrant-ink.css'
-import 'codemirror/theme/xq-dark.css'
-import 'codemirror/theme/xq-light.css'
-import 'codemirror/theme/yeti.css'
-import 'codemirror/theme/yonce.css'
-import 'codemirror/theme/zenburn.css'
 
 //
 //
@@ -323,13 +241,22 @@ export default {
     }
   },
   emits: ['update:content'],
+  computed: {
+    // 系统主题（含「跟随系统」自动识别）→ 编辑器主题，只有深/浅两种
+    ...mapState(useGuideStore, ['getThemeView']),
+    editorTheme() {
+      const view = typeof this.getThemeView === 'function' ? this.getThemeView() : 'light'
+      return view === 'dark' ? 'material-darker' : 'idea'
+    }
+  },
   data() {
     return {
       codeMirrorHeight: '',
       data: '',
       cmOptions: {
         mode: '', // Language mode
-        theme: localStorage.getItem('editorTheme') || 'idea', // Theme
+        // 主题只有两种：浅色 idea / 深色 material-darker，由系统主题自动推导（见 computed.editorTheme）
+        theme: 'idea', // Theme
         // // 是否应滚动或换行以显示长行
         lineWrapping: true,
         lineNumbers: true,
@@ -375,91 +302,20 @@ export default {
         defaultJsonIndentation: 2
       },
       modeList: modes,
-      themeList: [
-        // { name: '深色', theme: 'dracula' },
-        // { name: '浅色', theme: 'eclipse' },
-        // { name: '深色2', theme: 'blackboard' },
-        // { name: '', theme: 'abbott' },
-        // { name: '深白', theme: 'abcdef' },
-        // { name: '黑白', theme: 'ambiance' },
-        // { name: 'ayu深', theme: 'ayu-dark' },
-        // { name: 'ayu深2', theme: 'ayu-mirage' },
-        // { name: '浅灰', theme: 'bespin' }
-
-        { name: this.$t('i18n_72eae3107e'), theme: 'abbott' },
-        { name: this.$t('i18n_96c1c8f4ee'), theme: 'abcdef' },
-        { name: this.$t('i18n_cad01fe13c'), theme: 'ambiance-mobile' },
-        { name: this.$t('i18n_1880b85dc5'), theme: 'ambiance' },
-        { name: this.$t('i18n_50ed14e70b'), theme: 'dracula' },
-        { name: this.$t('i18n_d937a135b9'), theme: 'eclipse' },
-        { name: this.$t('i18n_be1956b246'), theme: 'blackboard' },
-        { name: this.$t('i18n_8cae9cb626'), theme: 'idea' },
-        { name: 'ayu-dark', theme: 'ayu-dark' },
-        { name: 'ayu-mirage', theme: 'ayu-mirage' },
-        { name: 'base16-dark', theme: 'base16-dark' },
-        { name: 'base16-light', theme: 'base16-light' },
-        { name: 'bespin', theme: 'bespin' },
-
-        { name: 'cobalt', theme: 'cobalt' },
-        { name: 'colorforth', theme: 'colorforth' },
-
-        { name: 'duotone-dark', theme: 'duotone-dark' },
-        { name: 'duotone-light', theme: 'duotone-light' },
-
-        { name: 'elegant', theme: 'elegant' },
-        { name: 'erlang-dark', theme: 'erlang-dark' },
-        { name: 'gruvbox-dark', theme: 'gruvbox-dark' },
-        { name: 'hopscotch', theme: 'hopscotch' },
-        { name: 'icecoder', theme: 'icecoder' },
-
-        { name: 'isotope', theme: 'isotope' },
-        { name: 'juejin', theme: 'juejin' },
-        { name: 'lesser-dark', theme: 'lesser-dark' },
-        { name: 'liquibyte', theme: 'liquibyte' },
-        { name: 'lucario', theme: 'lucario' },
-        { name: 'material-darker', theme: 'material-darker' },
-        { name: 'material-ocean', theme: 'material-ocean' },
-        { name: 'material-palenight', theme: 'material-palenight' },
-        { name: 'material', theme: 'material' },
-        { name: 'mbo', theme: 'mbo' },
-        { name: 'mdn-like', theme: 'mdn-like' },
-        { name: 'midnight', theme: 'midnight' },
-        { name: 'monokai', theme: 'monokai' },
-        { name: 'moxer', theme: 'moxer' },
-        { name: 'neat', theme: 'neat' },
-        { name: 'neo', theme: 'neo' },
-        { name: 'night', theme: 'night' },
-        { name: 'nord', theme: 'nord' },
-        { name: 'oceanic-next', theme: 'oceanic-next' },
-        { name: 'panda-syntax', theme: 'panda-syntax' },
-        { name: 'paraiso-dark', theme: 'paraiso-dark' },
-        { name: 'paraiso-light', theme: 'paraiso-light' },
-        { name: 'pastel-on-dark', theme: 'pastel-on-dark' },
-        { name: 'railscasts', theme: 'railscasts' },
-        { name: 'rubyblue', theme: 'rubyblue' },
-        { name: 'seti', theme: 'seti' },
-        { name: 'shadowfox', theme: 'shadowfox' },
-        { name: 'solarized', theme: 'solarized' },
-        { name: 'ssms', theme: 'ssms' },
-        { name: 'the-matrix', theme: 'the-matrix' },
-        { name: 'tomorrow-night-bright', theme: 'tomorrow-night-bright' },
-        { name: 'tomorrow-night-eighties', theme: 'tomorrow-night-eighties' },
-        { name: 'ttcn', theme: 'ttcn' },
-        { name: 'twilight', theme: 'twilight' },
-        { name: 'vibrant-ink', theme: 'vibrant-ink' },
-        { name: 'xq-dark', theme: 'xq-dark' },
-        { name: 'xq-light', theme: 'xq-light' },
-        { name: 'yeti', theme: 'yeti' },
-        { name: 'yonce', theme: 'yonce' },
-        { name: 'zenburn', theme: 'zenburn' },
-        { name: '3024-day', theme: '3024-day' },
-        { name: '3024-night', theme: '3024-night' }
-      ],
+      // CodeMirror 实例（v-model:cminstance 由 codemirror-editor-vue3 回传），用于运行时切主题
+      cmInstance: null,
 
       loading: true
     }
   },
   watch: {
+    // 主题切换（亮/暗/跟随系统）时同步给 CodeMirror 实例，不重建组件、不丢光标
+    editorTheme: {
+      handler(theme) {
+        this.applyEditorTheme(theme)
+      },
+      immediate: true
+    },
     fileSuffix: {
       handler(v) {
         if (!v) {
@@ -521,20 +377,6 @@ export default {
     //     this.modeList.push(paths[paths.length - 1].split('.')[0])
     //   })
     // }
-    // const themes = import.meta.glob('/node_modules/codemirror/theme/**/*.css', { query: '?inline' })
-    // const array = []
-    // for (const path in themes) {
-    //   themes[path]().then((mod) => {
-    //     console.log(`import '${path.replace('/node_modules/', '')}'`)
-    //     console.log(path, mod)
-    //     import(/* @vite-ignore */ path).then(() => {})
-    //     const paths = path.split('/')
-    //     array.push({ name: paths[paths.length - 1].split('.')[0], theme: paths[paths.length - 1].split('.')[0] })
-    //     this.themeList.push(paths[paths.length - 1].split('.')[0])
-    //     console.log(JSON.stringify(array))
-    //   })
-    // }
-
     // 延迟渲染，等待资源加载完成
     setTimeout(() => {
       this.loading = false
@@ -549,13 +391,23 @@ export default {
       this.cmOptions = { ...this.cmOptions, mode: v }
     },
 
-    // 选择皮肤
-    handleSelectTheme(v) {
-      this.cmOptions = { ...this.cmOptions, theme: v }
-      localStorage.setItem('editorTheme', v)
-    },
 
-    onReady() {
+    applyEditorTheme(theme) {
+      const next = theme || this.editorTheme
+      if (this.cmOptions.theme !== next) {
+        this.cmOptions = { ...this.cmOptions, theme: next }
+      }
+      const instance = this.cmInstance || (this.$refs.cmRef && this.$refs.cmRef.cminstance)
+      if (instance && typeof instance.setOption === 'function') {
+        instance.setOption('theme', next)
+      }
+    },
+    onReady(instance) {
+      if (instance) {
+        this.cmInstance = instance
+        // 实例就绪时组件可能已处于深色主题，补一次
+        this.applyEditorTheme()
+      }
       // console.log(editor)
       // // 绑定其他快捷键, 格式化编辑器代码做示例
       // let autoFormatSelection = () => {

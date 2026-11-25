@@ -10,7 +10,6 @@
 package org.dromara.jpom.pipeline.hook;
 
 import cn.hutool.core.util.StrUtil;
-import org.dromara.jpom.common.i18n.I18nMessageUtil;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -78,8 +77,16 @@ public enum PipelineEvent {
 
     /**
      * 匹配所有事件（与在线构建脚本 description 写 `all` 同义）
+     * <p>
+     * 供事件钩子配置使用：不想逐个勾选时选「全部事件」，当前与以后新增的事件都会命中。
+     * </p>
      */
     public static final String ALL = "all";
+
+    /**
+     * 「全部事件」的文案 key（不放进枚举值里：它不是一次状态切换，只是匹配通配）
+     */
+    public static final String ALL_DESC_KEY = "i18n.pipeline_event_all.8b11";
 
     private final String code;
     private final String descKey;
@@ -101,7 +108,8 @@ public enum PipelineEvent {
      * @return 本地化描述
      */
     public String desc() {
-        return I18nMessageUtil.get(descKey);
+        // 与钩子其它文案同一出口：取不到语言包时退回 key，不因为「取文案」把事件派发弄崩
+        return PipelineHookMessages.get(descKey);
     }
 
     /**
@@ -146,6 +154,8 @@ public enum PipelineEvent {
      */
     public static Map<String, String> descriptions() {
         Map<String, String> map = new LinkedHashMap<>();
+        // 第一位是「全部事件」：与前端选项顺序一致，用户不用逐个勾选
+        map.put(ALL, PipelineHookMessages.get(ALL_DESC_KEY));
         for (PipelineEvent event : values()) {
             map.put(event.code, event.desc());
         }

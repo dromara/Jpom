@@ -131,6 +131,9 @@ export function downloadPipelineRunLog(runId) {
  * </p>
  */
 export const pipelineHookEventCodes = [
+  // 「全部事件」：命中当前与以后新增的任何事件（后端 PipelineEvent.ALL 同义），
+  // 放在第一位，避免与具体事件逐条选择
+  'all',
   'run_start',
   'run_success',
   'run_failed',

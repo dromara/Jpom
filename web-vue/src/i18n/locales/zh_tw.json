@@ -3248,5 +3248,6 @@
   "i18n_pipeline_event_script_exit": "結束碼",
   "i18n_pipeline_event_script_duration": "耗時 {duration}ms",
   "i18n_pipeline_event_webhook_ok": "成功",
-  "i18n_pipeline_event_webhook_fail": "失敗"
+  "i18n_pipeline_event_webhook_fail": "失敗",
+  "i18n_pipeline_hook_event_all": "全部事件（含以後新增）"
 }

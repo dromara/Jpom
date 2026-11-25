@@ -3248,5 +3248,6 @@
   "i18n_pipeline_event_script_exit": "Exit code",
   "i18n_pipeline_event_script_duration": "took {duration}ms",
   "i18n_pipeline_event_webhook_ok": "Success",
-  "i18n_pipeline_event_webhook_fail": "Failed"
+  "i18n_pipeline_event_webhook_fail": "Failed",
+  "i18n_pipeline_hook_event_all": "All events (including future ones)"
 }

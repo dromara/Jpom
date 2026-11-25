@@ -27,7 +27,18 @@
         </a-row>
       </a-form>
 
-      <!-- 仓库源 -->
+      <!-- 步骤指示器：把「仓库源 / 事件通知 / 阶段编排」分开，避免一屏堆到底（参照在线构建编辑页） -->
+      <a-steps
+        :current="stepsCurrent"
+        size="small"
+        class="editor-steps"
+        :items="stepsItems"
+        data-testid="pipeline-steps"
+        @change="handleStepChange"
+      />
+
+      <!-- 步骤 1：仓库源 -->
+      <div v-show="stepsCurrent === 0" data-testid="pipeline-step-source">
       <a-card :title="$t('i18n_pipeline_source_title')" size="small" class="block">
         <template #extra>
           <a-button type="primary" data-testid="pipeline-add-source" @click="addSource">
@@ -114,7 +125,10 @@
         </div>
       </a-card>
 
-      <!-- 事件通知（Hooks） -->
+      </div>
+
+      <!-- 步骤 2：事件通知（Hooks） -->
+      <div v-show="stepsCurrent === 1" data-testid="pipeline-step-hooks">
       <a-card :title="$t('i18n_pipeline_hooks_title')" size="small" class="block hooks-card">
         <div class="card-hint">{{ $t('i18n_pipeline_hooks_tip') }}</div>
 
@@ -160,6 +174,7 @@
                     :options="hookEventOptions"
                     :placeholder="$t('i18n_pipeline_hook_events_placeholder')"
                     :data-testid="'pipeline-hook-script-events-' + hi"
+                    @change="(value) => onHookEventsChange(hook, value)"
                   />
                 </a-form-item>
               </a-col>
@@ -237,6 +252,7 @@
                     :options="hookEventOptions"
                     :placeholder="$t('i18n_pipeline_hook_events_placeholder')"
                     :data-testid="'pipeline-hook-webhook-events-' + hi"
+                    @change="(value) => onHookEventsChange(hook, value)"
                   />
                 </a-form-item>
               </a-col>
@@ -271,7 +287,10 @@
         </a-button>
       </a-card>
 
-      <!-- 编排 + 配置 -->
+      </div>
+
+      <!-- 步骤 3：阶段编排 + 配置 -->
+      <div v-show="stepsCurrent === 2" data-testid="pipeline-step-stages">
       <a-row :gutter="8" class="block">
         <a-col :span="configCollapsed ? 24 : 16">
           <a-card :title="$t('i18n_pipeline_stage_title')" size="small" class="full-height">
@@ -801,16 +820,9 @@
           </a-card>
         </a-col>
       </a-row>
+      </div>
     </a-spin>
 
-    <div class="editor-footer">
-      <a-space>
-        <a-button @click="$emit('close')">{{ $t('i18n_625fb26b4b') }}</a-button>
-        <a-button type="primary" :loading="saving" data-testid="pipeline-save" @click="handleSave">
-          {{ $t('i18n_be5fbbe34c') }}
-        </a-button>
-      </a-space>
-    </div>
   </div>
 </template>
 
@@ -890,14 +902,24 @@ const createHookWebhook = () => ({
 export default {
   name: 'PipelineEdit',
   components: { PipelineCanvas },
-  props: { id: { type: String, default: '' } },
-  emits: ['close', 'saved'],
+  props: {
+    id: { type: String, default: '' },
+    // 当前步骤（与父级抽屉 footer 的「上一步 / 下一步」双向同步）
+    editSteps: { type: Number, default: 0 }
+  },
+  emits: ['close', 'saved', 'update:editSteps'],
   data() {
     return {
       Empty,
       loading: false,
       saving: false,
       configCollapsed: false,
+      stepsCurrent: this.editSteps || 0,
+      stepsItems: [
+        { title: this.$t('i18n_pipeline_source_title') },
+        { title: this.$t('i18n_pipeline_hooks_title') },
+        { title: this.$t('i18n_pipeline_stage_title') }
+      ],
       form: { id: '', name: '', groupName: '' },
       sources: [],
       stages: [],
@@ -1073,7 +1095,44 @@ export default {
       this.loadDetail()
     }
   },
+  watch: {
+    // 父级（抽屉 footer 的「上一步 / 下一步」）改动时必须同步到子组件，
+    // 否则按钮只改父级计数、内容仍停在原步骤（独立验收 D-1）
+    editSteps: {
+      handler(v) {
+        const total = this.stepsItems.length
+        const next = typeof v === 'number' ? Math.max(0, Math.min(total - 1, v)) : 0
+        if (next !== this.stepsCurrent) {
+          this.stepsCurrent = next
+        }
+      },
+      immediate: true
+    }
+  },
   methods: {
+    /**
+     * 事件选择互斥：「全部事件」与具体事件不能同时存在
+     * <p>
+     * AntD 的 change 只给最终数组，但数组顺序就是选择顺序：最后一项是 all 说明刚选了「全部事件」，
+     * 其余情况说明是在已选 all 后又点了具体事件——两种都收敛成一个语义明确的取值。
+     * </p>
+     */
+    onHookEventsChange(hook, value) {
+      const list = Array.isArray(value) ? value.slice() : []
+      if (list.length <= 1 || list.indexOf('all') === -1) {
+        return
+      }
+      hook.events = list[list.length - 1] === 'all' ? ['all'] : list.filter((code) => code !== 'all')
+    },
+    handleStepChange(current) {
+      this.stepsCurrent = current
+      this.$emit('update:editSteps', current)
+    },
+    setStep(step) {
+      const next = Math.max(0, Math.min(this.stepsItems.length - 1, step))
+      this.stepsCurrent = next
+      this.$emit('update:editSteps', next)
+    },
     loadDetail() {
       this.loading = true
       getPipelineGet({ id: this.id })
@@ -1691,15 +1750,18 @@ export default {
     },
     handleSave() {
       if (!this.form.name) {
+        this.setStep(0)
         message.warning(this.$t('i18n_pipeline_name_required'))
         return
       }
       if (!this.stages.length) {
+        this.setStep(2)
         message.warning(this.$t('i18n_pipeline_stage_required'))
         return
       }
       const invalid = this.stages.find((stage) => !this.stageValid(stage))
       if (invalid) {
+        this.setStep(2)
         message.error(this.$t('i18n_pipeline_stage_invalid') + '：' + (invalid.name || invalid.id) + ' - ' + this.stageInvalidReason(invalid))
         this.selectedIndex = this.stages.indexOf(invalid)
         this.configCollapsed = false
@@ -1708,12 +1770,14 @@ export default {
       const ids = this.stages.map((stage) => stage.id)
       const duplicated = ids.filter((id, index) => ids.indexOf(id) !== index)
       if (duplicated.length) {
+        this.setStep(2)
         message.error(this.$t('i18n_pipeline_stage_key_duplicate') + '：' + duplicated.join(','))
         return
       }
       // 事件通知与阶段校验分开：行内标红之外，保存前再指明具体第几行
       const hookError = this.firstHookError()
       if (hookError) {
+        this.setStep(1)
         message.error(hookError)
         return
       }
@@ -1741,6 +1805,7 @@ export default {
       )
       const hooksJson = JSON.stringify(this.serializeHooks())
       this.saving = true
+      this.$emit('saving-change', true)
       savePipeline({
         id: this.form.id,
         name: this.form.name,
@@ -1760,6 +1825,7 @@ export default {
         })
         .finally(() => {
           this.saving = false
+          this.$emit('saving-change', false)
         })
     }
   }
@@ -1778,11 +1844,11 @@ export default {
 }
 .empty-hint {
   padding: 12px 0;
-  color: #8f959e;
+  color: var(--jp-color-text-tertiary);
   font-size: 13px;
 }
 .field-tip {
-  color: #8f959e;
+  color: var(--jp-color-text-tertiary);
   font-size: 12px;
   line-height: 18px;
   margin-top: 2px;
@@ -1791,16 +1857,16 @@ export default {
   max-width: 560px;
 }
 .card-hint {
-  color: #8f959e;
+  color: var(--jp-color-text-tertiary);
   font-size: 12px;
   margin: -4px 0 8px;
 }
 .source-card {
-  border: 1px solid #eef0f3;
+  border: 1px solid var(--jp-color-border-secondary);
   border-radius: 8px;
   padding: 10px 12px 2px;
   margin-bottom: 8px;
-  background: #fafbfc;
+  background: var(--jp-color-fill-alter);
 }
 .source-head {
   display: flex;
@@ -1824,16 +1890,16 @@ export default {
   margin-bottom: 8px;
 }
 .hook-card {
-  border: 1px solid #eef0f3;
+  border: 1px solid var(--jp-color-border-secondary);
   border-radius: 8px;
   padding: 10px 12px 2px;
   margin-bottom: 8px;
-  background: #fafbfc;
+  background: var(--jp-color-fill-alter);
 }
 /* 未选事件 / 地址非法：整行标红，配合下方行内原因 */
 .hook-card-invalid {
-  border-color: #ffa39e;
-  background: #fff1f0;
+  border-color: var(--jp-color-error-border);
+  background: var(--jp-color-error-bg);
 }
 .hook-head {
   display: flex;
@@ -1842,7 +1908,7 @@ export default {
   margin-bottom: 4px;
 }
 .hook-switch-label {
-  color: #8f959e;
+  color: var(--jp-color-text-tertiary);
   font-size: 12px;
 }
 .hook-form :deep(.ant-form-item) {
@@ -1852,7 +1918,7 @@ export default {
   padding-bottom: 2px;
 }
 .hook-error {
-  color: #cf1322;
+  color: var(--jp-color-error-text);
   font-size: 12px;
   line-height: 18px;
   padding-bottom: 8px;
@@ -1862,7 +1928,7 @@ export default {
   height: clamp(260px, calc(100vh - 470px), 720px);
 }
 .canvas-tip {
-  color: #8f959e;
+  color: var(--jp-color-text-tertiary);
   font-size: 12px;
   margin-top: 6px;
 }
@@ -1874,11 +1940,11 @@ export default {
   width: 100%;
 }
 .target-card {
-  border: 1px solid #eef0f3;
+  border: 1px solid var(--jp-color-border-secondary);
   border-radius: 8px;
   padding: 8px;
   margin-bottom: 8px;
-  background: #fafbfc;
+  background: var(--jp-color-fill-alter);
 }
 .target-head {
   display: flex;
@@ -1895,13 +1961,12 @@ export default {
 .stage-warning {
   margin-top: 8px;
 }
-.editor-footer {
-  position: sticky;
-  bottom: 0;
-  padding: 8px 12px;
-  background: #fff;
-  border-top: 1px solid #f0f0f0;
-  text-align: right;
-  z-index: 5;
+.editor-steps {
+  /* 步骤条与下方区块留出呼吸感，并随主题色 */
+  margin: 4px 0 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--jp-color-border-secondary);
+  border-radius: var(--jp-radius-lg);
+  background: var(--jp-color-fill-alter);
 }
 </style>

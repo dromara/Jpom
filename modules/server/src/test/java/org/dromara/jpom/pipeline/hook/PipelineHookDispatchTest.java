@@ -107,6 +107,41 @@ public class PipelineHookDispatchTest {
     }
 
     @Test
+    public void allMixedWithConcreteEventStillMatchesEverything() {
+        PipelineHookDispatcher dispatcher = new PipelineHookDispatcher(Collections.singletonList(new PipelineHookHandler() {
+            @Override
+            public String type() {
+                return "webhook";
+            }
+
+            @Override
+            public String handle(PipelineHookDef hook, PipelineHookContext context) {
+                return null;
+            }
+        }));
+        PipelineHookDef hook = new PipelineHookDef();
+        hook.setType("webhook");
+        hook.setUrl("https://example.com/hook");
+        // 历史/手工数据可能出现「all + 具体事件」混选：语义必须仍是全部命中，不能退化成只命中列出的那些
+        hook.setEvents(Arrays.asList(PipelineEvent.ALL, "run_failed"));
+        for (PipelineEvent event : PipelineEvent.values()) {
+            PipelineHookContext hookContext = new PipelineHookContext();
+            hookContext.setEvent(event);
+            hookContext.setPipelineContext(context(new ArrayList<>()));
+            Assertions.assertNotNull(dispatcher.fire(Collections.singletonList(hook), hookContext),
+                "混选 all 时事件 " + event.getCode() + " 必须命中");
+        }
+    }
+
+    @Test
+    public void eventDescriptionsStartWithAll() {
+        Map<String, String> descriptions = PipelineEvent.descriptions();
+        String firstKey = descriptions.keySet().iterator().next();
+        Assertions.assertEquals(PipelineEvent.ALL, firstKey, "「全部事件」必须排在事件清单第一位");
+        Assertions.assertEquals(PipelineEvent.values().length + 1, descriptions.size());
+    }
+
+    @Test
     public void noMatchingHookReturnsNull() {
         PipelineHookDispatcher dispatcher = new PipelineHookDispatcher(Collections.emptyList());
         PipelineHookContext hookContext = new PipelineHookContext();

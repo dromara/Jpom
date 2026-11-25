@@ -143,6 +143,7 @@
       width="92vw"
       :open="editVisible"
       :body-style="{ padding: '12px' }"
+      :footer-style="{ textAlign: 'right' }"
       @close="handleEditClose"
     >
       <template #title>
@@ -151,7 +152,42 @@
           <a-tag v-if="editingName">{{ editingName }}</a-tag>
         </a-space>
       </template>
-      <PipelineEdit v-if="editVisible" :id="editingId" @close="handleEditClose" @saved="handleSaved" />
+      <PipelineEdit
+        v-if="editVisible"
+        ref="pipelineEdit"
+        v-model:edit-steps="editSteps"
+        :id="editingId"
+        @close="handleEditClose"
+        @saved="handleSaved"
+        @saving-change="(v) => (editSaving = v)"
+      />
+      <!-- 底部操作固定在各步骤之外（与在线构建编辑一致）：内容再长也不影响按钮位置 -->
+      <template #footer>
+        <a-space>
+          <a-button data-testid="pipeline-cancel" @click="handleEditClose">{{ $t('i18n_625fb26b4b') }}</a-button>
+          <a-divider type="vertical" />
+          <a-button :disabled="editSteps === 0" data-testid="pipeline-step-prev" @click="editSteps -= 1">
+            {{ $t('i18n_eeb6908870') }}
+          </a-button>
+          <a-button
+            type="primary"
+            :disabled="editSteps === editStepCount - 1"
+            data-testid="pipeline-step-next"
+            @click="editSteps += 1"
+          >
+            {{ $t('i18n_38ce27d846') }}
+          </a-button>
+          <a-divider type="vertical" />
+          <a-button
+            type="primary"
+            :loading="editSaving"
+            data-testid="pipeline-save"
+            @click="$refs.pipelineEdit && $refs.pipelineEdit.handleSave()"
+          >
+            {{ $t('i18n_be5fbbe34c') }}
+          </a-button>
+        </a-space>
+      </template>
     </CustomDrawer>
 
     <!-- 运行记录：抽屉 -->
@@ -224,6 +260,9 @@ export default {
         status: undefined
       }),
       editVisible: false,
+      editSteps: 0,
+      editStepCount: 3,
+      editSaving: false,
       editingId: '',
       editingName: '',
       runVisible: false,
@@ -363,6 +402,8 @@ export default {
     },
     handleEditClose() {
       this.editVisible = false
+      this.editSteps = 0
+      this.editSaving = false
       this.editingId = ''
       this.editingName = ''
     },

@@ -358,7 +358,7 @@ export default {
   flex-wrap: wrap;
 }
 .event-time {
-  color: #8f959e;
+  color: var(--jp-color-text-tertiary);
   font-size: 12px;
 }
 .event-block {
@@ -366,7 +366,7 @@ export default {
   font-size: 12px;
 }
 .event-label {
-  color: #8f959e;
+  color: var(--jp-color-text-tertiary);
   margin-right: 4px;
 }
 .event-row {
@@ -380,6 +380,6 @@ export default {
   word-break: break-all;
 }
 .event-muted {
-  color: #8f959e;
+  color: var(--jp-color-text-tertiary);
 }
 </style>

@@ -161,7 +161,7 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #8f959e;
+  color: var(--jp-color-text-tertiary);
   font-size: 12px;
 }
 </style>

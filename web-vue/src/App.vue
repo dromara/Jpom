@@ -19,6 +19,9 @@
       // }
     }"
   >
+    <!-- 主题变量层：把当前算法（亮/暗/紧凑）下的设计 token 写成 --jp-*，页面样式只允许引用 var(--jp-*)
+         必须放在 a-config-provider 内部，见 runbooks/ui-interaction-guidelines.md §5 -->
+    <ThemeVarsProvider />
     <a-spin v-bind="globalLoadingProps">
       <router-view v-if="routerActivation" />
       <div v-if="pageloading" class="pageLoading"></div>
@@ -31,6 +34,7 @@ import { theme } from 'ant-design-vue'
 import { onMounted, onUnmounted } from 'vue'
 import { SpinProps } from 'ant-design-vue/es/spin/Spin'
 import { changeLang } from './i18n'
+import { ThemeVarsProvider } from './utils/theme-vars'
 import { useI18n } from 'vue-i18n'
 import { Locale } from 'ant-design-vue/es/locale'
 const routerActivation = ref(true)
