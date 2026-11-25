@@ -224,7 +224,20 @@ public class BuildExecuteService {
             //
             logRecorder.system(I18nMessageUtil.get("i18n.prepare_rollback.dba6"), fromBuildNumberId, buildId);
             //
-            buildExecutorPoolService.execute(() -> manage.rollback(item));
+            // 重发/回滚的发布进程历史上完全没有登记，导致「回滚中」取消不到；
+            // 这里登记执行体，取消时直接杀发布命令进程树。
+            String rollbackKey = item.getId();
+            buildExecutorPoolService.execute(() -> {
+                // 名称只用于诊断展示，直接用构建名，避免额外 i18n 键
+                ExecutionRegistry.Handle handle = ExecutionRegistry.register(rollbackKey, item.getName(), reason -> manage.killProcess());
+                handle.stage("release");
+                try {
+                    manage.rollback(item);
+                } finally {
+                    handle.stop();
+                    ExecutionRegistry.unregister(rollbackKey);
+                }
+            });
             return buildId;
         }
     }
@@ -434,7 +447,26 @@ public class BuildExecuteService {
     }
 
     public void updateStatus(String buildId, String logId, int buildNumberId, BuildStatus buildStatus, String msg) {
-        if (buildStatus != BuildStatus.Cancel && !buildStatus.isProgress() && CANCEL_REQUESTED.contains(buildId)) {
+        this.updateStatus(buildId, logId, buildNumberId, buildStatus, msg, true);
+    }
+
+    /**
+     * 写入状态（可关闭「取消意图归一」）
+     * <p>
+     * 取消路径必须关闭归一：它要根据「进程树是否确认退出」如实写 {@link BuildStatus#Cancel} 或
+     * {@link BuildStatus#AbnormalShutdown}；若走归一，异常关闭会被改写成「已取消」，
+     * 又回到「界面已取消、进程还在跑」的老问题。
+     * </p>
+     *
+     * @param buildId      构建 ID
+     * @param logId        历史记录 ID
+     * @param buildNumberId 构建编号
+     * @param buildStatus  目标状态
+     * @param msg          状态消息
+     * @param normalizeCancel 是否把取消后的终态归一为「已取消」
+     */
+    public void updateStatus(String buildId, String logId, int buildNumberId, BuildStatus buildStatus, String msg, boolean normalizeCancel) {
+        if (normalizeCancel && buildStatus != BuildStatus.Cancel && !buildStatus.isProgress() && CANCEL_REQUESTED.contains(buildId)) {
             // 取消后构建线程/节点回报的任何终态都归一为「已取消」
             buildStatus = BuildStatus.Cancel;
             msg = I18nMessageUtil.get("i18n.manual_cancel.8464");

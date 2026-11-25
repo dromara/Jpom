@@ -20,6 +20,8 @@ import cn.hutool.system.SystemUtil;
 import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.core.exec.ProcessKillResult;
+import org.dromara.jpom.core.exec.ProcessTree;
 import org.dromara.jpom.system.ExtConfigBean;
 
 import java.io.File;
@@ -30,6 +32,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * 命令行工具
@@ -427,9 +430,34 @@ public class CommandUtil {
      * @throws InterruptedException 异常
      */
     public static int execWaitFor(File scriptFile, File baseDir, Map<String, String> env, String args, BiConsumer<String, Process> consumer) throws IOException, InterruptedException {
+        return execWaitFor(scriptFile, baseDir, env, args, consumer, null);
+    }
+
+    /**
+     * 执行脚本（进程启动即回调，便于调用方立刻登记进程用于取消）
+     * <p>
+     * 直接依赖 {@code consumer} 拿进程有个坑：它只在有输出时触发，
+     * {@code sleep 600} 这类无输出命令会永远拿不到进程句柄 → 取消时杀不掉。
+     * </p>
+     *
+     * @param scriptFile 脚本文件
+     * @param baseDir    基础路径
+     * @param env        环境变量
+     * @param args       参数
+     * @param consumer   行回调
+     * @param onStart    进程启动回调（可为 null）
+     * @return 退出码
+     * @throws IOException          io
+     * @throws InterruptedException 异常
+     */
+    public static int execWaitFor(File scriptFile, File baseDir, Map<String, String> env, String args,
+                                  BiConsumer<String, Process> consumer, Consumer<Process> onStart) throws IOException, InterruptedException {
         ProcessBuilder processBuilder = new ProcessBuilder();
         //
         List<String> command = build(scriptFile, args);
+        // 让脚本单独成一个进程组：取消时才能把脚本下的孙进程（mvn/java/...）一起收掉，
+        // 否则只 kill 直接子进程 shell，孙进程会被 init 收养继续运行（界面已取消、进程还在跑）。
+        command = ProcessTree.wrapNewProcessGroup(command);
         log.debug(CollUtil.join(command, StrUtil.SPACE));
         processBuilder.redirectErrorStream(true);
         processBuilder.command(command);
@@ -444,6 +472,9 @@ public class CommandUtil {
         }
         //
         Process process = processBuilder.start();
+        if (onStart != null) {
+            onStart.accept(process);
+        }
         try (InputStream inputStream = process.getInputStream()) {
             IoUtil.readLines(inputStream, ExtConfigBean.getConsoleLogCharset(), (LineHandler) line -> consumer.accept(line, process));
         }
@@ -451,7 +482,14 @@ public class CommandUtil {
     }
 
     /**
-     * 关闭 Process实例
+     * 关闭 Process 实例及其全部子孙进程
+     * <p>
+     * 行为变化（2.11.16）：由「只 kill 直接子进程 + {@code while(true)} 自旋」改为委托
+     * {@link ProcessTree} 按进程组/进程树终止，并且全程有界。原因：构建脚本
+     * {@code sh build.sh} 下的 {@code mvn}/{@code java} 属于孙进程，只 destroy 父 shell 会让它们
+     * 被 init 收养继续运行，界面却显示「已取消」；自旋在进程不可中断时还会卡住调用线程，
+     * 导致其后的收尾代码（移除运行登记、关闭日志）永不执行。
+     * </p>
      *
      * @param process Process
      */
@@ -459,20 +497,12 @@ public class CommandUtil {
         if (process == null) {
             return;
         }
-        while (true) {
-            Object handle = tryGetProcessId(process);
-            process.destroy();
-            if (process.isAlive()) {
-                process.destroyForcibly();
-                try {
-                    process.waitFor(500, TimeUnit.MILLISECONDS);
-                } catch (InterruptedException ignored) {
-                }
-                log.info(I18nMessageUtil.get("i18n.waiting_to_close_process.3634"), handle);
-            } else {
-                break;
-            }
+        ProcessKillResult result = ProcessTree.kill(process);
+        if (result.isSuccess()) {
+            log.debug(I18nMessageUtil.get("i18n.waiting_to_close_process.3634"), tryGetProcessId(process));
+            return;
         }
+        log.warn(I18nMessageUtil.get("i18n.process_tree_residual.d0c1"), result.getRemainingPids());
     }
 
     public static Object tryGetProcessId(Process process) {

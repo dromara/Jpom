@@ -20,6 +20,7 @@ const routeMenuMap: Record<string, string> = {
   dockerSwarm: '/docker/swarm',
   sshList: '/ssh',
   sshProjectList: '/ssh-project',
+  pipelineList: '/pipeline/list',
   ftpList: '/ftp',
   commandList: '/ssh/command',
   commandLogList: '/ssh/command-log',

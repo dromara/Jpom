@@ -56,6 +56,10 @@
       {
         "id": "buildHistory",
         "title": "構建歷史"
+      },
+      {
+        "id": "pipelineList",
+        "title": "流水線"
       }
     ]
   },

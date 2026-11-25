@@ -141,7 +141,10 @@ public class BuildInfoService extends BaseWorkspaceService<BuildInfoModel> imple
             .set("status", CollUtil.newArrayList(
                 BuildStatus.Ing.getCode(),
                 BuildStatus.PubIng.getCode(),
-                BuildStatus.WaitExec.getCode())
+                BuildStatus.WaitExec.getCode(),
+                // 「取消中」是过渡态：服务重启后既没人确认退出、也没有进程句柄，只能落异常关闭，
+                // 否则界面会永远停在「取消中」
+                BuildStatus.CancelRequested.getCode())
             );
 
         return this.update(entity,condition);

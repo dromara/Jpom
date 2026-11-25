@@ -50,6 +50,10 @@ import lombok.Lombok;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.BaseServerController;
+import org.dromara.jpom.core.exec.ProcessKillResult;
+import org.dromara.jpom.core.release.ReleaseTarget;
+import org.dromara.jpom.core.release.ReleaseTargetRegistry;
+import org.dromara.jpom.core.exec.ProcessTree;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.build.version.BuildVersionService;
@@ -119,7 +123,11 @@ public class ReleaseManage {
 
     private final LogRecorder logRecorder;
     private File resultFile;
-    private Process process;
+    private volatile Process process;
+    /**
+     * 进程登记回调：让构建编排把发布命令的进程登记进执行体（取消「发布中」任务时才能杀掉）
+     */
+    private Consumer<Process> processListener;
 
     private static BuildExecuteService buildExecuteService;
     private static DockerInfoService dockerInfoService;
@@ -129,6 +137,23 @@ public class ReleaseManage {
     private static ScriptLibraryServer scriptLibraryServer;
     private static MachineFtpServer machineFtpServer;
 
+
+    /**
+     * 终止本次发布当前正在执行的命令进程（取消「发布中」任务用）
+     *
+     * @return true 确认进程已退出；false 表示杀不掉或本来就没有进程
+     */
+    public boolean killProcess() {
+        Process current = this.process;
+        if (current == null) {
+            return false;
+        }
+        ProcessKillResult result = ProcessTree.kill(current);
+        if (!result.isSuccess()) {
+            log.warn(I18nMessageUtil.get("i18n.process_tree_residual.d0c1"), result.getRemainingPids());
+        }
+        return result.isSuccess();
+    }
 
     private void loadService() {
         buildExecuteService = ObjectUtil.defaultIfNull(buildExecuteService, () -> SpringUtil.getBean(BuildExecuteService.class));
@@ -207,29 +232,14 @@ public class ReleaseManage {
         int releaseMethod = this.buildExtraModule.getReleaseMethod();
         logRecorder.system(I18nMessageUtil.get("i18n.publish_method_format.4622"), BaseEnum.getDescByCode(BuildReleaseMethod.class, releaseMethod));
 
-        if (releaseMethod == BuildReleaseMethod.Outgiving.getCode()) {
-            //
-            this.doOutGiving();
-        } else if (releaseMethod == BuildReleaseMethod.Project.getCode()) {
-            this.doProject();
-        } else if (releaseMethod == BuildReleaseMethod.Ssh.getCode()) {
-            this.doSsh();
-        } else if (releaseMethod == BuildReleaseMethod.LocalCommand.getCode()) {
-            return this.localCommand();
-        } else if (releaseMethod == BuildReleaseMethod.DockerImage.getCode()) {
-            return this.doDockerImage();
-        } else if (releaseMethod == BuildReleaseMethod.SshProject.getCode()) {
-            this.doSshProject();
-        } else if (releaseMethod == BuildReleaseMethod.Ftp.getCode()) {
-            this.doFtp();
-        } else if (releaseMethod == BuildReleaseMethod.No.getCode()) {
-            return null;
-        } else {
+        // 装配点：发布方式 → 实现类由注册表决定，新增一种方式不再改这里
+        ReleaseTarget target = ReleaseTargetRegistry.get(releaseMethod);
+        if (target == null) {
             String format = StrUtil.format(I18nMessageUtil.get("i18n.no_implemented_publish_distribution.fcf8"), releaseMethod);
             logRecorder.systemError(format);
             return format;
         }
-        return null;
+        return target.release(this);
     }
 
     /**
@@ -276,7 +286,7 @@ public class ReleaseManage {
             .collect(Collectors.joining(StrUtil.COMMA));
     }
 
-    private String doDockerImage() {
+    String doDockerImage() {
         // 生成临时目录
         File tempPath = FileUtil.file(JpomApplication.getInstance().getTempPath(), "build_temp", "docker_image", this.buildExtraModule.getId() + StrUtil.DASHED + this.buildNumberId);
         try {
@@ -313,61 +323,85 @@ public class ReleaseManage {
                 logRecorder.systemError(format);
                 return format;
             }
-            //String dockerBuildArgs = this.buildExtraModule.getDockerBuildArgs();
-            for (DockerInfoModel infoModel : dockerInfoModels) {
-                boolean done = this.doDockerImage(infoModel, envMap, dockerfile, baseDir, dockerTag, this.buildExtraModule);
-                if (!done) {
-                    logRecorder.systemWarning(I18nMessageUtil.get("i18n.container_build_exception.a98f"), infoModel.getName(), dockerTag);
-                    if (buildExtraModule.strictlyEnforce()) {
-                        return I18nMessageUtil.get("i18n.strict_mode_image_build_failure.ecea");
-                    }
-                }
+            // 逐台构建：任一失败在严格模式下直接失败，否则仅告警（沿用历史语义）
+            String buildError = this.buildImages(dockerInfoModels, envMap, dockerfile, baseDir, dockerTag);
+            if (buildError != null) {
+                return buildError;
             }
             // 推送 - 只选择一个 docker 服务来推送到远程仓库
             Boolean pushToRepository = this.buildExtraModule.getPushToRepository();
             Boolean pushToRepositoryAfterDelete = this.buildExtraModule.getPushToRepositoryAfterDelete();
             if (pushToRepository != null && pushToRepository) {
-                List<String> repositoryList = StrUtil.splitTrim(dockerTag, StrUtil.COMMA);
-                Map<String, Object> map2 = new HashMap<>(map);
-                for (String repositoryItem : repositoryList) {
-                    String registryUrl = StrUtil.emptyToDefault((String) map2.get("registryUrl"), StrUtil.EMPTY);
-                    Object name = map2.get("name");
-                    logRecorder.system(I18nMessageUtil.get("i18n.start_push_image_to_remote_repo.10a7"), name, registryUrl, repositoryItem, System.lineSeparator());
-                    //
-                    map2.put("repository", repositoryItem);
-                    Consumer<String> logConsumer = logRecorder::info;
-                    map2.put("logConsumer", logConsumer);
-                    IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
-                    try {
-                        plugin.execute("pushImage", map2);
-                    } catch (Exception e) {
-                        logRecorder.error(I18nMessageUtil.get("i18n.push_image_container_exception.2090"), e);
-                    }
-                }
+                this.pushImages(map, dockerTag);
             }
             // 发布 docker 服务
             this.updateSwarmService(dockerTag, this.buildExtraModule.getDockerSwarmId(), this.buildExtraModule.getDockerSwarmServiceName());
             // 推送后删除本地镜像
             if (pushToRepository != null && pushToRepository && pushToRepositoryAfterDelete != null && pushToRepositoryAfterDelete) {
-                // 删除本地镜像
-                List<String> repositoryList = StrUtil.splitTrim(dockerTag, StrUtil.COMMA);
-                Map<String, Object> map2 = new HashMap<>(map);
-                for (String repositoryItem : repositoryList) {
-                    Object name = map2.get("name");
-                    logRecorder.system(I18nMessageUtil.get("i18n.auto_delete_local_image_after_push.c13d"), name, repositoryItem, System.lineSeparator());
-                    map2.put("imageId", repositoryItem);
-                    IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
-                    try {
-                        plugin.execute("removeImage", map2);
-                    } catch (Exception e) {
-                        logRecorder.error(I18nMessageUtil.get("i18n.delete_local_image_failed.91fa"), e);
-                    }
-                }
+                this.removeLocalImages(map, dockerTag);
             }
         } finally {
             CommandUtil.systemFastDel(tempPath);
         }
         return null;
+    }
+
+    /**
+     * 逐台 Docker 服务构建镜像
+     *
+     * @return 错误信息；null 表示全部按策略完成
+     */
+    private String buildImages(List<DockerInfoModel> dockerInfoModels, Map<String, String> envMap,
+                               File dockerfile, File baseDir, String dockerTag) {
+        for (DockerInfoModel infoModel : dockerInfoModels) {
+            boolean done = this.doDockerImage(infoModel, envMap, dockerfile, baseDir, dockerTag, this.buildExtraModule);
+            if (!done) {
+                logRecorder.systemWarning(I18nMessageUtil.get("i18n.container_build_exception.a98f"), infoModel.getName(), dockerTag);
+                if (buildExtraModule.strictlyEnforce()) {
+                    return I18nMessageUtil.get("i18n.strict_mode_image_build_failure.ecea");
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 推送镜像到远程仓库（逐个 tag）
+     */
+    private void pushImages(Map<String, Object> map, String dockerTag) {
+        Map<String, Object> map2 = new HashMap<>(map);
+        for (String repositoryItem : StrUtil.splitTrim(dockerTag, StrUtil.COMMA)) {
+            String registryUrl = StrUtil.emptyToDefault((String) map2.get("registryUrl"), StrUtil.EMPTY);
+            Object name = map2.get("name");
+            logRecorder.system(I18nMessageUtil.get("i18n.start_push_image_to_remote_repo.10a7"), name, registryUrl, repositoryItem, System.lineSeparator());
+            map2.put("repository", repositoryItem);
+            Consumer<String> logConsumer = logRecorder::info;
+            map2.put("logConsumer", logConsumer);
+            IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+            try {
+                plugin.execute("pushImage", map2);
+            } catch (Exception e) {
+                logRecorder.error(I18nMessageUtil.get("i18n.push_image_container_exception.2090"), e);
+            }
+        }
+    }
+
+    /**
+     * 推送完成后删除本地镜像（逐个 tag）
+     */
+    private void removeLocalImages(Map<String, Object> map, String dockerTag) {
+        Map<String, Object> map2 = new HashMap<>(map);
+        for (String repositoryItem : StrUtil.splitTrim(dockerTag, StrUtil.COMMA)) {
+            Object name = map2.get("name");
+            logRecorder.system(I18nMessageUtil.get("i18n.auto_delete_local_image_after_push.c13d"), name, repositoryItem, System.lineSeparator());
+            map2.put("imageId", repositoryItem);
+            IPlugin plugin = PluginFactory.getPlugin(DockerInfoService.DOCKER_PLUGIN_NAME);
+            try {
+                plugin.execute("removeImage", map2);
+            } catch (Exception e) {
+                logRecorder.error(I18nMessageUtil.get("i18n.delete_local_image_failed.91fa"), e);
+            }
+        }
     }
 
     private void updateSwarmService(String dockerTag, String swarmId, String serviceName) {
@@ -418,7 +452,7 @@ public class ReleaseManage {
     /**
      * 本地命令执行
      */
-    private String localCommand() {
+    String localCommand() {
         // 执行命令
         String releaseCommand = this.buildExtraModule.getReleaseCommand();
         if (StrUtil.isEmpty(releaseCommand)) {
@@ -436,10 +470,13 @@ public class ReleaseManage {
         int waitFor = JpomApplication.getInstance()
             .execScript(s1 + releaseCommand, file -> {
                 try {
-                    return CommandUtil.execWaitFor(file, sourceFile, envFileMap, StrUtil.EMPTY, (s, process) -> {
-                        ReleaseManage.this.process = process;
-                        logRecorder.info(s);
-                    });
+                    // 进程启动即登记（发布命令同样可能是无输出命令）
+                    return CommandUtil.execWaitFor(file, sourceFile, envFileMap, StrUtil.EMPTY,
+                        (s, process) -> logRecorder.info(s),
+                        process -> {
+                            ReleaseManage.this.process = process;
+                            Optional.ofNullable(ReleaseManage.this.processListener).ifPresent(listener -> listener.accept(process));
+                        });
                 } catch (IOException | InterruptedException e) {
                     throw Lombok.sneakyThrow(e);
                 }
@@ -512,7 +549,7 @@ public class ReleaseManage {
     /**
      * ssh 发布（支持多目标；失败策略见 {@link #releaseTargets}）
      */
-    private void doSsh() {
+    void doSsh() {
         SshService sshService = SpringUtil.getBean(SshService.class);
         this.releaseTargets(this.buildExtraModule.getReleaseMethodDataId(), targetId -> {
             SshModel item = sshService.getByKey(targetId, false);
@@ -590,7 +627,7 @@ public class ReleaseManage {
      * 与「发布到项目」一致支持版本快照：发布前登记基线、发布成功后登记本次版本，
      * 构建历史里的「快速回滚」据此把远端目录切回历史版本（不重新传输产物）。
      */
-    private void doSshProject() {
+    void doSshProject() {
         SshProjectService sshProjectService = SpringUtil.getBean(SshProjectService.class);
         this.releaseTargets(this.buildExtraModule.getReleaseMethodDataId(), targetId -> {
             SshProjectModel project = sshProjectService.getByKey(targetId);
@@ -716,7 +753,7 @@ public class ReleaseManage {
      * 2026-11-23 复测：原来目标已删除只记一条错误日志、发布目录为空只告警，构建仍算成功，
      * 与 SSH / SSH 项目「目标缺失或上传异常算失败」的口径不一致，这里统一走 releaseTargets。
      */
-    private void doFtp() {
+    void doFtp() {
         FtpService ftpService = SpringUtil.getBean(FtpService.class);
         this.releaseTargets(this.buildExtraModule.getReleaseMethodDataId(), targetId -> {
             FtpModel item = ftpService.getByKey(targetId, false);
@@ -848,7 +885,7 @@ public class ReleaseManage {
     /**
      * 发布项目
      */
-    private void doProject() {
+    void doProject() {
         //AfterOpt afterOpt, boolean clearOld, boolean diffSync
         AfterOpt afterOpt = BaseEnum.getEnum(AfterOpt.class, this.buildExtraModule.getAfterOpt(), AfterOpt.No);
         boolean clearOld = this.buildExtraModule.isClearOld();
@@ -969,7 +1006,7 @@ public class ReleaseManage {
     /**
      * 分发包
      */
-    private void doOutGiving() throws ExecutionException, InterruptedException {
+    void doOutGiving() throws ExecutionException, InterruptedException {
         String releaseMethodDataId = this.buildExtraModule.getReleaseMethodDataId();
         String projectSecondaryDirectory = this.buildExtraModule.getProjectSecondaryDirectory();
         //

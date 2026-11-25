@@ -25,6 +25,7 @@ import org.dromara.jpom.func.system.service.ClusterInfoService;
 import org.dromara.jpom.func.user.server.UserLoginLogServer;
 import org.dromara.jpom.service.dblog.BackupInfoService;
 import org.dromara.jpom.service.dblog.BuildInfoService;
+import org.dromara.jpom.pipeline.service.PipelineInfoService;
 import org.dromara.jpom.service.dblog.DbBuildHistoryLogService;
 import org.dromara.jpom.service.dblog.DbMonitorNotifyLogService;
 import org.dromara.jpom.service.dblog.DbUserOperateLogService;
@@ -93,6 +94,10 @@ public enum ClassFeature {
      */
     BUILD(() -> I18nMessageUtil.get("i18n.online_build.6f7a"), BuildInfoService.class),
     BUILD_LOG(() -> I18nMessageUtil.get("i18n.build_log.7c0e"), DbBuildHistoryLogService.class),
+    /**
+     * 流水线（2.11.16 新增模块）：与 BUILD 分开授权——可以只给某人流水线权限而不给老构建权限
+     */
+    PIPELINE(() -> I18nMessageUtil.get("i18n.pipeline_info.7c1e"), PipelineInfoService.class),
     BUILD_REPOSITORY(() -> I18nMessageUtil.get("i18n.repository_info.22cd"), RepositoryService.class),
     USER(() -> I18nMessageUtil.get("i18n.user_management.7d94"), UserService.class),
     USER_LOG(() -> I18nMessageUtil.get("i18n.operation_log.cda8"), DbUserOperateLogService.class),

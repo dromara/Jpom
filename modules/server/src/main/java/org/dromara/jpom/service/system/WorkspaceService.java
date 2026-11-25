@@ -57,12 +57,42 @@ public class WorkspaceService extends BaseDbService<WorkspaceModel> implements I
             String value = super.parseRealTableName(tableName);
             String sql = StrUtil.format("update " + value + " set {}=? where ({} is null or {}='' or {}='null')",
                 workspaceId,workspaceId,workspaceId,workspaceId);
-            int execute = this.execute(sql, Const.WORKSPACE_DEFAULT_ID);
+            int execute;
+            try {
+                execute = this.execute(sql, Const.WORKSPACE_DEFAULT_ID);
+            } catch (Exception e) {
+                if (isTableMissing(e)) {
+                    // 新模块的表在应用启动早期还没建（建表发生在后置事件里），这里跳过即可：
+                    // 表不存在就没有历史数据需要修，不能因此让整个服务起不来（实测新增 PIPELINE_INFO 时启动 crash）
+                    log.debug("skip workspace repair for not-created table: {}", value);
+                    continue;
+                }
+                throw e;
+            }
             if (execute > 0) {
                 log.info(I18nMessageUtil.get("i18n.fix_null_workspace_data.4d0b"), value, execute);
             }
             total += execute;
         }
         return total;
+    }
+
+    /**
+     * 判断异常是否为「表不存在」
+     *
+     * @param e 异常
+     * @return true 表不存在
+     */
+    private static boolean isTableMissing(Throwable e) {
+        Throwable cause = e;
+        while (cause != null) {
+            String message = cause.getMessage();
+            if (message != null && (message.contains("not found") || message.contains("does not exist")
+                || message.contains("不存在") || message.contains("42S02"))) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
     }
 }
