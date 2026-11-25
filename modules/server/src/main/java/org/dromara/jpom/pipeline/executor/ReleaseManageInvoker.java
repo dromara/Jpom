@@ -45,10 +45,18 @@ public class ReleaseManageInvoker implements PipelineReleaseInvoker {
         PipelineArtifactStager.stage(request.getPipelineId(), request.getRunNumber(), request.getArtifactPath());
         BuildInfoModel synthetic = new BuildInfoModel();
         synthetic.setId(request.getPipelineId());
-        synthetic.setName("pipeline-" + request.getPipelineId());
+        // 名称带「流水线名 + 运行号」：文件中心的 name/description 用的就是这个名称，
+        // 否则同一流水线多次运行的产物在文件中心里完全同名，无法区分是哪一次
+        String pipelineName = StrUtil.emptyToDefault(request.getPipelineName(), request.getPipelineId());
+        synthetic.setName(pipelineName + " #" + request.getRunNumber());
         synthetic.setWorkspaceId(request.getWorkspaceId());
         synthetic.setBuildId(request.getRunNumber());
         synthetic.setResultDirFile(StrUtil.SLASH);
+        // 文件中心发布支持自定义别名码：目标配置里的 aliasCode 落到合成构建信息上（其余发布方式忽略）
+        Object aliasCode = request.getExtra() == null ? null : request.getExtra().get("aliasCode");
+        if (aliasCode != null && StrUtil.isNotBlank(String.valueOf(aliasCode))) {
+            synthetic.setAliasCode(String.valueOf(aliasCode));
+        }
         BuildExtraModule extra = this.toExtraModule(request, synthetic);
         EnvironmentMapBuilder env = new EnvironmentMapBuilder(10);
         env.putStr(request.getVariables());

@@ -30,6 +30,13 @@ public enum BuildReleaseMethod implements BaseEnum {
 	 * SSH 项目（不依赖插件端，产物直接落到项目目录并重启）
 	 */
 	SshProject(7, "SSH 项目"),
+	/**
+	 * 文件中心（产物存入系统文件中心，可被分发/下载复用）
+	 * <p>
+	 * 追加码（2.11.16）：0–7 的语义不变；流水线发布阶段与在线构建都能选到这一种方式。
+	 * </p>
+	 */
+	FileStorage(8, "文件中心"),
 	;
 	private final int code;
 	private final String desc;

@@ -9,14 +9,20 @@
  */
 package org.dromara.jpom.pipeline.service;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.db.Entity;
+import lombok.extern.slf4j.Slf4j;
+import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.model.enums.BuildStatus;
+import org.dromara.jpom.pipeline.engine.PipelineRunState;
 import org.dromara.jpom.pipeline.model.PipelineRunModel;
 import org.dromara.jpom.service.IStatusRecover;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * 流水线运行记录服务
@@ -29,8 +35,99 @@ import java.util.Arrays;
  * @author jpom
  * @since 2.11.16
  */
+@Slf4j
 @Service
 public class PipelineRunService extends BaseWorkspaceService<PipelineRunModel> implements IStatusRecover {
+
+    /**
+     * 取该流水线当前正在执行的运行记录（用于「取消中」中间态）
+     *
+     * @param pipelineId 流水线 ID
+     * @return 运行中的记录；没有返回 null
+     */
+    public PipelineRunModel getRunningRun(String pipelineId) {
+        PipelineRunModel where = new PipelineRunModel();
+        where.setPipelineId(pipelineId);
+        where.setStatus(BuildStatus.Ing.getCode());
+        List<PipelineRunModel> list = this.listByBean(where);
+        if (CollUtil.isEmpty(list)) {
+            where.setStatus(BuildStatus.PubIng.getCode());
+            list = this.listByBean(where);
+        }
+        return CollUtil.getFirst(list);
+    }
+
+    /**
+     * 受控状态转换
+     * <p>
+     * 所有「运行状态变化」都从这里走：{@link PipelineRunState} 判定合法才写库，非法转换直接拒绝并记
+     * 日志（不静默覆盖）。终态因此不会被后续写入改写。
+     * </p>
+     *
+     * @param run     运行记录（读当前状态）
+     * @param target  目标状态
+     * @param message 状态说明
+     * @return true 表示写入成功；false 表示非法转换被拒绝
+     */
+    public boolean transit(PipelineRunModel run, BuildStatus target, String message) {
+        if (run == null || target == null) {
+            return false;
+        }
+        Integer from = run.getStatus();
+        if (!PipelineRunState.canTransit(from, target.getCode())) {
+            log.warn("pipeline run status transit rejected, runId:{} from:{} to:{}", run.getId(), from, target.getCode());
+            return false;
+        }
+        this.writeStatus(run, target, message, null, null);
+        return true;
+    }
+
+    /**
+     * 收尾写入（终态 + 阶段结果 + 事件记录）
+     * <p>
+     * 收尾必须落库，否则界面会永远停在「运行中」；因此非法转换在这里是「记录并强制写入」，
+     * 而不是拒绝（拒绝会把运行记录卡在非终态）。非法转换的信息写进日志与状态说明，便于追查。
+     * </p>
+     *
+     * @param run       运行记录（已带阶段结果/耗时/日志大小）
+     * @param target    终态
+     * @param message   状态说明
+     * @param stagesJson 阶段结果 JSON（可为 null 表示不改）
+     * @param eventsJson 事件记录 JSON（可为 null 表示不改）
+     */
+    public void finish(PipelineRunModel run, BuildStatus target, String message, String stagesJson, String eventsJson) {
+        if (run == null || target == null) {
+            return;
+        }
+        Integer from = run.getStatus();
+        String finalMessage = message;
+        if (!PipelineRunState.canTransit(from, target.getCode())) {
+            log.error("pipeline run finish transit rejected, force write. runId:{} from:{} to:{}", run.getId(), from, target.getCode());
+            finalMessage = StrUtil.format(I18nMessageUtil.get("i18n.pipeline_state_force_finish.8d02"),
+                from, target.getCode()) + " " + StrUtil.nullToEmpty(message);
+        }
+        this.writeStatus(run, target, finalMessage, stagesJson, eventsJson);
+    }
+
+    private void writeStatus(PipelineRunModel run, BuildStatus target, String message, String stagesJson, String eventsJson) {
+        PipelineRunModel update = new PipelineRunModel();
+        update.setId(run.getId());
+        update.setStatus(target.getCode());
+        update.setStatusMsg(message);
+        update.setStagesResult(stagesJson);
+        update.setEventsJson(eventsJson);
+        update.setEndTime(run.getEndTime());
+        update.setLogFileSize(run.getLogFileSize());
+        this.updateById(update);
+        run.setStatus(target.getCode());
+        run.setStatusMsg(message);
+        if (stagesJson != null) {
+            run.setStagesResult(stagesJson);
+        }
+        if (eventsJson != null) {
+            run.setEventsJson(eventsJson);
+        }
+    }
 
     @Override
     public int statusRecover() {

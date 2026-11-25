@@ -124,6 +124,33 @@ export function downloadPipelineRunLog(runId) {
 }
 
 /**
+ * 事件通知（Hooks）的事件码：与服务端固定 10 个码值一一对应，顺序即展示顺序
+ * <p>
+ * 服务端另有 POST /pipeline/hook-events 返回同样的 [{code, desc}]，这里用固定常量便于离线渲染，
+ * 码值必须与后端完全一致（run_finished 总是最后触发）。
+ * </p>
+ */
+export const pipelineHookEventCodes = [
+  'run_start',
+  'run_success',
+  'run_failed',
+  'run_cancelled',
+  'run_finished',
+  'stage_start',
+  'stage_success',
+  'stage_failed',
+  'stage_skipped',
+  'stage_cancelled'
+]
+
+/**
+ * 事件码 → i18n key（四个语言包必须都有对应文案）
+ */
+export function pipelineHookEventLabelKey(code) {
+  return 'i18n_pipeline_hook_event_' + code
+}
+
+/**
  * 运行状态码 → 文案/颜色：与在线构建共用同一份状态字典（不另写一套中文）
  */
 export const pipelineStatusMap = statusMap

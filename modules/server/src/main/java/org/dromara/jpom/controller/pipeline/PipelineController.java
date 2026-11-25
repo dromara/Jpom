@@ -20,7 +20,6 @@ import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.build.ExecutionRegistry;
-import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
@@ -28,7 +27,11 @@ import org.dromara.jpom.pipeline.PipelineRunner;
 import org.dromara.jpom.pipeline.model.PipelineDefinition;
 import org.dromara.jpom.pipeline.model.PipelineInfoModel;
 import org.dromara.jpom.pipeline.model.PipelineValidateException;
+import org.dromara.jpom.pipeline.hook.PipelineEvent;
+import org.dromara.jpom.pipeline.hook.PipelineHookDef;
 import org.dromara.jpom.pipeline.service.PipelineInfoService;
+import org.dromara.jpom.model.script.ScriptModel;
+import org.dromara.jpom.service.script.ScriptServer;
 import org.dromara.jpom.service.user.TriggerUrlAssembler;
 import org.dromara.jpom.service.user.TriggerUrls;
 import org.springframework.http.MediaType;
@@ -38,6 +41,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -58,13 +64,38 @@ public class PipelineController extends BaseServerController {
     private final PipelineInfoService pipelineInfoService;
     private final PipelineRunner pipelineRunner;
     private final TriggerUrlAssembler triggerUrlAssembler;
+    private final ScriptServer scriptServer;
 
     public PipelineController(PipelineInfoService pipelineInfoService,
                               PipelineRunner pipelineRunner,
-                              TriggerUrlAssembler triggerUrlAssembler) {
+                              TriggerUrlAssembler triggerUrlAssembler,
+                              ScriptServer scriptServer) {
         this.pipelineInfoService = pipelineInfoService;
         this.pipelineRunner = pipelineRunner;
         this.triggerUrlAssembler = triggerUrlAssembler;
+        this.scriptServer = scriptServer;
+    }
+
+    /**
+     * 事件清单（事件状态切换机制的自描述）
+     * <p>
+     * 前端选项由接口返回，不在前端复制一份事件码：新增事件只改 {@link PipelineEvent}，
+     * 前端下拉自动出现，避免「界面有选项、后端不认识」。
+     * </p>
+     *
+     * @return 事件码与本地化描述
+     */
+    @RequestMapping(value = "/hook-events", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public IJsonMessage<List<Map<String, String>>> hookEvents() {
+        List<Map<String, String>> list = new ArrayList<>();
+        for (Map.Entry<String, String> entry : PipelineEvent.descriptions().entrySet()) {
+            Map<String, String> item = new LinkedHashMap<>();
+            item.put("code", entry.getKey());
+            item.put("desc", entry.getValue());
+            list.add(item);
+        }
+        return JsonMessage.success("", list);
     }
 
     /**
@@ -144,19 +175,30 @@ public class PipelineController extends BaseServerController {
                                   String group,
                                   String sourcesJson,
                                   @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.pipeline_stage_required.4c18") String stagesJson,
+                                  String hooksJson,
                                   HttpServletRequest request) {
         // 服务端校验：前端禁用/隐藏不算数（§0.25）；校验异常带 i18n key，这里翻译成用户可读文案
-        PipelineDefinition definition = PipelineDefinition.of(sourcesJson, stagesJson);
+        PipelineDefinition definition = PipelineDefinition.of(sourcesJson, stagesJson, hooksJson);
         try {
             definition.check();
         } catch (PipelineValidateException e) {
             throw new IllegalArgumentException(I18nMessageUtil.get(e.getKey()) + StrUtil.nullToEmpty(e.getDetail()), e);
+        }
+        // 事件脚本存在性：保存时拦住，避免运行到 notify 事件才发现脚本已被删除
+        for (PipelineHookDef hook : definition.getHooks()) {
+            if (hook == null || !"script".equals(hook.getType())) {
+                continue;
+            }
+            ScriptModel scriptModel = scriptServer.getByKey(hook.getScriptId(), request);
+            Assert.notNull(scriptModel, StrUtil.format(I18nMessageUtil.get("i18n.pipeline_hook_script_not_exists.8c02"),
+                hook.getScriptId()));
         }
         PipelineInfoModel model = new PipelineInfoModel();
         model.setName(name);
         model.setGroupName(group);
         model.setSourcesJson(JSON.toJSONString(definition.getSources()));
         model.setStagesJson(JSON.toJSONString(definition.getStages()));
+        model.setHooksJson(JSON.toJSONString(definition.getHooks()));
         model.setSchemaVersion(PipelineDefinition.CURRENT_SCHEMA_VERSION);
         if (StrUtil.isEmpty(id)) {
             model.setWorkspaceId(getWorkspaceId());

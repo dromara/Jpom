@@ -119,6 +119,8 @@ public class PipelineTriggerApiController extends BaseJpomController {
      * 与构建触发器一致的校验顺序：先查数据，再比对 token
      */
     private PipelineInfoModel checkToken(String id, String token) {
+        // 缺参（例如用户直接打开地址没带 ?id=&token=）如实回「token 错误或失效」，不要含糊成「没有对应数据」
+        Assert.state(StrUtil.isNotEmpty(id) && StrUtil.isNotEmpty(token), I18nMessageUtil.get("i18n.trigger_token_error_or_expired.8976"));
         PipelineInfoModel item = pipelineInfoService.getByKey(id);
         Assert.notNull(item, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
         Assert.state(StrUtil.equals(token, item.getTriggerToken()), I18nMessageUtil.get("i18n.trigger_token_error_or_expired.8976"));

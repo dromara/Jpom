@@ -48,6 +48,38 @@ public final class PipelineEngine {
     }
 
     /**
+     * 阶段监听（状态切换事件的接入口）
+     * <p>
+     * 引擎只负责「什么时候发生了状态切换」，事件钩子/日志/指标怎么处理由监听方决定；
+     * 默认空实现，因此不关心事件的调用方（单测、旧调用点）行为不变。
+     * </p>
+     */
+    public interface StageListener {
+        /**
+         * 阶段开始执行
+         *
+         * @param stage 阶段
+         */
+        default void onStageStart(PipelineStageDef stage) {
+        }
+
+        /**
+         * 阶段结束（成功/失败/跳过/取消都会回调）
+         *
+         * @param stage  阶段
+         * @param result 结果
+         */
+        default void onStageEnd(PipelineStageDef stage, StageResult result) {
+        }
+
+        /**
+         * 空实现
+         */
+        StageListener NOOP = new StageListener() {
+        };
+    }
+
+    /**
      * 执行整条流水线
      *
      * @param definition 定义
@@ -56,6 +88,21 @@ public final class PipelineEngine {
      * @return 运行结果（每个阶段都有明确状态）
      */
     public PipelineRunResult run(PipelineDefinition definition, PipelineContext context, CancelSignal signal) {
+        return this.run(definition, context, signal, StageListener.NOOP);
+    }
+
+    /**
+     * 执行整条流水线（带阶段监听）
+     *
+     * @param definition 定义
+     * @param context    上下文
+     * @param signal     取消信号
+     * @param listener   阶段监听
+     * @return 运行结果（每个阶段都有明确状态）
+     */
+    public PipelineRunResult run(PipelineDefinition definition, PipelineContext context, CancelSignal signal,
+                                 StageListener listener) {
+        StageListener stageListener = listener == null ? StageListener.NOOP : listener;
         PipelineLog log = context.getLog();
         List<StageResult> results = new ArrayList<>();
         List<PipelineStageDef> stages = definition.getStages();
@@ -66,21 +113,27 @@ public final class PipelineEngine {
                 StageResult skipped = StageResult.of(stage.getId(), stage.getName(), StageResult.Status.SKIPPED, "disabled", startTime);
                 results.add(skipped);
                 log.info("阶段已禁用，跳过：" + stage.getName());
+                stageListener.onStageEnd(stage, skipped);
                 continue;
             }
             if (signal.isCancelled()) {
                 StageResult cancelled = StageResult.of(stage.getId(), stage.getName(), StageResult.Status.CANCELLED, "cancelled", startTime);
                 results.add(cancelled);
                 log.info("已取消，跳过阶段：" + stage.getName());
+                stageListener.onStageEnd(stage, cancelled);
                 continue;
             }
             if (blocked) {
                 StageResult skipped = StageResult.of(stage.getId(), stage.getName(), StageResult.Status.SKIPPED, "blocked by previous failure", startTime);
                 results.add(skipped);
                 log.info("前置阶段失败（失败即停），跳过阶段：" + stage.getName());
+                stageListener.onStageEnd(stage, skipped);
                 continue;
             }
-            results.add(this.runStage(stage, context, log, startTime));
+            stageListener.onStageStart(stage);
+            StageResult stageResult = this.runStage(stage, context, log, startTime);
+            results.add(stageResult);
+            stageListener.onStageEnd(stage, stageResult);
             StageResult last = results.get(results.size() - 1);
             if (last.getStatus() == StageResult.Status.FAILED && stage.failFast()) {
                 blocked = true;

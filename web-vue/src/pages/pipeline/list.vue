@@ -284,7 +284,13 @@ export default {
     triggerLinks() {
       return [
         { label: this.$t('i18n_pipeline_trigger_run'), field: 'triggerUrl', method: 'GET' },
-        { label: this.$t('i18n_pipeline_trigger_status'), field: 'statusUrl', method: 'GET' }
+        {
+          label: this.$t('i18n_pipeline_trigger_status'),
+          field: 'statusUrl',
+          method: 'GET',
+          // 状态地址必须带 id + token，否则打开只会得到「没有对应数据」（与构建触发器的状态/日志地址同一口径）
+          suffix: (res) => '?id=' + ((res.data && res.data.id) || '') + '&token=' + ((res.data && res.data.token) || '')
+        }
       ]
     },
     statusOptions() {
@@ -321,7 +327,7 @@ export default {
             this.list = (res.data && res.data.result) || []
             this.listQuery.total = (res.data && res.data.total) || 0
           } else {
-            message.warn({ message: res.msg })
+            message.warning(res.msg)
           }
         })
         .finally(() => {
@@ -375,11 +381,11 @@ export default {
     handleRun(record) {
       runPipeline({ id: record.id }).then((res) => {
         if (res.code === 200) {
-          message.success({ message: this.$t('i18n_pipeline_run_submitted') })
+          message.success(this.$t('i18n_pipeline_run_submitted'))
           this.handleRuns(record)
           this.loadData()
         } else {
-          message.warn({ message: res.msg })
+          message.warning(res.msg)
         }
       })
     },
@@ -387,9 +393,9 @@ export default {
       cancelPipeline({ id: record.id }).then((res) => {
         if (res.code === 200) {
           // 后端已按三态（已受理/已在取消中/未找到执行体）返回可读文案，直接展示
-          message.info({ message: res.data || this.$t('i18n_pipeline_cancel_requested') })
+          message.info(res.data || this.$t('i18n_pipeline_cancel_requested'))
         } else {
-          message.warn({ message: res.msg })
+          message.warning(res.msg)
         }
         this.loadData()
       })
@@ -397,10 +403,10 @@ export default {
     handleDelete(record) {
       deletePipeline({ id: record.id }).then((res) => {
         if (res.code === 200) {
-          message.success({ message: res.msg })
+          message.success(res.msg)
           this.loadData()
         } else {
-          message.warn({ message: res.msg })
+          message.warning(res.msg)
         }
       })
     }

@@ -148,6 +148,14 @@ DEFAULT_TESTS=(
 	# SSH 项目（无插件端）接口契约 + 版本快照远端解析/过滤（构建历史快速回滚，2026-11-20）
 	SshProjectControllerTest
 	SshProjectVersionServiceTest
+	# 流水线事件钩子（脚本/webhook）与运行状态机（2.11.16）：事件匹配、单条失败不影响其它、终态不可被改写
+	PipelineHookDispatchTest
+	PipelineRunStateTest
+	PipelineEngineListenerTest
+	ScriptHookHandlerTest
+	# 文件中心发布方式注册（码值 8 只追加）与事件钩子配置校验（未知事件/非法地址必须在保存时拦下）
+	FileStorageReleaseTargetTest
+	PipelineDefinitionHooksTest
 )
 
 MVN_BIN=${MVN:-mvn}

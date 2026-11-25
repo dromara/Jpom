@@ -114,6 +114,163 @@
         </div>
       </a-card>
 
+      <!-- 事件通知（Hooks） -->
+      <a-card :title="$t('i18n_pipeline_hooks_title')" size="small" class="block hooks-card">
+        <div class="card-hint">{{ $t('i18n_pipeline_hooks_tip') }}</div>
+
+        <a-divider orientation="left">{{ $t('i18n_pipeline_hook_scripts') }}</a-divider>
+        <a-alert
+          v-if="!serverScriptLoading && !serverScripts.length"
+          type="info"
+          show-icon
+          class="hook-alert"
+          :message="$t('i18n_pipeline_hook_script_empty')"
+        />
+        <div v-if="!hooks.scripts.length" class="empty-hint">{{ $t('i18n_pipeline_hooks_empty') }}</div>
+        <div
+          v-for="(hook, hi) in hooks.scripts"
+          :key="hook.key"
+          class="hook-card"
+          :class="{ 'hook-card-invalid': !scriptHookValid(hook) }"
+        >
+          <div class="hook-head">
+            <b>{{ $t('i18n_pipeline_hook_script_index', { index: hi + 1 }) }}</b>
+            <a-space>
+              <span class="hook-switch-label">{{ $t('i18n_pipeline_hook_enabled') }}</span>
+              <a-switch
+                v-model:checked="hook.enabled"
+                size="small"
+                :data-testid="'pipeline-hook-script-enabled-' + hi"
+              />
+              <a-button size="small" type="text" danger @click="removeHookScript(hi)">
+                <DeleteOutlined />
+                {{ $t('i18n_2f4aaddde3') }}
+              </a-button>
+            </a-space>
+          </div>
+          <a-form layout="vertical" class="hook-form">
+            <a-row :gutter="12">
+              <a-col :xs="24" :sm="12">
+                <a-form-item :label="$t('i18n_pipeline_hook_events')">
+                  <a-select
+                    v-model:value="hook.events"
+                    mode="multiple"
+                    allow-clear
+                    :max-tag-count="2"
+                    :options="hookEventOptions"
+                    :placeholder="$t('i18n_pipeline_hook_events_placeholder')"
+                    :data-testid="'pipeline-hook-script-events-' + hi"
+                  />
+                </a-form-item>
+              </a-col>
+              <a-col :xs="24" :sm="12">
+                <a-form-item :label="$t('i18n_pipeline_hook_script')">
+                  <a-select
+                    v-model:value="hook.scriptId"
+                    show-search
+                    allow-clear
+                    option-filter-prop="label"
+                    :options="serverScriptOptions"
+                    :placeholder="$t('i18n_pipeline_hook_script_placeholder')"
+                    :not-found-content="$t('i18n_pipeline_hook_script_empty')"
+                    :data-testid="'pipeline-hook-script-id-' + hi"
+                  />
+                </a-form-item>
+              </a-col>
+            </a-row>
+            <div v-if="!scriptHookValid(hook)" class="hook-error">{{ scriptHookReason(hook) }}</div>
+          </a-form>
+        </div>
+        <a-button
+          type="dashed"
+          block
+          data-testid="pipeline-add-hook-script"
+          :disabled="!serverScripts.length"
+          @click="addHookScript"
+        >
+          <PlusOutlined />
+          {{ $t('i18n_pipeline_hook_script_add') }}
+        </a-button>
+        <div v-if="!serverScripts.length" class="field-tip">{{ $t('i18n_pipeline_hook_script_disabled_tip') }}</div>
+
+        <a-divider orientation="left">{{ $t('i18n_pipeline_hook_webhook') }}</a-divider>
+        <div
+          v-for="(hook, hi) in hooks.webhooks"
+          :key="hook.key"
+          class="hook-card"
+          :class="{ 'hook-card-invalid': !webhookHookValid(hook) }"
+        >
+          <div class="hook-head">
+            <b>{{ $t('i18n_pipeline_hook_webhook_index', { index: hi + 1 }) }}</b>
+            <a-space>
+              <span class="hook-switch-label">{{ $t('i18n_pipeline_hook_enabled') }}</span>
+              <a-switch
+                v-model:checked="hook.enabled"
+                size="small"
+                :data-testid="'pipeline-hook-webhook-enabled-' + hi"
+              />
+              <a-button size="small" type="text" danger @click="removeHookWebhook(hi)">
+                <DeleteOutlined />
+                {{ $t('i18n_2f4aaddde3') }}
+              </a-button>
+            </a-space>
+          </div>
+          <a-form layout="vertical" class="hook-form">
+            <a-row :gutter="12">
+              <a-col :xs="24" :sm="10">
+                <a-form-item :label="$t('i18n_pipeline_hook_url')">
+                  <a-input
+                    v-model:value="hook.url"
+                    :max-length="500"
+                    :placeholder="$t('i18n_pipeline_hook_url_placeholder')"
+                    :data-testid="'pipeline-hook-webhook-url-' + hi"
+                  />
+                </a-form-item>
+              </a-col>
+              <a-col :xs="24" :sm="8">
+                <a-form-item :label="$t('i18n_pipeline_hook_events')">
+                  <a-select
+                    v-model:value="hook.events"
+                    mode="multiple"
+                    allow-clear
+                    :max-tag-count="2"
+                    :options="hookEventOptions"
+                    :placeholder="$t('i18n_pipeline_hook_events_placeholder')"
+                    :data-testid="'pipeline-hook-webhook-events-' + hi"
+                  />
+                </a-form-item>
+              </a-col>
+              <a-col :xs="12" :sm="3">
+                <a-form-item :label="$t('i18n_pipeline_hook_method')">
+                  <a-select v-model:value="hook.method" :options="hookMethodOptions" />
+                </a-form-item>
+              </a-col>
+              <a-col :xs="12" :sm="3">
+                <a-form-item :label="$t('i18n_pipeline_hook_body_type')">
+                  <a-select
+                    v-model:value="hook.bodyType"
+                    :options="hookBodyTypeOptions"
+                    :disabled="hook.method === 'GET'"
+                  />
+                </a-form-item>
+              </a-col>
+            </a-row>
+            <a-form-item :label="$t('i18n_pipeline_hook_headers')">
+              <a-textarea
+                v-model:value="hook.headers"
+                :auto-size="{ minRows: 2, maxRows: 6 }"
+                :placeholder="$t('i18n_pipeline_hook_headers_placeholder')"
+              />
+            </a-form-item>
+            <div v-if="!webhookHookValid(hook)" class="hook-error">{{ webhookHookReason(hook) }}</div>
+          </a-form>
+        </div>
+        <a-button type="dashed" block data-testid="pipeline-add-hook-webhook" @click="addHookWebhook">
+          <PlusOutlined />
+          {{ $t('i18n_pipeline_hook_webhook_add') }}
+        </a-button>
+      </a-card>
+
       <!-- 编排 + 配置 -->
       <a-row :gutter="8" class="block">
         <a-col :span="configCollapsed ? 24 : 16">
@@ -577,6 +734,29 @@
                             <a-switch v-model:checked="target.clearOld" />
                           </a-form-item>
                         </template>
+                        <!-- 文件中心 -->
+                        <template v-if="target.method === 8">
+                          <a-form-item :label="$t('i18n_pipeline_target_keep_day')">
+                            <a-input-number
+                              v-model:value="target.fileStorageKeepDay"
+                              style="width: 100%"
+                              :min="1"
+                              :precision="0"
+                              allow-clear
+                              :placeholder="$t('i18n_pipeline_target_keep_day_placeholder')"
+                              :data-testid="'pipeline-target-keep-day-' + ti"
+                            />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_pipeline_target_alias_code')">
+                            <a-input
+                              v-model:value="target.aliasCode"
+                              :max-length="50"
+                              :placeholder="$t('i18n_pipeline_target_alias_code_placeholder')"
+                              :data-testid="'pipeline-target-alias-code-' + ti"
+                            />
+                          </a-form-item>
+                          <div class="field-tip">{{ $t('i18n_pipeline_target_file_storage_tip') }}</div>
+                        </template>
                       </div>
                     </div>
                     <a-button type="dashed" block data-testid="pipeline-add-target" @click="addTarget">
@@ -636,7 +816,7 @@
 
 <script>
 import { message, Empty } from 'ant-design-vue'
-import { getPipelineGet, savePipeline } from '@/api/pipeline'
+import { getPipelineGet, savePipeline, pipelineHookEventCodes } from '@/api/pipeline'
 import { getRepositoryList } from '@/api/repository'
 import { getBuildNodeList, getBranchList, releaseMethodMap } from '@/api/build-info'
 import { getSshListAll } from '@/api/ssh'
@@ -682,7 +862,29 @@ const createTarget = () => ({
   clearOld: false,
   diffSync: false,
   closeFirst: false,
+  // 文件中心（method 8）：保留天数留空即长期保留，别名码留空由服务端生成
+  fileStorageKeepDay: undefined,
+  aliasCode: '',
   docker: createDocker()
+})
+
+// 事件脚本行（type=script）：选择事件 + 一个服务端脚本
+const createHookScript = () => ({
+  key: nextKey(),
+  events: [],
+  scriptId: undefined,
+  enabled: true
+})
+
+// Webhook 行（type=webhook）：地址 + 请求方式 + 请求体格式 + 事件 + 自定义请求头
+const createHookWebhook = () => ({
+  key: nextKey(),
+  url: '',
+  method: 'POST',
+  bodyType: 'json',
+  events: [],
+  headers: '',
+  enabled: true
 })
 
 export default {
@@ -712,7 +914,11 @@ export default {
       swarmList: [],
       branchCache: {},
       branchLoading: {},
-      projectMap: {}
+      projectMap: {},
+      // 事件通知（Hooks）：按类型分组维护，序列化时合并为一个数组
+      hooks: { scripts: [], webhooks: [] },
+      serverScripts: [],
+      serverScriptLoading: false
     }
   },
   computed: {
@@ -772,6 +978,27 @@ export default {
       return [
         { value: 'run_finished', label: this.$t('i18n_pipeline_notify_event_finish') },
         { value: 'stage_failed', label: this.$t('i18n_pipeline_notify_event_fail') }
+      ]
+    },
+    serverScriptOptions() {
+      return this.serverScripts.map((item) => ({
+        value: item.id,
+        label: item.name + (item.description ? '（' + item.description + '）' : '')
+      }))
+    },
+    hookEventOptions() {
+      return pipelineHookEventCodes.map((code) => ({ value: code, label: this.$t('i18n_pipeline_hook_event_' + code) }))
+    },
+    hookMethodOptions() {
+      return [
+        { value: 'POST', label: 'POST' },
+        { value: 'GET', label: 'GET' }
+      ]
+    },
+    hookBodyTypeOptions() {
+      return [
+        { value: 'json', label: 'JSON' },
+        { value: 'form', label: 'form' }
       ]
     },
     dockerTagOptions() {
@@ -856,6 +1083,7 @@ export default {
             this.form = { id: data.id, name: data.name, groupName: data.groupName }
             this.sources = this.parseSources(data.sourcesJson)
             this.stages = this.parseStages(data.stagesJson)
+            this.hooks = this.parseHooks(data.hooksJson)
             this.selectedIndex = this.stages.length ? 0 : -1
             // 节点/项目、分支等联动数据：回显时补齐
             this.sources.forEach((source) => {
@@ -870,7 +1098,7 @@ export default {
               }
             })
           } else {
-            message.warn({ message: res.msg })
+            message.warning(res.msg)
           }
         })
         .finally(() => {
@@ -906,6 +1134,15 @@ export default {
       axios({ url: '/system/assets/script-library/list-data', method: 'post', data: {} }).then((res) => {
         if (res.code === 200) this.scripts = (res.data && res.data.result) || []
       })
+      // 事件通知里的「服务端脚本」来自服务端脚本列表（/script/list-all 无独立 api 导出，直调）
+      this.serverScriptLoading = true
+      axios({ url: '/script/list-all', method: 'get' })
+        .then((res) => {
+          if (res.code === 200) this.serverScripts = res.data || []
+        })
+        .finally(() => {
+          this.serverScriptLoading = false
+        })
       dockerAllTag().then((res) => {
         if (res.code === 200) this.dockerTags = res.data || []
       })
@@ -1010,6 +1247,119 @@ export default {
       })
       return options
     },
+    parseHooks(json) {
+      let list = []
+      try {
+        list = JSON.parse(json || '[]') || []
+      } catch (e) {
+        list = []
+      }
+      const result = { scripts: [], webhooks: [] }
+      list.forEach((raw) => {
+        if (!raw) return
+        if (raw.type === 'webhook') {
+          result.webhooks.push({
+            key: nextKey(),
+            url: raw.url || '',
+            // 只认契约里的两种取值，历史/异常值回落到默认
+            method: raw.method === 'GET' ? 'GET' : 'POST',
+            bodyType: raw.bodyType === 'form' ? 'form' : 'json',
+            events: raw.events || [],
+            headers: raw.headers || '',
+            enabled: raw.enabled !== false
+          })
+        } else if (raw.type === 'script') {
+          result.scripts.push({
+            key: nextKey(),
+            events: raw.events || [],
+            scriptId: raw.scriptId,
+            enabled: raw.enabled !== false
+          })
+        }
+      })
+      return result
+    },
+    addHookScript() {
+      this.hooks.scripts.push(createHookScript())
+    },
+    removeHookScript(index) {
+      this.hooks.scripts.splice(index, 1)
+    },
+    addHookWebhook() {
+      this.hooks.webhooks.push(createHookWebhook())
+    },
+    removeHookWebhook(index) {
+      this.hooks.webhooks.splice(index, 1)
+    },
+    isValidHookUrl(url) {
+      return /^https?:\/\/[^\s]+$/i.test((url || '').trim())
+    },
+    scriptHookValid(hook) {
+      return !!(hook && hook.events && hook.events.length && hook.scriptId)
+    },
+    scriptHookReason(hook) {
+      const reasons = []
+      if (!hook || !hook.events || !hook.events.length) reasons.push(this.$t('i18n_pipeline_hook_invalid_events'))
+      if (!hook || !hook.scriptId) reasons.push(this.$t('i18n_pipeline_hook_invalid_script'))
+      return reasons.join('；')
+    },
+    webhookHookValid(hook) {
+      return !!(hook && hook.events && hook.events.length && this.isValidHookUrl(hook.url))
+    },
+    webhookHookReason(hook) {
+      const reasons = []
+      if (!hook || !hook.events || !hook.events.length) reasons.push(this.$t('i18n_pipeline_hook_invalid_events'))
+      if (!hook || !this.isValidHookUrl(hook.url)) reasons.push(this.$t('i18n_pipeline_hook_invalid_url'))
+      return reasons.join('；')
+    },
+    /**
+     * 保存前的 hooks 校验：返回第一条不合法行的描述（空字符串表示全部通过）
+     * 前端只做交互提示，服务端仍会再校验一次
+     */
+    firstHookError() {
+      for (let index = 0; index < this.hooks.scripts.length; index++) {
+        const hook = this.hooks.scripts[index]
+        if (!this.scriptHookValid(hook)) {
+          return (
+            this.$t('i18n_pipeline_hook_script_row_invalid', { index: index + 1 }) + '：' + this.scriptHookReason(hook)
+          )
+        }
+      }
+      for (let index = 0; index < this.hooks.webhooks.length; index++) {
+        const hook = this.hooks.webhooks[index]
+        if (!this.webhookHookValid(hook)) {
+          return (
+            this.$t('i18n_pipeline_hook_webhook_row_invalid', { index: index + 1 }) +
+            '：' +
+            this.webhookHookReason(hook)
+          )
+        }
+      }
+      return ''
+    },
+    serializeHooks() {
+      const list = []
+      this.hooks.scripts.forEach((hook) => {
+        list.push({
+          type: 'script',
+          enabled: hook.enabled !== false,
+          events: hook.events || [],
+          scriptId: hook.scriptId
+        })
+      })
+      this.hooks.webhooks.forEach((hook) => {
+        list.push({
+          type: 'webhook',
+          enabled: hook.enabled !== false,
+          events: hook.events || [],
+          url: (hook.url || '').trim(),
+          method: hook.method === 'GET' ? 'GET' : 'POST',
+          bodyType: hook.bodyType === 'form' ? 'form' : 'json',
+          headers: (hook.headers || '').trim()
+        })
+      })
+      return list
+    },
     parseSources(json) {
       let list = []
       try {
@@ -1045,6 +1395,13 @@ export default {
         target.projectId = parts[1]
       } else if (target.method === 3 || target.method === 6 || target.method === 7) {
         target.ids = id ? String(id).split(',') : []
+      } else if (target.method === 8) {
+        // 文件中心：目标 id 为空，配置都在 extra 里
+        target.fileStorageKeepDay =
+          extra.fileStorageKeepDay === undefined || extra.fileStorageKeepDay === null || extra.fileStorageKeepDay === ''
+            ? undefined
+            : Number(extra.fileStorageKeepDay)
+        target.aliasCode = extra.aliasCode || ''
       }
       target.afterOpt = extra.afterOpt === undefined ? 0 : extra.afterOpt
       target.secondaryDirectory = extra.projectSecondaryDirectory || ''
@@ -1207,6 +1564,9 @@ export default {
       target.targetId = undefined
       target.projectId = undefined
       target.ids = []
+      // 切换发布方式时清掉文件中心专属配置，避免残留值被带到新方式
+      target.fileStorageKeepDay = undefined
+      target.aliasCode = ''
     },
     stageValid(stage) {
       if (!stage || !stage.id || !stage.name) return false
@@ -1227,6 +1587,8 @@ export default {
       if (target.method === 1) return !!target.targetId
       if (target.method === 2) return !!(target.nodeId && target.projectId)
       if (target.method === 3 || target.method === 6 || target.method === 7) return !!(target.ids && target.ids.length)
+      // 文件中心：保留天数与别名码都可空，始终可用
+      if (target.method === 8) return true
       return true
     },
     stageInvalidReason(stage) {
@@ -1281,6 +1643,17 @@ export default {
         result.id = (target.ids || []).join(',')
         extra.releaseCommand = target.afterCommand
         extra.clearOld = target.clearOld
+      } else if (target.method === 8) {
+        // 文件中心：id 固定为空串，保留天数留空表示长期保留（不下发该键）
+        result.id = ''
+        if (
+          target.fileStorageKeepDay !== undefined &&
+          target.fileStorageKeepDay !== null &&
+          target.fileStorageKeepDay !== ''
+        ) {
+          extra.fileStorageKeepDay = Math.floor(Number(target.fileStorageKeepDay))
+        }
+        extra.aliasCode = target.aliasCode || ''
       }
       return result
     },
@@ -1318,11 +1691,11 @@ export default {
     },
     handleSave() {
       if (!this.form.name) {
-        message.warn(this.$t('i18n_pipeline_name_required'))
+        message.warning(this.$t('i18n_pipeline_name_required'))
         return
       }
       if (!this.stages.length) {
-        message.warn(this.$t('i18n_pipeline_stage_required'))
+        message.warning(this.$t('i18n_pipeline_stage_required'))
         return
       }
       const invalid = this.stages.find((stage) => !this.stageValid(stage))
@@ -1336,6 +1709,12 @@ export default {
       const duplicated = ids.filter((id, index) => ids.indexOf(id) !== index)
       if (duplicated.length) {
         message.error(this.$t('i18n_pipeline_stage_key_duplicate') + '：' + duplicated.join(','))
+        return
+      }
+      // 事件通知与阶段校验分开：行内标红之外，保存前再指明具体第几行
+      const hookError = this.firstHookError()
+      if (hookError) {
+        message.error(hookError)
         return
       }
       const sourcesJson = JSON.stringify(
@@ -1360,8 +1739,16 @@ export default {
           config: this.buildStageConfig(stage)
         }))
       )
+      const hooksJson = JSON.stringify(this.serializeHooks())
       this.saving = true
-      savePipeline({ id: this.form.id, name: this.form.name, group: this.form.groupName, sourcesJson, stagesJson })
+      savePipeline({
+        id: this.form.id,
+        name: this.form.name,
+        group: this.form.groupName,
+        sourcesJson,
+        stagesJson,
+        hooksJson
+      })
         .then((res) => {
           if (res.code === 200) {
             message.success(this.$t('i18n_pipeline_save_success'))
@@ -1429,6 +1816,46 @@ export default {
 }
 .source-row {
   margin-bottom: 8px;
+}
+.hooks-card :deep(.ant-divider) {
+  margin: 8px 0;
+}
+.hook-alert {
+  margin-bottom: 8px;
+}
+.hook-card {
+  border: 1px solid #eef0f3;
+  border-radius: 8px;
+  padding: 10px 12px 2px;
+  margin-bottom: 8px;
+  background: #fafbfc;
+}
+/* 未选事件 / 地址非法：整行标红，配合下方行内原因 */
+.hook-card-invalid {
+  border-color: #ffa39e;
+  background: #fff1f0;
+}
+.hook-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.hook-switch-label {
+  color: #8f959e;
+  font-size: 12px;
+}
+.hook-form :deep(.ant-form-item) {
+  margin-bottom: 10px;
+}
+.hook-form :deep(.ant-form-item-label) {
+  padding-bottom: 2px;
+}
+.hook-error {
+  color: #cf1322;
+  font-size: 12px;
+  line-height: 18px;
+  padding-bottom: 8px;
 }
 .canvas-wrap {
   /* 自适应高度：跟随窗口可视高度伸缩，小窗口保底 260px、大窗口最多 720px（不写死 240px） */

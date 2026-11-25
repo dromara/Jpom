@@ -70,6 +70,14 @@
             </a-button>
             <a-button
               size="small"
+              data-testid="pipeline-run-events"
+              :disabled="!hasEvents(record)"
+              @click="handleEvents(record)"
+            >
+              {{ $t('i18n_pipeline_events') }}
+            </a-button>
+            <a-button
+              size="small"
               type="primary"
               danger
               data-testid="pipeline-run-stop"
@@ -84,16 +92,72 @@
     </CustomTable>
 
     <PipelineLog :open="logVisible" :run="logRun" @close="logVisible = false" />
+
+    <!-- 事件时间线：展示 hooks 触发结果（脚本退出码 / webhook 成败与原因） -->
+    <CustomDrawer
+      v-if="eventsVisible"
+      destroy-on-close
+      placement="right"
+      width="680px"
+      :open="eventsVisible"
+      @close="eventsVisible = false"
+    >
+      <template #title>
+        <a-space>
+          <span>{{ $t('i18n_pipeline_events_timeline') }}</span>
+          <a-tag v-if="eventsRun">#{{ eventsRun.runNumber }}</a-tag>
+        </a-space>
+      </template>
+      <a-empty
+        v-if="!eventsList.length"
+        :image="Empty.PRESENTED_IMAGE_SIMPLE"
+        :description="$t('i18n_pipeline_events_empty')"
+      />
+      <a-timeline v-else class="event-timeline">
+        <a-timeline-item v-for="(item, index) in eventsList" :key="index" :color="eventColor(item.event)">
+          <div class="event-head">
+            <b>{{ eventLabel(item.event) }}</b>
+            <span class="event-time">{{ parseTime(item.time) }}</span>
+            <a-tag v-if="item.status !== null && item.status !== undefined" :color="pipelineStatusColor[item.status]">
+              {{ pipelineStatusMap[item.status] || $t('i18n_pipeline_status_unknown') }}
+            </a-tag>
+            <a-tag v-if="item.stageId">{{ item.stageId }}</a-tag>
+          </div>
+          <div v-if="item.scripts && item.scripts.length" class="event-block">
+            <span class="event-label">{{ $t('i18n_pipeline_event_scripts') }}</span>
+            <div v-for="(script, si) in item.scripts" :key="si" class="event-row">
+              <a-tag :color="script.exitCode === 0 ? 'green' : 'red'">{{ script.name || script.scriptId }}</a-tag>
+              <span>{{ $t('i18n_pipeline_event_script_exit') }} {{ script.exitCode }}</span>
+              <span v-if="script.duration !== null && script.duration !== undefined" class="event-muted">
+                {{ $t('i18n_pipeline_event_script_duration', { duration: script.duration }) }}
+              </span>
+            </div>
+          </div>
+          <div v-if="item.webhooks && item.webhooks.length" class="event-block">
+            <span class="event-label">{{ $t('i18n_pipeline_event_webhooks') }}</span>
+            <div v-for="(hook, wi) in item.webhooks" :key="wi" class="event-row">
+              <a-tag :color="hook.success ? 'green' : 'red'">
+                {{ hook.success ? $t('i18n_pipeline_event_webhook_ok') : $t('i18n_pipeline_event_webhook_fail') }}
+              </a-tag>
+              <span class="event-url">{{ hook.url }}</span>
+              <span v-if="hook.message" class="event-muted">{{ hook.message }}</span>
+            </div>
+          </div>
+        </a-timeline-item>
+      </a-timeline>
+    </CustomDrawer>
   </div>
 </template>
 
 <script>
-import { message } from 'ant-design-vue'
+import { message, Empty } from 'ant-design-vue'
 import {
   getPipelineRuns,
   cancelPipeline,
   pipelineStatusMap,
-  pipelineStatusColor
+  pipelineStatusColor,
+  pipelineHookEventCodes,
+  pipelineHookEventLabelKey
 } from '@/api/pipeline'
 import { parseTime, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, CHANGE_PAGE } from '@/utils/const'
 import PipelineLog from './log.vue'
@@ -109,6 +173,7 @@ export default {
   emits: ['close'],
   data() {
     return {
+      Empty,
       pipelineStatusMap,
       pipelineStatusColor,
       loading: false,
@@ -116,6 +181,8 @@ export default {
       listQuery: Object.assign({ pipelineId: this.pipelineId }, PAGE_DEFAULT_LIST_QUERY),
       logVisible: false,
       logRun: null,
+      eventsVisible: false,
+      eventsRun: null,
       columns: [
         { title: this.$t('i18n_pipeline_run_number'), dataIndex: 'runNumber', key: 'runNumber', width: 100 },
         { title: this.$t('i18n_3fea7ca76c'), dataIndex: 'status', key: 'status', width: 200 },
@@ -137,6 +204,9 @@ export default {
   computed: {
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
+    },
+    eventsList() {
+      return this.parseEvents(this.eventsRun)
     }
   },
   mounted() {
@@ -179,7 +249,7 @@ export default {
             this.list = (res.data && res.data.result) || []
             this.listQuery.total = res.data.total || 0
           } else {
-            message.warn({ message: res.msg })
+            message.warning(res.msg)
           }
         })
         .finally(() => {
@@ -235,9 +305,35 @@ export default {
       this.logRun = record
       this.logVisible = true
     },
+    parseEvents(record) {
+      if (!record || !record.eventsJson) return []
+      try {
+        return JSON.parse(record.eventsJson) || []
+      } catch (e) {
+        return []
+      }
+    },
+    hasEvents(record) {
+      return this.parseEvents(record).length > 0
+    },
+    handleEvents(record) {
+      this.eventsRun = record
+      this.eventsVisible = true
+    },
+    eventLabel(code) {
+      // 未知码值（后端后续新增）直接展示原始码，避免出现 i18n key 字符串
+      return pipelineHookEventCodes.indexOf(code) > -1 ? this.$t(pipelineHookEventLabelKey(code)) : code
+    },
+    eventColor(code) {
+      if (code === 'run_failed' || code === 'stage_failed') return 'red'
+      if (code === 'run_success' || code === 'stage_success') return 'green'
+      if (code === 'run_cancelled' || code === 'stage_cancelled') return 'blue'
+      if (code === 'run_finished' || code === 'run_start') return 'gray'
+      return ''
+    },
     handleCancel(record) {
       cancelPipeline({ id: this.pipelineId }).then((res) => {
-        message.info({ message: res.data === 'REQUESTED' ? this.$t('i18n_pipeline_cancel_requested') : res.data })
+        message.info(res.data === 'REQUESTED' ? this.$t('i18n_pipeline_cancel_requested') : res.data)
         this.loadData()
       })
     }
@@ -251,5 +347,39 @@ export default {
 }
 .stage-inline {
   white-space: nowrap;
+}
+.event-timeline {
+  padding-top: 4px;
+}
+.event-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.event-time {
+  color: #8f959e;
+  font-size: 12px;
+}
+.event-block {
+  margin-top: 6px;
+  font-size: 12px;
+}
+.event-label {
+  color: #8f959e;
+  margin-right: 4px;
+}
+.event-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.event-url {
+  word-break: break-all;
+}
+.event-muted {
+  color: #8f959e;
 }
 </style>

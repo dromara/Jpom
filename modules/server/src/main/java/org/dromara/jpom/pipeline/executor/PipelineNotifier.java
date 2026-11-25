@@ -10,6 +10,7 @@
 package org.dromara.jpom.pipeline.executor;
 
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * 通知出口
@@ -25,10 +26,13 @@ public interface PipelineNotifier {
     /**
      * 发送一条通知
      *
-     * @param target  目标（脚本 ID / 地址等）
-     * @param event   事件（run_finished / stage_failed / stage_skipped）
-     * @param payload 变量（流水线、运行、阶段、状态）
+     * @param target      目标（脚本 ID / 地址等）
+     * @param event       事件（run_finished / stage_failed / stage_skipped）
+     * @param payload     变量（流水线、运行、阶段、状态）
+     * @param lineSink    脚本输出行回调（实时写进运行日志）
+     * @param processSink 进程回调（取消登记用）
      * @return null 表示成功，否则错误信息
      */
-    String notify(String target, String event, Map<String, String> payload) throws Exception;
+    String notify(String target, String event, Map<String, String> payload, Consumer<String> lineSink,
+                  Consumer<Process> processSink) throws Exception;
 }

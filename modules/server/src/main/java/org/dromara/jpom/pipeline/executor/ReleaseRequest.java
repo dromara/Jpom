@@ -49,6 +49,10 @@ public class ReleaseRequest {
      */
     private String pipelineId;
     /**
+     * 流水线名称（文件中心产物的名称/描述要能区分是哪条流水线的第几次运行）
+     */
+    private String pipelineName;
+    /**
      * 运行编号（复用为「构建编号」）
      */
     private int runNumber;

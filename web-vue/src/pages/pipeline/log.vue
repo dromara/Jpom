@@ -136,7 +136,7 @@ export default {
           } else {
             this.polling = false
             if (res.msg) {
-              message.warn({ message: res.msg })
+              message.warning(res.msg)
               this.$refs.logView && this.$refs.logView.appendLine([res.msg])
             }
             return

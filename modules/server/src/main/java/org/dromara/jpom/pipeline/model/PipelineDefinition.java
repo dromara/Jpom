@@ -10,9 +10,12 @@
 package org.dromara.jpom.pipeline.model;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import lombok.Data;
+import org.dromara.jpom.pipeline.hook.PipelineEvent;
+import org.dromara.jpom.pipeline.hook.PipelineHookDef;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -43,6 +46,11 @@ public class PipelineDefinition {
     private List<PipelineStageDef> stages = new ArrayList<>();
 
     /**
+     * 事件钩子（脚本 / webhook；存 {@code PIPELINE_INFO.hooksJson}，旧数据为空数组）
+     */
+    private List<PipelineHookDef> hooks = new ArrayList<>();
+
+    /**
      * 解析仓库源
      *
      * @param json JSON 文本（可为空）
@@ -71,6 +79,20 @@ public class PipelineDefinition {
     }
 
     /**
+     * 解析事件钩子
+     *
+     * @param json JSON 文本（可为空）
+     * @return 钩子列表（永不为 null）
+     */
+    public static List<PipelineHookDef> parseHooks(String json) {
+        if (StrUtil.isBlank(json)) {
+            return new ArrayList<>();
+        }
+        List<PipelineHookDef> list = JSON.parseArray(json, PipelineHookDef.class);
+        return list == null ? new ArrayList<>() : list;
+    }
+
+    /**
      * 组装定义
      *
      * @param sourcesJson 源 JSON
@@ -78,9 +100,22 @@ public class PipelineDefinition {
      * @return 定义
      */
     public static PipelineDefinition of(String sourcesJson, String stagesJson) {
+        return of(sourcesJson, stagesJson, null);
+    }
+
+    /**
+     * 组装定义（含事件钩子）
+     *
+     * @param sourcesJson 源 JSON
+     * @param stagesJson  阶段 JSON
+     * @param hooksJson   钩子 JSON（可为空）
+     * @return 定义
+     */
+    public static PipelineDefinition of(String sourcesJson, String stagesJson, String hooksJson) {
         PipelineDefinition definition = new PipelineDefinition();
         definition.setSources(parseSources(sourcesJson));
         definition.setStages(parseStages(stagesJson));
+        definition.setHooks(parseHooks(hooksJson));
         return definition;
     }
 
@@ -139,6 +174,50 @@ public class PipelineDefinition {
         }
         if (stages.stream().noneMatch(stage -> stage.enabled() && stage.getType() == PipelineStageType.BUILD)) {
             throw new PipelineValidateException("i18n.pipeline_build_stage_required.3e7a", null);
+        }
+        this.checkHooks();
+    }
+
+    /**
+     * 校验事件钩子（保存前调用）
+     * <p>
+     * 服务端校验为主：前端隐藏/禁用不算校验（§0.25）。事件码必须是 {@link PipelineEvent} 里存在的值，
+     * 脚本钩子必须有 scriptId，webhook 必须有 http(s) 地址——否则运行期才发现问题太晚。
+     * </p>
+     */
+    private void checkHooks() {
+        if (CollUtil.isEmpty(hooks)) {
+            return;
+        }
+        for (PipelineHookDef hook : hooks) {
+            if (hook == null) {
+                continue;
+            }
+            String type = StrUtil.nullToEmpty(hook.getType());
+            if (!StrUtil.equalsAny(type, "script", "webhook")) {
+                throw new PipelineValidateException("i18n.pipeline_hook_type_invalid.8c10", type);
+            }
+            if (CollUtil.isEmpty(hook.getEvents())) {
+                throw new PipelineValidateException("i18n.pipeline_hook_events_required.8c07", null);
+            }
+            for (String code : hook.getEvents()) {
+                if (!StrUtil.equalsIgnoreCase(code, PipelineEvent.ALL) && !PipelineEvent.exists(code)) {
+                    throw new PipelineValidateException("i18n.pipeline_hook_events_invalid.8c11", code);
+                }
+            }
+            if (StrUtil.equals(type, "script") && StrUtil.isBlank(hook.getScriptId())) {
+                throw new PipelineValidateException("i18n.pipeline_hook_script_required.8c08", null);
+            }
+            if (StrUtil.equals(type, "webhook")) {
+                String url = StrUtil.nullToEmpty(hook.getUrl());
+                if (StrUtil.isBlank(url) || !ReUtil.isMatch("^https?://[^\\s]+$", url)) {
+                    throw new PipelineValidateException("i18n.pipeline_hook_url_invalid.8c09", url);
+                }
+                String method = StrUtil.emptyToDefault(hook.getMethod(), "POST");
+                if (!StrUtil.equalsAnyIgnoreCase(method, "GET", "POST")) {
+                    throw new PipelineValidateException("i18n.pipeline_hook_method_invalid.8c18", method);
+                }
+            }
         }
     }
 

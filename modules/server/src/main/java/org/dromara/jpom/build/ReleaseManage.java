@@ -125,6 +125,10 @@ public class ReleaseManage {
     private File resultFile;
     private volatile Process process;
     /**
+     * 本次发布的构建信息（发布目标实现需要工作空间、名称、别名码等；由 {@link #start(Consumer, BuildInfoModel)} 注入）
+     */
+    private BuildInfoModel buildInfoModel;
+    /**
      * 进程登记回调：让构建编排把发布命令的进程登记进执行体（取消「发布中」任务时才能杀掉）
      */
     private Consumer<Process> processListener;
@@ -189,6 +193,7 @@ public class ReleaseManage {
      */
     public String start(Consumer<Long> consumer, BuildInfoModel buildInfoModel) throws Exception {
         this.init();
+        this.buildInfoModel = buildInfoModel;
         this.resultFile = buildExtraModule.resultDirFile(this.getRealBuildNumberId());
         this.buildEnv.put("BUILD_RESULT_FILE", FileUtil.getAbsolutePath(this.resultFile));
         this.buildEnv.put("BUILD_RESULT_DIR_FILE", buildExtraModule.getResultDirFile());
@@ -202,31 +207,10 @@ public class ReleaseManage {
         long resultFileSize = FileUtil.size(this.resultFile);
         logRecorder.system(I18nMessageUtil.get("i18n.start_executing_publishing_with_file_size.5039"), FileUtil.readableFileSize(resultFileSize));
         Optional.ofNullable(consumer).ifPresent(consumer1 -> consumer1.accept(resultFileSize));
-        // 先同步到文件管理中心
+        // 先同步到文件管理中心（与流水线「文件中心」发布方式共用同一段实现）
         Boolean syncFileStorage = this.buildExtraModule.getSyncFileStorage();
         if (syncFileStorage != null && syncFileStorage) {
-            // 处理保留天数
-            Integer fileStorageKeepDay =
-                Optional.ofNullable(this.buildExtraModule.getFileStorageKeepDay())
-                    .map(integer -> Convert.toInt(buildExtraModule.getFileStorageKeepDay()))
-                    .filter(integer -> integer > 0)
-                    .orElse(null);
-            String keepMsg = fileStorageKeepDay == null ? StrUtil.EMPTY : StrUtil.format(I18nMessageUtil.get("i18n.retention_days.3c7d"), fileStorageKeepDay);
-            logRecorder.system(I18nMessageUtil.get("i18n.start_syncing_to_file_management_center.0a03"), keepMsg);
-            boolean tarGz = this.buildEnv.getBool(BuildUtil.USE_TAR_GZ, false);
-            File dirPackage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, tarGz, (unZip, file) -> file);
-            String string = I18nMessageUtil.get("i18n.build_source.2ef9");
-            String successMd5 = fileStorageService.addFile(dirPackage, 1,
-                buildInfoModel.getWorkspaceId(),
-                string + buildInfoModel.getName(),
-                // 默认的别名码为构建id
-                StrUtil.emptyToDefault(buildInfoModel.getAliasCode(), buildInfoModel.getId()),
-                fileStorageKeepDay);
-            if (successMd5 != null) {
-                logRecorder.system(I18nMessageUtil.get("i18n.build_product_sync_success.f7d1"), successMd5);
-            } else {
-                logRecorder.systemWarning(I18nMessageUtil.get("i18n.build_product_file_sync_failed.0e64"));
-            }
+            this.syncToFileStorage(buildInfoModel);
         }
         //
         int releaseMethod = this.buildExtraModule.getReleaseMethod();
@@ -240,6 +224,111 @@ public class ReleaseManage {
             return format;
         }
         return target.release(this);
+    }
+
+    /**
+     * 当前发布的构建信息（发布目标实现用）
+     *
+     * @return 构建信息；未经 {@link #start(Consumer, BuildInfoModel)} 注入时为 null
+     */
+    BuildInfoModel getBuildInfoModel() {
+        return buildInfoModel;
+    }
+
+    /**
+     * 运行日志（发布目标实现要写日志时用）
+     *
+     * @return 日志记录器
+     */
+    LogRecorder getLogRecorder() {
+        return logRecorder;
+    }
+
+    /**
+     * 同步产物到文件中心
+     * <p>
+     * 两个调用方共用同一段实现：①在线构建的「同步到文件中心」开关（{@link #start}）；②流水线的
+     * 「文件中心」发布方式（{@code FileStorageReleaseTarget}）。抽取时保持日志与判定逐字不变，
+     * 老构建的行为不因新增发布方式而改变。
+     * </p>
+     *
+     * @param buildInfoModel 构建信息（工作空间、名称、别名码）
+     * @return 同步结果（不抛异常，失败原因在 message 里）
+     */
+    FileStorageSyncResult syncToFileStorage(BuildInfoModel buildInfoModel) {
+        // 处理保留天数
+        Integer fileStorageKeepDay =
+            Optional.ofNullable(this.buildExtraModule.getFileStorageKeepDay())
+                .map(integer -> Convert.toInt(buildExtraModule.getFileStorageKeepDay()))
+                .filter(integer -> integer > 0)
+                .orElse(null);
+        String keepMsg = fileStorageKeepDay == null ? StrUtil.EMPTY : StrUtil.format(I18nMessageUtil.get("i18n.retention_days.3c7d"), fileStorageKeepDay);
+        logRecorder.system(I18nMessageUtil.get("i18n.start_syncing_to_file_management_center.0a03"), keepMsg);
+        boolean tarGz = this.buildEnv == null ? false : this.buildEnv.getBool(BuildUtil.USE_TAR_GZ, false);
+        File dirPackage = BuildUtil.loadDirPackage(this.buildExtraModule.getId(), this.getRealBuildNumberId(), this.resultFile, tarGz, (unZip, file) -> file);
+        if (dirPackage == null || !dirPackage.exists()) {
+            String message = I18nMessageUtil.get("i18n.pipeline_file_storage_package_missing");
+            logRecorder.systemWarning(message);
+            return FileStorageSyncResult.failed(message);
+        }
+        String string = I18nMessageUtil.get("i18n.build_source.2ef9");
+        // 同名同 MD5 的产物在文件中心已存在时 addFile 会返回 null，这里单独判定，避免把「已存在」误报成失败
+        String fileMd5 = SecureUtil.md5(dirPackage);
+        boolean existed = fileStorageService.getByKey(fileMd5) != null;
+        String successMd5 = fileStorageService.addFile(dirPackage, 1,
+            buildInfoModel.getWorkspaceId(),
+            string + buildInfoModel.getName(),
+            // 默认的别名码为构建id
+            StrUtil.emptyToDefault(buildInfoModel.getAliasCode(), buildInfoModel.getId()),
+            fileStorageKeepDay);
+        if (successMd5 != null) {
+            logRecorder.system(I18nMessageUtil.get("i18n.build_product_sync_success.f7d1"), successMd5);
+        } else {
+            logRecorder.systemWarning(I18nMessageUtil.get("i18n.build_product_file_sync_failed.0e64"));
+        }
+        return new FileStorageSyncResult(successMd5, existed, dirPackage.getName());
+    }
+
+    /**
+     * 文件中心同步结果
+     * <p>
+     * {@code md5} 非空表示本次新写入；{@code existed} 表示同 MD5 产物早已在文件中心
+     * （在线构建历史上把它算作「同步失败」的告警，这里保留原判定，同时让流水线可以按「已存在＝成功」处理）。
+     * </p>
+     */
+    static final class FileStorageSyncResult {
+        private final String md5;
+        private final boolean existed;
+        private final String fileName;
+
+        FileStorageSyncResult(String md5, boolean existed, String fileName) {
+            this.md5 = md5;
+            this.existed = existed;
+            this.fileName = fileName;
+        }
+
+        static FileStorageSyncResult failed(String message) {
+            return new FileStorageSyncResult(null, false, message);
+        }
+
+        String getMd5() {
+            return md5;
+        }
+
+        boolean isExisted() {
+            return existed;
+        }
+
+        String getFileName() {
+            return fileName;
+        }
+
+        /**
+         * @return 产物是否已在文件中心（新写入或本来就存在）
+         */
+        boolean available() {
+            return md5 != null || existed;
+        }
     }
 
     /**

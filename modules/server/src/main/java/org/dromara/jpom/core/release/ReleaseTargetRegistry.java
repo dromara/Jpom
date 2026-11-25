@@ -10,6 +10,7 @@
 package org.dromara.jpom.core.release;
 
 import org.dromara.jpom.build.DockerImageReleaseTarget;
+import org.dromara.jpom.build.FileStorageReleaseTarget;
 import org.dromara.jpom.build.FtpReleaseTarget;
 import org.dromara.jpom.build.LocalCommandReleaseTarget;
 import org.dromara.jpom.build.NoopReleaseTarget;
@@ -44,6 +45,7 @@ public final class ReleaseTargetRegistry {
         register(new DockerImageReleaseTarget());
         register(new FtpReleaseTarget());
         register(new SshProjectReleaseTarget());
+        register(new FileStorageReleaseTarget());
     }
 
     private ReleaseTargetRegistry() {

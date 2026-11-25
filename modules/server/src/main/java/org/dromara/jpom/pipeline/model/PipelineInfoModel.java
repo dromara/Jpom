@@ -51,6 +51,13 @@ public class PipelineInfoModel extends BaseWorkspaceModel {
      */
     private String stagesJson;
     /**
+     * 事件钩子（JSON 数组，见 {@code PipelineHookDef}）
+     * <p>
+     * 追加列（2.11.16）：旧记录为空表示没有钩子，读取时按空数组处理，不做数据迁移。
+     * </p>
+     */
+    private String hooksJson;
+    /**
      * 结构版本（后续升级按版本兼容读取）
      */
     private Integer schemaVersion;
@@ -85,6 +92,7 @@ public class PipelineInfoModel extends BaseWorkspaceModel {
      * @return 定义（永不返回 null）
      */
     public PipelineDefinition definition() {
-        return PipelineDefinition.of(this.sourcesJson, this.stagesJson);
+        // 事件钩子必须一起解析：只传源与阶段会让钩子永远为空（运行期事件不会触发）
+        return PipelineDefinition.of(this.sourcesJson, this.stagesJson, this.hooksJson);
     }
 }
