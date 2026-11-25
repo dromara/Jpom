@@ -501,12 +501,19 @@ public class ReleaseManage {
      * @param logRecorder 日志
      */
     private void recordReleaseCommandExit(String phaseLabel, int exitCode, LogRecorder logRecorder) {
+        boolean strictlyEnforce = this.buildExtraModule.strictlyEnforce();
         if (ReleaseCommandExitCode.unknown(exitCode)) {
+            if (ReleaseCommandExitCode.shouldFailTarget(exitCode, strictlyEnforce)) {
+                // 严格模式下「读不到退出码」＝不能证明成功，按失败处理（2026-11-25 群反馈复测口径）
+                String message = ReleaseCommandExitCode.unknownFailureMessage(phaseLabel);
+                logRecorder.systemError(message);
+                throw new JpomRuntimeException(message);
+            }
             logRecorder.systemWarning(I18nMessageUtil.get("i18n.release_command_exit_unknown.a7f6"), phaseLabel);
             return;
         }
         logRecorder.system(I18nMessageUtil.get("i18n.execute_script_exit_code.64a8"), phaseLabel, exitCode);
-        if (!ReleaseCommandExitCode.shouldFailTarget(exitCode, this.buildExtraModule.strictlyEnforce())) {
+        if (!ReleaseCommandExitCode.shouldFailTarget(exitCode, strictlyEnforce)) {
             return;
         }
         String message = ReleaseCommandExitCode.failureMessage(phaseLabel, exitCode);

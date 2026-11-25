@@ -20,7 +20,8 @@ import org.dromara.jpom.common.i18n.I18nMessageUtil;
  *     <li>0：成功；</li>
  *     <li>&gt;0：失败，但是否把该目标判失败取决于构建配置「严格执行」（strictlyEnforce，默认关，
  *     关闭时保持 2.11.15 行为：只记录）；</li>
- *     <li>&lt;0（-1）：未知，JSch 未在等待期内收到 close 消息时返回，只提示不判失败，避免误判。</li>
+ *     <li>-1（{@link #UNKNOWN}）：未知，JSch 未在等待期内收到 close 消息时返回；未开严格执行只提示，
+ *     开启严格执行时同样判该目标失败——严格模式下「不能证明成功」按失败处理，否则用户会看到「脚本失败仍判成功」。</li>
  * </ul>
  * 这里是纯判断点（不碰 Spring / IO），行为由 {@code ReleaseCommandExitCodeTest} 覆盖。
  *
@@ -44,7 +45,7 @@ public final class ReleaseCommandExitCode {
      * @return true 未知
      */
     public static boolean unknown(int exitCode) {
-        return exitCode < 0;
+        return exitCode == UNKNOWN;
     }
 
     /**
@@ -65,7 +66,12 @@ public final class ReleaseCommandExitCode {
      * @return true 判目标失败
      */
     public static boolean shouldFailTarget(int exitCode, boolean strictlyEnforce) {
-        return failed(exitCode) && strictlyEnforce;
+        if (!strictlyEnforce) {
+            // 未开严格执行：保持 2.11.15 行为，只记录退出码，不改判发布结果
+            return false;
+        }
+        // 严格模式：非 0 判失败；-1（读不到）同样判失败，避免「命令失败仍判成功」
+        return failed(exitCode) || unknown(exitCode);
     }
 
     /**
@@ -77,5 +83,15 @@ public final class ReleaseCommandExitCode {
      */
     public static String failureMessage(String phaseLabel, int exitCode) {
         return StrUtil.format(I18nMessageUtil.get("i18n.release_command_non_zero_exit_code.a7f5"), phaseLabel, exitCode);
+    }
+
+    /**
+     * 退出码读不到（-1）且开启严格执行时的失败消息
+     *
+     * @param phaseLabel 阶段文案（发布前命令 / 发布后命令 / SSH 项目重启）
+     * @return 已国际化消息
+     */
+    public static String unknownFailureMessage(String phaseLabel) {
+        return StrUtil.format(I18nMessageUtil.get("i18n.release_command_exit_unknown_strict.c3d9"), phaseLabel);
     }
 }
