@@ -62,7 +62,7 @@ public class BuildInfoTriggerController extends BaseServerController {
     @RequestMapping(value = "/build/trigger/url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<Map<String, String>> getTriggerUrl(String id, String rest, HttpServletRequest request) {
-        BuildInfoModel item = buildInfoService.getByKey(id, request);
+        BuildInfoModel item = buildInfoService.getByKeyOrThrow(id, request, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
         UserModel user = getUser();
         BuildInfoModel updateInfo;
         if (StrUtil.isEmpty(item.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {

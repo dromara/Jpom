@@ -285,7 +285,7 @@ public class ScriptController extends BaseServerController {
     @RequestMapping(value = "trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<Map<String, String>> getTriggerUrl(String id, String rest, HttpServletRequest request) {
-        ScriptModel item = scriptServer.getByKey(id, request);
+        ScriptModel item = scriptServer.getByKeyOrThrow(id, request, I18nMessageUtil.get("i18n.no_script.93c4"));
         UserModel user = getUser();
         ScriptModel updateInfo;
         if (StrUtil.isEmpty(item.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {

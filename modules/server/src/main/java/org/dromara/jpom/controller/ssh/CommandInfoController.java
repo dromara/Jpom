@@ -212,7 +212,7 @@ public class CommandInfoController extends BaseServerController {
     @RequestMapping(value = "trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<Map<String, String>> getTriggerUrl(String id, String rest, HttpServletRequest request) {
-        CommandModel item = sshCommandService.getByKey(id, request);
+        CommandModel item = sshCommandService.getByKeyOrThrow(id, request, I18nMessageUtil.get("i18n.no_data_found.4ffb"));
         UserModel user = getUser();
         CommandModel updateInfo;
         if (StrUtil.isEmpty(item.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {
