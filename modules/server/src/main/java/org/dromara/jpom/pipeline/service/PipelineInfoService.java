@@ -9,10 +9,15 @@
  */
 package org.dromara.jpom.pipeline.service;
 
+import cn.hutool.core.util.StrUtil;
+import org.dromara.jpom.dialect.DialectUtil;
 import org.dromara.jpom.pipeline.model.PipelineInfoModel;
 import org.dromara.jpom.service.ITriggerToken;
 import org.dromara.jpom.service.h2db.BaseWorkspaceService;
 import org.springframework.stereotype.Service;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * 流水线配置服务
@@ -31,6 +36,30 @@ public class PipelineInfoService extends BaseWorkspaceService<PipelineInfoModel>
     @Override
     public boolean exists(String dataId) {
         return this.getByKey(dataId) != null;
+    }
+
+    /**
+     * 分组列表（当前工作空间内去重）
+     * <p>
+     * 与在线构建、仓库、SSH、FTP、项目同一套「虚拟逻辑分组」语义：分组不是独立管理的实体，
+     * 而是已有记录分组字段的去重结果，新增分组随记录保存自动出现（无需单独建分组表）。
+     * </p>
+     * <p>
+     * 必须覆盖父类：{@link BaseWorkspaceService#listGroup(HttpServletRequest)} 查的是 {@code group} 列，
+     * 而流水线的分组字段是 {@code groupName}（见 {@link PipelineInfoModel}）。
+     * </p>
+     *
+     * @param request 请求
+     * @return 分组名称列表（不含空分组：没填分组的记录不产生下拉候选项）
+     */
+    @Override
+    public List<String> listGroup(HttpServletRequest request) {
+        String workspaceId = getCheckUserWorkspace(request);
+        String group = DialectUtil.wrapField("groupName");
+        String sql = String.format("select %s from %s where workspaceId=? group by %s", group, getTableName(), group);
+        List<String> list = super.listGroupByName(sql, "groupName", workspaceId);
+        list.removeIf(StrUtil::isBlank);
+        return list;
     }
 
     @Override

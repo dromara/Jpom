@@ -99,6 +99,9 @@ DEFAULT_TESTS=(
 	RemoteVersionDownloadMessageTest
 	# 流水线运行日志按窗口读取（长日志不再每次整文件进内存）
 	PipelineLogReaderTest
+	# 流水线仓库源：克隆深度必须切系统 git（2026-11-26 群反馈「浅克隆不生效」的守卫）+ 源码缓存行为
+	PipelineSourceSyncParameterTest
+	PipelineSourceCacheTest
 	# 触发器统一收口点：查不到 405 / token 生成与重置唯一路径 / 响应 key 与历史一致（B-041 同类缺陷的守卫）
 	TriggerUrlAssemblerTest
 	UploadShardingExtensionTest

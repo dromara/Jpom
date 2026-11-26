@@ -142,6 +142,22 @@ public class PipelineController extends BaseServerController {
     }
 
     /**
+     * 分组列表（虚拟逻辑分组）
+     * <p>
+     * 与在线构建 {@code /build/list_group_all}、SSH、FTP、仓库、项目同一套语义：返回当前工作空间已存在的分组名，
+     * 供编辑页定制下拉框（{@code custom-select}）作为候选项；分组不是独立实体，新增分组随保存自动出现。
+     * </p>
+     *
+     * @param request 请求（工作空间由服务层强制）
+     * @return 分组名称列表
+     */
+    @RequestMapping(value = "/list_group_all", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Feature(method = MethodFeature.LIST)
+    public IJsonMessage<List<String>> listGroupAll(HttpServletRequest request) {
+        return JsonMessage.success("", pipelineInfoService.listGroup(request));
+    }
+
+    /**
      * 详情
      *
      * @param id      流水线 ID

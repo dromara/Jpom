@@ -21,7 +21,24 @@
           </a-col>
           <a-col :span="12">
             <a-form-item :label="$t('i18n_829abe5a8d')">
-              <a-input v-model:value="form.groupName" :max-length="50" :placeholder="$t('i18n_pipeline_group_placeholder')" />
+              <!-- 分组与在线构建 / 项目 / 仓库 / SSH 同一套交互：虚拟逻辑分组 + 定制下拉框（可选已有、可直接新增） -->
+              <custom-select
+                v-model:value="form.groupName"
+                data-testid="pipeline-group"
+                :max-length="50"
+                :data="groupList"
+                :input-placeholder="$t('i18n_bd0362bed3')"
+                :select-placeholder="$t('i18n_3e8c9c54ee')"
+              >
+                <template #suffix>
+                  <a-tooltip>
+                    <template #title>
+                      <div>{{ $t('i18n_bd7c7abc8c') }}</div>
+                    </template>
+                    <QuestionCircleOutlined />
+                  </a-tooltip>
+                </template>
+              </custom-select>
             </a-form-item>
           </a-col>
         </a-row>
@@ -874,7 +891,7 @@
 
 <script>
 import { message, Empty } from 'ant-design-vue'
-import { getPipelineGet, savePipeline, pipelineHookEventCodes } from '@/api/pipeline'
+import { getPipelineGet, savePipeline, getPipelineGroupAll, pipelineHookEventCodes } from '@/api/pipeline'
 import { getRepositoryList } from '@/api/repository'
 import { getBuildNodeList, getBranchList, releaseMethodMap } from '@/api/build-info'
 import { getSshListAll } from '@/api/ssh'
@@ -973,6 +990,8 @@ export default {
         { title: this.$t('i18n_pipeline_hooks_title') }
       ],
       form: { id: '', name: '', groupName: '' },
+      // 分组候选项（虚拟逻辑分组：后端按当前工作空间去重返回，不是独立管理的分组数据）
+      groupList: [],
       sources: [],
       stages: [],
       selectedIndex: -1,
@@ -1150,6 +1169,7 @@ export default {
   },
   mounted() {
     this.loadRefs()
+    this.loadGroupList()
     if (this.id) {
       this.loadDetail()
     }
@@ -1265,6 +1285,14 @@ export default {
         .finally(() => {
           this.loading = false
         })
+    },
+    // 分组候选项：与在线构建编辑页一致，失败不阻断编辑（下拉仍可手工输入新分组）
+    loadGroupList() {
+      getPipelineGroupAll().then((res) => {
+        if (res.code === 200) {
+          this.groupList = res.data || []
+        }
+      })
     },
     loadRefs() {
       this.repoLoading = true

@@ -90,6 +90,15 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
     }
 
     /**
+     * 是否使用新版本分组字段（{@code groupName}）
+     *
+     * @return true 表示模型里存在 groupName 字段（含父类字段）
+     */
+    public boolean isCanGroupName() {
+        return canGroupName;
+    }
+
+    /**
      * load date group by group name
      *
      * @return list
@@ -140,13 +149,46 @@ public abstract class BaseDbService<T extends BaseDbModel> extends BaseDbCommonS
 
 
     /**
-     * 恢复字段
+     * 恢复字段（旧版本分组字段 {@code group}）
+     * <p>
+     * 启动时由 {@code DataInitEvent} 对所有「类里有 group 字段」的表调用一次：把 null/空串分组修复为默认分组，
+     * 保证「空分组」不会长期留在库里（分组是虚拟逻辑分组，空值既不是分组也没有展示意义）。
+     * </p>
      */
     public void repairGroupFiled() {
         Assert.state(this.canGroup, I18nMessageUtil.get("i18n.data_table_not_supported_for_grouping.6678"));
-        String group = DialectUtil.wrapField("group");
-        String sql = String.format("update %s set %s =? where %s is null or %s = ''", getTableName(), group, group, group);
+        String sql = buildRepairGroupSql(getTableName(), "group", DialectUtil::wrapField);
         super.execute(sql, Const.DEFAULT_GROUP_NAME.get());
+    }
+
+    /**
+     * 恢复字段（新版本分组字段 {@code groupName}）
+     * <p>
+     * 与 {@link #repairGroupFiled()} 同一套规则，只是字段名不同：机器资产、流水线等把分组字段改名为
+     * {@code groupName} 之后，启动时的空分组修复必须跟着覆盖，否则老数据里的空分组永远不会被归一。
+     * </p>
+     */
+    public void repairGroupNameFiled() {
+        Assert.state(this.canGroupName, I18nMessageUtil.get("i18n.data_table_not_supported_for_grouping.6678"));
+        String sql = buildRepairGroupSql(getTableName(), "groupName", DialectUtil::wrapField);
+        super.execute(sql, Const.DEFAULT_GROUP_NAME.get());
+    }
+
+    /**
+     * 构造「把空分组修复为默认分组」的 SQL
+     * <p>
+     * 独立成静态包级方法是为了让单元测试直接断言产物：{@code is null} 与 {@code = ''} 两个条件缺一不可
+     * （只判空串会漏掉 NULL，只判 NULL 会漏掉空串）；字段包裹器由调用方注入，避免单测依赖数据库方言。
+     * </p>
+     *
+     * @param tableName    表名
+     * @param fieldName    分组字段名
+     * @param fieldWrapper 字段包裹器（生产为 {@link DialectUtil#wrapField(String)}）
+     * @return 更新 SQL
+     */
+    static String buildRepairGroupSql(String tableName, String fieldName, Function<String, String> fieldWrapper) {
+        String field = fieldWrapper.apply(fieldName);
+        return String.format("update %s set %s =? where %s is null or %s = ''", tableName, field, field, field);
     }
 
     public int insert(T t) {

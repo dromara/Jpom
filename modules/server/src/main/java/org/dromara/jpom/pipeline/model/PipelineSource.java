@@ -9,6 +9,7 @@
  */
 package org.dromara.jpom.pipeline.model;
 
+import cn.hutool.core.util.StrUtil;
 import lombok.Data;
 
 /**
@@ -39,4 +40,41 @@ public class PipelineSource {
      * 克隆深度
      */
     private Integer cloneDepth;
+
+    /**
+     * 是否标签引用（{@code tag:名称}）
+     *
+     * @return true 标签
+     */
+    public boolean isTagRef() {
+        return StrUtil.startWith(StrUtil.trimToEmpty(this.ref), "tag:");
+    }
+
+    /**
+     * 引用名（去掉 {@code tag:}/{@code branch:} 前缀；留空表示仓库默认分支）
+     * <p>
+     * 解析只在这里做：界面、同步、缓存 key 都从同一个方法取值，避免「界面按 tag 保存、后端按分支拉」。
+     * </p>
+     *
+     * @return 分支名/标签名
+     */
+    public String refName() {
+        String text = StrUtil.trimToEmpty(this.ref);
+        if (StrUtil.startWith(text, "tag:")) {
+            return StrUtil.trimToEmpty(StrUtil.removePrefix(text, "tag:"));
+        }
+        if (StrUtil.startWith(text, "branch:")) {
+            return StrUtil.trimToEmpty(StrUtil.removePrefix(text, "branch:"));
+        }
+        return text;
+    }
+
+    /**
+     * 生效的克隆深度（0 与空都表示完整克隆）
+     *
+     * @return 深度；null 表示全量
+     */
+    public Integer effectiveCloneDepth() {
+        return this.cloneDepth == null || this.cloneDepth <= 0 ? null : this.cloneDepth;
+    }
 }

@@ -320,7 +320,7 @@ public class PipelineRunner {
                 this.fireEvent(hooks, context, PipelineEvent.RUN_START, BuildStatus.Ing.getCode(),
                     run.getStatusMsg(), run.getTriggerType(), null, null, context.getProcessObserver(), eventRecords);
                 handle.stage("source-sync");
-                Map<String, String> commits = sourceSync.sync(pipelineId, definition.getSources(),
+                Map<String, String> commits = sourceSync.sync(workspace, pipelineId, definition.getSources(),
                     workspace.mountDirs(pipelineId, runNumber, definition.getSources()), new PipelineSourceSync.LogSink() {
                         @Override
                         public void info(String message) {

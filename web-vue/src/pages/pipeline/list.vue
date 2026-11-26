@@ -38,13 +38,27 @@
             :placeholder="$t('i18n_pipeline_name')"
             @press-enter="handleSearch"
           />
-          <a-input
-            v-model:value="listQuery['%groupName%']"
+          <!-- 分组：与在线构建 / 项目 / 仓库列表一致，虚拟逻辑分组的候选下拉（精确匹配），不再用模糊输入 -->
+          <a-select
+            v-model:value="listQuery.groupName"
+            data-testid="pipeline-list-group-filter"
+            show-search
             allow-clear
             class="search-input-item"
             :placeholder="$t('i18n_829abe5a8d')"
-            @press-enter="handleSearch"
-          />
+            :filter-option="
+              (input, option) => {
+                const children = option.children && option.children()
+                return (
+                  children &&
+                  children[0].children &&
+                  children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                )
+              }
+            "
+          >
+            <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
+          </a-select>
           <a-select
             v-model:value="listQuery.status"
             allow-clear
@@ -238,7 +252,8 @@ import {
   runPipeline,
   cancelPipeline,
   pipelineStatusMap,
-  pipelineStatusColor
+  pipelineStatusColor,
+  getPipelineGroupAll
 } from '@/api/pipeline'
 import { parseTime, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, CHANGE_PAGE } from '@/utils/const'
 import PipelineEdit from './edit.vue'
@@ -256,9 +271,12 @@ export default {
       list: [],
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY, {
         '%name%': '',
-        '%groupName%': '',
+        // 分组筛选与在线构建列表一致：下拉选已有分组，后端按 groupName 精确匹配
+        groupName: undefined,
         status: undefined
       }),
+      // 分组候选项（虚拟逻辑分组：后端按当前工作空间去重返回）
+      groupList: [],
       editVisible: false,
       editSteps: 0,
       editStepCount: 3,
@@ -342,9 +360,21 @@ export default {
   },
   mounted() {
     this.loadData()
+    this.loadGroupList()
+  },
+  // 列表页被 keep-alive 缓存：从别的页签回来时重新拉分组候选，避免「新建了分组但下拉里没有」
+  activated() {
+    this.loadGroupList()
   },
   methods: {
     parseTime,
+    loadGroupList() {
+      getPipelineGroupAll().then((res) => {
+        if (res.code === 200) {
+          this.groupList = res.data || []
+        }
+      })
+    },
     handleTableChange(pagination) {
       this.listQuery = CHANGE_PAGE(this.listQuery, { pagination })
       this.loadData()

@@ -23,6 +23,19 @@ export function getPipelineList(params) {
 }
 
 /**
+ * 流水线分组（虚拟逻辑分组：返回当前工作空间已存在的分组名）
+ * <p>
+ * 与在线构建 /build/list_group_all 同一套语义，供编辑页定制下拉框作为候选项。
+ * </p>
+ */
+export function getPipelineGroupAll() {
+  return axios({
+    url: '/pipeline/list_group_all',
+    method: 'get'
+  })
+}
+
+/**
  * 流水线详情
  */
 export function getPipelineGet(params) {

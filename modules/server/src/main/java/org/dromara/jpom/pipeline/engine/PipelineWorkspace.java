@@ -21,7 +21,8 @@ import java.util.List;
  * 流水线工作区布局
  * <pre>
  * data/pipeline/
- *   workspace/&lt;pipelineId&gt;/&lt;runNumber&gt;/&lt;mount&gt;   每个源一个子目录
+ *   workspace/&lt;pipelineId&gt;/&lt;runNumber&gt;/&lt;mount&gt;   每个源一个子目录（每次运行独立）
+ *   cache/&lt;仓库&gt;-&lt;key&gt;.git                      仓库源本地缓存（跨运行复用，可重建）
  *   artifacts/&lt;pipelineId&gt;/&lt;runNumber&gt;/&lt;stageId&gt;/ 阶段产物
  *   log/&lt;pipelineId&gt;/&lt;runNumber&gt;.log                运行日志
  * </pre>
@@ -51,6 +52,15 @@ public final class PipelineWorkspace {
      */
     public File workspace(String pipelineId, int runNumber) {
         return FileUtil.mkdir(FileUtil.file(root, "workspace", safe(pipelineId), String.valueOf(runNumber)));
+    }
+
+    /**
+     * 仓库源缓存根目录（跨运行复用；纯系统中间产物，删掉只会触发重新克隆）
+     *
+     * @return 目录
+     */
+    public File cacheDir() {
+        return FileUtil.mkdir(FileUtil.file(root, "cache"));
     }
 
     /**
