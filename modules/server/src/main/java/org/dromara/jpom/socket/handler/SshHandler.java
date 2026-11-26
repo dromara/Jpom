@@ -480,6 +480,11 @@ public class SshHandler extends BaseTerminalHandler {
                     this.recordOutput(tempBytes);
                     sendBinary(session, new String(tempBytes, machineSshModel.charset()));
                 }
+                // 远端 EOF：SSH 通道被关闭（kill sshd / 远端退出），按异常中断收尾
+                if (this.recorder instanceof AsciicastTerminalRecorder) {
+                    ((AsciicastTerminalRecorder) this.recorder).markAbnormal();
+                }
+                SshHandler.this.destroy(this.session);
             } catch (Exception e) {
                 if (this.recorder instanceof AsciicastTerminalRecorder) {
                     ((AsciicastTerminalRecorder) this.recorder).markAbnormal();
@@ -500,8 +505,8 @@ public class SshHandler extends BaseTerminalHandler {
         public void close() throws Exception {
             // 先落录制文件与会话行，再关通道
             // 只有「浏览器正常关闭终端（1000/1001）且 SSH 会话仍然连通」才算正常结束，其余一律标记异常中断
-            boolean cleanClose = this.closeStatus != null
-                && (this.closeStatus.getCode() == 1000 || this.closeStatus.getCode() == 1001);
+            // 1000 = 用户主动关闭终端；1001（GOING_AWAY，服务端重启/页面跳转）与 1006 一律按异常中断
+            boolean cleanClose = this.closeStatus != null && this.closeStatus.getCode() == 1000;
             boolean sessionBroken = this.openSession == null || !this.openSession.isConnected();
             if (!cleanClose || sessionBroken) {
                 if (this.recorder instanceof AsciicastTerminalRecorder) {
