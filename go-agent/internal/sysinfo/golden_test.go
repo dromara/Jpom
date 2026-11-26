@@ -19,11 +19,11 @@ import (
 	"testing"
 )
 
-// findGolden 在维护者私有工作区的黄金样本目录中查找 Java 端响应样本。
+// findGolden 查找 Java 端响应的黄金样本。
 //
-// 样本由私有工具采集并按脱敏规则归一化，仍含主机/路径/版本等环境指纹，**不随开源仓库发布**：
-// 仓库内没有样本时跳过 golden 比对（开源 CI 只跑不依赖样本的用例）。
-// 需要结构回归时用 JPOM_GOLDEN_DIR 指向样本目录，见 dev-scripts/go-agent/golden/README.md。
+// 样本由外部工具采集并按脱敏规则归一化，仍含主机/路径/版本等环境指纹，**不随仓库发布**：
+// 找不到样本时跳过 golden 比对，因此开源 CI 只跑不依赖样本的用例。
+// 需要结构回归时用 JPOM_GOLDEN_DIR 指向样本目录：目录内每个样本一个 JSON 文件，文件名即用例名。
 func findGolden(t *testing.T, name string) map[string]any {
 	t.Helper()
 	for _, dir := range goldenDirs() {
@@ -42,8 +42,8 @@ func findGolden(t *testing.T, name string) map[string]any {
 	return nil
 }
 
-// goldenDirs 返回黄金样本候选目录：环境变量优先，其次是私有工作区内的固定位置。
-// 公开仓（含 CI）不存在这些目录，用例会跳过，不产生伪失败。
+// goldenDirs 返回黄金样本候选目录：环境变量优先，其次是仓库内 testdata/golden。
+// 该目录不入库（含环境指纹），公开仓与 CI 都不存在，用例会跳过，不产生伪失败。
 func goldenDirs() []string {
 	var dirs []string
 	if dir := os.Getenv("JPOM_GOLDEN_DIR"); dir != "" {
@@ -51,11 +51,7 @@ func goldenDirs() []string {
 	}
 	if _, file, _, ok := runtime.Caller(0); ok {
 		// file = <workspace>/jpom-parent/go-agent/internal/sysinfo/golden_test.go
-		workspace := filepath.Join(filepath.Dir(file), "..", "..", "..", "..")
-		dirs = append(dirs,
-			filepath.Join(workspace, "dev-scripts", "go-agent", "golden"),
-			filepath.Join(workspace, ".tmp", "go-agent-ref", "golden"),
-		)
+		dirs = append(dirs, filepath.Join(filepath.Dir(file), "testdata", "golden"))
 	}
 	return dirs
 }

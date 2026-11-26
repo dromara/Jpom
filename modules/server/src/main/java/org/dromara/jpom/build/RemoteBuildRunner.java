@@ -52,7 +52,9 @@ import java.util.zip.ZipInputStream;
 /**
  * 远程构建执行器：把「拉代码 + 执行命令 + 收集产物」下发给 Go 插件端节点执行。
  * <p>
- * 协议见 {@code archive/2026-11-build-node-on-go-agent/PROTOCOL.md}。本类的关键职责：
+ * 事件流由 {@link RemoteBuildSession} 消费：节点按 {@code stage → log… → stage(end) → result → exit} 顺序推帧，
+ * 会话内部只维护三样状态——{@code seq} 去重（补发/重连帧）、按 stage 名记的退出码、终态与结果体；
+ * Runner 只按到达顺序推进阶段，不另建状态机。本类的关键职责：
  * 1) 组装 job 并下发（节点繁忙排队、能力不足直接失败）；
  * 2) 消费节点事件流，日志原样落到 Server 构建日志文件（前端/历史/下载全部零改动）；
  * 3) 三个阶段各自等待对应 stage 结束，保持 webhook 与状态语义与本地构建一致；

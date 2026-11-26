@@ -13,8 +13,8 @@
  *
  * 为什么需要它：系统主题（亮色 / 暗色 / 紧凑）由 App.vue 的 a-config-provider algorithm 统一切换，
  * 但 antd 4.2.x 没有 theme.cssVar（拿不到 --ant-* 变量），页面里一旦写死 #fff / #fafbfc 这类色值，
- * 暗色主题下就只剩这些页面是白底黑字。约定：**页面自定义样式只许引用 var(--jp-*)，禁止写死颜色**，
- * 规则见 runbooks/ui-interaction-guidelines.md §5。
+ * 暗色主题下就只剩这些页面是白底黑字。约定：**页面自定义样式只许引用 var(--jp-*)，禁止写死颜色**——
+ * 需要新色值时在本文件的 THEME_CSS_VARS 里加一行变量，而不是在页面里写字面值。
  *
  * 装配点只有一个：App.vue 里 `ThemeVarsProvider`（挂在 a-config-provider 内部，useToken 只在这里拿得到
  * 当前算法下的 token）。新增变量往 THEME_CSS_VARS 加一行即可，页面侧不需要任何改动。

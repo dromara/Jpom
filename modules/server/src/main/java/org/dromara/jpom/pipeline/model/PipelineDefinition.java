@@ -181,7 +181,7 @@ public class PipelineDefinition {
     /**
      * 校验事件钩子（保存前调用）
      * <p>
-     * 服务端校验为主：前端隐藏/禁用不算校验（§0.25）。事件码必须是 {@link PipelineEvent} 里存在的值，
+     * 服务端校验为主：前端隐藏/禁用只是交互提示，直接调接口仍可绕过。事件码必须是 {@link PipelineEvent} 里存在的值，
      * 脚本钩子必须有 scriptId，webhook 必须有 http(s) 地址——否则运行期才发现问题太晚。
      * </p>
      */

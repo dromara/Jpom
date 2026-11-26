@@ -193,7 +193,7 @@ public class PipelineController extends BaseServerController {
                                   @ValidatorItem(value = ValidatorRule.NOT_BLANK, msg = "i18n.pipeline_stage_required.4c18") String stagesJson,
                                   String hooksJson,
                                   HttpServletRequest request) {
-        // 服务端校验：前端禁用/隐藏不算数（§0.25）；校验异常带 i18n key，这里翻译成用户可读文案
+        // 服务端必须完整校验：前端禁用/隐藏只是交互提示，直接调接口仍可绕过；校验异常带 i18n key，这里翻译成用户可读文案
         PipelineDefinition definition = PipelineDefinition.of(sourcesJson, stagesJson, hooksJson);
         try {
             definition.check();

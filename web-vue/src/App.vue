@@ -20,7 +20,7 @@
     }"
   >
     <!-- 主题变量层：把当前算法（亮/暗/紧凑）下的设计 token 写成 --jp-*，页面样式只允许引用 var(--jp-*)
-         必须放在 a-config-provider 内部，见 runbooks/ui-interaction-guidelines.md §5 -->
+         必须放在 a-config-provider 内部：useToken 只有在 provider 内才能拿到当前算法的 token -->
     <ThemeVarsProvider />
     <a-spin v-bind="globalLoadingProps">
       <router-view v-if="routerActivation" />

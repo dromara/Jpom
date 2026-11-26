@@ -94,8 +94,8 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
      * 根据主键ID + 请求信息查询，查不到时抛业务异常（405「数据不存在」）而不是把 null 交给调用方
      * <p>
      * 收口点：生成触发器地址一族接口（构建 / 脚本 / SSH 命令 / 节点项目等）统一走这里。
-     * 历史缺陷 B-020 只修了节点项目一处，其余兄弟入口直接解引用 null，被全局异常处理器回 500
-     * （见 runbooks/architecture-and-refactoring.md §同类缺陷出现在兄弟入口）。
+     * 历史上只修了节点项目一处，其余同类入口仍直接解引用 null，被全局异常处理器回 500；
+     * 因此这里收口成「取不到即抛业务异常」，新增同类入口一律复用本方法，不要再各自解引用。
      * </p>
      *
      * @param keyValue 主键ID

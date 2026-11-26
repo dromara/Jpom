@@ -41,8 +41,15 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * 构建节点（Go 插件端）请求客户端。
  * <p>
- * 只负责「怎么把请求发到节点」，不做业务判断；协议字段见
- * {@code archive/2026-11-build-node-on-go-agent/PROTOCOL.md}。
+ * 只负责「怎么把请求发到节点」，不做业务判断。传输约定：
+ * <ul>
+ *   <li>控制面走 HTTP（{@code /info}、{@code /build/start}、{@code /build/status}、{@code /build/cancel}），
+ *       请求体 JSON，响应为 {@code {code, msg, data}}；{@code 409} 表示节点繁忙、{@code 501} 表示节点不支持构建；</li>
+ *   <li>任务事件走 WebSocket，帧带 {@code type=stage|log|env|result|exit|ping} 与 {@code seq}（单调递增，重复帧跳过）；
+ *       {@code stage} 帧带 {@code stage/event/code/message}，{@code env} 帧带 {@code data}（构建环境变量），
+ *       {@code exit} 帧带 {@code code/state/message}，{@code log} 帧按行原样落盘；</li>
+ *   <li>产物通过分片下载（{@code 206 Partial Content}）支持断点续传。</li>
+ * </ul>
  *
  * @author jpom
  * @since 2.11.15

@@ -63,7 +63,8 @@ public class OshiUtils {
      * <p>
      * 用白名单而不是黑名单：tmpfs 是内存、cifs/nfs/smbfs 是远端、squashfs（snap）互相重复，
      * 逐个累加会让「硬盘」总量远大于真实磁盘（实测 Linux 上 tmpfs + 4 个 cifs 把 1.27 TB 算成 17.65 TB），
-     * 而 Go 插件端一直按白名单统计，双端会给出差一个数量级的数字（AGENTS.md §0.13）。
+     * 而 Go 插件端一直按白名单统计，两端口径不一致会让同一台机器在两种插件端下给出差一个数量级的「硬盘」数字，
+     * 因此本列表与 {@code go-agent/internal/sysinfo/host_linux.go} 的白名单必须同步维护。
      */
     private static final Set<String> LOCAL_FILE_STORE_TYPES = new HashSet<>(Arrays.asList(
         "ext2", "ext3", "ext4", "xfs", "btrfs", "zfs", "f2fs", "jfs", "reiserfs",
