@@ -19,6 +19,8 @@ import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.ServerOpenApi;
 import org.dromara.jpom.common.UrlRedirectUtil;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.service.user.TriggerUrlAssembler;
+import org.dromara.jpom.service.user.TriggerUrls;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.model.PageResultDto;
 import org.dromara.jpom.model.data.NodeModel;
@@ -28,7 +30,6 @@ import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.service.node.ProjectInfoCacheService;
-import org.dromara.jpom.service.user.TriggerTokenLogServer;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -51,12 +52,12 @@ import java.util.Map;
 public class NodeProjectInfoController extends BaseServerController {
 
     private final ProjectInfoCacheService projectInfoCacheService;
-    private final TriggerTokenLogServer triggerTokenLogServer;
+    private final TriggerUrlAssembler triggerUrlAssembler;
 
     public NodeProjectInfoController(ProjectInfoCacheService projectInfoCacheService,
-                                     TriggerTokenLogServer triggerTokenLogServer) {
+                                     TriggerUrlAssembler triggerUrlAssembler) {
         this.projectInfoCacheService = projectInfoCacheService;
-        this.triggerTokenLogServer = triggerTokenLogServer;
+        this.triggerUrlAssembler = triggerUrlAssembler;
     }
 
 
@@ -148,39 +149,14 @@ public class NodeProjectInfoController extends BaseServerController {
     @RequestMapping(value = "project-trigger-url", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<Map<String, String>> getTriggerUrl(String id, String rest, HttpServletRequest request) {
-        ProjectInfoCacheModel item = projectInfoCacheService.getByKey(id, request);
-        // 传的是插件端 projectId（而不是服务端缓存 id）时这里会拿到 null，原实现紧接着 item.getTriggerToken() → NPE
-        // 表现为 500「空指针」，看不出是参数问题（BUGS B-020）
-        Assert.notNull(item, I18nMessageUtil.get("i18n.project_does_not_exist.3029"));
-        UserModel user = getUser();
-        ProjectInfoCacheModel updateItem;
-        if (StrUtil.isEmpty(item.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {
-            updateItem = new ProjectInfoCacheModel();
-            updateItem.setId(id);
-            updateItem.setTriggerToken(triggerTokenLogServer.restToken(item.getTriggerToken(), projectInfoCacheService.typeName(),
-                item.getId(), user.getId()));
-            projectInfoCacheService.updateById(updateItem);
-        } else {
-            updateItem = item;
-        }
-        Map<String, String> map = this.getBuildToken(updateItem, request);
-        String string = I18nMessageUtil.get("i18n.reset_success.faa3");
-        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : string, map);
+        ProjectInfoCacheModel item = triggerUrlAssembler.require(() -> projectInfoCacheService.getByKey(id, request),
+            I18nMessageUtil.get("i18n.project_does_not_exist.3029"));
+        Map<String, String> map = triggerUrlAssembler.issue(projectInfoCacheService, item.getId(), item.getTriggerToken(), rest, getUser().getId(),
+            TriggerUrls.builder()
+                .add("triggerUrl", ServerOpenApi.SERVER_PROJECT_TRIGGER_URL)
+                .add("batchTriggerUrl", ServerOpenApi.SERVER_PROJECT_TRIGGER_BATCH)
+                .build(), request);
+        return JsonMessage.success(TriggerUrlAssembler.successMessage(rest), map);
     }
 
-    private Map<String, String> getBuildToken(ProjectInfoCacheModel item, HttpServletRequest request) {
-        String contextPath = UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH);
-        String url = ServerOpenApi.SERVER_PROJECT_TRIGGER_URL.
-            replace("{id}", item.getId()).
-            replace("{token}", item.getTriggerToken());
-        String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
-        Map<String, String> map = new HashMap<>(10);
-        map.put("triggerUrl", FileUtil.normalize(triggerBuildUrl));
-        String batchTriggerBuildUrl = String.format("/%s/%s", contextPath, ServerOpenApi.SERVER_PROJECT_TRIGGER_BATCH);
-        map.put("batchTriggerUrl", FileUtil.normalize(batchTriggerBuildUrl));
-
-        map.put("id", item.getId());
-        map.put("token", item.getTriggerToken());
-        return map;
-    }
 }

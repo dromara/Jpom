@@ -50,6 +50,14 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class FileStorageService extends BaseGlobalOrWorkspaceService<FileStorageModel> implements ISystemTask, IStatusRecover, ITriggerToken {
 
+    @Override
+    public void updateTriggerToken(String id, String triggerToken) {
+        FileStorageModel update = new FileStorageModel();
+        update.setId(id);
+        update.setTriggerToken(triggerToken);
+        this.updateById(update);
+    }
+
     private final ServerConfig serverConfig;
     private final JpomApplication configBean;
     private final BuildExtConfig buildExtConfig;

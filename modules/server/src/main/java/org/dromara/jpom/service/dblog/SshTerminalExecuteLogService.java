@@ -50,6 +50,25 @@ public class SshTerminalExecuteLogService extends BaseWorkspaceService<SshTermin
      * @param refuse          是否拒绝执行
      */
     public void batch(UserModel userInfo, MachineSshModel machineSshModel, SshModel sshItem, String ip, String userAgent, boolean refuse, List<String> commands) {
+        this.batch(userInfo, machineSshModel, sshItem, ip, userAgent, refuse, commands, null, null, null);
+    }
+
+    /**
+     * 批量记录日志（带会话上下文）
+     *
+     * @param userInfo        操作的用户
+     * @param sshItem         ssh 对象
+     * @param machineSshModel 资产
+     * @param ip              操作人的ip
+     * @param userAgent       浏览器标识
+     * @param commands        命令行
+     * @param refuse          是否拒绝执行
+     * @param sessionId       所属终端会话 id
+     * @param seq             会话内序号
+     * @param source          命令来源（OSC133 / LEGACY）
+     */
+    public void batch(UserModel userInfo, MachineSshModel machineSshModel, SshModel sshItem, String ip, String userAgent, boolean refuse, List<String> commands,
+                      String sessionId, Integer seq, String source) {
         if (machineSshModel == null) {
             // 资产信息不能为空
             return;
@@ -75,6 +94,9 @@ public class SshTerminalExecuteLogService extends BaseWorkspaceService<SshTermin
                     sshTerminalExecuteLog.setCreateTimeMillis(optTime);
                     sshTerminalExecuteLog.setIp(ip);
                     sshTerminalExecuteLog.setUserAgent(userAgent);
+                    sshTerminalExecuteLog.setSessionId(sessionId);
+                    sshTerminalExecuteLog.setSeq(seq);
+                    sshTerminalExecuteLog.setSource(source);
                     //sshTerminalExecuteLog.setUserId(UserModel.getOptUserName(userInfo));
                     return sshTerminalExecuteLog;
                 }).collect(Collectors.toList());

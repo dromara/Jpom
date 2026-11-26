@@ -44,7 +44,8 @@
           </div>
         </div>
       </template>
-      <Background pattern-color="#e6e8ec" :gap="16" />
+      <!-- 网格点颜色由 CSS 变量控制（见下方 :deep(.vue-flow__background circle)），不在模板里写死色值 -->
+      <Background :gap="16" />
       <Controls />
     </VueFlow>
   </div>
@@ -90,6 +91,33 @@ export default {
   },
   mounted() {
     this.render()
+    // 面板折叠、拖拽分割线、改窗口都会让画布尺寸突变：尺寸稳定后重新 fitView，
+    // 否则节点会停在旧视口位置（甚至跑到可视区外）。
+    if (typeof ResizeObserver !== 'undefined') {
+      let timer = null
+      let lastWidth = 0
+      let lastHeight = 0
+      this.resizeObserver = new ResizeObserver((entries) => {
+        const rect = entries[0] && entries[0].contentRect
+        if (!rect) {
+          return
+        }
+        if (Math.abs(rect.width - lastWidth) < 24 && Math.abs(rect.height - lastHeight) < 24) {
+          return
+        }
+        lastWidth = rect.width
+        lastHeight = rect.height
+        clearTimeout(timer)
+        timer = setTimeout(() => this.fitView(), 180)
+      })
+      this.resizeObserver.observe(this.$el)
+    }
+  },
+  beforeUnmount() {
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect()
+      this.resizeObserver = null
+    }
   },
   methods: {
     typeText(type) {
@@ -193,9 +221,9 @@ export default {
   width: 100%;
   height: 100%;
   min-height: 320px;
-  border: 1px solid #eee;
-  border-radius: 8px;
-  background: #fafbfc;
+  border: 1px solid var(--jp-color-border-secondary);
+  border-radius: var(--jp-radius-lg);
+  background: var(--jp-color-fill-alter);
   overflow: hidden;
 }
 .pipeline-canvas :deep(.vue-flow) {
@@ -205,15 +233,16 @@ export default {
 .flow-node {
   pointer-events: none;
   width: 200px;
-  border: 1px solid #d9dee5;
+  color: var(--jp-color-text);
+  border: 1px solid var(--jp-color-border);
   border-radius: 10px;
-  background: #fff;
+  background: var(--jp-color-bg-container);
   padding: 8px 10px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--jp-shadow-tertiary);
 }
 .flow-node.selected {
-  border-color: #1677ff;
-  box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.12);
+  border-color: var(--jp-color-primary);
+  box-shadow: 0 0 0 3px var(--jp-color-primary-bg);
 }
 .flow-node.off {
   opacity: 0.55;
@@ -227,7 +256,7 @@ export default {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #eef1f5;
+  background: var(--jp-color-fill-tertiary);
   font-size: 11px;
   display: inline-flex;
   align-items: center;
@@ -242,27 +271,52 @@ export default {
 }
 .flow-node-head .tag {
   font-size: 11px;
-  color: #1677ff;
-  background: #e8f1ff;
+  color: var(--jp-color-primary);
+  background: var(--jp-color-primary-bg);
   border-radius: 10px;
   padding: 0 6px;
 }
 .flow-node-head .tag-parallel {
-  color: #d46b08;
-  background: #fff2e8;
+  color: var(--jp-color-warning-text);
+  background: var(--jp-color-warning-bg);
 }
 .flow-node-body {
   font-size: 12px;
-  color: #646a73;
+  color: var(--jp-color-text-secondary);
   margin-top: 4px;
   min-height: 16px;
 }
 .flow-node-foot {
   font-size: 11px;
-  color: #d46b08;
+  color: var(--jp-color-warning-text);
   margin-top: 4px;
 }
 .flow-node-foot.handled {
-  color: #389e0d;
+  color: var(--jp-color-success-text);
+}
+/* vue-flow 自带主题（@vue-flow/core/dist/theme-default.css、@vue-flow/controls/dist/style.css）
+   里把网格点、连线、缩放控件按钮写成了浅色固定值，暗色主题下会变成白块/看不清，
+   这里统一改由 --jp-* 变量驱动；选择器用 :deep() 穿透 scoped，优先级高于主题包里的同名规则。 */
+.pipeline-canvas :deep(.vue-flow__background circle) {
+  fill: var(--jp-color-border);
+}
+.pipeline-canvas :deep(.vue-flow__edge-path) {
+  stroke: var(--jp-color-text-quaternary);
+}
+.pipeline-canvas :deep(.vue-flow__edge-textbg) {
+  fill: var(--jp-color-bg-container);
+}
+.pipeline-canvas :deep(.vue-flow__controls) {
+  box-shadow: var(--jp-shadow-tertiary);
+}
+.pipeline-canvas :deep(.vue-flow__controls-button) {
+  background: var(--jp-color-bg-elevated);
+  border-bottom: 1px solid var(--jp-color-border-secondary);
+}
+.pipeline-canvas :deep(.vue-flow__controls-button:hover) {
+  background: var(--jp-color-fill-tertiary);
+}
+.pipeline-canvas :deep(.vue-flow__controls-button svg) {
+  fill: var(--jp-color-text-secondary);
 }
 </style>

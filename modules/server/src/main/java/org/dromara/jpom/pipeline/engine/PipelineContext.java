@@ -51,6 +51,10 @@ public class PipelineContext {
      */
     private int runNumber;
     /**
+     * 运行记录 ID（事件载荷用）
+     */
+    private String runId;
+    /**
      * 本次运行的工作区目录（每个源挂到 mount 子目录）
      */
     private File workspaceDir;

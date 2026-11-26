@@ -30,6 +30,8 @@ import org.dromara.jpom.common.UrlRedirectUtil;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
+import org.dromara.jpom.service.user.TriggerUrlAssembler;
+import org.dromara.jpom.service.user.TriggerUrls;
 import org.dromara.jpom.db.DbExtConfig;
 import org.dromara.jpom.db.StorageServiceFactory;
 import org.dromara.jpom.db.TableName;
@@ -72,11 +74,14 @@ public class BackupInfoController extends BaseServerController {
 
     private final BackupInfoService backupInfoService;
     private final SystemParametersServer systemParametersServer;
+    private final TriggerUrlAssembler triggerUrlAssembler;
 
     public BackupInfoController(BackupInfoService backupInfoService,
-                                SystemParametersServer systemParametersServer) {
+                                SystemParametersServer systemParametersServer,
+                                TriggerUrlAssembler triggerUrlAssembler) {
         this.backupInfoService = backupInfoService;
         this.systemParametersServer = systemParametersServer;
+        this.triggerUrlAssembler = triggerUrlAssembler;
     }
 
     /**
@@ -293,24 +298,13 @@ public class BackupInfoController extends BaseServerController {
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<Map<String, String>> getTriggerUrl(String rest, HttpServletRequest request) {
         String configToken = systemParametersServer.getConfig("backup-db-token", String.class);
-        if (StrUtil.isEmpty(configToken) || StrUtil.isNotEmpty(rest)) {
-            configToken = IdUtil.fastUUID();
-            String desc = I18nMessageUtil.get("i18n.backup_data_trigger.a71a");
-            systemParametersServer.upsert("backup-db-token", configToken, desc);
-        }
-        Map<String, String> map = this.getToken(configToken, request);
-        String string = I18nMessageUtil.get("i18n.reset_success.faa3");
-        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : string, map);
+        Map<String, String> map = triggerUrlAssembler.issueGlobal(configToken, rest,
+            token -> systemParametersServer.upsert("backup-db-token", token, I18nMessageUtil.get("i18n.backup_data_trigger.a71a")),
+            TriggerUrls.builder()
+                .add("triggerUrl", ServerOpenApi.BACKUP_TRIGGER_URL)
+                .withoutDataId()
+                .build(), request);
+        return JsonMessage.success(TriggerUrlAssembler.successMessage(rest), map);
     }
 
-    private Map<String, String> getToken(String token, HttpServletRequest request) {
-        String contextPath = UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH);
-        String url = ServerOpenApi.BACKUP_TRIGGER_URL.
-            replace("{token}", token);
-        String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
-        Map<String, String> map = new HashMap<>(10);
-        map.put("triggerUrl", FileUtil.normalize(triggerBuildUrl));
-        map.put("token", token);
-        return map;
-    }
 }

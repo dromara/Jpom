@@ -19,6 +19,7 @@ import com.alibaba.fastjson2.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.build.BuildExecutorPoolService;
+import org.dromara.jpom.common.BaseServerController;
 import org.dromara.jpom.build.ExecutionRegistry;
 import org.dromara.jpom.core.exec.ProcessKillResult;
 import org.dromara.jpom.core.exec.ProcessTree;
@@ -30,6 +31,13 @@ import org.dromara.jpom.pipeline.engine.PipelineLog;
 import org.dromara.jpom.pipeline.engine.PipelineRunResult;
 import org.dromara.jpom.pipeline.engine.PipelineWorkspace;
 import org.dromara.jpom.pipeline.engine.StageExecutorRegistry;
+import org.dromara.jpom.pipeline.engine.StageResult;
+import org.dromara.jpom.pipeline.hook.PipelineEvent;
+import org.dromara.jpom.pipeline.hook.PipelineEventRecord;
+import org.dromara.jpom.pipeline.hook.PipelineHookContext;
+import org.dromara.jpom.pipeline.hook.PipelineHookDef;
+import org.dromara.jpom.pipeline.hook.PipelineHookDispatcher;
+import org.dromara.jpom.pipeline.model.PipelineStageDef;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.pipeline.executor.BuildStageExecutor;
 import org.dromara.jpom.pipeline.executor.CommandStageExecutor;
@@ -53,12 +61,14 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 流水线运行编排（Spring 层）
@@ -85,6 +95,7 @@ public class PipelineRunner {
     private final PipelineNotifier notifier;
     private final PipelineContainerBuildRunner containerBuildRunner;
     private final PipelineNodeBuildRunner nodeBuildRunner;
+    private final PipelineHookDispatcher hookDispatcher;
     private final PipelineEngine engine = new PipelineEngine();
 
     /**
@@ -105,7 +116,8 @@ public class PipelineRunner {
                           BuildExecutorPoolService executorPoolService,
                           PipelineNotifier notifier,
                           PipelineContainerBuildRunner containerBuildRunner,
-                          PipelineNodeBuildRunner nodeBuildRunner) {
+                          PipelineNodeBuildRunner nodeBuildRunner,
+                          PipelineHookDispatcher hookDispatcher) {
         this.pipelineInfoService = pipelineInfoService;
         this.pipelineRunService = pipelineRunService;
         this.sourceSync = sourceSync;
@@ -114,6 +126,7 @@ public class PipelineRunner {
         this.notifier = notifier;
         this.containerBuildRunner = containerBuildRunner;
         this.nodeBuildRunner = nodeBuildRunner;
+        this.hookDispatcher = hookDispatcher;
     }
 
     /**
@@ -125,6 +138,23 @@ public class PipelineRunner {
      * @return 运行记录 ID
      */
     public String start(String pipelineId, UserModel user, String remark) {
+        return this.start(pipelineId, user, remark, 0);
+    }
+
+    /**
+     * 启动一次运行（异步，可指定触发方式）
+     *
+     * @param pipelineId  流水线 ID
+     * @param user        操作人
+     * @param remark      备注
+     * @param triggerType 触发方式：0 手动 / 2 系统（开放接口） / 3 重跑
+     * @return 运行记录 ID
+     */
+    public String start(String pipelineId, UserModel user, String remark, int triggerType) {
+        // 触发上下文收口：开放接口（token 触发）没有登录会话，而运行记录的写入要按工作空间校验用户，
+        // 不绑定就会在 fillInsert 里抛「没有对应的用户」，把一次合法触发打成失败。
+        // 这里统一按「触发用户，缺省系统身份」建立线程上下文；执行线程在 run() 里会再绑定一次。
+        bindTriggerUser(user);
         PipelineInfoModel item = pipelineInfoService.getByKey(pipelineId);
         if (item == null) {
             throw new IllegalArgumentException("pipeline not found: " + pipelineId);
@@ -136,7 +166,7 @@ public class PipelineRunner {
             throw new IllegalArgumentException(I18nMessageUtil.get("i18n.pipeline_already_running.7b31"));
         }
         try {
-            return this.startRun(item, definition, remark);
+            return this.startRun(item, definition, remark, triggerType, user);
         } catch (RuntimeException e) {
             // 启动阶段失败（读配置、建日志、线程池拒绝等）必须归还占位，否则该流水线会一直被判「正在运行」
             this.activeRuns.remove(pipelineId);
@@ -145,9 +175,24 @@ public class PipelineRunner {
     }
 
     /**
+     * 绑定触发用户上下文
+     * <p>
+     * 供「调用线程没有请求上下文」的场景使用（开放接口 token 触发、系统触发、后台线程）：
+     * 没有用户时用系统身份 {@link UserModel#EMPTY}（等价于系统管理员），否则沿用触发用户，
+     * 让运行记录与审计落在真实触发者名下。
+     * </p>
+     *
+     * @param user 触发用户，可为 null
+     */
+    static void bindTriggerUser(UserModel user) {
+        BaseServerController.resetInfo(user == null ? UserModel.EMPTY : user);
+    }
+
+    /**
      * 真正启动（已持有 {@link #activeRuns} 占位）
      */
-    private String startRun(PipelineInfoModel item, PipelineDefinition definition, String remark) {
+    private String startRun(PipelineInfoModel item, PipelineDefinition definition, String remark, int triggerType,
+                            UserModel user) {
         String pipelineId = item.getId();
         this.ensureExecutors();
         int runNumber = pipelineInfoService.nextRunNumber(pipelineId);
@@ -163,7 +208,7 @@ public class PipelineRunner {
         run.setStatus(BuildStatus.Ing.getCode());
         run.setStatusMsg(StrUtil.emptyToDefault(remark, "运行中"));
         run.setSourcesSnapshot(JSON.toJSONString(definition.getSources()));
-        run.setTriggerType(0);
+        run.setTriggerType(triggerType);
         run.setStartTime(System.currentTimeMillis());
         run.setHasLog(true);
         pipelineRunService.insert(run);
@@ -172,6 +217,8 @@ public class PipelineRunner {
         AtomicReference<ExecutionRegistry.Handle> handleRef = new AtomicReference<>();
         AtomicReference<PipelineContext> contextRef = new AtomicReference<>();
         AtomicBoolean killConfirmed = new AtomicBoolean(false);
+        // 杀不掉时把残留 pid 带进状态说明（与 BuildStatus#CancelRequested 的注释承诺一致）
+        AtomicReference<String> residualPids = new AtomicReference<>(StrUtil.EMPTY);
         ExecutionRegistry.Handle handle = ExecutionRegistry.register(pipelineId, item.getName(), reason -> {
             ExecutionRegistry.Handle current = handleRef.get();
             Process process = current == null ? null : current.getProcess();
@@ -194,13 +241,15 @@ public class PipelineRunner {
             }
             ProcessKillResult result = ProcessTree.kill(process);
             log.info("pipeline[{}] cancel hook kill result: {}", pipelineId, result);
+            residualPids.set(result.getRemainingPids() == null ? "" : String.valueOf(result.getRemainingPids()));
             killConfirmed.set(result.isSuccess());
             return result.isSuccess();
         });
         handleRef.set(handle);
         handle.stage("source-sync");
 
-        executorPoolService.execute(() -> this.run(item, definition, run, runNumber, workspace, logRecorder, handle, killConfirmed, contextRef));
+        executorPoolService.execute(() -> this.run(item, definition, run, runNumber, workspace, logRecorder, handle,
+            killConfirmed, residualPids, contextRef, user));
         return run.getId();
     }
 
@@ -211,6 +260,15 @@ public class PipelineRunner {
      * @return {@link ExecutionRegistry.CancelOutcome}
      */
     public ExecutionRegistry.CancelOutcome cancel(String pipelineId) {
+        // 先按状态机落「取消中」再下发取消动作：界面能区分「已受理」与「已取消」，
+        // 顺序不能反（反了会出现「先写已取消、后台还在跑」）
+        PipelineRunModel running = pipelineRunService.getRunningRun(pipelineId);
+        if (running != null) {
+            pipelineRunService.transit(running, BuildStatus.CancelRequested,
+                I18nMessageUtil.get("i18n.pipeline_cancel_requested.3f01"));
+            pipelineInfoService.updateRunStatus(pipelineId, BuildStatus.CancelRequested.getCode(),
+                running.getStatusMsg(), running.getId());
+        }
         return ExecutionRegistry.requestCancel(pipelineId, "manual cancel");
     }
 
@@ -231,8 +289,12 @@ public class PipelineRunner {
      */
     private void run(PipelineInfoModel item, PipelineDefinition definition, PipelineRunModel run, int runNumber,
                      PipelineWorkspace workspace, LogRecorder logRecorder, ExecutionRegistry.Handle handle,
-                     AtomicBoolean killConfirmed, AtomicReference<PipelineContext> contextRef) {
+                     AtomicBoolean killConfirmed, AtomicReference<String> residualPids,
+                     AtomicReference<PipelineContext> contextRef, UserModel user) {
         String pipelineId = item.getId();
+        // 运行线程没有请求上下文：发布目标（文件中心等）与脚本执行记录都要按「用户/工作空间」写库，
+        // 不设置会直接报「没有对应的用户」。系统触发用 UserModel.EMPTY（等价于系统管理员）。
+        BaseServerController.resetInfo(user == null ? UserModel.EMPTY : user);
         PipelineLog pipelineLog = new PipelineLog() {
             @Override
             public void info(String message) {
@@ -250,6 +312,7 @@ public class PipelineRunner {
         context.setPipelineName(item.getName());
         context.setWorkspaceId(item.getWorkspaceId());
         context.setRunNumber(runNumber);
+        context.setRunId(run.getId());
         context.setSources(definition.getSources());
         context.setWorkspaceDir(workspace.workspace(pipelineId, runNumber));
         context.setLog(pipelineLog);
@@ -261,6 +324,9 @@ public class PipelineRunner {
                 handle.attachProcess(process);
             }
         });
+        // 事件钩子：配置来自流水线定义（旧数据为空列表），事件记录最后落到 run.eventsJson
+        List<PipelineHookDef> hooks = definition.getHooks() == null ? new ArrayList<>() : definition.getHooks();
+        List<PipelineEventRecord> eventRecords = new ArrayList<>();
         BuildStatus finalStatus = BuildStatus.Error;
         String finalMsg = "failed";
         PipelineRunResult result = null;
@@ -269,8 +335,10 @@ public class PipelineRunner {
                 finalStatus = BuildStatus.Cancel;
                 finalMsg = "cancelled before start";
             } else {
+                this.fireEvent(hooks, context, PipelineEvent.RUN_START, BuildStatus.Ing.getCode(),
+                    run.getStatusMsg(), run.getTriggerType(), null, null, context.getProcessObserver(), eventRecords);
                 handle.stage("source-sync");
-                Map<String, String> commits = sourceSync.sync(pipelineId, definition.getSources(),
+                Map<String, String> commits = sourceSync.sync(workspace, pipelineId, definition.getSources(),
                     workspace.mountDirs(pipelineId, runNumber, definition.getSources()), new PipelineSourceSync.LogSink() {
                         @Override
                         public void info(String message) {
@@ -289,7 +357,19 @@ public class PipelineRunner {
                     context.putVariable(prefix + "_DIR",
                         workspace.mountDir(pipelineId, runNumber, source).getAbsolutePath());
                 }
-                result = engine.run(definition, context, () -> ExecutionRegistry.isCancelRequested(pipelineId));
+                result = engine.run(definition, context, () -> ExecutionRegistry.isCancelRequested(pipelineId),
+                    new PipelineEngine.StageListener() {
+                        @Override
+                        public void onStageStart(PipelineStageDef stage) {
+                            PipelineRunner.this.fireStageEvent(hooks, context, PipelineEvent.STAGE_START, run, stage, null, eventRecords);
+                        }
+
+                        @Override
+                        public void onStageEnd(PipelineStageDef stage, StageResult stageResult) {
+                            PipelineEvent event = toStageEvent(stageResult);
+                            PipelineRunner.this.fireStageEvent(hooks, context, event, run, stage, stageResult, eventRecords);
+                        }
+                    });
                 // 取消优先判定：被杀的阶段会返回「命令退出码 143」，不能因此把本次运行记成失败
                 boolean cancelRequested = ExecutionRegistry.isCancelRequested(pipelineId);
                 if (cancelRequested) {
@@ -304,9 +384,11 @@ public class PipelineRunner {
                     finalStatus = BuildStatus.Cancel;
                     finalMsg = "cancelled（进程树已确认退出）";
                 } else if (cancelRequested) {
-                    // 取消意图已登记但没确认杀干净：如实记异常关闭，不假装取消成功
+                    // 取消意图已登记但没确认杀干净：如实记异常关闭，不假装取消成功，并把残留 pid 写进状态说明
                     finalStatus = BuildStatus.AbnormalShutdown;
-                    finalMsg = "cancelled but process not confirmed：进程可能残留，请检查";
+                    String pids = StrUtil.nullToEmpty(residualPids.get());
+                    finalMsg = StrUtil.format(I18nMessageUtil.get("i18n.pipeline_cancel_not_confirmed.8d03"),
+                        StrUtil.isEmpty(pids) ? I18nMessageUtil.get("i18n.pipeline_cancel_unknown_pid.8d04") : pids);
                 } else if (result.cancelledCount() > 0) {
                     finalStatus = BuildStatus.Cancel;
                     finalMsg = "cancelled";
@@ -324,19 +406,97 @@ public class PipelineRunner {
             finalStatus = BuildStatus.Error;
             finalMsg = e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage();
         } finally {
+            // 终态事件在关闭日志之前触发（否则结果写不进运行日志）：取消后不再登记进程，
+            // 避免用户「停止」把收尾通知脚本一起杀掉
+            PipelineEvent terminalEvent = finalStatus == BuildStatus.Success ? PipelineEvent.RUN_SUCCESS
+                : finalStatus == BuildStatus.Cancel ? PipelineEvent.RUN_CANCELLED : PipelineEvent.RUN_FAILED;
+            this.fireEvent(hooks, context, terminalEvent, finalStatus.getCode(),
+                finalMsg, run.getTriggerType(), null, null, process -> {
+                }, eventRecords);
+            this.fireEvent(hooks, context, PipelineEvent.RUN_FINISHED, finalStatus.getCode(),
+                finalMsg, run.getTriggerType(), null, null, process -> {
+                }, eventRecords);
             handle.stop();
             ExecutionRegistry.unregister(pipelineId);
             this.activeRuns.remove(pipelineId);
             if (result != null) {
                 run.setStagesResult(JSON.toJSONString(result.getStages()));
             }
-            run.setStatus(finalStatus.getCode());
-            run.setStatusMsg(finalMsg);
             run.setEndTime(System.currentTimeMillis());
             run.setLogFileSize(logRecorder.size());
-            pipelineRunService.updateById(run);
-            pipelineInfoService.updateRunStatus(pipelineId, finalStatus.getCode(), finalMsg, run.getId());
+            pipelineRunService.finish(run, finalStatus, finalMsg, run.getStagesResult(),
+                eventRecords.isEmpty() ? null : JSON.toJSONString(eventRecords));
+            pipelineInfoService.updateRunStatus(pipelineId, finalStatus.getCode(), run.getStatusMsg(), run.getId());
             IoUtil.close(logRecorder);
+            BaseServerController.removeAll();
+        }
+    }
+
+    /**
+     * 阶段结果 → 阶段事件
+     *
+     * @param stageResult 阶段结果
+     * @return 事件（未知状态按失败处理，绝不静默）
+     */
+    private static PipelineEvent toStageEvent(StageResult stageResult) {
+        if (stageResult == null || stageResult.getStatus() == null) {
+            return PipelineEvent.STAGE_FAILED;
+        }
+        switch (stageResult.getStatus()) {
+            case SUCCESS:
+                return PipelineEvent.STAGE_SUCCESS;
+            case SKIPPED:
+                return PipelineEvent.STAGE_SKIPPED;
+            case CANCELLED:
+                return PipelineEvent.STAGE_CANCELLED;
+            default:
+                return PipelineEvent.STAGE_FAILED;
+        }
+    }
+
+    /**
+     * 触发阶段事件（阶段信息一并带进载荷，脚本/webhook 能区分是哪个阶段）
+     */
+    private void fireStageEvent(List<PipelineHookDef> hooks, PipelineContext context, PipelineEvent event,
+                                PipelineRunModel run, PipelineStageDef stage, StageResult stageResult,
+                                List<PipelineEventRecord> eventRecords) {
+        String stageStatus = stageResult == null ? null : String.valueOf(stageResult.getStatus());
+        this.fireEvent(hooks, context, event,
+            run == null ? null : run.getStatus(), run == null ? null : run.getStatusMsg(),
+            run == null ? null : run.getTriggerType(), stage, stageStatus, context.getProcessObserver(), eventRecords);
+    }
+
+    /**
+     * 触发事件并把记录收集到运行记录
+     * <p>
+     * 事件是旁路能力：任何异常只记日志，不改运行状态、不打断阶段。
+     * </p>
+     */
+    private void fireEvent(List<PipelineHookDef> hooks, PipelineContext context, PipelineEvent event,
+                           Integer status, String statusMsg, Integer triggerType,
+                           PipelineStageDef stage, String stageStatus, Consumer<Process> processSink,
+                           List<PipelineEventRecord> eventRecords) {
+        try {
+            PipelineHookContext hookContext = new PipelineHookContext();
+            hookContext.setEvent(event);
+            hookContext.setPipelineContext(context);
+            hookContext.setStageId(stage == null ? null : stage.getId());
+            hookContext.setStageName(stage == null ? null : stage.getName());
+            hookContext.setStageStatus(stageStatus);
+            hookContext.setStatus(status);
+            hookContext.setStatusMsg(statusMsg);
+            hookContext.setTriggerType(triggerType);
+            hookContext.setProcessSink(processSink == null ? process -> {
+            } : processSink);
+            PipelineEventRecord record = this.hookDispatcher.fire(hooks, hookContext);
+            if (record != null) {
+                synchronized (eventRecords) {
+                    eventRecords.add(record);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("pipeline hook dispatch error, pipeline:{} event:{}", context.getPipelineId(), event, e);
+            context.getLog().error("事件 " + (event == null ? "unknown" : event.getCode()) + " 调度异常：" + e.getMessage());
         }
     }
 

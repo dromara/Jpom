@@ -44,8 +44,10 @@ public class NotifyStageExecutorTest {
     @Test
     public void notifiesEveryTargetAndToleratesSingleFailure() {
         AtomicInteger calls = new AtomicInteger();
-        NotifyStageExecutor executor = new NotifyStageExecutor((target, event, payload) -> {
+        NotifyStageExecutor executor = new NotifyStageExecutor((target, event, payload, lineSink, processSink) -> {
             calls.incrementAndGet();
+            // 通知脚本输出必须能进运行日志（2.11.16 起不再丢弃输出）
+            lineSink.accept("notify-" + target);
             return "bad".equals(target) ? "send failed" : null;
         });
         StageResult result = executor.execute(stage(Arrays.asList("a", "bad", "c")), new PipelineContext());
@@ -57,7 +59,7 @@ public class NotifyStageExecutorTest {
 
     @Test
     public void emptyTargetsIsSuccess() {
-        NotifyStageExecutor executor = new NotifyStageExecutor((target, event, payload) -> null);
+        NotifyStageExecutor executor = new NotifyStageExecutor((target, event, payload, lineSink, processSink) -> null);
         StageResult result = executor.execute(stage(Arrays.asList()), new PipelineContext());
         Assertions.assertEquals(StageResult.Status.SUCCESS, result.getStatus());
     }

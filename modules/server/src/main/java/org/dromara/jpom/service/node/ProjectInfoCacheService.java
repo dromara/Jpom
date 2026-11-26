@@ -33,6 +33,14 @@ import java.util.List;
 @Service
 public class ProjectInfoCacheService extends BaseNodeService<ProjectInfoCacheModel> implements ITriggerToken {
 
+    @Override
+    public void updateTriggerToken(String id, String triggerToken) {
+        ProjectInfoCacheModel update = new ProjectInfoCacheModel();
+        update.setId(id);
+        update.setTriggerToken(triggerToken);
+        this.updateById(update);
+    }
+
     public ProjectInfoCacheService(NodeService nodeService,
                                    WorkspaceService workspaceService) {
         super(nodeService, workspaceService, I18nMessageUtil.get("i18n.project_name.31ec"));

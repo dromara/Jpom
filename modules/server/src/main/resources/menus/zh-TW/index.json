@@ -79,6 +79,10 @@
       {
         "title": "命令執行記錄",
         "id": "commandLogList"
+      },
+      {
+        "title": "會話回看",
+        "id": "sshSessionList"
       }
     ]
   },

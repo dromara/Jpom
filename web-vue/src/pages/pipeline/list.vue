@@ -38,13 +38,27 @@
             :placeholder="$t('i18n_pipeline_name')"
             @press-enter="handleSearch"
           />
-          <a-input
-            v-model:value="listQuery['%groupName%']"
+          <!-- 分组：与在线构建 / 项目 / 仓库列表一致，虚拟逻辑分组的候选下拉（精确匹配），不再用模糊输入 -->
+          <a-select
+            v-model:value="listQuery.groupName"
+            data-testid="pipeline-list-group-filter"
+            show-search
             allow-clear
             class="search-input-item"
             :placeholder="$t('i18n_829abe5a8d')"
-            @press-enter="handleSearch"
-          />
+            :filter-option="
+              (input, option) => {
+                const children = option.children && option.children()
+                return (
+                  children &&
+                  children[0].children &&
+                  children[0].children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                )
+              }
+            "
+          >
+            <a-select-option v-for="item in groupList" :key="item">{{ item }}</a-select-option>
+          </a-select>
           <a-select
             v-model:value="listQuery.status"
             allow-clear
@@ -53,12 +67,20 @@
             :options="statusOptions"
           />
           <a-button type="primary" :loading="loading" @click="handleSearch">{{ $t('i18n_e5f71fc31e') }}</a-button>
-          <a-button type="primary" data-testid="pipeline-add" @click="handleAdd">{{ $t('i18n_pipeline_add') }}</a-button>
+          <a-button type="primary" data-testid="pipeline-add" @click="handleAdd">{{
+            $t('i18n_pipeline_add')
+          }}</a-button>
         </a-space>
       </template>
       <template #tableBodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'name'">
-          <a-button type="link" size="small" style="padding: 0" data-testid="pipeline-row-edit" @click="handleEdit(record)">
+          <a-button
+            type="link"
+            size="small"
+            style="padding: 0"
+            data-testid="pipeline-row-edit"
+            @click="handleEdit(record)"
+          >
             {{ record.name }}
           </a-button>
         </template>
@@ -99,6 +121,9 @@
             <a-button size="small" type="primary" data-testid="pipeline-list-runs" @click="handleRuns(record)">
               {{ $t('i18n_pipeline_run_record') }}
             </a-button>
+            <a-button size="small" type="primary" data-testid="pipeline-list-trigger" @click="handleTrigger(record)">
+              {{ $t('i18n_4696724ed3') }}
+            </a-button>
             <a-dropdown>
               <a class="ant-dropdown-link" @click.prevent>
                 {{ $t('i18n_pipeline_more') }}
@@ -132,6 +157,7 @@
       width="92vw"
       :open="editVisible"
       :body-style="{ padding: '12px' }"
+      :footer-style="{ textAlign: 'right' }"
       @close="handleEditClose"
     >
       <template #title>
@@ -140,7 +166,42 @@
           <a-tag v-if="editingName">{{ editingName }}</a-tag>
         </a-space>
       </template>
-      <PipelineEdit v-if="editVisible" :id="editingId" @close="handleEditClose" @saved="handleSaved" />
+      <PipelineEdit
+        v-if="editVisible"
+        ref="pipelineEdit"
+        v-model:edit-steps="editSteps"
+        :id="editingId"
+        @close="handleEditClose"
+        @saved="handleSaved"
+        @saving-change="(v) => (editSaving = v)"
+      />
+      <!-- 底部操作固定在各步骤之外（与在线构建编辑一致）：内容再长也不影响按钮位置 -->
+      <template #footer>
+        <a-space>
+          <a-button data-testid="pipeline-cancel" @click="handleEditClose">{{ $t('i18n_625fb26b4b') }}</a-button>
+          <a-divider type="vertical" />
+          <a-button :disabled="editSteps === 0" data-testid="pipeline-step-prev" @click="editSteps -= 1">
+            {{ $t('i18n_eeb6908870') }}
+          </a-button>
+          <a-button
+            type="primary"
+            :disabled="editSteps === editStepCount - 1"
+            data-testid="pipeline-step-next"
+            @click="editSteps += 1"
+          >
+            {{ $t('i18n_38ce27d846') }}
+          </a-button>
+          <a-divider type="vertical" />
+          <a-button
+            type="primary"
+            :loading="editSaving"
+            data-testid="pipeline-save"
+            @click="$refs.pipelineEdit && $refs.pipelineEdit.handleSave()"
+          >
+            {{ $t('i18n_be5fbbe34c') }}
+          </a-button>
+        </a-space>
+      </template>
     </CustomDrawer>
 
     <!-- 运行记录：抽屉 -->
@@ -154,13 +215,31 @@
       @close="runVisible = false"
     >
       <template #title>{{ $t('i18n_pipeline_run_record') }}</template>
-      <PipelineRun
-        v-if="runVisible"
-        :open="runVisible"
-        :pipeline-id="runningId"
-        :pipeline-name="runningName"
-      />
+      <PipelineRun v-if="runVisible" :open="runVisible" :pipeline-id="runningId" :pipeline-name="runningName" />
     </CustomDrawer>
+
+    <!-- 触发器：地址列表 + 复制 + 重置由通用组件负责，调用说明留在本页 -->
+    <CustomModal
+      v-if="triggerVisible"
+      v-model:open="triggerVisible"
+      destroy-on-close
+      :title="$t('i18n_4696724ed3')"
+      width="50%"
+      :footer="null"
+      :mask-closable="false"
+    >
+      <TriggerUrlDialog
+        v-if="triggerVisible"
+        :id="triggerId"
+        :api="triggerApi"
+        :links="triggerLinks"
+        data-testid="pipeline-trigger-dialog"
+      >
+        <a-alert :message="$t('i18n_947d983961')" type="warning" show-icon>
+          <template #description>{{ $t('i18n_pipeline_trigger_tip') }}</template>
+        </a-alert>
+      </TriggerUrlDialog>
+    </CustomModal>
   </div>
 </template>
 
@@ -169,18 +248,21 @@ import { message } from 'ant-design-vue'
 import {
   getPipelineList,
   deletePipeline,
+  getTriggerUrl,
   runPipeline,
   cancelPipeline,
   pipelineStatusMap,
-  pipelineStatusColor
+  pipelineStatusColor,
+  getPipelineGroupAll
 } from '@/api/pipeline'
 import { parseTime, COMPUTED_PAGINATION, PAGE_DEFAULT_LIST_QUERY, CHANGE_PAGE } from '@/utils/const'
 import PipelineEdit from './edit.vue'
 import PipelineRun from './run.vue'
+import TriggerUrlDialog from '@/components/trigger-url-dialog.vue'
 
 export default {
   name: 'PipelineList',
-  components: { PipelineEdit, PipelineRun },
+  components: { PipelineEdit, PipelineRun, TriggerUrlDialog },
   data() {
     return {
       pipelineStatusMap,
@@ -189,24 +271,57 @@ export default {
       list: [],
       listQuery: Object.assign({}, PAGE_DEFAULT_LIST_QUERY, {
         '%name%': '',
-        '%groupName%': '',
+        // 分组筛选与在线构建列表一致：下拉选已有分组，后端按 groupName 精确匹配
+        groupName: undefined,
         status: undefined
       }),
+      // 分组候选项（虚拟逻辑分组：后端按当前工作空间去重返回）
+      groupList: [],
       editVisible: false,
+      editSteps: 0,
+      editStepCount: 3,
+      editSaving: false,
       editingId: '',
       editingName: '',
       runVisible: false,
       runningId: '',
       runningName: '',
+      triggerVisible: false,
+      triggerId: '',
+      // 交给通用组件的取地址接口（组件内部会带 id / rest 参数调用）
+      triggerApi: getTriggerUrl,
       columns: [
         { title: this.$t('i18n_pipeline_name'), dataIndex: 'name', key: 'name', width: 170, ellipsis: true },
         { title: this.$t('i18n_829abe5a8d'), dataIndex: 'groupName', key: 'groupName', width: 110, ellipsis: true },
         { title: this.$t('i18n_3fea7ca76c'), dataIndex: 'status', key: 'status', width: 120, align: 'center' },
         // dataIndex 必须有值：CustomTable 的列设置以 dataIndex 作唯一标识，缺失会被并成一列
-        { title: this.$t('i18n_pipeline_col_stage'), dataIndex: 'stageCount', key: 'stageCount', width: 80, align: 'center' },
-        { title: this.$t('i18n_pipeline_col_source'), dataIndex: 'sourceCount', key: 'sourceCount', width: 90, align: 'center' },
-        { title: this.$t('i18n_pipeline_run_total'), dataIndex: 'runNumber', key: 'runNumber', width: 80, align: 'center' },
-        { title: this.$t('i18n_pipeline_update_time'), dataIndex: 'modifyTimeMillis', key: 'modifyTimeMillis', width: 155 },
+        {
+          title: this.$t('i18n_pipeline_col_stage'),
+          dataIndex: 'stageCount',
+          key: 'stageCount',
+          width: 80,
+          align: 'center'
+        },
+        {
+          title: this.$t('i18n_pipeline_col_source'),
+          dataIndex: 'sourceCount',
+          key: 'sourceCount',
+          width: 90,
+          align: 'center'
+        },
+        {
+          title: this.$t('i18n_pipeline_run_total'),
+          dataIndex: 'runNumber',
+          key: 'runNumber',
+          width: 80,
+          align: 'center'
+        },
+        {
+          title: this.$t('i18n_pipeline_update_time'),
+          dataIndex: 'modifyTimeMillis',
+          key: 'modifyTimeMillis',
+          width: 155
+        },
         {
           title: this.$t('i18n_2b6bc0f293'),
           dataIndex: 'operation',
@@ -222,6 +337,19 @@ export default {
     pagination() {
       return COMPUTED_PAGINATION(this.listQuery)
     },
+    // 触发器地址：触发运行 / 查询状态（都是 GET，地址里已带 id 与 token）
+    triggerLinks() {
+      return [
+        { label: this.$t('i18n_pipeline_trigger_run'), field: 'triggerUrl', method: 'GET' },
+        {
+          label: this.$t('i18n_pipeline_trigger_status'),
+          field: 'statusUrl',
+          method: 'GET',
+          // 状态地址必须带 id + token，否则打开只会得到「没有对应数据」（与构建触发器的状态/日志地址同一口径）
+          suffix: (res) => '?id=' + ((res.data && res.data.id) || '') + '&token=' + ((res.data && res.data.token) || '')
+        }
+      ]
+    },
     statusOptions() {
       const list = []
       Object.keys(this.pipelineStatusMap).forEach((key) => {
@@ -232,9 +360,21 @@ export default {
   },
   mounted() {
     this.loadData()
+    this.loadGroupList()
+  },
+  // 列表页被 keep-alive 缓存：从别的页签回来时重新拉分组候选，避免「新建了分组但下拉里没有」
+  activated() {
+    this.loadGroupList()
   },
   methods: {
     parseTime,
+    loadGroupList() {
+      getPipelineGroupAll().then((res) => {
+        if (res.code === 200) {
+          this.groupList = res.data || []
+        }
+      })
+    },
     handleTableChange(pagination) {
       this.listQuery = CHANGE_PAGE(this.listQuery, { pagination })
       this.loadData()
@@ -256,7 +396,7 @@ export default {
             this.list = (res.data && res.data.result) || []
             this.listQuery.total = (res.data && res.data.total) || 0
           } else {
-            message.warn({ message: res.msg })
+            message.warning(res.msg)
           }
         })
         .finally(() => {
@@ -292,6 +432,8 @@ export default {
     },
     handleEditClose() {
       this.editVisible = false
+      this.editSteps = 0
+      this.editSaving = false
       this.editingId = ''
       this.editingName = ''
     },
@@ -303,14 +445,18 @@ export default {
       this.runningName = record.name
       this.runVisible = true
     },
+    handleTrigger(record) {
+      this.triggerId = record.id
+      this.triggerVisible = true
+    },
     handleRun(record) {
       runPipeline({ id: record.id }).then((res) => {
         if (res.code === 200) {
-          message.success({ message: this.$t('i18n_pipeline_run_submitted') })
+          message.success(this.$t('i18n_pipeline_run_submitted'))
           this.handleRuns(record)
           this.loadData()
         } else {
-          message.warn({ message: res.msg })
+          message.warning(res.msg)
         }
       })
     },
@@ -318,9 +464,9 @@ export default {
       cancelPipeline({ id: record.id }).then((res) => {
         if (res.code === 200) {
           // 后端已按三态（已受理/已在取消中/未找到执行体）返回可读文案，直接展示
-          message.info({ message: res.data || this.$t('i18n_pipeline_cancel_requested') })
+          message.info(res.data || this.$t('i18n_pipeline_cancel_requested'))
         } else {
-          message.warn({ message: res.msg })
+          message.warning(res.msg)
         }
         this.loadData()
       })
@@ -328,10 +474,10 @@ export default {
     handleDelete(record) {
       deletePipeline({ id: record.id }).then((res) => {
         if (res.code === 200) {
-          message.success({ message: res.msg })
+          message.success(res.msg)
           this.loadData()
         } else {
-          message.warn({ message: res.msg })
+          message.warning(res.msg)
         }
       })
     }

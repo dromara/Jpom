@@ -91,6 +91,25 @@ public abstract class BaseWorkspaceService<T extends BaseWorkspaceModel> extends
     }
 
     /**
+     * 根据主键ID + 请求信息查询，查不到时抛业务异常（405「数据不存在」）而不是把 null 交给调用方
+     * <p>
+     * 收口点：生成触发器地址一族接口（构建 / 脚本 / SSH 命令 / 节点项目等）统一走这里。
+     * 历史缺陷 B-020 只修了节点项目一处，其余兄弟入口直接解引用 null，被全局异常处理器回 500
+     * （见 runbooks/architecture-and-refactoring.md §同类缺陷出现在兄弟入口）。
+     * </p>
+     *
+     * @param keyValue 主键ID
+     * @param request  请求
+     * @param message  不存在时的提示文案（i18n）
+     * @return 非 null 实体
+     */
+    public T getByKeyOrThrow(String keyValue, HttpServletRequest request, String message) {
+        T item = this.getByKey(keyValue, request);
+        Assert.notNull(item, message);
+        return item;
+    }
+
+    /**
      * 根据主键ID + 请信息查询
      *
      * @param keyValue ID

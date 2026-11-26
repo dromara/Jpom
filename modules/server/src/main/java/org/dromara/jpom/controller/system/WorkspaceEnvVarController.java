@@ -26,6 +26,8 @@ import org.dromara.jpom.common.UrlRedirectUtil;
 import org.dromara.jpom.common.forward.NodeForward;
 import org.dromara.jpom.common.forward.NodeUrl;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.service.user.TriggerUrlAssembler;
+import org.dromara.jpom.service.user.TriggerUrls;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.common.validator.ValidatorRule;
 import org.dromara.jpom.model.PageResultDto;
@@ -36,7 +38,6 @@ import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.service.system.WorkspaceEnvVarService;
-import org.dromara.jpom.service.user.TriggerTokenLogServer;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -58,12 +59,12 @@ import java.util.Map;
 public class WorkspaceEnvVarController extends BaseServerController {
 
     private final WorkspaceEnvVarService workspaceEnvVarService;
-    private final TriggerTokenLogServer triggerTokenLogServer;
+    private final TriggerUrlAssembler triggerUrlAssembler;
 
     public WorkspaceEnvVarController(WorkspaceEnvVarService workspaceEnvVarService,
-                                     TriggerTokenLogServer triggerTokenLogServer) {
+                                     TriggerUrlAssembler triggerUrlAssembler) {
         this.workspaceEnvVarService = workspaceEnvVarService;
-        this.triggerTokenLogServer = triggerTokenLogServer;
+        this.triggerUrlAssembler = triggerUrlAssembler;
     }
 
     /**
@@ -255,38 +256,15 @@ public class WorkspaceEnvVarController extends BaseServerController {
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<Map<String, String>> getTriggerUrl(@ValidatorItem String id, @ValidatorItem String workspaceId, String rest, HttpServletRequest request) {
         workspaceEnvVarService.checkUserWorkspace(workspaceId);
-        WorkspaceEnvVarModel item = workspaceEnvVarService.getByKey(id);
-        Assert.notNull(item, I18nMessageUtil.get("i18n.no_environment_variable.c79f"));
+        WorkspaceEnvVarModel item = triggerUrlAssembler.require(() -> workspaceEnvVarService.getByKey(id),
+            I18nMessageUtil.get("i18n.no_environment_variable.c79f"));
         Assert.state(StrUtil.equals(workspaceId, item.getWorkspaceId()), I18nMessageUtil.get("i18n.select_workspace_error.426e"));
-        //
         Assert.state(ObjectUtil.defaultIfNull(item.getPrivacy(), -1) == 0, I18nMessageUtil.get("i18n.privacy_variable_cannot_trigger.dbc9"));
-        UserModel user = getUser();
-        WorkspaceEnvVarModel updateInfo;
-        if (StrUtil.isEmpty(item.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {
-            updateInfo = new WorkspaceEnvVarModel();
-            updateInfo.setId(id);
-            updateInfo.setTriggerToken(triggerTokenLogServer.restToken(item.getTriggerToken(), workspaceEnvVarService.typeName(),
-                item.getId(), user.getId()));
-            workspaceEnvVarService.updateById(updateInfo);
-        } else {
-            updateInfo = item;
-        }
-        Map<String, String> map = this.getBuildToken(updateInfo, request);
-        String string = I18nMessageUtil.get("i18n.reset_success.faa3");
-        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : string, map);
+        Map<String, String> map = triggerUrlAssembler.issue(workspaceEnvVarService, item.getId(), item.getTriggerToken(), rest, getUser().getId(),
+            TriggerUrls.builder()
+                .add("triggerUrl", ServerOpenApi.SERVER_ENV_VAR_TRIGGER_URL)
+                .build(), request);
+        return JsonMessage.success(TriggerUrlAssembler.successMessage(rest), map);
     }
 
-    private Map<String, String> getBuildToken(WorkspaceEnvVarModel item, HttpServletRequest request) {
-        String contextPath = UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH);
-        String url = ServerOpenApi.SERVER_ENV_VAR_TRIGGER_URL.
-            replace("{id}", item.getId()).
-            replace("{token}", item.getTriggerToken());
-        String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
-        Map<String, String> map = new HashMap<>(10);
-        map.put("triggerUrl", FileUtil.normalize(triggerBuildUrl));
-
-        map.put("id", item.getId());
-        map.put("token", item.getTriggerToken());
-        return map;
-    }
 }

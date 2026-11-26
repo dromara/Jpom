@@ -42,6 +42,14 @@ import java.util.List;
 public class ScriptServer extends BaseGlobalOrWorkspaceService<ScriptModel> implements ICron<ScriptModel>, ITriggerToken {
 
     @Override
+    public void updateTriggerToken(String id, String triggerToken) {
+        ScriptModel update = new ScriptModel();
+        update.setId(id);
+        update.setTriggerToken(triggerToken);
+        this.updateById(update);
+    }
+
+    @Override
     public List<ScriptModel> queryStartingList() {
         String autoExecCron = DialectUtil.wrapField("autoExecCron");
         String sql =StrUtil.format("select * from {} where {} is not null and {} <> ''",

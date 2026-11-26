@@ -42,4 +42,18 @@ public interface ITriggerToken {
     boolean exists(String dataId);
 
     BaseIdModel getByKey(String keyValue);
+
+    /**
+     * 写回触发器 token
+     * <p>
+     * 供统一收口点 {@code TriggerUrlAssembler} 在生成/重置 token 后落库，避免每个入口自己拼更新实体。
+     * 默认抛异常只是为了让漏实现的类型在开发期立刻暴露，生产代码里所有实现都必须覆盖。
+     * </p>
+     *
+     * @param id           数据 ID
+     * @param triggerToken 新 token
+     */
+    default void updateTriggerToken(String id, String triggerToken) {
+        throw new UnsupportedOperationException("updateTriggerToken not implemented: " + this.typeName());
+    }
 }

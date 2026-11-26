@@ -81,6 +81,22 @@ public class MachineSshModel extends BaseGroupNameModel implements ISshInfo {
     private String statusMsg;
 
     private String allowEditSuffix;
+
+    /**
+     * 是否录制终端会话
+     * <p>
+     * 资产上切换后，下一次建立终端连接即按新值生效（无需重启服务）；已打开的会话不受影响。
+     * 为空按关闭处理。
+     */
+    private Boolean terminalRecord;
+
+    /**
+     * 是否向终端注入 shell integration 脚本（用于采集精确命令与退出码）
+     * <p>
+     * 注入会在终端里回显一行脚本，默认关闭；关闭时命令索引退化为按键推断（准确度较低但终端干净）。
+     */
+    private Boolean terminalRecordShellIntegration;
+
     /**
      * 系统名称
      */

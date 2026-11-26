@@ -393,7 +393,9 @@ export const releaseMethodMap = {
   4: t('i18n_b71a7e6aab'),
   5: t('i18n_9136e1859a'),
   6: 'FTP',
-  7: t('i18n_8215da30b4')
+  7: t('i18n_8215da30b4'),
+  // 8 = 文件中心（产物存入 系统管理 → 文件中心，不落到节点/项目）
+  8: t('i18n_pipeline_target_file_storage')
 }
 
 export const triggerBuildTypeMap = {

@@ -63,6 +63,21 @@ public class SshTerminalExecuteLog extends BaseWorkspaceModel {
 
     private String machineSshName;
 
+    /**
+     * 所属终端会话 id（录制开关开启时才有值）
+     */
+    private String sessionId;
+
+    /**
+     * 会话内命令序号
+     */
+    private Integer seq;
+
+    /**
+     * 命令来源：OSC133 由 shell integration 上报（命令原文与退出码可信），LEGACY 为按键推断
+     */
+    private String source;
+
     public void setUserAgent(String userAgent) {
         this.userAgent = StrUtil.maxLength(userAgent, 280);
     }

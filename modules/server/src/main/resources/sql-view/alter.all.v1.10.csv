@@ -1,0 +1,3 @@
+alterType,tableName,name,type,len,defaultValue,comment,notNull
+ADD,PIPELINE_INFO,hooksJson,TEXT,,,流水线事件钩子配置（JSON）,false
+ADD,PIPELINE_RUN,eventsJson,TEXT,,,事件钩子执行记录（JSON）,false

@@ -63,7 +63,10 @@ public class NotifyStageExecutor implements StageExecutor {
         List<String> failed = new ArrayList<>();
         for (String target : targets) {
             try {
-                String error = this.notifier.notify(target, event, payload);
+                // 通知脚本输出实时写进运行日志（带目标前缀），并登记进程，取消运行能杀掉它
+                String error = this.notifier.notify(target, event, payload,
+                    line -> context.getLog().info("[" + stage.getName() + "] " + line),
+                    context.getProcessObserver());
                 if (error != null) {
                     failed.add(target + ": " + error);
                 }

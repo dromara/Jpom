@@ -58,6 +58,14 @@ import java.util.Map;
 @Slf4j
 public class SshCommandService extends BaseWorkspaceService<CommandModel> implements ICron<CommandModel>, ITriggerToken {
 
+    @Override
+    public void updateTriggerToken(String id, String triggerToken) {
+        CommandModel update = new CommandModel();
+        update.setId(id);
+        update.setTriggerToken(triggerToken);
+        this.updateById(update);
+    }
+
     private final SshService sshService;
     private final CommandExecLogService commandExecLogService;
     private final WorkspaceEnvVarService workspaceEnvVarService;

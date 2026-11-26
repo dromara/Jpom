@@ -34,10 +34,15 @@ import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.service.dblog.SshTerminalExecuteLogService;
 import org.dromara.jpom.service.node.ssh.SshService;
+import org.dromara.jpom.socket.handler.record.AsciicastTerminalRecorder;
+import org.dromara.jpom.socket.handler.record.OscMarkerScanner;
+import org.dromara.jpom.socket.handler.record.TerminalRecorder;
+import org.dromara.jpom.socket.handler.record.TerminalRecorderFactory;
 import org.dromara.jpom.service.user.UserBindWorkspaceService;
 import org.dromara.jpom.util.SocketSessionUtil;
 import org.dromara.jpom.util.StringUtil;
 import org.springframework.http.HttpHeaders;
+import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -50,6 +55,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
  * ssh 处理2
@@ -65,6 +71,13 @@ public class SshHandler extends BaseTerminalHandler {
     private static SshTerminalExecuteLogService sshTerminalExecuteLogService;
     private static UserBindWorkspaceService userBindWorkspaceService;
     private static SshService sshService;
+    private static TerminalRecorderFactory terminalRecorderFactory;
+
+    /**
+     * shell integration 注入脚本（OSC 133/633）：
+     * 仅用于产出「命令原文 + 退出码」标记，不改变命令执行；非 bash/zsh 环境下 if 条件不成立，不产生副作用。
+     */
+    private static final String SHELL_INTEGRATION = "if [ -n \"${BASH_VERSION:-}\" ]; then __jpom_h=${HISTCMD:-0}; __jpom_mark(){ local e=$?; local h=${HISTCMD:-0}; if [ \"$h\" -le \"$__jpom_h\" ]; then return; fi; __jpom_h=$h; printf '\\033]633;E;%s\\007\\033]133;D;%s\\007\\033]133;A\\007' \"$(fc -ln -1 2>/dev/null)\" \"$e\"; }; PROMPT_COMMAND=\"__jpom_mark${PROMPT_COMMAND:+;$PROMPT_COMMAND}\"; __jpom_h=$((HISTCMD+1)); elif [ -n \"${ZSH_VERSION:-}\" ]; then __jpom_mark(){ local e=$?; printf '\\033]633;E;%s\\007\\033]133;D;%s\\007\\033]133;A\\007' \"$(fc -ln -1 2>/dev/null)\" \"$e\"; }; precmd_functions+=(__jpom_mark); fi";
 
     private static void init() {
         if (sshTerminalExecuteLogService == null) {
@@ -75,6 +88,9 @@ public class SshHandler extends BaseTerminalHandler {
         }
         if (sshService == null) {
             sshService = SpringUtil.getBean(SshService.class);
+        }
+        if (terminalRecorderFactory == null) {
+            terminalRecorderFactory = SpringUtil.getBean(TerminalRecorderFactory.class);
         }
     }
 
@@ -160,6 +176,8 @@ public class SshHandler extends BaseTerminalHandler {
     }
 
     private void sendCommand(HandlerItem handlerItem, String data, UserModel userInfo, boolean sshCommandNotLimited) throws Exception {
+        // 录制用户输入（关闭录制时是空实现）
+        handlerItem.recordInput(data.getBytes());
         if (handlerItem.checkInput(data, userInfo, sshCommandNotLimited)) {
             handlerItem.outputStream.write(data.getBytes());
         } else {
@@ -207,6 +225,31 @@ public class SshHandler extends BaseTerminalHandler {
         private final MachineSshModel machineSshModel;
         private final StringBuilder nowLineInput = new StringBuilder();
         private final KeyEventCycle keyEventCycle = new KeyEventCycle();
+        /**
+         * 终端会话录制器（关闭录制时为空实现）
+         */
+        private TerminalRecorder recorder = TerminalRecorder.NOOP;
+        /**
+         * 录制器是否已尝试创建（首次拿到真实终端尺寸时创建）
+         */
+        private boolean recorderCreated;
+        /**
+         * OSC 133/633 标记扫描器
+         */
+        private final OscMarkerScanner oscScanner = new OscMarkerScanner();
+        /**
+         * 是否已拿到 shell integration 上报的命令（拿到后不再用按键推断做命令索引）
+         */
+        private volatile boolean oscSeen;
+        private int markerSeq;
+        /**
+         * WebSocket 关闭码（用于区分「用户正常结束」与「链路异常中断」）
+         */
+        private volatile CloseStatus closeStatus;
+
+        void setCloseStatus(CloseStatus closeStatus) {
+            this.closeStatus = closeStatus;
+        }
 
         HandlerItem(WebSocketSession session, MachineSshModel machineSshModel, SshModel sshModel) throws IOException {
             this.session = session;
@@ -235,6 +278,144 @@ public class SshHandler extends BaseTerminalHandler {
             Integer wp = Convert.toInt(jsonObject.getString("wp"), 10);
             Integer hp = Convert.toInt(jsonObject.getString("hp"), 10);
             this.channel.setPtySize(cols, rows, wp, hp);
+            // 首次拿到真实终端尺寸时创建录制器（保证录制头部的宽高与用户终端一致）
+            this.ensureRecorder(cols, rows);
+            this.safeRecord(recorder -> recorder.resize(cols, rows));
+        }
+
+        /**
+         * 创建录制器（只创建一次）
+         *
+         * @param cols 列
+         * @param rows 行
+         */
+        private void ensureRecorder(int cols, int rows) {
+            if (this.recorderCreated) {
+                return;
+            }
+            this.recorderCreated = true;
+            try {
+                Map<String, Object> attributes = session.getAttributes();
+                MachineSshModel machineSshModel = (MachineSshModel) attributes.get("machineSsh");
+                SshModel sshItem = (SshModel) attributes.get("dataItem");
+                UserModel userInfo = (UserModel) attributes.get("userInfo");
+                String ip = (String) attributes.get("ip");
+                String userAgent = (String) attributes.get(HttpHeaders.USER_AGENT);
+                Charset charset = machineSshModel == null ? Charset.forName("UTF-8") : machineSshModel.charset();
+                this.recorder = terminalRecorderFactory.create(machineSshModel, sshItem, userInfo, ip, userAgent, cols, rows, charset);
+                // shell integration 会往终端回显一行脚本，默认关闭；关闭时命令索引走按键推断（LEGACY）
+                if (this.recorder != TerminalRecorder.NOOP && machineSshModel != null
+                    && Boolean.TRUE.equals(machineSshModel.getTerminalRecordShellIntegration())) {
+                    this.installShellIntegration();
+                }
+            } catch (Exception e) {
+                log.warn(I18nMessageUtil.get("i18n.ssh_terminal_session_write_fail.9a5c"), e.getMessage());
+            }
+        }
+
+        /**
+         * 注入 shell integration（仅用于产出命令标记，失败不影响会话）
+         */
+        private void installShellIntegration() {
+            try {
+                // 必须以回车结束：否则 shell 会把后续用户输入拼到同一行，命令一直处于续行状态
+                this.outputStream.write((SHELL_INTEGRATION + StrUtil.CR).getBytes());
+                this.outputStream.flush();
+            } catch (Exception e) {
+                log.warn("install shell integration: {}", e.getMessage());
+            }
+        }
+
+        /**
+         * 录制用户输入
+         *
+         * @param data 输入字节
+         */
+        private void recordInput(byte[] data) {
+            this.safeRecord(recorder -> recorder.input(data));
+        }
+
+        /**
+         * 录制远端输出，并从输出里解析命令标记
+         *
+         * @param data 输出字节
+         */
+        private void recordOutput(byte[] data) {
+            if (this.recorder == TerminalRecorder.NOOP) {
+                return;
+            }
+            this.safeRecord(recorder -> recorder.output(data));
+            try {
+                String text = new String(data, machineSshModel.charset());
+                this.oscScanner.scan(text, this::onOscCommand);
+            } catch (Exception e) {
+                log.warn("scan osc marker: {}", e.getMessage());
+            }
+        }
+
+        /**
+         * 写一条按键推断的命令标记（不带退出码，source=LEGACY）
+         *
+         * @param command 命令行
+         */
+        private void writeLegacyMarker(String command) {
+            String text = StrUtil.trim(command);
+            if (StrUtil.isEmpty(text)) {
+                return;
+            }
+            int seq = ++this.markerSeq;
+            JSONObject marker = new JSONObject();
+            marker.put("seq", seq);
+            marker.put("cmd", text);
+            marker.put("source", "LEGACY");
+            this.safeRecord(recorder -> recorder.marker(marker.toJSONString()));
+        }
+
+        /**
+         * 命令标记回调（shell integration）
+         *
+         * @param command  命令原文
+         * @param exitCode 退出码
+         */
+        private void onOscCommand(String command, Integer exitCode) {
+            this.oscSeen = true;
+            int seq = ++this.markerSeq;
+            JSONObject marker = new JSONObject();
+            marker.put("seq", seq);
+            marker.put("exit", exitCode);
+            marker.put("cmd", command);
+            marker.put("source", "OSC133");
+            this.safeRecord(recorder -> recorder.marker(marker.toJSONString()));
+            if (StrUtil.isEmpty(command)) {
+                return;
+            }
+            try {
+                Map<String, Object> attributes = session.getAttributes();
+                UserModel userInfo = (UserModel) attributes.get("userInfo");
+                String ip = (String) attributes.get("ip");
+                String userAgent = (String) attributes.get(HttpHeaders.USER_AGENT);
+                SshModel sshItem = (SshModel) attributes.get("dataItem");
+                sshTerminalExecuteLogService.batch(userInfo, machineSshModel, sshItem, ip, userAgent, false,
+                    Collections.singletonList(command), this.recorder.sessionId(), seq, "OSC133");
+            } catch (Exception e) {
+                log.warn("record osc command: {}", e.getMessage());
+            }
+        }
+
+        /**
+         * 录制调用兜底：录制异常绝不影响终端会话
+         *
+         * @param consumer 操作
+         */
+        private void safeRecord(Consumer<TerminalRecorder> consumer) {
+            if (this.recorder == TerminalRecorder.NOOP) {
+                return;
+            }
+            try {
+                consumer.accept(this.recorder);
+            } catch (Exception e) {
+                log.warn(I18nMessageUtil.get("i18n.ssh_terminal_session_write_fail.9a5c"), e.getMessage());
+            }
         }
 
         /**
@@ -283,13 +464,20 @@ public class SshHandler extends BaseTerminalHandler {
             }
             // 执行命令行记录
             keyEventCycle.read(text -> {
+                if (this.oscSeen) {
+                    // shell integration 已提供可信命令与退出码，不再重复记录按键推断结果
+                    return;
+                }
                 // 获取基础信息
                 Map<String, Object> attributes = session.getAttributes();
                 String ip = (String) attributes.get("ip");
                 String userAgent = (String) attributes.get(HttpHeaders.USER_AGENT);
                 MachineSshModel machineSshModel = (MachineSshModel) attributes.get("machineSsh");
                 SshModel sshItem = (SshModel) attributes.get("dataItem");
-                sshTerminalExecuteLogService.batch(userInfo, machineSshModel, sshItem, ip, userAgent, refuse, Collections.singletonList(text));
+                sshTerminalExecuteLogService.batch(userInfo, machineSshModel, sshItem, ip, userAgent, refuse, Collections.singletonList(text),
+                    this.recorder.sessionId(), null, "LEGACY");
+                // 同步写一条命令标记，回放抽屉的「命令列表」依赖 cast 里的 marker
+                this.writeLegacyMarker(text);
             }, msg.getBytes(Charset.forName(machineSshModel.getCharset())));
             // 执行命令行记录
             // logCommands(session, allCommand, refuse);
@@ -310,25 +498,58 @@ public class SshHandler extends BaseTerminalHandler {
                     } catch (Exception e) {
                         log.warn("keyEventCycle.receive", e);
                     }
+                    // 录制远端输出（含 OSC 命令标记解析），关闭录制时为空操作
+                    this.recordOutput(tempBytes);
                     sendBinary(session, new String(tempBytes, machineSshModel.charset()));
                 }
+                // 远端 EOF：SSH 通道被关闭（kill sshd / 远端退出），按异常中断收尾
+                if (this.recorder instanceof AsciicastTerminalRecorder) {
+                    ((AsciicastTerminalRecorder) this.recorder).markAbnormal();
+                }
+                SshHandler.this.destroy(this.session);
             } catch (Exception e) {
+                if (this.recorder instanceof AsciicastTerminalRecorder) {
+                    ((AsciicastTerminalRecorder) this.recorder).markAbnormal();
+                }
                 if (!this.openSession.isConnected()) {
                     log.error(I18nMessageUtil.get("i18n.ssh_error_string.6bdb"), e.getMessage());
                     return;
                 }
                 log.error(I18nMessageUtil.get("i18n.read_error.7fa5"), e);
+                if (this.recorder instanceof AsciicastTerminalRecorder) {
+                    ((AsciicastTerminalRecorder) this.recorder).markAbnormal();
+                }
                 SshHandler.this.destroy(this.session);
             }
         }
 
         @Override
         public void close() throws Exception {
+            // 先落录制文件与会话行，再关通道
+            // 只有「浏览器正常关闭终端（1000/1001）且 SSH 会话仍然连通」才算正常结束，其余一律标记异常中断
+            // 1000 = 用户主动关闭终端；1001（GOING_AWAY，服务端重启/页面跳转）与 1006 一律按异常中断
+            boolean cleanClose = this.closeStatus != null && this.closeStatus.getCode() == 1000;
+            boolean sessionBroken = this.openSession == null || !this.openSession.isConnected();
+            if (!cleanClose || sessionBroken) {
+                if (this.recorder instanceof AsciicastTerminalRecorder) {
+                    ((AsciicastTerminalRecorder) this.recorder).markAbnormal();
+                }
+            }
+            IoUtil.close(this.recorder);
             IoUtil.close(this.inputStream);
             IoUtil.close(this.outputStream);
             JschUtil.close(this.channel);
             JschUtil.close(this.openSession);
         }
+    }
+
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+        HandlerItem handlerItem = HANDLER_ITEM_CONCURRENT_HASH_MAP.get(session.getId());
+        if (handlerItem != null) {
+            handlerItem.setCloseStatus(status);
+        }
+        super.afterConnectionClosed(session, status);
     }
 
     @Override

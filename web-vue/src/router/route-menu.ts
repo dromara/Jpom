@@ -24,6 +24,7 @@ const routeMenuMap: Record<string, string> = {
   ftpList: '/ftp',
   commandList: '/ssh/command',
   commandLogList: '/ssh/command-log',
+  sshSessionList: '/ssh/session-list',
   outgivingList: '/dispatch/list',
   outgivingLog: '/dispatch/log',
   logRead: '/dispatch/log-read',

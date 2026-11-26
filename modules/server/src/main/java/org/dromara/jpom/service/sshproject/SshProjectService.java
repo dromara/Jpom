@@ -46,6 +46,14 @@ import javax.servlet.http.HttpServletRequest;
 @Service
 public class SshProjectService extends BaseWorkspaceService<SshProjectModel> implements ITriggerToken {
 
+    @Override
+    public void updateTriggerToken(String id, String triggerToken) {
+        SshProjectModel update = new SshProjectModel();
+        update.setId(id);
+        update.setTriggerToken(triggerToken);
+        this.updateById(update);
+    }
+
     /**
      * 项目 id 允许的字符集：字母、数字、下划线、中划线（会拼进远端文件路径与 shell 命令）
      */

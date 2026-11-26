@@ -20,6 +20,7 @@
     "@vue-flow/core": "^1.48.2",
     "@vue-flow/minimap": "^1.5.3",
     "ant-design-vue": "^4.1.2",
+    "asciinema-player": "^3.19.0",
     "axios": "^1.6.8",
     "base64-js": "^1.5.1",
     "codemirror": "^5.65.16",

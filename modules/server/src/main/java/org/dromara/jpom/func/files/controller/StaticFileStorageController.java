@@ -18,6 +18,8 @@ import org.dromara.jpom.common.ServerConst;
 import org.dromara.jpom.common.ServerOpenApi;
 import org.dromara.jpom.common.UrlRedirectUtil;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.service.user.TriggerUrlAssembler;
+import org.dromara.jpom.service.user.TriggerUrls;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.func.files.model.StaticFileStorageModel;
 import org.dromara.jpom.func.files.service.FileStorageService;
@@ -27,7 +29,6 @@ import org.dromara.jpom.model.user.UserModel;
 import org.dromara.jpom.permission.ClassFeature;
 import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
-import org.dromara.jpom.service.user.TriggerTokenLogServer;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,14 +53,14 @@ public class StaticFileStorageController extends BaseServerController {
 
     private final StaticFileStorageService staticFileStorageService;
     private final FileStorageService fileStorageService;
-    private final TriggerTokenLogServer triggerTokenLogServer;
+    private final TriggerUrlAssembler triggerUrlAssembler;
 
     public StaticFileStorageController(StaticFileStorageService staticFileStorageService,
                                        FileStorageService fileStorageService,
-                                       TriggerTokenLogServer triggerTokenLogServer) {
+                                       TriggerUrlAssembler triggerUrlAssembler) {
         this.staticFileStorageService = staticFileStorageService;
         this.fileStorageService = fileStorageService;
-        this.triggerTokenLogServer = triggerTokenLogServer;
+        this.triggerUrlAssembler = triggerUrlAssembler;
     }
 
     /**
@@ -130,41 +131,16 @@ public class StaticFileStorageController extends BaseServerController {
     @GetMapping(value = "trigger-url", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)
     public IJsonMessage<Map<String, String>> getTriggerUrl(@ValidatorItem String id, String rest, HttpServletRequest request) {
-        UserModel user = getUser();
-        // 查询当前工作空间
-        StaticFileStorageModel item = staticFileStorageService.getByKey(id);
-
+        StaticFileStorageModel item = triggerUrlAssembler.require(() -> staticFileStorageService.getByKey(id),
+            I18nMessageUtil.get("i18n.no_file_info.db01"));
         this.checkStaticDir(item, request);
-        //
-        StaticFileStorageModel updateInfo;
-        if (StrUtil.isEmpty(item.getTriggerToken()) || StrUtil.isNotEmpty(rest)) {
-            updateInfo = new StaticFileStorageModel();
-            updateInfo.setId(id);
-            updateInfo.setTriggerToken(triggerTokenLogServer.restToken(item.getTriggerToken(), staticFileStorageService.typeName(),
-                item.getId(), user.getId()));
-            staticFileStorageService.updateById(updateInfo);
-        } else {
-            updateInfo = item;
-        }
-        Map<String, String> map = this.getBuildToken(updateInfo, request);
-        String string = I18nMessageUtil.get("i18n.reset_success.faa3");
-        return JsonMessage.success(StrUtil.isEmpty(rest) ? "ok" : string, map);
+        Map<String, String> map = triggerUrlAssembler.issue(staticFileStorageService, item.getId(), item.getTriggerToken(), rest, getUser().getId(),
+            TriggerUrls.builder()
+                .add("triggerDownloadUrl", ServerOpenApi.STATIC_FILE_STORAGE_DOWNLOAD)
+                .build(), request);
+        return JsonMessage.success(TriggerUrlAssembler.successMessage(rest), map);
     }
 
-    private Map<String, String> getBuildToken(StaticFileStorageModel item, HttpServletRequest request) {
-        String contextPath = UrlRedirectUtil.getHeaderProxyPath(request, ServerConst.PROXY_PATH);
-        Map<String, String> map = new HashMap<>(10);
-        {
-            String url = ServerOpenApi.STATIC_FILE_STORAGE_DOWNLOAD.
-                replace("{id}", item.getId()).
-                replace("{token}", item.getTriggerToken());
-            String triggerBuildUrl = String.format("/%s/%s", contextPath, url);
-            map.put("triggerDownloadUrl", FileUtil.normalize(triggerBuildUrl));
-        }
-        map.put("id", item.getId());
-        map.put("token", item.getTriggerToken());
-        return map;
-    }
 
     @PostMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Feature(method = MethodFeature.EDIT)

@@ -79,6 +79,10 @@
       {
         "title": "Command execution record",
         "id": "commandLogList"
+      },
+      {
+        "title": "Session Replay",
+        "id": "sshSessionList"
       }
     ]
   },

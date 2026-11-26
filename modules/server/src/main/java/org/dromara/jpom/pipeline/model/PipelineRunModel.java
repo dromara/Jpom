@@ -53,6 +53,13 @@ public class PipelineRunModel extends BaseWorkspaceModel {
      */
     private String sourcesSnapshot;
     /**
+     * 事件钩子执行记录（JSON 数组，见 {@code PipelineEventRecord}）
+     * <p>
+     * 追加列（2.11.16）：只有真正触发了钩子的事件才有记录，旧记录为空。
+     * </p>
+     */
+    private String eventsJson;
+    /**
      * 触发方式：0 手动 / 1 定时 / 2 系统 / 3 重跑
      */
     private Integer triggerType;

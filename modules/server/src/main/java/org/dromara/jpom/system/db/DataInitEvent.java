@@ -61,6 +61,10 @@ public class DataInitEvent implements ILoadEvent, ICacheTask {
         for (BaseDbService<?> value : groupServiceMap.values()) {
             if (value.isCanGroup()) {
                 value.repairGroupFiled();
+            } else if (value.isCanGroupName()) {
+                // 新版本分组字段（groupName，如 PIPELINE_INFO、机器资产）：同一套「启动时把 null/空串修复为默认分组」规则。
+                // 用 else if 是因为一个模型只会用其中一种字段；两种都有时以旧字段为准，避免同一次启动重复 UPDATE
+                value.repairGroupNameFiled();
             }
         }
         // 状态恢复的数据

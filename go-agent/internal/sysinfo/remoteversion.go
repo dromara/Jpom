@@ -32,8 +32,37 @@ const (
 	betaVersionsURL    = "https://jpom.top/docs/beta-versions.json"
 	// remoteVersionCacheTTL 对应 Java 端 cacheInfo 的 24 小时过期判断。
 	remoteVersionCacheTTL = 24 * time.Hour
-	remoteVersionTimeout  = 10 * time.Second
+	// remoteVersionDefaultTimeout 版本检查请求默认超时时间，对应 Java 端 RemoteVersion 的 10 秒。
+	remoteVersionDefaultTimeout = 10 * time.Second
+	// remoteVersionTimeoutEnv 版本检查请求超时时间（单位秒）的环境变量，与 Java 端同名。
+	remoteVersionTimeoutEnv = "JPOM_REMOTE_VERSION_TIMEOUT"
 )
+
+// resolveRemoteVersionTimeout 对应 Java RemoteVersion.timeoutMillis()：读取环境变量
+// JPOM_REMOTE_VERSION_TIMEOUT（单位秒，默认 10 秒），每次请求都重新读取；未配置、非数字
+// 或小于等于 0 时回落默认值，并返回一条告警文案（对应 Java 端的 log.warn）。
+func resolveRemoteVersionTimeout() (time.Duration, string) {
+	raw := strings.TrimSpace(os.Getenv(remoteVersionTimeoutEnv))
+	if raw == "" {
+		return remoteVersionDefaultTimeout, ""
+	}
+	seconds, err := strconv.Atoi(raw)
+	if err != nil || seconds <= 0 {
+		return remoteVersionDefaultTimeout, fmt.Sprintf(
+			"invalid %s=%q, fallback to default %d seconds",
+			remoteVersionTimeoutEnv, raw, int(remoteVersionDefaultTimeout/time.Second))
+	}
+	return time.Duration(seconds) * time.Second, ""
+}
+
+// remoteVersionTimeoutFor 返回本次请求使用的超时时间，配置非法时落一条告警日志。
+func remoteVersionTimeoutFor(a *app.App) time.Duration {
+	timeout, warning := resolveRemoteVersionTimeout()
+	if warning != "" && a != nil {
+		a.Log().Warn(warning)
+	}
+	return timeout
+}
 
 // RemoteVersionFile 返回 data/remote_version.json 路径（Const.REMOTE_VERSION）。
 func RemoteVersionFile(a *app.App) string { return filepath.Join(a.DataDir, "remote_version.json") }
@@ -147,7 +176,7 @@ func LoadRemoteInfo(a *app.App) (map[string]any, error) {
 	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
 		url = defaultRemoteVersionURL()
 	}
-	value, err := loadTransitURL(url)
+	value, err := loadTransitURL(url, remoteVersionTimeoutFor(a))
 	if err != nil {
 		return nil, err
 	}
@@ -158,8 +187,8 @@ func LoadRemoteInfo(a *app.App) (map[string]any, error) {
 	return value, nil
 }
 
-func loadTransitURL(url string) (map[string]any, error) {
-	client := &http.Client{Timeout: remoteVersionTimeout}
+func loadTransitURL(url string, timeout time.Duration) (map[string]any, error) {
+	client := &http.Client{Timeout: timeout}
 	response, err := client.Get(url)
 	if err != nil {
 		return nil, err
@@ -182,7 +211,7 @@ func loadTransitURL(url string) (map[string]any, error) {
 	}
 	// 中转地址：远程返回 { "url": "..." } 时继续拉取。
 	if transit := strings.TrimSpace(toString(value["url"])); transit != "" {
-		return loadTransitURL(transit)
+		return loadTransitURL(transit, timeout)
 	}
 	return nil, nil
 }
@@ -266,8 +295,11 @@ func cacheLoadTime(a *app.App, value map[string]any) {
 	}
 	value["upgrade"] = upgrade
 	if changelogURL := strings.TrimSpace(toString(value["changelogUrl"])); changelogURL != "" {
-		if changelog, err := fetchText(changelogURL); err == nil {
+		// changelog 属附加信息：获取失败（含超时）只告警，不影响版本检查结果（与 Java 端一致）。
+		if changelog, err := fetchText(changelogURL, remoteVersionTimeoutFor(a)); err == nil {
 			value["changelog"] = changelog
+		} else {
+			a.Log().Warn("fetch remote version changelog failed", "error", err)
 		}
 	}
 	// 与 Java 缓存文件一致：只写 RemoteVersion 字段集（别名/额外字段全部丢弃）。
@@ -280,8 +312,8 @@ func cacheLoadTime(a *app.App, value map[string]any) {
 	}
 }
 
-func fetchText(url string) (string, error) {
-	client := &http.Client{Timeout: remoteVersionTimeout}
+func fetchText(url string, timeout time.Duration) (string, error) {
+	client := &http.Client{Timeout: timeout}
 	response, err := client.Get(url)
 	if err != nil {
 		return "", err

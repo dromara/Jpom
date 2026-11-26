@@ -23,6 +23,19 @@ export function getPipelineList(params) {
 }
 
 /**
+ * 流水线分组（虚拟逻辑分组：返回当前工作空间已存在的分组名）
+ * <p>
+ * 与在线构建 /build/list_group_all 同一套语义，供编辑页定制下拉框作为候选项。
+ * </p>
+ */
+export function getPipelineGroupAll() {
+  return axios({
+    url: '/pipeline/list_group_all',
+    method: 'get'
+  })
+}
+
+/**
  * 流水线详情
  */
 export function getPipelineGet(params) {
@@ -50,6 +63,21 @@ export function savePipeline(params) {
 export function deletePipeline(params) {
   return axios({
     url: '/pipeline/delete',
+    method: 'post',
+    data: params
+  })
+}
+
+/**
+ * 流水线触发器地址
+ * <p>
+ * 响应 data：{ triggerUrl, statusUrl, id, token }；triggerUrl 为相对地址，由前端拼绝对地址。
+ * 传 rest='rest' 表示重置（服务端重新生成 token，旧地址立即失效）。
+ * </p>
+ */
+export function getTriggerUrl(params) {
+  return axios({
+    url: '/pipeline/trigger-url',
     method: 'post',
     data: params
   })
@@ -106,6 +134,36 @@ export function downloadPipelineRunLog(runId) {
   return loadRouterBase('/pipeline/run/download-log', {
     runId: runId
   })
+}
+
+/**
+ * 事件通知（Hooks）的事件码：与服务端固定 10 个码值一一对应，顺序即展示顺序
+ * <p>
+ * 服务端另有 POST /pipeline/hook-events 返回同样的 [{code, desc}]，这里用固定常量便于离线渲染，
+ * 码值必须与后端完全一致（run_finished 总是最后触发）。
+ * </p>
+ */
+export const pipelineHookEventCodes = [
+  // 「全部事件」：命中当前与以后新增的任何事件（后端 PipelineEvent.ALL 同义），
+  // 放在第一位，避免与具体事件逐条选择
+  'all',
+  'run_start',
+  'run_success',
+  'run_failed',
+  'run_cancelled',
+  'run_finished',
+  'stage_start',
+  'stage_success',
+  'stage_failed',
+  'stage_skipped',
+  'stage_cancelled'
+]
+
+/**
+ * 事件码 → i18n key（四个语言包必须都有对应文案）
+ */
+export function pipelineHookEventLabelKey(code) {
+  return 'i18n_pipeline_hook_event_' + code
 }
 
 /**

@@ -139,6 +139,7 @@ public class ReleaseStageExecutor implements StageExecutor {
         request.setFromStageId(StrUtil.nullToEmpty(target.getFrom()));
         request.setVariables(new LinkedHashMap<>(context.getVariables()));
         request.setPipelineId(context.getPipelineId());
+        request.setPipelineName(context.getPipelineName());
         request.setRunNumber(context.getRunNumber());
         request.setWorkspaceId(context.getWorkspaceId());
         request.setExtra(target.getExtra());

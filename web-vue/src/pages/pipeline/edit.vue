@@ -12,7 +12,7 @@
 <template>
   <div class="pipeline-editor">
     <a-spin :spinning="loading">
-      <a-form layout="horizontal" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
+      <adaptive-form :label-width="112" :label-width-tight="96" :tight-width="560" :inline-min-width="360">
         <a-row :gutter="16">
           <a-col :span="12">
             <a-form-item :label="$t('i18n_pipeline_name')">
@@ -21,13 +21,41 @@
           </a-col>
           <a-col :span="12">
             <a-form-item :label="$t('i18n_829abe5a8d')">
-              <a-input v-model:value="form.groupName" :max-length="50" :placeholder="$t('i18n_pipeline_group_placeholder')" />
+              <!-- 分组与在线构建 / 项目 / 仓库 / SSH 同一套交互：虚拟逻辑分组 + 定制下拉框（可选已有、可直接新增） -->
+              <custom-select
+                v-model:value="form.groupName"
+                data-testid="pipeline-group"
+                :max-length="50"
+                :data="groupList"
+                :input-placeholder="$t('i18n_bd0362bed3')"
+                :select-placeholder="$t('i18n_3e8c9c54ee')"
+              >
+                <template #suffix>
+                  <a-tooltip>
+                    <template #title>
+                      <div>{{ $t('i18n_bd7c7abc8c') }}</div>
+                    </template>
+                    <QuestionCircleOutlined />
+                  </a-tooltip>
+                </template>
+              </custom-select>
             </a-form-item>
           </a-col>
         </a-row>
-      </a-form>
+      </adaptive-form>
 
-      <!-- 仓库源 -->
+      <!-- 步骤指示器：把「仓库源 / 事件通知 / 阶段编排」分开，避免一屏堆到底（参照在线构建编辑页） -->
+      <a-steps
+        :current="stepsCurrent"
+        size="small"
+        class="editor-steps"
+        :items="stepsItems"
+        data-testid="pipeline-steps"
+        @change="handleStepChange"
+      />
+
+      <!-- 步骤 1：仓库源 -->
+      <div v-show="stepsCurrent === 0" data-testid="pipeline-step-source">
       <a-card :title="$t('i18n_pipeline_source_title')" size="small" class="block">
         <template #extra>
           <a-button type="primary" data-testid="pipeline-add-source" @click="addSource">
@@ -114,10 +142,17 @@
         </div>
       </a-card>
 
-      <!-- 编排 + 配置 -->
-      <a-row :gutter="8" class="block">
-        <a-col :span="configCollapsed ? 24 : 16">
-          <a-card :title="$t('i18n_pipeline_stage_title')" size="small" class="full-height">
+      </div>
+
+      <!-- 步骤 2：阶段编排 + 配置 -->
+      <div v-show="stepsCurrent === 1" class="step-pane step-pane-stages" data-testid="pipeline-step-stages">
+      <div ref="stageLayout" class="stage-layout block">
+        <a-card
+          v-show="!canvasCollapsed"
+          :title="$t('i18n_pipeline_stage_title')"
+          size="small"
+          class="stage-canvas-card"
+        >
             <template #extra>
               <a-space>
                 <a-dropdown trigger="click">
@@ -156,9 +191,45 @@
             </div>
             <div class="canvas-tip">{{ $t('i18n_pipeline_canvas_tip') }}</div>
           </a-card>
-        </a-col>
-        <a-col v-show="!configCollapsed" :span="8">
-          <a-card :title="$t('i18n_pipeline_stage_config')" size="small" class="full-height">
+        <!-- 可拖拽分割线：拖拽改宽、双击复位；两侧按钮分别折叠/展开「阶段编排」「阶段配置」 -->
+        <div
+          class="stage-splitter"
+          :title="$t('i18n_pipeline_config_splitter_tip')"
+          data-testid="pipeline-config-splitter"
+          @mousedown.prevent="startResizeConfig"
+          @dblclick="resetConfigWidth"
+        >
+          <button
+            type="button"
+            class="stage-splitter-btn"
+            :title="canvasCollapsed ? $t('i18n_pipeline_canvas_expand') : $t('i18n_pipeline_canvas_collapse')"
+            data-testid="pipeline-toggle-canvas"
+            @mousedown.stop.prevent
+            @click.stop.prevent="toggleCanvas"
+          >
+            <MenuUnfoldOutlined v-if="canvasCollapsed" />
+            <MenuFoldOutlined v-else />
+          </button>
+          <span class="stage-splitter-bar"></span>
+          <button
+            type="button"
+            class="stage-splitter-btn"
+            :title="configCollapsed ? $t('i18n_pipeline_stage_expand') : $t('i18n_pipeline_stage_collapse')"
+            data-testid="pipeline-toggle-config"
+            @mousedown.stop.prevent
+            @click.stop.prevent="toggleConfig"
+          >
+            <MenuUnfoldOutlined v-if="configCollapsed" />
+            <MenuFoldOutlined v-else />
+          </button>
+        </div>
+        <a-card
+          v-show="!configCollapsed"
+          :title="$t('i18n_pipeline_stage_config')"
+          size="small"
+          class="stage-config-card"
+          :style="configCardStyle"
+        >
             <template #extra>
               <a-space v-if="current && current.id">
                 <a-button :disabled="selectedIndex <= 0" @click="moveStage(-1)">{{ $t('i18n_315eacd193') }}</a-button>
@@ -169,7 +240,14 @@
               </a-space>
             </template>
             <a-empty v-if="!current || !current.id" :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="$t('i18n_pipeline_stage_select_tip')" />
-            <a-form v-else layout="horizontal" :label-col="{ span: 7 }" :wrapper-col="{ span: 17 }" class="stage-form">
+            <adaptive-form
+              v-else
+              class="stage-form"
+              :inline-min-width="420"
+              :tight-width="620"
+              :label-width="112"
+              :label-width-tight="88"
+            >
               <a-row :gutter="8">
                 <a-col :span="24">
                   <a-form-item :label="$t('i18n_pipeline_stage_name')">
@@ -303,7 +381,7 @@
                     v-model:content="current.run"
                     :show-tool="false"
                     :options="{ mode: 'shell' }"
-                    height="180px"
+                    height="clamp(180px, 34vh, 420px)"
                     :placeholder="$t('i18n_pipeline_command_placeholder')"
                   />
                 </a-form-item>
@@ -449,7 +527,7 @@
                               v-model:content="target.beforeCommand"
                               :show-tool="false"
                               :options="{ mode: 'shell' }"
-                              height="140px"
+                              height="clamp(120px, 22vh, 260px)"
                               :placeholder="$t('i18n_pipeline_before_command_placeholder')"
                             />
                           </a-form-item>
@@ -458,7 +536,7 @@
                               v-model:content="target.afterCommand"
                               :show-tool="false"
                               :options="{ mode: 'shell' }"
-                              height="140px"
+                              height="clamp(120px, 22vh, 260px)"
                               :placeholder="$t('i18n_pipeline_after_command_placeholder')"
                             />
                           </a-form-item>
@@ -470,7 +548,7 @@
                               v-model:content="target.afterCommand"
                               :show-tool="false"
                               :options="{ mode: 'shell' }"
-                              height="140px"
+                              height="clamp(120px, 22vh, 260px)"
                               :placeholder="$t('i18n_pipeline_after_command_placeholder')"
                             />
                           </a-form-item>
@@ -569,13 +647,36 @@
                               v-model:content="target.afterCommand"
                               :show-tool="false"
                               :options="{ mode: 'shell' }"
-                              height="140px"
+                              height="clamp(120px, 22vh, 260px)"
                               :placeholder="$t('i18n_pipeline_after_command_placeholder')"
                             />
                           </a-form-item>
                           <a-form-item :label="$t('i18n_pipeline_target_clear_old')">
                             <a-switch v-model:checked="target.clearOld" />
                           </a-form-item>
+                        </template>
+                        <!-- 文件中心 -->
+                        <template v-if="target.method === 8">
+                          <a-form-item :label="$t('i18n_pipeline_target_keep_day')">
+                            <a-input-number
+                              v-model:value="target.fileStorageKeepDay"
+                              style="width: 100%"
+                              :min="1"
+                              :precision="0"
+                              allow-clear
+                              :placeholder="$t('i18n_pipeline_target_keep_day_placeholder')"
+                              :data-testid="'pipeline-target-keep-day-' + ti"
+                            />
+                          </a-form-item>
+                          <a-form-item :label="$t('i18n_pipeline_target_alias_code')">
+                            <a-input
+                              v-model:value="target.aliasCode"
+                              :max-length="50"
+                              :placeholder="$t('i18n_pipeline_target_alias_code_placeholder')"
+                              :data-testid="'pipeline-target-alias-code-' + ti"
+                            />
+                          </a-form-item>
+                          <div class="field-tip">{{ $t('i18n_pipeline_target_file_storage_tip') }}</div>
                         </template>
                       </div>
                     </div>
@@ -617,26 +718,180 @@
                 class="stage-warning"
                 :message="stageInvalidReason(current)"
               />
-            </a-form>
-          </a-card>
-        </a-col>
-      </a-row>
+            </adaptive-form>
+        </a-card>
+      </div>
+      </div>
+      <!-- 步骤 3：事件通知（Hooks） -->
+      <div v-show="stepsCurrent === 2" data-testid="pipeline-step-hooks">
+      <a-card :title="$t('i18n_pipeline_hooks_title')" size="small" class="block hooks-card">
+        <div class="card-hint">{{ $t('i18n_pipeline_hooks_tip') }}</div>
+
+        <a-divider orientation="left">{{ $t('i18n_pipeline_hook_scripts') }}</a-divider>
+        <a-alert
+          v-if="!serverScriptLoading && !serverScripts.length"
+          type="info"
+          show-icon
+          class="hook-alert"
+          :message="$t('i18n_pipeline_hook_script_empty')"
+        />
+        <div v-if="!hooks.scripts.length" class="empty-hint">{{ $t('i18n_pipeline_hooks_empty') }}</div>
+        <div
+          v-for="(hook, hi) in hooks.scripts"
+          :key="hook.key"
+          class="hook-card"
+          :class="{ 'hook-card-invalid': !scriptHookValid(hook) }"
+        >
+          <div class="hook-head">
+            <b>{{ $t('i18n_pipeline_hook_script_index', { index: hi + 1 }) }}</b>
+            <a-space>
+              <span class="hook-switch-label">{{ $t('i18n_pipeline_hook_enabled') }}</span>
+              <a-switch
+                v-model:checked="hook.enabled"
+                size="small"
+                :data-testid="'pipeline-hook-script-enabled-' + hi"
+              />
+              <a-button size="small" type="text" danger @click="removeHookScript(hi)">
+                <DeleteOutlined />
+                {{ $t('i18n_2f4aaddde3') }}
+              </a-button>
+            </a-space>
+          </div>
+          <a-form layout="vertical" class="hook-form">
+            <a-row :gutter="12">
+              <a-col :xs="24" :sm="12">
+                <a-form-item :label="$t('i18n_pipeline_hook_events')">
+                  <a-select
+                    v-model:value="hook.events"
+                    mode="multiple"
+                    allow-clear
+                    :max-tag-count="2"
+                    :options="hookEventOptions"
+                    :placeholder="$t('i18n_pipeline_hook_events_placeholder')"
+                    :data-testid="'pipeline-hook-script-events-' + hi"
+                    @change="(value) => onHookEventsChange(hook, value)"
+                  />
+                </a-form-item>
+              </a-col>
+              <a-col :xs="24" :sm="12">
+                <a-form-item :label="$t('i18n_pipeline_hook_script')">
+                  <a-select
+                    v-model:value="hook.scriptId"
+                    show-search
+                    allow-clear
+                    option-filter-prop="label"
+                    :options="serverScriptOptions"
+                    :placeholder="$t('i18n_pipeline_hook_script_placeholder')"
+                    :not-found-content="$t('i18n_pipeline_hook_script_empty')"
+                    :data-testid="'pipeline-hook-script-id-' + hi"
+                  />
+                </a-form-item>
+              </a-col>
+            </a-row>
+            <div v-if="!scriptHookValid(hook)" class="hook-error">{{ scriptHookReason(hook) }}</div>
+          </a-form>
+        </div>
+        <a-button
+          type="dashed"
+          block
+          data-testid="pipeline-add-hook-script"
+          :disabled="!serverScripts.length"
+          @click="addHookScript"
+        >
+          <PlusOutlined />
+          {{ $t('i18n_pipeline_hook_script_add') }}
+        </a-button>
+        <div v-if="!serverScripts.length" class="field-tip">{{ $t('i18n_pipeline_hook_script_disabled_tip') }}</div>
+
+        <a-divider orientation="left">{{ $t('i18n_pipeline_hook_webhook') }}</a-divider>
+        <div
+          v-for="(hook, hi) in hooks.webhooks"
+          :key="hook.key"
+          class="hook-card"
+          :class="{ 'hook-card-invalid': !webhookHookValid(hook) }"
+        >
+          <div class="hook-head">
+            <b>{{ $t('i18n_pipeline_hook_webhook_index', { index: hi + 1 }) }}</b>
+            <a-space>
+              <span class="hook-switch-label">{{ $t('i18n_pipeline_hook_enabled') }}</span>
+              <a-switch
+                v-model:checked="hook.enabled"
+                size="small"
+                :data-testid="'pipeline-hook-webhook-enabled-' + hi"
+              />
+              <a-button size="small" type="text" danger @click="removeHookWebhook(hi)">
+                <DeleteOutlined />
+                {{ $t('i18n_2f4aaddde3') }}
+              </a-button>
+            </a-space>
+          </div>
+          <a-form layout="vertical" class="hook-form">
+            <a-row :gutter="12">
+              <a-col :xs="24" :sm="10">
+                <a-form-item :label="$t('i18n_pipeline_hook_url')">
+                  <a-input
+                    v-model:value="hook.url"
+                    :max-length="500"
+                    :placeholder="$t('i18n_pipeline_hook_url_placeholder')"
+                    :data-testid="'pipeline-hook-webhook-url-' + hi"
+                  />
+                </a-form-item>
+              </a-col>
+              <a-col :xs="24" :sm="8">
+                <a-form-item :label="$t('i18n_pipeline_hook_events')">
+                  <a-select
+                    v-model:value="hook.events"
+                    mode="multiple"
+                    allow-clear
+                    :max-tag-count="2"
+                    :options="hookEventOptions"
+                    :placeholder="$t('i18n_pipeline_hook_events_placeholder')"
+                    :data-testid="'pipeline-hook-webhook-events-' + hi"
+                    @change="(value) => onHookEventsChange(hook, value)"
+                  />
+                </a-form-item>
+              </a-col>
+              <a-col :xs="12" :sm="3">
+                <a-form-item :label="$t('i18n_pipeline_hook_method')">
+                  <a-select v-model:value="hook.method" :options="hookMethodOptions" />
+                </a-form-item>
+              </a-col>
+              <a-col :xs="12" :sm="3">
+                <a-form-item :label="$t('i18n_pipeline_hook_body_type')">
+                  <a-select
+                    v-model:value="hook.bodyType"
+                    :options="hookBodyTypeOptions"
+                    :disabled="hook.method === 'GET'"
+                  />
+                </a-form-item>
+              </a-col>
+            </a-row>
+            <a-form-item :label="$t('i18n_pipeline_hook_headers')">
+              <a-textarea
+                v-model:value="hook.headers"
+                :auto-size="{ minRows: 2, maxRows: 6 }"
+                :placeholder="$t('i18n_pipeline_hook_headers_placeholder')"
+              />
+            </a-form-item>
+            <div v-if="!webhookHookValid(hook)" class="hook-error">{{ webhookHookReason(hook) }}</div>
+          </a-form>
+        </div>
+        <a-button type="dashed" block data-testid="pipeline-add-hook-webhook" @click="addHookWebhook">
+          <PlusOutlined />
+          {{ $t('i18n_pipeline_hook_webhook_add') }}
+        </a-button>
+      </a-card>
+
+      </div>
+
     </a-spin>
 
-    <div class="editor-footer">
-      <a-space>
-        <a-button @click="$emit('close')">{{ $t('i18n_625fb26b4b') }}</a-button>
-        <a-button type="primary" :loading="saving" data-testid="pipeline-save" @click="handleSave">
-          {{ $t('i18n_be5fbbe34c') }}
-        </a-button>
-      </a-space>
-    </div>
   </div>
 </template>
 
 <script>
 import { message, Empty } from 'ant-design-vue'
-import { getPipelineGet, savePipeline } from '@/api/pipeline'
+import { getPipelineGet, savePipeline, getPipelineGroupAll, pipelineHookEventCodes } from '@/api/pipeline'
 import { getRepositoryList } from '@/api/repository'
 import { getBuildNodeList, getBranchList, releaseMethodMap } from '@/api/build-info'
 import { getSshListAll } from '@/api/ssh'
@@ -647,6 +902,7 @@ import { dockerAllTag } from '@/api/docker-api'
 import { dockerSwarmListAll } from '@/api/docker-swarm'
 import axios from '@/api/config'
 import PipelineCanvas from './PipelineCanvas.vue'
+import AdaptiveForm from '@/components/adaptiveForm/index.vue'
 
 let seed = 0
 const nextKey = () => ++seed
@@ -682,21 +938,60 @@ const createTarget = () => ({
   clearOld: false,
   diffSync: false,
   closeFirst: false,
+  // 文件中心（method 8）：保留天数留空即长期保留，别名码留空由服务端生成
+  fileStorageKeepDay: undefined,
+  aliasCode: '',
   docker: createDocker()
+})
+
+// 事件脚本行（type=script）：选择事件 + 一个服务端脚本
+const createHookScript = () => ({
+  key: nextKey(),
+  events: [],
+  scriptId: undefined,
+  enabled: true
+})
+
+// Webhook 行（type=webhook）：地址 + 请求方式 + 请求体格式 + 事件 + 自定义请求头
+const createHookWebhook = () => ({
+  key: nextKey(),
+  url: '',
+  method: 'POST',
+  bodyType: 'json',
+  events: [],
+  headers: '',
+  enabled: true
 })
 
 export default {
   name: 'PipelineEdit',
-  components: { PipelineCanvas },
-  props: { id: { type: String, default: '' } },
-  emits: ['close', 'saved'],
+  components: { PipelineCanvas, AdaptiveForm },
+  props: {
+    id: { type: String, default: '' },
+    // 当前步骤（与父级抽屉 footer 的「上一步 / 下一步」双向同步）
+    editSteps: { type: Number, default: 0 }
+  },
+  emits: ['close', 'saved', 'update:editSteps'],
   data() {
     return {
       Empty,
       loading: false,
       saving: false,
       configCollapsed: false,
+      stepsCurrent: this.editSteps || 0,
+      // 右侧「阶段配置」宽度（百分比）：可拖拽分割线调整并记住；窄屏可缩到 26%，双击分割线复位
+      configWidth: this.readConfigWidth(),
+      // 左右互斥折叠：canvasCollapsed 隐藏画布把宽度全给配置，configCollapsed 反之
+      canvasCollapsed: false,
+      stepsItems: [
+        { title: this.$t('i18n_pipeline_source_title') },
+        // 阶段编排放中间、事件通知放最后：事件通知是「配置完流程之后」的收尾动作
+        { title: this.$t('i18n_pipeline_stage_title') },
+        { title: this.$t('i18n_pipeline_hooks_title') }
+      ],
       form: { id: '', name: '', groupName: '' },
+      // 分组候选项（虚拟逻辑分组：后端按当前工作空间去重返回，不是独立管理的分组数据）
+      groupList: [],
       sources: [],
       stages: [],
       selectedIndex: -1,
@@ -712,10 +1007,21 @@ export default {
       swarmList: [],
       branchCache: {},
       branchLoading: {},
-      projectMap: {}
+      projectMap: {},
+      // 事件通知（Hooks）：按类型分组维护，序列化时合并为一个数组
+      hooks: { scripts: [], webhooks: [] },
+      serverScripts: [],
+      serverScriptLoading: false
     }
   },
   computed: {
+    configCardStyle() {
+      // 画布收起时，配置面板接管整行宽度（不能只写 width:auto，否则只按内容撑开）
+      if (this.canvasCollapsed) {
+        return { flex: '1 1 auto', width: 'auto' }
+      }
+      return { flex: '0 0 auto', width: this.configWidth + '%' }
+    },
     current() {
       return this.stages[this.selectedIndex] || {}
     },
@@ -772,6 +1078,27 @@ export default {
       return [
         { value: 'run_finished', label: this.$t('i18n_pipeline_notify_event_finish') },
         { value: 'stage_failed', label: this.$t('i18n_pipeline_notify_event_fail') }
+      ]
+    },
+    serverScriptOptions() {
+      return this.serverScripts.map((item) => ({
+        value: item.id,
+        label: item.name + (item.description ? '（' + item.description + '）' : '')
+      }))
+    },
+    hookEventOptions() {
+      return pipelineHookEventCodes.map((code) => ({ value: code, label: this.$t('i18n_pipeline_hook_event_' + code) }))
+    },
+    hookMethodOptions() {
+      return [
+        { value: 'POST', label: 'POST' },
+        { value: 'GET', label: 'GET' }
+      ]
+    },
+    hookBodyTypeOptions() {
+      return [
+        { value: 'json', label: 'JSON' },
+        { value: 'form', label: 'form' }
       ]
     },
     dockerTagOptions() {
@@ -842,11 +1169,92 @@ export default {
   },
   mounted() {
     this.loadRefs()
+    this.loadGroupList()
     if (this.id) {
       this.loadDetail()
     }
   },
+  watch: {
+    // 父级（抽屉 footer 的「上一步 / 下一步」）改动时必须同步到子组件，
+    // 否则按钮只改父级计数、内容仍停在原步骤（独立验收 D-1）
+    editSteps: {
+      handler(v) {
+        const total = this.stepsItems.length
+        const next = typeof v === 'number' ? Math.max(0, Math.min(total - 1, v)) : 0
+        if (next !== this.stepsCurrent) {
+          this.stepsCurrent = next
+        }
+      },
+      immediate: true
+    }
+  },
   methods: {
+    readConfigWidth() {
+      const v = Number(localStorage.getItem('pipeline-stage-config-width'))
+      return v >= 26 && v <= 62 ? v : 42
+    },
+    toggleCanvas() {
+      this.canvasCollapsed = !this.canvasCollapsed
+      // 两侧不能同时收起：收起画布时确保配置可见
+      if (this.canvasCollapsed) {
+        this.configCollapsed = false
+      }
+    },
+    toggleConfig() {
+      this.configCollapsed = !this.configCollapsed
+      if (this.configCollapsed) {
+        this.canvasCollapsed = false
+      }
+    },
+    resetConfigWidth() {
+      this.configWidth = 42
+      localStorage.setItem('pipeline-stage-config-width', '42')
+    },
+    /** 拖拽分割线调整「阶段配置」宽度：26%~62%，松手后记住 */
+    startResizeConfig(event) {
+      const layout = this.$refs.stageLayout
+      if (!layout) {
+        return
+      }
+      const rect = layout.getBoundingClientRect()
+      const onMove = (ev) => {
+        const percent = ((rect.right - ev.clientX) / rect.width) * 100
+        this.configWidth = Number(Math.min(62, Math.max(26, percent)).toFixed(2))
+      }
+      const onUp = () => {
+        document.removeEventListener('mousemove', onMove)
+        document.removeEventListener('mouseup', onUp)
+        document.body.style.userSelect = ''
+        localStorage.setItem('pipeline-stage-config-width', String(this.configWidth))
+      }
+      document.body.style.userSelect = 'none'
+      document.addEventListener('mousemove', onMove)
+      document.addEventListener('mouseup', onUp)
+      event.preventDefault()
+    },
+    /**
+     * 事件选择互斥：「全部事件」与具体事件不能同时存在
+     * <p>
+     * AntD 的 change 只给最终数组，但数组顺序就是选择顺序：最后一项是 all 说明刚选了「全部事件」，
+     * 其余情况说明是在已选 all 后又点了具体事件——两种都收敛成一个语义明确的取值。
+     * </p>
+     */
+    onHookEventsChange(hook, value) {
+      const list = Array.isArray(value) ? value.slice() : []
+      if (list.length <= 1 || list.indexOf('all') === -1) {
+        return
+      }
+      hook.events = list[list.length - 1] === 'all' ? ['all'] : list.filter((code) => code !== 'all')
+    },
+    handleStepChange(current) {
+      this.stepsCurrent = current
+      this.$emit('update:editSteps', current)
+    },
+    setStep(step) {
+      const next = Math.max(0, Math.min(this.stepsItems.length - 1, step))
+      this.stepsCurrent = next
+      this.$emit('update:editSteps', next)
+    },
     loadDetail() {
       this.loading = true
       getPipelineGet({ id: this.id })
@@ -856,6 +1264,7 @@ export default {
             this.form = { id: data.id, name: data.name, groupName: data.groupName }
             this.sources = this.parseSources(data.sourcesJson)
             this.stages = this.parseStages(data.stagesJson)
+            this.hooks = this.parseHooks(data.hooksJson)
             this.selectedIndex = this.stages.length ? 0 : -1
             // 节点/项目、分支等联动数据：回显时补齐
             this.sources.forEach((source) => {
@@ -870,12 +1279,20 @@ export default {
               }
             })
           } else {
-            message.warn({ message: res.msg })
+            message.warning(res.msg)
           }
         })
         .finally(() => {
           this.loading = false
         })
+    },
+    // 分组候选项：与在线构建编辑页一致，失败不阻断编辑（下拉仍可手工输入新分组）
+    loadGroupList() {
+      getPipelineGroupAll().then((res) => {
+        if (res.code === 200) {
+          this.groupList = res.data || []
+        }
+      })
     },
     loadRefs() {
       this.repoLoading = true
@@ -906,6 +1323,15 @@ export default {
       axios({ url: '/system/assets/script-library/list-data', method: 'post', data: {} }).then((res) => {
         if (res.code === 200) this.scripts = (res.data && res.data.result) || []
       })
+      // 事件通知里的「服务端脚本」来自服务端脚本列表（/script/list-all 无独立 api 导出，直调）
+      this.serverScriptLoading = true
+      axios({ url: '/script/list-all', method: 'get' })
+        .then((res) => {
+          if (res.code === 200) this.serverScripts = res.data || []
+        })
+        .finally(() => {
+          this.serverScriptLoading = false
+        })
       dockerAllTag().then((res) => {
         if (res.code === 200) this.dockerTags = res.data || []
       })
@@ -1010,6 +1436,119 @@ export default {
       })
       return options
     },
+    parseHooks(json) {
+      let list = []
+      try {
+        list = JSON.parse(json || '[]') || []
+      } catch (e) {
+        list = []
+      }
+      const result = { scripts: [], webhooks: [] }
+      list.forEach((raw) => {
+        if (!raw) return
+        if (raw.type === 'webhook') {
+          result.webhooks.push({
+            key: nextKey(),
+            url: raw.url || '',
+            // 只认契约里的两种取值，历史/异常值回落到默认
+            method: raw.method === 'GET' ? 'GET' : 'POST',
+            bodyType: raw.bodyType === 'form' ? 'form' : 'json',
+            events: raw.events || [],
+            headers: raw.headers || '',
+            enabled: raw.enabled !== false
+          })
+        } else if (raw.type === 'script') {
+          result.scripts.push({
+            key: nextKey(),
+            events: raw.events || [],
+            scriptId: raw.scriptId,
+            enabled: raw.enabled !== false
+          })
+        }
+      })
+      return result
+    },
+    addHookScript() {
+      this.hooks.scripts.push(createHookScript())
+    },
+    removeHookScript(index) {
+      this.hooks.scripts.splice(index, 1)
+    },
+    addHookWebhook() {
+      this.hooks.webhooks.push(createHookWebhook())
+    },
+    removeHookWebhook(index) {
+      this.hooks.webhooks.splice(index, 1)
+    },
+    isValidHookUrl(url) {
+      return /^https?:\/\/[^\s]+$/i.test((url || '').trim())
+    },
+    scriptHookValid(hook) {
+      return !!(hook && hook.events && hook.events.length && hook.scriptId)
+    },
+    scriptHookReason(hook) {
+      const reasons = []
+      if (!hook || !hook.events || !hook.events.length) reasons.push(this.$t('i18n_pipeline_hook_invalid_events'))
+      if (!hook || !hook.scriptId) reasons.push(this.$t('i18n_pipeline_hook_invalid_script'))
+      return reasons.join('；')
+    },
+    webhookHookValid(hook) {
+      return !!(hook && hook.events && hook.events.length && this.isValidHookUrl(hook.url))
+    },
+    webhookHookReason(hook) {
+      const reasons = []
+      if (!hook || !hook.events || !hook.events.length) reasons.push(this.$t('i18n_pipeline_hook_invalid_events'))
+      if (!hook || !this.isValidHookUrl(hook.url)) reasons.push(this.$t('i18n_pipeline_hook_invalid_url'))
+      return reasons.join('；')
+    },
+    /**
+     * 保存前的 hooks 校验：返回第一条不合法行的描述（空字符串表示全部通过）
+     * 前端只做交互提示，服务端仍会再校验一次
+     */
+    firstHookError() {
+      for (let index = 0; index < this.hooks.scripts.length; index++) {
+        const hook = this.hooks.scripts[index]
+        if (!this.scriptHookValid(hook)) {
+          return (
+            this.$t('i18n_pipeline_hook_script_row_invalid', { index: index + 1 }) + '：' + this.scriptHookReason(hook)
+          )
+        }
+      }
+      for (let index = 0; index < this.hooks.webhooks.length; index++) {
+        const hook = this.hooks.webhooks[index]
+        if (!this.webhookHookValid(hook)) {
+          return (
+            this.$t('i18n_pipeline_hook_webhook_row_invalid', { index: index + 1 }) +
+            '：' +
+            this.webhookHookReason(hook)
+          )
+        }
+      }
+      return ''
+    },
+    serializeHooks() {
+      const list = []
+      this.hooks.scripts.forEach((hook) => {
+        list.push({
+          type: 'script',
+          enabled: hook.enabled !== false,
+          events: hook.events || [],
+          scriptId: hook.scriptId
+        })
+      })
+      this.hooks.webhooks.forEach((hook) => {
+        list.push({
+          type: 'webhook',
+          enabled: hook.enabled !== false,
+          events: hook.events || [],
+          url: (hook.url || '').trim(),
+          method: hook.method === 'GET' ? 'GET' : 'POST',
+          bodyType: hook.bodyType === 'form' ? 'form' : 'json',
+          headers: (hook.headers || '').trim()
+        })
+      })
+      return list
+    },
     parseSources(json) {
       let list = []
       try {
@@ -1045,6 +1584,13 @@ export default {
         target.projectId = parts[1]
       } else if (target.method === 3 || target.method === 6 || target.method === 7) {
         target.ids = id ? String(id).split(',') : []
+      } else if (target.method === 8) {
+        // 文件中心：目标 id 为空，配置都在 extra 里
+        target.fileStorageKeepDay =
+          extra.fileStorageKeepDay === undefined || extra.fileStorageKeepDay === null || extra.fileStorageKeepDay === ''
+            ? undefined
+            : Number(extra.fileStorageKeepDay)
+        target.aliasCode = extra.aliasCode || ''
       }
       target.afterOpt = extra.afterOpt === undefined ? 0 : extra.afterOpt
       target.secondaryDirectory = extra.projectSecondaryDirectory || ''
@@ -1207,6 +1753,9 @@ export default {
       target.targetId = undefined
       target.projectId = undefined
       target.ids = []
+      // 切换发布方式时清掉文件中心专属配置，避免残留值被带到新方式
+      target.fileStorageKeepDay = undefined
+      target.aliasCode = ''
     },
     stageValid(stage) {
       if (!stage || !stage.id || !stage.name) return false
@@ -1227,6 +1776,8 @@ export default {
       if (target.method === 1) return !!target.targetId
       if (target.method === 2) return !!(target.nodeId && target.projectId)
       if (target.method === 3 || target.method === 6 || target.method === 7) return !!(target.ids && target.ids.length)
+      // 文件中心：保留天数与别名码都可空，始终可用
+      if (target.method === 8) return true
       return true
     },
     stageInvalidReason(stage) {
@@ -1281,6 +1832,17 @@ export default {
         result.id = (target.ids || []).join(',')
         extra.releaseCommand = target.afterCommand
         extra.clearOld = target.clearOld
+      } else if (target.method === 8) {
+        // 文件中心：id 固定为空串，保留天数留空表示长期保留（不下发该键）
+        result.id = ''
+        if (
+          target.fileStorageKeepDay !== undefined &&
+          target.fileStorageKeepDay !== null &&
+          target.fileStorageKeepDay !== ''
+        ) {
+          extra.fileStorageKeepDay = Math.floor(Number(target.fileStorageKeepDay))
+        }
+        extra.aliasCode = target.aliasCode || ''
       }
       return result
     },
@@ -1318,15 +1880,18 @@ export default {
     },
     handleSave() {
       if (!this.form.name) {
-        message.warn(this.$t('i18n_pipeline_name_required'))
+        this.setStep(0)
+        message.warning(this.$t('i18n_pipeline_name_required'))
         return
       }
       if (!this.stages.length) {
-        message.warn(this.$t('i18n_pipeline_stage_required'))
+        this.setStep(1)
+        message.warning(this.$t('i18n_pipeline_stage_required'))
         return
       }
       const invalid = this.stages.find((stage) => !this.stageValid(stage))
       if (invalid) {
+        this.setStep(1)
         message.error(this.$t('i18n_pipeline_stage_invalid') + '：' + (invalid.name || invalid.id) + ' - ' + this.stageInvalidReason(invalid))
         this.selectedIndex = this.stages.indexOf(invalid)
         this.configCollapsed = false
@@ -1335,7 +1900,15 @@ export default {
       const ids = this.stages.map((stage) => stage.id)
       const duplicated = ids.filter((id, index) => ids.indexOf(id) !== index)
       if (duplicated.length) {
+        this.setStep(1)
         message.error(this.$t('i18n_pipeline_stage_key_duplicate') + '：' + duplicated.join(','))
+        return
+      }
+      // 事件通知与阶段校验分开：行内标红之外，保存前再指明具体第几行
+      const hookError = this.firstHookError()
+      if (hookError) {
+        this.setStep(2)
+        message.error(hookError)
         return
       }
       const sourcesJson = JSON.stringify(
@@ -1360,8 +1933,17 @@ export default {
           config: this.buildStageConfig(stage)
         }))
       )
+      const hooksJson = JSON.stringify(this.serializeHooks())
       this.saving = true
-      savePipeline({ id: this.form.id, name: this.form.name, group: this.form.groupName, sourcesJson, stagesJson })
+      this.$emit('saving-change', true)
+      savePipeline({
+        id: this.form.id,
+        name: this.form.name,
+        group: this.form.groupName,
+        sourcesJson,
+        stagesJson,
+        hooksJson
+      })
         .then((res) => {
           if (res.code === 200) {
             message.success(this.$t('i18n_pipeline_save_success'))
@@ -1373,6 +1955,7 @@ export default {
         })
         .finally(() => {
           this.saving = false
+          this.$emit('saving-change', false)
         })
     }
   }
@@ -1391,11 +1974,11 @@ export default {
 }
 .empty-hint {
   padding: 12px 0;
-  color: #8f959e;
+  color: var(--jp-color-text-tertiary);
   font-size: 13px;
 }
 .field-tip {
-  color: #8f959e;
+  color: var(--jp-color-text-tertiary);
   font-size: 12px;
   line-height: 18px;
   margin-top: 2px;
@@ -1404,16 +1987,16 @@ export default {
   max-width: 560px;
 }
 .card-hint {
-  color: #8f959e;
+  color: var(--jp-color-text-tertiary);
   font-size: 12px;
   margin: -4px 0 8px;
 }
 .source-card {
-  border: 1px solid #eef0f3;
+  border: 1px solid var(--jp-color-border-secondary);
   border-radius: 8px;
   padding: 10px 12px 2px;
   margin-bottom: 8px;
-  background: #fafbfc;
+  background: var(--jp-color-fill-alter);
 }
 .source-head {
   display: flex;
@@ -1430,28 +2013,65 @@ export default {
 .source-row {
   margin-bottom: 8px;
 }
+.hooks-card :deep(.ant-divider) {
+  margin: 8px 0;
+}
+.hook-alert {
+  margin-bottom: 8px;
+}
+.hook-card {
+  border: 1px solid var(--jp-color-border-secondary);
+  border-radius: 8px;
+  padding: 10px 12px 2px;
+  margin-bottom: 8px;
+  background: var(--jp-color-fill-alter);
+}
+/* 未选事件 / 地址非法：整行标红，配合下方行内原因 */
+.hook-card-invalid {
+  border-color: var(--jp-color-error-border);
+  background: var(--jp-color-error-bg);
+}
+.hook-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.hook-switch-label {
+  color: var(--jp-color-text-tertiary);
+  font-size: 12px;
+}
+.hook-form :deep(.ant-form-item) {
+  margin-bottom: 10px;
+}
+.hook-form :deep(.ant-form-item-label) {
+  padding-bottom: 2px;
+}
+.hook-error {
+  color: var(--jp-color-error-text);
+  font-size: 12px;
+  line-height: 18px;
+  padding-bottom: 8px;
+}
 .canvas-wrap {
-  /* 自适应高度：跟随窗口可视高度伸缩，小窗口保底 260px、大窗口最多 720px（不写死 240px） */
-  height: clamp(260px, calc(100vh - 470px), 720px);
+  /* 高度由卡片 flex 分配（见 .stage-canvas-card），不再按视口猜数字 */
+  flex: 1 1 auto;
+  min-height: 240px;
 }
 .canvas-tip {
-  color: #8f959e;
+  color: var(--jp-color-text-tertiary);
   font-size: 12px;
   margin-top: 6px;
-}
-.full-height :deep(.ant-card-body) {
-  height: clamp(280px, calc(100vh - 420px), 720px);
-  overflow-y: auto;
 }
 .target-list {
   width: 100%;
 }
 .target-card {
-  border: 1px solid #eef0f3;
+  border: 1px solid var(--jp-color-border-secondary);
   border-radius: 8px;
   padding: 8px;
   margin-bottom: 8px;
-  background: #fafbfc;
+  background: var(--jp-color-fill-alter);
 }
 .target-head {
   display: flex;
@@ -1468,13 +2088,98 @@ export default {
 .stage-warning {
   margin-top: 8px;
 }
-.editor-footer {
-  position: sticky;
-  bottom: 0;
-  padding: 8px 12px;
-  background: #fff;
-  border-top: 1px solid #f0f0f0;
-  text-align: right;
-  z-index: 5;
+.pipeline-editor {
+  /* 高度交给抽屉：editor 占满 body，各步骤内用 flex 分配，不再用 100vh-420px 这类魔法数字 */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding-bottom: 0;
+}
+.pipeline-editor :deep(.ant-spin-nested-loading),
+.pipeline-editor :deep(.ant-spin-container) {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.step-pane-stages {
+  /* 阶段编排这一步要吃掉剩余高度，画布与配置卡片才能等高铺满 */
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.stage-layout {
+  display: flex;
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.stage-canvas-card,
+.stage-config-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+.stage-canvas-card {
+  flex: 1 1 auto;
+}
+.stage-config-card {
+  flex: 0 0 auto;
+}
+.stage-canvas-card :deep(.ant-card-body),
+.stage-config-card :deep(.ant-card-body) {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+/* 画布卡片 body 必须是 flex 列，否则 .canvas-wrap 的 flex:1 无处可依 → .vue-flow 高度 0（节点看不见） */
+.stage-canvas-card :deep(.ant-card-body) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+/* 可拖拽分割线：视觉上是一条浅色竖条，hover 变主色，光标为 col-resize */
+.stage-splitter {
+  flex: 0 0 18px;
+  margin-left: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: col-resize;
+}
+.stage-splitter-btn {
+  border: none;
+  background: transparent;
+  color: var(--jp-color-text-tertiary);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  font-size: 12px;
+}
+.stage-splitter-btn:hover {
+  color: var(--jp-color-primary);
+}
+.stage-splitter-bar {
+  width: 4px;
+  height: 46px;
+  border-radius: 2px;
+  background: var(--jp-color-border);
+  transition: background 0.2s;
+}
+.stage-splitter:hover .stage-splitter-bar {
+  background: var(--jp-color-primary);
+}
+.editor-steps {
+  /* 步骤条与下方区块留出呼吸感，并随主题色 */
+  margin: 4px 0 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--jp-color-border-secondary);
+  border-radius: var(--jp-radius-lg);
+  background: var(--jp-color-fill-alter);
 }
 </style>

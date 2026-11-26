@@ -45,6 +45,8 @@ DEFAULT_TESTS=(
 	# 通用分页过滤：字段名白名单/值绑定/`:in` 后缀（2.11.13 工作空间隔离回归的守卫）
 	BaseDbServiceListPageFilterTest
 	BaseDbServiceBuildWhereTest
+	# 启动时空分组修复：group / groupName 两种字段都要覆盖，NULL 与空串都必须被修复（2026-11-26 流水线分组）
+	BaseDbServiceGroupRepairSqlTest
 	# 服务端强制过滤条件 vs 客户端同字段参数冲突（P1-1 / P1-2 / P2-1 的守卫）
 	BaseDbServiceForcedFilterTest
 	ProjectManageControlExportDataTest
@@ -97,6 +99,13 @@ DEFAULT_TESTS=(
 	RemoteVersionDownloadMessageTest
 	# 流水线运行日志按窗口读取（长日志不再每次整文件进内存）
 	PipelineLogReaderTest
+	# 流水线仓库源：克隆深度必须切系统 git（2026-11-26 群反馈「浅克隆不生效」的守卫）+ 源码缓存行为
+	PipelineSourceSyncParameterTest
+	PipelineSourceCacheTest
+	# 流水线触发上下文：开放接口纯 token 触发必须绑定触发用户/系统身份（2026-11-26「没有对应的用户」缺陷的守卫）
+	PipelineRunnerTriggerUserContextTest
+	# 触发器统一收口点：查不到 405 / token 生成与重置唯一路径 / 响应 key 与历史一致（B-041 同类缺陷的守卫）
+	TriggerUrlAssemblerTest
 	UploadShardingExtensionTest
 	# 安全修复的既有单测（文件中心 SQL 注入 / 查询值绑定 / 日志路径穿越 / token 等）
 	FileStorageApiControllerSortTest
@@ -146,6 +155,17 @@ DEFAULT_TESTS=(
 	# SSH 项目（无插件端）接口契约 + 版本快照远端解析/过滤（构建历史快速回滚，2026-11-20）
 	SshProjectControllerTest
 	SshProjectVersionServiceTest
+	# 流水线事件钩子（脚本/webhook）与运行状态机（2.11.16）：事件匹配、单条失败不影响其它、终态不可被改写
+	PipelineHookDispatchTest
+	PipelineRunStateTest
+	PipelineEngineListenerTest
+	ScriptHookHandlerTest
+	# SSH 终端会话录制（asciicast v2 写入、OSC 133/633 命令标记解析）：开关关闭零产物、标记跨包解析、写入异常不影响会话
+	AsciicastTerminalRecorderTest
+	OscMarkerScannerTest
+	# 文件中心发布方式注册（码值 8 只追加）与事件钩子配置校验（未知事件/非法地址必须在保存时拦下）
+	FileStorageReleaseTargetTest
+	PipelineDefinitionHooksTest
 )
 
 MVN_BIN=${MVN:-mvn}
