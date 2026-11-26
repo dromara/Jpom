@@ -12,7 +12,7 @@
 <template>
   <div class="pipeline-editor">
     <a-spin :spinning="loading">
-      <a-form layout="horizontal" :label-col="{ span: 6 }" :wrapper-col="{ span: 18 }">
+      <adaptive-form :label-width="112" :label-width-tight="96" :tight-width="560" :inline-min-width="360">
         <a-row :gutter="16">
           <a-col :span="12">
             <a-form-item :label="$t('i18n_pipeline_name')">
@@ -25,7 +25,7 @@
             </a-form-item>
           </a-col>
         </a-row>
-      </a-form>
+      </adaptive-form>
 
       <!-- 步骤指示器：把「仓库源 / 事件通知 / 阶段编排」分开，避免一屏堆到底（参照在线构建编辑页） -->
       <a-steps
@@ -223,7 +223,14 @@
               </a-space>
             </template>
             <a-empty v-if="!current || !current.id" :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="$t('i18n_pipeline_stage_select_tip')" />
-            <a-form v-else layout="horizontal" :label-col="{ span: 7 }" :wrapper-col="{ span: 17 }" class="stage-form">
+            <adaptive-form
+              v-else
+              class="stage-form"
+              :inline-min-width="420"
+              :tight-width="620"
+              :label-width="112"
+              :label-width-tight="88"
+            >
               <a-row :gutter="8">
                 <a-col :span="24">
                   <a-form-item :label="$t('i18n_pipeline_stage_name')">
@@ -694,7 +701,7 @@
                 class="stage-warning"
                 :message="stageInvalidReason(current)"
               />
-            </a-form>
+            </adaptive-form>
         </a-card>
       </div>
       </div>
@@ -878,6 +885,7 @@ import { dockerAllTag } from '@/api/docker-api'
 import { dockerSwarmListAll } from '@/api/docker-swarm'
 import axios from '@/api/config'
 import PipelineCanvas from './PipelineCanvas.vue'
+import AdaptiveForm from '@/components/adaptiveForm/index.vue'
 
 let seed = 0
 const nextKey = () => ++seed
@@ -940,7 +948,7 @@ const createHookWebhook = () => ({
 
 export default {
   name: 'PipelineEdit',
-  components: { PipelineCanvas },
+  components: { PipelineCanvas, AdaptiveForm },
   props: {
     id: { type: String, default: '' },
     // 当前步骤（与父级抽屉 footer 的「上一步 / 下一步」双向同步）
