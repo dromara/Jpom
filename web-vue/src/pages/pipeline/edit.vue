@@ -169,12 +169,8 @@
                     </a-menu>
                   </template>
                 </a-dropdown>
-                <a-tooltip :title="configCollapsed ? $t('i18n_pipeline_stage_expand') : $t('i18n_pipeline_stage_collapse')">
-                  <a-button data-testid="pipeline-config-toggle" @click="configCollapsed = !configCollapsed">
-                    <MenuUnfoldOutlined v-if="configCollapsed" />
-                    <MenuFoldOutlined v-else />
-                  </a-button>
-                </a-tooltip>
+                <!-- 「收起/展开阶段配置」只保留分割线上的按钮（pipeline-toggle-config）：
+                     卡片头部再放一个会让同一个动作出现两个入口，且头部那个没做「画布/配置互斥」 -->
               </a-space>
             </template>
             <div class="canvas-wrap">
