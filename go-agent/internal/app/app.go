@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dromara/Jpom/go-agent/internal/agentid"
 	"github.com/dromara/Jpom/go-agent/internal/config"
 	"github.com/dromara/Jpom/go-agent/internal/i18n"
 )
@@ -89,6 +90,9 @@ type App struct {
 
 	logger  *slog.Logger
 	logFile *os.File
+
+	// userAgent is the standardized outbound User-Agent (Java parity, see agentid)
+	userAgent string
 }
 
 type installInfo struct {
@@ -134,6 +138,7 @@ func New(confPath, baseDir, version, buildTime string) (*App, error) {
 	a := &App{
 		Version:    version,
 		BuildTime:  buildTime,
+		userAgent:  agentid.Host(version),
 		BaseDir:    base,
 		ConfPath:   conf,
 		Config:     cfg,
@@ -315,16 +320,13 @@ func (a *App) ListenAddr() string {
 
 // OsName matches the value reported by the Java agent manifest.
 func (a *App) OsName() string {
-	switch runtime.GOOS {
-	case "linux":
-		return "Linux"
-	case "windows":
-		return "Windows"
-	case "darwin":
-		return "Mac OS X"
-	default:
-		return runtime.GOOS
-	}
+	return agentid.OSName()
+}
+
+// UserAgent returns the standardized outbound User-Agent (Java JpomUserAgent parity).
+// Outbound requests must use it through internal/netx.
+func (a *App) UserAgent() string {
+	return a.userAgent
 }
 
 // Manifest returns the /info manifest object, byte compatible with the Java agent.

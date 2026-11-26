@@ -10,6 +10,7 @@
 package org.dromara.jpom.common;
 
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
+import org.dromara.jpom.transport.TransportServer;
 
 import java.util.function.Supplier;
 
@@ -26,7 +27,7 @@ public class Const {
     /**
      * 请求 header
      */
-    public static final String WORKSPACE_ID_REQ_HEADER = "workspaceId";
+    public static final String WORKSPACE_ID_REQ_HEADER = TransportServer.WORKSPACE_ID_REQ_HEADER;
     /**
      * 默认的工作空间
      */
@@ -51,9 +52,9 @@ public class Const {
     /**
      * 用户名header
      */
-    public static final String JPOM_SERVER_USER_NAME = "Jpom-Server-UserName";
+    public static final String JPOM_SERVER_USER_NAME = TransportServer.JPOM_SERVER_USER_NAME;
 
-    public static final String JPOM_AGENT_AUTHORIZE = "Jpom-Agent-Authorize";
+    public static final String JPOM_AGENT_AUTHORIZE = TransportServer.JPOM_AGENT_AUTHORIZE;
 
     public static final String DATA = "data";
 

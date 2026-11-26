@@ -28,6 +28,7 @@ import (
 
 	"github.com/dromara/Jpom/go-agent/internal/app"
 	"github.com/dromara/Jpom/go-agent/internal/i18n"
+	"github.com/dromara/Jpom/go-agent/internal/jpomheader"
 )
 
 // Message is the response envelope understood by the Jpom server
@@ -131,9 +132,9 @@ func (r *Router) register(method, pattern string, handler Handler, public bool) 
 				c.JSONCode(500, c.T("i18n.service_exception.3821")+fmt.Sprint(recovered), nil)
 			}
 		}()
-		r.app.Log().Debug("request", "method", req.Method, "path", req.URL.Path, "remote", req.RemoteAddr, "workspace", req.Header.Get("workspaceId"))
+		r.app.Log().Debug("request", "method", req.Method, "path", req.URL.Path, "remote", req.RemoteAddr, "workspace", req.Header.Get(jpomheader.WorkspaceID))
 		if !public {
-			authorize := req.Header.Get("Jpom-Agent-Authorize")
+			authorize := req.Header.Get(jpomheader.Authorize)
 			if !r.app.CheckAuthorize(authorize) {
 				r.app.Log().Warn("agent authorization failed", "path", req.URL.Path, "remote", req.RemoteAddr)
 				c.JSONCode(900, c.T("i18n.auth_info_error.c184"), nil)
@@ -171,20 +172,20 @@ type Context struct {
 }
 
 func newContext(a *app.App, w http.ResponseWriter, r *http.Request) *Context {
-	workspace := strings.TrimSpace(r.Header.Get("workspaceId"))
+	workspace := strings.TrimSpace(r.Header.Get(jpomheader.WorkspaceID))
 	if workspace == "" {
 		workspace = "DEFAULT"
 	}
 	// 语言优先级与 Java I18nMessageUtil 一致：Accept-Language → jpom.system.lang
 	// → JPOM_LANG → zh-CN。
-	lang := i18n.Resolve(r.Header.Get("Accept-Language"), a.Config.Jpom.System.Lang)
+	lang := i18n.Resolve(r.Header.Get(jpomheader.AcceptLanguage), a.Config.Jpom.System.Lang)
 	return &Context{
 		W:          w,
 		R:          r,
 		App:        a,
 		Workspace:  workspace,
 		Lang:       lang,
-		ServerUser: r.Header.Get("Jpom-Server-UserName"),
+		ServerUser: r.Header.Get(jpomheader.ServerUserName),
 	}
 }
 

@@ -10,6 +10,7 @@
 4. 【docs】调整 版本清单补充 Go 各平台地址与 tar.gz 地址（主地址过渡期仍 zip）
 5. 【server】优化 Go 插件端在线升级优先用清单里的平台地址（升级 jpom-core 1.0.12）
 6. 【server】优化 升级包下载优先用清单里的 tar.gz 地址，不再依赖 zip 后缀改写
+7. 【agent】【agent-go】优化 出站请求统一 User-Agent 与头名常量，两端共用契约向量
 
 ### ⚠️ 升级说明
 

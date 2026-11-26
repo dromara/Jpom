@@ -30,6 +30,7 @@ import (
 	"time"
 
 	"github.com/dromara/Jpom/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/netx"
 )
 
 // 升级包校验/替换说明（与 Java 端 SystemUpdateController 的分片协议一致）：
@@ -597,7 +598,7 @@ func RemoteUpgrade(a *app.App) (string, error) {
 	var lastErr error
 	for _, upgradeURL := range urls {
 		a.Log().Info("download go agent upgrade container", "url", upgradeURL)
-		status, downloadErr := downloadPackageFile(upgradeURL, targetFile)
+		status, downloadErr := downloadPackageFile(a.UserAgent(), upgradeURL, targetFile)
 		if downloadErr == nil {
 			return installAgentPackage(a, targetFile)
 		}
@@ -652,8 +653,8 @@ func agentVersionFromURL(urlPath string) string {
 }
 
 // downloadPackageFile 下载升级包并返回 HTTP 状态码（0 表示未收到响应）。
-func downloadPackageFile(url, target string) (int, error) {
-	client := &http.Client{Timeout: 10 * time.Minute}
+func downloadPackageFile(userAgent, url, target string) (int, error) {
+	client := netx.Client(userAgent, 10*time.Minute)
 	response, err := client.Get(url)
 	if err != nil {
 		return 0, paramErr(405, "i18n.go_upgrade_download_failed", err.Error())

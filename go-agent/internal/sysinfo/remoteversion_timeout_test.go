@@ -66,10 +66,10 @@ func TestLoadTransitURLHonorsTimeout(t *testing.T) {
 	}))
 	defer server.Close()
 
-	if _, err := loadTransitURL(server.URL, 100*time.Millisecond); err == nil {
+	if _, err := loadTransitURL("", server.URL, 100*time.Millisecond); err == nil {
 		t.Fatal("expected timeout error for slow response")
 	}
-	value, err := loadTransitURL(server.URL, 5*time.Second)
+	value, err := loadTransitURL("", server.URL, 5*time.Second)
 	if err != nil {
 		t.Fatalf("expected success with generous timeout, got %v", err)
 	}
@@ -86,10 +86,10 @@ func TestFetchTextHonorsTimeout(t *testing.T) {
 	}))
 	defer server.Close()
 
-	if _, err := fetchText(server.URL, 100*time.Millisecond); err == nil {
+	if _, err := fetchText("", server.URL, 100*time.Millisecond); err == nil {
 		t.Fatal("expected timeout error for slow changelog")
 	}
-	body, err := fetchText(server.URL, 5*time.Second)
+	body, err := fetchText("", server.URL, 5*time.Second)
 	if err != nil {
 		t.Fatalf("expected success with generous timeout, got %v", err)
 	}

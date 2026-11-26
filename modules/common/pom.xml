@@ -179,5 +179,11 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.dromara.jpom.agent-transport</groupId>
+            <artifactId>agent-transport-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
     </dependencies>
 </project>

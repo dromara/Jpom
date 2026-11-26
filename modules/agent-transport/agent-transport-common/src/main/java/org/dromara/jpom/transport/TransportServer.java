@@ -31,6 +31,16 @@ public interface TransportServer {
     String TRANSPORT_ENCRYPTION = "transport-encryption";
 
     /**
+     * 出站标识请求头（值由 {@code JpomUserAgent} 生成，此处只定义头名，避免字面量散落）
+     */
+    String USER_AGENT = "User-Agent";
+
+    /**
+     * 服务端转发的登录用户名请求头
+     */
+    String JPOM_SERVER_USER_NAME = "Jpom-Server-UserName";
+
+    /**
      * 执行请求
      *
      * @param nodeInfo 节点信息

@@ -20,6 +20,8 @@ import (
 
 	"github.com/dromara/Jpom/go-agent/internal/app"
 	"github.com/dromara/Jpom/go-agent/internal/config"
+	"github.com/dromara/Jpom/go-agent/internal/jpomheader"
+	"github.com/dromara/Jpom/go-agent/internal/netx"
 	"github.com/dromara/Jpom/go-agent/internal/tunnel"
 )
 
@@ -44,7 +46,7 @@ func runPushLoop(ctx context.Context, application *app.App, client *tunnel.Clien
 	interval := time.Duration(settings.PushIntervalSeconds()) * time.Second
 	statURL := "http://" + tunnel.LoopbackAddr(application.ListenAddr()) + "/get-stat-info"
 	authorize := application.Auth.Authorize
-	httpClient := &http.Client{Timeout: 30 * time.Second}
+	httpClient := netx.Client(application.UserAgent(), 30*time.Second)
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 	var seq int64
@@ -86,7 +88,7 @@ func collectStatInfo(client *http.Client, statURL, authorize string) ([]byte, er
 		return nil, err
 	}
 	if authorize != "" {
-		request.Header.Set("Jpom-Agent-Authorize", authorize)
+		request.Header.Set(jpomheader.Authorize, authorize)
 	}
 	response, err := client.Do(request)
 	if err != nil {

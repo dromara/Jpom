@@ -31,7 +31,9 @@ import (
 // registerProjectFile owns /manage/file/* and /manage/file2/* endpoints.
 func registerProjectFile(r *httpx.Router, a *app.App) {
 	service := projectfile.New(a)
-	wireProjectFileHooks(project.NewRuntime(a.BaseDir, a.Config, a.Log()))
+	projectRuntime := project.NewRuntime(a.BaseDir, a.Config, a.Log())
+	projectRuntime.UserAgent = a.UserAgent()
+	wireProjectFileHooks(projectRuntime)
 
 	// POST /manage/file/getFileList
 	r.Handle(http.MethodPost, "/manage/file/getFileList", func(c *httpx.Context) {

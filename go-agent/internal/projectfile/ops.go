@@ -20,6 +20,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/dromara/Jpom/go-agent/internal/netx"
 )
 
 // UploadOptions are the form fields of /manage/file/sharding-merge.
@@ -552,7 +554,7 @@ func (s *Service) RemoteDownload(id, rawURL, levelName, unzip string, stripCompo
 	if err := os.MkdirAll(tempDir, 0o755); err != nil {
 		return Message{}, failSuffix("i18n.download_remote_file_failed.fcc3", err.Error())
 	}
-	downloadFile, size, err := downloadRemote(rawURL, tempDir)
+	downloadFile, size, err := downloadRemote(s.app.UserAgent(), rawURL, tempDir)
 	if err != nil {
 		return Message{}, failSuffix("i18n.download_remote_file_failed.fcc3", err.Error())
 	}
@@ -667,8 +669,8 @@ func invalidRemoteFileName(name string) bool {
 // size. The temp file name honours Content-Disposition, then the URL path
 // (hutool HttpResponse#completeFileNameFromHeader); the final name inside the
 // project lib is resolved by resolveRemoteFileName.
-func downloadRemote(rawURL, destDir string) (string, int64, error) {
-	client := &http.Client{Timeout: 10 * time.Minute}
+func downloadRemote(userAgent, rawURL, destDir string) (string, int64, error) {
+	client := netx.Client(userAgent, 10*time.Minute)
 	request, err := http.NewRequest(http.MethodGet, rawURL, nil)
 	if err != nil {
 		return "", 0, err

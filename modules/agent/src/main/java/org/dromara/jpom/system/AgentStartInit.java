@@ -28,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.common.ILoadEvent;
 import org.dromara.jpom.common.commander.ProjectCommander;
+import org.dromara.jpom.common.JpomUserAgent;
 import org.dromara.jpom.common.i18n.I18nMessageUtil;
 import org.dromara.jpom.common.version.RemoteVersions;
 import org.dromara.jpom.configuration.AgentAuthorize;
@@ -214,6 +215,8 @@ public class AgentStartInit implements ILoadEvent, ISystemTask {
      * @param url 服务端url
      */
     public void autoPushToServer(String url) {
+        // 启动阶段即出站：确保 hutool 全局 User-Agent 已注入（JpomManifest 延迟初始化）
+        JpomUserAgent.ensureApplied();
         url = StrUtil.removeSuffix(url, CharPool.SINGLE_QUOTE + "");
         url = StrUtil.removePrefix(url, CharPool.SINGLE_QUOTE + "");
         UrlBuilder urlBuilder = UrlBuilder.ofHttp(url);

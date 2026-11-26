@@ -1,0 +1,10 @@
+# Jpom 出站 User-Agent 契约向量（Java 插件端 JpomUserAgent 与 Go 插件端 internal/agentid 共用同一份）
+# template: Mozilla/5.0 ({osName} {osVersion}; {arch}; {runtime}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.0000.000 Safari/537.36 Jpom {type}/{version}
+# 列：type	version	osName	osVersion	arch	runtime	expect
+# 空值回退（两端必须一致）：osName/arch/runtime 为空 -> Unknown；osVersion 为空 -> 0；type 为空 -> Unknown；version 为空 -> dev
+Agent	2.11.15.3	Linux	5.15.0-91-generic	amd64	1.8.0_512	Mozilla/5.0 (Linux 5.15.0-91-generic; amd64; 1.8.0_512) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.0000.000 Safari/537.36 Jpom Agent/2.11.15.3
+Agent	2.11.15.3	Windows	10	amd64	17.0.9	Mozilla/5.0 (Windows 10; amd64; 17.0.9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.0000.000 Safari/537.36 Jpom Agent/2.11.15.3
+Agent	dev	docker	6.1.0-18-amd64	amd64	go1.22.0	Mozilla/5.0 (docker 6.1.0-18-amd64; amd64; go1.22.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.0000.000 Safari/537.36 Jpom Agent/dev
+Server	2.11.15	Linux	5.15.0-86-generic	arm64	1.8.0_402	Mozilla/5.0 (Linux 5.15.0-86-generic; arm64; 1.8.0_402) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.0000.000 Safari/537.36 Jpom Server/2.11.15
+Agent	2.11.15.3	Mac OS X	14.2	aarch64	21.0.1	Mozilla/5.0 (Mac OS X 14.2; aarch64; 21.0.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.0000.000 Safari/537.36 Jpom Agent/2.11.15.3
+Agent	2.11.15.3					Mozilla/5.0 (Unknown 0; Unknown; Unknown) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.0000.000 Safari/537.36 Jpom Agent/2.11.15.3
