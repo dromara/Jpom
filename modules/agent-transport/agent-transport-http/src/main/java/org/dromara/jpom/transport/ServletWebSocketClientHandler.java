@@ -19,6 +19,7 @@ import org.springframework.util.unit.DataSize;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.WebSocketConnectionManager;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
@@ -86,6 +87,10 @@ public class ServletWebSocketClientHandler extends AbstractWebSocketHandler impl
     public boolean connect() {
         Assert.isNull(this.manager, "The connection has been established, do not repeat the connection");
         this.manager = new WebSocketConnectionManager(CLIENT, this, this.uriTemplate);
+        // 出站标识：服务端到插件端的 ws 握手同样带统一 UA
+        WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
+        TransportUserAgent.headers().forEach(headers::set);
+        this.manager.setHeaders(headers);
         this.manager.start();
         // 时间不能太短，需要大于 1 秒
         return this.blocking(5);

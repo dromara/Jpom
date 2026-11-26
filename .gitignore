@@ -60,8 +60,8 @@ web-vue/stats.html
 *.tar.gz
 *.sha1
 
-# ===== 开发/测试脚本（统一放私有工作区 dev-scripts/，不要提交）=====
-# 详见工作区 AGENTS.md 第 0 节第 10 条；E2E/调试/审计脚本不要进开源仓
+# ===== 本地开发/测试脚本（不要提交）=====
+# E2E / 调试 / 审计类脚本绑定本机环境与内网信息，一律不进开源仓；需要时放在仓库外自用
 /e2e-*.sh
 /dbg-*.sh
 /audit_*.py
@@ -71,7 +71,9 @@ web-vue/stats.html
 /.tmp/
 
 # ===== go-agent 黄金响应样本（私有测试资料，不入公开仓）=====
-# 采集设备真实响应并脱敏得到的样本含环境指纹，只放私有工作区 dev-scripts/go-agent/golden/；
+# 采集设备真实响应并脱敏得到的样本仍含主机/路径/版本等环境指纹，不入公开仓；
+# 需要时放在仓库外，用 JPOM_GOLDEN_DIR 指向该目录；包内 testdata/golden 同样不入库
+**/internal/sysinfo/testdata/golden/
 # 仓库内只保留纯合成夹具：internal/builder/testdata 的 AntPath parity 基线、
 # internal/projectfile/testdata 的 7z 穿越/符号链接安全用例。
 /go-agent/testdata/

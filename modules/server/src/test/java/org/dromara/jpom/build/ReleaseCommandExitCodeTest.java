@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 import java.util.function.Supplier;
 
 /**
- * 发布命令退出码口径的行为级测试（AGENTS.md §0.8）
+ * 发布命令退出码口径的行为级测试：每个分支都配一条「改回旧实现必然失败」的反证用例
  * <p>
  * 反证：把 {@link ReleaseCommandExitCode#failed(int)} 改回 {@code exitCode != 0} 时，
  * {@code unknownExitCodeIsNotFailure} 会失败；把 {@link ReleaseCommandExitCode#unknown(int)} 改回

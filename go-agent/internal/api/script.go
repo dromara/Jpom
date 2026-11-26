@@ -23,6 +23,7 @@ import (
 	"github.com/dromara/Jpom/go-agent/internal/app"
 	"github.com/dromara/Jpom/go-agent/internal/dsl"
 	"github.com/dromara/Jpom/go-agent/internal/httpx"
+	"github.com/dromara/Jpom/go-agent/internal/jpomheader"
 	"github.com/dromara/Jpom/go-agent/internal/script"
 	"github.com/dromara/Jpom/go-agent/internal/sysinfo"
 	"github.com/dromara/Jpom/go-agent/internal/ws"
@@ -248,7 +249,7 @@ func registerScript(r *httpx.Router, a *app.App) {
 			return
 		}
 		global := scriptBool(c, "global", false)
-		workspaceID := strings.TrimSpace(c.R.Header.Get("workspaceId"))
+		workspaceID := strings.TrimSpace(c.R.Header.Get(jpomheader.WorkspaceID))
 		if global {
 			workspaceID = "GLOBAL"
 		}

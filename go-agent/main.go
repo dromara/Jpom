@@ -112,6 +112,7 @@ func main() {
 			LocalHTTPBase:  "http://" + local,
 			LocalWSBase:    "ws://" + local,
 			Authorize:      application.Auth.Authorize,
+			UserAgent:      application.UserAgent(),
 			AuthUser:       application.Auth.Name,
 			AuthToken:      application.Auth.Authorize,
 			MaxConcurrency: settings.MaxConcurrency,

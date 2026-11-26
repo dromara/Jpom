@@ -151,7 +151,7 @@ public class RemoteVersion extends cn.keepbx.jpom.RemoteVersion {
     }
 
     /**
-     * 下载地址可能带授权 token，异常信息回显前统一脱敏（§0.27）
+     * 下载地址可能带授权 token，异常信息回显前统一脱敏：日志、界面提示、上报字符串都要过这里
      *
      * @param message 原始异常信息
      * @return 脱敏后的信息

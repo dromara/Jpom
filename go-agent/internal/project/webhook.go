@@ -21,10 +21,15 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/dromara/Jpom/go-agent/internal/netx"
 )
 
-// webhookClient 复用连接执行项目 WebHooks 通知（等价 DefaultWebhookPluginImpl）。
-var webhookClient = &http.Client{Timeout: 30 * time.Second}
+// webhookClient 执行项目 WebHooks 通知（等价 DefaultWebhookPluginImpl）。
+// 出站客户端统一由 internal/netx 构造，保证带 Jpom User-Agent。
+func (r *Runtime) webhookClient() *http.Client {
+	return netx.Client(r.UserAgent, 30*time.Second)
+}
 
 // WebHooks 同步调用项目 WebHooks（token 为 http(s) 地址，参数以 query 形式拼接）。
 //
@@ -46,7 +51,7 @@ func (r *Runtime) WebHooks(info map[string]any, eventType string, params map[str
 		return "WebHooks error:" + err.Error()
 	}
 	target.RawQuery = query.Encode()
-	response, err := webhookClient.Get(target.String())
+	response, err := r.webhookClient().Get(target.String())
 	if err != nil {
 		if r.Log != nil {
 			r.Log.Warn("failed to call project webhooks", "id", GetString(info, "id"), "type", eventType, "error", err)

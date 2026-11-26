@@ -31,6 +31,7 @@ import (
 	"github.com/dromara/Jpom/go-agent/internal/app"
 	"github.com/dromara/Jpom/go-agent/internal/httpx"
 	"github.com/dromara/Jpom/go-agent/internal/i18n"
+	"github.com/dromara/Jpom/go-agent/internal/jpomheader"
 	"github.com/dromara/Jpom/go-agent/internal/project"
 	"github.com/dromara/Jpom/go-agent/internal/script"
 )
@@ -38,7 +39,7 @@ import (
 const (
 	// authorizeParam is the handshake query parameter carrying the agent
 	// authorization digest (same value as the HTTP header).
-	authorizeParam = "Jpom-Agent-Authorize"
+	authorizeParam = jpomheader.Authorize
 	// socketMsgTag marks control frames consumed by the browser
 	// (Const.SOCKET_MSG_TAG).
 	socketMsgTag = "JPOM_MSG"
@@ -163,6 +164,7 @@ type Manager struct {
 func NewManager(instance *app.App, scripts *script.Manager, executor *script.Executor) *Manager {
 	initReadLine := instance.Config.Jpom.InitReadLine
 	projectRuntime := project.NewRuntime(instance.BaseDir, instance.Config, instance.Log())
+	projectRuntime.UserAgent = instance.UserAgent()
 	return &Manager{
 		App:            instance,
 		Scripts:        scripts,
@@ -183,7 +185,7 @@ func (m *Manager) authorized(session *Session, request *http.Request) bool {
 	if session.Lang == "" && m.App.Config != nil {
 		session.Lang = m.App.Config.Jpom.System.Lang
 	}
-	session.Workspace = query(request, "workspaceId")
+	session.Workspace = query(request, jpomheader.WorkspaceID)
 	if m.App.CheckAuthorize(query(request, authorizeParam)) {
 		return true
 	}

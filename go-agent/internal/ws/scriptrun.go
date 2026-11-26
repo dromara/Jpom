@@ -14,6 +14,7 @@ import (
 	"github.com/gorilla/websocket"
 
 	"github.com/dromara/Jpom/go-agent/internal/httpx"
+	"github.com/dromara/Jpom/go-agent/internal/jpomheader"
 )
 
 // HandleScriptRun serves /script_run (AgentWebSocketScriptHandle): it attaches
@@ -31,7 +32,7 @@ func (m *Manager) HandleScriptRun(c *httpx.Context) {
 		return
 	}
 	scriptID := query(c.R, "id")
-	workspaceID := query(c.R, "workspaceId")
+	workspaceID := query(c.R, jpomheader.WorkspaceID)
 	// Java 的 onOpen 在参数缺失/脚本不存在时只发送提示帧、不关闭会话；
 	// 后续 onMessage 仍会按消息里的 scriptId 处理（不存在时再提示并关闭）。
 	if scriptID == "" || workspaceID == "" {

@@ -27,6 +27,7 @@ import org.dromara.jpom.common.version.RemoteVersions;
 import org.dromara.jpom.common.update.AgentEngine;
 import org.dromara.jpom.common.update.AgentPackageInfo;
 import org.dromara.jpom.common.update.AgentPackageResolver;
+import org.dromara.jpom.common.update.AgentUpgradeOverview;
 import org.dromara.jpom.common.validator.ValidatorItem;
 import org.dromara.jpom.controller.system.SystemUpdateController;
 import org.dromara.jpom.func.assets.model.MachineNodeModel;
@@ -37,6 +38,7 @@ import org.dromara.jpom.permission.Feature;
 import org.dromara.jpom.permission.MethodFeature;
 import org.dromara.jpom.permission.SystemPermission;
 import org.dromara.jpom.service.system.AgentPackageService;
+import org.dromara.jpom.service.system.AgentUpgradeOverviewService;
 import org.dromara.jpom.service.system.SystemParametersServer;
 import org.dromara.jpom.system.ServerConfig;
 import org.springframework.http.MediaType;
@@ -71,13 +73,16 @@ public class NodeUpdateController extends BaseServerController {
     private final SystemParametersServer systemParametersServer;
     private final ServerConfig serverConfig;
     private final AgentPackageService agentPackageService;
+    private final AgentUpgradeOverviewService agentUpgradeOverviewService;
 
     public NodeUpdateController(SystemParametersServer systemParametersServer,
                                 ServerConfig serverConfig,
-                                AgentPackageService agentPackageService) {
+                                AgentPackageService agentPackageService,
+                                AgentUpgradeOverviewService agentUpgradeOverviewService) {
         this.systemParametersServer = systemParametersServer;
         this.serverConfig = serverConfig;
         this.agentPackageService = agentPackageService;
+        this.agentUpgradeOverviewService = agentUpgradeOverviewService;
     }
 
     /**
@@ -151,6 +156,15 @@ public class NodeUpdateController extends BaseServerController {
             }
             jsonObject.put("downloadSource", remoteVersion.getDownloadSource());
         }
+        // 集群实际需要的升级包：混合部署时 Java 升级包与 Go 升级容器各一份，前端据此提示需要准备哪些包、
+        // 分别提供下载入口（旧前端忽略新增字段，按上面的 engine/platform 单包展示保持原行为）
+        AgentUpgradeOverview overview = agentUpgradeOverviewService.overview(jsonObject.getString("tagName"));
+        JSONObject engines = new JSONObject();
+        engines.put("java", overview.getJavaCount());
+        engines.put("go", overview.getGoCount());
+        engines.put("unknown", overview.getUnknownCount());
+        jsonObject.put("engines", engines);
+        jsonObject.put("packages", overview.getPackages());
         return JsonMessage.success("", jsonObject);
     }
 

@@ -18,10 +18,6 @@ import cn.hutool.core.lang.Opt;
 import cn.hutool.core.lang.Tuple;
 import cn.hutool.core.util.*;
 import cn.hutool.crypto.SecureUtil;
-import cn.hutool.http.GlobalHeaders;
-import cn.hutool.http.Header;
-import cn.hutool.http.useragent.UserAgentInfo;
-import cn.hutool.system.JavaInfo;
 import cn.hutool.system.OsInfo;
 import cn.hutool.system.SystemUtil;
 import cn.keepbx.jpom.Type;
@@ -157,20 +153,6 @@ public class JpomManifest {
         return StrUtil.isBlank(os) ? null : os + "/" + arch;
     }
 
-    private static String buildOsInfo() {
-        // Windows NT 10.0; Win64; x64
-        OsInfo osInfo = SystemUtil.getOsInfo();
-        JavaInfo javaInfo = SystemUtil.getJavaInfo();
-        boolean inDocker = StrUtil.isNotEmpty(SystemUtil.get("JPOM_PKG"));
-        String osName = Opt.ofBlankAble(osInfo.getName()).orElseGet(() -> UserAgentInfo.NameUnknown);
-        return StrUtil.format("{} {}; {}; {}",
-            inDocker ? "docker" : osName,
-            Opt.ofBlankAble(osInfo.getVersion()).orElse("0"),
-            Opt.ofBlankAble(osInfo.getArch()).orElse(UserAgentInfo.NameUnknown),
-            Opt.ofBlankAble(javaInfo.getVersion()).orElse(UserAgentInfo.NameUnknown)
-        );
-    }
-
     /**
      * 根据 jar 文件解析 jpom 版本信息
      *
@@ -209,10 +191,8 @@ public class JpomManifest {
                 if (JPOM_MANIFEST == null) {
                     JPOM_MANIFEST = buildJpomManifest();
                 }
-                String jpomTag = StrUtil.format("Jpom {}/{}", JPOM_MANIFEST.getType(), JPOM_MANIFEST.getVersion());
-                String osInfo = buildOsInfo();
-                // Mozilla/5.0 (${os-name} ${os-version}; ${os-arch}; ${jdk-version}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.0000.000 Safari/537.36 ${jpom-type}/${jpom-version}
-                GlobalHeaders.INSTANCE.header(Header.USER_AGENT, StrUtil.format("Mozilla/5.0 ({}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.0000.000 Safari/537.36 {}", osInfo, jpomTag), true);
+                // 出站 User-Agent 唯一产生点：JpomUserAgent（hutool 全局头 + 非 hutool 通道显式取值）
+                JpomUserAgent.applyGlobal(JPOM_MANIFEST.getType(), JPOM_MANIFEST.getVersion());
             }
         }
         return JPOM_MANIFEST;

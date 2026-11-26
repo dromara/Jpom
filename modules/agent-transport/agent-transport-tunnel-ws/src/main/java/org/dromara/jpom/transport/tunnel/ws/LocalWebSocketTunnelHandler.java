@@ -10,12 +10,14 @@
 package org.dromara.jpom.transport.tunnel.ws;
 
 import cn.hutool.core.util.StrUtil;
+import org.dromara.jpom.transport.TransportUserAgent;
 import org.dromara.jpom.transport.tunnel.TunnelFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
@@ -65,7 +67,7 @@ public class LocalWebSocketTunnelHandler implements TunnelStreamHandler {
         }
         URI uri = URI.create(this.baseWsUrl + path + buildQuery(query));
         LocalSessionHandler handler = new LocalSessionHandler(stream);
-        WebSocketSession session = this.webSocketClient.doHandshake(handler, null, uri)
+        WebSocketSession session = this.webSocketClient.doHandshake(handler, TunnelClient.wsHeaders(), uri)
             .get(timeoutSeconds, TimeUnit.SECONDS);
         handler.attach(session);
         stream.onData(handler::sendToLocal);

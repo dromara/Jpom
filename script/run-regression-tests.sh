@@ -47,6 +47,10 @@ DEFAULT_TESTS=(
 	BaseDbServiceBuildWhereTest
 	# 启动时空分组修复：group / groupName 两种字段都要覆盖，NULL 与空串都必须被修复（2026-11-26 流水线分组）
 	BaseDbServiceGroupRepairSqlTest
+	# 在线升级页升级包总览：混合集群必须同时给出 Java 与 Go 两类包状态（2026-11-26 群反馈）
+	AgentUpgradeOverviewServiceTest
+	# 版本清单里的 Go 升级容器地址解析（jpom-core RemoteVersion）：auth/顶层、token 替换、平台 key 兼容
+	RemoteVersionGoUrlTest
 	# 服务端强制过滤条件 vs 客户端同字段参数冲突（P1-1 / P1-2 / P2-1 的守卫）
 	BaseDbServiceForcedFilterTest
 	ProjectManageControlExportDataTest

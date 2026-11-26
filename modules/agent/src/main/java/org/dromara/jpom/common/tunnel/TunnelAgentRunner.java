@@ -11,11 +11,13 @@ package org.dromara.jpom.common.tunnel;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.system.SystemUtil;
+import cn.keepbx.jpom.Type;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.jpom.common.Const;
 import org.dromara.jpom.configuration.AgentAuthorize;
 import org.dromara.jpom.common.JpomManifest;
+import org.dromara.jpom.common.JpomUserAgent;
 import org.dromara.jpom.JpomApplication;
 import org.dromara.jpom.configuration.AgentConfig;
 import org.dromara.jpom.service.AgentStatInfoService;
@@ -79,6 +81,9 @@ public class TunnelAgentRunner implements ApplicationRunner, DisposableBean {
         int port = jpomApplication.getPort();
         // 授权头由服务端随请求/流打开参数转发（插件端不读取自身授权摘要，AgentAuthorize#getAuthorize 亦不对外暴露）
         Map<String, String> authorize = Collections.emptyMap();
+        // 回环请求同样要带插件端统一标识（原生 HttpURLConnection 不经过 hutool 全局头）
+        Map<String, String> localHeaders = new HashMap<>();
+        localHeaders.put(JpomUserAgent.HEADER_NAME, JpomUserAgent.of(Type.Agent, JpomManifest.getInstance().getVersion()));
         TunnelClientOptions options = new TunnelClientOptions();
         options.setServerUrl(properties.getServerUrl());
         options.setMachineId(properties.getMachineId());
@@ -91,11 +96,11 @@ public class TunnelAgentRunner implements ApplicationRunner, DisposableBean {
         options.setArch(SystemUtil.getOsInfo().getArch());
         options.setLocalHttpBase("http://127.0.0.1:" + port);
         options.setLocalWsBase("ws://127.0.0.1:" + port);
-        options.setLocalHeaders(authorize);
+        options.setLocalHeaders(localHeaders);
         options.setLocalQuery(authorize);
         options.setMaxConcurrency(properties.getMaxConcurrency());
         options.setTimeoutSeconds(properties.getTimeoutSeconds());
-        options.setRequestHandler(new LocalHttpTunnelHandler(options.getLocalHttpBase(), authorize, properties.getTimeoutSeconds()));
+        options.setRequestHandler(new LocalHttpTunnelHandler(options.getLocalHttpBase(), localHeaders, properties.getTimeoutSeconds()));
         options.setStreamHandler(new LocalWebSocketTunnelHandler(options.getLocalWsBase(), authorize, properties.getTimeoutSeconds()));
         this.tunnelClient = new TunnelClient(options);
         this.tunnelClient.start();

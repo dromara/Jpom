@@ -63,6 +63,8 @@ type Runtime struct {
 	Manager *Manager
 	Options Options
 	Log     *slog.Logger
+	// UserAgent 是出站 WebHooks 等请求使用的统一标识（由装配点填入，见 internal/netx）
+	UserAgent string
 
 	// lang 是当前请求语言（zh-CN/zh-HK/zh-TW/en-US）。
 	// HTTP handler 用 WithLang 生成请求级副本，避免并发请求串语言。

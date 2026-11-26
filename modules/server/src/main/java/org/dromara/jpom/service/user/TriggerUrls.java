@@ -40,7 +40,7 @@ public final class TriggerUrls {
     /**
      * 增加一个地址
      *
-     * @param responseKey 响应 key（与历史保持一致，不得改名，见 §0.15）
+     * @param responseKey 响应 key（历史响应字段，不得改名：前端与第三方脚本按此字段取值，改名即破坏兼容）
      * @param template    {@code ServerOpenApi} 中的地址模板
      * @return this
      */

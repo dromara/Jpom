@@ -15,7 +15,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -23,6 +22,7 @@ import (
 	"time"
 
 	"github.com/dromara/Jpom/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/netx"
 	"github.com/dromara/Jpom/go-agent/internal/store"
 )
 
@@ -176,7 +176,7 @@ func LoadRemoteInfo(a *app.App) (map[string]any, error) {
 	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
 		url = defaultRemoteVersionURL()
 	}
-	value, err := loadTransitURL(url, remoteVersionTimeoutFor(a))
+	value, err := loadTransitURL(a.UserAgent(), url, remoteVersionTimeoutFor(a))
 	if err != nil {
 		return nil, err
 	}
@@ -187,8 +187,8 @@ func LoadRemoteInfo(a *app.App) (map[string]any, error) {
 	return value, nil
 }
 
-func loadTransitURL(url string, timeout time.Duration) (map[string]any, error) {
-	client := &http.Client{Timeout: timeout}
+func loadTransitURL(userAgent, url string, timeout time.Duration) (map[string]any, error) {
+	client := netx.Client(userAgent, timeout)
 	response, err := client.Get(url)
 	if err != nil {
 		return nil, err
@@ -211,7 +211,7 @@ func loadTransitURL(url string, timeout time.Duration) (map[string]any, error) {
 	}
 	// 中转地址：远程返回 { "url": "..." } 时继续拉取。
 	if transit := strings.TrimSpace(toString(value["url"])); transit != "" {
-		return loadTransitURL(transit, timeout)
+		return loadTransitURL(userAgent, transit, timeout)
 	}
 	return nil, nil
 }
@@ -296,7 +296,7 @@ func cacheLoadTime(a *app.App, value map[string]any) {
 	value["upgrade"] = upgrade
 	if changelogURL := strings.TrimSpace(toString(value["changelogUrl"])); changelogURL != "" {
 		// changelog 属附加信息：获取失败（含超时）只告警，不影响版本检查结果（与 Java 端一致）。
-		if changelog, err := fetchText(changelogURL, remoteVersionTimeoutFor(a)); err == nil {
+		if changelog, err := fetchText(a.UserAgent(), changelogURL, remoteVersionTimeoutFor(a)); err == nil {
 			value["changelog"] = changelog
 		} else {
 			a.Log().Warn("fetch remote version changelog failed", "error", err)
@@ -312,8 +312,8 @@ func cacheLoadTime(a *app.App, value map[string]any) {
 	}
 }
 
-func fetchText(url string, timeout time.Duration) (string, error) {
-	client := &http.Client{Timeout: timeout}
+func fetchText(userAgent, url string, timeout time.Duration) (string, error) {
+	client := netx.Client(userAgent, timeout)
 	response, err := client.Get(url)
 	if err != nil {
 		return "", err

@@ -25,12 +25,16 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+
+	"github.com/dromara/Jpom/go-agent/internal/agentid"
+	"github.com/dromara/Jpom/go-agent/internal/jpomheader"
+	"github.com/dromara/Jpom/go-agent/internal/netx"
 )
 
 const (
-	authorizeHeader = "Jpom-Agent-Authorize"
-	workspaceHeader = "workspaceId"
-	encryptHeader   = "transport-encryption"
+	authorizeHeader = jpomheader.Authorize
+	workspaceHeader = jpomheader.WorkspaceID
+	encryptHeader   = jpomheader.TransportEncryption
 
 	initialRetry = 3 * time.Second
 	maxRetry     = 60 * time.Second
@@ -52,6 +56,8 @@ type Options struct {
 	LocalHTTPBase string
 	LocalWSBase   string
 	Authorize     string
+	// UserAgent is the standardized outbound User-Agent (handshake + loopback, Java parity)
+	UserAgent string
 	// AuthUser/AuthToken 随 HELLO 上报（服务端自动注册机器资产时补齐通讯账号与授权摘要）
 	AuthUser       string
 	AuthToken      string
@@ -128,7 +134,7 @@ func New(opts Options) (*Client, error) {
 		opts:   opts,
 		log:    logger,
 		dialer: websocket.DefaultDialer,
-		http:   &http.Client{Timeout: opts.Timeout},
+		http:   netx.Client(opts.UserAgent, opts.Timeout),
 		sem:    make(chan struct{}, opts.MaxConcurrency),
 		stop:   make(chan struct{}),
 	}, nil
@@ -190,7 +196,7 @@ func (c *Client) serve() error {
 	}
 	dialer := *c.dialer
 	dialer.HandshakeTimeout = c.opts.Timeout
-	conn, resp, err := dialer.Dial(target, nil)
+	conn, resp, err := dialer.Dial(target, agentid.Header(c.opts.UserAgent))
 	if err != nil {
 		if resp != nil {
 			return fmt.Errorf("dial tunnel %s: %w (http %d)", target, err, resp.StatusCode)
@@ -409,6 +415,10 @@ func (c *Client) executeRequest(frame *Frame, body []byte) {
 		fail(400, err.Error())
 		return
 	}
+	if c.opts.UserAgent != "" {
+		// 回环请求同样带插件端统一标识（Java 端由 hutool 全局头覆盖同一路径）
+		request.Header.Set(agentid.HeaderName, c.opts.UserAgent)
+	}
 	for name, value := range frame.Headers {
 		switch strings.ToLower(name) {
 		case "host", "connection", "content-length", "transfer-encoding", "accept-encoding", "keep-alive", "upgrade":
@@ -477,7 +487,7 @@ func (c *Client) handleOpen(frame *Frame) {
 	if len(query) > 0 {
 		target += "?" + query.Encode()
 	}
-	conn, resp, err := websocket.DefaultDialer.Dial(target, nil)
+	conn, resp, err := websocket.DefaultDialer.Dial(target, agentid.Header(c.opts.UserAgent))
 	if err != nil {
 		status := 0
 		if resp != nil {

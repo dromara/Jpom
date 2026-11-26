@@ -26,14 +26,17 @@ import org.apache.hc.core5.http.config.RegistryBuilder;
 import org.apache.hc.core5.http.impl.DefaultContentLengthStrategy;
 import org.apache.hc.core5.http.impl.io.EmptyInputStream;
 import org.apache.hc.core5.http.io.entity.InputStreamEntity;
+import org.apache.hc.core5.http.message.BasicHeader;
 import org.apache.hc.core5.http.protocol.BasicHttpContext;
 import org.apache.hc.core5.http.protocol.HttpContext;
 import org.apache.hc.core5.net.URIAuthority;
+import org.dromara.jpom.common.JpomUserAgent;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -65,6 +68,7 @@ public final class JschDockerHttpClient implements DockerHttpClient {
             host = HttpHost.create(dockerHostUri);
         }
         httpClient = HttpClients.custom()
+            .setDefaultHeaders(Collections.singletonList(new BasicHeader(JpomUserAgent.HEADER_NAME, JpomUserAgent.value())))
             .setRequestExecutor(new HijackingHttpRequestExecutor(null))
             .setConnectionManager(new PoolingHttpClientConnectionManager(
                 socketFactoryRegistry,

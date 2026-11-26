@@ -23,6 +23,8 @@ import (
 	"net/url"
 	"os"
 	"strings"
+
+	"github.com/dromara/Jpom/go-agent/internal/jpomheader"
 )
 
 // 传输加密（对应 Java 端 DecryptionFilter）：
@@ -113,7 +115,7 @@ func decryptValue(enc encryptor, value string) string {
 // decryptRequest rewrites the request in place so handlers can read plain
 // parameter names/values, matching the Java DecryptionFilter behaviour.
 func decryptRequest(req *http.Request) {
-	enc := newEncryptor(req.Header.Get("transport-encryption"))
+	enc := newEncryptor(req.Header.Get(jpomheader.TransportEncryption))
 	if _, ok := enc.(noneEncryptor); ok {
 		return
 	}

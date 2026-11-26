@@ -17,7 +17,7 @@ import org.dromara.jpom.model.data.RepositoryModel;
  * git 地址处理：带凭据的执行地址 + 脱敏后的展示地址
  * <p>
  * 规则与系统 git 插件一致（http 协议把账号口令写进 URL、ssh 原样），但日志里一律用脱敏地址，
- * 避免构建日志把仓库口令带出去（§0.27）。
+ * 避免构建日志把仓库口令带出去：日志、异常信息、界面展示一律只用脱敏地址。
  * </p>
  *
  * @author jpom

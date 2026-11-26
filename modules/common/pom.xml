@@ -164,7 +164,7 @@
         <dependency>
             <groupId>cn.keepbx.jpom</groupId>
             <artifactId>jpom-core-common</artifactId>
-            <version>1.0.10</version>
+            <version>1.0.12</version>
         </dependency>
 
         <dependency>
@@ -176,6 +176,12 @@
         <dependency>
             <groupId>org.dromara.jpom.plugins</groupId>
             <artifactId>encrypt</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.dromara.jpom.agent-transport</groupId>
+            <artifactId>agent-transport-common</artifactId>
             <version>${project.version}</version>
         </dependency>
 

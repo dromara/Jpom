@@ -16,11 +16,13 @@ import org.dromara.jpom.transport.tunnel.TunnelDataFrame;
 import org.dromara.jpom.transport.tunnel.TunnelFrame;
 import org.dromara.jpom.transport.tunnel.TunnelFrameCodec;
 import org.dromara.jpom.transport.tunnel.TunnelFrameType;
+import org.dromara.jpom.transport.TransportUserAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
@@ -186,7 +188,7 @@ public class TunnelClient {
             String url = normalizeUrl(options.getServerUrl());
             helloLatch = new CountDownLatch(1);
             ClientHandler handler = new ClientHandler();
-            this.webSocketClient.doHandshake(handler, null, URI.create(url))
+            this.webSocketClient.doHandshake(handler, handshakeHeaders(), URI.create(url))
                 .get(options.getTimeoutSeconds(), TimeUnit.SECONDS);
             CountDownLatch latch = helloLatch;
             if (latch == null || !latch.await(options.getTimeoutSeconds(), TimeUnit.SECONDS)) {
@@ -206,6 +208,27 @@ public class TunnelClient {
         } finally {
             connecting = false;
         }
+    }
+
+    /**
+     * 握手请求头：带上插件端统一 User-Agent（Spring 的 JSR-356 客户端默认不发该头）
+     *
+     * @return 握手头
+     */
+    private WebSocketHttpHeaders handshakeHeaders() {
+        // 传输层统一装配点：业务层注册的 UA（Spring 的 JSR-356 客户端默认不发该头）
+        return wsHeaders();
+    }
+
+    /**
+     * 把装配点的出站头转成 Spring 的 WebSocket 握手头
+     *
+     * @return 握手头
+     */
+    static WebSocketHttpHeaders wsHeaders() {
+        WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
+        TransportUserAgent.headers().forEach(headers::set);
+        return headers;
     }
 
     /**

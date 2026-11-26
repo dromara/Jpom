@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/dromara/Jpom/go-agent/internal/app"
+	"github.com/dromara/Jpom/go-agent/internal/netx"
 )
 
 // G7：升级失败自动回滚。
@@ -205,7 +206,7 @@ func defaultHealthyChecker(a *app.App) func() bool {
 			return false
 		}
 		host := net.JoinHostPort(address, strconv.Itoa(port))
-		client := &http.Client{Timeout: 2 * time.Second}
+		client := netx.Client(a.UserAgent(), 2*time.Second)
 		response, err := client.Get("http://" + host + "/")
 		if err != nil {
 			return false

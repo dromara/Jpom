@@ -21,6 +21,7 @@ import (
 
 	"github.com/dromara/Jpom/go-agent/internal/app"
 	"github.com/dromara/Jpom/go-agent/internal/httpx"
+	"github.com/dromara/Jpom/go-agent/internal/jpomheader"
 	"github.com/dromara/Jpom/go-agent/internal/proc"
 	"github.com/dromara/Jpom/go-agent/internal/project"
 	"github.com/dromara/Jpom/go-agent/internal/sysinfo"
@@ -50,6 +51,7 @@ const (
 // registerProject 注册 /manage/* 项目生命周期、状态与日志端点。
 func registerProject(r *httpx.Router, a *app.App) {
 	runtime := project.NewRuntime(a.BaseDir, a.Config, a.Log())
+	runtime.UserAgent = a.UserAgent()
 	// 项目后台任务：autoStart 项目启动
 	runtime.StartBackgroundTasks()
 	// 控制台日志自动备份注册到 sysinfo 统一调度器（/system/cache.taskList 与 Java 一致）
@@ -144,12 +146,12 @@ func (f *projectForm) convertBoolValue(key string) bool {
 
 // projectWorkspace 返回 workspaceId 请求头原值（Java 端不做 trim/默认值）。
 func projectWorkspace(c *httpx.Context) string {
-	return c.R.Header.Get("workspaceId")
+	return c.R.Header.Get(jpomheader.WorkspaceID)
 }
 
 // projectUser 解析服务端操作人：URL 解码，空值返回 "-"（等价 BaseAgentController.getUserName）。
 func projectUser(c *httpx.Context) string {
-	raw := c.R.Header.Get("Jpom-Server-UserName")
+	raw := c.R.Header.Get(jpomheader.ServerUserName)
 	if raw == "" {
 		return "-"
 	}
