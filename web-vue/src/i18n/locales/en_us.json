@@ -3027,7 +3027,7 @@
   "i18n_ssh_project_token_placeholder_7c42": "Enter access token",
   "i18n_build_version_keep_count_help": "3 recommended; empty or 0 keeps 3",
   "i18n_build_release_fail_fast": "Abort on target failure",
-  "i18n_build_release_fail_fast_help": "When enabled, publishing stops at the first failed target; when disabled, remaining targets are still published (a failed target still marks the release as failed). Only a missing target, connection or upload error counts as a failure; a non-zero exit code from the post-release script/restart is still only logged.",
+  "i18n_build_release_fail_fast_help": "When enabled, publishing stops at the first failed target; when disabled, remaining targets are still published (a failed target still marks the release as failed). A missing target, connection or upload error counts as a failure; a non-zero exit from the release commands or SSH project restart is only logged unless strict execution (step Other settings) is enabled, which then marks that target as failed.",
   "i18n_build_ssh_project_missing": "(the selected SSH project no longer exists or is not in the current workspace; please select again)",
   "i18n_ee992d9744": "Global workspace: ",
   "i18n_2c7b0a61f3": "cancelling",
@@ -3170,7 +3170,7 @@
   "i18n_pipeline_source_index": "Source {index}",
   "i18n_pipeline_source_id_placeholder": "e.g. backend",
   "i18n_pipeline_source_mount_placeholder": "Relative dir, e.g. backend",
-  "i18n_pipeline_clone_depth_placeholder": "e.g. 1; 0 or empty clones everything",
+  "i18n_pipeline_clone_depth_placeholder": "e.g. 1; 0 or empty clones everything (requires git on the server host, depth is ignored without it)",
   "i18n_pipeline_stage_name_placeholder": "e.g. Build",
   "i18n_pipeline_stage_key_placeholder": "Unique key, e.g. build",
   "i18n_pipeline_secondary_dir_placeholder": "Relative to target dir, e.g. conf",
@@ -3270,5 +3270,7 @@
   "i18n_9d1436dc49": "Delete the selected session replay records? This cannot be undone.",
   "i18n_38a7355b1f": "No command index was collected for this session; the replay is still complete.",
   "i18n_bbef4170b1": "Command list",
-  "i18n_3f331434b2": "Failed to load the replay component, please refresh the page and retry."
+  "i18n_3f331434b2": "Failed to load the replay component, please refresh the page and retry.",
+  "i18n_45a28913bb": "Accurate command index",
+  "i18n_3e3f962efa": "When enabled, one shell integration script line is written into each terminal session on connect (it is echoed in the terminal and excluded from the command list), capturing each command text and exit code. When disabled, commands are inferred from keystrokes: a cleaner terminal but possibly inaccurate command text"
 }

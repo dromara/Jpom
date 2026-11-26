@@ -21,8 +21,8 @@
   >
     <div class="session-replay">
       <!-- 工具条：会话元信息、倍速、下载 -->
-      <div class="session-replay__toolbar">
-        <a-space wrap size="middle">
+      <div class="session-replay__header">
+        <div class="session-replay__meta-row">
           <span>
             <strong>{{ $t('i18n_a5dd0b6b79') }}</strong>
             <span class="session-replay__meta">{{ sessionInfo.machineSshName || '-' }}</span>
@@ -46,10 +46,8 @@
           <a-tag v-if="sessionInfo.status !== undefined && sessionInfo.status !== null" :color="statusColor">
             {{ statusMap[sessionInfo.status] || '-' }}
           </a-tag>
-        </a-space>
-      </div>
-      <div class="session-replay__toolbar">
-        <a-space wrap size="middle">
+        </div>
+        <div class="session-replay__actions">
           <span>{{ $t('i18n_d37d357dee') }}</span>
           <a-radio-group v-model:value="speed" size="small" button-style="solid" @change="handleSpeedChange">
             <a-radio-button v-for="item in speedList" :key="item" :value="item">{{ item }}x</a-radio-button>
@@ -57,7 +55,7 @@
           <a-button size="small" type="primary" @click="handleDownload">
             <DownloadOutlined />{{ $t('i18n_f26ef91424') }}
           </a-button>
-        </a-space>
+        </div>
       </div>
       <a-alert v-if="errorMessage" type="warning" show-icon :message="errorMessage" class="session-replay__alert" />
       <!-- 左侧播放器，右侧命令索引 -->
@@ -409,15 +407,34 @@ export default {
 .session-replay {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  /* 用 min-height 而不是 height：高度不足时让外层滚动，工具条不能被压缩（否则元信息行与倍速行重叠） */
+  min-height: 100%;
 }
 
-.session-replay__toolbar {
+/* 头部：元信息（可换行）+ 操作（倍速/下载）同一容器，显式最小行高，避免被 flex 压扁后互相重叠 */
+.session-replay__header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  gap: 6px 12px;
+  flex: 0 0 auto;
   padding: 0 0 8px 0;
   font-size: 13px;
+}
+
+.session-replay__meta-row,
+.session-replay__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  min-height: 26px;
+  line-height: 22px;
+}
+
+.session-replay__meta-row > span {
+  white-space: nowrap;
 }
 
 .session-replay__meta {
@@ -430,7 +447,7 @@ export default {
 
 .session-replay__body {
   display: flex;
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
   gap: 8px;
 }

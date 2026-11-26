@@ -402,7 +402,7 @@
                 style="width: 100%"
               />
             </a-form-item>
-            <!-- 终端会话录制开关：随表单一起提交，默认关闭 -->
+            <!-- 终端会话录制开关 + 精确命令索引（注入 shell integration）开关：随表单一起提交，默认关闭 -->
             <a-form-item :label="$t('i18n_94378b31c2')" name="terminalRecord">
               <template #help>{{ $t('i18n_c1cb3e1bd5') }}</template>
               <a-switch
@@ -410,6 +410,18 @@
                 @change="
                   (checked) => {
                     temp = { ...temp, terminalRecord: checked }
+                  }
+                "
+              />
+            </a-form-item>
+            <a-form-item :label="$t('i18n_45a28913bb')" name="terminalRecordShellIntegration">
+              <template #help>{{ $t('i18n_3e3f962efa') }}</template>
+              <a-switch
+                :checked="!!temp.terminalRecordShellIntegration"
+                :disabled="!temp.terminalRecord"
+                @change="
+                  (checked) => {
+                    temp = { ...temp, terminalRecordShellIntegration: checked }
                   }
                 "
               />

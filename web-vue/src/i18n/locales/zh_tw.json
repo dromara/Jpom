@@ -3013,7 +3013,7 @@
   "i18n_fbf8959896": "版本保留個數",
   "i18n_build_version_keep_count_help": "建議 3；留空或 0 時按 3 保留",
   "i18n_build_release_fail_fast": "任一目標失敗即終止",
-  "i18n_build_release_fail_fast_help": "開啟後逐個目標發佈，其中一個失敗就跳過剩餘目標；關閉則繼續發佈其餘目標（最終只要有目標失敗仍標記發佈失敗）。目標不存在、連接或上傳異常才算失敗；發佈後的腳本/重啟返回非 0 仍只記錄錯誤",
+  "i18n_build_release_fail_fast_help": "開啟後逐個目標發佈，其中一個失敗就跳過剩餘目標；關閉則繼續發佈其餘目標（最終只要有目標失敗仍標記發佈失敗）。目標不存在、連線或上傳異常才算失敗；發佈前/後命令與 SSH 專案重啟返回非 0 時，未開啟「其他設定 → 嚴格執行」只記錄，開啟後判該目標失敗",
   "i18n_build_ssh_project_missing": "（選中的 SSH 項目不存在或已移出當前工作空間，請重新選擇）",
   "i18n_1f63281a79": "快速回滾（切換本機版本，不重新傳輸產物）",
   "i18n_387b56ef22": "版本快照",
@@ -3170,7 +3170,7 @@
   "i18n_pipeline_source_index": "源 {index}",
   "i18n_pipeline_source_id_placeholder": "如 backend",
   "i18n_pipeline_source_mount_placeholder": "相對於工作區，如 backend",
-  "i18n_pipeline_clone_depth_placeholder": "如 1；0 或留空為完整克隆",
+  "i18n_pipeline_clone_depth_placeholder": "如 1；0 或留空為完整克隆（需服務端所在機器安裝 git，未安裝時深度不生效）",
   "i18n_pipeline_stage_name_placeholder": "如 構建",
   "i18n_pipeline_stage_key_placeholder": "唯一標識，如 build",
   "i18n_pipeline_secondary_dir_placeholder": "相對發佈目錄，如 conf",
@@ -3270,5 +3270,7 @@
   "i18n_9d1436dc49": "確定刪除選中的會話回看記錄嗎？刪除後不可復原",
   "i18n_38a7355b1f": "該會話未蒐集到命令索引，回放仍完整可用",
   "i18n_bbef4170b1": "命令列表",
-  "i18n_3f331434b2": "回放元件載入失敗，請重新整理頁面重試"
+  "i18n_3f331434b2": "回放元件載入失敗，請重新整理頁面重試",
+  "i18n_45a28913bb": "精確命令索引",
+  "i18n_3e3f962efa": "開啟後每次建立終端連線會向會話寫入一行 shell integration 腳本（會回顯在終端裡，且不會進入命令列表），可採集每條命令原文與退出碼；關閉時改由按鍵推斷，終端更乾淨但命令文字可能不準"
 }

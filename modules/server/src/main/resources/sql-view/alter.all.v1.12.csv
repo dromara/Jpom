@@ -1,0 +1,2 @@
+alterType,tableName,name,type,len,defaultValue,comment,notNull
+ADD,MACHINE_SSH_INFO,terminalRecordShellIntegration,TINYINT,,0,是否注入 shell integration 采集精确命令{1，是，0 否},false

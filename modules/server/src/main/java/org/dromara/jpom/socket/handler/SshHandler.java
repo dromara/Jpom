@@ -303,7 +303,9 @@ public class SshHandler extends BaseTerminalHandler {
                 String userAgent = (String) attributes.get(HttpHeaders.USER_AGENT);
                 Charset charset = machineSshModel == null ? Charset.forName("UTF-8") : machineSshModel.charset();
                 this.recorder = terminalRecorderFactory.create(machineSshModel, sshItem, userInfo, ip, userAgent, cols, rows, charset);
-                if (this.recorder != TerminalRecorder.NOOP) {
+                // shell integration 会往终端回显一行脚本，默认关闭；关闭时命令索引走按键推断（LEGACY）
+                if (this.recorder != TerminalRecorder.NOOP && machineSshModel != null
+                    && Boolean.TRUE.equals(machineSshModel.getTerminalRecordShellIntegration())) {
                     this.installShellIntegration();
                 }
             } catch (Exception e) {
@@ -349,6 +351,24 @@ public class SshHandler extends BaseTerminalHandler {
             } catch (Exception e) {
                 log.warn("scan osc marker: {}", e.getMessage());
             }
+        }
+
+        /**
+         * 写一条按键推断的命令标记（不带退出码，source=LEGACY）
+         *
+         * @param command 命令行
+         */
+        private void writeLegacyMarker(String command) {
+            String text = StrUtil.trim(command);
+            if (StrUtil.isEmpty(text)) {
+                return;
+            }
+            int seq = ++this.markerSeq;
+            JSONObject marker = new JSONObject();
+            marker.put("seq", seq);
+            marker.put("cmd", text);
+            marker.put("source", "LEGACY");
+            this.safeRecord(recorder -> recorder.marker(marker.toJSONString()));
         }
 
         /**
@@ -456,6 +476,8 @@ public class SshHandler extends BaseTerminalHandler {
                 SshModel sshItem = (SshModel) attributes.get("dataItem");
                 sshTerminalExecuteLogService.batch(userInfo, machineSshModel, sshItem, ip, userAgent, refuse, Collections.singletonList(text),
                     this.recorder.sessionId(), null, "LEGACY");
+                // 同步写一条命令标记，回放抽屉的「命令列表」依赖 cast 里的 marker
+                this.writeLegacyMarker(text);
             }, msg.getBytes(Charset.forName(machineSshModel.getCharset())));
             // 执行命令行记录
             // logCommands(session, allCommand, refuse);
