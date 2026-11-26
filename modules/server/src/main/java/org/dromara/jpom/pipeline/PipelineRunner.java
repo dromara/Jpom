@@ -151,6 +151,10 @@ public class PipelineRunner {
      * @return 运行记录 ID
      */
     public String start(String pipelineId, UserModel user, String remark, int triggerType) {
+        // 触发上下文收口：开放接口（token 触发）没有登录会话，而运行记录的写入要按工作空间校验用户，
+        // 不绑定就会在 fillInsert 里抛「没有对应的用户」，把一次合法触发打成失败。
+        // 这里统一按「触发用户，缺省系统身份」建立线程上下文；执行线程在 run() 里会再绑定一次。
+        bindTriggerUser(user);
         PipelineInfoModel item = pipelineInfoService.getByKey(pipelineId);
         if (item == null) {
             throw new IllegalArgumentException("pipeline not found: " + pipelineId);
@@ -168,6 +172,20 @@ public class PipelineRunner {
             this.activeRuns.remove(pipelineId);
             throw e;
         }
+    }
+
+    /**
+     * 绑定触发用户上下文
+     * <p>
+     * 供「调用线程没有请求上下文」的场景使用（开放接口 token 触发、系统触发、后台线程）：
+     * 没有用户时用系统身份 {@link UserModel#EMPTY}（等价于系统管理员），否则沿用触发用户，
+     * 让运行记录与审计落在真实触发者名下。
+     * </p>
+     *
+     * @param user 触发用户，可为 null
+     */
+    static void bindTriggerUser(UserModel user) {
+        BaseServerController.resetInfo(user == null ? UserModel.EMPTY : user);
     }
 
     /**

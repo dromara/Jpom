@@ -77,7 +77,10 @@ public class PipelineTriggerApiController extends BaseJpomController {
     @RequestMapping(value = ServerOpenApi.PIPELINE_TRIGGER_URL, produces = MediaType.APPLICATION_JSON_VALUE)
     public IJsonMessage<JSONObject> trigger(@PathVariable String id, @PathVariable String token, String remark) {
         PipelineInfoModel item = this.checkToken(id, token);
+        // 与构建触发器一致：token 必须在触发凭证表里仍然有效，取不到就按「token 错误或失效」返回，
+        // 不要拿 null 用户去起运行（否则会以系统身份放行已注销的凭证）
         UserModel userModel = triggerTokenLogServer.getUserByToken(token, pipelineInfoService.typeName());
+        Assert.notNull(userModel, I18nMessageUtil.get("i18n.trigger_token_error_or_expired_with_code.393b"));
         String runId;
         try {
             runId = pipelineRunner.start(id, userModel, remark, TRIGGER_TYPE_API);
