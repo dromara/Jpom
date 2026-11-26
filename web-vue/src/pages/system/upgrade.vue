@@ -35,6 +35,13 @@
           @refresh="getNodeList"
         >
           <template #title>
+            <a-alert
+              v-if="clusterAlert"
+              type="warning"
+              show-icon
+              :message="clusterAlert"
+              style="margin-bottom: 10px"
+            />
             <a-row v-if="percentage">
               <a-col span="24"><a-progress v-if="percentage" :percent="percentage" /> </a-col>
             </a-row>
@@ -101,15 +108,24 @@
             </a-space>
           </template>
           <template #toolPrefix>
-            <a-tooltip :title="`${$t('i18n_3f78f88499')}${agentTimeStamp || $t('i18n_1622dc9b6b')}`">
-              Agent{{ $t('i18n_2684c4634d') }}{{ version_filter(agentVersion) }}
-              <span v-if="packageTypeLabel"> · {{ $t('i18n_52d9520ee1') }}: {{ packageTypeLabel }}</span>
-              <a-tag v-if="temp.upgrade" color="pink" @click="downloadRemoteEvent">
+            <a-space size="small" wrap>
+              <a-tooltip :title="`${$t('i18n_3f78f88499')}${agentTimeStamp || $t('i18n_1622dc9b6b')}`">
+                Agent{{ $t('i18n_2684c4634d') }}{{ version_filter(agentVersion) }}
+                <span v-if="packageTypeLabel"> · {{ $t('i18n_52d9520ee1') }}: {{ packageTypeLabel }}</span>
+              </a-tooltip>
+              <!-- 按集群实际存在的插件端类型逐条展示升级包状态：混合部署时 Java 与 Go 各自一份 -->
+              <template v-for="row in packageRows" :key="row.key">
+                <a-tag :color="row.color">{{ row.label }}</a-tag>
+                <a-button v-if="row.needDownload" type="link" size="small" @click="downloadPackageEvent(row)">
+                  <DownloadOutlined />{{ row.actionText }}
+                </a-button>
+              </template>
+              <!-- 旧服务端（无 packages 字段）保持原有单包展示 -->
+              <a-tag v-if="!packageRows.length && temp.upgrade" color="pink" @click="downloadRemoteEvent">
                 {{ $t('i18n_ac2f4259f1') }}{{ temp.newVersion }} <DownloadOutlined />
               </a-tag>
-              <!-- </div> -->
-            </a-tooltip></template
-          >
+            </a-space>
+          </template>
           <template #tableBodyCell="{ column, text, record }">
             <template v-if="column.tooltip">
               <a-tooltip :title="text">
@@ -152,9 +168,11 @@
               </div>
             </template>
             <template v-else-if="column.dataIndex === 'operation'">
-              <a-button type="primary" size="small" @click="updateNodeHandler(record)">{{
-                $t('i18n_32ac152be1')
-              }}</a-button>
+              <a-tooltip :title="nodeUpgradeTip(record)">
+                <a-button type="primary" size="small" :disabled="!!nodeUpgradeTip(record)" @click="updateNodeHandler(record)">
+                  {{ $t('i18n_32ac152be1') }}
+                </a-button>
+              </a-tooltip>
             </template>
           </template>
         </CustomTable>
@@ -272,6 +290,12 @@ export default {
       nodeVersion: {},
       nodeStatus: {},
       tableSelections: [],
+      // 升级包总览（服务端聚合：集群里有哪些插件端类型、每类包是否已上传/是否最新）
+      overview: {
+        engines: { java: 0, go: 0, unknown: 0 },
+        packages: [],
+        latestVersion: ''
+      },
       temp: {},
       percentage: 0,
       statusMap
@@ -306,6 +330,63 @@ export default {
       const type = engine === 'go' ? this.$t('i18n_baee195ca8') : this.$t('i18n_6fb5d67e27')
       const platform = engine === 'go' && this.temp.packagePlatform ? ` (${this.temp.packagePlatform})` : ''
       return `${type}${platform}`
+    },
+    /**
+     * 集群插件端类型：mixed（Java 与 Go 并存）/ java / go（服务端按资产表统计，不受列表分页影响）
+     */
+    clusterType() {
+      const engines = this.overview.engines || {}
+      const java = engines.java || 0
+      const go = engines.go || 0
+      if (java > 0 && go > 0) {
+        return 'mixed'
+      }
+      return go > 0 ? 'go' : 'java'
+    },
+    /**
+     * 混合部署提示：需要分别准备两类升级包，缺哪类哪类升不了
+     */
+    clusterAlert() {
+      if (this.clusterType !== 'mixed') {
+        return ''
+      }
+      const engines = this.overview.engines || {}
+      return this.$t('i18n_b879f13b73', { java: engines.java || 0, go: engines.go || 0 })
+    },
+    /**
+     * 按引擎/平台展示的升级包状态行（混合时 Java 与 Go 各一行）
+     */
+    packageRows() {
+      const latest = this.overview.latestVersion
+      return (this.overview.packages || []).map((item) => {
+        const typeText = item.engine === 'go' ? this.$t('i18n_baee195ca8') : this.$t('i18n_6fb5d67e27')
+        const platformText = item.engine === 'go' && item.platform ? ` (${item.platform})` : ''
+        const actionText = item.engine === 'go' ? this.$t('i18n_74f40f3cea') : this.$t('i18n_df3f233fb3')
+        let label
+        let color
+        let needDownload = false
+        if (item.missing) {
+          label = `${typeText}${platformText}: ${this.$t('i18n_7c166a0415')}`
+          color = 'pink'
+          needDownload = true
+        } else if (item.latestKnown && !item.upToDate) {
+          label = `${typeText}${platformText}: ${item.version} → ${latest}`
+          color = 'orange'
+          needDownload = true
+        } else {
+          label = `${typeText}${platformText}: ${item.version || '---'}${item.upToDate ? ' ' + this.$t('i18n_72ac9a729b') : ''}`
+          color = 'green'
+        }
+        return {
+          key: `${item.engine}-${item.platform || ''}`,
+          engine: item.engine,
+          platform: item.platform,
+          label,
+          color,
+          needDownload,
+          actionText
+        }
+      })
     }
   },
   mounted() {
@@ -411,7 +492,8 @@ export default {
       }
       this.socket.onclose = (err) => {
         //当客户端收到服务端发送的关闭连接请求时，触发onclose事件
-        console.error(err)
+        // 离开页面/切换页签时关闭属于正常事件，不作为 console error 噪音输出
+        console.debug(err)
         clearInterval(this.heart)
         $message.warning(this.$t('i18n_23b38c8dad'))
       }
@@ -421,6 +503,14 @@ export default {
       checkVersion().then((res) => {
         if (res.code === 200) {
           let upgrade = res.data?.upgrade
+          // 集群需要的升级包（旧服务端没有该字段时保持原有单包展示）
+          if (res.data.packages) {
+            this.overview = {
+              engines: res.data.engines || { java: 0, go: 0, unknown: 0 },
+              packages: res.data.packages || [],
+              latestVersion: res.data.tagName || ''
+            }
+          }
           this.temp = {
             ...this.temp,
             // 本地升级包的引擎/平台（Go 集群按平台下载/升级）
@@ -467,7 +557,102 @@ export default {
         })
         return
       }
+      const rows = this.tableSelections
+        .map((id) => this.list.find((item) => item.id === id))
+        .filter((item) => !!item)
+      if (this.overview.packages.length) {
+        // 升级包未就绪的节点先拦下：混合部署时不静默失败（跳过并说明原因）
+        const allowed = rows.filter((row) => !this.nodeUpgradeTip(row)).map((row) => row.id)
+        const skipped = rows.length - allowed.length
+        if (allowed.length === 0) {
+          $notification.warning({
+            message: this.$t('i18n_9a4aac7429', { count: skipped })
+          })
+          return
+        }
+        if (skipped > 0) {
+          $notification.warning({
+            message: this.$t('i18n_9a4aac7429', { count: skipped })
+          })
+        }
+        this.updateNode(allowed)
+        return
+      }
       this.updateNode()
+    },
+    /**
+     * 比较两段版本号（容忍 v 前缀与 -beta 之类后缀）
+     *
+     * @return 1 / 0 / -1
+     */
+    compareVersion(left, right) {
+      const parse = (value) =>
+        String(value || '')
+          .replace(/^v/i, '')
+          .split('.')
+          .map((part) => parseInt(part, 10) || 0)
+      const a = parse(left)
+      const b = parse(right)
+      const len = Math.max(a.length, b.length)
+      for (let i = 0; i < len; i++) {
+        const l = a[i] || 0
+        const r = b[i] || 0
+        if (l > r) {
+          return 1
+        }
+        if (l < r) {
+          return -1
+        }
+      }
+      return 0
+    },
+    /**
+     * 按引擎查找升级包状态（Go 只有一份包，平台在行内比对）
+     */
+    findPackage(engine) {
+      const packages = this.overview.packages || []
+      return packages.find((item) => item.engine === engine) || null
+    },
+    /**
+     * 行内「更新」不可用原因（空字符串表示可升级）
+     *
+     * <p>不可用即禁用（不做「点完再看插件端报错」）：缺少该类包、Go 平台不匹配、
+     * 包与运行版本一致（插件端只会回「新包和正在运行的包一致」）、不能降级。</p>
+     */
+    nodeUpgradeTip(record) {
+      if (!this.overview.packages.length) {
+        // 旧服务端没有 packages：保持原有行为（由服务端探测引擎）
+        return ''
+      }
+      if (!record.engine) {
+        // 类型还没识别出来（节点未上报 / 离线）：不可用即禁用，不做「点完等报错」
+        return this.$t('i18n_bcfec05b8f')
+      }
+      const pkg = this.findPackage(record.engine)
+      const platformSuffix = record.engine === 'go' && record.platform ? ` (${record.platform})` : ''
+      if (!pkg || pkg.missing) {
+        return this.$t('i18n_c369b37de5') + platformSuffix
+      }
+      if (record.engine === 'go' && pkg.platform && record.platform && pkg.platform !== record.platform) {
+        return this.$t('i18n_c369b37de5') + platformSuffix
+      }
+      // 以节点「实时运行版本」为准（缓存版本是上次推过去的包，不能代表运行中的包）
+      const runningVersion = record.jpomVersion || record.version
+      if (!runningVersion || !pkg.version) {
+        return ''
+      }
+      if (this.compareVersion(pkg.version, runningVersion) < 0) {
+        return this.$t('i18n_7f3130948c')
+      }
+      // 版本相同不在这里置灰：是否「完全一致的包」要同时比较打包时间，只有服务端能拿到运行包的打包时间，
+      // 由服务端预检返回精确提示（避免打包时间不同却被前端误拦）
+      return ''
+    },
+    /**
+     * 下载某一类升级包（Java 升级包 / 指定平台的 Go 升级容器）
+     */
+    downloadPackageEvent(row) {
+      this.downloadRemoteEvent(row)
     },
     updateNodeHandler(record) {
       this.tableSelections = [record.id]
@@ -584,14 +769,21 @@ export default {
       })
       this.updateList()
     },
-    updateNode() {
+    updateNode(ids) {
       if (!this.agentVersion) {
         $notification.error({
           message: this.$t('i18n_41fdb0c862')
         })
         return
       }
-      const len = this.tableSelections.length
+      const targetIds = ids && ids.length ? ids : this.tableSelections
+      if (!targetIds.length) {
+        $notification.warning({
+          message: this.$t('i18n_27f105b0c3')
+        })
+        return
+      }
+      const len = targetIds.length
       const html = `
         ${this.$t('i18n_4c28044efc')}
         <b style='color:red;font-size: 20px;'>
@@ -618,7 +810,7 @@ export default {
         onOk: () => {
           if (
             this.sendMsg('updateNode', {
-              ids: this.tableSelections,
+              ids: targetIds,
               protocol: this.temp.protocol
             })
           ) {
@@ -700,18 +892,22 @@ export default {
 
       return false
     },
-    // 下载远程最新文件
-    downloadRemoteEvent() {
-      // 存在 Go 节点时按 Go 节点平台下载升级容器（纯 Java 集群保持原 Java 包下载行为）
-      const goNode = (this.list || []).find((item) => item.engine === 'go')
+    // 下载远程最新文件（带 row 时下载指定类型的包；不带时兼容旧的单入口行为）
+    downloadRemoteEvent(row) {
+      // 混合部署时按「这一行缺哪类包」下载，不再由「列表里有没有 Go 节点」决定唯一一份包的类型
       let engine = 'java'
       let platform = ''
-      if (goNode) {
-        engine = 'go'
-        platform = goNode.platform || ''
-      } else if (this.temp.packageEngine === 'go') {
-        engine = 'go'
+      if (row && row.engine) {
+        engine = row.engine
+        platform = row.platform || ''
+      } else if (this.temp.packageEngine) {
+        engine = this.temp.packageEngine
         platform = this.temp.packagePlatform || ''
+      }
+      if (engine === 'go' && !platform) {
+        // Go 容器按平台区分：没有记录平台时使用第一个已上报平台的 Go 节点
+        const goNode = (this.list || []).find((item) => item.engine === 'go' && item.platform)
+        platform = (goNode && goNode.platform) || 'linux/amd64'
       }
       const engineText = engine === 'go' ? this.$t('i18n_11b8cdd4a6') : this.$t('i18n_ac0399d13b')
       const platformText = engine === 'go' ? platform || this.$t('i18n_2a20de5e5a') : '---'

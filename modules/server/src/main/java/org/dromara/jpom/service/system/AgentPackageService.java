@@ -233,7 +233,12 @@ public class AgentPackageService {
         if (StrUtil.isBlank(version)) {
             version = AgentPackageResolver.parseVersionInUrl(agentUrl);
         }
-        String goUrl = AgentPackageResolver.buildGoUpgradeUrl(agentUrl, version, targetPlatform);
+        // 优先用远端版本清单里显式声明的 Go 升级容器地址（按平台，auth 优先且替换 token），
+        // 清单没有该字段时回退到「Java 地址同目录推导」
+        String goUrl = remoteVersion.getGoUpgradeUrl(targetPlatform);
+        if (StrUtil.isBlank(goUrl)) {
+            goUrl = AgentPackageResolver.buildGoUpgradeUrl(agentUrl, version, targetPlatform);
+        }
         if (StrUtil.isBlank(goUrl)) {
             throw new IllegalStateException(I18nMessageUtil.get("i18n.new_version_exists_download_unavailable.4ba7"));
         }

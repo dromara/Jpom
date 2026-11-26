@@ -5,6 +5,15 @@
 ### 🐞 解决BUG、优化功能
 
 1. 【web-vue】优化 流水线阶段编排头部的重复「收起配置」按钮去掉，收起入口只保留分割线一处（与「收起阶段编排」成对）
+2. 【server】【web-vue】修复 混合集群只能升级一类插件端：按集群类型提示并分别提供升级包下载，缺包节点置灰
+3. 【server】修复 Java 插件端升级推同版本包，现直接提示先换新包
+4. 【docs】调整 版本清单补充 Go 各平台安装包与升级容器地址，在线升级改用 tar.gz
+5. 【server】优化 Go 插件端在线升级优先用清单里的平台地址（升级 jpom-core 1.0.11）
+
+### ⚠️ 升级说明
+
+1. **版本清单下载地址改为 tar.gz**：`release-versions.json` / `beta-versions.json` 的 `agentUrl`、`serverUrl` 现在指向 `*-release.tar.gz`，并新增 `goAgentUrls`、`goUpgradeUrls`（按平台，key 形如 `linux/amd64`）。在线升级要求服务端 **2.11.13.2 及以上**（该版本起已支持 tar.gz 并兼容 zip）；更低版本从这份清单取地址会下载失败，请先升级服务端。
+2. **过渡期仍提供 zip**：下载页与清单里的 `agentZipUrl`/`serverZipUrl` 保留过渡期 zip 兼容包；完全下线后由发版脚本 `--no-legacy-zip` 移除。
 
 ------
 

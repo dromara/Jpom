@@ -426,6 +426,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
             // 探测节点运行引擎、当前版本与运行平台（engine=go 时使用 Go 升级容器）
             AgentEngine engine;
             String nodeVersion;
+            String nodeTimeStamp;
             String nodePlatform = null;
             try {
                 JsonMessage<Object> infoMessage = NodeForward.request(node, StrUtil.EMPTY, NodeUrl.Info, "nodeId", id);
@@ -436,6 +437,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
                 JSONObject infoData = JSONObject.from(infoMessage.getData());
                 engine = AgentPackageResolver.resolveEngine(infoData);
                 nodeVersion = AgentPackageResolver.resolveVersion(infoData);
+                nodeTimeStamp = AgentPackageResolver.resolveTimeStamp(infoData);
                 if (engine == AgentEngine.GO) {
                     nodePlatform = AgentPackageResolver.resolvePlatform(infoData);
                     if (StrUtil.isBlank(nodePlatform) && AgentPackageResolver.hasPlatformInfo(infoData)) {
@@ -454,7 +456,7 @@ public class NodeUpdateHandler extends BaseProxyHandler {
             }
             AgentFileModel packageModel;
             try {
-                packageModel = this.selectPackageForNode(engine, nodePlatform, nodeVersion, javaPackage, goPackage);
+                packageModel = this.selectPackageForNode(engine, nodePlatform, nodeVersion, nodeTimeStamp, javaPackage, goPackage);
             } catch (PackageSelectionException e) {
                 this.onError(session, e.getMessage(), id);
                 return;
@@ -482,15 +484,23 @@ public class NodeUpdateHandler extends BaseProxyHandler {
      * @param engine       节点引擎
      * @param nodePlatform 节点平台（os/arch，null 表示旧版节点未上报）
      * @param nodeVersion  节点当前版本
+     * @param nodeTimeStamp 节点当前运行包的打包时间（与 {@code nodeVersion} 一起判断「同版本包」）
      * @param javaPackage  Java 升级包
      * @param goPackage    兼容旧数据：早期保存到 Java 槽位的 Go 升级包
      * @return 选中的升级包
      */
-    private AgentFileModel selectPackageForNode(AgentEngine engine, String nodePlatform, String nodeVersion, AgentFileModel javaPackage, AgentFileModel goPackage) {
+    private AgentFileModel selectPackageForNode(AgentEngine engine, String nodePlatform, String nodeVersion,
+                                                String nodeTimeStamp, AgentFileModel javaPackage, AgentFileModel goPackage) {
         if (engine == AgentEngine.JAVA) {
             String error = this.verifyPackage(javaPackage, engine, null, nodeVersion);
             if (error != null) {
                 throw new PackageSelectionException(error);
+            }
+            // 服务端预检：本地 Java 包与节点运行版本/打包时间一致时，插件端会回「新包和正在运行的包一致」，
+            // 这里直接给可操作提示（前端也按同一条件禁用更新，但不能只靠前端）
+            String sameVersion = this.sameAsRunningPackage(javaPackage, nodeVersion, nodeTimeStamp);
+            if (sameVersion != null) {
+                throw new PackageSelectionException(sameVersion);
             }
             return javaPackage;
         }
@@ -586,6 +596,41 @@ public class NodeUpdateHandler extends BaseProxyHandler {
         JsonMessage<Tuple> error = JpomManifest.checkJpomJar(file.getAbsolutePath(), Type.Agent, false);
         if (!error.success()) {
             return I18nMessageUtil.get("i18n.agent_jar_damaged.74a8") + error.getMsg();
+        }
+        return null;
+    }
+
+
+    /**
+     * 校验本地升级包是否与节点运行中的包完全一致（版本 + 打包时间）
+     *
+     * <p>Java 节点此前把「同版本包」原样推给插件端，由插件端回「新包和正在运行的包一致」，
+     * 页面只看到这一句、不知道要先换包。这里在服务端给出可操作提示（前端也按同一条件禁用，但不能只靠前端）。</p>
+     *
+     * @param packageModel  本地升级包
+     * @param nodeVersion   节点当前版本
+     * @param nodeTimeStamp 节点当前运行包的打包时间
+     * @return null 表示可以升级，否则为可操作提示
+     */
+    private String sameAsRunningPackage(AgentFileModel packageModel, String nodeVersion, String nodeTimeStamp) {
+        if (packageModel == null || StrUtil.isBlank(packageModel.getSavePath())) {
+            return null;
+        }
+        try {
+            AgentPackageInfo packageInfo = AgentPackageResolver.inspectPackage(FileUtil.file(packageModel.getSavePath()));
+            String packageVersion = AgentPackageResolver.normalizeVersion(packageInfo.getVersion());
+            String runningVersion = AgentPackageResolver.normalizeVersion(nodeVersion);
+            if (StrUtil.isBlank(packageVersion) || StrUtil.isBlank(runningVersion)) {
+                return null;
+            }
+            boolean sameVersion = StrUtil.equals(runningVersion, packageVersion);
+            // 旧版插件端未上报打包时间时只按版本判断（与插件端 checkJpomJar 的语义保持一致）
+            boolean sameTimeStamp = StrUtil.isBlank(nodeTimeStamp) || StrUtil.equals(packageInfo.getTimeStamp(), nodeTimeStamp);
+            if (sameVersion && sameTimeStamp) {
+                return StrUtil.format(I18nMessageUtil.get("i18n.agent_package_java_same_as_running.e5c8"), packageVersion);
+            }
+        } catch (Exception e) {
+            log.warn("{} {}", I18nMessageUtil.get("i18n.parse_jar.a26e"), e.getMessage());
         }
         return null;
     }

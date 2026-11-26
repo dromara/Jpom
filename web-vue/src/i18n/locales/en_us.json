@@ -3272,5 +3272,14 @@
   "i18n_bbef4170b1": "Command list",
   "i18n_3f331434b2": "Failed to load the replay component, please refresh the page and retry.",
   "i18n_45a28913bb": "Accurate command index",
-  "i18n_3e3f962efa": "When enabled, one shell integration script line is written into each terminal session on connect (it is echoed in the terminal and excluded from the command list), capturing each command text and exit code. When disabled, commands are inferred from keystrokes: a cleaner terminal but possibly inaccurate command text"
+  "i18n_3e3f962efa": "When enabled, one shell integration script line is written into each terminal session on connect (it is echoed in the terminal and excluded from the command list), capturing each command text and exit code. When disabled, commands are inferred from keystrokes: a cleaner terminal but possibly inaccurate command text",
+  "i18n_b879f13b73": "Mixed deployment detected: {java} Java agent(s) and {go} Go agent(s). Online upgrade needs both a Java upgrade package and Go upgrade containers (one per platform); missing types cannot be upgraded.",
+  "i18n_7c166a0415": "Not uploaded",
+  "i18n_72ac9a729b": "Up to date",
+  "i18n_df3f233fb3": "Download Java package",
+  "i18n_74f40f3cea": "Download Go container",
+  "i18n_c369b37de5": "Upgrade package of this type is missing, download or upload it first",
+  "i18n_7f3130948c": "The local upgrade package is older than the node version; downgrade is not allowed",
+  "i18n_9a4aac7429": "Skipped {count} node(s) whose upgrade package is not ready",
+  "i18n_bcfec05b8f": "Plugin type is not identified yet, wait for the node to report it before upgrading"
 }
