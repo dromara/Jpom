@@ -82,6 +82,58 @@ public class RemoteVersionGoUrlTest {
         Assertions.assertEquals("linux/amd64", RemoteVersion.normalizePlatformKey(" Linux-AMD64 "));
     }
 
+    /**
+     * 下载地址优先 tar.gz：清单同时给 agentUrl（过渡期 zip）与 agentTarGzUrl 时，新版本取 tar.gz
+     */
+    @Test
+    public void downloadUrlPreferTarGz() {
+        JSONObject root = new JSONObject();
+        root.put("agentUrl", "https://d2.example.com/release/1.0.0/agent-1.0.0-release.zip");
+        root.put("agentTarGzUrl", "https://d2.example.com/release/1.0.0/agent-1.0.0-release.tar.gz");
+        root.put("serverUrl", "https://d2.example.com/release/1.0.0/server-1.0.0-release.zip");
+        root.put("serverTarGzUrl", "https://d2.example.com/release/1.0.0/server-1.0.0-release.tar.gz");
+        RemoteVersion remoteVersion = root.to(RemoteVersion.class);
+        Assertions.assertEquals("https://d2.example.com/release/1.0.0/agent-1.0.0-release.tar.gz", remoteVersion.getAgentDownloadUrl());
+        Assertions.assertEquals("https://d2.example.com/release/1.0.0/server-1.0.0-release.tar.gz", remoteVersion.getServerDownloadUrl());
+    }
+
+    /**
+     * 带 token 时 auth 优先：auth.agentTarGzUrl > auth.agentUrl > 顶层 tarGz > 顶层 zip
+     */
+    @Test
+    public void downloadUrlAuthPriorityWithToken() {
+        JSONObject root = new JSONObject();
+        root.put("agentUrl", "https://d2.example.com/agent-1.0.0-release.zip");
+        root.put("agentTarGzUrl", "https://d2.example.com/agent-1.0.0-release.tar.gz");
+        JSONObject auth = new JSONObject();
+        auth.put("agentUrl", "https://download.example.com/agent-1.0.0-release.zip?token={token}");
+        root.put("auth", auth);
+        System.setProperty(AUTH_KEY, "tkn");
+        // auth 只有 zip 地址：仍优先 auth（保持原有 token 语义）
+        Assertions.assertEquals("https://download.example.com/agent-1.0.0-release.zip?token=tkn",
+            root.to(RemoteVersion.class).getAgentDownloadUrl());
+        // auth 有 tar.gz：优先它
+        JSONObject auth2 = new JSONObject();
+        auth2.put("agentUrl", "https://download.example.com/agent-1.0.0-release.zip?token={token}");
+        auth2.put("agentTarGzUrl", "https://download.example.com/agent-1.0.0-release.tar.gz?token={token}");
+        root.put("auth", auth2);
+        Assertions.assertEquals("https://download.example.com/agent-1.0.0-release.tar.gz?token=tkn",
+            root.to(RemoteVersion.class).getAgentDownloadUrl());
+    }
+
+    /**
+     * 旧清单（只有 agentUrl/serverUrl，没有 tar.gz 字段）行为不变
+     */
+    @Test
+    public void downloadUrlFallbackToZipForLegacyManifest() {
+        JSONObject root = new JSONObject();
+        root.put("agentUrl", "https://d2.example.com/agent-1.0.0-release.zip");
+        root.put("serverUrl", "https://d2.example.com/server-1.0.0-release.zip");
+        RemoteVersion remoteVersion = root.to(RemoteVersion.class);
+        Assertions.assertEquals("https://d2.example.com/agent-1.0.0-release.zip", remoteVersion.getAgentDownloadUrl());
+        Assertions.assertEquals("https://d2.example.com/server-1.0.0-release.zip", remoteVersion.getServerDownloadUrl());
+    }
+
     @Test
     public void installPackageUrlAndMissingPlatform() {
         RemoteVersion remoteVersion = manifest();

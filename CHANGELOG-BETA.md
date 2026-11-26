@@ -7,13 +7,15 @@
 1. 【web-vue】优化 流水线阶段编排头部的重复「收起配置」按钮去掉，收起入口只保留分割线一处（与「收起阶段编排」成对）
 2. 【server】【web-vue】修复 混合集群只能升级一类插件端：按集群类型提示并分别提供升级包下载，缺包节点置灰
 3. 【server】修复 Java 插件端升级推同版本包，现直接提示先换新包
-4. 【docs】调整 版本清单补充 Go 各平台安装包与升级容器地址，在线升级改用 tar.gz
-5. 【server】优化 Go 插件端在线升级优先用清单里的平台地址（升级 jpom-core 1.0.11）
+4. 【docs】调整 版本清单补充 Go 各平台地址与 tar.gz 地址（主地址过渡期仍 zip）
+5. 【server】优化 Go 插件端在线升级优先用清单里的平台地址（升级 jpom-core 1.0.12）
+6. 【server】优化 升级包下载优先用清单里的 tar.gz 地址，不再依赖 zip 后缀改写
 
 ### ⚠️ 升级说明
 
-1. **版本清单下载地址改为 tar.gz**：`release-versions.json` / `beta-versions.json` 的 `agentUrl`、`serverUrl` 现在指向 `*-release.tar.gz`，并新增 `goAgentUrls`、`goUpgradeUrls`（按平台，key 形如 `linux/amd64`）。在线升级要求服务端 **2.11.13.2 及以上**（该版本起已支持 tar.gz 并兼容 zip）；更低版本从这份清单取地址会下载失败，请先升级服务端。
-2. **过渡期仍提供 zip**：下载页与清单里的 `agentZipUrl`/`serverZipUrl` 保留过渡期 zip 兼容包；完全下线后由发版脚本 `--no-legacy-zip` 移除。
+1. **版本清单新增 Go 平台地址，并给出 tar.gz 显式地址**：`release-versions.json` / `beta-versions.json` 新增 `goAgentUrls`、`goUpgradeUrls`（按平台，key 形如 `linux/amd64`）与 `agentTarGzUrl`、`serverTarGzUrl`。**主地址 `agentUrl`/`serverUrl` 过渡期仍指向 zip**，已安装版本的一键升级不受影响。
+2. **最低兼容 2.11.13.3-beta / 2.11.14**：更早版本只认 zip。清单已给出 `agentTarGzUrl`，新版本直接用 tar.gz；主地址保持 zip 只为旧版本，旧版本退出后再切 `--online-ext tar.gz`。
+3. **旧版本升级路径不受影响的前提是主地址保持 zip**：服务端自升级（`system/remote_upgrade.json` 的兜底）与插件端包下载都走 `RemoteVersion.download → zipFileFind`，2.11.13.2 及更早只认 zip，因此清单主地址过渡期不切 tar.gz；等已安装版本 ≥ 2.11.13.3-beta / 2.11.14 后再切。
 
 ------
 
