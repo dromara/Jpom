@@ -89,6 +89,11 @@ const children = [
     component: () => import('../pages/ssh/command-log.vue')
   },
   {
+    path: '/ssh/session-list',
+    name: 'ssh-terminal-session',
+    component: () => import('../pages/ssh/session-list.vue')
+  },
+  {
     path: '/ftp',
     name: 'node-ftp',
     component: () => import('../pages/ftp/ftp.vue')

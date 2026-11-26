@@ -1,0 +1,5 @@
+alterType,tableName,name,type,len,defaultValue,comment,notNull
+ADD,MACHINE_SSH_INFO,terminalRecord,TINYINT,,0,是否录制终端会话{1，是，0 否},false
+ADD,SSHTERMINALEXECUTELOG,sessionId,String,50,,所属终端会话 id,false
+ADD,SSHTERMINALEXECUTELOG,seq,Integer,,,会话内命令序号,false
+ADD,SSHTERMINALEXECUTELOG,source,String,20,,命令来源{OSC133，LEGACY},false

@@ -45,6 +45,8 @@ DEFAULT_TESTS=(
 	# 通用分页过滤：字段名白名单/值绑定/`:in` 后缀（2.11.13 工作空间隔离回归的守卫）
 	BaseDbServiceListPageFilterTest
 	BaseDbServiceBuildWhereTest
+	# 启动时空分组修复：group / groupName 两种字段都要覆盖，NULL 与空串都必须被修复（2026-11-26 流水线分组）
+	BaseDbServiceGroupRepairSqlTest
 	# 服务端强制过滤条件 vs 客户端同字段参数冲突（P1-1 / P1-2 / P2-1 的守卫）
 	BaseDbServiceForcedFilterTest
 	ProjectManageControlExportDataTest
@@ -153,6 +155,9 @@ DEFAULT_TESTS=(
 	PipelineRunStateTest
 	PipelineEngineListenerTest
 	ScriptHookHandlerTest
+	# SSH 终端会话录制（asciicast v2 写入、OSC 133/633 命令标记解析）：开关关闭零产物、标记跨包解析、写入异常不影响会话
+	AsciicastTerminalRecorderTest
+	OscMarkerScannerTest
 	# 文件中心发布方式注册（码值 8 只追加）与事件钩子配置校验（未知事件/非法地址必须在保存时拦下）
 	FileStorageReleaseTargetTest
 	PipelineDefinitionHooksTest

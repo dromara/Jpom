@@ -31,6 +31,7 @@ import org.dromara.jpom.service.dblog.DbMonitorNotifyLogService;
 import org.dromara.jpom.service.dblog.DbUserOperateLogService;
 import org.dromara.jpom.service.dblog.RepositoryService;
 import org.dromara.jpom.service.dblog.SshTerminalExecuteLogService;
+import org.dromara.jpom.service.dblog.SshTerminalSessionService;
 import org.dromara.jpom.service.docker.DockerInfoService;
 import org.dromara.jpom.service.docker.DockerSwarmInfoService;
 import org.dromara.jpom.service.h2db.BaseDbService;
@@ -74,6 +75,7 @@ public enum ClassFeature {
     SSH_FILE(() -> I18nMessageUtil.get("i18n.ssh_file_manager.1482"), SshService.class),
     SSH_TERMINAL(() -> I18nMessageUtil.get("i18n.ssh_terminal.ec50"), SshService.class),
     SSH_TERMINAL_LOG(() -> I18nMessageUtil.get("i18n.ssh_terminal_log.775f"), SshTerminalExecuteLogService.class),
+    SSH_TERMINAL_SESSION(() -> I18nMessageUtil.get("i18n.ssh_terminal_session.1864"), SshTerminalSessionService.class),
     SSH_COMMAND(() -> I18nMessageUtil.get("i18n.ssh_command_management.c40a"), SshCommandService.class),
     SSH_COMMAND_LOG(() -> I18nMessageUtil.get("i18n.ssh_command_log.7fd1"), CommandExecLogService.class),
     FTP(() -> I18nMessageUtil.get("i18n.ftp_management.cb91"), FtpService.class),

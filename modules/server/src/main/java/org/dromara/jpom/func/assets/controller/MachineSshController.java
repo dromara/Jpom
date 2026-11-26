@@ -178,7 +178,8 @@ public class MachineSshController extends BaseGroupNameController {
                                      String id,
                                      Integer timeout,
                                      String allowEditSuffix,
-                                     String groupName) {
+                                     String groupName,
+                                     Boolean terminalRecord) {
         boolean add = StrUtil.isEmpty(id);
         if (add) {
             // 优先判断参数 如果是 password 在修改时可以不填写
@@ -211,6 +212,8 @@ public class MachineSshController extends BaseGroupNameController {
         sshModel.setName(name);
         sshModel.setConnectType(connectType.name());
         sshModel.setTimeout(timeout);
+        // 终端会话录制开关（不传时保持原值，避免旧前端把已开启的资产关掉）
+        Opt.ofNullable(terminalRecord).ifPresent(sshModel::setTerminalRecord);
         try {
             Charset.forName(charset);
             sshModel.setCharset(charset);
